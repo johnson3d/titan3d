@@ -377,11 +377,11 @@ namespace EngineNS.UI.Animation
 
         public virtual void Play()
         {
-            UEngine.Instance.UIManager.PlayTimeline(this);
+            TtEngine.Instance.UIManager.PlayTimeline(this);
         }
         public virtual void Stop()
         {
-            UEngine.Instance.UIManager.StopTimeline(this);
+            TtEngine.Instance.UIManager.StopTimeline(this);
         }
     }
 

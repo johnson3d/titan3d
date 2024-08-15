@@ -18,7 +18,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            return await UEngine.Instance.PhyModule.PhyContext.PhyMeshManager.GetMesh(GetAssetName());
+            return await TtEngine.Instance.PhyModule.PhyContext.PhyMeshManager.GetMesh(GetAssetName());
         }
         //public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         //{
@@ -67,15 +67,15 @@ namespace EngineNS.Bricks.PhysicsCore
             }
             protected override bool DoImportAsset()
             {
-                mAsset = UEngine.Instance.PhyModule.PhyContext.CookTriMesh(mMesh.MeshDataProvider, null, null, null);
+                mAsset = TtEngine.Instance.PhyModule.PhyContext.CookTriMesh(mMesh.MeshDataProvider, null, null, null);
                 mAsset.AssetName = GetAssetRName();
-                UEngine.Instance.SourceControlModule.AddFile(mAsset.AssetName.Address);
+                TtEngine.Instance.SourceControlModule.AddFile(mAsset.AssetName.Address);
 
                 return base.DoImportAsset();
             }
-            Graphics.Mesh.UMeshPrimitives mMesh;
+            Graphics.Mesh.TtMeshPrimitives mMesh;
             [Rtti.Meta]
-            [RName.PGRName(FilterExts=Graphics.Mesh.UMeshPrimitives.AssetExt)]
+            [RName.PGRName(FilterExts=Graphics.Mesh.TtMeshPrimitives.AssetExt)]
             public RName MeshSource
             {
                 get
@@ -88,7 +88,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 {
                     Action action = async () =>
                     {
-                        mMesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value);
+                        mMesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value);
                         await mMesh.LoadMeshDataProvider();
                     };
                     action();
@@ -115,7 +115,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public IO.IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
         public virtual void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
@@ -135,7 +135,7 @@ namespace EngineNS.Bricks.PhysicsCore
             }
 
             xnd.SaveXnd(name.Address);
-            UEngine.Instance.SourceControlModule.AddFile(name.Address);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         public static TtPhyTriMesh LoadXnd(UPhyMeshManager manager, IO.TtXndNode node)
         {
@@ -191,7 +191,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 ar.Read(out size);
                 blob.mCoreObject.ReSize(size);
                 ar.ReadPtr(blob.mCoreObject.GetData(), (int)size);
-                mesh.mCoreObject.CreateFromCookedData(UEngine.Instance.PhyModule.PhyContext.mCoreObject, blob.mCoreObject.GetData(), size);
+                mesh.mCoreObject.CreateFromCookedData(TtEngine.Instance.PhyModule.PhyContext.mCoreObject, blob.mCoreObject.GetData(), size);
                 return null;
             }
         }
@@ -256,7 +256,7 @@ namespace EngineNS.Bricks.PhysicsCore
             if (TriMeshes.TryGetValue(rn, out result))
                 return result;
 
-            result = await UEngine.Instance.EventPoster.Post((state) =>
+            result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {

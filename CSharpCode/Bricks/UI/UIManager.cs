@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.UI
 {
-    public partial class TtUIManager : UModule<UEngine>
+    public partial class TtUIManager : UModule<TtEngine>
     {
         TtUIConfig mConfig = new TtUIConfig();
         public TtUIConfig Config => mConfig;
@@ -21,7 +21,7 @@ namespace EngineNS.UI
             UIManagerConstruct_Msg();
         }
 
-        public override void Cleanup(UEngine host)
+        public override void Cleanup(TtEngine host)
         {
             ClearTemplates();
             base.Cleanup(host);
@@ -169,14 +169,14 @@ namespace EngineNS.UI
         {
             mTickUIElements.Remove(element);
         }
-        public override void TickLogic(UEngine host)
+        public override void TickLogic(TtEngine host)
         {
             for(int i=mUserUIList.Count - 1; i>=0; i--)
             {
                 _ = mUserUIList[i].BuildMesh();
             }
 
-            var elapsedSecond = UEngine.Instance.ElapsedSecond;
+            var elapsedSecond = TtEngine.Instance.ElapsedSecond;
             for (int i=mTickUIElements.Count - 1; i >= 0; i--)
             {
                 mTickUIElements[i].Tick(elapsedSecond);
@@ -202,7 +202,7 @@ namespace EngineNS.UI
                 }
                 var fileName = name.Address + "/" + name.PureName + name.ExtName;
                 xnd.SaveXnd(fileName);
-                UEngine.Instance.SourceControlModule.AddFile(fileName);
+                TtEngine.Instance.SourceControlModule.AddFile(fileName);
             }
         }
         [Rtti.Meta]
@@ -254,7 +254,7 @@ namespace EngineNS.UI
 
 namespace EngineNS
 {
-    public partial class UEngine
+    public partial class TtEngine
     {
         UI.TtUIManager mUIManager;
         [Rtti.Meta]

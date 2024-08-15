@@ -15,9 +15,9 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/AAShading.cginc", RName.ERNameType.Engine);
 
-            TypeAA = this.PushPermutation<Graphics.Pipeline.URenderPolicy.ETypeAA>("ENV_TypeAA", (int)Graphics.Pipeline.URenderPolicy.ETypeAA.TypeCount);
+            TypeAA = this.PushPermutation<Graphics.Pipeline.TtRenderPolicy.ETypeAA>("ENV_TypeAA", (int)Graphics.Pipeline.TtRenderPolicy.ETypeAA.TypeCount);
 
-            TypeAA.SetValue((int)Graphics.Pipeline.URenderPolicy.ETypeAA.None);
+            TypeAA.SetValue((int)Graphics.Pipeline.TtRenderPolicy.ETypeAA.None);
 
             this.UpdatePermutation();
         }
@@ -28,18 +28,18 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         protected override void EnvShadingDefines(in FPermutationId id, UShaderDefinitions defines)
         {
-            defines.AddDefine("ETypeAA_None", (int)Graphics.Pipeline.URenderPolicy.ETypeAA.None);
-            defines.AddDefine("TETypeAA_Fsaa", (int)Graphics.Pipeline.URenderPolicy.ETypeAA.Fsaa);
-            defines.AddDefine("TETypeAA_Taa", (int)Graphics.Pipeline.URenderPolicy.ETypeAA.Taa);
+            defines.AddDefine("ETypeAA_None", (int)Graphics.Pipeline.TtRenderPolicy.ETypeAA.None);
+            defines.AddDefine("TETypeAA_Fsaa", (int)Graphics.Pipeline.TtRenderPolicy.ETypeAA.Fsaa);
+            defines.AddDefine("TETypeAA_Taa", (int)Graphics.Pipeline.TtRenderPolicy.ETypeAA.Taa);
         }
         public UPermutationItem TypeAA
         {
             get;
             set;
         }
-        private void OnDrawcallTAA(NxRHI.UGraphicDraw drawcall, URenderPolicy deferredPolicy, TtAntiAliasingNode aaNode)
+        private void OnDrawcallTAA(NxRHI.UGraphicDraw drawcall, TtRenderPolicy deferredPolicy, TtAntiAliasingNode aaNode)
         {
-            if (deferredPolicy.TypeAA == URenderPolicy.ETypeAA.Taa)
+            if (deferredPolicy.TypeAA == TtRenderPolicy.ETypeAA.Taa)
             {
                 var index = drawcall.FindBinder("ColorBuffer");
                 if (index.IsValidPointer)
@@ -49,12 +49,12 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
                 else
                 {
-                    TypeAA.SetValue((uint)URenderPolicy.ETypeAA.Taa);
+                    TypeAA.SetValue((uint)TtRenderPolicy.ETypeAA.Taa);
                     this.UpdatePermutation();
                 }
                 index = drawcall.FindBinder("Samp_ColorBuffer");
                 if (index.IsValidPointer)
-                    drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                    drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
                 index = drawcall.FindBinder("DepthBuffer");
                 if (index.IsValidPointer)
@@ -64,7 +64,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
                 index = drawcall.FindBinder("Samp_DepthBuffer");
                 if (index.IsValidPointer)
-                    drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                    drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
                 index = drawcall.FindBinder("MotionBuffer");
                 if (index.IsValidPointer)
@@ -74,7 +74,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
                 index = drawcall.FindBinder("Samp_MotionBuffer");
                 if (index.IsValidPointer)
-                    drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                    drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
                 index = drawcall.FindBinder("PrevColorBuffer");
                 if (index.IsValidPointer)
@@ -84,12 +84,12 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
                 else
                 {
-                    TypeAA.SetValue((uint)URenderPolicy.ETypeAA.Taa);
+                    TypeAA.SetValue((uint)TtRenderPolicy.ETypeAA.Taa);
                     this.UpdatePermutation();
                 }
                 index = drawcall.FindBinder("Samp_PrevColorBuffer");
                 if (index.IsValidPointer)
-                    drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                    drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
                 index = drawcall.FindBinder("PrevDepthBuffer");
                 if (index.IsValidPointer)
@@ -99,7 +99,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
                 index = drawcall.FindBinder("Samp_PrevDepthBuffer");
                 if (index.IsValidPointer)
-                    drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                    drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
 
                 index = drawcall.FindBinder("cbShadingEnv");
@@ -107,7 +107,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 {
                     if (aaNode.CBShadingEnv == null)
                     {
-                        aaNode.CBShadingEnv = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                        aaNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                         var jitterUV = deferredPolicy.DefaultCamera.mCoreObject.GetJitterUV();
                         aaNode.CBShadingEnv.SetValue("JitterUV", in jitterUV);
                     }
@@ -124,16 +124,16 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
                 else
                 {
-                    TypeAA.SetValue((uint)URenderPolicy.ETypeAA.Taa);
+                    TypeAA.SetValue((uint)TtRenderPolicy.ETypeAA.Taa);
                     this.UpdatePermutation();
                 }
                 index = drawcall.FindBinder("Samp_ColorBuffer");
                 if (index.IsValidPointer)
-                    drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                    drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
             }
 
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
@@ -179,16 +179,16 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             return mBasePassShading;
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAntiAliasingShading>();
+            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAntiAliasingShading>();
 
-            mCopyColorDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
-            mCopyDepthDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
+            mCopyColorDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
+            mCopyDepthDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
 
             CopyPass.Initialize(rc, debugName + ".CopyPrev");
         }
@@ -224,7 +224,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         };
         private int CurrentOffsetIndex = 0;
         public float TaaBlendAlpha { get; set; } = 0.05f;
-        private void TickSyncTAA(URenderPolicy policy)
+        private void TickSyncTAA(TtRenderPolicy policy)
         {
             if (CBShadingEnv != null)
             {
@@ -240,7 +240,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             CurrentOffsetIndex++;
             CurrentOffsetIndex = CurrentOffsetIndex % OffsetHaltonSequencer.Length;
-            if (policy.TypeAA == URenderPolicy.ETypeAA.Taa)
+            if (policy.TypeAA == TtRenderPolicy.ETypeAA.Taa)
             {
                 Vector2 offset = OffsetHaltonSequencer[CurrentOffsetIndex];
                 policy.DefaultCamera.JitterOffset = offset;
@@ -252,14 +252,14 @@ namespace EngineNS.Graphics.Pipeline.Common
             CopyPass.SwapBuffer();
         }
 
-        public override void FrameBuild(URenderPolicy policy)
+        public override void FrameBuild(TtRenderPolicy policy)
         {
             base.FrameBuild(policy);
         }
 
-        public override void BeforeTickLogic(URenderPolicy policy)
+        public override void BeforeTickLogic(TtRenderPolicy policy)
         {
-            if (policy.TypeAA == URenderPolicy.ETypeAA.None)
+            if (policy.TypeAA == TtRenderPolicy.ETypeAA.None)
             {
                 this.MoveAttachment(ColorPinIn, ResultPinOut);
                 return;
@@ -273,7 +273,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     ResultPinOut.Attachement.Format = buffer.BufferDesc.Format;
                 }
             }
-            if (policy.TypeAA == URenderPolicy.ETypeAA.Taa)
+            if (policy.TypeAA == TtRenderPolicy.ETypeAA.Taa)
             {
                 if ((PreColor == null || PreDepth == null) || (PreColor.BufferDesc.Format != ResultPinOut.Attachement.Format
                  || PreColor.BufferDesc.Width != ResultPinOut.Attachement.Width
@@ -291,18 +291,18 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
             }
         }
-        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             switch (policy.TypeAA)
             {
-                case URenderPolicy.ETypeAA.None:
+                case TtRenderPolicy.ETypeAA.None:
                     break;
-                case URenderPolicy.ETypeAA.Taa:
+                case TtRenderPolicy.ETypeAA.Taa:
                     PreColorPinIn.ImportedBuffer = PreColor;
                     base.TickLogic(world, policy, bClear);
                     TickCopyLogic(policy);
                     break;
-                case URenderPolicy.ETypeAA.Fsaa:
+                case TtRenderPolicy.ETypeAA.Fsaa:
                     base.TickLogic(world, policy, bClear);
                     break;
             }
@@ -339,7 +339,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtAntiAliasingNode), nameof(TickCopyLogic));
-        public unsafe void TickCopyLogic(URenderPolicy policy)
+        public unsafe void TickCopyLogic(TtRenderPolicy policy)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -355,9 +355,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                 policy.CommitCommandList(cmdlist);
             }
         }
-        public override void TickSync(URenderPolicy policy)
+        public override void TickSync(TtRenderPolicy policy)
         {
-            if (policy.TypeAA == URenderPolicy.ETypeAA.None)
+            if (policy.TypeAA == TtRenderPolicy.ETypeAA.None)
             {
                 return;
             }

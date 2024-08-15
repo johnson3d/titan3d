@@ -179,7 +179,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             //RVTextureArray = new EngineNS.Bricks.VirtualTexture.UVirtualTextureArray();
             //RVTextureArray.CreateRVT(64, 64, 1, EPixelFormat.PXF_R8G8B8A8_UNORM, 256);
-            //var cmd = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList();
+            //var cmd = TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList();
             //RVTextureArray.PushTexture2D(cmd, RName.GetRName("utest/texture/xsl.srv"));
 
             if(trData.PgcName==null)
@@ -233,7 +233,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             if (TerrainCBuffer == null)
                 return;
-            var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+            var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
             TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.EyeCenter, EyeLocalCenter);
             TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.GridSize, GridSize);
 
@@ -395,7 +395,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         //bool DebugPrintLOD = false;
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UTerrainNode), nameof(TickLogic));
-        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
+        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -417,11 +417,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     i.LevelData?.Tick(world, policy);
                 }
 
-                LevelStreaming.Tick(UEngine.Instance.ElapsedSecond);
+                LevelStreaming.Tick(TtEngine.Instance.ElapsedSecond);
                 
-                if (UEngine.Instance.Config.Feature_UseRVT)
+                if (TtEngine.Instance.Config.Feature_UseRVT)
                 {
-                    UEngine.Instance.TickableManager.AddTickSync(static (arg) =>
+                    TtEngine.Instance.TickableManager.AddTickSync(static (arg) =>
                     {
                         var ts = arg as UTerrainSystem;
                         ts.TickSync();

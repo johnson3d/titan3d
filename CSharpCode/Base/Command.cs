@@ -94,12 +94,12 @@ namespace EngineNS
             var args = GetArguments(argsText);
             var flt = FindArgument(args, "Filter");
             
-            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Commands", $"List Command with {flt}:");
+            Profiler.Log.WriteLine<Profiler.TtDebugLogCategory>(Profiler.ELogTag.Info, $"List Command with {flt}:");
             foreach (var i in TtCommandManager.Instance.Commands)
             {
                 if (string.IsNullOrEmpty(flt) || i.Key.Contains(flt))
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Commands", $"{i.Key}");
+                    Profiler.Log.WriteLine<Profiler.TtDebugLogCategory>(Profiler.ELogTag.Info, $"{i.Key}");
                 }
             }
         }
@@ -122,11 +122,11 @@ namespace EngineNS
             var cmd = TtCommandManager.Instance.TryGetCommand(id);
             if (cmd == null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Commands", $"Command {id} is not found");
+                Profiler.Log.WriteLine<Profiler.TtDebugLogCategory>(Profiler.ELogTag.Info, $"Command {id} is not found");
             }
             else
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Commands", $"Help {id}: {cmd.CmdHelp}");
+                Profiler.Log.WriteLine<Profiler.TtDebugLogCategory>(Profiler.ELogTag.Info, $"Help {id}: {cmd.CmdHelp}");
             }
         }
     }
@@ -156,7 +156,7 @@ namespace EngineNS
                     open = false;
                 }
             }
-            UEngine.Instance.GfxDevice.RenderContext.SetBreakOnId(int.Parse(id), open);
+            TtEngine.Instance.GfxDevice.RenderContext.SetBreakOnId(int.Parse(id), open);
         }
     }
 
@@ -169,7 +169,7 @@ namespace EngineNS
         }
         public override void Execute(string argsText)
         {
-            UEngine.Instance.GfxDevice.AttachBufferManager.PrintCachedBuffer = true;
+            TtEngine.Instance.GfxDevice.AttachBufferManager.PrintCachedBuffer = true;
         }
     }
 }

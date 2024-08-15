@@ -4,14 +4,14 @@ using System.Text;
 
 namespace EngineNS.Animation
 {
-    public partial class TtAnimationModule : UModule<UEngine>
+    public partial class TtAnimationModule : UModule<TtEngine>
     {
 
     }
 }
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public EngineNS.Animation.TtAnimationModule AnimationModule { get; } = new Animation.TtAnimationModule();
     }

@@ -19,16 +19,16 @@ namespace EngineNS.Bricks.Network
                 {
                     UReturnContext retContext;
                     pkg.Read(out retContext);
-                    if (retContext.RunTarget != UEngine.Instance.RpcModule.RpcManager.CurrentTarget)
+                    if (retContext.RunTarget != TtEngine.Instance.RpcModule.RpcManager.CurrentTarget)
                     {
-                        var conn = UEngine.Instance.RpcModule.RpcManager.GetRunTargetConnect(in retContext, connect);
+                        var conn = TtEngine.Instance.RpcModule.RpcManager.GetRunTargetConnect(in retContext, connect);
                         if (conn != null)
                         {
                             conn.Send(ptr, size);
                         }
                         else
                         {
-                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "RPC", $"Relay failed {retContext}");
+                            Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"Relay failed {retContext}");
                         }
                         return;
                     }
@@ -37,24 +37,24 @@ namespace EngineNS.Bricks.Network
                 {
                     URouter router1 = new URouter();
                     pkg.Read(out router1);
-                    if (router1.RunTarget != ERunTarget.None && router1.RunTarget != UEngine.Instance.RpcModule.RpcManager.CurrentTarget)
+                    if (router1.RunTarget != ERunTarget.None && router1.RunTarget != TtEngine.Instance.RpcModule.RpcManager.CurrentTarget)
                     {
                         var pRouterAddr = (URouter*)((byte*)ptr + sizeof(RPC.FPkgHeader));
-                        if (UEngine.Instance.RpcModule.RpcManager.OnRelay(pRouterAddr, connect))
+                        if (TtEngine.Instance.RpcModule.RpcManager.OnRelay(pRouterAddr, connect))
                         {
-                            var conn = UEngine.Instance.RpcModule.RpcManager.GetRunTargetConnect(in *pRouterAddr, connect);
+                            var conn = TtEngine.Instance.RpcModule.RpcManager.GetRunTargetConnect(in *pRouterAddr, connect);
                             if (conn != null)
                             {
                                 conn.Send(ptr, size);
                             }
                             else
                             {
-                                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "RPC", $"Relay failed {router1.RunTarget}");
+                                Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"Relay failed {router1.RunTarget}");
                             }
                         }
                         else
                         {
-                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "RPC", $"OnRelay return false");
+                            Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"OnRelay return false");
                         }
                         return;
                     }
@@ -90,21 +90,21 @@ namespace EngineNS.Bricks.Network
                     {
                         UReturnContext retContext;
                         pkg.Read(out retContext);
-                        UEngine.Instance.RpcModule.RemoteReturn(retContext.Handle, ref pkg);
+                        TtEngine.Instance.RpcModule.RemoteReturn(retContext.Handle, ref pkg);
                     }
                     else
                     {
                         URouter router1 = new URouter();
                         pkg.Read(out router1);
-                        if (router1.RunTarget != ERunTarget.None && router1.RunTarget != UEngine.Instance.RpcModule.RpcManager.CurrentTarget)
+                        if (router1.RunTarget != ERunTarget.None && router1.RunTarget != TtEngine.Instance.RpcModule.RpcManager.CurrentTarget)
                         {
-                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "RPC", $"{router1.RunTarget} != ERunTarget.None");
+                            Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"{router1.RunTarget} != ERunTarget.None");
                             continue;
                         }
                         UInt16 methodIndex1 = 0;
                         pkg.Read(out methodIndex1);
 
-                        var exe = UEngine.Instance.RpcModule.RpcManager?.GetExecuter(in router1) as IRpcHost;
+                        var exe = TtEngine.Instance.RpcModule.RpcManager?.GetExecuter(in router1) as IRpcHost;
                         if (exe != null)
                         {
                             var fun = exe.GetRpcClass().GetCallee(methodIndex1);
@@ -113,15 +113,15 @@ namespace EngineNS.Bricks.Network
                             {
                                 UCallContext context = new UCallContext();
                                 context.NetConnect = conn;
-                                context.Callee = UEngine.Instance.RpcModule.RpcManager.CurrentTarget;
+                                context.Callee = TtEngine.Instance.RpcModule.RpcManager.CurrentTarget;
                                 fun.Method(pkg, exe, context);
                             }
                             else
                             {
                                 if (fun.Method == null)
-                                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "RPC", $"{exe.GetType().FullName}.{methodIndex1} is null");
+                                    Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"{exe.GetType().FullName}.{methodIndex1} is null");
                                 else if (fun.Attribute.Authority > conn.Authority)
-                                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "RPC", $"{exe.GetType().FullName}.{fun.Name}:{fun.Attribute.Authority} > {conn.Authority} || {fun.Attribute.Authority} > {router1.Authority}");
+                                    Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"{exe.GetType().FullName}.{fun.Name}:{fun.Attribute.Authority} > {conn.Authority} || {fun.Attribute.Authority} > {router1.Authority}");
                             }
                         }
                     }

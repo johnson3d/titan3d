@@ -91,7 +91,7 @@ namespace EngineNS.UI
                 if (value == null)
                     mUVAnimTask = null;
                 else
-                    mUVAnimTask = UEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(mUVAnimAsset);
+                    mUVAnimTask = TtEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(mUVAnimAsset);
                 UpdateMesh();
             }
         }
@@ -99,7 +99,7 @@ namespace EngineNS.UI
 
         RName mMaterial = RName.GetRName("ui/uimat_inst_default.uminst", RName.ERNameType.Engine);
         [Rtti.Meta, BindProperty]
-        [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.UMaterialInstance.AssetExt)]
+        [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt)]
         public RName Material
         {
             get => mMaterial;
@@ -204,7 +204,7 @@ namespace EngineNS.UI
         {
             if (mDefaultTextureTask == null)
             {
-                mDefaultTextureTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(UEngine.Instance.Config.UIDefaultTexture);
+                mDefaultTextureTask = TtEngine.Instance.GfxDevice.TextureManager.GetTexture(TtEngine.Instance.Config.UIDefaultTexture);
                 return false;
             }
             else if (mDefaultTextureTask.Value.IsCompleted == false)

@@ -21,7 +21,7 @@ namespace EngineNS.Editor
             RenderPolicy = null;
             base.Dispose();
         }
-        new protected async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        new protected async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             RenderPolicy = policy;
 
@@ -29,8 +29,8 @@ namespace EngineNS.Editor
 
             CameraController.ControlCamera(RenderPolicy.DefaultCamera);
 
-            var materials = new Graphics.Pipeline.Shader.UMaterial[1];
-            materials[0] = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("utest/ttt.material"));
+            var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
+            materials[0] = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("utest/ttt.material"));
             if (materials[0] == null)
                 return;
             var mesh = new Graphics.Mesh.TtMesh();
@@ -53,9 +53,9 @@ namespace EngineNS.Editor
         }
         public override async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
         {
-            Graphics.Pipeline.URenderPolicy policy = await UEngine.Instance.EventPoster.Post((state) =>
+            Graphics.Pipeline.TtRenderPolicy policy = await TtEngine.Instance.EventPoster.Post((state) =>
             {
-                var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName);
+                var rpAsset = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(policyName);
                 if (rpAsset == null)
                 {
                     return null;
@@ -119,7 +119,7 @@ namespace EngineNS.Editor
                     ImGuiAPI.SameLine(0, -1);
                     if (EGui.UIProxy.CustomButton.ToolButton("S", in Vector2.Zero))
                     {
-                        Editor.USnapshot.Save(PreviewAsset, UEngine.Instance.AssetMetaManager.GetAssetMeta(PreviewAsset), RenderPolicy.GetFinalShowRSV());
+                        Editor.USnapshot.Save(PreviewAsset, TtEngine.Instance.AssetMetaManager.GetAssetMeta(PreviewAsset), RenderPolicy.GetFinalShowRSV());
                     }
                     else if (HasAssetSnap == false)
                     {
@@ -127,7 +127,7 @@ namespace EngineNS.Editor
                         TimeSpan ts = tm.Subtract(StartTime);
                         if (ts.Seconds > 10)
                         {
-                            Editor.USnapshot.Save(PreviewAsset, UEngine.Instance.AssetMetaManager.GetAssetMeta(PreviewAsset), RenderPolicy.GetFinalShowRSV());
+                            Editor.USnapshot.Save(PreviewAsset, TtEngine.Instance.AssetMetaManager.GetAssetMeta(PreviewAsset), RenderPolicy.GetFinalShowRSV());
                             HasAssetSnap = true;
                         }
                     }
@@ -166,25 +166,25 @@ namespace EngineNS.Editor
 
             if (FreezCameraControl)
                 return true;
-            var keyboards = UEngine.Instance.InputSystem;
+            var keyboards = TtEngine.Instance.InputSystem;
             if (e.Type == Bricks.Input.EventType.MOUSEMOTION)
             {
                 if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
                 {
                     if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                     {
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * CameraRotSpeed * UEngine.Instance.ElapsedSecond);
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * CameraRotSpeed * UEngine.Instance.ElapsedSecond);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * CameraRotSpeed * TtEngine.Instance.ElapsedSecond);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * CameraRotSpeed * TtEngine.Instance.ElapsedSecond);
                         /*if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LCTRL))
                         {
-                            UEngine.Instance.GfxDevice.RenderCmdQueue.CaptureRenderDocFrame = true;
+                            TtEngine.Instance.GfxDevice.RenderCmdQueue.CaptureRenderDocFrame = true;
                         }*/
                     }
                 }
                 else if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_MIDDLE)
                 {
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.X - mPreMousePt.X) * CameraMoveSpeed * UEngine.Instance.ElapsedSecond);
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.Y - mPreMousePt.Y) * CameraMoveSpeed * UEngine.Instance.ElapsedSecond);
+                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.X - mPreMousePt.X) * CameraMoveSpeed * TtEngine.Instance.ElapsedSecond);
+                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.Y - mPreMousePt.Y) * CameraMoveSpeed * TtEngine.Instance.ElapsedSecond);
                 }
                 else if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_X1)
                 {
@@ -194,8 +194,8 @@ namespace EngineNS.Editor
                     }
                     else
                     {
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * CameraRotSpeed * UEngine.Instance.ElapsedSecond, true);
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * CameraRotSpeed * UEngine.Instance.ElapsedSecond, true);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * CameraRotSpeed * TtEngine.Instance.ElapsedSecond, true);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * CameraRotSpeed * TtEngine.Instance.ElapsedSecond, true);
                     }
                 }
 
@@ -218,8 +218,8 @@ namespace EngineNS.Editor
         #endregion
         protected override void TickOnFocus()
         {
-            float step = (UEngine.Instance.ElapseTickCountMS * 0.001f) * CameraMoveSpeed;
-            var keyboards = UEngine.Instance.InputSystem;
+            float step = (TtEngine.Instance.ElapseTickCountMS * 0.001f) * CameraMoveSpeed;
+            var keyboards = TtEngine.Instance.InputSystem;
             if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_w))
             {
                 CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, step, true);

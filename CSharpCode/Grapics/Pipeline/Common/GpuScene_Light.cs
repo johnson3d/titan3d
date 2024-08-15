@@ -13,7 +13,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             public Vector4 ColorAndIntensity;
         }
         public TtCpu2GpuBuffer<FPointLight> PointLights = new TtCpu2GpuBuffer<FPointLight>();
-        public void Initialize_Light(URenderPolicy policy, string debugName)
+        public void Initialize_Light(TtRenderPolicy policy, string debugName)
         {
             PointLights.Initialize(NxRHI.EBufferType.BFT_SRV);
         }
@@ -36,7 +36,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             attachement.Srv = PointLights.Srv;
             attachement.Uav = PointLights.Uav;
         }
-        private void TickLogic_Light(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, NxRHI.UCommandList cmd)
+        private void TickLogic_Light(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.UCommandList cmd)
         {
             PointLights.Clear();
             if (policy.DisablePointLight == false)

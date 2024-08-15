@@ -48,30 +48,30 @@ namespace EngineNS.UI.Controls
 
                 if(value == true)
                 {
-                    var arg = UEngine.Instance.UIManager.QueryEventSync();
+                    var arg = TtEngine.Instance.UIManager.QueryEventSync();
                     //arg.Host = RootUIHost;
                     arg.RoutedEvent = CheckedEvent;
                     arg.Source = this;
                     OnChecked(arg);
-                    UEngine.Instance.UIManager.ReleaseEventSync(arg);
+                    TtEngine.Instance.UIManager.ReleaseEventSync(arg);
                 }
                 else if(value == false)
                 {
-                    var arg = UEngine.Instance.UIManager.QueryEventSync();
+                    var arg = TtEngine.Instance.UIManager.QueryEventSync();
                     //arg.Host = RootUIHost;
                     arg.RoutedEvent = UncheckedEvent;
                     arg.Source = this;
                     OnUnchecked(arg);
-                    UEngine.Instance.UIManager.ReleaseEventSync(arg);
+                    TtEngine.Instance.UIManager.ReleaseEventSync(arg);
                 }
                 else
                 {
-                    var arg = UEngine.Instance.UIManager.QueryEventSync();
+                    var arg = TtEngine.Instance.UIManager.QueryEventSync();
                     //arg.Host = RootUIHost;
                     arg.RoutedEvent = IndeterminateEvent;
                     arg.Source = this;
                     OnIndeterminate(arg);
-                    UEngine.Instance.UIManager.ReleaseEventSync(arg);
+                    TtEngine.Instance.UIManager.ReleaseEventSync(arg);
                 }
             }
         }

@@ -88,16 +88,16 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             var baseResult = await base.InitializeNode(world, data, bvType, placementType);
             if (!baseResult)
                 return false;
-            var pc = UEngine.Instance.PhyModule.PhyContext;
+            var pc = TtEngine.Instance.PhyModule.PhyContext;
             var transform = Placement.TransformData;
             PhyActor = pc.CreateActor(CollisionNodeData.PhyActorType, in transform.mPosition, in transform.mQuat);
             PhyActor.mCoreObject.SetActorFlag(EPhyActorFlag.PAF_eVISUALIZATION, true);
 
             Bricks.PhysicsCore.TtPhyMaterial mtl;
             if (CollisionNodeData.PxMaterial != null)
-                mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(CollisionNodeData.PxMaterial);
+                mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(CollisionNodeData.PxMaterial);
             else
-                mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
+                mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
 
             var shape = pc.CreateShapeSphere(mtl, CollisionNodeData.Radius);
             shape.mCoreObject.SetQueryFilterData(CollisionNodeData.QueryFilterData);
@@ -125,16 +125,16 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             var baseResult = await base.InitializeNode(world, data, bvType, placementType);
             if (!baseResult)
                 return false;
-            var pc = UEngine.Instance.PhyModule.PhyContext;
+            var pc = TtEngine.Instance.PhyModule.PhyContext;
             var transform = Placement.TransformData;
             PhyActor = pc.CreateActor(CollisionNodeData.PhyActorType, in transform.mPosition, in transform.mQuat);
             PhyActor.mCoreObject.SetActorFlag(EPhyActorFlag.PAF_eVISUALIZATION, true);
 
             Bricks.PhysicsCore.TtPhyMaterial mtl;
             if (CollisionNodeData.PxMaterial != null)
-                mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(CollisionNodeData.PxMaterial);
+                mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(CollisionNodeData.PxMaterial);
             else
-                mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
+                mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
 
             var shape = pc.CreateShapeBox(mtl, CollisionNodeData.HalfExtent);
             shape.mCoreObject.SetQueryFilterData(CollisionNodeData.QueryFilterData);

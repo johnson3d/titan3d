@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Graphics.Mesh.UMaterialMeshAMeta@EngineCore">
+<Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="356957c7-469b-4538-afd2-f04f3492775e" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMaterialMesh&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
@@ -16,5 +16,5 @@
     <e_2 Value="Game,fbxresources/pivotpainter/mi_root.uminst,4ac41dac-30d3-4778-ba9b-d2c284ece3e7" />
     <e_3 Value="Game,fbxresources/pivotpainter/mi_branch.uminst,d25e3a38-f278-413d-b8df-262424569a03" />
   </RefAssetRNames>
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.UMaterialMesh@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
 </Root>

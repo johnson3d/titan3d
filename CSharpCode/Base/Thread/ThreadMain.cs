@@ -20,7 +20,7 @@ namespace EngineNS.Thread
         }
         private void BeforeFrame()
         {
-            //UEngine.Instance.BeforeFrame();
+            //TtEngine.Instance.BeforeFrame();
         }
         private void TickSync()
         {
@@ -36,27 +36,27 @@ namespace EngineNS.Thread
                 this.TickAwaitEvent();
 #endif
 
-                UEngine.Instance.TickSync();
+                TtEngine.Instance.TickSync();
 
                 TickStage = 0;
             }
         }
         private void RenderMT()
         {
-            UEngine.Instance.ThreadLogic.LogicEnd.Reset();
-            UEngine.Instance.ThreadLogic.LogicBegin.Set();
+            TtEngine.Instance.ThreadLogic.LogicEnd.Reset();
+            TtEngine.Instance.ThreadLogic.LogicBegin.Set();
 
-            UEngine.Instance.ThreadRHI.Tick();
+            TtEngine.Instance.ThreadRHI.Tick();
 
             using (new Profiler.TimeScopeHelper(ScopeWaitTickLogic))
             {
-                var evtIndex = System.Threading.WaitHandle.WaitAny(UEngine.Instance.ThreadLogic.LogicEndEvents);
+                var evtIndex = System.Threading.WaitHandle.WaitAny(TtEngine.Instance.ThreadLogic.LogicEndEvents);
                 if (evtIndex == (int)TtThreadLogic.EEndEvent.MacrossDebug)
                 {
                     System.Diagnostics.Debug.Assert(Macross.UMacrossDebugger.Instance.CurrrentBreak != null);
                 }
-                //UEngine.Instance.ThreadLogic.mLogicEnd.WaitOne();
-                UEngine.Instance.ThreadLogic.LogicEnd.Reset();
+                //TtEngine.Instance.ThreadLogic.mLogicEnd.WaitOne();
+                TtEngine.Instance.ThreadLogic.LogicEnd.Reset();
             }
         }
     }

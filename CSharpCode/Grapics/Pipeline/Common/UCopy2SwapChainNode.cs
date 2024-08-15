@@ -53,25 +53,25 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             AddOutput(ColorPinOut, NxRHI.EBufferType.BFT_SRV);
         }
-        public override async Task Initialize(URenderPolicy policy, string debugName)
+        public override async Task Initialize(TtRenderPolicy policy, string debugName)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             await base.Initialize(policy, debugName);
             BasePass.Initialize(rc, debugName + ".BasePass");
 
-            mCopyDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
+            mCopyDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
         }
-        public override void OnResize(URenderPolicy policy, float x, float y)
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             ColorPinOut.Attachement.Width = (uint)x;
             ColorPinOut.Attachement.Height = (uint)y;
             CoreSDK.DisposeObject(ref ColorAttachement);
         }
-        public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
+        public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             base.FrameBuild(policy);
         }
-        public override void BeforeTickLogic(URenderPolicy policy)
+        public override void BeforeTickLogic(TtRenderPolicy policy)
         {
             var buffer = this.FindAttachBuffer(ColorPinIn);
             if (buffer != null)
@@ -90,7 +90,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 attachement.Rtv = ColorAttachement.Rtv;
             }
         }
-        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             if (mCopyDrawcall == null)
                 return;

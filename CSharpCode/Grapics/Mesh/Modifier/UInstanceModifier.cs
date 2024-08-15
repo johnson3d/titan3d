@@ -65,7 +65,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
         {
             base.EnvShadingDefines(in id, defines);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
         {
             var instanceSSBO = drawcall.TagObject as TtInstanceBufferSSBO;
             if (instanceSSBO == null)
@@ -89,7 +89,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
         {
             base.EnvShadingDefines(in id, defines);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
         {
             var instanceSSBO = drawcall.TagObject as TtInstanceBufferSSBO;
             if (instanceSSBO == null)
@@ -113,7 +113,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
         {
             base.EnvShadingDefines(in id, defines);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
         {
             var instanceSSBO = drawcall.TagObject as TtInstanceBufferSSBO;
             if (instanceSSBO == null)
@@ -171,17 +171,17 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 }
             }
             
-            GpuCullSetupDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
+            GpuCullSetupDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
             GpuCullSetupDrawcall.TagObject = this;
 
-            GpuCullFlushDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
+            GpuCullFlushDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
             GpuCullFlushDrawcall.TagObject = this;
             
-            GpuCullDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
+            GpuCullDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
             GpuCullDrawcall.TagObject = this;
         }
 
-        public unsafe void InstanceCulling(TtInstanceModifier mdf, NxRHI.ICommandList cmd, Pipeline.URenderPolicy policy)
+        public unsafe void InstanceCulling(TtInstanceModifier mdf, NxRHI.ICommandList cmd, Pipeline.TtRenderPolicy policy)
         {
             if (!GpuCullSetupShading.IsReady || !GpuCullShading.IsReady || !GpuCullFlushShading.IsReady)
             {
@@ -229,7 +229,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
         }
 
         //static bool bIndirect = true;
-        public void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
+        public void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.TtRenderPolicy policy, TtMesh.TtAtom atom)
         {
             uint key = ((uint)(drawcall.SubMesh << 16) | drawcall.MeshAtom);
             TtGpuDrivenData.FDrawArgs drawArgs;
@@ -306,7 +306,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
             }
         }
 
-        public void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
+        public void OnDrawCall(TtInstanceModifier mdf, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.TtRenderPolicy policy, TtMesh.TtAtom atom)
         {
             drawcall.mCoreObject.DrawInstance = (ushort)NumOfInstance;
 
@@ -367,7 +367,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
         {
             Dispose();
         }
-        public unsafe void Initialize(Graphics.Mesh.UMaterialMesh materialMesh)
+        public unsafe void Initialize(Graphics.Mesh.TtMaterialMesh materialMesh)
         {
             InstanceBuffers = new TtInstanceBufferSSBO();
 
@@ -419,7 +419,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
             InstanceBuffers.SetInstance(index, instance);
         }
 
-        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.TtRenderPolicy policy, TtMesh.TtAtom atom)
         {
             InstanceBuffers.OnDrawCall(this, cmd, drawcall, policy, atom);
         }

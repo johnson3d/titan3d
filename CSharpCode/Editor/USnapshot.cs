@@ -17,29 +17,29 @@ namespace EngineNS.Editor
         public unsafe static void Save(RName rname, IO.IAssetMeta ameta, NxRHI.ITexture tex, uint x, uint y, uint w, uint h, ESnapSide side = ESnapSide.Center)
         {
             var file = rname.Address + ".snap";
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var fenceDesc = new NxRHI.FFenceDesc();
             fenceDesc.m_InitValue = 0;
             var fence = rc.CreateFence(in fenceDesc, file);
-            var cpDraw = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
-            var readable = tex.CreateReadable(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, 0, cpDraw.mCoreObject);
-            UEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
+            var cpDraw = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
+            var readable = tex.CreateReadable(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, 0, cpDraw.mCoreObject);
+            TtEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
             {
                 im_cmd.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
                 im_cmd.FlushDraws();
-                UEngine.Instance.GfxDevice.RenderContext.GpuQueue.IncreaseSignal(fence);
+                TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.IncreaseSignal(fence);
             }, "Copy Snap Texture");
 
-            UEngine.Instance.EventPoster.RunOn((state) =>
+            TtEngine.Instance.EventPoster.RunOn((state) =>
             {
                 fence.Wait(1);
-                UEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
+                TtEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
                 {
                     var gpuDataBlob = new Support.UBlobObject();
                     var bufferData = new Support.UBlobObject();
                     readable.FetchGpuData(0, gpuDataBlob.mCoreObject);
                     NxRHI.ITexture.BuildImage2DBlob(bufferData.mCoreObject, gpuDataBlob.mCoreObject, tex.Desc);
-                    UEngine.Instance.EventPoster.RunOn((state) =>
+                    TtEngine.Instance.EventPoster.RunOn((state) =>
                     {
                         SavePng(ameta, file, bufferData, side);
                         return true;
@@ -92,7 +92,7 @@ namespace EngineNS.Editor
                 writer.WritePng(image.Data, image.Width, image.Height, StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, memStream);
                 ameta.ResetSnapshot();
             }
-            UEngine.Instance.SourceControlModule.AddFile(file);
+            TtEngine.Instance.SourceControlModule.AddFile(file);
             return true;
         }
         public unsafe static bool SavePng(IO.IAssetMeta ameta, string file, Support.UBlobObject bufferData, uint TarW, uint TarH, uint SrcX, uint SrcY)
@@ -124,7 +124,7 @@ namespace EngineNS.Editor
         public static async System.Threading.Tasks.Task<USnapshot> Load(string file)
         {
             USnapshot result = new USnapshot();
-            result.mTextureRSV = await UEngine.Instance.GfxDevice.TextureManager.CreateTexture(file);
+            result.mTextureRSV = await TtEngine.Instance.GfxDevice.TextureManager.CreateTexture(file);
             if (result.mTextureRSV == null)
                 return null;
             return result;

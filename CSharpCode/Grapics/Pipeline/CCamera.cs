@@ -20,9 +20,9 @@ namespace EngineNS.Graphics.Pipeline
             {
                 if (mPerCameraCBuffer == null)
                 {
-                    mPerCameraCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(UEngine.Instance.GfxDevice.CoreShaderBinder.CBufferCreator.cbPerCamera);
+                    mPerCameraCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBufferCreator.cbPerCamera);
                     mPerCameraCBuffer.SetDebugName($"Camera");
-                    //mCoreObject.BindConstBuffer(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, mPerCameraCBuffer.mCoreObject);
+                    //mCoreObject.BindConstBuffer(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, mPerCameraCBuffer.mCoreObject);
                 }
                 return mPerCameraCBuffer;
             }
@@ -52,7 +52,7 @@ namespace EngineNS.Graphics.Pipeline
             if (MathHelper.Abs(zoomTimeInSecond) <= MathHelper.Epsilon)
             {
                 mCoreObject.LookAtLH(eye, sphere.Center, in up);
-                UEngine.Instance.TickableManager.RemoveTickable(this);
+                TtEngine.Instance.TickableManager.RemoveTickable(this);
             }
             else
             {
@@ -63,7 +63,7 @@ namespace EngineNS.Graphics.Pipeline
                 TargetEyeMoveSpeed = (TargetEye - mCoreObject.GetPosition()) / zoomTimeInSecond;
                 TargetLookAtMoveSpeed = (TargetLookAt - mCoreObject.GetLookAt()) / zoomTimeInSecond;
                 TargetUpMoveSpeed = Vector3.Zero;
-                UEngine.Instance.TickableManager.AddTickable(this);
+                TtEngine.Instance.TickableManager.AddTickable(this);
             }
         }
         public float GetScaleWithFixSizeInScreen(in DVector3 position, float screenSize)
@@ -298,9 +298,9 @@ namespace EngineNS.Graphics.Pipeline
             {
                 JitterPreFrameViewProjectionMatrix = GetJitterViewProjection();
             }
-            PerCameraCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.PreFrameViewPrjMtx, PreFrameViewProjectionMatrix.Value, true, mode);
-            PerCameraCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.JitterPreFrameViewPrjMtx, JitterPreFrameViewProjectionMatrix.Value, true, mode);
-            mCoreObject.UpdateConstBufferData(rc.mCoreObject, PerCameraCBuffer.mCoreObject, true, mode == NxRHI.UCbView.EUpdateMode.Immediately ? new NxRHI.FCbvUpdater() : UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
+            PerCameraCBuffer.SetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.PreFrameViewPrjMtx, PreFrameViewProjectionMatrix.Value, true, mode);
+            PerCameraCBuffer.SetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.JitterPreFrameViewPrjMtx, JitterPreFrameViewProjectionMatrix.Value, true, mode);
+            mCoreObject.UpdateConstBufferData(rc.mCoreObject, PerCameraCBuffer.mCoreObject, true, mode == NxRHI.UCbView.EUpdateMode.Immediately ? new NxRHI.FCbvUpdater() : TtEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
             PreFrameViewProjectionMatrix = GetViewProjection();
             JitterPreFrameViewProjectionMatrix = GetJitterViewProjection();
         }
@@ -354,7 +354,7 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     mZoomTime = 0;
                     mCoreObject.LookAtLH(in TargetEye, in TargetLookAt, in TargetUp);
-                    UEngine.Instance.TickableManager.RemoveTickable(this);
+                    TtEngine.Instance.TickableManager.RemoveTickable(this);
                 }
             }
         }

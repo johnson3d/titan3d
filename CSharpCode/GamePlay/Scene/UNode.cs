@@ -487,7 +487,9 @@ namespace EngineNS.GamePlay.Scene
             UpdateAABB();
         }
         [Rtti.Meta]
-        public UNode FindFirstChild(string name, System.Type type = null, bool bRecursive = false)
+        public UNode FindFirstChild(string name,
+            [Rtti.MetaParameter(FilterType = typeof(UNode), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
+            System.Type type = null, bool bRecursive = false)
         {
             foreach (var i in Children)
             {
@@ -635,7 +637,7 @@ namespace EngineNS.GamePlay.Scene
                 var nd = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(cldTypeStr)) as UNode;
                 if (nd == null || nodeData == null)
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, bTryFindNode ? "Prefab" : "Scene", $"SceneNode Load failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
+                    Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"SceneNode Load failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
                     continue;
                 }
                 
@@ -670,7 +672,7 @@ namespace EngineNS.GamePlay.Scene
                         var ok = await nd.InitializeNode(world, nodeData, EBoundVolumeType.Box, placementType);
                         if (ok == false)
                         {
-                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, bTryFindNode ? "Prefab" : "Scene", $"SceneNode Load Initialize failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
+                            Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"SceneNode Load Initialize failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
                             continue;
                         }
                         //nd.NodeData = data as UNodeData;
@@ -679,7 +681,7 @@ namespace EngineNS.GamePlay.Scene
                     catch (Exception ex)
                     {
                         Profiler.Log.WriteException(ex);
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"Scene({scene}): Node({nd.NodeData?.Name}) load failed");
+                        Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"Scene({scene}): Node({nd.NodeData?.Name}) load failed");
                     }
                 }
                 if (nd.Placement != null)
@@ -874,7 +876,7 @@ namespace EngineNS.GamePlay.Scene
         public class TtNodeTickParameters
         {
             public GamePlay.UWorld World;
-            public Graphics.Pipeline.URenderPolicy Policy;
+            public Graphics.Pipeline.TtRenderPolicy Policy;
             public bool IsTickChildren = true;
         }
         public virtual void TickLogic(TtNodeTickParameters args)
@@ -893,7 +895,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        public virtual bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
+        public virtual bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             return true;
         }
@@ -994,7 +996,7 @@ namespace EngineNS.GamePlay.Scene
                 var newScene = value.GetNearestParentScene();
                 if (ParentScene != null && newScene != ParentScene)
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "UNode", $"{GetType().FullName}:{NodeName} cann't move to another UScene");
+                    Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, "UNode", $"{GetType().FullName}:{NodeName} cann't move to another UScene");
                     return;
                 }
                 base.Parent = value;

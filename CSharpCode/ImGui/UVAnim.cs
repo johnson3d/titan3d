@@ -6,6 +6,7 @@ using EngineNS;
 namespace EngineNS.EGui
 {
     //[Rtti.Meta(NameAlias = new string[] { "EngineNS.EGui.UVAnimAMeta@EngineCore" })]
+    [Rtti.Meta]
     public partial class TtUVAnimAMeta : IO.IAssetMeta
     {
         [Rtti.Meta]
@@ -50,8 +51,8 @@ namespace EngineNS.EGui
             }
             if (SnapTask == null)
             {
-                var rc = UEngine.Instance.GfxDevice.RenderContext;
-                SnapTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(TextureName, 1);
+                var rc = TtEngine.Instance.GfxDevice.RenderContext;
+                SnapTask = TtEngine.Instance.GfxDevice.TextureManager.GetTexture(TextureName, 1);
                 cmdlist.AddText(in start, 0xFFFFFFFF, "UVAnim", null);
                 return;
             }
@@ -79,6 +80,7 @@ namespace EngineNS.EGui
         Thread.Async.TtTask<NxRHI.USrView>? SnapTask;
     }
     //[Rtti.Meta(NameAlias = new string[] { "EngineNS.EGui.UUvAnim@EngineCore" })]
+    [Rtti.Meta]
     [TtUVAnim.Import]
     [Editor.UAssetEditor(EditorType = typeof(UUvAnimEditor))]
     [IO.AssetCreateMenu(MenuName = "UI/UVAnim")]
@@ -120,7 +122,7 @@ namespace EngineNS.EGui
         }
         public IO.IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
@@ -143,7 +145,7 @@ namespace EngineNS.EGui
             if (ameta != null)
             {
                 UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta();
+                ameta.SaveAMeta(this);
             }
 
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
@@ -158,7 +160,7 @@ namespace EngineNS.EGui
             }
 
             xnd.SaveXnd(name.Address);
-            UEngine.Instance.SourceControlModule.AddFile(name.Address);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         public static TtUVAnim LoadXnd(TtUvAnimManager manager, IO.TtXndNode node)
         {
@@ -209,7 +211,7 @@ namespace EngineNS.EGui
                     mTextureTask = null;
                 else
                 {
-                    mTextureTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
+                    mTextureTask = TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
                 }
             }
         }
@@ -296,7 +298,7 @@ namespace EngineNS.EGui
             if (UVAnims.TryGetValue(rn, out result))
                 return result;
 
-            result = await UEngine.Instance.EventPoster.Post((state) =>
+            result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
@@ -327,7 +329,7 @@ namespace EngineNS.EGui
         public async Thread.Async.TtTask<TtUVAnim> CreateUVAnim(RName rn)
         {
             TtUVAnim result;
-            result = await UEngine.Instance.EventPoster.Post((state) =>
+            result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
@@ -354,7 +356,7 @@ namespace EngineNS.EGui
             if (UVAnims.TryGetValue(rn, out result) == false)
                 return true;
 
-            var ok = await UEngine.Instance.EventPoster.Post((state) =>
+            var ok = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {

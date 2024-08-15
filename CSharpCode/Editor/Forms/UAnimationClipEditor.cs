@@ -1,5 +1,4 @@
-﻿using Assimp;
-using EngineNS.Animation.Asset;
+﻿using EngineNS.Animation.Asset;
 using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.Thread.Async;
@@ -53,7 +52,7 @@ namespace EngineNS.Editor.Forms
 
         public void OnCloseEditor()
         {
-            UEngine.Instance.TickableManager.RemoveTickable(this);
+            TtEngine.Instance.TickableManager.RemoveTickable(this);
             Dispose();
         }
         bool mDockInitialized = false;
@@ -94,7 +93,7 @@ namespace EngineNS.Editor.Forms
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -117,9 +116,9 @@ namespace EngineNS.Editor.Forms
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
                 AnimationClip.SaveAssetTo(AnimationClip.AssetName);
-                var unused = UEngine.Instance.GfxDevice.MaterialMeshManager.ReloadMaterialMesh(AnimationClip.AssetName);
+                var unused = TtEngine.Instance.GfxDevice.MaterialMeshManager.ReloadMaterialMesh(AnimationClip.AssetName);
 
-                //USnapshot.Save(AnimationClip.AssetName, AnimationClip.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+                //USnapshot.Save(AnimationClip.AssetName, AnimationClip.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Reload", in btSize))
@@ -168,7 +167,7 @@ namespace EngineNS.Editor.Forms
         EngineNS.GamePlay.Scene.UMeshNode mCurrentMeshNode;
         public float PlaneScale = 5.0f;
         EngineNS.GamePlay.Scene.UMeshNode PlaneMeshNode;
-        protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -186,8 +185,8 @@ namespace EngineNS.Editor.Forms
 
             {
                 var PlaneMesh = new Graphics.Mesh.TtMesh();
-                var tMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
-                tMaterials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(UEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName);
+                var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
+                tMaterials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(TtEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName);
                 PlaneMesh.Initialize(Graphics.Mesh.UMeshDataProvider.MakePlane(10, 10).ToMesh(), tMaterials,
                     Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 PlaneMeshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), PlaneMesh, new DVector3(0, -0.0001f, 0), Vector3.One, Quaternion.Identity);
@@ -206,29 +205,29 @@ namespace EngineNS.Editor.Forms
         public async Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            AnimationClip = await UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(name);
+            AnimationClip = await TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(name);
             if (AnimationClip == null)
                 return false;
 
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"MaterialMesh:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewScene;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
+            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
             AnimationClipPreview = new TtAnimationClipPreview();
             AnimationClipPreview.AnimationClipEditor = this;
             AnimationClipPreview.AnimationClip = AnimationClip;
             AnimationClipPropGrid.Target = AnimationClipPreview;
-            UEngine.Instance.TickableManager.AddTickable(this);
+            TtEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
-        public async TtTask OnPreviewMeshChange(UMeshPrimitives meshPrimitives)
+        public async TtTask OnPreviewMeshChange(TtMeshPrimitives meshPrimitives)
         {
             if(mCurrentMeshNode != null)
             {
                 mCurrentMeshNode.Parent = null;
             }
-            var mtl = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(UEngine.Instance.Config.MeshPrimitiveEditorConfig.MaterialName);
-            var materials = new Graphics.Pipeline.Shader.UMaterial[meshPrimitives.mCoreObject.GetAtomNumber()];
+            var mtl = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(TtEngine.Instance.Config.MeshPrimitiveEditorConfig.MaterialName);
+            var materials = new Graphics.Pipeline.Shader.TtMaterial[meshPrimitives.mCoreObject.GetAtomNumber()];
             for (int i = 0; i < materials.Length; i++)
             {
                 materials[i] = mtl;
@@ -267,7 +266,7 @@ namespace EngineNS.Editor.Forms
             [Browsable(false)]
             public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
             private RName mPreivewMeshName;
-            [RName.PGRName(FilterExts = UMeshPrimitives.AssetExt)]
+            [RName.PGRName(FilterExts = TtMeshPrimitives.AssetExt)]
             public RName PreivewMesh
             {
                 get
@@ -282,7 +281,7 @@ namespace EngineNS.Editor.Forms
                     AssetState = IO.EAssetState.Loading;
                     System.Action exec = async () =>
                     {
-                        var Mesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value);
+                        var Mesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value);
                         if (Mesh.mCoreObject.IsValidPointer == false)
                         {
                             AssetState = IO.EAssetState.LoadFailed;

@@ -165,7 +165,7 @@ namespace EngineNS.EGui
         {
             SDL.SDL_WindowFlags sdl_flags = 0;
             
-            sdl_flags |= (SDL.SDL_WindowFlags)SDL.SDL_GetWindowFlags(UEngine.Instance.GfxDevice.SlateApplication.NativeWindow.Window) & SDL.SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
+            sdl_flags |= (SDL.SDL_WindowFlags)SDL.SDL_GetWindowFlags(TtEngine.Instance.GfxDevice.SlateApplication.NativeWindow.Window) & SDL.SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
             sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN;
             sdl_flags |= ((viewport->Flags & ImGuiViewportFlags_.ImGuiViewportFlags_NoDecoration) != 0) ? SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS : 0;
             sdl_flags |= ((viewport->Flags & ImGuiViewportFlags_.ImGuiViewportFlags_NoDecoration) != 0) ? 0 : SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE;
@@ -356,7 +356,7 @@ namespace EngineNS.EGui
             viewport->RendererUserData = System.Runtime.InteropServices.GCHandle.ToIntPtr(System.Runtime.InteropServices.GCHandle.Alloc(vpData)).ToPointer();
 
 
-            vpData.PresentWindow.InitSwapChain(UEngine.Instance.GfxDevice.RenderContext);            
+            vpData.PresentWindow.InitSwapChain(TtEngine.Instance.GfxDevice.RenderContext);            
             vpData.DrawData.InitializeGraphics(vpData.PresentWindow.GetSwapchainFormat(), vpData.PresentWindow.GetSwapchainDSFormat());
         }
         unsafe static ImGuiPlatformIO.FDelegate_Renderer_DestroyWindow ImGui_Renderer_DestroyWindow = ImGui_Renderer_DestroyWindow_Impl;

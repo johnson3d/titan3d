@@ -9,7 +9,7 @@ namespace EngineNS.Editor.Forms
     {
         public TtMemoryProfiler()
         {
-            UEngine.RootFormManager.RegRootForm(this);
+            TtEngine.RootFormManager.RegRootForm(this);
         }
         public bool Visible { get; set; } = true;
         public uint DockId { get; set; }

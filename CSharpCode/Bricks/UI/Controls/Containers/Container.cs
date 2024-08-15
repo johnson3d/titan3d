@@ -56,7 +56,7 @@ namespace EngineNS.UI.Controls.Containers
         {
             get
             {
-                //if (!UEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
+                //if (!TtEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
                 //{
                 //    throw new InvalidOperationException("need be called in logic thread");
                 //}
@@ -78,7 +78,7 @@ namespace EngineNS.UI.Controls.Containers
             }
             set
             {
-                //if (!UEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
+                //if (!TtEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
                 //{
                 //    throw new InvalidOperationException("need be called in logic thread");
                 //}
@@ -184,7 +184,7 @@ namespace EngineNS.UI.Controls.Containers
 
         public int IndexOf(TtUIElement item)
         {
-            //if (!UEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
+            //if (!TtEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
             //{
             //    throw new InvalidOperationException("need be called in logic thread");
             //}
@@ -210,7 +210,7 @@ namespace EngineNS.UI.Controls.Containers
 
         public void Insert(int index, TtUIElement item)
         {
-            //if (!UEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
+            //if (!TtEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
             //{
             //    throw new InvalidOperationException("need be called in logic thread");
             //}
@@ -245,7 +245,7 @@ namespace EngineNS.UI.Controls.Containers
 
         public void RemoveAt(int index)
         {
-            //if (!UEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
+            //if (!TtEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
             //{
             //    throw new InvalidOperationException("need be called in logic thread");
             //}
@@ -276,7 +276,7 @@ namespace EngineNS.UI.Controls.Containers
         }
         public bool Remove(TtUIElement item)
         {
-            //if (!UEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
+            //if (!TtEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
             //{
             //    throw new InvalidOperationException("need be called in logic thread");
             //}
@@ -314,7 +314,7 @@ namespace EngineNS.UI.Controls.Containers
         [Rtti.Meta]
         public void Add(TtUIElement item)
         {
-            //if (!UEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
+            //if (!TtEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
             //{
             //    throw new InvalidOperationException("need be called in logic thread");
             //}
@@ -355,7 +355,7 @@ namespace EngineNS.UI.Controls.Containers
 
         public void Clear()
         {
-            //if (!UEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
+            //if (!TtEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
             //{
             //    throw new InvalidOperationException("need be called in logic thread");
             //}
@@ -403,7 +403,7 @@ namespace EngineNS.UI.Controls.Containers
 
         public bool Contains(TtUIElement item)
         {
-            //if (!UEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
+            //if (!TtEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
             //{
             //    throw new InvalidOperationException("need be called in logic thread");
             //}
@@ -428,7 +428,7 @@ namespace EngineNS.UI.Controls.Containers
 
         public void CopyTo(TtUIElement[] array, int arrayIndex)
         {
-            //if (!UEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
+            //if (!TtEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
             //{
             //    throw new InvalidOperationException("need be called in logic thread");
             //}
@@ -451,7 +451,7 @@ namespace EngineNS.UI.Controls.Containers
 
         public IEnumerator<TtUIElement> GetEnumerator()
         {
-            //if (!UEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
+            //if (!TtEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
             //{
             //    throw new InvalidOperationException("need be called in logic thread");
             //}
@@ -476,7 +476,7 @@ namespace EngineNS.UI.Controls.Containers
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            //if (!UEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
+            //if (!TtEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
             //{
             //    throw new InvalidOperationException("need be called in logic thread");
             //}

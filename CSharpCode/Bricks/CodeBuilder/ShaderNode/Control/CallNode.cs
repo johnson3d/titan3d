@@ -37,11 +37,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 //var meta = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(typeof(HLSLMethod).FullName);
                 //Method = meta.GetMethod(value);
 
-                Method = UEngine.Instance.HLSLMethodManager.GetMethodByDeclString(value);
+                Method = TtEngine.Instance.HLSLMethodManager.GetMethodByDeclString(value);
                 if (Method == null)
                 {
                     var name = Rtti.UClassMeta.GetNameByDeclstring(value);
-                    Method = UEngine.Instance.HLSLMethodManager.GetMethod(name);
+                    Method = TtEngine.Instance.HLSLMethodManager.GetMethod(name);
                 }
                 this.Initialize(Method);
             }

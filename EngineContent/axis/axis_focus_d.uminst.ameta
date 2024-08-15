@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Graphics.Pipeline.Shader.UMaterialInstanceAMeta@EngineCore">
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="3ab01c36-05ae-42f4-a843-32aafa180dae" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterialInstance&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
@@ -13,5 +13,5 @@
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Value="Engine,axis/axis_mat.material,1ed955e2-80bf-4d74-844e-ac003d2f6906" />
   </RefAssetRNames>
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterialInstance@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
 </Root>

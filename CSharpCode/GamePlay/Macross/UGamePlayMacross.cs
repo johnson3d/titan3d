@@ -35,7 +35,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
                     //if (value == null)
                     //{
                     //    var gameplayMacross = new EngineNS.GamePlay.GamePlayMacross.UTestGameplayMacross();
-                    //    mMcGamePlay = Macross.UMacrossGetter<UGameplayMacross>.UnsafeNewInstance(UEngine.Instance.MacrossModule.Version, gameplayMacross, false);
+                    //    mMcGamePlay = Macross.UMacrossGetter<UGameplayMacross>.UnsafeNewInstance(TtEngine.Instance.MacrossModule.Version, gameplayMacross, false);
                     //    //var task = gameplayMacross.ConstructAnimGraph(meshNode1);
                     //    return;
                     //}
@@ -133,7 +133,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
             var idleState = new TtGamePlayState<UGameplayMacross>(mGamePlayStateMachine);
             idleState.LogicalState = new TtLogicalState<UGameplayMacross>(mGamePlayStateMachine);
             var idleAnimState = new TtAnimationState<UGameplayMacross>(mGamePlayStateMachine);
-            idleAnimState.Animation = await EngineNS.UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip"));
+            idleAnimState.Animation = await EngineNS.TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip"));
             //idleAnimState.Initialize();
             idleAnimState.mExtractPoseFromClipCommand?.SetExtractedPose(ref animatablePose);
             idleState.AnimationState = idleAnimState;
@@ -189,7 +189,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
             var idleState = new TtGamePlayState<UGameplayMacross>(mGamePlayStateMachine);
             idleState.LogicalState = new TtLogicalState<UGameplayMacross>(mGamePlayStateMachine);
             var idleAnimState = new TtAnimationState<UGameplayMacross>(mGamePlayStateMachine);
-            idleAnimState.Animation = await EngineNS.UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip"));
+            idleAnimState.Animation = await EngineNS.TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip"));
             //idleAnimState.Initialize();
             idleAnimState.mExtractPoseFromClipCommand.SetExtractedPose(ref animatablePose);
             idleState.AnimationState = idleAnimState;

@@ -16,7 +16,7 @@ namespace EngineNS.UI
     {
         void UIManagerConstruct_Msg()
         {
-            UEngine.Instance.EventProcessorManager.RegProcessor(this);
+            TtEngine.Instance.EventProcessorManager.RegProcessor(this);
         }
 
         // 模态对话框
@@ -84,13 +84,13 @@ namespace EngineNS.UI
                 if(mKeyboardFocusUIElement != null)
                 {
                     //mKeyboardFocusUIElement.ProcessOnLostFocus(eventArgs, element, mKeyboardFocusUIElement);
-                    var arg = UEngine.Instance.UIManager.QueryEventSync();
+                    var arg = TtEngine.Instance.UIManager.QueryEventSync();
                     arg.RoutedEvent = TtUIElement.OnLostFocusEvent;
                     arg.Source = this;
                     if(eventArgs != null)
                         arg.InputEventPtr = eventArgs.InputEventPtr;
                     mKeyboardFocusUIElement.RaiseEvent(arg);
-                    UEngine.Instance.UIManager.ReleaseEventSync(arg);
+                    TtEngine.Instance.UIManager.ReleaseEventSync(arg);
                 }
             }
             else if(IsKeyboardFocusable(element))
@@ -98,21 +98,21 @@ namespace EngineNS.UI
                 if (mKeyboardFocusUIElement != null)
                 {
                     //mKeyboardFocusUIElement.ProcessOnLostFocus(eventArgs, element, mKeyboardFocusUIElement);
-                    var arg = UEngine.Instance.UIManager.QueryEventSync();
+                    var arg = TtEngine.Instance.UIManager.QueryEventSync();
                     arg.RoutedEvent = TtUIElement.OnLostFocusEvent;
                     arg.Source = this;
                     if(eventArgs != null)
                         arg.InputEventPtr = eventArgs.InputEventPtr;
                     mKeyboardFocusUIElement.RaiseEvent(arg);
-                    UEngine.Instance.UIManager.ReleaseEventSync(arg);
+                    TtEngine.Instance.UIManager.ReleaseEventSync(arg);
                 }
-                var focArg = UEngine.Instance.UIManager.QueryEventSync();
+                var focArg = TtEngine.Instance.UIManager.QueryEventSync();
                 focArg.RoutedEvent = TtUIElement.OnFocusEvent;
                 focArg.Source = this;
                 if(eventArgs != null)
                     focArg.InputEventPtr = eventArgs.InputEventPtr;
                 element.RaiseEvent(focArg);
-                UEngine.Instance.UIManager.ReleaseEventSync(focArg);
+                TtEngine.Instance.UIManager.ReleaseEventSync(focArg);
                 //element.ProcessOnFocus(eventArgs, element, mKeyboardFocusUIElement);
                 mKeyboardFocusUIElement = element;
             }
@@ -121,22 +121,22 @@ namespace EngineNS.UI
                 if (mKeyboardFocusUIElement != null)
                 {
                     //mKeyboardFocusUIElement.ProcessOnLostFocus(eventArgs, element, mKeyboardFocusUIElement);
-                    var arg = UEngine.Instance.UIManager.QueryEventSync();
+                    var arg = TtEngine.Instance.UIManager.QueryEventSync();
                     arg.RoutedEvent = TtUIElement.OnLostFocusEvent;
                     arg.Source = this;
                     if(eventArgs != null)
                         arg.InputEventPtr = eventArgs.InputEventPtr;
                     mKeyboardFocusUIElement.RaiseEvent(arg);
-                    UEngine.Instance.UIManager.ReleaseEventSync(arg);
+                    TtEngine.Instance.UIManager.ReleaseEventSync(arg);
                 }
                 //element.ProcessOnFocus(eventArgs, element, mKeyboardFocusUIElement);
-                var focArg = UEngine.Instance.UIManager.QueryEventSync();
+                var focArg = TtEngine.Instance.UIManager.QueryEventSync();
                 focArg.RoutedEvent = TtUIElement.OnFocusEvent;
                 focArg.Source = this;
                 if(eventArgs != null)
                     focArg.InputEventPtr = eventArgs.InputEventPtr;
                 element.RaiseEvent(focArg);
-                UEngine.Instance.UIManager.ReleaseEventSync(focArg);
+                TtEngine.Instance.UIManager.ReleaseEventSync(focArg);
                 mKeyboardFocusUIElement = element.Parent;
             }
         }
@@ -148,25 +148,25 @@ namespace EngineNS.UI
             if (old != null)
             {
                 //old.ProcessOnLostMouseCapture(eventArgs, element, old);
-                var arg = UEngine.Instance.UIManager.QueryEventSync();
+                var arg = TtEngine.Instance.UIManager.QueryEventSync();
                 arg.RoutedEvent = TtUIElement.OnLostMouseCaptureEvent;
                 arg.Source = this;
                 if(eventArgs != null)
                     arg.InputEventPtr = eventArgs.InputEventPtr;
                 mKeyboardFocusUIElement.RaiseEvent(arg);
-                UEngine.Instance.UIManager.ReleaseEventSync(arg);
+                TtEngine.Instance.UIManager.ReleaseEventSync(arg);
             }
             mCapturedElements[UInputSystem.MaxMultiTouchNumber] = element;
             if (element != null)
             {
                 //element.ProcessOnMouseCapture(eventArgs, element, old);
-                var focArg = UEngine.Instance.UIManager.QueryEventSync();
+                var focArg = TtEngine.Instance.UIManager.QueryEventSync();
                 focArg.RoutedEvent = TtUIElement.OnMouseCaptureEvent;
                 focArg.Source = this;
                 if(eventArgs != null)
                     focArg.InputEventPtr = eventArgs.InputEventPtr;
                 element.RaiseEvent(focArg);
-                UEngine.Instance.UIManager.ReleaseEventSync(focArg);
+                TtEngine.Instance.UIManager.ReleaseEventSync(focArg);
             }
         }
         public void CaptureTouch(int index, TtUIElement element)

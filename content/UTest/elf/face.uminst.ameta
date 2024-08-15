@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Graphics.Pipeline.Shader.UMaterialInstanceAMeta@EngineCore">
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="dc26d238-52a6-40dd-a8e1-6776ff1ff7e2" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterialInstance&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
@@ -14,5 +14,5 @@
     <e_0 Value="Game,utest/puppet/pbr_role.material,13e877a1-aba6-4b7b-83a9-a852d111baff" />
     <e_1 Value="Game,utest/elf/elf_default_head_00_dn.srv,65287672-617e-44b6-b64e-ceabee92cdc6" />
   </RefAssetRNames>
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterialInstance@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
 </Root>

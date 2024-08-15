@@ -27,7 +27,7 @@ namespace EngineNS.UI
 
         protected Canvas.TtCanvas mCanvas = new Canvas.TtCanvas();
         protected Graphics.Mesh.UMeshDataProvider mMeshProvider;
-        protected Graphics.Mesh.UMeshPrimitives mMesh = null;
+        protected Graphics.Mesh.TtMeshPrimitives mMesh = null;
         protected Canvas.TtCanvasDrawBatch mDrawBatch = null;
         public Graphics.Pipeline.UCamera RenderCamera;
         public bool BoundingBoxDirty = true;
@@ -248,7 +248,7 @@ namespace EngineNS.UI
             if (mMeshProvider == null)
             {
                 mMeshProvider = new Graphics.Mesh.UMeshDataProvider();
-                mMesh = new Graphics.Mesh.UMeshPrimitives();
+                mMesh = new Graphics.Mesh.TtMeshPrimitives();
                 mMesh.Init("UICookedMesh", 0);
                 var builder = mMeshProvider.mCoreObject;
                 uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
@@ -266,7 +266,7 @@ namespace EngineNS.UI
             //var assistBatch = new Canvas.TtCanvasDrawBatch();
             //assistBatch.SetClientClip(winSize.Width, winSize.Height);
 
-            //var font = UEngine.Instance.FontModule.FontManager.GetFontSDF(RName.GetRName("fonts/simli.fontsdf", RName.ERNameType.Engine), fontSize: 64, 1024, 1024);
+            //var font = TtEngine.Instance.FontModule.FontManager.GetFontSDF(RName.GetRName("fonts/simli.fontsdf", RName.ERNameType.Engine), fontSize: 64, 1024, 1024);
             //canvasForeground.PushFont(font);
             //canvasForeground.AddText("abc中国1A，!,", -45, -35, Color4f.FromABGR(Color.LightPink));
             //canvasForeground.PopFont();
@@ -295,16 +295,16 @@ namespace EngineNS.UI
             mCanvas.BuildMesh(mMeshProvider);
             mMeshProvider.ToMesh(mMesh);
             mMesh.AssetName = RName.GetRName("@UI");
-            var materials = ListExtra.CreateList<Graphics.Pipeline.Shader.UMaterial>((int)mMesh.NumAtom);
+            var materials = ListExtra.CreateList<Graphics.Pipeline.Shader.TtMaterial>((int)mMesh.NumAtom);
             for (int i = 0; i < materials.Count; i++)
             {
-                Graphics.Pipeline.Shader.UMaterial mtl = null;
+                Graphics.Pipeline.Shader.TtMaterial mtl = null;
                 EngineNS.Canvas.FDrawCmd cmd = new EngineNS.Canvas.FDrawCmd();
                 cmd.NativePointer = mMeshProvider.GetAtomExtData((uint)i).NativePointer;
                 var brush = cmd.GetBrush();
                 if (brush.Name.StartWith("@Text:"))
                 {
-                    mtl = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/font_sdf_0.uminst", RName.ERNameType.Engine));
+                    mtl = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/font_sdf_0.uminst", RName.ERNameType.Engine));
                     var clr = mtl.FindVar("FontColor");
                     if (clr != null)
                     {
@@ -318,17 +318,17 @@ namespace EngineNS.UI
                     var name = brush.Name.c_str().Replace("@MatInst:", "");
                     if (string.IsNullOrEmpty(name) || "DefaultBrush" == name)
                     {
-                        mtl = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
+                        mtl = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
                     }
                     else
                     {
-                        mtl = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.ParseFrom(name));
+                        mtl = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.ParseFrom(name));
                         if(mtl == null)
-                            mtl = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
+                            mtl = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
                     }
                 }
                 else
-                    mtl = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
+                    mtl = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
 
                 materials[i] = mtl;
 

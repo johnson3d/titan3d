@@ -23,7 +23,8 @@ namespace EngineNS.Graphics.Pipeline
     }
 
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public partial class URenderPolicy : TtRenderGraph, IO.ISerializer
+    //[Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.URenderPolicy@EngineCore" })]
+    public partial class TtRenderPolicy : TtRenderGraph, IO.ISerializer
     {
         #region ISerializer
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)
@@ -35,7 +36,7 @@ namespace EngineNS.Graphics.Pipeline
 
         }
         #endregion
-        public URenderPolicy()
+        public TtRenderPolicy()
         {
             NodeList.Host = this;
         }
@@ -49,7 +50,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public class TtNodeListDefine
         {
-            internal URenderPolicy Host;
+            internal TtRenderPolicy Host;
             public class UValueEditorAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
             {
                 public unsafe override bool OnDraw(in EditorInfo info, out object newValue)
@@ -129,12 +130,12 @@ namespace EngineNS.Graphics.Pipeline
             return hitproxyNode.GetHitproxy(MouseX, MouseY);
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTickSync = Profiler.TimeScopeManager.GetTimeScope(typeof(URenderPolicy), nameof(TickSync));
+        private static Profiler.TimeScope ScopeTickSync = Profiler.TimeScopeManager.GetTimeScope(typeof(TtRenderPolicy), nameof(TickSync));
         public void UpdateCameraAttachements(NxRHI.UCbView.EUpdateMode mode = NxRHI.UCbView.EUpdateMode.Auto)
         {
             foreach (var i in CameraAttachments)
             {
-                i.Value.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext, mode);
+                i.Value.UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext, mode);
             }
         }
         public override void TickSync()
@@ -262,7 +263,7 @@ namespace EngineNS.Graphics.Pipeline
 
             foreach (var i in GraphNodes)
             {
-                await i.Value.Initialize((URenderPolicy)this, i.Value.Name);
+                await i.Value.Initialize((TtRenderPolicy)this, i.Value.Name);
             }
 
             this.OnResize(1, 1);
@@ -299,8 +300,8 @@ namespace EngineNS.Graphics.Pipeline
                     desc.MipLODBias = 0;
                     desc.MinLOD = 0;
                     desc.MaxLOD = 3.402823466e+38f;
-                    mClampState = UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(
-                        UEngine.Instance.GfxDevice.RenderContext, in desc);
+                    mClampState = TtEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(
+                        TtEngine.Instance.GfxDevice.RenderContext, in desc);
                 }
                 return mClampState;
             }
@@ -323,8 +324,8 @@ namespace EngineNS.Graphics.Pipeline
                     desc.MipLODBias = 0;
                     desc.MinLOD = 0;
                     desc.MaxLOD = 3.402823466e+38f;
-                    mClampPointState = UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(
-                        UEngine.Instance.GfxDevice.RenderContext, in desc);
+                    mClampPointState = TtEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(
+                        TtEngine.Instance.GfxDevice.RenderContext, in desc);
                 }
                 return mClampPointState;
             }
@@ -356,17 +357,18 @@ namespace EngineNS.Graphics.Pipeline
         {
             if (CmdQueue != null)
             {
-                //UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(cmd, qType);
+                //TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(cmd, qType);
                 CmdQueue.QueueCmdlist(cmd, name, qType);
             }
             else
             {
-                UEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmdlist(cmd, name, qType);
+                TtEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmdlist(cmd, name, qType);
             }
         }
     }
 
-    public class UDeferredPolicyBase : URenderPolicy
+    //[Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.UDeferredPolicyBase@EngineCore" })]
+    public class TtDeferredPolicyBase : TtRenderPolicy
     {
         #region Feature On/Off
         [Category("Option")]
@@ -469,7 +471,8 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
     }
-    public class UForwordPolicyBase : URenderPolicy
+    //[Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.UForwordPolicyBase@EngineCore" })]
+    public class TtForwordPolicyBase : TtRenderPolicy
     {
         #region Feature On/Off
         [Category("Option")]

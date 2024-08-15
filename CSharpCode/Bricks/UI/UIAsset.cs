@@ -16,7 +16,7 @@ namespace EngineNS.UI
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            //return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
+            //return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
             return null;
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
@@ -56,7 +56,7 @@ namespace EngineNS.UI
         }
         public IO.IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
@@ -83,11 +83,11 @@ namespace EngineNS.UI
             var ameta = this.GetAMeta();
             if (ameta == null)
             {
-                var asset = UEngine.Instance.AssetMetaManager.NewAsset<TtUIAsset>(name);
+                var asset = TtEngine.Instance.AssetMetaManager.NewAsset<TtUIAsset>(name);
                 ameta = asset.GetAMeta();
             }
             UpdateAMetaReferences(ameta);
-            ameta.SaveAMeta();
+            ameta.SaveAMeta(this);
 
             MacrossEditor.AssetName = name;
             MacrossEditor.DefClass.ClassName = name.PureName;
@@ -100,11 +100,11 @@ namespace EngineNS.UI
             if(UIHost == null)
             {
                 var canvas = new TtCanvasControl();
-                UEngine.Instance.UIManager.Save(name, canvas);
+                TtEngine.Instance.UIManager.Save(name, canvas);
             }
             else
             {
-                UEngine.Instance.UIManager.Save(name, UIHost.Children[0]);
+                TtEngine.Instance.UIManager.Save(name, UIHost.Children[0]);
             }
         }
         [Rtti.Meta]

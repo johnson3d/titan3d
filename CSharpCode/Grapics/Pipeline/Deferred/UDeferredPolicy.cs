@@ -160,23 +160,23 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
     //        //await GpuSceneNode.Initialize(this, null, EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_UNKNOWN, x, y, "GpuScene");
 
-    //        //await BasePassNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredOpaque>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y);
+    //        //await BasePassNode.Initialize(this, TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredOpaque>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y);
 
-    //        //await mShadowMapNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Shadow.UShadowShading>(), EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_D16_UNORM, x, y, "ShadowDepth");
+    //        //await mShadowMapNode.Initialize(this, TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Shadow.UShadowShading>(), EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_D16_UNORM, x, y, "ShadowDepth");
 
-    //        //await DirLightingNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredDirLightingShading>(), EPixelFormat.PXF_R10G10B10A2_UNORM, EPixelFormat.PXF_UNKNOWN, x, y, "DirLighting");
+    //        //await DirLightingNode.Initialize(this, TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredDirLightingShading>(), EPixelFormat.PXF_R10G10B10A2_UNORM, EPixelFormat.PXF_UNKNOWN, x, y, "DirLighting");
 
     //        //await ForwordNode.Initialize(this, null, EPixelFormat.PXF_R10G10B10A2_UNORM, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y, "Forward");
 
     //        //await ParticleNode.Initialize(this, null, EPixelFormat.PXF_R10G10B10A2_UNORM, EPixelFormat.PXF_D16_UNORM, x, y, "Particle"); 
 
-    //        //await HitproxyNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UHitproxyShading>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y, "Hitproxy");
+    //        //await HitproxyNode.Initialize(this, TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UHitproxyShading>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y, "Hitproxy");
 
-    //        //await PickedNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickSetupShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y, "PickedNode");
+    //        //await PickedNode.Initialize(this, TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickSetupShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_D24_UNORM_S8_UINT, x, y, "PickedNode");
 
-    //        //await PickBlurNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickBlurShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_UNKNOWN, x, y, "PickBlur");
+    //        //await PickBlurNode.Initialize(this, TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickBlurShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_UNKNOWN, x, y, "PickBlur");
 
-    //        //await PickHollowNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickHollowShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_UNKNOWN, x, y, "PickHollow");
+    //        //await PickHollowNode.Initialize(this, TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UPickHollowShading>(), EPixelFormat.PXF_R16G16_FLOAT, EPixelFormat.PXF_UNKNOWN, x, y, "PickHollow");
 
     //        //await VoxelsNode.Initialize(this, null, EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_D16_UNORM, x, y, "VoxelsNode");
 
@@ -186,7 +186,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
     //        //await AvgBrightnessNode.Initialize(this, null, EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_UNKNOWN, x, y, "Brightness");
 
-    //        //await HdrNode.Initialize(this, UEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UHdrShading>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_UNKNOWN, x, y, "Hdr");
+    //        //await HdrNode.Initialize(this, TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Common.UHdrShading>(), EPixelFormat.PXF_R8G8B8A8_UNORM, EPixelFormat.PXF_UNKNOWN, x, y, "Hdr");
 
     //    }
 

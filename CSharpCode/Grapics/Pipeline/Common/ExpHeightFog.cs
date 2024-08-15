@@ -8,14 +8,14 @@ namespace EngineNS.Graphics.Pipeline.Common
     //https://zhuanlan.zhihu.com/p/497976692
     public partial class TtFogShading
     {
-        private void OnDrawcallEHF(NxRHI.UGraphicDraw drawcall, URenderPolicy deferredPolicy, TtFogNode aaNode)
+        private void OnDrawcallEHF(NxRHI.UGraphicDraw drawcall, TtRenderPolicy deferredPolicy, TtFogNode aaNode)
         {
             if ((uint)deferredPolicy.TypeFog != TypeFog.GetValue())
             {
                 TypeFog.SetValue((uint)deferredPolicy.TypeFog);
                 this.UpdatePermutation();
             }
-            if (deferredPolicy.TypeFog != URenderPolicy.ETypeFog.None)
+            if (deferredPolicy.TypeFog != TtRenderPolicy.ETypeFog.None)
             {
                 var index = drawcall.FindBinder("ColorBuffer");
                 if (index.IsValidPointer)
@@ -25,7 +25,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
                 index = drawcall.FindBinder("Samp_ColorBuffer");
                 if (index.IsValidPointer)
-                    drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                    drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
                 index = drawcall.FindBinder("DepthBuffer");
                 if (index.IsValidPointer)
@@ -35,14 +35,14 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
                 index = drawcall.FindBinder("Samp_DepthBuffer");
                 if (index.IsValidPointer)
-                    drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                    drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
                 index = drawcall.FindBinder("cbShadingEnv");
                 if (index.IsValidPointer)
                 {
                     if (aaNode.CBShadingEnv == null)
                     {
-                        aaNode.CBShadingEnv = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                        aaNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                     }
                     drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
                 }
@@ -57,7 +57,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
                 index = drawcall.FindBinder("Samp_ColorBuffer");
                 if (index.IsValidPointer)
-                    drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                    drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
             }
         }
     }
@@ -164,7 +164,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
 
-        private void TickSyncEHF(URenderPolicy policy)
+        private void TickSyncEHF(TtRenderPolicy policy)
         {
             UpdateFogStruct(policy.DefaultCamera);
         }

@@ -69,13 +69,13 @@ namespace EngineNS.Bricks.Network
         {
             unsafe
             {
-                //UEngine.Instance.RpcModule.NetPackageManager.PushPackage(pkg.CoreWriter.Writer.GetPointer(), (uint)pkg.CoreWriter.Writer.Tell(), this);
+                //TtEngine.Instance.RpcModule.NetPackageManager.PushPackage(pkg.CoreWriter.Writer.GetPointer(), (uint)pkg.CoreWriter.Writer.Tell(), this);
                 Send(pkg.CoreWriter.Writer.GetPointer(), (uint)pkg.CoreWriter.Writer.Tell());
             }
         }
         public unsafe void Send(void* ptr, uint size)
         {
-            UEngine.Instance.RpcModule.NetPackageManager.PushPackage(ptr, size, this);
+            TtEngine.Instance.RpcModule.NetPackageManager.PushPackage(ptr, size, this);
         }
     }
 }

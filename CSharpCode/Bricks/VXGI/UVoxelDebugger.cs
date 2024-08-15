@@ -36,11 +36,11 @@ namespace EngineNS.Bricks.VXGI
         {
             return null;
         }
-        public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh)
+        public void Initialize(Graphics.Mesh.TtMaterialMesh materialMesh)
         {
 
         }
-        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             UMdfVoxelDebugMesh mdfQueue = mdfQueue1 as UMdfVoxelDebugMesh;
             var vxNode = mdfQueue.MdfDatas as UVoxelsNode;
@@ -97,7 +97,7 @@ namespace EngineNS.Bricks.VXGI
                 defines.AddDefine("VxSceneY", $"{VxSceneY}");
                 defines.AddDefine("VxSceneZ", $"{VxSceneZ}");
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var node = drawcall.TagObject as UVoxelsNode;
 
@@ -137,7 +137,7 @@ namespace EngineNS.Bricks.VXGI
                 defines.AddDefine("VxSceneY", $"{VxSceneY}");
                 defines.AddDefine("VxSceneZ", $"{VxSceneZ}");
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var node = drawcall.TagObject as UVoxelsNode;
                 // renwind test
@@ -181,7 +181,7 @@ namespace EngineNS.Bricks.VXGI
 
         private unsafe void ResetComputeDrawcall()
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             CoreSDK.DisposeObject(ref SetupVxDebuggerDrawcall);
             SetupVxDebuggerDrawcall = rc.CreateComputeDraw();
 
@@ -202,7 +202,7 @@ namespace EngineNS.Bricks.VXGI
                 VxDebugMesh = new Graphics.Mesh.TtMesh();
                 var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
                 var rectMesh = rect.ToMesh();
-                var materials = new Graphics.Pipeline.Shader.UMaterial[1];
+                var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
                 materials[0] = material;
                 VxDebugMesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<UMdfVoxelDebugMesh>.TypeDesc);
                 VxDebugMesh.MdfQueue.MdfDatas = this;
@@ -222,9 +222,9 @@ namespace EngineNS.Bricks.VXGI
             VxDebugMeshNode = meshNode;
         }
 
-        private async Thread.Async.TtTask<bool> InitVxDebugger(Graphics.Pipeline.Shader.UMaterial material)
+        private async Thread.Async.TtTask<bool> InitVxDebugger(Graphics.Pipeline.Shader.TtMaterial material)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             unsafe
             {
@@ -237,14 +237,14 @@ namespace EngineNS.Bricks.VXGI
             
             CoreSDK.DisposeObject(ref SetupVxDebuggerDrawcall);
             SetupVxDebuggerDrawcall = rc.CreateComputeDraw();
-            SetupVxDebugger = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupVxDebuggerShading>();
+            SetupVxDebugger = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupVxDebuggerShading>();
             
-            CollectVxDebugger = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<CollectVxDebuggerShading>();
+            CollectVxDebugger = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<CollectVxDebuggerShading>();
 
             VxDebugMesh = new Graphics.Mesh.TtMesh();
             var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
             var rectMesh = rect.ToMesh();
-            var materials = new Graphics.Pipeline.Shader.UMaterial[1];
+            var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = material;
             VxDebugMesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<UMdfVoxelDebugMesh>.TypeDesc);
             VxDebugMesh.MdfQueue.MdfDatas = this;
@@ -274,7 +274,7 @@ namespace EngineNS.Bricks.VXGI
             }
         }
 
-        private unsafe void TickVxDebugger(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
+        private unsafe void TickVxDebugger(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             if (DebugVoxels == false)
             {

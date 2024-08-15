@@ -152,17 +152,17 @@ namespace EngineNS.Bricks.PhysicsCore
         public TtPhyMaterialManager PhyMaterialManager { get; } = new TtPhyMaterialManager();
         public UPhyMeshManager PhyMeshManager { get; } = new UPhyMeshManager();
     }
-    public class UPhyModule : UModule<UEngine>
+    public class UPhyModule : UModule<TtEngine>
     {
         TtPhyContext mPhyContext;
         public TtPhyContext PhyContext { get => mPhyContext; }
-        public override void Cleanup(UEngine host)
+        public override void Cleanup(TtEngine host)
         {
             mPhyContext.PhyMeshManager.Cleanup();
             mPhyContext.PhyMaterialManager.Cleanup();
             mPhyContext = null;
         }
-        public override async System.Threading.Tasks.Task<bool> Initialize(UEngine host)
+        public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine host)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
             mPhyContext = new TtPhyContext();
@@ -170,7 +170,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 return false;
             return true;
         }
-        public override void TickModule(UEngine host)
+        public override void TickModule(TtEngine host)
         {
 
         }
@@ -179,7 +179,7 @@ namespace EngineNS.Bricks.PhysicsCore
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public Bricks.PhysicsCore.UPhyModule PhyModule { get; set; } = new Bricks.PhysicsCore.UPhyModule();
     }

@@ -131,29 +131,29 @@ namespace EngineNS.DesignMacross.Nodes
             var shadowExt = new Vector2(12, 12);
             if(node.Selected)
             {
-                var selImg = UEngine.Instance.UIProxyManager[styles.NodeShadowSelectedImg] as EGui.UIProxy.ImageProxy;
+                var selImg = TtEngine.Instance.UIProxyManager[styles.NodeShadowSelectedImg] as EGui.UIProxy.ImageProxy;
                 if (selImg != null)
                     selImg.OnDraw(cmdlist, nodeStart - shadowExt, nodeEnd + shadowExt);
             }
             else
             {
-                var shadowImg = UEngine.Instance.UIProxyManager[styles.NodeShadowImg] as EGui.UIProxy.ImageProxy;
+                var shadowImg = TtEngine.Instance.UIProxyManager[styles.NodeShadowImg] as EGui.UIProxy.ImageProxy;
                 if (shadowImg != null)
                     shadowImg.OnDraw(cmdlist, nodeStart - shadowExt, nodeEnd + shadowExt);
             }
-            var nodeBodyImg = UEngine.Instance.UIProxyManager[styles.NodeBodyImg] as EGui.UIProxy.ImageProxy;
+            var nodeBodyImg = TtEngine.Instance.UIProxyManager[styles.NodeBodyImg] as EGui.UIProxy.ImageProxy;
             if (nodeBodyImg != null)
                 nodeBodyImg.OnDraw(cmdlist, nodeStart, nodeEnd);
 
             var endTitle = context.ViewPortTransform(node.AbsLocation + new Vector2(node.Size.Width, node.TitleHeight));
             {//DrawTitle
-                var titleImg = UEngine.Instance.UIProxyManager[styles.NodeTitleImg] as EGui.UIProxy.ImageProxy;
+                var titleImg = TtEngine.Instance.UIProxyManager[styles.NodeTitleImg] as EGui.UIProxy.ImageProxy;
                 if (titleImg != null)
                     titleImg.OnDraw(cmdlist, nodeStart, endTitle);
-                var colorSpillImg = UEngine.Instance.UIProxyManager[styles.NodeColorSpillImg] as EGui.UIProxy.ImageProxy;
+                var colorSpillImg = TtEngine.Instance.UIProxyManager[styles.NodeColorSpillImg] as EGui.UIProxy.ImageProxy;
                 if (colorSpillImg != null)
                     colorSpillImg.OnDraw(cmdlist, nodeStart, endTitle, node.TitleColor);
-                var titleHighlightImg = UEngine.Instance.UIProxyManager[styles.NodeTitleHighlightImg] as EGui.UIProxy.ImageProxy;
+                var titleHighlightImg = TtEngine.Instance.UIProxyManager[styles.NodeTitleHighlightImg] as EGui.UIProxy.ImageProxy;
                 if (titleHighlightImg != null)
                     titleHighlightImg.OnDraw(cmdlist, nodeStart, endTitle);
 

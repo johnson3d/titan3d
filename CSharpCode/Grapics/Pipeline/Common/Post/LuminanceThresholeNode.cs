@@ -25,12 +25,12 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             defines.AddDefine("ENV_OUT_COLOR", "1");
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, UGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtLuminanceThresholeNode;
             if (aaNode == null)
             {
-                var pipelinePolicy = policy.TagObject as URenderPolicy;
+                var pipelinePolicy = policy.TagObject as TtRenderPolicy;
                 aaNode = pipelinePolicy.FindFirstNode<TtLuminanceThresholeNode>();
             }
 
@@ -42,14 +42,14 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
             index = drawcall.FindBinder("Samp_ColorBuffer");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
             index = drawcall.FindBinder("cbShadingEnv");
             if (index.IsValidPointer)
             {
                 if (aaNode.CBShadingEnv == null)
                 {
-                    aaNode.CBShadingEnv = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    aaNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
                 drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
             }
@@ -78,10 +78,10 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             return mBasePassShading;
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtLuminanceThresholeShading>();
+            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtLuminanceThresholeShading>();
         }
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         struct FLuminanceThresholeStruct
@@ -101,7 +101,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             set => mLuminanceThresholeStruct.Threshole = value;
         }
         public NxRHI.UCbView CBShadingEnv;
-        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             base.TickLogic(world, policy, bClear);
             if (CBShadingEnv != null)
@@ -109,11 +109,11 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 CBShadingEnv.SetValue("LuminanceThresholeStruct", in mLuminanceThresholeStruct);
             }
         }
-        public override void TickSync(URenderPolicy policy)
+        public override void TickSync(TtRenderPolicy policy)
         {
             base.TickSync(policy);
         }
-        public override void BeforeTickLogic(URenderPolicy policy)
+        public override void BeforeTickLogic(TtRenderPolicy policy)
         {
             var buffer = this.FindAttachBuffer(ColorPinIn);
             if (buffer != null)
@@ -150,12 +150,12 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             return mLuminanceShading;
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mLuminanceShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtLuminanceThresholeOutLumShading>();
+            mLuminanceShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtLuminanceThresholeOutLumShading>();
         }
-        public override void BeforeTickLogic(URenderPolicy policy)
+        public override void BeforeTickLogic(TtRenderPolicy policy)
         {
             var buffer = this.FindAttachBuffer(ColorPinIn);
             if (buffer != null)

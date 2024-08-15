@@ -46,14 +46,14 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var gpuScene = policy.GetGpuSceneNode();
                 var node = drawcall.TagObject as UAvgBrightnessNode;
                 var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerFrame");
                 if (srvIdx.IsValidPointer)
                 {
-                    drawcall.BindCBuffer(srvIdx, UEngine.Instance.GfxDevice.PerFrameCBuffer);
+                    drawcall.BindCBuffer(srvIdx, TtEngine.Instance.GfxDevice.PerFrameCBuffer);
                 }
                 srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
                 if (srvIdx.IsValidPointer)
@@ -88,7 +88,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var node = drawcall.TagObject as UAvgBrightnessNode;
                 var attachment = node.GetAttachBuffer(node.ColorPinIn);
@@ -107,23 +107,23 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         private CountAvgBrightnessShading CountAvgBrightness;
         private NxRHI.UComputeDraw CountAvgBrightnessDrawcall;
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName + ".BasePass");
 
-            CountAvgBrightness = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<CountAvgBrightnessShading>();
-            SetupAvgBrightness = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupAvgBrightnessShading>();
+            CountAvgBrightness = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<CountAvgBrightnessShading>();
+            SetupAvgBrightness = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupAvgBrightnessShading>();
 
             ResetComputeDrawcall(policy);
         }
-        private unsafe void ResetComputeDrawcall(URenderPolicy policy)
+        private unsafe void ResetComputeDrawcall(TtRenderPolicy policy)
         {
             if (SetupAvgBrightness == null)
                 return;
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var gpuScene = policy.GetGpuSceneNode();
 
             CoreSDK.DisposeObject(ref SetupAvgBrightnessDrawcall);
@@ -136,13 +136,13 @@ namespace EngineNS.Graphics.Pipeline.Common
                 CountAvgBrightnessDrawcall = rc.CreateComputeDraw();
             }
         }
-        public override void OnResize(URenderPolicy policy, float x, float y)
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             ResetComputeDrawcall(policy);
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UAvgBrightnessNode), nameof(TickLogic));
-        public unsafe override void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {

@@ -55,7 +55,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 mImageName = value;
                 System.Action exec = async () =>
                 {
-                    TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
+                    TextureSRV = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
                 };
                 exec();
             }

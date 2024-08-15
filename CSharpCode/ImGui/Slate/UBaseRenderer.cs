@@ -8,7 +8,7 @@ namespace EngineNS.EGui.Slate
 {
     public class UBaseRenderer
     {
-        public Graphics.Pipeline.Shader.UEffect SlateEffect;
+        public Graphics.Pipeline.Shader.TtEffect SlateEffect;
 
         public NxRHI.UInputLayout InputLayout { get; private set; }
         public NxRHI.USampler SamplerState;
@@ -16,11 +16,11 @@ namespace EngineNS.EGui.Slate
         public NxRHI.USrView FontSRV;
         public async System.Threading.Tasks.Task Initialize()
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-            SlateEffect = await UEngine.Instance.GfxDevice.EffectManager.GetEffect(
-                await UEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Shader.CommanShading.USlateGUIShading>(),
-                UEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
+            SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
+                await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Shader.CommanShading.USlateGUIShading>(),
+                TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
 
             var iptDesc = new NxRHI.UInputLayoutDesc();
             unsafe
@@ -31,7 +31,7 @@ namespace EngineNS.EGui.Slate
                 //iptDesc.SetShaderDesc(SlateEffect.GraphicsEffect);
             }
             iptDesc.mCoreObject.SetShaderDesc(SlateEffect.DescVS.mCoreObject);
-            InputLayout = UEngine.Instance.GfxDevice.RenderContext.CreateInputLayout(iptDesc); //UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
+            InputLayout = TtEngine.Instance.GfxDevice.RenderContext.CreateInputLayout(iptDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
 
             SlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
 
@@ -44,7 +44,7 @@ namespace EngineNS.EGui.Slate
             splDesc.MipLODBias = 0;
             splDesc.MaxAnisotropy = 0;
             splDesc.CmpMode = NxRHI.EComparisionMode.CMP_ALWAYS;
-            SamplerState = UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(rc, in splDesc);
+            SamplerState = TtEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(rc, in splDesc);
         }
         public void Cleanup()
         {
@@ -119,9 +119,9 @@ namespace EngineNS.EGui.Slate
             //fontConfig.UnsafeCallConstructor();
             //fontConfig.MergeMode = true;
             ////io.FontsWrapper.AddFontDefault(ref mFontConfig);
-            //Font_15px = io.Fonts.AddFontFromFileTTF(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Regular.ttf", 15.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
-            //Font_Bold_13px = io.Fonts.AddFontFromFileTTF(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Bold.ttf", 13.0f, &fontConfig, io.Fonts.GetGlyphRangesDefault());
-            //Font_13px = io.Fonts.AddFontFromFileTTF(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Regular.ttf", 13.0f, &fontConfig, io.Fonts.GetGlyphRangesDefault());
+            //Font_15px = io.Fonts.AddFontFromFileTTF(TtEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Regular.ttf", 15.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
+            //Font_Bold_13px = io.Fonts.AddFontFromFileTTF(TtEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Bold.ttf", 13.0f, &fontConfig, io.Fonts.GetGlyphRangesDefault());
+            //Font_13px = io.Fonts.AddFontFromFileTTF(TtEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/Roboto-Regular.ttf", 13.0f, &fontConfig, io.Fonts.GetGlyphRangesDefault());
             //// Build
             //byte* pixels;
             //int width = 0, height = 0, bytesPerPixel = 0;
@@ -133,7 +133,7 @@ namespace EngineNS.EGui.Slate
             //initData.pSysMem = pixels;
             //initData.SysMemPitch = (uint)(width * bytesPerPixel);
 
-            //var rc = UEngine.Instance.GfxDevice.RenderContext;
+            //var rc = TtEngine.Instance.GfxDevice.RenderContext;
             //var txDesc = new NxRHI.FTextureDesc();
             //txDesc.SetDefault();
             //txDesc.Width = (uint)width;
@@ -168,7 +168,7 @@ namespace EngineNS.EGui.Slate
                 ranges.Add(new Wchar16(0xFF00));
                 ranges.Add(new Wchar16(0xFFEF));
                 // CJK Ideograms
-                switch (UEngine.Instance.Config.EditorLanguage)
+                switch (TtEngine.Instance.Config.EditorLanguage)
                 {
                     case "Chinese":
                         {
@@ -181,11 +181,11 @@ namespace EngineNS.EGui.Slate
                 ranges.Add(new Wchar16(0));
 
                 var io = ImGuiAPI.GetIO();
-                var FontName = UEngine.Instance.Config.EditorFont.Address;
-                //CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/NotoSansSC-Regular.otf", 15.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
+                var FontName = TtEngine.Instance.Config.EditorFont.Address;
+                //CreateFontTexture(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/NotoSansSC-Regular.otf", 15.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
                 var ftName = CreateFontTexture(FontName, 15.0f, (ImFontConfig*)0, ranges.UnsafeGetElementAddress(0));
 
-                ftName = CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/Roboto-Bold.ttf", 13.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
+                ftName = CreateFontTexture(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/Roboto-Bold.ttf", 13.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
                 //ftName = CreateFontTexture(FontName, 13.0f, (ImFontConfig*)0, ranges.UnsafeGetElementAddress(0));
 
                 ftName = CreateFontTexture(FontName, 13.0f, (ImFontConfig*)0, ranges.UnsafeGetElementAddress(0));
@@ -194,8 +194,8 @@ namespace EngineNS.EGui.Slate
                 iconRange[0] = new Wchar16(0xe005);
                 iconRange[1] = new Wchar16(0xf8ff);
                 iconRange[2] = new Wchar16(0);
-                //CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/fa-solid-900.ttf", 15.0f, &fontConfig, iconRange);
-                ftName = CreateFontTexture(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/fa-solid-900.ttf", 15.0f, (ImFontConfig*)0, iconRange);
+                //CreateFontTexture(TtEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/fa-solid-900.ttf", 15.0f, &fontConfig, iconRange);
+                ftName = CreateFontTexture(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/fa-solid-900.ttf", 15.0f, (ImFontConfig*)0, iconRange);
             }
         }
 
@@ -214,7 +214,7 @@ namespace EngineNS.EGui.Slate
             initData.RowPitch = (uint)(width * bytesPerPixel);
             initData.DepthPitch = (uint)(initData.RowPitch * height);
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var txDesc = new NxRHI.FTextureDesc();
             txDesc.SetDefault();
             txDesc.Width = (uint)width;

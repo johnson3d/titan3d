@@ -10,11 +10,11 @@ namespace EngineNS.Rtti
         {
             public ULevelServerAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:LevelServer AssemblyDesc Created");
+                Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Info, "Plugins:LevelServer AssemblyDesc Created");
             }
             ~ULevelServerAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:LevelServer AssemblyDesc Destroyed");
+                Profiler.Log.WriteLine<Profiler.TtCookGategory>(Profiler.ELogTag.Info, "Plugins:LevelServer AssemblyDesc Destroyed");
             }
             public override string Name { get => "LevelServer"; }
             public override string Service { get { return "Plugins"; } }
@@ -46,12 +46,12 @@ namespace EngineNS.Plugins.ClientRobot
         public void OnLoadedPlugin()
         {
             Robot = new RobotClient.URobot();
-            UEngine.Instance.TickableManager.AddTickable(Robot);
+            TtEngine.Instance.TickableManager.AddTickable(Robot);
             var nu = Robot.Initialize();
         }
         public void OnUnloadPlugin()
         {
-            UEngine.Instance.TickableManager.RemoveTickable(Robot);
+            TtEngine.Instance.TickableManager.RemoveTickable(Robot);
             Robot = null;
         }
     }

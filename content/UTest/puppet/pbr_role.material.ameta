@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Graphics.Pipeline.Shader.UMaterialAMeta@EngineCore">
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="13e877a1-aba6-4b7b-83a9-a852d111baff" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterial&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
@@ -17,5 +17,5 @@
     <e_1 Value="Game,utest/puppet/texture/puppet_n.srv,4cec76af-2b8c-4961-9f71-16d3aec8b626" />
     <e_2 Value="Game,utest/puppet/texture/puppet_ao.srv,2c7867fa-102a-4c8f-bb61-ddc45b08b8e8" />
   </RefAssetRNames>
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterial@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

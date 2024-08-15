@@ -144,7 +144,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
 
         public override IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
 
         public override void UpdateAMetaReferences(IAssetMeta ameta)

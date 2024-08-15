@@ -8,7 +8,7 @@ namespace EngineNS.Editor.Forms
     {
         public TtGpuProfiler()
         {
-            UEngine.RootFormManager.RegRootForm(this);
+            TtEngine.RootFormManager.RegRootForm(this);
         }
 
         public async Thread.Async.TtTask<bool> Initialize()
@@ -44,7 +44,7 @@ namespace EngineNS.Editor.Forms
             if (result)
             {
                 var cmdlst = ImGuiAPI.GetWindowDrawList();
-                var stats = UEngine.Instance.GfxDevice.RenderSwapQueue.GetStat();
+                var stats = TtEngine.Instance.GfxDevice.RenderSwapQueue.GetStat();
                 ImGuiAPI.Text($"CmdList = {stats.NumOfCmdlist};Drawcall = {stats.NumOfDrawcall};Primitive = {stats.NumOfPrimitive};");
                 EGui.UIProxy.SearchBarProxy.OnDraw(ref mFilterFocusd, cmdlst, "filter", ref mFilter, ImGuiAPI.GetWindowContentRegionWidth());
                 DockId = ImGuiAPI.GetWindowDockID();
@@ -67,7 +67,7 @@ namespace EngineNS.Editor.Forms
                             
                         }
 
-                        foreach (var j in UEngine.Instance.ProfilerModule.GpuTimeScopeManager.Scopes.Values)
+                        foreach (var j in TtEngine.Instance.ProfilerModule.GpuTimeScopeManager.Scopes.Values)
                         {
                             if (string.IsNullOrEmpty(mFilter) == false && j.Name.Contains(mFilter) == false)
                                 continue;

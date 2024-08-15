@@ -43,7 +43,7 @@ namespace EngineNS.Plugins.LoginServer
         }
         public override async System.Threading.Tasks.Task<bool> StartServer(string ip, UInt16 port)
         {
-            var np = Bricks.Network.FNetworkPoint.FromString(UEngine.Instance.Config.RootServerURL);
+            var np = Bricks.Network.FNetworkPoint.FromString(TtEngine.Instance.Config.RootServerURL);
             var ret = await RootConnect.Connect(np.Ip, np.Port, RootConnectPackages);
             if (ret == false)
                 return false;

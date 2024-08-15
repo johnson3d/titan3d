@@ -823,7 +823,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (klsGraph == null)
                 return;
         }
-        public Bricks.NodeGraph.UGraphRenderer GraphRenderer = new NodeGraph.UGraphRenderer();
+        public Bricks.NodeGraph.TtGraphRenderer GraphRenderer = new NodeGraph.TtGraphRenderer();
         //[Obsolete]
         //public void BuildCodeExpr(ICodeGen cGen)
         //{
@@ -1287,7 +1287,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             ((UMacrossMethodGraph)(node.ContentGraph)).MacrossEditor = MacrossEditor;
             DeleteSelectedNodes();
         }
-        public override UGraphRenderer GetGraphRenderer()
+        public override TtGraphRenderer GetGraphRenderer()
         {
             return GraphRenderer;
         }
@@ -1583,7 +1583,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //    this.AddNode(node);
             //}
         }
-        public override void OnDrawAfter(Bricks.NodeGraph.UGraphRenderer renderer, UNodeGraphStyles styles, ImDrawList cmdlist)
+        public override void OnDrawAfter(Bricks.NodeGraph.TtGraphRenderer renderer, UNodeGraphStyles styles, ImDrawList cmdlist)
         {
             var mousePt = ImGuiAPI.GetMousePos() - ImGuiAPI.GetWindowPos();
             if (mousePt.X < 0 || mousePt.Y < 0)

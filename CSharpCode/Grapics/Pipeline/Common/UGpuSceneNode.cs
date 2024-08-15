@@ -34,7 +34,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             InstancePinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(InstancePinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         }
-        public unsafe override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
+        public unsafe override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             GpuScenePinOut.Attachement.Height = 1;
             GpuScenePinOut.Attachement.Width = (uint)sizeof(FGpuSceneDesc);
@@ -75,7 +75,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 {
                     mExposure = value;
                     
-                    PerGpuSceneCbv.SetValue(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.Exposure, in mExposure);
+                    PerGpuSceneCbv.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.Exposure, in mExposure);
                 }
             }
         }
@@ -88,7 +88,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (PerGpuSceneCbv != null)
                 {
                     mEyeAdapterTimeRange = value;
-                    PerGpuSceneCbv.SetValue(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.EyeAdapterTimeRange, in mEyeAdapterTimeRange);
+                    PerGpuSceneCbv.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.EyeAdapterTimeRange, in mEyeAdapterTimeRange);
                 }
             }
         }
@@ -101,7 +101,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 mHdrMiddleGrey = value;
                 if (PerGpuSceneCbv != null)
                 {
-                    PerGpuSceneCbv.SetValue(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.HdrMiddleGrey, in mHdrMiddleGrey);
+                    PerGpuSceneCbv.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.HdrMiddleGrey, in mHdrMiddleGrey);
                 }
             }
         }
@@ -114,7 +114,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (PerGpuSceneCbv != null)
                 {
                     mHdrMaxLuminance = value;
-                    PerGpuSceneCbv.SetValue(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.HdrMaxLuminance, in mHdrMaxLuminance);
+                    PerGpuSceneCbv.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.HdrMaxLuminance, in mHdrMaxLuminance);
                 }
             }
         }
@@ -127,7 +127,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (PerGpuSceneCbv != null)
                 {
                     mHdrMinLuminance = value;
-                    PerGpuSceneCbv.SetValue(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.HdrMinLuminance, in mHdrMinLuminance);
+                    PerGpuSceneCbv.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.HdrMinLuminance, in mHdrMinLuminance);
                 }
             }
         }
@@ -148,11 +148,11 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
 
         public TtCpuCullingNode CpuCullNode = null;
-        public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public async override System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName + ".BasePass");
 
             GpuSceneDescBuffer = new TtGpuBuffer<FGpuSceneDesc>();
@@ -160,7 +160,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 GpuSceneDescBuffer.SetSize(1, IntPtr.Zero.ToPointer(), NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
             }
-            PerGpuSceneCbv = rc.CreateCBV(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.Binder.mCoreObject);
+            PerGpuSceneCbv = rc.CreateCBV(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.Binder.mCoreObject);
 
             Initialize_Light(policy, debugName);
             await Initialize_Instance(policy, debugName);
@@ -178,13 +178,13 @@ namespace EngineNS.Graphics.Pipeline.Common
                 CpuCullNode = linker.OutPin.HostNode as TtCpuCullingNode;
             }
         }
-        public override unsafe void OnResize(URenderPolicy policy, float x, float y)
+        public override unsafe void OnResize(TtRenderPolicy policy, float x, float y)
         {
 
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UGpuSceneNode), nameof(TickLogic));
-        public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -201,7 +201,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 policy.CommitCommandList(cmd);
             }   
         }
-        public unsafe override void TickSync(Graphics.Pipeline.URenderPolicy policy)
+        public unsafe override void TickSync(Graphics.Pipeline.TtRenderPolicy policy)
         {
             BasePass.SwapBuffer();
         }

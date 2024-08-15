@@ -86,7 +86,7 @@ namespace EngineNS.UI
             //var uiData = data as TtUINodeData;
             return true;
         }
-        [RName.PGRName(FilterExts = Graphics.Mesh.UMaterialMesh.AssetExt)]
+        [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
         [Category("Option")]
         public RName UIName
         {

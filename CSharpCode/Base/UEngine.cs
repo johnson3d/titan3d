@@ -37,8 +37,8 @@ namespace EngineNS
         Queue,
         QueueNextFrame,
     }
-    [Rtti.Meta]
-    public partial class UEngineConfig
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.UEngineConfig@EngineCore" })]
+    public partial class TtEngineConfig
     {
         public const int MajorVersion = 1;
         public const int MiniVersion = 4;
@@ -132,7 +132,7 @@ namespace EngineNS
         public RName UIDefaultTexture { get; set; }
         [Rtti.Meta]
         public bool IsWriteShaderDebugFile { get; set; } = false;
-        public UEngineConfig()
+        public TtEngineConfig()
         {
             EditorFont = RName.GetRName("fonts/Roboto-Regular.ttf", RName.ERNameType.Engine);
             UIDefaultTexture = RName.GetRName("texture/white.srv", RName.ERNameType.Engine);
@@ -143,7 +143,7 @@ namespace EngineNS
         public bool VS_StructureBuffer { get; set; } = false;
     }
     [Rtti.Meta]
-    public partial class UEngine : UModuleHost<UEngine>
+    public partial class TtEngine : UModuleHost<TtEngine>
     {
         public static string FindArgument(string[] args, string startWith)
         {
@@ -156,16 +156,16 @@ namespace EngineNS
             }
             return null;
         }
-        public UEngine(string[] args)
+        public TtEngine(string[] args)
         {
             mFileManager = new IO.TtFileManager(args);
         }
-        private static UEngine mInstance;
+        private static TtEngine mInstance;
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.Unserializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
-        public static UEngine Instance { get => mInstance; }
+        public static TtEngine Instance { get => mInstance; }
         public EPlayMode PlayMode { get; set; } = EPlayMode.Editor;
         [Rtti.Meta]
-        public UEngineConfig Config { get; set; }
+        public TtEngineConfig Config { get; set; }
         public URuntimeConfig RuntimeConfig { get; set; }
         private IO.TtFileManager mFileManager;
         public IO.TtFileManager FileManager
@@ -197,7 +197,7 @@ namespace EngineNS
         [Rtti.Meta]
         public float TickCountSecond { get; set; }
         public float ElapsedSecond { get; set; }
-        protected override UEngine GetHost()
+        protected override TtEngine GetHost()
         {
             return this;
         }
@@ -205,11 +205,11 @@ namespace EngineNS
         {
             get;
         } = new Profiler.UNativeMemory();
-        public static async System.Threading.Tasks.Task<bool> StartEngine(UEngine engine, string cfgFile)
+        public static async System.Threading.Tasks.Task<bool> StartEngine(TtEngine engine, string cfgFile)
         {
             System.Threading.Thread.CurrentThread.Name = "Main";
             mInstance = engine;
-            engine.Config = new UEngineConfig();
+            engine.Config = new TtEngineConfig();
             engine.RuntimeConfig = new URuntimeConfig();
 
             return await mInstance.PreInitEngine(cfgFile);
@@ -227,7 +227,7 @@ namespace EngineNS
                 return;
             IsDredDump = true;
             var tmpDir = $"{System.DateTime.Now.Year}_{System.DateTime.Now.Month}_{System.DateTime.Now.Day}_{System.DateTime.Now.Hour}_{System.DateTime.Now.Minute}_{System.DateTime.Now.Second}";
-            var tmpFile = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "dred/" + tmpDir + "/";
+            var tmpFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "dred/" + tmpDir + "/";
             IO.TtFileManager.SureDirectory(tmpFile);
             GpuDump.NvAftermath.OnDredDump(arg0, tmpFile);
         }
@@ -250,7 +250,7 @@ namespace EngineNS
             var t3 = Support.Time.HighPrecision_GetTickCount();
             
             EngineNS.Profiler.Log.InitLogger();
-            UEngine.Instance.AssetMetaManager.LoadMetas();
+            TtEngine.Instance.AssetMetaManager.LoadMetas();
             var t4 = Support.Time.HighPrecision_GetTickCount();
             
             EngineNS.UCs2CppBase.InitializeNativeCoreProvider();
@@ -259,14 +259,14 @@ namespace EngineNS
 
             if (cfgFile == null)
                 cfgFile = FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) + "EngineConfig.cfg";
-            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Load Application Config:{cfgFile}");
+            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Load Application Config:{cfgFile}");
 
-            Config = IO.TtFileManager.LoadXmlToObject<UEngineConfig>(cfgFile);
+            Config = IO.TtFileManager.LoadXmlToObject<TtEngineConfig>(cfgFile);
             if (Config == null)
             {
                 System.Diagnostics.Debug.Assert(false);
-                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Cook", $"Load failed: {cfgFile}");
-                Config = new UEngineConfig();
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Load failed: {cfgFile}");
+                Config = new TtEngineConfig();
                 Config.DefaultTexture = RName.GetRName("texture/checkboard.txpic", RName.ERNameType.Engine);
                 Config.DefaultMaterial = RName.GetRName("material/SysDft.material", RName.ERNameType.Engine);
                 Config.DefaultMaterialInstance = RName.GetRName("material/box_wite.uminst", RName.ERNameType.Game);
@@ -291,16 +291,16 @@ namespace EngineNS
             {
                 if (Config.HasDebugLayer)
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Graphics", $"Config: GpuDump = true; HasDebugLayer will be set as false");
+                    Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, $"Config: GpuDump = true; HasDebugLayer will be set as false");
                     Config.HasDebugLayer = false;
                 }
                 if (Config.UseRenderDoc)
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Graphics", $"Config: GpuDump = true; UseRenderDoc will be set as false");
+                    Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, $"Config: GpuDump = true; UseRenderDoc will be set as false");
                     Config.UseRenderDoc = false;
                 }
             }
-            Config.ConfigName = $"Titan3D.{UEngineConfig.MajorVersion}.{UEngineConfig.MiniVersion} [{IO.TtFileManager.GetPureName(cfgFile)}]";
+            Config.ConfigName = $"Titan3D.{TtEngineConfig.MajorVersion}.{TtEngineConfig.MiniVersion} [{IO.TtFileManager.GetPureName(cfgFile)}]";
 
             CoreSDK.SetOnGpuDeviceRemovedCallBack(OnGpuDeviceRemoved);
             
@@ -317,33 +317,33 @@ namespace EngineNS
             await base.InitializeModules();
 
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Collect Type Info:{(t2 - t1) / 1000} ms");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Collect Type Info:{(t2 - t1) / 1000} ms");
 
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Load Rtti MetaDatas:{(t3 - t2) / 1000} ms");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Load Rtti MetaDatas:{(t3 - t2) / 1000} ms");
 
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Load AssetMetas:{(t4 - t3) / 1000} ms");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Load AssetMetas:{(t4 - t3) / 1000} ms");
 
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", "PreInitEngine OK");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, "PreInitEngine OK");
             }
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             if (Config.DoUnitTest)
             {
                 t2 = Support.Time.HighPrecision_GetTickCount();
                 EngineNS.UTest.UnitTestManager.DoUnitTests();
                 t3 = Support.Time.HighPrecision_GetTickCount();
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Unit Test:{(t3 - t2) / 1000} ms");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Unit Test:{(t3 - t2) / 1000} ms");
             }
 
             InitPreIntegratedDF();
 
             var tEnd = Support.Time.HighPrecision_GetTickCount();
-            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"Engine PreInit Time:{(tEnd - t1) / 1000} ms");
+            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Engine PreInit Time:{(tEnd - t1) / 1000} ms");
 
             return true;
         }
         [ThreadStatic]
-        static Profiler.TimeScope Scope_Tick = Profiler.TimeScopeManager.GetTimeScope(typeof(UEngine), nameof(Tick));
+        static Profiler.TimeScope Scope_Tick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtEngine), nameof(Tick));
         public bool Tick()
         {
             using(new Profiler.TimeScopeHelper(Scope_Tick))

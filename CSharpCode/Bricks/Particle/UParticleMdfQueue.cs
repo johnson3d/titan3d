@@ -55,7 +55,7 @@ namespace EngineNS.Bricks.Particle
 
                 UniqueText = Hash160.CreateHash160(UniqueText).ToString();
 
-                UEngine.Instance.RegFinalCleanupAction(() =>
+                TtEngine.Instance.RegFinalCleanupAction(() =>
                 {
                     ParticleVarCode = null;
                     ParticleEmitterCode = null;
@@ -107,11 +107,11 @@ namespace EngineNS.Bricks.Particle
                 Graphics.Pipeline.Shader.EPixelShaderInput.PST_Color,
             };
         }
-        public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh)
+        public void Initialize(Graphics.Mesh.TtMaterialMesh materialMesh)
         {
 
         }
-        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, TtMesh.TtAtom atom)
         {
 
         }
@@ -125,7 +125,7 @@ namespace EngineNS.Bricks.Particle
             Emitter = (mdf as TtParticleMdfQueue).Emitter;
         }
         public TtEmitter Emitter;
-        public override unsafe void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
+        public override unsafe void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 

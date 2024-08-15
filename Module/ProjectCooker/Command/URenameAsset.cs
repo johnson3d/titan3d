@@ -65,7 +65,7 @@ namespace ProjectCooker.Command
                     break;
                 case ".ums":
                     {
-                        return await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(name);
+                        return await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(name);
                     }
                 case ".material":
                     {
@@ -84,7 +84,7 @@ namespace ProjectCooker.Command
         }
         async System.Threading.Tasks.Task ProcMesh(EngineNS.RName src, EngineNS.RName tar)
         {
-            var asset = await EngineNS.UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(src);
+            var asset = await EngineNS.TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(src);
             if (asset == null)
                 return;
             var ameta = asset.GetAMeta();
@@ -92,7 +92,7 @@ namespace ProjectCooker.Command
                 return;
 
             List<EngineNS.IO.IAssetMeta> holders = new List<EngineNS.IO.IAssetMeta>();
-            UEngine.Instance.AssetMetaManager.GetAssetHolder(ameta, holders);
+            TtEngine.Instance.AssetMetaManager.GetAssetHolder(ameta, holders);
 
             List<EngineNS.IO.IAsset> holdAssets = new List<EngineNS.IO.IAsset>();
             foreach (var i in holders)
@@ -106,12 +106,12 @@ namespace ProjectCooker.Command
 
             var ametaPath = ameta.GetAssetName().Address + EngineNS.IO.IAssetMeta.MetaExt;
             ameta.SetAssetName(tar);
-            ameta.SaveAMeta();
+            ameta.SaveAMeta(asset);
             System.IO.File.Delete(ametaPath);
             //asset.SaveAssetTo(tar);
             System.IO.File.Move(src.Address, tar.Address);
 
-            EngineNS.UEngine.Instance.GfxDevice.MeshPrimitiveManager.UnsafeRenameForCook(src, tar);
+            EngineNS.TtEngine.Instance.GfxDevice.MeshPrimitiveManager.UnsafeRenameForCook(src, tar);
 
             foreach (var i in holdAssets)
             {

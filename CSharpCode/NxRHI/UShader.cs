@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.NxRHI
 {
-    public class UShader : AuxPtrType<NxRHI.IShader>
+    public class TtShader : AuxPtrType<NxRHI.IShader>
     {
         public class UShaderVarAttribute : Attribute
         {
@@ -13,8 +13,8 @@ namespace EngineNS.NxRHI
         }
         public class UShaderBinderIndexer
         {
-            NxRHI.UShaderEffect mEffect;
-            public unsafe void UpdateBindResouce(NxRHI.UShaderEffect effect)
+            NxRHI.TtShaderEffect mEffect;
+            public unsafe void UpdateBindResouce(NxRHI.TtShaderEffect effect)
             {
                 if (mEffect != null)
                     return;
@@ -34,8 +34,8 @@ namespace EngineNS.NxRHI
         }
         public class UShaderVarIndexer
         {
-            UShaderBinder mBinder;
-            public UShaderBinder Binder
+            TtShaderBinder mBinder;
+            public TtShaderBinder Binder
             {
                 get => mBinder;
             }
@@ -48,20 +48,20 @@ namespace EngineNS.NxRHI
                 var binder = effect.FindBinder(VNameString.FromString(name)).GetShaderBinder(EShaderType.SDT_Unknown);
                 if (binder.IsValidPointer == false)
                     return false;
-                UpdateFieldVar(new UShaderBinder(binder));
+                UpdateFieldVar(new TtShaderBinder(binder));
                 return true;
             }
-            public bool UpdateFieldVar(UShader shader, string name)
+            public bool UpdateFieldVar(TtShader shader, string name)
             {
                 if (mBinder != null)
                     return true;
                 var binder = shader.Reflector.FindBinder(EShaderBindType.SBT_CBuffer, name);
                 if (binder.IsValidPointer == false)
                     return false;
-                UpdateFieldVar(new UShaderBinder(binder));
+                UpdateFieldVar(new TtShaderBinder(binder));
                 return true;
             }
-            public unsafe void UpdateFieldVar(UShaderBinder binder)
+            public unsafe void UpdateFieldVar(TtShaderBinder binder)
             {
                 if (mBinder != null)
                     return;
@@ -84,20 +84,20 @@ namespace EngineNS.NxRHI
                     }
                     else
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Shader", $"CB({binder.mCoreObject.Name.c_str()}) can't find {i.Name}");
+                        Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, $"CB({binder.mCoreObject.Name.c_str()}) can't find {i.Name}");
                     }
                 }
             }
             public UShaderVarIndexer NextIndexer = null;
         }
-        internal UShaderReflector mReflector;
-        public UShaderReflector Reflector
+        internal TtShaderReflector mReflector;
+        public TtShaderReflector Reflector
         {
             get
             {
                 if (mReflector == null)
                 {
-                    mReflector = new UShaderReflector();
+                    mReflector = new TtShaderReflector();
                     mReflector.mCoreObject = mCoreObject.GetReflector();
                     mReflector.mCoreObject.NativeSuper.AddRef();
                 }
@@ -109,8 +109,8 @@ namespace EngineNS.NxRHI
         public const string AssetExt = ".shader";
         public unsafe void SaveTo(RName shader, in Hash160 hash)
         {
-            var path = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Shader);
-            var file = path + hash.ToString() + UShader.AssetExt;
+            var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Shader);
+            var file = path + hash.ToString() + TtShader.AssetExt;
             var xnd = new IO.TtXndHolder("UShader", 0, 0);
 
             var descAttr = new XndAttribute(xnd.RootNode.mCoreObject.GetOrAddAttribute("Desc", 0, 0));
@@ -132,7 +132,7 @@ namespace EngineNS.NxRHI
 
             xnd.SaveXnd(file);
         }
-        public unsafe static UShader Load(IO.TtXndHolder xnd)
+        public unsafe static TtShader Load(IO.TtXndHolder xnd)
         {
             var descAttr = xnd.RootNode.mCoreObject.TryGetAttribute("Desc");
             if (descAttr.IsValidPointer == false)
@@ -154,11 +154,11 @@ namespace EngineNS.NxRHI
             if (vsNode.IsValidPointer == false)
                 return null;
 
-            var desc = new UShaderDesc();
-            if (desc.mCoreObject.LoadXnd(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, vsNode) == false)
+            var desc = new TtShaderDesc();
+            if (desc.mCoreObject.LoadXnd(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, vsNode) == false)
                 return null;
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var result = rc.CreateShader(desc);
             result.PermutationId = permutationId;
             return result;
@@ -168,16 +168,16 @@ namespace EngineNS.NxRHI
 
         }
     }
-    public class UShaderReflector : AuxPtrType<NxRHI.IShaderReflector>
+    public class TtShaderReflector : AuxPtrType<NxRHI.IShaderReflector>
     {
         public FShaderBinder FindBinder(EShaderBindType type, string name)
         {
             return mCoreObject.FindBinder(type, name);
         }
     }
-    public class UShaderVarDesc : AuxPtrType<NxRHI.FShaderVarDesc>
+    public class TtShaderVarDesc : AuxPtrType<NxRHI.FShaderVarDesc>
     {
-        public UShaderVarDesc(NxRHI.FShaderVarDesc ptr)
+        public TtShaderVarDesc(NxRHI.FShaderVarDesc ptr)
         {
             mCoreObject = ptr;
             mCoreObject.NativeSuper.AddRef();
@@ -191,9 +191,9 @@ namespace EngineNS.NxRHI
         //    mCoreObject.NativeSuper.AddRef();
         //}
     }
-    public class UShaderBinder : AuxPtrType<NxRHI.FShaderBinder>
+    public class TtShaderBinder : AuxPtrType<NxRHI.FShaderBinder>
     {
-        public UShaderBinder(FShaderBinder ptr)
+        public TtShaderBinder(FShaderBinder ptr)
         {
             mCoreObject = ptr;
             mCoreObject.NativeSuper.AddRef();

@@ -62,7 +62,7 @@ namespace EngineNS.UI.Controls
             {
                 if(mFontAsset == null || mFontDirty)
                 {
-                    mFontAsset = UEngine.Instance.FontModule.FontManager.GetFontSDF(mFont, mFontSize, mTextureSize.X, mTextureSize.Y);
+                    mFontAsset = TtEngine.Instance.FontModule.FontManager.GetFontSDF(mFont, mFontSize, mTextureSize.X, mTextureSize.Y);
                     mFontDirty = false;
                 }
                 return mFontAsset;
@@ -457,7 +457,7 @@ namespace EngineNS.UI.Controls
                 for(int i=startIndex; i<words.Count; i++)
                 {
                     var wordWidth = words[i].Advance.X * fontScaleDelta;
-                    var curWordCulture = UEngine.Instance.LocalizationManager.GetCulture(mText[i]);
+                    var curWordCulture = TtEngine.Instance.LocalizationManager.GetCulture(mText[i]);
                     if(currentWidth + wordWidth > areaSize.Width)
                     {
                         if((curWordCulture == LocalizationManager.ECulture.Separator) &&
@@ -479,7 +479,7 @@ namespace EngineNS.UI.Controls
                                 else if(TextWrapping == ETextWrapping.WrapWithOverflow)
                                 {
                                     LocalizationManager.ECulture breakerCulture;
-                                    var breakerIdx = UEngine.Instance.LocalizationManager.GetNextWordBreaker(Text, startIndex, words.Count - 1, out breakerCulture);
+                                    var breakerIdx = TtEngine.Instance.LocalizationManager.GetNextWordBreaker(Text, startIndex, words.Count - 1, out breakerCulture);
                                     if ((breakerCulture == LocalizationManager.ECulture.Separator) ||
                                         (breakerCulture == LocalizationManager.ECulture.Punctuation))
                                         breakerIdx += 1;
@@ -497,7 +497,7 @@ namespace EngineNS.UI.Controls
                             else
                             {
                                 LocalizationManager.ECulture breakerCulture;
-                                var breakerIdx = UEngine.Instance.LocalizationManager.GetLastWordBreaker(Text, startIndex, i, out breakerCulture);
+                                var breakerIdx = TtEngine.Instance.LocalizationManager.GetLastWordBreaker(Text, startIndex, i, out breakerCulture);
                                 if ((breakerCulture == LocalizationManager.ECulture.Separator) ||
                                     (breakerCulture == LocalizationManager.ECulture.Punctuation))
                                     breakerIdx += 1;
@@ -600,7 +600,7 @@ namespace EngineNS.UI.Controls
                                 {
                                     var endIndex = startIndex + newCount - 1;
                                     LocalizationManager.ECulture breakerCulture;
-                                    var breakerIdx = UEngine.Instance.LocalizationManager.GetLastWordBreaker(Text, startIndex, endIndex, out breakerCulture);
+                                    var breakerIdx = TtEngine.Instance.LocalizationManager.GetLastWordBreaker(Text, startIndex, endIndex, out breakerCulture);
                                     //if ((breakerCulture == LocalizationManager.ECulture.Separator) ||
                                     //    (breakerCulture == LocalizationManager.ECulture.Punctuation))
                                     //    breakerIdx += 1;

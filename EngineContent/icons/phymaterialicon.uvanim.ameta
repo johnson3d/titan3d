@@ -16,5 +16,5 @@
   <SnapUVEnd Type="EngineNS.Vector2@EngineCore" Value="1,1" />
   <SnapUVStart Type="EngineNS.Vector2@EngineCore" Value="0,0" />
   <TextureName Type="EngineNS.RName@EngineCore" Value="Engine,uestyle/graph/regularnode_shadow_selected.srv,af5c8272-337a-4adb-96cf-4f1aa084742d" />
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.EGui.UUvAnim@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.EGui.TtUVAnim@EngineCore" />
 </Root>

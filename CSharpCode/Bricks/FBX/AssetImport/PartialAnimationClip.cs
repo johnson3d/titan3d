@@ -33,7 +33,7 @@ namespace EngineNS.Animation.Asset
                             string filePath = mFileDialog.GetCurrentPath();
                             if (!string.IsNullOrEmpty(mSourceFile))
                             {
-                                mFBXImporter = UEngine.Instance.FBXFactoryModule.Instance.CreateImporter();
+                                mFBXImporter = TtEngine.Instance.FBXFactoryModule.Instance.CreateImporter();
                                 var fileDesc = mFBXImporter.PreImport(mSourceFile);
                                 PGAsset.Target = fileDesc;
                                 mName = IO.TtFileManager.GetPureName(mSourceFile);
@@ -138,8 +138,8 @@ namespace EngineNS.Animation.Asset
                             ameta.AssetId = Guid.NewGuid();
                             ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtAnimationClip));
                             ameta.Description = $"This is a {typeof(TtAnimationClip).FullName}\n";
-                            ameta.SaveAMeta();
-                            UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                            ameta.SaveAMeta(animClip);
+                            TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
                         }
                     }
                 }

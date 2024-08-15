@@ -12,7 +12,7 @@ namespace EngineNS.IO
 
             //SetRoot(ERootDir.Root, root);
 
-            var cfg = UEngine.FindArgument(args, "publish=");
+            var cfg = TtEngine.FindArgument(args, "publish=");
             if (cfg == "true")
             {
                 SetRoot(ERootDir.Execute, root + "publishbin");

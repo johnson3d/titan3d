@@ -61,7 +61,7 @@ namespace EngineNS.NxRHI
         private NxRHI.TtGpuScope CurrentGpuScope;
         public void BeginPass(UFrameBuffers fb, in FRenderPassClears passClears, string name)
         {
-            CurrentGpuScope = UEngine.Instance.ProfilerModule.GpuTimeScopeManager.GetGpuScope(name);
+            CurrentGpuScope = TtEngine.Instance.ProfilerModule.GpuTimeScopeManager.GetGpuScope(name);
             if (CurrentGpuScope != null)
                 CurrentGpuScope.Begin(this);
             mCoreObject.BeginPass(fb.mCoreObject, in passClears, name);
@@ -97,7 +97,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.InheritPass(cmdlist.mCoreObject);
         }
-        public void SetShader(UShader shader)
+        public void SetShader(TtShader shader)
         {
             mCoreObject.SetShader(shader.mCoreObject);
         }
@@ -226,7 +226,7 @@ namespace EngineNS.NxRHI
         }
         public unsafe void PushAction(IActionDraw.FDelegate_OnActionDraw action, void* arg)
         {
-            var draw = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.CreateActionDraw();
+            var draw = TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.CreateActionDraw();
             draw.OnActionDraw = action;
             draw.Arg = arg;
             mCoreObject.PushGpuDraw(draw.NativeSuper);
@@ -280,19 +280,19 @@ namespace EngineNS.NxRHI
             if (ScopeFrameValue == 0)
             {
                 mCoreObject.End(cmdlist.mCoreObject);
-                ScopeFrameValue = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetFrameFence().GetExpectValue();
+                ScopeFrameValue = TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetFrameFence().GetExpectValue();
             }
         }
         public void Update()
         {
             if (ScopeFrameValue != 0)
             {
-                var completed = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetFrameFence().GetCompletedValue();
+                var completed = TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetFrameFence().GetCompletedValue();
                 if (completed >= ScopeFrameValue)
                 {
                     var delta = GetDeltaTime();
 
-                    var freq = UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetCmdQueue().mDefaultQueueFrequence;
+                    var freq = TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetCmdQueue().mDefaultQueueFrequence;
                     TimeUS = (delta * 1000000) / freq;
 
                     ScopeFrameValue = 0;
@@ -334,7 +334,7 @@ namespace EngineNS.NxRHI
             TtGpuScope scope;
             if (Scopes.TryGetValue(name, out scope))
                 return scope;
-            scope = UEngine.Instance.GfxDevice.RenderContext.CreateGpuScope();
+            scope = TtEngine.Instance.GfxDevice.RenderContext.CreateGpuScope();
             if (scope == null)
                 return null;
             scope.Name = name;

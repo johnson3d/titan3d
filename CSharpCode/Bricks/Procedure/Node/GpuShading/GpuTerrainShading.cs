@@ -22,7 +22,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         {
             base.EnvShadingDefines(in id, defines);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
         {
             var node = drawcall.TagObject as TtErosionIncWaterNode;
             var uav = policy.AttachmentCache.FindAttachement(node.WaterPinInOut).Uav;
@@ -31,7 +31,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             var binder = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_Sampler, "Samp_RainTexture");
             if (binder.IsValidPointer)
             {
-                drawcall.BindSampler(binder, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                drawcall.BindSampler(binder, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
             }
             binder = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "RainTexture");
             if (binder.IsValidPointer)
@@ -65,7 +65,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
                 mRain = value;
                 var action = async () =>
                 {
-                    mRainTexture = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
+                    mRainTexture = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
                 };
                 action();
             }
@@ -80,7 +80,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         {
             if (CBuffer == null)
             {
-                CBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
+                CBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
             }
             CBuffer.SetValue("TextureWidth", TextureWidth);
             CBuffer.SetValue("TextureHeight", TextureHeight);
@@ -103,17 +103,17 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
 
             base.InitNodePins();
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ShadingEnv = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtErosionIncWaterShading>();
+            ShadingEnv = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtErosionIncWaterShading>();
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             mCmdList = rc.CreateCommandList();
             mDrawcall = rc.CreateComputeDraw();
             mDrawcall.TagObject = this;
         }
-        public unsafe override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new NxRHI.TtCmdListScope(mCmdList))
             {
@@ -125,7 +125,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
                 mCmdList.FlushDraws();
             }
 
-            UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, NxRHI.EQueueType.QU_Compute);
+            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, NxRHI.EQueueType.QU_Compute);
         }
     }
 
@@ -146,7 +146,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         {
             base.EnvShadingDefines(in id, defines);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
         {
             var node = drawcall.TagObject as TtHeigh2FlowMapNode;
             
@@ -199,17 +199,17 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
 
             base.InitNodePins();
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ShadingEnv = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtHeigh2FlowMapShading>();
+            ShadingEnv = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtHeigh2FlowMapShading>();
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             mCmdList = rc.CreateCommandList();
             mDrawcall = rc.CreateComputeDraw();
             mDrawcall.TagObject = this;
         }
-        public unsafe override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new NxRHI.TtCmdListScope(mCmdList))
             {
@@ -218,7 +218,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
                 mCmdList.FlushDraws();
             }
 
-            UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, NxRHI.EQueueType.QU_Compute);
+            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, NxRHI.EQueueType.QU_Compute);
         }
     }
 
@@ -239,7 +239,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         {
             base.EnvShadingDefines(in id, defines);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
         {
             var node = drawcall.TagObject as TtWaterBasinNode;
 
@@ -303,18 +303,18 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
 
             base.InitNodePins();
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            ShadingEnv = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtWaterBasinShading>();
+            ShadingEnv = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtWaterBasinShading>();
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             mCmdList = rc.CreateCommandList();
             mDrawcall = rc.CreateComputeDraw();
             mDrawcall.TagObject = this;
             mCopyDrawcall = rc.CreateCopyDraw();
         }
-        public unsafe override void BeforeTickLogic(URenderPolicy policy)
+        public unsafe override void BeforeTickLogic(TtRenderPolicy policy)
         {
             var water = policy.AttachmentCache.FindAttachement(WaterPinInOut);
 
@@ -325,7 +325,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             }
             mCopyDrawcall.Copy(PrevWaterTexture.GpuBuffer, water.Buffer as NxRHI.UBuffer);
         }
-        public unsafe override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new NxRHI.TtCmdListScope(mCmdList))
             {
@@ -339,7 +339,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
                 mCmdList.FlushDraws();
             }
 
-            UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, NxRHI.EQueueType.QU_Compute);
+            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, NxRHI.EQueueType.QU_Compute);
         }
     }
 }

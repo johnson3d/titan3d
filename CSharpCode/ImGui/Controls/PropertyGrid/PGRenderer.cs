@@ -270,7 +270,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, EGui.UIProxy.StyleConfig.Instance.PGItemHoveredColor);
                 ImGuiAPI.Separator();
 
-                UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.UBaseRenderer.enFont.Font_13px);
+                TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.UBaseRenderer.enFont.Font_13px);
 
                 Vector2 size = Vector2.MinusOne;
                 //Vector2 size = Vector2.Zero;
@@ -481,7 +481,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     //ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Header, EGui.UIProxy.StyleConfig.Instance.PGHeadColor);
                     ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FrameRounding, 0);
                     ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in EGui.UIProxy.StyleConfig.Instance.PGCategoryPadding);
-                    UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.UBaseRenderer.enFont.Font_Bold_13px);
+                    TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.UBaseRenderer.enFont.Font_Bold_13px);
 
                     if(isSubPropertyGrid)
                     {
@@ -631,7 +631,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                 ImGuiAPI.TableSetColumnIndex(1);
                                 //ImGuiAPI.GotoColumns(1);
                                 PushPGEditorStyleValues();
-                                var changed = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.ObjectWithCreateEditor.OnDraw(in itemEditorInfo, out newValue);
+                                var changed = EngineNS.TtEngine.Instance.PGTypeEditorManagerInstance.ObjectWithCreateEditor.OnDraw(in itemEditorInfo, out newValue);
                                 PopPGEditorStyleValues();
                                 bool canSet = true;
                                 if (CanSetPropertyValueAction != null)
@@ -824,7 +824,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
             if(typeDesc == null)
                 typeDesc = Rtti.UTypeDesc.TypeOf(value.GetType());
-            var editor = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.GetEditorType(typeDesc);
+            var editor = EngineNS.TtEngine.Instance.PGTypeEditorManagerInstance.GetEditorType(typeDesc);
             if (editor != null)
                 return !editor.Expandable;
             if (typeDesc.SystemType.IsEnum)
@@ -851,31 +851,31 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 if (info.Value == null && CanNewObject(info.Type))
                 {
-                    valueChanged = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.ObjectWithCreateEditor.OnDraw(in info, out newValue);
+                    valueChanged = EngineNS.TtEngine.Instance.PGTypeEditorManagerInstance.ObjectWithCreateEditor.OnDraw(in info, out newValue);
                 }
-                else if (EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.DrawTypeEditor(in info, out newValue, out valueChanged))
+                else if (EngineNS.TtEngine.Instance.PGTypeEditorManagerInstance.DrawTypeEditor(in info, out newValue, out valueChanged))
                 {
                     //return valueChanged;
                 }
                 else if (info.Type.IsEnum)
                 {
-                    if (EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.EnumEditor != null)
-                        valueChanged = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.EnumEditor.OnDraw(in info, out newValue);
+                    if (EngineNS.TtEngine.Instance.PGTypeEditorManagerInstance.EnumEditor != null)
+                        valueChanged = EngineNS.TtEngine.Instance.PGTypeEditorManagerInstance.EnumEditor.OnDraw(in info, out newValue);
                 }
                 else if (info.Type.IsArray)
                 {
-                    if (EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.ArrayEditor != null)
-                        valueChanged = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.ArrayEditor.OnDraw(in info, out newValue);
+                    if (EngineNS.TtEngine.Instance.PGTypeEditorManagerInstance.ArrayEditor != null)
+                        valueChanged = EngineNS.TtEngine.Instance.PGTypeEditorManagerInstance.ArrayEditor.OnDraw(in info, out newValue);
                 }
                 else if (info.Type.SystemType.GetInterface(typeof(System.Collections.IList).FullName) != null)
                 {
-                    if (EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.ListEditor != null)
-                        valueChanged = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.ListEditor.OnDraw(in info, out newValue);
+                    if (EngineNS.TtEngine.Instance.PGTypeEditorManagerInstance.ListEditor != null)
+                        valueChanged = EngineNS.TtEngine.Instance.PGTypeEditorManagerInstance.ListEditor.OnDraw(in info, out newValue);
                 }
                 else if (info.Type.SystemType.GetInterface(typeof(System.Collections.IDictionary).FullName) != null)
                 {
-                    if (EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.DictionaryEditor != null)
-                        valueChanged = EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.DictionaryEditor.OnDraw(in info, out newValue);
+                    if (EngineNS.TtEngine.Instance.PGTypeEditorManagerInstance.DictionaryEditor != null)
+                        valueChanged = EngineNS.TtEngine.Instance.PGTypeEditorManagerInstance.DictionaryEditor.OnDraw(in info, out newValue);
                 }
                 else
                 {

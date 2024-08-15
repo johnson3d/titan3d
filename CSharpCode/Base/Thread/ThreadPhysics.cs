@@ -18,7 +18,7 @@ namespace EngineNS.Thread
             var now = Support.Time.GetTickCount();
             if(now - mPrevTestTime>100)
             {
-                mPrevFrameCount = UEngine.Instance.FrameCount;
+                mPrevFrameCount = TtEngine.Instance.FrameCount;
                 mPrevTestTime = now;
             }
             

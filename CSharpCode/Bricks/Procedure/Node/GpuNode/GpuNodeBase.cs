@@ -9,7 +9,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
     {
         protected RName mPolicyName;
         [Rtti.Meta(Order = 2)]
-        [RName.PGRName(FilterExts = URenderPolicyAsset.AssetExt)]
+        [RName.PGRName(FilterExts = TtRenderPolicyAsset.AssetExt)]
         public RName PolicyName
         {
             get
@@ -20,7 +20,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
             {
                 var action = async () =>
                 {
-                    var policy = URenderPolicyAsset.LoadAsset(value).CreateRenderPolicy(null, null);
+                    var policy = TtRenderPolicyAsset.LoadAsset(value).CreateRenderPolicy(null, null);
                     await policy.Initialize(null);
                     Policy = policy;
                     mPolicyName = value;
@@ -30,19 +30,19 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
             }
         }
         public bool IsCapture { get; set; } = false;
-        protected Graphics.Pipeline.URenderPolicy Policy;
+        protected Graphics.Pipeline.TtRenderPolicy Policy;
         protected TtPgcGpuProcessor GpuProcessor = new TtPgcGpuProcessor();
         protected void GpuProcess()
         {
             if (IsCapture)
             {
-                UEngine.Instance.GfxDevice.RenderSwapQueue.CaptureRenderDocFrame = true;
-                UEngine.Instance.GfxDevice.RenderSwapQueue.BeginFrameCapture();
+                TtEngine.Instance.GfxDevice.RenderSwapQueue.CaptureRenderDocFrame = true;
+                TtEngine.Instance.GfxDevice.RenderSwapQueue.BeginFrameCapture();
             }
             GpuProcessor.Process();
             if (IsCapture)
             {
-                UEngine.Instance.GfxDevice.RenderSwapQueue.EndFrameCapture(this.Name);
+                TtEngine.Instance.GfxDevice.RenderSwapQueue.EndFrameCapture(this.Name);
             }
         }
     }

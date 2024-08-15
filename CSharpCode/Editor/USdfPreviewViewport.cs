@@ -63,25 +63,25 @@ namespace EngineNS.Editor
 
             if (FreezCameraControl)
                 return true;
-            var keyboards = UEngine.Instance.InputSystem;
+            var keyboards = TtEngine.Instance.InputSystem;
             if (e.Type == Bricks.Input.EventType.MOUSEMOTION)
             {
                 if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
                 {
                     if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                     {
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * CameraRotSpeed * UEngine.Instance.ElapsedSecond);
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * CameraRotSpeed * UEngine.Instance.ElapsedSecond);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * CameraRotSpeed * TtEngine.Instance.ElapsedSecond);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * CameraRotSpeed * TtEngine.Instance.ElapsedSecond);
                         /*if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LCTRL))
                         {
-                            UEngine.Instance.GfxDevice.RenderCmdQueue.CaptureRenderDocFrame = true;
+                            TtEngine.Instance.GfxDevice.RenderCmdQueue.CaptureRenderDocFrame = true;
                         }*/
                     }
                 }
                 else if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_MIDDLE)
                 {
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.X - mPreMousePt.X) * CameraMoveSpeed * UEngine.Instance.ElapsedSecond);
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.Y - mPreMousePt.Y) * CameraMoveSpeed * UEngine.Instance.ElapsedSecond);
+                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.X - mPreMousePt.X) * CameraMoveSpeed * TtEngine.Instance.ElapsedSecond);
+                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.Y - mPreMousePt.Y) * CameraMoveSpeed * TtEngine.Instance.ElapsedSecond);
                 }
                 else if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_X1)
                 {
@@ -91,8 +91,8 @@ namespace EngineNS.Editor
                     }
                     else
                     {
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * CameraRotSpeed * UEngine.Instance.ElapsedSecond, true);
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * CameraRotSpeed * UEngine.Instance.ElapsedSecond, true);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * CameraRotSpeed * TtEngine.Instance.ElapsedSecond, true);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * CameraRotSpeed * TtEngine.Instance.ElapsedSecond, true);
                     }
                 }
 
@@ -115,8 +115,8 @@ namespace EngineNS.Editor
         #endregion
         protected virtual void TickOnFocus()
         {
-            float step = (UEngine.Instance.ElapseTickCountMS * 0.001f) * CameraMoveSpeed;
-            var keyboards = UEngine.Instance.InputSystem;
+            float step = (TtEngine.Instance.ElapseTickCountMS * 0.001f) * CameraMoveSpeed;
+            var keyboards = TtEngine.Instance.InputSystem;
             if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_w))
             {
                 CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, step, true);

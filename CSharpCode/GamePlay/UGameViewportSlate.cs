@@ -10,7 +10,7 @@ namespace EngineNS.GamePlay
         public UGameViewportSlate(bool regRoot)
         {
             if (regRoot)
-                UEngine.RootFormManager.RegRootForm(this);
+                TtEngine.RootFormManager.RegRootForm(this);
             CameraController = new Editor.Controller.EditorCameraController();
         }
         TtNativeString mNstrTitle = new TtNativeString();
@@ -26,7 +26,7 @@ namespace EngineNS.GamePlay
         protected override void OnViewportClosed()
         {
             mPresentWindow?.UnregEventProcessor(this);
-            UEngine.Instance.EndPlayInEditor();
+            TtEngine.Instance.EndPlayInEditor();
         }
         public bool IsSetViewportPos = false;
         public Vector2 GameViewportPos = new Vector2(0,0);

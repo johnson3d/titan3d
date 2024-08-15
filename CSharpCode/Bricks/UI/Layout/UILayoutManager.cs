@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.UI.Layout
 {
-    internal class TtUILayoutManager : UModule<UEngine>
+    internal class TtUILayoutManager : UModule<TtEngine>
     {
         // 在极端情况下（内存溢出等），树的强制刷新包含该元素
         private UI.Controls.TtUIElement mForceLayoutElement;
@@ -254,7 +254,7 @@ namespace EngineNS.UI.Layout
 
         internal UI.Controls.TtUIElement LastExceptionElement;
 
-        public override void TickLogic(UEngine host)
+        public override void TickLogic(TtEngine host)
         {
             if (host.GfxDevice.SlateApplication == null)
                 return;
@@ -265,7 +265,7 @@ namespace EngineNS.UI.Layout
 
 namespace EngineNS
 {
-    public partial class UEngine
+    public partial class TtEngine
     {
         internal UI.Layout.TtUILayoutManager UILayoutManager { get; } = new UI.Layout.TtUILayoutManager();
     }

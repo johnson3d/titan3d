@@ -11,6 +11,7 @@
       <Position Type="EngineNS.Vector2@EngineCore" Value="509,335" />
       <GraphNode Type="EngineNS.Bricks.Procedure.Node.GpuShading.TtErosionIncWaterNode@EngineCore">
         <Rain Type="EngineNS.RName@EngineCore" Value="Game,tutorials/terrain/rain.srv,d2ea56cf-55e9-408a-9c9f-492ad2e37de3" />
+        <RainScalar Type="System.Single@Unknown" Value="10" />
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
@@ -24,14 +25,14 @@
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_1>
   </Nodes>
-  <PolicyType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.UDeferredPolicyBase@EngineCore" />
-  <RenderPolicy Type="EngineNS.Graphics.Pipeline.UDeferredPolicyBase@EngineCore">
+  <PolicyType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore" />
+  <RenderPolicy Type="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore">
     <DisableAO Type="System.Boolean@Unknown" Value="False" />
     <DisableHDR Type="System.Boolean@Unknown" Value="False" />
     <DisablePointLight Type="System.Boolean@Unknown" Value="False" />
     <DisableShadow Type="System.Boolean@Unknown" Value="False" />
-    <TypeAA Type="EngineNS.Graphics.Pipeline.URenderPolicy.ETypeAA@EngineCore" Value="Taa" />
-    <TypeFog Type="EngineNS.Graphics.Pipeline.URenderPolicy.ETypeFog@EngineCore" Value="None" />
+    <TypeAA Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA@EngineCore" Value="Taa" />
+    <TypeFog Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog@EngineCore" Value="None" />
   </RenderPolicy>
   <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">

@@ -401,7 +401,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 GraphAsset = UPgcAsset.LoadAsset(value);
                 if (false == SureSubGraphInputOutputs())
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Pgc", $"SubGraph({value}) is not match parentNode({this.ParentGraph.GraphName}:{this.Name})");
+                    Profiler.Log.WriteLine<Profiler.TtPgcGategory>(Profiler.ELogTag.Warning, $"SubGraph({value}) is not match parentNode({this.ParentGraph.GraphName}:{this.Name})");
                 }
             }
         }
@@ -530,7 +530,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
-            ImGui.ImGuiFileDialog mFileDialog = UEngine.Instance.EditorInstance.FileDialog.mFileDialog;
+            ImGui.ImGuiFileDialog mFileDialog = TtEngine.Instance.EditorInstance.FileDialog.mFileDialog;
 
             var ctrlPos = prevStart;
             ctrlPos -= ImGuiAPI.GetWindowPos();
@@ -581,8 +581,8 @@ namespace EngineNS.Bricks.Procedure.Node
                     if (GraphName == null)
                     {
                         var file = mFileDialog.GetFilePathName();
-                        var rootType = UEngine.Instance.FileManager.GetRootDirType(file);
-                        var rPath = IO.TtFileManager.GetRelativePath(UEngine.Instance.FileManager.GetRoot(rootType), file);
+                        var rootType = TtEngine.Instance.FileManager.GetRootDirType(file);
+                        var rPath = IO.TtFileManager.GetRelativePath(TtEngine.Instance.FileManager.GetRoot(rootType), file);
                         if (rootType == IO.TtFileManager.ERootDir.Game)
                             mGraphName = RName.GetRName(rPath, RName.ERNameType.Game);
                         else if (rootType == IO.TtFileManager.ERootDir.Engine)

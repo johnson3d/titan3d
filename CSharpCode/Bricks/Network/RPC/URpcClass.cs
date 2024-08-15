@@ -79,7 +79,7 @@ namespace EngineNS.Bricks.Network.RPC
                 realRetType.Name != "ISerializer" &&
                 realRetType.GetInterface("ISerializer") == null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "RPC", $"{mtd.Name} return type is invalid");
+                Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Error, $"{mtd.Name} return type is invalid");
                 return false;
             }
                 
@@ -95,7 +95,7 @@ namespace EngineNS.Bricks.Network.RPC
                     parms[i].ParameterType.Name != "ISerializer" &&
                     parms[i].ParameterType.GetInterface("ISerializer") == null)
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Error, "RPC", $"{mtd.Name} parameter{i} type is invalid");
+                    Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Error, $"{mtd.Name} parameter{i} type is invalid");
                     return false;
                 }
                     

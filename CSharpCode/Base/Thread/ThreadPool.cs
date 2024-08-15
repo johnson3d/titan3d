@@ -32,9 +32,9 @@ namespace EngineNS.Thread
         }
         public override void Tick()
         {
-            UEngine.Instance.ContextThreadManager.mTPoolTrigger.WaitOne(5);
+            TtEngine.Instance.ContextThreadManager.mTPoolTrigger.WaitOne(5);
             
-            var events = UEngine.Instance.ContextThreadManager.TPoolEvents;
+            var events = TtEngine.Instance.ContextThreadManager.TPoolEvents;
             var numOfEvent = events.Count;
             while (true)
             {
@@ -51,7 +51,7 @@ namespace EngineNS.Thread
                     }
                     else
                     {
-                        UEngine.Instance.ContextThreadManager.mTPoolTrigger.Reset();
+                        TtEngine.Instance.ContextThreadManager.mTPoolTrigger.Reset();
                         break;
                     }
                 }
@@ -83,7 +83,7 @@ namespace EngineNS.Thread
             //lock (events)
             //{
             //    if (events.Count == 0)
-            //        UEngine.Instance.ContextThreadManager.mTPoolTrigger.Reset();
+            //        TtEngine.Instance.ContextThreadManager.mTPoolTrigger.Reset();
             //}
             TickAwaitEvent();
         }

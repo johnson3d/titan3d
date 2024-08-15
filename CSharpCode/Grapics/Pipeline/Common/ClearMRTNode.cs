@@ -46,11 +46,11 @@ namespace EngineNS.Graphics.Pipeline.Common
             AddInputOutput(DepthStencilPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
             DepthStencilPinOut.IsAllowInputNull = true;
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName + ".BasePass");
 
             ClearFlags[0] = NxRHI.ERenderPassClearFlags.CLEAR_RT0;
@@ -59,7 +59,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             ClearFlags[3] = ClearFlags[3] | NxRHI.ERenderPassClearFlags.CLEAR_RT3;
             CreateGBuffers(policy);
         }
-        public override void OnResize(URenderPolicy policy, float x, float y)
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             foreach(var i in GBuffers)
             {
@@ -75,9 +75,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                 RtPinOut[i].Attachement.Width = (uint)x;
             }
         }
-        public virtual unsafe TtGraphicsBuffers CreateGBuffers(URenderPolicy policy)
+        public virtual unsafe TtGraphicsBuffers CreateGBuffers(TtRenderPolicy policy)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var PassDesc = new NxRHI.FRenderPassDesc();
             for (int i = 0; i < 4; i++)
             {
@@ -95,7 +95,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             for (int i = 0; i < 4; i++)
             {
                 PassDesc.NumOfMRT = (uint)i + 1;
-                RenderPass[i] = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
+                RenderPass[i] = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
                 GBuffers[i] = new TtGraphicsBuffers();
 
                 GBuffers[i].Initialize(policy, RenderPass[i]);
@@ -111,7 +111,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             return GBuffers[0];
         }
 
-        public override void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
+        public override void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             int MrtNum = OutputRT;
             if (MrtNum == 0)
@@ -159,7 +159,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 policy.CommitCommandList(BasePass.DrawCmdList, "ClearRT");
             }
         }
-        public override void TickSync(URenderPolicy policy)
+        public override void TickSync(TtRenderPolicy policy)
         {
             base.TickSync(policy);
         }

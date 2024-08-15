@@ -65,7 +65,7 @@ namespace EngineNS.Bricks.Input
             }
         }
 
-        public unsafe int Tick(UEngine engine)
+        public unsafe int Tick(TtEngine engine)
         {
             if (mKeyboardStateDirty)
             {
@@ -224,7 +224,7 @@ namespace EngineNS.Bricks.Input
 }
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public Bricks.Input.UInputSystem InputSystem
         {

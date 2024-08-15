@@ -35,7 +35,7 @@ namespace EngineNS.UI.Controls
         {
             // test only ////////////////////////////////////
             //mDrawBrush.Name = "utest/ddd.uminst";
-            //var texture = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("utest/texture/ground_01.srv"));
+            //var texture = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("utest/texture/ground_01.srv"));
             //mDrawBrush.SetSrv(texture);
             /////////////////////////////////////////////////
         }
@@ -47,7 +47,7 @@ namespace EngineNS.UI.Controls
         public override void Draw(TtCanvas canvas, TtCanvasDrawBatch batch)
         {
             //mBrush.Name = "utest/ddd.uminst";
-            //var texture = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("utest/texture/groundsnow.srv"));
+            //var texture = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("utest/texture/groundsnow.srv"));
             //mBrush.mCoreObject.SetSrv(texture.mCoreObject);
             //batch.Middleground.PushBrush(mBrush);
             mUIBrush.Draw(this, in mDesignClipRect, in mCurFinalRect, batch);

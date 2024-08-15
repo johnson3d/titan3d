@@ -17,7 +17,7 @@ namespace EngineNS.Graphics.Pipeline
             VisiblesOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(VisiblesOut, NxRHI.EBufferType.BFT_NONE);
         }
-        public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public async override System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
@@ -25,7 +25,7 @@ namespace EngineNS.Graphics.Pipeline
 
             mPolicy = policy;
         }
-        URenderPolicy mPolicy;
+        TtRenderPolicy mPolicy;
         [Rtti.Meta]
         public string CullCameraName
         {
@@ -46,7 +46,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             get => mVisParameter;
         }
-        public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
             //if (GetInput(0).FindInLinker() == null)
             //{

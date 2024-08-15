@@ -40,7 +40,7 @@ namespace EngineNS.Editor.Forms
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
         TtTextureViewerCmdParams CmdParameters;
-        public Graphics.Pipeline.Shader.UEffect SlateEffect;
+        public Graphics.Pipeline.Shader.TtEffect SlateEffect;
         public NxRHI.USrView TextureSRV;
         public NxRHI.USrView ShowTextureSRV;
         public EGui.Controls.PropertyGrid.PropertyGrid TexturePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
@@ -71,7 +71,7 @@ namespace EngineNS.Editor.Forms
         public async Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetOrNewTexture(name);
+            TextureSRV = await TtEngine.Instance.GfxDevice.TextureManager.GetOrNewTexture(name);
             if (TextureSRV == null)
                 return false;
 
@@ -84,11 +84,11 @@ namespace EngineNS.Editor.Forms
                 ScaleSpeed = 0.1f * ScaleFactor;
             }    
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-            SlateEffect = await UEngine.Instance.GfxDevice.EffectManager.GetEffect(
-                await UEngine.Instance.ShadingEnvManager.GetShadingEnv<USlateTextureViewerShading>(),
-                UEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
+            SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
+                await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<USlateTextureViewerShading>(),
+                TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
             var iptDesc = new NxRHI.UInputLayoutDesc();
             unsafe
             {
@@ -98,7 +98,7 @@ namespace EngineNS.Editor.Forms
                 //iptDesc.SetShaderDesc(SlateEffect.GraphicsEffect);
             }
             iptDesc.mCoreObject.SetShaderDesc(SlateEffect.DescVS.mCoreObject);
-            var InputLayout = rc.CreateInputLayout(iptDesc); //UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
+            var InputLayout = rc.CreateInputLayout(iptDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
             SlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
 
             
@@ -108,7 +108,7 @@ namespace EngineNS.Editor.Forms
             cmdParams.Drawcall.BindShaderEffect(SlateEffect);
             cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
             cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, TextureSRV);
-            cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+            cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
             cmdParams.IsNormalMap = 0;
             if (TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)

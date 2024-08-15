@@ -17,9 +17,9 @@
                 mFrame_OnUpdateEmitter.SetWatchVariable("elpased", elpased);
                 System.Single tmp_r_Sin_1051780063 = default(System.Single);
                 EngineNS.Vector3 tmp_r_CreateVector3f_4100741359 = default(EngineNS.Vector3);
-                mFrame_OnUpdateEmitter.SetWatchVariable("v_v_Sin_1051780063", (EngineNS.UEngine.Instance.TickCountSecond * 0.0001f));
+                mFrame_OnUpdateEmitter.SetWatchVariable("v_v_Sin_1051780063", (EngineNS.TtEngine.Instance.TickCountSecond * 0.0001f));
                 breaker_Sin_1051780063.TryBreak();
-                tmp_r_Sin_1051780063 = EngineNS.MathHelper.Sin((EngineNS.UEngine.Instance.TickCountSecond * 0.0001f));
+                tmp_r_Sin_1051780063 = EngineNS.MathHelper.Sin((EngineNS.TtEngine.Instance.TickCountSecond * 0.0001f));
                 mFrame_OnUpdateEmitter.SetWatchVariable("tmp_r_Sin_1051780063", tmp_r_Sin_1051780063);
                 mFrame_OnUpdateEmitter.SetWatchVariable("v_x_CreateVector3f_4100741359", 0f);
                 mFrame_OnUpdateEmitter.SetWatchVariable("v_y_CreateVector3f_4100741359", (tmp_r_Sin_1051780063 * 10f));

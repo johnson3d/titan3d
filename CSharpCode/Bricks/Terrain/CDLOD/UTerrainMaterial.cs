@@ -205,7 +205,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
                 var desc = new NxRHI.FTextureDesc();
                 desc.SetDefault();
-                if (UEngine.Instance.CurrentPlatform == EPlatformType.PLTF_Windows)
+                if (TtEngine.Instance.CurrentPlatform == EPlatformType.PLTF_Windows)
                 {
                     desc.Format = EPixelFormat.PXF_BC1_UNORM;
                 }
@@ -216,7 +216,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 desc.MipLevels = (uint)txDesc.MipLevel;
                 desc.ArraySize = (uint)MaterialIdArray.Count;
 
-                DiffuseTextureArray = UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
+                DiffuseTextureArray = TtEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
                 var srvDesc = new NxRHI.FSrvDesc();
                 srvDesc.SetTexture2DArray();
                 srvDesc.Format = desc.Format;
@@ -224,7 +224,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 srvDesc.Texture2DArray.FirstArraySlice = 0;
                 srvDesc.Texture2DArray.MipLevels = desc.MipLevels;
                 srvDesc.Texture2DArray.MostDetailedMip = 0;
-                DiffuseTextureArraySRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(DiffuseTextureArray, in srvDesc);
+                DiffuseTextureArraySRV = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(DiffuseTextureArray, in srvDesc);
 
                 unsafe
                 {
@@ -261,7 +261,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
                 var desc = new NxRHI.FTextureDesc();
                 desc.SetDefault();
-                if (UEngine.Instance.CurrentPlatform == EPlatformType.PLTF_Windows)
+                if (TtEngine.Instance.CurrentPlatform == EPlatformType.PLTF_Windows)
                 {
                     desc.Format = EPixelFormat.PXF_BC1_UNORM;
                 }
@@ -271,7 +271,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 desc.MipLevels = (uint)txDesc.MipLevel;
                 desc.ArraySize = (uint)MaterialIdArray.Count;
 
-                NormalTextureArray = UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
+                NormalTextureArray = TtEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
                 var srvDesc = new NxRHI.FSrvDesc();
                 srvDesc.SetTexture2DArray();
                 srvDesc.Format = desc.Format;
@@ -279,7 +279,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 srvDesc.Texture2DArray.FirstArraySlice = 0;
                 srvDesc.Texture2DArray.MipLevels = desc.MipLevels;
                 srvDesc.Texture2DArray.MostDetailedMip = 0;
-                NormalTextureArraySRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(NormalTextureArray, in srvDesc);
+                NormalTextureArraySRV = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(NormalTextureArray, in srvDesc);
 
                 unsafe
                 {

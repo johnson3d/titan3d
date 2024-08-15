@@ -17,17 +17,17 @@ namespace EngineNS.Thread
                 this.TickAwaitEvent();
             }
 
-            //if (UEngine.Instance.TextureManager.WaitStreamingCount == 0 &&
-            //    UEngine.Instance.SkeletonActionManager.PendingActions.Count == 0 &&
-            //    UEngine.Instance.MeshPrimitivesManager.PendingMeshPrimitives.Count == 0 &&
+            //if (TtEngine.Instance.TextureManager.WaitStreamingCount == 0 &&
+            //    TtEngine.Instance.SkeletonActionManager.PendingActions.Count == 0 &&
+            //    TtEngine.Instance.MeshPrimitivesManager.PendingMeshPrimitives.Count == 0 &&
             //    (AsyncEvents.Count + ContinueEvents.Count == 0))
             if (AsyncEvents.Count + ContinueEvents.Count == 0)
             {
                 System.Threading.Thread.Sleep(50);
 
-                lock (UEngine.Instance.ContextThreadManager.AsyncIOEmptys)
+                lock (TtEngine.Instance.ContextThreadManager.AsyncIOEmptys)
                 {
-                    foreach (var i in UEngine.Instance.ContextThreadManager.AsyncIOEmptys)
+                    foreach (var i in TtEngine.Instance.ContextThreadManager.AsyncIOEmptys)
                     {
                         i.ExecutePostEvent();
                         i.ExecuteContinue();

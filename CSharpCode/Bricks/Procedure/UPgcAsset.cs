@@ -13,7 +13,7 @@ namespace EngineNS.Bricks.Procedure
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
+            return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -74,7 +74,7 @@ namespace EngineNS.Bricks.Procedure
         }
         public IO.IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
@@ -103,15 +103,15 @@ namespace EngineNS.Bricks.Procedure
             var ameta = this.GetAMeta();
             if (ameta == null)
             {
-                var asset = UEngine.Instance.AssetMetaManager.NewAsset<UPgcAsset>(name);
+                var asset = TtEngine.Instance.AssetMetaManager.NewAsset<UPgcAsset>(name);
                 ameta = asset.GetAMeta();
             }
             UpdateAMetaReferences(ameta);
-            ameta.SaveAMeta();
+            ameta.SaveAMeta(this);
 
             AssetGraph.Version++;
             IO.TtFileManager.SaveObjectToXml(name.Address, AssetGraph);
-            UEngine.Instance.SourceControlModule.AddFile(name.Address);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         [Rtti.Meta]
         public RName AssetName

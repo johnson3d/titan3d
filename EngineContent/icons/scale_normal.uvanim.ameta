@@ -16,5 +16,5 @@
   <SnapUVEnd Type="EngineNS.Vector2@EngineCore" Value="0.318,0.038" />
   <SnapUVStart Type="EngineNS.Vector2@EngineCore" Value="0.28,0" />
   <TextureName Type="EngineNS.RName@EngineCore" Value="Engine,icons/icon001.srv,84c6e915-a00f-42a5-885a-91e9427a8456" />
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.EGui.UUvAnim@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.EGui.TtUVAnim@EngineCore" />
 </Root>

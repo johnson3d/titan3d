@@ -4,12 +4,12 @@ using System.Text;
 
 namespace EngineNS.Graphics.Mesh
 {
-    [Rtti.Meta]
-    public class UMeshPrimitivesAMeta : IO.IAssetMeta
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMeshPrimitivesAMeta@EngineCore" })]
+    public class TtMeshPrimitivesAMeta : IO.IAssetMeta
     {
         public override string GetAssetExtType()
         {
-            return UMeshPrimitives.AssetExt;
+            return TtMeshPrimitives.AssetExt;
         }
         public override string GetAssetTypeName()
         {
@@ -17,15 +17,15 @@ namespace EngineNS.Graphics.Mesh
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            return await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(GetAssetName());
+            return await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(GetAssetName());
         }
         public override void OnBeforeRenamedAsset(IO.IAsset asset, RName name)
         {
-            CoreSDK.CheckResult(UEngine.Instance.GfxDevice.MeshPrimitiveManager.UnsafeRemove(name) == asset);
+            CoreSDK.CheckResult(TtEngine.Instance.GfxDevice.MeshPrimitiveManager.UnsafeRemove(name) == asset);
         }
         public override void OnAfterRenamedAsset(IO.IAsset asset, RName name)
         {
-            UEngine.Instance.GfxDevice.MeshPrimitiveManager.UnsafeAdd(name, (UMeshPrimitives)asset);
+            TtEngine.Instance.GfxDevice.MeshPrimitiveManager.UnsafeAdd(name, (TtMeshPrimitives)asset);
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -45,10 +45,10 @@ namespace EngineNS.Graphics.Mesh
         public bool IsClustered { get; set; } = false;
     }
 
-    [Rtti.Meta]
-    [UMeshPrimitives.Import]
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMeshPrimitives@EngineCore" })]
+    [TtMeshPrimitives.Import]
     [IO.AssetCreateMenu(MenuName = "Mesh/Mesh")]
-    public partial class UMeshPrimitives : AuxPtrType<NxRHI.FMeshPrimitives>, IO.IAsset
+    public partial class TtMeshPrimitives : AuxPtrType<NxRHI.FMeshPrimitives>, IO.IAsset
     {
         public const string AssetExt = ".vms";
 
@@ -59,7 +59,7 @@ namespace EngineNS.Graphics.Mesh
                 //mFileDialog.Dispose();
             }
             string mSourceFile;
-            ImGui.ImGuiFileDialog mFileDialog = UEngine.Instance.EditorInstance.FileDialog.mFileDialog;
+            ImGui.ImGuiFileDialog mFileDialog = TtEngine.Instance.EditorInstance.FileDialog.mFileDialog;
             //EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
             public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
             {
@@ -78,23 +78,23 @@ namespace EngineNS.Graphics.Mesh
             public unsafe partial bool FBXCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser);
             public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser);
         }
-        public UMeshPrimitives()
+        public TtMeshPrimitives()
         {
             mCoreObject = NxRHI.FMeshPrimitives.CreateInstance();
         }
-        public UMeshPrimitives(string name, uint atom)
+        public TtMeshPrimitives(string name, uint atom)
         {
             mCoreObject = NxRHI.FMeshPrimitives.CreateInstance();
-            mCoreObject.Init(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, name, atom);
+            mCoreObject.Init(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, name, atom);
         }
-        public UMeshPrimitives(NxRHI.FMeshPrimitives iMeshPrimitives)
+        public TtMeshPrimitives(NxRHI.FMeshPrimitives iMeshPrimitives)
         {
             mCoreObject = iMeshPrimitives;
             System.Diagnostics.Debug.Assert(mCoreObject.IsValidPointer);
         }
         public bool Init(string name, uint atom)
         {
-            return mCoreObject.Init(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, name, atom);
+            return mCoreObject.Init(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, name, atom);
         }
         public void SetTransientVertexBuffer(NxRHI.TtTransientBuffer buffer)
         {
@@ -122,18 +122,18 @@ namespace EngineNS.Graphics.Mesh
         }
         public IO.IAssetMeta CreateAMeta()
         {
-            var result = new UMeshPrimitivesAMeta();
+            var result = new TtMeshPrimitivesAMeta();
             return result;
         }
         public IO.IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
             ameta.RefAssetRNames.Clear();
 
-            var meshMeta = ameta as UMeshPrimitivesAMeta;
+            var meshMeta = ameta as TtMeshPrimitivesAMeta;
             if (meshMeta != null && meshMeta.IsClustered)
             {
                 ameta.RefAssetRNames.Add(RName.GetRName(AssetName.Name + ".clustermesh", AssetName.RNameType));
@@ -145,10 +145,10 @@ namespace EngineNS.Graphics.Mesh
             if (ameta != null)
             {
                 UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta();
+                ameta.SaveAMeta(this);
             }
             //这里需要存盘的情况很少，正常来说vms是fbx导入的时候生成的，不是保存出来的
-            var rc = UEngine.Instance?.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance?.GfxDevice.RenderContext;
             var xnd = new IO.TtXndHolder("UMeshPrimitives", 0, 0);
             unsafe
             {
@@ -175,13 +175,13 @@ namespace EngineNS.Graphics.Mesh
             get;
             set;
         }
-        public unsafe static UMeshPrimitives LoadXnd(UMeshPrimitiveManager manager, IO.TtXndHolder xnd)
+        public unsafe static TtMeshPrimitives LoadXnd(UMeshPrimitiveManager manager, IO.TtXndHolder xnd)
         {
-            var result = new UMeshPrimitives();
+            var result = new TtMeshPrimitives();
             
             try
             {
-                var ret = result.mCoreObject.LoadXnd(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, "", xnd.mCoreObject, true);
+                var ret = result.mCoreObject.LoadXnd(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, "", xnd.mCoreObject, true);
                 if (ret == false)
                     return null;
                 var attr = xnd.RootNode.mCoreObject.TryGetAttribute("PartialSkeleton");
@@ -221,7 +221,7 @@ namespace EngineNS.Graphics.Mesh
 
             if (mMeshDataProvider == null)
             {
-                var result = await UEngine.Instance.EventPoster.Post((state) =>
+                var result = await TtEngine.Instance.EventPoster.Post((state) =>
                 {
                     using (var xnd = IO.TtXndHolder.LoadXnd(AssetName.Address))
                     {
@@ -272,8 +272,8 @@ namespace EngineNS.Graphics.Mesh
             //}
             Meshes.Clear();
         }
-        UMeshPrimitives mUnitSphere;
-        public UMeshPrimitives UnitSphere
+        TtMeshPrimitives mUnitSphere;
+        public TtMeshPrimitives UnitSphere
         {
             get
             {
@@ -284,8 +284,8 @@ namespace EngineNS.Graphics.Mesh
                 return mUnitSphere;
             }
         }
-        UMeshPrimitives mUnitBox;
-        public UMeshPrimitives UnitBox
+        TtMeshPrimitives mUnitBox;
+        public TtMeshPrimitives UnitBox
         {
             get
             {
@@ -296,20 +296,20 @@ namespace EngineNS.Graphics.Mesh
                 return mUnitBox;
             }
         }
-        public Dictionary<RName, UMeshPrimitives> Meshes { get; } = new Dictionary<RName, UMeshPrimitives>();
+        public Dictionary<RName, TtMeshPrimitives> Meshes { get; } = new Dictionary<RName, TtMeshPrimitives>();
         public async System.Threading.Tasks.Task Initialize()
         {
             var t = GetMeshPrimitive(RName.GetRName("axis/movex.vms", RName.ERNameType.Engine));
             await t;
         }
-        public UMeshPrimitives FindMeshPrimitive(RName name)
+        public TtMeshPrimitives FindMeshPrimitive(RName name)
         {
-            UMeshPrimitives result;
+            TtMeshPrimitives result;
             if (Meshes.TryGetValue(name, out result))
                 return result;
             return null;
         }
-        internal UMeshPrimitives UnsafeRemove(RName name)
+        internal TtMeshPrimitives UnsafeRemove(RName name)
         {
             lock (Meshes)
             {
@@ -320,7 +320,7 @@ namespace EngineNS.Graphics.Mesh
                 return null;
             }
         }
-        internal void UnsafeAdd(RName name, UMeshPrimitives obj)
+        internal void UnsafeAdd(RName name, TtMeshPrimitives obj)
         {
             lock (Meshes)
             {
@@ -328,11 +328,11 @@ namespace EngineNS.Graphics.Mesh
             }
         }
         //public async System.Threading.Tasks.Task<UMeshPrimitives> GetMeshPrimitive(RName name)
-        public async Thread.Async.TtTask<UMeshPrimitives> GetMeshPrimitive(RName name)
+        public async Thread.Async.TtTask<TtMeshPrimitives> GetMeshPrimitive(RName name)
         {
             if (name == null)
                 return null;
-            UMeshPrimitives result;
+            TtMeshPrimitives result;
             if (Meshes.TryGetValue(name, out result))
                 return result;
 
@@ -346,16 +346,16 @@ namespace EngineNS.Graphics.Mesh
 
             return null;
         }
-        public async Thread.Async.TtTask<UMeshPrimitives> CreateMeshPrimitive(RName name)
+        public async Thread.Async.TtTask<TtMeshPrimitives> CreateMeshPrimitive(RName name)
         {
-            UMeshPrimitives result;
-            result = await UEngine.Instance.EventPoster.Post((state) =>
+            TtMeshPrimitives result;
+            result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
                 {
                     if (xnd != null)
                     {
-                        var mesh = UMeshPrimitives.LoadXnd(this, xnd);
+                        var mesh = TtMeshPrimitives.LoadXnd(this, xnd);
                         if (mesh == null)
                             return null;
 
@@ -378,7 +378,7 @@ namespace EngineNS.Graphics.Mesh
         }
         public void UnsafeRenameForCook(RName name, RName newName)
         {
-            UMeshPrimitives result;
+            TtMeshPrimitives result;
             if (Meshes.TryGetValue(name, out result) == false)
                 return;
 

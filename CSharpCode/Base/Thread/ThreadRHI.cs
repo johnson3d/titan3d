@@ -20,7 +20,7 @@ namespace EngineNS.Thread
                 this.TickAwaitEvent();
                 ScopeTickAwaitEvent.End();
 
-                UEngine.Instance.TryTickRender();
+                TtEngine.Instance.TryTickRender();
             }
             TickStage = 0;
         }

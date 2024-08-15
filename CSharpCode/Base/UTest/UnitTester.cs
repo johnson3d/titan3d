@@ -4,6 +4,14 @@ using System.Text;
 
 namespace EngineNS.UTest
 {
+    public class TtTestCategory : Profiler.TtLogCategory
+    {
+        public override string ToString()
+        {
+            return "TtTest";
+        }
+    }
+
     public class UTestAttribute : Attribute
     {
         public bool Enable = true;
@@ -14,7 +22,7 @@ namespace EngineNS.UTest
             [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
             [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
         {
-            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "UTest", $"Info:{sourceFilePath}:{sourceLineNumber}->{memberName}->{message}");
+            Profiler.Log.WriteLine<TtTestCategory>(Profiler.ELogTag.Info, $"Info:{sourceFilePath}:{sourceLineNumber}->{memberName}->{message}");
         }
         public static void TAssert(bool condi, string message, [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
             [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
@@ -22,7 +30,7 @@ namespace EngineNS.UTest
         {
             if (condi == false)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "UTest", $"Assert:{sourceFilePath}:{sourceLineNumber}->{memberName}->{message}");
+                Profiler.Log.WriteLine<TtTestCategory>(Profiler.ELogTag.Error, $"Assert:{sourceFilePath}:{sourceLineNumber}->{memberName}->{message}");
                 System.Diagnostics.Debug.Assert(false);
             }
         }

@@ -45,7 +45,7 @@ namespace EngineNS.Bricks.NodeGraph
             //UpdatePinMenus();
         }
         public virtual void SetDefaultActionForNode(UNodeBase node) { }
-        public virtual UGraphRenderer GetGraphRenderer() 
+        public virtual TtGraphRenderer GetGraphRenderer() 
         {
             throw new MissingMethodException("Need override this method");
         }
@@ -868,11 +868,11 @@ namespace EngineNS.Bricks.NodeGraph
             switch(key)
             {
                 case EKey.Ctl:
-                    return UEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_LCTRL) || UEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_RCTRL);
+                    return TtEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_LCTRL) || TtEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_RCTRL);
                 case EKey.Shift:
-                    return UEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_LSHIFT) || UEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_RSHIFT);
+                    return TtEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_LSHIFT) || TtEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_RSHIFT);
                 case EKey.Alt:
-                    return UEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_LALT) || UEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_RALT);
+                    return TtEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_LALT) || TtEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_RALT);
             }
 
             return false;
@@ -1226,7 +1226,7 @@ namespace EngineNS.Bricks.NodeGraph
                 return false;
             }
 
-            mShakeElapsedSecond += EngineNS.UEngine.Instance.ElapsedSecond;
+            mShakeElapsedSecond += EngineNS.TtEngine.Instance.ElapsedSecond;
             var dotVal = Vector2.Dot(dir, mLastDragDirection);
             if(dotVal < 0)
             {
@@ -1441,7 +1441,7 @@ namespace EngineNS.Bricks.NodeGraph
 
                 // move viewport when drag to edge
                 float edgeDelta = 20;
-                float edgeMoveSpeed = 500 * UEngine.Instance.ElapsedSecond;
+                float edgeMoveSpeed = 500 * TtEngine.Instance.ElapsedSecond;
                 var delta = DragPosition - PositionVP;
                 if (delta.X <= edgeDelta)
                     PositionVP.X -= edgeMoveSpeed;
@@ -1573,7 +1573,7 @@ namespace EngineNS.Bricks.NodeGraph
         #endregion
 
         #region override
-        public virtual void OnDrawAfter(Bricks.NodeGraph.UGraphRenderer renderer, UNodeGraphStyles styles, ImDrawList cmdlist)
+        public virtual void OnDrawAfter(Bricks.NodeGraph.TtGraphRenderer renderer, UNodeGraphStyles styles, ImDrawList cmdlist)
         {
 
         }

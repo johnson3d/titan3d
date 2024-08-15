@@ -21,7 +21,7 @@ namespace EngineNS.Editor.Forms
         {
             WorldViewportState = viewport;
             if (regRoot)
-                UEngine.RootFormManager.RegRootForm(this);
+                TtEngine.RootFormManager.RegRootForm(this);
 
             UpdateAddNodeMenu();
         }
@@ -303,7 +303,7 @@ namespace EngineNS.Editor.Forms
         public List<GamePlay.Scene.UNode> SelectedNodes = new List<GamePlay.Scene.UNode>();
         public override void OnNodeUI_LClick(INodeUIProvider provider)
         {
-            //var ctrlKeyDown = UEngine.Instance.InputSystem.IsCtrlKeyDown();
+            //var ctrlKeyDown = TtEngine.Instance.InputSystem.IsCtrlKeyDown();
             //if (ctrlKeyDown)
             //{
 
@@ -320,7 +320,7 @@ namespace EngineNS.Editor.Forms
             //    WorldViewportState.OnHitproxySelected((GamePlay.Scene.UNode)provider);
             //}
 
-            //var appliction = UEngine.Instance.GfxDevice.MainWindow as EngineNS.Editor.UMainEditorApplication;
+            //var appliction = TtEngine.Instance.GfxDevice.MainWindow as EngineNS.Editor.UMainEditorApplication;
             //if (appliction == null)
             //    return;
             //appliction.mMainInspector.PropertyGrid.Target = provider;

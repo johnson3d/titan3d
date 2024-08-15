@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Graphics.Pipeline.Shader.UMaterialInstanceAMeta@EngineCore">
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="25a300fe-b7e8-43b7-beb8-533281a2e5bc" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterialInstance&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
@@ -18,5 +18,5 @@
     <e_4 Value="Game,fbxresources/pivotpainter/ht_p2_xvec_xexdiv2048r2048_uv_2.srv,66ecf7d0-b1ea-46bd-8619-46518307c225" />
     <e_5 Value="Game,fbxresources/pivotpainter/windturblencevectorandgustmagnitude.srv,c941dc73-76ac-493d-9e51-f493f7dc57ba" />
   </RefAssetRNames>
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterialInstance@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
 </Root>

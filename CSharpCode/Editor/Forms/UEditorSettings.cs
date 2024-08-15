@@ -8,7 +8,7 @@ namespace EngineNS.Editor.Forms
     {
         public UEditorSettings()
         {
-            UEngine.RootFormManager.RegRootForm(this);
+            TtEngine.RootFormManager.RegRootForm(this);
         }
         public async Thread.Async.TtTask<bool> Initialize()
         {
@@ -18,15 +18,15 @@ namespace EngineNS.Editor.Forms
             return true;
         }
         
-        public UEngineConfig Config
+        public TtEngineConfig Config
         {
             get
             {
-                return UEngine.Instance.Config;
+                return TtEngine.Instance.Config;
             }
             set
             {
-                UEngine.Instance.Config = value;
+                TtEngine.Instance.Config = value;
             }
         }
         public void Dispose() { }
@@ -48,14 +48,14 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
 
             Vector2 size = Vector2.Zero;
-            var fileDlg = UEngine.Instance.EditorInstance.FileDialog.mFileDialog;
+            var fileDlg = TtEngine.Instance.EditorInstance.FileDialog.mFileDialog;
             var result = EGui.UIProxy.DockProxy.BeginMainForm("EditorSettings", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (result)
             {
                 DockId = ImGuiAPI.GetWindowDockID();
                 if (ImGuiAPI.Button("Save"))
                 {
-                    fileDlg.OpenModal("ChooseConfigKey", "Choose Config", ".cfg", UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game));
+                    fileDlg.OpenModal("ChooseConfigKey", "Choose Config", ".cfg", TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game));
                 }
                 SettingsPropGrid.OnDraw(true, false, false);
             }

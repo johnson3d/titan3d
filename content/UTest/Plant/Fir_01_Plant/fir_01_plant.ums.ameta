@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Graphics.Mesh.UMaterialMeshAMeta@EngineCore">
+<Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="04431abc-430f-45e2-8f6b-cfe2fe8407a5" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMaterialMesh&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
@@ -21,5 +21,5 @@
     <e_1 Value="Game,utest/plant/fir_01_plant/leaf.uminst,ceaf5c79-bbab-47ac-a137-6632405489b6" />
     <e_2 Value="Game,utest/plant/fir_01_plant/branch.uminst,243cedad-54d9-4bd2-a82f-7e7a62654d08" />
   </RefAssetRNames>
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.UMaterialMesh@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
 </Root>

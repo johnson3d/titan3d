@@ -59,8 +59,8 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     var desc = new NxRHI.FGpuPipelineDesc();
                     desc.SetDefault();
-                    mDefaultState = UEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(
-                        UEngine.Instance.GfxDevice.RenderContext, in desc);
+                    mDefaultState = TtEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(
+                        TtEngine.Instance.GfxDevice.RenderContext, in desc);
                 }
                 return mDefaultState;
             }
@@ -94,8 +94,8 @@ namespace EngineNS.Graphics.Pipeline
                     desc.MipLODBias = 0;
                     desc.MinLOD = 0;
                     desc.MaxLOD = 3.402823466e+38f;
-                    mDefaultState = UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(
-                        UEngine.Instance.GfxDevice.RenderContext, in desc);
+                    mDefaultState = TtEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(
+                        TtEngine.Instance.GfxDevice.RenderContext, in desc);
                 }
                 return mDefaultState;
             }
@@ -118,8 +118,8 @@ namespace EngineNS.Graphics.Pipeline
                     desc.MipLODBias = 0;
                     desc.MinLOD = 0;
                     desc.MaxLOD = 3.402823466e+38f;
-                    mLinearClampState = UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(
-                        UEngine.Instance.GfxDevice.RenderContext, in desc);
+                    mLinearClampState = TtEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(
+                        TtEngine.Instance.GfxDevice.RenderContext, in desc);
                 }
                 return mLinearClampState;
             }
@@ -142,8 +142,8 @@ namespace EngineNS.Graphics.Pipeline
                     desc.MipLODBias = 0;
                     desc.MinLOD = 0;
                     desc.MaxLOD = 3.402823466e+38f;
-                    mPointState = UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(
-                        UEngine.Instance.GfxDevice.RenderContext, in desc);
+                    mPointState = TtEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(
+                        TtEngine.Instance.GfxDevice.RenderContext, in desc);
                 }
                 return mPointState;
             }
@@ -160,7 +160,7 @@ namespace EngineNS.Graphics.Pipeline
     public class URenderPassManager : UStateManager<NxRHI.URenderPass>
     {
         //public NxRHI.URenderPass DefaultRenderPass { get; private set; }
-        public void Initialize(UEngine engine)
+        public void Initialize(TtEngine engine)
         {
             //var desc = new NxRHI.FRenderPassDesc();
             //desc.SetDefault();

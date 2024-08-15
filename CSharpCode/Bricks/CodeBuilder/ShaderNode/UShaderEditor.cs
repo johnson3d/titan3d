@@ -97,7 +97,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
         bool IsStarting = false;
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -105,7 +105,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             (viewport as Editor.TtPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
-            var materials = new Graphics.Pipeline.Shader.UMaterial[1];
+            var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = Material;
             if (materials[0] == null)
                 return;
@@ -147,9 +147,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             MaterialGraph.ShaderEditor = this;
             MaterialGraph.ResetGraph();
             IsStarting = true;
-            Material = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(name);
+            Material = await TtEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(name);
             Material.IsEditingMaterial = true;
-            //Material = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(name);
+            //Material = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(name);
             if (Material == null)
             {
                 IsStarting = false;
@@ -189,7 +189,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"MaterialPreview:{AssetName}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterial;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
+            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
             
             await PreviewPropGrid.Initialize();
             PreviewPropGrid.PGName = $"PGMaterialPreview:{AssetName}";
@@ -197,13 +197,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             GraphRenderer.SetGraph(MaterialGraph);
 
-            UEngine.Instance.TickableManager.AddTickable(this);
+            TtEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
         public void OnCloseEditor()
         {
-            UEngine.Instance.GfxDevice.EffectManager.RemoveEditingMaterial(AssetName);
-            UEngine.Instance.TickableManager.RemoveTickable(this);
+            TtEngine.Instance.GfxDevice.EffectManager.RemoveEditingMaterial(AssetName);
+            TtEngine.Instance.TickableManager.RemoveTickable(this);
             Dispose();
         }
         public void OnEvent(in Bricks.Input.Event e)
@@ -212,13 +212,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         }
         #endregion
         public RName AssetName { get; set; }
-        public Graphics.Pipeline.Shader.UMaterial Material;
+        public Graphics.Pipeline.Shader.TtMaterial Material;
         public float LeftWidth = 0;
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
         [Rtti.Meta]
         public UMaterialGraph MaterialGraph { get; } = new UMaterialGraph();
-        public Bricks.NodeGraph.UGraphRenderer GraphRenderer = new NodeGraph.UGraphRenderer();
+        public Bricks.NodeGraph.TtGraphRenderer GraphRenderer = new NodeGraph.TtGraphRenderer();
         [Rtti.Meta(Order = 1)]
         public Guid OutputNodeId
         {
@@ -258,7 +258,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -438,9 +438,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             Material.SaveAssetTo(Material.AssetName);
             //Material.SerialId++;
 
-            //Editor.USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+            //Editor.USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
 
-            if (await UEngine.Instance.GfxDevice.MaterialManager.ReloadMaterial(Material.AssetName))
+            if (await TtEngine.Instance.GfxDevice.MaterialManager.ReloadMaterial(Material.AssetName))
             {
                 
             }
@@ -498,7 +498,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             Material.VSNeedStreams = MaterialOutput.GetVSNeedStreams();
             Material.PSNeedInputs = MaterialOutput.GetPSNeedInputs();
 
-            if (Material.NormalMode == Graphics.Pipeline.Shader.UMaterial.ENormalMode.NormalMap)
+            if (Material.NormalMode == Graphics.Pipeline.Shader.TtMaterial.ENormalMode.NormalMap)
             {
                 if (Material.VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Normal) == false)
                     Material.VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Normal);
@@ -510,7 +510,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 if (Material.PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent) == false)
                     Material.PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent);
             }
-            else if (Material.NormalMode == Graphics.Pipeline.Shader.UMaterial.ENormalMode.Normal)
+            else if (Material.NormalMode == Graphics.Pipeline.Shader.TtMaterial.ENormalMode.Normal)
             {
                 if (Material.VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Normal) == false)
                     Material.VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Normal);
@@ -592,7 +592,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 namespace EngineNS.Graphics.Pipeline.Shader
 {
     [Editor.UAssetEditor(EditorType = typeof(Bricks.CodeBuilder.ShaderNode.UShaderEditor))]
-    public partial class UMaterial
+    public partial class TtMaterial
     {
     }
 }

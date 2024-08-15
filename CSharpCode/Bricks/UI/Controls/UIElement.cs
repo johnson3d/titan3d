@@ -541,7 +541,7 @@ namespace EngineNS.UI.Controls
                 if(this != RootUIHost)
                     data.IntersectPos.Y = RootUIHost.DesignRect.Height - data.IntersectPos.Y;
                 data.Distance = distance;
-                //UEngine.Instance.UIManager.DebugHitPt = data.IntersectPos;
+                //TtEngine.Instance.UIManager.DebugHitPt = data.IntersectPos;
                 return true;
             }
             else if (Ray.Intersects(in ray, v3, v2, v1, out distance, out barycentricU, out barycentricV))
@@ -553,7 +553,7 @@ namespace EngineNS.UI.Controls
                 if(this != RootUIHost)
                     data.IntersectPos.Y = RootUIHost.DesignRect.Height - data.IntersectPos.Y;
                 data.Distance = distance;
-                //UEngine.Instance.UIManager.DebugHitPt = data.IntersectPos;
+                //TtEngine.Instance.UIManager.DebugHitPt = data.IntersectPos;
                 return true;
             }
             return false;
@@ -636,7 +636,7 @@ namespace EngineNS.UI.Controls
                             throw new EngineNS.IO.IOException($"Read attacked property: property type {proType} is missing");
                         }
                         var valObj = EngineNS.IO.SerializerHelper.ReadObject(ar, type, host);
-                        var pro = EngineNS.UEngine.Instance.UIBindManager.FindBindableProperty(proName, hostType);
+                        var pro = EngineNS.TtEngine.Instance.UIBindManager.FindBindableProperty(proName, hostType);
                         if (pro == null)
                             continue;
                         element.mLoadedAttachedValues[pro] = valObj;

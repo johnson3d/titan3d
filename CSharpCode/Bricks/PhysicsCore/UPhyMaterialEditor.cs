@@ -38,7 +38,7 @@ namespace EngineNS.Bricks.PhysicsCore
         public async Thread.Async.TtTask<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            Material = await UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.CreateMaterial(name);
+            Material = await TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.CreateMaterial(name);
             if (Material == null)
                 return false;
 
@@ -88,7 +88,7 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -108,12 +108,12 @@ namespace EngineNS.Bricks.PhysicsCore
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
                 Material.SaveAssetTo(Material.AssetName);
-                var unused = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.ReloadMaterial(Material.AssetName);
+                var unused = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.ReloadMaterial(Material.AssetName);
             }
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Reload", in btSize))
             {
-                var unused = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.ReloadMaterial(Material.AssetName);
+                var unused = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.ReloadMaterial(Material.AssetName);
             }
         }
         bool mLeftShow = true;

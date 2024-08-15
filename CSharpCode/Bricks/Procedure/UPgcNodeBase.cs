@@ -47,9 +47,9 @@ namespace EngineNS.Bricks.Procedure
             var vms = Graphics.Mesh.UMeshDataProvider.MakeRect2D(0, 0, 100, 100, 0).ToMesh();
             var mesh = new Graphics.Mesh.TtMesh();
 
-            var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
-            materials1[0] = Graphics.Pipeline.Shader.UMaterialInstance.CreateMaterialInstance(
-                await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/SysDft.material", RName.ERNameType.Engine))
+            var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
+            materials1[0] = Graphics.Pipeline.Shader.TtMaterialInstance.CreateMaterialInstance(
+                await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/SysDft.material", RName.ERNameType.Engine))
                 );
             var state = materials1[0].Rasterizer;
             state.CullMode = NxRHI.ECullMode.CMD_NONE;
@@ -231,7 +231,7 @@ namespace EngineNS.Bricks.Procedure
             var hash = GetOutBufferHash(pin);
             if (hash == Hash160.Emtpy)
                 return;
-            var rootDir = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "pgcbuffer/";
+            var rootDir = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "pgcbuffer/";
             var dir = IO.TtFileManager.CombinePath(rootDir, graph.AssetName.Name);
             IO.TtFileManager.SureDirectory(dir);
             buffer.SaveToCache($"{dir}/{this.Name}_{NodeId}_{pin.Name}.bfpgc", in hash);
@@ -243,7 +243,7 @@ namespace EngineNS.Bricks.Procedure
             var buffer = graph.BufferCache.FindBuffer(pin);
             if (buffer == null)
                 return;
-            var rootDir = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "pgcbuffer/";
+            var rootDir = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "pgcbuffer/";
             var dir = IO.TtFileManager.CombinePath(rootDir, graph.AssetName.Name);
             IO.TtFileManager.SureDirectory(dir);
             buffer.SaveToCache($"{dir}/{this.Name}_{NodeId}_{pin.Name}.bfpgc", in hash);
@@ -256,7 +256,7 @@ namespace EngineNS.Bricks.Procedure
             if (buffer == null)
                 return false;
             var hash = GetOutBufferHash(pin);
-            var rootDir = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "pgcbuffer/";
+            var rootDir = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "pgcbuffer/";
             var dir = IO.TtFileManager.CombinePath(rootDir, graph.AssetName.Name);
 
             return buffer.LoadFromCache($"{dir}/{this.Name}_{NodeId}_{pin.Name}.bfpgc", in hash);
@@ -268,7 +268,7 @@ namespace EngineNS.Bricks.Procedure
             var buffer = graph.BufferCache.FindBuffer(pin);
             if (buffer == null)
                 return false;
-            var rootDir = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "pgcbuffer/";
+            var rootDir = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "pgcbuffer/";
             var dir = IO.TtFileManager.CombinePath(rootDir, graph.AssetName.Name);
 
             return buffer.LoadFromCache($"{dir}/{this.Name}_{NodeId}_{pin.Name}.bfpgc", in hash);
@@ -377,7 +377,7 @@ namespace EngineNS.Bricks.Procedure
             }
             else
             {
-                //UEngine.Instance.EventPoster.ParrallelFor(result.Depth * result.Height * result.Width, (index, arg0, arg1) =>
+                //TtEngine.Instance.EventPoster.ParrallelFor(result.Depth * result.Height * result.Width, (index, arg0, arg1) =>
                 //{
                 //    var pThis = arg1 as UBufferConponent;
                 //    pThis.OnPerPixel(graph, this, result, x, y, z, tag);
@@ -394,7 +394,7 @@ namespace EngineNS.Bricks.Procedure
                                 int x = k;
                                 int y = j;
                                 int z = i;
-                                UEngine.Instance.EventPoster.RunOn((state) =>
+                                TtEngine.Instance.EventPoster.RunOn((state) =>
                                 {
                                     OnPerPixel(graph, this, result, x, y, z, tag);
                                     smp.Release();
@@ -412,7 +412,7 @@ namespace EngineNS.Bricks.Procedure
                         {
                             int y = j;
                             int z = i;
-                            UEngine.Instance.EventPoster.RunOn((state) =>
+                            TtEngine.Instance.EventPoster.RunOn((state) =>
                             {
                                 for (int k = 0; k < result.Width; k++)
                                 {
@@ -429,7 +429,7 @@ namespace EngineNS.Bricks.Procedure
                     for (int i = 0; i < result.Depth; i++)
                     {
                         int z = i;
-                        UEngine.Instance.EventPoster.RunOn((state) =>
+                        TtEngine.Instance.EventPoster.RunOn((state) =>
                         {
                             for (int j = 0; j < result.Height; j++)
                             {

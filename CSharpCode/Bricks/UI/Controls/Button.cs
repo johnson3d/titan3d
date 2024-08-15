@@ -64,8 +64,8 @@ namespace EngineNS.UI.Controls
             if (ClickType != EClickType.Hover)
             {
                 eventArgs.Handled = true;
-                UEngine.Instance.UIManager.KeyboardFocus(eventArgs, this);
-                UEngine.Instance.UIManager.CaptureMouse(eventArgs, this);
+                TtEngine.Instance.UIManager.KeyboardFocus(eventArgs, this);
+                TtEngine.Instance.UIManager.CaptureMouse(eventArgs, this);
                 if (!IsPressed)
                     IsPressed = true;
 
@@ -78,7 +78,7 @@ namespace EngineNS.UI.Controls
                     catch (Exception)
                     {
                         IsPressed = false;
-                        UEngine.Instance.UIManager.CaptureMouse(eventArgs, null);
+                        TtEngine.Instance.UIManager.CaptureMouse(eventArgs, null);
                     }
                 }
             }
@@ -92,7 +92,7 @@ namespace EngineNS.UI.Controls
                 if (shouldClick)
                     OnClick(eventArgs);
                 if (IsMouseCaptured)
-                    UEngine.Instance.UIManager.CaptureMouse(eventArgs, null);
+                    TtEngine.Instance.UIManager.CaptureMouse(eventArgs, null);
             }
         }
 
@@ -104,7 +104,7 @@ namespace EngineNS.UI.Controls
         }
         protected virtual void OnClick(TtRoutedEventArgs args)
         {
-            var arg = UEngine.Instance.UIManager.QueryEventSync();
+            var arg = TtEngine.Instance.UIManager.QueryEventSync();
             //arg.Host = this.RootUIHost;
             arg.RoutedEvent = ClickEvent;
             arg.Source = this;
@@ -113,7 +113,7 @@ namespace EngineNS.UI.Controls
                 arg.InputEventPtr = args.InputEventPtr;
             }
             RaiseEvent(arg);
-            UEngine.Instance.UIManager.ReleaseEventSync(arg);
+            TtEngine.Instance.UIManager.ReleaseEventSync(arg);
         }
 
         bool HandleIsMouseOverChanged(TtRoutedEventArgs args)
@@ -153,7 +153,7 @@ namespace EngineNS.UI.Controls
         {
             if((ClickType != EClickType.Hover) && 
                 IsMouseCaptured && 
-                UEngine.Instance.InputSystem.Mouse.IsMouseButtonDown(Bricks.Input.EMouseButton.BUTTON_LEFT) && 
+                TtEngine.Instance.InputSystem.Mouse.IsMouseButtonDown(Bricks.Input.EMouseButton.BUTTON_LEFT) && 
                 !IsSpaceKeyDown)
             {
                 UpdateIsPressed();
@@ -168,14 +168,14 @@ namespace EngineNS.UI.Controls
                 return;
             if (eventArgs.InputEventPtr->Keyboard.Keysym.Sym == Bricks.Input.Keycode.KEY_SPACE)
             {
-                if (!UEngine.Instance.InputSystem.IsKeyDown(Bricks.Input.Keycode.KEY_LALT) &&
-                   !UEngine.Instance.InputSystem.IsKeyDown(Bricks.Input.Keycode.KEY_RALT))
+                if (!TtEngine.Instance.InputSystem.IsKeyDown(Bricks.Input.Keycode.KEY_LALT) &&
+                   !TtEngine.Instance.InputSystem.IsKeyDown(Bricks.Input.Keycode.KEY_RALT))
                 {
                     if (!IsMouseCaptured && (eventArgs.Source == this))
                     {
                         IsSpaceKeyDown = true;
                         IsPressed = true;
-                        UEngine.Instance.UIManager.CaptureMouse(eventArgs, this);
+                        TtEngine.Instance.UIManager.CaptureMouse(eventArgs, this);
 
                         if (ClickType == EClickType.Press)
                             OnClick(eventArgs);
@@ -190,7 +190,7 @@ namespace EngineNS.UI.Controls
                 {
                     IsSpaceKeyDown = false;
                     IsPressed = false;
-                    UEngine.Instance.UIManager.CaptureMouse(eventArgs, null);
+                    TtEngine.Instance.UIManager.CaptureMouse(eventArgs, null);
 
                     OnClick(eventArgs);
                     eventArgs.Handled = true;
@@ -203,7 +203,7 @@ namespace EngineNS.UI.Controls
                     IsPressed = false;
                     IsSpaceKeyDown = false;
                     if (IsMouseCaptured)
-                        UEngine.Instance.UIManager.CaptureMouse(eventArgs, null);
+                        TtEngine.Instance.UIManager.CaptureMouse(eventArgs, null);
                 }
             }
         }
@@ -215,15 +215,15 @@ namespace EngineNS.UI.Controls
                 return;
             if(eventArgs.InputEventPtr->Keyboard.Keysym.Sym == Bricks.Input.Keycode.KEY_SPACE && IsSpaceKeyDown)
             {
-                if (!UEngine.Instance.InputSystem.IsKeyDown(Bricks.Input.Keycode.KEY_LALT) &&
-                    !UEngine.Instance.InputSystem.IsKeyDown(Bricks.Input.Keycode.KEY_RALT))
+                if (!TtEngine.Instance.InputSystem.IsKeyDown(Bricks.Input.Keycode.KEY_LALT) &&
+                    !TtEngine.Instance.InputSystem.IsKeyDown(Bricks.Input.Keycode.KEY_RALT))
                 {
                     IsSpaceKeyDown = false;
-                    if(UEngine.Instance.InputSystem.Mouse.IsMouseButtonUp(Bricks.Input.EMouseButton.BUTTON_LEFT))
+                    if(TtEngine.Instance.InputSystem.Mouse.IsMouseButtonUp(Bricks.Input.EMouseButton.BUTTON_LEFT))
                     {
                         var shouldClick = IsPressed && (ClickType == EClickType.Release);
                         if (IsMouseCaptured)
-                            UEngine.Instance.UIManager.CaptureMouse(eventArgs, null);
+                            TtEngine.Instance.UIManager.CaptureMouse(eventArgs, null);
                         if (shouldClick)
                             OnClick(eventArgs);
                     }
@@ -259,7 +259,7 @@ namespace EngineNS.UI.Controls
                     IsPressed = false;
 
                 if (IsMouseCaptured)
-                    UEngine.Instance.UIManager.CaptureMouse(args, null);
+                    TtEngine.Instance.UIManager.CaptureMouse(args, null);
 
                 IsSpaceKeyDown = false;
             }
@@ -270,7 +270,7 @@ namespace EngineNS.UI.Controls
             if((args.Source == this) && (ClickType != EClickType.Hover) && !IsSpaceKeyDown)
             {
                 if (IsKeyboardFocused)
-                    UEngine.Instance.UIManager.KeyboardFocus(args, null);
+                    TtEngine.Instance.UIManager.KeyboardFocus(args, null);
 
                 IsPressed = false;
             }
@@ -282,10 +282,10 @@ namespace EngineNS.UI.Controls
     {
         public TtButton()
         {
-            Template = UEngine.Instance.UIManager.GetDefaultTemplate(UTypeDesc.TypeOf(typeof(TtButton)));
+            Template = TtEngine.Instance.UIManager.GetDefaultTemplate(UTypeDesc.TypeOf(typeof(TtButton)));
             Template.Seal();
 
-            //UEngine.Instance.UIManager.RegisterTickElement(this);
+            //TtEngine.Instance.UIManager.RegisterTickElement(this);
         }
 
         static TtButton()

@@ -10,12 +10,12 @@ namespace EngineNS.Graphics.Pipeline
         public TtViewportSlate()
         {
             World = new GamePlay.UWorld(this);
-            UEngine.Instance.ViewportSlateManager.AddViewport(this);
+            TtEngine.Instance.ViewportSlateManager.AddViewport(this);
         }
         ~TtViewportSlate()
         {
             PresentWindow?.UnregEventProcessor(this);
-            UEngine.Instance?.ViewportSlateManager.RemoveViewport(this);
+            TtEngine.Instance?.ViewportSlateManager.RemoveViewport(this);
             Dispose();
         }
         public virtual void Dispose()
@@ -58,7 +58,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true, UserDraw = false)]
-        public Graphics.Pipeline.URenderPolicy RenderPolicy { get; set; }
+        public Graphics.Pipeline.TtRenderPolicy RenderPolicy { get; set; }
         public Vector2 Window2Viewport(Vector2 pos)
         {//pos为真实窗口的坐标，返回ViewportSlate坐标
             Vector2 tmp;
@@ -306,7 +306,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public void ProcessHitproxySelected(float mouseX, float mouseY)
         {
-            var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.URenderPolicy;
+            var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.TtRenderPolicy;
             if (edtorPolicy != null)
             {
                 var pos = Window2Viewport(new Vector2(mouseX, mouseY));
@@ -340,7 +340,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
         {
-            var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.URenderPolicy;
+            var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.TtRenderPolicy;
             if (edtorPolicy != null)
             {
                 if (proxy == null)
@@ -356,7 +356,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual void OnHitproxySelectedMulti(bool clearPre, params Graphics.Pipeline.IProxiable[] proxies)
         {
-            var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.URenderPolicy;
+            var edtorPolicy = this.RenderPolicy as Graphics.Pipeline.TtRenderPolicy;
             if (edtorPolicy != null)
             {
                 if (proxies == null || proxies.Length == 0)
@@ -376,7 +376,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual void OnHitproxyUnSelectedMulti(params Graphics.Pipeline.IProxiable[] proxies)
         {
-            var editorPolicy = this.RenderPolicy as Graphics.Pipeline.URenderPolicy;
+            var editorPolicy = this.RenderPolicy as Graphics.Pipeline.TtRenderPolicy;
             if(editorPolicy != null)
             {
                 for(int i=0; i<proxies.Length; i++)
@@ -387,12 +387,12 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
         }
-        public delegate System.Threading.Tasks.Task FOnInitialize(TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax);
+        public delegate System.Threading.Tasks.Task FOnInitialize(TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax);
         public FOnInitialize OnInitialize = null;
         [Rtti.Meta]
         public virtual async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
         {
-            var policy = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName).CreateRenderPolicy(this);
+            var policy = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(policyName).CreateRenderPolicy(this);
             if (OnInitialize != null)
             {
                 await OnInitialize(this, application, policy, zMin, zMax);
@@ -549,7 +549,7 @@ namespace EngineNS.Graphics.Pipeline
 
     public partial class TtOffscreenRenderer
     {
-        public Graphics.Pipeline.URenderPolicy RenderPolicy { get; set; }
+        public Graphics.Pipeline.TtRenderPolicy RenderPolicy { get; set; }
         public GamePlay.UWorld World { get; set; }
         public GamePlay.UWorld.UVisParameter VisParameter = new GamePlay.UWorld.UVisParameter();
         public void SetCameraOffset(in DVector3 offset)
@@ -559,7 +559,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual async System.Threading.Tasks.Task Initialize(RName policyName)
         {
-            RenderPolicy = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName).CreateRenderPolicy(null);
+            RenderPolicy = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(policyName).CreateRenderPolicy(null);
             await RenderPolicy.Initialize(null);
 
             World = new GamePlay.UWorld(null);
@@ -585,7 +585,7 @@ namespace EngineNS.Graphics.Pipeline
             RenderPolicy.TickLogic(World, null);
             RenderPolicy.EndTickLogic(World);
 
-            UEngine.Instance.GfxDevice.CbvUpdater.UpdateCBVs();
+            TtEngine.Instance.GfxDevice.CbvUpdater.UpdateCBVs();
             RenderPolicy.ExecuteCmdQueue();
         }
         public void TickSync()
@@ -597,7 +597,7 @@ namespace EngineNS.Graphics.Pipeline
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public Graphics.Pipeline.UViewportSlateManager ViewportSlateManager { get; } = new Graphics.Pipeline.UViewportSlateManager();
     }

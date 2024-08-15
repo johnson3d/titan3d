@@ -405,7 +405,7 @@ namespace EngineNS.DistanceField
                 }
                 if(bUseMultiThread == true)
                 {
-                    UEngine.Instance.EventPoster.ParrallelFor(sdfTaskList.Count, static (index, arg1, arg2) =>
+                    TtEngine.Instance.EventPoster.ParrallelFor(sdfTaskList.Count, static (index, arg1, arg2) =>
                     {
                         var pTaskList = arg1 as List<FSparseMeshDistanceFieldAsyncTask>;
                         var task = pTaskList[index];
@@ -470,7 +470,7 @@ namespace EngineNS.DistanceField
                 float memoryKB = OutData.GetAllocatedSize()/1024.0f;
                 var occupied = (int)Math.Round(100.0f * OutData.Mips[0].NumDistanceFieldBricks / (float)(Mip0IndirectionDimensions.X * Mip0IndirectionDimensions.Y * Mip0IndirectionDimensions.Z));
                    
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "SDF Generate", $"SDF Generate: Finished distance field build in {BuildTime:0.00} - " +
+                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, $"SDF Generate: Finished distance field build in {BuildTime:0.00} - " +
                     $"{Mip0IndirectionDimensions.X * sdfConfig.UniqueDataBrickSize}x{Mip0IndirectionDimensions.Y * sdfConfig.UniqueDataBrickSize}x{Mip0IndirectionDimensions.Z * sdfConfig.UniqueDataBrickSize} " +
                     $"sparse distance field, {memoryKB:0.0}Kb total, {occupied}% occupied, {embreeScene.NumIndices/3} triangles, {MeshName}");
             }

@@ -54,14 +54,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         //}
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
-            var material = data.UserData as UMaterial;
+            var material = data.UserData as TtMaterial;
             var varNode = this;
             if (varNode.IsUniform && (material.FindVar(Name) == null))
             {
                 var type = this.GetType();
                 var valueProp = type.GetProperty("Value");
                 var value = valueProp.GetValue(this, null);
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameValuePair();
+                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameValuePair();
                 tmp.VarType = data.CodeGen.GetTypeString(varNode.VarType);
                 tmp.Name = this.Name;
                 tmp.Value = value.ToString();

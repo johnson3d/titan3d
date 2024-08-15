@@ -32,32 +32,32 @@ namespace EngineNS
             var host = GetHost();
             foreach (var i in mModules)
             {
-                if (i.IsModuleRun(UEngine.Instance.PlayMode) == false)
+                if (i.IsModuleRun(TtEngine.Instance.PlayMode) == false)
                     continue;
 
                 var t1 = Support.Time.HighPrecision_GetTickCount();
                 if (false == await i.Initialize(host))
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Engine", $"Module {i.GetType()} init failed");
+                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Error, $"Module {i.GetType()} init failed");
                 }
                 var t2 = Support.Time.HighPrecision_GetTickCount();
 
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"InitializeModules {i.GetType().FullName}:{(t2 - t1) / 1000} ms");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"InitializeModules {i.GetType().FullName}:{(t2 - t1) / 1000} ms");
             }
 
             foreach (var i in mModules)
             {
-                if (i.IsModuleRun(UEngine.Instance.PlayMode) == false)
+                if (i.IsModuleRun(TtEngine.Instance.PlayMode) == false)
                     continue;
 
                 var t1 = Support.Time.HighPrecision_GetTickCount();
                 if (false == await i.PostInitialize(host))
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Engine", $"Module {i.GetType()} PostInit failed");
+                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Error, $"Module {i.GetType()} PostInit failed");
                 }
                 var t2 = Support.Time.HighPrecision_GetTickCount();
 
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "System", $"PostInitializeModules {i.GetType().FullName}:{(t2 - t1) / 1000} ms");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"PostInitializeModules {i.GetType().FullName}:{(t2 - t1) / 1000} ms");
             }
         }
         protected void TickModules()
@@ -65,7 +65,7 @@ namespace EngineNS
             var host = GetHost();
             foreach (var i in mModules)
             {
-                if (i.IsModuleRun(UEngine.Instance.PlayMode) == false)
+                if (i.IsModuleRun(TtEngine.Instance.PlayMode) == false)
                     continue;
                 i.TickModule(host);
             }
@@ -75,7 +75,7 @@ namespace EngineNS
             var host = GetHost();
             foreach (var i in mModules)
             {
-                if (i.IsModuleRun(UEngine.Instance.PlayMode) == false)
+                if (i.IsModuleRun(TtEngine.Instance.PlayMode) == false)
                     continue;
                 i.TickLogic(host);
             }
@@ -85,7 +85,7 @@ namespace EngineNS
             var host = GetHost();
             foreach (var i in mModules)
             {
-                if (i.IsModuleRun(UEngine.Instance.PlayMode) == false)
+                if (i.IsModuleRun(TtEngine.Instance.PlayMode) == false)
                     continue;
                 i.TickRender(host);
             }
@@ -95,7 +95,7 @@ namespace EngineNS
             var host = GetHost();
             foreach (var i in mModules)
             {
-                if (i.IsModuleRun(UEngine.Instance.PlayMode) == false)
+                if (i.IsModuleRun(TtEngine.Instance.PlayMode) == false)
                     continue;
                 i.EndFrame(host);
             }
@@ -105,7 +105,7 @@ namespace EngineNS
             var host = GetHost();
             foreach (var i in mModules)
             {
-                if (i.IsModuleRun(UEngine.Instance.PlayMode) == false)
+                if (i.IsModuleRun(TtEngine.Instance.PlayMode) == false)
                     continue;
                 i.Cleanup(host);
             }

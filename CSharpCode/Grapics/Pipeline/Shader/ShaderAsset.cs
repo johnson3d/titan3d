@@ -19,8 +19,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            //return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
-            return null;
+            return TtShaderAsset.LoadAsset(GetAssetName());
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -74,7 +73,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 if (TemplateName != null)
                 {
                     ameta.TemplateName = TemplateName;
-                    var templateAMeta = UEngine.Instance.AssetMetaManager.GetAssetMeta(TemplateName) as TtShaderAssetAMeta;
+                    var templateAMeta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(TemplateName) as TtShaderAssetAMeta;
                     ameta.ShaderType = templateAMeta.ShaderType;
 
                     var shader = (mAsset as TtShaderAsset);
@@ -106,7 +105,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public IO.IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
@@ -118,13 +117,13 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (ameta != null)
             {
                 UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta();
+                ameta.SaveAMeta(this);
             }
             if (ShaderCode != null)
             {
                 IO.TtFileManager.WriteAllText(name.Address, ShaderCode);
             }
-            UEngine.Instance.SourceControlModule.AddFile(name.Address, true);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
         }
         [Rtti.Meta]
         public RName AssetName
@@ -244,7 +243,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }

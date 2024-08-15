@@ -75,7 +75,7 @@ namespace EngineNS.Bricks.PhysicsCore
         private void InitPhysics(TtRigidBodyNodeData rbNodeData)
         {
             ref FTransform transform = ref this.Placement.AbsTransform;
-            PxActor = UEngine.Instance.PhyModule.PhyContext.CreateActor(rbNodeData.PxActorType, in transform.mPosition, in transform.mQuat);
+            PxActor = TtEngine.Instance.PhyModule.PhyContext.CreateActor(rbNodeData.PxActorType, in transform.mPosition, in transform.mQuat);
             PxActor.mCoreObject.SetActorFlag(EPhyActorFlag.PAF_eVISUALIZATION, true);
 
             UpdatePxShape(rbNodeData.PxShapes);
@@ -174,8 +174,8 @@ namespace EngineNS.Bricks.PhysicsCore
                     var node = info.ObjectInstance as TtRigidBodyNode;
                     if (node != null)
                     {
-                        var mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
-                        var box = UEngine.Instance.PhyModule.PhyContext.CreateShapeBox(mtl, in HalfExtent);
+                        var mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
+                        var box = TtEngine.Instance.PhyModule.PhyContext.CreateShapeBox(mtl, in HalfExtent);
                         node.Shapes.Add(box);
                         node.UpdateShapeAABB();
                     }
@@ -256,13 +256,13 @@ namespace EngineNS.Bricks.PhysicsCore
                 {
                     if (ImGuiAPI.Button("AddTriMeshShape"))
                     {
-                        var pc = UEngine.Instance.PhyModule.PhyContext;
+                        var pc = TtEngine.Instance.PhyModule.PhyContext;
                         var mesh = pc.PhyMeshManager.GetMeshSync(mTriMeshName);
                         var mtl = pc.PhyMaterialManager.GetMaterialSync(mTriMaterialName);
                         var rbNode = info.ObjectInstance as TtRigidBodyNode;
                         if (rbNode != null)
                         {
-                            var shape = UEngine.Instance.PhyModule.PhyContext.CreateShapeTriMesh(new List<TtPhyMaterial>() { mtl }, mesh, rbNode.Placement.Scale, rbNode.Placement.Quat);
+                            var shape = TtEngine.Instance.PhyModule.PhyContext.CreateShapeTriMesh(new List<TtPhyMaterial>() { mtl }, mesh, rbNode.Placement.Scale, rbNode.Placement.Quat);
                             rbNode.Shapes.Add(shape);
                             rbNode.UpdateShapeAABB();
                         }
@@ -287,7 +287,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public override void OnGatherVisibleMeshes(GamePlay.UWorld.UVisParameter rp)
         {
-            //if (UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug) == false)
+            //if (TtEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug) == false)
             //    return;
 
             if ((rp.CullFilters & GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug) == 0)
@@ -349,11 +349,11 @@ namespace EngineNS.GamePlay.Scene
     //            var rbData = new Bricks.PhysicsCore.URigidBodyNode.URigidBodyNodeData();
     //            rbData.Name = name;
     //            rbData.PxActorType = EPhyActorType.PAT_Static;
-    //            //UEngine.Instance.PhyModule.PhyContext.CreateShapeTriMesh(,,)
+    //            //TtEngine.Instance.PhyModule.PhyContext.CreateShapeTriMesh(,,)
     //            //rbData.PxShapes.Add()
     //            rbNode = new Bricks.PhysicsCore.URigidBodyNode();
     //            var task = rbNode.InitializeNode(GetWorld(), rbData, EBoundVolumeType.Box, this.Placement.GetType());
-    //            UEngine.Instance.EventPoster.RunOnUntilFinish((state) =>
+    //            TtEngine.Instance.EventPoster.RunOnUntilFinish((state) =>
     //            {
     //                if (task.IsCompleted)
     //                {

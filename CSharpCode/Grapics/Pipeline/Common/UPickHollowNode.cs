@@ -18,10 +18,10 @@ namespace EngineNS.Graphics.Pipeline.Common
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
+        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
@@ -35,7 +35,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             index = drawcall.FindBinder("Samp_gPickedSetUpTex");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
             index = drawcall.FindBinder("gPickedBlurTex");
             if (index.IsValidPointer)
@@ -45,7 +45,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             index = drawcall.FindBinder("Samp_gPickedBlurTex");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
         }
     }
     [Bricks.CodeBuilder.ContextMenu("PickHollow", "Pick\\PickHollow", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
@@ -71,20 +71,20 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             return mBasePassShading;
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickHollowShading>();
+            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickHollowShading>();
         }
         public override void OnLinkIn(TtRenderGraphLinker linker)
         {
             //ResultPinOut.Attachement.Format = PickedPinIn.Attachement.Format;
         }
-        public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
+        public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             
         }
-        public override void OnResize(URenderPolicy policy, float x, float y)
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             float scaleFactor = 1.0f;
             var hitProxyNode = policy.FindFirstNode<UHitproxyNode>();
@@ -97,7 +97,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             base.OnResize(policy, x * scaleFactor, y * scaleFactor);
         }
-        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             var PickedManager = policy.GetOptionData("PickedManager") as UPickedProxiableManager;
             if (PickedManager != null && PickedManager.PickedProxies.Count == 0)
@@ -117,10 +117,10 @@ namespace EngineNS.Graphics.Pipeline.Common
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
+        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
@@ -134,7 +134,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             index = drawcall.FindBinder("Samp_ColorBuffer");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
             index = drawcall.FindBinder("DepthBuffer");
             if (index.IsValidPointer)
@@ -144,7 +144,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             index = drawcall.FindBinder("Samp_DepthBuffer");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
             index = drawcall.FindBinder("GPickedTex");
             if (index.IsValidPointer)
@@ -154,7 +154,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             index = drawcall.FindBinder("Samp_GPickedTex");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
         }
     }
 
@@ -181,20 +181,20 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             return mBasePassShading;
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtPickHollowBlendShading>();
+            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtPickHollowBlendShading>();
         }
         public override void OnLinkIn(TtRenderGraphLinker linker)
         {
             //ResultPinOut.Attachement.Format = PickedPinIn.Attachement.Format;
         }
-        public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
+        public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
 
         }
-        public override void BeforeTickLogic(URenderPolicy policy)
+        public override void BeforeTickLogic(TtRenderPolicy policy)
         {
             var PickedManager = policy.GetOptionData("PickedManager") as UPickedProxiableManager;
             if (PickedManager != null && PickedManager.PickedProxies.Count == 0)
@@ -213,7 +213,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
             }
         }
-        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             var PickedManager = policy.GetOptionData("PickedManager") as UPickedProxiableManager;
             if (PickedManager != null && PickedManager.PickedProxies.Count == 0)

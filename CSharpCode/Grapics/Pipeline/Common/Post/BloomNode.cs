@@ -48,7 +48,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public TtGaussNode[] DownSampleNodes = null;
         public TtGaussAdditiveNode[] UpSampleNodes = null;
 
-        public override async Task Initialize(URenderPolicy policy, string debugName)
+        public override async Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
 
@@ -86,7 +86,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 prevMipPin = usNode.ResultPinOut;
             }
         }
-        public override void OnResize(URenderPolicy policy, float x, float y)
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             base.OnResize(policy, x, y);
 
@@ -113,7 +113,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 }
             }
         }
-        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             foreach (var i in DownSampleNodes)
             {
@@ -140,7 +140,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
             base.TickLogic(world, policy, bClear);
         }
-        public override void TickSync(URenderPolicy policy)
+        public override void TickSync(TtRenderPolicy policy)
         {
             foreach (var i in DownSampleNodes)
             {

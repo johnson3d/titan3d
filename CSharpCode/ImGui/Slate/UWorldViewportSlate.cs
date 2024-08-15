@@ -42,7 +42,7 @@ namespace EngineNS.EGui.Slate
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
-        public async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        public async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             RenderPolicy = policy;
 
@@ -50,8 +50,8 @@ namespace EngineNS.EGui.Slate
         }
         public override async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
         {
-            URenderPolicy policy = null;
-            var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(policyName);
+            TtRenderPolicy policy = null;
+            var rpAsset = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(policyName);
             if (rpAsset != null)
             {
                 policy = rpAsset.CreateRenderPolicy(this);
@@ -60,7 +60,7 @@ namespace EngineNS.EGui.Slate
 
             IsInlitialized = true;
         }
-        private async Thread.Async.TtTask InitializeImpl(USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        private async Thread.Async.TtTask InitializeImpl(USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             await Initialize();
             
@@ -120,7 +120,7 @@ namespace EngineNS.EGui.Slate
         public unsafe override bool OnEvent(in Bricks.Input.Event e)
         {
             mAxis?.OnEvent(this, in e);
-            var keyboards = UEngine.Instance.InputSystem;
+            var keyboards = TtEngine.Instance.InputSystem;
             if (e.Type == Bricks.Input.EventType.MOUSEBUTTONDOWN)
             {
                 mStartMousePt = new Vector2(e.MouseMotion.X, e.MouseMotion.Y);
@@ -190,8 +190,8 @@ namespace EngineNS.EGui.Slate
         
         protected virtual void TickOnFocus()
         {
-            float step = (UEngine.Instance.ElapseTickCountMS * 0.001f) * CameraMoveSpeed;
-            var keyboards = UEngine.Instance.InputSystem;
+            float step = (TtEngine.Instance.ElapseTickCountMS * 0.001f) * CameraMoveSpeed;
+            var keyboards = TtEngine.Instance.InputSystem;
             if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_w))
             {
                 CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, step, true);

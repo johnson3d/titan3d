@@ -57,7 +57,7 @@ namespace EngineNS.UI.Layout
                 }
                 catch (System.OutOfMemoryException ex)
                 {
-                    UEngine.Instance.UILayoutManager.SetForceLayout(ui);
+                    TtEngine.Instance.UILayoutManager.SetForceLayout(ui);
                     throw ex;
                 }
             }
@@ -80,7 +80,7 @@ namespace EngineNS.UI.Layout
         }
         internal void Add(TtUIElement ui)
         {
-            System.Diagnostics.Debug.Assert(UEngine.Instance.ThreadLogic.IsThisThread());
+            System.Diagnostics.Debug.Assert(TtEngine.Instance.ThreadLogic.IsThisThread());
 
             if (GetRequest(ui) != null)
                 return;
@@ -122,11 +122,11 @@ namespace EngineNS.UI.Layout
                 }
             }
 
-            UEngine.Instance.UILayoutManager.NeedsRecalculate();
+            TtEngine.Instance.UILayoutManager.NeedsRecalculate();
         }
         internal void Remove(TtUIElement ui)
         {
-            System.Diagnostics.Debug.Assert(UEngine.Instance.ThreadLogic.IsThisThread());
+            System.Diagnostics.Debug.Assert(TtEngine.Instance.ThreadLogic.IsThisThread());
 
             Request r = GetRequest(ui);
             if (r == null)
@@ -136,7 +136,7 @@ namespace EngineNS.UI.Layout
         }
         internal void RemoveOrphans(TtUIElement parent)
         {
-            System.Diagnostics.Debug.Assert(UEngine.Instance.ThreadLogic.IsThisThread());
+            System.Diagnostics.Debug.Assert(TtEngine.Instance.ThreadLogic.IsThisThread());
 
             Request r = mRequestHead;
             while (r != null)
@@ -163,7 +163,7 @@ namespace EngineNS.UI.Layout
 
         internal TtUIElement GetTopMost()
         {
-            System.Diagnostics.Debug.Assert(UEngine.Instance.ThreadLogic.IsThisThread());
+            System.Diagnostics.Debug.Assert(TtEngine.Instance.ThreadLogic.IsThisThread());
 
             TtUIElement found = null;
             var treeLevel = UInt32.MaxValue;

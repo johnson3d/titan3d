@@ -18,14 +18,14 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
+        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
             //var cbIndex = drawcall.mCoreObject.FindCBufferIndex("cbPerShadingEnv");
             //if (cbIndex != 0xFFFFFFFF)
             //{
             //    if (PerShadingCBuffer == null)
             //    {
-            //        PerShadingCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(gpuProgram, cbIndex);
+            //        PerShadingCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateConstantBuffer(gpuProgram, cbIndex);
             //        PerShadingCBuffer.SetMatrix(0, ref Matrix.mIdentity);
             //        var RenderColor = new Color4f(1, 1, 1, 1);
             //        PerShadingCBuffer.SetValue(1, ref RenderColor);
@@ -33,7 +33,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             //    drawcall.mCoreObject.BindCBufferAll(cbIndex, PerShadingCBuffer.mCoreObject.Ptr);
             //}
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
@@ -50,7 +50,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
             index = drawcall.FindBinder("Samp_GShadowMap");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
         }
     }
     [Bricks.CodeBuilder.ContextMenu("ESM", "Shadow\\ESM", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
@@ -76,20 +76,20 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         {
             return mBasePassShading;
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UExponentialShadowShading>();
+            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UExponentialShadowShading>();
         }
         public override void OnLinkIn(TtRenderGraphLinker linker)
         {
             //ResultPinOut.Attachement.Format = PickedPinIn.Attachement.Format;
         }
-        public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
+        public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
 
         }
-        public override void OnResize(URenderPolicy policy, float x, float y)
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             float scaleFactor = 1.0f;
             var hitProxyNode = policy.FindFirstNode<UHitproxyNode>();

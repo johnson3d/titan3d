@@ -299,7 +299,7 @@ namespace EngineNS.IO
             UInt64 versionHash;
             if (magic != SerializerHelper.HashMagic)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"读取到老的资产格式请重新保存成最新版本");
+                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"读取到老的资产格式请重新保存成最新版本");
                 versionHash = magic;
             }
             else
@@ -315,14 +315,14 @@ namespace EngineNS.IO
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
             if (meta == null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"Meta Type lost:{typeHash}");
+                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"Meta Type lost:{typeHash}");
                 throw new Exception($"Meta Type lost:{typeHash}");
             }
             Rtti.UMetaVersion metaVersion = meta.GetMetaVersion(versionHash);
             if (metaVersion == null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"Meta Type lost in direct:{meta.ClassMetaName}");
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"MetaVersion lost:{versionHash}");
+                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"Meta Type lost in direct:{meta.ClassMetaName}");
+                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"MetaVersion lost:{versionHash}");
                 throw new Exception($"MetaVersion lost:{versionHash}");
             }
             v = Rtti.UTypeDescManager.CreateInstance(meta.ClassType) as ISerializer;
@@ -348,7 +348,7 @@ namespace EngineNS.IO
             UInt64 versionHash;
             if (magic != SerializerHelper.HashMagic)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"读取到老的资产格式请重新保存成最新版本");
+                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"读取到老的资产格式请重新保存成最新版本");
                 versionHash = magic;
             }
             else
@@ -366,14 +366,14 @@ namespace EngineNS.IO
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
             if (meta == null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"Meta Type lost:{typeHash}");
+                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"Meta Type lost:{typeHash}");
                 throw new Exception($"Meta Type lost:{typeHash}");
             }
             Rtti.UMetaVersion metaVersion = meta.GetMetaVersion(versionHash);
             if (metaVersion == null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"Meta Type lost in direct:{meta.ClassMetaName}");
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"MetaVersion lost:{versionHash}");
+                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"Meta Type lost in direct:{meta.ClassMetaName}");
+                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"MetaVersion lost:{versionHash}");
                 this.Seek(savePos);
                 return false;
                 //throw new Exception($"MetaVersion lost:{versionHash}");

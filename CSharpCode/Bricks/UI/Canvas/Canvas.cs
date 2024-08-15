@@ -63,15 +63,15 @@ namespace EngineNS.UI.Canvas
         //        {
         //            var brush = new TtCanvasBrush();
         //            brush.Name = "utest/ddd.uminst";
-        //            var texture = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("utest/texture/ground_01.srv"));
+        //            var texture = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("utest/texture/ground_01.srv"));
         //            brush.mCoreObject.SetSrv(texture.mCoreObject);
         //            TestCanvasDrawBatch.Middleground.AddImage(brush.mCoreObject, 0, 0, 800, 600, Color.DarkRed, ref outCmd);
         //        }
         //        TestCanvasDrawBatch.Middleground.AddLine(new Vector2(1, 1), new Vector2(799, 599), 80.0f, Color.DarkRed, ref outCmd);
 
-        //        //var font = UEngine.Instance.FontModule.FontManager.GetFontSDF(RName.GetRName("fonts/roboto-regular.fontsdf", RName.ERNameType.Engine), 0, 1024, 512);
-        //        //var font = UEngine.Instance.FontModule.FontManager.GetFontSDF(RName.GetRName("fonts/dengl.fontsdf", RName.ERNameType.Engine), 0, 1024, 512);
-        //        var font = UEngine.Instance.FontModule.FontManager.GetFontSDF(RName.GetRName("fonts/simli.fontsdf", RName.ERNameType.Engine), fontSize: 64, 1024, 1024);
+        //        //var font = TtEngine.Instance.FontModule.FontManager.GetFontSDF(RName.GetRName("fonts/roboto-regular.fontsdf", RName.ERNameType.Engine), 0, 1024, 512);
+        //        //var font = TtEngine.Instance.FontModule.FontManager.GetFontSDF(RName.GetRName("fonts/dengl.fontsdf", RName.ERNameType.Engine), 0, 1024, 512);
+        //        var font = TtEngine.Instance.FontModule.FontManager.GetFontSDF(RName.GetRName("fonts/simli.fontsdf", RName.ERNameType.Engine), fontSize: 64, 1024, 1024);
         //        TestCanvasDrawBatch.Middleground.PushFont(font);
         //        TestCanvasDrawBatch.Middleground.AddText("abc中国1A，!,", 30, 30, Color4f.FromABGR(Color.LightPink));
         //        TestCanvasDrawBatch.Middleground.PopFont();
@@ -79,7 +79,7 @@ namespace EngineNS.UI.Canvas
         //        {
         //            var brush = new TtCanvasBrush();
         //            brush.Name = "utest/ddd.uminst";
-        //            var texture = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("utest/texture/groundsnow.srv"));
+        //            var texture = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(RName.GetRName("utest/texture/groundsnow.srv"));
         //            brush.mCoreObject.SetSrv(texture.mCoreObject);
         //            TestCanvasDrawBatch.Middleground.PushBrush(brush);
                     
@@ -119,7 +119,7 @@ namespace EngineNS.UI.Canvas
         //        var brush = cmd.GetBrush();
         //        if (brush.Name.StartWith("@Text:"))
         //        {
-        //            mtl = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/font_sdf_0.uminst", RName.ERNameType.Engine));
+        //            mtl = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/font_sdf_0.uminst", RName.ERNameType.Engine));
         //            var clr = mtl.FindVar("FontColor");
         //            if (clr != null)
         //            {
@@ -132,11 +132,11 @@ namespace EngineNS.UI.Canvas
         //            var name = brush.Name.c_str();
         //            if ("DefaultBrush" == name)
         //            {
-        //                mtl = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
+        //                mtl = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
         //            }
         //            else
         //            {
-        //                mtl = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName(name));
+        //                mtl = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName(name));
         //            }
                     
         //            mtl.RenderLayer = Graphics.Pipeline.ERenderLayer.RL_Translucent;

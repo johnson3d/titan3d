@@ -77,7 +77,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             Rt3PinOut.IsAllowInputNull = true;
             DepthStencilPinOut.IsAllowInputNull = true;
         }
-        public override void OnResize(URenderPolicy policy, float x, float y)
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             if (GBuffers != null)
             {
@@ -87,7 +87,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             Rt0PinOut.Attachement.Height = (uint)y;
             Rt0PinOut.Attachement.Width = (uint)x;
         }
-        public override void FrameBuild(URenderPolicy policy)
+        public override void FrameBuild(TtRenderPolicy policy)
         {
             
         }
@@ -95,17 +95,17 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public UDeferredOpaque mOpaqueShading;
         public NxRHI.URenderPass RenderPass;
 
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName + ".BasePass");
             BackgroundPass.Initialize(rc, debugName + ".Background");
 
             CreateGBuffers(policy, Rt0PinOut.Attachement.Format);
             
-            mOpaqueShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredOpaque>();
+            mOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredOpaque>();
 
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
@@ -119,9 +119,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 GpuCullNode = linker.OutPin.HostNode as TtGpuCullingNode;
             }
         }
-        public virtual unsafe TtGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
+        public virtual unsafe TtGraphicsBuffers CreateGBuffers(TtRenderPolicy policy, EPixelFormat format)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var PassDesc = new NxRHI.FRenderPassDesc();
             PassDesc.NumOfMRT = 4;
             PassDesc.AttachmentMRTs[0].Format = format;
@@ -149,7 +149,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             //PassDesc.mFBClearColorRT0 = new Color4f(1, 0, 0, 0);
             //PassDesc.mDepthClearValue = 1.0f;                
             //PassDesc.mStencilClearValue = 0u;
-            RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
+            RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
 
             GBuffers.Initialize(policy, RenderPass);
             GBuffers.SetRenderTarget(policy, 0, Rt0PinOut);
@@ -172,7 +172,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             return mOpaqueShading;
         }
-        public override void BeforeTickLogic(URenderPolicy policy)
+        public override void BeforeTickLogic(TtRenderPolicy policy)
         {
             //if (DepthStencilPinOut.FindInLinker() == null)
             //{
@@ -202,7 +202,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UDeferredBasePassNode), nameof(TickLogic));
         [ThreadStatic]
         private static Profiler.TimeScope ScopePushGpuDraw = Profiler.TimeScopeManager.GetTimeScope(typeof(UDeferredBasePassNode), "PushGpuDraw");
-        public override void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
+        public override void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -297,15 +297,15 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 policy.CommitCommandList(BasePass.DrawCmdList, "DSNodeBase");
             }
         }
-        public override void TickSync(URenderPolicy policy)
+        public override void TickSync(TtRenderPolicy policy)
         {
             BackgroundPass.SwapBuffer();
             base.TickSync(policy);
 
             foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
             {
-                var preMatrix = i.Mesh.PerMeshCBuffer.GetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
-                i.Mesh.PerMeshCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.PreWorldMatrix, preMatrix);
+                var preMatrix = i.Mesh.PerMeshCBuffer.GetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
+                i.Mesh.PerMeshCBuffer.SetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.PreWorldMatrix, preMatrix);
             }
         }
         

@@ -53,7 +53,7 @@ namespace EngineNS.Graphics.Pipeline
             scDesc.Width = (uint)size.X;
             scDesc.Height = (uint)size.Y;
             scDesc.OutputWindow = HWindow.ToPointer();
-            SwapChain = UEngine.Instance.GfxDevice.RenderContext.CreateSwapChain(in scDesc);
+            SwapChain = TtEngine.Instance.GfxDevice.RenderContext.CreateSwapChain(in scDesc);
         }
         public EPixelFormat GetSwapchainFormat()
         {
@@ -88,13 +88,13 @@ namespace EngineNS.Graphics.Pipeline
 
             if (SwapChain == null)
                 return;
-            UEngine.Instance.GfxDevice.RenderSwapQueue.Reset();
+            TtEngine.Instance.GfxDevice.RenderSwapQueue.Reset();
             SwapChain.OnResize(x, y);
-            //UEngine.Instance.EventPoster.PostTickSyncEvent(() =>
+            //TtEngine.Instance.EventPoster.PostTickSyncEvent(() =>
             //{
             //    if (SwapChain == null)
             //        return true;
-            //    UEngine.Instance.GfxDevice.RenderCmdQueue.Reset();
+            //    TtEngine.Instance.GfxDevice.RenderCmdQueue.Reset();
             //    SwapChain.OnResize(x, y);
             //    return true;
             //});
@@ -119,7 +119,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public unsafe virtual void TickRender(int ellapse)
         {
-            //var rc = UEngine.Instance.GfxDevice.RenderContext;
+            //var rc = TtEngine.Instance.GfxDevice.RenderContext;
             //var cmdlist = SwapChainPass.CommitCmdList.mCoreObject;
             //cmdlist.Commit(rc.mCoreObject);
         }

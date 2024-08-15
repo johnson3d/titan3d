@@ -27,7 +27,7 @@ namespace EngineNS.Bricks.Procedure.Node
         public UBufferCreator IndexBufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3i, FInt3Operator>>(-1, -1, -1);
         public UBufferCreator Vec3BufferCreator { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3, FFloat3Operator>>(-1, -1, -1);
 
-        public Graphics.Mesh.UMaterialMesh PreviewMesh;
+        public Graphics.Mesh.TtMaterialMesh PreviewMesh;
         public UMeshLoader()
         {
             PrevSize = new Vector2(100, 100);
@@ -50,10 +50,10 @@ namespace EngineNS.Bricks.Procedure.Node
                 Task = null;
             }
         }
-        public Graphics.Mesh.UMaterialMesh Mesh;
+        public Graphics.Mesh.TtMaterialMesh Mesh;
         RName mMeshName;
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = Graphics.Mesh.UMaterialMesh.AssetExt)]
+        [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
         public RName MeshName
         {
             get => mMeshName;
@@ -62,7 +62,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 mMeshName = value;
                 System.Action exec = async () =>
                 {
-                    Mesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(value);
+                    Mesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(value);
                     await Mesh.GetMeshPrimitives(0).LoadMeshDataProvider();
                 };
                 exec();
@@ -261,17 +261,17 @@ namespace EngineNS.Bricks.Procedure.Node
                 builder.PushAtomLOD(0, in dpDesc);
             }
 
-            PreviewMesh = new Graphics.Mesh.UMaterialMesh();
+            PreviewMesh = new Graphics.Mesh.TtMaterialMesh();
             PreviewMesh.AssetName = rn;
             var meshPrimitve = meshBuilder.ToMesh();
-            var matrials = new Graphics.Pipeline.Shader.UMaterialInstance[1];
-            matrials[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria;
+            var matrials = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
+            matrials[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria;
             matrials[0].RenderLayer = Graphics.Pipeline.ERenderLayer.RL_Translucent;
             var rast = matrials[0].Rasterizer;
             rast.FillMode = NxRHI.EFillMode.FMD_WIREFRAME;
             matrials[0].Rasterizer = rast;
-            PreviewMesh.Initialize(new List<Graphics.Mesh.UMeshPrimitives>() { meshPrimitve },
-                new List<Graphics.Pipeline.Shader.UMaterial[]>() { matrials });
+            PreviewMesh.Initialize(new List<Graphics.Mesh.TtMeshPrimitives>() { meshPrimitve },
+                new List<Graphics.Pipeline.Shader.TtMaterial[]>() { matrials });
         }
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
@@ -297,7 +297,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         public async System.Threading.Tasks.Task DoPreview()
         {
-            //var mainEditor = UEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
+            //var mainEditor = TtEngine.Instance.GfxDevice.MainWindow as Editor.UMainEditorApplication;
             //if (mainEditor != null)
             //{
             //    var rn = RName.GetRName(this.ParentGraph.GraphName, RName.ERNameType.Transient);
@@ -363,7 +363,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 //    PreviewMesh = new Graphics.Mesh.UMaterialMesh();
                 //    var meshPrimitve = TriMesh.ToMesh();
                 //    var matrials = new Graphics.Pipeline.Shader.UMaterialInstance[1];
-                //    matrials[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria;
+                //    matrials[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria;
                 //    matrials[0].RenderLayer = Graphics.Pipeline.ERenderLayer.RL_Translucent;
                 //    var rast = matrials[0].Rasterizer;
                 //    rast.FillMode = EFillMode.FMD_WIREFRAME;
@@ -388,6 +388,6 @@ namespace EngineNS.Bricks.Procedure.Node
             return true;
         }
 
-        public Graphics.Mesh.UMaterialMesh PreviewMesh;
+        public Graphics.Mesh.TtMaterialMesh PreviewMesh;
     }
 }

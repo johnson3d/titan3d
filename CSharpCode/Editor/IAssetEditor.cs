@@ -103,7 +103,7 @@ namespace EngineNS.Editor
             mAssetEditorOpenProgress.CurrentEditor = null;
             if (ok == false)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Editor", $"AssetEditor {name} open failed");
+                Profiler.Log.WriteLine<Profiler.TtEditorGategory>(Profiler.ELogTag.Warning, "Editor", $"AssetEditor {name} open failed");
             }
             else
             {
@@ -118,7 +118,7 @@ namespace EngineNS.Editor
                     }
                     else
                     {
-                        var application = UEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
+                        var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
                         form.DockId = EGui.UIProxy.DockProxy.MainFormDockClass.ClassId;
                         form.DockCond = ImGuiCond_.ImGuiCond_Appearing;
                     }

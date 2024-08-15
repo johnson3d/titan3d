@@ -62,7 +62,7 @@ namespace EngineNS.Bricks.Network.RPC
                 if (isTimeOut)
                 {
                     //throw Timeout exception : UReturnAwaiter & coneinuation;
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "RPC", $"{typedAwaiter.ContinuationAction.ToString()} timeout");
+                    Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"{typedAwaiter.ContinuationAction.ToString()} timeout");
                 }
                 else
                 {
@@ -118,7 +118,7 @@ namespace EngineNS.Bricks.Network.RPC
                 if (isTimeOut)
                 {
                     tmp = null;//应该给一个错误的对象用来判断超时间
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "RPC", $"{typedAwaiter.ContinuationAction.ToString()} timeout");
+                    Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"{typedAwaiter.ContinuationAction.ToString()} timeout");
                 }
                 else
                 {
@@ -174,7 +174,7 @@ namespace EngineNS.Bricks.Network.RPC
                 if (isTimeOut)
                 {
                     ((UReturnAwaiter<string>)awaiter).Result = "@RPC_TimeOut@";
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "RPC", $"{typedAwaiter.ContinuationAction.ToString()} timeout");
+                    Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"{typedAwaiter.ContinuationAction.ToString()} timeout");
                 }
                 else
                 {

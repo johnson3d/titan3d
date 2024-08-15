@@ -626,20 +626,20 @@ namespace EngineNS.Bricks.AssetImpExp
     }
     public class MeshGenerater
     {
-        public static List<UMeshPrimitives> Generate(Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
+        public static List<TtMeshPrimitives> Generate(Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
             var meshNodes = AssimpSceneUtil.FindMeshNodes(scene);
             var skeletons = SkeletonGenerater.Generate(scene, importOption);
             return Generate(meshNodes, skeletons, scene, importOption);
         }
-        public static List<UMeshPrimitives> Generate(List<TtSkinSkeleton> meshSkeletons, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
+        public static List<TtMeshPrimitives> Generate(List<TtSkinSkeleton> meshSkeletons, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
             var meshNodes = AssimpSceneUtil.FindMeshNodes(scene);
             return Generate(meshNodes, meshSkeletons, scene, importOption);
         }
-        private static List<UMeshPrimitives> Generate(List<Assimp.Node> meshNodes, List<TtSkinSkeleton> meshSkeletons, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
+        private static List<TtMeshPrimitives> Generate(List<Assimp.Node> meshNodes, List<TtSkinSkeleton> meshSkeletons, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
-            List<UMeshPrimitives> meshPrimitives = new List<UMeshPrimitives>();
+            List<TtMeshPrimitives> meshPrimitives = new List<TtMeshPrimitives>();
             foreach (var meshNode in meshNodes)
             {
                 var skeleton = AssimpSceneUtil.FindMeshSkeleton(meshNode, meshSkeletons, scene);
@@ -662,7 +662,7 @@ namespace EngineNS.Bricks.AssetImpExp
             }
             return validMeshes;
         }
-        private static UMeshPrimitives CreateMeshPrimitives(Assimp.Node meshNode, TtSkinSkeleton skeleton, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
+        private static TtMeshPrimitives CreateMeshPrimitives(Assimp.Node meshNode, TtSkinSkeleton skeleton, Assimp.Scene scene, TtAssetImportOption_Mesh importOption)
         {
             var preAssimpTransform = Assimp.Matrix4x4.Identity;
             if (AssimpSceneUtil.IsZUpLeftHandCoordinate(scene))
@@ -696,7 +696,7 @@ namespace EngineNS.Bricks.AssetImpExp
 
             var meshes = GetValidMesh(meshNode, scene);
 
-            UMeshPrimitives meshPrimitives = new UMeshPrimitives(meshNode.Name, (uint)meshes.Count);
+            TtMeshPrimitives meshPrimitives = new TtMeshPrimitives(meshNode.Name, (uint)meshes.Count);
             int vertextCount = 0;
             int indicesCount = 0;
             uint nextStartIndex = 0;
@@ -885,7 +885,7 @@ namespace EngineNS.Bricks.AssetImpExp
             }
 
             //set stream
-            var cmd = UEngine.Instance.GfxDevice.RenderContext.CreateCommandList();
+            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CreateCommandList();
             unsafe
             {
                 fixed (void* data = posStream)

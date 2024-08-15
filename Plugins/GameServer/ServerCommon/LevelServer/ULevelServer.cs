@@ -63,15 +63,15 @@ namespace EngineNS.Plugins.LevelServer
             {//level up authority for debug
                 if (action == "OnAccept")
                 {
-                    connect.Authority = UEngine.Instance.Config.DefaultAuthority;
+                    connect.Authority = TtEngine.Instance.Config.DefaultAuthority;
                 }
             };
 
-            var np = Bricks.Network.FNetworkPoint.FromString(UEngine.Instance.Config.RootServerURL);
+            var np = Bricks.Network.FNetworkPoint.FromString(TtEngine.Instance.Config.RootServerURL);
             ret = await RootConnect.Connect(np.Ip, np.Port, RootConnectPackages);
             if (ret == false)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "RPC", $"LevelServer connect root failed:{np}");
+                Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"LevelServer connect root failed:{np}");
                 return true;
             }
             else

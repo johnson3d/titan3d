@@ -121,7 +121,7 @@ namespace EngineNS.Bricks.ProjectGen
             //file + ".Console.csproj";
 
             System.Xml.XmlDocument xml = new System.Xml.XmlDocument();
-            var path = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
+            var path = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
             var proj = path + "Module/Template.csproj";
             xml.Load(proj);
             var root = xml.LastChild;

@@ -9,7 +9,7 @@ namespace EngineNS.Editor.Forms
     {
         public UCpuProfiler()
         {
-            UEngine.RootFormManager.RegRootForm(this);
+            TtEngine.RootFormManager.RegRootForm(this);
         }
 
         public async Thread.Async.TtTask<bool> Initialize()
@@ -134,7 +134,7 @@ namespace EngineNS.Editor.Forms
         {
             if (mRpcProfilerThreads == null || mRpcProfilerThreads.IsCompleted)
             {
-                if (UEngine.Instance.RpcModule.RpcManager != null)
+                if (TtEngine.Instance.RpcModule.RpcManager != null)
                 {
                     if (mRpcProfilerThreads != null)
                         ProfilerThreadNames = mRpcProfilerThreads.Result.ThreadNames;
@@ -152,7 +152,7 @@ namespace EngineNS.Editor.Forms
             if (result)
             {
                 var cmdlst = ImGuiAPI.GetWindowDrawList();
-                var stats = UEngine.Instance.GfxDevice.RenderSwapQueue.GetStat();
+                var stats = TtEngine.Instance.GfxDevice.RenderSwapQueue.GetStat();
                 ImGuiAPI.Text($"CmdList = {stats.NumOfCmdlist};Drawcall = {stats.NumOfDrawcall};Primitive = {stats.NumOfPrimitive};");
                 EGui.UIProxy.SearchBarProxy.OnDraw(ref mFilterFocusd, cmdlst, "filter", ref mFilter, ImGuiAPI.GetWindowContentRegionWidth());
                 DockId = ImGuiAPI.GetWindowDockID();

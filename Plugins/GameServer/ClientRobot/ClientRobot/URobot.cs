@@ -50,9 +50,9 @@ namespace RobotClient
         public bool Initialized = false;
         public virtual async System.Threading.Tasks.Task<bool> Initialize()
         {
-            EngineNS.UEngine.Instance.RpcModule.RpcManager = this;
+            EngineNS.TtEngine.Instance.RpcModule.RpcManager = this;
             Guid sessionId = Guid.NewGuid();
-            EngineNS.UEngine.Instance.RpcModule.DefaultNetConnect = RootConnect;
+            EngineNS.TtEngine.Instance.RpcModule.DefaultNetConnect = RootConnect;
             var ret = await RootConnect.Connect("127.0.0.1", 2334, RootConnectPackages);
             if (ret)
             {
@@ -64,14 +64,14 @@ namespace RobotClient
                 RootConnect.Disconnect();
                 if (lnk == null)
                 {
-                    EngineNS.Profiler.Log.WriteLine(EngineNS.Profiler.ELogTag.Error, "RPC", "Gateway is invalid");
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtNetCategory>(EngineNS.Profiler.ELogTag.Error, "Gateway is invalid");
                 }
                 var np = lnk.GatewayURL;
                 ret = await RootConnect.Connect(np.Ip, np.Port, RootConnectPackages);
                 sessionId = lnk.Sessiond;
 
                 IndexInGate = await EngineNS.Plugins.GateServer.UGateServer_RpcCaller.RegClient(sessionId, "User0");
-                UEngine.Instance.RpcModule.DefaultExeIndex = IndexInGate;
+                TtEngine.Instance.RpcModule.DefaultExeIndex = IndexInGate;
 
                 var ok = await EngineNS.Plugins.RootServer.URootServer_RpcCaller.UpdatePayload(EngineNS.Bricks.Network.RPC.ERunTarget.Gate, 0, 1);
                 if (ok)
@@ -90,7 +90,7 @@ namespace RobotClient
                 IndexInLevel = await EngineNS.Plugins.LevelServer.ULevelServer_RpcCaller.RegClient(sessionId, "User0", UInt16.MaxValue, 5000);
                 if (EngineNS.Bricks.Network.RPC.URpcAwaiter.IsTimeout)
                     return false;
-                UEngine.Instance.RpcModule.DefaultExeIndex = IndexInLevel;
+                TtEngine.Instance.RpcModule.DefaultExeIndex = IndexInLevel;
 
                 var sceneId = Guid.NewGuid();
                 ret = await EngineNS.Plugins.LevelServer.ULevelServer_RpcCaller.RegLevel(sceneId, RName.GetRName("test0.scene"));

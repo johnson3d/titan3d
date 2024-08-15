@@ -18,7 +18,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             return result;
         }
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = Graphics.Mesh.UMaterialMesh.AssetExt)]
+        [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
         public RName MeshName { get; set; }
         [Rtti.Meta]
         public float MinScale { get; set; } = 0.8f;
@@ -89,7 +89,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             public Bricks.Terrain.CDLOD.UTerrainNode Terrain;
             public UTerrainPlant PlantDesc { get; set; }
             public List<UPlantInstance> ObjInstances { get; } = new List<UPlantInstance>();
-            public Graphics.Mesh.UMaterialMesh MaterialMesh;
+            public Graphics.Mesh.TtMaterialMesh MaterialMesh;
             public Graphics.Mesh.TtMesh Mesh;
             public Graphics.Mesh.UMdfInstanceStaticMesh InstanceMdf;
             public DVector3 InstanceOffset;
@@ -98,7 +98,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 Terrain = trn;
                 PlantDesc = desc;
-                MaterialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(desc.MeshName);
+                MaterialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(desc.MeshName);
                 Mesh = new Graphics.Mesh.TtMesh();
                 Mesh.Initialize(MaterialMesh, 
                     Rtti.UTypeDescGetter<Graphics.Mesh.UMdfInstanceStaticMesh>.TypeDesc);
@@ -121,7 +121,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 if (InstanceMdf == null)
                     return;
                 InstanceMdf.InstanceModifier.SetCapacity((uint)capacity, false);
-                UEngine.Instance.GfxDevice.HitproxyManager.MapProxy(obj);
+                TtEngine.Instance.GfxDevice.HitproxyManager.MapProxy(obj);
                 ObjInstances.Add(obj);
             }
             public void OnHitProxyChanged()
@@ -139,7 +139,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             //{
             //    foreach (var j in i.Plants)
             //    {
-            //        await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(j.MeshName);
+            //        await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(j.MeshName);
             //    }
             //}
         }
@@ -155,7 +155,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             if(type.CreateFinished == false)
             {
                 var tempTrans = trans;
-                UEngine.Instance.EventPoster.RunOnUntilFinish((Thread.Async.TtAsyncTaskStateBase state) =>
+                TtEngine.Instance.EventPoster.RunOnUntilFinish((Thread.Async.TtAsyncTaskStateBase state) =>
                 {
                     if (type.CreateFinished)
                     {

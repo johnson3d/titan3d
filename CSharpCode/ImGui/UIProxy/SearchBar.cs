@@ -24,7 +24,7 @@ namespace EngineNS.EGui.UIProxy
 
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            if(UEngine.Instance.UIProxyManager[SearchBarIconKey] == null)
+            if(TtEngine.Instance.UIProxyManager[SearchBarIconKey] == null)
             {
                 var icon = new ImageProxy()
                 {
@@ -34,7 +34,7 @@ namespace EngineNS.EGui.UIProxy
                     UVMax = new Vector2(19.0f / 1024, 671.0f / 1024),
                 };
                 await icon.Initialize();
-                UEngine.Instance.UIProxyManager[SearchBarIconKey] = icon;
+                TtEngine.Instance.UIProxyManager[SearchBarIconKey] = icon;
             }
 
             return true;
@@ -65,7 +65,7 @@ namespace EngineNS.EGui.UIProxy
 
             var itemMin = ImGuiAPI.GetItemRectMin();
             var itemMax = ImGuiAPI.GetItemRectMax();
-            var icon = UEngine.Instance.UIProxyManager[SearchBarIconKey] as ImageProxy;
+            var icon = TtEngine.Instance.UIProxyManager[SearchBarIconKey] as ImageProxy;
             if (icon != null)
             {
                 var pos = new Vector2(itemMin.X + 6, itemMin.Y + (itemMax.Y - itemMin.Y - icon.ImageSize.Y) * 0.5f);

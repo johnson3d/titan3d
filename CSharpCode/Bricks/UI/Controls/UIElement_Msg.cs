@@ -108,7 +108,7 @@ namespace EngineNS.UI.Controls
             if (args == null)
                 throw new ArgumentNullException("args");
 
-            var route = UEngine.Instance.UIManager.QueryRouteSync(args.RoutedEvent);
+            var route = TtEngine.Instance.UIManager.QueryRouteSync(args.RoutedEvent);
 
             try
             {
@@ -122,7 +122,7 @@ namespace EngineNS.UI.Controls
 
             }
 
-            UEngine.Instance.UIManager.ReleaseRouteSync(route);
+            TtEngine.Instance.UIManager.ReleaseRouteSync(route);
         }
         internal static readonly int MAX_ELEMENTS_IN_ROUTE = 4096;
         void BuildRoutedHelper(TtEventRoute route, TtRoutedEventArgs args)
@@ -291,7 +291,7 @@ namespace EngineNS.UI.Controls
         [Browsable(false)]
         public bool IsMouseDirectlyOver
         {
-            get => UEngine.Instance.UIManager.IsMouseDirectlyHover(this);
+            get => TtEngine.Instance.UIManager.IsMouseDirectlyHover(this);
         }
 
         [Browsable(false), BindProperty]
@@ -307,7 +307,7 @@ namespace EngineNS.UI.Controls
         [Browsable(false)]
         public bool IsTouchDirectlyOver
         {
-            get => UEngine.Instance.UIManager.IsTouchDirectlyHover(this);
+            get => TtEngine.Instance.UIManager.IsTouchDirectlyHover(this);
         }
 
         [Browsable(false), BindProperty]
@@ -324,12 +324,12 @@ namespace EngineNS.UI.Controls
         [Browsable(false), BindProperty]
         public bool IsMouseCaptured
         {
-            get => UEngine.Instance.UIManager.MouseCaptured == this;
+            get => TtEngine.Instance.UIManager.MouseCaptured == this;
         }
         [Browsable(false), BindProperty]
         public bool IsKeyboardFocused
         {
-            get => UEngine.Instance.UIManager.KeyboardFocusUIElement == this;
+            get => TtEngine.Instance.UIManager.KeyboardFocusUIElement == this;
         }
 
         //public delegate void Delegate_Focus(TtRoutedEventArgs eventArgs, TtUIElement newFocused, TtUIElement oldFocused);

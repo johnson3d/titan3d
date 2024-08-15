@@ -21,12 +21,12 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtGaussNode;
             if (aaNode == null)
             {
-                var pipelinePolicy = policy.TagObject as URenderPolicy;
+                var pipelinePolicy = policy.TagObject as TtRenderPolicy;
                 aaNode = pipelinePolicy.FindFirstNode<TtGaussNode>();
             }
 
@@ -38,14 +38,14 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
             index = drawcall.FindBinder("Samp_ColorBuffer");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
             index = drawcall.FindBinder("cbShadingEnv");
             if (index.IsValidPointer)
             {
                 if (aaNode.CBShadingEnv == null)
                 {
-                    aaNode.CBShadingEnv = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    aaNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
                 drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
             }
@@ -74,12 +74,12 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             return mBasePassShading;
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGaussShading>();
+            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGaussShading>();
         }
-        public override void OnResize(URenderPolicy policy, float x, float y)
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             base.OnResize(policy, x, y);
         }
@@ -121,7 +121,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             set => mGaussStruct.BlurSigma = value;
         }
         public NxRHI.UCbView CBShadingEnv;
-        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             base.TickLogic(world, policy, bClear);
             if (CBShadingEnv != null)
@@ -140,7 +140,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 CBShadingEnv.SetValue("GaussStruct", in mGaussStruct);
             }
         }
-        public override void BeforeTickLogic(URenderPolicy policy)
+        public override void BeforeTickLogic(TtRenderPolicy policy)
         {
             var buffer = this.FindAttachBuffer(ColorPinIn);
             if (buffer != null)
@@ -167,12 +167,12 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtGaussAdditiveNode;
             if (aaNode == null)
             {
-                var pipelinePolicy = policy.TagObject as URenderPolicy;
+                var pipelinePolicy = policy.TagObject as TtRenderPolicy;
                 aaNode = pipelinePolicy.FindFirstNode<TtGaussAdditiveNode>();
             }
 
@@ -184,7 +184,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
             index = drawcall.FindBinder("Samp_Color1Buffer");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
             index = drawcall.FindBinder("Color2Buffer");
             if (index.IsValidPointer)
@@ -194,14 +194,14 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
             index = drawcall.FindBinder("Samp_Color2Buffer");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
             index = drawcall.FindBinder("cbShadingEnv");
             if (index.IsValidPointer)
             {
                 if (aaNode.CBShadingEnv == null)
                 {
-                    aaNode.CBShadingEnv = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    aaNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
                 drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
             }
@@ -232,10 +232,10 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             return mBasePassShading;
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGaussAdditiveShading>();
+            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtGaussAdditiveShading>();
         }
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         struct FGaussStruct
@@ -280,7 +280,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             set => mGaussStruct.BlurSigma = value;
         }
         public NxRHI.UCbView CBShadingEnv;
-        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             base.TickLogic(world, policy, bClear);
             if (CBShadingEnv != null)
@@ -310,11 +310,11 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 CBShadingEnv.SetValue("GaussStruct", in mGaussStruct);
             }
         }
-        public override void TickSync(URenderPolicy policy)
+        public override void TickSync(TtRenderPolicy policy)
         {
             base.TickSync(policy);
         }
-        public override void BeforeTickLogic(URenderPolicy policy)
+        public override void BeforeTickLogic(TtRenderPolicy policy)
         {
             var buffer = this.FindAttachBuffer(Color1PinIn);
             if (buffer != null)

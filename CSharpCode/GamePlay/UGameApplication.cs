@@ -17,15 +17,15 @@ namespace EngineNS.GamePlay
         //}
         public override void Cleanup()
         {
-            UEngine.Instance.TickableManager.RemoveTickable(this);
+            TtEngine.Instance.TickableManager.RemoveTickable(this);
             base.Cleanup();
         }
         public override async System.Threading.Tasks.Task<bool> InitializeApplication(NxRHI.UGpuDevice rc, RName rpName)
         {
             await base.InitializeApplication(rc, rpName);
-            await UEngine.Instance.StartPlayInEditor(this, rpName);
+            await TtEngine.Instance.StartPlayInEditor(this, rpName);
 
-            UEngine.Instance.TickableManager.AddTickable(this);
+            TtEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
         protected unsafe override void OnDrawUI()
@@ -35,7 +35,7 @@ namespace EngineNS.GamePlay
             worldSlate.GameViewportPos = new Vector2(0);
             worldSlate.GameViewportSize = this.NativeWindow.GetWindowSize();
 
-            UEngine.RootFormManager.DrawRootForms();
+            TtEngine.RootFormManager.DrawRootForms();
         }
         #region Tick
         public virtual void TickLogic(float ellapse)

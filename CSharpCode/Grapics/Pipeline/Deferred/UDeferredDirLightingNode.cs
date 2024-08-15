@@ -71,10 +71,10 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
+        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
@@ -97,7 +97,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             index = drawcall.FindBinder("Samp_GBufferRT0");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
             index = drawcall.FindBinder("GBufferRT1");
             if (index.IsValidPointer)
@@ -107,7 +107,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             index = drawcall.FindBinder("Samp_GBufferRT1");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
             index = drawcall.FindBinder("GBufferRT2");
             if (index.IsValidPointer)
@@ -117,7 +117,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             index = drawcall.FindBinder("Samp_GBufferRT2");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
             index = drawcall.FindBinder("GBufferRT3");
             if (index.IsValidPointer)
@@ -127,7 +127,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             index = drawcall.FindBinder("Samp_GBufferRT3");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
             index = drawcall.FindBinder("DepthBuffer");
             if (index.IsValidPointer)
@@ -137,7 +137,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             index = drawcall.FindBinder("Samp_DepthBuffer");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
             #endregion
 
             #region shadow
@@ -149,7 +149,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             index = drawcall.FindBinder("Samp_GShadowMap");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
             #endregion
 
             #region effect
@@ -161,17 +161,17 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             index = drawcall.FindBinder("Samp_gEnvMap");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
             index = drawcall.FindBinder("gPreIntegratedGF");
             if (index.IsValidPointer)
             {
-                drawcall.BindSRV(index, UEngine.Instance.GetPreIntegratedDFSrv(cmd));
+                drawcall.BindSRV(index, TtEngine.Instance.GetPreIntegratedDFSrv(cmd));
             }
             index = drawcall.FindBinder("Samp_gPreIntegratedGF");
             if (index.IsValidPointer)
             {
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
             }
 
             index = drawcall.FindBinder("GVignette");
@@ -182,7 +182,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             index = drawcall.FindBinder("Samp_GVignette");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
             #endregion
 
             #region MultiLights
@@ -277,7 +277,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             AddInput(PointLightsPinIn, NxRHI.EBufferType.BFT_SRV);
             AddInput(GpuScenePinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         }
-        public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
+        public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             base.FrameBuild(policy);
         }
@@ -286,14 +286,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             return mBasePassShading;
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredDirLightingShading>();
+            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredDirLightingShading>();
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UDeferredDirLightingNode), nameof(TickLogic));
-        public override void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
+        public override void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -301,7 +301,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 base.TickLogic(world, policy, bClear);
             }
         }
-        public override void TickSync(URenderPolicy policy)
+        public override void TickSync(TtRenderPolicy policy)
         {
             base.TickSync(policy);
         }
@@ -310,7 +310,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public void Dispose()
         {
@@ -446,7 +446,7 @@ namespace EngineNS
                 desc.Width = 128;
                 desc.Height = 32;
 
-                PreIntegratedDFTexture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
+                PreIntegratedDFTexture = TtEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
                 var srvDesc = new NxRHI.FSrvDesc();
                 srvDesc.SetTexture2DArray();
                 srvDesc.Format = desc.Format;
@@ -454,7 +454,7 @@ namespace EngineNS
                 srvDesc.Texture2DArray.FirstArraySlice = 0;
                 srvDesc.Texture2DArray.MipLevels = desc.MipLevels;
                 srvDesc.Texture2DArray.MostDetailedMip = 0;
-                PreIntegratedDFSrv = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(PreIntegratedDFTexture, in srvDesc);
+                PreIntegratedDFSrv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(PreIntegratedDFTexture, in srvDesc);
 
                 var fp = new NxRHI.FSubResourceFootPrint();
                 fp.SetDefault();

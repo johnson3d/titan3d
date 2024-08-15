@@ -89,7 +89,7 @@ namespace EngineNS.NxRHI
             if (caps.IsSupportSSBO_VS)
             {
                 GlobalEnvDefines.AddDefine("HW_VS_STRUCTUREBUFFER", "1");
-                if (UEngine.Instance.Config.Feature_UseRVT)
+                if (TtEngine.Instance.Config.Feature_UseRVT)
                 {
                     GlobalEnvDefines.AddDefine("FEATURE_USE_RVT", "1");
                 }
@@ -120,7 +120,7 @@ namespace EngineNS.NxRHI
                 return null;
             return result;
         }
-        public UCbView CreateCBV(UEffectBinder binder)
+        public UCbView CreateCBV(TtEffectBinder binder)
         {
             if (binder == null)
                 return null;
@@ -281,18 +281,18 @@ namespace EngineNS.NxRHI
                 return null;
             return result;
         }
-        public UShader CreateShader(UShaderDesc desc)
+        public TtShader CreateShader(TtShaderDesc desc)
         {
-            var result = new UShader();
+            var result = new TtShader();
             result.PermutationId = desc.PermutationId;
             result.mCoreObject = mCoreObject.CreateShader(desc.mCoreObject);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public UShaderEffect CreateShaderEffect(UShader vs, UShader ps)
+        public TtShaderEffect CreateShaderEffect(TtShader vs, TtShader ps)
         {
-            var result = new UShaderEffect();
+            var result = new TtShaderEffect();
             result.mCoreObject = mCoreObject.CreateShaderEffect();
             result.mCoreObject.BindVS(vs.mCoreObject);
             result.mCoreObject.BindPS(ps.mCoreObject);
@@ -300,9 +300,9 @@ namespace EngineNS.NxRHI
             result.mCoreObject.BuildState(mCoreObject);
             return result;
         }
-        public UComputeEffect CreateComputeEffect(UShader cs)
+        public TtComputeEffect CreateComputeEffect(TtShader cs)
         {
-            var result = new UComputeEffect();
+            var result = new TtComputeEffect();
             result.mComputeShader = cs;
             result.mCoreObject = mCoreObject.CreateComputeEffect();
             result.mCoreObject.BindCS(cs.mCoreObject);
@@ -458,15 +458,15 @@ namespace EngineNS.NxRHI
         public FTransientCmd(EQueueType type, string debugName)
         {
             mType = type;
-            mCmdList = UEngine.Instance.GfxDevice.RenderContext.GpuQueue.GetIdleCmdlist();
+            mCmdList = TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.GetIdleCmdlist();
             mCmdList.BeginCommand();
         }
         public void Dispose()
         {
             mCmdList.FlushDraws();
             mCmdList.EndCommand();
-            UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, mType);
-            UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ReleaseIdleCmdlist(mCmdList);
+            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, mType);
+            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ReleaseIdleCmdlist(mCmdList);
         }
     }
 }

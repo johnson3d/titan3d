@@ -19,13 +19,13 @@ namespace EngineNS.NxPhysics
                 if (mDebugMesh == null)
                 {
                     mDebugMesh = new Graphics.Mesh.TtMesh();
-                    var clr = ((uint)UEngine.Instance.PxSystem.Random.Next()) | 0xff000000;
+                    var clr = ((uint)TtEngine.Instance.PxSystem.Random.Next()) | 0xff000000;
                     var radius = mCoreObject.mDesc.Radius.AsSingle();
-                    var stack = (uint)(radius / UEngine.Instance.PxSystem.DebugTriangleSize);
+                    var stack = (uint)(radius / TtEngine.Instance.PxSystem.DebugTriangleSize);
                     var geoMesh = Graphics.Mesh.UMeshDataProvider.MakeSphere(radius, stack, stack, clr).ToMesh();
-                    Graphics.Pipeline.Shader.UMaterial[] materials = new Graphics.Pipeline.Shader.UMaterial[]
+                    Graphics.Pipeline.Shader.TtMaterial[] materials = new Graphics.Pipeline.Shader.TtMaterial[]
                     {
-                        UEngine.Instance.PxSystem.DebugShapeMaterial,
+                        TtEngine.Instance.PxSystem.DebugShapeMaterial,
                     };
                     mDebugMesh.Initialize(geoMesh, materials, 
                         Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
@@ -52,16 +52,16 @@ namespace EngineNS.NxPhysics
                 if (mDebugMesh == null)
                 {
                     mDebugMesh = new Graphics.Mesh.TtMesh();
-                    var clr = ((uint)UEngine.Instance.PxSystem.Random.Next()) | 0xff000000;
+                    var clr = ((uint)TtEngine.Instance.PxSystem.Random.Next()) | 0xff000000;
                     Vector3 halfExt = new Vector3();
                     Vector3 start = -halfExt;
                     Vector3 size = halfExt * 2.0f;
                     mCoreObject.mDesc.HalfExtent.ToVector3f(&halfExt);
                     var geoMesh = Graphics.Mesh.UMeshDataProvider.MakeBox(start.X, start.Y, start.Z,
                          size.X, size.Y, size.Z, clr).ToMesh();
-                    Graphics.Pipeline.Shader.UMaterial[] materials = new Graphics.Pipeline.Shader.UMaterial[]
+                    Graphics.Pipeline.Shader.TtMaterial[] materials = new Graphics.Pipeline.Shader.TtMaterial[]
                     {
-                        UEngine.Instance.PxSystem.DebugShapeMaterial,
+                        TtEngine.Instance.PxSystem.DebugShapeMaterial,
                     };
                     mDebugMesh.Initialize(geoMesh, materials,
                         Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);

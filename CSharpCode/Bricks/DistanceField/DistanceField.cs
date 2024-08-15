@@ -75,7 +75,7 @@ namespace EngineNS.DistanceField
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            return await UEngine.Instance.SdfAssetManager.GetSdfAsset(GetAssetName());
+            return await TtEngine.Instance.SdfAssetManager.GetSdfAsset(GetAssetName());
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -112,7 +112,7 @@ namespace EngineNS.DistanceField
 
         public IO.IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
 
         public void SaveAssetTo(RName name)
@@ -149,7 +149,7 @@ namespace EngineNS.DistanceField
             }
 
             xnd.SaveXnd(name.Address);
-            UEngine.Instance.SourceControlModule.AddFile(name.Address);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
 
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
@@ -235,7 +235,7 @@ namespace EngineNS.DistanceField
             if (sdfAssets.TryGetValue(name, out result))
                 return result;
 
-            result = await UEngine.Instance.EventPoster.Post((state) =>
+            result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
                 {
@@ -268,7 +268,7 @@ namespace EngineNS.DistanceField
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public DistanceField.TtSdfAssetManager SdfAssetManager { get; } = new DistanceField.TtSdfAssetManager();
     }

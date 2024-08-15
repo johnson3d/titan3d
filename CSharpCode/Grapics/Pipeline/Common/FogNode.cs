@@ -13,9 +13,9 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/FogShading.cginc", RName.ERNameType.Engine);
 
-            TypeFog = this.PushPermutation<Graphics.Pipeline.URenderPolicy.ETypeAA>("ENV_FOGFACTOR_TYPE", (int)Graphics.Pipeline.URenderPolicy.ETypeFog.TypeCount);
+            TypeFog = this.PushPermutation<Graphics.Pipeline.TtRenderPolicy.ETypeAA>("ENV_FOGFACTOR_TYPE", (int)Graphics.Pipeline.TtRenderPolicy.ETypeFog.TypeCount);
 
-            TypeFog.SetValue((int)Graphics.Pipeline.URenderPolicy.ETypeFog.None);
+            TypeFog.SetValue((int)Graphics.Pipeline.TtRenderPolicy.ETypeFog.None);
 
             this.UpdatePermutation();
         }
@@ -26,8 +26,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
         {
-            defines.AddDefine("TypeFog_None", (int)Graphics.Pipeline.URenderPolicy.ETypeFog.None);
-            defines.AddDefine("TypeFog_ExpHeight", (int)Graphics.Pipeline.URenderPolicy.ETypeFog.ExpHeight);
+            defines.AddDefine("TypeFog_None", (int)Graphics.Pipeline.TtRenderPolicy.ETypeFog.None);
+            defines.AddDefine("TypeFog_ExpHeight", (int)Graphics.Pipeline.TtRenderPolicy.ETypeFog.ExpHeight);
         }
 
         public UPermutationItem TypeFog
@@ -35,11 +35,11 @@ namespace EngineNS.Graphics.Pipeline.Common
             get;
             set;
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
-            var pipelinPolicy = policy.TagObject as URenderPolicy;
+            var pipelinPolicy = policy.TagObject as TtRenderPolicy;
 
             var aaNode = drawcall.TagObject as TtFogNode;
             if (aaNode == null)
@@ -47,10 +47,10 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             switch (pipelinPolicy.TypeFog)
             {
-                case URenderPolicy.ETypeFog.None:
+                case TtRenderPolicy.ETypeFog.None:
                     OnDrawcallEHF(drawcall, pipelinPolicy, aaNode);
                     break;
-                case URenderPolicy.ETypeFog.ExpHeight:
+                case TtRenderPolicy.ETypeFog.ExpHeight:
                     OnDrawcallEHF(drawcall, pipelinPolicy, aaNode);
                     break;
             }
@@ -82,18 +82,18 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             return mBasePassShading;
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtFogShading>();
+            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtFogShading>();
         }
-        public override void FrameBuild(URenderPolicy policy)
+        public override void FrameBuild(TtRenderPolicy policy)
         {
             base.FrameBuild(policy);
         }
-        public override void BeforeTickLogic(URenderPolicy policy)
+        public override void BeforeTickLogic(TtRenderPolicy policy)
         {
-            if (policy.TypeFog == URenderPolicy.ETypeFog.None)
+            if (policy.TypeFog == TtRenderPolicy.ETypeFog.None)
             {
                 this.MoveAttachment(ColorPinIn, ResultPinOut);
                 return;
@@ -110,26 +110,26 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
         public NxRHI.UCbView CBShadingEnv;
-        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
-            if (policy.TypeFog == URenderPolicy.ETypeFog.None)
+            if (policy.TypeFog == TtRenderPolicy.ETypeFog.None)
             {
                 return;
             }
             base.TickLogic(world, policy, bClear);
         }
-        public override void TickSync(URenderPolicy policy)
+        public override void TickSync(TtRenderPolicy policy)
         {
-            if (policy.TypeFog == URenderPolicy.ETypeFog.None)
+            if (policy.TypeFog == TtRenderPolicy.ETypeFog.None)
             {
                 return;
             }
             base.TickSync(policy);
             switch (policy.TypeFog)
             {
-                case URenderPolicy.ETypeFog.None:
+                case TtRenderPolicy.ETypeFog.None:
                     break;
-                case URenderPolicy.ETypeFog.ExpHeight:
+                case TtRenderPolicy.ETypeFog.ExpHeight:
                     TickSyncEHF(policy);
                     break;
             }

@@ -149,7 +149,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public void SaveClassGraph(RName rn)
         {
-            var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as UMacrossAMeta;
+            var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as UMacrossAMeta;
             if (ameta != null)
             {
                 if(DefClass.SupperClassNames.Count > 0)
@@ -161,7 +161,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         tmp.AssetName = rn;
                         tmp.SelectedType = baseType;
                         tmp.UpdateAMetaReferences(ameta);
-                        ameta.SaveAMeta();
+                        ameta.SaveAMeta(tmp);
                     }
                     else if(baseType == null && !string.IsNullOrEmpty(ameta.BaseTypeStr))
                     {
@@ -169,7 +169,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         tmp.AssetName = rn;
                         tmp.SelectedType = null;
                         tmp.UpdateAMetaReferences(ameta);
-                        ameta.SaveAMeta();
+                        ameta.SaveAMeta(tmp);
                     }
                 }
             }
@@ -184,7 +184,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var xmlText = IO.TtFileManager.GetXmlText(xml);
             var graphDataFileName = $"{rn.Address}/class_graph.dat";
             IO.TtFileManager.WriteAllText(graphDataFileName, xmlText);
-            UEngine.Instance.SourceControlModule.AddFile(graphDataFileName);
+            TtEngine.Instance.SourceControlModule.AddFile(graphDataFileName);
 
             for(int i=0; i<Methods.Count; i++)
             {
@@ -200,13 +200,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
                 var methodFileName = $"{rn.Address}/{Methods[i].Name}_{Hash160.CreateHash160(declName)}.fn";
                 IO.TtFileManager.WriteAllText(methodFileName, funcXmlText);
-                UEngine.Instance.SourceControlModule.AddFile(methodFileName);
+                TtEngine.Instance.SourceControlModule.AddFile(methodFileName);
             }
 
             //LoadClassGraph(rn);
         }
         public void LoadClassGraph(RName rn)
         {
+            AssetName = rn;
             DefClass.Reset();
             Methods.Clear();
             OpenFunctions.Clear();
@@ -233,7 +234,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 else
                 {
                     DefClass.Namespace = new UNamespaceDeclaration("NS_" + ((UInt32)nsName.GetHashCode()).ToString());
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Macross", $"Get namespace failed, {rn.Name} has invalid char!");
+                    Profiler.Log.WriteLine<Profiler.TtMacrossCategory>(Profiler.ELogTag.Warning, $"Get namespace failed, {rn.Name} has invalid char!");
                 }    
                 DefClass.ClearMethods();
                 var funcFiles = IO.TtFileManager.GetFiles(rn.Address, "*.fn", false);
@@ -369,7 +370,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 DefClass.ResetRuntimeData();
                 //GenerateAssemblyDescCreateInstanceCode();
 
-                EngineNS.UEngine.Instance.MacrossManager.GenerateProjects();
+                EngineNS.TtEngine.Instance.MacrossManager.GenerateProjects();
                 return code;
             }
             catch (NodeGraph.GraphException ex)
@@ -439,7 +440,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         //void GenerateAssemblyDescCreateInstanceCode()
         //{
-        //    var projFolder = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + IO.TtFileManager.GetParentPathName(UEngine.Instance.EditorInstance.Config.GameProject);
+        //    var projFolder = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + IO.TtFileManager.GetParentPathName(TtEngine.Instance.EditorInstance.Config.GameProject);
         //    var assemblyFileName = projFolder + "/Assembly.cs";
         //    string assemblyDescCodes = "";
         //    using(var sr = new System.IO.StreamReader(assemblyFileName, Encoding.UTF8, true))
@@ -477,7 +478,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //{
         //    try
         //    {
-        //        var projFolder = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + IO.TtFileManager.GetParentPathName(UEngine.Instance.EditorInstance.Config.GameProject);
+        //        var projFolder = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + IO.TtFileManager.GetParentPathName(TtEngine.Instance.EditorInstance.Config.GameProject);
         //        var assemblyFileName = projFolder + "/Assembly.cs";
         //        string assemblyDescCodes = "";
         //        using (var sr = new System.IO.StreamReader(assemblyFileName, Encoding.UTF8, true))
@@ -518,11 +519,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public Action<UMacrossEditor> AfterCompileCode;
         public void CompileCode()
         {
-            UEngine.Instance.MacrossManager.ClearGameProjectTemplateBuildFiles();
-            var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameAssembly;
-            if (UEngine.Instance.MacrossModule.CompileCode(assemblyFile))
+            TtEngine.Instance.MacrossManager.ClearGameProjectTemplateBuildFiles();
+            var assemblyFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameAssembly;
+            if (TtEngine.Instance.MacrossModule.CompileCode(assemblyFile))
             {
-                UEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
+                TtEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
                 var typeDesc = DefClass.TryGetTypeDesc();
                 if(typeDesc != null)
                 {
@@ -550,7 +551,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 sr.Write(code);
             }
-            UEngine.Instance.SourceControlModule.AddFile(fileName);
+            TtEngine.Instance.SourceControlModule.AddFile(fileName);
         }
         void SaveHlslFile(string code)
         {
@@ -559,7 +560,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 sr.Write(code);
             }
-            UEngine.Instance.SourceControlModule.AddFile(fileName);
+            TtEngine.Instance.SourceControlModule.AddFile(fileName);
         }
 
         List<EGui.UIProxy.MenuItemProxy> mMenuItems = new List<EGui.UIProxy.MenuItemProxy>();
@@ -665,12 +666,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList, 
                 ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Save"))
             {
-                var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as UMacrossAMeta;
+                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as UMacrossAMeta;
                 if (ameta != null)
                 {
                     UMacross.UpdateAMetaReferences(this, ameta);
                     ameta.Description = $"MacrossType:{ameta.BaseTypeStr}\n";
-                    ameta.SaveAMeta();
+                    ameta.SaveAMeta((IO.IAsset)null);
                 }
                 SaveClassGraph(AssetName);
                 GenerateCode();
@@ -710,9 +711,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList, in Support.UAnyPointer.Default,
             //    ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "DebugTest"))
             //{
-            //    var result = UEngine.Instance.EventPoster.Post(() =>
+            //    var result = TtEngine.Instance.EventPoster.Post(() =>
             //    {
-            //        var tt = UEngine.Instance.MacrossModule.NewInnerObject<Macross.UMacrossTestClass>(AssetName);
+            //        var tt = TtEngine.Instance.MacrossModule.NewInnerObject<Macross.UMacrossTestClass>(AssetName);
             //        var methodInfo = tt.GetType().GetMethod("Method_0");
             //        //tt.VirtualFunc3(5);
             //        methodInfo?.Invoke(tt, null);
@@ -749,7 +750,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -809,7 +810,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 var funcFileName = $"{AssetName.Address}/{method.Name}.func";
                 IO.TtFileManager.DeleteFile(funcFileName);
-                UEngine.Instance.SourceControlModule.RemoveFile(funcFileName);
+                TtEngine.Instance.SourceControlModule.RemoveFile(funcFileName);
             }
             Methods.Remove(method);
             for (int methodIdx = 0; methodIdx < method.MethodDatas.Count; methodIdx++)
@@ -936,7 +937,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             {
                                 PGMember.Target = mem;
                                 DraggingMember = MemberVar.NewMemberVar(DefClass, mem.VariableName,
-                                    UEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_LCTRL) ? false : true);
+                                    TtEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_LCTRL) ? false : true);
                                 DraggingMember.UserData = this;
                                 IsDraggingMember = false;
                             }
@@ -1138,7 +1139,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         {
                             PGMember.Target = mem;
                             DraggingLocalVar = MethodLocalVar.NewMethodLocalVar(CurrentOpenMethod, mem.VariableName,
-                                UEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_LCTRL) ? false : true);
+                                TtEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_LCTRL) ? false : true);
                             DraggingLocalVar.UserData = this;
                             IsDraggingLocalVar = false;
                         }
@@ -1333,8 +1334,8 @@ namespace EngineNS.Macross
         }
         partial void TryCompileCode(string assemblyFile, ref bool success)
         {
-            var csFilesPath = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
-            var projectFile = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProject;
+            var csFilesPath = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
+            var projectFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameProject;
             success = CompileGameProject(csFilesPath, projectFile, assemblyFile);
         }
         public static bool CompileGameProject(string csFilesPath, string projectFile, string assemblyFile)

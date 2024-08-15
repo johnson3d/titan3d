@@ -61,7 +61,7 @@ namespace EngineNS.Graphics.Pipeline
 
                 if (HitProxyAllocatorId == uint.MaxValue)
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "UHitproxy", "HitProxyAllocatorId == uint.MaxValue");
+                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, "HitProxyAllocatorId == uint.MaxValue");
                     System.Diagnostics.Debug.Assert(false);
                     HitProxyAllocatorId = 0;
                     foreach (var i in Proxies)

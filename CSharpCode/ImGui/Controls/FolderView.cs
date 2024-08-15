@@ -35,14 +35,14 @@ namespace EngineNS.EGui.Controls
         {
             await TtAsyncDummyClass.DummyFunc();
 
-            if (UEngine.Instance.UIProxyManager[FolderOpenImgName] == null)
-                UEngine.Instance.UIProxyManager[FolderOpenImgName] = new EGui.UIProxy.ImageProxy(RName.GetRName(FolderOpenImgName, RName.ERNameType.Engine));
-            if (UEngine.Instance.UIProxyManager[FolderClosedImgName] == null)
-                UEngine.Instance.UIProxyManager[FolderClosedImgName] = new EGui.UIProxy.ImageProxy(RName.GetRName(FolderClosedImgName, RName.ERNameType.Engine));
-            if (UEngine.Instance.UIProxyManager[PreFolderImgName] == null)
-                UEngine.Instance.UIProxyManager[PreFolderImgName] = new EGui.UIProxy.ImageProxy(RName.GetRName(PreFolderImgName, RName.ERNameType.Engine));
-            if (UEngine.Instance.UIProxyManager[NextFolderImgName] == null)
-                UEngine.Instance.UIProxyManager[NextFolderImgName] = new EGui.UIProxy.ImageProxy(RName.GetRName(NextFolderImgName, RName.ERNameType.Engine));
+            if (TtEngine.Instance.UIProxyManager[FolderOpenImgName] == null)
+                TtEngine.Instance.UIProxyManager[FolderOpenImgName] = new EGui.UIProxy.ImageProxy(RName.GetRName(FolderOpenImgName, RName.ERNameType.Engine));
+            if (TtEngine.Instance.UIProxyManager[FolderClosedImgName] == null)
+                TtEngine.Instance.UIProxyManager[FolderClosedImgName] = new EGui.UIProxy.ImageProxy(RName.GetRName(FolderClosedImgName, RName.ERNameType.Engine));
+            if (TtEngine.Instance.UIProxyManager[PreFolderImgName] == null)
+                TtEngine.Instance.UIProxyManager[PreFolderImgName] = new EGui.UIProxy.ImageProxy(RName.GetRName(PreFolderImgName, RName.ERNameType.Engine));
+            if (TtEngine.Instance.UIProxyManager[NextFolderImgName] == null)
+                TtEngine.Instance.UIProxyManager[NextFolderImgName] = new EGui.UIProxy.ImageProxy(RName.GetRName(NextFolderImgName, RName.ERNameType.Engine));
 
             InitializeDirContextMenu();
 
@@ -73,15 +73,15 @@ namespace EngineNS.EGui.Controls
             if (!string.IsNullOrEmpty(mCreateFolderDir))
             {
                 var pathName = IO.TtFileManager.GetLastestPathName(mCreateFolderDir);
-                if (UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) == mCreateFolderDir)
+                if (TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) == mCreateFolderDir)
                 {
                     pathName = "Game";
                 }
-                else if (UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) == mCreateFolderDir)
+                else if (TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) == mCreateFolderDir)
                 {
                     pathName = "Engine";
                 }
-                else if (UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Editor) == mCreateFolderDir)
+                else if (TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Editor) == mCreateFolderDir)
                 {
                     pathName = "Editor";
                 }
@@ -123,9 +123,9 @@ namespace EngineNS.EGui.Controls
             ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
             if (root == CurrentDir)
                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
-            UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)EGui.Slate.UBaseRenderer.enFont.Font_Bold_13px);
+            TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)EGui.Slate.UBaseRenderer.enFont.Font_Bold_13px);
             var treeNodeResult = ImGuiAPI.TreeNodeEx(root.RNameType.ToString(), flags);
-            UEngine.Instance.GfxDevice.SlateRenderer.PopFont();
+            TtEngine.Instance.GfxDevice.SlateRenderer.PopFont();
             DrawDirContextMenu(root.Address);
             if (treeNodeResult)
             {
@@ -210,7 +210,7 @@ namespace EngineNS.EGui.Controls
                             foreach (var f in files)
                             {
                                 var ff = f.Substring(0, f.Length - ".ameta".Length);
-                                var ameta1 = UEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRNameFromAbsPath(ff)) as Bricks.CodeBuilder.UMacrossAMeta;
+                                var ameta1 = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRNameFromAbsPath(ff)) as Bricks.CodeBuilder.UMacrossAMeta;
                                 if (ameta1 == null)
                                     continue;
 
@@ -229,7 +229,7 @@ namespace EngineNS.EGui.Controls
                             foreach (var f in files)
                             {
                                 var ff = f.Substring(0, f.Length - ".ameta".Length);
-                                var ameta1 = UEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRNameFromAbsPath(ff)) as Graphics.Pipeline.Shader.TtShaderAssetAMeta;
+                                var ameta1 = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRNameFromAbsPath(ff)) as Graphics.Pipeline.Shader.TtShaderAssetAMeta;
                                 if (ameta1 == null)
                                     continue;
 
@@ -281,14 +281,14 @@ namespace EngineNS.EGui.Controls
             var imgSize = 16;
             if (treeNodeResult)
             {
-                var shadowImg = UEngine.Instance.UIProxyManager[FolderOpenImgName] as EGui.UIProxy.ImageProxy;
+                var shadowImg = TtEngine.Instance.UIProxyManager[FolderOpenImgName] as EGui.UIProxy.ImageProxy;
                 if (shadowImg != null)
                     shadowImg.OnDraw(cmdList, start, start + new Vector2(imgSize, imgSize), 0xff558fb6);
             }
             else
             {
                 start.X += style->IndentSpacing;
-                var shadowImg = UEngine.Instance.UIProxyManager[FolderClosedImgName] as EGui.UIProxy.ImageProxy;
+                var shadowImg = TtEngine.Instance.UIProxyManager[FolderClosedImgName] as EGui.UIProxy.ImageProxy;
                 if (shadowImg != null)
                     shadowImg.OnDraw(cmdList, start, start + new Vector2(imgSize, imgSize), 0xff558fb6);
             }

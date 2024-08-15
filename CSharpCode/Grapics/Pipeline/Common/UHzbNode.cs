@@ -20,7 +20,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             HzbPinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(HzbPinOut, NxRHI.EBufferType.BFT_SRV);
         }
-        public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
+        public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             var hzbBuffer = RenderGraph.AttachmentCache.ImportAttachment(HzbPinOut);
             hzbBuffer.GpuResource = HzbTexture;
@@ -49,7 +49,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var node = drawcall.TagObject as UHzbNode;
 
@@ -76,7 +76,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var node = drawcall.TagObject as UHzbNode;
 
@@ -86,11 +86,11 @@ namespace EngineNS.Graphics.Pipeline.Common
         private DownSampleShading DownSample;
         private NxRHI.UComputeDraw[] MipsDrawcalls;
         
-        public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public async override System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             BasePass.Initialize(rc, debugName);
 
@@ -99,19 +99,19 @@ namespace EngineNS.Graphics.Pipeline.Common
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
 
-            Setup = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupShading>();
+            Setup = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupShading>();
 
-            DownSample = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<DownSampleShading>();
+            DownSample = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<DownSampleShading>();
 
             //ResetComputeDrawcall(policy);
         }
-        private unsafe void ResetComputeDrawcall(URenderPolicy policy)
+        private unsafe void ResetComputeDrawcall(TtRenderPolicy policy)
         {
             if (Setup == null)
                 return;
 
             if (SetupDrawcall == null)
-                SetupDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
+                SetupDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
 
             Setup.SetDrawcallDispatch(this, policy, SetupDrawcall, MaxSRVWidth / Dispatch_SetupDimArray2.X, MaxSRVHeight / Dispatch_SetupDimArray2.Y, 1, false);
             //SetupDrawcall.SetComputeEffect(Setup.CurrentEffect);
@@ -154,7 +154,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 {
                     height = 1;
                 }
-                var drawcall = UEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
+                var drawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
                 CoreSDK.DisposeObject(ref MipsDrawcalls[i - 1]);
                 MipsDrawcalls[i - 1] = drawcall;
                 DownSample.SetDrawcallDispatch(this, policy, drawcall, width, height, 1, true);
@@ -199,11 +199,11 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         uint MaxSRVWidth;
         uint MaxSRVHeight;
-        public override unsafe void OnResize(URenderPolicy policy, float x, float y)
+        public override unsafe void OnResize(TtRenderPolicy policy, float x, float y)
         {
             if (x == 1 || y == 1)
                 return;
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             x /= 2;
             y /= 2;
@@ -250,7 +250,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UHzbNode), nameof(TickLogic));
-        public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
             if (SetupDrawcall == null)
                 return;

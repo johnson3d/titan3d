@@ -17,7 +17,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            //return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
+            //return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
             return null;
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
@@ -89,7 +89,7 @@ namespace EngineNS.GamePlay.Scene
         public void Cleanup()
         {
             ClearChildren();
-            UEngine.Instance?.SceneManager.UnloadScene(this.AssetName);
+            TtEngine.Instance?.SceneManager.UnloadScene(this.AssetName);
         }
         public USceneData SceneData
         {
@@ -195,7 +195,7 @@ namespace EngineNS.GamePlay.Scene
             if (ameta != null)
             {
                 UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta();
+                ameta.SaveAMeta(this);
             }
 
             var typeStr = Rtti.UTypeDesc.TypeStr(GetType());
@@ -244,14 +244,14 @@ namespace EngineNS.GamePlay.Scene
                         ar.ReadTo(desc, scene);
                         if (await scene.InitializeNode(world, nodeData, EBoundVolumeType.None, null) == false)
                         {
-                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Scene", $"InitializeNode failed: NodeDataType={descAttr.Name}, NodeData={xnd.RootNode.Name}");
+                            Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"InitializeNode failed: NodeDataType={descAttr.Name}, NodeData={xnd.RootNode.Name}");
                             return null;
                         }
                     }
                     catch (Exception ex)
                     {
                         Profiler.Log.WriteException(ex);
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"SceneData({scene.AssetName}): load failed");
+                        Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"SceneData({scene.AssetName}): load failed");
                     }
                 }
 
@@ -278,7 +278,7 @@ namespace EngineNS.GamePlay.Scene
 
         public IO.IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
 
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
@@ -299,9 +299,9 @@ namespace EngineNS.GamePlay.Scene
         #endregion
 
         UMemberTickables mMemberTickables = new UMemberTickables();
-        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
+        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
-            mMemberTickables.TickLogic(this, UEngine.Instance.ElapseTickCountMS);
+            mMemberTickables.TickLogic(this, TtEngine.Instance.ElapseTickCountMS);
             return true;
         }
         public override unsafe bool IsTreeContain(DVector3* localStart, DVector3* dir, DBoundingBox* pBox)
@@ -319,9 +319,9 @@ namespace EngineNS.GamePlay.Scene
 
     }
 
-    public class USceneManager : UModule<UEngine>
+    public class USceneManager : UModule<TtEngine>
     {
-        public override void Cleanup(UEngine host)
+        public override void Cleanup(TtEngine host)
         {
             Scenes.Clear();
         }
@@ -386,7 +386,7 @@ namespace EngineNS.GamePlay.Scene
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public GamePlay.Scene.USceneManager SceneManager { get; } = new GamePlay.Scene.USceneManager();
     }

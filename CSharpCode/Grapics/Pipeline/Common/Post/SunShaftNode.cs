@@ -42,12 +42,12 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, UGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtSunShaftDepthThresholeNode;
             if (aaNode == null)
             {
-                var pipelinePolicy = policy.TagObject as URenderPolicy;
+                var pipelinePolicy = policy.TagObject as TtRenderPolicy;
                 aaNode = pipelinePolicy.FindFirstNode<TtSunShaftDepthThresholeNode>();
             }
 
@@ -59,7 +59,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
             index = drawcall.FindBinder("Samp_ColorBuffer");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
             index = drawcall.FindBinder("DepthBuffer");
             if (index.IsValidPointer)
             {
@@ -68,14 +68,14 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
             index = drawcall.FindBinder("Samp_DepthBuffer");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
             index = drawcall.FindBinder("cbShadingEnv");
             if (index.IsValidPointer)
             {
                 if (aaNode.CBShadingEnv == null)
                 {
-                    aaNode.CBShadingEnv = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    aaNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
                 drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
             }
@@ -107,10 +107,10 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             return mBasePassShading;
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDepthThresholeShading>();
+            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDepthThresholeShading>();
         }
 
         FSunShaftStruct mSunShaftStruct = new FSunShaftStruct();
@@ -146,7 +146,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
         }
         public NxRHI.UCbView CBShadingEnv;
-        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             base.TickLogic(world, policy, bClear);
 
@@ -162,11 +162,11 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 CBShadingEnv.SetValue("SunShaftStruct", in mSunShaftStruct);
             }
         }
-        public override void TickSync(URenderPolicy policy)
+        public override void TickSync(TtRenderPolicy policy)
         {
             base.TickSync(policy);
         }
-        public override void BeforeTickLogic(URenderPolicy policy)
+        public override void BeforeTickLogic(TtRenderPolicy policy)
         {
             //var buffer = this.FindAttachBuffer(ColorPinIn);
             //if (buffer != null)
@@ -191,7 +191,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, UGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtSunShaftRadialBlurNode;
             if (aaNode == null)
@@ -207,14 +207,14 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
             index = drawcall.FindBinder("Samp_ColorBuffer");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
             index = drawcall.FindBinder("cbShadingEnv");
             if (index.IsValidPointer)
             {
                 if (aaNode.CBShadingEnv == null)
                 {
-                    aaNode.CBShadingEnv = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    aaNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
                 drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
             }
@@ -245,10 +245,10 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             return mBasePassShading;
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtRadialBlurShading>();
+            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtRadialBlurShading>();
         }
 
         FSunShaftStruct mSunShaftStruct = new FSunShaftStruct();
@@ -279,7 +279,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
         }
         public NxRHI.UCbView CBShadingEnv;
-        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             var toViewport = policy.DefaultCamera.GetViewProjection();
             var clipPos = Vector3.Transform(new Vector3(100, 100, 100), in toViewport);
@@ -294,11 +294,11 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
             base.TickLogic(world, policy, bClear);
         }
-        public override void TickSync(URenderPolicy policy)
+        public override void TickSync(TtRenderPolicy policy)
         {
             base.TickSync(policy);
         }
-        public override void BeforeTickLogic(URenderPolicy policy)
+        public override void BeforeTickLogic(TtRenderPolicy policy)
         {
             var buffer = this.FindAttachBuffer(ColorPinIn);
             if (buffer != null)

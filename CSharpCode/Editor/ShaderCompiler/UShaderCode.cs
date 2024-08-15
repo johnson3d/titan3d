@@ -112,9 +112,9 @@ namespace EngineNS.Editor.ShaderCompiler
             var files = IO.TtFileManager.GetFiles(shaderDir.Address, "*.*", true);
             string root;
             if(shaderDir.RNameType == RName.ERNameType.Engine)
-                root = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine);
+                root = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine);
             else
-                root = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
+                root = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
             foreach (var i in files)
             {
                 if (i.EndsWith(".vcxitems") || i.EndsWith(".filters") || i.EndsWith(".bak"))
@@ -275,7 +275,7 @@ namespace EngineNS.Editor.ShaderCompiler
 
             if (bWriteFile)
             {
-                IO.TtFileManager.WriteAllText(UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.DebugUtility)
+                IO.TtFileManager.WriteAllText(TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.DebugUtility)
                     + $"/engine_preprosessors.cginc", sourceCode);
             }
             return result;
@@ -290,11 +290,11 @@ namespace EngineNS.Editor.ShaderCompiler
         }
         public Graphics.Pipeline.Shader.IShaderCodeProvider GetShaderCodeProvider(RName name)
         {
-            if (name.ExtName == Graphics.Pipeline.Shader.UMaterial.AssetExt)
+            if (name.ExtName == Graphics.Pipeline.Shader.TtMaterial.AssetExt)
             {
                 var saveMode = Thread.Async.TtContextThreadManager.ImmidiateMode;
                 Thread.Async.TtContextThreadManager.ImmidiateMode = true;
-                var task = UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(name);
+                var task = TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(name);
                 task.Wait();
                 Thread.Async.TtContextThreadManager.ImmidiateMode = saveMode;
                 var material = task.Result;

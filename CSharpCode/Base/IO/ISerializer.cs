@@ -98,7 +98,7 @@ namespace EngineNS.IO
             UInt64 versionHash;
             if (magic != HashMagic)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"读取到老的资产格式请重新保存成最新版本");
+                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"读取到老的资产格式请重新保存成最新版本");
                 versionHash = magic;
             }
             else
@@ -186,7 +186,7 @@ namespace EngineNS.IO
                 {
                     if (Rtti.UTypeDesc.CanCast(value.GetType(), i.PropInfo.PropertyType) == false)
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Serializer", $"ProperySet {i.PropertyName}: {value.GetType().FullName}!={i.PropInfo.PropertyType.FullName}");
+                        Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"ProperySet {i.PropertyName}: {value.GetType().FullName}!={i.PropInfo.PropertyType.FullName}");
                         continue;
                     }
                     try
@@ -561,7 +561,7 @@ namespace EngineNS.IO
                 UInt64 versionHash;
                 if (magic != SerializerHelper.HashMagic)
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"读取到老的资产格式请重新保存成最新版本");
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"读取到老的资产格式请重新保存成最新版本");
                     versionHash = magic;
                 }
                 else
@@ -925,9 +925,9 @@ namespace EngineNS.IO
             if (typeDesc == null)
             {
                 if (hostObject != null)
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "MetaData", $"{hostObject.GetType()}: MetaField({thisTypeStr}) Type Missing");
+                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"{hostObject.GetType()}: MetaField({thisTypeStr}) Type Missing");
                 else
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "MetaData", $"null: MetaField({thisTypeStr}) Type Missing");
+                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"null: MetaField({thisTypeStr}) Type Missing");
                 if (obj != null)
                     obj = Support.TConvert.ToObject(obj.GetType(), node.GetAttribute("Value"));
                 return;

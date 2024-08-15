@@ -13,25 +13,29 @@
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
     <e_1 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
-      <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.Post.SWRasterizerNode@EngineCore" />
+      <GraphNodeTypeString Type="System.String@Unknown" Value="" />
       <Label Type="System.String@Unknown" Value="SWRasterizerNode" />
       <Name Type="System.String@Unknown" Value="SWRasterizerNode" />
       <NodeId Type="System.Guid@Unknown" Value="604a4fdd-1917-437a-89b8-c64a6e26c2b8" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="471,235" />
-      <GraphNode Type="EngineNS.Graphics.Pipeline.Common.Post.SWRasterizerNode@EngineCore">
-        <Scale Type="System.Single@Unknown" Value="2" />
-      </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_1>
   </Nodes>
-  <PolicyClassName Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.UDeferredPolicyBase@EngineCore" />
+  <PolicyType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore" />
+  <RenderPolicy Type="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore">
+    <DisableAO Type="System.Boolean@Unknown" Value="False" />
+    <DisableHDR Type="System.Boolean@Unknown" Value="False" />
+    <DisablePointLight Type="System.Boolean@Unknown" Value="False" />
+    <DisableShadow Type="System.Boolean@Unknown" Value="False" />
+    <TypeAA Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA@EngineCore" Value="Taa" />
+    <TypeFog Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog@EngineCore" Value="None" />
+  </RenderPolicy>
   <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
         <InNodeId Type="System.Guid@Unknown" Value="9f1f1cbc-9cfe-4392-93a3-fbf7f992c628" />
         <InPinName Type="System.String@Unknown" Value="Color" />
-        <OutNodeId Type="System.Guid@Unknown" Value="604a4fdd-1917-437a-89b8-c64a6e26c2b8" />
-        <OutPinName Type="System.String@Unknown" Value="ColorOut" />
+        <OutNodeId Type="System.Guid@Unknown" Value="00000000-0000-0000-0000-000000000000" />
       </SaveData>
     </e_0>
   </Linkers>

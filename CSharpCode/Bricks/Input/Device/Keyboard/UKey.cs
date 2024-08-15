@@ -147,7 +147,7 @@ namespace EngineNS.Bricks.Input.Device.Keyboard
         }
         public void Tick()
         {
-            if (IsPressed && !UEngine.Instance.InputSystem.IsKeyDown(Keycode))
+            if (IsPressed && !TtEngine.Instance.InputSystem.IsKeyDown(Keycode))
             {
                 WasReleasedThisFrame = true;
             }

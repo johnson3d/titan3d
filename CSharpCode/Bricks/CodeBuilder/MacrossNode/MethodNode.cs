@@ -572,7 +572,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     {
                         if (Result.Tag != null)
                         {
-                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Meta", $"{method.MethodName} ParamMeta Error");
+                            Profiler.Log.WriteLine<Profiler.TtMacrossCategory>(Profiler.ELogTag.Warning, $"{method.MethodName} ParamMeta Error");
                         }
 
                         Result.Tag = Rtti.UTypeDesc.TypeOf(i.Meta.FilterType);
@@ -694,7 +694,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     {
                         if (Result.Tag != null)
                         {
-                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Meta", $"{m.MethodName} ParamMeta Error");
+                            Profiler.Log.WriteLine<Profiler.TtMacrossCategory>(Profiler.ELogTag.Warning, $"{m.MethodName} ParamMeta Error");
                         }
                         Result.Tag = i.Meta.FilterType;
                     }

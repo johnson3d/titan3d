@@ -61,7 +61,7 @@ namespace EngineNS.Thread.Async
     }
     public class TtJobSystem<T> : IJobSystem where T : IJob
     {
-        public TtJobThread<T>[] JobThreads = new TtJobThread<T>[UEngine.Instance.ContextThreadManager.PooledThreadNum];
+        public TtJobThread<T>[] JobThreads = new TtJobThread<T>[TtEngine.Instance.ContextThreadManager.PooledThreadNum];
         private int NumOfRemainTasks = 0;
         public List<T> Jobs = new List<T>();
         private System.Threading.AutoResetEvent mFinishEvent = new System.Threading.AutoResetEvent(false);
@@ -116,9 +116,9 @@ namespace EngineNS.Thread.Async
             mFinishEvent.Reset();
             for(int i=0; i< JobThreads.Length; i++)
             {
-                UEngine.Instance.ContextThreadManager.ContextPools[i].AddJobThread(JobThreads[i]);
+                TtEngine.Instance.ContextThreadManager.ContextPools[i].AddJobThread(JobThreads[i]);
             }
-            UEngine.Instance.ContextThreadManager.mTPoolTrigger.Set();
+            TtEngine.Instance.ContextThreadManager.mTPoolTrigger.Set();
         }
         public void Wait()
         {
@@ -126,7 +126,7 @@ namespace EngineNS.Thread.Async
         }
         public async System.Threading.Tasks.Task Await()
         {
-            await UEngine.Instance.ContextThreadManager.AwaitJobSystem(this);
+            await TtEngine.Instance.ContextThreadManager.AwaitJobSystem(this);
         }
     }
 }

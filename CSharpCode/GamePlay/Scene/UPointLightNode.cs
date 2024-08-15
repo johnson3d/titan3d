@@ -76,9 +76,9 @@ namespace EngineNS.GamePlay.Scene
             {
                 if (mDebugMesh == null)
                 {
-                    var cookedMesh = UEngine.Instance.GfxDevice.MeshPrimitiveManager.UnitSphere;
-                    var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
-                    materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria.CloneMaterialInstance();
+                    var cookedMesh = TtEngine.Instance.GfxDevice.MeshPrimitiveManager.UnitSphere;
+                    var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
+                    materials1[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria.CloneMaterialInstance();
                     var mesh2 = new Graphics.Mesh.TtMesh();
                     var ok1 = mesh2.Initialize(cookedMesh, materials1,
                         Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
@@ -124,7 +124,7 @@ namespace EngineNS.GamePlay.Scene
                 rp.VisibleNodes.Add(this);
             }
 
-            //if (UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug) == false)
+            //if (TtEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug) == false)
             //    return;
             if ((rp.CullFilters & GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug) == 0)
                 return;
@@ -166,10 +166,10 @@ namespace EngineNS.GamePlay.Scene
                 mDebugMesh.IsDrawHitproxy = false;
             }
         }
-        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
+        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             //test temp code 
-            LightData.Intensity = 120 * (float)Math.Sin(UEngine.Instance.TickCountSecond * 0.005f);
+            LightData.Intensity = 120 * (float)Math.Sin(TtEngine.Instance.TickCountSecond * 0.005f);
 
             return true;
         }

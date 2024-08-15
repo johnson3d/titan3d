@@ -13,7 +13,7 @@ namespace EngineNS.GamePlay
         [Rtti.Meta]
         public virtual async System.Threading.Tasks.Task<bool> BeginPlay(UGameInstance host)
         {
-            await host.InitViewportSlate(UEngine.Instance.Config.MainRPolicyName);
+            await host.InitViewportSlate(TtEngine.Instance.Config.MainRPolicyName);
 
             return true;
         }
@@ -91,19 +91,19 @@ namespace EngineNS.GamePlay
         }
         [Rtti.Meta]
         public async System.Threading.Tasks.Task InitViewportSlate(
-            [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.URenderPolicyAsset.AssetExt)]
+            [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]
             RName rPolicy, 
             float zMin = 0, float zMax = 1)
         {
             await WorldViewportSlate.Initialize(null, rPolicy, zMin, zMax);
             WorldViewportSlate.RenderPolicy.DisableShadow = false;
-            UEngine.Instance.GfxDevice.SlateApplication.NativeWindow.RegEventProcessor(WorldViewportSlate);
+            TtEngine.Instance.GfxDevice.SlateApplication.NativeWindow.RegEventProcessor(WorldViewportSlate);
         }
         [Rtti.Meta]
         public void FinalViewportSlate()
         {
-            UEngine.Instance.GfxDevice.SlateApplication.NativeWindow.UnregEventProcessor(WorldViewportSlate);
-            UEngine.RootFormManager.UnregRootForm(WorldViewportSlate);
+            TtEngine.Instance.GfxDevice.SlateApplication.NativeWindow.UnregEventProcessor(WorldViewportSlate);
+            TtEngine.RootFormManager.UnregRootForm(WorldViewportSlate);
         }
 
         [Rtti.Meta]
@@ -251,7 +251,7 @@ namespace EngineNS.GamePlay
 
 namespace EngineNS
 {
-    public partial class UEngine
+    public partial class TtEngine
     {
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.Unserializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public GamePlay.UGameInstance GameInstance

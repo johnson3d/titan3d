@@ -95,9 +95,9 @@ namespace EngineNS.UI.Editor
         {
             // debug //////////////////
             //if (element != null)
-            //    UEngine.Instance.UIManager.DebugPointatElement = element.Name + "(" + element.GetType().Name + ")";
+            //    TtEngine.Instance.UIManager.DebugPointatElement = element.Name + "(" + element.GetType().Name + ")";
             //else
-            //    UEngine.Instance.UIManager.DebugPointatElement = "";
+            //    TtEngine.Instance.UIManager.DebugPointatElement = "";
             ///////////////////////////
 
             if (element != null)

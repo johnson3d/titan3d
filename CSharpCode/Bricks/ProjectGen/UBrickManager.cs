@@ -9,7 +9,7 @@ namespace EngineNS.Bricks.ProjectGen
     {
         public UBrickManager()
         {
-            UEngine.RootFormManager.RegRootForm(this);
+            TtEngine.RootFormManager.RegRootForm(this);
         }
         bool mVisible = false;
         public bool Visible 
@@ -22,7 +22,7 @@ namespace EngineNS.Bricks.ProjectGen
         public async Thread.Async.TtTask<bool> Initialize()
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
-            var path = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
+            var path = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
             var files = IO.TtFileManager.GetFiles(path, "*.brick", true);
             foreach(var i in files)
             {
@@ -84,7 +84,7 @@ namespace EngineNS.Bricks.ProjectGen
             releaseConfig.Arch = UCompileConfig.ECpuArch.AnyCPU;
             ProjectDesc.Configs.Add(releaseConfig);
 
-            var path = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
+            var path = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
             ProjectDesc.Build();
             ProjectDesc.SaveVSProject(IO.TtFileManager.CombinePath(path, projName));
         }

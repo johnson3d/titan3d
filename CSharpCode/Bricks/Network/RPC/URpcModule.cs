@@ -120,10 +120,10 @@ namespace EngineNS.Bricks.Network.RPC
 			var result = mAllocator.QueryObjectSync();
 			result.IsCompleted = false;
             result.Context.Handle = System.Threading.Interlocked.Increment(ref TtReturnAwaiterBase.CurrentId);
-			result.Context.RunTarget = UEngine.Instance.RpcModule.RpcManager.CurrentTarget;
+			result.Context.RunTarget = TtEngine.Instance.RpcModule.RpcManager.CurrentTarget;
 			result.BeginWaitTime = Support.Time.GetTickCount();
 			result.Timeout = timeOut;
-			UEngine.Instance.RpcModule.PushReturnAwaiter(result);
+			TtEngine.Instance.RpcModule.PushReturnAwaiter(result);
 			return result;
 		}
         #endregion
@@ -189,7 +189,7 @@ namespace EngineNS.Bricks.Network.RPC
         }
     }
 
-	public class URpcModule : UModule<UEngine>
+	public class URpcModule : UModule<TtEngine>
 	{
 		public INetConnect DefaultNetConnect = new UFakeNetConnect();
         public UInt16 DefaultExeIndex = UInt16.MaxValue;
@@ -222,7 +222,7 @@ namespace EngineNS.Bricks.Network.RPC
 
 			awaiter.Dispose();
 		}
-		public override async System.Threading.Tasks.Task<bool> Initialize(UEngine host)
+		public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine host)
 		{
 			await Thread.TtAsyncDummyClass.DummyFunc();
 			var type = Rtti.UTypeDesc.TypeOf(host.Config.RpcRootType);
@@ -233,7 +233,7 @@ namespace EngineNS.Bricks.Network.RPC
 			}
 			return true;
 		}
-        public unsafe override void TickModule(UEngine host)
+        public unsafe override void TickModule(TtEngine host)
         {
             NetPackageManager.Tick();
 			var now = Support.Time.GetTickCount();
@@ -258,7 +258,7 @@ namespace EngineNS.Bricks.Network.RPC
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public Bricks.Network.RPC.URpcModule RpcModule { get; } = new Bricks.Network.RPC.URpcModule();
     }
@@ -383,7 +383,7 @@ namespace EngineNS.UTest
         {
             Action action = async () =>
             {
-                INetConnect pConnect = UEngine.Instance.RpcModule.DefaultNetConnect;
+                INetConnect pConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
                 //UTcpClient tcpClient = new UTcpClient();
                 //var ok = await tcpClient.Connect("127.0.0.1", 5555);
                 //if (ok)
@@ -433,11 +433,11 @@ namespace EngineNS.Bricks.Network.RPC
 		{
 			if (ExeIndex == UInt16.MaxValue)
 			{
-				ExeIndex = UEngine.Instance.RpcModule.DefaultExeIndex;
+				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
 			}
 			if (NetConnect == null)
 			{
-				NetConnect = UEngine.Instance.RpcModule.DefaultNetConnect;
+				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
 			var retContext = UReturnAwaiter<int>.CreateInstance(Timeout);
 			if (NetConnect != null)
@@ -504,11 +504,11 @@ namespace EngineNS.UTest
 		{
 			if (ExeIndex == UInt16.MaxValue)
 			{
-				ExeIndex = UEngine.Instance.RpcModule.DefaultExeIndex;
+				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
 			}
 			if (NetConnect == null)
 			{
-				NetConnect = UEngine.Instance.RpcModule.DefaultNetConnect;
+				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
 			var retContext = UReturnAwaiter<int>.CreateInstance(Timeout);
 			if (NetConnect != null)
@@ -540,11 +540,11 @@ namespace EngineNS.UTest
 		{
 			if (ExeIndex == UInt16.MaxValue)
 			{
-				ExeIndex = UEngine.Instance.RpcModule.DefaultExeIndex;
+				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
 			}
 			if (NetConnect == null)
 			{
-				NetConnect = UEngine.Instance.RpcModule.DefaultNetConnect;
+				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
 			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
 			{
@@ -568,11 +568,11 @@ namespace EngineNS.UTest
 		{
 			if (ExeIndex == UInt16.MaxValue)
 			{
-				ExeIndex = UEngine.Instance.RpcModule.DefaultExeIndex;
+				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
 			}
 			if (NetConnect == null)
 			{
-				NetConnect = UEngine.Instance.RpcModule.DefaultNetConnect;
+				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
 			var retContext = UReturnAwaiter<IO.ISerializer>.CreateInstance(Timeout);
 			if (NetConnect != null)
@@ -603,11 +603,11 @@ namespace EngineNS.UTest
 		{
 			if (ExeIndex == UInt16.MaxValue)
 			{
-				ExeIndex = UEngine.Instance.RpcModule.DefaultExeIndex;
+				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
 			}
 			if (NetConnect == null)
 			{
-				NetConnect = UEngine.Instance.RpcModule.DefaultNetConnect;
+				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
 			var retContext = UReturnAwaiter<string>.CreateInstance(Timeout);
 			if (NetConnect != null)
@@ -638,11 +638,11 @@ namespace EngineNS.UTest
 		{
 			if (ExeIndex == UInt16.MaxValue)
 			{
-				ExeIndex = UEngine.Instance.RpcModule.DefaultExeIndex;
+				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
 			}
 			if (NetConnect == null)
 			{
-				NetConnect = UEngine.Instance.RpcModule.DefaultNetConnect;
+				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
 			var retContext = UReturnAwaiter<Vector3>.CreateInstance(Timeout);
 			if (NetConnect != null)
@@ -673,11 +673,11 @@ namespace EngineNS.UTest
 		{
 			if (ExeIndex == UInt16.MaxValue)
 			{
-				ExeIndex = UEngine.Instance.RpcModule.DefaultExeIndex;
+				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
 			}
 			if (NetConnect == null)
 			{
-				NetConnect = UEngine.Instance.RpcModule.DefaultNetConnect;
+				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
 			var retContext = UReturnAwaiter<EngineNS.UTest.UTest_Rpc.TestRPCArgument>.CreateInstance(Timeout);
 			if (NetConnect != null)
@@ -708,11 +708,11 @@ namespace EngineNS.UTest
 		{
 			if (ExeIndex == UInt16.MaxValue)
 			{
-				ExeIndex = UEngine.Instance.RpcModule.DefaultExeIndex;
+				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
 			}
 			if (NetConnect == null)
 			{
-				NetConnect = UEngine.Instance.RpcModule.DefaultNetConnect;
+				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
 			var retContext = UReturnAwaiter<int>.CreateInstance(Timeout);
 			if (NetConnect != null)

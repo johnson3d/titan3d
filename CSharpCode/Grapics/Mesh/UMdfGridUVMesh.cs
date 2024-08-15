@@ -39,11 +39,11 @@ namespace EngineNS.Graphics.Mesh
                 Graphics.Pipeline.Shader.EPixelShaderInput.PST_UV
             };
         }
-        public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh)
+        public void Initialize(Graphics.Mesh.TtMaterialMesh materialMesh)
         {
 
         }
-        public unsafe void OnDrawCall(TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             UMdfGridUVMesh mdfQueue = mdfQueue1 as UMdfGridUVMesh;
             var binder = drawcall.FindBinder("cbGridUVMesh");
@@ -53,7 +53,7 @@ namespace EngineNS.Graphics.Mesh
             }
             if (mdfQueue.PerGridUVMeshCBuffer == null)
             {
-                mdfQueue.PerGridUVMeshCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
+                mdfQueue.PerGridUVMeshCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
             }
             drawcall.BindCBuffer(binder, mdfQueue.PerGridUVMeshCBuffer);
         }

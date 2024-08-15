@@ -7,6 +7,7 @@
       <e_0 Type="EngineNS.Bricks.Particle.Simple.TtSimpleEmitterNode@EngineCore">
         <DefaultCurrentQueue Type="System.String@Unknown" Value="Default" />
         <EmitterName Type="System.String@Unknown" Value="Default" />
+        <EmitterStyles Type="EngineNS.Bricks.Particle.EParticleEmitterStyles@EngineCore" Value="0" />
         <Enable Type="System.Boolean@Unknown" Value="True" />
         <IsGpuDriven Type="System.Boolean@Unknown" Value="True" />
         <Label Type="System.String@Unknown" Value="Emitter" />
@@ -16,6 +17,7 @@
         <Name Type="System.String@Unknown" Value="SimpleEmitter" />
         <NodeId Type="System.Guid@Unknown" Value="5ce620dd-1414-411b-92fb-28970448db6a" />
         <Position Type="EngineNS.Vector2@EngineCore" Value="511.00003,319" />
+        <TimerInterval Type="System.Single@Unknown" Value="0" />
         <Velocity Type="EngineNS.Vector3@EngineCore" Value="10,10,0" />
         <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
       </e_0>

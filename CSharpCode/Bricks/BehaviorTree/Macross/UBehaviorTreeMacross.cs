@@ -42,11 +42,11 @@ namespace EngineNS.BehaviorTree.Macross
 
             //if (UMacrossEditor.RemoveAssemblyDescCreateInstanceCode(name, type))
             {
-                EngineNS.UEngine.Instance.MacrossManager.GenerateProjects();
-                var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameAssembly;
-                if (UEngine.Instance.MacrossModule.CompileCode(assemblyFile))
+                EngineNS.TtEngine.Instance.MacrossManager.GenerateProjects();
+                var assemblyFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameAssembly;
+                if (TtEngine.Instance.MacrossModule.CompileCode(assemblyFile))
                 {
-                    UEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
+                    TtEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
                 }
             }
         }
@@ -57,7 +57,7 @@ namespace EngineNS.BehaviorTree.Macross
         }
         //public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         //{
-        //    UEngine.Instance.EditorInstance.MacrossIcon?.OnDraw(cmdlist, in start, in end, 0);
+        //    TtEngine.Instance.EditorInstance.MacrossIcon?.OnDraw(cmdlist, in start, in end, 0);
         //    cmdlist.AddText(in start, 0xFFFFFFFF, "Macross", null);
         //}
     }
@@ -112,7 +112,7 @@ namespace EngineNS.BehaviorTree.Macross
                     if (EGui.UIProxy.ComboBox.BeginCombo("##TypeSel", (mSelectedType == null) ? "None" : mSelectedType.Name))
                     {
                         var comboDrawList = ImGuiAPI.GetWindowDrawList();
-                        var searchBar = UEngine.Instance.UIProxyManager["MacrossTypeSearchBar"] as EGui.UIProxy.SearchBarProxy;
+                        var searchBar = TtEngine.Instance.UIProxyManager["MacrossTypeSearchBar"] as EGui.UIProxy.SearchBarProxy;
                         if (searchBar == null)
                         {
                             searchBar = new EGui.UIProxy.SearchBarProxy()
@@ -120,7 +120,7 @@ namespace EngineNS.BehaviorTree.Macross
                                 InfoText = "Search macross base type",
                                 Width = -1,
                             };
-                            UEngine.Instance.UIProxyManager["MacrossTypeSearchBar"] = searchBar;
+                            TtEngine.Instance.UIProxyManager["MacrossTypeSearchBar"] = searchBar;
                         }
                         if (!ImGuiAPI.IsAnyItemActive() && !ImGuiAPI.IsMouseClicked(0, false))
                             ImGuiAPI.SetKeyboardFocusHere(0);
@@ -207,7 +207,7 @@ namespace EngineNS.BehaviorTree.Macross
 
         public IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
 
         UTypeDesc mSelectedType = null;

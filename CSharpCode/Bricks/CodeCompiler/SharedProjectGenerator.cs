@@ -21,7 +21,7 @@ namespace EngineNS.CodeCompiler
         {
             get
             {
-                return IO.TtFileManager.GetBaseDirectory(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameProject) + ProjectFile;
+                return IO.TtFileManager.GetBaseDirectory(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameProject) + ProjectFile;
             }
         }
         public System.Version MinVSVersion;

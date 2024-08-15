@@ -11,11 +11,11 @@ namespace EngineNS.Rtti
         {
             public URootServerAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:RootServer AssemblyDesc Created");
+                Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(Profiler.ELogTag.Info, "Plugins:RootServer AssemblyDesc Created");
             }
             ~URootServerAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:RootServer AssemblyDesc Destroyed");
+                Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(Profiler.ELogTag.Info, "Plugins:RootServer AssemblyDesc Destroyed");
             }
             public override string Name { get => "RootServer"; }
             public override string Service { get { return "Plugins"; } }
@@ -46,10 +46,10 @@ namespace EngineNS.Plugins.RootServer
         public void OnLoadedPlugin()
         {
             var server = new URootServer();
-            UEngine.Instance.RpcModule.RpcManager = server;
+            TtEngine.Instance.RpcModule.RpcManager = server;
             Action action = async () =>
             {
-                var np = Bricks.Network.FNetworkPoint.FromString(UEngine.Instance.Config.RootServerURL);
+                var np = Bricks.Network.FNetworkPoint.FromString(TtEngine.Instance.Config.RootServerURL);
                 var ret = await server.StartServer(np.Ip, np.Port);
                 Console.WriteLine($"RootServer start;{ret}");
             };
@@ -57,7 +57,7 @@ namespace EngineNS.Plugins.RootServer
         }
         public void OnUnloadPlugin()
         {
-            var server = UEngine.Instance.RpcModule.RpcManager as URootServer;
+            var server = TtEngine.Instance.RpcModule.RpcManager as URootServer;
             server?.StopServer();
         }
     }

@@ -48,23 +48,23 @@ namespace EngineNS.IO
             mDirtyAssets.Clear();
             foreach (var i in Modifiers)
             {
-                var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(i.Source);
+                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(i.Source);
                 if (i.Source != ameta.GetAssetName())
                 {
                     System.Diagnostics.Debug.Assert(false);
                     continue;
                 }
-                await UEngine.Instance.AssetMetaManager.GetAssetHolder(ameta, mDirtyAssets);
+                await TtEngine.Instance.AssetMetaManager.GetAssetHolder(ameta, mDirtyAssets);
             }
             foreach (var i in Modifiers)
             {
-                var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(i.Source);
+                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(i.Source);
                 IAsset asset = await ameta.LoadAsset();
 
                 asset.SaveAssetTo(new RName(i.TargetPath, i.TargetType));
 
                 var src = i.Source.Address;
-                UEngine.Instance.AssetMetaManager.RemoveAMeta(ameta);
+                TtEngine.Instance.AssetMetaManager.RemoveAMeta(ameta);
                 var nameSets = RName.RNameManager.Instance.mNameSets[(int)i.Source.RNameType];
                 nameSets.Remove(i.Source.Name);
                 i.Source.UnsafeUpdate(i.TargetPath, i.TargetType);
@@ -72,12 +72,12 @@ namespace EngineNS.IO
                 tarNameSets.Add(i.Source.Name, i.Source);
                 var tar = i.Source.Address;
 
-                UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
                 if (IO.TtFileManager.FileExists(src + ".snap"))
                     IO.TtFileManager.CopyFile(src + ".snap", tar + ".snap");
 
-                ameta.SaveAMeta();
+                ameta.SaveAMeta(asset);
             }
             foreach (var i in mDirtyAssets)
             {
@@ -85,7 +85,7 @@ namespace EngineNS.IO
             }
             foreach (var i in Modifiers)
             {
-                var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(i.Source);
+                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(i.Source);
                 ameta.DeleteAsset(i.SourcePath, i.SourceType);
             }
             Modifiers.Clear();
@@ -105,7 +105,7 @@ namespace EngineNS.UTest
             {
                 var assetOp = new IO.UAssetOperator();
                 var rn = RName.GetRName(@"axis\axis_focus_matins.uminst", RName.ERNameType.Game);
-                var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(rn);
+                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(rn);
                 if (ameta != null)
                 {
                     assetOp.AddModifier(rn, @"material\axis\axis_focus_matins.uminst", RName.ERNameType.Engine);

@@ -33,7 +33,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             AddOutput(PickedPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_RTV);
             AddOutput(DepthPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
         }
-        public override void OnResize(URenderPolicy policy, float x, float y)
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             float scaleFactor = 1.0f;
             var hitProxyNode = policy.FindFirstNode<UHitproxyNode>();
@@ -59,12 +59,12 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             return PickedShading;
         }
-        public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public async override System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
-            PickedShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickSetupShading>();
+            PickedShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickSetupShading>();
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName + ".BasePass");
             BasePass.SetDebugName("UPickedProxiableManager");
 
@@ -86,7 +86,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 //PassDesc.mDepthClearValue = 1.0f;
                 //PassDesc.mStencilClearValue = 0u;
             }
-            RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc); 
+            RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc); 
 
             PickedBuffer.Initialize(policy, RenderPass);
             PickedBuffer.SetRenderTarget(policy, 0, PickedPinOut);
@@ -106,7 +106,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         List<Mesh.TtMesh> mPickedMeshes = new List<Mesh.TtMesh>();
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UPickedNode), nameof(TickLogic));
-        public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {

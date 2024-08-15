@@ -4,12 +4,12 @@ using System.ComponentModel;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
-    [Rtti.Meta]
-    public partial class UMaterialAMeta : IO.IAssetMeta
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterialAMeta@EngineCore" })]
+    public partial class TtMaterialAMeta : IO.IAssetMeta
     {
         public override string GetAssetExtType()
         {
-            return UMaterial.AssetExt;
+            return TtMaterial.AssetExt;
         }
         public override string GetAssetTypeName()
         {
@@ -17,15 +17,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            return await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(GetAssetName());
+            return await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(GetAssetName());
         }
         public override void OnBeforeRenamedAsset(IO.IAsset asset, RName name)
         {
-            CoreSDK.CheckResult(UEngine.Instance.GfxDevice.MaterialManager.UnsafeRemove(name) == asset);
+            CoreSDK.CheckResult(TtEngine.Instance.GfxDevice.MaterialManager.UnsafeRemove(name) == asset);
         }
         public override void OnAfterRenamedAsset(IO.IAsset asset, RName name)
         {
-            UEngine.Instance.GfxDevice.MaterialManager.UnsafeAdd(name, (UMaterial)asset);
+            TtEngine.Instance.GfxDevice.MaterialManager.UnsafeAdd(name, (TtMaterial)asset);
         }
         public override void DeleteAsset(string name, RName.ERNameType type)
         {
@@ -48,14 +48,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
         //    cmdlist.AddText(in start, 0xFFFFFFFF, "Mtl", null);
         //}
     }
-    [Rtti.Meta]
-    [UMaterial.MaterialImport]
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial@EngineCore" })]
+    [TtMaterial.MaterialImport]
     [IO.AssetCreateMenu(MenuName = "Graphics/Material")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public partial class UMaterial : IO.ISerializer, IO.IAsset, IShaderCodeProvider
+    public partial class TtMaterial : IO.ISerializer, IO.IAsset, IShaderCodeProvider
     {
         public const string AssetExt = ".material";
-        public UMaterial()
+        public TtMaterial()
         {
             mPipelineDesc.SetDefault();
         }
@@ -231,7 +231,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 await base.DoCreate(dir, type, ext);
 
-                var material = (mAsset as UMaterial);
+                var material = (mAsset as TtMaterial);
                 material.mPipelineDesc.SetDefault();
                 material.UpdateShaderCode(true);
             }
@@ -239,12 +239,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
         #region IAsset
         public virtual IO.IAssetMeta CreateAMeta()
         {
-            var result = new UMaterialAMeta();
+            var result = new TtMaterialAMeta();
             return result;
         }
         public virtual IO.IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
         public virtual void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
@@ -262,7 +262,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (ameta != null)
             {
                 UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta();
+                ameta.SaveAMeta(this);
             }
 
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
@@ -280,9 +280,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 xnd.SaveXnd(name.Address);
             }
             
-            UEngine.Instance.SourceControlModule.AddFile(name.Address);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
-        public static bool ReloadXnd(UMaterial material, UMaterialManager manager, IO.TtXndNode node)
+        public static bool ReloadXnd(TtMaterial material, TtMaterialManager manager, IO.TtXndNode node)
         {
             var attr = node.TryGetAttribute("Material");
             if (attr.NativePointer != IntPtr.Zero)
@@ -314,7 +314,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         #endregion
 
         [Browsable(false)]
-        public virtual UMaterial ParentMaterial
+        public virtual TtMaterial ParentMaterial
         {
             get { return this; }
             protected set { }
@@ -330,7 +330,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public virtual void GetDefines(List<KeyValuePair<string, string>> vars)
         {
         }
-        public static UMaterial LoadXnd(UMaterialManager manager, IO.TtXndNode node)
+        public static TtMaterial LoadXnd(TtMaterialManager manager, IO.TtXndNode node)
         {
             IO.ISerializer result = null;
             var attr = node.TryGetAttribute("Material");
@@ -342,7 +342,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 }
             }
 
-            var material = result as UMaterial;
+            var material = result as TtMaterial;
             if (material != null)
             {
                 material.UpdateShaderCode(false);
@@ -736,13 +736,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
         } = null;
         #endregion
         #region Texture
+        [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial.NameRNamePair@EngineCore" })] 
         public class NameRNamePair : IO.BaseSerializer
         {
             public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
             {
-                HostMaterial = hostObject as UMaterial;
+                HostMaterial = hostObject as TtMaterial;
             }
-            UMaterial HostMaterial;
+            TtMaterial HostMaterial;
             [Rtti.Meta()]
             public string Name { get; set; }
             RName mValue;
@@ -760,7 +761,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             [Rtti.Meta]
             public string ShaderType { get; set; } = "Texture2D";
-            public NameRNamePair Clone(UMaterial mtl)
+            public NameRNamePair Clone(TtMaterial mtl)
             {
                 var result = new NameRNamePair();
                 result.HostMaterial = mtl;
@@ -801,7 +802,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var srv = UsedRSView[index].SrvObject as NxRHI.USrView;
             if (srv != null)
                 return srv;
-            UsedRSView[index].SrvObject = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(UsedRSView[index].Value);
+            UsedRSView[index].SrvObject = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(UsedRSView[index].Value);
             return UsedRSView[index].SrvObject as NxRHI.USrView;
         }
         public NxRHI.USrView TryGetSRV(int index)
@@ -809,11 +810,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var srv = UsedRSView[index].SrvObject as NxRHI.USrView;
             if (srv != null)
                 return srv;
-            UsedRSView[index].SrvObject = UEngine.Instance.GfxDevice.TextureManager.TryGetTexture(UsedRSView[index].Value);
+            UsedRSView[index].SrvObject = TtEngine.Instance.GfxDevice.TextureManager.TryGetTexture(UsedRSView[index].Value);
             return UsedRSView[index].SrvObject as NxRHI.USrView;
         }
         #endregion
         #region Sampler
+        [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair@EngineCore" })]
         public class NameSamplerStateDescPair : IO.BaseSerializer
         {
             public NameSamplerStateDescPair()
@@ -822,9 +824,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
             {
-                HostMaterial = hostObject as UMaterial;
+                HostMaterial = hostObject as TtMaterial;
             }
-            UMaterial HostMaterial;
+            TtMaterial HostMaterial;
             [Rtti.Meta()]
             public string Name { get; set; }
             internal NxRHI.FSamplerDesc mValue;
@@ -839,7 +841,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                         HostMaterial.SerialId++;
                 }
             }
-            public NameSamplerStateDescPair Clone(UMaterial mtl)
+            public NameSamplerStateDescPair Clone(TtMaterial mtl)
             {
                 var result = new NameSamplerStateDescPair();
                 result.HostMaterial = mtl;
@@ -881,7 +883,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //{
             //    mUsedSamplerStates[index].mValue.m_AddressW = EAddressMode.ADM_WRAP;
             //}
-            return UEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(UEngine.Instance.GfxDevice.RenderContext, in mUsedSamplerStates[index].mValue);
+            return TtEngine.Instance.GfxDevice.SamplerStateManager.GetPipelineState(TtEngine.Instance.GfxDevice.RenderContext, in mUsedSamplerStates[index].mValue);
         }
         public NameSamplerStateDescPair FindSampler(string name)
         {
@@ -894,13 +896,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         #endregion
         #region UniformVar
+        [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial.NameValuePair@EngineCore" })]
         public class NameValuePair : IO.BaseSerializer
         {
             public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
             {
-                HostMaterial = hostObject as UMaterial;
+                HostMaterial = hostObject as TtMaterial;
             }
-            UMaterial HostMaterial;
+            TtMaterial HostMaterial;
             [Rtti.Meta]
             public string VarType { get; set; }
             [Rtti.Meta]
@@ -960,7 +963,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 Value = v.ToString();
                 return true;
             }
-            public NameValuePair Clone(UMaterial mtl)
+            public NameValuePair Clone(TtMaterial mtl)
             {
                 var result = new NameValuePair();
                 result.HostMaterial = mtl;
@@ -1095,7 +1098,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         internal void UpdatePipeline()
         {
-            mPipeline = UEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(UEngine.Instance.GfxDevice.RenderContext, in mPipelineDesc);
+            mPipeline = TtEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(TtEngine.Instance.GfxDevice.RenderContext, in mPipelineDesc);
         }
         NxRHI.UCbView mPerMaterialCBuffer;
         [Browsable(false)]
@@ -1133,12 +1136,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
             v.SetValue(in value);
             PerMaterialCBuffer?.SetValue(name, in value);
         }
-        public bool CreateCBuffer(UEffect effect)
+        public bool CreateCBuffer(TtEffect effect)
         {
             var binder = effect.ShaderEffect.FindBinder("cbPerMaterial");
             if (binder == null)
                 return false;
-            mPerMaterialCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
+            mPerMaterialCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
             return true;
         }
         [Rtti.Meta]
@@ -1176,7 +1179,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         #endregion
     }
-    public class UMaterialManager
+    public class TtMaterialManager
     {
         public void Cleanup()
         {
@@ -1192,7 +1195,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public async Thread.Async.TtTask Initialize(UGfxDevice device)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
-            ScreenMaterial = new UMaterial();
+            ScreenMaterial = new TtMaterial();
 
             var dsDesc = new NxRHI.FDepthStencilDesc();
             dsDesc.SetDefault();
@@ -1203,20 +1206,20 @@ namespace EngineNS.Graphics.Pipeline.Shader
             PxDebugMaterial = await this.CreateMaterial(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
             VtxColorMaterial = await this.CreateMaterial(RName.GetRName("material/vfx_color.material", RName.ERNameType.Engine));
         }
-        public UMaterial ScreenMaterial;
-        public UMaterial PxDebugMaterial;
-        public UMaterial VtxColorMaterial;
-        public Dictionary<RName, UMaterial> Materials { get; } = new Dictionary<RName, UMaterial>();
-        public async Thread.Async.TtTask<UMaterial> CreateMaterial(RName rn)
+        public TtMaterial ScreenMaterial;
+        public TtMaterial PxDebugMaterial;
+        public TtMaterial VtxColorMaterial;
+        public Dictionary<RName, TtMaterial> Materials { get; } = new Dictionary<RName, TtMaterial>();
+        public async Thread.Async.TtTask<TtMaterial> CreateMaterial(RName rn)
         {
-            UMaterial result;
-            result = await UEngine.Instance.EventPoster.Post((state) =>
+            TtMaterial result;
+            result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
                     if (xnd != null)
                     {
-                        var material = UMaterial.LoadXnd(this, xnd.RootNode);
+                        var material = TtMaterial.LoadXnd(this, xnd.RootNode);
                         if (material == null)
                             return null;
 
@@ -1234,17 +1237,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public async Thread.Async.TtTask<bool> ReloadMaterial(RName rn)
         {
-            UMaterial result;
+            TtMaterial result;
             if (Materials.TryGetValue(rn, out result) == false)
                 return true;
 
-            var ok = await UEngine.Instance.EventPoster.Post((state) =>
+            var ok = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
                     if (xnd != null)
                     {
-                        return UMaterial.ReloadXnd(result, this, xnd.RootNode);
+                        return TtMaterial.ReloadXnd(result, this, xnd.RootNode);
                     }
                     else
                     {
@@ -1253,7 +1256,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 }
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
-            var effects = UEngine.Instance.GfxDevice.EffectManager.Effects;
+            var effects = TtEngine.Instance.GfxDevice.EffectManager.Effects;
             foreach (var i in effects)
             {
                 if (i.Value.Desc.MaterialName == rn)
@@ -1267,7 +1270,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             return ok;
         }
-        internal UMaterial UnsafeRemove(RName name)
+        internal TtMaterial UnsafeRemove(RName name)
         {
             lock (Materials)
             {
@@ -1278,29 +1281,29 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return null;
             }
         }
-        internal void UnsafeAdd(RName name, UMaterial obj)
+        internal void UnsafeAdd(RName name, TtMaterial obj)
         {
             lock (Materials)
             {
                 Materials.Add(name, obj);
             }
         }
-        public async Thread.Async.TtTask<UMaterial> GetMaterial(RName rn)
+        public async Thread.Async.TtTask<TtMaterial> GetMaterial(RName rn)
         {
             if (rn == null)
                 return null;
 
-            UMaterial result;
+            TtMaterial result;
             if (Materials.TryGetValue(rn, out result))
                 return result;
 
-            result = await UEngine.Instance.EventPoster.Post((state) =>
+            result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
                     if (xnd != null)
                     {
-                        var material = UMaterial.LoadXnd(this, xnd.RootNode);
+                        var material = TtMaterial.LoadXnd(this, xnd.RootNode);
                         if (material == null)
                             return null;
 

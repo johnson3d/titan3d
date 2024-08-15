@@ -197,8 +197,8 @@ namespace EngineNS.GamePlay
         {
             public Scene.UMeshNode MeshNode;
             public enAxisType AxisType;
-            Graphics.Pipeline.Shader.UMaterial[] NormalMaterials;
-            Graphics.Pipeline.Shader.UMaterial[] FocusMaterials;
+            Graphics.Pipeline.Shader.TtMaterial[] NormalMaterials;
+            Graphics.Pipeline.Shader.TtMaterial[] FocusMaterials;
             bool mFocused = false;
             public bool Focused
             {
@@ -227,17 +227,17 @@ namespace EngineNS.GamePlay
 
             async System.Threading.Tasks.Task<Graphics.Mesh.TtMesh> GetAxisMesh(RName meshName, params RName[] materialNames)
             {
-                var materials = new List<Graphics.Pipeline.Shader.UMaterial>(materialNames.Length);
+                var materials = new List<Graphics.Pipeline.Shader.TtMaterial>(materialNames.Length);
                 for (int i = 0; i < materialNames.Length; i++)
                 {
-                    var mtl = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(materialNames[i]);
+                    var mtl = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(materialNames[i]);
                     if (mtl == null)
                         return null;
                     materials.Add(mtl);
                 }
                 var mesh = new Graphics.Mesh.TtMesh();
                 var ok = await mesh.Initialize(new List<RName>() { meshName }, 
-                    new List<List<Graphics.Pipeline.Shader.UMaterial>>() { materials },
+                    new List<List<Graphics.Pipeline.Shader.TtMaterial>>() { materials },
                     Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 mesh.IsAcceptShadow = false;
                 return ok ? mesh : null;
@@ -256,13 +256,13 @@ namespace EngineNS.GamePlay
                         axisMesh = await GetAxisMesh(mAxisMeshMoveX, mAxisMaterial_X_d);
                         meshNodeData.MeshName = mAxisMeshMoveX;
                         meshNodeData.Name = mAxisMeshMoveX.Name;
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_X_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_X_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Move_Y:
@@ -270,13 +270,13 @@ namespace EngineNS.GamePlay
                         rot = Quaternion.RotationAxis(Vector3.Backward, (float)(Math.PI * 0.5f));
                         meshNodeData.MeshName = mAxisMeshMoveX;
                         meshNodeData.Name = mAxisMeshMoveX.Name;
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Y_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Y_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Move_Z:
@@ -284,28 +284,28 @@ namespace EngineNS.GamePlay
                         rot = Quaternion.RotationAxis(Vector3.Down, (float)(Math.PI * 0.5f));
                         meshNodeData.MeshName = mAxisMeshMoveX;
                         meshNodeData.Name = mAxisMeshMoveX.Name;
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Z_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Z_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Move_Line_XY:
                         axisMesh = await GetAxisMesh(mAxisMeshMoveXY_Line, mAxisMaterial_X_d, mAxisMaterial_Y_d);
                         meshNodeData.MeshName = mAxisMeshMoveXY_Line;
                         meshNodeData.Name = mAxisMeshMoveXY_Line.Name;
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_X_d),
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Y_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_X_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Y_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Move_Line_XZ:
@@ -313,15 +313,15 @@ namespace EngineNS.GamePlay
                         rot = Quaternion.RotationAxis(Vector3.Left, (float)(Math.PI * 0.5f));
                         meshNodeData.MeshName = mAxisMeshMoveXY_Line;
                         meshNodeData.Name = mAxisMeshMoveXY_Line.Name;
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_X_d),
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Z_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_X_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Z_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Move_Line_YZ:
@@ -329,28 +329,28 @@ namespace EngineNS.GamePlay
                         rot = Quaternion.RotationAxis(Vector3.Up, (float)(Math.PI * 0.5f));
                         meshNodeData.MeshName = mAxisMeshMoveXY_Line;
                         meshNodeData.Name = mAxisMeshMoveXY_Line.Name;
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Z_d),
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Y_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Z_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Y_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Move_Plane_XY:
                         axisMesh = await GetAxisMesh(mAxisMeshMoveXY, mAxisMaterial_Focus_d);
                         meshNodeData.MeshName = mAxisMeshMoveXY;
                         meshNodeData.Name = mAxisMeshMoveXY.Name;
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Move_Plane_XZ:
@@ -358,13 +358,13 @@ namespace EngineNS.GamePlay
                         rot = Quaternion.RotationAxis(Vector3.Left, (float)(Math.PI * 0.5f));
                         meshNodeData.MeshName = mAxisMeshMoveXY;
                         meshNodeData.Name = mAxisMeshMoveXY.Name;
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Move_Plane_YZ:
@@ -372,39 +372,39 @@ namespace EngineNS.GamePlay
                         rot = Quaternion.RotationAxis(Vector3.Up, (float)(Math.PI * 0.5f));
                         meshNodeData.MeshName = mAxisMeshMoveXY;
                         meshNodeData.Name = mAxisMeshMoveXY.Name;
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Move_XYZ:
                         axisMesh = await GetAxisMesh(mAxisMeshMoveAll, mAxisMaterial_Center);
                         meshNodeData.MeshName = mAxisMeshMoveAll;
                         meshNodeData.Name = mAxisMeshMoveAll.Name;
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Center),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Center),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Rot_X:
                         axisMesh = await GetAxisMesh(mAxisMeshRotX, mAxisMaterial_X);
                         meshNodeData.MeshName = mAxisMeshRotX;
                         meshNodeData.Name = "AxisRotX";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_X),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_X),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus),
                         };
                         break;
                     case enAxisType.Rot_Y:
@@ -412,13 +412,13 @@ namespace EngineNS.GamePlay
                         rot = Quaternion.RotationAxis(Vector3.Backward, (float)(Math.PI * 0.5f));
                         meshNodeData.MeshName = mAxisMeshRotX;
                         meshNodeData.Name = "AxisRotY";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Y),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Y),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus),
                         };
                         break;
                     case enAxisType.Rot_Z: 
@@ -426,13 +426,13 @@ namespace EngineNS.GamePlay
                         rot = Quaternion.RotationAxis(Vector3.Down, (float)(Math.PI * 0.5f));
                         meshNodeData.MeshName = mAxisMeshRotX;
                         meshNodeData.Name = "AxisRotZ";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Z),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Z),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus),
                         };
                         break;
                     //case enAxisType.Rot_Plane_XY: break;
@@ -442,13 +442,13 @@ namespace EngineNS.GamePlay
                         axisMesh = await GetAxisMesh(mAxisMeshScaleX, mAxisMaterial_X_d);
                         meshNodeData.MeshName = mAxisMeshScaleX;
                         meshNodeData.Name = "AxisScaleX";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_X_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_X_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Scale_Y: 
@@ -456,13 +456,13 @@ namespace EngineNS.GamePlay
                         rot = Quaternion.RotationAxis(Vector3.Backward, (float)(Math.PI * 0.5f));
                         meshNodeData.MeshName = mAxisMeshScaleX;
                         meshNodeData.Name = "AxisScaleY";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Y_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Y_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Scale_Z:
@@ -470,110 +470,110 @@ namespace EngineNS.GamePlay
                         rot = Quaternion.RotationAxis(Vector3.Down, (float)(Math.PI * 0.5f));
                         meshNodeData.MeshName = mAxisMeshScaleX;
                         meshNodeData.Name = "AxisScaleZ";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Z_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Z_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Scale_Line_XY:
                         axisMesh = await GetAxisMesh(mAxisMeshScaleXY_Line, mAxisMaterial_X_d, mAxisMaterial_Y_d);
                         meshNodeData.MeshName = mAxisMeshScaleXY_Line;
                         meshNodeData.Name = "AxisScaleXY";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_X_d),
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Y_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_X_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Y_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Scale_Line_XZ: 
                         axisMesh = await GetAxisMesh(mAxisMeshScaleXY_Line, mAxisMaterial_X_d, mAxisMaterial_Z_d);
                         meshNodeData.MeshName = mAxisMeshScaleXY_Line;
                         meshNodeData.Name = "AxisScaleXY";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_X_d),
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Z_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_X_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Z_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Scale_Line_YZ: 
                         axisMesh = await GetAxisMesh(mAxisMeshScaleXY_Line, mAxisMaterial_Y_d, mAxisMaterial_Z_d);
                         meshNodeData.MeshName = mAxisMeshScaleXY_Line;
                         meshNodeData.Name = "AxisScaleXY";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Y_d),
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Z_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Y_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Z_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Scale_Plane_XY:
                         axisMesh = await GetAxisMesh(mAxisMeshScaleXY, mAxisMaterial_Focus_d);
                         meshNodeData.MeshName = mAxisMeshScaleXY;
                         meshNodeData.Name = "AxisScaleXY";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Scale_Plane_XZ: 
                         axisMesh = await GetAxisMesh(mAxisMeshScaleXY, mAxisMaterial_Focus_d);
                         meshNodeData.MeshName = mAxisMeshScaleXY;
                         meshNodeData.Name = "AxisScaleYZ";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Scale_Plane_YZ:
                         axisMesh = await GetAxisMesh(mAxisMeshScaleXY, mAxisMaterial_Focus_d);
                         meshNodeData.MeshName = mAxisMeshScaleXY;
                         meshNodeData.Name = "AxisScaleYZ";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Scale_XYZ: 
                         axisMesh = await GetAxisMesh(mAxisMeshScaleAll, mAxisMaterial_Center);
                         meshNodeData.MeshName = mAxisMeshScaleAll;
                         meshNodeData.Name = "AxisScaleAll";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Center),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Center),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     case enAxisType.Edge_X_Min:
@@ -581,13 +581,13 @@ namespace EngineNS.GamePlay
                         rot = Quaternion.RotationAxis(Vector3.Backward, (float)(Math.PI));
                         meshNodeData.MeshName = mAxisMeshEdgeX;
                         meshNodeData.Name = "Edge_XMin";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_X_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_X_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     //case enAxisType.Edge_X_MinPlane:  break;
@@ -595,13 +595,13 @@ namespace EngineNS.GamePlay
                         axisMesh = await GetAxisMesh(mAxisMeshEdgeX, mAxisMaterial_X);
                         meshNodeData.MeshName = mAxisMeshEdgeX;
                         meshNodeData.Name = "Edge_XMax";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_X_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_X_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     //case enAxisType.Edge_X_MaxPlane:  break;
@@ -610,13 +610,13 @@ namespace EngineNS.GamePlay
                         rot = Quaternion.RotationAxis(Vector3.Backward, (float)(Math.PI * -0.5f));
                         meshNodeData.MeshName = mAxisMeshEdgeX;
                         meshNodeData.Name = "Edge_YMin";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Y_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Y_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     //case enAxisType.Edge_Y_MinPlane:  break;
@@ -625,13 +625,13 @@ namespace EngineNS.GamePlay
                         rot = Quaternion.RotationAxis(Vector3.Backward, (float)(Math.PI * 0.5f));
                         meshNodeData.MeshName = mAxisMeshEdgeX;
                         meshNodeData.Name = "Edge_YMax";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Y_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Y_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     //case enAxisType.Edge_Y_MaxPlane:  break;
@@ -640,13 +640,13 @@ namespace EngineNS.GamePlay
                         rot = Quaternion.RotationAxis(Vector3.Down, (float)(Math.PI * -0.5f));
                         meshNodeData.MeshName = mAxisMeshEdgeX;
                         meshNodeData.Name = "Edge_ZMin";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Z_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Z_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     //case enAxisType.Edge_Z_MinPlane:  break;
@@ -655,13 +655,13 @@ namespace EngineNS.GamePlay
                         rot = Quaternion.RotationAxis(Vector3.Down, (float)(Math.PI * 0.5f));
                         meshNodeData.MeshName = mAxisMeshEdgeX;
                         meshNodeData.Name = "Edge_ZMin";
-                        NormalMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        NormalMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Z_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Z_d),
                         };
-                        FocusMaterials = new Graphics.Pipeline.Shader.UMaterial[]
+                        FocusMaterials = new Graphics.Pipeline.Shader.TtMaterial[]
                         {
-                            await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
+                            await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d),
                         };
                         break;
                     //case enAxisType.Edge_Z_MaxPlane:  break;
@@ -975,10 +975,10 @@ namespace EngineNS.GamePlay
             mRootNode.Parent = world.Root;
             ((GamePlay.UPlacement)mRootNode.Placement).InheritScale = true;
 
-            var rotArrowAssetMat = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d);
+            var rotArrowAssetMat = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d);
             var rotArrowAssetMesh = new Graphics.Mesh.TtMesh();
             var ok = await rotArrowAssetMesh.Initialize(mAxisMeshMoveX, 
-                new List<Graphics.Pipeline.Shader.UMaterial>() { rotArrowAssetMat },
+                new List<Graphics.Pipeline.Shader.TtMaterial>() { rotArrowAssetMat },
                 Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if(ok)
             {
@@ -1009,10 +1009,10 @@ namespace EngineNS.GamePlay
             var mesh = new Graphics.Mesh.TtMesh();
             var plane = Graphics.Mesh.UMeshDataProvider.MakePlane(1, 1);
             var planeMesh = plane.ToMesh();
-            var planeMaterial = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d);
+            var planeMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d);
             var ok = mesh.Initialize(
                 planeMesh,
-                new Graphics.Pipeline.Shader.UMaterial[] { planeMaterial },
+                new Graphics.Pipeline.Shader.TtMaterial[] { planeMaterial },
                 Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if(ok)
             {
@@ -1035,8 +1035,8 @@ namespace EngineNS.GamePlay
             mesh = new Graphics.Mesh.TtMesh();
             var point = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.05f, -0.05f, -0.05f, 0.1f, 0.1f, 0.1f);
             var pointMesh = point.ToMesh();
-            var pointMaterial = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Center);
-            ok = mesh.Initialize(pointMesh, new Graphics.Pipeline.Shader.UMaterial[] { pointMaterial },
+            var pointMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Center);
+            ok = mesh.Initialize(pointMesh, new Graphics.Pipeline.Shader.TtMaterial[] { pointMaterial },
                 Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if(ok)
             {
@@ -1221,7 +1221,7 @@ namespace EngineNS.GamePlay
                     {
                         if(!mIsTransAxisOperation)
                         {
-                            var edtorPolicy = viewport.RenderPolicy as Graphics.Pipeline.URenderPolicy;
+                            var edtorPolicy = viewport.RenderPolicy as Graphics.Pipeline.TtRenderPolicy;
                             if (edtorPolicy != null)
                             {
                                 var pos = viewport.Window2Viewport(new Vector2((float)e.MouseMotion.X, (float)e.MouseMotion.Y));

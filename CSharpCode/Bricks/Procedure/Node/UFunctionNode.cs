@@ -449,7 +449,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
             this.SaveOutBufferToCache(graph, ResultPin, testHash);
             heightComp.LifeCount--;
-            //MaterialIdManager.BuildSRV(UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+            //MaterialIdManager.BuildSRV(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             return true;
         }
     }
@@ -481,7 +481,7 @@ namespace EngineNS.Bricks.Procedure.Node
             mask.LifeCount--;
             trueBuffer.LifeCount--;
             falseBuffer.LifeCount--;
-            //MaterialIdManager.BuildSRV(UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+            //MaterialIdManager.BuildSRV(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             return true;
         }
     }
@@ -686,7 +686,7 @@ namespace EngineNS.Bricks.Procedure.Node
                         {
                             initData.RowPitch = desc.Width * (uint)sizeof(Byte4);
                             initData.pData = p;
-                            texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
+                            texture = TtEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
                         }
 
                         var rsvDesc = new NxRHI.FSrvDesc();
@@ -694,7 +694,7 @@ namespace EngineNS.Bricks.Procedure.Node
                         rsvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
                         rsvDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
                         rsvDesc.Texture2D.MipLevels = desc.MipLevels;
-                        PreviewSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(texture, in rsvDesc);
+                        PreviewSRV = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(texture, in rsvDesc);
                     }
                 }
             }

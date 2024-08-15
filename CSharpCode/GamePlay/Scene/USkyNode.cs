@@ -19,7 +19,7 @@ namespace EngineNS.GamePlay.Scene
                 SunDirection.Normalize();
             }
             [Rtti.Meta]
-            [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.UMaterialInstance.AssetExt)]
+            [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt)]
             public RName SunMaterialName { get; set; }
             [Rtti.Meta]
             public Vector3 SunDirection { get; set; }
@@ -31,10 +31,10 @@ namespace EngineNS.GamePlay.Scene
             get => GetNodeData<TtSkyNodeData>().SunDirection;
             set => GetNodeData<TtSkyNodeData>().SunDirection = value;
         }
-        Graphics.Pipeline.Shader.UMaterialInstance SunMaterial;
+        Graphics.Pipeline.Shader.TtMaterialInstance SunMaterial;
         [Category("Option")]
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.UMaterialInstance.AssetExt)]
+        [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt)]
         public RName SunMaterialName
         {
             get => GetNodeData<TtSkyNodeData>().SunMaterialName;
@@ -43,7 +43,7 @@ namespace EngineNS.GamePlay.Scene
                 GetNodeData<TtSkyNodeData>().SunMaterialName = value;
                 var action = async () =>
                 {
-                    SunMaterial = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(value);
+                    SunMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(value);
                 };
                 action();
             }
@@ -60,19 +60,19 @@ namespace EngineNS.GamePlay.Scene
                 meta.CopyObjectMetaField(skyData, data);
                 skyData.SunMaterialName = RName.GetRName("material/default_sun.uminst", RName.ERNameType.Engine);
                 data = skyData;
-                SunMaterial = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(skyData.SunMaterialName);
+                SunMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(skyData.SunMaterialName);
             }
             else
             {
-                SunMaterial = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(skyData.SunMaterialName);
+                SunMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(skyData.SunMaterialName);
             }
             await base.InitializeNode(world, data, bvType, placementType);
             var rect = Graphics.Mesh.UMeshDataProvider.MakeRect2D(-0.5f, -0.5f, 1, 1, 0);
             var rectMesh = rect.ToMesh();
-            var materials = new Graphics.Pipeline.Shader.UMaterialInstance[1];
+            var materials = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
             materials[0] = SunMaterial;
             SunMesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-            SunMesh.UserShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Shader.CommanShading.UDrawViewportShading>();
+            SunMesh.UserShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Shader.CommanShading.UDrawViewportShading>();
             return true;
         }
         public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
@@ -84,7 +84,7 @@ namespace EngineNS.GamePlay.Scene
                 //rp.VisibleMeshes.Add(SunMesh);
             }
         }
-        public override bool OnTickLogic(UWorld world, URenderPolicy policy)
+        public override bool OnTickLogic(UWorld world, TtRenderPolicy policy)
         {
             SunMesh.IsUnlit = true;
             this.Mesh.IsUnlit = true;

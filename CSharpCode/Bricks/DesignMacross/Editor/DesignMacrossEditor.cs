@@ -40,7 +40,7 @@ namespace EngineNS.DesignMacross.Editor
                 DrawToolbar();
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    if (UEngine.Instance.GfxDevice.SlateApplication is EngineNS.Editor.UMainEditorApplication mainEditor)
+                    if (TtEngine.Instance.GfxDevice.SlateApplication is EngineNS.Editor.UMainEditorApplication mainEditor)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
                 OnDrawMainMenu();
@@ -84,7 +84,7 @@ namespace EngineNS.DesignMacross.Editor
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
 
-            if (UEngine.Instance.InputSystem.IsKeyPressed(EngineNS.Bricks.Input.Keycode.KEY_z))
+            if (TtEngine.Instance.InputSystem.IsKeyPressed(EngineNS.Bricks.Input.Keycode.KEY_z))
             {
                 if (bIsZKeyDown)
                 {
@@ -98,7 +98,7 @@ namespace EngineNS.DesignMacross.Editor
                 bIsZKeyHasDown = false;
             }
 
-            if (UEngine.Instance.InputSystem.IsKeyPressed(EngineNS.Bricks.Input.Keycode.KEY_y))
+            if (TtEngine.Instance.InputSystem.IsKeyPressed(EngineNS.Bricks.Input.Keycode.KEY_y))
             {
                 if (bIsYKeyDown)
                 {
@@ -112,12 +112,12 @@ namespace EngineNS.DesignMacross.Editor
                 bIsYKeyHasDown = false;
             }
 
-            if (bIsZKeyDown && !bIsZKeyHasDown && UEngine.Instance.InputSystem.IsCtrlKeyDown())
+            if (bIsZKeyDown && !bIsZKeyHasDown && TtEngine.Instance.InputSystem.IsCtrlKeyDown())
             {
                 CommandHistory.Undo();
             }
 
-            if (UEngine.Instance.InputSystem.IsCtrlKeyDown() && bIsYKeyDown && !bIsYKeyHasDown)
+            if (TtEngine.Instance.InputSystem.IsCtrlKeyDown() && bIsYKeyDown && !bIsYKeyHasDown)
             {
                 CommandHistory.Redo();
             }
@@ -170,16 +170,16 @@ namespace EngineNS.DesignMacross.Editor
             {
                 sr.Write(code);
             }
-            EngineNS.UEngine.Instance.MacrossManager.GenerateProjects();
+            EngineNS.TtEngine.Instance.MacrossManager.GenerateProjects();
             return code;
         }
         public void CompileCode()
         {
-            UEngine.Instance.MacrossManager.ClearGameProjectTemplateBuildFiles();
-            var assemblyFile = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + UEngine.Instance.EditorInstance.Config.GameAssembly;
-            if (UEngine.Instance.MacrossModule.CompileCode(assemblyFile))
+            TtEngine.Instance.MacrossManager.ClearGameProjectTemplateBuildFiles();
+            var assemblyFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameAssembly;
+            if (TtEngine.Instance.MacrossModule.CompileCode(assemblyFile))
             {
-                UEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
+                TtEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
                 foreach (var classDeclaration in ClassDeclarationsForGenerateCompileCode)
                 {
                     var typeDesc = classDeclaration.TryGetTypeDesc();
@@ -246,9 +246,9 @@ namespace EngineNS.DesignMacross.Editor
             //if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList, in Support.UAnyPointer.Default,
             //    ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "DebugTest"))
             //{
-            //    var result = UEngine.Instance.EventPoster.Post(() =>
+            //    var result = TtEngine.Instance.EventPoster.Post(() =>
             //    {
-            //        var tt = UEngine.Instance.MacrossModule.NewInnerObject<Macross.UMacrossTestClass>(AssetName);
+            //        var tt = TtEngine.Instance.MacrossModule.NewInnerObject<Macross.UMacrossTestClass>(AssetName);
             //        var methodInfo = tt.GetType().GetMethod("Method_0");
             //        //tt.VirtualFunc3(5);
             //        methodInfo?.Invoke(tt, null);

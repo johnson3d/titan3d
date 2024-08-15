@@ -45,7 +45,7 @@ namespace EngineNS.NxRHI
         public FViewPort Viewport;
         public unsafe void InitRenderPass()
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var SwapChainPassDesc = new NxRHI.FRenderPassDesc();
             SwapChainPassDesc.NumOfMRT = 1;
             SwapChainPassDesc.AttachmentMRTs[0].IsSwapChain = 1;
@@ -73,7 +73,7 @@ namespace EngineNS.NxRHI
             Viewport.MinDepth = 0;
             Viewport.MaxDepth = 1.0f;
 
-            RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in SwapChainPassDesc);
+            RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in SwapChainPassDesc);
         }
         public void OnResize(float x, float y)
         {
@@ -85,7 +85,7 @@ namespace EngineNS.NxRHI
             Viewport.MaxDepth = 1.0f;
 
             mBackFrameBuffers = null;
-            mCoreObject.Resize(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, (uint)x, (uint)y);
+            mCoreObject.Resize(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, (uint)x, (uint)y);
         }
         public FViewPort GetViewport()
         {
@@ -118,7 +118,7 @@ namespace EngineNS.NxRHI
         }
         public void Present(uint SyncInterval, uint Flags)
         {
-            mCoreObject.Present(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, SyncInterval, Flags);
+            mCoreObject.Present(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, SyncInterval, Flags);
         }
 
         UFrameBuffers[] mBackFrameBuffers;
@@ -131,7 +131,7 @@ namespace EngineNS.NxRHI
                 mBackFrameBuffers = new UFrameBuffers[Num];
                 for (uint i = 0; i < Num; i++)
                 {
-                    mBackFrameBuffers[i] = UEngine.Instance.GfxDevice.RenderContext.CreateFrameBuffers(RenderPass);
+                    mBackFrameBuffers[i] = TtEngine.Instance.GfxDevice.RenderContext.CreateFrameBuffers(RenderPass);
                     mBackFrameBuffers[i].mCoreObject.BindRenderTargetView(0, mCoreObject.GetBackRTV(i));
 
                     mBackFrameBuffers[i].FlushModify();

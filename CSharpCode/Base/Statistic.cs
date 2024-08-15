@@ -38,7 +38,7 @@ namespace EngineNS
         {
             get
             {
-                return UEngine.Instance.GfxDevice.RenderSwapQueue.GetStat();
+                return TtEngine.Instance.GfxDevice.RenderSwapQueue.GetStat();
             }
         }
     }

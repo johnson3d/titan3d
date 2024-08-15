@@ -42,20 +42,20 @@ namespace EngineNS.NxRHI
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
+            return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
         }
         public override void OnBeforeRenamedAsset(IAsset asset, RName name)
         {
             ((USrView)asset).LoadOriginImageObject();
-            CoreSDK.CheckResult(UEngine.Instance.GfxDevice.TextureManager.UnsafeRemove(name) == asset);
+            CoreSDK.CheckResult(TtEngine.Instance.GfxDevice.TextureManager.UnsafeRemove(name) == asset);
         }
         public override void OnAfterRenamedAsset(IAsset asset, RName name)
         {
             ((USrView)asset).FreeOriginImageObject();
-            UEngine.Instance.GfxDevice.TextureManager.UnsafeAdd(name, (USrView)asset);
+            TtEngine.Instance.GfxDevice.TextureManager.UnsafeAdd(name, (USrView)asset);
         }
         Thread.Async.TtTask<USrView>? SnapTask;
-        Thread.Async.TtTask<EngineNS.Graphics.Pipeline.Shader.UEffect>? EffectTask;
+        Thread.Async.TtTask<EngineNS.Graphics.Pipeline.Shader.TtEffect>? EffectTask;
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //纹理不会引用别的资产
@@ -93,19 +93,19 @@ namespace EngineNS.NxRHI
         }
         protected bool mShowA = false;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
-        private async Thread.Async.TtTask<EngineNS.Graphics.Pipeline.Shader.UEffect> GetEffect()
+        private async Thread.Async.TtTask<EngineNS.Graphics.Pipeline.Shader.TtEffect> GetEffect()
         {
-            var shading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>();
-            return await UEngine.Instance.GfxDevice.EffectManager.GetEffect(shading,
-                UEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial,
+            var shading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>();
+            return await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(shading,
+                TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial,
                 new Graphics.Mesh.UMdfStaticMesh());
         }
         public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
             if (SnapTask == null)
             {
-                var rc = UEngine.Instance.GfxDevice.RenderContext;
-                SnapTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(this.GetAssetName(), 1);
+                var rc = TtEngine.Instance.GfxDevice.RenderContext;
+                SnapTask = TtEngine.Instance.GfxDevice.TextureManager.GetTexture(this.GetAssetName(), 1);
                 //cmdlist.AddText(in start, 0xFFFFFFFF, "texture", null);
 
                 EffectTask = GetEffect();
@@ -121,7 +121,7 @@ namespace EngineNS.NxRHI
             {
                 if(CmdParameters==null && SnapTask.Value.Result!=null && EffectTask.Value.Result!=null)
                 {
-                    var rc = UEngine.Instance.GfxDevice.RenderContext;
+                    var rc = TtEngine.Instance.GfxDevice.RenderContext;
                     var SlateEffect = EffectTask.Value.Result;
 
                     var iptDesc = new NxRHI.UInputLayoutDesc();
@@ -133,7 +133,7 @@ namespace EngineNS.NxRHI
                         //iptDesc.SetShaderDesc(SlateEffect.GraphicsEffect);
                     }
                     iptDesc.mCoreObject.SetShaderDesc(SlateEffect.DescVS.mCoreObject);
-                    var InputLayout = rc.CreateInputLayout(iptDesc); //UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
+                    var InputLayout = rc.CreateInputLayout(iptDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
                     SlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
 
                     var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<EngineNS.Editor.Forms.TtTextureViewerCmdParams>();
@@ -142,7 +142,7 @@ namespace EngineNS.NxRHI
                     cmdParams.Drawcall.BindShaderEffect(SlateEffect);
                     cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
                     cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, SnapTask.Value.Result);
-                    cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                    cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
                     cmdParams.IsNormalMap = 0;
                     if (SnapTask.Value.Result.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || SnapTask.Value.Result.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || SnapTask.Value.Result.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
@@ -707,7 +707,7 @@ namespace EngineNS.NxRHI
             string mName;
             string mSourceFile;
             public UPicDesc mDesc = new UPicDesc();
-            ImGui.ImGuiFileDialog mFileDialog = UEngine.Instance.EditorInstance.FileDialog.mFileDialog;
+            ImGui.ImGuiFileDialog mFileDialog = TtEngine.Instance.EditorInstance.FileDialog.mFileDialog;
             EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
             public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
             {
@@ -884,9 +884,9 @@ namespace EngineNS.NxRHI
                     ameta.AssetId = Guid.NewGuid();
                     ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(USrView));
                     ameta.Description = $"This is a {typeof(USrView).FullName}\n";
-                    ameta.SaveAMeta();
+                    ameta.SaveAMeta((IAsset)null);
 
-                    UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                    TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
                 }
                 return true;
             }
@@ -925,10 +925,10 @@ namespace EngineNS.NxRHI
                 ameta.AssetId = Guid.NewGuid();
                 ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(USrView));
                 ameta.Description = $"This is a {typeof(USrView).FullName}\n";
-                ameta.SaveAMeta();
+                ameta.SaveAMeta((IO.IAsset)null);
 
-                UEngine.Instance.AssetMetaManager.RegAsset(ameta);
-                UEngine.Instance.SourceControlModule.AddFile(rn.Address);
+                TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                TtEngine.Instance.SourceControlModule.AddFile(rn.Address);
 
                 return true;
             }
@@ -947,10 +947,10 @@ namespace EngineNS.NxRHI
                 ameta.AssetId = Guid.NewGuid();
                 ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(USrView));
                 ameta.Description = $"This is a {typeof(USrView).FullName}\n";
-                ameta.SaveAMeta();
+                ameta.SaveAMeta((IO.IAsset)null);
 
-                UEngine.Instance.AssetMetaManager.RegAsset(ameta);
-                UEngine.Instance.SourceControlModule.AddFile(rn.Address);
+                TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                TtEngine.Instance.SourceControlModule.AddFile(rn.Address);
                 return true;
             }
 
@@ -968,10 +968,10 @@ namespace EngineNS.NxRHI
                 ameta.AssetId = Guid.NewGuid();
                 ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(USrView));
                 ameta.Description = $"This is a {typeof(USrView).FullName}\n";
-                ameta.SaveAMeta();
+                ameta.SaveAMeta((IO.IAsset)null);
 
-                UEngine.Instance.AssetMetaManager.RegAsset(ameta);
-                UEngine.Instance.SourceControlModule.AddFile(rn.Address);
+                TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                TtEngine.Instance.SourceControlModule.AddFile(rn.Address);
                 return true;
             }
 
@@ -1016,7 +1016,7 @@ namespace EngineNS.NxRHI
         }
         public IO.IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
@@ -1082,7 +1082,7 @@ namespace EngineNS.NxRHI
                         var image = LoadOriginPng(this.AssetName);
                         if (image == null)
                         {
-                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Assets", $"SaveAssetTo failed: LoadOriginImage({AssetName}) = null");
+                            Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, $"SaveAssetTo failed: LoadOriginImage({AssetName}) = null");
                             return;
                         }
                         ImportAttribute.SaveSrv(image, name, this.PicDesc);
@@ -1101,7 +1101,7 @@ namespace EngineNS.NxRHI
                         var file = LoadOriginExr(AssetName, ref outStream);
                         if(file == null)
                         {
-                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Assets", $"SaveAssetTo failed: LoadOriginImage({AssetName}) = null");
+                            Profiler.Log.WriteLine<Profiler.TtEditorGategory>(Profiler.ELogTag.Warning, $"SaveAssetTo failed: LoadOriginImage({AssetName}) = null");
                             return;
                         }
                         ImportAttribute.SaveSrv(file, name, this.PicDesc);
@@ -1113,7 +1113,7 @@ namespace EngineNS.NxRHI
             if (ameta != null)
             {
                 UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta();
+                ameta.SaveAMeta(this);
             }
         }
         [Rtti.Meta]
@@ -1177,7 +1177,7 @@ namespace EngineNS.NxRHI
             }
             if (level < 0 || level > MaxLOD)
                 return false;
-            var tex2d = await UEngine.Instance.EventPoster.Post((state) =>
+            var tex2d = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 var xnd = IO.TtXndHolder.LoadXnd(AssetName.Address);
                 if (xnd == null)
@@ -1186,7 +1186,7 @@ namespace EngineNS.NxRHI
                 return LoadTexture2DMipLevel(xnd.RootNode, this.PicDesc, level);
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             LevelOfDetail = level;
             unsafe
             {
@@ -1341,7 +1341,7 @@ namespace EngineNS.NxRHI
                     var sourceFile = name.Address + ".png";
                     if (System.IO.File.Exists(sourceFile) == false)
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Assets", $"LoadOriginImage({name}) failed");
+                        Profiler.Log.WriteLine<Profiler.TtEditorGategory>(Profiler.ELogTag.Warning, $"LoadOriginImage({name}) failed");
                         return null;
                     }
                     using (var stream = System.IO.File.OpenRead(sourceFile))
@@ -1437,11 +1437,11 @@ namespace EngineNS.NxRHI
             desc.MipSizes.Clear();
             if (desc.DontCompress == false)
             {
-                if (UEngine.Instance.Config.CompressDxt)
+                if (TtEngine.Instance.Config.CompressDxt)
                 {
                     desc.CompressFormat = ETextureCompressFormat.TCF_BC6;
                 }
-                else if (UEngine.Instance.Config.CompressAstc)
+                else if (TtEngine.Instance.Config.CompressAstc)
                 {
                     System.Diagnostics.Debug.Assert(false);
                     desc.CompressFormat = ETextureCompressFormat.TCF_Astc_4x4_Float;
@@ -1533,11 +1533,11 @@ namespace EngineNS.NxRHI
             desc.MipSizes.Clear();
             if (desc.DontCompress == false)
             {
-                if (UEngine.Instance.Config.CompressDxt)
+                if (TtEngine.Instance.Config.CompressDxt)
                 {
                     desc.CompressFormat = ETextureCompressFormat.TCF_BC6;
                 }
-                else if (UEngine.Instance.Config.CompressAstc)
+                else if (TtEngine.Instance.Config.CompressAstc)
                 {
                     System.Diagnostics.Debug.Assert(false);
                     desc.CompressFormat = ETextureCompressFormat.TCF_Astc_4x4_Float;
@@ -1685,7 +1685,7 @@ namespace EngineNS.NxRHI
             desc.MipSizes.Clear();
             if (desc.DontCompress == false)
             {
-                if (UEngine.Instance.Config.CompressDxt)
+                if (TtEngine.Instance.Config.CompressDxt)
                 {
                     if(desc.IsNormal)
                     {
@@ -1704,7 +1704,7 @@ namespace EngineNS.NxRHI
                         desc.CompressFormat = ETextureCompressFormat.TCF_Dxt1;
                     }
                 }
-                else if (UEngine.Instance.Config.CompressEtc)
+                else if (TtEngine.Instance.Config.CompressEtc)
                 {
                     if (desc.BitNumAlpha == 8 || desc.BitNumAlpha == 4)
                     {
@@ -1719,7 +1719,7 @@ namespace EngineNS.NxRHI
                         desc.CompressFormat = ETextureCompressFormat.TCF_Etc2_RGB8;
                     }
                 }
-                else if (UEngine.Instance.Config.CompressAstc)
+                else if (TtEngine.Instance.Config.CompressAstc)
                 {
                     System.Diagnostics.Debug.Assert(false);
                     desc.CompressFormat = ETextureCompressFormat.TCF_Etc2_RGBA8;
@@ -2676,7 +2676,7 @@ namespace EngineNS.NxRHI
         {
             if (mipLevel == 0)
                 return null;
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             var exrNode = node.TryGetChildNode("ExrMips");
             if (exrNode.NativePointer == IntPtr.Zero)
@@ -2736,7 +2736,7 @@ namespace EngineNS.NxRHI
         {
             if (mipLevel == 0)
                 return null;
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             var exrNode = node.TryGetChildNode("ExrMips");
             if (exrNode.NativePointer == IntPtr.Zero)
@@ -2875,7 +2875,7 @@ namespace EngineNS.NxRHI
         {
             if (mipLevel == 0)
                 return null;
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             var hdrNode = node.TryGetChildNode("HdrMips");
             if (hdrNode.NativePointer == IntPtr.Zero)
@@ -2951,7 +2951,7 @@ namespace EngineNS.NxRHI
         {
             if (mipLevel == 0)
                 return null;
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             var pngNode = node.TryGetChildNode("PngMips");
             if (pngNode.NativePointer == IntPtr.Zero)
@@ -3021,7 +3021,7 @@ namespace EngineNS.NxRHI
         {
             if (mipLevel == 0)
                 return null;
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             var pngNode = node.TryGetChildNode("DxtMips");
             if (pngNode.NativePointer == IntPtr.Zero)
@@ -3172,7 +3172,7 @@ namespace EngineNS.NxRHI
         public static async System.Threading.Tasks.Task<USrView> LoadSrvMipmap(RName rn, int mipLevel)
         {
             UPicDesc desc = null;
-            var tex2d = await UEngine.Instance.EventPoster.Post((state) =>
+            var tex2d = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 var xnd = IO.TtXndHolder.LoadXnd(rn.Address);
                 if (xnd == null)
@@ -3188,14 +3188,14 @@ namespace EngineNS.NxRHI
 
             if (tex2d == null)
             {
-                if (UEngine.Instance.PlayMode == EPlayMode.Editor)
+                if (TtEngine.Instance.PlayMode == EPlayMode.Editor)
                     SaveOriginImage(rn);
                 return null;
             }
 
             tex2d.SetDebugName(rn.Name);
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var srvDesc = new FSrvDesc();
             srvDesc.SetTexture2D();
             srvDesc.Type = ESrvType.ST_Texture2D;
@@ -3214,7 +3214,7 @@ namespace EngineNS.NxRHI
         public static async System.Threading.Tasks.Task<USrView> LoadSrvMipmap(RName rn, int mipLevel, int channelR, int channelG, int channelB, int channelA)
         {
             UPicDesc desc = null;
-            var tex2d = await UEngine.Instance.EventPoster.Post((state) =>
+            var tex2d = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 var xnd = IO.TtXndHolder.LoadXnd(rn.Address);
                 if (xnd == null)
@@ -3230,12 +3230,12 @@ namespace EngineNS.NxRHI
 
             if (tex2d == null)
             {
-                if (UEngine.Instance.PlayMode == EPlayMode.Editor)
+                if (TtEngine.Instance.PlayMode == EPlayMode.Editor)
                     SaveOriginImage(rn);
                 return null;
             }
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var srvDesc = new FSrvDesc();
             srvDesc.SetTexture2D();
             srvDesc.Type = ESrvType.ST_Texture2D;
@@ -3280,7 +3280,7 @@ namespace EngineNS.NxRHI
         ~UTextureManager()
         {
             Cleanup();
-            UEngine.Instance?.TickableManager.RemoveTickable(this);
+            TtEngine.Instance?.TickableManager.RemoveTickable(this);
         }
         public void Cleanup()
         {
@@ -3294,7 +3294,7 @@ namespace EngineNS.NxRHI
             StreamingAssets.Clear();
         }
         public USrView DefaultTexture;
-        public async System.Threading.Tasks.Task Initialize(UEngine engine)
+        public async System.Threading.Tasks.Task Initialize(TtEngine engine)
         {
             DefaultTexture = await GetTexture(engine.Config.DefaultTexture);
         }
@@ -3304,7 +3304,7 @@ namespace EngineNS.NxRHI
         {
             if (EngineNS.IO.TtFileManager.FileExists(file) == false)
                 return null;
-            StbImageSharp.ImageResult image = await UEngine.Instance.EventPoster.Post((state) =>
+            StbImageSharp.ImageResult image = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var memStream = new System.IO.FileStream(file, System.IO.FileMode.Open))
                 {
@@ -3341,7 +3341,7 @@ namespace EngineNS.NxRHI
             {
                 data.pData = pData;
 
-                var rc = UEngine.Instance.GfxDevice.RenderContext;
+                var rc = TtEngine.Instance.GfxDevice.RenderContext;
                 var texture2d = rc.CreateTexture(in texDesc);
                 texture2d.SetDebugName(file);
 
@@ -3440,9 +3440,9 @@ namespace EngineNS.NxRHI
             if (srv == null)
                 return false;
 
-            var nowFrame = UEngine.Instance.CurrentTickFrame;
+            var nowFrame = TtEngine.Instance.CurrentTickFrame;
             var resState = srv.mCoreObject.GetResourceState();
-            if (nowFrame - resState->GetAccessFrame() > 15 * (uint)UEngine.Instance.Config.TargetFps)//15 second & 60 target fps
+            if (nowFrame - resState->GetAccessFrame() > 15 * (uint)TtEngine.Instance.Config.TargetFps)//15 second & 60 target fps
             {
                 srv.TargetLOD = 1;
                 //mWaitRemoves.Add(asset.AssetName);

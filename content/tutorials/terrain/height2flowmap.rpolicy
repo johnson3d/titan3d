@@ -22,14 +22,14 @@
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_1>
   </Nodes>
-  <PolicyType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.UDeferredPolicyBase@EngineCore" />
-  <RenderPolicy Type="EngineNS.Graphics.Pipeline.UDeferredPolicyBase@EngineCore">
+  <PolicyType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore" />
+  <RenderPolicy Type="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore">
     <DisableAO Type="System.Boolean@Unknown" Value="False" />
     <DisableHDR Type="System.Boolean@Unknown" Value="False" />
     <DisablePointLight Type="System.Boolean@Unknown" Value="False" />
     <DisableShadow Type="System.Boolean@Unknown" Value="False" />
-    <TypeAA Type="EngineNS.Graphics.Pipeline.URenderPolicy.ETypeAA@EngineCore" Value="Taa" />
-    <TypeFog Type="EngineNS.Graphics.Pipeline.URenderPolicy.ETypeFog@EngineCore" Value="None" />
+    <TypeAA Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA@EngineCore" Value="Taa" />
+    <TypeFog Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog@EngineCore" Value="None" />
   </RenderPolicy>
   <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">

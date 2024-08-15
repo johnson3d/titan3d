@@ -29,7 +29,7 @@ namespace EngineNS.Editor
         { 
             get
             {
-                return $"binaries/{UEngine.DotNetVersion}/{GameModuleName}";
+                return $"binaries/{TtEngine.DotNetVersion}/{GameModuleName}";
             }
         }
         [Rtti.Meta]
@@ -46,19 +46,19 @@ namespace EngineNS.Editor
         //}
     }
 
-    public partial class UEditor : UModule<UEngine>
+    public partial class UEditor : UModule<TtEngine>
     {
         public UEditorConfig Config { get; set; } = new UEditorConfig();
         public EGui.TtUVAnim PhyMaterialIcon { get; set; }
         public EGui.TtUVAnim FontIcon { get; set; }
         public EGui.TtUVAnim MacrossIcon { get; set; }
-        public override void Cleanup(UEngine host)
+        public override void Cleanup(TtEngine host)
         {
             //CoreSDK.DisposeObject(ref RNamePopupContentBrowser);
             base.Cleanup(host);
         }
 
-        public override async Task<bool> Initialize(UEngine host)
+        public override async Task<bool> Initialize(TtEngine host)
         {
             var cfgFile = host.FileManager.GetRoot(IO.TtFileManager.ERootDir.Editor) + "EditorConfig.cfg";
             Config = IO.TtFileManager.LoadXmlToObject<UEditorConfig>(cfgFile);
@@ -72,33 +72,33 @@ namespace EngineNS.Editor
                 Config.SaveConfig(cfgFile);
             }
 
-            var gameAssembly = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + Config.GameAssembly;
+            var gameAssembly = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + Config.GameAssembly;
             
-            UEngine.Instance.MacrossModule.ReloadAssembly(gameAssembly);
+            TtEngine.Instance.MacrossModule.ReloadAssembly(gameAssembly);
 
             //await RNamePopupContentBrowser.Initialize();
 
             return await base.Initialize(host);
         }
-        public override async Task<bool> PostInitialize(UEngine host)
+        public override async Task<bool> PostInitialize(TtEngine host)
         {
             if (Config.PhyMaterialIconName == null)
             {
                 Config.PhyMaterialIconName = RName.GetRName("icons/phymaterialicon.uvanim", RName.ERNameType.Engine);
             }
-            PhyMaterialIcon = await UEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(Config.PhyMaterialIconName);
+            PhyMaterialIcon = await TtEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(Config.PhyMaterialIconName);
 
             if (Config.FontIconName == null)
             {
                 Config.FontIconName = RName.GetRName("icons/font.uvanim", RName.ERNameType.Engine);
             }
-            FontIcon = await UEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(Config.FontIconName);
+            FontIcon = await TtEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(Config.FontIconName);
 
             if (Config.MacrossIconName == null)
             {
                 Config.MacrossIconName = RName.GetRName("icons/macrossicon.uvanim", RName.ERNameType.Engine);
             }
-            MacrossIcon = await UEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(Config.MacrossIconName);
+            MacrossIcon = await TtEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(Config.MacrossIconName);
 
             return await base.Initialize(host);
         }
@@ -107,7 +107,7 @@ namespace EngineNS.Editor
 
 namespace EngineNS
 {
-    public partial class UEngine
+    public partial class TtEngine
     {
         public Editor.UEditor EditorInstance { get; } = new Editor.UEditor();
     }

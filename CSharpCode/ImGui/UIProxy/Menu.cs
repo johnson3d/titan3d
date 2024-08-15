@@ -404,7 +404,7 @@ namespace EngineNS.EGui.UIProxy
         public static bool OnDraw(string name, in ImDrawList drawList, float thickness)
         {
             ImGuiAPI.BeginGroup();
-            UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.UBaseRenderer.enFont.Font_Bold_13px);
+            TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)Slate.UBaseRenderer.enFont.Font_Bold_13px);
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.NamedMenuSeparatorColor);
             ImGuiAPI.Text(name);
             ImGuiAPI.PopStyleColor(1);
@@ -415,7 +415,7 @@ namespace EngineNS.EGui.UIProxy
             var start = new Vector2(cursorPos.X, cursorPos.Y + itemSize.Y * 0.5f);
             var end = new Vector2(start.X + winWidth - itemSize.X - StyleConfig.Instance.WindowPadding.X * 2 - StyleConfig.Instance.ItemSpacing.X, start.Y);
             drawList.AddLine(in start, in end, StyleConfig.Instance.NamedMenuSeparatorColor, thickness);
-            UEngine.Instance.GfxDevice.SlateRenderer.PopFont();
+            TtEngine.Instance.GfxDevice.SlateRenderer.PopFont();
             ImGuiAPI.EndGroup();
             return true;
         }

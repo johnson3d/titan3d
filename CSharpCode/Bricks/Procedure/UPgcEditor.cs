@@ -42,7 +42,7 @@ namespace EngineNS.Bricks.Procedure
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public UPgcAsset EditAsset { get; private set; }
-        public UGraphRenderer GraphRenderer { get; } = new UGraphRenderer();
+        public TtGraphRenderer GraphRenderer { get; } = new TtGraphRenderer();
         public EGui.Controls.PropertyGrid.PropertyGrid NodePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid GraphPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public float LeftWidth = 0;
@@ -87,7 +87,7 @@ namespace EngineNS.Bricks.Procedure
             
             return true;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -160,7 +160,7 @@ namespace EngineNS.Bricks.Procedure
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"MaterialPreview:{AssetName}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterial;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
+            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
 
             mDockKeyClass = new ImGuiWindowClass()
             {
@@ -174,12 +174,12 @@ namespace EngineNS.Bricks.Procedure
                 DockingAllowUnclassed = true,
             };
 
-            UEngine.Instance.TickableManager.AddTickable(this);
+            TtEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
         public void OnCloseEditor()
         {
-            UEngine.Instance.TickableManager.RemoveTickable(this);
+            TtEngine.Instance.TickableManager.RemoveTickable(this);
             Dispose();
         }
         public void OnEvent(in Bricks.Input.Event e)
@@ -203,7 +203,7 @@ namespace EngineNS.Bricks.Procedure
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -389,7 +389,7 @@ namespace EngineNS.Bricks.Procedure
         }
         private async System.Threading.Tasks.Task Compile()
         {
-            await UEngine.Instance.EventPoster.Post((state) =>
+            await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 EditAsset.Compile(EditAsset.AssetGraph.Root);
                 return true;

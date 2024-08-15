@@ -131,7 +131,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
             else
             {
-                await UEngine.Instance.EventPoster.Post((state) =>
+                await TtEngine.Instance.EventPoster.Post((state) =>
                 {
                     BuildLevelDataFromPGC(Level.Node.GetNodeData<UTerrainNode.UTerrainData>());
                     return true;
@@ -627,7 +627,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var patchSide = Level.PatchSide;
             var terrainGen = Level.Node.TerrainGen;
 
-            var dir = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "terrain/";
+            var dir = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "terrain/";
             dir = IO.TtFileManager.CombinePath(dir, terrainName.Name);
             IO.TtFileManager.SureDirectory(dir);
             var lvlFile = $"{dir}/X{Level.LevelX}_Y{Level.LevelZ}.trlvl";
@@ -701,12 +701,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         #region Px & Collide
         public unsafe void InitPhysics(UTerrainLevel level)
         {
-            var pc = UEngine.Instance.PhyModule.PhyContext;
+            var pc = TtEngine.Instance.PhyModule.PhyContext;
             int texSize = level.Node.TexSizePerPatch * level.Node.PatchSide;
             fixed (PhyHeightFieldSample* pPixelData = &PxHeightfieldSamples[0])
             {
                 PhyHeightfield = pc.CookHeightfield(texSize, texSize, pPixelData, 0, false);
-                var materials = new List<Bricks.PhysicsCore.TtPhyMaterial>() { UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial };
+                var materials = new List<Bricks.PhysicsCore.TtPhyMaterial>() { TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial };
                 var terrainShape = pc.CreateShapeHeightfield(materials,
                     PhyHeightfield, PxHeightfieldScale, in Vector3.One);
                 PhyFilterData SimulationFilterData = new PhyFilterData();
@@ -781,7 +781,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 i.OnGatherVisibleMeshes(rp);
             }
         }
-        public void Tick(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
+        public void Tick(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             foreach (var i in TiledPatch)
             {
@@ -792,9 +792,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             if (PhyActor == null)
                 return;
-            //if (UEngine.Instance != null)
+            //if (TtEngine.Instance != null)
             {
-                //if (UEngine.Instance.PlayMode != EPlayMode.Editor || UEngine.Instance.PlayMode != EPlayMode.Cook)
+                //if (TtEngine.Instance.PlayMode != EPlayMode.Editor || TtEngine.Instance.PlayMode != EPlayMode.Cook)
                 {
                     if (cur != null)
                     {

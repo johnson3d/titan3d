@@ -48,7 +48,7 @@ namespace EngineNS.NxRHI
             info.Tag = cmd;
             info.Cmd = static (NxRHI.ICommandList im_cmd, ref FRCmdInfo info) =>
             {
-                UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(info.Tag as UCommandList, info.QueueType);
+                TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(info.Tag as UCommandList, info.QueueType);
             };
             Cmds.Enqueue(info);
 
@@ -103,7 +103,7 @@ namespace EngineNS.NxRHI
                 TickRender(0);
                 TickSync(0);
 
-                UEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
+                TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
                 var count = RenderCmds[0].Cmds.Count + RenderCmds[1].Cmds.Count;
                 System.Diagnostics.Debug.Assert(count == 0);
             }
@@ -112,7 +112,7 @@ namespace EngineNS.NxRHI
         {
             lock (RenderCmds)
             {
-                if (UEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.None)
+                if (TtEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.None)
                 {
                     var info = new FRCmdInfo();
                     info.Name = name;
@@ -135,9 +135,9 @@ namespace EngineNS.NxRHI
             System.Diagnostics.Debug.Assert(cmd.mCoreObject.IsRecording() == false);
             lock (RenderCmds)
             {
-                if (UEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.None)
+                if (TtEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.None)
                 {
-                    UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(cmd, qType);
+                    TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(cmd, qType);
                 }
                 else
                 {
@@ -153,7 +153,7 @@ namespace EngineNS.NxRHI
         private static Profiler.TimeScope ScopeRenderTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtRenderSwapQueue), nameof(TickRender));
         public void TickRender(float ellapse)
         {
-            var cmdQueue = UEngine.Instance.GfxDevice.RenderContext.GpuQueue;
+            var cmdQueue = TtEngine.Instance.GfxDevice.RenderContext.GpuQueue;
 
             using (new Profiler.TimeScopeHelper(ScopeRenderTick))
             {
@@ -165,7 +165,7 @@ namespace EngineNS.NxRHI
         }
         private void TickRenderImpl(ICommandList ImCmdlist)
         {
-            if (UEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.Queue)
+            if (TtEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.Queue)
             {
                 var curCmds = RenderCmds[0].Cmds;
                 while (true)
@@ -194,7 +194,7 @@ namespace EngineNS.NxRHI
                     }
                 }
             }
-            else if (UEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.QueueNextFrame)
+            else if (TtEngine.Instance.Config.MultiRenderMode == EMultiRenderMode.QueueNextFrame)
             {
                 RenderCmds[1].Execute(ImCmdlist);
             }
@@ -209,7 +209,7 @@ namespace EngineNS.NxRHI
         {
             using (new Profiler.TimeScopeHelper(ScopeRenderTick))
             {
-                var cmdQueue = UEngine.Instance.GfxDevice.RenderContext.GpuQueue;
+                var cmdQueue = TtEngine.Instance.GfxDevice.RenderContext.GpuQueue;
 
                 Swap(ref RenderCmds[0], ref RenderCmds[1]);
                 RenderCmds[0].QueueStats.Reset();
@@ -252,7 +252,7 @@ namespace EngineNS.NxRHI
             {
                 var extName = (tagName != null) ? "_" + tagName : "";
                 var tarFile = IO.TtFileManager.GetPureName(file) + $"{extName}.rdc";
-                var absTarFile = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.RenderDoc) + tarFile;
+                var absTarFile = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.RenderDoc) + tarFile;
                 try
                 {
                     System.IO.File.Move(file, absTarFile, true);

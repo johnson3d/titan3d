@@ -141,7 +141,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     public class UTerrainGrass : IO.BaseSerializer
     {
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = Graphics.Mesh.UMaterialMesh.AssetExt)]
+        [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
         public RName MeshName { get; set; }
 
         [Rtti.Meta]
@@ -200,7 +200,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             public TtPatch Patch;
             public UTerrainGrass GrassDesc { get; set; }
             public List<UGrassInstance> ObjInstances { get; } = new List<UGrassInstance>();
-            public Graphics.Mesh.UMaterialMesh MaterialMesh;
+            public Graphics.Mesh.TtMaterialMesh MaterialMesh;
             public Graphics.Mesh.TtMesh Mesh;
             public Grass.UMdfGrassStaticMesh InstanceMdf;
             public NxRHI.UCbView GrassCBuffer;
@@ -213,7 +213,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             //{
             //    Patch = patch;
             //    GrassDesc = desc;
-            //    MaterialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(desc.MeshName);
+            //    MaterialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(desc.MeshName);
             //    Mesh = new Graphics.Mesh.TtMesh();
             //    if (desc.FollowHeight)
             //        Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Grass.UMdf_Grass_VertexFollowHeight>>.TypeDesc);
@@ -239,7 +239,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 GrassDesc = desc;
                 WeightMap = weights;
                 WeightStride = weightStride;
-                MaterialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(desc.MeshName);
+                MaterialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(desc.MeshName);
                 if (MaterialMesh == null)
                 {
                     CreateFinished = true;
@@ -326,7 +326,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         //    {
         //        var tempPatchOffset = patchOffset;
         //        var tempTrans = trans;
-        //        UEngine.Instance.EventPoster.RunOnUntilFinish((Thread.Async.TtAsyncTaskStateBase state) =>
+        //        TtEngine.Instance.EventPoster.RunOnUntilFinish((Thread.Async.TtAsyncTaskStateBase state) =>
         //        {
         //            var isFinish = type.CreateFinished;
         //            if (isFinish)
@@ -444,7 +444,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
             if(type.CreateFinished == false)
             {
-                UEngine.Instance.EventPoster.RunOnUntilFinish((Thread.Async.TtAsyncTaskStateBase state) =>
+                TtEngine.Instance.EventPoster.RunOnUntilFinish((Thread.Async.TtAsyncTaskStateBase state) =>
                 {
                     var isFinish = type.CreateFinished;
                     if(isFinish)

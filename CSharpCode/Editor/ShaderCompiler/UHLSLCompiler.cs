@@ -21,10 +21,10 @@ namespace EngineNS.Editor.ShaderCompiler
         {
             get
             {
-                return UEngine.Instance.Config.IsWriteShaderDebugFile;
+                return TtEngine.Instance.Config.IsWriteShaderDebugFile;
             }
         }
-        NxRHI.UShaderCompiler mShaderCompiler = null;
+        NxRHI.TtShaderCompiler mShaderCompiler = null;
         public Graphics.Pipeline.Shader.TtMdfQueueBase MdfQueue = null;
         static CoreSDK.FDelegate_FOnShaderTranslated OnShaderTranslated = OnShaderTranslatedImpl;
         static void OnShaderTranslatedImpl(NxRHI.FShaderDesc arg0)
@@ -56,7 +56,7 @@ namespace EngineNS.Editor.ShaderCompiler
         public UHLSLCompiler()
         {
             GetShaderCodeStream = this.GetHLSLCode;
-            mShaderCompiler = new NxRHI.UShaderCompiler(GetShaderCodeStream);
+            mShaderCompiler = new NxRHI.TtShaderCompiler(GetShaderCodeStream);
         }
         private static string FixRootPath(string file)
         {
@@ -65,7 +65,7 @@ namespace EngineNS.Editor.ShaderCompiler
             if (repPos >= 0)
             {
                 result = file.Substring(repPos);
-                result = file.Replace("@Engine/", UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine));
+                result = file.Replace("@Engine/", TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine));
             }
             else
             {
@@ -73,7 +73,7 @@ namespace EngineNS.Editor.ShaderCompiler
                 if (repPos >= 0)
                 {
                     result = file.Substring(repPos);
-                    result = result.Replace("@Game/", UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game));
+                    result = result.Replace("@Game/", TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game));
                 }
                 else
                 {
@@ -90,14 +90,14 @@ namespace EngineNS.Editor.ShaderCompiler
             {
                 rn = RName.GetRName(file, RName.ERNameType.Engine);
             }
-            else if (file.StartsWith(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine)))
+            else if (file.StartsWith(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine)))
             {
-                var path = IO.TtFileManager.GetRelativePath(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine), file);
+                var path = IO.TtFileManager.GetRelativePath(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine), file);
                 rn = RName.GetRName(path, RName.ERNameType.Engine);
             }
-            else if (file.StartsWith(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game)))
+            else if (file.StartsWith(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game)))
             {
-                var path = IO.TtFileManager.GetRelativePath(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game), file);
+                var path = IO.TtFileManager.GetRelativePath(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game), file);
                 rn = RName.GetRName(path, RName.ERNameType.Game);
             }
             else
@@ -144,7 +144,7 @@ namespace EngineNS.Editor.ShaderCompiler
 
                 if (IsWriteDebugFile && Material.AssetName != null)
                 {
-                    var path = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.DebugUtility) + $"/material/{Material.AssetName.RNameType}/{IO.TtFileManager.GetBaseDirectory(Material.AssetName.Name)}";
+                    var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.DebugUtility) + $"/material/{Material.AssetName.RNameType}/{IO.TtFileManager.GetBaseDirectory(Material.AssetName.Name)}";
                     IO.TtFileManager.SureDirectory(path);
                     IO.TtFileManager.WriteAllText(path + $"{Material.AssetName.PureName}.shader", MaterialCodeForDebug);
                 }
@@ -156,7 +156,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     return (NxRHI.FShaderCode*)0;
                 if (IsWriteDebugFile && Material.AssetName != null)
                 {
-                    var path = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.DebugUtility) + $"/material/{Material.AssetName.RNameType}/{IO.TtFileManager.GetBaseDirectory(Material.AssetName.Name)}";
+                    var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.DebugUtility) + $"/material/{Material.AssetName.RNameType}/{IO.TtFileManager.GetBaseDirectory(Material.AssetName.Name)}";
                     IO.TtFileManager.SureDirectory(path);
                     
                     IO.TtFileManager.WriteAllText(path + $"{Material.AssetName.PureName}_var.shader", Material.DefineCode.TextCode);
@@ -170,7 +170,7 @@ namespace EngineNS.Editor.ShaderCompiler
                 {
                     if (IsWriteDebugFile)
                     {
-                        var path = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.DebugUtility) + $"/mdfqueue/";
+                        var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.DebugUtility) + $"/mdfqueue/";
                         IO.TtFileManager.SureDirectory(path);
                         IO.TtFileManager.WriteAllText(path + $"{mdf.GetType().FullName}.shader", mdf.SourceCode.TextCode);
                     }
@@ -183,14 +183,14 @@ namespace EngineNS.Editor.ShaderCompiler
             {
                 rn = RName.GetRName(file, RName.ERNameType.Engine);
             }
-            else if (file.StartsWith(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine)))
+            else if (file.StartsWith(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine)))
             {
-                var path = IO.TtFileManager.GetRelativePath(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine), file);
+                var path = IO.TtFileManager.GetRelativePath(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine), file);
                 rn = RName.GetRName(path, RName.ERNameType.Engine);
             }
-            else if (file.StartsWith(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game)))
+            else if (file.StartsWith(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game)))
             {
-                var path = IO.TtFileManager.GetRelativePath(UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game), file);
+                var path = IO.TtFileManager.GetRelativePath(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game), file);
                 rn = RName.GetRName(path, RName.ERNameType.Game);
             }
             else
@@ -215,7 +215,7 @@ namespace EngineNS.Editor.ShaderCompiler
             return (NxRHI.FShaderCode*)0;
         }
         private UHLSLInclude UserInclude;
-        private Graphics.Pipeline.Shader.UMaterial Material;
+        private Graphics.Pipeline.Shader.TtMaterial Material;
         private Rtti.UTypeDesc MdfQueueType;
         private string GetVertexStreamDefine(NxRHI.EVertexStreamType type)
         {
@@ -297,8 +297,8 @@ namespace EngineNS.Editor.ShaderCompiler
             }
             return null;
         }
-        public unsafe NxRHI.UShaderDesc CompileShader(string shader, string entry, NxRHI.EShaderType type,
-            Graphics.Pipeline.Shader.TtShadingEnv shadingEnvshadingEnv, Graphics.Pipeline.Shader.UMaterial mtl, Type mdfType,
+        public unsafe NxRHI.TtShaderDesc CompileShader(string shader, string entry, NxRHI.EShaderType type,
+            Graphics.Pipeline.Shader.TtShadingEnv shadingEnvshadingEnv, Graphics.Pipeline.Shader.TtMaterial mtl, Type mdfType,
             NxRHI.UShaderDefinitions defines, UHLSLInclude incProvider, string sm = null, bool bDebugShader = true, string extHlslVersion = null)
         {
             var code_text = IO.TtFileManager.ReadAllText(shader);
@@ -333,7 +333,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     }
                 }
             }
-            var desc = new NxRHI.UShaderDesc(type);
+            var desc = new NxRHI.TtShaderDesc(type);
             var mtlName = "";
             if (mtl != null)
                 mtlName = mtl.ToString();
@@ -445,9 +445,9 @@ namespace EngineNS.Editor.ShaderCompiler
                         break;
                 }
 
-                defPtr.MergeDefinitions(UEngine.Instance.GfxDevice.RenderContext.GlobalEnvDefines);
+                defPtr.MergeDefinitions(TtEngine.Instance.GfxDevice.RenderContext.GlobalEnvDefines);
 
-                var cfg = UEngine.Instance.Config;
+                var cfg = TtEngine.Instance.Config;
                 if (cfg.CookDXBC)
                 {
                     defPtr.AddDefine("RHI_TYPE", "RHI_DX11");

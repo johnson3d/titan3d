@@ -41,9 +41,9 @@ namespace EngineNS
             {
                 unsafe
                 {
-                    IRenderDocTool.GetInstance().SetGpuDevice(UEngine.Instance.GfxDevice.RenderContext.mCoreObject);
+                    IRenderDocTool.GetInstance().SetGpuDevice(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject);
                     //IRenderDocTool.GetInstance().SetActiveWindow(HWindow.ToPointer());
-                    UEngine.Instance.GfxDevice.RenderSwapQueue.CaptureRenderDocFrame = true;
+                    TtEngine.Instance.GfxDevice.RenderSwapQueue.CaptureRenderDocFrame = true;
                 }
             }
 

@@ -18,7 +18,7 @@ namespace EngineNS.GamePlay.Scene
             }
             public TtDirectionLight DirectionLight { get; set; } = new TtDirectionLight();
             [Rtti.Meta]
-            [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.UMaterialInstance.AssetExt)]
+            [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt)]
             public RName SunMaterialName { get; set; }
         }
         protected override void OnParentChanged(UNode prev, UNode cur)
@@ -36,10 +36,10 @@ namespace EngineNS.GamePlay.Scene
             get => GetNodeData<TtSunNodeData>().DirectionLight;
             set => GetNodeData<TtSunNodeData>().DirectionLight = value;
         }
-        Graphics.Pipeline.Shader.UMaterialInstance SunMaterial;
+        Graphics.Pipeline.Shader.TtMaterialInstance SunMaterial;
         [Category("Option")]
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.UMaterialInstance.AssetExt)]
+        [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt)]
         public RName SunMaterialName
         {
             get => GetNodeData<TtSunNodeData>().SunMaterialName;
@@ -48,7 +48,7 @@ namespace EngineNS.GamePlay.Scene
                 GetNodeData<TtSunNodeData>().SunMaterialName = value;
                 var action = async () =>
                 {
-                    SunMaterial = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(value);
+                    SunMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(value);
                 };
                 action();
             }
@@ -109,11 +109,11 @@ namespace EngineNS.GamePlay.Scene
             {
                 if (mDebugMesh == null)
                 {
-                    var cookedMesh = UEngine.Instance.GfxDevice.MeshPrimitiveManager.FindMeshPrimitive(RName.GetRName("axis/movex.vms", RName.ERNameType.Engine));
+                    var cookedMesh = TtEngine.Instance.GfxDevice.MeshPrimitiveManager.FindMeshPrimitive(RName.GetRName("axis/movex.vms", RName.ERNameType.Engine));
                     if (cookedMesh == null)
                         return null;
-                    var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
-                    materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("axis/axis_x_d.uminst", RName.ERNameType.Engine));
+                    var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
+                    materials1[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("axis/axis_x_d.uminst", RName.ERNameType.Engine));
                     var mesh2 = new Graphics.Mesh.TtMesh();
                     var ok1 = mesh2.Initialize(cookedMesh, materials1,
                         Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);

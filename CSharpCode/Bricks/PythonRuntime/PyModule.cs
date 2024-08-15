@@ -59,11 +59,11 @@ namespace EngineNS.Bricks.PythonRuntime
         }
     }
 
-    public class TtPython : UModule<UEngine>
+    public class TtPython : UModule<TtEngine>
     {
         public TtPyModule RootModule { get; private set; }
         public bool StartPython { get; set; } = false;
-        public override async Task<bool> Initialize(UEngine host)
+        public override async Task<bool> Initialize(TtEngine host)
         {
             if (StartPython == false)
                 return true;
@@ -89,7 +89,7 @@ namespace EngineNS.Bricks.PythonRuntime
 
             return await base.Initialize(host);
         }
-        public override void Cleanup(UEngine host)
+        public override void Cleanup(TtEngine host)
         {
             RootModule?.Dispose();
             RootModule = null;
@@ -188,7 +188,7 @@ namespace EngineNS.Bricks.PythonRuntime
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public Bricks.PythonRuntime.TtPython PythonModule { get; } = new Bricks.PythonRuntime.TtPython();
     }

@@ -3,7 +3,7 @@
   <AssetId Type="System.Guid@Unknown" Value="9f463216-c26b-45b3-8f1a-30939daabeec" />
   <BaseTypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.UMacrossGame@EngineCore" />
   <Description Type="System.String@Unknown" Value="MacrossType:EngineNS.GamePlay.UMacrossGame@EngineCore&#xA;" />
-  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">

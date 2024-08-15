@@ -182,12 +182,12 @@ namespace EngineNS.Animation.Animatable
     //    }
     //}
 
-    public partial class TtPropertySetterModule : EngineNS.UModule<EngineNS.UEngine>
+    public partial class TtPropertySetterModule : EngineNS.UModule<EngineNS.TtEngine>
     {
         //maybe can use hashcode to replace the AnimatablePropertyDesc as the key
         Dictionary<TtAnimatablePropertyDesc, Rtti.UTypeDesc> ObjectPropertySetFuncDic { get; set; } = new Dictionary<TtAnimatablePropertyDesc, Rtti.UTypeDesc>();
         bool bInitialized = false;
-        public override Task<bool> Initialize(UEngine host)
+        public override Task<bool> Initialize(TtEngine host)
         {
             foreach (var i in Rtti.UTypeDescManager.Instance.Services)
             {
@@ -222,7 +222,7 @@ namespace EngineNS.Animation.Animatable
             bInitialized = true;
             return base.Initialize(host);
         }
-        public override void TickModule(UEngine host)
+        public override void TickModule(TtEngine host)
         {
             if (!bInitialized)
                 return;
@@ -302,7 +302,7 @@ namespace EngineNS
     }
 
 
-    partial class UEngine
+    partial class TtEngine
     {
         public Animation.Animatable.TtPropertySetterModule AnimatablePropertySetterModule { get; } = new Animation.Animatable.TtPropertySetterModule();
     }

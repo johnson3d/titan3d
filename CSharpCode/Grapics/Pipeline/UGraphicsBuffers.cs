@@ -97,7 +97,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             if (LifeMode == TtAttachBuffer.ELifeMode.Imported)
                 return;
-            var manager = UEngine.Instance.GfxDevice.AttachBufferManager;
+            var manager = TtEngine.Instance.GfxDevice.AttachBufferManager;
             mRefCount = 0;
             manager.Free(this);
         }
@@ -155,7 +155,7 @@ namespace EngineNS.Graphics.Pipeline
             LifeMode = ELifeMode.Transient;
             BufferDesc = abfdesc;
             var types = BufferDesc.BufferViewTypes;
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             if (BufferDesc.Format != EPixelFormat.PXF_UNKNOWN || (BufferDesc.BufferViewTypes & (NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_DSV)) != 0)
             {
                 var desc = new NxRHI.FTextureDesc();
@@ -406,12 +406,12 @@ namespace EngineNS.Graphics.Pipeline
             if (PrintCachedBuffer == false)
                 return;
             PrintCachedBuffer = false;
-            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Graphics", "Begin AttachBuffer====");
+            Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, "Begin AttachBuffer====");
             foreach (var i in Pools)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Graphics", $"{i.Key.ToString()} X {i.Value.PoolSize} => Max({i.Value.FrameMaxLiveCount}) / Alloc({i.Value.FrameAllocCount})");
+                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, $"{i.Key.ToString()} X {i.Value.PoolSize} => Max({i.Value.FrameMaxLiveCount}) / Alloc({i.Value.FrameAllocCount})");
             }
-            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Graphics", "End AttachBuffer====");
+            Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, "End AttachBuffer====");
         }
     }
     
@@ -451,20 +451,20 @@ namespace EngineNS.Graphics.Pipeline
             {
                 if (mPerViewportCBuffer == null)
                 {
-                    var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
-                    mPerViewportCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerViewport.Binder.mCoreObject);
+                    var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
+                    mPerViewportCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerViewport.Binder.mCoreObject);
                     PerViewportCBuffer.SetDebugName($"Viewport");
                     UpdateViewportCBuffer();
                 }
                 return mPerViewportCBuffer;
             }
         }
-        public void SetViewportCBuffer(GamePlay.UWorld world, URenderPolicy mobilePolicy)
+        public void SetViewportCBuffer(GamePlay.UWorld world, TtRenderPolicy mobilePolicy)
         {
             NxRHI.UCbView cBuffer = PerViewportCBuffer;
             if (cBuffer == null)
                 return;
-            var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+            var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
             var shadowNode = mobilePolicy.FindFirstNode<Shadow.UShadowMapNode>();
             if (shadowNode != null)
             {
@@ -521,9 +521,9 @@ namespace EngineNS.Graphics.Pipeline
             FrameBuffers.FlushModify();
             //UpdateFrameBuffers(, y);
         }
-        public unsafe void Initialize(URenderPolicy policy, NxRHI.URenderPass renderPass)
+        public unsafe void Initialize(TtRenderPolicy policy, NxRHI.URenderPass renderPass)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             
             FrameBuffers = rc.CreateFrameBuffers(renderPass);
 
@@ -586,7 +586,7 @@ namespace EngineNS.Graphics.Pipeline
                 x = 1.0f;
             if (y < 1.0f)
                 y = 1.0f;
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             if (rc == null)
                 return;
 
@@ -602,7 +602,7 @@ namespace EngineNS.Graphics.Pipeline
             {
                 if (PerViewportCBuffer != null)
                 {
-                    var indexer = UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerViewport;
+                    var indexer = TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerViewport;
 
                     Vector4 gViewportSizeAndRcp = new Vector4(Viewport.Width, Viewport.Height, 1 / Viewport.Width, 1 / Viewport.Height);
                     PerViewportCBuffer.SetValue(indexer.gViewportSizeAndRcp, in gViewportSizeAndRcp);
@@ -619,8 +619,8 @@ namespace EngineNS.NxRHI
     {
         public void BindGBuffer(Graphics.Pipeline.UCamera camera, Graphics.Pipeline.TtGraphicsBuffers GBuffers)
         {
-            //UEngine.Instance.GfxDevice.CoreShaderBinder.ShaderResource.cbPerViewport
-            //UEngine.Instance.GfxDevice.CoreShaderBinder.ShaderResource.cbPerCamera
+            //TtEngine.Instance.GfxDevice.CoreShaderBinder.ShaderResource.cbPerViewport
+            //TtEngine.Instance.GfxDevice.CoreShaderBinder.ShaderResource.cbPerCamera
 
             if (GBuffers.PerViewportCBuffer != null && Effect.BindIndexer.cbPerViewport != null)
                 mCoreObject.BindResource(Effect.BindIndexer.cbPerViewport.mCoreObject, GBuffers.PerViewportCBuffer.mCoreObject.NativeSuper);

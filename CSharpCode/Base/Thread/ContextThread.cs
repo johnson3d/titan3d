@@ -41,7 +41,7 @@ namespace EngineNS.Thread
                 if(mMonitorEnterObjects[i]!=null)
                 {
                     System.Threading.Monitor.Exit(mMonitorEnterObjects[i]);
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Thread", $"Locker({mMonitorEnterObjects[i]}) is not released");
+                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Locker({mMonitorEnterObjects[i]}) is not released");
                 }
             }
             mMonitorEnterObjects.Clear();
@@ -112,7 +112,7 @@ namespace EngineNS.Thread
             //Async.PostEvent cur;
             //while (DoOnePriorityEvent(out cur))
             //{
-            //    UEngine.Instance.EventPoster.mRunOnPEAllocator.ReleaseObject(cur);
+            //    TtEngine.Instance.EventPoster.mRunOnPEAllocator.ReleaseObject(cur);
             //}
             //while (DoOneAsyncEvent(out cur))
             //{
@@ -270,13 +270,13 @@ namespace EngineNS.Thread
             {
                 if (cur - t1 > 4 * limit)//20 ms
                 {
-                    if (UEngine.Instance.EventPoster.IsThread(Async.EAsyncTarget.Logic))
+                    if (TtEngine.Instance.EventPoster.IsThread(Async.EAsyncTarget.Logic))
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"Logic Thread[Async] is Blocked({(cur - t1)/1000}ms > {limit / 1000}):\n{state.ToString()}");
+                        Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Logic Thread[Async] is Blocked({(cur - t1)/1000}ms > {limit / 1000}):\n{state.ToString()}");
                     }
-                    else if (UEngine.Instance.EventPoster.IsThread(Async.EAsyncTarget.Render))
+                    else if (TtEngine.Instance.EventPoster.IsThread(Async.EAsyncTarget.Render))
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"Render Thread[Async] is Blocked({(cur - t1)/1000}ms > {limit / 1000}):\n{state.ToString()}");
+                        Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Render Thread[Async] is Blocked({(cur - t1)/1000}ms > {limit / 1000}):\n{state.ToString()}");
                         //if (cur.CallStackTrace != null)
                         //{
                         //    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"StackInof=>{cur.CallStackTrace}");

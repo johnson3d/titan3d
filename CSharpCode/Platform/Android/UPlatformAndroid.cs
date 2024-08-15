@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public EPlatformType CurrentPlatform
         {
@@ -154,7 +154,7 @@ namespace EngineNS
 
     public partial class USlateApplication
     {
-        public bool CreateNativeWindow(UEngine engine, string title, int x, int y, int w, int h)
+        public bool CreateNativeWindow(TtEngine engine, string title, int x, int y, int w, int h)
         {
             return false;
         }

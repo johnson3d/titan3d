@@ -31,7 +31,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             ImageName = RName.GetRName("texture/default_envmap.srv", RName.ERNameType.Engine);
         }
-        public unsafe override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
+        public unsafe override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             var attachement = RenderGraph.AttachmentCache.ImportAttachment(ImagePinOut);
             attachement.Srv = ImageSrv;
@@ -54,7 +54,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 System.Action action = async () =>
                 {
-                    ImageSrv = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
+                    ImageSrv = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
                     if (ImageSrv != null)
                     {
                         ImagePinOut.Attachement.Format = ImageSrv.SrvFormat;

@@ -22,7 +22,7 @@ namespace EngineNS.Macross
         {
             if (Enable)
             {
-                if (Thread.TtContextThread.CurrentContext.ThreadId == UEngine.Instance.ThreadMain.ThreadId)
+                if (Thread.TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadMain.ThreadId)
                 {//不能在主线程break住，否则没法调试了
                     return;
                 }
@@ -40,7 +40,7 @@ namespace EngineNS.Macross
                 BreakStackFrame = UMacrossStackTracer.CurrentFrame;
                 UMacrossDebugger.Instance.CurrrentBreak = this;
                 UMacrossDebugger.Instance.BreakEvent.Reset();
-                UEngine.Instance.ThreadLogic.MacrossDebug.Set();
+                TtEngine.Instance.ThreadLogic.MacrossDebug.Set();
             }
             UMacrossDebugger.Instance.BreakEvent.WaitOne();
         }
@@ -97,7 +97,7 @@ namespace EngineNS.Macross
                 var result = CurrrentBreak;
                 CurrrentBreak = null;
 
-                UEngine.Instance.ThreadLogic.MacrossDebug.Reset();
+                TtEngine.Instance.ThreadLogic.MacrossDebug.Reset();
                 BreakEvent.Set();
 
                 return result;

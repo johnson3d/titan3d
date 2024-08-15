@@ -23,7 +23,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             AddInput(DepthPinIn, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
             AddInputOutput(PointLightsPinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         }
-        public unsafe override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
+        public unsafe override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             TilingPinOut.Attachement.Height = TileX * TileY;
             TilingPinOut.Attachement.Width = (uint)sizeof(FTileData);
@@ -77,7 +77,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCbv;
                 var node = drawcall.TagObject as UScreenTilingNode;
@@ -123,7 +123,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCbv;
                 var node = drawcall.TagObject as UScreenTilingNode;
@@ -152,21 +152,21 @@ namespace EngineNS.Graphics.Pipeline.Common
         private PushLightToTileDataShading PushLightToTileData;
         private NxRHI.UComputeDraw PushLightToTileDataDrawcall;
 
-        public async override System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public async override System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             BasePass.Initialize(rc, debugName + ".BasePass");
 
-            SetupTileData = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupTileDataShading>();
-            PushLightToTileData = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<PushLightToTileDataShading>();
+            SetupTileData = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupTileDataShading>();
+            PushLightToTileData = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<PushLightToTileDataShading>();
         }
-        private unsafe void ResetComputeDrawcall(URenderPolicy policy)
+        private unsafe void ResetComputeDrawcall(TtRenderPolicy policy)
         {
             if (SetupTileData == null)
                 return;
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             var gpuScene = policy.GetGpuSceneNode();// .FindNode("GpuSceneNode") as Common.UGpuSceneNode;
             var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCbv;
@@ -190,7 +190,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             base.Dispose();
         }
-        public override unsafe void OnResize(URenderPolicy policy, float x, float y)
+        public override unsafe void OnResize(TtRenderPolicy policy, float x, float y)
         {
             TileX = MathHelper.Roundup((uint)x, TileSize);
             TileY = MathHelper.Roundup((uint)y, TileSize);
@@ -204,7 +204,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             TileSRV?.Dispose();
             TileSRV = null;
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             var desc = new NxRHI.FBufferDesc();
             desc.SetDefault(false, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
@@ -227,7 +227,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UScreenTilingNode), nameof(TickLogic));
-        public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {

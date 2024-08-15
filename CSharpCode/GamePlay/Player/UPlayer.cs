@@ -30,7 +30,7 @@ namespace EngineNS.GamePlay.Player
             {
                 return false;
             }
-            UEngine.Instance.EventProcessorManager.RegProcessor(this);
+            TtEngine.Instance.EventProcessorManager.RegProcessor(this);
             return true;
         }
         public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)

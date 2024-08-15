@@ -52,7 +52,7 @@ namespace EngineNS.UI.Editor
             if (mUIHost == null)
                 mUIHost = new EditorUIHost(this);
             mUIHost.Name = "UIEditorHost";
-            var newRect = UEngine.Instance.UIManager.Config.DefaultDesignRect;
+            var newRect = TtEngine.Instance.UIManager.Config.DefaultDesignRect;
             mDesignResolution = new Vector2i((int)newRect.Width, (int)newRect.Height);
             mUIHost.WindowSize = newRect.Size;
             mUIHost.SetDesignRect(in newRect, true);
@@ -87,7 +87,7 @@ namespace EngineNS.UI.Editor
 
             return true;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -221,7 +221,7 @@ namespace EngineNS.UI.Editor
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -252,7 +252,7 @@ namespace EngineNS.UI.Editor
         bool mIsSimulateMode = false;
         void Save()
         {
-            UEngine.Instance.UIManager.Save(AssetName, mUIHost.Children[0]);
+            TtEngine.Instance.UIManager.Save(AssetName, mUIHost.Children[0]);
             UIAsset.MacrossEditor.SaveClassGraph(AssetName);
             UIAsset.MacrossEditor.GenerateCode();
             UIAsset.MacrossEditor.CompileCode();
@@ -278,9 +278,9 @@ namespace EngineNS.UI.Editor
             {
                 Save();
                 //Mesh.SaveAssetTo(Mesh.AssetName);
-                //var unused = UEngine.Instance.GfxDevice.MaterialInstanceManager.ReloadMaterialInstance(Mesh.AssetName);
+                //var unused = TtEngine.Instance.GfxDevice.MaterialInstanceManager.ReloadMaterialInstance(Mesh.AssetName);
 
-                //USnapshot.Save(Mesh.AssetName, Mesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+                //USnapshot.Save(Mesh.AssetName, Mesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Reload", in btSize))
@@ -305,8 +305,8 @@ namespace EngineNS.UI.Editor
             if(EGui.UIProxy.CustomButton.ToggleButton("Simulate", in btSize, ref mIsSimulateMode))
             {
                 PreviewViewport.FreezCameraControl = mIsSimulateMode;
-                UEngine.Instance.UIManager.KeyboardFocus(null, null);
-                UEngine.Instance.UIManager.CaptureMouse(null, null);
+                TtEngine.Instance.UIManager.KeyboardFocus(null, null);
+                TtEngine.Instance.UIManager.CaptureMouse(null, null);
                 if (mIsSimulateMode)
                 {
                     if (mUIHost.Children.Count > 0)
@@ -321,11 +321,11 @@ namespace EngineNS.UI.Editor
                         mc.Initialize();
                     }
 
-                    UEngine.Instance.UIManager.AddUI(AssetName, "UIEditorSimulate", mUIHost);
+                    TtEngine.Instance.UIManager.AddUI(AssetName, "UIEditorSimulate", mUIHost);
                 }
                 else
                 {
-                    UEngine.Instance.UIManager.RemoveUI(AssetName, "UIEditorSimulate");
+                    TtEngine.Instance.UIManager.RemoveUI(AssetName, "UIEditorSimulate");
                 }
             }
             EGui.UIProxy.Toolbar.EndToolbar();
@@ -515,17 +515,17 @@ namespace EngineNS.UI.Editor
                 // debug ///////////////////
                 var drawList = ImGuiAPI.GetForegroundDrawList();
                 drawList.AddText(pos + new Vector2(0, 50), 0xffffffff, 
-                    $"x:{UEngine.Instance.UIManager.DebugMousePt.X}\r\n" +
-                    $"y:{UEngine.Instance.UIManager.DebugMousePt.Y}\r\n" +
-                    $"px:{UEngine.Instance.UIManager.DebugHitPt.X}\r\n" +
-                    $"py:{UEngine.Instance.UIManager.DebugHitPt.Y}\r\n" +
-                    $"el:{UEngine.Instance.UIManager.DebugPointatElement}", null);
+                    $"x:{TtEngine.Instance.UIManager.DebugMousePt.X}\r\n" +
+                    $"y:{TtEngine.Instance.UIManager.DebugMousePt.Y}\r\n" +
+                    $"px:{TtEngine.Instance.UIManager.DebugHitPt.X}\r\n" +
+                    $"py:{TtEngine.Instance.UIManager.DebugHitPt.Y}\r\n" +
+                    $"el:{TtEngine.Instance.UIManager.DebugPointatElement}", null);
                 ////////////////////////////
-                UEngine.Instance.UIManager.DebugHitPt = new Vector2(UEngine.Instance.InputSystem.Mouse.EventMouseX, UEngine.Instance.InputSystem.Mouse.EventMouseY);
+                TtEngine.Instance.UIManager.DebugHitPt = new Vector2(TtEngine.Instance.InputSystem.Mouse.EventMouseX, TtEngine.Instance.InputSystem.Mouse.EventMouseY);
                 var dragDropPayload = ImGuiAPI.GetDragDropPayload();
                 if (dragDropPayload != null)
                 {
-                    var curPos = new Vector2(UEngine.Instance.InputSystem.Mouse.EventMouseX, UEngine.Instance.InputSystem.Mouse.EventMouseY);
+                    var curPos = new Vector2(TtEngine.Instance.InputSystem.Mouse.EventMouseX, TtEngine.Instance.InputSystem.Mouse.EventMouseY);
                     Vector2 pointOffset;
                     var element = mUIHost.GetPointAtElement(in curPos, out pointOffset);
                     if(element != null)
@@ -572,7 +572,7 @@ namespace EngineNS.UI.Editor
                 }
                 for(int i = mMessages.Count - 1; i >= 0; i--)
                 {
-                    mMessages[i].Tick(UEngine.Instance.ElapsedSecond);
+                    mMessages[i].Tick(TtEngine.Instance.ElapsedSecond);
                     if(mMessages[i].ShowTimeSecond <= 0)
                     {
                         mMessages.RemoveAt(i);
@@ -719,7 +719,7 @@ namespace EngineNS.UI.Editor
             if(ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
             {
                 if (!mSelectedElements.Contains(element))
-                    ProcessSelectElement(element, UEngine.Instance.InputSystem.IsCtrlKeyDown());
+                    ProcessSelectElement(element, TtEngine.Instance.InputSystem.IsCtrlKeyDown());
                 ImGuiAPI.OpenPopup("##ContextMenu_" + name, ImGuiPopupFlags_.ImGuiPopupFlags_None);
             }
             if(ImGuiAPI.BeginPopup("##ContextMenu_" + name, ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
@@ -1010,7 +1010,7 @@ namespace EngineNS.UI.Editor
 
             if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
             {
-                ProcessSelectElement(element, UEngine.Instance.InputSystem.IsCtrlKeyDown());
+                ProcessSelectElement(element, TtEngine.Instance.InputSystem.IsCtrlKeyDown());
             }
             if (ImGuiAPI.BeginDragDropTarget())
             {
@@ -1228,7 +1228,7 @@ namespace EngineNS.UI.Editor
             if (AssetName != null)
             {
                 if (EGui.UIProxy.CustomButton.ToolButton("S", in Vector2.Zero))
-                    EngineNS.Editor.USnapshot.Save(AssetName, UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName), PreviewViewport.RenderPolicy.GetFinalShowRSV());
+                    EngineNS.Editor.USnapshot.Save(AssetName, TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName), PreviewViewport.RenderPolicy.GetFinalShowRSV());
                 ImGuiAPI.SameLine(0, -1);
             }
             if (EGui.UIProxy.CustomButton.ToolButton("Reset Camera", in Vector2.Zero))
@@ -1285,7 +1285,7 @@ namespace EngineNS.UI.Editor
                 {
                     if (mIsWireFrame)
                     {
-                        var mtl = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/wireframe_red.uminst", RName.ERNameType.Engine));
+                        var mtl = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/wireframe_red.uminst", RName.ERNameType.Engine));
                         mUIHost.DrawMesh.UpdateMaterial(mtl);
                     }
                     else
@@ -1355,7 +1355,7 @@ namespace EngineNS.UI.Editor
         public async Thread.Async.TtTask<bool> OpenEditor(EngineNS.Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            mUIHost.Children.Add(UEngine.Instance.UIManager.Load(AssetName));
+            mUIHost.Children.Add(TtEngine.Instance.UIManager.Load(AssetName));
             UIAsset = new TtUIAsset();
             UIAsset.AssetName = name;
             //UIAsset.Mesh = await UI.Canvas.TtCanvas.TestCreate();
@@ -1365,18 +1365,18 @@ namespace EngineNS.UI.Editor
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"UI:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
+            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
             PreviewViewport.OnEventAction = OnPreviewViewportEvent;
 
             await InitializeDecorators();
 
             //DetailsGrid.Target = UIAsset;
-            UEngine.Instance.TickableManager.AddTickable(this);
+            TtEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
         public void OnCloseEditor()
         {
-            UEngine.Instance.TickableManager.RemoveTickable(this);
+            TtEngine.Instance.TickableManager.RemoveTickable(this);
             Dispose();
         }
         #endregion
@@ -1410,7 +1410,7 @@ namespace EngineNS.UI.Editor
                            mousePt.Y <= PreviewViewport.ClientMax.Y &&
                            (CurrentDecorator == null || !CurrentDecorator.IsInDecoratorOperation()))
                         {
-                            ProcessSelectElement(mCurrentPointAtElement, UEngine.Instance.InputSystem.IsCtrlKeyDown());
+                            ProcessSelectElement(mCurrentPointAtElement, TtEngine.Instance.InputSystem.IsCtrlKeyDown());
                         }
 
                         if(e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_MIDDLE)

@@ -57,7 +57,7 @@ namespace EngineNS.Animation.SceneNode
             System.Diagnostics.Debug.Assert(animPlayNodeData != null);
             if (animPlayNodeData.OverrideAsset)
             {
-                //var skeletonAnimClip = await UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(animPlayNodeData.AnimatinName);
+                //var skeletonAnimClip = await TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(animPlayNodeData.AnimatinName);
                 bs2D = new TtBlendSpace2D();
                 for (int i = 0; i < animPlayNodeData.Axises.Count; ++i)
                 {
@@ -65,7 +65,7 @@ namespace EngineNS.Animation.SceneNode
                 }
                 for (int i = 0; i < animPlayNodeData.Points.Count; ++i)
                 {
-                    var animation = await UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(animPlayNodeData.Points[i].Animation);
+                    var animation = await TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(animPlayNodeData.Points[i].Animation);
                     bs2D.AddPoint(animation, animPlayNodeData.Points[i].Value);
                 }
                 Player = new Player.TtBlendSpace2DPlayer(bs2D);

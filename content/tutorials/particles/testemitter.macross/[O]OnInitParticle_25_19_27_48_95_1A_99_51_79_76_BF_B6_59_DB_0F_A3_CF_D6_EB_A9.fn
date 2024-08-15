@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossMethodGraph@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/particles/testemitter.macross,b778ef00-25fd-47f3-ac2a-e1c2f71056fd" />
   <CustumCode Type="System.String@Unknown" Value="void OnInitParticle(TtEmitter emt,inout FParticle particle)&#xA;{&#xA;    float tmp_r_RandomUnit_3537506712 = 0;&#xA;    float tmp_r_RandomUnit_2843124104 = 0;&#xA;    particle.Velocity = emt.Velocity;&#xA;    tmp_r_RandomUnit_3537506712 = emt.RandomUnit(particle);&#xA;    particle.Life = (tmp_r_RandomUnit_3537506712 + particle.Life);&#xA;    tmp_r_RandomUnit_2843124104 = emt.RandomUnit(particle);&#xA;    particle.Color = (uint)tmp_r_RandomUnit_2843124104;&#xA;    particle.Scale = 1;&#xA;}&#xA;&#xA;" />
   <GraphName Type="System.String@Unknown" Value="OnInitParticle" />
   <IsUseCustumCode Type="System.Boolean@Unknown" Value="False" />

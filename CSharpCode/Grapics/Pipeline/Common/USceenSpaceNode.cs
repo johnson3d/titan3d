@@ -33,17 +33,17 @@ namespace EngineNS.Graphics.Pipeline.Common
         public NxRHI.URenderPass RenderPass;
         public string DebugName;
         //public override Graphics.Pipeline.Shader.UGraphicsShadingEnv GetPassShading(URenderPolicy.EShadingType type = URenderPolicy.EShadingType.Count, Graphics.Mesh.TtMesh.TtAtom atom = null) abstract;
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             CreateGBuffers(policy, ResultPinOut.Attachement.Format);
 
             BasePass.Initialize(rc, debugName + ".BasePass");
             DebugName = debugName;
 
-            var materials = new Graphics.Pipeline.Shader.UMaterial[1];
-            materials[0] = UEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial;
+            var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
+            materials[0] = TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial;
             if (materials[0] == null)
                 return;
 
@@ -57,7 +57,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
         public TtGraphicsBuffers.TtTargetViewIdentifier TargetViewId = new TtGraphicsBuffers.TtTargetViewIdentifier();
-        public virtual unsafe TtGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
+        public virtual unsafe TtGraphicsBuffers CreateGBuffers(TtRenderPolicy policy, EPixelFormat format)
         {
             var PassDesc = new NxRHI.FRenderPassDesc();
 
@@ -76,8 +76,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             //PassDesc.mDepthClearValue = 1.0f;
             //PassDesc.mStencilClearValue = 0u;
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-            RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
 
             GBuffers.Initialize(policy, RenderPass);
             GBuffers.SetRenderTarget(policy, 0, ResultPinOut);
@@ -85,7 +85,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             return GBuffers;
         }
-        public override void OnResize(URenderPolicy policy, float x, float y)
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             if (GBuffers != null && RenderPass != null)
             {
@@ -94,7 +94,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 ResultPinOut.Attachement.Height = (uint)(y * OutputScaleFactor);
             }
         }
-        public unsafe void ClearGBuffer(URenderPolicy policy)
+        public unsafe void ClearGBuffer(TtRenderPolicy policy)
         {
             var cmdlist = BasePass.DrawCmdList;
             using (new NxRHI.TtCmdListScope(cmdlist))
@@ -108,13 +108,13 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmdlist.EndPass();
             }
         }
-        public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
+        public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             base.FrameBuild(policy);
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(USceenSpaceNode), nameof(TickLogic));
-        public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {

@@ -4,12 +4,12 @@ using System.ComponentModel;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
-    [Rtti.Meta]
-    public partial class UMaterialInstanceAMeta : IO.IAssetMeta
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterialInstanceAMeta@EngineCore" })]
+    public partial class TtMaterialInstanceAMeta : IO.IAssetMeta
     {
         public override string GetAssetExtType()
         {
-            return UMaterialInstance.AssetExt;
+            return TtMaterialInstance.AssetExt;
         }
         public override string GetAssetTypeName()
         {
@@ -17,15 +17,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            return await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(GetAssetName());
+            return await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(GetAssetName());
         }
         public override void OnBeforeRenamedAsset(IO.IAsset asset, RName name)
         {
-            CoreSDK.CheckResult(UEngine.Instance.GfxDevice.MaterialInstanceManager.UnsafeRemove(name) == asset);
+            CoreSDK.CheckResult(TtEngine.Instance.GfxDevice.MaterialInstanceManager.UnsafeRemove(name) == asset);
         }
         public override void OnAfterRenamedAsset(IO.IAsset asset, RName name)
         {
-            UEngine.Instance.GfxDevice.MaterialInstanceManager.UnsafeAdd(name, (UMaterialInstance)asset);
+            TtEngine.Instance.GfxDevice.MaterialInstanceManager.UnsafeAdd(name, (TtMaterialInstance)asset);
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -49,10 +49,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return Color4b.Cyan;
         }
     }
-    [Rtti.Meta]
-    [UMaterialInstance.MaterialInstanceImport]
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterialInstance@EngineCore" })]
+    [TtMaterialInstance.MaterialInstanceImport]
     [IO.AssetCreateMenu(MenuName = "Graphics/MaterialInstance")]
-    public partial class UMaterialInstance : UMaterial
+    public partial class TtMaterialInstance : TtMaterial
     {
         public new const string AssetExt = ".uminst";
 
@@ -60,7 +60,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             protected override bool CheckAsset()
             {
-                var material = mAsset as UMaterialInstance;
+                var material = mAsset as TtMaterialInstance;
                 if (material == null)
                     return false;
 
@@ -73,12 +73,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
         #region IAsset
         public override IO.IAssetMeta CreateAMeta()
         {
-            var result = new UMaterialInstanceAMeta();
+            var result = new TtMaterialInstanceAMeta();
             return result;
         }
         public override IO.IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
         public override void SaveAssetTo(RName name)
         {
@@ -86,7 +86,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (ameta != null)
             {
                 UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta();
+                ameta.SaveAMeta(this);
             }
 
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
@@ -104,9 +104,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 xnd.SaveXnd(name.Address);
             }
             
-            UEngine.Instance.SourceControlModule.AddFile(name.Address);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
-        public static bool ReloadXnd(UMaterialInstance material, UMaterialInstanceManager manager, IO.TtXndNode node)
+        public static bool ReloadXnd(TtMaterialInstance material, TtMaterialInstanceManager manager, IO.TtXndNode node)
         {
             var attr = node.TryGetAttribute("MaterialInstance");
             if (attr.NativePointer != IntPtr.Zero)
@@ -126,7 +126,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             return true;
         }
-        public static UMaterialInstance LoadXnd(UMaterialInstanceManager manager, IO.TtXndNode node)
+        public static TtMaterialInstance LoadXnd(TtMaterialInstanceManager manager, IO.TtXndNode node)
         {
             IO.ISerializer result = null;
             var attr = node.TryGetAttribute("MaterialInstance");
@@ -145,7 +145,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 }
             }
 
-            var material = result as UMaterialInstance;
+            var material = result as TtMaterialInstance;
             if (material != null)
             {
                 return material;
@@ -164,9 +164,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         #endregion        
-        public static UMaterialInstance CreateMaterialInstance(UMaterial mtl)
+        public static TtMaterialInstance CreateMaterialInstance(TtMaterial mtl)
         {
-            var result = new UMaterialInstance();
+            var result = new TtMaterialInstance();
             result.ParentMaterial = mtl;
             result.AssetState = IO.EAssetState.LoadFinished;
             
@@ -192,9 +192,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.SerialId++;
             return result;
         }
-        public UMaterialInstance CloneMaterialInstance()
+        public TtMaterialInstance CloneMaterialInstance()
         {
-            var result = new UMaterialInstance();
+            var result = new TtMaterialInstance();
             result.AssetName = AssetName;
             result.ParentMaterial = ParentMaterial;
             result.MaterialHash = MaterialHash;
@@ -224,6 +224,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         [Browsable(false)]
         public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
+        [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterialInstance.TSaveData@EngineCore" })]
         public class TSaveData : IO.BaseSerializer
         {
             [Rtti.Meta]
@@ -246,10 +247,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 AssetState = IO.EAssetState.Loading;
                 System.Action exec = async () =>
                 {
-                    ParentMaterial = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(value.MaterialName);
+                    ParentMaterial = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(value.MaterialName);
                     if (ParentMaterial == null)
                     {
-                        ParentMaterial = UEngine.Instance.GfxDevice.MaterialManager.PxDebugMaterial;
+                        ParentMaterial = TtEngine.Instance.GfxDevice.MaterialManager.PxDebugMaterial;
                     }
                     bool isMatch = true;
                     #region UniformVars match parent
@@ -366,7 +367,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         [Category("Option")]
-        [RName.PGRName(FilterExts = UMaterial.AssetExt)]
+        [RName.PGRName(FilterExts = TtMaterial.AssetExt)]
         public RName MaterialName
         {
             get
@@ -382,15 +383,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 AssetState = IO.EAssetState.Loading;
                 System.Action exec = async () =>
                 {
-                    ParentMaterial = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(value);
+                    ParentMaterial = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(value);
                     AssetState = IO.EAssetState.LoadFinished;
                 };
                 exec();
             }
         }
-        UMaterial mParentMaterial;
+        TtMaterial mParentMaterial;
         [Browsable(false)]
-        public override UMaterial ParentMaterial
+        public override TtMaterial ParentMaterial
         {
             get => mParentMaterial;
             protected set
@@ -519,22 +520,22 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         #endregion
     }
-    public class UMaterialInstanceManager
+    public class TtMaterialInstanceManager
     {
-        UMaterialInstance mWireColorMateria;
-        public UMaterialInstance WireColorMateria
+        TtMaterialInstance mWireColorMateria;
+        public TtMaterialInstance WireColorMateria
         {
             get
             {
                 return mWireColorMateria;
             }
         }
-        public UMaterialInstance WireVtxColorMateria
+        public TtMaterialInstance WireVtxColorMateria
         {
             get;
             private set;
         }
-        public async Thread.Async.TtTask<bool> Initialize(UEngine engine)
+        public async Thread.Async.TtTask<bool> Initialize(TtEngine engine)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
@@ -561,20 +562,20 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             Materials.Clear();
         }
-        public Dictionary<RName, UMaterialInstance> Materials { get; } = new Dictionary<RName, UMaterialInstance>();
-        public UMaterialInstance FindMaterialInstance(RName rn)
+        public Dictionary<RName, TtMaterialInstance> Materials { get; } = new Dictionary<RName, TtMaterialInstance>();
+        public TtMaterialInstance FindMaterialInstance(RName rn)
         {
             if (rn == null)
                 return null;
 
-            UMaterialInstance result;
+            TtMaterialInstance result;
             if (Materials.TryGetValue(rn, out result))
                 return result;
 
             var task = CreateMaterialInstance(rn);
             return null;
         }
-        internal UMaterial UnsafeRemove(RName name)
+        internal TtMaterial UnsafeRemove(RName name)
         {
             lock (Materials)
             {
@@ -585,21 +586,21 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return null;
             }
         }
-        internal void UnsafeAdd(RName name, UMaterialInstance obj)
+        internal void UnsafeAdd(RName name, TtMaterialInstance obj)
         {
             lock (Materials)
             {
                 Materials.Add(name, obj);
             }
         }
-        public async Thread.Async.TtTask<UMaterialInstance> CreateMaterialInstance(RName rn)
+        public async Thread.Async.TtTask<TtMaterialInstance> CreateMaterialInstance(RName rn)
         {
             var origin = await GetMaterialInstance(rn);
             if (origin == null)
                 return null;
             return origin.CloneMaterialInstance();
             //UMaterialInstance result;
-            //result = await UEngine.Instance.EventPoster.Post((state) =>
+            //result = await TtEngine.Instance.EventPoster.Post((state) =>
             //{
             //    using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
             //    {
@@ -622,17 +623,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public async Thread.Async.TtTask<bool> ReloadMaterialInstance(RName rn)
         {
-            UMaterialInstance result;
+            TtMaterialInstance result;
             if (Materials.TryGetValue(rn, out result)==false)
                 return true;
 
-            var ok = await UEngine.Instance.EventPoster.Post((state) =>
+            var ok = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
                     if (xnd != null)
                     {
-                        return UMaterialInstance.ReloadXnd(result, this, xnd.RootNode);
+                        return TtMaterialInstance.ReloadXnd(result, this, xnd.RootNode);
                     }
                     else
                     {
@@ -643,22 +644,22 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             return ok;
         }
-        public async Thread.Async.TtTask<UMaterialInstance> GetMaterialInstance(RName rn)
+        public async Thread.Async.TtTask<TtMaterialInstance> GetMaterialInstance(RName rn)
         {
             if (rn == null)
                 return null;
 
-            UMaterialInstance result;
+            TtMaterialInstance result;
             if (Materials.TryGetValue(rn, out result))
                 return result;
 
-            result = await UEngine.Instance.EventPoster.Post((state) =>
+            result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
                     if (xnd != null)
                     {
-                        var material = UMaterialInstance.LoadXnd(this, xnd.RootNode);
+                        var material = TtMaterialInstance.LoadXnd(this, xnd.RootNode);
                         if (material == null)
                             return null;
 

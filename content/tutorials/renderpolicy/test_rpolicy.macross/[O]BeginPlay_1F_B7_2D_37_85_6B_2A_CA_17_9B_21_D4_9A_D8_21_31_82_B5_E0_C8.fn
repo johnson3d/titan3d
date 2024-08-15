@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossMethodGraph@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/renderpolicy/test_rpolicy.macross,37c3834e-f24f-471b-b4d4-2c621f5d304c" />
   <GraphName Type="System.String@Unknown" Value="BeginPlay" />
   <IsUseCustumCode Type="System.Boolean@Unknown" Value="False" />
   <LocalVars Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />

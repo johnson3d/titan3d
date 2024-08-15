@@ -7,7 +7,7 @@ using System.Text;
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public EPlatformType CurrentPlatform
         {
@@ -251,7 +251,7 @@ namespace EngineNS
 {
     public partial class USlateApplication
     {
-        public bool CreateNativeWindow(UEngine engine, string title, int x, int y, int w, int h)
+        public bool CreateNativeWindow(TtEngine engine, string title, int x, int y, int w, int h)
         {
             NativeWindow = new UPresentWindow();
             SDL.SDL_WindowFlags sdl_flags = 0;
@@ -351,8 +351,8 @@ namespace EngineNS
                     // SDL 2.0.4 and later has SDL_GetGlobalMouseState() and SDL_CaptureMouse()
                     int mouse_x_global, mouse_y_global;
                     SDL.SDL_GetGlobalMouseState(out mouse_x_global, out mouse_y_global);
-                    UEngine.Instance.InputSystem.Mouse.GlobalMouseX = mouse_x_global;
-                    UEngine.Instance.InputSystem.Mouse.GlobalMouseY = mouse_y_global;
+                    TtEngine.Instance.InputSystem.Mouse.GlobalMouseX = mouse_x_global;
+                    TtEngine.Instance.InputSystem.Mouse.GlobalMouseY = mouse_y_global;
 
                     if ((io.ConfigFlags & ImGuiConfigFlags_.ImGuiConfigFlags_ViewportsEnable) != 0)
                     {

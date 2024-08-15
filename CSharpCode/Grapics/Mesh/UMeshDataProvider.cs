@@ -17,9 +17,9 @@ namespace EngineNS.Graphics.Mesh
         {
             mCoreObject = self;
         }
-        public bool InitFrom(UMeshPrimitives mesh)
+        public bool InitFrom(TtMeshPrimitives mesh)
         {
-            return mCoreObject.InitFromMesh(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, mesh.mCoreObject);
+            return mCoreObject.InitFromMesh(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, mesh.mCoreObject);
         }
         public bool IsIndex32
         {
@@ -54,12 +54,12 @@ namespace EngineNS.Graphics.Mesh
         }
         public NxRHI.TtTransientBuffer TransientVB;
         public NxRHI.TtTransientBuffer TransientIB;
-        public UMeshPrimitives ToMesh()
+        public TtMeshPrimitives ToMesh()
         {
             unsafe
             {
-                var rc = UEngine.Instance.GfxDevice.RenderContext;
-                var result = new UMeshPrimitives();
+                var rc = TtEngine.Instance.GfxDevice.RenderContext;
+                var result = new TtMeshPrimitives();
                 result.Init("", 1);
                 if (TransientVB != null)
                     result.SetTransientVertexBuffer(TransientVB);
@@ -75,19 +75,19 @@ namespace EngineNS.Graphics.Mesh
                 return result;
             }
         }
-        public Graphics.Mesh.TtMesh ToDrawMesh(Graphics.Pipeline.Shader.UMaterial material)
+        public Graphics.Mesh.TtMesh ToDrawMesh(Graphics.Pipeline.Shader.TtMaterial material)
         {
             var mesh = new Graphics.Mesh.TtMesh();
-            var materials = new Graphics.Pipeline.Shader.UMaterial[1];
+            var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = material;
             mesh.Initialize(ToMesh(), materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             return mesh;
         }
-        public void ToMesh(UMeshPrimitives mesh)
+        public void ToMesh(TtMeshPrimitives mesh)
         {
             unsafe
             {
-                var rc = UEngine.Instance.GfxDevice.RenderContext;
+                var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
                 using (var cmd = new FTransientCmd(EQueueType.QU_Default, "ToMesh"))
                 {
@@ -397,16 +397,16 @@ namespace EngineNS.Graphics.Mesh
                 vbUV[(int)ENUM_FRUSTUM_CORNER.ENUM_FRUSTUMCN_1].SetValue(1, 0);
                 vbUV[(int)ENUM_FRUSTUM_CORNER.ENUM_FRUSTUMCN_2].SetValue(1, 1);
                 vbUV[(int)ENUM_FRUSTUM_CORNER.ENUM_FRUSTUMCN_3].SetValue(0, 1);
-                if (lh == false && (UEngine.Instance.GfxDevice.RenderContext.mCoreObject.Desc.RhiType == NxRHI.ERhiType.RHI_D3D11 ||
-                    UEngine.Instance.GfxDevice.RenderContext.mCoreObject.Desc.RhiType == NxRHI.ERhiType.RHI_D3D12 ||
-                    UEngine.Instance.GfxDevice.RenderContext.mCoreObject.Desc.RhiType == NxRHI.ERhiType.RHI_VK))
+                if (lh == false && (TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.Desc.RhiType == NxRHI.ERhiType.RHI_D3D11 ||
+                    TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.Desc.RhiType == NxRHI.ERhiType.RHI_D3D12 ||
+                    TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.Desc.RhiType == NxRHI.ERhiType.RHI_VK))
                 {//全屏幕用的-1，-1，2，2这里要换手系
                     vbUV[0].Y = 1 - vbUV[0].Y;
                     vbUV[1].Y = 1 - vbUV[1].Y;
                     vbUV[2].Y = 1 - vbUV[2].Y;
                     vbUV[3].Y = 1 - vbUV[3].Y;
                 }
-                //else if (UEngine.Instance.GfxDevice.RenderContext.mCoreObject.Desc.RhiType == NxRHI.ERhiType.RHI_VK)// UEngine.Instance.GfxDevice.RenderContext.RHIType == ERHIType.RHT_OGL)
+                //else if (TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.Desc.RhiType == NxRHI.ERhiType.RHI_VK)// TtEngine.Instance.GfxDevice.RenderContext.RHIType == ERHIType.RHT_OGL)
                 //{
                 //    vbUV[0].Y = 1 - vbUV[0].Y;
                 //    vbUV[1].Y = 1 - vbUV[1].Y;

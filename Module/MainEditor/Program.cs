@@ -154,11 +154,11 @@ namespace MainEditor
             var cfg = FindArgument(args, "config=");
             Console.WriteLine($"Config={cfg}");
 
-            var task = EngineNS.UEngine.StartEngine(new EngineNS.UEngine(args), cfg);
+            var task = EngineNS.TtEngine.StartEngine(new EngineNS.TtEngine(args), cfg);
 
             while (true)
             {
-                if (EngineNS.UEngine.Instance.Tick() == false)
+                if (EngineNS.TtEngine.Instance.Tick() == false)
                 {
                     break;
                 }
@@ -183,8 +183,8 @@ namespace MainEditor
                 }
             }
             
-            var wr = new WeakReference(EngineNS.UEngine.Instance);
-            EngineNS.UEngine.Instance.FinalCleanup();
+            var wr = new WeakReference(EngineNS.TtEngine.Instance);
+            EngineNS.TtEngine.Instance.FinalCleanup();
             return wr;
         }
         public static string FindArgument(string[] args, string startWith)

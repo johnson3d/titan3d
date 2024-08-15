@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Graphics.Mesh.UMaterialMeshAMeta@EngineCore">
+<Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="15ec2216-bf13-481e-a2ef-d3a8a9b739a8" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMaterialMesh&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
@@ -14,5 +14,5 @@
     <e_0 Value="Game,tutorials/common/box.vms,fefaa1e1-5deb-4b9e-bc04-4e5da924cc22" />
     <e_1 Value="Game,tutorials/common/materialinst01.uminst,8348db13-900a-40c8-962f-0a218f2fc8dd" />
   </RefAssetRNames>
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.UMaterialMesh@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
 </Root>

@@ -52,9 +52,9 @@ namespace EngineNS.Bricks.Network
             if (pkgManager != null)
                 mPkgBuilder.NetPackageManager = pkgManager;
             else
-                mPkgBuilder.NetPackageManager = UEngine.Instance.RpcModule.NetPackageManager;
+                mPkgBuilder.NetPackageManager = TtEngine.Instance.RpcModule.NetPackageManager;
             ConnectId = connId;
-            var ok = await UEngine.Instance.EventPoster.Post((state) =>
+            var ok = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 return mCoreObject.Connect(ip, port, timeOut);
             }, Thread.Async.EAsyncTarget.TPools);

@@ -25,15 +25,15 @@ namespace EngineNS.Graphics.Pipeline.Common
             public Vector4i HZBTestViewRect;
         }
 
-        public class UCBufferHZBCullData : NxRHI.UShader.UShaderVarIndexer
+        public class UCBufferHZBCullData : NxRHI.TtShader.UShaderVarIndexer
         {
-            [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(Matrix))]
             public NxRHI.FShaderVarDesc PrevTranslatedWorldToClip;
-            [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(Matrix))]
             public NxRHI.FShaderVarDesc PrevPreViewTranslation;
-            [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(Matrix))]
             public NxRHI.FShaderVarDesc WorldToClip;
-            [NxRHI.UShader.UShaderVar(VarType = typeof(Vector4i))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(Vector4i))]
             public NxRHI.FShaderVarDesc HZBTestViewRect;
         }
 
@@ -131,14 +131,14 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var node = drawcall.TagObject as UGpuSceneNode;
 
                 node.cbPerHZBCullData_CullInstance = CurrentEffect.FindBinder("cbPerPatchHZBCullData");
 
                 node.HZBCullInstanceData.UpdateFieldVar(CurrentEffect.mComputeShader, "cbPerPatchHZBCullData");
-                node.HZBCullInstanceCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(node.HZBCullInstanceData.Binder.mCoreObject);
+                node.HZBCullInstanceCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(node.HZBCullInstanceData.Binder.mCoreObject);
 
                 //HZBCullInstanceCBuffer.SetValue
 
@@ -168,7 +168,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var node = drawcall.TagObject as UGpuSceneNode;
 
@@ -196,7 +196,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var node = drawcall.TagObject as UGpuSceneNode;
 
@@ -225,7 +225,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var node = drawcall.TagObject as UGpuSceneNode;
 
@@ -241,8 +241,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         public NxRHI.UComputeDraw Cull_CullClusterDrawcall;
         public NxRHI.UComputeDraw Cull_SetupDrawClusterArgsDrawcall;
 
-        public NxRHI.UShaderBinder cbPerHZBCullData_CullInstance;
-        public NxRHI.UShaderBinder cbPerHZBCullData_CullCluster;
+        public NxRHI.TtShaderBinder cbPerHZBCullData_CullInstance;
+        public NxRHI.TtShaderBinder cbPerHZBCullData_CullCluster;
 
         public UCBufferHZBCullData HZBCullInstanceData = new UCBufferHZBCullData();
         public UCBufferHZBCullData HZBCullClusterData = new UCBufferHZBCullData();
@@ -254,7 +254,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
         public int NumThreadsPerGroup = 64;
 
-        public async Thread.Async.TtTask<bool> Initialize_Instance(URenderPolicy policy, string debugName)
+        public async Thread.Async.TtTask<bool> Initialize_Instance(TtRenderPolicy policy, string debugName)
         {
             GpuInstances.Initialize(EBufferType.BFT_SRV);
             CullInstancesBuffer.Initialize(EBufferType.BFT_SRV | EBufferType.BFT_UAV);
@@ -264,16 +264,16 @@ namespace EngineNS.Graphics.Pipeline.Common
             //After BuildInstances function..
             var defines = new NxRHI.UShaderDefinitions();
             
-            Cull_CullGpuIndexs = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<CullGpuIndexsShading>();
+            Cull_CullGpuIndexs = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<CullGpuIndexsShading>();
 
-            Cull_SetupCullClusterArgs = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupCullClusterArgsShading>();
+            Cull_SetupCullClusterArgs = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupCullClusterArgsShading>();
 
-            Cull_CullCluster = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<CullClusterShading>();
+            Cull_CullCluster = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<CullClusterShading>();
 
-            Cull_SetupDrawClusterArgsBuffer = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupDrawClusterArgsBufferShading>();
+            Cull_SetupDrawClusterArgsBuffer = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupDrawClusterArgsBufferShading>();
 
             //cbPerHZBCullData_CullCluster = Cull_CullCluster.FindBinder("cbPerPatchHZBCullData");
-            //HZBCullClusterCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(HZBCullClusterData.Binder.mCoreObject);
+            //HZBCullClusterCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(HZBCullClusterData.Binder.mCoreObject);
 
             //drawcall.BindCBuffer(effectBinder.cbPerPatch.mCoreObject, pat.PatchCBuffer);
 
@@ -358,7 +358,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             // TODO CullInstancesBuffer
         }
-        private void TickLogic_Instance(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, UCommandList cmd)
+        private void TickLogic_Instance(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, UCommandList cmd)
         {
             //GpuInstances.Clear(); Fixd
 
@@ -387,9 +387,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             CullInstancesBuffer.Flush2GPU(cmd.mCoreObject);
         }
 
-        private unsafe void Cull(NxRHI.UGpuDevice rcj, Graphics.Pipeline.URenderPolicy policy)
+        private unsafe void Cull(NxRHI.UGpuDevice rcj, Graphics.Pipeline.TtRenderPolicy policy)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var cmd = BasePass.DrawCmdList;
             cmd.BeginCommand();
 

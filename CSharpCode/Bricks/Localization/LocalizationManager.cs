@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace EngineNS.Localization
 {
-    public partial class LocalizationManager : UModule<UEngine>
+    public partial class LocalizationManager : UModule<TtEngine>
     {
         public enum ECulture
         {
@@ -137,7 +137,7 @@ namespace EngineNS.Localization
 
 namespace EngineNS
 {
-    public partial class UEngine
+    public partial class TtEngine
     {
         Localization.LocalizationManager mLocalizationManager;
         internal Localization.LocalizationManager LocalizationManager

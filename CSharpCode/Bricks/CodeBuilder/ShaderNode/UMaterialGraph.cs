@@ -60,7 +60,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 }
             }
             //var kls = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(typeof(Control.HLSLMethod).FullName);
-            var methods = UEngine.Instance.HLSLMethodManager.Methods;
+            var methods = TtEngine.Instance.HLSLMethodManager.Methods;
             var funcMenu = CanvasMenus.AddMenuItem("Function", null, null);
             foreach(var i in methods.Values)
             {
@@ -110,17 +110,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             }
             var uniformVarMenus = CanvasMenus.AddMenuItem("UniformVars", null, null);
             var perFrameMenus = uniformVarMenus.AddMenuItem("PerFrame", null, null);
-            var members = UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerFrame.GetType().GetFields();
+            var members = TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerFrame.GetType().GetFields();
             foreach(var i in members)
             {
-                var attrs = i.GetCustomAttributes(typeof(NxRHI.UShader.UShaderVarAttribute), false);
+                var attrs = i.GetCustomAttributes(typeof(NxRHI.TtShader.UShaderVarAttribute), false);
                 if (attrs.Length == 0)
                     continue;
                 perFrameMenus.AddMenuItem(i.Name, null,
                     (TtMenuItem item, object sender) =>
                     {
                         var node = new UUniformVar();
-                        node.VarType = Rtti.UTypeDesc.TypeOf((attrs[0] as NxRHI.UShader.UShaderVarAttribute).VarType);
+                        node.VarType = Rtti.UTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.UShaderVarAttribute).VarType);
                         node.Name = i.Name;
                         node.UserData = this;
                         node.Position = PopMenuPosition;
@@ -129,17 +129,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     });
             }
             var perCameraMenus = uniformVarMenus.AddMenuItem("PerCamera", null, null);
-            var cameraMembers = UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.GetType().GetFields();
+            var cameraMembers = TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.GetType().GetFields();
             foreach (var i in cameraMembers)
             {
-                var attrs = i.GetCustomAttributes(typeof(NxRHI.UShader.UShaderVarAttribute), false);
+                var attrs = i.GetCustomAttributes(typeof(NxRHI.TtShader.UShaderVarAttribute), false);
                 if (attrs.Length == 0)
                     continue;
                 perCameraMenus.AddMenuItem(i.Name, null,
                     (TtMenuItem item, object sender) =>
                     {
                         var node = new UUniformVar();
-                        node.VarType = Rtti.UTypeDesc.TypeOf((attrs[0] as NxRHI.UShader.UShaderVarAttribute).VarType);
+                        node.VarType = Rtti.UTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.UShaderVarAttribute).VarType);
                         node.Name = i.Name;
                         node.UserData = this;
                         node.Position = PopMenuPosition;
@@ -153,14 +153,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 (TtMenuItem item, object sender) =>
                 {
                     var node = new UUniformVar();
-                    node.VarType = Rtti.UTypeDesc.TypeOf(typeof(Graphics.Pipeline.Shader.UMaterial.PSInput));
+                    node.VarType = Rtti.UTypeDesc.TypeOf(typeof(Graphics.Pipeline.Shader.TtMaterial.PSInput));
                     node.Name = "input";
                     node.UserData = this;
                     node.Position = PopMenuPosition;
                     SetDefaultActionForNode(node);
                     this.AddNode(node);
                 });
-            System.Reflection.FieldInfo[] psInputmembers = typeof(Graphics.Pipeline.Shader.UMaterial.PSInput).GetFields();
+            System.Reflection.FieldInfo[] psInputmembers = typeof(Graphics.Pipeline.Shader.TtMaterial.PSInput).GetFields();
             foreach (var i in psInputmembers)
             {
                 psInputMenus.AddMenuItem(i.Name, null,
@@ -299,7 +299,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             node.UserData = this;
         }
         //int Seed = 5;
-        public override void OnDrawAfter(Bricks.NodeGraph.UGraphRenderer renderer, UNodeGraphStyles styles, ImDrawList cmdlist)
+        public override void OnDrawAfter(Bricks.NodeGraph.TtGraphRenderer renderer, UNodeGraphStyles styles, ImDrawList cmdlist)
         {
             //var O = WindowPos + new Vector2(GraphViewSize.X / 2, GraphViewSize.Y);
 

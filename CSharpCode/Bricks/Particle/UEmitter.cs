@@ -162,7 +162,7 @@ namespace EngineNS.Bricks.Particle
         public NxRHI.UUaView DrawArgUav;
         public unsafe void Initialize(TtEmitter emitter, in FParticleEmitter sysData) 
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             fixed (FParticleEmitter* pAddr = &sysData)
             {
@@ -173,7 +173,7 @@ namespace EngineNS.Bricks.Particle
                 var pAddr = (FParticle*)CoreSDK.Alloc(emitter.MaxParticle * (uint)sizeof(FParticle), "Nebula", 0);
                 for (uint i = 0; i < emitter.MaxParticle; i++)
                 {
-                    ((FParticle*)&pAddr[i])->RandomSeed = (uint)UEngine.Instance.NebulaTemplateManager.mRandom.Next();
+                    ((FParticle*)&pAddr[i])->RandomSeed = (uint)TtEngine.Instance.NebulaTemplateManager.mRandom.Next();
                     ((FParticle*)&pAddr[i])->Flags = i;
                 }
                 ParticlesBuffer.SetSize(emitter.MaxParticle, pAddr, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
@@ -266,7 +266,7 @@ namespace EngineNS.Bricks.Particle
             emt.IsGpuDriven = IsGpuDriven;
             var mesh = new Graphics.Mesh.TtMesh();
             mesh.Initialize(Mesh.MaterialMesh, Rtti.UTypeDescGetter<TtParticleMdfQueue>.TypeDesc); //mesh.MdfQueue
-            emt.InitEmitter(UEngine.Instance.GfxDevice.RenderContext, mesh, 1024);
+            emt.InitEmitter(TtEngine.Instance.GfxDevice.RenderContext, mesh, 1024);
 
             foreach (var i in EmitterShapes)
             {
@@ -374,8 +374,8 @@ namespace EngineNS.Bricks.Particle
         [Rtti.Meta]
         public virtual async Thread.Async.TtTask<bool> InitEmitter(RName meshName, uint maxParticle)
         {
-            NxRHI.UGpuDevice rc = UEngine.Instance.GfxDevice.RenderContext;
-            var umesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshName);
+            NxRHI.UGpuDevice rc = TtEngine.Instance.GfxDevice.RenderContext;
+            var umesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshName);
             if (umesh == null)
                 return false;
             var mesh = new Graphics.Mesh.TtMesh();
@@ -399,7 +399,7 @@ namespace EngineNS.Bricks.Particle
             var nblMdf = mesh.MdfQueue as TtParticleMdfQueue;
             nblMdf.Emitter = this;
 
-            mParticleStartSecond = UEngine.Instance.TickCountSecond;
+            mParticleStartSecond = TtEngine.Instance.TickCountSecond;
             TimerRemain = TimerInterval;
         }
         public bool SetCurrentQueue(string name)
@@ -439,14 +439,14 @@ namespace EngineNS.Bricks.Particle
 
         #region Update
         private float mParticleStartSecond;
-        public unsafe void Update(Graphics.Pipeline.URenderPolicy policy, UParticleGraphNode particleSystem, float elapsed)
+        public unsafe void Update(Graphics.Pipeline.TtRenderPolicy policy, UParticleGraphNode particleSystem, float elapsed)
         {
             if (Mesh == null)
                 return;
             var quat = Quaternion.RotationMatrix(policy.DefaultCamera.GetViewMatrix());
             EmitterData.CameralEuler = quat.ToEuler();
-            var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
-            var timeSecond = UEngine.Instance.TickCountSecond - mParticleStartSecond;
+            var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
+            var timeSecond = TtEngine.Instance.TickCountSecond - mParticleStartSecond;
             CurrentQueue?.CBuffer?.SetValue(coreBinder.CBPerParticle.ParticleStartSecond, timeSecond);
             TimerRemain -= elapsed;
             if (TimerRemain < 0)
@@ -508,7 +508,7 @@ namespace EngineNS.Bricks.Particle
         {
             if (CurrentQueue.Shader == null || CurrentQueue.Shader.Particle_Update == null)
                 return;
-            CurrentQueue.UpdateComputeDrawcall(UEngine.Instance.GfxDevice.RenderContext, this);
+            CurrentQueue.UpdateComputeDrawcall(TtEngine.Instance.GfxDevice.RenderContext, this);
 
             var cmdlist = particleSystem.BasePass.DrawCmdList;
 
@@ -600,17 +600,17 @@ namespace EngineNS.Bricks.Particle
         public float RandomUnit(ref FParticle cur)//[0,1]
         {
             //cur.RandomSeed = rand_lcg(cur.RandomSeed);
-            return (float)UEngine.Instance.NebulaTemplateManager.mRandom.NextDouble();
+            return (float)TtEngine.Instance.NebulaTemplateManager.mRandom.NextDouble();
         }
         [Rtti.Meta(ShaderName = "RandomSignedUnit")]
         public float RandomSignedUnit(ref FParticle cur)//[-1,1]
         {
-            return UEngine.Instance.NebulaTemplateManager.RandomSignedUnit();
+            return TtEngine.Instance.NebulaTemplateManager.RandomSignedUnit();
         }
         [Rtti.Meta(ShaderName = "RandomNext")]
         public int RandomNext(ref FParticle cur)
         {
-            return UEngine.Instance.NebulaTemplateManager.mRandom.Next();
+            return TtEngine.Instance.NebulaTemplateManager.mRandom.Next();
         }
         [Rtti.Meta(ShaderName = "RandomVector3")]
         public Vector3 RandomVector3(ref FParticle cur, bool normalized = true)

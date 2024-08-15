@@ -37,7 +37,7 @@ namespace EngineNS.EGui
         public async Thread.Async.TtTask<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            UvAnim = await UEngine.Instance.GfxDevice.UvAnimManager.CreateUVAnim(name);
+            UvAnim = await TtEngine.Instance.GfxDevice.UvAnimManager.CreateUVAnim(name);
             if (UvAnim == null)
                 return false;
 
@@ -108,7 +108,7 @@ namespace EngineNS.EGui
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
                 UvAnim.SaveAssetTo(UvAnim.AssetName);
-                var unused = UEngine.Instance.GfxDevice.UvAnimManager.ReloadUVAnim(UvAnim.AssetName);
+                var unused = TtEngine.Instance.GfxDevice.UvAnimManager.ReloadUVAnim(UvAnim.AssetName);
             }
             ImGuiAPI.SameLine(0, 100);
             if (EngineNS.EGui.UIProxy.CheckBox.DrawCheckBox("ShowFrames", ref mIsShowFrames))

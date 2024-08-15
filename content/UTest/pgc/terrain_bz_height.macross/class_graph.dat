@@ -105,46 +105,7 @@
         <AsyncType Type="EngineNS.Bricks.CodeBuilder.UMethodDeclaration.EAsyncType@EngineCore" Value="None" />
         <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
         <IsOverride Type="System.Boolean@Unknown" Value="False" />
-        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="2">
-          <e_0 Type="EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore">
-            <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
-            <InitValue Type="EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore">
-              <Type Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
-                <IsEnum Type="System.Boolean@Unknown" Value="False" />
-                <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Vector3@EngineCore" />
-                <TypeFullName Type="System.String@Unknown" Value="EngineNS.Vector3" />
-              </Type>
-            </InitValue>
-            <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
-            <IsBindable Type="System.Boolean@Unknown" Value="False" />
-            <VariableName Type="System.String@Unknown" Value="tmp_r_GetUVW_504025461" />
-            <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
-              <IsEnum Type="System.Boolean@Unknown" Value="False" />
-              <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Vector3@EngineCore" />
-              <TypeFullName Type="System.String@Unknown" Value="EngineNS.Vector3" />
-            </VariableType>
-            <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
-          </e_0>
-          <e_1 Type="EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore">
-            <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
-            <InitValue Type="EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore">
-              <Type Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
-                <IsEnum Type="System.Boolean@Unknown" Value="False" />
-                <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.Single@Unknown" />
-                <TypeFullName Type="System.String@Unknown" Value="System.Single" />
-              </Type>
-            </InitValue>
-            <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
-            <IsBindable Type="System.Boolean@Unknown" Value="False" />
-            <VariableName Type="System.String@Unknown" Value="tmp_r_GetY_4154552476" />
-            <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
-              <IsEnum Type="System.Boolean@Unknown" Value="False" />
-              <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.Single@Unknown" />
-              <TypeFullName Type="System.String@Unknown" Value="System.Single" />
-            </VariableType>
-            <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
-          </e_1>
-        </LocalVariables>
+        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
         <MethodName Type="System.String@Unknown" Value="dm_onPerPiexel_DispatchPixels_545367290" />
         <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
       </e_0>

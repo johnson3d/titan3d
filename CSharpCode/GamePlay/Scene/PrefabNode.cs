@@ -53,13 +53,13 @@ namespace EngineNS.GamePlay.Scene
         {
             if (save != null)
             {
-                var oldfab = await UEngine.Instance.PrefabManager.GetPrefab(save);
+                var oldfab = await TtEngine.Instance.PrefabManager.GetPrefab(save);
                 if (oldfab != null)
                 {
                     oldfab.RemovePrefabChildren(this);
                 }
             }
-            var prefab = await UEngine.Instance.PrefabManager.GetPrefab(value);
+            var prefab = await TtEngine.Instance.PrefabManager.GetPrefab(value);
             if (prefab != null)
                 await prefab.ConcreatePrefab(this.GetWorld(), this);
         }
@@ -82,7 +82,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            //return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
+            //return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
             return null;
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
@@ -125,7 +125,7 @@ namespace EngineNS.GamePlay.Scene
             prefab.Root.NodeName = "Prefab";
 
             prefab.SaveAssetTo(assetName);
-            await UEngine.Instance.PrefabManager.ReloadPrefab(assetName);
+            await TtEngine.Instance.PrefabManager.ReloadPrefab(assetName);
         }
         
         #region IAsset
@@ -160,7 +160,7 @@ namespace EngineNS.GamePlay.Scene
             if (ameta != null)
             {
                 UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta();
+                ameta.SaveAMeta(this);
             }
 
             var typeStr = Rtti.UTypeDesc.TypeStr(GetType());
@@ -215,14 +215,14 @@ namespace EngineNS.GamePlay.Scene
                         nodeData.IsDirty = true;
                         if (await node.InitializeNode(world, nodeData, EBoundVolumeType.None, null) == false)
                         {
-                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Scene", $"InitializeNode failed: NodeDataType={descAttr.Name}, NodeData={xnd.RootNode.Name}");
+                            Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"InitializeNode failed: NodeDataType={descAttr.Name}, NodeData={xnd.RootNode.Name}");
                             return null;
                         }
                     }
                     catch (Exception ex)
                     {
                         Profiler.Log.WriteException(ex);
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"Prefab({prefab.AssetName}): load failed");
+                        Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"Prefab({prefab.AssetName}): load failed");
                     }
                 }
 
@@ -261,14 +261,14 @@ namespace EngineNS.GamePlay.Scene
                         ar.ReadTo(desc, node);
                         if (await node.InitializeNode(world, nodeData, EBoundVolumeType.None, null) == false)
                         {
-                            Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Scene", $"InitializeNode failed: NodeDataType={descAttr.Name}, NodeData={xnd.RootNode.Name}");
+                            Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"InitializeNode failed: NodeDataType={descAttr.Name}, NodeData={xnd.RootNode.Name}");
                             return;
                         }
                     }
                     catch (Exception ex)
                     {
                         Profiler.Log.WriteException(ex);
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "IO", $"Prefab({prefab.AssetName}): load failed");
+                        Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"Prefab({prefab.AssetName}): load failed");
                     }
                 }
 
@@ -291,7 +291,7 @@ namespace EngineNS.GamePlay.Scene
 
         public IO.IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
 
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
@@ -360,13 +360,13 @@ namespace EngineNS.GamePlay.Scene
             RemovePrefabChildren(tarNode, Root);
         }
     }
-    public class TtPrefabManager : UModule<UEngine>
+    public class TtPrefabManager : UModule<TtEngine>
     {
-        public override void Cleanup(UEngine host)
+        public override void Cleanup(TtEngine host)
         {
             Prefabs.Clear();
         }
-        public override async System.Threading.Tasks.Task<bool> Initialize(UEngine host)
+        public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine host)
         {
             PrefabWorld = new UWorld(null);
             return await PrefabWorld.InitWorld();
@@ -433,7 +433,7 @@ namespace EngineNS.GamePlay.Scene
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public GamePlay.Scene.TtPrefabManager PrefabManager { get; } = new GamePlay.Scene.TtPrefabManager();
     }

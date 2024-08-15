@@ -16,7 +16,7 @@ namespace EngineNS.NxPhysics
         {
             await base.InitializeNode(world, data, bvType, placementType);
 
-            var mDevice = UEngine.Instance.PxSystem.Device;
+            var mDevice = TtEngine.Instance.PxSystem.Device;
             var sceneDesc = new NxSceneDesc();
             sceneDesc.TimeStep = NxReal.ByF32(0.001f);
             mScene = mDevice.CreateScene(in sceneDesc);
@@ -59,7 +59,7 @@ namespace EngineNS.NxPhysics
         public TtScene mScene;
         public NxReal mSumElapsedTime = NxReal.ByF32(0.0f);
         public NxReal mStepTime = NxReal.ByF32(0.01f);
-        public unsafe override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
+        public unsafe override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             bool bSteped = false;
             mSumElapsedTime = mSumElapsedTime + NxReal.ByF32(world.DeltaTimeSecond);

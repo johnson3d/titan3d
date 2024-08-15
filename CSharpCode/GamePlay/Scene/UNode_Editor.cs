@@ -9,7 +9,7 @@ namespace EngineNS.GamePlay.Scene
     {
         ~UNode()
         {
-            UEngine.Instance?.GfxDevice.HitproxyManager.UnmapProxy(this);
+            TtEngine.Instance?.GfxDevice.HitproxyManager.UnmapProxy(this);
         }
         public virtual void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
         {
@@ -41,17 +41,17 @@ namespace EngineNS.GamePlay.Scene
             switch(newValue)
             {
                 case Graphics.Pipeline.UHitProxy.EHitproxyType.None:
-                    UEngine.Instance.GfxDevice.HitproxyManager.UnmapProxy(this);
+                    TtEngine.Instance.GfxDevice.HitproxyManager.UnmapProxy(this);
                     SetHitProxySubTree(null);
                     break;
                 case Graphics.Pipeline.UHitProxy.EHitproxyType.Root:
-                    UEngine.Instance.GfxDevice.HitproxyManager.UnmapProxy(this);
-                    UEngine.Instance.GfxDevice.HitproxyManager.MapProxy(this);
+                    TtEngine.Instance.GfxDevice.HitproxyManager.UnmapProxy(this);
+                    TtEngine.Instance.GfxDevice.HitproxyManager.MapProxy(this);
                     SetHitProxySubTree(HitProxy);
                     break;
                 case Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent:
                     if (oldValue != Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent)
-                        UEngine.Instance.GfxDevice.HitproxyManager.UnmapProxy(this);
+                        TtEngine.Instance.GfxDevice.HitproxyManager.UnmapProxy(this);
                     if (Parent != null)
                     {
                         HitProxy = Parent.HitProxy;
@@ -66,7 +66,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 if (i.HitproxyType == Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent)
                 {
-                    UEngine.Instance.GfxDevice.HitproxyManager.UnmapProxy(i);
+                    TtEngine.Instance.GfxDevice.HitproxyManager.UnmapProxy(i);
                     i.HitProxy = proxy;
                     i.SetHitProxySubTree(proxy);
                     i.OnHitProxyChanged();

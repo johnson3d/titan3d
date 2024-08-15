@@ -130,7 +130,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        public override bool OnTickLogic(UWorld world, URenderPolicy policy)
+        public override bool OnTickLogic(UWorld world, TtRenderPolicy policy)
         {
             EyeCenter = policy.DefaultCamera.mCoreObject.GetPosition();
             EyeLocalCenter = policy.DefaultCamera.mCoreObject.GetLocalPosition();

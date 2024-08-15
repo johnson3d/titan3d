@@ -52,7 +52,7 @@ namespace EngineNS.Bricks.Procedure.Node
             if (MaterialIdManager.MaterialIdArray.Count == 0)
             {
                 var dft = new Terrain.CDLOD.UTerrainMaterialId();
-                dft.TexDiffuse = UEngine.Instance.GfxDevice.TextureManager.DefaultTexture.AssetName;
+                dft.TexDiffuse = TtEngine.Instance.GfxDevice.TextureManager.DefaultTexture.AssetName;
                 MaterialIdManager.MaterialIdArray.Add(dft);
             }
             foreach (var i in MaterialIdManager.MaterialIdArray)
@@ -67,12 +67,12 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         public async System.Threading.Tasks.Task SureMaterialResources()
         {
-            //MaterialIdManager.BuildSRV(UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+            //MaterialIdManager.BuildSRV(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             foreach (var i in MaterialIdManager.MaterialIdArray)
             {
                 foreach (var j in i.Plants)
                 {
-                    await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(j.MeshName);
+                    await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(j.MeshName);
                 }
             }
         }
@@ -177,7 +177,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
             this.SaveOutBufferToCache(graph, ResultPin, testHash);
             heightComp.LifeCount--;
-            //MaterialIdManager.BuildSRV(UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+            //MaterialIdManager.BuildSRV(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             return true;
         }
         class MatIdCounter
@@ -317,7 +317,7 @@ namespace EngineNS.Bricks.Procedure.Node
             {
                 //var mdfType = Rtti.UTypeDesc.TypeOf(typeof(Terrain.CDLOD.UTerrainMdfQueuePermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>));
 
-                //var Material = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/SysDft.material", RName.ERNameType.Engine));
+                //var Material = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/SysDft.material", RName.ERNameType.Engine));
                 //TerrainMesh = Graphics.Mesh.UMeshDataProvider.MakeGridForTerrain(256, 256).ToMesh();
                 //var materials = new Graphics.Pipeline.Shader.UMaterial[1];
                 //materials[0] = Material;

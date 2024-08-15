@@ -64,13 +64,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
         [Rtti.Meta]
         [TtHLSLProvider(Name = "GetTerrainDiffuse")]
-        public static Vector3 GetTerrainDiffuse(Vector2 uv, Graphics.Pipeline.Shader.UMaterial.PSInput input)
+        public static Vector3 GetTerrainDiffuse(Vector2 uv, Graphics.Pipeline.Shader.TtMaterial.PSInput input)
         {
             return Vector3.Zero;
         }
         [Rtti.Meta]
         [TtHLSLProvider(Name = "GetTerrainNormal")]
-        public static Vector3 GetTerrainNormal(Vector2 uv, Graphics.Pipeline.Shader.UMaterial.PSInput input)
+        public static Vector3 GetTerrainNormal(Vector2 uv, Graphics.Pipeline.Shader.TtMaterial.PSInput input)
         {
             return Vector3.Zero;
         }
@@ -602,16 +602,16 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 }
                 System.Action exec = async () =>
                 {
-                    TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
+                    TextureSRV = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
 
-                    mSlateEffect = await UEngine.Instance.GfxDevice.EffectManager.GetEffect(
-                        await UEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
-                        UEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
+                    mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
+                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
+                        TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
                 };
                 exec();
             }
         }
-        UEffect mSlateEffect;
+        TtEffect mSlateEffect;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta]
@@ -628,7 +628,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             {
                 if (CmdParameters == null)
                 {
-                    var rc = UEngine.Instance.GfxDevice.RenderContext;
+                    var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
                     var iptDesc = new NxRHI.UInputLayoutDesc();
                     unsafe
@@ -639,7 +639,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                         //iptDesc.SetShaderDesc(SlateEffect.GraphicsEffect);
                     }
                     iptDesc.mCoreObject.SetShaderDesc(mSlateEffect.DescVS.mCoreObject);
-                    var InputLayout = rc.CreateInputLayout(iptDesc); //UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
+                    var InputLayout = rc.CreateInputLayout(iptDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
                     mSlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
 
                     var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<EngineNS.Editor.Forms.TtTextureViewerCmdParams>();
@@ -648,7 +648,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     cmdParams.Drawcall.BindShaderEffect(mSlateEffect);
                     cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
                     cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, TextureSRV);
-                    cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                    cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
                     cmdParams.IsNormalMap = 0;
                     if (TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
@@ -724,11 +724,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
         public override void BuildStatements(NodePin pin, ref NodeGraph.BuildCodeStatementsData data)
         {
-            var material = data.UserData as UMaterial;
+            var material = data.UserData as TtMaterial;
             var texturePinIn = FindPinIn("texture");
             if (texturePinIn.HasLinker() == false)
             {
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
+                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameRNamePair();
                 tmp.Name = TextureVarName;
                 tmp.ShaderType = "Texture2D";
                 if (material.FindSRV(tmp.Name) == null)
@@ -740,7 +740,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             var samplerPinIn = FindPinIn("sampler");
             if (samplerPinIn.HasLinker() == false)
             {
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
+                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair();
                 tmp.Name = "Samp_" + TextureVarName;
                 if (material.FindSampler(tmp.Name) == null)
                 {
@@ -813,17 +813,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 }
                 System.Action exec = async () =>
                 {
-                    TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
+                    TextureSRV = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
 
-                    mSlateEffect = await UEngine.Instance.GfxDevice.EffectManager.GetEffect(
-                        await UEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
-                        UEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
+                    mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
+                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
+                        TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
 
                 };
                 exec();
             }
         }
-        UEffect mSlateEffect;
+        TtEffect mSlateEffect;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta]
@@ -838,7 +838,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             {
                 if (CmdParameters == null)
                 {
-                    var rc = UEngine.Instance.GfxDevice.RenderContext;
+                    var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
                     var iptDesc = new NxRHI.UInputLayoutDesc();
                     unsafe
@@ -849,7 +849,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                         //iptDesc.SetShaderDesc(SlateEffect.GraphicsEffect);
                     }
                     iptDesc.mCoreObject.SetShaderDesc(mSlateEffect.DescVS.mCoreObject);
-                    var InputLayout = rc.CreateInputLayout(iptDesc); //UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
+                    var InputLayout = rc.CreateInputLayout(iptDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
                     mSlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
 
                     var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<EngineNS.Editor.Forms.TtTextureViewerCmdParams>();
@@ -858,7 +858,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     cmdParams.Drawcall.BindShaderEffect(mSlateEffect);
                     cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
                     cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, TextureSRV);
-                    cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, UEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                    cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
                     cmdParams.IsNormalMap = 0;
                     if (TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
@@ -941,11 +941,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
         public override void BuildStatements(NodePin pin, ref NodeGraph.BuildCodeStatementsData data)
         {
-            var material = data.UserData as UMaterial;
+            var material = data.UserData as TtMaterial;
             var texturePinIn = FindPinIn("texture");
             if(texturePinIn.HasLinker() == false)
             {
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
+                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameRNamePair();
                 tmp.Name = TextureVarName;
                 tmp.ShaderType = "Texture2D";
                 if (material.FindSRV(tmp.Name) == null)
@@ -957,7 +957,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             var samplerPinIn = FindPinIn("sampler");
             if (samplerPinIn.HasLinker() == false)
             {
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
+                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair();
                 tmp.Name = "Samp_" + TextureVarName;
                 if (material.FindSampler(tmp.Name) == null)
                 {
@@ -1029,7 +1029,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 }
                 System.Action exec = async () =>
                 {
-                    TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
+                    TextureSRV = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
                 };
                 exec();
             }
@@ -1110,11 +1110,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
         public override void BuildStatements(NodePin pin, ref NodeGraph.BuildCodeStatementsData data)
         {
-            var material = data.UserData as UMaterial;
+            var material = data.UserData as TtMaterial;
             var texturePinIn = FindPinIn("texture");
             if (texturePinIn.HasLinker() == false)
             {
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
+                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameRNamePair();
                 tmp.Name = TextureVarName;
                 tmp.ShaderType = "Texture2D";
                 if (material.FindSRV(tmp.Name) == null)
@@ -1126,7 +1126,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             var samplerPinIn = FindPinIn("sampler");
             if (samplerPinIn.HasLinker() == false)
             {
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
+                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair();
                 tmp.Name = "Samp_" + TextureVarName;
                 if (material.FindSampler(tmp.Name) == null)
                 {
@@ -1198,7 +1198,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 }
                 System.Action exec = async () =>
                 {
-                    TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
+                    TextureSRV = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
                 };
                 exec();
             }
@@ -1279,11 +1279,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
         public override void BuildStatements(NodePin pin, ref NodeGraph.BuildCodeStatementsData data)
         {
-            var material = data.UserData as UMaterial;
+            var material = data.UserData as TtMaterial;
             var texturePinIn = FindPinIn("texture");
             if (texturePinIn.HasLinker() == false)
             {
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
+                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameRNamePair();
                 tmp.Name = TextureVarName;
                 tmp.ShaderType = "Texture2D";
                 if (material.FindSRV(tmp.Name) == null)
@@ -1295,7 +1295,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             var samplerPinIn = FindPinIn("sampler");
             if (samplerPinIn.HasLinker() == false)
             {
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
+                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair();
                 tmp.Name = "Samp_" + TextureVarName;
                 if (material.FindSampler(tmp.Name) == null)
                 {
@@ -1310,7 +1310,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
 namespace EngineNS
 {
-    public partial class UEngine
+    public partial class TtEngine
     {
         Bricks.CodeBuilder.ShaderNode.Control.TtHLSLMethodManager mHLSLMethodManager = new Bricks.CodeBuilder.ShaderNode.Control.TtHLSLMethodManager();
         public Bricks.CodeBuilder.ShaderNode.Control.TtHLSLMethodManager HLSLMethodManager 

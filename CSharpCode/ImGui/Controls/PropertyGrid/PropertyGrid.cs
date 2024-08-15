@@ -240,13 +240,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public virtual object GetValue(object arg) { return null; }
     }
 
-    public class PGTypeEditorManager : UModule<UEngine>
+    public class PGTypeEditorManager : UModule<TtEngine>
     {
         public PGTypeEditorManager()
         {
         }
 
-        public override void Cleanup(UEngine host)
+        public override void Cleanup(TtEngine host)
         {
             Cleanup();
             base.Cleanup(host);
@@ -264,7 +264,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
         }
 
-        public override async Task<bool> Initialize(UEngine host)
+        public override async Task<bool> Initialize(TtEngine host)
         {
             RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(bool)), new BoolEditor());
             RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(int)), new Int32Editor());
@@ -563,7 +563,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
 namespace EngineNS
 {
-    public partial class UEngine
+    public partial class TtEngine
     {
         public EngineNS.EGui.Controls.PropertyGrid.PGTypeEditorManager PGTypeEditorManagerInstance { get; } = new EGui.Controls.PropertyGrid.PGTypeEditorManager();
     }

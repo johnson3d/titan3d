@@ -24,11 +24,11 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             CoreSDK.DisposeObject(ref mFinishFence);
             CoreSDK.DisposeObject(ref mCmdList);
         }
-        public override async Task Initialize(URenderPolicy policy, string debugName)
+        public override async Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var fenceDesc = new NxRHI.FFenceDesc();
             mFinishFence = rc.CreateFence(in fenceDesc, "GpuFetch");
             mCmdList = rc.CreateCommandList();
@@ -36,19 +36,19 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         public NxRHI.UFence mFinishFence;
         public NxRHI.UCommandList mCmdList;
         public NxRHI.IBuffer ReadableTexture;
-        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new NxRHI.TtCmdListScope(mCmdList))
             {
-                var cpDraw = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
+                var cpDraw = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
                 var texture = policy.AttachmentCache.FindAttachement(SrcPinIn).GpuResource;
                 CoreSDK.DisposePtr(ref ReadableTexture);
                 ReadableTexture = texture.CreateReadable(0, cpDraw.mCoreObject);
                 mCmdList.PushGpuDraw(cpDraw);
                 mCmdList.FlushDraws();
             }
-            UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, NxRHI.EQueueType.QU_Compute);
-            UEngine.Instance.GfxDevice.RenderContext.GpuQueue.IncreaseSignal(mFinishFence, NxRHI.EQueueType.QU_Compute);
+            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, NxRHI.EQueueType.QU_Compute);
+            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.IncreaseSignal(mFinishFence, NxRHI.EQueueType.QU_Compute);
         }
     }
 }

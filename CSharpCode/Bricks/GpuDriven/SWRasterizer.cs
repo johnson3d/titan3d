@@ -234,7 +234,7 @@ namespace EngineNS.Bricks.GpuDriven
         {
             base.EnvShadingDefines(in id, defines);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
         {
             var node = drawcall.TagObject as TtSwRasterizeNode;
 
@@ -247,7 +247,7 @@ namespace EngineNS.Bricks.GpuDriven
             {
                 if (node.CBShadingStruct == null)
                 {
-                    node.CBShadingStruct = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    node.CBShadingStruct = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
                 drawcall.BindCBuffer(index, node.CBShadingStruct);
             }
@@ -271,7 +271,7 @@ namespace EngineNS.Bricks.GpuDriven
         {
             base.EnvShadingDefines(in id, defines);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
         {
             var node = drawcall.TagObject as TtSwRasterizeNode;
 
@@ -282,7 +282,7 @@ namespace EngineNS.Bricks.GpuDriven
             {
                 if (node.CBShadingStruct == null)
                 {
-                    node.CBShadingStruct = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    node.CBShadingStruct = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
                 drawcall.BindCBuffer(index, node.CBShadingStruct);
             }
@@ -306,7 +306,7 @@ namespace EngineNS.Bricks.GpuDriven
         {
             base.EnvShadingDefines(in id, defines);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
         {
             var node = drawcall.TagObject as TtSwRasterizeNode;
             if (node == null)
@@ -329,7 +329,7 @@ namespace EngineNS.Bricks.GpuDriven
             {
                 if (node.CBShadingStruct == null)
                 {
-                    node.CBShadingStruct = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    node.CBShadingStruct = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
                 drawcall.BindCBuffer(index, node.CBShadingStruct);
             }
@@ -399,30 +399,30 @@ namespace EngineNS.Bricks.GpuDriven
 
             base.InitNodePins();
         }
-        public override void OnResize(URenderPolicy policy, float x, float y)
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             base.OnResize(policy, x, y);
             mShadingStruct.QuarkRTSizeFactor.X = x;
             mShadingStruct.QuarkRTSizeFactor.Y = y;
         }
-        public override async Task Initialize(URenderPolicy policy, string debugName)
+        public override async Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName);
 
             mShadingStruct.SetDefault();
             CoreSDK.DisposeObject(ref SWRasterizerDrawcall);
             SWRasterizerDrawcall = rc.CreateComputeDraw();
-            SWRasterizer = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeShading>();
+            SWRasterizer = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeShading>();
 
             CoreSDK.DisposeObject(ref DispatchArgShadingDrawcall);
             DispatchArgShadingDrawcall = rc.CreateComputeDraw();
-            DispatchArgShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeDispatchArgShading>();
+            DispatchArgShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeDispatchArgShading>();
 
             CoreSDK.DisposeObject(ref SetUpRasterizeDrawcall);
             SetUpRasterizeDrawcall = rc.CreateComputeDraw();
-            SetUpRasterizeShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeSetUpShading>();
+            SetUpRasterizeShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSwRasterizeSetUpShading>();
 
             mShadingStruct.DispatchArg = SWRasterizer.DispatchArg;
             //unsafe
@@ -445,7 +445,7 @@ namespace EngineNS.Bricks.GpuDriven
             idArg.Z = 1;
             IndirectArgBuffer.SetSize(size + 1, &idArg, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_IndirectArgs);
         }
-        public unsafe override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             var attachment = GetAttachBuffer(ClustersPinIn);
             if (attachment.Srv != null)
@@ -502,7 +502,7 @@ namespace EngineNS.Bricks.GpuDriven
         {
 
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             var node = drawcall.TagObject as TtQuarkResolveNode;
 
@@ -514,7 +514,7 @@ namespace EngineNS.Bricks.GpuDriven
             }
             index = drawcall.FindBinder("Samp_QuarkTexture");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
             base.OnDrawCall(cmd, drawcall, policy, atom);
         }
@@ -553,18 +553,18 @@ namespace EngineNS.Bricks.GpuDriven
         {
             return mBasePassShading;
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
 
             CreateGBuffers(policy, DepthStencilPinIn.Attachement.Format);
 
-            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtQuarkResolveShading>();
+            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtQuarkResolveShading>();
         }
 
-        public override unsafe TtGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
+        public override unsafe TtGraphicsBuffers CreateGBuffers(TtRenderPolicy policy, EPixelFormat format)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var PassDesc = new NxRHI.FRenderPassDesc();
             PassDesc.NumOfMRT = 4;
             PassDesc.AttachmentMRTs[0].Format = Rt0PinOut.Attachement.Format;
@@ -593,7 +593,7 @@ namespace EngineNS.Bricks.GpuDriven
             //PassDesc.mFBClearColorRT0 = new Color4f(1, 0, 0, 0);
             //PassDesc.mDepthClearValue = 1.0f;                
             //PassDesc.mStencilClearValue = 0u;
-            RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
+            RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
 
             GBuffers.Initialize(policy, RenderPass);
             GBuffers.SetRenderTarget(policy, 0, Rt0PinOut);

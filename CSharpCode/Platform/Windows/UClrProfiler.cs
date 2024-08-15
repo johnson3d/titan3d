@@ -8,7 +8,7 @@ namespace EngineNS.Windows
     {
         public UClrProfiler()
         {
-            UEngine.RootFormManager.RegRootForm(this);
+            TtEngine.RootFormManager.RegRootForm(this);
         }
 
         public async Thread.Async.TtTask<bool> Initialize()

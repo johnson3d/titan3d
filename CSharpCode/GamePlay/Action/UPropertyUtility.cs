@@ -12,7 +12,7 @@ namespace EngineNS.GamePlay.Action
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
-    public partial class UMaterial : GamePlay.Action.IActionRecordable
+    public partial class TtMaterial : GamePlay.Action.IActionRecordable
     {
         public GamePlay.Action.UActionRecorder ActionRecorder { get; set; }
     }

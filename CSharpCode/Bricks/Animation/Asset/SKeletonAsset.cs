@@ -15,7 +15,7 @@ namespace EngineNS.Animation.Asset
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            return await UEngine.Instance.AnimationModule.SkeletonAssetManager.GetSkeletonAsset(GetAssetName());
+            return await TtEngine.Instance.AnimationModule.SkeletonAssetManager.GetSkeletonAsset(GetAssetName());
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -46,7 +46,7 @@ namespace EngineNS.Animation.Asset
 
         public IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
 
         public void SaveAssetTo(RName name)
@@ -64,7 +64,7 @@ namespace EngineNS.Animation.Asset
             }
 
             xnd.SaveXnd(name.Address);
-            UEngine.Instance.SourceControlModule.AddFile(name.Address);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
 
         public void UpdateAMetaReferences(IAssetMeta ameta)
@@ -107,7 +107,7 @@ namespace EngineNS.Animation.Asset
             if (SkeletonAssets.TryGetValue(name, out result))
                 return result;
 
-            result = await UEngine.Instance.EventPoster.Post((state) =>
+            result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
                 {

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace EngineNS
 {
-    public partial class UEngine
+    public partial class TtEngine
     {
         public Thread.TtThreadMain ThreadMain
         {
@@ -261,11 +261,11 @@ namespace EngineNS
                 //using (new Profiler.TimeScopeHelper(ScopeDrawSlateWindow))
                 //{
                 //    DrawSlateWindow();
-                //    UEngine.Instance.GfxDevice.SlateApplication?.OnDrawSlate();
+                //    TtEngine.Instance.GfxDevice.SlateApplication?.OnDrawSlate();
                 //}
                 if (this.PlayMode != EPlayMode.Game)
                 {
-                    UEngine.Instance.AssetMetaManager.EditorCheckShowIconTimeout();
+                    TtEngine.Instance.AssetMetaManager.EditorCheckShowIconTimeout();
                 }
             }
             catch (Exception ex)
@@ -310,11 +310,11 @@ namespace EngineNS
                 using (new Profiler.TimeScopeHelper(ScopeDrawSlateWindow))
                 {
                     DrawSlateWindow();
-                    UEngine.Instance.GfxDevice.SlateApplication?.OnDrawSlate();
+                    TtEngine.Instance.GfxDevice.SlateApplication?.OnDrawSlate();
                 }
                 if (this.PlayMode != EPlayMode.Game)
                 {
-                    UEngine.Instance.AssetMetaManager.EditorCheckShowIconTimeout();
+                    TtEngine.Instance.AssetMetaManager.EditorCheckShowIconTimeout();
                 }
             }
             catch (Exception ex)
@@ -332,7 +332,7 @@ namespace EngineNS
             }
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeDrawSlateWindow = Profiler.TimeScopeManager.GetTimeScope(typeof(UEngine), nameof(DrawSlateWindow));
+        private static Profiler.TimeScope ScopeDrawSlateWindow = Profiler.TimeScopeManager.GetTimeScope(typeof(TtEngine), nameof(DrawSlateWindow));
         partial void DrawSlateWindow();
     }
 }

@@ -11,11 +11,11 @@ namespace EngineNS.Rtti
         {
             public UGateServerAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:GateServer AssemblyDesc Created");
+                Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(Profiler.ELogTag.Info, "Plugins:GateServer AssemblyDesc Created");
             }
             ~UGateServerAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:GateServer AssemblyDesc Destroyed");
+                Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(Profiler.ELogTag.Info, "Plugins:GateServer AssemblyDesc Destroyed");
             }
             public override string Name { get => "GateServer"; }
             public override string Service { get { return "Plugins"; } }
@@ -46,7 +46,7 @@ namespace EngineNS.Plugins.GateServer
         public void OnLoadedPlugin()
         {
             var server = new UGateServer();
-            UEngine.Instance.RpcModule.RpcManager = server;
+            TtEngine.Instance.RpcModule.RpcManager = server;
             Action action = async () =>
             {
                 var np = server.SelectNetworkPoint();
@@ -57,7 +57,7 @@ namespace EngineNS.Plugins.GateServer
         }
         public void OnUnloadPlugin()
         {
-            var server = UEngine.Instance.RpcModule.RpcManager as UGateServer;
+            var server = TtEngine.Instance.RpcModule.RpcManager as UGateServer;
             server?.StopServer();
         }
     }

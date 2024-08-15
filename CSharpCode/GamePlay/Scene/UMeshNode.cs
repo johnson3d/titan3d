@@ -18,10 +18,10 @@ namespace EngineNS.GamePlay.Scene
         public class UMeshNodeData : UNodeData
         {
             [Rtti.Meta]
-            [RName.PGRName(FilterExts = Graphics.Mesh.UMaterialMesh.AssetExt)]
+            [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
             public RName MeshName { get; set; }
             [Rtti.Meta]
-            [RName.PGRName(FilterExts = Graphics.Mesh.UMaterialMesh.AssetExt)]
+            [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
             public RName CollideName { get; set; }
             [Rtti.Meta]
             [ReadOnly(true)]
@@ -65,7 +65,7 @@ namespace EngineNS.GamePlay.Scene
                 return false;
 
             var meshData = data as UMeshNodeData;
-            var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
+            var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
             if (materialMesh != null)
             {
                 var mesh = new Graphics.Mesh.TtMesh();
@@ -163,7 +163,7 @@ namespace EngineNS.GamePlay.Scene
         public static async System.Threading.Tasks.Task<UMeshNode> AddMeshNode(GamePlay.UWorld world, UNode parent, UNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var meshData = data as UMeshNodeData;
-            var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
+            var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
             if (materialMesh == null)
                 return null;
             var mesh = new Graphics.Mesh.TtMesh();
@@ -175,7 +175,7 @@ namespace EngineNS.GamePlay.Scene
             var meshNode = await AddMeshNode(world, parent, data, placementType, mesh, pos, scale, quat);
             if (meshData.CollideName != null)
             {
-                var collideMesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(meshData.CollideName);
+                var collideMesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(meshData.CollideName);
                 if (collideMesh != null)
                 {
                     if (collideMesh.MeshDataProvider == null)
@@ -230,7 +230,7 @@ namespace EngineNS.GamePlay.Scene
                 mMesh.HostNode = this;
             }
         }
-        [RName.PGRName(FilterExts = Graphics.Mesh.UMaterialMesh.AssetExt)]
+        [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
         [Category("Option")]
         public RName MeshName 
         {
@@ -253,7 +253,7 @@ namespace EngineNS.GamePlay.Scene
                 {
                     var mesh = new Graphics.Mesh.TtMesh();
 
-                    var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(value);
+                    var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(value);
                     var ok = mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
                     if (ok == false)
                         return;
@@ -281,8 +281,8 @@ namespace EngineNS.GamePlay.Scene
             if (meshData == null || meshData.MeshName == null)
             {
                 var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeBoxWireframe(0, 0, 0, 5, 5, 5).ToMesh();
-                var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
-                materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria;// UEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria.CloneMaterialInstance();
+                var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
+                materials1[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria;// TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria.CloneMaterialInstance();
                 //var colorVar = materials1[0].FindVar("clr4_0");
                 //if (colorVar != null)
                 //{
@@ -298,7 +298,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 System.Action action = async () =>
                 {
-                    var materialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
+                    var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
                     if (materialMesh != null)
                     {
                         var mesh = new Graphics.Mesh.TtMesh();
@@ -340,7 +340,7 @@ namespace EngineNS.GamePlay.Scene
         }
         static Macross.UMacrossStackFrame mLogicTickFrame = new Macross.UMacrossStackFrame();
         static Macross.UMacrossBreak mTestBreak = new Macross.UMacrossBreak("UMeshNode.OnTickLogic", false);
-        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
+        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             //using (var guard = new Macross.UMacrossStackGuard(mLogicTickFrame))
             //{

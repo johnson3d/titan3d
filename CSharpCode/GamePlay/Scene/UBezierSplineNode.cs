@@ -55,9 +55,9 @@ namespace EngineNS.GamePlay.Scene
                 return mDebugPointMesh;
             }
         }
-        public override bool OnTickLogic(UWorld world, URenderPolicy policy)
+        public override bool OnTickLogic(UWorld world, TtRenderPolicy policy)
         {
-            //if (UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.UtilityDebug) == false)
+            //if (TtEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.UtilityDebug) == false)
             //    return true;
 
             //if ((rp.CullFilters & GamePlay.UWorld.UVisParameter.EVisCullFilter.UtilityDebug) == 0)
@@ -79,7 +79,7 @@ namespace EngineNS.GamePlay.Scene
 
             ~USplinePoint()
             {
-                UEngine.Instance?.GfxDevice.HitproxyManager.UnmapProxy(this);
+                TtEngine.Instance?.GfxDevice.HitproxyManager.UnmapProxy(this);
             }
             public Graphics.Pipeline.UHitProxy HitProxy { get; set; }
             public Graphics.Pipeline.UHitProxy.EHitproxyType HitproxyType
@@ -132,8 +132,8 @@ namespace EngineNS.GamePlay.Scene
                 var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeBezier3DSpline(Spline, 0xFFFFFFFF).ToMesh();
                 if (cookedMesh == null)
                     return;
-                var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
-                materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
+                var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
+                materials1[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
                 var mesh2 = new Graphics.Mesh.TtMesh();
                 var ok1 = mesh2.Initialize(cookedMesh, materials1,
                     Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
@@ -164,8 +164,8 @@ namespace EngineNS.GamePlay.Scene
                 var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeSphere(radius, pointSmooth, pointSmooth, 0xffffffff).ToMesh();
                 if (cookedMesh == null)
                     return;
-                var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
-                materials1[0] = UEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
+                var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
+                materials1[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
                 var mesh2 = new Graphics.Mesh.TtMesh();
                 var ok1 = mesh2.Initialize(cookedMesh, materials1,
                     Rtti.UTypeDescGetter<Graphics.Mesh.UMdfInstanceStaticMesh>.TypeDesc);
@@ -184,7 +184,7 @@ namespace EngineNS.GamePlay.Scene
 
                     foreach(var i in SplinePoints)
                     {
-                        UEngine.Instance.GfxDevice.HitproxyManager.UnmapProxy(i);
+                        TtEngine.Instance.GfxDevice.HitproxyManager.UnmapProxy(i);
                     }
                     SplinePoints.Clear();
 
@@ -196,7 +196,7 @@ namespace EngineNS.GamePlay.Scene
                         var sPoint = new USplinePoint();
                         sPoint.CurveIndex = i + 1;
                         sPoint.Spline = Spline;
-                        UEngine.Instance.GfxDevice.HitproxyManager.MapProxy(sPoint);
+                        TtEngine.Instance.GfxDevice.HitproxyManager.MapProxy(sPoint);
                         SplinePoints.Add(sPoint);
                         //instantMesh.InstanceModifier.PushInstance(in i.End, in Vector3.UnitXYZ, in Quaternion.Identity, in UInt32_4.Zero, this.HitProxy.ProxyId);
                         var instance = new Graphics.Mesh.Modifier.FVSInstanceData();
@@ -246,7 +246,7 @@ namespace EngineNS.GamePlay.Scene
             if (mDebugSplineMesh == null)
                 return;
 
-            //if (UEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.UtilityDebug) == false)
+            //if (TtEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.UtilityDebug) == false)
             //    return;
 
             if ((rp.CullFilters & GamePlay.UWorld.UVisParameter.EVisCullFilter.UtilityDebug) == 0)

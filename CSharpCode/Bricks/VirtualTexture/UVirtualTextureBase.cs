@@ -35,7 +35,7 @@ namespace EngineNS.Bricks.VirtualTexture
             srcDesc.Format = format;
             srcDesc.Texture2DArray.MipLevels = mipLevel;
             srcDesc.Texture2DArray.ArraySize = arrayNum;
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             TextureArray = rc.CreateTexture(in TexDesc);
             TextureArraySRV = rc.CreateSRV(TextureArray, srcDesc);
@@ -249,7 +249,7 @@ namespace EngineNS.Bricks.VirtualTexture
                     TextureSlotBuffer.UpdateData(i, slot.GetGpuDesc());
             }
             TextureSlotBuffer.Flush2GPU(cmd);
-            UEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(cmd, NxRHI.EQueueType.QU_Transfer);
+            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(cmd, NxRHI.EQueueType.QU_Transfer);
         }
         public void UpLoadRVT(NxRHI.UCommandList cmd, TtRVT rvt)
         {
@@ -257,7 +257,7 @@ namespace EngineNS.Bricks.VirtualTexture
             //TextureArrays[rvt.SlotDesc.TextureIndex]
             for (uint mip = 0; mip < TextureSlotAllocator.TexDesc.MipLevels; mip++)
             {
-                var cpDraw = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
+                var cpDraw = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
                 cpDraw.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
                 cpDraw.BindTextureSrc(rvt.Texture.GetTexture());
                 cpDraw.BindTextureDest(TextureSlotAllocator.TextureArray);

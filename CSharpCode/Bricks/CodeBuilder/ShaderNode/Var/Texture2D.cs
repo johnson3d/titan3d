@@ -25,7 +25,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             {
                 System.Action exec = async () =>
                 {
-                    TextureSRV = await UEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
+                    TextureSRV = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
                 };
                 exec();
             }
@@ -88,10 +88,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
-            var material = data.UserData as UMaterial;
+            var material = data.UserData as TtMaterial;
             if(material.FindSRV(this.Name) == null)
             {
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
+                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameRNamePair();
                 tmp.Name = this.Name;
                 var texNode = this;
                 tmp.Value = texNode.AssetName;

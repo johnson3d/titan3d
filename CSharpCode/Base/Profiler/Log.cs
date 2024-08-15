@@ -20,8 +20,100 @@ namespace EngineNS.Profiler
         Fatal = 1 << 3,
         All = Info | Warning | Error | Fatal,
     }
-    public unsafe partial class Log
+    public class TtLogCategory
     {
+        public override string ToString()
+        {
+            return "Default";
+        }
+    }
+    public class TtExceptionLogCategory : TtLogCategory
+    {
+        public override string ToString()
+        {
+            return "Exception";
+        }
+    }
+    public class TtDebugLogCategory : TtLogCategory
+    {
+        public override string ToString()
+        {
+            return "Debug";
+        }
+    }
+    public class TtIOCategory : TtLogCategory
+    {
+        public override string ToString()
+        {
+            return "IO";
+        }
+    }
+    public class TtNetCategory : TtLogCategory
+    {
+        public override string ToString()
+        {
+            return "Net";
+        }
+    }
+    public class TtMacrossCategory : TtLogCategory
+    {
+        public override string ToString()
+        {
+            return "Macross";
+        }
+    }
+    public class TtGraphicsGategory : TtLogCategory
+    {
+        public override string ToString()
+        {
+            return "Graphics";
+        }
+    }
+    public class TtCoreGategory : TtLogCategory
+    {
+        public override string ToString()
+        {
+            return "Core";
+        }
+    }
+    public class TtCookGategory : TtLogCategory
+    {
+        public override string ToString()
+        {
+            return "Cook";
+        }
+    }
+    public class TtEditorGategory : TtLogCategory
+    {
+        public override string ToString()
+        {
+            return "Editor";
+        }
+    }
+    public class TtPgcGategory : TtLogCategory
+    {
+        public override string ToString()
+        {
+            return "Pgc";
+        }
+    }
+    public class TtGameplayGategory : TtLogCategory
+    {
+        public override string ToString()
+        {
+            return "Gameplay";
+        }
+    }
+    public class TtLogCategoryGetter<T> where T : TtLogCategory, new()
+    {
+        static T Object = new T();
+        public static T Get()
+        {
+            return Object;
+        }
+    }
+    public unsafe partial class Log
+    {   
         static Log()
         {
             OnReportLog += OnReportLog_WriteConsole;
@@ -84,27 +176,26 @@ namespace EngineNS.Profiler
         }
         public static void WriteInfoSimple(string info)
         {
-            WriteLine(ELogTag.Info, "Default", info);
+            WriteLine<TtLogCategory>(ELogTag.Info, info);
         }
-        [Rtti.Meta]
-        public static void WriteLine(ELogTag tag, string category, string info, 
+        public static void WriteLine<T>(ELogTag tag, string info, 
                 [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
                 [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
-                [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
+                [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0) where T : TtLogCategory, new()
         {
-            OnReportLog?.Invoke(tag, category, memberName, sourceFilePath, sourceLineNumber, info);
+            OnReportLog?.Invoke(tag, TtLogCategoryGetter<T>.Get().ToString(), memberName, sourceFilePath, sourceLineNumber, info);
         }
-        public static void WriteException(Exception ex, string category = "异常",
+        public static void WriteException(Exception ex, 
                 [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
                 [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
                 [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
         {
             var info = ex.ToString();
-            OnReportLog?.Invoke(ELogTag.Error, category, memberName, sourceFilePath, sourceLineNumber, info);
+            OnReportLog?.Invoke(ELogTag.Error, TtLogCategoryGetter<TtExceptionLogCategory>.Get().ToString(), memberName, sourceFilePath, sourceLineNumber, info);
         }
         public static void WriteLineSingle(string info)
         {
-            WriteLine(ELogTag.Info, "Default", info);
+            WriteLine<TtLogCategory>(ELogTag.Info, info);
         }
     }
 }

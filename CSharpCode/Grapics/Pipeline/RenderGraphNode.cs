@@ -244,7 +244,7 @@ namespace EngineNS.Graphics.Pipeline
             //return false;
         }
 
-        public virtual async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public virtual async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
         }
@@ -252,7 +252,7 @@ namespace EngineNS.Graphics.Pipeline
         {
 
         }
-        public virtual void FrameBuild(URenderPolicy policy)
+        public virtual void FrameBuild(TtRenderPolicy policy)
         {
         }
         public virtual void OnLinkIn(TtRenderGraphLinker linker)
@@ -267,27 +267,27 @@ namespace EngineNS.Graphics.Pipeline
         {
 
         }
-        public virtual void OnResize(URenderPolicy policy, float x, float y)
+        public virtual void OnResize(TtRenderPolicy policy, float x, float y)
         {
 
         }
-        public virtual void BeginTickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
+        public virtual void BeginTickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
 
         }
-        public virtual void EndTickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
+        public virtual void EndTickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
 
         }
-        public virtual void BeforeTickLogic(URenderPolicy policy)
+        public virtual void BeforeTickLogic(TtRenderPolicy policy)
         {
 
         }
-        public virtual void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
+        public virtual void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
 
         }
-        public virtual void TickSync(URenderPolicy policy)
+        public virtual void TickSync(TtRenderPolicy policy)
         {
             BasePass.SwapBuffer();
         }

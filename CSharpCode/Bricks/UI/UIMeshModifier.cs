@@ -10,9 +10,9 @@ namespace EngineNS.Graphics.Pipeline
 {
     public partial class UCoreShaderBinder
     {
-        public class TtCBufferPerUIMeshIndexer : NxRHI.UShader.UShaderVarIndexer
+        public class TtCBufferPerUIMeshIndexer : NxRHI.TtShader.UShaderVarIndexer
         {
-            [NxRHI.UShader.UShaderVar(VarType = typeof(Matrix))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(Matrix))]
             public NxRHI.FShaderVarDesc AbsTransform;
         }
         public readonly TtCBufferPerUIMeshIndexer CBPerUIMesh = new TtCBufferPerUIMeshIndexer();
@@ -20,7 +20,7 @@ namespace EngineNS.Graphics.Pipeline
 }
 namespace EngineNS.Graphics.Mesh
 {
-    public partial class UMeshPrimitives
+    public partial class TtMeshPrimitives
     {
     }
 }
@@ -63,11 +63,11 @@ namespace EngineNS.UI
         {
             return null;
         }
-        public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh)
+        public void Initialize(Graphics.Mesh.TtMaterialMesh materialMesh)
         {
 
         }
-        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
 
         }
@@ -81,17 +81,17 @@ namespace EngineNS.UI
             base.CopyFrom(mdf);
             PerUIMeshCBuffer = (mdf as TtMdfUIMesh).PerUIMeshCBuffer;
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmdlist, UGraphicDraw drawcall, URenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmdlist, UGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmdlist, drawcall, policy, atom);
             unsafe
             {
-                var shaderBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+                var shaderBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
                 if(PerUIMeshCBuffer == null)
                 {
                     if(shaderBinder.CBPerUIMesh.UpdateFieldVar(drawcall.GraphicsEffect, "cbUIMesh"))
                     {
-                        PerUIMeshCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(shaderBinder.CBPerUIMesh.Binder.mCoreObject);
+                        PerUIMeshCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(shaderBinder.CBPerUIMesh.Binder.mCoreObject);
                     }
                 }
 
@@ -111,7 +111,7 @@ namespace EngineNS.UI
                     *absTrans = data.Matrix;
                     absTrans++;
                 }
-                PerUIMeshCBuffer.mCoreObject.FlushWrite(true, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
+                PerUIMeshCBuffer.mCoreObject.FlushWrite(true, TtEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
 
                 var brush = cmd.GetBrush();
                 if (brush.Name.StartWith("@Text:"))
@@ -133,10 +133,10 @@ namespace EngineNS.UI
                                 if (fld.IsValidPointer)
                                 {
                                     var color = cmd.InstanceData.Color.ToColor4Float();
-                                    cbuffer.SetValue(fld, &color, sizeof(Color4f), true, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
+                                    cbuffer.SetValue(fld, &color, sizeof(Color4f), true, TtEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
                                     cmd.IsDirty = false;
                                 }
-                                brush.SetValuesToCbView(cbuffer, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
+                                brush.SetValuesToCbView(cbuffer, TtEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
                             }
                         }
                     }
@@ -161,10 +161,10 @@ namespace EngineNS.UI
                                 if (fld.IsValidPointer)
                                 {
                                     var color = brush.Color.ToColor4Float();
-                                    cbuffer.SetValue(fld, &color, sizeof(Color4f), true, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
+                                    cbuffer.SetValue(fld, &color, sizeof(Color4f), true, TtEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
                                     brush.IsDirty = false;
                                 }
-                                brush.SetValuesToCbView(cbuffer, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
+                                brush.SetValuesToCbView(cbuffer, TtEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
                                 //var fld = cbuffer->ShaderBinder.FindField("UIMatrix");
                                 //cbuffer->SetMatrix(fld, new Matrix(), true);
                             }

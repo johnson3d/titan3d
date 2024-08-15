@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_675706602868539352 Type="EngineNS.Graphics.Pipeline.TtForwordPolicyBase@EngineCore">
+  <DisableAO Type="System.Boolean@Unknown" Order="0" />
+  <DisableHDR Type="System.Boolean@Unknown" Order="0" />
+  <DisablePointLight Type="System.Boolean@Unknown" Order="0" />
+  <DisableShadow Type="System.Boolean@Unknown" Order="0" />
+  <TypeAA Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA@EngineCore" Order="0" />
+  <TypeFog Type="EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog@EngineCore" Order="0" />
+</Hash_675706602868539352>

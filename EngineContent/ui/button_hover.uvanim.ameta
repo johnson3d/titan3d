@@ -16,5 +16,5 @@
   <SnapUVEnd Type="EngineNS.Vector2@EngineCore" Value="0.137,0.0685" />
   <SnapUVStart Type="EngineNS.Vector2@EngineCore" Value="0.0685,0" />
   <TextureName Type="EngineNS.RName@EngineCore" Value="Engine,uestyle/graph/execpin_connected.srv,71ef199f-7144-4f43-85d7-34f894d12c1a" />
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.EGui.UUvAnim@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.EGui.TtUVAnim@EngineCore" />
 </Root>

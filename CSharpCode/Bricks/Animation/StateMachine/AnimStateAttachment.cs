@@ -22,7 +22,7 @@ namespace EngineNS.Animation.StateMachine
         public override async TtTask<bool> Initialize(TtAnimStateMachineContext context)
         {
             var animClipBlendTree = new TtBlendTree_AnimationClip();
-            animClipBlendTree.Clip = await UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(AnimationClipName);
+            animClipBlendTree.Clip = await TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(AnimationClipName);
             BlendTree = animClipBlendTree;
             BlendTree.Initialize(ref context.BlendTreeContext);
             return await base.Initialize(context);

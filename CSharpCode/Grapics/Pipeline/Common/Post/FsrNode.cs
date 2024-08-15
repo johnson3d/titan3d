@@ -46,7 +46,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             defines.AddDefine("UpSampleMode_Bilinear", (int)EUpSampleMode.Bilinear);
             defines.AddDefine("UpSampleMode_EASU", (int)EUpSampleMode.EASU);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, URenderPolicy policy)
+        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, TtRenderPolicy policy)
         {
             var aaNode = drawcall.TagObject as TtFsrNode;
             if (aaNode == null)
@@ -63,7 +63,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
             index = drawcall.FindBinder(EShaderBindType.SBT_Sampler, "Samp_ColorBuffer");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
             index = drawcall.FindBinder(EShaderBindType.SBT_UAV, "OutputTexture");
             if (index.IsValidPointer)
             {
@@ -75,7 +75,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             {
                 if (aaNode.CBShadingEnv == null)
                 {
-                    aaNode.CBShadingEnv = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    aaNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
                 drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
             }
@@ -100,7 +100,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
             defines.AddDefine("USE_RCAS", (int)1);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, URenderPolicy policy)
+        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, TtRenderPolicy policy)
         {
             var aaNode = drawcall.TagObject as TtFsrNode;
 
@@ -112,7 +112,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
             index = drawcall.FindBinder(EShaderBindType.SBT_Sampler, "Samp_ColorBuffer");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
             index = drawcall.FindBinder(EShaderBindType.SBT_UAV, "OutputTexture");
             if (index.IsValidPointer)
             {
@@ -124,7 +124,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             {
                 if (aaNode.CBShadingEnv == null)
                 {
-                    aaNode.CBShadingEnv = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    aaNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
                 drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
             }
@@ -176,23 +176,23 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             public Vector4 Sample;
         }
         FFsrStruct mFsrStruct;
-        public override async Task Initialize(URenderPolicy policy, string debugName)
+        public override async Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName);
 
             CoreSDK.DisposeObject(ref UpSampleDrawcall);
             UpSampleDrawcall = rc.CreateComputeDraw();
-            UpSampleShadingEnv = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtFsrUpSampleShading>();
+            UpSampleShadingEnv = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtFsrUpSampleShading>();
             RCASDrawcall = rc.CreateComputeDraw();
-            RCASShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtRCASShading>();
+            RCASShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtRCASShading>();
         }
-        public override void OnResize(URenderPolicy policy, float x, float y)
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             base.OnResize(policy, x, y);            
         }
-        public override void BeforeTickLogic(URenderPolicy policy)
+        public override void BeforeTickLogic(TtRenderPolicy policy)
         {
             base.BeforeTickLogic(policy);
 
@@ -221,7 +221,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 }
             }
         }
-        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             const uint threadGroupWorkRegionDim = 16;
             var dispatchX = MathHelper.Roundup(UpSamplePinOut.Attachement.Width, threadGroupWorkRegionDim);

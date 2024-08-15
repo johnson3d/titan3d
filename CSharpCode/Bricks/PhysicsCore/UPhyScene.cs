@@ -119,7 +119,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 return false;
             HostScene = scene;
 
-            var pc = UEngine.Instance.PhyModule.PhyContext;
+            var pc = TtEngine.Instance.PhyModule.PhyContext;
             if (pc == null)
                 return false;
             
@@ -143,7 +143,7 @@ namespace EngineNS.Bricks.PhysicsCore
         public void TickLogic(object host, float ellapse)
         {
             TickPxScene(ellapse);
-            //var task = UEngine.Instance.EventPoster.RunOn((state) =>
+            //var task = TtEngine.Instance.EventPoster.RunOn((state) =>
             //{
             //    TickPxScene(ellapse);
             //    return true;

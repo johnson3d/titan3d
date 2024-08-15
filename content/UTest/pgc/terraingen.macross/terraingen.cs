@@ -3,10 +3,9 @@
     [EngineNS.Macross.UMacross]
     public partial class terraingen : EngineNS.Bricks.Procedure.UPgcGraphProgram
     {
-        EngineNS.Macross.UMacrossBreak breaker_FindPgcNodeByName_1051611981 = new EngineNS.Macross.UMacrossBreak("breaker_FindPgcNodeByName_1051611981");
-        EngineNS.Macross.UMacrossBreak breaker_if_2408442523 = new EngineNS.Macross.UMacrossBreak("breaker_if_2408442523");
+        public EngineNS.Macross.UMacrossBreak breaker_FindPgcNodeByName_1051611981 = new EngineNS.Macross.UMacrossBreak("breaker_FindPgcNodeByName_1051611981");
+        public EngineNS.Macross.UMacrossBreak breaker_if_2408442523 = new EngineNS.Macross.UMacrossBreak("breaker_if_2408442523");
         EngineNS.Macross.UMacrossStackFrame mFrame_OnNodeInitialized = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("utest/pgc/terraingen.macross", EngineNS.RName.ERNameType.Game));
-        [EngineNS.Rtti.Meta]
         public override System.Boolean OnNodeInitialized(EngineNS.Bricks.Procedure.UPgcGraph graph,EngineNS.Bricks.Procedure.UPgcNodeBase node)
         {
             using(var guard_OnNodeInitialized = new EngineNS.Macross.UMacrossStackGuard(mFrame_OnNodeInitialized))

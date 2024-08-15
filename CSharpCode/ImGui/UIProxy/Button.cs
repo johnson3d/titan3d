@@ -107,7 +107,7 @@ namespace EngineNS.EGui.UIProxy
                 if (value == null)
                     mNormalUVAnimTask = null;
                 else
-                    mNormalUVAnimTask = UEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(value);
+                    mNormalUVAnimTask = TtEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(value);
             }
         }
         RName mChecked;
@@ -120,7 +120,7 @@ namespace EngineNS.EGui.UIProxy
                 if (value == null)
                     mCheckedUVAnimTask = null;
                 else
-                    mCheckedUVAnimTask = UEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(value);
+                    mCheckedUVAnimTask = TtEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(value);
             }
         }
 

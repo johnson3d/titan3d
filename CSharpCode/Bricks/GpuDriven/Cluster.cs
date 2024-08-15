@@ -58,7 +58,7 @@ namespace EngineNS.Bricks.GpuDriven
     };
     public class TtClusteredMesh
     {
-        public bool InitFromMesh(Graphics.Mesh.UMeshPrimitives mesh)
+        public bool InitFromMesh(Graphics.Mesh.TtMeshPrimitives mesh)
         {
             Mesh = mesh;
             return true;
@@ -68,7 +68,7 @@ namespace EngineNS.Bricks.GpuDriven
             var file = meshName.Address + ".clustermesh";
             var xnd = new IO.TtXndHolder("Cluster", 0, 0);
 
-            var rc = UEngine.Instance?.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance?.GfxDevice.RenderContext;
             var count = Mesh.mCoreObject.ClusterizeTriangles(rc.mCoreObject);
             if (count > 0 && Mesh.mCoreObject.SaveClusters(xnd.RootNode.mCoreObject))
             {
@@ -79,14 +79,14 @@ namespace EngineNS.Bricks.GpuDriven
                 // error
             }            
         }
-        public static TtClusteredMesh LoadClusteredMesh(RName meshName, Graphics.Mesh.UMeshPrimitives mesh)
+        public static TtClusteredMesh LoadClusteredMesh(RName meshName, Graphics.Mesh.TtMeshPrimitives mesh)
         {
             var file = meshName.Address + ".clustermesh";
             var xnd = IO.TtXndHolder.LoadXnd(file);
             var result = new TtClusteredMesh();
 
             // load vb, ib
-            var rc = UEngine.Instance?.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance?.GfxDevice.RenderContext;
             int count = mesh.mCoreObject.LoadClusters(xnd.mCoreObject, rc.mCoreObject);
             for (int i = 0; i < count; i++)
             {
@@ -134,10 +134,10 @@ namespace EngineNS.Bricks.GpuDriven
         public Vector3[] Vertices = null;
         public uint[] Indices = null;
 
-        private Graphics.Mesh.UMeshPrimitives Mesh;
+        private Graphics.Mesh.TtMeshPrimitives Mesh;
         public static unsafe TtClusteredMesh Merge(List<TtClusteredMesh> meshes, NxRHI.UCommandList cmdlist)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             var result = new TtClusteredMesh();
 
@@ -247,7 +247,7 @@ namespace EngineNS.Bricks.GpuDriven
         {
             return;
         }
-        public async Thread.Async.TtTask<TtClusteredMesh> GetClusteredMesh(RName name, Graphics.Mesh.UMeshPrimitives mesh)
+        public async Thread.Async.TtTask<TtClusteredMesh> GetClusteredMesh(RName name, Graphics.Mesh.TtMeshPrimitives mesh)
         {
             TtClusteredMesh result;
             if (ClusteredMeshes.TryGetValue(name, out result))
@@ -258,7 +258,7 @@ namespace EngineNS.Bricks.GpuDriven
                 return null;
             }
 
-            result = await UEngine.Instance.EventPoster.Post((state) =>
+            result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 return TtClusteredMesh.LoadClusteredMesh(name, mesh);
             }, Thread.Async.EAsyncTarget.AsyncIO);
@@ -276,7 +276,7 @@ namespace EngineNS.Bricks.GpuDriven
 
 namespace EngineNS.Graphics.Mesh
 {
-    public partial class UMeshPrimitives
+    public partial class TtMeshPrimitives
     {
         Bricks.GpuDriven.TtClusteredMesh mClusteredMesh;
         public Bricks.GpuDriven.TtClusteredMesh ClusteredMesh { get => mClusteredMesh; }
@@ -284,10 +284,10 @@ namespace EngineNS.Graphics.Mesh
         {
             if (mClusteredMesh == null || bForce)
             {
-                var meshMeta = GetAMeta() as UMeshPrimitivesAMeta;
+                var meshMeta = GetAMeta() as TtMeshPrimitivesAMeta;
                 if (meshMeta == null || meshMeta.IsClustered == false)
                     return null;
-                mClusteredMesh = await UEngine.Instance.GfxDevice.ClusteredMeshManager.GetClusteredMesh(AssetName, this);
+                mClusteredMesh = await TtEngine.Instance.GfxDevice.ClusteredMeshManager.GetClusteredMesh(AssetName, this);
             }
             return mClusteredMesh;
         }

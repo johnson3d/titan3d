@@ -53,7 +53,7 @@ namespace EngineNS.GamePlay.Movemnet
             SettedAngularVelocity = Vector3.Zero;
             return temp;
         }
-        protected virtual void UpdatePlacement(UWorld world, URenderPolicy policy)
+        protected virtual void UpdatePlacement(UWorld world, TtRenderPolicy policy)
         {
             var settedLinearVelocity = ConsumeSettedLinearVelocity();
             var settedAngularVelocity = ConsumeSettedAngularVelocity();

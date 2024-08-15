@@ -29,8 +29,8 @@ namespace EngineNS.EGui.UIProxy
         {
             if (mTask == null)
             {
-                var rc = UEngine.Instance.GfxDevice.RenderContext;
-                mTask = UEngine.Instance.GfxDevice.TextureManager.GetTexture(ImageFile);
+                var rc = TtEngine.Instance.GfxDevice.RenderContext;
+                mTask = TtEngine.Instance.GfxDevice.TextureManager.GetTexture(ImageFile);
                 return IntPtr.Zero;
             }
             else if (mTask.Value.IsCompleted == false)

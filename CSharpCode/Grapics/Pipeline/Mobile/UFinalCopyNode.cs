@@ -86,14 +86,14 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             DisableHdr.SetValue(value);
             UpdatePermutation();
         }
-        public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
+        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
-            var Manager = policy.TagObject as URenderPolicy;
+            var Manager = policy.TagObject as TtRenderPolicy;
 
             var node = Manager.FindFirstNode<UFinalCopyNode>();
             var index = drawcall.FindBinder("gBaseSceneView");
@@ -103,7 +103,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             }
             index = drawcall.FindBinder("Samp_gBaseSceneView");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
             index = drawcall.FindBinder("gPickedTex");
             if (index.IsValidPointer)
@@ -112,7 +112,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             }
             index = drawcall.FindBinder("Samp_gPickedTex");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
             index = drawcall.FindBinder("GVignette");
             if (index.IsValidPointer)
@@ -121,7 +121,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             }
             index = drawcall.FindBinder("Samp_GVignette");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
         }
     }
     [Bricks.CodeBuilder.ContextMenu("FinalCopy", "Mobile\\FinalCopy", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
@@ -152,10 +152,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         {
             return mBasePassShading;
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UFinalCopyShading>();
+            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UFinalCopyShading>();
         }
     }
 }

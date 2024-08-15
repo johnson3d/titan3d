@@ -292,14 +292,14 @@ namespace EngineNS.Bricks.Procedure
                 fixed (Byte4* p = &pixels[0, 0])
                 {
                     initData.pData = p;
-                    texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
+                    texture = TtEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
                 }
                 var rsvDesc = new NxRHI.FSrvDesc();
                 rsvDesc.SetTexture2D();
                 rsvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
                 rsvDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
                 rsvDesc.Texture2D.MipLevels = desc.MipLevels;
-                var result = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(texture, in rsvDesc);
+                var result = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(texture, in rsvDesc);
                 result.PicDesc = new NxRHI.USrView.UPicDesc();
                 return result;
             }
@@ -357,14 +357,14 @@ namespace EngineNS.Bricks.Procedure
                 fixed (Byte4* p = &pixels[0, 0])
                 {
                     initData.pData = p;
-                    texture = UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
+                    texture = TtEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
                 }
                 var rsvDesc = new NxRHI.FSrvDesc();
                 rsvDesc.SetTexture2D();
                 rsvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
                 rsvDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
                 rsvDesc.Texture2D.MipLevels = desc.MipLevels;
-                var result = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(texture, in rsvDesc);
+                var result = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(texture, in rsvDesc);
                 if (result != null)
                     result.PicDesc = new NxRHI.USrView.UPicDesc();
                 return result;

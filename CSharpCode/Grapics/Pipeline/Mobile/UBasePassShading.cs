@@ -53,19 +53,19 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             get;
             set;
         }
-        public override bool IsValidPermutation(TtMdfQueueBase mdfQueue, Shader.UMaterial mtl)
+        public override bool IsValidPermutation(TtMdfQueueBase mdfQueue, Shader.TtMaterial mtl)
         {
-            if (mtl.LightingMode != Shader.UMaterial.ELightingMode.Stand)
+            if (mtl.LightingMode != Shader.TtMaterial.ELightingMode.Stand)
             {
                 if(DisableAO.GetValue() == 1 || DisablePointLights.GetValue() == 1)
                     return false;
             }
             return true;
         }
-        public unsafe override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
+        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
@@ -83,7 +83,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                     }
                     index = drawcall.FindBinder("Samp_gEnvMap");
                     if (index.IsValidPointer)
-                        drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                        drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
                     index = drawcall.FindBinder("GVignette");
                     if (index.IsValidPointer)
@@ -93,7 +93,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                     }
                     index = drawcall.FindBinder("Samp_GVignette");
                     if (index.IsValidPointer)
-                        drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                        drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
                     index = drawcall.FindBinder("GShadowMap");
                     if (index.IsValidPointer)
@@ -103,7 +103,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                     }
                     index = drawcall.FindBinder("Samp_GShadowMap");
                     if (index.IsValidPointer)
-                        drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                        drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
 
                     index = drawcall.FindBinder("cbPerGpuScene");
                     if (index.IsValidPointer)
@@ -189,11 +189,11 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public NxRHI.URenderPass RenderPass;
         public NxRHI.URenderPass GizmosRenderPass;
 
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             LayerBasePass.Initialize(rc, debugName + ".OpaqueBassPass");
 
             var PassDesc = new NxRHI.FRenderPassDesc();
@@ -215,7 +215,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 //PassDesc.mDepthClearValue = 1.0f;
                 //PassDesc.mStencilClearValue = 0u;
             }
-            RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
+            RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
             var GizmosPassDesc = new NxRHI.FRenderPassDesc();
             unsafe
             {
@@ -235,7 +235,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 //GizmosPassDesc.mDepthClearValue = 1.0f;
                 //GizmosPassDesc.mStencilClearValue = 0u;
             }
-            GizmosRenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in GizmosPassDesc);
+            GizmosRenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in GizmosPassDesc);
 
             GBuffers.Initialize(policy, RenderPass);
             GBuffers.SetRenderTarget(policy, 0, ColorPinOut);
@@ -248,7 +248,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             GGizmosBuffers.TargetViewIdentifier = GBuffers.TargetViewIdentifier;
 
             //mBasePassShading = shading as Pipeline.Mobile.UBasePassOpaque;
-            mOpaqueShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UBasePassOpaque>();
+            mOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UBasePassOpaque>();
 
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
@@ -266,7 +266,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             base.Dispose();
         }
-        public override void OnResize(URenderPolicy policy, float x, float y)
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             if (GBuffers != null)
             {
@@ -279,7 +279,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UMobileOpaqueNode), nameof(TickLogic));
-        public unsafe override void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -341,7 +341,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 //cmdlist.EndCommand();
             }
         }
-        public override void TickSync(URenderPolicy policy)
+        public override void TickSync(TtRenderPolicy policy)
         {
             LayerBasePass.SwapBuffer();
         }
@@ -370,7 +370,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             
             AddOutput(GizmosDepthPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
         }
-        public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
+        public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             
         }
@@ -379,11 +379,11 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public NxRHI.URenderPass RenderPass;
         public NxRHI.URenderPass GizmosRenderPass;
         public TtCpuCullingNode CpuCullNode = null;
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             LayerBasePass.Initialize(rc, debugName + ".TranslucentBasePass");
 
             var PassDesc = new NxRHI.FRenderPassDesc();
@@ -405,7 +405,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 //PassDesc.mDepthClearValue = 1.0f;
                 //PassDesc.mStencilClearValue = 0u;
             }
-            RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
+            RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
 
             var GizmosPassDesc = new NxRHI.FRenderPassDesc();
             unsafe
@@ -426,7 +426,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 //GizmosPassDesc.mDepthClearValue = 1.0f;
                 //GizmosPassDesc.mStencilClearValue = 0u;
             }
-            GizmosRenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in GizmosPassDesc);
+            GizmosRenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in GizmosPassDesc);
 
             GBuffers.Initialize(policy, RenderPass);
             GBuffers.SetRenderTarget(policy, 0, AlbedoPinInOut);
@@ -438,7 +438,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             GGizmosBuffers.SetDepthStencil(policy, GizmosDepthPinOut);
             GGizmosBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
 
-            mTranslucentShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UBasePassTranslucent>();
+            mTranslucentShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UBasePassTranslucent>();
 
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
@@ -456,7 +456,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             base.Dispose();
         }
-        public override void OnResize(URenderPolicy policy, float x, float y)
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             if (GBuffers != null)
             {
@@ -470,7 +470,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UMobileTranslucentNode), nameof(TickLogic));
-        public override void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
+        public override void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -523,7 +523,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                 //LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GBuffers, GGizmosBuffers, "Forward:");
             }   
         }
-        public override void TickSync(URenderPolicy policy)
+        public override void TickSync(TtRenderPolicy policy)
         {
             LayerBasePass.SwapBuffer();
         }

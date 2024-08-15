@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Graphics.Mesh
 {
-    [Rtti.Meta]
-    public class UMaterialMeshAMeta : IO.IAssetMeta
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMaterialMeshAMeta@EngineCore" })]
+    public class TtMaterialMeshAMeta : IO.IAssetMeta
     {
         public override string GetAssetExtType()
         {
-            return UMaterialMesh.AssetExt;
+            return TtMaterialMesh.AssetExt;
         }
         public override string GetAssetTypeName()
         {
@@ -23,15 +23,15 @@ namespace EngineNS.Graphics.Mesh
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            return await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(GetAssetName());
+            return await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(GetAssetName());
         }
         public override void OnBeforeRenamedAsset(IO.IAsset asset, RName name)
         {
-            CoreSDK.CheckResult(UEngine.Instance.GfxDevice.MaterialMeshManager.UnsafeRemove(name) == asset);
+            CoreSDK.CheckResult(TtEngine.Instance.GfxDevice.MaterialMeshManager.UnsafeRemove(name) == asset);
         }
         public override void OnAfterRenamedAsset(IO.IAsset asset, RName name)
         {
-            UEngine.Instance.GfxDevice.MaterialMeshManager.UnsafeAdd(name, (UMaterialMesh)asset);
+            TtEngine.Instance.GfxDevice.MaterialMeshManager.UnsafeAdd(name, (TtMaterialMesh)asset);
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -44,7 +44,7 @@ namespace EngineNS.Graphics.Mesh
             await renderer.Initialize(RName.GetRName("graphics/deferred.rpolicy", RName.ERNameType.Engine));
             renderer.SetSize(256, 256);
             
-            Graphics.Mesh.UMaterialMesh Mesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.CreateMaterialMesh(GetAssetName());
+            Graphics.Mesh.TtMaterialMesh Mesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.CreateMaterialMesh(GetAssetName());
             var mesh = new Graphics.Mesh.TtMesh();
             var ok = mesh.Initialize(Mesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
@@ -58,12 +58,12 @@ namespace EngineNS.Graphics.Mesh
                 renderer.RenderPolicy.DefaultCamera.AutoZoom(in meshNode.AABB);
             }
 
-            UEngine.Instance.GfxDevice.RenderSwapQueue.CaptureRenderDocFrame = true;
-            UEngine.Instance.GfxDevice.RenderSwapQueue.BeginFrameCapture();
+            TtEngine.Instance.GfxDevice.RenderSwapQueue.CaptureRenderDocFrame = true;
+            TtEngine.Instance.GfxDevice.RenderSwapQueue.BeginFrameCapture();
 
             renderer.ExecuteRender();
 
-            UEngine.Instance.GfxDevice.RenderSwapQueue.EndFrameCapture($"AutoGen:{GetAssetName()}");
+            TtEngine.Instance.GfxDevice.RenderSwapQueue.EndFrameCapture($"AutoGen:{GetAssetName()}");
 
             renderer.TickSync();
             Editor.USnapshot.Save(this.GetAssetName(), this, renderer.RenderPolicy.GetFinalShowRSV());
@@ -85,7 +85,7 @@ namespace EngineNS.Graphics.Mesh
             {
                 var start = worldViewport.CameraController.Camera.GetPosition();
                 Vector3 dir = Vector3.Zero;
-                var msPt = new Vector2(UEngine.Instance.InputSystem.Mouse.GlobalMouseX, UEngine.Instance.InputSystem.Mouse.GlobalMouseY) - vpSlate.ViewportPos;
+                var msPt = new Vector2(TtEngine.Instance.InputSystem.Mouse.GlobalMouseX, TtEngine.Instance.InputSystem.Mouse.GlobalMouseY) - vpSlate.ViewportPos;
                 msPt = worldViewport.Window2Viewport(msPt);
                 worldViewport.CameraController.Camera.GetPickRay(ref dir, msPt.X, msPt.Y, worldViewport.ClientSize.X, worldViewport.ClientSize.Y);
                 var end = start + dir.AsDVector() * 1000.0f;
@@ -176,10 +176,10 @@ namespace EngineNS.Graphics.Mesh
             mPreviewNode.Placement.Position = hitPos;
         }
     }
-    [Rtti.Meta]
-    [UMaterialMesh.Import]
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMaterialMesh@EngineCore" })]
+    [TtMaterialMesh.Import]
     [IO.AssetCreateMenu(MenuName = "Mesh/MaterialMesh")]
-    public partial class UMaterialMesh : IO.ISerializer, IO.IAsset
+    public partial class TtMaterialMesh : IO.ISerializer, IO.IAsset
     {
         public const string AssetExt = ".ums";
 
@@ -188,19 +188,19 @@ namespace EngineNS.Graphics.Mesh
             public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
             {
                 await base.DoCreate(dir, type, ext);
-                var mesh = mAsset as UMaterialMesh;
+                var mesh = mAsset as TtMaterialMesh;
                 mesh.SubMeshes[0].MeshName = RName.GetRName("mesh/base/box.vms", RName.ERNameType.Engine);
             }
         }
         #region IAsset
         public IO.IAssetMeta CreateAMeta()
         {
-            var result = new UMaterialMeshAMeta();
+            var result = new TtMaterialMeshAMeta();
             return result;
         }
         public IO.IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
@@ -226,7 +226,7 @@ namespace EngineNS.Graphics.Mesh
             if (ameta != null)
             {
                 UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta();
+                ameta.SaveAMeta(this);
             }
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
             using (var xnd = new IO.TtXndHolder(typeStr, 0, 0))
@@ -243,7 +243,7 @@ namespace EngineNS.Graphics.Mesh
                 xnd.SaveXnd(name.Address);
                 this.SerialId++;
             }
-            UEngine.Instance.SourceControlModule.AddFile(name.Address);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         [Rtti.Meta]
         [RName.PGRName(ReadOnly = true)]
@@ -263,7 +263,7 @@ namespace EngineNS.Graphics.Mesh
         {
 
         }
-        public bool Initialize(List<UMeshPrimitives> mesh, List<Pipeline.Shader.UMaterial[]> materials)
+        public bool Initialize(List<TtMeshPrimitives> mesh, List<Pipeline.Shader.TtMaterial[]> materials)
         {
             if (mesh.Count != materials.Count)
                 return false;
@@ -278,7 +278,7 @@ namespace EngineNS.Graphics.Mesh
             UpdateAABB();
             return true;
         }
-        public bool Initialize(List<UMeshPrimitives> mesh, List<List<Pipeline.Shader.UMaterial>> materials)
+        public bool Initialize(List<TtMeshPrimitives> mesh, List<List<Pipeline.Shader.TtMaterial>> materials)
         {
             if (mesh.Count != materials.Count)
                 return false;
@@ -307,7 +307,7 @@ namespace EngineNS.Graphics.Mesh
             UpdateAABB();
             SerialId++;
         }
-        public unsafe static UMaterialMesh LoadXnd(UMaterialMeshManager manager, IO.TtXndNode node)
+        public unsafe static TtMaterialMesh LoadXnd(UMaterialMeshManager manager, IO.TtXndNode node)
         {
             try
             {
@@ -321,7 +321,7 @@ namespace EngineNS.Graphics.Mesh
                     }
                 }
 
-                var mesh = result as UMaterialMesh;
+                var mesh = result as TtMaterialMesh;
                 if (mesh != null)
                 {
                     mesh.UpdateAABB();
@@ -335,7 +335,7 @@ namespace EngineNS.Graphics.Mesh
                 return null;
             }
         }
-        public static bool ReloadXnd(UMaterialMesh mesh, UMaterialMeshManager manager, IO.TtXndNode node)
+        public static bool ReloadXnd(TtMaterialMesh mesh, UMaterialMeshManager manager, IO.TtXndNode node)
         {
             unsafe
             {
@@ -351,11 +351,12 @@ namespace EngineNS.Graphics.Mesh
                 return true;
             }
         }
+        [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMaterialMesh.TtSubMaterialedMesh@EngineCore" })]
         public class TtSubMaterialedMesh : IO.BaseSerializer
         {
-            UMeshPrimitives mMesh;
+            TtMeshPrimitives mMesh;
             [Browsable(false)]
-            public UMeshPrimitives Mesh
+            public TtMeshPrimitives Mesh
             {
                 get => mMesh;
                 internal set
@@ -374,7 +375,7 @@ namespace EngineNS.Graphics.Mesh
                     }
                 }
             }
-            [RName.PGRName(FilterExts = UMeshPrimitives.AssetExt)]
+            [RName.PGRName(FilterExts = TtMeshPrimitives.AssetExt)]
             [ReadOnly(true)]
             public RName MeshName
             {
@@ -391,10 +392,10 @@ namespace EngineNS.Graphics.Mesh
                     AssetState = IO.EAssetState.Loading;
                     System.Action exec = async () =>
                     {
-                        Mesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value);
+                        Mesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value);
                         if (Mesh.mCoreObject.IsValidPointer == false)
                         {
-                            Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"GetMeshPrimitive({value}) failed");
+                            Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"GetMeshPrimitive({value}) failed");
                             AssetState = IO.EAssetState.LoadFailed;
                             return;
                         }
@@ -434,7 +435,7 @@ namespace EngineNS.Graphics.Mesh
                     else
                     {
                         ImGuiAPI.Text(info.Type.ToString());
-                        var lst = info.Value as List<Pipeline.Shader.UMaterial>;
+                        var lst = info.Value as List<Pipeline.Shader.TtMaterial>;
                         if (lst != null)
                             Expandable = lst.Count > 0;
                         if (info.Expand)
@@ -448,7 +449,7 @@ namespace EngineNS.Graphics.Mesh
 
                     return valueChanged;
                 }
-                private bool OnArray(EditorInfo info, List<Pipeline.Shader.UMaterial> materials)
+                private bool OnArray(EditorInfo info, List<Pipeline.Shader.TtMaterial> materials)
                 {
                     if (materials == null)
                         return false;
@@ -485,7 +486,7 @@ namespace EngineNS.Graphics.Mesh
                         ImGuiAPI.SetNextItemWidth(-1);
                         var old = materials[i]?.AssetName;
 
-                        mRNameEditor.FilterExts = Pipeline.Shader.UMaterial.AssetExt + "," + Pipeline.Shader.UMaterialInstance.AssetExt;
+                        mRNameEditor.FilterExts = Pipeline.Shader.TtMaterial.AssetExt + "," + Pipeline.Shader.TtMaterialInstance.AssetExt;
                         object newValue;
                         info.Value = materials[i]?.AssetName;
                         mRNameEditor.OnDraw(in info, out newValue);
@@ -496,7 +497,7 @@ namespace EngineNS.Graphics.Mesh
                         {
                             if (rn == null)
                             {
-                                materials[i] = UEngine.Instance.GfxDevice.MaterialManager.PxDebugMaterial;
+                                materials[i] = TtEngine.Instance.GfxDevice.MaterialManager.PxDebugMaterial;
                             }
                             else
                             {
@@ -506,16 +507,16 @@ namespace EngineNS.Graphics.Mesh
                                     int IndexOfMaterial = i;
                                     System.Action exec = async () =>
                                     {
-                                        if (rn.ExtName == Pipeline.Shader.UMaterialInstance.AssetExt)
+                                        if (rn.ExtName == Pipeline.Shader.TtMaterialInstance.AssetExt)
                                         {
-                                            materials[IndexOfMaterial] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(rn);
+                                            materials[IndexOfMaterial] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(rn);
                                         }
-                                        else if (rn.ExtName == Pipeline.Shader.UMaterial.AssetExt)
+                                        else if (rn.ExtName == Pipeline.Shader.TtMaterial.AssetExt)
                                         {
-                                            materials[IndexOfMaterial] = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(rn);
+                                            materials[IndexOfMaterial] = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(rn);
                                         }
                                         umesh.AssetState = IO.EAssetState.LoadFinished;
-                                        var mesh = (UMaterialMesh)info.HostPropertyGrid.Target;
+                                        var mesh = (TtMaterialMesh)info.HostPropertyGrid.Target;
                                     };
                                     exec();
                                 }
@@ -528,13 +529,13 @@ namespace EngineNS.Graphics.Mesh
                 }
             }
             [PGMaterials]
-            public List<Pipeline.Shader.UMaterial> Materials
+            public List<Pipeline.Shader.TtMaterial> Materials
             {
                 get;
-            } = new List<Pipeline.Shader.UMaterial>();
+            } = new List<Pipeline.Shader.TtMaterial>();
             [Browsable(false)]
             public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
-            public bool Initialize(UMeshPrimitives mesh, Pipeline.Shader.UMaterial[] materials)
+            public bool Initialize(TtMeshPrimitives mesh, Pipeline.Shader.TtMaterial[] materials)
             {
                 if (mesh.mCoreObject.GetAtomNumber() != materials.Length)
                     return false;
@@ -548,7 +549,7 @@ namespace EngineNS.Graphics.Mesh
 
                 return true;
             }
-            public bool Initialize(UMeshPrimitives mesh, List<Pipeline.Shader.UMaterial> materials)
+            public bool Initialize(TtMeshPrimitives mesh, List<Pipeline.Shader.TtMaterial> materials)
             {
                 if (mesh.mCoreObject.GetAtomNumber() != materials.Count)
                     return false;
@@ -563,6 +564,7 @@ namespace EngineNS.Graphics.Mesh
                 return true;
             }
 
+            [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMaterialMesh.TtSubMaterialedMesh.TSaveData@EngineCore" })]
             public class TSaveData : IO.BaseSerializer
             {
                 [Rtti.Meta]
@@ -597,23 +599,23 @@ namespace EngineNS.Graphics.Mesh
                     Mesh = null;
                     System.Action exec = async () =>
                     {
-                        Mesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value.MeshName);
+                        Mesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value.MeshName);
                         if (Mesh == null)
                         {
-                            Profiler.Log.WriteLine(Profiler.ELogTag.Error, "IO", $"GetMeshPrimitive({value.MeshName}) failed");
+                            Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"GetMeshPrimitive({value.MeshName}) failed");
                             AssetState = IO.EAssetState.LoadFailed;
                             return;
                         }
-                        var mtlMgr = UEngine.Instance.GfxDevice.MaterialInstanceManager;
+                        var mtlMgr = TtEngine.Instance.GfxDevice.MaterialInstanceManager;
                         for (int i = 0; i < Materials.Count; i++)
                         {
                             if (i < value.Materials.Count)
                             {
-                                if (value.Materials[i].ExtName == Graphics.Pipeline.Shader.UMaterial.AssetExt)
+                                if (value.Materials[i].ExtName == Graphics.Pipeline.Shader.TtMaterial.AssetExt)
                                 {
-                                    Materials[i] = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(value.Materials[i]);
+                                    Materials[i] = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(value.Materials[i]);
                                 }
-                                else if (value.Materials[i].ExtName == Graphics.Pipeline.Shader.UMaterialInstance.AssetExt)
+                                else if (value.Materials[i].ExtName == Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt)
                                 {
                                     Materials[i] = await mtlMgr.GetMaterialInstance(value.Materials[i]);
                                 }
@@ -628,7 +630,7 @@ namespace EngineNS.Graphics.Mesh
         }
         [Rtti.Meta()]
         public List<TtSubMaterialedMesh> SubMeshes { get; set; } = new List<TtSubMaterialedMesh>() { new TtSubMaterialedMesh() };
-        public Graphics.Mesh.UMeshPrimitives GetMeshPrimitives(int index)
+        public Graphics.Mesh.TtMeshPrimitives GetMeshPrimitives(int index)
         {
             return SubMeshes[index].Mesh;
         }
@@ -658,16 +660,16 @@ namespace EngineNS.Graphics.Mesh
 
     public class UMaterialMeshManager
     {
-        public Dictionary<RName, UMaterialMesh> Meshes { get; } = new Dictionary<RName, UMaterialMesh>();
-        public async Thread.Async.TtTask<UMaterialMesh> CreateMaterialMesh(RName name)
+        public Dictionary<RName, TtMaterialMesh> Meshes { get; } = new Dictionary<RName, TtMaterialMesh>();
+        public async Thread.Async.TtTask<TtMaterialMesh> CreateMaterialMesh(RName name)
         {
-            var result = await UEngine.Instance.EventPoster.Post((state) =>
+            var result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
                 {
                     if (xnd != null)
                     {
-                        var mesh = UMaterialMesh.LoadXnd(this, xnd.RootNode);
+                        var mesh = TtMaterialMesh.LoadXnd(this, xnd.RootNode);
                         if (mesh == null)
                             return null;
 
@@ -683,17 +685,17 @@ namespace EngineNS.Graphics.Mesh
         }
         public async Thread.Async.TtTask<bool> ReloadMaterialMesh(RName rn)
         {
-            UMaterialMesh result;
+            TtMaterialMesh result;
             if (Meshes.TryGetValue(rn, out result) == false)
                 return true;
 
-            var ok = await UEngine.Instance.EventPoster.Post((state) =>
+            var ok = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
                     if (xnd != null)
                     {
-                        return UMaterialMesh.ReloadXnd(result, this, xnd.RootNode);
+                        return TtMaterialMesh.ReloadXnd(result, this, xnd.RootNode);
                     }
                     else
                     {
@@ -704,16 +706,16 @@ namespace EngineNS.Graphics.Mesh
 
             return ok;
         }
-        public UMaterialMesh TryGetMaterialMesh(RName name)
+        public TtMaterialMesh TryGetMaterialMesh(RName name)
         {
             if (name == null)
                 return null;
-            UMaterialMesh result;
+            TtMaterialMesh result;
             if (Meshes.TryGetValue(name, out result))
                 return result;
             return null;
         }
-        internal UMaterialMesh UnsafeRemove(RName name)
+        internal TtMaterialMesh UnsafeRemove(RName name)
         {
             lock (Meshes)
             {
@@ -724,18 +726,18 @@ namespace EngineNS.Graphics.Mesh
                 return null;
             }
         }
-        internal void UnsafeAdd(RName name, UMaterialMesh obj)
+        internal void UnsafeAdd(RName name, TtMaterialMesh obj)
         {
             lock (Meshes)
             {
                 Meshes.Add(name, obj);
             }
         }
-        public async Thread.Async.TtTask<UMaterialMesh> GetMaterialMesh(RName name)
+        public async Thread.Async.TtTask<TtMaterialMesh> GetMaterialMesh(RName name)
         {
             if (name == null)
                 return null;
-            UMaterialMesh result;
+            TtMaterialMesh result;
             if (Meshes.TryGetValue(name, out result))
                 return result;
 

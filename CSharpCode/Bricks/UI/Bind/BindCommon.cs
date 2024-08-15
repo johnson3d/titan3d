@@ -38,7 +38,7 @@ namespace EngineNS.UI.Bind
                 mBindValueA = value;
             }
         }
-        static TtBindableProperty BindValueAProperty = UEngine.Instance.UIBindManager.Register<int, BindA>("BindValueA", -1);
+        static TtBindableProperty BindValueAProperty = TtEngine.Instance.UIBindManager.Register<int, BindA>("BindValueA", -1);
 
         [BindProperty(IsAutoGen = false, IsCallSetProperty = false)]
         public int BindValueA2
@@ -46,13 +46,13 @@ namespace EngineNS.UI.Bind
             get => GetValue<int>();
             set => SetValue(value);
         }
-        static TtBindableProperty BindValueA2Property = UEngine.Instance.UIBindManager.Register<int, BindA>("BindValueA2", -6, 
+        static TtBindableProperty BindValueA2Property = TtEngine.Instance.UIBindManager.Register<int, BindA>("BindValueA2", -6, 
             (bObj, bp, val)=>
             {
                 
             });
 
-        public static TtBindableProperty AttachedProperty_Int = UEngine.Instance.UIBindManager.RegisterAttached<int, BindA>("AttPro_Int",0);
+        public static TtBindableProperty AttachedProperty_Int = TtEngine.Instance.UIBindManager.RegisterAttached<int, BindA>("AttPro_Int",0);
         public static int GetAttPro_Int(IBindableObject target)
         {
             return target.GetValue<int>(AttachedProperty_Int);
@@ -181,7 +181,7 @@ namespace EngineNS.UI.Bind
     // generated code ////////////////////////////////////////
     //public partial class BindB
     //{
-    //    static TtBindableProperty BindValueBProperty = UEngine.Instance.UIBindManager.Register<int, BindB>("BindValueB", -10);
+    //    static TtBindableProperty BindValueBProperty = TtEngine.Instance.UIBindManager.Register<int, BindB>("BindValueB", -10);
     //    public TtBindingBase CreateBinding(string propertyName)
     //    {
     //        switch(propertyName)
@@ -1046,7 +1046,7 @@ namespace EngineNS.UI.Bind
                         return key;
                 }
             }
-            return UEngine.Instance.UIBindManager.FindBindableProperty(propertyName, UTypeDesc.TypeOf(GetType())); 
+            return TtEngine.Instance.UIBindManager.FindBindableProperty(propertyName, UTypeDesc.TypeOf(GetType())); 
         }
         //public TtBindingExpressionBase SetBinding(TtBindableProperty bp, TtBindingBase binding)
         //{
@@ -1070,7 +1070,7 @@ namespace EngineNS.UI.Bind
         public virtual void SetValue<T>(in T value, [CallerMemberName] string? propertyName = null)
 #nullable disable
         {
-            var bp = UEngine.Instance.UIBindManager.FindBindableProperty(propertyName, UTypeDesc.TypeOf(GetType()));
+            var bp = TtEngine.Instance.UIBindManager.FindBindableProperty(propertyName, UTypeDesc.TypeOf(GetType()));
             SetValue<T>(value, bp);
         }
         public virtual void SetValue<T>(in T value, TtBindableProperty bp)
@@ -1100,7 +1100,7 @@ namespace EngineNS.UI.Bind
         public virtual T GetValue<T>([CallerMemberName] string? propertyName = null)
 #nullable disable
         {
-            var bp = UEngine.Instance.UIBindManager.FindBindableProperty(propertyName, UTypeDesc.TypeOf(GetType()));
+            var bp = TtEngine.Instance.UIBindManager.FindBindableProperty(propertyName, UTypeDesc.TypeOf(GetType()));
             return GetValue<T>(bp);
         }
         public virtual T GetValue<T>(TtBindableProperty bp)
@@ -1147,7 +1147,7 @@ namespace EngineNS.UI.Bind
         {
             var retVal = new TtBindingExpression<TProperty>(binding, parent);
             retVal.TargetObject = this;
-            retVal.TargetProperty = (TtBindableProperty<TProperty>)UEngine.Instance.UIBindManager.FindBindableProperty(propertyName, UTypeDesc.TypeOf(GetType()));
+            retVal.TargetProperty = (TtBindableProperty<TProperty>)TtEngine.Instance.UIBindManager.FindBindableProperty(propertyName, UTypeDesc.TypeOf(GetType()));
             return retVal;
         }
         public virtual void ClearBindExpression(TtBindableProperty bp)

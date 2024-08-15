@@ -33,7 +33,7 @@ namespace EngineNS.Bricks.Network.RPC
 
             if (length < count)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "RPC", "夭寿啦！");
+                Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Error, "夭寿啦！");
                 length = 0;
                 return pSrc;
             }

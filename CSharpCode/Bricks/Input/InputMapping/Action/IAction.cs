@@ -13,7 +13,7 @@ namespace EngineNS.Bricks.Input.InputMapping.Action
         {
             var obj = Activator.CreateInstance<T>();
             obj.Initialize(data);
-            UEngine.Instance.InputSystem.RegAction(obj);
+            TtEngine.Instance.InputSystem.RegAction(obj);
             return obj;
         }
         public void Initialize(IActionData data);

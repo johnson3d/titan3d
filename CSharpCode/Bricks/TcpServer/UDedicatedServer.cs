@@ -4,19 +4,19 @@ using System.Text;
 
 namespace EngineNS.Bricks.TcpServer
 {
-    public class UDedicatedServer : UModule<UEngine>
+    public class UDedicatedServer : UModule<TtEngine>
     {
-        public override async System.Threading.Tasks.Task<bool> Initialize(UEngine engine)
+        public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine engine)
         {
             await base.Initialize(engine);
 
             return true;
         }
-        public override void Cleanup(UEngine engine)
+        public override void Cleanup(TtEngine engine)
         {
 
         }
-        public override void TickModule(UEngine engine)
+        public override void TickModule(TtEngine engine)
         {
             mServer?.Tick();
         }
@@ -41,7 +41,7 @@ namespace EngineNS.Bricks.TcpServer
 
 namespace EngineNS
 {
-    public partial class UEngine
+    public partial class TtEngine
     {
         public static System.Type UDedicatedServerType = typeof(Bricks.TcpServer.UDedicatedServer);
         private Bricks.TcpServer.UDedicatedServer mDedicatedServer;

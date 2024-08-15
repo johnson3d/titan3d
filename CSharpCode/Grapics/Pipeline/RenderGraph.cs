@@ -35,7 +35,7 @@ namespace EngineNS.Graphics.Pipeline
             TtRenderGraphNode fNode;
             if (GraphNodes.TryGetValue(id, out fNode))
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Graphics", $"Policy() node({node}) is repeated");
+                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Error, $"Policy() node({node}) is repeated");
                 return false;
             }
             node.RenderGraph = this;
@@ -242,7 +242,7 @@ namespace EngineNS.Graphics.Pipeline
                     if (pin.IsAllowInputNull == false)
                     {
                         hasInputError = true;
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "RenderGraph", $"Input({pin.HostNode.Name}.{pin.Name}) linked null");
+                        Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, $"Input({pin.HostNode.Name}.{pin.Name}) linked null");
                     }
                 }
             }
@@ -261,7 +261,7 @@ namespace EngineNS.Graphics.Pipeline
         {
 
         }
-        public void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
+        public void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             foreach (var i in GraphNodes)
             {
@@ -272,7 +272,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual void BeginTickLogic(GamePlay.UWorld world)
         {
-            FrameBuild(this as URenderPolicy);
+            FrameBuild(this as TtRenderPolicy);
 
             if (NodeLayers != null)
             {
@@ -283,7 +283,7 @@ namespace EngineNS.Graphics.Pipeline
                         if (j.IsUsed == false)
                             continue;
                         if (j.Enable)
-                            j.BeginTickLogic(world, this as URenderPolicy, true);
+                            j.BeginTickLogic(world, this as TtRenderPolicy, true);
                     }
                 }
             }
@@ -299,7 +299,7 @@ namespace EngineNS.Graphics.Pipeline
                         if (j.IsUsed == false)
                             continue;
                         if (j.Enable)
-                            j.EndTickLogic(world, this as URenderPolicy, true);
+                            j.EndTickLogic(world, this as TtRenderPolicy, true);
                     }
                 }
             }
@@ -321,9 +321,9 @@ namespace EngineNS.Graphics.Pipeline
                             continue;
                         if (j.Enable)
                         {
-                            j.BeforeTickLogic((URenderPolicy)this);
+                            j.BeforeTickLogic((TtRenderPolicy)this);
 
-                            j.TickLogic(world, (URenderPolicy)this, true);
+                            j.TickLogic(world, (TtRenderPolicy)this, true);
 
                             j.TryReleaseBufers(mTempTryReleaseLinkers, onRemove);
 
@@ -356,7 +356,7 @@ namespace EngineNS.Graphics.Pipeline
                     foreach (var j in i)
                     {
                         if (j.Enable)
-                            j.TickSync((URenderPolicy)this);
+                            j.TickSync((TtRenderPolicy)this);
                     }
                 }
             }
@@ -384,7 +384,7 @@ namespace EngineNS.Graphics.Pipeline
                         pin.Attachement.Height = (uint)y;
                     }
                 }
-                i.Value.OnResize((URenderPolicy)this, x, y);
+                i.Value.OnResize((TtRenderPolicy)this, x, y);
             }
             AttachmentCache.ResetCache(true);
         }

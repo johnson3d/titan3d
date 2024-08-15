@@ -39,7 +39,7 @@ namespace EngineNS.Bricks.Procedure
 
             //Root = new Buffer2D.UEndingNode();
         }
-        public override UGraphRenderer GetGraphRenderer()
+        public override TtGraphRenderer GetGraphRenderer()
         {
             return GraphEditor?.GraphRenderer;
         }
@@ -170,7 +170,7 @@ namespace EngineNS.Bricks.Procedure
                     j.DoProcedure(this);
                     this.McProgram?.Get().OnNodeProcedureFinished(this, j);
                     var t2 = Support.Time.HighPrecision_GetTickCount();
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Procedure", $"Node:{j.Name} = {(t2 - t1) / 1000000.0f}");
+                    Profiler.Log.WriteLine<Profiler.TtPgcGategory>(Profiler.ELogTag.Info, $"Node:{j.Name} = {(t2 - t1) / 1000000.0f}");
                 }
             }
         }

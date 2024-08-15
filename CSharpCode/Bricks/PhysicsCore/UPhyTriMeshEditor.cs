@@ -20,7 +20,7 @@ namespace EngineNS.Bricks.PhysicsCore
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
         public TtPhyTriMesh TriMesh;
-        public Graphics.Mesh.UMaterialMesh ShowMesh;
+        public Graphics.Mesh.TtMaterialMesh ShowMesh;
         public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
         public EGui.Controls.PropertyGrid.PropertyGrid TriMeshPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         ~UPhyTriMeshEditor()
@@ -43,7 +43,7 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             return this;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMesh(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMesh(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -53,21 +53,21 @@ namespace EngineNS.Bricks.PhysicsCore
 
             (viewport as Editor.TtPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
-            ShowMesh = new Graphics.Mesh.UMaterialMesh();
+            ShowMesh = new Graphics.Mesh.TtMaterialMesh();
             //pxmesh: no normal, no uv
             var meshPrimitve = TriMesh.ToMeshProvider().ToMesh();
 
-            var matrials = new Graphics.Pipeline.Shader.UMaterial[1];
-            matrials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
+            var matrials = new Graphics.Pipeline.Shader.TtMaterial[1];
+            matrials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
 
-            var matrials1 = new Graphics.Pipeline.Shader.UMaterial[1];
-            matrials1[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
+            var matrials1 = new Graphics.Pipeline.Shader.TtMaterial[1];
+            matrials1[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
             var rast = matrials1[0].Rasterizer;
             rast.FillMode = NxRHI.EFillMode.FMD_WIREFRAME;
             matrials1[0].Rasterizer = rast;
 
-            ShowMesh.Initialize(new List<Graphics.Mesh.UMeshPrimitives>() { meshPrimitve, meshPrimitve },
-                new List<Graphics.Pipeline.Shader.UMaterial[]>() { matrials, matrials1 });
+            ShowMesh.Initialize(new List<Graphics.Mesh.TtMeshPrimitives>() { meshPrimitve, meshPrimitve },
+                new List<Graphics.Pipeline.Shader.TtMaterial[]>() { matrials, matrials1 });
             
             var mesh = new Graphics.Mesh.TtMesh();
             var ok = mesh.Initialize(ShowMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
@@ -95,15 +95,15 @@ namespace EngineNS.Bricks.PhysicsCore
         public async Thread.Async.TtTask<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            TriMesh = await UEngine.Instance.PhyModule.PhyContext.PhyMeshManager.GetMesh(name);
+            TriMesh = await TtEngine.Instance.PhyModule.PhyContext.PhyMeshManager.GetMesh(name);
             if (TriMesh == null)
                 return false;
 
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"PxTriMesh:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMesh;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
-            UEngine.Instance.TickableManager.AddTickable(this);
+            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
+            TtEngine.Instance.TickableManager.AddTickable(this);
 
             TriMeshPropGrid.Target = TriMesh;
             return true;
@@ -151,7 +151,7 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -173,7 +173,7 @@ namespace EngineNS.Bricks.PhysicsCore
             var btSize = Vector2.Zero;
             if (EGui.UIProxy.CustomButton.ToolButton("SaveSnap", in btSize))
             {
-                //Editor.USnapshot.Save(TriMesh.AssetName, TriMesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+                //Editor.USnapshot.Save(TriMesh.AssetName, TriMesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
         }
         bool mLeftDraw = true;

@@ -29,7 +29,7 @@ namespace EngineNS.Bricks.GpuDriven
         {
             base.EnvShadingDefines(in id, defines);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
         {
             var node = drawcall.TagObject as TtCullClusterNode;
 
@@ -42,7 +42,7 @@ namespace EngineNS.Bricks.GpuDriven
             {
                 if (node.CBCameraFrustum == null)
                 {
-                    node.CBCameraFrustum = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    node.CBCameraFrustum = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
                 drawcall.BindCBuffer(index, node.CBCameraFrustum);
             }
@@ -55,7 +55,7 @@ namespace EngineNS.Bricks.GpuDriven
             }
             index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_Sampler, "Samp_HZBTexture");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, UEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
         }
     }
@@ -126,15 +126,15 @@ namespace EngineNS.Bricks.GpuDriven
 
             base.InitNodePins();
         }
-        public override async Task Initialize(URenderPolicy policy, string debugName)
+        public override async Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName);
 
             CoreSDK.DisposeObject(ref CullClusterShadingDrawcall);
             CullClusterShadingDrawcall = rc.CreateComputeDraw();
-            CullClusterShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<TtCullClusterShading>();
+            CullClusterShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtCullClusterShading>();
 
             Vertices.Initialize(NxRHI.EBufferType.BFT_SRV);
             Indices.Initialize(NxRHI.EBufferType.BFT_SRV);
@@ -241,7 +241,7 @@ namespace EngineNS.Bricks.GpuDriven
                 attachment.Srv = SrcClusters.Srv;
             }
         }
-        public override void BeforeTickLogic(URenderPolicy policy)
+        public override void BeforeTickLogic(TtRenderPolicy policy)
         {
             base.BeforeTickLogic(policy);
 
@@ -252,7 +252,7 @@ namespace EngineNS.Bricks.GpuDriven
             }
 
         }
-        public unsafe override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             if (CBCameraFrustum != null)
             {

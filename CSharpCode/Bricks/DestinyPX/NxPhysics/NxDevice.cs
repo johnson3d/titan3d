@@ -28,23 +28,23 @@ namespace EngineNS.NxPhysics
         }
     }
 
-    public class TtPxSystem : UModule<UEngine>
+    public class TtPxSystem : UModule<TtEngine>
     {
         public TtDevice Device { get; } = new TtDevice();
-        public Graphics.Pipeline.Shader.UMaterialInstance DebugShapeMaterial;
+        public Graphics.Pipeline.Shader.TtMaterialInstance DebugShapeMaterial;
         public System.Random Random { get; } = new Random(0);
         public float DebugTriangleSize = 0.1f;
         public override int GetOrder()
         {
             return 2;
         }
-        public override async Task<bool> Initialize(UEngine host)
+        public override async Task<bool> Initialize(TtEngine host)
         {
             DebugShapeMaterial = await host.GfxDevice.MaterialInstanceManager.GetMaterialInstance(
                 RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
 
             //var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
-            //var mesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(RName.GetRName("mesh/sphere001.vms", RName.ERNameType.Engine));
+            //var mesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(RName.GetRName("mesh/sphere001.vms", RName.ERNameType.Engine));
             //meshBuilder.InitFrom(mesh);
             //var clrBuffer = meshBuilder.mCoreObject.CreateStream(NxRHI.EVertexStreamType.VST_Color);
             //unsafe
@@ -58,7 +58,7 @@ namespace EngineNS.NxPhysics
             //meshBuilder.ToMesh().SaveAssetTo(RName.GetRName("mesh/sphere001_1.vms", RName.ERNameType.Engine));
             return true;
         }
-        public override void Cleanup(UEngine host)
+        public override void Cleanup(TtEngine host)
         {
             DebugShapeMaterial = null;
             base.Cleanup(host);
@@ -68,7 +68,7 @@ namespace EngineNS.NxPhysics
 
 namespace EngineNS
 {
-    public partial class UEngine
+    public partial class TtEngine
     {
         public NxPhysics.TtPxSystem PxSystem { get; } = new NxPhysics.TtPxSystem();
     }

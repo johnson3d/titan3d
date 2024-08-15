@@ -10,11 +10,11 @@ namespace EngineNS.Rtti
         {
             public GameAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "GameAssemblyDesc Created");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, "GameAssemblyDesc Created");
             }
             ~GameAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "GameAssemblyDesc Destroyed");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, "GameAssemblyDesc Destroyed");
             }
             public override string Name { get => "GameProject"; }
             public override string Service { get { return "Game"; } }

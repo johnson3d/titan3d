@@ -435,10 +435,10 @@ namespace EngineNS.Profiler
         #endregion
     }
 
-    public class TtProfilerModule : UModule<UEngine>
+    public class TtProfilerModule : UModule<TtEngine>
     {
         public NxRHI.TtGpuTimeScopeManager GpuTimeScopeManager { get; } = new NxRHI.TtGpuTimeScopeManager();
-        public override unsafe void TickModule(UEngine host)
+        public override unsafe void TickModule(TtEngine host)
         {
             GpuTimeScopeManager.UpdateSync();
         }
@@ -447,7 +447,7 @@ namespace EngineNS.Profiler
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public Profiler.TtProfilerModule ProfilerModule { get; } = new Profiler.TtProfilerModule();
     }
@@ -466,11 +466,11 @@ namespace EngineNS.Profiler
 		{
 			if (ExeIndex == UInt16.MaxValue)
 			{
-				ExeIndex = UEngine.Instance.RpcModule.DefaultExeIndex;
+				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
 			}
 			if (NetConnect == null)
 			{
-				NetConnect = UEngine.Instance.RpcModule.DefaultNetConnect;
+				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
 			var retContext = UReturnAwaiter<EngineNS.Profiler.URpcProfiler.RpcProfilerThreads>.CreateInstance(Timeout);
 			if (NetConnect != null)
@@ -501,11 +501,11 @@ namespace EngineNS.Profiler
 		{
 			if (ExeIndex == UInt16.MaxValue)
 			{
-				ExeIndex = UEngine.Instance.RpcModule.DefaultExeIndex;
+				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
 			}
 			if (NetConnect == null)
 			{
-				NetConnect = UEngine.Instance.RpcModule.DefaultNetConnect;
+				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
 			var retContext = UReturnAwaiter<EngineNS.Profiler.URpcProfiler.RpcProfilerData>.CreateInstance(Timeout);
 			if (NetConnect != null)
@@ -536,11 +536,11 @@ namespace EngineNS.Profiler
 		{
 			if (ExeIndex == UInt16.MaxValue)
 			{
-				ExeIndex = UEngine.Instance.RpcModule.DefaultExeIndex;
+				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
 			}
 			if (NetConnect == null)
 			{
-				NetConnect = UEngine.Instance.RpcModule.DefaultNetConnect;
+				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
 			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
 			{

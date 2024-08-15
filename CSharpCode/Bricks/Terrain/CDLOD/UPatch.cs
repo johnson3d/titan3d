@@ -86,16 +86,16 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public NxRHI.UCbView PatchCBuffer;
         public void SureCBuffer(NxRHI.IGraphicsEffect shaderProg, ref NxRHI.UCbView cbuffer)
         {
-            var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+            var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
             if (cbuffer == null)
             {
                 coreBinder.CBPerTerrainPatch.UpdateFieldVar(shaderProg, "cbPerPatch");
-                cbuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerTerrainPatch.Binder.mCoreObject);
+                cbuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerTerrainPatch.Binder.mCoreObject);
             }
             if (TerrainNode.TerrainCBuffer == null)
             {
                 coreBinder.CBPerTerrain.UpdateFieldVar(shaderProg, "cbPerTerrain");
-                TerrainNode.TerrainCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerTerrain.Binder.mCoreObject);
+                TerrainNode.TerrainCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerTerrain.Binder.mCoreObject);
             }
         }
 
@@ -168,13 +168,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             //}
 
             var mdfType = Rtti.UTypeDesc.TypeOf(typeof(UTerrainMdfQueue));
-            var tMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
+            var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
             tMaterials[0] = terrain.Material;
 
-            var tWireFrameMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
+            var tWireFrameMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
             tWireFrameMaterials[0] = (terrain as UTerrainSystem).WireFrameMaterial;
 
-            var twMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
+            var twMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
             twMaterials[0] = terrain.WaterMaterial;
 
             TerrainMesh = new Graphics.Mesh.TtMesh[terrain.GridMipLevels.Length];
@@ -283,7 +283,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 mMesh.IsAcceptShadow = value;
             }
         }
-        public void Tick(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
+        public void Tick(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             if (TerrainMesh == null)
                 return;

@@ -4,10 +4,10 @@ using System.Text;
 
 namespace EngineNS.Bricks.Particle
 {
-    public class UNebulaShader
+    public class TtNebulaShader
     {
         public static readonly Vector3ui Dispatch_SetupDimArray1 = new Vector3ui(32, 1, 1);
-        public NxRHI.UComputeEffect Particle_Update;
+        public NxRHI.TtComputeEffect Particle_Update;
 
         public TtEmitter Emitter;
         public RName NebulaName;
@@ -16,7 +16,7 @@ namespace EngineNS.Bricks.Particle
         public NxRHI.UShaderCode HLSLCode;
         public class UNebulaInclude : EngineNS.Editor.ShaderCompiler.UHLSLInclude
         {
-            public UNebulaShader Host;
+            public TtNebulaShader Host;
             public override unsafe NxRHI.FShaderCode* GetHLSLCode(string includeName, out bool bIncluded)
             {
                 if (includeName.EndsWith("/NebulaModifierDefine"))
@@ -57,10 +57,10 @@ namespace EngineNS.Bricks.Particle
             CBufferVar = new NxRHI.UShaderCode();
             CBufferVar.TextCode = cbVar;
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var incProvider = new UNebulaInclude();
             incProvider.Host = this;
-            Particle_Update = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/Particle/Particle.compute", RName.ERNameType.Engine),
+            Particle_Update = await TtEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(RName.GetRName("Shaders/Bricks/Particle/Particle.compute", RName.ERNameType.Engine),
                 "CS_Particle_Update", NxRHI.EShaderType.SDT_ComputeShader, null, defines, incProvider);
 
             return true;
@@ -68,9 +68,9 @@ namespace EngineNS.Bricks.Particle
     }
     public class UNebulaShaderManager
     {
-        public Dictionary<Hash160, UNebulaShader> Shaders { get; } = new Dictionary<Hash160, UNebulaShader>();
+        public Dictionary<Hash160, TtNebulaShader> Shaders { get; } = new Dictionary<Hash160, TtNebulaShader>();
     }
-    public class UNebulaTemplateManager : UModule<UEngine>
+    public class UNebulaTemplateManager : UModule<TtEngine>
     {
         public uint ShaderRandomPoolSize = 65535;
         public NxRHI.UBuffer RandomPoolBuffer;
@@ -83,11 +83,11 @@ namespace EngineNS.Bricks.Particle
         {
             return ((float)mRandom.NextDouble() - 0.5f) * 2.0f;
         }
-        public override async System.Threading.Tasks.Task<bool> Initialize(UEngine host)
+        public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine host)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
             
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             unsafe
             {
                 var bfDesc = new NxRHI.FBufferDesc();
@@ -156,10 +156,10 @@ namespace EngineNS.Bricks.Particle
                     var hlslDefine = defineCode + j.GetParametersDefine();
                     var hlsl = emitterCode + j.GetHLSL();
                     var hash = Hash160.CreateHash160(hlslVar + hlslDefine + hlsl);
-                    UNebulaShader shader;
+                    TtNebulaShader shader;
                     if (NebulaShaderManager.Shaders.TryGetValue(hash, out shader) == false)
                     {
-                        shader = new UNebulaShader();
+                        shader = new TtNebulaShader();
                         await shader.Init(hash, particle.AssetName, i, hlslVar, hlslDefine, hlsl);
                         NebulaShaderManager.Shaders.Add(hash, shader);
                     }
@@ -173,7 +173,7 @@ namespace EngineNS.Bricks.Particle
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public Bricks.Particle.UNebulaTemplateManager NebulaTemplateManager
         {

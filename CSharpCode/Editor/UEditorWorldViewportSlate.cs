@@ -10,7 +10,7 @@ namespace EngineNS.Editor
         public UEditorWorldViewportSlate(bool regRoot)
         {
             if (regRoot)
-                UEngine.RootFormManager.RegRootForm(this);
+                TtEngine.RootFormManager.RegRootForm(this);
             CameraController = new Controller.EditorCameraController();
             Title = "WorldEditor";
         }
@@ -29,7 +29,7 @@ namespace EngineNS.Editor
                 this.ShowBoundVolumes(true, true, node);
             }
 
-            var app = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+            var app = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
             if (app != null)
             {
                 app.mMainInspector.PropertyGrid.Target = proxy;

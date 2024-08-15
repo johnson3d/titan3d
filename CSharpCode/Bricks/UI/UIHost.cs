@@ -67,7 +67,7 @@ namespace EngineNS.UI
 
                 mWindowSize = value;
                 SizeF tagDesignSize;
-                mDPIScale = UEngine.Instance.UIManager.Config.GetDPIScaleAndDesignSize(mWindowSize.Width, mWindowSize.Height, out tagDesignSize);
+                mDPIScale = TtEngine.Instance.UIManager.Config.GetDPIScaleAndDesignSize(mWindowSize.Width, mWindowSize.Height, out tagDesignSize);
                 var newRect = new RectangleF(0, 0, tagDesignSize.Width, tagDesignSize.Height);
                 SetDesignRect(in newRect, true);
                 var childrenCount = VisualTreeHelper.GetChildrenCount(this);
@@ -102,7 +102,7 @@ namespace EngineNS.UI
 
         public TtUIHost()
         {
-            WindowSize = UEngine.Instance.UIManager.Config.DefaultDesignRect.Size;
+            WindowSize = TtEngine.Instance.UIManager.Config.DefaultDesignRect.Size;
             BypassLayoutPolicies = true;
         }
 
@@ -196,7 +196,7 @@ namespace EngineNS.UI
                 return null;
             data.Direction = dir;
 
-            //UEngine.Instance.UIManager.DebugMousePt = mousePt;// - delta;
+            //TtEngine.Instance.UIManager.DebugMousePt = mousePt;// - delta;
             var ray = new Ray(data.Start, data.Direction);
             if (!Ray.Intersects(in ray, BoundingBox, out data.Distance))
                 return null;

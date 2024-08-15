@@ -52,7 +52,7 @@ namespace EngineNS.Graphics.Mesh
                 mIsCastShadow = value;
             }
         }
-        public UMaterialMesh MaterialMesh { get; private set; }
+        public TtMaterialMesh MaterialMesh { get; private set; }
         public uint MaterialMeshSerialId { get; private set; }
         private void CheckVersionUpdated()
         {
@@ -86,7 +86,7 @@ namespace EngineNS.Graphics.Mesh
                 {
                     ObjectFlags_2Bit &= (~1);
                 }
-                PerMeshCBuffer?.SetValue(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.ObjectFLags_2Bit, in ObjectFlags_2Bit);
+                PerMeshCBuffer?.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.ObjectFLags_2Bit, in ObjectFlags_2Bit);
             }
         }
         public bool IsUnlit
@@ -105,7 +105,7 @@ namespace EngineNS.Graphics.Mesh
                 {
                     ObjectFlags_2Bit &= (~(2));
                 }
-                PerMeshCBuffer.SetValue(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.ObjectFLags_2Bit, in ObjectFlags_2Bit);
+                PerMeshCBuffer.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.ObjectFLags_2Bit, in ObjectFlags_2Bit);
             }
         }
         public NxRHI.UCbView PerMeshCBuffer 
@@ -114,8 +114,8 @@ namespace EngineNS.Graphics.Mesh
             {
                 if (mPerMeshCBuffer == null)
                 {
-                    var binder = UEngine.Instance.GfxDevice.CoreShaderBinder.CBufferCreator.cbPerMesh;
-                    mPerMeshCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
+                    var binder = TtEngine.Instance.GfxDevice.CoreShaderBinder.CBufferCreator.cbPerMesh;
+                    mPerMeshCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
                     if (mPerMeshCBuffer == null)
                         return null;
                     if (OnAfterCBufferCreated != null)
@@ -161,8 +161,8 @@ namespace EngineNS.Graphics.Mesh
             public int AtomIndex;
 
             public uint MaterialSerialId;
-            public Pipeline.Shader.UMaterial Material;
-            public Pipeline.Shader.UMaterial GetMeshMaterial()
+            public Pipeline.Shader.TtMaterial Material;
+            public Pipeline.Shader.TtMaterial GetMeshMaterial()
             {
                 if (SubMesh == null)
                     return null;
@@ -173,11 +173,11 @@ namespace EngineNS.Graphics.Mesh
                     return null;
                 return mtlMesh.SubMeshes[SubMesh.MeshIndex].Materials[AtomIndex];
             }            
-            public UMaterialMesh MaterialMesh 
+            public TtMaterialMesh MaterialMesh 
             {
                 get => SubMesh.Mesh.MaterialMesh;
             }
-            public UMeshPrimitives MeshPrimitives
+            public TtMeshPrimitives MeshPrimitives
             {
                 get
                 {
@@ -213,24 +213,24 @@ namespace EngineNS.Graphics.Mesh
                 public WeakReference<Pipeline.TtGraphicsBuffers.TtTargetViewIdentifier> TargetView;
                 public NxRHI.UGraphicDraw DrawCalls;
                 //不同的View上可以有不同的渲染策略，同一个模型，可以渲染在不同视口上，比如装备预览的策略可以和GameView不一样
-                public Pipeline.URenderPolicy Policy;                
+                public Pipeline.TtRenderPolicy Policy;                
             }
             public List<ViewDrawCalls> TargetViews;
             
-            private async Thread.Async.TtTask BuildDrawCall(ViewDrawCalls vdc, Pipeline.URenderPolicy policy,
+            private async Thread.Async.TtTask BuildDrawCall(ViewDrawCalls vdc, Pipeline.TtRenderPolicy policy,
                 Pipeline.TtRenderGraphNode node)
             {
-                var device = UEngine.Instance.GfxDevice;
+                var device = TtEngine.Instance.GfxDevice;
                 Graphics.Pipeline.Shader.TtGraphicsShadingEnv shading = null;
                 try
                 {
                     shading = node.GetPassShading(this);
                     if (shading != null)
                     {
-                        var effect = await UEngine.Instance.GfxDevice.EffectManager.GetEffect(shading, Material.ParentMaterial, this.MdfQueue);
+                        var effect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(shading, Material.ParentMaterial, this.MdfQueue);
                         if (effect == null)
                             return;
-                        var drawcall = UEngine.Instance.GfxDevice.RenderContext.CreateGraphicDraw();// (shading, Material.ParentMaterial, mesh.MdfQueue);
+                        var drawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateGraphicDraw();// (shading, Material.ParentMaterial, mesh.MdfQueue);
                         drawcall.SetSourceAtom(this);
                         drawcall.BindShaderEffect(effect);
                         drawcall.BindGeomMesh(this.MeshPrimitives.mCoreObject.GetGeomtryMesh());
@@ -271,9 +271,9 @@ namespace EngineNS.Graphics.Mesh
                         unsafe
                         {
                             var coreBinder = device.CoreShaderBinder;
-                            if (UEngine.Instance.GfxDevice.PerFrameCBuffer != null)
+                            if (TtEngine.Instance.GfxDevice.PerFrameCBuffer != null)
                             {
-                                drawcall.BindCBuffer(effect.BindIndexer.cbPerFrame, UEngine.Instance.GfxDevice.PerFrameCBuffer);
+                                drawcall.BindCBuffer(effect.BindIndexer.cbPerFrame, TtEngine.Instance.GfxDevice.PerFrameCBuffer);
                             }
                             if (this.SubMesh.Mesh.PerMeshCBuffer != null)
                             {
@@ -308,7 +308,7 @@ namespace EngineNS.Graphics.Mesh
                 {
                     System.Diagnostics.Debug.Assert(false);
                     Profiler.Log.WriteException(ex);
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Mesh", "policy.GetPassShading except");
+                    Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, "policy.GetPassShading except");
                 }
             }
             internal void ResetDrawCalls()
@@ -323,7 +323,7 @@ namespace EngineNS.Graphics.Mesh
                     TargetViews = null;
                 }
             }            
-            private ViewDrawCalls GetOrCreateDrawCalls(Pipeline.TtGraphicsBuffers.TtTargetViewIdentifier id, Pipeline.URenderPolicy policy)
+            private ViewDrawCalls GetOrCreateDrawCalls(Pipeline.TtGraphicsBuffers.TtTargetViewIdentifier id, Pipeline.TtRenderPolicy policy)
             {
                 ViewDrawCalls drawCalls = null;
                 //查找或者缓存TargetView
@@ -354,7 +354,7 @@ namespace EngineNS.Graphics.Mesh
             }
             [ThreadStatic]
             private static Profiler.TimeScope ScopeOnDrawCall = Profiler.TimeScopeManager.GetTimeScope(typeof(TtAtom), "OnDrawCall");
-            public unsafe virtual NxRHI.UGraphicDraw GetDrawCall(NxRHI.ICommandList cmd, Pipeline.TtGraphicsBuffers targetView, Pipeline.URenderPolicy policy,
+            public unsafe virtual NxRHI.UGraphicDraw GetDrawCall(NxRHI.ICommandList cmd, Pipeline.TtGraphicsBuffers targetView, Pipeline.TtRenderPolicy policy,
                 Pipeline.TtRenderGraphNode node)
             {
                 if (Material == null)
@@ -476,7 +476,7 @@ namespace EngineNS.Graphics.Mesh
             }
         }
         [Rtti.Meta]
-        public Pipeline.Shader.UMaterial GetMaterial(uint subMesh, uint atom)
+        public Pipeline.Shader.TtMaterial GetMaterial(uint subMesh, uint atom)
         {
             if (subMesh >= SubMeshes.Count)
                 return null;
@@ -515,7 +515,7 @@ namespace EngineNS.Graphics.Mesh
             }
             return true;
         }
-        public bool Initialize(UMaterialMesh materialMesh, Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
+        public bool Initialize(TtMaterialMesh materialMesh, Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
         {
             if (atomType == null)
                 atomType = Rtti.UTypeDesc.TypeOf(typeof(TtAtom));
@@ -549,13 +549,13 @@ namespace EngineNS.Graphics.Mesh
         }
         public async Thread.Async.TtTask<bool> Initialize(RName materialMesh, Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
         {
-            MaterialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(materialMesh);
+            MaterialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(materialMesh);
             if (MaterialMesh == null)
                 return false;
 
             return Initialize(MaterialMesh, mdfQueueType, atomType);
         }
-        public async Thread.Async.TtTask<bool> Initialize(List<RName> meshSource, List<List<Pipeline.Shader.UMaterial>> materials,
+        public async Thread.Async.TtTask<bool> Initialize(List<RName> meshSource, List<List<Pipeline.Shader.TtMaterial>> materials,
             Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
         {
             if (atomType == null)
@@ -563,10 +563,10 @@ namespace EngineNS.Graphics.Mesh
             if (atomType != Rtti.UTypeDesc.TypeOf(typeof(TtAtom)) && atomType.IsSubclassOf(typeof(TtAtom)) == false)
                 return false;
 
-            var mesh = new List<UMeshPrimitives>();
+            var mesh = new List<TtMeshPrimitives>();
             foreach(var i in meshSource)
             {
-                var tm = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(i);
+                var tm = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(i);
                 mesh.Add(tm);
             }
             if (false == UpdateMesh(mesh, materials, atomType))
@@ -579,7 +579,7 @@ namespace EngineNS.Graphics.Mesh
             return true;
         }
 
-        public bool Initialize(List<UMeshPrimitives> mesh, List<List<Pipeline.Shader.UMaterial>> materials,
+        public bool Initialize(List<TtMeshPrimitives> mesh, List<List<Pipeline.Shader.TtMaterial>> materials,
             Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
         {
             if (false == UpdateMesh(mesh, materials, atomType))
@@ -591,30 +591,30 @@ namespace EngineNS.Graphics.Mesh
             MdfQueue.Initialize(MaterialMesh);
             return true; 
         }
-        public bool Initialize(UMeshPrimitives mesh, Pipeline.Shader.UMaterial[] mats,
+        public bool Initialize(TtMeshPrimitives mesh, Pipeline.Shader.TtMaterial[] mats,
             Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
         {
             var materials = ListExtra.CreateList(mats);
-            return Initialize(new List<UMeshPrimitives>(){ mesh }, 
-                new List<List<Pipeline.Shader.UMaterial>>() { materials }, 
+            return Initialize(new List<TtMeshPrimitives>(){ mesh }, 
+                new List<List<Pipeline.Shader.TtMaterial>>() { materials }, 
                 mdfQueueType, atomType);
         }
-        public bool Initialize(UMeshPrimitives mesh, List<Pipeline.Shader.UMaterial> materials,
+        public bool Initialize(TtMeshPrimitives mesh, List<Pipeline.Shader.TtMaterial> materials,
             Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
         {
-            return Initialize(new List<UMeshPrimitives>() { mesh },
-                new List<List<Pipeline.Shader.UMaterial>>() { materials },
+            return Initialize(new List<TtMeshPrimitives>() { mesh },
+                new List<List<Pipeline.Shader.TtMaterial>>() { materials },
                 mdfQueueType, atomType);
         }
-        public async Thread.Async.TtTask<bool> Initialize(RName meshName, List<Pipeline.Shader.UMaterial> materials,
+        public async Thread.Async.TtTask<bool> Initialize(RName meshName, List<Pipeline.Shader.TtMaterial> materials,
             Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
         {
-            var mesh = await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(meshName);
-            return Initialize(new List<UMeshPrimitives>() { mesh },
-                new List<List<Pipeline.Shader.UMaterial>>() { materials },
+            var mesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(meshName);
+            return Initialize(new List<TtMeshPrimitives>() { mesh },
+                new List<List<Pipeline.Shader.TtMaterial>>() { materials },
                 mdfQueueType, atomType);
         }
-        public bool UpdateMaterial(Pipeline.Shader.UMaterial material, int subMesh = -1, Rtti.UTypeDesc atomType = null)
+        public bool UpdateMaterial(Pipeline.Shader.TtMaterial material, int subMesh = -1, Rtti.UTypeDesc atomType = null)
         {
             if(subMesh >= 0 && subMesh < MaterialMesh.SubMeshes.Count)
             {
@@ -631,7 +631,7 @@ namespace EngineNS.Graphics.Mesh
             }
             return true;
         }
-        public bool UpdateMaterial(List<Pipeline.Shader.UMaterial> materials, int subMesh = -1, Rtti.UTypeDesc atomType = null)
+        public bool UpdateMaterial(List<Pipeline.Shader.TtMaterial> materials, int subMesh = -1, Rtti.UTypeDesc atomType = null)
         {
             if(subMesh >= 0 && subMesh < MaterialMesh.SubMeshes.Count)
             {
@@ -648,7 +648,7 @@ namespace EngineNS.Graphics.Mesh
             }
             return true;
         }
-        public bool UpdateMesh(int subMesh, UMeshPrimitives mesh, Pipeline.Shader.UMaterial material, Rtti.UTypeDesc atomType = null)
+        public bool UpdateMesh(int subMesh, TtMeshPrimitives mesh, Pipeline.Shader.TtMaterial material, Rtti.UTypeDesc atomType = null)
         {
             if (atomType == null)
                 atomType = Rtti.UTypeDescGetter<TtAtom>.TypeDesc;
@@ -663,7 +663,7 @@ namespace EngineNS.Graphics.Mesh
             MeshAtomUpdate(subMesh, atomType);
             return true;
         }
-        public bool UpdateMesh(int subMesh, UMeshPrimitives mesh, List<Pipeline.Shader.UMaterial> materials, Rtti.UTypeDesc atomType = null)
+        public bool UpdateMesh(int subMesh, TtMeshPrimitives mesh, List<Pipeline.Shader.TtMaterial> materials, Rtti.UTypeDesc atomType = null)
         {
             if (atomType == null)
                 atomType = Rtti.UTypeDescGetter<TtAtom>.TypeDesc;
@@ -714,13 +714,13 @@ namespace EngineNS.Graphics.Mesh
                 }
             }
         }
-        public bool UpdateMesh(List<UMeshPrimitives> mesh, List<List<Pipeline.Shader.UMaterial>> materials, Rtti.UTypeDesc atomType = null)
+        public bool UpdateMesh(List<TtMeshPrimitives> mesh, List<List<Pipeline.Shader.TtMaterial>> materials, Rtti.UTypeDesc atomType = null)
         {
             if (mesh.Count != materials.Count)
                 return false;
             if (MaterialMesh == null || MaterialMesh.SubMeshes.Count != mesh.Count)
             {
-                MaterialMesh = new UMaterialMesh();
+                MaterialMesh = new TtMaterialMesh();
                 MaterialMesh.Initialize(mesh, materials);
                 MaterialMeshSerialId = MaterialMesh.SerialId;
 
@@ -746,7 +746,7 @@ namespace EngineNS.Graphics.Mesh
         {
             if (PerMeshCBuffer == null || world == null)
                 return;
-            var tm = PerMeshCBuffer.GetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
+            var tm = PerMeshCBuffer.GetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
             var realPos = WorldLocation - world.CameraOffset;
             tm.Translation = realPos.ToSingleVector3();
             this.DirectSetWorldMatrix(in tm);
@@ -794,15 +794,15 @@ namespace EngineNS.Graphics.Mesh
                 {
                     if (saved != null)
                         saved();
-                    PerMeshCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix, in savedTM);
+                    PerMeshCBuffer.SetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix, in savedTM);
                     var inv = Matrix.Invert(in savedTM);
-                    PerMeshCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrixInverse, in inv);
+                    PerMeshCBuffer.SetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrixInverse, in inv);
                 };
                 return;
             }   
-            PerMeshCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix, in tm);
+            PerMeshCBuffer.SetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix, in tm);
             var inv = Matrix.Invert(in tm);
-            PerMeshCBuffer.SetMatrix(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrixInverse, in inv);
+            PerMeshCBuffer.SetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrixInverse, in inv);
         }
         public void SetValue<T>(NxRHI.FShaderVarDesc index, in T value, int elem = 0) where T : unmanaged
         {
@@ -832,11 +832,11 @@ namespace EngineNS.Graphics.Mesh
                     if (saved != null)
                         saved();
 
-                    PerMeshCBuffer.SetValue(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.HitProxyId, in savedValue);
+                    PerMeshCBuffer.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.HitProxyId, in savedValue);
                 };
                 return;
             }
-            PerMeshCBuffer.SetValue(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.HitProxyId, in value);
+            PerMeshCBuffer.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.HitProxyId, in value);
         }
     }
 }

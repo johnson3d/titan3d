@@ -145,8 +145,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public EPixelShaderInput[] GetPSNeedInputs();
         public unsafe NxRHI.FShaderCode* GetHLSLCode(string includeName, string includeOriName);
         public string GetUniqueText();
-        public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh);
-        public void OnDrawCall(TtMdfQueueBase mdfQueue, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom);
+        public void Initialize(Graphics.Mesh.TtMaterialMesh materialMesh);
+        public void OnDrawCall(TtMdfQueueBase mdfQueue, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom);
     }
 
     public abstract class TtMdfQueueBase : AuxPtrType<IMdfQueue>, IShaderCodeProvider
@@ -165,7 +165,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             Modifiers.Clear();
             base.Dispose();
         }
-        public virtual void Initialize(Graphics.Mesh.UMaterialMesh materialMesh)
+        public virtual void Initialize(Graphics.Mesh.TtMaterialMesh materialMesh)
         {
             foreach (var i in Modifiers)
             {
@@ -314,9 +314,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             OnDrawCallCallback = mdf.OnDrawCallCallback;
         }
         
-        public delegate void FOnDrawCall(NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom);
+        public delegate void FOnDrawCall(NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom);
         public FOnDrawCall OnDrawCallCallback = null;
-        public virtual void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public virtual void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             if (OnDrawCallCallback != null)
                 OnDrawCallCallback(drawcall, policy, atom);

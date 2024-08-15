@@ -8,7 +8,7 @@ namespace EngineNS.EGui.Controls
     {
         public UItemDragging()
         {
-            UEngine.RootFormManager.RegRootForm(this);
+            TtEngine.RootFormManager.RegRootForm(this);
         }
 
         public async Thread.Async.TtTask<bool> Initialize()
@@ -18,7 +18,7 @@ namespace EngineNS.EGui.Controls
         }
         public void Dispose() 
         {
-            UEngine.RootFormManager.UnregRootForm(this);
+            TtEngine.RootFormManager.UnregRootForm(this);
         }
         protected bool mVisible = true;
         public bool Visible { get => mVisible; set => mVisible = value; }

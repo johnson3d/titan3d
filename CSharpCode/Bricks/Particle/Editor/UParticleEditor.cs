@@ -66,7 +66,7 @@ namespace EngineNS.Bricks.Particle.Editor
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -226,10 +226,10 @@ namespace EngineNS.Bricks.Particle.Editor
         public float LeftWidth = 0;
 
         public TtParticleGraph ParticleGraph { get => NebulaParticle.ParticleGraph; }
-        public UGraphRenderer GraphRenderer { get; } = new UGraphRenderer();
+        public TtGraphRenderer GraphRenderer { get; } = new TtGraphRenderer();
         //public CodeBuilder.UClassLayoutBuilder ParticleStructBuilder { get; } = new CodeBuilder.UClassLayoutBuilder();
         bool IsStarting = false;
-        protected async System.Threading.Tasks.Task Initialize_PreviewParticle(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewParticle(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -237,7 +237,7 @@ namespace EngineNS.Bricks.Particle.Editor
 
             var nebulaData = new Bricks.Particle.TtNebulaNode.TtNebulaNodeData();
             nebulaData.NebulaName = AssetName;
-            nebulaData.NebulaParticle = await UEngine.Instance.NebulaTemplateManager.CreateParticle(AssetName);
+            nebulaData.NebulaParticle = await TtEngine.Instance.NebulaTemplateManager.CreateParticle(AssetName);
             var meshNode = new Bricks.Particle.TtNebulaNode();
             await meshNode.InitializeNode(viewport.World, nebulaData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
             meshNode.Parent = viewport.World.Root;
@@ -251,7 +251,7 @@ namespace EngineNS.Bricks.Particle.Editor
             NubulaNode = meshNode;
 
             //var materials = new Graphics.Pipeline.Shader.UMaterial[1];
-            //materials[0] = UEngine.Instance.GfxDevice.MaterialManager.PxDebugMaterial;
+            //materials[0] = TtEngine.Instance.GfxDevice.MaterialManager.PxDebugMaterial;
             //if (materials[0] == null)
             //    return;
             //var mesh = new Graphics.Mesh.TtMesh();
@@ -302,9 +302,9 @@ namespace EngineNS.Bricks.Particle.Editor
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"NebulaPreview:{AssetName}";
             PreviewViewport.OnInitialize = Initialize_PreviewParticle;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
+            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
 
-            UEngine.Instance.TickableManager.AddTickable(this);
+            TtEngine.Instance.TickableManager.AddTickable(this);
 
             //ParticleGraph.ResetGraph();
             ParticleGraph.OnChangeGraph = (UNodeGraph graph) =>
@@ -320,7 +320,7 @@ namespace EngineNS.Bricks.Particle.Editor
         public void OnCloseEditor()
         {
             ParticleGraph.Editor = null;
-            UEngine.Instance.TickableManager.RemoveTickable(this);
+            TtEngine.Instance.TickableManager.RemoveTickable(this);
             Dispose();
         }
         public void OnEvent(in Bricks.Input.Event e)

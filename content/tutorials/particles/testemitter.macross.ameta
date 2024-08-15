@@ -3,7 +3,7 @@
   <AssetId Type="System.Guid@Unknown" Value="b778ef00-25fd-47f3-ac2a-e1c2f71056fd" />
   <BaseTypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Particle.TtEmitterMacross@EngineCore" />
   <Description Type="System.String@Unknown" Value="MacrossType:EngineNS.Bricks.Particle.TtEmitterMacross@EngineCore&#xA;" />
-  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">

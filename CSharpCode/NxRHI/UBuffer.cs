@@ -141,7 +141,7 @@ namespace EngineNS.NxRHI
         }
         public NxRHI.IBuffer CreateReadable(int subRes, EngineNS.NxRHI.ICopyDraw cpDraw)
         {
-            return mCoreObject.CreateReadable(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, subRes, cpDraw);
+            return mCoreObject.CreateReadable(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, subRes, cpDraw);
         }
         public void TransitionTo(ICommandList cmd, EGpuResourceState state)
         {
@@ -165,20 +165,20 @@ namespace EngineNS.NxRHI
         public void Initialize(uint size, EngineNS.NxRHI.EBufferType type = EBufferType.BFT_Vertex | EBufferType.BFT_Index,
             EngineNS.NxRHI.EGpuUsage usage = EGpuUsage.USAGE_DEFAULT, EngineNS.NxRHI.ECpuAccess cpuAccess = (ECpuAccess)0)
         {
-            mCoreObject.Initialize(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, size, type, usage, cpuAccess);
+            mCoreObject.Initialize(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, size, type, usage, cpuAccess);
         }
         public uint Alloc(uint size, bool bGrow)
         {
-            return mCoreObject.Alloc(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, size, bGrow);
+            return mCoreObject.Alloc(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, size, bGrow);
         }
         public UVbView AllocVBV(uint stride, uint size, bool bGrow)
         {
-            var ptr = mCoreObject.AllocVBV(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, stride, size, bGrow);
+            var ptr = mCoreObject.AllocVBV(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, stride, size, bGrow);
             return new UVbView(ptr);
         }
         public UIbView AllocIBV(uint stride, uint size, bool bGrow)
         {
-            var ptr = mCoreObject.AllocIBV(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, stride, size, bGrow);
+            var ptr = mCoreObject.AllocIBV(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, stride, size, bGrow);
             return new UIbView(ptr);
         }
         public void Reset()
@@ -199,7 +199,7 @@ namespace EngineNS.NxRHI
         //    texDesc.Width = w;
         //    texDesc.Height = h;
         //    texDesc.Format = format;
-        //    return UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in texDesc);
+        //    return TtEngine.Instance.GfxDevice.RenderContext.CreateTexture(in texDesc);
         //}
         public UTexture(ITexture ptr)
         {
@@ -232,7 +232,7 @@ namespace EngineNS.NxRHI
         }
         public NxRHI.IBuffer CreateReadable(int subRes, EngineNS.NxRHI.ICopyDraw cpDraw)
         {
-            return mCoreObject.CreateReadable(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, subRes, cpDraw);
+            return mCoreObject.CreateReadable(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, subRes, cpDraw);
         }
         public void TransitionTo(ICommandList cmd, EGpuResourceState state)
         {
@@ -244,7 +244,7 @@ namespace EngineNS.NxRHI
         }
         public unsafe UGpuResource CreateBufferData(uint mipIndex, ECpuAccess cpuAccess, ref EngineNS.NxRHI.FSubResourceFootPrint outFootPrint)
         {
-            var device = UEngine.Instance.GfxDevice.RenderContext;
+            var device = TtEngine.Instance.GfxDevice.RenderContext;
             var ptr = mCoreObject.CreateBufferData(device.mCoreObject, mipIndex, cpuAccess, ref outFootPrint);
             if (!ptr.IsValidPointer)
                 return null;
@@ -307,7 +307,7 @@ namespace EngineNS.NxRHI
                     switch (mode)
                     {
                         case EUpdateMode.Auto:
-                            mCoreObject.SetValue(binder, p, sizeof(T), bFlush, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
+                            mCoreObject.SetValue(binder, p, sizeof(T), bFlush, TtEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
                             break;
                         case EUpdateMode.Immediately:
                             mCoreObject.SetValue(binder, p, sizeof(T), bFlush, new FCbvUpdater());
@@ -325,7 +325,7 @@ namespace EngineNS.NxRHI
                     switch (mode)
                     {
                         case EUpdateMode.Auto:
-                            mCoreObject.SetArrrayValue(binder, elemIndex, p, sizeof(T), bFlush, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
+                            mCoreObject.SetArrrayValue(binder, elemIndex, p, sizeof(T), bFlush, TtEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
                             break;
                         case EUpdateMode.Immediately:
                             mCoreObject.SetArrrayValue(binder, elemIndex, p, sizeof(T), bFlush, new FCbvUpdater());

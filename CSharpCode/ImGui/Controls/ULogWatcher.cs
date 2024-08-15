@@ -8,7 +8,7 @@ namespace EngineNS.EGui.Controls
     {
         public ULogWatcher()
         {
-            UEngine.RootFormManager.RegRootForm(this);
+            TtEngine.RootFormManager.RegRootForm(this);
             Profiler.Log.OnReportLog += OnReportLog;
 
             UpdateCategoryFilters();
@@ -133,7 +133,7 @@ namespace EngineNS.EGui.Controls
                     }
                     else
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Commands", $"Command {cmdName} is not found");
+                        Profiler.Log.WriteLine<Profiler.TtDebugLogCategory>(Profiler.ELogTag.Info, "Commands", $"Command {cmdName} is not found");
                     }
                     CommandText = "";
                 }

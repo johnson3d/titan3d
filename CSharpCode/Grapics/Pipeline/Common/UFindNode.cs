@@ -60,11 +60,11 @@ namespace EngineNS.Graphics.Pipeline.Common
             ResultPinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(ResultPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         }
-        public override async Task Initialize(URenderPolicy policy, string debugName)
+        public override async Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
         }
-        public override void BeforeTickLogic(URenderPolicy policy)
+        public override void BeforeTickLogic(TtRenderPolicy policy)
         {
             if (string.IsNullOrEmpty(ProxyNodeName))
                 return;
@@ -74,13 +74,13 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             if (mNode == null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Graphics", $"{ProxyNodeName} is not found");
+                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Error, $"{ProxyNodeName} is not found");
                 return;
             }
             var pin = mNode.FindOutput(ProxyPinName);
             if (pin == null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "Graphics", $"{ProxyNodeName}:{ProxyPinName} is not found");
+                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Error, $"{ProxyNodeName}:{ProxyPinName} is not found");
                 return;
             }
             var refAttachement = RenderGraph.AttachmentCache.FindAttachement(pin.Attachement.AttachmentName);

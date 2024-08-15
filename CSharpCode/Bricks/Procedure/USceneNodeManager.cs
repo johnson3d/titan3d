@@ -150,7 +150,7 @@ namespace EngineNS.Bricks.Procedure
 }
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public EngineNS.Bricks.Procedure.PgcSceneNodeManager PgcSceneNodeManager { get; } = new Bricks.Procedure.PgcSceneNodeManager();
     }

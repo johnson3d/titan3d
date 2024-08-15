@@ -4,7 +4,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.RenderPolicyEditor
 {
-    public class UPolicyEditor : Editor.IAssetEditor, IO.ISerializer, IRootForm
+    public class TtPolicyEditor : Editor.IAssetEditor, IO.ISerializer, IRootForm
     {
         public RName AssetName { get; set; }
         protected bool mVisible = true;
@@ -14,17 +14,17 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         protected ImGuiWindowClass mDockKeyClass;
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
-        public URenderPolicyAsset PolicyGraph { get; private set; }
-        public UGraphRenderer GraphRenderer { get; } = new UGraphRenderer();
+        public TtRenderPolicyAsset PolicyGraph { get; private set; }
+        public TtGraphRenderer GraphRenderer { get; } = new TtGraphRenderer();
         public EGui.Controls.PropertyGrid.PropertyGrid NodePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public float LeftWidth = 0;
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
-        public UPolicyEditor()
+        public TtPolicyEditor()
         {
 
         }
-        ~UPolicyEditor()
+        ~TtPolicyEditor()
         {
             Dispose();
         }
@@ -62,7 +62,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
 
             IsStarting = true;
 
-            PolicyGraph = URenderPolicyAsset.LoadAsset(name);
+            PolicyGraph = TtRenderPolicyAsset.LoadAsset(name);
             PolicyGraph.PolicyGraph.PolicyEditor = this;
 
             AssetName = name;
@@ -98,7 +98,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -190,12 +190,12 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         {
             PolicyGraph.SaveAssetTo(AssetName);
 
-            //Editor.USnapshot.Save(AssetName, PolicyGraph.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+            //Editor.USnapshot.Save(AssetName, PolicyGraph.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
         }
         private async System.Threading.Tasks.Task SetCurrentPolicy()
         {
             /*
-            var mainWindow = UEngine.Instance.GfxDevice.MainWindow as EngineNS.Editor.UMainEditorApplication;
+            var mainWindow = TtEngine.Instance.GfxDevice.MainWindow as EngineNS.Editor.UMainEditorApplication;
             var saved = mainWindow.WorldViewportSlate.RenderPolicy;
             //var policy = new Graphics.Pipeline.Mobile.UMobileEditorFSPolicy();                                
             //await policy.Initialize(saved.DefaultCamera);
@@ -215,16 +215,16 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             saved.Cleanup();
             */
 
-            UEngine.Instance.Config.MainRPolicyName = AssetName;
+            TtEngine.Instance.Config.MainRPolicyName = AssetName;
         }
         private async System.Threading.Tasks.Task Compile()
         {
-            var policy = new Graphics.Pipeline.URenderPolicy();
+            var policy = new Graphics.Pipeline.TtRenderPolicy();
             foreach (UPolicyNode i in PolicyGraph.PolicyGraph.Nodes)
             {
                 if (false == policy.RegRenderNode(i.NodeId, i.GraphNode))
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "PolicyEditor", $"Node{i.Name} regist failed");
+                    Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, $"Node{i.Name} regist failed");
                 }
             }
             foreach (var i in PolicyGraph.PolicyGraph.Linkers)

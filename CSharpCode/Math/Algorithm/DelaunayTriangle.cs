@@ -644,7 +644,7 @@ namespace EngineNS.Algorithm
                     var triPtr = Triangles.UnsafeGetElementAddress(triIdx);
                     if((*triPtr).Tet1 != -1)
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Fatal, "EdgeMesh", "Try to create edge mesh");
+                        Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Fatal, "Try to create edge mesh");
                         return -1;
                     }
                     (*triPtr).Tet1 = tetIdx;
@@ -664,7 +664,7 @@ namespace EngineNS.Algorithm
                     var triPtr = Triangles.UnsafeGetElementAddress(triIdx);
                     if((*triPtr).Tet1 != -1)
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Fatal, "EdgeMesh", "Try to create edge mesh");
+                        Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Fatal, "Try to create edge mesh");
                         return -1;
                     }
                     (*triPtr).Tet1 = tetIdx;
@@ -684,7 +684,7 @@ namespace EngineNS.Algorithm
                     var triPtr = Triangles.UnsafeGetElementAddress(triIdx);
                     if ((*triPtr).Tet1 != -1)
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Fatal, "EdgeMesh", "Try to create edge mesh");
+                        Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Fatal, "Try to create edge mesh");
                         return -1;
                     }
                     (*triPtr).Tet1 = tetIdx;
@@ -704,7 +704,7 @@ namespace EngineNS.Algorithm
                     var triPtr = Triangles.UnsafeGetElementAddress(triIdx);
                     if ((*triPtr).Tet1 != -1)
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Fatal, "EdgeMesh", "Try to create edge mesh");
+                        Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Fatal, "Try to create edge mesh");
                         return -1;
                     }
                     (*triPtr).Tet1 = tetIdx;
@@ -1149,7 +1149,7 @@ namespace EngineNS.Algorithm
                     Edge* tempEdge = Edges.UnsafeGetElementAddress(tempEdgeIdx);
                     if ((*tempEdge).Tri1 != -1)
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Fatal, "EdgeMesh", "Try to create edge mesh");
+                        Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Fatal, "Try to create edge mesh");
                         return -1;
                     }
                     (*tempEdge).Tri1 = triIdx;
@@ -1169,7 +1169,7 @@ namespace EngineNS.Algorithm
                     Edge* tempEdge = Edges.UnsafeGetElementAddress(tempEdgeIdx);
                     if ((*tempEdge).Tri1 != -1)
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Fatal, "EdgeMesh", "Try to create edge mesh");
+                        Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Fatal, "Try to create edge mesh");
                         return -1;
                     }
                     (*tempEdge).Tri1 = triIdx;
@@ -1189,7 +1189,7 @@ namespace EngineNS.Algorithm
                     Edge* tempEdge = Edges.UnsafeGetElementAddress(tempEdgeIdx);
                     if ((*tempEdge).Tri1 != -1)
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Fatal, "EdgeMesh", "Try to create edge mesh");
+                        Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Fatal, "Try to create edge mesh");
                         return -1;
                     }
                     (*tempEdge).Tri1 = triIdx;

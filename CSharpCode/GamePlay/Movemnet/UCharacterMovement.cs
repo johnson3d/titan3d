@@ -9,7 +9,7 @@ namespace EngineNS.GamePlay.Movemnet
     public class UCharacterMovement : UMovement
     {
 
-        protected override void UpdatePlacement(UWorld world, URenderPolicy policy)
+        protected override void UpdatePlacement(UWorld world, TtRenderPolicy policy)
         {
             var settedLinearVelocity = ConsumeSettedLinearVelocity();
             var settedAngularVelocity = ConsumeSettedAngularVelocity();

@@ -211,7 +211,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 mCurrentPermutationId = FPermutationId.BitOrValue(mCurrentPermutationId, in i.Value);
             }
         }
-        public virtual bool IsValidPermutation(TtMdfQueueBase mdfQueue, UMaterial mtl)
+        public virtual bool IsValidPermutation(TtMdfQueueBase mdfQueue, TtMaterial mtl)
         {
             return true;
         }
@@ -277,8 +277,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 EPixelShaderInput.PST_SpecialData,
             };
         }
-        public virtual void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall) { }
-        public virtual void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public virtual void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall) { }
+        public virtual void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
 
         }
@@ -286,8 +286,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
     public abstract class TtComputeShadingEnv : TtShadingEnv
     {
         public virtual string MainName { get; set; }
-        private NxRHI.UComputeEffect mCurrentEffect;
-        public NxRHI.UComputeEffect CurrentEffect
+        private NxRHI.TtComputeEffect mCurrentEffect;
+        public NxRHI.TtComputeEffect CurrentEffect
         {
             get => mCurrentEffect;
         }
@@ -307,17 +307,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         internal override async Thread.Async.TtTask<bool> OnCreateEffect()
         {
-            mCurrentEffect = await UEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(CodeName,
+            mCurrentEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetComputeEffect(CodeName,
                 MainName, NxRHI.EShaderType.SDT_ComputeShader, this, null, null);
             System.Diagnostics.Debug.Assert(this.mCurrentPermutationId == CurrentEffect.PermutationId);
 
             return true;
         }
-        public virtual void OnDrawCall(NxRHI.UComputeDraw drawcall, URenderPolicy policy)
+        public virtual void OnDrawCall(NxRHI.UComputeDraw drawcall, TtRenderPolicy policy)
         {
 
         }
-        public void SetDrawcallDispatch(object tagObject, URenderPolicy policy, NxRHI.UComputeDraw drawcall, uint x, uint y, uint z, bool bRoundupXYZ)
+        public void SetDrawcallDispatch(object tagObject, TtRenderPolicy policy, NxRHI.UComputeDraw drawcall, uint x, uint y, uint z, bool bRoundupXYZ)
         {
             drawcall.TagObject = tagObject;
             
@@ -335,7 +335,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             this.OnDrawCall(drawcall, policy);
         }
-        public void SetDrawcallIndirectDispatch(object tagObject, URenderPolicy policy, NxRHI.UComputeDraw drawcall, NxRHI.UBuffer indirectBuffer)
+        public void SetDrawcallIndirectDispatch(object tagObject, TtRenderPolicy policy, NxRHI.UComputeDraw drawcall, NxRHI.UBuffer indirectBuffer)
         {
             drawcall.TagObject = tagObject;
             drawcall.SetComputeEffect(CurrentEffect);
@@ -368,7 +368,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 };
         }
     }
-    public class TtShadingEnvManager : UModule<UEngine>
+    public class TtShadingEnvManager : UModule<TtEngine>
     {
         public Dictionary<Type, TtShadingEnv> Shadings { get; } = new Dictionary<Type, TtShadingEnv>();
         public TtShadingEnv GetShadingEnv(Type name)
@@ -408,7 +408,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            //return await UEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
+            //return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
             return null;
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
@@ -472,7 +472,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public IO.IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
@@ -484,10 +484,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (ameta != null)
             {
                 UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta();
+                ameta.SaveAMeta(this);
             }
             IO.TtFileManager.SaveObjectToXml(name.Address, this);
-            UEngine.Instance.SourceControlModule.AddFile(name.Address, true);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
         }
         public static TtMacrossShadingEnv LoadAsset(RName rn)
         {
@@ -666,7 +666,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -833,7 +833,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public Graphics.Pipeline.Shader.TtShadingEnvManager ShadingEnvManager { get; } = new Graphics.Pipeline.Shader.TtShadingEnvManager();
     }
@@ -842,17 +842,17 @@ namespace EngineNS
     {
         public partial class UGraphicDraw
         {
-            public Graphics.Pipeline.Shader.UEffect Effect { get; private set; }
+            public Graphics.Pipeline.Shader.TtEffect Effect { get; private set; }
             internal Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId PermutationId;
             public bool IsPermutationChanged()
             {
                 var shading = Effect.ShadingEnv;
                 return PermutationId != shading.mCurrentPermutationId;
             }
-            public void BindShaderEffect(Graphics.Pipeline.Shader.UEffect effect)
+            public void BindShaderEffect(Graphics.Pipeline.Shader.TtEffect effect)
             {
                 Effect = effect;
-                mCoreObject.BindShaderEffect(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, effect.ShaderEffect.mCoreObject);
+                mCoreObject.BindShaderEffect(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, effect.ShaderEffect.mCoreObject);
             }
         }
     }

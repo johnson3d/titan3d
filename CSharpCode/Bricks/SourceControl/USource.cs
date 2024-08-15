@@ -70,7 +70,7 @@ namespace EngineNS.Bricks.SourceControl
         //}
     }
 
-    public class USourceControlModule : UModule<UEngine>
+    public class USourceControlModule : UModule<TtEngine>
     {
         public USource Source { get; private set; } = null;
         public List<string> PreAddFiles = new List<string>();
@@ -78,11 +78,11 @@ namespace EngineNS.Bricks.SourceControl
         {
             return 2;
         }
-        public override async System.Threading.Tasks.Task<bool> Initialize(UEngine host)
+        public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine host)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            var serverPlugin = UEngine.Instance.PluginModuleManager.GetPluginModule("SourceGit");
+            var serverPlugin = TtEngine.Instance.PluginModuleManager.GetPluginModule("SourceGit");
             if (serverPlugin != null)
                 Source = serverPlugin.GetPluginObject<USource>();
 
@@ -135,7 +135,7 @@ namespace EngineNS.Bricks.SourceControl
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public Bricks.SourceControl.USourceControlModule SourceControlModule { get; } = new Bricks.SourceControl.USourceControlModule();
     }

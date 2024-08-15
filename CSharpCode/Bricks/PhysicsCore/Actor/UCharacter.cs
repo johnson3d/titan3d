@@ -18,9 +18,9 @@ namespace EngineNS.GamePlay.Character
             desc.mCoreObject.SetCapsuleRadius(radius);
             Bricks.PhysicsCore.TtPhyMaterial mtl;
             if (this.PlayerData.PxMaterial!=null)
-                mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(this.PlayerData.PxMaterial);
+                mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(this.PlayerData.PxMaterial);
             else
-                mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
+                mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
             desc.SetMaterial(mtl);
             PhyController = scene.PxSceneMB.PxScene.CreateCapsuleController(desc.mCoreObject);
             if (PhyController == null)

@@ -331,7 +331,7 @@ namespace EngineNS.Rtti
             var result = UTypeDescManager.Instance.GetTypeDescFromString(typeStr);
             if (result == null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Rtti", $"Typeof failed:{typeStr}");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Typeof failed:{typeStr}");
             }
             return result;
         }
@@ -350,7 +350,7 @@ namespace EngineNS.Rtti
             var result = UTypeDescManager.Instance.GetTypeDescFromFullName(fullName);
             if (result == null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Rtti", $"TypeOfFullName failed:{fullName}");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"TypeOfFullName failed:{fullName}");
             }
             return result;
         }

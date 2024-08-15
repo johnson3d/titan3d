@@ -14,7 +14,7 @@ namespace EngineNS.Bricks.Particle
         }
         public string Name;
         public List<TtEffector> Effectors { get; } = new List<TtEffector>();
-        public UNebulaShader Shader { get; set; }
+        public TtNebulaShader Shader { get; set; }
         public NxRHI.UCbView CBuffer;
         public NxRHI.UComputeDraw mParticleUpdateDrawcall;
 
@@ -22,14 +22,14 @@ namespace EngineNS.Bricks.Particle
         {
             TtGpuParticleResources gpuResources = emitter.GpuResources;
 
-            var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+            var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
             if (mParticleUpdateDrawcall == null)
             {
                 mParticleUpdateDrawcall = rc.CreateComputeDraw();
                 coreBinder.CBPerParticle.UpdateFieldVar(Shader.Particle_Update.mComputeShader, "cbParticleDesc");
                 CBuffer = rc.CreateCBV(coreBinder.CBPerParticle.Binder.mCoreObject);
 
-                CBuffer.SetValue(coreBinder.CBPerParticle.ParticleRandomPoolSize, UEngine.Instance.NebulaTemplateManager.ShaderRandomPoolSize);
+                CBuffer.SetValue(coreBinder.CBPerParticle.ParticleRandomPoolSize, TtEngine.Instance.NebulaTemplateManager.ShaderRandomPoolSize);
                 var dpDesc = emitter.Mesh.SubMeshes[0].Atoms[0].GetMeshAtomDesc(0);
                 CBuffer.SetValue(coreBinder.CBPerParticle.Draw_IndexCountPerInstance, dpDesc->m_NumPrimitives * 3);
                 CBuffer.SetValue(coreBinder.CBPerParticle.Draw_StartIndexLocation, dpDesc->m_StartIndex);
@@ -45,7 +45,7 @@ namespace EngineNS.Bricks.Particle
                 mParticleUpdateDrawcall.SetComputeEffect(Shader.Particle_Update);
 
                 mParticleUpdateDrawcall.BindCBuffer("cbParticleDesc", CBuffer);
-                mParticleUpdateDrawcall.BindSrv("bfRandomPool", UEngine.Instance.NebulaTemplateManager.RandomPoolSrv);
+                mParticleUpdateDrawcall.BindSrv("bfRandomPool", TtEngine.Instance.NebulaTemplateManager.RandomPoolSrv);
 
                 mParticleUpdateDrawcall.BindUav("bfParticles", gpuResources.ParticlesBuffer.Uav);
                 mParticleUpdateDrawcall.BindUav("bfEmitterData", gpuResources.SystemDataBuffer.Uav);
@@ -57,8 +57,8 @@ namespace EngineNS.Bricks.Particle
                 mParticleUpdateDrawcall.BindIndirectDispatchArgsBuffer(gpuResources.DispatchArgBuffer);
             }
 
-            CBuffer.SetValue(coreBinder.CBPerParticle.ParticleElapsedTime, UEngine.Instance.ElapsedSecond);
-            CBuffer.SetValue(coreBinder.CBPerParticle.ParticleRandomSeed, UEngine.Instance.NebulaTemplateManager.mRandom.Next());
+            CBuffer.SetValue(coreBinder.CBPerParticle.ParticleElapsedTime, TtEngine.Instance.ElapsedSecond);
+            CBuffer.SetValue(coreBinder.CBPerParticle.ParticleRandomSeed, TtEngine.Instance.NebulaTemplateManager.mRandom.Next());
 
             emitter.SetCBuffer(CBuffer);
 
@@ -163,7 +163,7 @@ namespace EngineNS.Bricks.Particle
                 else
                 {
                     ForParameters.effector = e;
-                    UEngine.Instance.EventPoster.ParrallelFor((int)aliveNum, static (i, arg1, arg2) =>
+                    TtEngine.Instance.EventPoster.ParrallelFor((int)aliveNum, static (i, arg1, arg2) =>
                     {
                         var ForParameters = (TtForParameters)arg1;
                         var index = ForParameters.pAlives[i];
@@ -191,7 +191,7 @@ namespace EngineNS.Bricks.Particle
             }
             else
             {   
-                UEngine.Instance.EventPoster.ParrallelFor((int)aliveNum, static (i, arg1, arg2) =>
+                TtEngine.Instance.EventPoster.ParrallelFor((int)aliveNum, static (i, arg1, arg2) =>
                 {
                     var ForParameters = (TtForParameters)arg1;
                     var index = ForParameters.pAlives[i];

@@ -303,7 +303,7 @@ namespace EngineNS.Rtti
             }
             catch (System.Exception)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Fatal, "metadata", "meta load field in " + path);
+                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Fatal, "meta load field in " + path);
                 return false;
             }
             return true;
@@ -318,7 +318,7 @@ namespace EngineNS.Rtti
             //{
             //    rootDir = IO.FileManager.ERootDir.Game;
             //}
-            //var metaRoot = UEngine.Instance.FileManager.GetPath(rootDir, IO.FileManager.ESystemDir.MetaData);
+            //var metaRoot = TtEngine.Instance.FileManager.GetPath(rootDir, IO.FileManager.ESystemDir.MetaData);
             //var path = EngineNS.IO.FileManager.CombinePath(metaRoot, typeDesc.Assembly.Service);
             //path = EngineNS.IO.FileManager.CombinePath(path, typeDesc.Assembly.Name);
             var tmpPath = Path;// EngineNS.IO.FileManager.CombinePath(Path, $"{MetaDirectoryName}");
@@ -328,7 +328,7 @@ namespace EngineNS.Rtti
             }
             var txtFilepath = EngineNS.IO.TtFileManager.CombinePath(tmpPath, $"typedesc.txt");
             EngineNS.IO.TtFileManager.WriteAllText(txtFilepath, ClassType.TypeString);
-            UEngine.Instance.SourceControlModule.AddFile(txtFilepath);
+            TtEngine.Instance.SourceControlModule.AddFile(txtFilepath);
         }
         public UMetaVersion BuildCurrentVersion()
         {
@@ -847,7 +847,7 @@ namespace EngineNS.Rtti
                 }
                 if (propType == null || propType.SystemType != info.PropertyType)
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Rtti", $"Property {mHostType}.{name}'s type is not match: {propType}!={info.PropertyType}");
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Property {mHostType}.{name}'s type is not match: {propType}!={info.PropertyType}");
                 }
                 mPropInfoRef = info;
                 mHostType = metaVersion.HostClass.ClassType;
@@ -1065,7 +1065,7 @@ namespace EngineNS.Rtti
                 fd.Build(this, fieldType, i.Name, false);
                 if (fd.FieldType == null)
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Meta", $"Property lost: Name = {i.Name}; Type = {fieldTypeStr}");
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Property lost: Name = {i.Name}; Type = {fieldTypeStr}");
                 }
                 Propertys.Add(fd);
             }
@@ -1108,7 +1108,7 @@ namespace EngineNS.Rtti
             //    rootDirType = IO.FileManager.ERootDir.Game;
             //}
             //var assmemblyDir = typeDesc.Assembly.Service + "/" + typeDesc.Assembly.Name + "/";
-            //var rootDir = UEngine.Instance.FileManager.GetPath(rootDirType, IO.FileManager.ESystemDir.MetaData);
+            //var rootDir = TtEngine.Instance.FileManager.GetPath(rootDirType, IO.FileManager.ESystemDir.MetaData);
             //rootDir += assmemblyDir;
             //var tmpPath = EngineNS.IO.FileManager.CombinePath(rootDir, $"{HostClass.MetaDirectoryName}");
             
@@ -1119,7 +1119,7 @@ namespace EngineNS.Rtti
             
             EngineNS.IO.TtFileManager.WriteAllText(xmlFilepath, xmlText);
 
-            UEngine.Instance.SourceControlModule.AddFile(xmlFilepath);
+            TtEngine.Instance.SourceControlModule.AddFile(xmlFilepath);
         }
     }
 
@@ -1139,7 +1139,7 @@ namespace EngineNS.Rtti
             var rootTypes = new IO.TtFileManager.ERootDir[2] { IO.TtFileManager.ERootDir.Engine, IO.TtFileManager.ERootDir.Game };
             foreach (var r in rootTypes)
             {
-                var metaRoot = UEngine.Instance.FileManager.GetPath(r, IO.TtFileManager.ESystemDir.MetaData);
+                var metaRoot = TtEngine.Instance.FileManager.GetPath(r, IO.TtFileManager.ESystemDir.MetaData);
                 if (EngineNS.IO.TtFileManager.DirectoryExists(metaRoot) == false)
                 {
                     continue;
@@ -1185,7 +1185,7 @@ namespace EngineNS.Rtti
                 {
                     if (i.Value.ClassMetaName != meta.ClassMetaName)
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Fatal, "Meta", $"Same Hash:{i.Value.ClassMetaName} == {meta.ClassMetaName}");
+                        Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Fatal, $"Same Hash:{i.Value.ClassMetaName} == {meta.ClassMetaName}");
                         System.Diagnostics.Debug.Assert(false);
                     }
                     continue;
@@ -1308,7 +1308,7 @@ namespace EngineNS.Rtti
                 if (EngineNS.IO.TtFileManager.FileExists(txtFilepath) == false)
                 {
                     EngineNS.IO.TtFileManager.WriteAllText(txtFilepath, i.Value.ClassType.TypeString);
-                    UEngine.Instance.SourceControlModule.AddFile(txtFilepath);
+                    TtEngine.Instance.SourceControlModule.AddFile(txtFilepath);
                 }
             }
         }
@@ -1316,9 +1316,9 @@ namespace EngineNS.Rtti
         {
             string root = "";
             if (classMeta.ClassType.Assembly.IsGameModule)
-                root = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Game, IO.TtFileManager.ESystemDir.MetaData);
+                root = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Game, IO.TtFileManager.ESystemDir.MetaData);
             else
-                root = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Engine, IO.TtFileManager.ESystemDir.MetaData);
+                root = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Engine, IO.TtFileManager.ESystemDir.MetaData);
 
             var dir = classMeta.ClassType.Assembly.Service;
             dir += "." + classMeta.ClassType.Assembly.Name;

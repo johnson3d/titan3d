@@ -127,7 +127,7 @@ namespace EngineNS.Graphics.Pipeline
                     bfDesc.CpuAccess = NxRHI.ECpuAccess.CAS_WRITE;
                     bfDesc.Usage = NxRHI.EGpuUsage.USAGE_DYNAMIC;
                 }
-                GpuBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
+                GpuBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
                 System.Diagnostics.Debug.Assert(GpuBuffer != null);
 
                 if ((bfDesc.Type & NxRHI.EBufferType.BFT_UAV) != 0)
@@ -136,7 +136,7 @@ namespace EngineNS.Graphics.Pipeline
                     uavDesc.SetBuffer(isRaw);
                     uavDesc.Buffer.NumElements = (uint)GpuCapacity;
                     uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
-                    Uav = UEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
+                    Uav = TtEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
                 }
                 if ((bfDesc.Type & NxRHI.EBufferType.BFT_SRV) != 0)
                 {
@@ -144,7 +144,7 @@ namespace EngineNS.Graphics.Pipeline
                     srvDesc.SetBuffer(isRaw);
                     srvDesc.Buffer.NumElements = (uint)GpuCapacity;
                     srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
-                    Srv = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
+                    Srv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
                 }
             }
             else
@@ -218,7 +218,7 @@ namespace EngineNS.Graphics.Pipeline
                 bfDesc.InitData = pInitData;
                 bfDesc.Type = bufferType;
 
-                GpuResource = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
+                GpuResource = TtEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
 
                 if ((bufferType & NxRHI.EBufferType.BFT_UAV) != 0)
                 {
@@ -226,7 +226,7 @@ namespace EngineNS.Graphics.Pipeline
                     uavDesc.SetBuffer(isRaw);
                     uavDesc.Buffer.NumElements = (uint)Count;
                     uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
-                    Uav = UEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
+                    Uav = TtEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
                 }
 
                 if ((bufferType & NxRHI.EBufferType.BFT_SRV) != 0)
@@ -235,7 +235,7 @@ namespace EngineNS.Graphics.Pipeline
                     srvDesc.SetBuffer(isRaw);
                     srvDesc.Buffer.NumElements = (uint)Count;
                     srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
-                    Srv = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
+                    Srv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
                 }
             }
         }
@@ -263,7 +263,7 @@ namespace EngineNS.Graphics.Pipeline
             }
 
             initData.pData = pInitData;
-            GpuResource = UEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
+            GpuResource = TtEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
 
             if ((bufferType & NxRHI.EBufferType.BFT_UAV) != 0)
             {
@@ -271,7 +271,7 @@ namespace EngineNS.Graphics.Pipeline
                 uavDesc.SetTexture2D();
                 uavDesc.Format = desc.Format;
                 //uavDesc.Texture2D.MipSlice = desc.MipLevels;
-                Uav = UEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuTexture, in uavDesc);
+                Uav = TtEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuTexture, in uavDesc);
             }
 
             if ((bufferType & NxRHI.EBufferType.BFT_SRV) != 0)
@@ -281,7 +281,7 @@ namespace EngineNS.Graphics.Pipeline
                 rsvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
                 rsvDesc.Format = desc.Format;
                 rsvDesc.Texture2D.MipLevels = desc.MipLevels;
-                Srv = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuTexture, in rsvDesc);
+                Srv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuTexture, in rsvDesc);
             }
         }
     }

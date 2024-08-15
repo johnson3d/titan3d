@@ -70,7 +70,7 @@ namespace EngineNS
             void ComboOpenAction(in Support.UAnyPointer data)
             {
                 ContentBrowser.OnDraw();
-                //UEngine.Instance.EditorInstance.RNamePopupContentBrowser.OnDraw();
+                //TtEngine.Instance.EditorInstance.RNamePopupContentBrowser.OnDraw();
             }
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
@@ -86,7 +86,7 @@ namespace EngineNS
 
                 var snapSize = new Vector2(64, 64);
                 var snapEnd = cursorPos + snapSize;
-                var assetMeta = UEngine.Instance.AssetMetaManager.GetAssetMeta(name);
+                var assetMeta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(name);
                 assetMeta?.OnDrawSnapshot(in drawList, ref cursorPos, ref snapEnd);
 
                 var preViewStr = "null";
@@ -179,7 +179,7 @@ namespace EngineNS
         {
             get
             {
-                var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(this);
+                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(this);
                 if (ameta != null)
                     return ameta.AssetId;
                 
@@ -189,7 +189,7 @@ namespace EngineNS
             {
                 if (value == Guid.Empty)
                     return;
-                var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(value);
+                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(value);
                 if (ameta != null)
                 {
                     if (ameta.GetAssetName().Name != Name || ameta.GetAssetName().mRNameType != mRNameType)
@@ -244,7 +244,7 @@ namespace EngineNS
             string name = null;
             for (var i = IO.TtFileManager.ERootDir.Game; i < IO.TtFileManager.ERootDir.Count; i++)
             {
-                var root = UEngine.Instance.FileManager.GetRoot(i);
+                var root = TtEngine.Instance.FileManager.GetRoot(i);
                 if (path.StartsWith(root))
                 {
                     switch (i)
@@ -294,9 +294,9 @@ namespace EngineNS
             switch (type)
             {
                 case ERNameType.Engine:
-                    return UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + name;
+                    return TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + name;
                 case ERNameType.Game:
-                    return UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) + name;
+                    return TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) + name;
                 default:
                     {
                         return null;

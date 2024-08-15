@@ -10,11 +10,11 @@ namespace EngineNS.Rtti
         {
             public AGameTaskAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:GameTasks AssemblyDesc Created");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, "Plugins:GameTasks AssemblyDesc Created");
             }
             ~AGameTaskAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:GameTasks AssemblyDesc Destroyed");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, "Plugins:GameTasks AssemblyDesc Destroyed");
             }
             public override string Name { get => "GameTasks"; }
             public override string Service { get { return "Plugins"; } }
@@ -45,7 +45,7 @@ namespace EngineNS.Plugins.GameTasks
         public AGameTaskDescriptorManager TaskDescriptorManager = new AGameTaskDescriptorManager();
         public void OnLoadedPlugin()
         {
-            var editor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+            var editor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
             if (editor != null)
             {
                 editor.ContentBrowser.OnTypeChanged();
@@ -53,7 +53,7 @@ namespace EngineNS.Plugins.GameTasks
         }
         public void OnUnloadPlugin()
         {
-            var editor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+            var editor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
             if (editor != null)
             {
                 editor.ContentBrowser.OnTypeChanged();
@@ -106,7 +106,7 @@ namespace EngineNS.Plugins.GameTasks
         }
         public IO.IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
@@ -118,7 +118,7 @@ namespace EngineNS.Plugins.GameTasks
             if (ameta != null)
             {
                 UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta();
+                ameta.SaveAMeta(this);
             }
             IO.TtFileManager.SaveObjectToXml(name.Address, this);
         }

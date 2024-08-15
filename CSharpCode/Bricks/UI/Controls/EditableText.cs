@@ -175,8 +175,8 @@ namespace EngineNS.UI.Controls
                 SelectionLength = 0;
             }
 
-            UEngine.Instance.UIManager.KeyboardFocus(args, this);
-            UEngine.Instance.UIManager.CaptureMouse(args, this);
+            TtEngine.Instance.UIManager.KeyboardFocus(args, this);
+            TtEngine.Instance.UIManager.CaptureMouse(args, this);
 
         }
         int CalculateCursorPos(in Vector2 mousePt)
@@ -225,7 +225,7 @@ namespace EngineNS.UI.Controls
         {
             args.Handled = true;
             if (IsMouseCaptured)
-                UEngine.Instance.UIManager.CaptureMouse(args, null);
+                TtEngine.Instance.UIManager.CaptureMouse(args, null);
 
             // 计算光标位置
             var mousePt = new Vector2(args.InputEventPtr->MouseButton.X, args.InputEventPtr->MouseButton.Y);
@@ -247,7 +247,7 @@ namespace EngineNS.UI.Controls
         }
         private unsafe void TtEditableText_MouseMove(object sender, TtRoutedEventArgs args)
         {
-            if(IsMouseCaptured && UEngine.Instance.InputSystem.Mouse.IsMouseButtonDown(Bricks.Input.EMouseButton.BUTTON_LEFT))
+            if(IsMouseCaptured && TtEngine.Instance.InputSystem.Mouse.IsMouseButtonDown(Bricks.Input.EMouseButton.BUTTON_LEFT))
             {
                 args.Handled = true;
 

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_11685940077627183917 Type="EngineNS.TtEngine@EngineCore">
+  <Config Type="EngineNS.TtEngineConfig@EngineCore" Order="0" />
+  <TickableManager Type="EngineNS.UTickableManager@EngineCore" Order="0" />
+  <TickCountSecond Type="System.Single@Unknown" Order="0" />
+  <UIManager Type="EngineNS.UI.TtUIManager@EngineCore" Order="0" />
+</Hash_11685940077627183917>

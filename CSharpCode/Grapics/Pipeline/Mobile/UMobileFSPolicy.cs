@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Mobile
 {
-    public class UMobileFSPolicy : URenderPolicy
+    public class UMobileFSPolicy : TtRenderPolicy
     {
         #region Feature On/Off
         public override bool DisableShadow

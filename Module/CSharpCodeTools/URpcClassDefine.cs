@@ -186,13 +186,13 @@ namespace CSharpCodeTools
                             AddLine($"if (ExeIndex == UInt16.MaxValue)");
                             PushBrackets();
                             {
-                                AddLine($"ExeIndex = UEngine.Instance.RpcModule.DefaultExeIndex;");
+                                AddLine($"ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;");
                             }
                             PopBrackets();
                             AddLine($"if (NetConnect == null)");
                             PushBrackets();
                             {
-                                AddLine($"NetConnect = UEngine.Instance.RpcModule.DefaultNetConnect;");
+                                AddLine($"NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;");
                             }
                             PopBrackets();
 

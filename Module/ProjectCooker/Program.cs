@@ -37,7 +37,7 @@ namespace ProjectCooker
             var cfgFile = UCookCommand.FindArgument(args, "CookCfg=");
             //var cfgFile = @"F:\titan3d\content\EngineConfigForCook.cfg";
             //EngineNS.UEngine.UGfxDeviceType = typeof(EngineNS.Graphics.Pipeline.UGfxDeviceConsole);
-            var task = EngineNS.UEngine.StartEngine(new EngineNS.UEngine(args), cfgFile);
+            var task = EngineNS.TtEngine.StartEngine(new EngineNS.TtEngine(args), cfgFile);
 
             var cmd = UCookCommand.FindArgument(args, "ExeCmd=");
             Action action = async () =>
@@ -76,7 +76,7 @@ namespace ProjectCooker
                         return;
                     case "LoadPlugin":
                         {
-                            var serverPlugin = UEngine.Instance.PluginModuleManager.GetPluginModule("SourceGit");
+                            var serverPlugin = TtEngine.Instance.PluginModuleManager.GetPluginModule("SourceGit");
                             if (serverPlugin != null)
                             {
                                 serverPlugin.SureLoad();
@@ -85,7 +85,7 @@ namespace ProjectCooker
                         return;
                     case "StartRobot":
                         {
-                            var serverPlugin = UEngine.Instance.PluginModuleManager.GetPluginModule("ClientRobot");
+                            var serverPlugin = TtEngine.Instance.PluginModuleManager.GetPluginModule("ClientRobot");
                             if (serverPlugin != null)
                             {
                                 serverPlugin.SureLoad();
@@ -94,7 +94,7 @@ namespace ProjectCooker
                         return;
                     case "StartRootServer":
                         {
-                            var serverPlugin = UEngine.Instance.PluginModuleManager.GetPluginModule("RootServer");
+                            var serverPlugin = TtEngine.Instance.PluginModuleManager.GetPluginModule("RootServer");
                             if (serverPlugin != null)
                             {
                                 serverPlugin.SureLoad();
@@ -103,7 +103,7 @@ namespace ProjectCooker
                         return;
                     case "StartLoginServer":
                         {
-                            var serverPlugin = UEngine.Instance.PluginModuleManager.GetPluginModule("LoginServer");
+                            var serverPlugin = TtEngine.Instance.PluginModuleManager.GetPluginModule("LoginServer");
                             if (serverPlugin != null)
                             {
                                 serverPlugin.SureLoad();
@@ -112,7 +112,7 @@ namespace ProjectCooker
                         return;
                     case "StartLevelServer":
                         {
-                            var serverPlugin = UEngine.Instance.PluginModuleManager.GetPluginModule("LevelServer");
+                            var serverPlugin = TtEngine.Instance.PluginModuleManager.GetPluginModule("LevelServer");
                             if (serverPlugin != null)
                             {
                                 serverPlugin.SureLoad();
@@ -121,7 +121,7 @@ namespace ProjectCooker
                         return;
                     case "StartGateServer":
                         {
-                            var serverPlugin = UEngine.Instance.PluginModuleManager.GetPluginModule("GateServer");
+                            var serverPlugin = TtEngine.Instance.PluginModuleManager.GetPluginModule("GateServer");
                             if (serverPlugin != null)
                             {
                                 serverPlugin.SureLoad();
@@ -136,13 +136,13 @@ namespace ProjectCooker
                         }
                         break;
                 }
-                EngineNS.UEngine.Instance.PostQuitMessage();
+                EngineNS.TtEngine.Instance.PostQuitMessage();
             };
 
             bool isExcuteAction = false;
             while (true)
             {
-                if (EngineNS.UEngine.Instance.Tick() == false)
+                if (EngineNS.TtEngine.Instance.Tick() == false)
                     break;
 
                 if (isExcuteAction == false && task.IsCompleted)
@@ -152,7 +152,7 @@ namespace ProjectCooker
                 }
             }
 
-            EngineNS.UEngine.Instance.FinalCleanup();
+            EngineNS.TtEngine.Instance.FinalCleanup();
         }
     }
 }

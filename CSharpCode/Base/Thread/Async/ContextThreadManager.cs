@@ -228,7 +228,7 @@ namespace EngineNS.Thread.Async
                     }
                     break;
                 default:
-                    return UEngine.Instance.IsThread(target);
+                    return TtEngine.Instance.IsThread(target);
             }
             return false;
         }
@@ -269,7 +269,7 @@ namespace EngineNS.Thread.Async
                     userArgs.Obj2 = userData1;
                     userArgs.Obj3 = userData2;
                     userArgs.Value0.X = (uint)i;
-                    UEngine.Instance.EventPoster.RunParallel(static (state) =>
+                    TtEngine.Instance.EventPoster.RunParallel(static (state) =>
                     {
                         var action = (Delegate_ParrallelForAction)state.UserArguments.Obj0;
                         action((int)state.UserArguments.Value0.X, state.UserArguments.Obj2, state.UserArguments.Obj3);
@@ -326,7 +326,7 @@ namespace EngineNS.Thread.Async
                         return thread;
                     }
                 default:
-                    return UEngine.Instance.GetContext(target);
+                    return TtEngine.Instance.GetContext(target);
             }
         }
 
@@ -406,15 +406,15 @@ namespace EngineNS.Thread.Async
             var eh = TtAsyncTaskState<T>.CreateInstance();
             eh.AsyncTarget = ctx;
             eh.ContinueThread = TtContextThread.CurrentContext;
-            if (eh.ContinueThread == UEngine.Instance.ThreadRHI)
+            if (eh.ContinueThread == TtEngine.Instance.ThreadRHI)
             {
                 switch(TtContextThread.TickStage)
                 {
                     case 1:
-                        eh.ContinueThread = UEngine.Instance.ThreadMain;
+                        eh.ContinueThread = TtEngine.Instance.ThreadMain;
                         break;
                     case 2:
-                        eh.ContinueThread = UEngine.Instance.ThreadRHI;
+                        eh.ContinueThread = TtEngine.Instance.ThreadRHI;
                         break;
                 }
             }
@@ -432,7 +432,7 @@ namespace EngineNS.Thread.Async
 
             if (smp==null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "", $"AwaitSemaphore is null");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Error, $"AwaitSemaphore is null");
             }
 
             return new FTaskAwaiter<bool>(eh);
@@ -445,7 +445,7 @@ namespace EngineNS.Thread.Async
             eh.AsyncType = EAsyncType.JobSystem;
             if (smp == null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "", $"AwaitSemaphore is null");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Error, $"AwaitSemaphore is null");
                 return new FTaskAwaiter<bool>(eh);
             }
             eh.Tag = smp;
@@ -547,9 +547,9 @@ namespace EngineNS.Thread.Async
                     {
                         System.Diagnostics.Debug.Assert(PEvent.AsyncTarget == null);
                         System.Diagnostics.Debug.Assert(PEvent.PostAction == null);
-                        lock (UEngine.Instance.ContextThreadManager.AsyncIOEmptys)
+                        lock (TtEngine.Instance.ContextThreadManager.AsyncIOEmptys)
                         {
-                            UEngine.Instance.ContextThreadManager.AsyncIOEmptys.Add(PEvent);
+                            TtEngine.Instance.ContextThreadManager.AsyncIOEmptys.Add(PEvent);
                         }
                     }
                     break;
@@ -585,10 +585,10 @@ namespace EngineNS.Thread.Async
                     break;
                 case EAsyncType.ParallelTasks:
                     {
-                        lock (UEngine.Instance.ContextThreadManager.TPoolEvents)
+                        lock (TtEngine.Instance.ContextThreadManager.TPoolEvents)
                         {
-                            UEngine.Instance.ContextThreadManager.TPoolEvents.Enqueue(PEvent);
-                            UEngine.Instance.ContextThreadManager.mTPoolTrigger.Set();
+                            TtEngine.Instance.ContextThreadManager.TPoolEvents.Enqueue(PEvent);
+                            TtEngine.Instance.ContextThreadManager.mTPoolTrigger.Set();
                         }
                     }
                     break;
@@ -616,7 +616,7 @@ namespace EngineNS.Thread.Async
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         internal Thread.Async.TtContextThreadManager ContextThreadManager = new Thread.Async.TtContextThreadManager();
     }

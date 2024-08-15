@@ -18,11 +18,11 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            return await UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterial(GetAssetName());
+            return await TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterial(GetAssetName());
         }
         public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
-            UEngine.Instance.EditorInstance.PhyMaterialIcon?.OnDraw(cmdlist, in start, in end, 0);
+            TtEngine.Instance.EditorInstance.PhyMaterialIcon?.OnDraw(cmdlist, in start, in end, 0);
             //cmdlist.AddText(in start, 0xFFFFFFFF, "PhyMtl", null);
         }
         public override string GetAssetTypeName()
@@ -47,7 +47,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 TypeSlt.SelectedType = type;
 
                 PGAssetInitTask = PGAsset.Initialize();
-                mAsset = UEngine.Instance.PhyModule.PhyContext.CreateMaterial(0, 0, 0);
+                mAsset = TtEngine.Instance.PhyModule.PhyContext.CreateMaterial(0, 0, 0);
                 PGAsset.Target = mAsset;
             }
             protected override bool CheckAsset()
@@ -74,7 +74,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public IO.IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
         public virtual void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
@@ -94,11 +94,11 @@ namespace EngineNS.Bricks.PhysicsCore
             }
 
             xnd.SaveXnd(name.Address);
-            UEngine.Instance.SourceControlModule.AddFile(name.Address);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         public static TtPhyMaterial LoadXnd(TtPhyMaterialManager manager, IO.TtXndNode node)
         {
-            TtPhyMaterial result = UEngine.Instance.PhyModule.PhyContext.CreateMaterial(0, 0, 0);
+            TtPhyMaterial result = TtEngine.Instance.PhyModule.PhyContext.CreateMaterial(0, 0, 0);
             if (ReloadXnd(result, manager, node) == false)
                 return null;
             return result;
@@ -167,7 +167,7 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 if (mDefaultMaterial == null)
                 {
-                    mDefaultMaterial = UEngine.Instance.PhyModule.PhyContext.CreateMaterial(1, 1, 0.6f);
+                    mDefaultMaterial = TtEngine.Instance.PhyModule.PhyContext.CreateMaterial(1, 1, 0.6f);
                 }
                 return mDefaultMaterial;
             }
@@ -210,7 +210,7 @@ namespace EngineNS.Bricks.PhysicsCore
             if (Materials.TryGetValue(rn, out result))
                 return result;
 
-            result = await UEngine.Instance.EventPoster.Post((state) =>
+            result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
@@ -241,7 +241,7 @@ namespace EngineNS.Bricks.PhysicsCore
         public async System.Threading.Tasks.Task<TtPhyMaterial> CreateMaterial(RName rn)
         {
             TtPhyMaterial result;
-            result = await UEngine.Instance.EventPoster.Post((state) =>
+            result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {
@@ -268,7 +268,7 @@ namespace EngineNS.Bricks.PhysicsCore
             if (Materials.TryGetValue(rn, out result) == false)
                 return true;
 
-            var ok = await UEngine.Instance.EventPoster.Post((state) =>
+            var ok = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
                 {

@@ -20,22 +20,22 @@ namespace EngineNS.Bricks.Particle
             AddInputOutput(ColorPinInOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         }
-        public async override System.Threading.Tasks.Task Initialize(Graphics.Pipeline.URenderPolicy policy,
+        public async override System.Threading.Tasks.Task Initialize(Graphics.Pipeline.TtRenderPolicy policy,
                     string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName + ".BasePass");
         }
         public List<GamePlay.Scene.UMeshNode> ParticleNodes = new List<GamePlay.Scene.UMeshNode>();
-        public override unsafe void BeginTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
+        public override unsafe void BeginTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
             var cmd = BasePass.DrawCmdList;
             cmd.BeginCommand();
             cmd.BeginEvent("NebulaUpdate");
         }
-        public override unsafe void EndTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
+        public override unsafe void EndTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
             var cmd = BasePass.DrawCmdList;
             cmd.FlushDraws();
@@ -43,11 +43,11 @@ namespace EngineNS.Bricks.Particle
             cmd.EndCommand();
             policy.CommitCommandList(cmd);
         }
-        public override void FrameBuild(URenderPolicy policy)
+        public override void FrameBuild(TtRenderPolicy policy)
         {
             base.FrameBuild(policy);
         }
-        public override void TickLogic(UWorld world, URenderPolicy policy, bool bClear)
+        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             base.TickLogic(world, policy, bClear);
         }

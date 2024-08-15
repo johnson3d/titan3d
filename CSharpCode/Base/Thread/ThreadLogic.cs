@@ -38,10 +38,10 @@ namespace EngineNS.Thread
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
                 TickAwaitEvent();
-                UEngine.Instance.TryTickLogic();
+                TtEngine.Instance.TryTickLogic();
             }
 
-            UEngine.Instance.GfxDevice?.RenderSwapQueue?.QueueCmd(static (NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
+            TtEngine.Instance.GfxDevice?.RenderSwapQueue?.QueueCmd(static (NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
             {
 
             }, "#TickLogicEnd#");
@@ -66,7 +66,7 @@ namespace EngineNS.Thread
         {
             base.StopThread(()=>
             {
-                UEngine.Instance.StartFrame();
+                TtEngine.Instance.StartFrame();
             });
         }
     }

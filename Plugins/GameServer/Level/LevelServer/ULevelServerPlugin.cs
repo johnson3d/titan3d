@@ -11,11 +11,11 @@ namespace EngineNS.Rtti
         {
             public ULevelServerAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:LevelServer AssemblyDesc Created");
+                Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(Profiler.ELogTag.Info, "Plugins:LevelServer AssemblyDesc Created");
             }
             ~ULevelServerAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:LevelServer AssemblyDesc Destroyed");
+                Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(Profiler.ELogTag.Info, "Plugins:LevelServer AssemblyDesc Destroyed");
             }
             public override string Name { get => "LevelServer"; }
             public override string Service { get { return "Plugins"; } }
@@ -46,7 +46,7 @@ namespace EngineNS.Plugins.LevelServer
         public void OnLoadedPlugin()
         {
             var server = new ULevelServer();
-            UEngine.Instance.RpcModule.RpcManager = server;
+            TtEngine.Instance.RpcModule.RpcManager = server;
             Action action = async () =>
             {
                 var np = server.SelectNetworkPoint();
@@ -57,7 +57,7 @@ namespace EngineNS.Plugins.LevelServer
         }
         public void OnUnloadPlugin()
         {
-            var server = UEngine.Instance.RpcModule.RpcManager as ULevelServer;
+            var server = TtEngine.Instance.RpcModule.RpcManager as ULevelServer;
             server?.StopServer();
         }
     }

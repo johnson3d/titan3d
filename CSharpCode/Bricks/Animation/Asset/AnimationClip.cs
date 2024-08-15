@@ -56,7 +56,7 @@ namespace EngineNS.Animation.Asset
 
         public IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
 
         public void UpdateAMetaReferences(IAssetMeta ameta)
@@ -85,7 +85,7 @@ namespace EngineNS.Animation.Asset
             if (ameta != null)
             {
                 UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta();
+                ameta.SaveAMeta(this);
             }
             var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
             var xnd = new IO.TtXndHolder(typeStr, 0, 0);
@@ -124,7 +124,7 @@ namespace EngineNS.Animation.Asset
                 var clip = result as TtAnimationClip;
                 if (clip != null)
                 {
-                    var chunk = EngineNS.UEngine.Instance.AnimationModule.AnimationChunkManager.GetAnimationChunk(clip.AnimationChunkName);
+                    var chunk = EngineNS.TtEngine.Instance.AnimationModule.AnimationChunkManager.GetAnimationChunk(clip.AnimationChunkName);
                     if (chunk != null)
                     {
                         clip.AnimationChunk = chunk;
@@ -163,7 +163,7 @@ namespace EngineNS.Animation.Asset
                 //mFileDialog.Dispose();
             }
             string mSourceFile;
-            ImGui.ImGuiFileDialog mFileDialog = UEngine.Instance.EditorInstance.FileDialog.mFileDialog;
+            ImGui.ImGuiFileDialog mFileDialog = TtEngine.Instance.EditorInstance.FileDialog.mFileDialog;
             //EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
             public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
             {
@@ -207,7 +207,7 @@ namespace EngineNS.Animation.Asset
 
             //this is a demo for suspend&cancel operation
             Thread.Async.TtAsyncTaskToken token = null;// new Thread.Async.TtAsyncTaskToken();
-            result = await UEngine.Instance.EventPoster.Post((state) =>
+            result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 if (state.TaskToken != null)
                 {

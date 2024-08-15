@@ -6,13 +6,13 @@ using System.Text;
 
 namespace EngineNS.Graphics.Mesh
 {
-    public partial class UMeshPrimitives
+    public partial class TtMeshPrimitives
     {
         public partial class ImportAttribute : IO.CommonCreateAttribute
         {
             public ImportAttribute()
             {
-                ExtName = UMeshPrimitives.AssetExt;
+                ExtName = TtMeshPrimitives.AssetExt;
             }
             AssetImportAndExport.FBX.FBXImporter mFBXImporter; //for now we only have one file to import
             string MeshType = "FromFile";
@@ -27,7 +27,7 @@ namespace EngineNS.Graphics.Mesh
             {
                 if (bPopOpen == false)
                     ImGuiAPI.OpenPopup($"Import MeshPrimitives", ImGuiPopupFlags_.ImGuiPopupFlags_None);
-                var mFileDialog = UEngine.Instance.EditorInstance.FileDialog.mFileDialog;
+                var mFileDialog = TtEngine.Instance.EditorInstance.FileDialog.mFileDialog;
                 var visible = true;
                 var retValue = false;
                 if (ImGuiAPI.BeginPopupModal($"Import MeshPrimitives", &visible, ImGuiWindowFlags_.ImGuiWindowFlags_None))
@@ -85,7 +85,7 @@ namespace EngineNS.Graphics.Mesh
                                         string filePath = mFileDialog.GetCurrentPath();
                                         if (!string.IsNullOrEmpty(mSourceFile))
                                         {
-                                            mFBXImporter = UEngine.Instance.FBXFactoryModule.Instance.CreateImporter();
+                                            mFBXImporter = TtEngine.Instance.FBXFactoryModule.Instance.CreateImporter();
                                             var fileDesc = mFBXImporter.PreImport(mSourceFile);
                                             PGAsset.Target = fileDesc;
                                             mName = IO.TtFileManager.GetPureName(mSourceFile);
@@ -131,7 +131,7 @@ namespace EngineNS.Graphics.Mesh
                     bool nameChanged = ImGuiAPI.InputText("##in_rname", ref mName);
                     if (nameChanged)
                     {
-                        if (IO.TtFileManager.FileExists(mDir.Address + mName + UMeshPrimitives.AssetExt))
+                        if (IO.TtFileManager.FileExists(mDir.Address + mName + TtMeshPrimitives.AssetExt))
                             eErrorType = enErrorType.IsExisting;
                     }
                     ImGuiAPI.Separator();
@@ -155,13 +155,13 @@ namespace EngineNS.Graphics.Mesh
                                             BoxParameter.Extent.X, BoxParameter.Extent.Y, BoxParameter.Extent.Z, new Color4f(BoxParameter.Color).ToArgb(), BoxParameter.FaceFlags);
 
                                         var name = this.GetAssetRName();
-                                        var ameta = new UMeshPrimitivesAMeta();
+                                        var ameta = new TtMeshPrimitivesAMeta();
                                         ameta.SetAssetName(name);
                                         ameta.AssetId = Guid.NewGuid();
-                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
-                                        ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
-                                        ameta.SaveAMeta();
-                                        UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
+                                        ameta.Description = $"This is a {typeof(TtMeshPrimitives).FullName}\n";
+                                        ameta.SaveAMeta((IO.IAsset)null);
+                                        TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
                                         mesh.ToMesh().SaveAssetTo(name);
                                         ImGuiAPI.CloseCurrentPopup();
@@ -174,13 +174,13 @@ namespace EngineNS.Graphics.Mesh
                                             Rect2DParameter.Width, Rect2DParameter.Height, Rect2DParameter.Position.Z);
 
                                         var name = this.GetAssetRName();
-                                        var ameta = new UMeshPrimitivesAMeta();
+                                        var ameta = new TtMeshPrimitivesAMeta();
                                         ameta.SetAssetName(name);
                                         ameta.AssetId = Guid.NewGuid();
-                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
-                                        ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
-                                        ameta.SaveAMeta();
-                                        UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
+                                        ameta.Description = $"This is a {typeof(TtMeshPrimitives).FullName}\n";
+                                        ameta.SaveAMeta((IO.IAsset)null);
+                                        TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
                                         mesh.ToMesh().SaveAssetTo(name);
                                         ImGuiAPI.CloseCurrentPopup();
@@ -193,13 +193,13 @@ namespace EngineNS.Graphics.Mesh
                                             SphereParameter.Stacks, new Color4f(SphereParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();
-                                        var ameta = new UMeshPrimitivesAMeta();
+                                        var ameta = new TtMeshPrimitivesAMeta();
                                         ameta.SetAssetName(name);
                                         ameta.AssetId = Guid.NewGuid();
-                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
-                                        ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
-                                        ameta.SaveAMeta();
-                                        UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
+                                        ameta.Description = $"This is a {typeof(TtMeshPrimitives).FullName}\n";
+                                        ameta.SaveAMeta((IO.IAsset)null);
+                                        TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
                                         mesh.ToMesh().SaveAssetTo(name);
                                         ImGuiAPI.CloseCurrentPopup();
@@ -212,13 +212,13 @@ namespace EngineNS.Graphics.Mesh
                                             CylinderParameter.Slices, CylinderParameter.Stacks, new Color4f(CylinderParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();
-                                        var ameta = new UMeshPrimitivesAMeta();
+                                        var ameta = new TtMeshPrimitivesAMeta();
                                         ameta.SetAssetName(name);
                                         ameta.AssetId = Guid.NewGuid();
-                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
-                                        ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
-                                        ameta.SaveAMeta();
-                                        UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
+                                        ameta.Description = $"This is a {typeof(TtMeshPrimitives).FullName}\n";
+                                        ameta.SaveAMeta((IO.IAsset)null);
+                                        TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
                                         mesh.ToMesh().SaveAssetTo(name);
                                         ImGuiAPI.CloseCurrentPopup();
@@ -231,13 +231,13 @@ namespace EngineNS.Graphics.Mesh
                                             TorusParameter.Slices, TorusParameter.Rings, new Color4f(TorusParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();
-                                        var ameta = new UMeshPrimitivesAMeta();
+                                        var ameta = new TtMeshPrimitivesAMeta();
                                         ameta.SetAssetName(name);
                                         ameta.AssetId = Guid.NewGuid();
-                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
-                                        ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
-                                        ameta.SaveAMeta();
-                                        UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
+                                        ameta.Description = $"This is a {typeof(TtMeshPrimitives).FullName}\n";
+                                        ameta.SaveAMeta((IO.IAsset)null);
+                                        TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
                                         mesh.ToMesh().SaveAssetTo(name);
                                         ImGuiAPI.CloseCurrentPopup();
@@ -250,13 +250,13 @@ namespace EngineNS.Graphics.Mesh
                                             (int)CapsuleParameter.Latitudes, (int)CapsuleParameter.Longitudes, (int)CapsuleParameter.Rings, CapsuleParameter.UvProfile, new Color4f(TorusParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();
-                                        var ameta = new UMeshPrimitivesAMeta();
+                                        var ameta = new TtMeshPrimitivesAMeta();
                                         ameta.SetAssetName(name);
                                         ameta.AssetId = Guid.NewGuid();
-                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
-                                        ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
-                                        ameta.SaveAMeta();
-                                        UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
+                                        ameta.Description = $"This is a {typeof(TtMeshPrimitives).FullName}\n";
+                                        ameta.SaveAMeta((IO.IAsset)null);
+                                        TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
                                         mesh.ToMesh().SaveAssetTo(name);
                                         ImGuiAPI.CloseCurrentPopup();
@@ -292,7 +292,7 @@ namespace EngineNS.Graphics.Mesh
                 {
                     using (var meshImporter = mFBXImporter.CreateMeshImporter(i))
                     {
-                        meshImporter.Process(UEngine.Instance.GfxDevice.RenderContext.mCoreObject);
+                        meshImporter.Process(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject);
                         string meshName = "";
                         bool hasSkin = false;
                         unsafe
@@ -309,7 +309,7 @@ namespace EngineNS.Graphics.Mesh
                             await CreateOrMergeSkeleton(rn, fbxSkeletonDesc);
                         }
                         {
-                            var rn = RName.GetRName(mDir.Name + meshName + UMeshPrimitives.AssetExt, mDir.RNameType);
+                            var rn = RName.GetRName(mDir.Name + meshName + TtMeshPrimitives.AssetExt, mDir.RNameType);
                             CreateMesh(rn, meshImporter.GetMeshPrimitives(), hasSkin, meshImporter.GetSkeletonDesc());
                         }
                     }
@@ -320,7 +320,7 @@ namespace EngineNS.Graphics.Mesh
 
             private async System.Threading.Tasks.Task CreateOrMergeSkeleton(RName skeletonAsset, AssetImportAndExport.FBX.FBXSkeletonDesc fBXSkeletonDesc)
             {
-                var ska = await EngineNS.UEngine.Instance.AnimationModule.SkeletonAssetManager.GetSkeletonAsset(skeletonAsset);
+                var ska = await EngineNS.TtEngine.Instance.AnimationModule.SkeletonAssetManager.GetSkeletonAsset(skeletonAsset);
                 if (ska == null)
                 {
                     Animation.Asset.TtSkeletonAsset newAsset = new Animation.Asset.TtSkeletonAsset();
@@ -332,8 +332,8 @@ namespace EngineNS.Graphics.Mesh
                     sktameta.AssetId = Guid.NewGuid();
                     sktameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(Animation.Asset.TtSkeletonAssetAMeta));
                     sktameta.Description = $"This is a {typeof(Animation.Asset.TtSkeletonAssetAMeta).FullName}\n";
-                    sktameta.SaveAMeta();
-                    UEngine.Instance.AssetMetaManager.RegAsset(sktameta);
+                    sktameta.SaveAMeta(newAsset);
+                    TtEngine.Instance.AssetMetaManager.RegAsset(sktameta);
                 }
                 else
                 {
@@ -342,15 +342,15 @@ namespace EngineNS.Graphics.Mesh
             }
             private void CreateMesh(RName name, NxRHI.FMeshPrimitives meshPrimitives, bool hasSkin, AssetImportAndExport.FBX.FBXSkeletonDesc fbxSkeletonDesc)
             {
-                var ameta = new UMeshPrimitivesAMeta();
+                var ameta = new TtMeshPrimitivesAMeta();
                 ameta.SetAssetName(name);
                 ameta.AssetId = Guid.NewGuid();
-                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(UMeshPrimitives));
-                ameta.Description = $"This is a {typeof(UMeshPrimitives).FullName}\n";
-                ameta.SaveAMeta();
-                UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
+                ameta.Description = $"This is a {typeof(TtMeshPrimitives).FullName}\n";
+                ameta.SaveAMeta((IO.IAsset)null);
+                TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
-                var cMeshPrimitives = new UMeshPrimitives(meshPrimitives);
+                var cMeshPrimitives = new TtMeshPrimitives(meshPrimitives);
                 if (hasSkin)
                 {
                     cMeshPrimitives.PartialSkeleton = AssetImportAndExport.FBX.FBXMeshImportUtility.CreateSkinSkeleton(fbxSkeletonDesc);

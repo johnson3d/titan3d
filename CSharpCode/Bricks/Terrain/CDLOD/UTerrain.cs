@@ -14,27 +14,27 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         public EShowMode ShowMode { get; set; } = EShowMode.Normal;
         public bool IsShowWater { get; set; } = false;
-        public Graphics.Pipeline.Shader.UMaterial Material;
-        public Graphics.Pipeline.Shader.UMaterial WaterMaterial;
-        public Graphics.Pipeline.Shader.UMaterial WireFrameMaterial;
+        public Graphics.Pipeline.Shader.TtMaterial Material;
+        public Graphics.Pipeline.Shader.TtMaterial WaterMaterial;
+        public Graphics.Pipeline.Shader.TtMaterial WireFrameMaterial;
         public VirtualTexture.TtVirtualTextureArray HeightmapRVT;
         public VirtualTexture.TtVirtualTextureArray NormalmapRVT;
         public VirtualTexture.TtVirtualTextureArray MaterialIdRVT;
         public NxRHI.UCommandList UpdateRvtPass;
 
         public int MipLevels { get; set; } = 6;
-        public Graphics.Mesh.UMeshPrimitives[] GridMipLevels;
+        public Graphics.Mesh.TtMeshPrimitives[] GridMipLevels;
 
         public TtLayerManager LayerManager { get; } = new TtLayerManager();
 
         public async System.Threading.Tasks.Task<bool> Initialize(int mipLevel)
         {
             MipLevels = mipLevel;
-            //Material = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("material/SysDft.material", RName.ERNameType.Engine));
-            Material = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("utest/material/terrainidmap.material"));
+            //Material = await TtEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("material/SysDft.material", RName.ERNameType.Engine));
+            Material = await TtEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("utest/material/terrainidmap.material"));
             Material.IsEditingMaterial = false;
 
-            if (UEngine.Instance.Config.Feature_UseRVT)
+            if (TtEngine.Instance.Config.Feature_UseRVT)
             {
                 HeightmapRVT = new VirtualTexture.TtVirtualTextureArray();
                 HeightmapRVT.Initialize(EPixelFormat.PXF_R16_FLOAT, 1024, 1, 32);
@@ -44,17 +44,17 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 MaterialIdRVT.Initialize(EPixelFormat.PXF_R8G8B8A8_UNORM, 1024, 1, 32);
             }
 
-            WireFrameMaterial = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
+            WireFrameMaterial = await TtEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
             WireFrameMaterial.IsEditingMaterial = false;
 
-            WaterMaterial = await UEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("utest/material/terrainwater.material"));
+            WaterMaterial = await TtEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(RName.GetRName("utest/material/terrainwater.material"));
             WaterMaterial.IsEditingMaterial = false;
 
             var rast = WireFrameMaterial.Rasterizer;
             rast.FillMode = NxRHI.EFillMode.FMD_WIREFRAME;
             WireFrameMaterial.Rasterizer = rast;
 
-            GridMipLevels = new Graphics.Mesh.UMeshPrimitives[mipLevel];
+            GridMipLevels = new Graphics.Mesh.TtMeshPrimitives[mipLevel];
             for (int i = 0; i < GridMipLevels.Length; i++)
             {
                 var size = (ushort)Math.Pow(2, GridMipLevels.Length - i - 1);
@@ -67,7 +67,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             //Parameters.LODDistanceRatio = 0.6f;
             //Parameters.MorphStartRatio = 0.3f;
 
-            UpdateRvtPass = UEngine.Instance.GfxDevice.RenderContext.CreateCommandList();
+            UpdateRvtPass = TtEngine.Instance.GfxDevice.RenderContext.CreateCommandList();
             return true;
         }
         public void Dispose()

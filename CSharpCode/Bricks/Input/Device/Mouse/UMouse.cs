@@ -31,10 +31,10 @@ namespace EngineNS.Bricks.Input.Device.Mouse
         {
             if(!ShowCursor)
             {
-                if (UEngine.Instance.GameInstance != null)
+                if (TtEngine.Instance.GameInstance != null)
                 {
-                    var windowPos = UEngine.Instance.GameInstance.WorldViewportSlate.ViewportPos;
-                    var windowSize = UEngine.Instance.GameInstance.WorldViewportSlate.ClientSize;
+                    var windowPos = TtEngine.Instance.GameInstance.WorldViewportSlate.ViewportPos;
+                    var windowSize = TtEngine.Instance.GameInstance.WorldViewportSlate.ClientSize;
                     WarpMouseInWindow(IntPtr.Zero, (int)windowSize.X / 2, (int)(windowSize.Y) / 2);
                 }
             }

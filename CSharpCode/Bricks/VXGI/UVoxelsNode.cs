@@ -46,7 +46,7 @@ namespace EngineNS.Bricks.VXGI
             AddOutput(VxPoolPinOut, NxRHI.EBufferType.BFT_UAV);
         }
 
-        public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
+        public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             var attachement = RenderGraph.AttachmentCache.ImportAttachment(VxPoolPinOut);
             attachement.GpuResource = VoxelPool;
@@ -115,7 +115,7 @@ namespace EngineNS.Bricks.VXGI
                 defines.mCoreObject.AddDefine("VxSceneY", $"{VxSceneY}");
                 defines.mCoreObject.AddDefine("VxSceneZ", $"{VxSceneZ}");
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var node = drawcall.TagObject as UVoxelsNode;
 
@@ -158,14 +158,14 @@ namespace EngineNS.Bricks.VXGI
                 defines.mCoreObject.AddDefine("VxSceneY", $"{VxSceneY}");
                 defines.mCoreObject.AddDefine("VxSceneZ", $"{VxSceneZ}");
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var node = drawcall.TagObject as UVoxelsNode;
 
                 var cbIndex = CurrentEffect.FindBinder(TtNameTable.cbGBufferDesc);
                 if (node.CBuffer == null)
                 {
-                    node.CBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(cbIndex);
+                    node.CBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(cbIndex);
                 }
 
                 var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbGBufferDesc");
@@ -228,7 +228,7 @@ namespace EngineNS.Bricks.VXGI
                 defines.mCoreObject.AddDefine("VxSceneY", $"{VxSceneY}");
                 defines.mCoreObject.AddDefine("VxSceneZ", $"{VxSceneZ}");
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.URenderPolicy policy)
+            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var node = drawcall.TagObject as UVoxelsNode;
 
@@ -260,11 +260,11 @@ namespace EngineNS.Bricks.VXGI
         private NxRHI.UComputeDraw EraseVoxelGroupDrawcall;
         #endregion
 
-        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var desc = new NxRHI.FBufferDesc();
             desc.SetDefault(false, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
             desc.Type = NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV;            
@@ -282,15 +282,15 @@ namespace EngineNS.Bricks.VXGI
             UavVoxelPool = rc.CreateUAV(VoxelPool, in uavDesc);
             System.Diagnostics.Debug.Assert(UavVoxelPool != null);
 
-            SetupVoxelGroupAllocator = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupVoxelGroupAllocatorShading>();
+            SetupVoxelGroupAllocator = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupVoxelGroupAllocatorShading>();
             
-            EraseVoxelGroup = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<EraseVoxelGroupShading>();
+            EraseVoxelGroup = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EraseVoxelGroupShading>();
 
-            InjectVoxels = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<InjectVoxelsShading>();
+            InjectVoxels = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<InjectVoxelsShading>();
             
             if (true)
             {
-                var material = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
+                var material = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
                 material.RenderLayer = Graphics.Pipeline.ERenderLayer.RL_Translucent;
                 //var rast = material.Rasterizer;
                 //rast.FillMode = EFillMode.FMD_WIREFRAME;
@@ -304,9 +304,9 @@ namespace EngineNS.Bricks.VXGI
 
             //ResetComputeDrawcall(policy);
         }
-        private unsafe void ResetComputeDrawcall(Graphics.Pipeline.URenderPolicy policy)
+        private unsafe void ResetComputeDrawcall(Graphics.Pipeline.TtRenderPolicy policy)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             CoreSDK.DisposeObject(ref SetupVoxelGroupAllocatorDrawcall);
             SetupVoxelGroupAllocatorDrawcall = rc.CreateComputeDraw();
@@ -319,7 +319,7 @@ namespace EngineNS.Bricks.VXGI
             InjectVoxelsDrawcall = rc.CreateComputeDraw();
             
         }
-        public override void OnResize(Graphics.Pipeline.URenderPolicy policy, float x, float y)
+        public override void OnResize(Graphics.Pipeline.TtRenderPolicy policy, float x, float y)
         {
             //UavAbedo?.Dispose();
             //UavAbedo = policy.GetBasePassNode().GBuffers.CreateUAV(0);
@@ -362,7 +362,7 @@ namespace EngineNS.Bricks.VXGI
         bool bTestErase = false;
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UVoxelsNode), nameof(TickLogic));
-        public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {

@@ -200,7 +200,7 @@ namespace EngineNS.Bricks.NodeGraph
         public override bool OnDraw(in EditorInfo info, out object newValue)
         {
             bool valueChanged = false;
-            EngineNS.UEngine.Instance.PGTypeEditorManagerInstance.DrawTypeEditor(info, out newValue, out valueChanged);
+            EngineNS.TtEngine.Instance.PGTypeEditorManagerInstance.DrawTypeEditor(info, out newValue, out valueChanged);
             if (valueChanged)
             {
                 Value = newValue;
@@ -432,7 +432,7 @@ namespace EngineNS.Bricks.NodeGraph
             //{
             //    ComboOpenAction = (in Support.UAnyPointer data) =>
             //    {
-            //        UEngine.Instance.EditorInstance.RNamePopupContentBrowser.OnDraw();
+            //        TtEngine.Instance.EditorInstance.RNamePopupContentBrowser.OnDraw();
             //    }
             //};
         }
@@ -461,7 +461,7 @@ namespace EngineNS.Bricks.NodeGraph
 
             if (ContentBrowser == null)
             {
-                ContentBrowser = Editor.UEditor.NewPopupContentBrowser();//UEngine.Instance.EditorInstance.RNamePopupContentBrowser
+                ContentBrowser = Editor.UEditor.NewPopupContentBrowser();//TtEngine.Instance.EditorInstance.RNamePopupContentBrowser
             }
 
             if (AssetName != null)
@@ -470,7 +470,7 @@ namespace EngineNS.Bricks.NodeGraph
                 var iconSize = new Vector2(64 * fScale, 64 * fScale);
                 var end = pos + iconSize;
                 var cmdList = ImGuiAPI.GetWindowDrawList();
-                var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
                 ameta?.OnDrawSnapshot(cmdList, ref pos, ref end);
                 cmdList.AddText(new Vector2(pos.X, end.Y), 0xFFFFFFFF, AssetName.Name, null);
                 ImGuiAPI.SetCursorScreenPos(new Vector2(pos.X + iconSize.X, pos.Y));

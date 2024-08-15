@@ -24,13 +24,13 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 EPixelShaderInput.PST_Position,
             };
         }
-        public override void OnBuildDrawCall(URenderPolicy policy, NxRHI.UGraphicDraw drawcall)
+        public override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
             var shadowMapNode = policy.FindFirstNode<UShadowMapNode>();
             if (shadowMapNode == null)
                 return;
 
-            drawcall.mCoreObject.BindPipeline(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, shadowMapNode.DepthRaster.mCoreObject);
+            drawcall.mCoreObject.BindPipeline(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, shadowMapNode.DepthRaster.mCoreObject);
         }
     }
     [Bricks.CodeBuilder.ContextMenu("CSM", "Shadow\\CSM", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
@@ -108,12 +108,12 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         {
             return mShadowShading;
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-            mShadowShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<Shadow.UShadowShading>();
+            mShadowShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Shadow.UShadowShading>();
 
             mShadowCameraArray = new UCamera[4];
             for (UInt32 CamIdx = 0; CamIdx < mCsmNum; CamIdx++)
@@ -154,7 +154,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 //PassDesc.mFBClearColorRT0 = TempClearColor;
                 //PassDesc.mDepthClearValue = 1.0f;
                 //PassDesc.mStencilClearValue = 0u;
-                NxRHI.URenderPass RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
+                NxRHI.URenderPass RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
 
                 GBuffersArray[0] = new TtGraphicsBuffers();
                 GBuffersArray[0].Initialize(policy, RenderPass);
@@ -177,7 +177,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 PassDescTwo.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 PassDescTwo.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
                 PassDescTwo.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-                NxRHI.URenderPass RenderPassTwo = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDescTwo);
+                NxRHI.URenderPass RenderPassTwo = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDescTwo);
 
                 for (UInt32 CamIdx = 1; CamIdx < mCsmNum; CamIdx++)
                 {
@@ -209,7 +209,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             DepthPinOut.Attachement.Width = mWholeReslutionX;
             DepthPinOut.Attachement.Height = mWholeReslutionY;
 
-            if (UEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_GL)
+            if (TtEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_GL)
             {
                 //gles;
                 mOrtho2UVMtx.M11 = 0.5f;
@@ -220,7 +220,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 mOrtho2UVMtx.M42 = 0.5f;
                 mOrtho2UVMtx.M43 = 0.5f;
             }
-            else if (UEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_VK)
+            else if (TtEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_VK)
             {
                 //Vulkan;
                 mOrtho2UVMtx.M11 = 0.5f;
@@ -248,7 +248,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             dpRastDesc.SetDefault();
             dpRastDesc.m_Rasterizer.m_DepthBias = 1;
             dpRastDesc.m_Rasterizer.m_SlopeScaledDepthBias = 2.0f;
-            DepthRaster = UEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(UEngine.Instance.GfxDevice.RenderContext, in dpRastDesc);
+            DepthRaster = TtEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(TtEngine.Instance.GfxDevice.RenderContext, in dpRastDesc);
 
 
             for (UInt32 UVAdjustIdx = 0; UVAdjustIdx < mCsmNum; UVAdjustIdx++)
@@ -300,7 +300,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UShadowMapNode), nameof(TickLogic));
         [ThreadStatic]
         private static Profiler.TimeScope ScopePushGpuDraw = Profiler.TimeScopeManager.GetTimeScope(typeof(UShadowMapNode), "PushGpuDraw");
-        public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             foreach (var i in CSMCullingNode)
             {
@@ -317,7 +317,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
                 ViewerCamera = policy.DefaultCamera;
                 
-                //ViewCamera.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext);
+                //ViewCamera.UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext);
                 //calculate viewer camera frustum bounding sphere and shadow camera data;
                 for (UInt32 CsmIdx = 0; CsmIdx < mCsmNum; CsmIdx++)
                 {
@@ -408,7 +408,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                     float DepthBiasClipSpace = UniformDepthBias / (shadowZFar - shadowZNear) * (FrustumSphereDiameter / mInnerResolutionY) * PerObjCustomDepthBias;
                     //float DepthBiasClipSpace = UniformDepthBias / (ShadowCameraZFar - ShadowCameraZNear) * PerObjCustomDepthBias;
 
-                    var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+                    var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
                     var cBuffer = GBuffersArray[CsmIdx].PerViewportCBuffer;
                     if (cBuffer != null)
                     {
@@ -423,7 +423,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                     mFadeParam.X = 1.0f / (ShadowDistance - FadeStartDistance + 0.0001f);
                     mFadeParam.Y = -FadeStartDistance * mFadeParam.X;
 
-                    mShadowCameraArray[CsmIdx].UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext);
+                    mShadowCameraArray[CsmIdx].UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext);
                     CSMPass[CsmIdx].SwapBuffer();
 
                     var cmdlist = CSMPass[CsmIdx].DrawCmdList;
@@ -510,10 +510,10 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             }   
         }
 
-        public override void TickSync(URenderPolicy policy)
+        public override void TickSync(TtRenderPolicy policy)
         {
             //base.SwapBuffer();
-            //ShadowCamera.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext);
+            //ShadowCamera.UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext);
         }
     }
 }

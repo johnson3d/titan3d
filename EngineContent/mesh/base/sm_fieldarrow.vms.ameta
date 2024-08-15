@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Graphics.Mesh.UMeshPrimitivesAMeta@EngineCore">
+<Root Type="EngineNS.Graphics.Mesh.TtMeshPrimitivesAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="29db73d8-c9a2-46fc-8c94-76bb3bf5b868" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMeshPrimitives&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
@@ -12,5 +12,5 @@
   </Icon>
   <IsClustered Type="System.Boolean@Unknown" Value="False" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.UMeshPrimitives@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMeshPrimitives@EngineCore" />
 </Root>

@@ -12,7 +12,7 @@ namespace ProjectCooker.Command
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             var port = FindArgument(args, DS_Port);
-            EngineNS.UEngine.Instance.DedicatedServer.StartServer("0.0.0.0", System.Convert.ToUInt16(port));
+            EngineNS.TtEngine.Instance.DedicatedServer.StartServer("0.0.0.0", System.Convert.ToUInt16(port));
         }
     }
 }

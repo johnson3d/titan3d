@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Graphics.Pipeline.Shader.UMaterialAMeta@EngineCore">
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="44007e03-adeb-44b7-a985-4d0cc23d1633" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterial&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
@@ -16,5 +16,5 @@
     <e_0 Value="Game,utest/plant/fir_01_plant/t_fir_alba_bark_01_bc.srv,598c63d3-30b7-4354-a068-03e8807fc0dd" />
     <e_1 Value="Game,utest/plant/fir_01_plant/t_fir_bark_01_n.srv,d6ad543f-2115-47b3-ab6b-1dad9f93e463" />
   </RefAssetRNames>
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterial@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

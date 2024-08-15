@@ -50,10 +50,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
-            var material = data.UserData as UMaterial;
+            var material = data.UserData as TtMaterial;
             if(material.FindSampler(this.Name) == null)
             {
-                var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
+                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair();
                 tmp.Name = this.Name;
                 var sampNode = this;
                 tmp.Value = sampNode.Desc;

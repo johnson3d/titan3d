@@ -108,8 +108,8 @@ namespace EngineNS.EGui.Controls
             await mSelectFolderView.Initialize();
             InitializeFilterMenu();
 
-            if (UEngine.Instance.UIProxyManager[FilterImgName] == null)
-                UEngine.Instance.UIProxyManager[FilterImgName] = new EGui.UIProxy.ImageProxy(RName.GetRName(FilterImgName, RName.ERNameType.Engine));
+            if (TtEngine.Instance.UIProxyManager[FilterImgName] == null)
+                TtEngine.Instance.UIProxyManager[FilterImgName] = new EGui.UIProxy.ImageProxy(RName.GetRName(FilterImgName, RName.ERNameType.Engine));
 
             return true;
         }
@@ -161,7 +161,7 @@ namespace EngineNS.EGui.Controls
                             parentMenu.AddMenuItem(menuStr, menuStr, null,
                                 (TtMenuItem item, object sender) =>
                                 {
-                                    EnqueueAssetImporter(UEngine.Instance.AssetMetaManager.ImportAsset(mFolderView.CurrentDir, typeDesc, (string)assetExtField.GetValue(null)), ""); 
+                                    EnqueueAssetImporter(TtEngine.Instance.AssetMetaManager.ImportAsset(mFolderView.CurrentDir, typeDesc, (string)assetExtField.GetValue(null)), ""); 
                                 });
                         }
                     }
@@ -223,7 +223,7 @@ namespace EngineNS.EGui.Controls
 
                     if (MacrossBase != null && ext == Bricks.CodeBuilder.UMacross.AssetExt)
                     {
-                        var ameta1 = UEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType)) as Bricks.CodeBuilder.UMacrossAMeta;
+                        var ameta1 = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType)) as Bricks.CodeBuilder.UMacrossAMeta;
                         if (ameta1 == null)
                             continue;
 
@@ -234,7 +234,7 @@ namespace EngineNS.EGui.Controls
                     }
                     else if (ShaderType != null && ext == Graphics.Pipeline.Shader.TtShaderAsset.AssetExt)
                     {
-                        var ameta1 = UEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType)) as Graphics.Pipeline.Shader.TtShaderAssetAMeta;
+                        var ameta1 = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType)) as Graphics.Pipeline.Shader.TtShaderAssetAMeta;
                         if (ameta1 == null)
                             continue;
 
@@ -253,7 +253,7 @@ namespace EngineNS.EGui.Controls
                         continue;
                 }
 
-                var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType));
+                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType));
                 if (ameta == null)
                     continue;
                 var assetTypeName = ameta.GetAssetTypeName();
@@ -281,8 +281,8 @@ namespace EngineNS.EGui.Controls
                 {
                     var name = IO.TtFileManager.GetPureName(i);
 
-                    var rootType = UEngine.Instance.FileManager.GetRootDirType(i);
-                    var rPath = IO.TtFileManager.GetRelativePath(UEngine.Instance.FileManager.GetRoot(rootType), i);
+                    var rootType = TtEngine.Instance.FileManager.GetRootDirType(i);
+                    var rPath = IO.TtFileManager.GetRelativePath(TtEngine.Instance.FileManager.GetRoot(rootType), i);
                     if (rootType == IO.TtFileManager.ERootDir.Game)
                         ameta.SetAssetName(RName.GetRName(rPath, RName.ERNameType.Game));
                     else if (rootType == IO.TtFileManager.ERootDir.Engine)
@@ -379,14 +379,14 @@ namespace EngineNS.EGui.Controls
                         //        curItem.Browser = this;
                         //        ItemDragging.SetCurItem(curItem, () =>
                         //        {
-                        //            curItem.AMeta.OnDragTo(UEngine.Instance.ViewportSlateManager.GetPressedViewport());
+                        //            curItem.AMeta.OnDragTo(TtEngine.Instance.ViewportSlateManager.GetPressedViewport());
                         //            return;
                         //        });
                         //    }
                         //}
                         if (ImGuiAPI.IsMouseDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                         {
-                            var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                            var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                             if (mainEditor != null)
                             {
                                 var type = Rtti.UTypeDesc.TypeOf(ameta.TypeStr).SystemType;
@@ -418,7 +418,7 @@ namespace EngineNS.EGui.Controls
                         //if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                         {
                             //if(ImGuiAPI.IsKeyDown(ImGuiKey.ImGuiKey_ReservedForModCtrl))
-                            if (UEngine.Instance.InputSystem.IsCtrlKeyDown())
+                            if (TtEngine.Instance.InputSystem.IsCtrlKeyDown())
                             {
                                 ameta.IsSelected = !ameta.IsSelected;
                                 if (ameta.IsSelected)
@@ -433,7 +433,7 @@ namespace EngineNS.EGui.Controls
                                 }
                             }
                             //else if(ImGuiAPI.IsKeyDown(ImGuiKey.ImGuiKey_ReservedForModShift))
-                            else if (UEngine.Instance.InputSystem.IsShiftKeyDown())
+                            else if (TtEngine.Instance.InputSystem.IsShiftKeyDown())
                             {
                                 if (FirstClickIndex < 0)
                                     FirstClickIndex = 0;
@@ -456,7 +456,7 @@ namespace EngineNS.EGui.Controls
                         }
                     }
                 }
-                ameta.ShowIconTime = UEngine.Instance.CurrentTickCountUS;
+                ameta.ShowIconTime = TtEngine.Instance.CurrentTickCountUS;
                 ameta.OnDraw(in cmdlist, in sz, this);
 
                 if (ImGuiAPI.BeginDragDropSource(ImGuiDragDropFlags_.ImGuiDragDropFlags_SourceNoDisableHover))
@@ -631,7 +631,7 @@ namespace EngineNS.EGui.Controls
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(cmd,
                 ref mIsPreFolderMouseDown,
                 ref mIsPreFolderMouseHover,
-                UEngine.Instance.UIProxyManager[FolderView.PreFolderImgName] as EGui.UIProxy.ImageProxy,
+                TtEngine.Instance.UIProxyManager[FolderView.PreFolderImgName] as EGui.UIProxy.ImageProxy,
                 "", mFolderView.IsPreFolderDisable))
             {
                 mFolderView.CurrentDirHistoryIdx--;
@@ -647,7 +647,7 @@ namespace EngineNS.EGui.Controls
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(cmd,
                 ref mIsNextFolderMouseDown,
                 ref mIsNextFolderMouseHover,
-                UEngine.Instance.UIProxyManager[FolderView.NextFolderImgName] as EGui.UIProxy.ImageProxy,
+                TtEngine.Instance.UIProxyManager[FolderView.NextFolderImgName] as EGui.UIProxy.ImageProxy,
                 "", mFolderView.IsNextFolderDisable))
             {
                 mFolderView.CurrentDirHistoryIdx++;
@@ -792,7 +792,7 @@ namespace EngineNS.EGui.Controls
                     if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(cmd,
                         ref mIsFilterMouseDown,
                         ref mIsFilterMouseHover,
-                        UEngine.Instance.UIProxyManager[FilterImgName] as EGui.UIProxy.ImageProxy,
+                        TtEngine.Instance.UIProxyManager[FilterImgName] as EGui.UIProxy.ImageProxy,
                         "", false, frameHeight))
                     {
                         ImGuiAPI.OpenPopup("AssetFilterMenus", ImGuiPopupFlags_.ImGuiPopupFlags_None);
@@ -810,11 +810,11 @@ namespace EngineNS.EGui.Controls
                         var max = ImGuiAPI.GetWindowContentRegionMax();
                         RightSize = max - min;
 
-                        if(UEngine.Instance.InputSystem.IsDropFiles)
+                        if(TtEngine.Instance.InputSystem.IsDropFiles)
                         {
                             var pos = ImGuiAPI.GetWindowPos();
                             var size = ImGuiAPI.GetWindowSize();
-                            var mousePos = new Vector2(UEngine.Instance.InputSystem.Mouse.GlobalMouseX, UEngine.Instance.InputSystem.Mouse.GlobalMouseY);
+                            var mousePos = new Vector2(TtEngine.Instance.InputSystem.Mouse.GlobalMouseX, TtEngine.Instance.InputSystem.Mouse.GlobalMouseY);
                             if(mousePos.X >= pos.X && mousePos.X <= (pos.X + size.X) &&
                                mousePos.Y >= pos.Y && mousePos.Y <= (pos.Y + size.Y))
                             {
@@ -833,9 +833,9 @@ namespace EngineNS.EGui.Controls
                                     }
                                 }
 
-                                for (int i = 0; i < UEngine.Instance.InputSystem.DropFiles.Count; i++)
+                                for (int i = 0; i < TtEngine.Instance.InputSystem.DropFiles.Count; i++)
                                 {
-                                    var file = UEngine.Instance.InputSystem.DropFiles[i];
+                                    var file = TtEngine.Instance.InputSystem.DropFiles[i];
                                     var fileExt = IO.TtFileManager.GetExtName(file);
                                     for (int j = 0; j < importers.Count; j++)
                                     {
@@ -845,7 +845,7 @@ namespace EngineNS.EGui.Controls
                                             if (((IO.IAssetCreateAttribute)(attrs[0])).IsAssetSource(fileExt))
                                             {
                                                 var assetExtField = Rtti.UTypeDesc.GetField(importers[j].SystemType, "AssetExt");
-                                                EnqueueAssetImporter(UEngine.Instance.AssetMetaManager.ImportAsset(mFolderView.CurrentDir, importers[j], (string)assetExtField.GetValue(null)), file);
+                                                EnqueueAssetImporter(TtEngine.Instance.AssetMetaManager.ImportAsset(mFolderView.CurrentDir, importers[j], (string)assetExtField.GetValue(null)), file);
                                                 break;
                                             }
                                         }
@@ -855,7 +855,7 @@ namespace EngineNS.EGui.Controls
                                         }
                                     }
                                 }
-                                UEngine.Instance.InputSystem.ClearFilesDrop();
+                                TtEngine.Instance.InputSystem.ClearFilesDrop();
                             }
                         }
 
@@ -987,7 +987,7 @@ namespace EngineNS.EGui.Controls
                             }
                             else
                             {
-                                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Asset", "Please wait for Action(MoveTo)");
+                                Profiler.Log.WriteLine<Profiler.TtEditorGategory>(Profiler.ELogTag.Info, "Please wait for Action(MoveTo)");
                             }
                         }
                         catch

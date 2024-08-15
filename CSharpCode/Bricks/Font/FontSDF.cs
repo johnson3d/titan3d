@@ -25,12 +25,12 @@ namespace EngineNS.Bricks.Font
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            //return await UEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(GetAssetName());
+            //return await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(GetAssetName());
             return null;
         }
         public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
-            UEngine.Instance.EditorInstance.FontIcon?.OnDraw(cmdlist, in start, in end, 0);
+            TtEngine.Instance.EditorInstance.FontIcon?.OnDraw(cmdlist, in start, in end, 0);
             //cmdlist.AddText(in start, 0xFFFFFFFF, "PhyMtl", null);
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
@@ -72,7 +72,7 @@ namespace EngineNS.Bricks.Font
             string mName;
             string mSourceFile;
             public TtFontDesc mDesc = new TtFontDesc();
-            ImGui.ImGuiFileDialog mFileDialog = UEngine.Instance.EditorInstance.FileDialog.mFileDialog;
+            ImGui.ImGuiFileDialog mFileDialog = TtEngine.Instance.EditorInstance.FileDialog.mFileDialog;
             EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
             public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
             {
@@ -172,16 +172,16 @@ namespace EngineNS.Bricks.Font
                 var rn = RName.GetRName(mDir.Name + mName + TtFontSDF.AssetExt, mDir.RNameType);
 
                 mDesc.CharFilters.Excludes.Add(new Vector2ui(0, 65535));
-                TtFontSDF.SaveFont(rn, UEngine.Instance.FontModule.FontManager, mSourceFile, mDesc);
+                TtFontSDF.SaveFont(rn, TtEngine.Instance.FontModule.FontManager, mSourceFile, mDesc);
 
                 var ameta = new TtFontSDFAMeta();
                 ameta.SetAssetName(rn);
                 ameta.AssetId = Guid.NewGuid();
                 ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtFontSDFAMeta));
                 ameta.Description = $"This is a {typeof(TtFontSDFAMeta).FullName}\n";
-                ameta.SaveAMeta();
+                ameta.SaveAMeta((IO.IAsset)null);
 
-                UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
                 return true;
             }
         }
@@ -198,7 +198,7 @@ namespace EngineNS.Bricks.Font
         }
         public IO.IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
@@ -210,9 +210,9 @@ namespace EngineNS.Bricks.Font
             if (ameta != null)
             {
                 UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta();
+                ameta.SaveAMeta(this);
             }
-            UEngine.Instance.SourceControlModule.AddFile(name.Address);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         [Rtti.Meta]
         public RName AssetName
@@ -309,13 +309,13 @@ namespace EngineNS.Bricks.Font
             fontName = IO.TtFileManager.GetRegularPath(fontName).ToLower();
             TtFontCharFilter filter = desc.CharFilters;
             var font = new TtFontSDF();
-            font.mCoreObject.InitForBuildFont(UEngine.Instance.GfxDevice.RenderContext.mCoreObject,
+            font.mCoreObject.InitForBuildFont(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject,
                 manager.mCoreObject, fontName, desc.FontSize,
                 desc.OriginPixelSize, desc.Spread, desc.PixelColored);
 
             //内存扛不住。。。
             //var num = filter.CharEnd - filter.CharBegin;
-            //var smp = UEngine.Instance.EventPoster.ParrallelFor((int)num, (index) =>
+            //var smp = TtEngine.Instance.EventPoster.ParrallelFor((int)num, (index) =>
             //{
             //    uint unicode = (uint)index + filter.CharBegin;
 
@@ -327,7 +327,7 @@ namespace EngineNS.Bricks.Font
             //});
             //smp?.Wait(int.MaxValue);
 
-            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Font",$"Begin SFFont = {filter.CharBegin} : {filter.CharEnd}");
+            Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, $"Begin SFFont = {filter.CharBegin} : {filter.CharEnd}");
             for (uint unicode = filter.CharBegin; unicode < filter.CharEnd; unicode++)
             {
                 if (font.mCoreObject.GetCharIndex(unicode) == 0)
@@ -337,7 +337,7 @@ namespace EngineNS.Bricks.Font
                 font.mCoreObject.AddWordForBuild(unicode);
                 System.Diagnostics.Debug.WriteLine($"AddWord {unicode}");
             }
-            Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Font", "End SFFont");
+            Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, "End SFFont");
             font.mCoreObject.SaveFontSDF(name.Address);
         }
 
@@ -405,10 +405,10 @@ namespace EngineNS.Bricks.Font
         }
         public TtFontSDF GetFontSDF(RName font, int fontSize, int texSizeX, int texSizeY)
         {
-            var result = new TtFontSDF(mCoreObject.GetFont(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, font.Address, fontSize, texSizeX, texSizeY));
+            var result = new TtFontSDF(mCoreObject.GetFont(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, font.Address, fontSize, texSizeX, texSizeY));
             return result;
         }
-        public void Tick(UEngine host)
+        public void Tick(TtEngine host)
         {
             mCoreObject.Update(host.GfxDevice.RenderContext.mCoreObject, false);
         }
@@ -427,11 +427,11 @@ namespace EngineNS.Bricks.Font
         }
     }
 
-    public class UFontModule : UModule<UEngine>
+    public class UFontModule : UModule<TtEngine>
     {
         TtFontManager mFontManager = new TtFontManager();
         public TtFontManager FontManager { get => mFontManager; }
-        public override Task<bool> PostInitialize(UEngine host)
+        public override Task<bool> PostInitialize(TtEngine host)
         {
             //var font = FontManager.GetFontSDF(RName.GetRName("fonts/roboto-regular.fontsdf", RName.ERNameType.Engine), 0, 1024, 512);
             //using (var words = UNativeArray<EngineNS.FTWord>.CreateInstance())
@@ -440,12 +440,12 @@ namespace EngineNS.Bricks.Font
             //}
             return base.PostInitialize(host);
         }
-        public override void TickModule(UEngine host)
+        public override void TickModule(TtEngine host)
         {
             FontManager.Tick(host);
             base.TickModule(host);
         }
-        public override void Cleanup(UEngine host)
+        public override void Cleanup(TtEngine host)
         {
             CoreSDK.DisposeObject(ref mFontManager);
             base.Cleanup(host);
@@ -455,7 +455,7 @@ namespace EngineNS.Bricks.Font
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public Bricks.Font.UFontModule FontModule { get; } = new Bricks.Font.UFontModule();
     }

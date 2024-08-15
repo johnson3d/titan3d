@@ -178,7 +178,7 @@ namespace EngineNS.EGui.Controls
     //    //                    continue;
     //    //            }
 
-    //    //            var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType));
+    //    //            var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType));
     //    //            if (ameta == null)
     //    //                continue;
 
@@ -205,7 +205,7 @@ namespace EngineNS.EGui.Controls
     //    //        {
     //    //            CtrlUtility.DrawHelper(ameta.GetAssetName().Name, ameta.Description);
     //    //        }
-    //    //        ameta.ShowIconTime = UEngine.Instance.CurrentTickCount;
+    //    //        ameta.ShowIconTime = TtEngine.Instance.CurrentTickCount;
     //    //        ameta.OnDraw(ref cmdlist, ref sz, null);
     //    //        if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
     //    //        {

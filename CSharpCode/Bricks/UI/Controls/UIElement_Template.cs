@@ -67,7 +67,7 @@ namespace EngineNS.UI.Controls
         }
         public virtual bool ApplyTemplate()
         {
-            if (!UEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
+            if (!TtEngine.Instance.EventPoster.IsThread(Thread.Async.EAsyncTarget.Logic))
             {
                 throw new InvalidOperationException("ApplyTemplate need be call in logic thread");
             }

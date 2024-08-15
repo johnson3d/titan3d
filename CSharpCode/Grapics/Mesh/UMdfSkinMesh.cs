@@ -20,7 +20,7 @@ namespace EngineNS.Graphics.Mesh
             base.CopyFrom(mdf);
             PerSkinMeshCBuffer = (mdf as UMdfSkinMesh).PerSkinMeshCBuffer;
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.URenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
             unsafe
@@ -35,12 +35,12 @@ namespace EngineNS.Graphics.Mesh
                 }
                 var runtimePose = SkinModifier.RuntimePose;
 
-                var shaderBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+                var shaderBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
                 if (PerSkinMeshCBuffer == null)
                 {
                     if (shaderBinder.CBPerSkinMesh.UpdateFieldVar(drawcall.GraphicsEffect, "cbSkinMesh"))
                     {
-                        PerSkinMeshCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(shaderBinder.CBPerSkinMesh.Binder.mCoreObject);
+                        PerSkinMeshCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(shaderBinder.CBPerSkinMesh.Binder.mCoreObject);
                     }
                 }
 
@@ -71,7 +71,7 @@ namespace EngineNS.Graphics.Mesh
                     absQuat++;
                 }
 
-                PerSkinMeshCBuffer.mCoreObject.FlushWrite(true, UEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
+                PerSkinMeshCBuffer.mCoreObject.FlushWrite(true, TtEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
             }
         }
     }

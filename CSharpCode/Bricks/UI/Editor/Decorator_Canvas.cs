@@ -107,10 +107,10 @@ namespace EngineNS.UI.Editor
         List<Vector4> mOriAnchorPoints = new List<Vector4>();
 
         TtUIEditor mEditor;
-        Graphics.Pipeline.Shader.UMaterialInstance mWhiteColorMat;
-        Graphics.Pipeline.Shader.UMaterialInstance mGreenColorMat;
-        List<Graphics.Pipeline.Shader.UMaterial> mNormalAnchorMats;
-        List<Graphics.Pipeline.Shader.UMaterial> mHighLightAnchorMats;
+        Graphics.Pipeline.Shader.TtMaterialInstance mWhiteColorMat;
+        Graphics.Pipeline.Shader.TtMaterialInstance mGreenColorMat;
+        List<Graphics.Pipeline.Shader.TtMaterial> mNormalAnchorMats;
+        List<Graphics.Pipeline.Shader.TtMaterial> mHighLightAnchorMats;
         bool mInitialized = false;
 
         public bool IsDirty { get; set; } = false;
@@ -119,18 +119,18 @@ namespace EngineNS.UI.Editor
         {
             mEditor = editor;
 
-            mWhiteColorMat = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("ui/uidecorator_white.uminst", RName.ERNameType.Engine));
-            mGreenColorMat = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("ui/uidecorator_green.uminst", RName.ERNameType.Engine));
-            mNormalAnchorMats = new List<Graphics.Pipeline.Shader.UMaterial>();
+            mWhiteColorMat = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("ui/uidecorator_white.uminst", RName.ERNameType.Engine));
+            mGreenColorMat = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("ui/uidecorator_green.uminst", RName.ERNameType.Engine));
+            mNormalAnchorMats = new List<Graphics.Pipeline.Shader.TtMaterial>();
             mNormalAnchorMats.Add(mWhiteColorMat);
-            mHighLightAnchorMats = new List<Graphics.Pipeline.Shader.UMaterial>();
+            mHighLightAnchorMats = new List<Graphics.Pipeline.Shader.TtMaterial>();
             mHighLightAnchorMats.Add(mGreenColorMat);
             var meshProvider = UMeshDataProvider.MakeSphere(1.0f, 8, 8, 0xffffffff);
             var meshPrim = meshProvider.ToMesh();
             for (int i = (int)EDecoratorType.Size_Left_Top; i <= (int)EDecoratorType.Size_Right_Bottom; i++)
             {
                 var mesh = new TtMesh();
-                mesh.Initialize(meshPrim, new Graphics.Pipeline.Shader.UMaterial[] { mWhiteColorMat },
+                mesh.Initialize(meshPrim, new Graphics.Pipeline.Shader.TtMaterial[] { mWhiteColorMat },
                     Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 mOperatorNodes[i] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                     new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement),
@@ -148,7 +148,7 @@ namespace EngineNS.UI.Editor
                         {
                             var mesh = new TtMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_001.vms", RName.ERNameType.Engine), 
-                                new List<Graphics.Pipeline.Shader.UMaterial>() { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                                new List<Graphics.Pipeline.Shader.TtMaterial>() { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
                             mAnchorNodes[idx].Parent = null;
@@ -159,7 +159,7 @@ namespace EngineNS.UI.Editor
                         {
                             var mesh = new TtMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_002.vms", RName.ERNameType.Engine), 
-                                new List<Graphics.Pipeline.Shader.UMaterial>() { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                                new List<Graphics.Pipeline.Shader.TtMaterial>() { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
                             mAnchorNodes[idx].Parent = null;
@@ -170,7 +170,7 @@ namespace EngineNS.UI.Editor
                         {
                             var mesh = new TtMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_003.vms", RName.ERNameType.Engine),
-                                new List<Graphics.Pipeline.Shader.UMaterial>() { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                                new List<Graphics.Pipeline.Shader.TtMaterial>() { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
                             mAnchorNodes[idx].Parent = null;
@@ -181,7 +181,7 @@ namespace EngineNS.UI.Editor
                         {
                             var mesh = new TtMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_002.vms", RName.ERNameType.Engine), 
-                                new List<Graphics.Pipeline.Shader.UMaterial>() { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                                new List<Graphics.Pipeline.Shader.TtMaterial>() { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, -MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
@@ -192,7 +192,7 @@ namespace EngineNS.UI.Editor
                         {
                             var mesh = new TtMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_003.vms", RName.ERNameType.Engine), 
-                                new List<Graphics.Pipeline.Shader.UMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                                new List<Graphics.Pipeline.Shader.TtMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, -MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
@@ -203,7 +203,7 @@ namespace EngineNS.UI.Editor
                         {
                             var mesh = new TtMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_002.vms", RName.ERNameType.Engine), 
-                                new List<Graphics.Pipeline.Shader.UMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                                new List<Graphics.Pipeline.Shader.TtMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI));
                             mAnchorNodes[idx].Parent = null;
@@ -214,7 +214,7 @@ namespace EngineNS.UI.Editor
                         {
                             var mesh = new TtMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_003.vms", RName.ERNameType.Engine),
-                                new List<Graphics.Pipeline.Shader.UMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                                new List<Graphics.Pipeline.Shader.TtMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI));
                             mAnchorNodes[idx].Parent = null;
@@ -225,7 +225,7 @@ namespace EngineNS.UI.Editor
                         {
                             var mesh = new TtMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_002.vms", RName.ERNameType.Engine),
-                                new List<Graphics.Pipeline.Shader.UMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                                new List<Graphics.Pipeline.Shader.TtMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
@@ -236,7 +236,7 @@ namespace EngineNS.UI.Editor
                         {
                             var mesh = new TtMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_003.vms", RName.ERNameType.Engine), 
-                                new List<Graphics.Pipeline.Shader.UMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                                new List<Graphics.Pipeline.Shader.TtMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
@@ -247,7 +247,7 @@ namespace EngineNS.UI.Editor
                         {
                             var mesh = new TtMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_004.vms", RName.ERNameType.Engine),
-                                new List<Graphics.Pipeline.Shader.UMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                                new List<Graphics.Pipeline.Shader.TtMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
                             mAnchorNodes[idx].Parent = null;
@@ -258,7 +258,7 @@ namespace EngineNS.UI.Editor
                         {
                             var mesh = new TtMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_004.vms", RName.ERNameType.Engine),
-                                new List<Graphics.Pipeline.Shader.UMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                                new List<Graphics.Pipeline.Shader.TtMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, -MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
@@ -269,7 +269,7 @@ namespace EngineNS.UI.Editor
                         {
                             var mesh = new TtMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_004.vms", RName.ERNameType.Engine), 
-                                new List<Graphics.Pipeline.Shader.UMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                                new List<Graphics.Pipeline.Shader.TtMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI));
                             mAnchorNodes[idx].Parent = null;
@@ -280,7 +280,7 @@ namespace EngineNS.UI.Editor
                         {
                             var mesh = new TtMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_004.vms", RName.ERNameType.Engine), 
-                                new List<Graphics.Pipeline.Shader.UMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                                new List<Graphics.Pipeline.Shader.TtMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
@@ -291,7 +291,7 @@ namespace EngineNS.UI.Editor
                         {
                             var mesh = new TtMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_005.vms", RName.ERNameType.Engine), 
-                                new List<Graphics.Pipeline.Shader.UMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                                new List<Graphics.Pipeline.Shader.TtMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
                             mAnchorNodes[idx].Parent = null;
@@ -302,7 +302,7 @@ namespace EngineNS.UI.Editor
                         {
                             var mesh = new TtMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_005.vms", RName.ERNameType.Engine), 
-                                new List<Graphics.Pipeline.Shader.UMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                                new List<Graphics.Pipeline.Shader.TtMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, -MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
@@ -313,7 +313,7 @@ namespace EngineNS.UI.Editor
                         {
                             var mesh = new TtMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_005.vms", RName.ERNameType.Engine), 
-                                new List<Graphics.Pipeline.Shader.UMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                                new List<Graphics.Pipeline.Shader.TtMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI));
                             mAnchorNodes[idx].Parent = null;
@@ -324,7 +324,7 @@ namespace EngineNS.UI.Editor
                         {
                             var mesh = new TtMesh();
                             await mesh.Initialize(RName.GetRName("ui/p_005.vms", RName.ERNameType.Engine), 
-                                new List<Graphics.Pipeline.Shader.UMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                                new List<Graphics.Pipeline.Shader.TtMaterial> { mWhiteColorMat }, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                             mAnchorNodes[idx] = await UMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
@@ -735,7 +735,7 @@ namespace EngineNS.UI.Editor
                                                 mesh.UpdateMesh(0, mesh.MaterialMesh.SubMeshes[0].Mesh, mHighLightAnchorMats);
                                                 mCurrentPointAtAnchor = mAnchorNodes[i];
                                                 bFind = true;
-                                                Log.WriteLine(ELogTag.Info, "Test", "Set current point at anchor " + i);
+                                                Log.WriteLine<Profiler.TtGraphicsGategory>(ELogTag.Info, "Set current point at anchor " + i);
                                                 break;
                                             }
                                         }
@@ -746,7 +746,7 @@ namespace EngineNS.UI.Editor
                                                 mCurrentPointAtAnchor.Mesh.UpdateMesh(0, mCurrentPointAtAnchor.Mesh.MaterialMesh.SubMeshes[0].Mesh, mNormalAnchorMats);
                                             }
                                             mCurrentPointAtAnchor = null;
-                                            Log.WriteLine(ELogTag.Info, "Test", "clear current point at anchor");
+                                            Log.WriteLine<Profiler.TtGraphicsGategory>(ELogTag.Info, "clear current point at anchor");
                                         }
                                     }
                                 }

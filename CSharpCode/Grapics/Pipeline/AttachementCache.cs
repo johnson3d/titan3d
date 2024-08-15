@@ -48,7 +48,7 @@ namespace EngineNS.Graphics.Pipeline
             {
                 //result = new UAttachBuffer();
                 //result.CreateBufferViews(in desc.BufferDesc);
-                result = UEngine.Instance.GfxDevice.AttachBufferManager.Alloc(desc.BufferDesc);
+                result = TtEngine.Instance.GfxDevice.AttachBufferManager.Alloc(desc.BufferDesc);
                 CachedAttachments.Add(name, result);
                 return result;
             }

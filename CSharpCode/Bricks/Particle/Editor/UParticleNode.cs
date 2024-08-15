@@ -63,7 +63,7 @@ namespace EngineNS.Bricks.Particle.Editor
         public bool Enable { get; set; } = true;
         [Category("Option")]
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = Graphics.Mesh.UMaterialMesh.AssetExt)]
+        [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
         public RName MeshName
         {
             get; set;

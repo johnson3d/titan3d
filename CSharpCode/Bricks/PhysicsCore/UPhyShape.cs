@@ -118,7 +118,7 @@ namespace EngineNS.Bricks.PhysicsCore
                     RName rn = (RName)newValue;
                     if (rn != old)
                     {
-                        materials[i] = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(rn);
+                        materials[i] = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(rn);
                         var hostShape = info.ObjectInstance as TtPhyShape;
                         //if (hostShape != null)
                         hostShape.FlushMaterials();
@@ -151,7 +151,7 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 if (mDebugMesh == null)
                 {
-                    Graphics.Mesh.UMeshPrimitives meshPrimitive = null;
+                    Graphics.Mesh.TtMeshPrimitives meshPrimitive = null;
                     switch (ShapeType)
                     {
                         case EPhysShapeType.PST_Plane:
@@ -180,7 +180,7 @@ namespace EngineNS.Bricks.PhysicsCore
                         case EPhysShapeType.PST_TriangleMesh:
                             {
                                 var shape = this as TtPhyTriMeshShape;
-                                var triMesh = UEngine.Instance.PhyModule.PhyContext.PhyMeshManager.GetMeshSync(shape.TriMeshSource);
+                                var triMesh = TtEngine.Instance.PhyModule.PhyContext.PhyMeshManager.GetMeshSync(shape.TriMeshSource);
                                 if(triMesh!=null)
                                 {
                                     meshPrimitive = triMesh.ToMeshProvider().ToMesh();
@@ -193,11 +193,11 @@ namespace EngineNS.Bricks.PhysicsCore
 
                     if (meshPrimitive != null)
                     {
-                        var matrials = new Graphics.Pipeline.Shader.UMaterial[1];
-                        matrials[0] = UEngine.Instance.GfxDevice.MaterialManager.PxDebugMaterial;
-                        var ShowMesh = new Graphics.Mesh.UMaterialMesh();
-                        ShowMesh.Initialize(new List<Graphics.Mesh.UMeshPrimitives>() { meshPrimitive },
-                                new List<Graphics.Pipeline.Shader.UMaterial[]>() { matrials });
+                        var matrials = new Graphics.Pipeline.Shader.TtMaterial[1];
+                        matrials[0] = TtEngine.Instance.GfxDevice.MaterialManager.PxDebugMaterial;
+                        var ShowMesh = new Graphics.Mesh.TtMaterialMesh();
+                        ShowMesh.Initialize(new List<Graphics.Mesh.TtMeshPrimitives>() { meshPrimitive },
+                                new List<Graphics.Pipeline.Shader.TtMaterial[]>() { matrials });
                         mDebugMesh = new Graphics.Mesh.TtMesh();
                         mDebugMesh.Initialize(ShowMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                     }
@@ -243,7 +243,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public static TtPhyShape CreateShape(TtShapeSerializer sr)
         {
-            var pc = UEngine.Instance.PhyModule.PhyContext;
+            var pc = TtEngine.Instance.PhyModule.PhyContext;
             var mtl = pc.PhyMaterialManager.GetMaterialSync(sr.PxMaterialName);
             if (sr.GetType() == typeof(TtPhyBoxShape.TtBoxSerializer))
             {
@@ -253,7 +253,7 @@ namespace EngineNS.Bricks.PhysicsCore
             else if (sr.GetType() == typeof(TtPhyTriMeshShape.TtTriMeshSerializer))
             {
                 var mesh = sr as TtPhyTriMeshShape.TtTriMeshSerializer;
-                var triMesh = UEngine.Instance.PhyModule.PhyContext.PhyMeshManager.GetMeshSync(sr.PxMaterialName);
+                var triMesh = TtEngine.Instance.PhyModule.PhyContext.PhyMeshManager.GetMeshSync(sr.PxMaterialName);
                 return pc.CreateShapeTriMesh(mesh.Materials, triMesh, mesh.Scale, in Quaternion.Identity);
             }
             return null;

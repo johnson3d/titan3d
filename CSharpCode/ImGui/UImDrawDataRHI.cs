@@ -12,7 +12,7 @@ namespace EngineNS.EGui
             var result = new T();
             result.NativeHandle = System.Runtime.InteropServices.GCHandle.Alloc(result);
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             result.Drawcall = rc.CreateGraphicDraw();
             {
                 var pipeDesc = new NxRHI.FGpuPipelineDesc();
@@ -34,7 +34,7 @@ namespace EngineNS.EGui
                 pRenderTarget[0].SrcBlendAlpha = NxRHI.EBlend.BLD_INV_SRC_ALPHA;
                 pRenderTarget[0].DestBlendAlpha = NxRHI.EBlend.BLD_ONE;
                 pRenderTarget[0].BlendEnable = 1;
-                var pipeline = UEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(UEngine.Instance.GfxDevice.RenderContext, in pipeDesc);
+                var pipeline = TtEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(TtEngine.Instance.GfxDevice.RenderContext, in pipeDesc);
                 result.Drawcall.BindPipeline(pipeline);
 
                 //Pipeline.mCoreObject.GetGpuProgram().BindInputLayout(renderer.InputLayout.mCoreObject);
@@ -67,12 +67,12 @@ namespace EngineNS.EGui
     public class UImDrawDataRHI : IDisposable
     {
         public NxRHI.UCommandList CmdList;
-        public NxRHI.UEffectBinder FontTextureBindInfo;
+        public NxRHI.TtEffectBinder FontTextureBindInfo;
         public NxRHI.UCbView FontCBuffer;
         public NxRHI.UGraphicDraw Drawcall;
 
         public NxRHI.UGeomMesh GeomMesh;
-        public Graphics.Mesh.UMeshPrimitives PrimitiveMesh;
+        public Graphics.Mesh.TtMeshPrimitives PrimitiveMesh;
 
         #region TriangleData
         public NxRHI.UVbView VertexBuffer;
@@ -82,14 +82,14 @@ namespace EngineNS.EGui
         #endregion
         public unsafe bool InitializeGraphics(EPixelFormat format, EPixelFormat dsFormat)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             CmdList = rc.CreateCommandList();
 
-            var renderer = UEngine.Instance.GfxDevice.SlateRenderer;
+            var renderer = TtEngine.Instance.GfxDevice.SlateRenderer;
 
             GeomMesh = rc.CreateGeomMesh();
             GeomMesh.SetAtomNum(1);
-            PrimitiveMesh = new Graphics.Mesh.UMeshPrimitives();
+            PrimitiveMesh = new Graphics.Mesh.TtMeshPrimitives();
             PrimitiveMesh.mCoreObject.Init(rc.mCoreObject, GeomMesh.mCoreObject, new BoundingBox());
             var dpDesc = new NxRHI.FMeshAtomDesc();
             dpDesc.SetDefault();
@@ -130,7 +130,7 @@ namespace EngineNS.EGui
                 pRenderTarget[0].SrcBlendAlpha = NxRHI.EBlend.BLD_INV_SRC_ALPHA;
                 pRenderTarget[0].DestBlendAlpha = NxRHI.EBlend.BLD_ONE;
                 pRenderTarget[0].BlendEnable = 1;
-                var pipeline = UEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(UEngine.Instance.GfxDevice.RenderContext, in pipeDesc);
+                var pipeline = TtEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(TtEngine.Instance.GfxDevice.RenderContext, in pipeDesc);
                 var count = pipeline.UnsafeRefCount;
                 Drawcall.BindPipeline(pipeline);
 
@@ -166,7 +166,7 @@ namespace EngineNS.EGui
         private static Profiler.TimeScope ScopeDrawPass = Profiler.TimeScopeManager.GetTimeScope(typeof(UImDrawDataRHI), "RenderImDrawData.DrawPass");
         private unsafe static void RenderImDrawDataImpl(ref ImDrawData draw_data, Graphics.Pipeline.UPresentWindow presentWindow, UImDrawDataRHI rhiData)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var drawCmd = rhiData.CmdList.mCoreObject;
             uint vertexOffsetInVertices = 0;
             uint indexOffsetInElements = 0;

@@ -65,7 +65,7 @@ namespace EngineNS.Editor.Forms
                     var pos = Position;
                     pos.X -= 600;
                     var holders = new List<IO.IAssetMeta>();
-                    UEngine.Instance.AssetMetaManager.GetAssetHolder(AMeta, holders);
+                    TtEngine.Instance.AssetMetaManager.GetAssetHolder(AMeta, holders);
                     foreach (var i in holders)
                     {
                         bool bFind = false;
@@ -83,7 +83,7 @@ namespace EngineNS.Editor.Forms
                             node.UserData = this;
                             node.AMeta = i;
                             var curPos = pos;
-                            UEngine.Instance.EventPoster.RunOn((state) =>
+                            TtEngine.Instance.EventPoster.RunOn((state) =>
                             {
                                 this.ParentGraph.AddNode(node);
                                 node.Position = curPos;
@@ -120,9 +120,9 @@ namespace EngineNS.Editor.Forms
                             var node = new UAssetReferNode();
                             node.Name = i.ToString();
                             node.UserData = this;
-                            node.AMeta = UEngine.Instance.AssetMetaManager.GetAssetMeta(i);
+                            node.AMeta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(i);
                             var curPos = pos;
-                            UEngine.Instance.EventPoster.RunOn((state) =>
+                            TtEngine.Instance.EventPoster.RunOn((state) =>
                             {
                                 this.ParentGraph.AddNode(node);
                                 node.Position = curPos;
@@ -154,7 +154,7 @@ namespace EngineNS.Editor.Forms
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public IO.IAssetMeta EditAsset { get; private set; }
         public UAssetReferGraph ReferGraph = new UAssetReferGraph();
-        public UGraphRenderer GraphRenderer { get; } = new UGraphRenderer();
+        public TtGraphRenderer GraphRenderer { get; } = new TtGraphRenderer();
 
         public float LeftWidth = 0;
         public IRootForm GetRootForm()
@@ -233,7 +233,7 @@ namespace EngineNS.Editor.Forms
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }

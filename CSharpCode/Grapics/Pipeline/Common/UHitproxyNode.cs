@@ -49,7 +49,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             var id = GetHitProxyID(MouseX, MouseY);
             if (id == 0)
                 return null;
-            return UEngine.Instance.GfxDevice.HitproxyManager.FindProxy(id);
+            return TtEngine.Instance.GfxDevice.HitproxyManager.FindProxy(id);
         }
 
         public UInt32 GetHitProxyID(UInt32 MouseX, UInt32 MouseY)
@@ -99,7 +99,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 if (HitProxyIdArray == null)
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Error, "@Graphic", $"HitProxyError: Null Ptr!!!", "");
+                    Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Error, $"HitProxyError: Null Ptr!!!", "");
                     return 0;
                 }
 
@@ -146,14 +146,14 @@ namespace EngineNS.Graphics.Pipeline.Common
             return mHitproxyShading;
         }
         public TtCpuCullingNode CpuCullNode = null;
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             HitproxyPass.Initialize(rc, debugName);
 
-            mHitproxyShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UHitproxyShading>();
+            mHitproxyShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UHitproxyShading>();
 
             CreateGBuffers(policy, DepthPinInOut.Attachement.Format, true);
             mCopyFence = rc.CreateFence(new NxRHI.FFenceDesc(), "Copy Hitproxy Texture");
@@ -164,9 +164,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                 CpuCullNode = linker.OutPin.GetNakedHostNode<TtCpuCullingNode>();
             }
         }
-        public unsafe void CreateGBuffers(URenderPolicy policy, EPixelFormat DSFormat, bool bClearDS)
+        public unsafe void CreateGBuffers(TtRenderPolicy policy, EPixelFormat DSFormat, bool bClearDS)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             var HitproxyPassDesc = new NxRHI.FRenderPassDesc();
             unsafe
@@ -186,7 +186,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 //HitproxyPassDesc.mDepthClearValue = 1.0f;
                 //HitproxyPassDesc.mStencilClearValue = 0u;
             }
-            HitproxyRenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in HitproxyPassDesc);
+            HitproxyRenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in HitproxyPassDesc);
 
             var GizmosPassDesc = new NxRHI.FRenderPassDesc();
             unsafe
@@ -206,7 +206,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 //GizmosPassDesc.mDepthClearValue = 1.0f;
                 //GizmosPassDesc.mStencilClearValue = 0u;
             }
-            GizmosRenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in GizmosPassDesc);
+            GizmosRenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in GizmosPassDesc);
 
             GHitproxyBuffers.Initialize(policy, HitproxyRenderPass);
             GHitproxyBuffers.SetRenderTarget(policy, 0, HitIdPinOut);
@@ -231,7 +231,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             base.Dispose();
         }
-        public override unsafe void OnResize(URenderPolicy policy, float x, float y)
+        public override unsafe void OnResize(TtRenderPolicy policy, float x, float y)
         {
             HitIdPinOut.Attachement.Width = (uint)(x * ScaleFactor);
             HitIdPinOut.Attachement.Height = (uint)(y * ScaleFactor);
@@ -267,7 +267,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         bool IsHitproxyBuilding = false;
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UHitproxyNode), nameof(TickLogic));
-        public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             if (IsHitproxyBuilding)
                 return;
@@ -328,7 +328,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 HitproxyPass.ExecuteCommands(policy);
             }
             
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             //copy to sys memory after draw all meshesr
             var cmdlist_post = HitproxyPass.PostCmds.DrawCmdList.mCoreObject;
             var attachBuffer = RenderGraph.AttachmentCache.FindAttachement(GHitproxyBuffers.RenderTargets[0].Attachement.AttachmentName);
@@ -343,7 +343,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             cmdlist_post.BeginCommand();
             fixed(NxRHI.FSubResourceFootPrint* pFootprint = &CopyBufferFootPrint)
             {
-                var cpDraw = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
+                var cpDraw = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
                 var dstTex = readTexture as NxRHI.UTexture;
                 var dstBf = readTexture as NxRHI.UBuffer;
                 if (dstTex != null)
@@ -370,12 +370,12 @@ namespace EngineNS.Graphics.Pipeline.Common
             policy.CommitCommandList(HitproxyPass.PostCmds.DrawCmdList);
 
             var fence = mCopyFence;
-            UEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
+            TtEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
             {
                 rc.GpuQueue.IncreaseSignal(fence);
                 var targetValue = fence.ExpectValue;
                 var postTime = Support.Time.GetTickCount();
-                UEngine.Instance.EventPoster.PostTickSyncEvent((tickCount) =>
+                TtEngine.Instance.EventPoster.PostTickSyncEvent((tickCount) =>
                 {
                     if (readTexture != mReadableHitproxyTexture || tickCount - postTime > 1000)
                     {
@@ -409,17 +409,17 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             
 
-            //UEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((im_cmd, name) =>
+            //TtEngine.Instance.GfxDevice.RenderCmdQueue.QueueCmd((im_cmd, name) =>
             //{
             //    var bufferData = new Support.CBlobObject();
             //    mReadableHitproxyTexture.mCoreObject.FetchGpuDataAsImage2DBlob(im_cmd, 0, 0, mHitProxyData.mCoreObject);
-            //    UEngine.Instance.GfxDevice.RenderContext.CmdQueue.SignalFence(mReadHitproxyFence, 0);
+            //    TtEngine.Instance.GfxDevice.RenderContext.CmdQueue.SignalFence(mReadHitproxyFence, 0);
 
             //    IsHitproxyBuilding = false;
             //}, "Fetch Image");
         }
 
-        public override void BeforeTickLogic(URenderPolicy policy)
+        public override void BeforeTickLogic(TtRenderPolicy policy)
         {
             var buffer = this.FindAttachBuffer(DepthPinInOut);
             if (buffer != null)
@@ -436,7 +436,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             //    this.CreateGBuffers(policy, DepthPinInOut.Attachement.Format, true);
             //}
         }
-        public unsafe override void TickSync(URenderPolicy policy)
+        public unsafe override void TickSync(TtRenderPolicy policy)
         {
             HitproxyPass.SwapBuffer();
         }

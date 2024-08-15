@@ -20,12 +20,12 @@ namespace EngineNS.Editor.Forms
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
-        public Graphics.Pipeline.Shader.UMaterialInstance Material;
+        public Graphics.Pipeline.Shader.TtMaterialInstance Material;
         public Editor.TtPreviewViewport PreviewViewport { get; set; } = new Editor.TtPreviewViewport();
         public EGui.Controls.PropertyGrid.PropertyGrid MaterialPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public UMaterialInstanceEditorRecorder ActionRecorder = new UMaterialInstanceEditorRecorder();
-        public URenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
+        public TtRenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
         GamePlay.Scene.UMeshNode PreviewNode;
         ~UMaterialInstanceEditor()
         {
@@ -54,7 +54,7 @@ namespace EngineNS.Editor.Forms
         {
             return this;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -62,7 +62,7 @@ namespace EngineNS.Editor.Forms
 
             (viewport as Editor.TtPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
-            var materials = new Graphics.Pipeline.Shader.UMaterial[1];
+            var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = Material;
             if (materials[0] == null)
                 return;
@@ -99,7 +99,7 @@ namespace EngineNS.Editor.Forms
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
         }
-        async System.Threading.Tasks.Task CreateAnother(Graphics.Pipeline.TtViewportSlate viewport, Graphics.Mesh.UMeshPrimitives rectMesh, Graphics.Pipeline.Shader.UMaterial[] materials)
+        async System.Threading.Tasks.Task CreateAnother(Graphics.Pipeline.TtViewportSlate viewport, Graphics.Mesh.TtMeshPrimitives rectMesh, Graphics.Pipeline.Shader.TtMaterial[] materials)
         {
             materials[0] = Material.CloneMaterialInstance();
             materials[0].RenderLayer = ERenderLayer.RL_Translucent;
@@ -122,7 +122,7 @@ namespace EngineNS.Editor.Forms
             LoadingPercent = 0;
             ProgressText = "Load Material";
             AssetName = name;
-            Material = await UEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(name);
+            Material = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(name);
             if (Material == null)
                 return false;
             LoadingPercent = 0.1f;
@@ -134,13 +134,13 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"Material:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
+            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
 
             LoadingPercent = 0.8f;
 
             MaterialPropGrid.Target = Material;
             EditorPropGrid.Target = this;
-            UEngine.Instance.TickableManager.AddTickable(this);
+            TtEngine.Instance.TickableManager.AddTickable(this);
             LoadingPercent = 1.0f;
             return true;
         }
@@ -148,7 +148,7 @@ namespace EngineNS.Editor.Forms
         {
             Material.ActionRecorder = null;
             ActionRecorder.ClearRecords();
-            UEngine.Instance.TickableManager.RemoveTickable(this);
+            TtEngine.Instance.TickableManager.RemoveTickable(this);
             Dispose();
         }
         bool mDockInitialized = false;
@@ -217,7 +217,7 @@ namespace EngineNS.Editor.Forms
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -278,9 +278,9 @@ namespace EngineNS.Editor.Forms
             {
                 Material.SaveAssetTo(Material.AssetName);
                 Material.SerialId++;
-                var unused = UEngine.Instance.GfxDevice.MaterialInstanceManager.ReloadMaterialInstance(Material.AssetName);
+                var unused = TtEngine.Instance.GfxDevice.MaterialInstanceManager.ReloadMaterialInstance(Material.AssetName);
 
-                //USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+                //USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Reload", in btSize))
@@ -351,7 +351,7 @@ namespace EngineNS.Editor.Forms
 namespace EngineNS.Graphics.Pipeline.Shader
 {
     [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.UMaterialInstanceEditor))]
-    public partial class UMaterialInstance
+    public partial class TtMaterialInstance
     {
     }
 }

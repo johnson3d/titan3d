@@ -11,11 +11,11 @@ namespace EngineNS.Rtti
         {
             public URpcCallerAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:RpcCaller AssemblyDesc Created");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, "Plugins:RpcCaller AssemblyDesc Created");
             }
             ~URpcCallerAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:RpcCaller AssemblyDesc Destroyed");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, "Plugins:RpcCaller AssemblyDesc Destroyed");
             }
             public override string Name { get => "RpcCaller"; }
             public override string Service { get { return "Plugins"; } }

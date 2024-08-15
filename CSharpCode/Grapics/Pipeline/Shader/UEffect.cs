@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
-    public class UEffect
+    public class TtEffect
     {
         public const string AssetExt = ".effect";
 
@@ -14,7 +14,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return base.ToString();
         }
-        public class UEffectDesc : IO.ISerializer
+        public class TtEffectDesc : IO.ISerializer
         {
             public void OnPreRead(object tagObject, object hostObject, bool fromXml)
             {
@@ -49,28 +49,28 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             public Hash160 EffectHash;
         }
-        public UEffectDesc Desc { get; set; } = new UEffectDesc();
-        public NxRHI.UShaderEffect ShaderEffect { get; private set; }
-        public NxRHI.UShaderDesc DescVS { get; private set; }
-        public NxRHI.UShaderDesc DescPS { get; private set; }
+        public TtEffectDesc Desc { get; set; } = new TtEffectDesc();
+        public NxRHI.TtShaderEffect ShaderEffect { get; private set; }
+        public NxRHI.TtShaderDesc DescVS { get; private set; }
+        public NxRHI.TtShaderDesc DescPS { get; private set; }
         public TtShadingEnv ShadingEnv { get; internal set; }
 
-        internal UEffect UnsafeCloneForEditor()
+        internal TtEffect UnsafeCloneForEditor()
         {
-            var result = new UEffect();
+            var result = new TtEffect();
             result.ShaderEffect = ShaderEffect;
             result.DescVS = DescVS;
             result.DescPS = DescPS;
             result.ShadingEnv = ShadingEnv;
-            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDescGetter<UEffectDesc>.TypeDesc);
+            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDescGetter<TtEffectDesc>.TypeDesc);
             meta.CopyObjectMetaField(result.Desc, Desc);
             return result;
         }
 
         public unsafe void SaveTo(Hash160 hash)
         {
-            var path = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect);
-            var file = path + hash.ToString() + UEffect.AssetExt;
+            var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect);
+            var file = path + hash.ToString() + TtEffect.AssetExt;
             var xnd = new IO.TtXndHolder("UEffect", 0, 0);
 
             var descAttr = new XndAttribute(xnd.RootNode.mCoreObject.GetOrAddAttribute("Desc", 0, 0));
@@ -91,13 +91,13 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             xnd.SaveXnd(file);
         }
-        public static async Thread.Async.TtTask<UEffect> LoadEffect(Hash160 hash, TtShadingEnv shading, UMaterial material, TtMdfQueueBase mdf)
+        public static async Thread.Async.TtTask<TtEffect> LoadEffect(Hash160 hash, TtShadingEnv shading, TtMaterial material, TtMdfQueueBase mdf)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-            var path = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect);
-            var file = path + hash.ToString() + UEffect.AssetExt;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect);
+            var file = path + hash.ToString() + TtEffect.AssetExt;
 
-            UEffect result = null;
+            TtEffect result = null;
             using (var xnd = IO.TtXndHolder.LoadXnd(file))
             {
                 if (xnd == null)
@@ -119,19 +119,19 @@ namespace EngineNS.Graphics.Pipeline.Shader
                         return null;
                 }
 
-                result = await UEngine.Instance.EventPoster.Post((state) =>
+                result = await TtEngine.Instance.EventPoster.Post((Thread.Async.FPostEvent<TtEffect>)((state) =>
                 {
-                    var effect = new UEffect();
+                    var effect = new TtEffect();
                     IO.ISerializer desc;
                     using (var ar = descAttr.GetReader(effect))
                     {
                         IO.SerializerHelper.Read(ar, out desc, effect);
                     }
-                    var effectDesc = desc as UEffectDesc;
+                    var effectDesc = desc as TtEffectDesc;
                     if (effectDesc == null)
                         return null;
 
-                    if (effectDesc.EffectVersion != UEffectDesc.CurrentEffectVersion)
+                    if (effectDesc.EffectVersion != TtEffectDesc.CurrentEffectVersion)
                         return null;
 
                     var shadingCode = Editor.ShaderCompiler.TtShaderCodeManager.Instance.GetShaderCode(shading.CodeName);
@@ -147,27 +147,27 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
                     unsafe
                     {
-                        effect.DescVS = new NxRHI.UShaderDesc(NxRHI.EShaderType.SDT_VertexShader);
-                        if (effect.DescVS.mCoreObject.LoadXnd(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, vsNode) == false)
+                        effect.DescVS = new NxRHI.TtShaderDesc(NxRHI.EShaderType.SDT_VertexShader);
+                        if (effect.DescVS.mCoreObject.LoadXnd(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, vsNode) == false)
                             return null;
-                        effect.DescPS = new NxRHI.UShaderDesc(NxRHI.EShaderType.SDT_PixelShader);
-                        if (effect.DescPS.mCoreObject.LoadXnd(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, psNode) == false)
+                        effect.DescPS = new NxRHI.TtShaderDesc(NxRHI.EShaderType.SDT_PixelShader);
+                        if (effect.DescPS.mCoreObject.LoadXnd(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, psNode) == false)
                             return null;
                         effect.DescVS.mCoreObject.Type = NxRHI.EShaderType.SDT_VertexShader;
                         effect.DescPS.mCoreObject.Type = NxRHI.EShaderType.SDT_PixelShader;
                     }
                     return effect;
-                }, Thread.Async.EAsyncTarget.AsyncIO);
+                }), Thread.Async.EAsyncTarget.AsyncIO);
 
                 if (result == null)
                     return null;
             }
 
-            NxRHI.UShader VertexShader = null;
-            NxRHI.UShader PixelShader = null;
-            if (UEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_GL)
+            NxRHI.TtShader VertexShader = null;
+            NxRHI.TtShader PixelShader = null;
+            if (TtEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_GL)
             {
-                bool created = await UEngine.Instance.EventPoster.Post((state) =>
+                bool created = await TtEngine.Instance.EventPoster.Post((state) =>
                 {
                     VertexShader = rc.CreateShader(result.DescVS);
                     if (VertexShader == null)
@@ -195,7 +195,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 var layoutDesc = new NxRHI.UInputLayoutDesc(IMesh.CreateInputLayoutDesc(result.Desc.InputStreams));
                 layoutDesc.mCoreObject.SetShaderDesc(result.DescVS.mCoreObject);
-                InputLayout = UEngine.Instance.GfxDevice.RenderContext.CreateInputLayout(layoutDesc); //UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, layoutDesc);
+                InputLayout = TtEngine.Instance.GfxDevice.RenderContext.CreateInputLayout(layoutDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, layoutDesc);
                 if (InputLayout == null)
                 {
                     System.Diagnostics.Debug.Assert(false);
@@ -216,11 +216,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.ShadingEnv = shading;
             return result;
         }
-        public static async Thread.Async.TtTask<UEffect> CreateEffect(TtShadingEnv shading, TtShadingEnv.FPermutationId permutationId, UMaterial material, TtMdfQueueBase mdf)
+        public static async Thread.Async.TtTask<TtEffect> CreateEffect(TtShadingEnv shading, TtShadingEnv.FPermutationId permutationId, TtMaterial material, TtMdfQueueBase mdf)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-            var result = new UEffect();
+            var result = new TtEffect();
             var shadingCode = Editor.ShaderCompiler.TtShaderCodeManager.Instance.GetShaderCode(shading.CodeName);
             if (shadingCode == null)
                 return null;
@@ -237,32 +237,32 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var defines = new NxRHI.UShaderDefinitions();
             shading.GetShaderDefines(in permutationId, defines);
 
-            var cfg = UEngine.Instance.Config;
-            result.DescVS = await UEngine.Instance.EventPoster.Post((state) =>
+            var cfg = TtEngine.Instance.Config;
+            result.DescVS = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
                 compilier.MdfQueue = mdf;
                 return compilier.CompileShader(shading.CodeName.Address, "VS_Main", NxRHI.EShaderType.SDT_VertexShader,
-                    shading, material, mdf.GetType(), defines, null, null, UEngine.Instance.Config.IsDebugShader);
+                    shading, material, mdf.GetType(), defines, null, null, TtEngine.Instance.Config.IsDebugShader);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (result.DescVS == null)
                 return null;
 
-            result.DescPS = await UEngine.Instance.EventPoster.Post((state) =>
+            result.DescPS = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
                 compilier.MdfQueue = mdf;
                 return compilier.CompileShader(shading.CodeName.Address, "PS_Main", NxRHI.EShaderType.SDT_PixelShader, 
-                    shading, material, mdf.GetType(), defines, null, null, UEngine.Instance.Config.IsDebugShader);
+                    shading, material, mdf.GetType(), defines, null, null, TtEngine.Instance.Config.IsDebugShader);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (result.DescPS == null)
                 return null;
 
-            NxRHI.UShader VertexShader = null;
-            NxRHI.UShader PixelShader = null;
-            if (UEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_GL)
+            NxRHI.TtShader VertexShader = null;
+            NxRHI.TtShader PixelShader = null;
+            if (TtEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_GL)
             {
-                bool created = await UEngine.Instance.EventPoster.Post((state) =>
+                bool created = await TtEngine.Instance.EventPoster.Post((state) =>
                 {
                     VertexShader = rc.CreateShader(result.DescVS);
                     if (VertexShader == null)
@@ -292,7 +292,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 mdf.mCoreObject.GetInputStreams(ref inputStreams);
                 var layoutDesc = new NxRHI.UInputLayoutDesc(IMesh.CreateInputLayoutDesc(inputStreams));
                 layoutDesc.mCoreObject.SetShaderDesc(result.DescVS.mCoreObject);
-                InputLayout = UEngine.Instance.GfxDevice.RenderContext.CreateInputLayout(layoutDesc); //UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, layoutDesc);
+                InputLayout = TtEngine.Instance.GfxDevice.RenderContext.CreateInputLayout(layoutDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, layoutDesc);
 
                 result.Desc.InputStreams = inputStreams;
 
@@ -307,22 +307,22 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.ShaderEffect.DebugName = $"{shading},{material.AssetName},{Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}";
             return result;
         }
-        public async Thread.Async.TtTask<bool> RefreshEffect(UMaterial material)
+        public async Thread.Async.TtTask<bool> RefreshEffect(TtMaterial material)
         {
             {
-                var path = UEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect);
-                var file = path + this.Desc.EffectHash.ToString() + UEffect.AssetExt;
+                var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect);
+                var file = path + this.Desc.EffectHash.ToString() + TtEffect.AssetExt;
                 if (IO.TtFileManager.FileExists(file))
                     IO.TtFileManager.DeleteFile(file);
             }
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             var defines = new NxRHI.UShaderDefinitions();
             var type = Rtti.UTypeDescManager.Instance.GetTypeFromString(Desc.ShadingType);
             if (type == null)
                 return false;
-            var shading = UEngine.Instance.ShadingEnvManager.GetShadingEnv(type);
+            var shading = TtEngine.Instance.ShadingEnvManager.GetShadingEnv(type);
             if (shading == null)
                 return false;
             shading.GetShaderDefines(Desc.PermutationId, defines);
@@ -338,22 +338,22 @@ namespace EngineNS.Graphics.Pipeline.Shader
             this.Desc.MaterialHash = material.GetHash();
             this.Desc.MdfQueueHash = mdf.GetHash();
 
-            var descVS = await UEngine.Instance.EventPoster.Post((state) =>
+            var descVS = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
                 compilier.MdfQueue = mdf;
                 return compilier.CompileShader(shading.CodeName.Address, "VS_Main", NxRHI.EShaderType.SDT_VertexShader, 
-                    shading, material, mdfType.SystemType, defines, null, null, UEngine.Instance.Config.IsDebugShader);
+                    shading, material, mdfType.SystemType, defines, null, null, TtEngine.Instance.Config.IsDebugShader);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (descVS == null)
                 return false;
 
-            var descPS = await UEngine.Instance.EventPoster.Post((state) =>
+            var descPS = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 var compilier = new Editor.ShaderCompiler.UHLSLCompiler();
                 compilier.MdfQueue = mdf;
                 return compilier.CompileShader(shading.CodeName.Address, "PS_Main", NxRHI.EShaderType.SDT_PixelShader, 
-                    shading, material, mdfType.SystemType, defines, null, null, UEngine.Instance.Config.IsDebugShader);
+                    shading, material, mdfType.SystemType, defines, null, null, TtEngine.Instance.Config.IsDebugShader);
             }, Thread.Async.EAsyncTarget.AsyncIO);
             if (descPS == null)
                 return false;
@@ -377,7 +377,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
                 var layoutDesc = new NxRHI.UInputLayoutDesc(IMesh.CreateInputLayoutDesc(inputSteams));
                 layoutDesc.mCoreObject.SetShaderDesc(descVS.mCoreObject);
-                InputLayout = UEngine.Instance.GfxDevice.RenderContext.CreateInputLayout(layoutDesc); //UEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, layoutDesc);
+                InputLayout = TtEngine.Instance.GfxDevice.RenderContext.CreateInputLayout(layoutDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, layoutDesc);
                 
                 Desc.InputStreams = inputSteams;
             }
@@ -393,7 +393,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             ShaderEffect.DebugName = dbg_name;
             return true;
         }
-        private static async System.Threading.Tasks.Task<bool> LinkShaders(UEffect result)
+        private static async System.Threading.Tasks.Task<bool> LinkShaders(TtEffect result)
         {
             //result.GraphicsEffect.mCoreObject.LinkShaders();
             return true;
@@ -413,16 +413,16 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
     }
-    public class UEffectManager
+    public class TtEffectManager
     {
-        public UEffect DummyEffect;
+        public TtEffect DummyEffect;
         public async System.Threading.Tasks.Task<bool> Initialize(UGfxDevice device)
         {
-            DummyEffect = await this.GetEffect(await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDummyShading>(), device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
+            DummyEffect = await this.GetEffect(await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UDummyShading>(), device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
 
             if (DummyEffect == null)
             {
-                DummyEffect = await UEffect.CreateEffect(await UEngine.Instance.ShadingEnvManager.GetShadingEnv<UDummyShading>(),
+                DummyEffect = await TtEffect.CreateEffect(await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UDummyShading>(),
                    new TtShadingEnv.FPermutationId(0), device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
             }
             if (DummyEffect == null)
@@ -436,42 +436,42 @@ namespace EngineNS.Graphics.Pipeline.Shader
             System.Diagnostics.Debug.Assert(mCreatingSession.mSessions.Count == 0);
             Effects.Clear();
         }
-        private Thread.UAwaitSessionManager<Hash160, UEffect> mCreatingSession = new Thread.UAwaitSessionManager<Hash160, UEffect>();
-        public Dictionary<Hash160, UEffect> Effects { get; } = new Dictionary<Hash160, UEffect>();
-        public Dictionary<Hash160, NxRHI.UComputeEffect> ComputeEffects { get; } = new Dictionary<Hash160, NxRHI.UComputeEffect>();
-        public NxRHI.UComputeEffect TryGetComputeEffect(Hash160 hash)
+        private Thread.UAwaitSessionManager<Hash160, TtEffect> mCreatingSession = new Thread.UAwaitSessionManager<Hash160, TtEffect>();
+        public Dictionary<Hash160, TtEffect> Effects { get; } = new Dictionary<Hash160, TtEffect>();
+        public Dictionary<Hash160, NxRHI.TtComputeEffect> ComputeEffects { get; } = new Dictionary<Hash160, NxRHI.TtComputeEffect>();
+        public NxRHI.TtComputeEffect TryGetComputeEffect(Hash160 hash)
         {
             lock (Effects)
             {
-                NxRHI.UComputeEffect result;
+                NxRHI.TtComputeEffect result;
                 if (ComputeEffects.TryGetValue(hash, out result))
                     return result;
 
                 return null;
             }
         }
-        public UEffect TryGetEffect(Hash160 hash)
+        public TtEffect TryGetEffect(Hash160 hash)
         {
             lock (Effects)
             {
-                UEffect result;
+                TtEffect result;
                 if (Effects.TryGetValue(hash, out result))
                     return result;
 
                 return null;
             }
         }
-        public static Hash160 GetShaderHash(TtShadingEnv shading, UMaterial material, TtMdfQueueBase mdf)
+        public static Hash160 GetShaderHash(TtShadingEnv shading, TtMaterial material, TtMdfQueueBase mdf)
         {
             //var caps = new IRenderContextCaps();
-            //UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetRenderContextCaps(ref caps);
+            //TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetRenderContextCaps(ref caps);
             //return Hash160.CreateHash160($"{shading},{material.AssetName},{mdf},{caps}");
-            return Hash160.CreateHash160($"{UEngine.Instance.GfxDevice.RenderContext.GlobalEnvHash},{shading},{material.AssetName},{mdf}");
+            return Hash160.CreateHash160($"{TtEngine.Instance.GfxDevice.RenderContext.GlobalEnvHash},{shading},{material.AssetName},{mdf}");
         }
-        public Dictionary<Hash160, UEffect> MaterialEditingEffects { get; } = new Dictionary<Hash160, UEffect>();
-        public async Thread.Async.TtTask<UEffect> GetEffect(TtShadingEnv shading, UMaterial material, TtMdfQueueBase mdf)
+        public Dictionary<Hash160, TtEffect> MaterialEditingEffects { get; } = new Dictionary<Hash160, TtEffect>();
+        public async Thread.Async.TtTask<TtEffect> GetEffect(TtShadingEnv shading, TtMaterial material, TtMdfQueueBase mdf)
         {
-            UEffect result = null;
+            TtEffect result = null;
             Hash160 hash = new Hash160();
             if (material.IsEditingMaterial)
             {
@@ -488,7 +488,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result = await GetEffectImpl(shading, material, mdf);
             if (material.IsEditingMaterial)
             {
-                UEffect nr = null;
+                TtEffect nr = null;
                 if (MaterialEditingEffects.TryGetValue(hash, out nr))
                 {
                     return nr;
@@ -514,9 +514,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 MaterialEditingEffects.Remove(i);
             }
         }
-        private async Thread.Async.TtTask<UEffect> GetEffectImpl(TtShadingEnv shading, UMaterial material, TtMdfQueueBase mdf)
+        private async Thread.Async.TtTask<TtEffect> GetEffectImpl(TtShadingEnv shading, TtMaterial material, TtMdfQueueBase mdf)
         {
-            UEffect result = null;
+            TtEffect result = null;
             //if (material.IsEditingMaterial)
             //{
             //    result = await UEffect.CreateEffect(shading, shading.mCurrentPermutationId, material, mdf);
@@ -543,7 +543,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             try
             {
-                result = await UEffect.LoadEffect(hash, shading, material, mdf);
+                result = await TtEffect.LoadEffect(hash, shading, material, mdf);
                 if (result != null)
                 {
                     if (Effects.ContainsKey(hash) == false)
@@ -561,14 +561,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     }
                 }
 
-                result = await UEffect.CreateEffect(shading, shading.mCurrentPermutationId, material, mdf);
+                result = await TtEffect.CreateEffect(shading, shading.mCurrentPermutationId, material, mdf);
                 if (result != null)
                 {
                     result.Desc.EffectHash = hash;
                     result.Desc.PermutationId = shading.mCurrentPermutationId;
                     //if (material.IsEditingMaterial == false)
                     {
-                        await UEngine.Instance.EventPoster.Post((state) =>
+                        await TtEngine.Instance.EventPoster.Post((state) =>
                         {
                             result.SaveTo(hash);
                             return true;
@@ -601,7 +601,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         //需要逐渐被UComputeShadingEnv替换
-        public async Thread.Async.TtTask<NxRHI.UComputeEffect> GetComputeEffect(RName shaderName, string entry, NxRHI.EShaderType type,
+        public async Thread.Async.TtTask<NxRHI.TtComputeEffect> GetComputeEffect(RName shaderName, string entry, NxRHI.EShaderType type,
             Graphics.Pipeline.Shader.TtShadingEnv shadingEnv, NxRHI.UShaderDefinitions defines, 
             Editor.ShaderCompiler.UHLSLInclude incProvider, string sm = null, bool bDebugShader = true)
         {
@@ -612,18 +612,18 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 hashStr += shadingEnv.ToString();
             if (defines != null)
                 hashStr += defines.ToString();
-            hashStr += UEngine.Instance.GfxDevice.RenderContext.GlobalEnvHash.ToString();
+            hashStr += TtEngine.Instance.GfxDevice.RenderContext.GlobalEnvHash.ToString();
             var hash = Hash160.CreateHash160(hashStr);
             var shadingCode = Editor.ShaderCompiler.TtShaderCodeManager.Instance.GetShaderCode(shaderName);
-            NxRHI.UComputeEffect result;
+            NxRHI.TtComputeEffect result;
             lock (Effects)
             {
                 if (ComputeEffects.TryGetValue(hash, out result))
                     return result;
             }
-            result = await UEngine.Instance.EventPoster.Post((state) =>
+            result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
-                return NxRHI.UComputeEffect.Load(hash); ;
+                return NxRHI.TtComputeEffect.Load(hash); ;
             }, Thread.Async.EAsyncTarget.AsyncIO);
             //result = NxRHI.UComputeEffect.Load(hash);
             if (result != null)
@@ -636,7 +636,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 }
                 return result;
             }
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var compiler = new Editor.ShaderCompiler.UHLSLCompiler();
             compiler.MdfQueue = null;
             if (defines == null)
@@ -645,7 +645,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             if (shadingEnv != null)
                 shadingEnv.GetShaderDefines(shadingEnv.CurrentPermutationId, defines);
-            var shaderDesc = await UEngine.Instance.EventPoster.Post((state) =>
+            var shaderDesc = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 return compiler.CompileShader(shader, entry, type, shadingEnv, null, null, defines, incProvider, sm, bDebugShader);
             }, Thread.Async.EAsyncTarget.AsyncIO);
@@ -655,7 +655,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (csShader == null)
                 return null;
 
-            result = UEngine.Instance.GfxDevice.RenderContext.CreateComputeEffect(csShader);
+            result = TtEngine.Instance.GfxDevice.RenderContext.CreateComputeEffect(csShader);
 
             lock (Effects)
             {
@@ -664,7 +664,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 ComputeEffects.Add(hash, result);
             }
 
-            UEngine.Instance.EventPoster.RunOn((state) =>
+            TtEngine.Instance.EventPoster.RunOn((state) =>
             {
                 result.SaveTo(shaderName, hash);
                 return true;

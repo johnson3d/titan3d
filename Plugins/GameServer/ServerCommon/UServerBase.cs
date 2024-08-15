@@ -20,14 +20,14 @@ namespace EngineNS.Plugins.ServerCommon
         public virtual async System.Threading.Tasks.Task<bool> StartServer(string ip, UInt16 port)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
-            UEngine.Instance.TickableManager.AddTickable(this);
+            TtEngine.Instance.TickableManager.AddTickable(this);
             TcpServer = new Bricks.TcpServer.UTcpServer();
             return TcpServer.StartServer(ip, port);
         }
         public virtual void StopServer()
         {
             TcpServer.StopServer();
-            UEngine.Instance.TickableManager.RemoveTickable(this);
+            TtEngine.Instance.TickableManager.RemoveTickable(this);
         }
         public virtual void Tick()
         {

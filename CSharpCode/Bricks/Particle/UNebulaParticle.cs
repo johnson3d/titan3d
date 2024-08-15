@@ -21,7 +21,7 @@ namespace EngineNS.Bricks.Particle
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
-            return await UEngine.Instance.NebulaTemplateManager.GetParticle(GetAssetName());
+            return await TtEngine.Instance.NebulaTemplateManager.GetParticle(GetAssetName());
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -57,7 +57,7 @@ namespace EngineNS.Bricks.Particle
         }
         public IO.IAssetMeta GetAMeta()
         {
-            return UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+            return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
@@ -77,12 +77,12 @@ namespace EngineNS.Bricks.Particle
             if (ameta != null)
             {
                 UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta();
+                ameta.SaveAMeta(this);
             }
-            UEngine.Instance.SourceControlModule.AddFile(name.Address);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address);
 
             IO.TtFileManager.SaveObjectToXml(name.Address, this);
-            UEngine.Instance.SourceControlModule.AddFile(name.Address);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         public static async Thread.Async.TtTask<TtNebulaParticle> LoadAsset(RName name, bool bForEditor)
         {
@@ -113,7 +113,7 @@ namespace EngineNS.Bricks.Particle
                 Emitter.AddEffector("default", ef1);
                 Emitter.SetCurrentQueue("default");
 
-                await UEngine.Instance.NebulaTemplateManager.UpdateShaders(result);
+                await TtEngine.Instance.NebulaTemplateManager.UpdateShaders(result);
                 return result;
                 //return null;
             }
@@ -166,7 +166,7 @@ namespace EngineNS.Bricks.Particle
                         emt.SetCurrentQueue(emtNode.DefaultCurrentQueue);
                 }
             }
-            await UEngine.Instance.NebulaTemplateManager.UpdateShaders(this);
+            await TtEngine.Instance.NebulaTemplateManager.UpdateShaders(this);
 
             mMcObject?.Get()?.OnCreated(this);
         }
@@ -198,7 +198,7 @@ namespace EngineNS.Bricks.Particle
         {
             Emitter.Remove(name);
         }
-        public void Update(Graphics.Pipeline.URenderPolicy policy, UParticleGraphNode particleSystem, float elpased)
+        public void Update(Graphics.Pipeline.TtRenderPolicy policy, UParticleGraphNode particleSystem, float elpased)
         {
             mMcObject?.Get()?.OnUpdate(this, particleSystem, elpased);
 
@@ -246,7 +246,7 @@ namespace EngineNS.Bricks.Particle
             {
                 result.Emitter.Add(i.Key, i.Value.CloneEmitter());
             }
-            await UEngine.Instance.NebulaTemplateManager.UpdateShaders(result);
+            await TtEngine.Instance.NebulaTemplateManager.UpdateShaders(result);
             return result;
             //return this;
         }

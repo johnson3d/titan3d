@@ -9,14 +9,14 @@ using SDL2;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public partial class UGfxDevice : UModule<UEngine>
+    public partial class UGfxDevice : UModule<TtEngine>
     {
         public override int GetOrder()
         {
             return 0;
         }
         public readonly NxRHI.TtRenderSwapQueue RenderSwapQueue = new NxRHI.TtRenderSwapQueue();
-        public override async System.Threading.Tasks.Task<bool> Initialize(UEngine engine)
+        public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine engine)
         {
             if(engine.Config.RHIType == NxRHI.ERhiType.RHI_VirtualDevice)
             {
@@ -76,7 +76,7 @@ namespace EngineNS.Graphics.Pipeline
 
             return true;
         }
-        public override void TickModule(UEngine engine)
+        public override void TickModule(TtEngine engine)
         {
             var binder = CoreShaderBinder;
             if (PerFrameCBuffer != null)
@@ -95,32 +95,32 @@ namespace EngineNS.Graphics.Pipeline
                 PerFrameCBuffer.SetValue(binder.CBPerFrame.ElapsedTime, in elapsed);
             }
         }
-        public override void TickLogic(UEngine host)
+        public override void TickLogic(TtEngine host)
         {
             RenderSwapQueue.TickLogic(host.ElapsedSecond);
         }
-        public override void TickRender(UEngine host)
+        public override void TickRender(TtEngine host)
         {
             RenderSwapQueue.TickRender(host.ElapsedSecond);
         }
-        public void TickSync(UEngine host)
+        public void TickSync(TtEngine host)
         {
             var testTime = Support.Time.GetTickCount();
-            UEngine.Instance.EventPoster.TickPostTickSyncEvents(testTime);
-            UEngine.Instance.GfxDevice.RenderContext.TickPostEvents();
+            TtEngine.Instance.EventPoster.TickPostTickSyncEvents(testTime);
+            TtEngine.Instance.GfxDevice.RenderContext.TickPostEvents();
 
             AttachBufferManager.Tick();
 
             RenderSwapQueue.TickSync(host.ElapsedSecond);
             CbvUpdater.UpdateCBVs();
         }
-        public override void EndFrame(UEngine engine)
+        public override void EndFrame(TtEngine engine)
         {
             
         }
-        public override void Cleanup(UEngine engine)
+        public override void Cleanup(TtEngine engine)
         {
-            UEngine.Instance.EventPoster.TickPostTickSyncEvents(long.MaxValue);
+            TtEngine.Instance.EventPoster.TickPostTickSyncEvents(long.MaxValue);
 
             AttachBufferManager?.Dispose();
             TextureManager?.Cleanup();
@@ -150,7 +150,7 @@ namespace EngineNS.Graphics.Pipeline
             {
                 AttachBufferManager.Tick();
                 var testTime = Support.Time.GetTickCount();
-                UEngine.Instance.EventPoster.TickPostTickSyncEvents(testTime);
+                TtEngine.Instance.EventPoster.TickPostTickSyncEvents(testTime);
                 RenderContext.GpuQueue.Flush(NxRHI.EQueueType.QU_ALL);
                 RenderContext.TickPostEvents();
             }
@@ -165,9 +165,9 @@ namespace EngineNS.Graphics.Pipeline
         public USlateApplication SlateApplication { get; set; }
         public NxRHI.UGpuSystem RenderSystem { get; private set; }
         public NxRHI.UGpuDevice RenderContext { get; private set; }
-        protected async System.Threading.Tasks.Task<bool> InitGPU(UEngine engine, int Adapter, NxRHI.ERhiType rhi, IntPtr window, bool bDebugLayer, bool useRenderDoc)
+        protected async System.Threading.Tasks.Task<bool> InitGPU(TtEngine engine, int Adapter, NxRHI.ERhiType rhi, IntPtr window, bool bDebugLayer, bool useRenderDoc)
         {
-            if (UEngine.Instance.PlayMode != EPlayMode.Game)
+            if (TtEngine.Instance.PlayMode != EPlayMode.Game)
             {
                 Editor.ShaderCompiler.TtShaderCodeManager.Instance.Initialize(RName.GetRName("shaders/", RName.ERNameType.Engine));
             }
@@ -232,13 +232,13 @@ namespace EngineNS.Graphics.Pipeline
 
         #region Manager
         public NxRHI.UTextureManager TextureManager { get; } = new NxRHI.UTextureManager();
-        public Shader.UMaterialManager MaterialManager { get; private set; } = new Shader.UMaterialManager();
-        public Shader.UMaterialInstanceManager MaterialInstanceManager { get; private set; } = new Shader.UMaterialInstanceManager();
+        public Shader.TtMaterialManager MaterialManager { get; private set; } = new Shader.TtMaterialManager();
+        public Shader.TtMaterialInstanceManager MaterialInstanceManager { get; private set; } = new Shader.TtMaterialInstanceManager();
         public EGui.Slate.UBaseRenderer SlateRenderer { get; private set; }
-        public Graphics.Pipeline.Shader.UEffectManager EffectManager
+        public Graphics.Pipeline.Shader.TtEffectManager EffectManager
         {
             get;
-        } = new Graphics.Pipeline.Shader.UEffectManager();
+        } = new Graphics.Pipeline.Shader.TtEffectManager();
         public Graphics.Pipeline.UGpuPipelineManager PipelineManager
         {
             get;
@@ -277,9 +277,9 @@ namespace EngineNS.Graphics.Pipeline
             {
                 if (mPerFrameCBuffer == null)
                 {
-                    if (UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerFrame.Binder != null)
+                    if (TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerFrame.Binder != null)
                     {
-                        mPerFrameCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(UEngine.Instance.GfxDevice.CoreShaderBinder.CBPerFrame.Binder.mCoreObject);
+                        mPerFrameCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerFrame.Binder.mCoreObject);
                     }
                     else
                     {
@@ -295,7 +295,7 @@ namespace EngineNS.Graphics.Pipeline
 
 namespace EngineNS
 {
-    public partial class UEngine
+    public partial class TtEngine
     {
         public static System.Type UGfxDeviceType = typeof(Graphics.Pipeline.UGfxDevice);
         private Graphics.Pipeline.UGfxDevice mGfxDevice;

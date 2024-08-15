@@ -129,7 +129,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     if (i.Name.StartsWith("input."))
                     {
                         var name = i.Name.Substring("input.".Length);
-                        var t = Graphics.Pipeline.Shader.UMaterial.VSInput.NameToInputStream(name);
+                        var t = Graphics.Pipeline.Shader.TtMaterial.VSInput.NameToInputStream(name);
                         if (t != EngineNS.NxRHI.EVertexStreamType.VST_Number)
                         {
                             if (result.Contains(t) == false)
@@ -159,7 +159,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     if (i.Name.StartsWith("input."))
                     {
                         var name = i.Name.Substring("input.".Length);
-                        var t = Graphics.Pipeline.Shader.UMaterial.PSInput.NameToInput(name);
+                        var t = Graphics.Pipeline.Shader.TtMaterial.PSInput.NameToInput(name);
                         if (t != Graphics.Pipeline.Shader.EPixelShaderInput.PST_Number)
                         {
                             if (result.Contains(t) == false)

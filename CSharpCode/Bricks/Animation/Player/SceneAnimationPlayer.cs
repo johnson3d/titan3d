@@ -76,7 +76,7 @@ namespace EngineNS.Animation.Player
         //                            Animatable.UAnimatablePropertyDesc desc = new Animatable.UAnimatablePropertyDesc();
         //                            desc.ClassType = objType;
         //                            desc.PropertyType = hierarchyNodePropertyDesc.ClassType;
-        //                            var func = UEngine.Instance.AnimatablePropertySetterModule.CreateInstance(desc);
+        //                            var func = TtEngine.Instance.AnimatablePropertySetterModule.CreateInstance(desc);
         //                            func.AssignObject(animatable);
         //                            Curve.ICurve curve = null;
         //                            var isExsit = SceneAnimClip.AnimCurvesList.TryGetValue(hierarchyNodePropertyDesc.CurveId, out curve);
@@ -155,7 +155,7 @@ namespace EngineNS.Animation.Player
         //                                Animatable.UAnimatablePropertyDesc desc = new Animatable.UAnimatablePropertyDesc();
         //                                desc.ClassType = objType;
         //                                desc.PropertyType = attType;
-        //                                var func = UEngine.Instance.AnimatablePropertySetterModule.CreateInstance(desc);
+        //                                var func = TtEngine.Instance.AnimatablePropertySetterModule.CreateInstance(desc);
         //                                func.AssignObject(animatable);
 
         //                                Curve.ICurve curve = null;

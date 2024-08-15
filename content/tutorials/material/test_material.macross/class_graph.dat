@@ -63,17 +63,17 @@
             <InitValue Type="EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore">
               <Type Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
                 <IsEnum Type="System.Boolean@Unknown" Value="False" />
-                <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.UNode@EngineCore" />
-                <TypeFullName Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.UNode" />
+                <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.UMeshNode@EngineCore" />
+                <TypeFullName Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.UMeshNode" />
               </Type>
             </InitValue>
             <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
             <IsBindable Type="System.Boolean@Unknown" Value="False" />
-            <VariableName Type="System.String@Unknown" Value="tmp_r_FindFirstChild_3814355933" />
+            <VariableName Type="System.String@Unknown" Value="tmp_r_FindFirstChild_1251959139" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
-              <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.UNode@EngineCore" />
-              <TypeFullName Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.UNode" />
+              <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.UMeshNode@EngineCore" />
+              <TypeFullName Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.UMeshNode" />
             </VariableType>
             <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
           </e_1>
@@ -157,17 +157,17 @@
             <InitValue Type="EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore">
               <Type Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
                 <IsEnum Type="System.Boolean@Unknown" Value="False" />
-                <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.Shader.UMaterial@EngineCore" />
-                <TypeFullName Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterial" />
+                <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
+                <TypeFullName Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial" />
               </Type>
             </InitValue>
             <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
             <IsBindable Type="System.Boolean@Unknown" Value="False" />
-            <VariableName Type="System.String@Unknown" Value="tmp_r_GetMaterial_131299697" />
+            <VariableName Type="System.String@Unknown" Value="tmp_r_GetMaterial_2979780793" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
-              <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.Shader.UMaterial@EngineCore" />
-              <TypeFullName Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.UMaterial" />
+              <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
+              <TypeFullName Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial" />
             </VariableType>
             <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
           </e_0>

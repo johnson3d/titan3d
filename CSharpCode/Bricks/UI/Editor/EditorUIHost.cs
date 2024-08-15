@@ -117,7 +117,7 @@ namespace EngineNS.UI.Editor
 
                 mDesignWindowSize = value;
                 SizeF tagDesignSize;
-                mDPIScale = UEngine.Instance.UIManager.Config.GetDPIScaleAndDesignSize(mDesignWindowSize.Width, mDesignWindowSize.Height, out tagDesignSize);
+                mDPIScale = TtEngine.Instance.UIManager.Config.GetDPIScaleAndDesignSize(mDesignWindowSize.Width, mDesignWindowSize.Height, out tagDesignSize);
                 var newRect = new RectangleF(0, 0, tagDesignSize.Width, tagDesignSize.Height);
                 SetDesignRect(in newRect, true);
                 var childrenCount = VisualTreeHelper.GetChildrenCount(this);
@@ -158,8 +158,8 @@ namespace EngineNS.UI.Editor
         public EditorUIHost(TtUIEditor editor)
         {
             mHostEditor = editor;
-            DesignRect = UEngine.Instance.UIManager.Config.DefaultDesignRect;
-            DesignWindowSize = UEngine.Instance.UIManager.Config.DefaultDesignRect.Size;
+            DesignRect = TtEngine.Instance.UIManager.Config.DefaultDesignRect;
+            DesignWindowSize = TtEngine.Instance.UIManager.Config.DefaultDesignRect.Size;
         }
 
         //public void SaveEditorOnlyData(RName asset)
@@ -177,7 +177,7 @@ namespace EngineNS.UI.Editor
         //        }
         //        var fileName = asset.Address + "/EditorOnlyData.dat";
         //        xnd.SaveXnd(fileName);
-        //        UEngine.Instance.SourceControlModule.AddFile(fileName);
+        //        TtEngine.Instance.SourceControlModule.AddFile(fileName);
         //    }
         //}
         //public void LoadEditorOnlyData(RName asset)
@@ -207,7 +207,7 @@ namespace EngineNS.UI.Editor
 
         //async TtTask Init2DGrid()
         //{
-        //    var material = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/gridline.material", RName.ERNameType.Engine));
+        //    var material = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/gridline.material", RName.ERNameType.Engine));
         //    var materialInstance = Graphics.Pipeline.Shader.UMaterialInstance.CreateMaterialInstance(material);
         //    materialInstance.RenderLayer = Graphics.Pipeline.ERenderLayer.RL_PostTranslucent;
         //    unsafe

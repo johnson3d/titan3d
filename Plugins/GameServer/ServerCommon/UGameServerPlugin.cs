@@ -11,11 +11,11 @@ namespace EngineNS.Rtti
         {
             public UGameServerAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:GameServer AssemblyDesc Created");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, "Plugins:GameServer AssemblyDesc Created");
             }
             ~UGameServerAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:GameServer AssemblyDesc Destroyed");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, "Plugins:GameServer AssemblyDesc Destroyed");
             }
             public override string Name { get => "GameServer"; }
             public override string Service { get { return "Plugins"; } }

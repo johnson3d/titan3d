@@ -7,19 +7,19 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Editor
 {
-    public partial class UPIEModule : UModule<UEngine>
+    public partial class UPIEModule : UModule<TtEngine>
     {
-        public override void TickModule(UEngine engine)
+        public override void TickModule(TtEngine engine)
         {
             
         }
-        public override void TickLogic(UEngine engine)
+        public override void TickLogic(TtEngine engine)
         {
             if (engine.GameInstance == null)
                 return;
             engine.GameInstance.Tick(engine.ElapseTickCountMS);
         }
-        public override void Cleanup(UEngine engine)
+        public override void Cleanup(TtEngine engine)
         {
             if (engine.GameInstance == null)
                 return;
@@ -49,7 +49,7 @@ namespace EngineNS.Editor
 
         public UPIEController()
         {
-            UEngine.RootFormManager.RegRootForm(this);
+            TtEngine.RootFormManager.RegRootForm(this);
         }
 
         public void Dispose()
@@ -61,7 +61,7 @@ namespace EngineNS.Editor
             if (!await mRNameEditor.Initialize())
                 return false;
 
-            mCurrentName = UEngine.Instance.Config.PlayGameName;
+            mCurrentName = TtEngine.Instance.Config.PlayGameName;
             mRNameEditor.FilterExts = Bricks.CodeBuilder.UMacross.AssetExt;
             mRNameEditor.MacrossType = typeof(GamePlay.UMacrossGame);
 
@@ -79,7 +79,7 @@ namespace EngineNS.Editor
 
                 //if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(drawList, ref mToolBtn_IsMouseDown[1], ref mToolBtn_IsMouseHover[1], null, "Play"))
                 //{
-                //    var task = OnPlayGame(UEngine.Instance.Config.PlayGameName);
+                //    var task = OnPlayGame(TtEngine.Instance.Config.PlayGameName);
                 //}
                 //if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(drawList, ref mToolBtn_IsMouseDown[2], ref mToolBtn_IsMouseHover[2], null, "Stop"))
                 //{
@@ -115,11 +115,11 @@ namespace EngineNS.Editor
 
         void OnPlayGame(RName assetName)
         {
-            if (UEngine.Instance.GameInstance != null)
+            if (TtEngine.Instance.GameInstance != null)
                 return;
-            UEngine.Instance.EventPoster.RunOn(async (state) =>
+            TtEngine.Instance.EventPoster.RunOn(async (state) =>
             {
-                return await UEngine.Instance.StartPlayInEditor(UEngine.Instance.GfxDevice.SlateApplication, assetName);
+                return await TtEngine.Instance.StartPlayInEditor(TtEngine.Instance.GfxDevice.SlateApplication, assetName);
             }, Thread.Async.EAsyncTarget.Logic);
         }
     }
@@ -127,9 +127,9 @@ namespace EngineNS.Editor
 
 namespace EngineNS
 {
-    public partial class UEngine
+    public partial class TtEngine
     {
-        static UEngine()
+        static TtEngine()
         {
             switch (Version.Major)
             {
@@ -153,8 +153,8 @@ namespace EngineNS
             if (this.GameInstance != null)
                 return false;
 
-            var root = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute);
-            UEngine.Instance.MacrossModule.ReloadAssembly(root + $"/{DotNetVersion}/GameProject.dll");
+            var root = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute);
+            TtEngine.Instance.MacrossModule.ReloadAssembly(root + $"/{DotNetVersion}/GameProject.dll");
 
             this.GameInstance = new GamePlay.UGameInstance();
             this.GameInstance.WorldViewportSlate.Title = $"Game:{main.Name}";
@@ -163,25 +163,25 @@ namespace EngineNS
             var ret = await this.GameInstance.BeginPlay();
             if (ret == false)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Error, "PIE", $"{main} BeginPlay failed!");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Error, $"{main} BeginPlay failed!");
                 this.GameInstance = null;
                 return false;
             }
             
-            UEngine.Instance.TickableManager.AddTickable(this.GameInstance);
+            TtEngine.Instance.TickableManager.AddTickable(this.GameInstance);
 
-            UEngine.Instance.InputSystem.Mouse.ShowCursor = false;
+            TtEngine.Instance.InputSystem.Mouse.ShowCursor = false;
             var esc = IControl.Create<UKey>(new UKey.UKeyData() { Keycode = Bricks.Input.Keycode.KEY_ESCAPE });
             esc.TriggerPress += (ITriggerControl sender)=>
                                 {
-                                    UEngine.Instance.InputSystem.Mouse.ShowCursor = true;
+                                    TtEngine.Instance.InputSystem.Mouse.ShowCursor = true;
                                     EndPlayInEditor();
                                 };
 
             var outOfMouse = IControl.Create<UKey>(new UKey.UKeyData() { Keycode = Bricks.Input.Keycode.KEY_F1 });
             outOfMouse.TriggerPress += (ITriggerControl sender) =>
             {
-                UEngine.Instance.InputSystem.Mouse.ShowCursor = !UEngine.Instance.InputSystem.Mouse.ShowCursor;
+                TtEngine.Instance.InputSystem.Mouse.ShowCursor = !TtEngine.Instance.InputSystem.Mouse.ShowCursor;
             };
 
             return ret;
@@ -200,7 +200,7 @@ namespace EngineNS
 
             if (wr.IsAlive)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Core", "EndPIE: GameInstance is alive");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, "EndPIE: GameInstance is alive");
             }
             else
             {
@@ -216,7 +216,7 @@ namespace EngineNS
             if (this.GameInstance == null)
                 return null;
 
-            UEngine.Instance?.TickableManager.RemoveTickable(this.GameInstance);
+            TtEngine.Instance?.TickableManager.RemoveTickable(this.GameInstance);
             this.GameInstance.BeginDestroy();
             var wr = new WeakReference(this.GameInstance);
             this.GameInstance = null;

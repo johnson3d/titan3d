@@ -117,19 +117,19 @@ namespace EngineNS.UI.Controls
 
                 if(value == true)
                 {
-                    var arg = UEngine.Instance.UIManager.QueryEventSync();
+                    var arg = TtEngine.Instance.UIManager.QueryEventSync();
                     arg.RoutedEvent = ExpanderExpandedEvent;
                     arg.Source = this;
                     RaiseEvent(arg);
-                    UEngine.Instance.UIManager.ReleaseEventSync(arg);
+                    TtEngine.Instance.UIManager.ReleaseEventSync(arg);
                 }
                 else
                 {
-                    var arg = UEngine.Instance.UIManager.QueryEventSync();
+                    var arg = TtEngine.Instance.UIManager.QueryEventSync();
                     arg.RoutedEvent = ExpanderCollapsedEvent;
                     arg.Source = this;
                     RaiseEvent(arg);
-                    UEngine.Instance.UIManager.ReleaseEventSync(arg);
+                    TtEngine.Instance.UIManager.ReleaseEventSync(arg);
                 }
 
                 UpdateLayout();
@@ -151,7 +151,7 @@ namespace EngineNS.UI.Controls
 
         public TtExpander()
         {
-            Template = UEngine.Instance.UIManager.GetDefaultTemplate(UTypeDesc.TypeOf(typeof(TtExpander)));
+            Template = TtEngine.Instance.UIManager.GetDefaultTemplate(UTypeDesc.TypeOf(typeof(TtExpander)));
             Template.Seal();
         }
     }

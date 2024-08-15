@@ -67,9 +67,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             
             Bricks.PhysicsCore.TtPhyMaterial mtl;
             if (CapsulePhyControllerNodeData.PxMaterial != null)
-                mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(CapsulePhyControllerNodeData.PxMaterial);
+                mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(CapsulePhyControllerNodeData.PxMaterial);
             else
-                mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
+                mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
             PhyControllerDesc.SetMaterial(mtl);
             return true;
         }
@@ -108,9 +108,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             PhyControllerDesc.mCoreObject.SetExtent(BoxPhyControllerNodeData.Extent);
             Bricks.PhysicsCore.TtPhyMaterial mtl;
             if (BoxPhyControllerNodeData.PxMaterial != null)
-                mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(BoxPhyControllerNodeData.PxMaterial);
+                mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(BoxPhyControllerNodeData.PxMaterial);
             else
-                mtl = UEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
+                mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
             PhyControllerDesc.SetMaterial(mtl);
             return true;
         }

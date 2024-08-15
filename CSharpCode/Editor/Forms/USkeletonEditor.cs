@@ -1,5 +1,4 @@
-﻿using Assimp;
-using EngineNS.Animation.Asset;
+﻿using EngineNS.Animation.Asset;
 using EngineNS.Animation.Pipeline;
 using EngineNS.Animation.Player;
 using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
@@ -82,7 +81,7 @@ namespace EngineNS.Editor.Forms
             {
                 var index = SkeletonAsset.Skeleton.Limbs[i].Index.Value;
                 var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeSphere(0.005f, 5, 5, Color4b.Green.ToArgb());
-                var mesh = meshProvider.ToDrawMesh(UEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
+                var mesh = meshProvider.ToDrawMesh(TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
                 BoneMeshes.Add(index, mesh);
             }
             CreateBoneLineMesh(SkeletonAsset.Skeleton.Root);
@@ -95,7 +94,7 @@ namespace EngineNS.Editor.Forms
             {
                 var end = child.Index.Value;
                 var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeBox(0, -0.0005f, -0.0005f, 1, 0.001f, 0.001f, Color4b.Green.ToArgb());
-                var mesh = meshProvider.ToDrawMesh(UEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
+                var mesh = meshProvider.ToDrawMesh(TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
                 var boneLine = new FBoneLine() { Start = start, End = end };
                 BoneLineMeshes.Add(boneLine, mesh);
                 CreateBoneLineMesh(child);
@@ -177,7 +176,7 @@ namespace EngineNS.Editor.Forms
 
         public void OnCloseEditor()
         {
-            UEngine.Instance.TickableManager.RemoveTickable(this);
+            TtEngine.Instance.TickableManager.RemoveTickable(this);
             Dispose();
         }
         bool mDockInitialized = false;
@@ -218,7 +217,7 @@ namespace EngineNS.Editor.Forms
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -241,9 +240,9 @@ namespace EngineNS.Editor.Forms
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
                 SkeletonAsset.SaveAssetTo(SkeletonAsset.AssetName);
-                var unused = UEngine.Instance.GfxDevice.MaterialMeshManager.ReloadMaterialMesh(SkeletonAsset.AssetName);
+                var unused = TtEngine.Instance.GfxDevice.MaterialMeshManager.ReloadMaterialMesh(SkeletonAsset.AssetName);
 
-                //USnapshot.Save(AnimationClip.AssetName, AnimationClip.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+                //USnapshot.Save(AnimationClip.AssetName, AnimationClip.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Reload", in btSize))
@@ -291,7 +290,7 @@ namespace EngineNS.Editor.Forms
         }
         EngineNS.GamePlay.Scene.UMeshNode PlaneMeshNode;
         USkeletonShowNode SkeletonShowNode = null;
-        protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -312,8 +311,8 @@ namespace EngineNS.Editor.Forms
 
             {
                 var PlaneMesh = new Graphics.Mesh.TtMesh();
-                var tMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
-                tMaterials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(UEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName);
+                var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
+                tMaterials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(TtEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName);
                 PlaneMesh.Initialize(Graphics.Mesh.UMeshDataProvider.MakePlane(10, 10).ToMesh(), tMaterials,
                     Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 PlaneMeshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), PlaneMesh, new DVector3(0, -0.0001f, 0), Vector3.One, Quaternion.Identity);
@@ -332,18 +331,18 @@ namespace EngineNS.Editor.Forms
         public async Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            SkeletonAsset = await UEngine.Instance.AnimationModule.SkeletonAssetManager.GetSkeletonAsset(name);
+            SkeletonAsset = await TtEngine.Instance.AnimationModule.SkeletonAssetManager.GetSkeletonAsset(name);
             if (SkeletonAsset == null)
                 return false;
 
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"MaterialMesh:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewScene;
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
+            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
             AnimationClipPreview = new TtAnimationClipPreview();
             AnimationClipPreview.SkeletonEditor = this;
             AnimationClipPropGrid.Target = AnimationClipPreview;
-            UEngine.Instance.TickableManager.AddTickable(this);
+            TtEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
         TtAnimationClip PreviewAnimationClip = null;
@@ -378,7 +377,7 @@ namespace EngineNS.Editor.Forms
                     AssetState = IO.EAssetState.Loading;
                     System.Action exec = async () =>
                     {
-                        var animation = await UEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(value);
+                        var animation = await TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(value);
                         if (animation == null)
                         {
                             AssetState = IO.EAssetState.LoadFailed;

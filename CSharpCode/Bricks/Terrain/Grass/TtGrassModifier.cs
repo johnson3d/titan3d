@@ -64,7 +64,7 @@ namespace EngineNS.Bricks.Terrain.Grass
         {
             return null;
         }
-        public void Initialize(Graphics.Mesh.UMaterialMesh materialMesh)
+        public void Initialize(Graphics.Mesh.TtMaterialMesh materialMesh)
         {
 
         }
@@ -119,7 +119,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                     }
                 }
 
-                var rc = UEngine.Instance.GfxDevice.RenderContext;
+                var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
                 if (mAttachVBs == null)
                     mAttachVBs = rc.CreateVertexArray();
@@ -137,7 +137,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                 if (mdf.mCurNumber == 0)
                     return;
 
-                var rc = UEngine.Instance.GfxDevice.RenderContext;
+                var rc = TtEngine.Instance.GfxDevice.RenderContext;
                 fixed(UInt32* p = &mData[0])
                 {
                     var dataSize = (UInt32)sizeof(UInt32) * mdf.mCurNumber;
@@ -154,7 +154,7 @@ namespace EngineNS.Bricks.Terrain.Grass
             }
             public uint PushInstance(TtGrassModifier mdf, UInt32 data, float height)
             {
-                var rc = UEngine.Instance.GfxDevice.RenderContext;
+                var rc = TtEngine.Instance.GfxDevice.RenderContext;
                 SureBuffers(mdf, mdf.mCurNumber + 1);
 
                 mData[mdf.mCurNumber] = data;
@@ -211,12 +211,12 @@ namespace EngineNS.Bricks.Terrain.Grass
                     {
                         CoreSDK.MemoryCopy(pTar, pSrc, mdf.mCurNumber * (uint)sizeof(FVSGrassData));
                         bfDesc.InitData = pTar;
-                        InstantBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
+                        InstantBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
                     }
                 }
                 else
                 {
-                    InstantBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
+                    InstantBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateBuffer(in bfDesc);
                 }
                 InstantBuffer.SetDebugName("GrassInst");
                 
@@ -224,7 +224,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                 srvDesc.SetBuffer(false);
                 srvDesc.Buffer.NumElements = mdf.mMaxNumber;
                 srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
-                InstantSRV = UEngine.Instance.GfxDevice.RenderContext.CreateSRV(InstantBuffer, in srvDesc);
+                InstantSRV = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(InstantBuffer, in srvDesc);
                 InstantSRV.SetDebugName("InstantSRV");
 
             }
@@ -268,7 +268,7 @@ namespace EngineNS.Bricks.Terrain.Grass
 
                 if(IsDirty)
                 {
-                    var rc = UEngine.Instance.GfxDevice.RenderContext;
+                    var rc = TtEngine.Instance.GfxDevice.RenderContext;
                     fixed(FVSGrassData* pTar = &InstData[0])
                     {
                         InstantBuffer.UpdateGpuData(cmd, 0, pTar, mdf.mCurNumber * (uint)sizeof(FVSGrassData));
@@ -325,17 +325,17 @@ namespace EngineNS.Bricks.Terrain.Grass
         }
         private void SureCBuffer(NxRHI.IGraphicsEffect shaderProg)
         {
-            var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+            var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
             if(GrassType.GrassCBuffer == null)
             {
                 coreBinder.CBPerGrassType.UpdateFieldVar(shaderProg, "cbPerGrassType");
                 if(coreBinder.CBPerGrassType.Binder != null)
-                    GrassType.GrassCBuffer = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerGrassType.Binder.mCoreObject);
+                    GrassType.GrassCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerGrassType.Binder.mCoreObject);
             }
         }
         public class UMdfShaderBinder : Graphics.Pipeline.UCoreShaderBinder.UShaderResourceIndexer
         {
-            public void Init(NxRHI.UShaderEffect effect)
+            public void Init(NxRHI.TtShaderEffect effect)
             {
                 UpdateBindResouce(effect);
                 HeightMapTexture = effect.FindBinder("HeightMapTexture");
@@ -345,14 +345,14 @@ namespace EngineNS.Bricks.Terrain.Grass
                 cbPerGrassType = effect.FindBinder("cbPerGrassType");
                 VSGrassDataArray = effect.FindBinder("VSGrassDataArray");
             }
-            public NxRHI.UEffectBinder HeightMapTexture;
-            public NxRHI.UEffectBinder Samp_HeightMapTexture;
-            public NxRHI.UEffectBinder cbPerPatch;
-            public NxRHI.UEffectBinder cbPerTerrain;
-            public NxRHI.UEffectBinder cbPerGrassType;
-            public NxRHI.UEffectBinder VSGrassDataArray;
+            public NxRHI.TtEffectBinder HeightMapTexture;
+            public NxRHI.TtEffectBinder Samp_HeightMapTexture;
+            public NxRHI.TtEffectBinder cbPerPatch;
+            public NxRHI.TtEffectBinder cbPerTerrain;
+            public NxRHI.TtEffectBinder cbPerGrassType;
+            public NxRHI.TtEffectBinder VSGrassDataArray;
         }
-        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.URenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             var pat = GrassType.Patch;
             pat.SureCBuffer(drawcall.mCoreObject.GetGraphicsEffect(), ref pat.PatchCBuffer);
@@ -371,7 +371,7 @@ namespace EngineNS.Bricks.Terrain.Grass
             if (effectBinder.HeightMapTexture != null)
             {
                 drawcall.BindSRV(effectBinder.HeightMapTexture, pat.Level.HeightMapSRV);
-                //drawcall.BindSRV(effectBinder.HeightMapTexture, UEngine.Instance.GfxDevice.TextureManager.DefaultTexture);
+                //drawcall.BindSRV(effectBinder.HeightMapTexture, TtEngine.Instance.GfxDevice.TextureManager.DefaultTexture);
             }
             //index = drawcall.FindBinder("Samp_HeightMapTexture");
             if (effectBinder.Samp_HeightMapTexture != null)
@@ -383,7 +383,7 @@ namespace EngineNS.Bricks.Terrain.Grass
             //var cbIndex = drawcall.FindBinder("cbPerPatch");
             if (effectBinder.cbPerPatch != null)
             {
-                var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+                var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
                 pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.StartPosition, in pat.StartPosition);
 
                 pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.CurrentLOD, pat.CurrentLOD);
@@ -417,7 +417,7 @@ namespace EngineNS.Bricks.Terrain.Grass
             //index = drawcall.FindBinder("cbPerGrassType");
             if (effectBinder.cbPerGrassType != null)
             {
-                var coreBinder = UEngine.Instance.GfxDevice.CoreShaderBinder;
+                var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
                 GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.MinScale, GrassType.GrassDesc.MinScale);
                 GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.MaxScale, GrassType.GrassDesc.MaxScale);
                 GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.HeightMapMinHeight, in pat.Level.HeightMapMinHeight);
@@ -435,19 +435,19 @@ namespace EngineNS.Graphics.Pipeline
 {
     public partial class UCoreShaderBinder
     {
-        public class UCBufferPerGrassTypeIndexer : NxRHI.UShader.UShaderVarIndexer
+        public class UCBufferPerGrassTypeIndexer : NxRHI.TtShader.UShaderVarIndexer
         {
-            [NxRHI.UShader.UShaderVar(VarType = typeof(float))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc MinScale;
-            [NxRHI.UShader.UShaderVar(VarType = typeof(float))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc MaxScale;
-            [NxRHI.UShader.UShaderVar(VarType = typeof(float))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc HeightMapMinHeight;
-            [NxRHI.UShader.UShaderVar(VarType = typeof(float))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc PatchIdxX;
-            [NxRHI.UShader.UShaderVar(VarType = typeof(float))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc PatchIdxZ;
-            [NxRHI.UShader.UShaderVar(VarType = typeof(int))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(int))]
             public NxRHI.FShaderVarDesc MaxGrassInstanceNum;
         }
         public readonly UCBufferPerGrassTypeIndexer CBPerGrassType = new UCBufferPerGrassTypeIndexer();

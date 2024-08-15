@@ -11,9 +11,9 @@ using static EngineNS.UI.Bind.TtBindableProperty;
 
 namespace EngineNS.UI.Bind
 {
-    public class TtBindManager : UModule<UEngine>
+    public class TtBindManager : UModule<TtEngine>
     {
-        public override async Task<bool> Initialize(UEngine host)
+        public override async Task<bool> Initialize(TtEngine host)
         {
             foreach(var service in UTypeDescManager.Instance.Services.Values)
             {
@@ -154,7 +154,7 @@ namespace EngineNS.UI.Bind
 
 namespace EngineNS
 {
-    public partial class UEngine
+    public partial class TtEngine
     {
         public UI.Bind.TtBindManager UIBindManager { get; } = new UI.Bind.TtBindManager();
     }

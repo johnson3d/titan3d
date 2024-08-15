@@ -111,18 +111,18 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public TtLayerDrawBuffers LayerBasePass = new TtLayerDrawBuffers();
         public NxRHI.URenderPass RenderPass;
         public TtCpuCullingNode CpuCullNode = null;
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
             var dfPolicy = policy;// as UDeferredPolicy;
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             LayerBasePass.Initialize(rc, debugName + ".ForwordPass");
 
             CreateGBuffers(policy, ColorPinInOut.Attachement.Format);
 
-            mOpaqueShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<USdfOpaqueShading>();
-            mTranslucentShading = await UEngine.Instance.ShadingEnvManager.GetShadingEnv<USdfTranslucentShading>();
+            mOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<USdfOpaqueShading>();
+            mTranslucentShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<USdfTranslucentShading>();
 
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
@@ -130,7 +130,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 CpuCullNode = linker.OutPin.GetNakedHostNode<TtCpuCullingNode>();
             }
         }
-        public virtual unsafe TtGraphicsBuffers CreateGBuffers(URenderPolicy policy, EPixelFormat format)
+        public virtual unsafe TtGraphicsBuffers CreateGBuffers(TtRenderPolicy policy, EPixelFormat format)
         {
             var PassDesc = new NxRHI.FRenderPassDesc();
 
@@ -149,8 +149,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             //PassDesc.mDepthClearValue = 1.0f;
             //PassDesc.mStencilClearValue = 0u;
 
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-            RenderPass = UEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
 
             GBuffers.Initialize(policy, RenderPass);
             GBuffers.SetRenderTarget(policy, 0, ColorPinInOut);
@@ -168,7 +168,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             base.Dispose();
         }
-        public override void OnResize(URenderPolicy policy, float x, float y)
+        public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             if (mOpaqueShading == null)
                 return;
@@ -190,7 +190,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                     return mOpaqueShading;
             }
         }
-        public override void BeforeTickLogic(URenderPolicy policy)
+        public override void BeforeTickLogic(TtRenderPolicy policy)
         {
             var buffer = this.FindAttachBuffer(ColorPinInOut);
             if (buffer != null)
@@ -216,7 +216,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(USdfForwordNode), nameof(TickLogic));
-        public unsafe override void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -271,14 +271,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 LayerBasePass.ExecuteCommands(policy);
             }   
         }
-        public override void TickSync(URenderPolicy policy)
+        public override void TickSync(TtRenderPolicy policy)
         {
             if (mOpaqueShading == null)
                 return;
             LayerBasePass.SwapBuffer();
-            //GBuffers?.Camera?.mCoreObject.UpdateConstBufferData(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, 1);
+            //GBuffers?.Camera?.mCoreObject.UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, 1);
         }
-        public override void FrameBuild(URenderPolicy policy)
+        public override void FrameBuild(TtRenderPolicy policy)
         {
             base.FrameBuild(policy);
         }

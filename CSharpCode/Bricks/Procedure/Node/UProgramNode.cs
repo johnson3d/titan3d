@@ -199,7 +199,7 @@ namespace EngineNS.Bricks.Procedure.Node
             ImGuiAPI.PushID($"{this.NodeId.ToString()}");
             if (ImGuiAPI.Button("OpenMacross"))
             {
-                var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                 if (mainEditor != null)
                 {
                     if (ProgramName != null)

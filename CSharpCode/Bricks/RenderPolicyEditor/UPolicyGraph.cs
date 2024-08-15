@@ -172,14 +172,14 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         public const string RGDEditorKeyword = "RDG";
         public UPolicyGraph()
         {
-            PolicyType = Rtti.UTypeDesc.TypeOf(typeof(Graphics.Pipeline.UDeferredPolicyBase));
+            PolicyType = Rtti.UTypeDesc.TypeOf(typeof(Graphics.Pipeline.TtDeferredPolicyBase));
             UpdateCanvasMenus();
             UpdateNodeMenus();
             UpdatePinMenus();
         }
-        Graphics.Pipeline.URenderPolicy mRenderPolicy;
+        Graphics.Pipeline.TtRenderPolicy mRenderPolicy;
         [Rtti.Meta]
-        public Graphics.Pipeline.URenderPolicy RenderPolicy
+        public Graphics.Pipeline.TtRenderPolicy RenderPolicy
         {
             get => mRenderPolicy;
             set
@@ -189,18 +189,18 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         }
         Rtti.UTypeDesc mPolicyType;
         [Rtti.Meta]
-        [PGTypeEditor(typeof(Graphics.Pipeline.URenderPolicy))]
+        [PGTypeEditor(typeof(Graphics.Pipeline.TtRenderPolicy))]
         public Rtti.UTypeDesc PolicyType
         {
             get => mPolicyType;
             set
             {
                 mPolicyType = value;
-                mRenderPolicy = Rtti.UTypeDescManager.CreateInstance(mPolicyType, null) as Graphics.Pipeline.URenderPolicy;
+                mRenderPolicy = Rtti.UTypeDescManager.CreateInstance(mPolicyType, null) as Graphics.Pipeline.TtRenderPolicy;
             }
         }
         
-        public UPolicyEditor PolicyEditor;
+        public TtPolicyEditor PolicyEditor;
         List<Rtti.UTypeDesc> mGraphNodeTypes = null;
         public List<Rtti.UTypeDesc> GraphNodeTypes
         {

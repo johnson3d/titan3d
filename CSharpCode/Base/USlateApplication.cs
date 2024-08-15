@@ -153,7 +153,7 @@ namespace EngineNS
 
                 mImGuiContext = (IntPtr)ImGuiAPI.CreateContext(new ImFontAtlas((void*)0));
                 ImGuiAPI.SetCurrentContext(mImGuiContext.ToPointer());
-                UEngine.Instance.GfxDevice.SlateRenderer.RecreateFontDeviceTexture();
+                TtEngine.Instance.GfxDevice.SlateRenderer.RecreateFontDeviceTexture();
 
                 var io = ImGuiAPI.GetIO();
 
@@ -161,7 +161,7 @@ namespace EngineNS
                 configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
                 //configFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
                 configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_DockingEnable;           // Enable Docking
-                if (UEngine.Instance.Config.SupportMultWindows)
+                if (TtEngine.Instance.Config.SupportMultWindows)
                     configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
                 //io.ConfigViewportsNoAutoMerge = true;
                 //io.ConfigViewportsNoTaskBarIcon = true;
@@ -265,16 +265,16 @@ namespace EngineNS
             {
                 ImGuiAPI.SetCurrentContext(mImGuiContext.ToPointer());
 
-                Update((UEngine.Instance.ElapseTickCountMS) * 0.001f);
+                Update((TtEngine.Instance.ElapseTickCountMS) * 0.001f);
                 OnDrawUI();
             }
 
-            UEngine.Instance.InputSystem.ClearFilesDrop();
+            TtEngine.Instance.InputSystem.ClearFilesDrop();
             ImGuiAPI.Render();
 
             using (new Profiler.TimeScopeHelper(ScopeImGuiRender))
             {
-                if (UEngine.Instance.Config.SupportMultWindows == false)
+                if (TtEngine.Instance.Config.SupportMultWindows == false)
                 {
                     var draw_data = ImGuiAPI.GetDrawData();
                     EGui.UImDrawDataRHI.RenderImDrawData(ref *draw_data, NativeWindow, mDrawData);
@@ -311,14 +311,14 @@ namespace EngineNS
         }
         public override void Cleanup()
         {
-            UEngine.Instance.TickableManager.RemoveTickable(this);
+            TtEngine.Instance.TickableManager.RemoveTickable(this);
             base.Cleanup();
         }
         public override async System.Threading.Tasks.Task<bool> InitializeApplication(NxRHI.UGpuDevice rc, RName rpName)
         {
             await base.InitializeApplication(rc, rpName);
 
-            UEngine.Instance.TickableManager.AddTickable(this);
+            TtEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
         protected bool Visible = true;
@@ -329,7 +329,7 @@ namespace EngineNS
                 var num = ImGuiAPI.PlatformIO_Viewports_Size(ImGuiAPI.GetPlatformIO());
                 if (num == 1)
                 {//只剩下被特意隐藏的主Viewport了
-                    UEngine.Instance.PostQuitMessage();
+                    TtEngine.Instance.PostQuitMessage();
                 }
                 return;
             }
@@ -341,7 +341,7 @@ namespace EngineNS
             }
             ImGuiAPI.End();
 
-            UEngine.RootFormManager.DrawRootForms();
+            TtEngine.RootFormManager.DrawRootForms();
         }
         #region Tick
         public virtual void TickLogic(float ellapse)
@@ -363,7 +363,7 @@ namespace EngineNS
         #endregion
     }
 
-    partial class UEngine
+    partial class TtEngine
     {
         public static URootFormManager RootFormManager
         {

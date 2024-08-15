@@ -12,9 +12,9 @@ namespace EngineNS.Thread
 #pragma warning disable 1998
         public static async Async.TtTask DummyFunc()
         {
-            //if (UEngine.Instance == null)
+            //if (TtEngine.Instance == null)
             //    return;
-            //await UEngine.Instance.EventPoster.Post((state) =>
+            //await TtEngine.Instance.EventPoster.Post((state) =>
             //{
             //    return true;
             //});
@@ -92,7 +92,7 @@ namespace EngineNS.Thread
             }
             else
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Thread", $"ASyncSemaphore.Waiter is null");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"ASyncSemaphore.Waiter is null");
             }
         }
         public async System.Threading.Tasks.Task Await()
@@ -101,7 +101,7 @@ namespace EngineNS.Thread
             {
                 System.Diagnostics.Debug.Assert(false);
             }
-            await UEngine.Instance.EventPoster.AwaitSemaphore(this);
+            await TtEngine.Instance.EventPoster.AwaitSemaphore(this);
         }
     }
 

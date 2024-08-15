@@ -14,13 +14,13 @@ namespace EngineNS.Bricks.Input.Control
         public static T Create<T>() where T : UControlEvent
         {
             var evt = Activator.CreateInstance<T>();
-            evt.RegSelf(UEngine.Instance.InputSystem);
+            evt.RegSelf(TtEngine.Instance.InputSystem);
             return evt;
         }
         public static T Create<T>(UControlEventData controlData) where T : UControlEvent
         {
             var evt = Activator.CreateInstance<T>();
-            evt.RegSelf(UEngine.Instance.InputSystem);
+            evt.RegSelf(TtEngine.Instance.InputSystem);
             evt.Initialize(controlData);
             return evt;
         }
@@ -54,7 +54,7 @@ namespace EngineNS.Bricks.Input.Control
         {
             var obj = Activator.CreateInstance<T>();
             obj.Initialize(controlData);
-            UEngine.Instance.InputSystem.RegControl(obj);
+            TtEngine.Instance.InputSystem.RegControl(obj);
             return obj;
         }
         public void Initialize(IControlData controlData);

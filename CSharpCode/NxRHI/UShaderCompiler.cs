@@ -71,14 +71,14 @@ namespace EngineNS.NxRHI
             mCoreObject.MergeDefinitions(def.mCoreObject);
         }
     }
-    public class UShaderDesc : AuxPtrType<NxRHI.FShaderDesc>
+    public class TtShaderDesc : AuxPtrType<NxRHI.FShaderDesc>
     {
         public Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId PermutationId { get; set; }
-        public UShaderDesc()
+        public TtShaderDesc()
         {
             mCoreObject = FShaderDesc.CreateInstance();
         }
-        public UShaderDesc(EShaderType type)
+        public TtShaderDesc(EShaderType type)
         {
             mCoreObject = FShaderDesc.CreateInstance();
             mCoreObject.Type = type;
@@ -98,15 +98,15 @@ namespace EngineNS.NxRHI
             set => mCoreObject.FunctionName = VNameString.FromString(value);
         }
     }
-    public class UShaderCompiler : AuxPtrType<NxRHI.FShaderCompiler>
+    public class TtShaderCompiler : AuxPtrType<NxRHI.FShaderCompiler>
     {
-        public UShaderCompiler(FShaderCompiler.FDelegate_FnGetShaderCodeStream fn)
+        public TtShaderCompiler(FShaderCompiler.FDelegate_FnGetShaderCodeStream fn)
         {
             mCoreObject = FShaderCompiler.CreateInstance();
             mCoreObject.SetCallback(fn);
         }
         
-        public bool CompileShader(UShaderDesc shaderDesc, string shader, string entry, EShaderType type, string sm, UShaderDefinitions defines, EShaderLanguage sl, bool bDebugShader, string extHlslVersion, string dxcArgs)
+        public bool CompileShader(TtShaderDesc shaderDesc, string shader, string entry, EShaderType type, string sm, UShaderDefinitions defines, EShaderLanguage sl, bool bDebugShader, string extHlslVersion, string dxcArgs)
         {
             return mCoreObject.CompileShader(shaderDesc.mCoreObject, shader, entry, type, sm, defines.mCoreObject, sl, bDebugShader, extHlslVersion, dxcArgs);
         }

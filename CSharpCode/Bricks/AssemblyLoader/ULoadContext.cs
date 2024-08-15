@@ -231,7 +231,7 @@ namespace EngineNS.Bricks.AssemblyLoader
                     }
                 case EPluginModuleState.ReloadReady:
                     {
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Plugin", $"PluginModule({AssemblyPath}): will be reloaded");
+                        Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): will be reloaded");
                         if (UnloadPlugin(false) == false)
                         {
                             ModuleSate = EPluginModuleState.Loaded;
@@ -263,7 +263,7 @@ namespace EngineNS.Bricks.AssemblyLoader
                 var dModule = Manager.GetPluginModule(i);
                 if (dModule == null)
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Plugin", $"PluginModule({AssemblyPath}): load failed because the {i} is not found");
+                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): load failed because the {i} is not found");
                     return false;
                 }
                 dModule.PluginDescriptor.Enable = true;
@@ -287,26 +287,26 @@ namespace EngineNS.Bricks.AssemblyLoader
             Assembly assembly;
             if (ModuleAssembly.TryGetTarget(out assembly) == false)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Plugin", $"PluginModule({AssemblyPath}): ModuleAssembly is not alive");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): ModuleAssembly is not alive");
                 return false;
             }
             var type = assembly.GetType($"EngineNS.Plugins.{this.Name}.UPluginLoader");
             if (type == null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Plugin", $"PluginModule({AssemblyPath}): EngineNS.Plugin.UPluginLoader is not found");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): EngineNS.Plugin.UPluginLoader is not found");
                 return false;
             }
             var method = type.GetMethod("GetPluginObject", BindingFlags.Static | BindingFlags.Public);
             if (method == null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Plugin", $"PluginModule({AssemblyPath}): EngineNS.Plugin.UPluginLoader.GetPluginObject is not found");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): EngineNS.Plugin.UPluginLoader.GetPluginObject is not found");
                 return false;
             }
             var obj = method.Invoke(null, null);
             PluginObject = obj as IPlugin;
             if (PluginObject == null)
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Plugin", $"PluginModule({AssemblyPath}): EngineNS.Plugin.UPluginLoader.GetPluginObject return null");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): EngineNS.Plugin.UPluginLoader.GetPluginObject return null");
                 return false;
             }
             PluginObject.OnLoadedPlugin();
@@ -349,7 +349,7 @@ namespace EngineNS.Bricks.AssemblyLoader
                 if (i > 10)
                 {
                     GetPluginObjectImpl();
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Plugin", $"PluginModule({AssemblyPath}) is alive still after unload");
+                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}) is alive still after unload");
                     return false;
                 }
                 GC.Collect();
@@ -397,7 +397,7 @@ namespace EngineNS.Bricks.AssemblyLoader
             }
         }
         private string PlatformSuffix;
-        public void InitPlugins(UEngine engine)
+        public void InitPlugins(TtEngine engine)
         {
             CoreBinDirectory = engine.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute);
             var path = engine.FileManager.GetRoot(IO.TtFileManager.ERootDir.Plugin);
@@ -475,7 +475,7 @@ namespace EngineNS.Bricks.AssemblyLoader
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public Bricks.AssemblyLoader.UPluginModuleManager PluginModuleManager { get; } = new Bricks.AssemblyLoader.UPluginModuleManager();
     }

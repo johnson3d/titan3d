@@ -10,11 +10,11 @@ namespace EngineNS.Rtti
         {
             public USourceGitAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:SourceGit AssemblyDesc Created");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, "Plugins:SourceGit AssemblyDesc Created");
             }
             ~USourceGitAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:SourceGit AssemblyDesc Destroyed");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, "Plugins:SourceGit AssemblyDesc Destroyed");
             }
             public override string Name { get => "RpcCaller"; }
             public override string Service { get { return "Plugins"; } }
@@ -59,18 +59,23 @@ namespace EngineNS.Plugins.SourceGit
             ProcessStartInfo processStartInfo = new ProcessStartInfo();
             processStartInfo.FileName = @"git.exe";
             processStartInfo.Arguments = $"add {file}";
+            processStartInfo.RedirectStandardOutput = true;
 
             System.Diagnostics.Process? result = null;
             try
             {
                 result = System.Diagnostics.Process.Start(processStartInfo);
+                
                 var hr = new Bricks.SourceControl.USourceOpResult(0);
                 if (result != null)
                 {
-                    //if (result.StandardOutput != null)
-                    //    hr.Info = result.StandardOutput.ReadToEnd();
+                    while (result.HasExited == false)
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtEditorGategory>(Profiler.ELogTag.Info, result.StandardOutput.ReadToEnd());
+                    }
+                    return hr;
                 }
-                return hr;
+                return new Bricks.SourceControl.USourceOpResult(-1);
             }
             catch (Exception)
             {

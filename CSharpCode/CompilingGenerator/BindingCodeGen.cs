@@ -399,7 +399,7 @@ namespace {namespaceName}
                         if (!classSymbol.MemberNames.Any(name => bindPropName == name))
                         {
                             source += @$"
-        public static EngineNS.UI.Bind.TtBindableProperty {bindPropName} = EngineNS.UEngine.Instance.UIBindManager.Register<{propTypeDisplayName}, {className}{classGeneric}>(""{propName}"",{(string.IsNullOrEmpty(categoryValue) ? "" : @$" ""{categoryValue}"",")} {defValStr}, null, {valEditorStr}, {displayNameStr});";
+        public static EngineNS.UI.Bind.TtBindableProperty {bindPropName} = EngineNS.TtEngine.Instance.UIBindManager.Register<{propTypeDisplayName}, {className}{classGeneric}>(""{propName}"",{(string.IsNullOrEmpty(categoryValue) ? "" : @$" ""{categoryValue}"",")} {defValStr}, null, {valEditorStr}, {displayNameStr});";
                         }
 
                         //var bindingImpName = $"{className}_BindingImp_{propName}";
@@ -707,7 +707,7 @@ namespace {namespaceName}
                         if (!classSymbol.MemberNames.Any(name => bindPropName == name))
                         {
                             source += $@"
-        public static EngineNS.UI.Bind.TtBindableProperty {bindPropName} = EngineNS.UEngine.Instance.UIBindManager.RegisterAttached<{propTypeDisplayName}, {className}{classGeneric}>(""{nameVal}"",{(string.IsNullOrEmpty(categoryVal) ? "" : @$" ""{categoryVal}"",")} {defValStr}, {methodName}, {valEditorStr}, {displayNameStr});";
+        public static EngineNS.UI.Bind.TtBindableProperty {bindPropName} = EngineNS.TtEngine.Instance.UIBindManager.RegisterAttached<{propTypeDisplayName}, {className}{classGeneric}>(""{nameVal}"",{(string.IsNullOrEmpty(categoryVal) ? "" : @$" ""{categoryVal}"",")} {defValStr}, {methodName}, {valEditorStr}, {displayNameStr});";
                         }
 
                         if (!classSymbol.MemberNames.Any(name => $"Get{nameVal}" == name))

@@ -173,9 +173,9 @@ namespace EngineNS.IO
             ameta.AssetId = Guid.NewGuid();
             ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mAsset.GetType());
             ameta.Description = $"This is a {mAsset.GetType().FullName}\n";
-            ameta.SaveAMeta();
+            ameta.SaveAMeta((IAsset)null);
 
-            UEngine.Instance.AssetMetaManager.RegAsset(ameta);
+            TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
 
             mAsset.SaveAssetTo(mAsset.AssetName);
             return true;
@@ -268,7 +268,7 @@ namespace EngineNS.IO
                 return;
             IAsset asset = await LoadAsset();
             List<EngineNS.IO.IAssetMeta> holders = new List<EngineNS.IO.IAssetMeta>();
-            UEngine.Instance.AssetMetaManager.GetAssetHolder(this, holders);
+            TtEngine.Instance.AssetMetaManager.GetAssetHolder(this, holders);
             List<EngineNS.IO.IAsset> holdAssets = new List<EngineNS.IO.IAsset>();
             foreach (var i in holders)
             {
@@ -287,7 +287,7 @@ namespace EngineNS.IO
             IO.TtFileManager.CopyFile(mAssetName.Address + ".snap", tarAddress + ".snap");
 
             mAssetName.UnsafeUpdate(name, type);
-            this.SaveAMeta();
+            this.SaveAMeta(asset);
             asset.SaveAssetTo(mAssetName);
             
             OnAfterRenamedAsset(asset, mAssetName);
@@ -307,14 +307,14 @@ namespace EngineNS.IO
             if (asset == null)
                 return;
             var tarName = RName.GetRName(name, type);
-            var ameta = UEngine.Instance.AssetMetaManager.NewAMeta(tarName, asset.GetAMeta().GetType());
+            var ameta = TtEngine.Instance.AssetMetaManager.NewAMeta(tarName, asset.GetAMeta().GetType());
             ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(asset.GetType());
             foreach (var i in this.RefAssetRNames)
             {
                 ameta.RefAssetRNames.Add(i);
             }
 
-            ameta.SaveAMeta();
+            ameta.SaveAMeta(asset);
             asset.SaveAssetTo(tarName);
 
             IO.TtFileManager.MoveFile(mAssetName.Address + ".snap", tarName.Address + ".snap");
@@ -340,10 +340,14 @@ namespace EngineNS.IO
         {
             return mAssetName;
         }
-        public void SaveAMeta()
+        public void SaveAMeta(IAsset asset)
         {
             if (mAssetName != null)
             {
+                if (asset != null)
+                {
+                    TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(asset.GetType());
+                }
                 var fileName = mAssetName.Address + MetaExt;
                 SaveAMeta(fileName);
             }
@@ -352,7 +356,7 @@ namespace EngineNS.IO
         public void SaveAMeta(string fileName)
         {
             IO.TtFileManager.SaveObjectToXml(fileName, this);
-            UEngine.Instance.SourceControlModule.AddFile(fileName, true);
+            TtEngine.Instance.SourceControlModule.AddFile(fileName, true);
         }
         public virtual bool CanRefAssetType(IAssetMeta ameta)
         {
@@ -381,7 +385,7 @@ namespace EngineNS.IO
             var start = ImGuiAPI.GetItemRectMin() + offset;
             var end = start + sz;
 
-            var shadowImg = UEngine.Instance.UIProxyManager[TtAssetMetaManager.ItemShadowImgName] as EGui.UIProxy.ImageProxy;
+            var shadowImg = TtEngine.Instance.UIProxyManager[TtAssetMetaManager.ItemShadowImgName] as EGui.UIProxy.ImageProxy;
             if (shadowImg != null)
                 shadowImg.OnDraw(cmdlist, start - tempDelta0, end + tempDelta);
             var color = 0xff383838;
@@ -404,9 +408,9 @@ namespace EngineNS.IO
             Vector2 tpos;
             tpos.X = start.X + delta;
             tpos.Y = start.Y + delta;
-            UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)EGui.Slate.UBaseRenderer.enFont.Font_13px);
+            TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)EGui.Slate.UBaseRenderer.enFont.Font_13px);
             cmdlist.AddText(in tpos, typeFontColor, typeName, null);
-            UEngine.Instance.GfxDevice.SlateRenderer.PopFont();
+            TtEngine.Instance.GfxDevice.SlateRenderer.PopFont();
 
             //ImGuiAPI.PushClipRect(in start, in end, true);
 
@@ -414,7 +418,7 @@ namespace EngineNS.IO
             var snapEnd = snapStart + new Vector2(snapSize, snapSize);
             OnDrawSnapshot(in cmdlist, ref snapStart, ref snapEnd);
 
-            //var titleImg = UEngine.Instance.UIManager.GetUIProxy("uestyle/graph/regularnode_shadow_selected.srv", new Thickness(18.0f / 64.0f)) as EGui.UIProxy.ImageProxy;
+            //var titleImg = TtEngine.Instance.UIManager.GetUIProxy("uestyle/graph/regularnode_shadow_selected.srv", new Thickness(18.0f / 64.0f)) as EGui.UIProxy.ImageProxy;
             //if (titleImg != null)
             //    titleImg.OnDraw(cmdlist, in start, in end);
 
@@ -425,9 +429,9 @@ namespace EngineNS.IO
             var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
             tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
             tpos.Y = snapEnd.Y + 8;
-            UEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)EGui.Slate.UBaseRenderer.enFont.Font_15px);
+            TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)EGui.Slate.UBaseRenderer.enFont.Font_15px);
             cmdlist.AddText(in tpos, nameColor, name, null);
-            UEngine.Instance.GfxDevice.SlateRenderer.PopFont();
+            TtEngine.Instance.GfxDevice.SlateRenderer.PopFont();
             //ImGuiAPI.PopClipRect();
 
 
@@ -461,7 +465,7 @@ namespace EngineNS.IO
             }
             if (EGui.UIProxy.MenuItemProxy.MenuItem("RefGraph", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
             {
-                var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                 var rn = RName.GetRName(mAssetName.Name + ".ameta", mAssetName.RNameType);
                 var task = mainEditor.AssetEditorManager.OpenEditor(mainEditor, typeof(Editor.Forms.UAssetReferViewer), rn, this);
             }
@@ -641,14 +645,14 @@ namespace EngineNS.IO
         public static string ItemShadowImgName = "uestyle/content/uniformshadow.srv";
         public void LoadMetas()
         {
-            var root = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine);
+            var root = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine);
             var metas = IO.TtFileManager.GetFiles(RName.GetRName("", RName.ERNameType.Engine).Address, "*" + IAssetMeta.MetaExt, true);
             foreach(var i in metas)
             {
                 var m = IO.TtFileManager.LoadXmlToObject(i) as IAssetMeta;
                 if (m == null)
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Meta", $"{i} is not a IAssetMeta");
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"{i} is not a IAssetMeta");
                     continue;
                 }
                 var rn = IO.TtFileManager.GetRelativePath(root, i);
@@ -656,14 +660,14 @@ namespace EngineNS.IO
                 IAssetMeta om;
                 if (Assets.TryGetValue(m.AssetId, out om))
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Meta", $"{m.RefAssetRNames} ID repeat:{om.GetAssetName()}");
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"{m.RefAssetRNames} ID repeat:{om.GetAssetName()}");
                     continue;
                 }
                 Assets.Add(m.AssetId, m);
                 RNameAssets[m.GetAssetName()] = m;
             }
 
-            root = UEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
+            root = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
             metas = IO.TtFileManager.GetFiles(RName.GetRName("", RName.ERNameType.Game).Address, "*" + IAssetMeta.MetaExt, true);
             foreach (var i in metas)
             {
@@ -677,15 +681,15 @@ namespace EngineNS.IO
                 IAssetMeta om;
                 if (Assets.TryGetValue(m.AssetId, out om))
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Meta", $"{m.RefAssetRNames} ID repeat:{om.GetAssetName()}");
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"{m.RefAssetRNames} ID repeat:{om.GetAssetName()}");
                     continue;
                 }
                 Assets.Add(m.AssetId, m);
                 RNameAssets[m.GetAssetName()] = m;
             }
 
-            if (UEngine.Instance.UIProxyManager[ItemShadowImgName] == null)
-                UEngine.Instance.UIProxyManager[ItemShadowImgName] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(ItemShadowImgName, RName.ERNameType.Engine), new Thickness(16.0f / 64.0f, 16.0f / 64.0f, 16.0f / 64.0f, 16.0f / 64.0f));
+            if (TtEngine.Instance.UIProxyManager[ItemShadowImgName] == null)
+                TtEngine.Instance.UIProxyManager[ItemShadowImgName] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(ItemShadowImgName, RName.ERNameType.Engine), new Thickness(16.0f / 64.0f, 16.0f / 64.0f, 16.0f / 64.0f, 16.0f / 64.0f));
         }
         public T NewAsset<T>(RName name) where T : class, IAsset, new()
         {
@@ -700,7 +704,7 @@ namespace EngineNS.IO
             ameta.SetAssetName(name);
             ameta.AssetId = Guid.NewGuid();
             ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(T));
-            ameta.SaveAMeta();
+            ameta.SaveAMeta(asset);
             Assets.Add(ameta.AssetId, ameta);
             RNameAssets.Add(ameta.GetAssetName(), ameta);
 
@@ -721,7 +725,7 @@ namespace EngineNS.IO
             ameta.SetAssetName(name);
             ameta.AssetId = Guid.NewGuid();
             ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(type);
-            ameta.SaveAMeta();
+            ameta.SaveAMeta(asset);
             Assets.Add(ameta.AssetId, ameta);
             RNameAssets.Add(ameta.GetAssetName(), ameta);
 
@@ -738,7 +742,7 @@ namespace EngineNS.IO
             ameta.SetAssetName(name);
             ameta.AssetId = Guid.NewGuid();
             //ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(type);
-            ameta.SaveAMeta();
+            ameta.SaveAMeta((IAsset)null);
             Assets.Add(ameta.AssetId, ameta);
             RNameAssets.Add(ameta.GetAssetName(), ameta);
             return ameta;
@@ -809,7 +813,7 @@ namespace EngineNS.IO
         public long LastestCheckTime = 0;
         public void EditorCheckShowIconTimeout()
         {
-            var tickCount = UEngine.Instance.CurrentTickCountUS;
+            var tickCount = TtEngine.Instance.CurrentTickCountUS;
             if(tickCount - LastestCheckTime > 15*1000 * 1000)
             {
                 LastestCheckTime = tickCount;
@@ -850,7 +854,7 @@ namespace EngineNS.IO
                     }
                 }
             }
-            var meta = UEngine.Instance.AssetMetaManager.GetAssetMeta(rn);
+            var meta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(rn);
             if (meta == null)
                 return null;
             asset = await meta.LoadAsset();
@@ -888,7 +892,7 @@ namespace EngineNS.IO
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public IO.TtAssetMetaManager AssetMetaManager { get; } = new IO.TtAssetMetaManager();
         public IO.TtAssetManager AssetManager { get; } = new IO.TtAssetManager();
@@ -904,11 +908,11 @@ namespace EngineNS.UTest
         {
             //IO.FileManager.SureDirectory(RName.GetRName("UTest").Address);
             //var rn = RName.GetRName("UTest/test_icon.uvanim");
-            //var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(rn);
+            //var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(rn);
             //if (ameta == null)
             //{
             //    var rnAsset = RName.GetRName("UTest/test_icon.uvanim");
-            //    var asset = UEngine.Instance.AssetMetaManager.NewAsset<EGui.UUvAnim>(rnAsset);
+            //    var asset = TtEngine.Instance.AssetMetaManager.NewAsset<EGui.UUvAnim>(rnAsset);
             //    asset.SaveAssetTo(rnAsset);
             //}
         }

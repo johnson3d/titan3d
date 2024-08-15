@@ -18,19 +18,19 @@ namespace EngineNS.Graphics.Pipeline.Common
             AddInput(SrcPinIn, NxRHI.EBufferType.BFT_SRV);
             AddOutput(DestPinOut, NxRHI.EBufferType.BFT_SRV);
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             await base.Initialize(policy, debugName);
             BasePass.Initialize(rc, debugName + ".BasePass");
 
-            mCopyDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
+            mCopyDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
         }
         public TtAttachBuffer ResultBuffer;
         public bool IsCpuAceesResult { get; set; } = false;
         public NxRHI.UCopyDraw mCopyDrawcall;
-        public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
+        public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             var attachement = RenderGraph.AttachmentCache.ImportAttachment(DestPinOut);
             if (SrcPinIn.Attachement.Format != DestPinOut.Attachement.Format ||
@@ -58,7 +58,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UCopyNode), nameof(TickLogic));
-        public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -127,21 +127,21 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             return Color4b.FromRgb(255, 255, 0);
         }
-        public override async System.Threading.Tasks.Task Initialize(URenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             await base.Initialize(policy, debugName);
             BasePass.Initialize(rc, debugName + ".BasePass");
 
-            mCopyDrawcall = UEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
+            mCopyDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
         }
         public TtAttachBuffer[] ResultBuffer = new TtAttachBuffer[2];
         public TtAttachBuffer Current { get => ResultBuffer[0]; }
         public TtAttachBuffer Previos { get => ResultBuffer[1]; }
         public bool IsCpuAceesResult { get; set; } = false;
         public NxRHI.UCopyDraw mCopyDrawcall;
-        public override void FrameBuild(Graphics.Pipeline.URenderPolicy policy)
+        public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             var attachement = RenderGraph.AttachmentCache.ImportAttachment(PrevPinOut);
             if (SrcPinIn.Attachement.Format != PrevPinOut.Attachement.Format ||
@@ -170,7 +170,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UCopyNode), nameof(TickLogic));
-        public override unsafe void TickLogic(GamePlay.UWorld world, URenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -211,7 +211,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
 
-        public override unsafe void TickSync(URenderPolicy policy)
+        public override unsafe void TickSync(TtRenderPolicy policy)
         {
             base.TickSync(policy);
             MathHelper.Swap(ref ResultBuffer[0], ref ResultBuffer[1]);

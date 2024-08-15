@@ -19,9 +19,9 @@ namespace EngineNS.Editor.Forms
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
 
-        public Graphics.Mesh.UMaterialMesh Mesh;
+        public Graphics.Mesh.TtMaterialMesh Mesh;
         public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
-        public URenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
+        public TtRenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
         public EGui.Controls.PropertyGrid.PropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
 
@@ -81,14 +81,14 @@ namespace EngineNS.Editor.Forms
         #region Color Sdf Preview
         DistanceField.TtSdfAsset MeshSdfAsset = new DistanceField.TtSdfAsset();
         public EngineNS.Editor.USdfPreviewViewport sdfViewport = new EngineNS.Editor.USdfPreviewViewport();
-        protected async System.Threading.Tasks.Task Initialize_SdfViewport(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_SdfViewport(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
             var subMesh = Mesh.GetMeshPrimitives(0);            
             var noExtName = subMesh.AssetName.Name.Substring(0, subMesh.AssetName.Name.Length - subMesh.AssetName.ExtName.Length);
             var rn = RName.GetRName(noExtName + DistanceField.TtSdfAsset.AssetExt, Mesh.AssetName.RNameType);
-            MeshSdfAsset = await UEngine.Instance.SdfAssetManager.GetSdfAsset(rn);
+            MeshSdfAsset = await TtEngine.Instance.SdfAssetManager.GetSdfAsset(rn);
 
             if (MeshSdfAsset == null)
             {
@@ -143,7 +143,7 @@ namespace EngineNS.Editor.Forms
         EngineNS.GamePlay.Scene.UMeshNode mArrowMeshNode;
         EngineNS.GamePlay.Scene.UGridNode GridNode;
         float mCurrentMeshRadius = 1.0f;
-        protected async System.Threading.Tasks.Task Initialize_PreviewMesh(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.URenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMesh(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -152,7 +152,7 @@ namespace EngineNS.Editor.Forms
 
             (viewport as Editor.TtPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
-            List<Graphics.Mesh.UMeshPrimitives> MeshPrimitivesList = new List<Graphics.Mesh.UMeshPrimitives>();
+            List<Graphics.Mesh.TtMeshPrimitives> MeshPrimitivesList = new List<Graphics.Mesh.TtMeshPrimitives>();
             foreach (var j in Mesh.SubMeshes)
             {
                 if (j.Mesh == null)
@@ -175,7 +175,7 @@ namespace EngineNS.Editor.Forms
                 mCurrentMeshNode = meshNode;
             }
 
-            var arrowMaterialMesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(RName.GetRName("mesh/base/arrow.ums", RName.ERNameType.Engine));
+            var arrowMaterialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(RName.GetRName("mesh/base/arrow.ums", RName.ERNameType.Engine));
             var arrowMesh = new Graphics.Mesh.TtMesh();
             ok = arrowMesh.Initialize(arrowMaterialMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
@@ -205,8 +205,8 @@ namespace EngineNS.Editor.Forms
                 var box = Graphics.Mesh.UMeshDataProvider.MakePlane(meshSize.X, meshSize.Z).ToMesh();
 
                 var PlaneMesh = new Graphics.Mesh.TtMesh();
-                var tMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
-                tMaterials[0] = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
+                var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
+                tMaterials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
                 PlaneMesh.Initialize(box, tMaterials,
                     Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 PlaneMeshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), PlaneMesh, new DVector3(0, boxStart.Y, 0), Vector3.One, Quaternion.Identity);
@@ -224,10 +224,10 @@ namespace EngineNS.Editor.Forms
         public async Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            Mesh = arg as Graphics.Mesh.UMaterialMesh;
+            Mesh = arg as Graphics.Mesh.TtMaterialMesh;
             if (Mesh == null)
             {
-                Mesh = await UEngine.Instance.GfxDevice.MaterialMeshManager.CreateMaterialMesh(name);
+                Mesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.CreateMaterialMesh(name);
                 if (Mesh == null)
                     return false;
             }
@@ -236,15 +236,15 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.Title = $"MaterialMesh:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMesh;
             var SimpleRPolicyName = RName.GetRName("graphics/deferred_simple.rpolicy", RName.ERNameType.Engine);
-            await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, SimpleRPolicyName, 0, 1);
-            //await PreviewViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, UEngine.Instance.Config.MainRPolicyName, 0, 1);
+            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, SimpleRPolicyName, 0, 1);
+            //await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
             PreviewViewport.World.DirectionLight.mSunLightIntensity = 1.0f;
 
             #region sdf
             var sdfRPolicyName = RName.GetRName("graphics/sdf.rpolicy", RName.ERNameType.Engine);
             //sdfViewport.Title = $"MaterialMesh:{name}";
             sdfViewport.OnInitialize = Initialize_SdfViewport;
-            await sdfViewport.Initialize(UEngine.Instance.GfxDevice.SlateApplication, sdfRPolicyName, 0, 1);
+            await sdfViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, sdfRPolicyName, 0, 1);
             var mesh = new Graphics.Mesh.TtMesh();
             var ok = mesh.Initialize(Mesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
@@ -260,13 +260,13 @@ namespace EngineNS.Editor.Forms
 
             MeshPropGrid.Target = Mesh;
             EditorPropGrid.Target = this;
-            UEngine.Instance.TickableManager.AddTickable(this);
+            TtEngine.Instance.TickableManager.AddTickable(this);
 
             return true;
         }
         public void OnCloseEditor()
         {
-            UEngine.Instance.TickableManager.RemoveTickable(this);
+            TtEngine.Instance.TickableManager.RemoveTickable(this);
             Dispose();
         }
         #region DrawUI
@@ -285,7 +285,7 @@ namespace EngineNS.Editor.Forms
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = UEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -342,9 +342,9 @@ namespace EngineNS.Editor.Forms
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
                 Mesh.SaveAssetTo(Mesh.AssetName);
-                var unused = UEngine.Instance.GfxDevice.MaterialMeshManager.ReloadMaterialMesh(Mesh.AssetName);
+                var unused = TtEngine.Instance.GfxDevice.MaterialMeshManager.ReloadMaterialMesh(Mesh.AssetName);
 
-                //USnapshot.Save(Mesh.AssetName, Mesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), UEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
+                //USnapshot.Save(Mesh.AssetName, Mesh.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
             }
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("ApplySubMeshes", in btSize))
@@ -374,7 +374,7 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.ToggleButton("TestAuto", ref mShowTangent, in btSize, 0))
             {
-                var ameta = UEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
+                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
                 _ = ameta.AutoGenSnap();
             }
         }
@@ -466,7 +466,7 @@ namespace EngineNS.Editor.Forms
 
             if (ImGuiAPI.IsMouseDragging(ImGuiMouseButton_.ImGuiMouseButton_Left, -1) || ImGuiAPI.IsMouseDragging(ImGuiMouseButton_.ImGuiMouseButton_Right, -1))
             {
-                if (UEngine.Instance.InputSystem.IsKeyDown(EngineNS.Bricks.Input.Keycode.KEY_l))
+                if (TtEngine.Instance.InputSystem.IsKeyDown(EngineNS.Bricks.Input.Keycode.KEY_l))
                 {
                     var delta = ImGuiAPI.GetMouseDragDelta(ImGuiMouseButton_.ImGuiMouseButton_Left, -1);
                     var delta2 = ImGuiAPI.GetMouseDragDelta(ImGuiMouseButton_.ImGuiMouseButton_Right, -1);
@@ -510,7 +510,7 @@ namespace EngineNS.Editor.Forms
 namespace EngineNS.Graphics.Mesh
 {
     [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.UMeshEditor))]
-    public partial class UMaterialMesh
+    public partial class TtMaterialMesh
     {
         
     }

@@ -83,12 +83,12 @@ namespace EngineNS.Profiler
                 {
                     changed = (int)type.Count - (int)oType.Count;
                     if (changed != 0)
-                        Profiler.Log.WriteLine(ELogTag.Info, "NativeMemory", $"[{type.Size}]{type.File}({type.Line}):{changed} = {type.Count} - {oType.Count}");
+                        Profiler.Log.WriteLine<Profiler.TtDebugLogCategory>(ELogTag.Info, $"[{type.Size}]{type.File}({type.Line}):{changed} = {type.Count} - {oType.Count}");
                 }
                 else
                 {
                     changed = type.Count;
-                    Profiler.Log.WriteLine(ELogTag.Info, "NativeMemory", $"[{type.Size}]{type.File}({type.Line}):{changed} = {type.Count} - 0");
+                    Profiler.Log.WriteLine<Profiler.TtDebugLogCategory>(ELogTag.Info, $"[{type.Size}]{type.File}({type.Line}):{changed} = {type.Count} - 0");
                 }
             }
             while (mCoreObject.NextIterate(iter));

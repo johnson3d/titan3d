@@ -10,11 +10,11 @@ namespace EngineNS.Rtti
         {
             public ULoginServerAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:LoginServer AssemblyDesc Created");
+                Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(Profiler.ELogTag.Info, "Plugins:LoginServer AssemblyDesc Created");
             }
             ~ULoginServerAssemblyDesc()
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Info, "Core", "Plugins:LoginServer AssemblyDesc Destroyed");
+                Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(Profiler.ELogTag.Info, "Plugins:LoginServer AssemblyDesc Destroyed");
             }
             public override string Name { get => "LoginServer"; }
             public override string Service { get { return "Plugins"; } }
@@ -44,7 +44,7 @@ namespace EngineNS.Plugins.LoginServer
         public void OnLoadedPlugin()
         {
             var server = new ULoginServer();
-            UEngine.Instance.RpcModule.RpcManager = server;
+            TtEngine.Instance.RpcModule.RpcManager = server;
             Action action = async () =>
             {
                 var np = server.SelectNetworkPoint();

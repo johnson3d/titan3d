@@ -53,7 +53,7 @@ namespace EngineNS.NxRHI
         
         public void BindPipeline(UGpuPipeline pipeline)
         {
-            mCoreObject.BindPipeline(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, pipeline.mCoreObject);
+            mCoreObject.BindPipeline(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, pipeline.mCoreObject);
         }
         public bool BindCBuffer(VNameString name, UCbView buffer)
         {
@@ -65,7 +65,7 @@ namespace EngineNS.NxRHI
                 return;
             mCoreObject.BindResource(binder, buffer.mCoreObject.NativeSuper);
         }
-        public void BindCBuffer(UEffectBinder binder, UCbView buffer)
+        public void BindCBuffer(TtEffectBinder binder, UCbView buffer)
         {
             if (binder == null || buffer == null)
                 return;
@@ -87,7 +87,7 @@ namespace EngineNS.NxRHI
                 return;
             mCoreObject.BindResource(binder, srv.mCoreObject.NativeSuper);
         }
-        public void BindSRV(NxRHI.UEffectBinder binder, USrView srv)
+        public void BindSRV(NxRHI.TtEffectBinder binder, USrView srv)
         {
             if (binder == null || srv == null)
                 return;
@@ -103,7 +103,7 @@ namespace EngineNS.NxRHI
                 return;
             mCoreObject.BindResource(binder, uav.mCoreObject.NativeSuper);
         }
-        public void BindUAV(UEffectBinder binder, UUaView uav)
+        public void BindUAV(TtEffectBinder binder, UUaView uav)
         {
             if (binder == null || uav == null)
                 return;
@@ -121,7 +121,7 @@ namespace EngineNS.NxRHI
                 return;
             mCoreObject.BindResource(binder, sampler.mCoreObject.NativeSuper);
         }
-        public void BindSampler(UEffectBinder binder, USampler sampler)
+        public void BindSampler(TtEffectBinder binder, USampler sampler)
         {
             if (binder == null || sampler == null)
                 return;
@@ -129,11 +129,11 @@ namespace EngineNS.NxRHI
         }
         public void BindGeomMesh(UGeomMesh mesh)
         {
-            mCoreObject.BindGeomMesh(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, mesh.mCoreObject);
+            mCoreObject.BindGeomMesh(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, mesh.mCoreObject);
         }
         public void BindGeomMesh(FGeomMesh mesh)
         {
-            mCoreObject.BindGeomMesh(UEngine.Instance.GfxDevice.RenderContext.mCoreObject, mesh);
+            mCoreObject.BindGeomMesh(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, mesh);
         }
         public void BindAttachVertexArray(UVertexArray va)
         {
@@ -171,7 +171,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.NativeSuper.Commit(cmdlist.mCoreObject, false);
         }
-        public void SetComputeEffect(UComputeEffect effect)
+        public void SetComputeEffect(TtComputeEffect effect)
         {
             mCoreObject.SetComputeEffect(effect.mCoreObject);
         }
@@ -209,7 +209,7 @@ namespace EngineNS.NxRHI
                 return;
             if (resource == null)
             {
-                resource = UEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
+                resource = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
             }
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }

@@ -28,7 +28,7 @@
                 mFrame_BeginPlay.SetWatchVariable("tmp_r_LoadScene_3113493897", tmp_r_LoadScene_3113493897);
                 mFrame_BeginPlay.SetWatchVariable("v_name_Load_2325772087", EngineNS.RName.GetRName("tutorials/helloword/hello.ui", EngineNS.RName.ERNameType.Game));
                 breaker_Load_2325772087.TryBreak();
-                tmp_r_Load_2325772087 = EngineNS.UEngine.Instance.UIManager.Load(EngineNS.RName.GetRName("tutorials/helloword/hello.ui", EngineNS.RName.ERNameType.Game));
+                tmp_r_Load_2325772087 = EngineNS.TtEngine.Instance.UIManager.Load(EngineNS.RName.GetRName("tutorials/helloword/hello.ui", EngineNS.RName.ERNameType.Game));
                 mFrame_BeginPlay.SetWatchVariable("tmp_r_Load_2325772087", tmp_r_Load_2325772087);
                 mFrame_BeginPlay.SetWatchVariable("v_item_Add_1937078671", tmp_r_Load_2325772087);
                 breaker_Add_1937078671.TryBreak();
@@ -36,6 +36,7 @@
                 ret_4129711059 = true;
                 mFrame_BeginPlay.SetWatchVariable("ret_4129711059_1529912777", ret_4129711059);
                 breaker_return_1529912777.TryBreak();
+                return ret_4129711059;
                 return ret_4129711059;
             }
         }

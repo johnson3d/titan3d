@@ -25,7 +25,7 @@ namespace EngineNS.GamePlay.Scene
         public class USceneCaptureData : UNodeData
         {
             [Rtti.Meta]
-            [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.URenderPolicyAsset.AssetExt)]
+            [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]
             public RName RPolicyName { get; set; }
             [Rtti.Meta]
             public Vector2 TargetSize { get; set; } = new Vector2(256, 256);
@@ -36,7 +36,7 @@ namespace EngineNS.GamePlay.Scene
             [Rtti.Meta]
             public List<Guid> ExcludeActors { get; set; }
         }
-        public Graphics.Pipeline.URenderPolicy RenderPolicy { get; set; }
+        public Graphics.Pipeline.TtRenderPolicy RenderPolicy { get; set; }
         public Editor.Controller.EditorCameraController CameraController = new Editor.Controller.EditorCameraController();
         public GamePlay.UWorld CaptureWorld { get; set; }
         GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
@@ -47,10 +47,10 @@ namespace EngineNS.GamePlay.Scene
             var nd = GetNodeData<USceneCaptureData>();
             if (nd.RPolicyName == null)
             {
-                nd.RPolicyName = UEngine.Instance.Config.MainRPolicyName;
+                nd.RPolicyName = TtEngine.Instance.Config.MainRPolicyName;
             }
-            Graphics.Pipeline.URenderPolicy policy = null;
-            var rpAsset = Bricks.RenderPolicyEditor.URenderPolicyAsset.LoadAsset(nd.RPolicyName);
+            Graphics.Pipeline.TtRenderPolicy policy = null;
+            var rpAsset = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(nd.RPolicyName);
             if (rpAsset != null)
             {
                 policy = rpAsset.CreateRenderPolicy(null);
@@ -65,7 +65,7 @@ namespace EngineNS.GamePlay.Scene
 
             UpdateCamera();
 
-            UEngine.Instance.TickableManager.AddTickable(this);
+            TtEngine.Instance.TickableManager.AddTickable(this);
 
             mVisParameter.OnVisitNode = this.OnVisitNode;
             return true;
@@ -177,9 +177,9 @@ namespace EngineNS.GamePlay.Scene
             {
                 mVisible = value;
                 if (value)
-                    UEngine.RootFormManager.RegRootForm(this);
+                    TtEngine.RootFormManager.RegRootForm(this);
                 else
-                    UEngine.RootFormManager.UnregRootForm(this);
+                    TtEngine.RootFormManager.UnregRootForm(this);
             }
         }
         public uint DockId { get; set; }

@@ -24,13 +24,13 @@ namespace EngineNS.GamePlay.Scene
             return true;
         }
         public Graphics.Pipeline.TtViewportSlate ViewportSlate;
-        public Graphics.Pipeline.Shader.UMaterialInstance mGridlineMaterial;
+        public Graphics.Pipeline.Shader.TtMaterialInstance mGridlineMaterial;
         public Graphics.Mesh.UMdfGridUVMesh GridUVModifier;
         public static async Thread.Async.TtTask<UGridNode> AddGridNode(GamePlay.UWorld world, UNode parent)
         {
-            var rc = UEngine.Instance.GfxDevice.RenderContext;
-            var material = await UEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/gridline.material", RName.ERNameType.Engine));
-            var materialInstance = Graphics.Pipeline.Shader.UMaterialInstance.CreateMaterialInstance(material);
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            var material = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/gridline.material", RName.ERNameType.Engine));
+            var materialInstance = Graphics.Pipeline.Shader.TtMaterialInstance.CreateMaterialInstance(material);
             materialInstance.RenderLayer = Graphics.Pipeline.ERenderLayer.RL_PostTranslucent;
             unsafe
             {
@@ -63,7 +63,7 @@ namespace EngineNS.GamePlay.Scene
             var mesh = Graphics.Mesh.UMeshDataProvider.MakeGridPlane(rc, Vector2.Zero, Vector2.One, 10).ToMesh();
 
             var gridMesh = new Graphics.Mesh.TtMesh();
-            var tMaterials = new Graphics.Pipeline.Shader.UMaterial[1];
+            var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
             tMaterials[0] = materialInstance;
             var ok = gridMesh.Initialize(mesh, tMaterials,
                 Rtti.UTypeDescGetter<Graphics.Mesh.UMdfGridUVMesh>.TypeDesc);
@@ -93,7 +93,7 @@ namespace EngineNS.GamePlay.Scene
         //private static RHI.FNameVarIndex ShaderIdx_UVMin = new RHI.FNameVarIndex("UVMin");
         //private static RHI.FNameVarIndex ShaderIdx_UVMax = new RHI.FNameVarIndex("UVMax");
         double WorldToUVScale = 0.0001f;
-        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
+        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             if (mGridlineMaterial == null || mGridlineMaterial.PerMaterialCBuffer == null)
                 return true;

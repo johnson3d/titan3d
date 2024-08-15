@@ -56,12 +56,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                             var t2 = Support.Time.GetTickCount();
                             if (t2 - t1 > 1000 * 15)
                             {
-                                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "LevelStreaming", $"CreateLevelData({level.LevelX},{level.LevelX}, force = true) time out");
+                                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"CreateLevelData({level.LevelX},{level.LevelX}, force = true) time out");
                                 return;
                             }
                             System.Threading.Thread.Sleep(10);
                         }
-                        Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "LevelStreaming", $"CreateLevelData({level.LevelX},{level.LevelX})Level ForceLoad in async streaming == 1");
+                        Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"CreateLevelData({level.LevelX},{level.LevelX})Level ForceLoad in async streaming == 1");
                     }
                     return;
                 }
@@ -80,7 +80,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
             else
             {
-                Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "LevelStreaming", $"CreateLevelData({level.LevelX},{level.LevelX})Level ForceLoad in async streaming == 2");
+                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"CreateLevelData({level.LevelX},{level.LevelX})Level ForceLoad in async streaming == 2");
             }
 
             lock (this)
@@ -88,7 +88,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 StreamingLevels.Remove(level);
                 if (IsStreaming == false)
                 {
-                    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "LevelStreaming", $"CreateLevelData({level.LevelX},{level.LevelX}): IsStreaming == false");
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"CreateLevelData({level.LevelX},{level.LevelX}): IsStreaming == false");
                     level.LevelData?.Dispose();
                     level.LevelData = null;
                 }

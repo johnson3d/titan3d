@@ -341,11 +341,11 @@ namespace AssetImportAndExport.FBX
             }
         }
     }
-    public partial class UFBXFactoryModule : EngineNS.UModule<EngineNS.UEngine>
+    public partial class UFBXFactoryModule : EngineNS.UModule<EngineNS.TtEngine>
     {
         public AssetImportAndExport.FBX.FBXFactory Instance = AssetImportAndExport.FBX.FBXFactory.CreateInstance();
 
-        public override void Cleanup(EngineNS.UEngine host)
+        public override void Cleanup(EngineNS.TtEngine host)
         {
             Instance.Dispose();
         }
@@ -356,7 +356,7 @@ namespace AssetImportAndExport.FBX
 
 namespace EngineNS
 {
-    partial class UEngine
+    partial class TtEngine
     {
         public AssetImportAndExport.FBX.UFBXFactoryModule FBXFactoryModule { get; } = new AssetImportAndExport.FBX.UFBXFactoryModule();
     }

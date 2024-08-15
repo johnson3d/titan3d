@@ -11,7 +11,7 @@ namespace EngineNS.EGui.UIProxy
         System.Threading.Tasks.Task<bool> Initialize();
         bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData);
     }
-    public class UIManager : UModule<UEngine>
+    public class UIManager : UModule<TtEngine>
     {
         Dictionary<string, IUIProxyBase> mDic = new Dictionary<string, IUIProxyBase>();
 
@@ -43,7 +43,7 @@ namespace EngineNS.EGui.UIProxy
             return item;
         }
 
-        public override void Cleanup(UEngine host)
+        public override void Cleanup(TtEngine host)
         {
             foreach(var item in mDic.Values)
             {
@@ -64,7 +64,7 @@ namespace EngineNS.EGui.UIProxy
 
 namespace EngineNS
 {
-    public partial class UEngine
+    public partial class TtEngine
     {
         public EGui.UIProxy.UIManager UIProxyManager { get; } = new EGui.UIProxy.UIManager();
     }

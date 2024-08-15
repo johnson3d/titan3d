@@ -351,7 +351,7 @@ namespace EngineNS.Bricks.Input
             // 设置IME状态
             public static unsafe void SetIMEStatus(bool open, in Vector2 pos)
             {
-                var hwnd = new IntPtr(EngineNS.UEngine.Instance.GfxDevice.SlateApplication.NativeWindow.HWindow.ToPointer());
+                var hwnd = new IntPtr(EngineNS.TtEngine.Instance.GfxDevice.SlateApplication.NativeWindow.HWindow.ToPointer());
                 IntPtr hIMC = ImmGetContext(hwnd);
                 if(hIMC != IntPtr.Zero)
                 {

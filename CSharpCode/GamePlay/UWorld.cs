@@ -28,14 +28,14 @@ namespace EngineNS.GamePlay
             mRoot.World = this;
         }
         UMemberTickables mMemberTickables = new UMemberTickables();
-        Graphics.Pipeline.Shader.UMaterialInstance mBoundingDebugMaterial;
+        Graphics.Pipeline.Shader.TtMaterialInstance mBoundingDebugMaterial;
         public async System.Threading.Tasks.Task<bool> InitWorld()
         {
             Scene.UNodeData data = new Scene.UNodeData();
             await mRoot.InitializeNode(this, data, Scene.EBoundVolumeType.Box, typeof(UPlacement));
             mRoot.SetStyle(GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
 
-            mBoundingDebugMaterial = await UEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
+            mBoundingDebugMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
 
             await mMemberTickables.InitializeMembers(this);
             return true;
@@ -167,7 +167,7 @@ namespace EngineNS.GamePlay
                 var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeBox(in box, color.ToArgb());
                 meshProvider.TransientVB = TransientVB;
                 meshProvider.TransientIB = TransientIB;
-                var mesh = meshProvider.ToDrawMesh(UEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
+                var mesh = meshProvider.ToDrawMesh(TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
                 var localTrans = FTransform.CreateTransform(aabb.Minimum, in Vector3.One, in Quaternion.Identity);
                 FTransform trans;
                 FTransform.Multiply(out trans, in transform, in localTrans);
@@ -177,7 +177,7 @@ namespace EngineNS.GamePlay
             public void AddBoundingBox(in BoundingBox box, in Color4f color)
             {
                 var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeBox(in box, color.ToArgb());
-                var mesh = meshProvider.ToDrawMesh(UEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
+                var mesh = meshProvider.ToDrawMesh(TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
                 mesh.SetWorldTransform(in FTransform.Identity, this.World, true);
                 AddVisibleMesh(mesh);
             }
@@ -272,8 +272,8 @@ namespace EngineNS.GamePlay
                 (float)size.X, (float)size.Y, (float)size.Z).ToMesh();
             var mesh2 = new Graphics.Mesh.TtMesh();
 
-            var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
-            materials1[0] = mBoundingDebugMaterial;// UEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
+            var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
+            materials1[0] = mBoundingDebugMaterial;// TtEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
             if (materials1[0] == null)
             {
                 //System.Diagnostics.Debug.Assert(false);
@@ -329,7 +329,7 @@ namespace EngineNS.GamePlay
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(TickLogic));
         private UNode.TtNodeTickParameters NodeTickParameters = new UNode.TtNodeTickParameters();
-        public virtual void TickLogic(Graphics.Pipeline.URenderPolicy policy, float ellapse)
+        public virtual void TickLogic(Graphics.Pipeline.TtRenderPolicy policy, float ellapse)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -344,7 +344,7 @@ namespace EngineNS.GamePlay
                 Root.TickLogic(NodeTickParameters);
 
                 //NodeTickParameters.IsTickChildren = false;
-                //UEngine.Instance.EventPoster.ParrallelFor(ActiveNodes.Count, static (Index, obj1, obj2) =>
+                //TtEngine.Instance.EventPoster.ParrallelFor(ActiveNodes.Count, static (Index, obj1, obj2) =>
                 //{
                 //    var pThis = (UWorld)obj1;
                 //    pThis.ActiveNodes[Index].TickLogic(pThis.NodeTickParameters);
@@ -354,7 +354,7 @@ namespace EngineNS.GamePlay
                 //    i.TickLogic(NodeTickParameters);
                 //}
 
-                mMemberTickables.TickLogic(this, UEngine.Instance.ElapseTickCountMS);
+                mMemberTickables.TickLogic(this, TtEngine.Instance.ElapseTickCountMS);
 
                 foreach (var i in mAfterTicks)
                 {

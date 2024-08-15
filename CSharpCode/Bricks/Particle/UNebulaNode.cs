@@ -38,7 +38,7 @@ namespace EngineNS.Bricks.Particle
                 GetNodeData<TtNebulaNodeData>().NebulaName = value;
                 System.Action action = async () =>
                 {
-                    mNebulaParticle = await UEngine.Instance.NebulaTemplateManager.GetParticle(value);
+                    mNebulaParticle = await TtEngine.Instance.NebulaTemplateManager.GetParticle(value);
                 };
                 action();
             }
@@ -51,7 +51,7 @@ namespace EngineNS.Bricks.Particle
             if (GetNodeData<TtNebulaNodeData>().NebulaParticle != null)
                 mNebulaParticle = GetNodeData<TtNebulaNodeData>().NebulaParticle; 
             else
-                mNebulaParticle = await UEngine.Instance.NebulaTemplateManager.GetParticle(GetNodeData<TtNebulaNodeData>().NebulaName);
+                mNebulaParticle = await TtEngine.Instance.NebulaTemplateManager.GetParticle(GetNodeData<TtNebulaNodeData>().NebulaName);
             return ret;
         }
         public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
@@ -81,14 +81,14 @@ namespace EngineNS.Bricks.Particle
                 i.Mesh.UpdateCameraOffset(world);
             }
         }
-        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.URenderPolicy policy)
+        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             //var particleNode = policy.FindNode("ParticleNode") as UParticleGraphNode;
             var particleNode = policy.FindFirstNode<UParticleGraphNode>();
             if (particleNode == null)
                 return true;
 
-            NebulaParticle.Update(policy, particleNode, UEngine.Instance.ElapsedSecond);
+            NebulaParticle.Update(policy, particleNode, TtEngine.Instance.ElapsedSecond);
 
             return true;
         }
