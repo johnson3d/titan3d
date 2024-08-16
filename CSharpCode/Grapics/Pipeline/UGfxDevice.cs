@@ -222,7 +222,7 @@ namespace EngineNS.Graphics.Pipeline
             }
 
             RenderPassManager.Initialize(engine);
-            await TextureManager.Initialize(engine);
+            await TextureManager.Initialize(engine);    
             await MaterialManager.Initialize(this);
             await MaterialInstanceManager.Initialize(engine);
             await EffectManager.Initialize(this);

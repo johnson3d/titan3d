@@ -31,7 +31,7 @@
         <AsyncType Type="EngineNS.Bricks.CodeBuilder.UMethodDeclaration.EAsyncType@EngineCore" Value="SystemTask" />
         <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
         <IsOverride Type="System.Boolean@Unknown" Value="True" />
-        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="1">
+        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="2">
           <e_0 Type="EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore">
             <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
             <InitValue Type="EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore">
@@ -51,6 +51,25 @@
             </VariableType>
             <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
           </e_0>
+          <e_1 Type="EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore">
+            <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+            <InitValue Type="EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore">
+              <Type Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+                <IsEnum Type="System.Boolean@Unknown" Value="False" />
+                <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.UI.Controls.TtUIElement@EngineCore" />
+                <TypeFullName Type="System.String@Unknown" Value="EngineNS.UI.Controls.TtUIElement" />
+              </Type>
+            </InitValue>
+            <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
+            <IsBindable Type="System.Boolean@Unknown" Value="False" />
+            <VariableName Type="System.String@Unknown" Value="tmp_r_Load_2325772087" />
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+              <IsEnum Type="System.Boolean@Unknown" Value="False" />
+              <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.UI.Controls.TtUIElement@EngineCore" />
+              <TypeFullName Type="System.String@Unknown" Value="EngineNS.UI.Controls.TtUIElement" />
+            </VariableType>
+            <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+          </e_1>
         </LocalVariables>
         <MethodName Type="System.String@Unknown" Value="BeginPlay" />
         <ReturnValue Type="EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore">
@@ -233,7 +252,7 @@
     </e_9>
     <e_10 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassPropertyVar@EngineCore">
       <IsGet Type="System.Boolean@Unknown" Value="True" />
-      <Label Type="System.String@Unknown" Value="EngineNS.TtEngine@EngineCore" />
+      <Label Type="System.String@Unknown" Value="Get Instance" />
       <Name Type="System.String@Unknown" Value="Get Instance" />
       <NodeId Type="System.Guid@Unknown" Value="4e8e85bc-e4d3-43f0-9627-103c162ae609" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="543.5001,531.99854" />

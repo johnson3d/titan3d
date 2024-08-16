@@ -14,6 +14,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\..\cache\debugutility\engine_preprosessors.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\ClusterCulling.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\FRaster.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\GpuCulling.cginc" />
@@ -85,6 +86,7 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredDirLighting.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredOpaque.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\MuliViewID\BasePass.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\DrawViewportShading.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\DummyShading.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\ExpHeightFog.cginc" />
@@ -119,6 +121,7 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Sys\SSM.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\TemporalAA.cginc" />
     <None Include="$(MSBuildThisFileDirectory)slate\SlateGUI.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)slate\Slate_TextureCubeViewer.cginc" />
     <None Include="$(MSBuildThisFileDirectory)slate\Slate_TextureViewer.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\ParticleModifier.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\SkinModifier.cginc" />

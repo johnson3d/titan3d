@@ -2157,7 +2157,7 @@ namespace EngineNS.NxRHI
             int imageHeight = curImage.Height;
             if (desc.CubeFaces == 6)
             {
-                imageWidth = imageHeight = MathHelper.Min(imageWidth, imageHeight);
+                desc.Width = desc.Height = imageWidth = imageHeight = MathHelper.Min(imageWidth, imageHeight);
             }
             else
                 desc.CubeFaces = 1;
@@ -3198,9 +3198,17 @@ namespace EngineNS.NxRHI
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var srvDesc = new FSrvDesc();
             srvDesc.SetTexture2D();
-            srvDesc.Type = ESrvType.ST_Texture2D;
+            if (desc.CubeFaces == 6)
+            {
+                srvDesc.Type = ESrvType.ST_TextureCube;
+                srvDesc.TextureCube.MipLevels = (uint)mipLevel;
+            }
+            else
+            {
+                srvDesc.Type = ESrvType.ST_Texture2D;
+                srvDesc.Texture2D.MipLevels = (uint)mipLevel;
+            }
             srvDesc.Format = tex2d.mCoreObject.Desc.Format;
-            srvDesc.Texture2D.MipLevels = (uint)mipLevel;
             
             var result = rc.CreateSRV(tex2d, in srvDesc);
             result.PicDesc = desc;

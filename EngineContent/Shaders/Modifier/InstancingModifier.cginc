@@ -1,9 +1,9 @@
 
 #if HW_VS_STRUCTUREBUFFER == 1
-StructuredBuffer<VSInstanceData> VSInstanceDataArray DX_AUTOBIND;//: register(t13);
-VSInstanceData GetInstanceData(VS_MODIFIER input)
+StructuredBuffer<FVSInstanceData> VSInstanceDataArray DX_AUTOBIND;//: register(t13);
+FVSInstanceData GetInstanceData(VS_MODIFIER input)
 {
-	VSInstanceData result = VSInstanceDataArray[input.vInstanceId];
+	FVSInstanceData result = VSInstanceDataArray[input.vInstanceId];
 	//result.InstanceId = input.vInstanceId;
 	return result;
 }
@@ -15,7 +15,7 @@ VSInstanceData GetInstanceData(VS_MODIFIER input)
 
 void DoInstancingModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 {
-	VSInstanceData instData = GetInstanceData(vert);
+	FVSInstanceData instData = GetInstanceData(vert);
 
     float3 inst_pos = instData.Position.xyz;
     float4 inst_quat = instData.Quat;
@@ -39,8 +39,8 @@ void DoInstancingModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
     vert.vNormal.xyz = QuatRotateVector(vert.vNormal.xyz, instData.Quat);
 
 	vsOut.vPosition.xyz = Pos;
-    vsOut.SetNormal(vert.vNormal);
-    vsOut.SetSpecialDataX(instData.HitProxyId);
+    vsOut.Set_vNormal(vert.vNormal);
+    vsOut.Set_vSpecialDataX(instData.HitProxyId);
 
 	if(instData.UserData.x>0)
     {

@@ -1,19 +1,18 @@
 #ifndef _DEFERRED_OPAQUE_
 #define _DEFERRED_OPAQUE_
 
-#include "../../Inc/VertexLayout.cginc"
-#include "../../Inc/LightCommon.cginc"
-#include "../../Inc/Math.cginc"
-#include "../../Inc/ShadowCommon.cginc"
-#include "../../Inc/FogCommon.cginc"
-#include "../../Inc/MixUtility.cginc"
-#include "../../Inc/SysFunction.cginc"
-#include "DeferredCommon.cginc"
+#include "../../../Inc/VertexLayout.cginc"
+#include "../../../Inc/LightCommon.cginc"
+#include "../../../Inc/Math.cginc"
+#include "../../../Inc/ShadowCommon.cginc"
+#include "../../../Inc/FogCommon.cginc"
+#include "../../../Inc/MixUtility.cginc"
+#include "../../../Inc/SysFunction.cginc"
 
 #include "Material"
 #include "MdfQueue"
 
-#include "../../Inc/SysFunctionDefImpl.cginc"
+#include "../../../Inc/SysFunctionDefImpl.cginc"
  
 //WARNING:don't change vs_main or ps_main's parameters name cause we also use it in c++;It's an appointment;
 PS_INPUT VS_Main(VS_INPUT input1)
@@ -37,9 +36,9 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	output.vPosition.xyz += mtl.mVertexOffset;
 
 	float4 wp4 = mul(float4(output.vPosition.xyz, 1), WorldMatrix);
-    output.Set_vWorldPos(wp4.xyz);
-    output.Set_vNormal(normalize(mul(float4(output.Get_vNormal(), 0), WorldMatrix).xyz));
-    output.Set_vTangent(normalize(mul(float4(output.Get_vTangent().xyz, 0), WorldMatrix).xyz));
+    output.SetWorldPos(wp4.xyz);
+    output.SetNormal(normalize(mul(float4(output.GetNormal(), 0), WorldMatrix).xyz));
+    output.SetTangent(normalize(mul(float4(output.GetTangent().xyz, 0), WorldMatrix).xyz));
 #else
 	float4 wp4 = float4(output.vPosition.xyz, 1);
 #endif
@@ -73,14 +72,14 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	return output;
 }
 
-#include "DeferredBasePassPS.cginc"
+struct PS_OUTPUT
+{
+    float4 RT0 : SV_Target0; //R8G8B8A8:abedo.rgb - metallicty
+};
 
 PS_OUTPUT PS_Main(PS_INPUT input)
 {	
-	/*PS_OUTPUT output = (PS_OUTPUT)0;
-	output.RT0 = float4(1, 1, 1, 1);
-	return output;*/
-	return PS_MobileBasePass(input);
+	
 }
 
 #endif//#ifndef _DEFERRED_OPAQUE_

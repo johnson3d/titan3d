@@ -92,7 +92,7 @@
           </e_0>
         </Attributes>
         <IsOverride Type="System.Boolean@Unknown" Value="True" />
-        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="1">
+        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="2">
           <e_0 Type="EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore">
             <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
             <InitValue Type="EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore">
@@ -112,6 +112,25 @@
             </VariableType>
             <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
           </e_0>
+          <e_1 Type="EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore">
+            <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+            <InitValue Type="EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore">
+              <Type Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+                <IsEnum Type="System.Boolean@Unknown" Value="False" />
+                <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Vector3@EngineCore" />
+                <TypeFullName Type="System.String@Unknown" Value="EngineNS.Vector3" />
+              </Type>
+            </InitValue>
+            <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
+            <IsBindable Type="System.Boolean@Unknown" Value="False" />
+            <VariableName Type="System.String@Unknown" Value="tmp_r_CreateVector3f_4100741359" />
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+              <IsEnum Type="System.Boolean@Unknown" Value="False" />
+              <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Vector3@EngineCore" />
+              <TypeFullName Type="System.String@Unknown" Value="EngineNS.Vector3" />
+            </VariableType>
+            <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+          </e_1>
         </LocalVariables>
         <MethodName Type="System.String@Unknown" Value="OnUpdateEmitter" />
         <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />

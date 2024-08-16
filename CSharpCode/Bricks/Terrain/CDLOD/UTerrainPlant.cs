@@ -55,7 +55,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 if (PlantType == null)
                     return;
 
-                var instance = new Graphics.Mesh.Modifier.FVSInstanceData();
+                var instance = new Graphics.Pipeline.Shader.FVSInstanceData();
                 instance.Position = (Placement.Position - PlantType.InstanceOffset).ToSingleVector3();
                 instance.Scale = Placement.Scale;
                 instance.Quat = Placement.Quat;
@@ -196,7 +196,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                         continue;
 
                     var pos = (j.Placement.Position - i.InstanceOffset).ToSingleVector3();
-                    var instance = new Graphics.Mesh.Modifier.FVSInstanceData();
+                    var instance = new Graphics.Pipeline.Shader.FVSInstanceData();
                     instance.Position = pos;
                     instance.Scale = j.Placement.Scale;
                     instance.Quat = j.Placement.Quat;

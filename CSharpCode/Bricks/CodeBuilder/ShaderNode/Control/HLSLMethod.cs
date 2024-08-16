@@ -64,13 +64,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
         [Rtti.Meta]
         [TtHLSLProvider(Name = "GetTerrainDiffuse")]
-        public static Vector3 GetTerrainDiffuse(Vector2 uv, Graphics.Pipeline.Shader.TtMaterial.PSInput input)
+        public static Vector3 GetTerrainDiffuse(Vector2 uv, Graphics.Pipeline.Shader.PS_INPUT input)
         {
             return Vector3.Zero;
         }
         [Rtti.Meta]
         [TtHLSLProvider(Name = "GetTerrainNormal")]
-        public static Vector3 GetTerrainNormal(Vector2 uv, Graphics.Pipeline.Shader.TtMaterial.PSInput input)
+        public static Vector3 GetTerrainNormal(Vector2 uv, Graphics.Pipeline.Shader.PS_INPUT input)
         {
             return Vector3.Zero;
         }

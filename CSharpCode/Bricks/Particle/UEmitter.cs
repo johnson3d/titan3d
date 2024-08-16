@@ -6,21 +6,6 @@ using System.Text;
 
 namespace EngineNS.Bricks.Particle
 {
-    [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FComputeEnv")]
-    struct FComputeEnv
-    {
-        public FComputeEnv(Vector3ui Id, Vector3ui GroupId, Vector3ui GroupThreadId, uint GroupIndex)
-        {
-            mId = Id;
-            mGroupId = GroupId;
-            mGroupThreadId = GroupThreadId;
-            mGroupIndex = GroupIndex;
-        }
-        public Vector3ui mId;//SV_DispatchThreadID
-        public Vector3ui mGroupId;//SV_GroupID
-        public Vector3ui mGroupThreadId;//SV_GroupThreadID
-        public uint mGroupIndex;// SV_GroupIndex
-    }
     [Flags]
     [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "EParticleFlags")]
     public enum EParticleFlags : uint
@@ -33,13 +18,21 @@ namespace EngineNS.Bricks.Particle
     [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FParticle")]
     public struct FParticle
     {
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "Flags")]
         public uint mFlags;//system need
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "Life")]
         public float mLife;//system need
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "Scale")]
         public float mScale;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "RandomSeed")]
         public uint mRandomSeed;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "Location")]
         public Vector3 mLocation;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "Color")]
         public uint mColor;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "Velocity")]
         public Vector3 mVelocity;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "Rotator")]
         public uint mRotator;
         [Rtti.Meta(ShaderName = "Flags")]
         public uint Flags { get => mFlags; set => mFlags = value; }
@@ -107,15 +100,22 @@ namespace EngineNS.Bricks.Particle
     [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FParticleEmitter")]
     public struct FParticleEmitter
     {
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "Location")]
         public Vector3 mLocation;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "Flags")]
         public uint mFlags;
 
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "Velocity")]
         public Vector3 mVelocity;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "Flags1")]
         public uint mFlags1;
 
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "CameralEuler")]
         public FRotator mCameralEuler;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "Flags2")]
         public uint mFlags2;
 
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "TempData")]
         public Vector4i mTempData;//for compute UAV
         [Rtti.Meta(ShaderName = "Location")]
         public Vector3 Location { get => mLocation; set => mLocation = value; }

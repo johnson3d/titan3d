@@ -153,14 +153,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 (TtMenuItem item, object sender) =>
                 {
                     var node = new UUniformVar();
-                    node.VarType = Rtti.UTypeDesc.TypeOf(typeof(Graphics.Pipeline.Shader.TtMaterial.PSInput));
+                    node.VarType = Rtti.UTypeDesc.TypeOf(typeof(Graphics.Pipeline.Shader.PS_INPUT));
                     node.Name = "input";
                     node.UserData = this;
                     node.Position = PopMenuPosition;
                     SetDefaultActionForNode(node);
                     this.AddNode(node);
                 });
-            System.Reflection.FieldInfo[] psInputmembers = typeof(Graphics.Pipeline.Shader.TtMaterial.PSInput).GetFields();
+            System.Reflection.FieldInfo[] psInputmembers = typeof(Graphics.Pipeline.Shader.PS_INPUT).GetFields();
             foreach (var i in psInputmembers)
             {
                 psInputMenus.AddMenuItem(i.Name, null,

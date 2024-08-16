@@ -1,7 +1,6 @@
 #ifndef	_GobalDefine_shadderinc_
 #define _GobalDefine_shadderinc_
 
-
 //RHI_TYPE
 #define RHI_DX11 1
 #define RHI_DX12 2
@@ -67,6 +66,43 @@
 	#define VK_LOCATION(n) [[vk::location(n)]]
 	#define VK_OFFSET(n) [[vk::offset(n)]]
 #endif
+
+#include "@engine_preprosessors.cginc"
+
+void PS_INPUT::Set_vTangent(float3 v)
+{
+#if USE_PS_Tangent == 1
+    vTangent.xyz = v;
+#endif
+}
+
+void PS_INPUT::Set_vSpecialDataX(uint v)
+{
+#if USE_PS_SpecialData == 1
+    vSpecialData.x = v;
+#endif
+}
+
+void PS_INPUT::Set_vSpecialDataY(uint v)
+{
+#if USE_PS_SpecialData == 1
+    vSpecialData.y = v;
+#endif
+}
+
+void PS_INPUT::Set_vSpecialDataZ(uint v)
+{
+#if USE_PS_SpecialData == 1
+    vSpecialData.z = v;
+#endif
+}
+
+void PS_INPUT::Set_vSpecialDataW(uint v)
+{
+#if USE_PS_SpecialData == 1
+    vSpecialData.w = v;
+#endif
+}
 
 // Works around bug in the spirv for the missing implementation of the and() and or() intrinsics.
 bool  and_internal(bool  a, bool  b) { return bool(a && b); }

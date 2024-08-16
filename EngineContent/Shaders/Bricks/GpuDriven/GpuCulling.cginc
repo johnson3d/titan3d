@@ -30,12 +30,12 @@ struct FCullBounding
     float Radius;
 };
 
-StructuredBuffer<VSInstanceData> InstanceDataArray DX_AUTOBIND;
+StructuredBuffer<FVSInstanceData> InstanceDataArray DX_AUTOBIND;
 StructuredBuffer<FCullBounding> InstanceBoundingArray DX_AUTOBIND;
-RWStructuredBuffer<VSInstanceData> CullInstanceDataArray DX_AUTOBIND;
+RWStructuredBuffer<FVSInstanceData> CullInstanceDataArray DX_AUTOBIND;
 RWByteAddressBuffer IndirectArgsBuffer DX_AUTOBIND;
 
-void PushInstance(VSInstanceData instance)
+void PushInstance(FVSInstanceData instance)
 {
     uint index;
     IndirectArgsBuffer.InterlockedAdd((IndirectArgsOffset + 1) * 4, 1, index);
@@ -80,7 +80,7 @@ void CS_GPUCullingMain(uint DispatchThreadId : SV_DispatchThreadID, uint3 LocalT
     if (DispatchThreadId.x >= MaxInstance)
         return;
     
-    VSInstanceData instance = InstanceDataArray[DispatchThreadId.x];
+    FVSInstanceData instance = InstanceDataArray[DispatchThreadId.x];
     TtFrustum frustum = TtFrustum::CreateByCamera();
     TtQuat quat = TtQuat::CreateQuat(instance.Quat);
     if (UseInstanceBounding == 0)

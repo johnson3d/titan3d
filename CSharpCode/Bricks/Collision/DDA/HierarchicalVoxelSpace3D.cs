@@ -171,7 +171,7 @@ namespace EngineNS.Bricks.Collision.DDA
                             pos += new Vector3(0.5f);
                             //DebugMeshInstanceMdf.InstanceModifier.PushInstance(in pos, in Vector3.One, in Quaternion.Identity, in Vector4ui.Zero, meshNode.HitProxy.ProxyId);
 
-                            var instance = new Graphics.Mesh.Modifier.FVSInstanceData();
+                            var instance = new Graphics.Pipeline.Shader.FVSInstanceData();
                             instance.Position = pos;
                             instance.Scale = Vector3.One;
                             instance.Quat = Quaternion.Identity;

@@ -24,7 +24,7 @@ PS_INPUT VS_Main(VS_INPUT input1)
 
     output.vPosition = float4(input.vPosition.xyz, 1.0f);
     output.vUV = input.vUV;
-    output.SpecialData.x = input1.vVertexID;
+    output.Set_vSpecialDataX(input1.vVertexID);
 
     return output;
 }

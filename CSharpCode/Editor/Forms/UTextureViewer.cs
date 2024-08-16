@@ -29,6 +29,28 @@ namespace EngineNS.Editor.Forms
         }
     }
 
+    public class USlateTextureCubeViewerShading : Graphics.Pipeline.Shader.TtGraphicsShadingEnv
+    {
+        public USlateTextureCubeViewerShading()
+        {
+            CodeName = RName.GetRName("shaders/slate/Slate_TextureCubeViewer.cginc", RName.ERNameType.Engine);
+        }
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
+        {
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_UV,};
+        }
+        public override EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return new EPixelShaderInput[] {
+                EPixelShaderInput.PST_Position,
+                EPixelShaderInput.PST_UV,
+                EPixelShaderInput.PST_Color,
+            };
+        }
+    }
+
+
     public class UTextureViewer : Editor.IAssetEditor, IRootForm
     {
         public RName AssetName { get; set; }
@@ -86,9 +108,20 @@ namespace EngineNS.Editor.Forms
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-            SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
-                await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<USlateTextureViewerShading>(),
-                TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
+            if(TextureSRV.PicDesc.CubeFaces == 6)
+            {
+                ImageSize.X = ImageSize.X*4;
+                ImageSize.Y = ImageSize.Y*3;
+                SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
+                     await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<USlateTextureCubeViewerShading>(),
+                     TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
+            }
+            else
+            {
+                SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
+                    await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<USlateTextureViewerShading>(),
+                    TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
+            }
             var iptDesc = new NxRHI.UInputLayoutDesc();
             unsafe
             {

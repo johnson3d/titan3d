@@ -6,26 +6,6 @@ using System.Text;
 namespace EngineNS.Graphics.Mesh.Modifier
 {
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
-    public struct FVSInstanceData
-    {
-        public Vector3 Position;
-        public uint HitProxyId;
-
-        public Vector3 Scale;
-        public uint Scale_Pad;
-
-        public Quaternion Quat;
-
-        public Vector4ui UserData;
-        public Vector4ui UserData2;
-        public void SetMatrix(in Matrix mat)
-        {
-            Position = mat.Translation;
-            Scale = mat.Scale;
-            Quat = mat.Rotation;
-        }
-    };
-    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
     public struct FCullBounding
     {
         public FCullBounding()
@@ -127,7 +107,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
             public uint Offset;
             public fixed uint Arguments[5];
         }
-        public Pipeline.TtGpuBuffer<FVSInstanceData> CullingBuffer = new Pipeline.TtGpuBuffer<FVSInstanceData>();
+        public Pipeline.TtGpuBuffer<Pipeline.Shader.FVSInstanceData> CullingBuffer = new Pipeline.TtGpuBuffer<Pipeline.Shader.FVSInstanceData>();
         public Pipeline.TtCpu2GpuBuffer<uint> DrawArgsBuffer = null;
         public Dictionary<uint, FDrawArgs> DrawArgsOffsetDict = null;
 
@@ -246,7 +226,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
     }
     public class TtInstanceBufferSSBO : IDisposable
     {
-        public Pipeline.TtCpu2GpuBuffer<FVSInstanceData> InstanceBuffer = new Pipeline.TtCpu2GpuBuffer<FVSInstanceData>();
+        public Pipeline.TtCpu2GpuBuffer<Pipeline.Shader.FVSInstanceData> InstanceBuffer = new Pipeline.TtCpu2GpuBuffer<Pipeline.Shader.FVSInstanceData>();
         public Pipeline.TtCpu2GpuBuffer<FCullBounding> InstanceBoundingBuffer = null;
 
         public TtInstanceBufferSSBO()
@@ -284,7 +264,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
             if (InstanceBoundingBuffer != null)
                 InstanceBoundingBuffer.SetSize(0);
         }
-        public uint PushInstance(TtInstanceModifier mdf, in FVSInstanceData instance, in FCullBounding bounding)
+        public uint PushInstance(TtInstanceModifier mdf, in Pipeline.Shader.FVSInstanceData instance, in FCullBounding bounding)
         {
             var index = (uint)InstanceBuffer.PushData(in instance);
             if (InstanceBoundingBuffer != null)
@@ -293,7 +273,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
             }
             return index;
         }
-        public unsafe void SetInstance(uint index, in FVSInstanceData instance)
+        public unsafe void SetInstance(uint index, in Pipeline.Shader.FVSInstanceData instance)
         {
             InstanceBuffer.UpdateData((int)index, in instance);
         }
@@ -406,15 +386,15 @@ namespace EngineNS.Graphics.Mesh.Modifier
 
         public TtGpuDrivenData GpuDrivenData = null;
 
-        public uint PushInstance(in FVSInstanceData instance, in FCullBounding bounding)
+        public uint PushInstance(in Pipeline.Shader.FVSInstanceData instance, in FCullBounding bounding)
         {
             return InstanceBuffers.PushInstance(this, in instance, in bounding);
         }
-        public uint PushInstance(in FVSInstanceData instance)
+        public uint PushInstance(in Pipeline.Shader.FVSInstanceData instance)
         {
             return InstanceBuffers.PushInstance(this, in instance, new FCullBounding());
         }
-        public unsafe void SetInstance(uint index, in FVSInstanceData instance)
+        public unsafe void SetInstance(uint index, in Pipeline.Shader.FVSInstanceData instance)
         {
             InstanceBuffers.SetInstance(index, instance);
         }

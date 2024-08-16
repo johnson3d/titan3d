@@ -199,7 +199,7 @@ namespace EngineNS.GamePlay.Scene
                         TtEngine.Instance.GfxDevice.HitproxyManager.MapProxy(sPoint);
                         SplinePoints.Add(sPoint);
                         //instantMesh.InstanceModifier.PushInstance(in i.End, in Vector3.UnitXYZ, in Quaternion.Identity, in UInt32_4.Zero, this.HitProxy.ProxyId);
-                        var instance = new Graphics.Mesh.Modifier.FVSInstanceData();
+                        var instance = new Graphics.Pipeline.Shader.FVSInstanceData();
                         instance.Position = Spline.Curves[i].mEnd;
                         instance.Scale = Vector3.One;
                         instance.Quat = Quaternion.Identity;

@@ -910,7 +910,6 @@ namespace NxRHI
 			tar->ViewDimension = D3D11_SRV_DIMENSION::D3D10_1_SRV_DIMENSION_TEXTURECUBE;
 			tar->TextureCube.MipLevels = src->TextureCube.MipLevels;
 			tar->TextureCube.MostDetailedMip = src->TextureCube.MostDetailedMip;
-			ASSERT(false);
 		}
 		break;
 		case ST_TextureCubeArray:

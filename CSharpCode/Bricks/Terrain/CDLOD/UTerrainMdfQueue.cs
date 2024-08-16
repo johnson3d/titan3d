@@ -189,7 +189,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 drawcall.BindSampler(effectBinder.Samp_NormalTextureArray, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
             }
         }
-        public static void SetInstanceData(Graphics.Mesh.TtMesh mesh, Bricks.Terrain.CDLOD.UTerrainMdfQueue mdfQueue, ref Graphics.Mesh.Modifier.FVSInstanceData instance)
+        public static void SetInstanceData(Graphics.Mesh.TtMesh mesh, Bricks.Terrain.CDLOD.UTerrainMdfQueue mdfQueue, ref Graphics.Pipeline.Shader.FVSInstanceData instance)
         {
             var cb =  mesh.PerMeshCBuffer;
             var matrix = cb.GetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);

@@ -25,7 +25,7 @@ float3 GetStartPosition(VS_MODIFIER input)
 {
     //return StartPosition;
 #if defined(FEATURE_USE_RVT)
-    VSInstanceData result = GetInstanceData(input);
+    FVSInstanceData result = GetInstanceData(input);
     return asfloat(result.UserData2.xyz);
 #else
     return StartPosition;
@@ -36,7 +36,7 @@ uint GetCurrentLOD(VS_MODIFIER input)
 {
     //return CurrentLOD;
 #if defined(FEATURE_USE_RVT)
-    VSInstanceData result = GetInstanceData(input);
+    FVSInstanceData result = GetInstanceData(input);
     return result.UserData.w;
 #else
     return CurrentLOD;
@@ -46,7 +46,7 @@ uint GetCurrentLOD(VS_MODIFIER input)
 float2 GetTexUVOffset(VS_MODIFIER input)
 {
 #if defined(FEATURE_USE_RVT)
-	VSInstanceData result = GetInstanceData(input);
+	FVSInstanceData result = GetInstanceData(input);
     return float2(asfloat(result.UserData2.w),asfloat(result.Scale_Pad));
 #else
     return TexUVOffset;
@@ -57,7 +57,7 @@ float2 GetTexUVOffset(VS_MODIFIER input)
 uint GetHeightmapTextureId(VS_MODIFIER input)
 {
 #if defined(FEATURE_USE_RVT)
-    VSInstanceData result = GetInstanceData(input);
+    FVSInstanceData result = GetInstanceData(input);
     return result.UserData.x;
 #else
     return 0;
@@ -67,7 +67,7 @@ uint GetHeightmapTextureId(VS_MODIFIER input)
 uint GetNormalmapTextureId(VS_MODIFIER input)
 {
 #if defined(FEATURE_USE_RVT)
-    VSInstanceData result = GetInstanceData(input);
+    FVSInstanceData result = GetInstanceData(input);
     return result.UserData.y;
 #else
     return 0;
@@ -77,7 +77,7 @@ uint GetNormalmapTextureId(VS_MODIFIER input)
 uint GetMaterailIdTextureId(VS_MODIFIER input)
 {
 #if defined(FEATURE_USE_RVT)
-    VSInstanceData result = GetInstanceData(input);
+    FVSInstanceData result = GetInstanceData(input);
     return result.UserData.z;
 #else
     return 0;
@@ -138,7 +138,7 @@ float3 GetTerrainDiffuse(float2 uvOrig, PS_INPUT input)
 	float2 remain = fmod(uvLevel, MaterialIdUVStep);
 	remain = saturate(remain / (MaterialIdUVStep));
 	
-    uint materailUniqueID = input.SpecialData.y;
+    uint materailUniqueID = input.Get_vSpecialData().y;
     uint i0_0 = (uint) (GetMaterialId(input.vLightMap.xy, materailUniqueID).r * 255.0f + 0.1f);
     uint i1_0 = (uint) (GetMaterialId(input.vLightMap.xy + float2(MaterialIdUVStep, 0), materailUniqueID).r * 255.0f + 0.1f);
     uint i1_1 = (uint) (GetMaterialId(input.vLightMap.xy + float2(MaterialIdUVStep, MaterialIdUVStep), materailUniqueID).r * 255.0f + 0.1f);
@@ -170,7 +170,7 @@ float3 GetTerrainNormal(float2 uvOrig, PS_INPUT input)
 	float2 remain = fmod(uvLevel, MaterialIdUVStep);
 	remain = saturate(remain / (MaterialIdUVStep));
 
-    uint materailUniqueID = input.SpecialData.y;
+    uint materailUniqueID = input.Get_vSpecialData().y;
     uint i0_0 = (uint) (GetMaterialId(input.vLightMap.xy, materailUniqueID).r * 255.0f + 0.1f);
     uint i1_0 = (uint) (GetMaterialId(input.vLightMap.xy + float2(MaterialIdUVStep, 0), materailUniqueID).r * 255.0f + 0.1f);
     uint i1_1 = (uint) (GetMaterialId(input.vLightMap.xy + float2(MaterialIdUVStep, MaterialIdUVStep), materailUniqueID).r * 255.0f + 0.1f);
@@ -261,7 +261,7 @@ void DoTerrainModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
 	vsOut.vLightMap.xy = heightUV.xy;
 #endif
 
-    vsOut.SetSpecialDataY(materialIdID);
+    vsOut.Set_vSpecialDataY(materialIdID);
 	
 	/*uint v0_0 = (uint)(GetMaterialId(heightUV.xy).r * 255.0f + 0.1f);
 	uint v1_0 = (uint)(GetMaterialId(heightUV.xy + float2(MaterialIdUVStep, 0)).r * 255.0f + 0.1f);

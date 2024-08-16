@@ -37,14 +37,14 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	output.vPosition.xyz += mtl.mVertexOffset;
 	float4 wp4 = mul(float4(output.vPosition.xyz, 1), WorldMatrix);
 	
-    output.SetNormal(normalize(mul(float4(output.GetNormal().xyz, 0), WorldMatrix).xyz));
-    output.SetTangent(normalize(mul(float4(output.GetTangent().xyz, 0), WorldMatrix).xyz));
+    output.Set_vNormal(normalize(mul(float4(output.Get_vNormal().xyz, 0), WorldMatrix).xyz));
+    output.Set_vTangent(normalize(mul(float4(output.Get_vTangent().xyz, 0), WorldMatrix).xyz));
 
 #else
 	float4 wp4 = float4(output.vPosition.xyz, 1);
 #endif
 
-    output.SetWorldPos(wp4.xyz);
+    output.Set_vWorldPos(wp4.xyz);
 	
 	output.vPosition = mul(wp4, GetViewPrjMtx(false));
 

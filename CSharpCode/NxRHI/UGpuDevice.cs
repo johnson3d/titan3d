@@ -94,6 +94,14 @@ namespace EngineNS.NxRHI
                     GlobalEnvDefines.AddDefine("FEATURE_USE_RVT", "1");
                 }
             }
+            if (RhiType == ERhiType.RHI_D3D12 || RhiType == ERhiType.RHI_VK)
+            {
+                GlobalEnvDefines.AddDefine("USE_VS_ViewID", "1");
+            }
+            if (RhiType == ERhiType.RHI_VK)
+            {
+                GlobalEnvDefines.AddDefine("USE_VS_DrawIndex", "1");
+            }
             mGlobalEnvHash = Hash160.CreateHash160(GlobalEnvDefines.ToString());
         }
         public UCommandList CreateCommandList()

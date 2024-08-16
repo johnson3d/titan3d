@@ -33,7 +33,7 @@ void DoNebulaModifierVS(inout PS_INPUT vsOut, inout VS_MODIFIER vert)
     float3 Pos = inst.Location + QuatRotateVector(vert.vPosition.xyz * inst.Scale, quat); //QuateFromAxisAngle
     vsOut.vPosition.xyz = Pos;
     vert.vNormal.xyz = QuatRotateVector(vert.vNormal.xyz, quat);
-    vsOut.SetNormal(vert.vNormal);
+    vsOut.Set_vNormal(vert.vNormal);
     vsOut.vColor = (float4) ToColor4f(inst.Color);
 
 }

@@ -345,7 +345,7 @@ namespace EngineNS.Graphics.Pipeline
                 }
                 var cb = mesh.PerMeshCBuffer;
                 var matrix = cb.GetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
-                var instance = new Graphics.Mesh.Modifier.FVSInstanceData();
+                var instance = new Graphics.Pipeline.Shader.FVSInstanceData();
                 instance.SetMatrix(matrix);
                 instance.HitProxyId = cb.GetValue<uint>(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.HitProxyId);
                 batch.GetInstanceModifier().PushInstance(in instance, new Graphics.Mesh.Modifier.FCullBounding());
@@ -381,7 +381,7 @@ namespace EngineNS.Graphics.Pipeline
 
                 var world = mdfQueue.TerrainModifier.TerrainNode.GetWorld();
                 mdfQueue.TerrainModifier.ActiveRVTs();
-                var instance = new Graphics.Mesh.Modifier.FVSInstanceData();
+                var instance = new Graphics.Pipeline.Shader.FVSInstanceData();
                 Bricks.Terrain.CDLOD.TtTerrainModifier.SetInstanceData(mesh, mdfQueue, ref instance);
                 DBoundingBox aabb;
                 aabb.Minimum = mdfQueue.Patch.AABB.Minimum - world.CameraOffset;

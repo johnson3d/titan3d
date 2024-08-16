@@ -1,13 +1,25 @@
 ﻿using NPOI.HPSF;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace EngineNS.Editor.ShaderCompiler
 {
+    [Flags]
+    public enum EShaderDefine : uint
+    {
+        HasGet = 1,
+        HasSet = 1 << 1,
+    }
     public class TtShaderDefineAttribute : Attribute
     {
+        public EShaderDefine Flags = (EShaderDefine)0;
         public string ShaderName;
+        public string Condition;
+        public string Semantic;
+        public string Binder;
+        public int Order = 0;
     }
 
     public class TtShaderSourceCode : Graphics.Pipeline.Shader.IShaderCodeProvider
@@ -145,7 +157,7 @@ namespace EngineNS.Editor.ShaderCompiler
         public static string ToHLSLTypeString(System.Type type)
         {
             string memberType = "";
-            if (type == typeof(Vector4))
+            if (type == typeof(Vector4) || type == typeof(Quaternion))
             {
                 memberType = "float4";
             }
@@ -197,8 +209,21 @@ namespace EngineNS.Editor.ShaderCompiler
             {
                 memberType = "float4";
             }
+            else if (type == typeof(bool))
+            {
+                memberType = "bool";
+            }
+            else if (type == typeof(void))
+            {
+                memberType = "void";
+            }
             else
             {
+                var attr = type.GetCustomAttribute<TtShaderDefineAttribute>(false);
+                if (attr != null)
+                {
+                    return attr.ShaderName;
+                }
                 System.Diagnostics.Debug.Assert(false);
             }
             return memberType;
@@ -235,7 +260,12 @@ namespace EngineNS.Editor.ShaderCompiler
             });
             ShaderStructs.Sort((x, y) =>
             {
-                return x.Key.ShaderName.CompareTo(y.Key.ShaderName);
+                if (x.Key.Order.CompareTo(y.Key.Order) < 0)
+                    return -1;
+                else if (x.Key.Order.CompareTo(y.Key.Order) > 0)
+                    return 1;
+                else
+                    return x.Key.ShaderName.CompareTo(y.Key.ShaderName);
             });
             codeBuilder.AddLine($"#ifndef ENGINE_PREPROCESSORTS_INC", ref sourceCode);
             codeBuilder.AddLine($"#define ENGINE_PREPROCESSORTS_INC", ref sourceCode);
@@ -262,12 +292,105 @@ namespace EngineNS.Editor.ShaderCompiler
                     var members = kv.Value.SystemType.GetFields();
                     foreach (var i in members)
                     {
-                        System.Diagnostics.Debug.Assert(i.Name[0] == 'm');
-                        codeBuilder.AddLine($"{ToHLSLTypeString(i.FieldType)} {i.Name.Substring(1)};", ref sourceCode);
+                        var typeStr = ToHLSLTypeString(i.FieldType);
+                        var attr = i.GetCustomAttribute<TtShaderDefineAttribute>(false);
+                        if (attr != null && attr.ShaderName != null)
+                        {
+                            string prefix = "";
+                            string suffix = "";
+                            if (attr.Binder != null)
+                            {
+                                prefix = attr.Binder + " ";
+                            }
+                            if (attr.Semantic != null)
+                            {
+                                suffix = " : " + attr.Semantic;
+                            }
+                            if (attr.Condition != null)
+                            {
+                                codeBuilder.AddLine($"#if {attr.Condition}", ref sourceCode);
+                            }
+                            codeBuilder.AddLine($"{prefix}{typeStr} {attr.ShaderName}{suffix};", ref sourceCode);
+                            if (attr.Condition != null)
+                            {
+                                codeBuilder.AddLine($"#endif//{attr.Condition}", ref sourceCode);
+                            }
+                            if ((attr.Flags & EShaderDefine.HasGet) != 0)
+                            {
+                                codeBuilder.AddLine($"{typeStr} Get_{attr.ShaderName}()", ref sourceCode);
+                                codeBuilder.PushSegment(ref sourceCode);
+                                {
+                                    if (attr.Condition != null)
+                                    {
+                                        codeBuilder.AddLine($"#if {attr.Condition}", ref sourceCode);
+                                    }
+
+                                    codeBuilder.AddLine($"return {attr.ShaderName};", ref sourceCode);
+
+                                    if (attr.Condition != null)
+                                    {
+                                        codeBuilder.AddLine($"#else", ref sourceCode);
+                                        codeBuilder.AddLine($"return ({typeStr})0;", ref sourceCode);
+                                        codeBuilder.AddLine($"#endif//{attr.Condition}", ref sourceCode);
+                                    }
+                                }
+                                codeBuilder.PopSegment(ref sourceCode);
+                            }
+                            if ((attr.Flags & EShaderDefine.HasSet) != 0)
+                            {
+                                codeBuilder.AddLine($"void Set_{attr.ShaderName}({typeStr} v)", ref sourceCode);
+                                codeBuilder.PushSegment(ref sourceCode);
+                                {
+                                    if (attr.Condition != null)
+                                    {
+                                        codeBuilder.AddLine($"#if {attr.Condition}", ref sourceCode);
+                                    }
+
+                                    codeBuilder.AddLine($"{attr.ShaderName} = v;", ref sourceCode);
+
+                                    if (attr.Condition != null)
+                                    {
+                                        codeBuilder.AddLine($"#endif//{attr.Condition}", ref sourceCode);
+                                    }
+                                }
+                                codeBuilder.PopSegment(ref sourceCode);
+                            }
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.Assert(i.Name[0] == 'm');
+                            codeBuilder.AddLine($"{typeStr} {i.Name.Substring(1)};", ref sourceCode);
+                        }
+                    }
+
+                    codeBuilder.AddLine($"// Method declaration", ref sourceCode);
+                    var methods = kv.Value.SystemType.GetMethods();
+                    foreach (var i in methods)
+                    {
+                        var attr = i.GetCustomAttribute<TtShaderDefineAttribute>(false);
+                        if (attr == null)
+                            continue;
+                        var retType = ToHLSLTypeString(i.ReturnType);
+                        var pmter = i.GetParameters();
+                        string callArg = "";
+                        foreach (var j in pmter)
+                        {
+                            var argType = ToHLSLTypeString(j.ParameterType);
+                            callArg += $"{argType} {j.Name},";
+                        }
+                        if (pmter.Length > 0)
+                        {
+                            callArg = callArg.Substring(0, callArg.Length - 1);
+                        }
+                        codeBuilder.AddLine($"{retType} {attr.ShaderName}({callArg});", ref sourceCode);
                     }
                 }
                 codeBuilder.PopSegment(ref sourceCode, true);
             }
+
+            Graphics.Pipeline.Shader.VS_MODIFIER.VSInput_2_VSModifier(codeBuilder, ref sourceCode);
+            Graphics.Pipeline.Shader.PS_INPUT.VSModifier_2_PSInput(codeBuilder, ref sourceCode);
+
             codeBuilder.AddLine($"#endif//define ENGINE_PREPROCESSORTS_INC", ref sourceCode);
 
             result.SourceCode.TextCode = sourceCode;
@@ -275,8 +398,12 @@ namespace EngineNS.Editor.ShaderCompiler
 
             if (bWriteFile)
             {
-                IO.TtFileManager.WriteAllText(TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.DebugUtility)
-                    + $"/engine_preprosessors.cginc", sourceCode);
+                var file = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.DebugUtility) + $"/engine_preprosessors.cginc";
+                var code = IO.TtFileManager.ReadAllText(file);
+                if (code != sourceCode)
+                {
+                    IO.TtFileManager.WriteAllText(file, sourceCode);
+                }
             }
             return result;
         }

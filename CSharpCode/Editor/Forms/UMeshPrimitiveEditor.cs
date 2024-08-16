@@ -417,7 +417,7 @@ namespace EngineNS.Editor.Forms
             {
                 var voxelPos = OutVoxelPositions[i];
                 var QuantizedDistance = OutVoxelDistance[i];
-                var instance = new Graphics.Mesh.Modifier.FVSInstanceData();
+                var instance = new Graphics.Pipeline.Shader.FVSInstanceData();
                 instance.Position = mCurrentMeshNode.Location.ToSingleVector3() + voxelPos;
                 instance.Scale = VoxelSize/**0.2f*/;
                 instance.Quat = Quaternion.Identity;

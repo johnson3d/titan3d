@@ -1,7 +1,7 @@
 #ifndef _MATH_INC_
 #define _MATH_INC_
 
-#include "@engine_preprosessors.cginc"
+#include "GlobalDefine.cginc"
 
 #define Pi  3.14159265h
 #define PI 3.1415926535897932f

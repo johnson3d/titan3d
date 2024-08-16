@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using EngineNS.Bricks.NodeGraph;
 using NPOI.POIFS.Crypt.Dsig;
 
@@ -22,65 +23,83 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             TitleColor = 0xFF804020;
             BackColor = 0x80808080;
 
-            Name = "Output";
-
             Position = new Vector2(100, 100);
 
-            Albedo.Name = "Albedo ";
-            Albedo.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();            
-            this.AddPinIn(Albedo);
+            Name = "Output";
 
-            Emissive.Name = "Emissive ";
-            Emissive.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
-            this.AddPinIn(Emissive);
+            var fields = typeof(Graphics.Pipeline.Shader.MTL_OUTPUT).GetFields();
+            foreach (var i in fields)
+            {
+                var attr = i.GetCustomAttribute<EngineNS.Editor.ShaderCompiler.TtShaderDefineAttribute>(false);
+                if (attr == null)
+                    continue;
+                var pin = new PinIn();
+                System.Diagnostics.Debug.Assert(attr.ShaderName.StartsWith("m"));
+                pin.Name = attr.ShaderName.Substring(1) + " ";
+                pin.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+                this.AddPinIn(pin);
 
-            Normal.Name = "Normal ";
-            Normal.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
-            this.AddPinIn(Normal);
+                FieldPins.Add(pin);
+            }   
 
-            Metallic.Name = "Metallic ";
-            Metallic.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
-            this.AddPinIn(Metallic);
+            //Albedo.Name = "Albedo ";
+            //Albedo.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();            
+            //this.AddPinIn(Albedo);
 
-            Rough.Name = "Rough ";
-            Rough.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
-            this.AddPinIn(Rough);
+            //Emissive.Name = "Emissive ";
+            //Emissive.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            //this.AddPinIn(Emissive);
 
-            Alpha.Name = "Alpha ";
-            Alpha.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
-            this.AddPinIn(Alpha);
+            //Normal.Name = "Normal ";
+            //Normal.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            //this.AddPinIn(Normal);
 
-            AlphaTest.Name = "AlphaTest ";
-            AlphaTest.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
-            this.AddPinIn(AlphaTest);
+            //Metallic.Name = "Metallic ";
+            //Metallic.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            //this.AddPinIn(Metallic);
 
-            VertexOffset.Name = "VertexOffset ";
-            VertexOffset.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
-            this.AddPinIn(VertexOffset);
+            //Rough.Name = "Rough ";
+            //Rough.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            //this.AddPinIn(Rough);
 
-            AO.Name = "AO";
-            AO.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
-            this.AddPinIn(AO); 
+            //Alpha.Name = "Alpha ";
+            //Alpha.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            //this.AddPinIn(Alpha);
+
+            //AlphaTest.Name = "AlphaTest ";
+            //AlphaTest.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            //this.AddPinIn(AlphaTest);
+
+            //VertexOffset.Name = "VertexOffset ";
+            //VertexOffset.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            //this.AddPinIn(VertexOffset);
+
+            //AO.Name = "AO";
+            //AO.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            //this.AddPinIn(AO); 
         }
         [Browsable(false)]
-        public PinIn Albedo { get; set; } = new PinIn();
+        public List<PinIn> FieldPins { get; } = new List<PinIn>();
+        
+        //[Browsable(false)]
+        //public PinIn Albedo { get; set; } = new PinIn();
 
-        [Browsable(false)]
-        public PinIn Emissive { get; set; } = new PinIn();
-        [Browsable(false)]
-        public PinIn Normal { get; set; } = new PinIn();
-        [Browsable(false)]
-        public PinIn Metallic { get; set; } = new PinIn();
-        [Browsable(false)]
-        public PinIn Rough { get; set; } = new PinIn();
-        [Browsable(false)]
-        public PinIn Alpha { get; set; } = new PinIn();
-        [Browsable(false)]
-        public PinIn AlphaTest { get; set; } = new PinIn();
-        [Browsable(false)]
-        public PinIn VertexOffset { get; set; } = new PinIn();
-        [Browsable(false)]
-        public PinIn AO { get; set; } = new PinIn();
+        //[Browsable(false)]
+        //public PinIn Emissive { get; set; } = new PinIn();
+        //[Browsable(false)]
+        //public PinIn Normal { get; set; } = new PinIn();
+        //[Browsable(false)]
+        //public PinIn Metallic { get; set; } = new PinIn();
+        //[Browsable(false)]
+        //public PinIn Rough { get; set; } = new PinIn();
+        //[Browsable(false)]
+        //public PinIn Alpha { get; set; } = new PinIn();
+        //[Browsable(false)]
+        //public PinIn AlphaTest { get; set; } = new PinIn();
+        //[Browsable(false)]
+        //public PinIn VertexOffset { get; set; } = new PinIn();
+        //[Browsable(false)]
+        //public PinIn AO { get; set; } = new PinIn();
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
@@ -89,19 +108,19 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var nodeExpr = OutNode as UNodeBase;
             var type = nodeExpr.GetOutPinType(oPin);
 
-            if (iPin == Albedo ||
-                iPin == Emissive ||
-                iPin == Normal ||
-                iPin == VertexOffset)
+            if (iPin == FindPinIn("Albedo") ||
+                iPin == FindPinIn("Emissive") ||
+                iPin == FindPinIn("Normal") ||
+                iPin == FindPinIn("VertexOffset"))
             {
                 if (!type.IsEqual(typeof(Vector3)))
                     return false;
             }
-            else if (iPin == Metallic ||
-                iPin == Rough ||
-                iPin == AO ||
-                iPin == Alpha ||
-                iPin == AlphaTest)
+            else if (iPin == FindPinIn("Metallic") ||
+                iPin == FindPinIn("Rough") ||
+                iPin == FindPinIn("AO") ||
+                iPin == FindPinIn("Alpha") ||
+                iPin == FindPinIn("AlphaTest"))
             {
                 if (!type.IsEqual(typeof(float)))
                     return false;
@@ -129,7 +148,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     if (i.Name.StartsWith("input."))
                     {
                         var name = i.Name.Substring("input.".Length);
-                        var t = Graphics.Pipeline.Shader.TtMaterial.VSInput.NameToInputStream(name);
+                        var t = Graphics.Pipeline.Shader.VS_INPUT.NameToInputStream(name);
                         if (t != EngineNS.NxRHI.EVertexStreamType.VST_Number)
                         {
                             if (result.Contains(t) == false)
@@ -159,7 +178,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     if (i.Name.StartsWith("input."))
                     {
                         var name = i.Name.Substring("input.".Length);
-                        var t = Graphics.Pipeline.Shader.TtMaterial.PSInput.NameToInput(name);
+                        var t = Graphics.Pipeline.Shader.PS_INPUT.NameToInput(name);
                         if (t != Graphics.Pipeline.Shader.EPixelShaderInput.PST_Number)
                         {
                             if (result.Contains(t) == false)
@@ -199,118 +218,25 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             PSFunction.MethodBody.Sequence.Clear();
             data.CurrentStatements = PSFunction.MethodBody.Sequence;
             data.MethodDec = PSFunction;
-            if (Albedo.HasLinker())
+
+            foreach (var i in FieldPins)
             {
-                var linker = graph.FindInLinkerSingle(Albedo);
-                var opPin = graph.GetOppositePin(Albedo);
-                var pinNode = graph.GetOppositePinNode(Albedo);
-                pinNode.BuildStatements(opPin, ref data);
-                var exp = graph.GetOppositePinExpression(Albedo, ref data);
-                var assign = new UAssignOperatorStatement()
+                if (i.HasLinker())
                 {
-                    From = exp,
-                    To = new UVariableReferenceExpression("mAlbedo", new UVariableReferenceExpression("mtl")),
-                };
-                PSFunction.MethodBody.Sequence.Add(assign);
+                    var linker = graph.FindInLinkerSingle(i);
+                    var opPin = graph.GetOppositePin(i);
+                    var pinNode = graph.GetOppositePinNode(i);
+                    pinNode.BuildStatements(opPin, ref data);
+                    var exp = graph.GetOppositePinExpression(i, ref data);
+                    var assign = new UAssignOperatorStatement()
+                    {
+                        From = exp,
+                        To = new UVariableReferenceExpression("m" + i.Name, new UVariableReferenceExpression("mtl")),
+                    };
+                    PSFunction.MethodBody.Sequence.Add(assign);
+                }
             }
-            if(Emissive.HasLinker())
-            {
-                var linker = graph.FindInLinkerSingle(Emissive);
-                var opPin = graph.GetOppositePin(Emissive);
-                var pinNode = graph.GetOppositePinNode(Emissive);
-                pinNode.BuildStatements(opPin, ref data);
-                var exp = graph.GetOppositePinExpression(Emissive, ref data);
-                var assign = new UAssignOperatorStatement()
-                {
-                    From = exp,
-                    To = new UVariableReferenceExpression("mEmissive", new UVariableReferenceExpression("mtl")),
-                };
-                PSFunction.MethodBody.Sequence.Add(assign);
-            }
-            if (Normal.HasLinker())
-            {
-                var linker = graph.FindInLinkerSingle(Normal);
-                var pinNode = graph.GetOppositePinNode(Normal);
-                var opPin = graph.GetOppositePin(Normal);
-                pinNode.BuildStatements(opPin, ref data);
-                var exp = graph.GetOppositePinExpression(Normal, ref data);
-                var assign = new UAssignOperatorStatement()
-                {
-                    From = exp,
-                    To = new UVariableReferenceExpression("mNormal", new UVariableReferenceExpression("mtl")),
-                };
-                PSFunction.MethodBody.Sequence.Add(assign);
-            }
-            if (Metallic.HasLinker())
-            {
-                var linker = graph.FindInLinkerSingle(Metallic);
-                var pinNode = graph.GetOppositePinNode(Metallic);
-                var opPin = graph.GetOppositePin(Metallic);
-                pinNode.BuildStatements(opPin, ref data);
-                var exp = graph.GetOppositePinExpression(Metallic, ref data);
-                var assign = new UAssignOperatorStatement()
-                {
-                    From = exp,
-                    To = new UVariableReferenceExpression("mMetallic", new UVariableReferenceExpression("mtl")),
-                };
-                PSFunction.MethodBody.Sequence.Add(assign);
-            }
-            if (Rough.HasLinker())
-            {
-                var linker = graph.FindInLinkerSingle(Rough);
-                var pinNode = graph.GetOppositePinNode(Rough);
-                var opPin = graph.GetOppositePin(Rough);
-                pinNode.BuildStatements(opPin, ref data);
-                var exp = graph.GetOppositePinExpression(Rough, ref data);
-                var assign = new UAssignOperatorStatement()
-                {
-                    From = exp,
-                    To = new UVariableReferenceExpression("mRough", new UVariableReferenceExpression("mtl")),
-                };
-                PSFunction.MethodBody.Sequence.Add(assign);
-            }
-            if (AO.HasLinker())
-            {
-                var linker = graph.FindInLinkerSingle(AO);
-                var pinNode = graph.GetOppositePinNode(AO);
-                var opPin = graph.GetOppositePin(AO);
-                pinNode.BuildStatements(opPin, ref data);
-                var exp = graph.GetOppositePinExpression(AO, ref data);
-                var assign = new UAssignOperatorStatement()
-                {
-                    From = exp,
-                    To = new UVariableReferenceExpression("mAO", new UVariableReferenceExpression("mtl")),
-                };
-                PSFunction.MethodBody.Sequence.Add(assign);
-            }
-            if (Alpha.HasLinker())
-            {
-                var linker = graph.FindInLinkerSingle(Alpha);
-                var pinNode = graph.GetOppositePinNode(Alpha);
-                var opPin = graph.GetOppositePin(Alpha);
-                pinNode.BuildStatements(opPin, ref data);
-                var exp = graph.GetOppositePinExpression(Alpha, ref data);
-                var assign = new UAssignOperatorStatement()
-                {
-                    From = exp,
-                    To = new UVariableReferenceExpression("mAlpha", new UVariableReferenceExpression("mtl")),
-                };
-                PSFunction.MethodBody.Sequence.Add(assign);
-            }
-            if (AlphaTest.HasLinker())
-            {
-                var linker = graph.FindInLinkerSingle(AlphaTest);
-                var pinNode = graph.GetOppositePinNode(AlphaTest);
-                var opPin = graph.GetOppositePin(AlphaTest);
-                pinNode.BuildStatements(opPin, ref data);
-                var exp = graph.GetOppositePinExpression(AlphaTest, ref data);
-                var assign = new UAssignOperatorStatement()
-                {
-                    From = exp,
-                    To = new UVariableReferenceExpression("mAlphaTest", new UVariableReferenceExpression("mtl")),
-                };
-                PSFunction.MethodBody.Sequence.Add(assign);
-            }
+            
 
             VSFunction.MethodName = "DO_VS_MATERIAL_IMPL";
             VSFunction.Arguments.Clear();
@@ -332,19 +258,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             VSFunction.MethodBody.Sequence.Clear();
             data.CurrentStatements = VSFunction.MethodBody.Sequence;
             data.MethodDec = VSFunction;
-            if (VertexOffset.HasLinker())
-            {
-                var opPin = graph.GetOppositePin(VertexOffset);
-                var pinNode = graph.GetOppositePinNode(VertexOffset);
-                pinNode.BuildStatements(opPin, ref data);
-                var exp = graph.GetOppositePinExpression(VertexOffset, ref data);
-                var assign = new UAssignOperatorStatement()
-                {
-                    From = exp,
-                    To = new UVariableReferenceExpression("mVertexOffset", new UVariableReferenceExpression("mtl")),
-                };
-                VSFunction.MethodBody.Sequence.Add(assign);
-            }
         }
     }
 }

@@ -94,6 +94,9 @@
     <Filter Include="Bricks\Particle\SimpleEmitter">
       <UniqueIdentifier>{81e0ef76-1030-4095-81ae-fb4a2552414f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ShadingEnv\Deffered\MultiViewID">
+      <UniqueIdentifier>{d195b1b5-9fd6-465a-8be4-0c73f0ad731b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -411,6 +414,15 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)Compute\MacrossComputeShadingEnvImpl.cginc">
       <Filter>Compute</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\MuliViewID\BasePass.cginc">
+      <Filter>ShadingEnv\Deffered\MultiViewID</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\..\cache\debugutility\engine_preprosessors.cginc">
+      <Filter>Inc</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)slate\Slate_TextureCubeViewer.cginc">
+      <Filter>Slate</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
