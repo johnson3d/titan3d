@@ -29,7 +29,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             ImagePinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(ImagePinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
-            ImageName = RName.GetRName("texture/default_envmap.srv", RName.ERNameType.Engine);
+            if(ImageName == null)
+                ImageName = RName.GetRName("texture/default_envmap.srv", RName.ERNameType.Engine);
         }
         public unsafe override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {

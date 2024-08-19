@@ -79,6 +79,7 @@ namespace NxRHI
 	public:
 		TWeakRefHandle<DX12GpuSystem>	mGpuSystem;
 		AutoRef<ID3D12Device>			mDevice;
+		AutoRef<ID3D12Device2>			mDevice2;
 		AutoRef<ID3D12DebugDevice>		mDebugDevice;
 		AutoRef<ID3D12DebugDevice1>		mDebugDevice1;
 		D3D_FEATURE_LEVEL               mFeatureLevel;

@@ -40,7 +40,7 @@ SamplerState Samp_GBufferRT3 DX_AUTOBIND;
 Texture2D GShadowMap DX_AUTOBIND;
 SamplerState Samp_GShadowMap DX_AUTOBIND;
 
-Texture2D gEnvMap DX_AUTOBIND;
+TextureCube gEnvMap DX_AUTOBIND;
 SamplerState Samp_gEnvMap DX_AUTOBIND;
 
 Texture2D gPreIntegratedGF DX_AUTOBIND;
@@ -67,6 +67,13 @@ float4	GetWorldPosition(float4 PosProj, float vDepth)
 	VPos = mul(VPos, GetViewPrjMtxInverse(true));
 	VPos.xyzw /= VPos.w;
 	return VPos;
+}
+
+// Point lobe in off-specular peak direction
+float3 GetOffSpecularPeakReflectionDir(float3 Normal, float3 ReflectionVector, float Roughness)
+{
+    float a = Square(Roughness);
+    return lerp(Normal, ReflectionVector, (1 - a) * (sqrt(1 - a) + a));
 }
 
 PS_INPUT VS_Main(VS_INPUT input1)
@@ -260,24 +267,24 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	// half3 DirLightSpecShading = BRDFMobile(Roughness, N, H, NoH, LoH, NoV, NoL, OptSpecShading) * sqrt(NoL) * Idir * Cdir;
 
 	//sphere env mapping;
-	half3 VrN = 2.0h * NoV * N - V;
-	half3 EnvMapUV = CalcSphereMapUV(VrN, Roughness, (half)gEnvMapMaxMipLevel);
+    half3 R = 2 * dot(V, N) * N - V;
+	// Point lobe in off-specular peak direction
+    R = GetOffSpecularPeakReflectionDir(N, R, GBuffer.Roughness);
     half3 EnvSpecLightColor = 0;
     if (GBuffer.IsDisableEnvColor() == false)
     {
-        EnvSpecLightColor = (half3) gEnvMap.SampleLevel(Samp_gEnvMap, EnvMapUV.xy, EnvMapUV.z).rgb;
+        half EnvMipLevel = GetTexMipLevelFromRoughness(Roughness, (half)gEnvMapMaxMipLevel);
+        EnvSpecLightColor = (half3) gEnvMap.SampleLevel(Samp_gEnvMap, R, EnvMipLevel).rgb;
     }
     else
     {
         EnvSpecLightColor = 0;
     }
-	half Ihdr = max(0.6h, CalcLuminanceYCbCr(EnvSpecLightColor));
-	Ihdr = exp2((Ihdr - 0.6h) * 7.5h);
-
+	
 	float RoughnessSq = GBuffer.Roughness * GBuffer.Roughness;
 	float SpecularOcclusion = GetSpecularOcclusion(NoV, RoughnessSq, AOs);
 
-	half3 EnvSpec = (half3)EnvBRDF(EnvSpecLightColor, OptSpecShading, Roughness, NoV, gPreIntegratedGF, Samp_gPreIntegratedGF) * Ihdr * SpecularOcclusion;
+	half3 EnvSpec = (half3)EnvBRDF(EnvSpecLightColor, OptSpecShading, Roughness, NoV, gPreIntegratedGF, Samp_gPreIntegratedGF) * SpecularOcclusion;
 
 	half FinalShadowValue = min(1.0h, ShadowValue + DirLightLeak);
 

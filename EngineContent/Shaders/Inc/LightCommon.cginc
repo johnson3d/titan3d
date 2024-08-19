@@ -62,7 +62,8 @@ float3 SpecularGGX( float Roughness, float3 SpecularColor, float NoH, float NoV,
 half GetTexMipLevelFromRoughness(half Roughness, half MipMaxLevel)
 {
 	//return max(0.0h, MipMaxLevel + log2(Roughness));
-	return MipMaxLevel * Roughness;
+    half LevelFrom1x1 = 1 - 1.2 * log2(Roughness);
+	return MipMaxLevel -1.0f - LevelFrom1x1;
 }
 
 half3 CalcSphereMapUV(half3 VrN, half roughness, half MipMaxLevel)

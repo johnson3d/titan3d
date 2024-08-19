@@ -322,8 +322,7 @@ namespace NxRHI
 		}
 	};
 
-	class TR_CLASS()
-		FGpuPipelineManager : public IWeakReference
+	class FGpuPipelineManager : public IWeakReference
 	{
 	public:
 		const IGpuDrawState* GetOrCreate(IGpuDevice* device, IRenderPass * rpass, IGraphicsEffect* effect, IGpuPipeline* pipeline, EPrimitiveType topology);

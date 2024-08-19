@@ -99,6 +99,10 @@ namespace NxRHI
 	{
 		
 	}
+	void NullCommandList::SetViewInstanceMask(UINT Mask)
+	{
+
+	}
 	void NullCommandList::Draw(EPrimitiveType topology, UINT BaseVertex, UINT DrawCount, UINT Instance)
 	{
 		

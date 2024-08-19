@@ -365,6 +365,7 @@ namespace NxRHI
 	{
 		auto result = new IRenderPass();
 		result->Desc = *desc;
+		result->SetViewInstanceLocations();
 		return result;
 	}
 	IFrameBuffers* DX11GpuDevice::CreateFrameBuffers(IRenderPass* rpass)

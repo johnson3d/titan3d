@@ -187,6 +187,8 @@ namespace NxRHI
 		auto hr = D3D12CreateDevice(pIAdapter, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(mDevice.GetAddressOf()));
 		if (FAILED(hr))
 			return false;
+		
+		mDevice->QueryInterface(IID_PPV_ARGS(mDevice2.GetAddressOf()));
 
 		if (pGpuSystem->Desc.CreateDebugLayer && pGpuSystem->Desc.GpuBaseValidation)
 		{
@@ -340,6 +342,7 @@ namespace NxRHI
 
 		mCaps.IsSupoortBufferToTexture = true;
 		mCaps.IsSupportSSBO_VS = true;
+		mCaps.MaxViewInstanceCount = D3D12_MAX_VIEW_INSTANCE_COUNT;
 
 		mDefaultBufferMemAllocator = MakeWeakRef(new DX12DefaultGpuMemAllocator());
 		mDefaultBufferMemAllocator->mHeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
@@ -617,6 +620,7 @@ namespace NxRHI
 	{
 		auto result = new IRenderPass();
 		result->Desc = *desc;
+		result->SetViewInstanceLocations();
 		return result;
 	}
 	IFrameBuffers* DX12GpuDevice::CreateFrameBuffers(IRenderPass* rpass)

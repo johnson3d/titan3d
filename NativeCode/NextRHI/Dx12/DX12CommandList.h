@@ -38,6 +38,8 @@ namespace NxRHI
 		virtual void SetComputePipeline(const IComputeEffect* drawState) override;
 		virtual void SetInputLayout(IInputLayout* layout) override;
 
+		virtual void SetViewInstanceMask(UINT Mask) override;
+
 		virtual bool BeginPass(IFrameBuffers* fb, const FRenderPassClears* passClears, const char* name) override;
 		virtual void SetViewport(UINT Num, const FViewPort* pViewports) override;
 		virtual void SetScissor(UINT Num, const FScissorRect* pScissor) override;

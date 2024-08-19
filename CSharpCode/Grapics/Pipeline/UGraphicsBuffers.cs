@@ -497,7 +497,7 @@ namespace EngineNS.Graphics.Pipeline
             cBuffer.SetValue(coreBinder.CBPerViewport.mSkyLightColor, in dirLight.mSkyLightColor);
             cBuffer.SetValue(coreBinder.CBPerViewport.mGroundLightColor, in dirLight.mGroundLightColor);
 
-            float EnvMapMaxMipLevel = 1.0f;
+            float EnvMapMaxMipLevel = 10.0f;
             cBuffer.SetValue(coreBinder.CBPerViewport.gEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
             cBuffer.SetValue(coreBinder.CBPerViewport.gEyeEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
         }

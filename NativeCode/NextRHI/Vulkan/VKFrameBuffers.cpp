@@ -113,6 +113,8 @@ namespace NxRHI
 	bool VKRenderPass::Init(VKGpuDevice* device, const FRenderPassDesc& desc)
 	{
 		Desc = desc;
+		SetViewInstanceLocations();
+
 		mDeviceRef.FromObject(device);
 
 		std::vector<VkAttachmentDescription> attachments;

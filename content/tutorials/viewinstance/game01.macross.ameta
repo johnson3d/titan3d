@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.CodeBuilder.UMacrossAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="2313039c-2bda-4cfa-9953-e4e56363704b" />
+  <BaseTypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.UMacrossGame@EngineCore" />
+  <Description Type="System.String@Unknown" Value="MacrossType:EngineNS.GamePlay.UMacrossGame@EngineCore&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Game,tutorials/viewinstance/viewid.rpolicy,29575bd7-1fef-4085-a64d-79c4930e2100" />
+    <e_1 Value="Game,tutorials/viewinstance/test01.scene,8e523125-74c8-46db-8746-d280191ca248" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.CodeBuilder.UMacross@EngineCore" />
+</Root>

@@ -510,6 +510,10 @@ namespace NxRHI
 		ASSERT(mIsRecording);
 		//mContext->IASetInputLayout(((VKInputLayout*)layout)->mLayout);
 	}
+	void VKCommandList::SetViewInstanceMask(UINT Mask)
+	{
+		ASSERT(false);
+	}
 	inline VkPrimitiveTopology PrimitiveTopology2VK(EPrimitiveType type, UINT NumPrimitives, UINT& indexCount)
 	{
 		switch (type)

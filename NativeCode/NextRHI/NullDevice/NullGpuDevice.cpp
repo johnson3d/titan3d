@@ -155,6 +155,7 @@ namespace NxRHI
 	{
 		auto result = new IRenderPass();
 		result->Desc = *desc;
+		result->SetViewInstanceLocations();
 		return result;
 	}
 	IFrameBuffers* NullGpuDevice::CreateFrameBuffers(IRenderPass* rpass)

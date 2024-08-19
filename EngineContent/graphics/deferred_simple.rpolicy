@@ -93,7 +93,7 @@
       <NodeId Type="System.Guid@Unknown" Value="18beece3-c815-4637-94e5-dd693373430b" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="264.17737,201.32346" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.UImageAssetNode@EngineCore">
-        <ImageName Type="EngineNS.RName@EngineCore" Value="Engine,texture/default_envmap.srv,503f8435-1844-4cd7-9725-4a5db9892a88" />
+        <ImageName Type="EngineNS.RName@EngineCore" Value="Engine,texture/hdri_epic_courtyard_daylight.srv,d9118f94-fbb6-462b-b6ab-87bda179fb8d" />
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_8>

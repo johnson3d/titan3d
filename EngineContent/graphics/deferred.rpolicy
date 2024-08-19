@@ -83,7 +83,7 @@
       <NodeId Type="System.Guid@Unknown" Value="046b85e5-59c8-4bd0-9c3f-a82c26127508" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="868,630.99994" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.UImageAssetNode@EngineCore">
-        <ImageName Type="EngineNS.RName@EngineCore" Value="Engine,texture/default_envmap.srv,503f8435-1844-4cd7-9725-4a5db9892a88" />
+        <ImageName Type="EngineNS.RName@EngineCore" Value="Engine,texture/cannon_1k.srv,8d2413ba-1364-4fb3-b422-96601f6dc952" />
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_7>

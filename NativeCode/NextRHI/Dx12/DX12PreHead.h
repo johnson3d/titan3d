@@ -12,6 +12,7 @@
 #include <d3d12Shader.h>
 #include <d3dcompiler.h>
 #include <dxgi1_4.h>
+#include "d3dx12.h"
 #pragma warning(pop)
 
 NS_BEGIN
@@ -684,6 +685,7 @@ namespace NxRHI
 			}
 		}
 	};
+
 }
 
 NS_END

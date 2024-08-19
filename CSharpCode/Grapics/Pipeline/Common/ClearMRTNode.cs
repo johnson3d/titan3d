@@ -1,6 +1,8 @@
 ﻿using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
@@ -26,8 +28,14 @@ namespace EngineNS.Graphics.Pipeline.Common
         public TtGraphicsBuffers[] GBuffers = new TtGraphicsBuffers[4];
         public NxRHI.ERenderPassClearFlags[] ClearFlags = new NxRHI.ERenderPassClearFlags[4];
 
+        [Category("Option")]
         [Rtti.Meta]
-        public int OutputRT { get; set; } = 0;
+        public int OutputRT
+        {
+            get;
+            set;
+        } = 0;
+        [Category("Option")]
         [Rtti.Meta]
         public bool OutputDS { get; set; } = true;
         public TtClearMRTNode()

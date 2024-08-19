@@ -90,6 +90,7 @@ namespace EngineNS.Graphics.Pipeline
             return true;
         }
     }
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtRenderGraphNode : IO.BaseSerializer, IDisposable
     {
         ~TtRenderGraphNode()

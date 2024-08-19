@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using EngineNS.Graphics.Pipeline.Shader;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace EngineNS.Graphics.Pipeline.Deferred
@@ -199,6 +200,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 }
             }
         }
+        [Category("Option")]
         [Rtti.Meta]
         public List<ERenderLayer> LayerFilters { get; set; } = new List<ERenderLayer> { ERenderLayer.RL_Opaque, ERenderLayer.RL_Translucent, ERenderLayer.RL_Sky };
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

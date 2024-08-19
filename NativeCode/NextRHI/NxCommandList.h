@@ -124,6 +124,8 @@ namespace NxRHI
 		virtual void SetGraphicsPipeline(const IGpuDrawState* drawState) = 0;
 		virtual void SetComputePipeline(const IComputeEffect * drawState) = 0;
 		virtual void SetInputLayout(IInputLayout* layout) = 0;
+
+		virtual void SetViewInstanceMask(UINT Mask) = 0;
 		
 		virtual bool BeginPass(IFrameBuffers* fb, const FRenderPassClears * passClears, const char* name) = 0;
 		virtual void SetViewport(UINT Num, const FViewPort* pViewports) = 0;

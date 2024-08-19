@@ -60,6 +60,30 @@ namespace NxRHI
 	};
 
 	struct TR_CLASS(SV_LayoutStruct = 8)
+		FViewInstanceLocation
+	{
+		void SetDefault()
+		{
+			ViewportArrayIndex = 0;
+			RenderTargetArrayIndex = 0;
+		}
+		UINT ViewportArrayIndex;
+		UINT RenderTargetArrayIndex;
+	};
+
+	struct TR_CLASS(SV_LayoutStruct = 8)
+		FViewInstanceDesc
+	{
+		void SetDefault()
+		{
+			ViewInstanceCount = 0;
+			pViewInstanceLocations = nullptr;
+		}
+		UINT ViewInstanceCount;
+		const FViewInstanceLocation* pViewInstanceLocations;
+	};
+
+	struct TR_CLASS(SV_LayoutStruct = 8)
 		FRenderPassDesc
 	{
 		FRenderPassDesc()
@@ -74,10 +98,14 @@ namespace NxRHI
 				AttachmentMRTs[i].SetDefault();
 			}
 			AttachmentDepthStencil.Format = EPixelFormat::PXF_UNKNOWN;
+
+			ViewInstanceDesc.SetDefault();
 		}
 		UINT NumOfMRT;
 		FAttachmentDesc AttachmentMRTs[C_MAX_MRT_NUM];
 		FAttachmentDesc AttachmentDepthStencil;
+
+		FViewInstanceDesc ViewInstanceDesc{};
 	};
 
 	enum TR_ENUM()
@@ -130,6 +158,17 @@ namespace NxRHI
 	public:
 		ENGINE_RTTI(IRenderPass);
 		FRenderPassDesc			Desc;
+
+		void SetViewInstanceLocations()
+		{
+			ViewInstanceLocations.clear();
+			for (size_t i = 0; i < Desc.ViewInstanceDesc.ViewInstanceCount; i++)
+			{
+				ViewInstanceLocations.push_back(Desc.ViewInstanceDesc.pViewInstanceLocations[i]);
+			}
+			Desc.ViewInstanceDesc.pViewInstanceLocations = ViewInstanceLocations.data();
+		}
+		std::vector<FViewInstanceLocation> ViewInstanceLocations;
 	};
 
 

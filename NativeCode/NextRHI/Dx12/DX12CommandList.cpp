@@ -487,6 +487,11 @@ namespace NxRHI
 		ASSERT(mIsRecording);
 		//mContext->IASetInputLayout(((DX12InputLayout*)layout)->mLayout);
 	}
+	void DX12CommandList::SetViewInstanceMask(UINT Mask)
+	{
+		ASSERT(mContext2 != nullptr);
+		mContext2->SetViewInstanceMask(Mask);
+	}
 	static inline D3D12_PRIMITIVE_TOPOLOGY PrimitiveTypeToDX12(EPrimitiveType type, UINT NumPrimitives, UINT* pCount)
 	{
 		switch (type)

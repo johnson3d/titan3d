@@ -217,6 +217,7 @@ namespace EngineNS.GamePlay.Scene
             SaveChildNode(this, xnd.mCoreObject, node.mCoreObject);
 
             xndHolder.SaveXnd(name.Address);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
         }
         internal static async System.Threading.Tasks.Task<UScene> LoadScene(GamePlay.UWorld world, RName name)
         {

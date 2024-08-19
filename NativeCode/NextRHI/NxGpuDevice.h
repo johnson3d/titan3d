@@ -143,6 +143,7 @@ namespace NxRHI
 		bool	IsSupportSSBO_VS = true;
 		bool	IsSupoortBufferToTexture = false;
 		bool	Unused = false;
+		UINT			MaxViewInstanceCount = 0;
 		UINT			NumOfSwapchainFormats = 0;
 		EPixelFormat	SwapchainFormats[16] = {};
 		bool IsSupportSwapchainFormat(EPixelFormat format) const

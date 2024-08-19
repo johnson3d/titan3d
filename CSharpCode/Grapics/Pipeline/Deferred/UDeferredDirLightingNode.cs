@@ -161,7 +161,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             index = drawcall.FindBinder("Samp_gEnvMap");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
             index = drawcall.FindBinder("gPreIntegratedGF");
             if (index.IsValidPointer)

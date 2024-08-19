@@ -361,6 +361,10 @@ namespace NxRHI
 	{
 		mContext->IASetInputLayout(((DX11InputLayout*)layout)->mLayout);
 	}
+	void DX11CommandList::SetViewInstanceMask(UINT Mask)
+	{
+		ASSERT(false);
+	}
 	inline D3D_PRIMITIVE_TOPOLOGY PrimitiveTypeToDX(EPrimitiveType type, UINT NumPrimitives, UINT* pCount)
 	{
 		switch (type)

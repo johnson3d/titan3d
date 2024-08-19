@@ -190,7 +190,10 @@ bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FS
 		sl == NxRHI::EShaderLanguage::SL_GLSL ||
 		sl == NxRHI::EShaderLanguage::SL_METAL)
 	{
-		CompileHLSL(compiler, desc, shader, entry, type, sm, defines, sl, debugShader, extHlslVersion, dxcArgs);
+		auto ret = CompileHLSL(compiler, desc, shader, entry, type, sm, defines, sl, debugShader, extHlslVersion, dxcArgs);
+		if (sl == NxRHI::EShaderLanguage::SL_DXIL)
+			return ret;
+		//Spirv is not ready for all shaders
 	}
 
 	if (sl == NxRHI::EShaderLanguage::SL_SPIRV)

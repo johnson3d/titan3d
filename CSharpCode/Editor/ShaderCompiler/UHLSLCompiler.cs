@@ -448,7 +448,7 @@ namespace EngineNS.Editor.ShaderCompiler
                 defPtr.MergeDefinitions(TtEngine.Instance.GfxDevice.RenderContext.GlobalEnvDefines);
 
                 var cfg = TtEngine.Instance.Config;
-                if (cfg.CookDXBC)
+                if (cfg.CookDXBC && extHlslVersion == null)
                 {
                     defPtr.AddDefine("RHI_TYPE", "RHI_DX11");
                     defPtr.AddDefine("CP_SM_major", "5");

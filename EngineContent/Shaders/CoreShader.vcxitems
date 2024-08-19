@@ -86,7 +86,7 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredDirLighting.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredOpaque.cginc" />
-    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\MuliViewID\BasePass.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\MultiViewID\BasePass.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\DrawViewportShading.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\DummyShading.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\ExpHeightFog.cginc" />

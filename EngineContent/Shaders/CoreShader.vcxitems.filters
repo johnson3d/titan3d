@@ -415,14 +415,12 @@
     <None Include="$(MSBuildThisFileDirectory)Compute\MacrossComputeShadingEnvImpl.cginc">
       <Filter>Compute</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\MuliViewID\BasePass.cginc">
-      <Filter>ShadingEnv\Deffered\MultiViewID</Filter>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)..\..\cache\debugutility\engine_preprosessors.cginc">
       <Filter>Inc</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)slate\Slate_TextureCubeViewer.cginc">
-      <Filter>Slate</Filter>
+    <None Include="$(MSBuildThisFileDirectory)slate\Slate_TextureCubeViewer.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\MultiViewID\BasePass.cginc">
+      <Filter>ShadingEnv\Deffered\MultiViewID</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

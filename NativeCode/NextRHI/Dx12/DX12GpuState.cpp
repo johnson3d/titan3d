@@ -152,6 +152,10 @@ namespace NxRHI
 	}
 	bool DX12GpuDrawState::BuildState(IGpuDevice* device)
 	{
+		if (((DX12GpuDevice*)device)->mDevice2 != nullptr)
+		{
+			return BuildStateByDevice2((DX12GpuDevice*)device);
+		}
 		auto pDx12 = this->Pipeline.UnsafeConvertTo<DX12GpuPipeline>();
 		auto pEffect = ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>();
 		auto pInputLayout = pEffect->mInputLayout.UnsafeConvertTo<DX12InputLayout>();
@@ -195,6 +199,86 @@ namespace NxRHI
 			return false;
 		}
 		mDxState = pState;
+		pState->Release();
+		return true;
+	}
+
+	bool DX12GpuDrawState::BuildStateByDevice2(DX12GpuDevice* device)
+	{
+		auto pDx12 = this->Pipeline.UnsafeConvertTo<DX12GpuPipeline>();
+		auto pEffect = ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>();
+		auto pInputLayout = pEffect->mInputLayout.UnsafeConvertTo<DX12InputLayout>();
+		std::vector<D3D12_INPUT_ELEMENT_DESC> mDx12Elements;
+		pInputLayout->GetDX12Elements(mDx12Elements);
+
+		//如果要启动ViewID，需要自己做PipelineState
+		//ViewID: https://microsoft.github.io/DirectX-Specs/d3d/ViewInstancing.html#view-instancing-work-ordering-semantics 
+		
+		struct PipelineStateStream
+		{
+			CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE pRootSignature;
+			CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT InputLayout;
+			CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY PrimitiveTopologyType;
+			CD3DX12_PIPELINE_STATE_STREAM_VS VS;
+			CD3DX12_PIPELINE_STATE_STREAM_PS PS;
+			CD3DX12_PIPELINE_STATE_STREAM_RASTERIZER Raster;
+			CD3DX12_PIPELINE_STATE_STREAM_BLEND_DESC Blend;
+			CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL DepthStencil;
+			CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL_FORMAT DSVFormat;
+			CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS RTVFormats;
+			CD3DX12_PIPELINE_STATE_STREAM_VIEW_INSTANCING ViewInstance;
+		} Stream;
+		Stream.pRootSignature = pEffect->mSignature;
+		Stream.InputLayout = { &mDx12Elements[0], (UINT)mDx12Elements.size() };
+		Stream.PrimitiveTopologyType = PrimitiveTypeToDX12(TopologyType);
+		Stream.VS = {
+			&ShaderEffect->mVertexShader->Desc->DxIL[0],
+			ShaderEffect->mVertexShader->Desc->DxIL.size()
+		};
+		Stream.PS = {
+			&ShaderEffect->mPixelShader->Desc->DxIL[0],
+			ShaderEffect->mPixelShader->Desc->DxIL.size()
+		};
+		Stream.Raster = CD3DX12_RASTERIZER_DESC(pDx12->mRasterState);
+		Stream.Blend = CD3DX12_BLEND_DESC(pDx12->mBlendState);
+		Stream.DepthStencil = CD3DX12_DEPTH_STENCIL_DESC(pDx12->mDepthStencilState);
+
+		D3D12_RT_FORMAT_ARRAY rtvFormats{};
+		rtvFormats.NumRenderTargets = RenderPass->Desc.NumOfMRT;
+		for (UINT i = 0; i < RenderPass->Desc.NumOfMRT; i++)
+		{
+			rtvFormats.RTFormats[i] = FormatToDX12Format(RenderPass->Desc.AttachmentMRTs[i].Format);
+			ASSERT(rtvFormats.RTFormats[i] != DXGI_FORMAT_UNKNOWN);
+		}
+		Stream.RTVFormats = D3D12_RT_FORMAT_ARRAY(rtvFormats);
+		Stream.DSVFormat = FormatToDX12Format(RenderPass->Desc.AttachmentDepthStencil.Format);
+
+		D3D12_VIEW_INSTANCING_DESC vwidesc{};
+		vwidesc.ViewInstanceCount = RenderPass->Desc.ViewInstanceDesc.ViewInstanceCount;
+		vwidesc.pViewInstanceLocations = (const D3D12_VIEW_INSTANCE_LOCATION*)RenderPass->Desc.ViewInstanceDesc.pViewInstanceLocations;
+		if (RenderPass->Desc.ViewInstanceDesc.ViewInstanceCount > 0)
+		{
+			vwidesc.Flags = D3D12_VIEW_INSTANCING_FLAG_NONE;
+		}
+		else
+		{
+			vwidesc.Flags = D3D12_VIEW_INSTANCING_FLAG_ENABLE_VIEW_INSTANCE_MASKING;
+		}
+		Stream.ViewInstance = CD3DX12_VIEW_INSTANCING_DESC(vwidesc);
+
+		D3D12_PIPELINE_STATE_STREAM_DESC ssdesc = {
+		   sizeof(Stream),&Stream
+		};
+
+		ID3D12PipelineState* pState2;
+		if (S_OK != device->mDevice2->CreatePipelineState(&ssdesc, IID_PPV_ARGS(&pState2)))
+		{
+			VFX_LTRACE(ELTT_Error, "CreatePSO failed: VS(%s) PS(%s)", ShaderEffect->mVertexShader->Desc->DebugName.c_str(),
+				ShaderEffect->mPixelShader->Desc->DebugName.c_str());
+			return false;
+		}
+		mDxState = pState2;
+		pState2->Release();
 		return true;
 	}
 }

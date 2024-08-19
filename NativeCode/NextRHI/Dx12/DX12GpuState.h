@@ -39,6 +39,7 @@ namespace NxRHI
 	{
 	public:
 		virtual bool BuildState(IGpuDevice* device) override;
+		bool BuildStateByDevice2(DX12GpuDevice* device);
 	public:
 		AutoRef<ID3D12PipelineState>	mDxState;
 	};

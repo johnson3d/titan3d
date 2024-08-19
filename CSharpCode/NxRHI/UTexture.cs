@@ -22,6 +22,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Linq;
+using EngineNS.Graphics.Pipeline.Shader;
 
 namespace EngineNS.NxRHI
 {
@@ -93,9 +94,13 @@ namespace EngineNS.NxRHI
         }
         protected bool mShowA = false;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
-        private async Thread.Async.TtTask<EngineNS.Graphics.Pipeline.Shader.TtEffect> GetEffect()
+        private async Thread.Async.TtTask<EngineNS.Graphics.Pipeline.Shader.TtEffect> GetEffect(bool isCubemap)
         {
-            var shading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>();
+            TtShadingEnv shading = null;
+            if(isCubemap)
+                shading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureCubeViewerShading>();
+            else
+                shading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>();
             return await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(shading,
                 TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial,
                 new Graphics.Mesh.UMdfStaticMesh());
@@ -108,11 +113,15 @@ namespace EngineNS.NxRHI
                 SnapTask = TtEngine.Instance.GfxDevice.TextureManager.GetTexture(this.GetAssetName(), 1);
                 //cmdlist.AddText(in start, 0xFFFFFFFF, "texture", null);
 
-                EffectTask = GetEffect();
-
                 return;
             }
-            else if (SnapTask.Value.IsCompleted == false || EffectTask.Value.IsCompleted == false)
+            if (EffectTask == null)
+            {
+                if(SnapTask.Value.IsCompleted == true && SnapTask.Value.Result != null)
+                    EffectTask = GetEffect(SnapTask.Value.Result.PicDesc.CubeFaces == 6);
+                return;
+            }
+            if (SnapTask.Value.IsCompleted == false || EffectTask.Value.IsCompleted == false)
             {
                 cmdlist.AddText(in start, 0xFFFFFFFF, "loading...", null);
                 return;
@@ -726,7 +735,7 @@ namespace EngineNS.NxRHI
                         mDesc.Width = image.Width;
                         mDesc.Height = image.Height;
 
-                        mDesc.MipLevel = Math.Max(CalcMipLevel(mDesc.Width, mDesc.Height, true) - 3, 1);
+                        mDesc.MipLevel = Math.Max(CalcMipLevel(mDesc.Width, mDesc.Height, true)-2, 1);
                     }
                 }
             }
@@ -2187,8 +2196,10 @@ namespace EngineNS.NxRHI
                     encoder.GetBlockCount(mipSize.X, mipSize.Y, out blockDimension.X, out blockDimension.Y);
                     desc.BlockSize = encoder.GetBlockSize();
                     if(desc.MipSizes.Count < desc.MipLevel)
+                    {
                         desc.MipSizes.Add(mipSize);
-                    desc.BlockDimenstions.Add(blockDimension);
+                        desc.BlockDimenstions.Add(blockDimension);
+                    }
 
                     var attr = faceNode.GetOrAddAttribute($"DxtMip{j}", 0, 0);
                     {
