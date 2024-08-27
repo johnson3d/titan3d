@@ -330,7 +330,14 @@ namespace NxRHI
 	void DX12CommandList::SetScissor(UINT Num, const FScissorRect* pScissor)
 	{
 		ASSERT(mIsRecording);
-		mContext->RSSetScissorRects(Num, (const D3D12_RECT*)pScissor);
+		if (Num == 0)
+		{
+			mContext->RSSetScissorRects(0, nullptr);
+		}
+		else
+		{
+			mContext->RSSetScissorRects(Num, (const D3D12_RECT*)pScissor);
+		}
 	}
 	void DX12CommandList::SetShader(IShader* shader)
 	{

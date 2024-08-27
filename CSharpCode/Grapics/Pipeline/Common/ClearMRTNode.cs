@@ -119,7 +119,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             return GBuffers[0];
         }
 
-        public override void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             int MrtNum = OutputRT;
             if (MrtNum == 0)
@@ -152,6 +152,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                     {
                         cmdlist.SetViewport(in GBuffers[MrtNum - 1].Viewport);
+                        cmdlist.SetScissor(0, (NxRHI.FScissorRect*)0);
                         passClears.ClearFlags = ClearFlags[MrtNum - 1];
                         if (clearDS)
                         {

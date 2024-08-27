@@ -1,7 +1,7 @@
 #ifndef _HashSparseSpace_Compute_H_
 #define _HashSparseSpace_Compute_H_
 
-#if RHI_TYPE == RHI_DX11 || RHI_TYPE == RHI_VK || HLSL_VERSION != 2021
+#if RHI_TYPE == RHI_DX11
 interface IHashSparseSpace
 {
 	void Allocator_InterlockedOr(uint index, out uint oldKeyState);

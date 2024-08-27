@@ -16,9 +16,6 @@
     <Filter Include="ShadingEnv\Sys">
       <UniqueIdentifier>{b207efa2-d866-4d5f-aa01-44bd1c1ea210}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ShadingEnv\Deffered">
-      <UniqueIdentifier>{fbe441dc-fd08-4441-82f5-0b6041ae324b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Inc">
       <UniqueIdentifier>{a7f12604-ff72-4008-8f2a-f9b423956161}</UniqueIdentifier>
     </Filter>
@@ -94,7 +91,10 @@
     <Filter Include="Bricks\Particle\SimpleEmitter">
       <UniqueIdentifier>{81e0ef76-1030-4095-81ae-fb4a2552414f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ShadingEnv\Deffered\MultiViewID">
+    <Filter Include="ShadingEnv\Deferred">
+      <UniqueIdentifier>{fbe441dc-fd08-4441-82f5-0b6041ae324b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ShadingEnv\Deferred\MultiViewID">
       <UniqueIdentifier>{d195b1b5-9fd6-465a-8be4-0c73f0ad731b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -220,16 +220,16 @@
       <Filter>ShadingEnv\Mobile</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredBasePassPS.cginc">
-      <Filter>ShadingEnv\Deffered</Filter>
+      <Filter>ShadingEnv\Deferred</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredCommon.cginc">
-      <Filter>ShadingEnv\Deffered</Filter>
+      <Filter>ShadingEnv\Deferred</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredDirLighting.cginc">
-      <Filter>ShadingEnv\Deffered</Filter>
+      <Filter>ShadingEnv\Deferred</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredOpaque.cginc">
-      <Filter>ShadingEnv\Deffered</Filter>
+      <Filter>ShadingEnv\Deferred</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\DummyShading.cginc">
       <Filter>ShadingEnv</Filter>
@@ -420,7 +420,7 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)slate\Slate_TextureCubeViewer.cginc" />
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\MultiViewID\BasePass.cginc">
-      <Filter>ShadingEnv\Deffered\MultiViewID</Filter>
+      <Filter>ShadingEnv\Deferred\MultiViewID</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

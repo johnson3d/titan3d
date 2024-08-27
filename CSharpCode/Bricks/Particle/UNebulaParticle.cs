@@ -13,7 +13,7 @@ namespace EngineNS.Bricks.Particle
         }
         protected override Color4b GetBorderColor()
         {
-            return Color4b.HotPink;
+            return TtEngine.Instance.EditorInstance.Config.NebulaBoderColor;
         }
         public override string GetAssetTypeName()
         {

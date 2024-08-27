@@ -17,8 +17,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Camera\UCamera.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Camera\UCameraSpringArm.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Character\UCharacter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Player\PlayerStart.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\PrefabNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\SunNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Scene\UPBRTestNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UCenterData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controller\IController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controller\UNPCController.cs" />
@@ -27,7 +29,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Movemnet\UCharacterMovement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Movemnet\UMovement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\Actor\UActor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Player\UPlayer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Player\Player.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UBezierSplineNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UGridNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UMeshNode.cs" />
@@ -58,8 +60,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)GamePlay.brick" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)Player\" />
   </ItemGroup>
 </Project>

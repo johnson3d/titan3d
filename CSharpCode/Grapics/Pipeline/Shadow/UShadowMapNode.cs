@@ -465,6 +465,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                             Viewport.Height = GBuffersArray[CsmIdx].Viewport.Height;
 
                             cmdlist.SetViewport(in Viewport);
+                            cmdlist.SetScissor(0, (NxRHI.FScissorRect*)0);
 
                             var passClear = new NxRHI.FRenderPassClears();
                             //if (CsmIdx == 0)

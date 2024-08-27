@@ -17,6 +17,10 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         {
             return "RPolicy";
         }
+        protected override Color4b GetBorderColor()
+        {
+            return TtEngine.Instance.EditorInstance.Config.RenderPolicyBoderColor;
+        }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             return TtRenderPolicyAsset.LoadAsset(GetAssetName());

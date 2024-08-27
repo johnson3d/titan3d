@@ -75,6 +75,8 @@ namespace EngineNS.DesignMacross.Design
     }
     public class TtOutlineElementsListRender_Methods : IOutlineElementsListRender
     {
+        EGui.UIProxy.MenuItemProxy.MenuState mNewMethodMenuState = new() { Enable = true, Opened = false, Hovered = false, HasIndent = true };
+        EGui.UIProxy.MenuItemProxy.MenuState mOverrideMenuState = new() { Enable = true, Opened = false, Hovered = false, HasIndent = true };
         public void Draw(IRenderableElement renderableElement, ref FOutlineElementRenderingContext context)
         {
             var elementsList = renderableElement as TtOutlineElementsList_Methods;
@@ -89,28 +91,73 @@ namespace EngineNS.DesignMacross.Design
             ImGuiAPI.SameLine(regionSize.X, -1.0f);
             if (EGui.UIProxy.CustomButton.ToolButton("+", in buttonSize, 0xFF00FF00))
             {
-                const string methodName = "New_Method";
-                var num = 0;
-                while (true)
+                ImGuiAPI.OpenPopup("DMCMethodSelectPopup", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+            }
+            if (ImGuiAPI.BeginPopup("DMCMethodSelectPopup", ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            {
+                var drawList = ImGuiAPI.GetWindowDrawList();
+                var menuData = new Support.UAnyPointer();
+                if (EGui.UIProxy.MenuItemProxy.MenuItem("New Method", null, false, null, in drawList, in menuData, ref mNewMethodMenuState))
                 {
-                    var result = elementsList.Descriptions.ToImmutableList()
-                        .Find(desc => desc.Name == $"{methodName}_{num}");
-                    if (result == null)
+                    const string methodName = "New_Method";
+                    var num = 0;
+                    while (true)
                     {
-                        break;
+                        var result = elementsList.Descriptions.ToImmutableList()
+                            .Find(desc => desc.Name == $"{methodName}_{num}");
+                        if (result == null)
+                        {
+                            break;
+                        }
+
+                        num++;
                     }
 
-                    num++;
+                    var name = $"{methodName}_{num}";
+                    if (UTypeDescManager.CreateInstance(UTypeDesc.TypeOf<TtMethodDescription>()) is IMethodDescription
+                        description)
+                    {
+                        description.Name = name;
+                        description.Parent = (elementsList.Parent as TtOutline).Description;
+                        elementsList.Descriptions.Add(description);
+                    }
+                }
+                if (EGui.UIProxy.MenuItemProxy.BeginMenuItem("Override Method", null, null, in drawList, in menuData, ref mOverrideMenuState))
+                {
+                    List<EGui.UIProxy.MenuItemProxy> menuItemProxies = new List<EGui.UIProxy.MenuItemProxy>();
+                    foreach(var superClassName in context.EditorInteroperation.OutlineEditPanel.ClassDesc.SupperClassNames)
+                    {
+                        var superClassType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(superClassName);
+                        foreach(var method in superClassType.GetMethods())
+                        {
+                            if(method.IsVirtual && method.DeclaringType == superClassType.SystemType)
+                            {
+                                var menuItem = new EGui.UIProxy.MenuItemProxy();
+                                menuItem.MenuName = method.Name;
+
+                                menuItem.Action = (proxy, data) =>
+                                {
+                                    if (UTypeDescManager.CreateInstance(UTypeDesc.TypeOf<TtMethodDescription>()) is IMethodDescription
+                                        description)
+                                    {
+                                        description.Name = method.Name;
+                                        description.Parent = (elementsList.Parent as TtOutline).Description;
+                                        description.IsOverride = true;
+                                        elementsList.Descriptions.Add(description);
+                                    }
+                                };
+                                menuItemProxies.Add(menuItem);
+                            }
+                        }
+                    }
+                    for (int i = 0; i < menuItemProxies.Count; i++)
+                    {
+                        menuItemProxies[i].OnDraw(in drawList, in menuData);
+                    }
+                    EGui.UIProxy.MenuItemProxy.EndMenuItem();
                 }
 
-                var name = $"{methodName}_{num}";
-                if (UTypeDescManager.CreateInstance(UTypeDesc.TypeOf<TtMethodDescription>()) is IMethodDescription
-                    description)
-                {
-                    description.Name = name;
-                    description.Parent = (elementsList.Parent as TtOutline).Description;
-                    elementsList.Descriptions.Add(description);
-                }
+                ImGuiAPI.EndPopup();
             }
 
             if (treeNodeResult)

@@ -21,9 +21,7 @@ struct PS_INPUT_SLATE
 
 VK_BIND(0) Texture2D FontTexture DX_AUTOBIND;
 VK_BIND(1) sampler Samp_FontTexture DX_AUTOBIND;
-/**Meta Begin:(VS_Main)
-HLSL=2021
-Meta End:(VS_Main)**/
+
 PS_INPUT_SLATE VS_Main(VS_INPUT_SLATE input)
 {
     PS_INPUT_SLATE output;
@@ -34,9 +32,6 @@ PS_INPUT_SLATE VS_Main(VS_INPUT_SLATE input)
     return output;
 }
 
-/**Meta Begin:(PS_Main)
-HLSL=2021
-Meta End:(PS_Main)**/
 float4 PS_Main(PS_INPUT_SLATE input) : SV_Target
 {
     if ((int)(input.col.a * 255.0f) == 1)

@@ -50,13 +50,19 @@ namespace EngineNS.DesignMacross
                 }
                 mMacrossGetter = Macross.UMacrossGetter<TtDesignMacrossBase>.NewInstance();
                 mMacrossGetter.Name = value;
-                mMacrossGetter.Get().MacrossNode = this;
-                mMacrossGetter.Get().Initialize();
+                if(mMacrossGetter.Get() != null)
+                {
+                    mMacrossGetter.Get().MacrossNode = this;
+                    mMacrossGetter.Get().Initialize();
+                }
             }
         }
         public override void TickLogic(TtNodeTickParameters args)
         {
-            mMacrossGetter.Get().Tick(args.World.TimeSecond);
+            if(mMacrossGetter!= null && mMacrossGetter.Get() != null)
+            {
+                mMacrossGetter.Get().Tick(args.World.TimeSecond);
+            }
             base.TickLogic(args);
         }
     }

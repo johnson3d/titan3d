@@ -68,8 +68,18 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override NxRHI.EVertexStreamType[] GetNeedStreams()
         {
-            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
-                NxRHI.EVertexStreamType.VST_UV,};
+            return new NxRHI.EVertexStreamType[] { 
+                NxRHI.EVertexStreamType.VST_Position,
+                NxRHI.EVertexStreamType.VST_UV,
+            };
+        }
+        public override EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return new EPixelShaderInput[] {
+                EPixelShaderInput.PST_Position,
+                EPixelShaderInput.PST_UV,
+                EPixelShaderInput.PST_LightMap,
+            };
         }
         public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
         {
@@ -182,7 +192,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             }
             index = drawcall.FindBinder("Samp_GVignette");
             if (index.IsValidPointer)
-                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
             #endregion
 
             #region MultiLights

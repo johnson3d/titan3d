@@ -229,7 +229,10 @@ namespace EngineNS.Graphics.Mesh
                     {
                         var effect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(shading, Material.ParentMaterial, this.MdfQueue);
                         if (effect == null)
+                        {
+                            Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Error, $"GetEffect({shading},{Material.ParentMaterial},{this.MdfQueue}) failed");
                             return;
+                        }
                         var drawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateGraphicDraw();// (shading, Material.ParentMaterial, mesh.MdfQueue);
                         drawcall.SetSourceAtom(this);
                         drawcall.BindShaderEffect(effect);

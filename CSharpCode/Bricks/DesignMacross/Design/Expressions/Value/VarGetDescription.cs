@@ -8,12 +8,29 @@ namespace EngineNS.DesignMacross.Design.Expressions
     [GraphElement(typeof(TtGraphElement_VarGet))]
     public class TtVarGetDescription : TtExpressionDescription
     {
-        public override string Name { get => VariableDescription.Name; set => VariableDescription.Name = value; }
-        public IVariableDescription VariableDescription { get; set; } 
+        public override string Name
+        {
+            get
+            {
+                if(GetVariableDescription() != null)
+                {
+
+                }
+                return "";
+            }
+        }
+        public IVariableDescription VariableDescription { get; set; }
+        public Guid VariableId { get; set; } = Guid.Empty;
         public UTypeDesc VarTypeDesc { get=>VariableDescription.VariableType.TypeDesc; }
         public TtVarGetDescription()
         {
             AddDtaOutPin(new() { Name = "Get", TypeDesc = UTypeDesc.TypeOf<bool>() });
+        }
+
+        public IVariableDescription GetVariableDescription()
+        {
+
+            return null;
         }
     }
 }

@@ -258,12 +258,13 @@ namespace NxRHI
 		vwidesc.pViewInstanceLocations = (const D3D12_VIEW_INSTANCE_LOCATION*)RenderPass->Desc.ViewInstanceDesc.pViewInstanceLocations;
 		if (RenderPass->Desc.ViewInstanceDesc.ViewInstanceCount > 0)
 		{
-			vwidesc.Flags = D3D12_VIEW_INSTANCING_FLAG_NONE;
+			vwidesc.Flags = D3D12_VIEW_INSTANCING_FLAG_ENABLE_VIEW_INSTANCE_MASKING; 
 		}
 		else
 		{
-			vwidesc.Flags = D3D12_VIEW_INSTANCING_FLAG_ENABLE_VIEW_INSTANCE_MASKING;
+			vwidesc.Flags = D3D12_VIEW_INSTANCING_FLAG_NONE;
 		}
+		vwidesc.Flags = D3D12_VIEW_INSTANCING_FLAG_NONE;
 		Stream.ViewInstance = CD3DX12_VIEW_INSTANCING_DESC(vwidesc);
 
 		D3D12_PIPELINE_STATE_STREAM_DESC ssdesc = {

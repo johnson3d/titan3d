@@ -23,6 +23,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Linq;
 using EngineNS.Graphics.Pipeline.Shader;
+using Mono.Cecil.Cil;
 
 namespace EngineNS.NxRHI
 {
@@ -31,7 +32,7 @@ namespace EngineNS.NxRHI
     {
         protected override Color4b GetBorderColor()
         {
-            return Color4b.LightPink;
+            return TtEngine.Instance.EditorInstance.Config.TextureBoderColor;
         }
         public override string GetAssetExtType()
         {
@@ -271,6 +272,7 @@ namespace EngineNS.NxRHI
             }
         }
         public UPicDesc PicDesc { get; set; }
+        public UTexture StreamingTexture { get; private set; } = null;
         public object TagObject;
         public static int NumOfInstance = 0;
         public static int NumOfGCHandle = 0;
@@ -1186,20 +1188,21 @@ namespace EngineNS.NxRHI
             }
             if (level < 0 || level > MaxLOD)
                 return false;
-            var tex2d = await TtEngine.Instance.EventPoster.Post((state) =>
+            var oldTexture = StreamingTexture;
+            StreamingTexture = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 var xnd = IO.TtXndHolder.LoadXnd(AssetName.Address);
                 if (xnd == null)
                     return null;
 
-                return LoadTexture2DMipLevel(xnd.RootNode, this.PicDesc, level);
+                return LoadTexture2DMipLevel(xnd.RootNode, this.PicDesc, level, oldTexture);
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             LevelOfDetail = level;
             unsafe
             {
-                if (tex2d == null)
+                if (StreamingTexture == null)
                 {
                     //return this.mCoreObject.UpdateBuffer(rc.mCoreObject, new IGpuBufferData());
                     return false;
@@ -1214,7 +1217,7 @@ namespace EngineNS.NxRHI
                     //this.mCoreObject = srv;
                     //this.mCoreObject.NativeSuper.SetFingerPrint(fp + 1);
                     //return true;
-                    return this.mCoreObject.UpdateBuffer(rc.mCoreObject, tex2d.mCoreObject.NativeSuper);
+                    return this.mCoreObject.UpdateBuffer(rc.mCoreObject, StreamingTexture.mCoreObject.NativeSuper);
                 }
             }
         }
@@ -2609,7 +2612,7 @@ namespace EngineNS.NxRHI
             LoadPictureDesc(node, desc);
             return desc;
         }
-        public static unsafe UTexture LoadTexture2DMipLevel(IO.TtXndNode node, UPicDesc desc, int level)
+        public static unsafe UTexture LoadTexture2DMipLevel(IO.TtXndNode node, UPicDesc desc, int level, UTexture oldTexture)
         {
             switch (desc.CompressFormat)
             {
@@ -2640,7 +2643,8 @@ namespace EngineNS.NxRHI
                 case ETextureCompressFormat.TCF_BC6:
                 case ETextureCompressFormat.TCF_BC6_FLOAT:
                     {
-                        return LoadDxtTexture2DMipLevel(node.mCoreObject, desc, level);
+                        oldTexture = null;
+                        return LoadDxtTexture2DMipLevel(node.mCoreObject, desc, level, oldTexture);
                     }
                 default:
                     return null;
@@ -3107,6 +3111,117 @@ namespace EngineNS.NxRHI
                 }
             }
         }
+
+        private static unsafe UTexture LoadDxtTexture2DMipLevel(XndNode node, UPicDesc desc, int mipLevel, UTexture oldTexture)
+        {
+            if (oldTexture == null)
+            {
+                return LoadDxtTexture2DMipLevel(node, desc, mipLevel);
+            }
+
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+
+            var pngNode = node.TryGetChildNode("DxtMips");
+            if (pngNode.NativePointer == IntPtr.Zero)
+                return null;
+
+            uint oldLevel = oldTexture.mCoreObject.Desc.MipLevels;
+            var texDesc = new FTextureDesc();
+            texDesc.SetDefault();
+            texDesc.Width = (uint)desc.MipSizes[desc.MipLevel - mipLevel].X;
+            texDesc.Height = (uint)desc.MipSizes[desc.MipLevel - mipLevel].Y;
+            texDesc.MipLevels = (uint)mipLevel;
+            texDesc.Format = desc.Desc.Format;
+            if (desc.CubeFaces == 6)
+            {
+                texDesc.ArraySize = 6;
+                texDesc.MiscFlags = EResourceMiscFlag.RM_TEXTURECUBE;
+            }
+
+            var result = rc.CreateTexture(in texDesc);
+
+            using (var tsCmd = new NxRHI.FTransientCmd(NxRHI.EQueueType.QU_Transfer, "Texture.LoadMip.CopyOld"))
+            {
+                var copyNum = Math.Min(mipLevel, oldLevel);
+                for (uint j = 0; j < desc.Desc.CubeFaces; j++)
+                {
+                    for (uint i = 0; i < copyNum; i++)
+                    {
+                        var cpDraw = rc.CreateCopyDraw();
+                        cpDraw.Mode = ECopyDrawMode.CDM_Texture2Texture;
+                        cpDraw.BindTextureSrc(oldTexture);
+                        cpDraw.BindTextureDest(result);
+                        cpDraw.DestSubResource = i;
+                        cpDraw.SrcSubResource = i;
+                        tsCmd.CmdList.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                    }
+                }
+            }
+
+            if (oldLevel < mipLevel)
+            {
+                using (var tsCmd = new NxRHI.FTransientCmd(NxRHI.EQueueType.QU_Transfer, "Texture.LoadMip.CopyNewMip"))
+                {
+                    for (uint j = 0; j < desc.Desc.CubeFaces; j++)
+                    {
+                        var faceNode = pngNode.TryGetChildNode($"Face{j}");
+                        if (faceNode.IsValidPointer == false)
+                        {
+                            continue;
+                        }
+                        for (uint i = oldLevel; i < mipLevel; i++)
+                        {
+                            var ptr = faceNode.TryGetAttribute($"DxtMip{i}");
+                            if (ptr.NativePointer == IntPtr.Zero)
+                                continue;
+                            var mipAttr = ptr;
+                            byte[] data;
+                            using (var ar = mipAttr.GetReader(null))
+                            {
+                                ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
+                            }
+
+                            var blockWidth = desc.BlockDimenstions[(int)i].X;
+                            var blockHeight = desc.BlockDimenstions[(int)i].Y;
+                            fixed (byte* p = &data[0])
+                            {
+                                NxRHI.FTextureDesc tDesc = new FTextureDesc();
+                                tDesc.SetDefault();
+                                tDesc.Usage = EGpuUsage.USAGE_STAGING;
+                                tDesc.CpuAccess = ECpuAccess.CAS_WRITE;
+                                tDesc.MipLevels = 1;
+                                tDesc.Width = (uint)desc.MipSizes[desc.MipLevel - (int)i].X;
+                                tDesc.Height = (uint)desc.MipSizes[desc.MipLevel - (int)i].Y;
+                                tDesc.Format = desc.Desc.Format;
+                                FMappedSubResource subRes = new FMappedSubResource();
+                                subRes.pData = p;
+                                if (desc.BlockSize == 0)
+                                {
+                                    subRes.RowPitch = (uint)desc.MipSizes[(int)i].Z;
+                                    subRes.DepthPitch = subRes.RowPitch * (uint)desc.MipSizes[(int)i].Y;
+                                }
+                                else
+                                {
+                                    subRes.RowPitch = (uint)(blockWidth * desc.BlockSize);
+                                    subRes.DepthPitch = subRes.RowPitch * (uint)blockHeight;
+                                }
+                                tDesc.InitData = &subRes;
+                                var tex = rc.CreateTexture(in tDesc);
+
+                                var cpDraw = rc.CreateCopyDraw();
+                                cpDraw.Mode = ECopyDrawMode.CDM_Texture2Texture;
+                                cpDraw.BindTextureSrc(tex);
+                                cpDraw.BindTextureDest(result);
+                                cpDraw.DestSubResource = i;
+                                cpDraw.SrcSubResource = 0;
+                                tsCmd.CmdList.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        }
         #endregion
         static StbImageWriteSharp.ColorComponents ComponentConvert(StbImageSharp.ColorComponents component)
         {
@@ -3180,7 +3295,7 @@ namespace EngineNS.NxRHI
                     break;
             }
         }
-        public static async System.Threading.Tasks.Task<USrView> LoadSrvMipmap(RName rn, int mipLevel)
+        public static async System.Threading.Tasks.Task<USrView> LoadSrvMipmap(RName rn, int mipLevel, UTexture oldTexture)
         {
             UPicDesc desc = null;
             var tex2d = await TtEngine.Instance.EventPoster.Post((state) =>
@@ -3194,7 +3309,7 @@ namespace EngineNS.NxRHI
                 if (mipLevel == -1 || mipLevel > desc.MipLevel)
                     mipLevel = desc.MipLevel;
 
-                return LoadTexture2DMipLevel(xnd.RootNode, desc, mipLevel);
+                return LoadTexture2DMipLevel(xnd.RootNode, desc, mipLevel, oldTexture);
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
             if (tex2d == null)
@@ -3222,6 +3337,7 @@ namespace EngineNS.NxRHI
             srvDesc.Format = tex2d.mCoreObject.Desc.Format;
             
             var result = rc.CreateSRV(tex2d, in srvDesc);
+            result.StreamingTexture = tex2d;
             result.PicDesc = desc;
             result.LevelOfDetail = mipLevel;
             result.TargetLOD = mipLevel;
@@ -3384,7 +3500,7 @@ namespace EngineNS.NxRHI
             if (result != null)
                 return result;
 
-            return await USrView.LoadSrvMipmap(rn, mipLevel);
+            return await USrView.LoadSrvMipmap(rn, mipLevel, null);
         }
         public async Thread.Async.TtTask<USrView> GetTexture(RName rn, int mipLevel = 1)
         {
@@ -3413,7 +3529,7 @@ namespace EngineNS.NxRHI
 
             try
             {
-                srv = await USrView.LoadSrvMipmap(rn, mipLevel);
+                srv = await USrView.LoadSrvMipmap(rn, mipLevel, null);
                 if (srv == null)
                     return srv;
                 lock (StreamingAssets)

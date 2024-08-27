@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
@@ -30,7 +31,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             AddOutput(ImagePinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
             if(ImageName == null)
-                ImageName = RName.GetRName("texture/default_envmap.srv", RName.ERNameType.Engine);
+                ImageName = RName.GetRName("texture/hdri_epic_courtyard_daylight.srv", RName.ERNameType.Engine);
         }
         public unsafe override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
@@ -43,6 +44,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public NxRHI.USrView ImageSrv;
         [Rtti.Meta]
+        [Category("Image")]
         public RName ImageName
         {
             get

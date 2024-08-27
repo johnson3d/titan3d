@@ -58,6 +58,11 @@ namespace EngineNS.Bricks.StateMachine.Macross
             return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
 
+        public override void GenerateCodeInClass(UClassDeclaration classDeclaration)
+        {
+            base.GenerateCodeInClass(classDeclaration);
+        }
+
         #region Internal AST Build
         private UMethodDeclaration BuildOverrideInitializeMethod()
         {

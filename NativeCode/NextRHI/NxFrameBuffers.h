@@ -137,7 +137,7 @@ namespace NxRHI
 		{
 			for (int i = 0; i < 8; i++)
 			{
-				ClearColor[i] = v3dxColor4(1, 0, 0, 0);
+				ClearColor[i] = v3dxColor4(0, 0, 0, 0);
 			}
 			DepthClearValue = 1.0f;
 			StencilClearValue = 0;

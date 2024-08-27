@@ -134,7 +134,7 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"Material:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;
-            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
+            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.SimpleRPolicyName, 0, 1);
 
             LoadingPercent = 0.8f;
 

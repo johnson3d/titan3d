@@ -7,7 +7,7 @@ float3 MTL_OUTPUT::GetWorldNormal(PS_INPUT input)
 #elif MTL_NORMAL_MODE==MTL_NORMALMAP
 	half3 worldNorm = normalize(mNormal);
 #if USE_PS_Normal == 1 && USE_PS_Tangent == 1
-    NormalMap((float3)mNormal, (half4) input.vTangent, (float3) input.vNormal, worldNorm);
+    NormalMap((float3)mNormal, (float4) input.vTangent, (float3) input.vNormal, worldNorm);
 #endif
     return worldNorm;
 #elif MTL_NORMAL_MODE==MTL_NORMAL	

@@ -278,6 +278,10 @@ namespace EngineNS.Support
             {
                 return Color3f.FromObject(obj);
             }
+            else if (type == typeof(Color4b))
+            {
+                return Color4b.FromObject(obj);
+            }
             else
             {
                 System.Diagnostics.Debug.Assert(false);
@@ -319,6 +323,10 @@ namespace EngineNS.Support
                 else if (type == typeof(RName))
                 {
                     var segs = text.Split(':');
+                    if (segs.Length != 2)
+                    {
+                        return null;
+                    }
                     var eType = (RName.ERNameType)TConvert.ToEnumValue(typeof(RName.ERNameType), segs[1]);
                     return RName.GetRName(segs[0], eType);
                 }
@@ -337,6 +345,10 @@ namespace EngineNS.Support
                 else if (type == typeof(Color4f))
                 {
                     return Color4f.FromString(text);
+                }
+                else if (type == typeof(Color4b))
+                {
+                    return Color4b.FromString(text);
                 }
                 else if (type.IsEnum)
                 {

@@ -17,7 +17,7 @@
 #include "../Inc/GlobalDefine.cginc"
 #include "../Inc/Math.cginc"
 
-Texture2D< half >	HZBTexture;
+Texture2D<float>	HZBTexture;
 SamplerState		HZBSampler;
 
 float2 HZBViewSize;

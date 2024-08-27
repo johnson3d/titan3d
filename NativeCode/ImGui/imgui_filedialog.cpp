@@ -35,6 +35,14 @@ namespace ImGui
 				vKey, vTitle, vFilters, vPath);
 		}
 	}
+	void ImGuiFileDialog::OpenModalWithMutiSelect(const char* vKey, const char* vTitle, const char* vFilters, const char* vPath, int vCountSelectionMax)
+	{
+		if (mDialog)
+		{
+			mDialog->OpenModal(
+				vKey, vTitle, vFilters, vPath, vCountSelectionMax);
+		}
+	}
 
 	bool ImGuiFileDialog::DisplayDialog(const char* vKey)
 	{
@@ -64,6 +72,11 @@ namespace ImGui
 				mCurrentPath = mDialog->GetCurrentPath();
 				mCurrentFileName = mDialog->GetCurrentFileName();
 				mCurrentFilter = mDialog->GetCurrentFilter();
+				mSelectedPaths.clear();
+				for (auto selection : mDialog->GetSelection())
+				{
+					mSelectedPaths.push_back(selection.second);
+				}
 			}
 			return mDialog->IsOk();
 		}
@@ -199,4 +212,23 @@ namespace ImGui
 			mDialog->ClearExtentionInfos();
 		}
 	}
+
+	int ImGuiFileDialog::GetSelectedCount()
+	{
+		if (mDialog)
+		{
+		 	return (int)mSelectedPaths.size();
+		}
+		return 0;
+	}
+
+	const char* ImGuiFileDialog::GetFilePathByIndex(int index)
+	{
+		if (mDialog)
+		{
+			return mSelectedPaths[index].c_str();
+		}
+		return nullptr;
+	}
+
 }

@@ -64,13 +64,18 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
         }
         public override string ToString()
         {
-            return base.ToString() + $":USE_VS_ViewID=0&&USE_PS_ViewID=0";
+            return base.ToString() + $":USE_VS_ViewID=1";
         }
         protected override void EnvShadingDefines(in FPermutationId id, UShaderDefinitions defines)
         {
             base.EnvShadingDefines(id, defines);
-            //defines.AddDefine("USE_VS_ViewID", "1");
-            //defines.AddDefine("USE_PS_ViewID", "1"); 
+            defines.AddDefine("USE_VS_ViewID", "1");
+            //defines.AddDefine("USE_PS_ViewID", "0"); 
+        }
+        public override void OnBuildDrawCall(TtRenderPolicy policy, UGraphicDraw drawcall)
+        {
+            base.OnBuildDrawCall(policy, drawcall);
+            drawcall.mCoreObject.ViewInstanceMask = (1 | (1 << 1));
         }
     }
 
@@ -80,6 +85,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
         public TtRenderGraphPin GpuCullPinIn = TtRenderGraphPin.CreateInput("GpuCull");
         public TtRenderGraphPin Rt0PinOut = TtRenderGraphPin.CreateInputOutput("MRT0", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);//rgb - metallicty
+        public TtRenderGraphPin Rt1PinOut = TtRenderGraphPin.CreateInputOutput("MRT1", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);//rgb - metallicty
         public TtRenderGraphPin DepthStencilPinOut = TtRenderGraphPin.CreateInputOutput("DepthStencil", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
         public TtBasePassShading mOpaqueShading;
         public NxRHI.URenderPass RenderPass;
@@ -87,6 +93,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
 
         public TtCpuCullingNode CpuCullNode = null;
         public TtGpuCullingNode GpuCullNode = null;
+        public NxRHI.FViewPort[] Viewports = new FViewPort[2];
         [Category("Option")]
         [Rtti.Meta]
         public bool ClearMRT
@@ -103,10 +110,12 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
             AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
             AddInput(GpuCullPinIn, NxRHI.EBufferType.BFT_NONE);
             AddInputOutput(Rt0PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(Rt1PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddInputOutput(DepthStencilPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
 
             GpuCullPinIn.IsAllowInputNull = true;
             Rt0PinOut.IsAllowInputNull = true;
+            Rt1PinOut.IsAllowInputNull = true;
             DepthStencilPinOut.IsAllowInputNull = true;
         }
         public override void OnResize(TtRenderPolicy policy, float x, float y)
@@ -118,6 +127,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
 
             Rt0PinOut.Attachement.Height = (uint)y;
             Rt0PinOut.Attachement.Width = (uint)x;
+
+            Rt1PinOut.Attachement.Height = (uint)y;
+            Rt1PinOut.Attachement.Width = (uint)x;
         }
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
@@ -153,6 +165,12 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
             PassDesc.AttachmentMRTs[0].Samples = 1;
             PassDesc.AttachmentMRTs[0].LoadAction = ClearMRT ? NxRHI.EFrameBufferLoadAction.LoadActionClear : NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
             PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+            
+            //PassDesc.AttachmentMRTs[1].Format = format;
+            //PassDesc.AttachmentMRTs[1].Samples = 1;
+            //PassDesc.AttachmentMRTs[1].LoadAction = ClearMRT ? NxRHI.EFrameBufferLoadAction.LoadActionClear : NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+            //PassDesc.AttachmentMRTs[1].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+
             PassDesc.m_AttachmentDepthStencil.Format = DepthStencilPinOut.Attachement.Format;
             PassDesc.m_AttachmentDepthStencil.Samples = 1;
             PassDesc.m_AttachmentDepthStencil.LoadAction = ClearMRT ? NxRHI.EFrameBufferLoadAction.LoadActionClear : NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
@@ -164,13 +182,17 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
             viewInstance[0].ViewportArrayIndex = 0;
             viewInstance[0].RenderTargetArrayIndex = 0;
 
-            //PassDesc.m_ViewInstanceDesc.ViewInstanceCount = 2;
-            //PassDesc.m_ViewInstanceDesc.m_pViewInstanceLocations = viewInstance;
+            viewInstance[1].ViewportArrayIndex = 1;
+            viewInstance[1].RenderTargetArrayIndex = 0;
+
+            PassDesc.m_ViewInstanceDesc.ViewInstanceCount = 2;
+            PassDesc.m_ViewInstanceDesc.m_pViewInstanceLocations = viewInstance;
             
             RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
 
             GBuffers.Initialize(policy, RenderPass);
             GBuffers.SetRenderTarget(policy, 0, Rt0PinOut);
+            //GBuffers.SetRenderTarget(policy, 1, Rt1PinOut);
             GBuffers.SetDepthStencil(policy, DepthStencilPinOut);
             GBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
 
@@ -268,11 +290,31 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
                     {
                         passClears[i].SetDefault();
                         passClears[i].SetClearColor(0, new Color4f(0, 0, 0, 0));
-                        passClears[i].ClearFlags = 0;
+                        if (i == (int)ERenderLayer.RL_Opaque)
+                            passClears[i].ClearFlags = ERenderPassClearFlags.CLEAR_DEPTH | ERenderPassClearFlags.CLEAR_STENCIL | ERenderPassClearFlags.CLEAR_RT0 | ERenderPassClearFlags.CLEAR_RT1;
+                        else
+                            passClears[i].ClearFlags = 0;
                     }
 
                     GBuffers.BuildFrameBuffers(policy);
-                    LayerBasePass.BuildRenderPass(policy, in GBuffers.Viewport, passClears, (int)ERenderLayer.RL_Num, GBuffers, GBuffers, "Forword:");
+                    Viewports[0].TopLeftX = 0;
+                    Viewports[0].TopLeftY = 0;
+                    Viewports[0].Width = GBuffers.Viewport.Width * 0.5f;
+                    Viewports[0].Height = GBuffers.Viewport.Height * 0.5f;
+                    Viewports[0].MinDepth = GBuffers.Viewport.MinDepth;
+                    Viewports[0].MaxDepth = GBuffers.Viewport.MaxDepth;
+
+                    Viewports[1].TopLeftX = GBuffers.Viewport.Width * 0.5f;
+                    Viewports[1].TopLeftY = 0;
+                    Viewports[1].Width = Viewports[0].Width;
+                    Viewports[1].Height = Viewports[0].Height;
+                    Viewports[1].MinDepth = GBuffers.Viewport.MinDepth;
+                    Viewports[1].MaxDepth = GBuffers.Viewport.MaxDepth;
+
+                    fixed (NxRHI.FViewPort* pVp = &Viewports[0])
+                    {
+                        LayerBasePass.BuildRenderPass(policy, 2, pVp, passClears, (int)ERenderLayer.RL_Num, GBuffers, GBuffers, "Forword:");
+                    }
                 }
 
                 LayerBasePass.ExecuteCommands(policy);

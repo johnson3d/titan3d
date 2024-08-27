@@ -35,14 +35,16 @@ namespace EngineNS.Graphics.Mesh
         public bool ApplyTransformToVertex { get; set; } = false;
         [Category("ImportSetting")]
         public bool GenerateUMS { get; set; } = true;
+        [Category("ImportSetting"), Browsable(false)]
+        public TtAssetImporter AssetImporter { get; set; } = null;
     }
     public partial class TtMeshPrimitives
     {
         public partial class ImportAttribute : IO.CommonCreateAttribute
         {
-            TtAssetImporter AssetImporter = new TtAssetImporter();
-            TtMeshImprotSetting MeshImprotSetting = new TtMeshImprotSetting();
-        public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser)
+            //TtMeshImprotSetting MeshImprotSetting = new TtMeshImprotSetting();
+            List<TtMeshImprotSetting> MeshImprotSettings = new List<TtMeshImprotSetting>();
+            public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)
                     ImGuiAPI.OpenPopup($"Import MeshPrimitives", ImGuiPopupFlags_.ImGuiPopupFlags_None);
@@ -92,7 +94,7 @@ namespace EngineNS.Graphics.Mesh
                                 var sz = new Vector2(-1, 0);
                                 if (ImGuiAPI.Button("Select FBX", in sz))
                                 {
-                                    mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".*", ".");
+                                    mFileDialog.OpenModalWithMutiSelect("ChooseFileDlgKey", "Choose File", ".*", ".", int.MaxValue - 1);
                                 }
                                 // display
                                 if (mFileDialog.DisplayDialog("ChooseFileDlgKey"))
@@ -100,41 +102,52 @@ namespace EngineNS.Graphics.Mesh
                                     // action if OK
                                     if (mFileDialog.IsOk() == true)
                                     {
-                                        mSourceFile = mFileDialog.GetFilePathName();
-                                        string filePath = mFileDialog.GetCurrentPath();
-                                        if (!string.IsNullOrEmpty(mSourceFile))
+                                        var count = mFileDialog.GetSelectedCount();
+                                        for(int i = 0; i < count; ++i)
                                         {
-                                            var assetDescription = AssetImporter.PreImport(mSourceFile);
-                                            if (assetDescription == null)
+                                            var path = mFileDialog.GetFilePathByIndex(i);
+                                            TtMeshImprotSetting meshImprotSetting = new TtMeshImprotSetting();
+                                            string filePath = mFileDialog.GetCurrentPath();
+                                            if (!string.IsNullOrEmpty(path))
                                             {
-                                                eErrorType = enErrorType.EmptyName;
+                                                TtAssetImporter AssetImporter = new TtAssetImporter();
+                                                var assetDescription = AssetImporter.PreImport(path);
+                                                if (assetDescription == null)
+                                                {
+                                                    eErrorType = enErrorType.EmptyName;
+                                                }
+                                                else
+                                                {
+                                                    meshImprotSetting.FileName = assetDescription.FileName;
+                                                    meshImprotSetting.MeshesCount = assetDescription.MeshesCount;
+                                                    meshImprotSetting.MeshesHaveScale = assetDescription.MeshesHaveScale;
+                                                    meshImprotSetting.MeshesHaveTranslation = assetDescription.MeshesHaveTranslation;
+                                                    meshImprotSetting.UpAxis = assetDescription.UpAxis;
+                                                    meshImprotSetting.UnitScaleFactor = assetDescription.UnitScaleFactor;
+                                                    meshImprotSetting.Generator = assetDescription.Generator;
+                                                    meshImprotSetting.AssetImporter = AssetImporter;
+                                                    if ( i == 0)
+                                                    {
+                                                        PGAsset.Target = meshImprotSetting;
+                                                        mName = IO.TtFileManager.GetPureName(path);
+                                                    }
+                                                    MeshImprotSettings.Add(meshImprotSetting);
+                                                }
+                                            }
+                                            if (eErrorType != enErrorType.None)
+                                            {
+                                                var clr = new Vector4(1, 0, 0, 1);
+                                                ImGuiAPI.TextColored(in clr, $"Source:{path}");
                                             }
                                             else
                                             {
-                                                MeshImprotSetting.FileName = assetDescription.FileName;
-                                                MeshImprotSetting.MeshesCount = assetDescription.MeshesCount;
-                                                MeshImprotSetting.MeshesHaveScale = assetDescription.MeshesHaveScale;
-                                                MeshImprotSetting.MeshesHaveTranslation = assetDescription.MeshesHaveTranslation;
-                                                MeshImprotSetting.UpAxis = assetDescription.UpAxis;
-                                                MeshImprotSetting.UnitScaleFactor = assetDescription.UnitScaleFactor;
-                                                MeshImprotSetting.Generator = assetDescription.Generator;
-                                                PGAsset.Target = MeshImprotSetting;
-                                                mName = IO.TtFileManager.GetPureName(mSourceFile);
+                                                var clr = new Vector4(1, 1, 1, 1);
+                                                ImGuiAPI.TextColored(in clr, $"Source:{path}");
                                             }
                                         }
                                     }
                                     // close
                                     mFileDialog.CloseDialog();
-                                }
-                                if (eErrorType != enErrorType.None)
-                                {
-                                    var clr = new Vector4(1, 0, 0, 1);
-                                    ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
-                                }
-                                else
-                                {
-                                    var clr = new Vector4(1, 1, 1, 1);
-                                    ImGuiAPI.TextColored(in clr, $"Source:{mSourceFile}");
                                 }
                             }
                             break;
@@ -319,19 +332,27 @@ namespace EngineNS.Graphics.Mesh
 
             private async System.Threading.Tasks.Task<bool> DoImport()
             {
+                foreach(var importSetting in MeshImprotSettings)
+                {
+                    await ImportAndSaveMesh(importSetting);
+                }
+                return true;
+            }
+            private async System.Threading.Tasks.Task<bool> ImportAndSaveMesh(TtMeshImprotSetting improtSetting)
+            {
                 var AssetImportOption = new TtAssetImportOption_Mesh();
-                AssetImportOption.UnitScale = MeshImprotSetting.UnitScale;
-                AssetImportOption.AsStaticMesh = MeshImprotSetting.AsStaticMesh;
-                AssetImportOption.ApplyTransformToVertex = MeshImprotSetting.ApplyTransformToVertex;
-                AssetImportOption.GenerateUMS = MeshImprotSetting.GenerateUMS;
-                var skeletons = SkeletonGenerater.Generate(AssetImporter.AiScene, AssetImportOption);
+                AssetImportOption.UnitScale = improtSetting.UnitScale;
+                AssetImportOption.AsStaticMesh = improtSetting.AsStaticMesh;
+                AssetImportOption.ApplyTransformToVertex = improtSetting.ApplyTransformToVertex;
+                AssetImportOption.GenerateUMS = improtSetting.GenerateUMS;
+                var skeletons = SkeletonGenerater.Generate(improtSetting.AssetImporter.AiScene, AssetImportOption);
                 if (skeletons.Count == 0)
                 {
-                    
+
                 }
-                else if(skeletons.Count == 1)
+                else if (skeletons.Count == 1)
                 {
-                    var rn = RName.GetRName(mDir.Name + MeshImprotSetting.FileName + Animation.Asset.TtSkeletonAsset.AssetExt, mDir.RNameType);
+                    var rn = RName.GetRName(mDir.Name + improtSetting.FileName + Animation.Asset.TtSkeletonAsset.AssetExt, mDir.RNameType);
                     await SaveSkeleton(rn, skeletons[0]);
                 }
                 else
@@ -345,12 +366,12 @@ namespace EngineNS.Graphics.Mesh
                     //}
                 }
 
-                var meshPrimitives = MeshGenerater.Generate(skeletons ,AssetImporter.AiScene, AssetImportOption);
-                foreach(var mesh in meshPrimitives)
+                var meshPrimitives = MeshGenerater.Generate(skeletons, improtSetting.AssetImporter.AiScene, AssetImportOption);
+                foreach (var mesh in meshPrimitives)
                 {
-                    var rn = RName.GetRName(mDir.Name + mesh.mCoreObject.GetName()+ TtMeshPrimitives.AssetExt, mDir.RNameType);
+                    var rn = RName.GetRName(mDir.Name + mesh.mCoreObject.GetName() + TtMeshPrimitives.AssetExt, mDir.RNameType);
                     await SaveMesh(rn, mesh);
-                    if(AssetImportOption.GenerateUMS)
+                    if (AssetImportOption.GenerateUMS)
                     {
 
                         var umsRN = RName.GetRName(mDir.Name + mesh.mCoreObject.GetName() + TtMaterialMesh.AssetExt, mDir.RNameType);
@@ -358,7 +379,11 @@ namespace EngineNS.Graphics.Mesh
                         {
                             AssetName = umsRN,
                         };
-                        ums.SubMeshes[0].Mesh= mesh;
+                        ums.SubMeshes[0].Mesh = mesh;
+                        for(int i = 0; i < ums.SubMeshes[0].Materials.Count; i++)
+                        {
+                            ums.SubMeshes[0].Materials[i] = await EngineNS.TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(EngineNS.TtEngine.Instance.Config.DefaultMaterial);
+                        }
                         var ameta = new TtMaterialMeshAMeta();
                         ameta.SetAssetName(umsRN);
                         ameta.AssetId = Guid.NewGuid();

@@ -11,6 +11,10 @@ namespace EngineNS.Bricks.Procedure
         {
             return UPgcAsset.AssetExt;
         }
+        protected override Color4b GetBorderColor()
+        {
+            return TtEngine.Instance.EditorInstance.Config.PgcBoderColor;
+        }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());

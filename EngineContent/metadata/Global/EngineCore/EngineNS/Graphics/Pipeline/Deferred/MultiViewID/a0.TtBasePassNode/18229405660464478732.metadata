@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_18229405660464478732 Type="EngineNS.Graphics.Pipeline.Deferred.MultiViewID.TtBasePassNode@EngineCore">
+  <ClearMRT Type="System.Boolean@Unknown" Order="0" />
+  <LayerFilters Type="System.Collections.Generic.List&lt;EngineNS.Graphics.Pipeline.ERenderLayer@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_18229405660464478732>

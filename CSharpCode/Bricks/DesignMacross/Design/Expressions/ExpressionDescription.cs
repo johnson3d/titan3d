@@ -86,6 +86,27 @@ namespace EngineNS.DesignMacross.Design.Expressions
             pin = null;
             return false;
         }
+        public bool TryGetDataPin(string pinName, out TtDataPinDescription pin)
+        {
+            foreach (var dataPin in DataInPins)
+            {
+                if (dataPin.Name == pinName)
+                {
+                    pin = dataPin;
+                    return true;
+                }
+            }
+            foreach (var dataPin in DataOutPins)
+            {
+                if (dataPin.Name == pinName)
+                {
+                    pin = dataPin;
+                    return true;
+                }
+            }
+            pin = null;
+            return false;
+        }
         public bool TryGetExecutePin(Guid pinId, out TtExecutionPinDescription pin)
         {
             foreach(var executionPin in ExecutionInPins)
@@ -196,9 +217,14 @@ namespace EngineNS.DesignMacross.Design.Expressions
         }
         #endregion ISerializer
     }
-    public class TtVariableReferenceExpressionDescription
+    public class TtVariableReferenceExpressionDescription : TtExpressionDescription
     {
-
+        //public override string Name { get => ""; set { } }
+        public TtVariableReferenceExpressionDescription()
+        {
+            AddDtaInPin(new () { Name = "" });
+            AddDtaOutPin(new () { Name = "" });
+        }
     }
     public class TtSelfReferenceExpressionDescription
     {

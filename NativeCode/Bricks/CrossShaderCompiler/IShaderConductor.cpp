@@ -194,6 +194,12 @@ bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FS
 		if (sl == NxRHI::EShaderLanguage::SL_DXIL)
 			return ret;
 		//Spirv is not ready for all shaders
+		//ASSERT(ret);
+		//return ret;
+		if (ret == false)
+		{
+			VFX_LTRACE(ELTT_Error, "Shader(%s) compile failed on spirv\r\n", shader);
+		}
 	}
 
 	if (sl == NxRHI::EShaderLanguage::SL_SPIRV)

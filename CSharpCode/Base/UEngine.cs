@@ -95,6 +95,8 @@ namespace EngineNS
         [Rtti.Meta]
         public RName MainRPolicyName { get; set; }
         [Rtti.Meta]
+        public RName SimpleRPolicyName { get; set; }
+        [Rtti.Meta]
         public string RpcRootType { get; set; } = Rtti.UTypeDesc.TypeStr(typeof(EngineNS.UTest.UTest_Rpc));
         [Rtti.Meta]
         public bool CookDXBC { get; set; } = true;
@@ -272,6 +274,7 @@ namespace EngineNS
                 Config.DefaultMaterialInstance = RName.GetRName("material/box_wite.uminst", RName.ERNameType.Game);
                 Config.MainWindowType = Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Editor.UMainEditorApplication));
                 Config.MainRPolicyName = RName.GetRName("utest/deferred.rpolicy", RName.ERNameType.Game);
+                Config.SimpleRPolicyName = RName.GetRName("graphics/deferred_simple.rpolicy", RName.ERNameType.Engine);                
                 Config.GlobalConfigs.Add(new TtGlobalConfig()
                 {
                     Name = "RenderDocCallStacks",

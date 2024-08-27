@@ -23,13 +23,14 @@ namespace EngineNS.Animation.Asset
         public float UnitScale { get; set; } = 0.01f;
         [Category("ImportSetting")]
         public bool IgnoreScale { get; set; } = true;
+        [Category("ImportSetting"), Browsable(false)]
+        public TtAssetImporter AssetImporter = null;
     }
     public partial class TtAnimationClip
     {
         public partial class ImportAttribute
         {
-            TtAssetImporter AssetImporter = new TtAssetImporter();
-            TtAnimImprotSetting AnimImprotSetting = new TtAnimImprotSetting();
+            List<TtAnimImprotSetting> AnimImprotSettings = new ();
             public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)
@@ -41,7 +42,7 @@ namespace EngineNS.Animation.Asset
                     var sz = new Vector2(-1, 0);
                     if (ImGuiAPI.Button("Select FBX", in sz))
                     {
-                        mFileDialog.OpenModal("ChooseFileDlgKey", "Choose File", ".FBX,.fbx", ".");
+                        mFileDialog.OpenModalWithMutiSelect("ChooseFileDlgKey", "Choose File", ".FBX,.fbx", ".", int.MaxValue - 1);
                     }
                     // display
                     if (mFileDialog.DisplayDialog("ChooseFileDlgKey"))
@@ -49,26 +50,38 @@ namespace EngineNS.Animation.Asset
                         // action if OK
                         if (mFileDialog.IsOk() == true)
                         {
-                            mSourceFile = mFileDialog.GetFilePathName();
-                            string filePath = mFileDialog.GetCurrentPath();
-                            if (!string.IsNullOrEmpty(mSourceFile))
+                            var count = mFileDialog.GetSelectedCount();
+                            for (int i = 0; i < count; ++i)
                             {
-                                var AssetDescription = AssetImporter.PreImport(mSourceFile);
-                                if(AssetDescription == null)
+                                var path = mFileDialog.GetFilePathByIndex(i);
+                                TtAnimImprotSetting animImprotSetting = new TtAnimImprotSetting();
+                                if (!string.IsNullOrEmpty(path))
                                 {
-                                    eErrorType = enErrorType.EmptyName;
-                                }
-                                else
-                                {
-                                    AnimImprotSetting.FileName = AssetDescription.FileName;
-                                    AnimImprotSetting.AnimationsCount = AssetDescription.AnimationsCount;
-                                    AnimImprotSetting.UpAxis = AssetDescription.UpAxis;
-                                    AnimImprotSetting.UnitScaleFactor = AssetDescription.UnitScaleFactor;
-                                    AnimImprotSetting.Generator = AssetDescription.Generator;
-                                    PGAsset.Target = AnimImprotSetting;
-                                    mName = IO.TtFileManager.GetPureName(mSourceFile);
+                                    TtAssetImporter assetImporter = new TtAssetImporter();
+                                    var AssetDescription = assetImporter.PreImport(path);
+                                    if (AssetDescription == null)
+                                    {
+                                        eErrorType = enErrorType.EmptyName;
+                                    }
+                                    else
+                                    {
+                                        animImprotSetting .FileName = AssetDescription.FileName;
+                                        animImprotSetting .AnimationsCount = AssetDescription.AnimationsCount;
+                                        animImprotSetting .UpAxis = AssetDescription.UpAxis;
+                                        animImprotSetting .UnitScaleFactor = AssetDescription.UnitScaleFactor;
+                                        animImprotSetting .Generator = AssetDescription.Generator;
+                                        animImprotSetting.AssetImporter = assetImporter;
+                                        if (i == 0)
+                                        {
+                                            mName = IO.TtFileManager.GetPureName(path);
+                                            PGAsset.Target = animImprotSetting;
+                                            mName = IO.TtFileManager.GetPureName(path);
+                                        }
+                                        AnimImprotSettings.Add(animImprotSetting);
+                                    }
                                 }
                             }
+                               
                         }
                         // close
                         mFileDialog.CloseDialog();
@@ -127,18 +140,27 @@ namespace EngineNS.Animation.Asset
 
             private unsafe bool DoImport()
             {
+               foreach(var setting in AnimImprotSettings)
+                {
+                    ImportAndSaveAnimation(setting);
+                }
+                return true;
+            }
+
+            private unsafe bool ImportAndSaveAnimation(TtAnimImprotSetting animImprotSetting)
+            {
                 bool hasOnlyOneAnim = false;
-                if (AnimImprotSetting.AnimationsCount == 1)
+                if (animImprotSetting.AnimationsCount == 1)
                 {
                     hasOnlyOneAnim = true;
                 }
-                var animations = AssetImporter.GetAnimations();
-                foreach(var anim in animations)
+                var animations = animImprotSetting.AssetImporter.GetAnimations();
+                foreach (var anim in animations)
                 {
                     string animName = null;
                     if (hasOnlyOneAnim)
                     {
-                        animName = AnimImprotSetting.FileName;
+                        animName = animImprotSetting.FileName;
                     }
                     else
                     {
@@ -146,9 +168,9 @@ namespace EngineNS.Animation.Asset
                     }
                     var rn = RName.GetRName(mDir.Name + animName + TtAnimationClip.AssetExt);
                     var importSetting = new TtAssetImportOption_Animation();
-                    importSetting.Scale = AnimImprotSetting.UnitScale;
-                    importSetting.IgnoreScale = AnimImprotSetting.IgnoreScale;
-                    var chunk = AnimationChunkGenerater.Generate(rn, anim, AssetImporter.AiScene, importSetting);
+                    importSetting.Scale = animImprotSetting.UnitScale;
+                    importSetting.IgnoreScale = animImprotSetting.IgnoreScale;
+                    var chunk = AnimationChunkGenerater.Generate(rn, anim, animImprotSetting.AssetImporter.AiScene, importSetting);
                     var animClip = new TtAnimationClip();
                     animClip.SampleRate = (float)anim.TicksPerSecond;
                     animClip.Duration = (float)(anim.DurationInTicks / anim.TicksPerSecond);

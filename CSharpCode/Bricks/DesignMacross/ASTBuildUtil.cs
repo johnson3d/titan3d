@@ -12,6 +12,8 @@ namespace EngineNS.DesignMacross
         public static string VariableNamePrefix => "";
         public static string MethodNamePrefix => "";
         public static string MethodLocalVarNamePrefix => "";
+        public static string InitMethdName = "Initialize";
+        public static string InitMethodReturedValueVarName = "returnedValue";
         public static string GenerateClassName(IClassDescription classDescription)
         {
             if(bGenerateDebugable)
@@ -163,7 +165,7 @@ namespace EngineNS.DesignMacross
             {
                 VariableType = varType,
                 InitValue = varInitValue,
-                VariableName = "returnedValue",
+                VariableName = InitMethodReturedValueVarName,
                 VisitMode = varVisisMode
             };
         }
@@ -179,6 +181,14 @@ namespace EngineNS.DesignMacross
                 From = rightHandSide
             };
             return assignOperatorStatement;
+        }
+        public static UMethodDeclaration CreateInitMethodDeclaration(bool isOverride = true)
+        {
+            UMethodDeclaration methodDeclaration = new UMethodDeclaration();
+            methodDeclaration.IsOverride = isOverride;
+            methodDeclaration.MethodName = "Initialize";
+            methodDeclaration.ReturnValue = CreateMethodReturnVariableDeclaration(new UTypeReference(typeof(bool)), new UDefaultValueExpression(typeof(bool)));
+            return methodDeclaration;
         }
     }
 }

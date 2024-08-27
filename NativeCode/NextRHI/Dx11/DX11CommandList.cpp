@@ -151,7 +151,15 @@ namespace NxRHI
 	}
 	void DX11CommandList::SetScissor(UINT Num, const FScissorRect* pScissor)
 	{
-		mContext->RSSetScissorRects(Num, (const D3D11_RECT*)pScissor);
+		ASSERT(mIsRecording);
+		if (Num == 0)
+		{
+			mContext->RSSetScissorRects(0, nullptr);
+		}
+		else
+		{
+			mContext->RSSetScissorRects(Num, (const D3D11_RECT*)pScissor);
+		}
 	}
 	void DX11CommandList::EndPass()
 	{

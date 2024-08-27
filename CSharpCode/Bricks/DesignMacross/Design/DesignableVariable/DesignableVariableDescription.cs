@@ -48,6 +48,11 @@ namespace EngineNS.DesignMacross.Design
         {
             return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
+
+        public virtual void GenerateCodeInClass(UClassDeclaration classDeclaration)
+        {
+            
+        }
         #region ISerializer
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {

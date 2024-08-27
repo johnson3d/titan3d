@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.GamePlay.Scene
@@ -14,6 +15,10 @@ namespace EngineNS.GamePlay.Scene
         public override string GetAssetTypeName()
         {
             return "Scene";
+        }
+        protected override Color4b GetBorderColor()
+        {
+            return TtEngine.Instance.EditorInstance.Config.SceneBoderColor;
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
@@ -33,7 +38,9 @@ namespace EngineNS.GamePlay.Scene
     }
     public class USceneData : UNodeData
     {
-        
+        [Rtti.Meta]
+        [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]
+        public RName RPolicyName { get; set; }
     }
     [UScene.SceneCreateAttribute]
     [IO.AssetCreateMenu(MenuName = "Scene")]
@@ -96,6 +103,19 @@ namespace EngineNS.GamePlay.Scene
             get
             {
                 return NodeData as USceneData;
+            }
+        }
+        [Category("Option")]
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
+        [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]
+        public RName RPolicyName 
+        {
+            get => SceneData?.RPolicyName;
+            set
+            {
+                if (SceneData == null)
+                    return;
+                SceneData.RPolicyName = value;
             }
         }
         public UWorld World;

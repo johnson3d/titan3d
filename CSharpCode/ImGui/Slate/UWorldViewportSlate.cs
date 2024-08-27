@@ -13,7 +13,6 @@ namespace EngineNS.EGui.Slate
         NxRHI.FScissorRect mScissorRect = new NxRHI.FScissorRect();
         public NxRHI.FScissorRect ScissorRect { get=> mScissorRect; }
 
-        public Graphics.Pipeline.UDrawBuffers Copy2SwapChainPass = new Graphics.Pipeline.UDrawBuffers();
         public NxRHI.URenderPass SwapChainPassDesc;
 
         protected GamePlay.UAxis mAxis;

@@ -77,7 +77,7 @@ namespace EngineNS.DesignMacross.Base.Description
 
     public interface IDesignableVariableDescription : IVariableDescription, IClassDescription
     {
-
+        public void GenerateCodeInClass(UClassDeclaration classDeclaration);
     }
 
     public interface IExpressionDescription : IDescription

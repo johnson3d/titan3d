@@ -282,6 +282,11 @@ namespace NxRHI
 			}
 		}
 		
+		if (ViewInstanceMask != 0)
+		{
+			//cmdlist->SetViewInstanceMask(ViewInstanceMask);
+		}
+
 		{
 			AUTO_SAMP("NxRHI.GraphicDraw.Commit.Draw");
 			auto pDrawDesc = Mesh->GetAtomDesc(MeshAtom, MeshLOD);

@@ -139,6 +139,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     }
                     {
                         cmdlist.SetViewport(in GBuffers.Viewport);
+                        cmdlist.SetScissor(0, (NxRHI.FScissorRect*)0);
                         var passClears = new NxRHI.FRenderPassClears();
                         passClears.SetDefault();
                         passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));

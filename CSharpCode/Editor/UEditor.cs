@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace EngineNS.Editor
 {
     [Rtti.Meta]
-    public partial class UEditorConfig
+    public partial class TtEditorConfig
     {
         public void SaveConfig(string sltFile)
         {
@@ -38,17 +38,33 @@ namespace EngineNS.Editor
         public RName FontIconName { get; set; }
         [Rtti.Meta]
         public RName MacrossIconName { get; set; }
-        //[Rtti.Meta]
-        //public GamePlay.UWorld.UVisParameter.EVisCullFilter CullFilters { get; set; } = GamePlay.UWorld.UVisParameter.EVisCullFilter.All;
-        //public bool IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter filters)
-        //{
-        //    return (CullFilters & filters) == filters;
-        //}
+        [Rtti.Meta]
+        public Color4b PrefabBoderColor { get; set; } = Color4b.DeepPink;
+        [Rtti.Meta]
+        public Color4b SceneBoderColor { get; set; } = Color4b.Crimson;
+        [Rtti.Meta]
+        public Color4b RenderPolicyBoderColor { get; set; } = Color4b.Coral;
+        [Rtti.Meta]
+        public Color4b FontSDFBoderColor { get; set; } = Color4b.LightGray;
+        [Rtti.Meta]
+        public Color4b NebulaBoderColor { get; set; } = Color4b.HotPink;
+        [Rtti.Meta]
+        public Color4b MaterialMeshBoderColor { get; set; } = Color4b.OrangeRed;
+        [Rtti.Meta]
+        public Color4b MeshPrimitivesBoderColor { get; set; } = Color4b.LightYellow;
+        [Rtti.Meta]
+        public Color4b MaterialBoderColor { get; set; } = Color4b.Gold;
+        [Rtti.Meta]
+        public Color4b MaterialInstanceBoderColor { get; set; } = Color4b.Cyan;
+        [Rtti.Meta]
+        public Color4b TextureBoderColor { get; set; } = Color4b.LightPink;
+        [Rtti.Meta]
+        public Color4b PgcBoderColor { get; set; } = Color4b.Khaki;
     }
 
     public partial class UEditor : UModule<TtEngine>
     {
-        public UEditorConfig Config { get; set; } = new UEditorConfig();
+        public TtEditorConfig Config { get; set; } = new TtEditorConfig();
         public EGui.TtUVAnim PhyMaterialIcon { get; set; }
         public EGui.TtUVAnim FontIcon { get; set; }
         public EGui.TtUVAnim MacrossIcon { get; set; }
@@ -61,10 +77,10 @@ namespace EngineNS.Editor
         public override async Task<bool> Initialize(TtEngine host)
         {
             var cfgFile = host.FileManager.GetRoot(IO.TtFileManager.ERootDir.Editor) + "EditorConfig.cfg";
-            Config = IO.TtFileManager.LoadXmlToObject<UEditorConfig>(cfgFile);
+            Config = IO.TtFileManager.LoadXmlToObject<TtEditorConfig>(cfgFile);
             if (Config == null)
             {
-                Config = new UEditorConfig();
+                Config = new TtEditorConfig();
                 Config.GameProject = "Module/GameProject/GameProject.csproj";
                 Config.PhyMaterialIconName = RName.GetRName("icons/phymaterialicon.uvanim", RName.ERNameType.Engine);
                 Config.FontIconName = RName.GetRName("icons/font.uvanim", RName.ERNameType.Engine);

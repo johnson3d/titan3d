@@ -104,6 +104,7 @@ namespace NxRHI
 		USHORT						DrawInstance = 1;
 		BYTE						MeshAtom = 0;//Maybe: bit12
 		BYTE						MeshLOD = 0;//Maybe: bit6
+		UINT						ViewInstanceMask = 0;
 
 		const IGpuDrawState*		GpuDrawState = nullptr;
 	protected:

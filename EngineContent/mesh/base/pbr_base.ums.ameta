@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="e5fd1f75-b3bd-4f63-bde5-50867224b202" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.TtMaterialMesh&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Engine,mesh/base/sphere.vms,d10ee00a-40c9-4e34-8e37-9c18adc9fdde" />
+    <e_1 Value="Engine,material/brdf_base.material,55041983-a501-45bd-a1a6-704daa6f6b28" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
+</Root>

@@ -83,7 +83,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                     }
                     index = drawcall.FindBinder("Samp_gEnvMap");
                     if (index.IsValidPointer)
-                        drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                        drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
                     index = drawcall.FindBinder("GVignette");
                     if (index.IsValidPointer)
@@ -93,7 +93,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                     }
                     index = drawcall.FindBinder("Samp_GVignette");
                     if (index.IsValidPointer)
-                        drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                        drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
                     index = drawcall.FindBinder("GShadowMap");
                     if (index.IsValidPointer)
@@ -470,7 +470,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UMobileTranslucentNode), nameof(TickLogic));
-        public override void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {

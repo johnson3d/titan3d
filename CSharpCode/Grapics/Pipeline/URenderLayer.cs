@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NPOI.SS.Formula.Functions;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -124,12 +125,10 @@ namespace EngineNS.Graphics.Pipeline
         }
         public unsafe void SetViewport(in NxRHI.FViewPort vp)
         {
-            fixed(NxRHI.FViewPort* p = &vp)
+            for (ERenderLayer i = ERenderLayer.RL_Begin; i < ERenderLayer.RL_Num; i++)
             {
-                for (ERenderLayer i = ERenderLayer.RL_Begin; i < ERenderLayer.RL_Num; i++)
-                {
-                    PassBuffers[(int)i].DrawCmdList.SetViewport(1, p);
-                }
+                PassBuffers[(int)i].DrawCmdList.SetViewport(in vp);
+                PassBuffers[(int)i].DrawCmdList.SetScissor(0, (NxRHI.FScissorRect*)0);
             }
         }
         public unsafe void BuildTranslucentRenderPass(TtRenderPolicy policy, in NxRHI.FRenderPassClears passClear, TtGraphicsBuffers frameBuffers, TtGraphicsBuffers gizmosFrameBuffers)
@@ -194,6 +193,22 @@ namespace EngineNS.Graphics.Pipeline
         }
         public unsafe void BuildRenderPass(TtRenderPolicy policy, in NxRHI.FViewPort viewport, NxRHI.FRenderPassClears* pLayerClear, int numOfClears, TtGraphicsBuffers frameBuffers, TtGraphicsBuffers gizmosFrameBuffers, string debugName)
         {
+            fixed(NxRHI.FViewPort* p = &viewport)
+            {
+                BuildRenderPass(policy, 1, p, pLayerClear, numOfClears, frameBuffers, gizmosFrameBuffers, debugName);
+            }
+        }
+        public unsafe void BuildRenderPass(TtRenderPolicy policy, uint numOfViewport, NxRHI.FViewPort* viewport, NxRHI.FRenderPassClears* pLayerClear, int numOfClears, TtGraphicsBuffers frameBuffers, TtGraphicsBuffers gizmosFrameBuffers, string debugName)
+        {
+            NxRHI.FScissorRect* sr = stackalloc NxRHI.FScissorRect[(int)numOfViewport];
+            for (int j = 0; j < numOfViewport; j++)
+            {
+                sr[j].m_MinX = (int)viewport[j].TopLeftX;
+                sr[j].m_MinY = (int)viewport[j].TopLeftY;
+                sr[j].m_MaxX = (int)(viewport[j].TopLeftX + viewport[j].Width);
+                sr[j].m_MaxY = (int)(viewport[j].TopLeftY + viewport[j].Height);
+            }
+
             for (ERenderLayer i = ERenderLayer.RL_Begin; i< ERenderLayer.RL_Num; i++)
             {
                 var index = (int)i;
@@ -202,10 +217,11 @@ namespace EngineNS.Graphics.Pipeline
                 var bClear = pLayerClear[index].ClearFlags != 0;
                 if (bClear == false && PassBuffers[index].DrawcallNumber == 0)
                 {
+                    //cmdlist.SetScissor(0, (NxRHI.FScissorRect*)0);
+                    //cmdlist.SetScissor(numOfViewport, sr);
                     continue;
                 }
 
-                cmdlist.SetViewport(in viewport);
                 //frameBuffers.BuildFrameBuffers(policy);
                 NxRHI.UFrameBuffers fb = null;
                 if (i == ERenderLayer.RL_Gizmos || i == ERenderLayer.RL_TranslucentGizmos)
@@ -217,6 +233,9 @@ namespace EngineNS.Graphics.Pipeline
                     fb = frameBuffers.FrameBuffers;
                 }
                 cmdlist.BeginPass(fb, pLayerClear[index], debugName + i.ToString());
+                cmdlist.SetViewport(numOfViewport, viewport);
+                cmdlist.SetScissor(numOfViewport, sr);
+
                 cmdlist.FlushDraws();
                 cmdlist.EndPass();
             }

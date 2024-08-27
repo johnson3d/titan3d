@@ -155,7 +155,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     //    {
     //        await base.Initialize(camera);
 
-    //        EnvMapNode.ImageName = RName.GetRName("texture/default_envmap.srv", RName.ERNameType.Engine);
+    //        EnvMapNode.ImageName = RName.GetRName("texture/hdri_epic_courtyard_daylight.srv", RName.ERNameType.Engine);
     //        VignetteNode.ImageName = RName.GetRName("texture/default_vignette.srv", RName.ERNameType.Engine);
 
     //        //await GpuSceneNode.Initialize(this, null, EPixelFormat.PXF_UNKNOWN, EPixelFormat.PXF_UNKNOWN, x, y, "GpuScene");
@@ -238,7 +238,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     //        AddLinker(GpuSceneNode.GpuScenePinOut, VoxelsNode.GpuScenePinInOut);
     //        AddLinker(BasePassNode.Rt0PinOut, VoxelsNode.AlbedoPinInOut);
     //        AddLinker(BasePassNode.DepthStencilPinOut, VoxelsNode.DepthPinInOut);
-            
+
     //        AddLinker(VoxelsNode.GpuScenePinInOut, AvgBrightnessNode.GpuScenePinInOut);
 
 

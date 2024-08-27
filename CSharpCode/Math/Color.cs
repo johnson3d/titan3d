@@ -804,6 +804,16 @@ namespace EngineNS
         {
             return R + "," + G + "," + B + "," + A;
         }
+        public static Color4b FromObject(object obj)
+        {
+            if (obj.GetType() == typeof(Color4b))
+                return (Color4b)obj;
+            else
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return new Color4b();
+            }
+        }
         public static Color4b FromString(string val)
         {
             //var ret = Color.White;

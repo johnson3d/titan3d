@@ -86,7 +86,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         {
             await base.Initialize(camera);
 
-            EnvMapNode.ImageName = RName.GetRName("texture/default_envmap.srv", RName.ERNameType.Engine);
+            EnvMapNode.ImageName = RName.GetRName("texture/hdri_epic_courtyard_daylight.srv", RName.ERNameType.Engine);
             VignetteNode.ImageName = RName.GetRName("texture/default_vignette.srv", RName.ERNameType.Engine);
 
             //await BasePassNode.Initialize(this, TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Pipeline.Mobile.UBasePassOpaque>(),

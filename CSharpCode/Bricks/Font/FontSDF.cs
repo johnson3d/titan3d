@@ -39,7 +39,7 @@ namespace EngineNS.Bricks.Font
         }
         protected override Color4b GetBorderColor()
         {
-            return Color4b.LightGray;
+            return TtEngine.Instance.EditorInstance.Config.FontSDFBoderColor;
         }
     }
     [Rtti.Meta]

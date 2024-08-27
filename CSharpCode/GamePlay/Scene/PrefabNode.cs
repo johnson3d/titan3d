@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using System.ComponentModel;
-using Assimp;
 using NPOI.Util;
 
 namespace EngineNS.GamePlay.Scene
@@ -80,6 +79,10 @@ namespace EngineNS.GamePlay.Scene
         {
             return "Prefab";
         }
+        protected override Color4b GetBorderColor()
+        {
+            return TtEngine.Instance.EditorInstance.Config.PrefabBoderColor;
+        }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             //return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
@@ -112,10 +115,15 @@ namespace EngineNS.GamePlay.Scene
             path = segs[0].Split('/');
             return false;
         }
-        public class TtPrefabNodeData : UNodeData
-        {
-        }
         public const string AssetExt = ".prefab";
+        [Category("Option")]
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
+        [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]
+        public RName RPolicyName
+        {
+            get;
+            set;
+        }
 
         public static async Thread.Async.TtTask CreatePrefab(TtPrefabNode node, RName assetName)
         {

@@ -202,7 +202,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UDeferredBasePassNode), nameof(TickLogic));
         [ThreadStatic]
         private static Profiler.TimeScope ScopePushGpuDraw = Profiler.TimeScopeManager.GetTimeScope(typeof(UDeferredBasePassNode), "PushGpuDraw");
-        public override void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -275,6 +275,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                     {
                         bgCmdlist.SetViewport(in GBuffers.Viewport);
+                        cmdlist.SetScissor(0, (NxRHI.FScissorRect*)0);
                         bgCmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Background.ToString());
 
                         bgCmdlist.FlushDraws();
@@ -284,6 +285,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
                     {
                         cmdlist.SetViewport(in GBuffers.Viewport);
+                        cmdlist.SetScissor(0, (NxRHI.FScissorRect*)0);
                         passClears.ClearFlags = (NxRHI.ERenderPassClearFlags)0;
                         cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Opaque.ToString());
 

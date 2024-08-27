@@ -998,7 +998,8 @@ namespace EngineNS.Bricks.AssetImpExp
             if(element != null)
             {
                 var scales = element.ScalingKeys;
-                return scales[keyIndex].Value * GetScaleRecursively(node.Parent, aiAnim, scene, keyIndex);
+                var finalIndex = scales.Count > keyIndex ? keyIndex : scales.Count - 1;
+                return scales[finalIndex].Value * GetScaleRecursively(node.Parent, aiAnim, scene, keyIndex);
             }
             else
             {

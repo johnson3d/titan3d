@@ -1,7 +1,7 @@
 #ifndef _Forword_BasePassPS_H_
 #define _Forword_BasePassPS_H_
 
-Texture2D gEnvMap DX_AUTOBIND;
+TextureCube gEnvMap DX_AUTOBIND;
 SamplerState Samp_gEnvMap DX_AUTOBIND;
 
 Texture2D gEyeEnvMap DX_AUTOBIND;
@@ -298,9 +298,11 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		half3 DirLightSpecShading = BRDFMobile(Roughness, N, H, NoH, LoH, NoV, NoL, OptSpecShading) * sqrt(NoL) * Idir * Cdir;
 
 		//sphere env mapping;
-		half3 VrN = 2.0h * NoV * N - V;
-		half3 EnvMapUV = CalcSphereMapUV(VrN, Roughness, (half)gEnvMapMaxMipLevel);
-		half3 EnvSpecLightColor = (half3)gEnvMap.SampleLevel(Samp_gEnvMap, EnvMapUV.xy, EnvMapUV.z).rgb;
+		half3 R = 2 * dot(V, N) * N - V;
+		// Point lobe in off-specular peak direction
+		R = GetOffSpecularPeakReflectionDir(N, R, Roughness);
+		half EnvMipLevel = GetTexMipLevelFromRoughness(Roughness, (half)gEnvMapMaxMipLevel);
+		half3 EnvSpecLightColor = (half3) gEnvMap.SampleLevel(Samp_gEnvMap, R, EnvMipLevel).rgb;
 		half Ihdr = max(0.6h, CalcLuminanceYCbCr(EnvSpecLightColor));
 		Ihdr = exp2((Ihdr - 0.6h) * 7.5h);
 		half3 EnvSpec = (half3)EnvBRDFMobile(EnvSpecLightColor, OptSpecShading, Roughness, NoV) * Ihdr;

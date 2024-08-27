@@ -76,7 +76,7 @@ namespace EngineNS.Graphics.Mesh
         //}
         protected override Color4b GetBorderColor()
         {
-            return Color4b.OrangeRed;
+            return TtEngine.Instance.EditorInstance.Config.MaterialMeshBoderColor;
         }
         DVector3 CalculateDragPosition(Graphics.Pipeline.TtViewportSlate vpSlate)
         {
@@ -585,10 +585,11 @@ namespace EngineNS.Graphics.Mesh
                     for (int i = 0; i < Materials.Count; i++)
                     {
                         if (Materials[i] == null)
-                            tmp.Materials.Add(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
+                            tmp.Materials.Add(EngineNS.TtEngine.Instance.Config.DefaultMaterial);
                         else
                             tmp.Materials.Add(Materials[i].AssetName);
                     }
+                    
                     return tmp;
                 }
                 set

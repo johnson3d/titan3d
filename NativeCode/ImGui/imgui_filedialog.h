@@ -23,6 +23,12 @@ namespace ImGui
 			const char* vTitle,
 			const char* vFilters,
 			const char* vPath);
+		void OpenModalWithMutiSelect(
+			const char* vKey,
+			const char* vTitle,
+			const char* vFilters,
+			const char* vPath,
+			int vCountSelectionMax);
 		bool DisplayDialog(const char* vKey);
 		void CloseDialog();
 		bool IsOk();
@@ -30,6 +36,8 @@ namespace ImGui
 		bool WasOpenedThisFrame();
 		bool IsKeyOpened(const char* vCurrentOpenedKey);
 		bool IsOpened();
+		int GetSelectedCount();
+		const char* GetFilePathByIndex(int index);
 		const char* GetFilePathName();
 		const char* GetCurrentFileName();
 		const char* GetCurrentPath();
@@ -51,6 +59,7 @@ namespace ImGui
 		std::string mCurrentFileName;
 		std::string mCurrentFilter;
 		FileDialog* mDialog = nullptr;
+		std::vector<std::string> mSelectedPaths;
 	};
 };
 

@@ -160,7 +160,7 @@ namespace EngineNS.Bricks.Procedure
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"MaterialPreview:{AssetName}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterial;
-            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
+            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.SimpleRPolicyName, 0, 1);
 
             mDockKeyClass = new ImGuiWindowClass()
             {

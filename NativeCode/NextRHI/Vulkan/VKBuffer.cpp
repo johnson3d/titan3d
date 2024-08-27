@@ -1134,6 +1134,33 @@ namespace NxRHI
 
 		FreeView();
 
+		switch (Desc.Type)
+		{
+			case ESrvType::ST_Texture1D:
+				Desc.Texture1D.MipLevels = Buffer.UnsafeConvertTo<ITexture>()->Desc.MipLevels;
+				break;
+			case ESrvType::ST_Texture1DArray:
+				Desc.Texture1DArray.MipLevels = Buffer.UnsafeConvertTo<ITexture>()->Desc.MipLevels;
+				break;
+			case ESrvType::ST_Texture2D:
+				Desc.Texture2D.MipLevels = Buffer.UnsafeConvertTo<ITexture>()->Desc.MipLevels;
+				break;
+			case ESrvType::ST_Texture2DArray:
+				Desc.Texture2DArray.MipLevels = Buffer.UnsafeConvertTo<ITexture>()->Desc.MipLevels;
+				break;
+			case ESrvType::ST_Texture3D:
+				Desc.Texture3D.MipLevels = Buffer.UnsafeConvertTo<ITexture>()->Desc.MipLevels;
+				break;
+			case ESrvType::ST_TextureCube:
+				Desc.TextureCube.MipLevels = Buffer.UnsafeConvertTo<ITexture>()->Desc.MipLevels;
+				break;
+			case ESrvType::ST_TextureCubeArray:
+				Desc.TextureCubeArray.MipLevels = Buffer.UnsafeConvertTo<ITexture>()->Desc.MipLevels;
+				break;
+			default:
+				break;
+		}
+
 		auto device = (VKGpuDevice*)device1;
 		
 		if (Desc.Type == ESrvType::ST_BufferSRV)

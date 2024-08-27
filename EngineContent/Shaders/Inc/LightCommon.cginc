@@ -3,6 +3,87 @@
 
 #include "Math.cginc"
 
+// Point lobe in off-specular peak direction
+float3 GetOffSpecularPeakReflectionDir(float3 Normal, float3 ReflectionVector, float Roughness)
+{
+    float a = Square(Roughness);
+    return lerp(Normal, ReflectionVector, (1 - a) * (sqrt(1 - a) + a));
+}
+
+// SphereMaxNoH
+struct BxDFContext
+{
+	float NoV;
+	float NoL;
+	float VoL;
+	float NoH;
+	float VoH;
+};
+
+void Init( inout BxDFContext Context, half3 N, half3 V, half3 L )
+{
+	Context.NoL = dot(N, L);
+	Context.NoV = dot(N, V);
+	Context.VoL = dot(V, L);
+	float InvLenH = rsqrt( 2 + 2 * Context.VoL );
+	Context.NoH = saturate( ( Context.NoL + Context.NoV ) * InvLenH );
+	Context.VoH = saturate( InvLenH + InvLenH * Context.VoL );
+	//NoL = saturate( NoL );
+	//NoV = saturate( abs( NoV ) + 1e-5 );
+}
+
+// [ de Carpentier 2017, "Decima Engine: Advances in Lighting and AA" ]
+void SphereMaxNoH( inout BxDFContext Context, float SinAlpha, bool bNewtonIteration )
+{
+	if( SinAlpha > 0 )
+	{
+		float CosAlpha = sqrt( 1 - Pow2( SinAlpha ) );
+	
+		float RoL = 2 * Context.NoL * Context.NoV - Context.VoL;
+		if( RoL >= CosAlpha )
+		{
+			Context.NoH = 1;
+			Context.VoH = abs( Context.NoV );
+		}
+		else
+		{
+			float rInvLengthT = SinAlpha * rsqrt( 1 - RoL*RoL );
+			float NoTr = rInvLengthT * ( Context.NoV - RoL * Context.NoL );
+			float VoTr = rInvLengthT * ( 2 * Context.NoV*Context.NoV - 1 - RoL * Context.VoL );
+
+			if( bNewtonIteration )
+			{
+				// dot( cross(N,L), V )
+				float NxLoV = sqrt( saturate( 1 - Pow2(Context.NoL) - Pow2(Context.NoV) - Pow2(Context.VoL) + 2 * Context.NoL * Context.NoV * Context.VoL ) );
+
+				float NoBr = rInvLengthT * NxLoV;
+				float VoBr = rInvLengthT * NxLoV * 2 * Context.NoV;
+				float NoLVTr = Context.NoL * CosAlpha + Context.NoV + NoTr;
+				float VoLVTr = Context.VoL * CosAlpha + 1   + VoTr;
+
+				float p = NoBr   * VoLVTr;
+				float q = NoLVTr * VoLVTr;
+				float s = VoBr   * NoLVTr;
+
+				float xNum = q * ( -0.5 * p + 0.25 * VoBr * NoLVTr );
+				float xDenom = p*p + s * (s - 2*p) + NoLVTr * ( (Context.NoL * CosAlpha + Context.NoV) * Pow2(VoLVTr) + q * (-0.5 * (VoLVTr + Context.VoL * CosAlpha) - 0.5) );
+				float TwoX1 = 2 * xNum / ( Pow2(xDenom) + Pow2(xNum) );
+				float SinTheta = TwoX1 * xDenom;
+				float CosTheta = 1.0 - TwoX1 * xNum;
+				NoTr = CosTheta * NoTr + SinTheta * NoBr;
+				VoTr = CosTheta * VoTr + SinTheta * VoBr;
+			}
+
+			Context.NoL = Context.NoL * CosAlpha + NoTr;
+			Context.VoL = Context.VoL * CosAlpha + VoTr;
+			float InvLenH = rsqrt( 2 + 2 * Context.VoL );
+			Context.NoH = saturate( ( Context.NoL + Context.NoV ) * InvLenH );
+			Context.VoH = saturate( InvLenH + InvLenH * Context.VoL );
+		}
+	}
+}
+
+
 ////////////////////// high-level begin ///////////////////////////////
 
 float4 Pow4( float4 x )
@@ -45,7 +126,7 @@ float3 F_Schlick( float3 SpecularColor, float VoH )
 
 float3 SpecularGGX( float Roughness, float3 SpecularColor, float NoH, float NoV, float NoL, float VoH )
 {
-	float a2 = Pow4( Roughness );
+    float a2 = (float)Pow4(Roughness);
 	// float Energy = EnergyNormalization( a2, Context.VoH, AreaLight );
 	
 	// Generalized microfacet specular
@@ -57,13 +138,45 @@ float3 SpecularGGX( float Roughness, float3 SpecularColor, float NoH, float NoV,
 	return (D * Vis) * F;
 }
 
+float New_a2( float a2, float SinAlpha, float VoH )
+{
+	return a2 + 0.25 * SinAlpha * (3.0 * sqrt(a2) + SinAlpha) / ( VoH + 0.001 );
+	//return a2 + 0.25 * SinAlpha * ( saturate(12 * a2 + 0.125) + SinAlpha ) / ( VoH + 0.001 );
+	//return a2 + 0.25 * SinAlpha * ( a2 * 2 + 1 + SinAlpha ) / ( VoH + 0.001 );
+}
+
+float EnergyNormalization( inout float a2, float VoH, float AreaLightSphereSinAlpha )
+{
+	float Sphere_a2 = a2;
+	float Energy = 1;
+	if( AreaLightSphereSinAlpha > 0 )
+	{
+		Sphere_a2 = New_a2( a2, AreaLightSphereSinAlpha, VoH );
+		Energy = a2 / Sphere_a2;
+	}
+
+	return Energy;
+}
+float3 SpecularGGX( float Roughness, float3 SpecularColor, BxDFContext Context, float NoL, float AreaLightSphereSinAlpha )
+{
+	float a2 = Pow4( Roughness );
+	float Energy = EnergyNormalization( a2, Context.VoH, AreaLightSphereSinAlpha );
+	
+	// Generalized microfacet specular
+	float D = D_GGX( a2, Context.NoH ) * Energy;
+	float Vis = Vis_SmithJointApprox( a2, Context.NoV, NoL );
+	float3 F = F_Schlick( SpecularColor, Context.VoH );
+
+	return (D * Vis) * F;
+}
+
 ////////////////////// high-level end ///////////////////////////////
 
 half GetTexMipLevelFromRoughness(half Roughness, half MipMaxLevel)
 {
 	//return max(0.0h, MipMaxLevel + log2(Roughness));
-    half LevelFrom1x1 = 1 - 1.2 * log2(Roughness);
-	return MipMaxLevel -1.0f - LevelFrom1x1;
+    half LevelFrom1x1 = 1.0h - 1.2h * log2(Roughness);
+	return MipMaxLevel - 1.0h - LevelFrom1x1;
 }
 
 half3 CalcSphereMapUV(half3 VrN, half roughness, half MipMaxLevel)
@@ -85,10 +198,10 @@ float GetSpecularOcclusion(float NoV, float RoughnessSq, float AO)
 half3 EnvBRDF( half3 LightColorSpec, half3 OptSpecShading, half Roughness, half NoV, Texture2D PreIntegrateGF, SamplerState samp )
 {
 	// Importance sampled preintegrated G * F
-	float2 AB = PreIntegrateGF.Sample(samp, float2( NoV, Roughness )).rg;
+    half2 AB = (half2)PreIntegrateGF.Sample(samp, float2(NoV, Roughness)).rg;
 
 	// Anything less than 2% is physically impossible and is instead considered to be shadowing 
-	float3 GF = OptSpecShading * AB.x + saturate( 50.0 * OptSpecShading.g ) * AB.y;
+    half3 GF = OptSpecShading * AB.x + (half)saturate(50.0h * OptSpecShading.g) * AB.y;
 	return GF * LightColorSpec;
 }
 

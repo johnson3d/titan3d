@@ -161,6 +161,9 @@ namespace EngineNS.DesignMacross.Design
         {
             popupMenu.bHasSearchBox = true;
             TtMethodGraphLinkedPinContextMenuUtil.ConstructMenuItemsAboutAssembly(ref context, popupMenu, this);
+            TtMethodGraphLinkedPinContextMenuUtil.ConstructMenuItemsAboutReflection(ref context, popupMenu, this);
+            TtMethodGraphLinkedPinContextMenuUtil.ConstructMenuItemsAboutDesignedClass(ref context, popupMenu, this);
+            TtMethodGraphLinkedPinContextMenuUtil.ConstructMenuItemsAboutClassPropertiesAndMethods(ref context, popupMenu, this);
         }
 
         #region IContextMeunable

@@ -48,15 +48,17 @@ PS_INPUT VS_Main(VS_INPUT input1)
 
     output.Set_vWorldPos(wp4.xyz);
 	
-    //if (input.vViewID == 0)
-    //{
-    //    output.vPosition = mul(wp4, GetViewPrjMtx(false));
-    //}
-    //else if (input.vViewID == 1)
-    //{
-    //    output.vPosition = mul(wp4, GetViewPrjMtx(false));
-    //}
-    output.vPosition = mul(wp4, GetViewPrjMtx(false));
+    if (input.vViewID == 0)
+    {
+        wp4.x += 2.0f;
+        output.vPosition = mul(wp4, GetViewPrjMtx(false));
+    }
+    else if (input.vViewID == 1)
+    {
+        wp4.x -= 2.0f;
+        output.vPosition = mul(wp4, GetViewPrjMtx(false));
+    }
+    //output.vPosition = mul(wp4, GetViewPrjMtx(false));
 
 #if USE_PS_Custom0 == 1
 #if ENV_DISABLE_POINTLIGHTS == 0
@@ -65,12 +67,12 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	//output.psCustomUV0.z = float(output.vPosition.z / output.vPosition.w);
 	output.psCustomUV0.w = output.vPosition.w;
 #endif
+    output.psCustomUV1.x = input.vViewID;
 
     return output;
-	return output;
 }
 
-Texture2D gEnvMap DX_AUTOBIND;
+TextureCube gEnvMap DX_AUTOBIND;
 SamplerState Samp_gEnvMap DX_AUTOBIND;
 
 Texture2D gEyeEnvMap DX_AUTOBIND;
@@ -84,6 +86,7 @@ StructuredBuffer<FTileData> TilingBuffer DX_AUTOBIND;
 struct PS_OUTPUT
 {
     float4 RT0 : SV_Target0;
+    //float4 RT1 : SV_Target1;
 };
 
 /**Meta Begin:(PS_Main)
@@ -229,9 +232,10 @@ PS_OUTPUT PS_Main(PS_INPUT input)
         half3 DirLightSpecShading = BRDFMobile(Roughness, N, H, NoH, LoH, NoV, NoL, OptSpecShading) * sqrt(NoL) * Idir * Cdir;
 
 		//sphere env mapping;
-        half3 VrN = 2.0h * NoV * N - V;
-        half3 EnvMapUV = CalcSphereMapUV(VrN, Roughness, (half) gEnvMapMaxMipLevel);
-        half3 EnvSpecLightColor = (half3) gEnvMap.SampleLevel(Samp_gEnvMap, EnvMapUV.xy, EnvMapUV.z).rgb;
+        half3 R = 2 * dot(V, N) * N - V;
+        R = GetOffSpecularPeakReflectionDir(N, R, GBuffer.Roughness);
+        half EnvMipLevel = GetTexMipLevelFromRoughness(Roughness, (half)gEnvMapMaxMipLevel);
+        half3 EnvSpecLightColor = (half3) gEnvMap.SampleLevel(Samp_gEnvMap, R, EnvMipLevel).rgb;
         half Ihdr = max(0.6h, CalcLuminanceYCbCr(EnvSpecLightColor));
         Ihdr = exp2((Ihdr - 0.6h) * 7.5h);
         half3 EnvSpec = (half3) EnvBRDFMobile(EnvSpecLightColor, OptSpecShading, Roughness, NoV) * Ihdr;
@@ -280,8 +284,16 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 #endif
 
         output.RT0 = half4(BaseShading, PerPixelViewerDistance * rcp((half) gZFar));
+        //output.RT1 = half4(BaseShading, PerPixelViewerDistance * rcp((half) gZFar));
+        //if (input.psCustomUV1.x == 0)
+        //{
+        //    output.RT0 = half4(1, 0, 0, 1);
+        //}
+        //else
+        //{
+        //    output.RT0 = half4(1, 0, 1, 1);
+        //}
     }
-
 #endif//#ifdef MTL_ID_UNLIT
 
 	//output.RT0.rgb = Albedo;

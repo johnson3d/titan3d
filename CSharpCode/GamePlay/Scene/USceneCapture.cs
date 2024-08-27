@@ -47,7 +47,7 @@ namespace EngineNS.GamePlay.Scene
             var nd = GetNodeData<USceneCaptureData>();
             if (nd.RPolicyName == null)
             {
-                nd.RPolicyName = TtEngine.Instance.Config.MainRPolicyName;
+                nd.RPolicyName = TtEngine.Instance.Config.SimpleRPolicyName;
             }
             Graphics.Pipeline.TtRenderPolicy policy = null;
             var rpAsset = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(nd.RPolicyName);

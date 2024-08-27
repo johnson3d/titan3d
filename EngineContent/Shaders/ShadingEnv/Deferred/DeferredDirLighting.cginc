@@ -69,13 +69,6 @@ float4	GetWorldPosition(float4 PosProj, float vDepth)
 	return VPos;
 }
 
-// Point lobe in off-specular peak direction
-float3 GetOffSpecularPeakReflectionDir(float3 Normal, float3 ReflectionVector, float Roughness)
-{
-    float a = Square(Roughness);
-    return lerp(Normal, ReflectionVector, (1 - a) * (sqrt(1 - a) + a));
-}
-
 PS_INPUT VS_Main(VS_INPUT input1)
 {
 	VS_MODIFIER input = VS_INPUT_TO_VS_MODIFIER(input1);
@@ -237,7 +230,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	half3 OptDiffShading = Sdiff * Albedo;
 
 	//AbsSpecular = 0.08h * AbsSpecular;
-	half3 OptSpecShading = AbsSpecular - AbsSpecular * Metallic + Metallic * Albedo;
+	float3 OptSpecShading = AbsSpecular - AbsSpecular * Metallic + Metallic * Albedo;
 
 	half3 H = normalize(L + V);
 	half NoLsigned = dot(N, L);
@@ -248,25 +241,29 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	half VoH = saturate(dot(V, H));
 	// NoV = saturate( abs( NoV ) + 1e-5 );
     
-	//sky light;
-	//half SkyAtten = 1.0h - NoL;
+	// todo: remove Csky Cground
+	// sky light; 
 	half SkyAtten = min(1.0h, 2.0h - NoL - ShadowValue);
 	half3 SkyShading = lerp(Cground, Csky, 0.5h * N.y + 0.5h) * SkyAtten * SkyAtten * OptDiffShading * Ienv_light;
 	if (NoPixel)
 	{
 		SkyShading = 0;
 	}
-	//half3 SkyShading = (0.35h * N.y + 0.65h) * Csky * OptDiffShading * ECCd;
-	//half3 SkyShading = (0.35h * N.y + 0.65h) * Ienv_light * Csky * OptDiffShading * ECCd;
-	//half3 SkyShading = Ienv_light * Csky * OptDiffShading * ECCd;
 
-	//half3 DirLightDiffuseShading = NoL * Idir * Cdir * OptDiffShading * ECCd;
+	Roughness = max( Roughness, 0.02 );
 	half3 DirLightDiffuseShading = RetroDiffuseMobile(NoL, NoV, LoH, Roughness) * Idir * Cdir * OptDiffShading;
 
-	half3 DirLightSpecShading = NoL * Idir * Cdir * SpecularGGX( Roughness, OptSpecShading, NoH, NoV, NoL, VoH );
-	// half3 DirLightSpecShading = BRDFMobile(Roughness, N, H, NoH, LoH, NoV, NoL, OptSpecShading) * sqrt(NoL) * Idir * Cdir;
+	// SphereMaxNoH
+	BxDFContext Context;
+	Init(Context, N, V, L);
+	// todo: calc SphereSinAlpha from light parameters
+	float AreaLightSphereSinAlpha = 0.3f;
+	// float AreaLightSphereSinAlpha = 0.405f;
+	SphereMaxNoH(Context, AreaLightSphereSinAlpha, true);
+	half3 DirLightSpecShading = NoL * Idir * Cdir * SpecularGGX( Roughness, OptSpecShading, Context, NoL, AreaLightSphereSinAlpha );
+	// half3 DirLightSpecShading = NoL * Idir * Cdir * SpecularGGX( Roughness, OptSpecShading, NoH, NoV, NoL, VoH );
 
-	//sphere env mapping;
+	// env mapping;
     half3 R = 2 * dot(V, N) * N - V;
 	// Point lobe in off-specular peak direction
     R = GetOffSpecularPeakReflectionDir(N, R, GBuffer.Roughness);
@@ -279,17 +276,16 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     else
     {
         EnvSpecLightColor = 0;
-    }
-	
+    }	
 	float RoughnessSq = GBuffer.Roughness * GBuffer.Roughness;
 	float SpecularOcclusion = GetSpecularOcclusion(NoV, RoughnessSq, AOs);
-
 	half3 EnvSpec = (half3)EnvBRDF(EnvSpecLightColor, OptSpecShading, Roughness, NoV, gPreIntegratedGF, Samp_gPreIntegratedGF) * SpecularOcclusion;
+	EnvSpec = -min(-EnvSpec.rgb, 0.0);
 
 	half FinalShadowValue = min(1.0h, ShadowValue + DirLightLeak);
 
 	BaseShading = DirLightDiffuseShading * FinalShadowValue + DirLightSpecShading * ShadowValue + SkyShading;
-    BaseShading = BaseShading * AOs + EnvSpec * min(ShadowValue + 0.85h, 1.0h);
+    BaseShading = BaseShading * AOs + EnvSpec;
 
 #if ENV_DISABLE_POINTLIGHTS == 0
 	if (NoPixel == false)
@@ -306,12 +302,9 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		}
 	}
 #endif
-	
-    half3 Color = BaseShading.rgb;
 
+ 	half3 Color = BaseShading.rgb;
 	output.RT0.rgb = Linear2sRGB(Color);
-	//output.RT0.rgb = Linear2sRGB(GBuffer.MtlColorRaw);
-
 	return output;
 }
 

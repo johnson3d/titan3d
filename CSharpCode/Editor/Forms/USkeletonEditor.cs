@@ -338,7 +338,7 @@ namespace EngineNS.Editor.Forms
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"MaterialMesh:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewScene;
-            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
+            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.SimpleRPolicyName, 0, 1);
             AnimationClipPreview = new TtAnimationClipPreview();
             AnimationClipPreview.SkeletonEditor = this;
             AnimationClipPropGrid.Target = AnimationClipPreview;

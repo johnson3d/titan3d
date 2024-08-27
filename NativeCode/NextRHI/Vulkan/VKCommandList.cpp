@@ -310,32 +310,39 @@ namespace NxRHI
 		//mContext->RSSetScissorRects(Num, (const D3D12_RECT*)pScissor);
 		ASSERT(Num < 32);
 		mCurrentScissorRects.resize(Num);
-		for (UINT i = 0; i < Num; i++)
+		if (Num == 0)
 		{
-			mCurrentScissorRects[i].offset.x = pScissor[i].MinX;
-			mCurrentScissorRects[i].offset.y = pScissor[i].MinY;
-
-			mCurrentScissorRects[i].extent.width = (UINT)(pScissor[i].MaxX - pScissor[i].MinX);
-			mCurrentScissorRects[i].extent.height = (UINT)(pScissor[i].MaxY - pScissor[i].MinY);
+			vkCmdSetScissor(mCommandBuffer->RealObject, 0, 0, nullptr);
 		}
-		if (pScissor == nullptr)
+		else
 		{
-			if (mCurrentViewports.size() > 0)
+			for (UINT i = 0; i < Num; i++)
 			{
-				mCurrentScissorRects.resize(1);
-				mCurrentScissorRects[0].offset.x = (int)mCurrentViewports[0].x;
-				mCurrentScissorRects[0].offset.y = (int)(mCurrentViewports[0].y + mCurrentViewports[0].height);
+				mCurrentScissorRects[i].offset.x = pScissor[i].MinX;
+				mCurrentScissorRects[i].offset.y = pScissor[i].MinY;
 
-				mCurrentScissorRects[0].extent.width = (UINT)mCurrentViewports[0].width;
-				mCurrentScissorRects[0].extent.height = (UINT)(-mCurrentViewports[0].height);
-				Num = 1;
+				mCurrentScissorRects[i].extent.width = (UINT)(pScissor[i].MaxX - pScissor[i].MinX);
+				mCurrentScissorRects[i].extent.height = (UINT)(pScissor[i].MaxY - pScissor[i].MinY);
 			}
-			else
+			if (pScissor == nullptr)
 			{
-				return;
+				if (mCurrentViewports.size() > 0)
+				{
+					mCurrentScissorRects.resize(1);
+					mCurrentScissorRects[0].offset.x = (int)mCurrentViewports[0].x;
+					mCurrentScissorRects[0].offset.y = (int)(mCurrentViewports[0].y + mCurrentViewports[0].height);
+
+					mCurrentScissorRects[0].extent.width = (UINT)mCurrentViewports[0].width;
+					mCurrentScissorRects[0].extent.height = (UINT)(-mCurrentViewports[0].height);
+					Num = 1;
+				}
+				else
+				{
+					return;
+				}
 			}
+			vkCmdSetScissor(mCommandBuffer->RealObject, 0, Num, &mCurrentScissorRects[0]);
 		}
-		vkCmdSetScissor(mCommandBuffer->RealObject, 0, Num, &mCurrentScissorRects[0]);
 	}
 	void VKCommandList::UseCurrentScissors()
 	{

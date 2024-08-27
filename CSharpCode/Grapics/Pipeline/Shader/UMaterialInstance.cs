@@ -46,7 +46,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         protected override Color4b GetBorderColor()
         {
-            return Color4b.Cyan;
+            return TtEngine.Instance.EditorInstance.Config.MaterialInstanceBoderColor;
         }
     }
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterialInstance@EngineCore" })]

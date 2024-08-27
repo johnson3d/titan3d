@@ -80,7 +80,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     
                 }
             }
-            return result;
+            return result = result.Replace('\\','/');
         }
         public static NxRHI.FShaderCode GetIncludeCode(string file)
         {
@@ -301,6 +301,9 @@ namespace EngineNS.Editor.ShaderCompiler
             Graphics.Pipeline.Shader.TtShadingEnv shadingEnvshadingEnv, Graphics.Pipeline.Shader.TtMaterial mtl, Type mdfType,
             NxRHI.UShaderDefinitions defines, UHLSLInclude incProvider, string sm = null, bool bDebugShader = true, string extHlslVersion = null)
         {
+            bool ignoreDXBC = false;
+            bool ignoreDXIR = false;
+            bool ignoreSpirv = false;
             var code_text = IO.TtFileManager.ReadAllText(shader);
             var metaIndex = code_text.IndexOf($"/**Meta Begin:({entry})");
             if (metaIndex >= 0)
@@ -327,6 +330,27 @@ namespace EngineNS.Editor.ShaderCompiler
                                     extHlslVersion = pairs[1];
                                     if (extHlslVersion == "none")
                                         extHlslVersion = null;
+                                    break;
+                                case "IgnoreIR":
+                                    {
+                                        var text = pairs[1];
+                                        var segs = i.Split('+');
+                                        foreach (var s in segs)
+                                        {
+                                            switch (s)
+                                            {
+                                                case "DXBC":
+                                                    ignoreDXBC = true;
+                                                    break;
+                                                case "DXIR":
+                                                    ignoreDXIR = true;
+                                                    break;
+                                                case "Spirv":
+                                                    ignoreSpirv = true;
+                                                    break;
+                                            }
+                                        }
+                                    }
                                     break;
                             }
                         }
@@ -448,7 +472,7 @@ namespace EngineNS.Editor.ShaderCompiler
                 defPtr.MergeDefinitions(TtEngine.Instance.GfxDevice.RenderContext.GlobalEnvDefines);
 
                 var cfg = TtEngine.Instance.Config;
-                if (cfg.CookDXBC && extHlslVersion == null)
+                if (cfg.CookDXBC && ignoreDXBC == false)
                 {
                     defPtr.AddDefine("RHI_TYPE", "RHI_DX11");
                     defPtr.AddDefine("CP_SM_major", "5");
@@ -462,7 +486,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     if (ok == false)
                         return null;
                 }
-                if (cfg.CookDXIL)
+                if (cfg.CookDXIL && ignoreDXIR == false)
                 {
                     defPtr.AddDefine("RHI_TYPE", "RHI_DX12");
                     defPtr.AddDefine("CP_SM_major", "6");
@@ -480,7 +504,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     if (ok == false)
                         return null;
                 }
-                if (cfg.CookGLSL)
+                if (cfg.CookGLSL && ignoreSpirv == false)
                 {
                     defPtr.AddDefine("RHI_TYPE", "RHI_GL");
                     defPtr.AddDefine("CP_SM_major", "6");
@@ -498,7 +522,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     if (ok == false)
                         return null;
                 }
-                if (cfg.CookMETAL)
+                if (cfg.CookMETAL && ignoreSpirv == false)
                 {
                     defPtr.AddDefine("RHI_TYPE", "RHI_MTL");
                     defPtr.AddDefine("CP_SM_major", "6");
@@ -517,7 +541,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     if (ok == false)
                         return null;
                 }
-                if (cfg.CookSPIRV)
+                if (cfg.CookSPIRV && ignoreSpirv == false)
                 {
                     //extHlslVersion = "2021";
                     defPtr.AddDefine("RHI_TYPE", "RHI_VK");

@@ -922,8 +922,8 @@ namespace EngineNS.Editor
         public static async System.Threading.Tasks.Task TestCreateCharacter(GamePlay.UWorld world, GamePlay.Scene.UNode root, bool hideTerrain = false)
         {
             var characterController = new GamePlay.Controller.UCharacterController();
-            var player = new GamePlay.Player.UPlayer();
-            var playerData = new GamePlay.Player.UPlayer.UPlayerData() { CharacterController = characterController };
+            var player = new GamePlay.Player.TtPlayer();
+            var playerData = new GamePlay.Player.TtPlayer.TtPlayerData() { CharacterController = characterController };
             await player.InitializeNode(world, playerData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
             player.Parent = root;
 

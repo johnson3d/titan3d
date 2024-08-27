@@ -249,7 +249,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 if (methodInvokeExp.Method != null)
                 {
                     var attr = methodInvokeExp.Method.GetFirstCustomAttribute<Rtti.MetaAttribute>(false);
-                    if (attr != null)
+                    if (attr != null && attr.ShaderName != null)
                     {
                         methodName = attr.ShaderName;
                     }

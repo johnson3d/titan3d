@@ -16,6 +16,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Design\ConnectingLine\GraphElement_DataLine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\LogicOperator\GraphElement_LogicOperator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\LogicOperator\LogicOperatorDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\Value\GraphElement_SelfReference.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\Value\SelfReferenceDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\Value\PropertyGetDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\Value\PropertySetDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Method\MethodUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\FlowControl\IfStatementDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\Reflected\GraphElement_MethodInvokeReflected.cs" />
@@ -33,7 +37,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ValueOperator\SubtractOperatorDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ValueOperator\AddOperatorDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\GraphElement_ExpressionDescription.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\Nodes\Binocular.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CommandHistory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ASTBuildUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\DesignableVariable\DesignableVariableDescription.cs" />
@@ -41,7 +44,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Design\DesignableVariable\OutlineElement_DesignableVariable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\DelegateEvent\GraphElement_DelegateEvent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\ConnectingLine\GraphElement_ExecutionLine.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\Nodes\NodeBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\Value\GraphElement_VarSet.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\Value\GraphElement_VarGet.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\Value\GraphElement_ImmediateValue.cs" />

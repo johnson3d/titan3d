@@ -14,15 +14,15 @@ using MathNet.Numerics.LinearAlgebra.Solvers;
 
 namespace EngineNS.Editor.Forms
 {
-    public class USceneEditorOutliner : UWorldOutliner
+    public class TtSceneEditorOutliner : UWorldOutliner
     {
-        public USceneEditorOutliner(EGui.Slate.TtWorldViewportSlate viewport, bool regRoot)
+        public TtSceneEditorOutliner(EGui.Slate.TtWorldViewportSlate viewport, bool regRoot)
             : base(viewport, regRoot)
         {
 
         }
     }
-    public class USceneEditor : Editor.IAssetEditor, ITickable, IRootForm
+    public class TtSceneEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
         public int GetTickOrder()
         {
@@ -30,7 +30,7 @@ namespace EngineNS.Editor.Forms
         }
         public class USceneEditorViewport : EGui.Slate.TtWorldViewportSlate
         {
-            public USceneEditor HostEditor;
+            public TtSceneEditor HostEditor;
             
             public override void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
             {
@@ -453,12 +453,12 @@ namespace EngineNS.Editor.Forms
             shapesItem.Children.Add(planeItem);
 
         }
-        public USceneEditor()
+        public TtSceneEditor()
         {
-            mWorldOutliner = new USceneEditorOutliner(PreviewViewport, false);
+            mWorldOutliner = new TtSceneEditorOutliner(PreviewViewport, false);
             PreviewViewport.HostEditor = this;
         }
-        ~USceneEditor()
+        ~TtSceneEditor()
         {
             Dispose();
         }
@@ -516,16 +516,18 @@ namespace EngineNS.Editor.Forms
         public async virtual Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            //PreviewViewport.PreviewAsset = name;
-            PreviewViewport.Title = $"Scene:{name}";
-            PreviewViewport.OnInitialize = Initialize_PreviewScene;
-            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
-            var camPos = new DVector3(10, 10, 10);
-            PreviewViewport.CameraController.Camera.mCoreObject.LookAtLH(in camPos, in DVector3.Zero, in Vector3.Up);
-
             Scene = await TtEngine.Instance.SceneManager.CreateScene(PreviewViewport.World, name);
             if (Scene == null)
                 return false;
+            var rpolicy = Scene.RPolicyName;
+            if (rpolicy == null)
+                rpolicy = TtEngine.Instance.Config.MainRPolicyName;
+            //PreviewViewport.PreviewAsset = name;
+            PreviewViewport.Title = $"Scene:{name}";
+            PreviewViewport.OnInitialize = Initialize_PreviewScene;
+            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.SimpleRPolicyName, 0, 1);
+            var camPos = new DVector3(10, 10, 10);
+            PreviewViewport.CameraController.Camera.mCoreObject.LookAtLH(in camPos, in DVector3.Zero, in Vector3.Up);
 
             PreviewViewport.Axis.RootNode.Parent = Scene;
             PreviewViewport.World.Root = Scene;
@@ -738,7 +740,7 @@ namespace EngineNS.Editor.Forms
         EGui.UIProxy.MenuItemProxy mDrawSceneDetailsShow = new EGui.UIProxy.MenuItemProxy()
         {
             MenuName = "SceneDetails",
-            Selected = false,
+            Selected = true,
             Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data) =>
             {
                 item.Selected = !item.Selected;
@@ -1005,7 +1007,7 @@ namespace EngineNS.Editor.Forms
         }
         #region Tickable
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(USceneEditor), nameof(TickLogic));
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtSceneEditor), nameof(TickLogic));
         public void TickLogic(float ellapse)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
@@ -1044,7 +1046,7 @@ namespace EngineNS.Editor.Forms
             base.DrawAsChildWindow(in size);
         }
     }
-    public class TtPrefabEditor : USceneEditor
+    public class TtPrefabEditor : TtSceneEditor
     {
         public GamePlay.Scene.TtPrefab Prefab;
         public override IO.IAsset GetAsset()
@@ -1058,15 +1060,18 @@ namespace EngineNS.Editor.Forms
         public override bool IsAssetLoaed { get => Prefab != null; }
         public async override Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
         {
+            Prefab = await TtEngine.Instance.PrefabManager.CreatePrefab(name);
+            if (Prefab == null)
+                return false;
+            var rpolicy = Prefab.RPolicyName;
+            if (rpolicy == null)
+                rpolicy = TtEngine.Instance.Config.MainRPolicyName;
+
             AssetName = name;
             //PreviewViewport.PreviewAsset = name;
             PreviewViewport.Title = $"Prefab:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewScene;
-            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
-
-            Prefab = await TtEngine.Instance.PrefabManager.CreatePrefab(name);
-            if (Prefab == null)
-                return false;
+            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.SimpleRPolicyName, 0, 1);
 
             Prefab.Root.Parent = PreviewViewport.World.Root;
 
@@ -1105,7 +1110,7 @@ namespace EngineNS.Editor.Forms
 
 namespace EngineNS.GamePlay.Scene
 {
-    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.USceneEditor))]
+    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.TtSceneEditor))]
     public partial class UScene
     {
     }

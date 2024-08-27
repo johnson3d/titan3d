@@ -45,6 +45,7 @@ namespace EngineNS.DesignMacross.Design
             {
                 classDeclarationsBuilded.AddRange(designVarDesc.BuildClassDeclarations(ref classBuildContext));
                 thisClassDeclaration.Properties.Add(designVarDesc.BuildVariableDeclaration(ref classBuildContext));
+                designVarDesc.GenerateCodeInClass(thisClassDeclaration);
             }
             classDeclarationsBuilded.Add(thisClassDeclaration);
             return classDeclarationsBuilded;

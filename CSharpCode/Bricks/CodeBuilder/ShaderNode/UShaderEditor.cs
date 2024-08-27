@@ -110,8 +110,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             if (materials[0] == null)
                 return;
             var mesh = new Graphics.Mesh.TtMesh();
-            var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
-            var rectMesh = rect.ToMesh();
+            //var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
+            //var rectMesh = rect.ToMesh();
+            var rectMesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.CreateMeshPrimitive(RName.GetRName("mesh/base/sphere.vms", RName.ERNameType.Engine));
             var ok = mesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
@@ -189,7 +190,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"MaterialPreview:{AssetName}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterial;
-            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
+            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.SimpleRPolicyName, 0, 1);
             
             await PreviewPropGrid.Initialize();
             PreviewPropGrid.PGName = $"PGMaterialPreview:{AssetName}";

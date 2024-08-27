@@ -74,7 +74,7 @@ namespace EngineNS.GamePlay.Controller
                 float PitchSpeed = 15, YawSpeed = 15;
                 float yawDelta = Math.Min(YawDelta, 100) * 0.01f;
                 float pitchDelta = Math.Min(PitchDelta, 100) * 0.01f;
-                CameraControlNode.AddDelta(new FRotator(-pitchDelta * PitchSpeed * args.World.DeltaTimeSecond, yawDelta * YawSpeed * args.World.DeltaTimeSecond, 0));
+                CameraControlNode.AddDelta(new FRotator(yawDelta * YawSpeed * args.World.DeltaTimeSecond, -pitchDelta * PitchSpeed * args.World.DeltaTimeSecond, 0));
 
                 //MovementNode.AngularVelocity = new DVector3(0, YawDelta * 0.1f, 0);
                 if (OrientCameraRoation)

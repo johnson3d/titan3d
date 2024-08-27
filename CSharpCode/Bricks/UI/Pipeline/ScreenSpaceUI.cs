@@ -95,7 +95,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtScreenSpaceUINode), nameof(TickLogic));
-        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -127,6 +127,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                     {
                         cmdlist.SetViewport(in GBuffers.Viewport);
+                        cmdlist.SetScissor(0, (FScissorRect*)0);
                         var passClears = new NxRHI.FRenderPassClears();
                         passClears.SetDefault();
                         passClears.SetClearColor(0, new Color4f(0, 0, 0, 0));

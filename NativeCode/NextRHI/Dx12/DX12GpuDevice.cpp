@@ -342,8 +342,7 @@ namespace NxRHI
 
 		mCaps.IsSupoortBufferToTexture = true;
 		mCaps.IsSupportSSBO_VS = true;
-		mCaps.MaxViewInstanceCount = D3D12_MAX_VIEW_INSTANCE_COUNT;
-
+		
 		mDefaultBufferMemAllocator = MakeWeakRef(new DX12DefaultGpuMemAllocator());
 		mDefaultBufferMemAllocator->mHeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
 		mDefaultBufferMemAllocator->mHeapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY::D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
@@ -503,6 +502,17 @@ namespace NxRHI
 			D3D12_FEATURE_DATA_GPU_VIRTUAL_ADDRESS_SUPPORT feature{};
 			mDevice->CheckFeatureSupport(D3D12_FEATURE::D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &feature, sizeof(feature));
 			VFX_LTRACE(ELTT_Warning, "MaxGPUVirtualAddressBitsPerResource = %d\r\n", feature.MaxGPUVirtualAddressBitsPerResource);
+		}
+		D3D12_FEATURE_DATA_D3D12_OPTIONS3 opt3 = {};
+		mDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &opt3, sizeof(D3D12_FEATURE_DATA_D3D12_OPTIONS3));
+		if (opt3.ViewInstancingTier == D3D12_VIEW_INSTANCING_TIER_NOT_SUPPORTED) 
+		{
+			VFX_LTRACE(ELTT_Warning, "ERROR: D3D12: Device does not support D3D12_VIEW_INSTANCING\r\n");
+			mCaps.MaxViewInstanceCount = 0;
+		}
+		else
+		{
+			mCaps.MaxViewInstanceCount = D3D12_MAX_VIEW_INSTANCE_COUNT;
 		}
 		//ASSERT(op4.Native16BitShaderOpsSupported);
 	}
