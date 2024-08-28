@@ -13,7 +13,7 @@
     <DefineConstants>$(DefineConstants);TRACE;PWindow;TitanEngine_AutoGen</DefineConstants>
     <SkipPostSharp>True</SkipPostSharp>
     <NoWarn>1701;1702;1998;8632</NoWarn>
-    <DebugType>portable</DebugType>
+    <DebugType>full</DebugType>
     <Optimize>False</Optimize>
   </PropertyGroup>
 
@@ -23,7 +23,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DefineConstants>$(DefineConstants);TRACE;PWindow;TitanEngine_AutoGen</DefineConstants>
     <NoWarn>1701;1702;1998;8632</NoWarn>
-    <DebugType>portable</DebugType>
+    <DebugType>full</DebugType>
+    <Optimize>True</Optimize>
   </PropertyGroup>
 
   <Import Project="..\..\CSharpCode\Base\Base.projitems" Label="Shared" />

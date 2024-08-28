@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Bricks.Particle
 {
-    [Bricks.CodeBuilder.ContextMenu("NebulaNode ", "NebulaNode ", UNode.EditorKeyword)]
-    [UNode(NodeDataType = typeof(TtNebulaNode.TtNebulaNodeData), DefaultNamePrefix = "Nebula")]
-    public class TtNebulaNode : GamePlay.Scene.UMeshNode 
+    [Bricks.CodeBuilder.ContextMenu("NebulaNode ", "NebulaNode ", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtNebulaNode.TtNebulaNodeData), DefaultNamePrefix = "Nebula")]
+    public class TtNebulaNode : GamePlay.Scene.TtMeshNode 
     {
         public override void Dispose()
         {
             CoreSDK.DisposeObject(ref mNebulaParticle);
             base.Dispose();
         }
-        public class TtNebulaNodeData : GamePlay.Scene.UMeshNode.UMeshNodeData
+        public class TtNebulaNodeData : GamePlay.Scene.TtMeshNode.TtMeshNodeData
         {
             public TtNebulaNodeData()
             {
@@ -45,7 +45,7 @@ namespace EngineNS.Bricks.Particle
         }
         TtNebulaParticle mNebulaParticle;
         public TtNebulaParticle NebulaParticle { get=> mNebulaParticle; }
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var ret = await base.InitializeNode(world, data, bvType, placementType);
             if (GetNodeData<TtNebulaNodeData>().NebulaParticle != null)

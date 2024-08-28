@@ -12,9 +12,9 @@ using static EngineNS.Bricks.PhysicsCore.SceneNode.TtPhyControllerNodeBase;
 
 namespace EngineNS.Bricks.PhysicsCore.SceneNode
 {
-    public class TtPhyControllerNodeBase : GamePlay.Scene.ULightWeightNodeBase
+    public class TtPhyControllerNodeBase : GamePlay.Scene.TtLightWeightNodeBase
     {
-        public class TtPhyControllerNodeDataBase : UNodeData
+        public class TtPhyControllerNodeDataBase : TtNodeData
         {
             [Rtti.Meta]
             public RName PxMaterial { get; set; }
@@ -56,7 +56,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         }
         TtPhyCapsuleControllerDesc PhyControllerDesc = null;
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var baseResult = await base.InitializeNode(world, data, bvType, placementType);
             if (!baseResult)
@@ -73,7 +73,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             PhyControllerDesc.SetMaterial(mtl);
             return true;
         }
-        protected override void OnParentChanged(UNode prev, UNode cur)
+        protected override void OnParentChanged(TtNode prev, TtNode cur)
         {
             PhyController = ParentScene.PxSceneMB.PxScene.CreateCapsuleController(PhyControllerDesc.mCoreObject);
             if (PhyController == null)
@@ -99,7 +99,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             get => NodeData as TtBoxPhyControllerNodeData;
         }
         TtPhyBoxControllerDesc PhyControllerDesc = null;
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var baseResult = await base.InitializeNode(world, data, bvType, placementType);
             if (!baseResult)
@@ -114,7 +114,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             PhyControllerDesc.SetMaterial(mtl);
             return true;
         }
-        protected override void OnParentChanged(UNode prev, UNode cur)
+        protected override void OnParentChanged(TtNode prev, TtNode cur)
         {
             PhyController = ParentScene.PxSceneMB.PxScene.CreateBoxController(PhyControllerDesc.mCoreObject);
             if (PhyController == null)

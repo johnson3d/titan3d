@@ -252,7 +252,7 @@ namespace EngineNS.EGui.Slate
         }
         #region Debug Assist
         public List<FVisibleMesh> WorldBoundShapes = new List<FVisibleMesh>();
-        public void ShowBoundVolumes(bool bClear, bool bShow, params GamePlay.Scene.UNode[] nodes)
+        public void ShowBoundVolumes(bool bClear, bool bShow, params GamePlay.Scene.TtNode[] nodes)
         {
             if (bShow)
             {
@@ -273,7 +273,7 @@ namespace EngineNS.EGui.Slate
         public override void OnHitproxySelected(IProxiable proxy)
         {
             base.OnHitproxySelected(proxy);
-            var node = proxy as GamePlay.Scene.UNode;
+            var node = proxy as GamePlay.Scene.TtNode;
             mAxis.SetSelectedNodes(node);
         }
 
@@ -284,10 +284,10 @@ namespace EngineNS.EGui.Slate
                 mAxis.SetSelectedNodes(null);
             else
             {
-                var nodes = new List<UNode>(proxies.Length);
+                var nodes = new List<TtNode>(proxies.Length);
                 for (int i = 0; i < proxies.Length; i++)
                 {
-                    var uNode = proxies[i] as UNode;
+                    var uNode = proxies[i] as TtNode;
                     nodes.Add(uNode);
                 }
                 mAxis.SetSelectedNodes(nodes.ToArray());
@@ -298,7 +298,7 @@ namespace EngineNS.EGui.Slate
             base.OnHitproxyUnSelectedMulti(proxies);
             for(int i=0; i<proxies.Length; i++)
             {
-                mAxis.UnSelectedNode(proxies[i] as UNode);
+                mAxis.UnSelectedNode(proxies[i] as TtNode);
             }
         }
 

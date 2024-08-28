@@ -4,16 +4,16 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene
 {
-    [Bricks.CodeBuilder.ContextMenu("PointLight", "PointLight", UNode.EditorKeyword)]
-    [UNode(NodeDataType = typeof(UPointLightNode.ULightNodeData), DefaultNamePrefix = "PointLight")]
-    public partial class UPointLightNode : USceneActorNode
+    [Bricks.CodeBuilder.ContextMenu("PointLight", "PointLight", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(UPointLightNode.ULightNodeData), DefaultNamePrefix = "PointLight")]
+    public partial class UPointLightNode : TtSceneActorNode
     {
         public override void Dispose()
         {
             CoreSDK.DisposeObject(ref mDebugMesh);
             base.Dispose();
         }
-        public class ULightNodeData : UNodeData
+        public class ULightNodeData : TtNodeData
         {
             internal UPointLightNode HostNode;
             Vector3 mColor;
@@ -33,7 +33,7 @@ namespace EngineNS.GamePlay.Scene
             [Rtti.Meta]
             public float Radius { get; set; }
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data == null)
             {
@@ -44,7 +44,7 @@ namespace EngineNS.GamePlay.Scene
             GetNodeData<ULightNodeData>().HostNode = this;
             return ret;
         }
-        public static async Thread.Async.TtTask<UPointLightNode> AddPointLightNode(UWorld world, UNode parent, ULightNodeData data, DVector3 pos)
+        public static async Thread.Async.TtTask<UPointLightNode> AddPointLightNode(UWorld world, TtNode parent, ULightNodeData data, DVector3 pos)
         {
             var scene = parent.GetNearestParentScene();
             var scale = new Vector3(data.Radius);
@@ -103,7 +103,7 @@ namespace EngineNS.GamePlay.Scene
                 return mDebugMesh;
             }
         }
-        public override void OnNodeLoaded(UNode parent)
+        public override void OnNodeLoaded(TtNode parent)
         {
             base.OnNodeLoaded(parent);
             UpdateAbsTransform();

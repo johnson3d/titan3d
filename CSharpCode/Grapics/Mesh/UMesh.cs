@@ -37,7 +37,7 @@ namespace EngineNS.Graphics.Mesh
             CoreSDK.DisposeObject(ref mPerMeshCBuffer);
         }
         public Graphics.Pipeline.Shader.TtGraphicsShadingEnv UserShading = null;
-        public GamePlay.Scene.UNode HostNode { get; set; }
+        public GamePlay.Scene.TtNode HostNode { get; set; }
         bool mIsCastShadow = false;
         public bool IsCastShadow 
         { 

@@ -15,6 +15,7 @@ namespace EngineNS.Editor.Forms
         public async Thread.Async.TtTask<bool> Initialize()
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
+            ExcludeThreads.Add("TPool");
             return true;
         }
 
@@ -93,6 +94,16 @@ namespace EngineNS.Editor.Forms
             ByTime,
         }
         ESortMode mSortMode = ESortMode.None;
+        public List<string> ExcludeThreads { get; set; } = new List<string>();
+        private bool IsExcludeThread(string name)
+        {
+            foreach(var i in ExcludeThreads)
+            {
+                if (name.StartsWith(i))
+                    return true;
+            }
+            return false;
+        }
         void SortScopes()
         {
             switch (mSortMode)
@@ -160,6 +171,8 @@ namespace EngineNS.Editor.Forms
                 {
                     foreach (var i in ProfilerThreadNames)
                     {
+                        if (IsExcludeThread(i))
+                            continue;
                         if (ImGuiAPI.BeginTabItem(i, null, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
                         {
                             if (i != CurrentThreadName)

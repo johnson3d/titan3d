@@ -176,14 +176,14 @@ namespace EngineNS.GamePlay
         float mSnapGridSize = 0.1f;
         #endregion
 
-        public class UAxisNode : Scene.USceneActorNode
+        public class UAxisNode : Scene.TtSceneActorNode
         {
-            public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, Scene.UNodeData data, Scene.EBoundVolumeType bvType, Type placementType)                
+            public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, Scene.TtNodeData data, Scene.EBoundVolumeType bvType, Type placementType)                
             {
                 return await base.InitializeNode(world, data, bvType, placementType);
             }
 
-            public override bool DrawNode(EngineNS.Editor.UTreeNodeDrawer tree, int index, int NumOfChild)
+            public override bool DrawNode(EngineNS.Editor.TtTreeNodeDrawer tree, int index, int NumOfChild)
             {
                 return false;
             }
@@ -195,7 +195,7 @@ namespace EngineNS.GamePlay
 
         class AxisData
         {
-            public Scene.UMeshNode MeshNode;
+            public Scene.TtMeshNode MeshNode;
             public enAxisType AxisType;
             Graphics.Pipeline.Shader.TtMaterial[] NormalMaterials;
             Graphics.Pipeline.Shader.TtMaterial[] FocusMaterials;
@@ -245,7 +245,7 @@ namespace EngineNS.GamePlay
             public async System.Threading.Tasks.Task Initialize(enAxisType type, GamePlay.UWorld world)
             {
                 Graphics.Mesh.TtMesh axisMesh = null;
-                var meshNodeData = new GamePlay.Scene.UMeshNode.UMeshNodeData();
+                var meshNodeData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
                 DVector3 pos = DVector3.Zero;
                 Quaternion rot = Quaternion.Identity;
                 Vector3 scale = Vector3.One;
@@ -667,8 +667,8 @@ namespace EngineNS.GamePlay
                     //case enAxisType.Edge_Z_MaxPlane:  break;
                 }
 
-                MeshNode = (Scene.UMeshNode) await world.Root.NewNode(world, typeof(Scene.UMeshNode), meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
-                MeshNode.SetStyle(Scene.UNode.ENodeStyles.HideBoundShape | Scene.UNode.ENodeStyles.NoPickedDraw);
+                MeshNode = (Scene.TtMeshNode) await world.Root.NewNode(world, typeof(Scene.TtMeshNode), meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                MeshNode.SetStyle(Scene.TtNode.ENodeStyles.HideBoundShape | Scene.TtNode.ENodeStyles.NoPickedDraw);
                 if(axisMesh != null)
                 {
                     MeshNode.Mesh = axisMesh;
@@ -893,7 +893,7 @@ namespace EngineNS.GamePlay
         UAxisNode mRootNode;
         public UAxisNode RootNode { get => mRootNode; }
         float mRootNodeScaleValue = 1.0f;
-        Scene.UMeshNode mRotArrowAssetNode;
+        Scene.TtMeshNode mRotArrowAssetNode;
         bool mInitialized = false;
         Graphics.Pipeline.ICameraController mCameraController;
 
@@ -965,7 +965,7 @@ namespace EngineNS.GamePlay
             mAxisMeshDatas = tmpAxis;
 
             mRootNode = (UAxisNode)await world.Root.NewNode(world, typeof(UAxisNode),
-                new GamePlay.Scene.UNodeData()
+                new GamePlay.Scene.TtNodeData()
                 {
                     Name = "AxisRootNode"
                 },
@@ -983,11 +983,11 @@ namespace EngineNS.GamePlay
             if(ok)
             {
                 rotArrowAssetMesh.IsAcceptShadow = false;
-                var meshNodeData = new GamePlay.Scene.UMeshNode.UMeshNodeData();
+                var meshNodeData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
                 meshNodeData.MeshName = mAxisMeshMoveX;
                 meshNodeData.Name = "RotArrowAsset";
-                mRotArrowAssetNode = (Scene.UMeshNode)await world.Root.NewNode(world, typeof(Scene.UMeshNode), meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
-                mRotArrowAssetNode.SetStyle(Scene.UNode.ENodeStyles.HideBoundShape | Scene.UNode.ENodeStyles.NoPickedDraw);
+                mRotArrowAssetNode = (Scene.TtMeshNode)await world.Root.NewNode(world, typeof(Scene.TtMeshNode), meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                mRotArrowAssetNode.SetStyle(Scene.TtNode.ENodeStyles.HideBoundShape | Scene.TtNode.ENodeStyles.NoPickedDraw);
                 mRotArrowAssetNode.Mesh = rotArrowAssetMesh;
                 mRotArrowAssetNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 mRotArrowAssetNode.IsCastShadow = false;
@@ -1002,8 +1002,8 @@ namespace EngineNS.GamePlay
         }
 
         #region Debug
-        Scene.UMeshNode mPlaneNode;
-        Scene.UMeshNode mPointNode;
+        Scene.TtMeshNode mPlaneNode;
+        Scene.TtMeshNode mPointNode;
         async System.Threading.Tasks.Task InitializeDebugAssit()
         {
             var mesh = new Graphics.Mesh.TtMesh();
@@ -1017,10 +1017,10 @@ namespace EngineNS.GamePlay
             if(ok)
             {
                 mesh.IsAcceptShadow = false;
-                mPlaneNode = await Scene.UMeshNode.AddMeshNode(
+                mPlaneNode = await Scene.TtMeshNode.AddMeshNode(
                     mHostWorld,
                     mHostWorld.Root,
-                    new Scene.UMeshNode.UMeshNodeData(),
+                    new Scene.TtMeshNode.TtMeshNodeData(),
                     typeof(UPlacement),
                     mesh,
                     DVector3.Zero,
@@ -1041,10 +1041,10 @@ namespace EngineNS.GamePlay
             if(ok)
             {
                 mesh.IsAcceptShadow = false;
-                mPointNode = await Scene.UMeshNode.AddMeshNode(
+                mPointNode = await Scene.TtMeshNode.AddMeshNode(
                     mHostWorld,
                     mHostWorld.Root,
-                    new Scene.UMeshNode.UMeshNodeData(),
+                    new Scene.TtMeshNode.TtMeshNodeData(),
                     typeof(UPlacement),
                     mesh,
                     DVector3.Zero,
@@ -1060,7 +1060,7 @@ namespace EngineNS.GamePlay
 
         public class SelectedNodeData
         {
-            public GamePlay.Scene.UNode Node;
+            public GamePlay.Scene.TtNode Node;
             public FTransform StartAbsTransform = FTransform.Identity;
             public FTransform StartTransform = FTransform.Identity;
         }
@@ -1084,7 +1084,7 @@ namespace EngineNS.GamePlay
                 return null;
             return mSelectedNodes[mSelectedNodes.Count - 1];
         }
-        public void UnSelectedNode(GamePlay.Scene.UNode node)
+        public void UnSelectedNode(GamePlay.Scene.TtNode node)
         {
             if (node == null)
                 return;
@@ -1097,7 +1097,7 @@ namespace EngineNS.GamePlay
                 }
             }
         }
-        public void SetSelectedNodes(params GamePlay.Scene.UNode[] nodes)
+        public void SetSelectedNodes(params GamePlay.Scene.TtNode[] nodes)
         {
             if (nodes != null)
             {
@@ -1412,7 +1412,7 @@ namespace EngineNS.GamePlay
                     }
                     break;
                 default:
-                    if (!mRootNode.HasStyle(Scene.UNode.ENodeStyles.Invisible))
+                    if (!mRootNode.HasStyle(Scene.TtNode.ENodeStyles.Invisible))
                     {
                         var camPos = mCameraController.Camera.mCoreObject.GetPosition();
                         mRootNodeScaleValue = (float)(mRootNode.Placement.Position - camPos).Length() * 0.15f;
@@ -1422,7 +1422,7 @@ namespace EngineNS.GamePlay
                     break;
             }
         }
-        void GetNodeAbsPosition(Scene.UNode node, ref DVector3 absPos)
+        void GetNodeAbsPosition(Scene.TtNode node, ref DVector3 absPos)
         {
             if (node.Parent == null)
                 absPos = node.Placement.Position;
@@ -1433,7 +1433,7 @@ namespace EngineNS.GamePlay
                 //Vector3.TransformCoordinate(in pos, in node.Parent.Placement.mAbsTransform, out absPos);
             }
         }
-        void GetNodeAbsRotation(Scene.UNode node, out Quaternion absRot)
+        void GetNodeAbsRotation(Scene.TtNode node, out Quaternion absRot)
         {
             if (node.Parent == null)
                 absRot = node.Placement.Quat;
@@ -1448,7 +1448,7 @@ namespace EngineNS.GamePlay
 
             if(mSelectedNodes != null && mSelectedNodes.Count > 0)
             {
-                mRootNode.UnsetStyle(Scene.UNode.ENodeStyles.Invisible);
+                mRootNode.UnsetStyle(Scene.TtNode.ENodeStyles.Invisible);
                 if (!mIsTransAxisOperation)
                 {
                     var camera = mCameraController.Camera.mCoreObject;
@@ -1631,7 +1631,7 @@ namespace EngineNS.GamePlay
             }
             else
             {
-                mRootNode.SetStyle(Scene.UNode.ENodeStyles.Invisible);
+                mRootNode.SetStyle(Scene.TtNode.ENodeStyles.Invisible);
             }
         }
 

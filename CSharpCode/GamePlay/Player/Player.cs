@@ -9,9 +9,9 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Player
 {
-    public partial class TtPlayer : UNode, IEventProcessor
+    public partial class TtPlayer : TtNode, IEventProcessor
     {
-        public partial class TtPlayerData : UNodeData
+        public partial class TtPlayerData : TtNodeData
         {
             [Rtti.Meta]
             public UCharacterController CharacterController { get; set; } = null; //there maybe many controllers cause of one player can control many characters, for now assume only one
@@ -24,7 +24,7 @@ namespace EngineNS.GamePlay.Player
                 return NodeData as TtPlayerData;
             }
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (await base.InitializeNode(world, data, bvType, placementType) == false)
             {
@@ -37,7 +37,7 @@ namespace EngineNS.GamePlay.Player
         {
             base.OnGatherVisibleMeshes(rp);
         }
-        protected override void OnParentSceneChanged(UScene prev, UScene cur)
+        protected override void OnParentSceneChanged(TtScene prev, TtScene cur)
         {
 
         }

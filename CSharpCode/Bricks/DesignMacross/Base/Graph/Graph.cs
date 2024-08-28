@@ -86,7 +86,10 @@ namespace EngineNS.DesignMacross.Base.Graph
         }
         #endregion ISelectable
         #region IContextMeunable
-
+        public virtual void ConstructLinkedPinContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
+        {
+            
+        }
         public virtual void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
         {
 

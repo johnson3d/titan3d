@@ -11,6 +11,7 @@ namespace EngineNS
     {
         public DVector3 Minimum;
         public DVector3 Maximum;
+        public static readonly DBoundingBox Empty = new DBoundingBox(DVector3.Zero, float.MinValue);
         public DBoundingBox(in DVector3 minimum, in DVector3 maximum)
         {
             Minimum = minimum;

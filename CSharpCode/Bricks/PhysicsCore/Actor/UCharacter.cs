@@ -11,7 +11,7 @@ namespace EngineNS.GamePlay.Character
             
         }
         public Bricks.PhysicsCore.TtPhyController PhyController { get; set; }
-        partial void CreatePxCapsuleController(ref bool result, Scene.UScene scene, float radius, float height)
+        partial void CreatePxCapsuleController(ref bool result, Scene.TtScene scene, float radius, float height)
         {
             var desc = new Bricks.PhysicsCore.TtPhyCapsuleControllerDesc();
             desc.mCoreObject.SetCapsuleHeight(height);

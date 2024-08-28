@@ -806,7 +806,7 @@ namespace EngineNS.Rtti
                     }
                 }
             }
-            return null;
+            return Rtti.UTypeDescManager.Instance.FindNameAlias(fullName);
         }
         public System.Type GetTypeFromString(string typeStr)
         {

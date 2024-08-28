@@ -45,14 +45,14 @@ namespace EngineNS.UI.Editor
         {
             mSelectedDecoratorUIHost = new SelectedDecorator();
             mSelectedDecoratorUIHost.DrawBrush.Color = Color4b.LightGreen;
-            SelectedRect = await TtUINode.AddUINode(PreviewViewport.World, mUINode, new UNodeData(),
+            SelectedRect = await TtUINode.AddUINode(PreviewViewport.World, mUINode, new TtNodeData(),
                 typeof(GamePlay.UPlacement), mSelectedDecoratorUIHost, DVector3.Zero, Vector3.One, Quaternion.Identity);
             SelectedRect.Parent = null;
 
             var pointAtHost = new EditorUIHost();
             pointAtHost.DrawBrush.Color = Color4b.LightBlue;
             pointAtHost.PathWidth = 4.5f;
-            PointAtRect = await TtUINode.AddUINode(PreviewViewport.World, mUINode, new UNodeData(),
+            PointAtRect = await TtUINode.AddUINode(PreviewViewport.World, mUINode, new TtNodeData(),
                 typeof(GamePlay.UPlacement), pointAtHost, DVector3.Zero, Vector3.One, Quaternion.Identity);
             PointAtRect.Parent = null;
 

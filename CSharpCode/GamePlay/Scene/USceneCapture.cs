@@ -8,9 +8,9 @@ using static EngineNS.GamePlay.UWorld;
 
 namespace EngineNS.GamePlay.Scene
 {
-    [Bricks.CodeBuilder.ContextMenu("Capture", "SceneCapture", UNode.EditorKeyword)]
-    [UNode(NodeDataType = typeof(USceneCapture.USceneCaptureData), DefaultNamePrefix = "Capture")]
-    public partial class USceneCapture : USceneActorNode, ITickable, IRootForm
+    [Bricks.CodeBuilder.ContextMenu("Capture", "SceneCapture", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(USceneCapture.USceneCaptureData), DefaultNamePrefix = "Capture")]
+    public partial class USceneCapture : TtSceneActorNode, ITickable, IRootForm
     {
         public int GetTickOrder()
         {
@@ -22,7 +22,7 @@ namespace EngineNS.GamePlay.Scene
             OnlyShowNodes,
             ExcludeNodes,
         }
-        public class USceneCaptureData : UNodeData
+        public class USceneCaptureData : TtNodeData
         {
             [Rtti.Meta]
             [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]
@@ -40,7 +40,7 @@ namespace EngineNS.GamePlay.Scene
         public Editor.Controller.EditorCameraController CameraController = new Editor.Controller.EditorCameraController();
         public GamePlay.UWorld CaptureWorld { get; set; }
         GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
 
@@ -70,7 +70,7 @@ namespace EngineNS.GamePlay.Scene
             mVisParameter.OnVisitNode = this.OnVisitNode;
             return true;
         }
-        bool OnVisitNode(Scene.UNode node, UVisParameter arg)
+        bool OnVisitNode(Scene.TtNode node, UVisParameter arg)
         {
             switch (CaptureMode)
             {
@@ -80,7 +80,7 @@ namespace EngineNS.GamePlay.Scene
                     }
                 case ECaptureMode.OnlyShowNodes:
                     {
-                        var actor = node as USceneActorNode;
+                        var actor = node as TtSceneActorNode;
                         if (actor == null)
                             return false;
                         var data = GetNodeData<USceneCaptureData>();
@@ -88,7 +88,7 @@ namespace EngineNS.GamePlay.Scene
                     }
                 case ECaptureMode.ExcludeNodes:
                     {
-                        var actor = node as USceneActorNode;
+                        var actor = node as TtSceneActorNode;
                         if (actor == null)
                             return false;
                         var data = GetNodeData<USceneCaptureData>();

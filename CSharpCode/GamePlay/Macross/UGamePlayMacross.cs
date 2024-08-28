@@ -16,9 +16,9 @@ using EngineNS.Bricks.StateMachine.TimedSM;
 
 namespace EngineNS.GamePlay.GamePlayMacross
 {
-    public class UGamePlayMacrossNode : GamePlay.Scene.ULightWeightNodeBase
+    public class UGamePlayMacrossNode : GamePlay.Scene.TtLightWeightNodeBase
     {
-        public class UGamePlayMacrossNodeData : UNodeData
+        public class UGamePlayMacrossNodeData : TtNodeData
         {
             [Rtti.Meta]
             [RName.PGRName(FilterExts = Bricks.CodeBuilder.UMacross.AssetExt, MacrossType = typeof(UGameplayMacross))]
@@ -54,9 +54,9 @@ namespace EngineNS.GamePlay.GamePlayMacross
                     return mMcGamePlay;
                 }
             }
-            public UMeshNode AnimatedMeshNode = null;
+            public TtMeshNode AnimatedMeshNode = null;
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             SetStyle(ENodeStyles.Invisible);
             if (!await base.InitializeNode(world, data, bvType, placementType))
@@ -65,12 +65,12 @@ namespace EngineNS.GamePlay.GamePlayMacross
             }
             return true;
         }
-        public override UNode Parent
+        public override TtNode Parent
         {
             set
             {
                 base.Parent = value;
-                var meshNode = value as UMeshNode;
+                var meshNode = value as TtMeshNode;
                 if (meshNode != null)
                 {
                     var task = GetNodeData<UGamePlayMacrossNodeData>().McGamePlay.Get().ConstructAnimGraph(meshNode);
@@ -94,10 +94,10 @@ namespace EngineNS.GamePlay.GamePlayMacross
                 base.TickLogic(args);
             }   
         }
-        public override void OnNodeLoaded(UNode parent)
+        public override void OnNodeLoaded(TtNode parent)
         {
             base.OnNodeLoaded(parent);
-            var animMesh = parent as UMeshNode;
+            var animMesh = parent as TtMeshNode;
             var data = GetNodeData<UGamePlayMacrossNodeData>();
             var mcrs = data.McGamePlay;
             var task = mcrs.Get()?.ConstructAnimGraph(animMesh);
@@ -121,7 +121,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
         public virtual void ConstructLogicGraph()
         {
         }
-        public async virtual Task<bool> ConstructAnimGraph(UMeshNode animatedMeshNode)
+        public async virtual Task<bool> ConstructAnimGraph(TtMeshNode animatedMeshNode)
         {
             //return false;
             var animatablePose = animatedMeshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as EngineNS.Animation.SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
@@ -178,7 +178,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
         {
 
         }
-        public async override Task<bool> ConstructAnimGraph(UMeshNode animatedMeshNode)
+        public async override Task<bool> ConstructAnimGraph(TtMeshNode animatedMeshNode)
         {
             var animatablePose = animatedMeshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as EngineNS.Animation.SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
             var skinMDfQueue = animatedMeshNode.Mesh.MdfQueue as EngineNS.Graphics.Mesh.UMdfSkinMesh;

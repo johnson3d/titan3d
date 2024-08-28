@@ -97,7 +97,7 @@ namespace EngineNS.Bricks.PhysicsCore
 
     public class UPhySceneMember : IMemberTickable
     {
-        private GamePlay.Scene.UScene HostScene;
+        private GamePlay.Scene.TtScene HostScene;
         private TtPhyScene mPxScene;
         public TtPhyScene PxScene
         {
@@ -114,7 +114,7 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            var scene = host as GamePlay.Scene.UScene;
+            var scene = host as GamePlay.Scene.TtScene;
             if (scene == null)
                 return false;
             HostScene = scene;
@@ -140,21 +140,31 @@ namespace EngineNS.Bricks.PhysicsCore
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UPhySceneMember), nameof(TickLogic));
         System.Threading.AutoResetEvent PxSceneTickEndEvent = new System.Threading.AutoResetEvent(false);
+        private float TickLogic_ellapse;
         public void TickLogic(object host, float ellapse)
         {
-            TickPxScene(ellapse);
-            //var task = TtEngine.Instance.EventPoster.RunOn((state) =>
-            //{
-            //    TickPxScene(ellapse);
-            //    return true;
-            //}, Thread.Async.EAsyncTarget.TPools, null, PxSceneTickEndEvent);
-            //PxSceneTickEndEvent?.WaitOne();
+            if (TtEngine.Instance.Config.UsePhysxMT)
+            {
+                TickLogic_ellapse = ellapse;
+                TtEngine.Instance.EventPoster.RunOn(static (state) =>
+                {
+                    var scene = state.UserArguments.Obj0 as UPhySceneMember;
+                    scene.TickPxScene(scene.TickLogic_ellapse);
+                    return true;
+                }, Thread.Async.EAsyncTarget.Physics, this, PxSceneTickEndEvent);
+                //PxSceneTickEndEvent?.WaitOne();
 
-            //var hostNode = host as UNode;
-            //hostNode.GetWorld().RegAfterTickAction(() =>
-            //{
-            //    PxSceneTickEndEvent?.WaitOne();
-            //});
+                //var hostNode = host as UNode;
+                //hostNode.GetWorld().RegAfterTickAction(() =>
+                TtEngine.Instance.RegAfterTickAction(() =>
+                {
+                    PxSceneTickEndEvent?.WaitOne();
+                });
+            }
+            else
+            {
+                TickPxScene(ellapse);
+            }
         }
         private void TickPxScene(float ellapse)
         {
@@ -172,7 +182,7 @@ namespace EngineNS.Bricks.PhysicsCore
 
 namespace EngineNS.GamePlay.Scene
 {
-    public partial class UScene
+    public partial class TtScene
     {
         public Bricks.PhysicsCore.UPhySceneMember PxSceneMB { get; } = new Bricks.PhysicsCore.UPhySceneMember();
     }

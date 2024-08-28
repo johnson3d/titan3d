@@ -305,7 +305,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         //Graphics.Mesh.UMeshPrimitives TerrainMesh;
         //Graphics.Mesh.TtMesh PreviewMesh = new Graphics.Mesh.TtMesh();
-        Bricks.Terrain.CDLOD.UTerrainNode PreviewTerrainNode;
+        Bricks.Terrain.CDLOD.TtTerrainNode PreviewTerrainNode;
         public override async System.Threading.Tasks.Task DoPreviewMesh()
         {
             var graph = this.ParentGraph as UPgcGraph;
@@ -339,8 +339,8 @@ namespace EngineNS.Bricks.Procedure.Node
 
                 graph.GraphEditor.PreviewRoot.ClearChildren();
 
-                var terrainNode = new Bricks.Terrain.CDLOD.UTerrainNode();
-                var terrainData = new Bricks.Terrain.CDLOD.UTerrainNode.UTerrainData();
+                var terrainNode = new Bricks.Terrain.CDLOD.TtTerrainNode();
+                var terrainData = new Bricks.Terrain.CDLOD.TtTerrainNode.TtTerrainData();
                 terrainData.NumOfLevelX = 1;
                 terrainData.NumOfLevelZ = 1;
                 terrainData.LODRangeFloat.Clear();

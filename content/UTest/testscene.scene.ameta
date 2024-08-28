@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.GamePlay.Scene.USceneAMeta@EngineCore">
+<Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="a00c461a-6cda-478a-8ff7-0f27abd247a7" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.UScene&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
@@ -15,5 +15,5 @@
     <e_1 Value="Game,utest/puppet/mesh/puppet.ums,f96719f6-83b6-4bd6-87f2-547a6cf50c04" />
     <e_2 Value="Game,utest/brdf_test/chair2.ums,5e719504-b5a0-4b08-bfb1-03c410445a57" />
   </RefAssetRNames>
-  <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.UScene@EngineCore" />
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
 </Root>

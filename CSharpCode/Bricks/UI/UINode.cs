@@ -11,8 +11,8 @@ using System.Threading.Tasks;
 
 namespace EngineNS.UI
 {
-    [Bricks.CodeBuilder.ContextMenu("UINode,UI", "UINode", UNode.EditorKeyword)]
-    [UNode(NodeDataType = typeof(TtUINode.TtUINodeData), DefaultNamePrefix = "UI")]
+    [Bricks.CodeBuilder.ContextMenu("UINode,UI", "UINode", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtUINode.TtUINodeData), DefaultNamePrefix = "UI")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtUINode : TtGpuSceneNode
     {
@@ -68,14 +68,14 @@ namespace EngineNS.UI
                 return null;
             return mUIHost[index];
         }
-        public class TtUINodeData : UNodeData
+        public class TtUINodeData : TtNodeData
         {
             [Rtti.Meta]
             [RName.PGRName(FilterExts = UI.TtUIAsset.AssetExt)]
             public RName UIName { get; set; }
         }
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data as TtUINodeData == null)
                 data = new TtUINodeData();
@@ -107,7 +107,7 @@ namespace EngineNS.UI
                 // todo: load ui
             }
         }
-        public override void OnNodeLoaded(UNode parent)
+        public override void OnNodeLoaded(TtNode parent)
         {
             base.OnNodeLoaded(parent);
 
@@ -153,7 +153,7 @@ namespace EngineNS.UI
             if(UIName != null)
                 ameta.AddReferenceAsset(UIName);
         }
-        public static async TtTask<TtUINode> AddUINode(GamePlay.UWorld world, UNode parent, UNodeData data, Type placementType, TtUIHost uiHost, DVector3 pos, Vector3 scale, Quaternion quat)
+        public static async TtTask<TtUINode> AddUINode(GamePlay.UWorld world, TtNode parent, TtNodeData data, Type placementType, TtUIHost uiHost, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
             var uiNode = await scene.NewNode(world, typeof(TtUINode), data, EBoundVolumeType.Box, placementType) as TtUINode;

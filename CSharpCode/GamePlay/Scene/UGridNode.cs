@@ -4,14 +4,14 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene
 {
-    [UNode(NodeDataType = typeof(UGridNode.UGridNodeData), DefaultNamePrefix = "Grid")]
-    public partial class UGridNode : UMeshNode
+    [TtNode(NodeDataType = typeof(UGridNode.UGridNodeData), DefaultNamePrefix = "Grid")]
+    public partial class UGridNode : TtMeshNode
     {
-        public class UGridNodeData : UNodeData
+        public class UGridNodeData : TtNodeData
         {
         }
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data == null)
             {
@@ -26,7 +26,7 @@ namespace EngineNS.GamePlay.Scene
         public Graphics.Pipeline.TtViewportSlate ViewportSlate;
         public Graphics.Pipeline.Shader.TtMaterialInstance mGridlineMaterial;
         public Graphics.Mesh.UMdfGridUVMesh GridUVModifier;
-        public static async Thread.Async.TtTask<UGridNode> AddGridNode(GamePlay.UWorld world, UNode parent)
+        public static async Thread.Async.TtTask<UGridNode> AddGridNode(GamePlay.UWorld world, TtNode parent)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var material = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/gridline.material", RName.ERNameType.Engine));

@@ -13,9 +13,15 @@
     <Compile Include="$(MSBuildThisFileDirectory)BlendTree\Node\BlendTree_AnimStateMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\AnimASTBuildUtil.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\BlendTreeClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\GraphElement_PoseLine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\BlendTreeNodeClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\GraphElement_BlendTreeNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\PoseLineDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Graph_BlendTree.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\BlendTree_AnimStateMachineClassDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\BlendTree_PoseOutputClassDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\GraphElement_BlendTree_AnimStateMachine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\GraphElement_BlendTree_PoseOutput.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\BlendTree\OutlineElement_BlendTreeGraph.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\Postprocessing\AnimFinalPoseOutputCclassDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\Postprocessing\OutlineElement_AnimFinalPoseOutput.cs" />
@@ -100,7 +106,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)AnimationModule.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)Macross\BlendTree\Node\" />
     <Folder Include="$(MSBuildThisFileDirectory)MorphAnimation\" />
   </ItemGroup>
   <ItemGroup>

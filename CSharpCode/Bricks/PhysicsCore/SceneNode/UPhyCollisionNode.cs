@@ -10,14 +10,14 @@ using static EngineNS.Bricks.PhysicsCore.SceneNode.TtPhyCollisionNode;
 
 namespace EngineNS.Bricks.PhysicsCore.SceneNode
 {
-    public abstract class TtPhyCollisionNode : GamePlay.Scene.ULightWeightNodeBase
+    public abstract class TtPhyCollisionNode : GamePlay.Scene.TtLightWeightNodeBase
     {
-        public class TtPhyCollisionNodeData : GamePlay.Scene.UNodeData
+        public class TtPhyCollisionNodeData : GamePlay.Scene.TtNodeData
         {
            
         }
         public Bricks.PhysicsCore.TtPhyActor PhyActor { get; set; }
-        protected override void OnParentChanged(UNode prev, UNode cur)
+        protected override void OnParentChanged(TtNode prev, TtNode cur)
         {
             base.OnParentChanged(prev, cur);
             PhyActor.TagNode = Parent;
@@ -26,7 +26,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             PhyActor.AddToScene(ParentScene.PxSceneMB.PxScene);
         }
 
-        protected override void OnParentSceneChanged(UScene prev, UScene cur)
+        protected override void OnParentSceneChanged(TtScene prev, TtScene cur)
         {
             base.OnParentSceneChanged(prev, cur);
             //TODO: Remove from Prev-Scene if exist
@@ -71,8 +71,8 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
 
     }
 
-    [Bricks.CodeBuilder.ContextMenu("SphereCollisionNode", "SphereCollisionNode", UNode.EditorKeyword)]
-    [UNode(NodeDataType = typeof(TtPhySphereCollisionNode.UPhySphereCollisionNodeData), DefaultNamePrefix = "SphereCollisionNode")]
+    [Bricks.CodeBuilder.ContextMenu("SphereCollisionNode", "SphereCollisionNode", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtPhySphereCollisionNode.UPhySphereCollisionNodeData), DefaultNamePrefix = "SphereCollisionNode")]
     public class TtPhySphereCollisionNode : TtPhySingleShapeCollisionNode
     {
         public class UPhySphereCollisionNodeData : UPhySingleShapeCollisionNodeData
@@ -83,7 +83,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         {
             get => NodeData as UPhySphereCollisionNodeData;
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var baseResult = await base.InitializeNode(world, data, bvType, placementType);
             if (!baseResult)
@@ -120,7 +120,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         {
             get => NodeData as UPhyBoxCollisionNodeData;
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var baseResult = await base.InitializeNode(world, data, bvType, placementType);
             if (!baseResult)

@@ -18,9 +18,9 @@ namespace EngineNS.Animation.SceneNode
             Value = value;
         }
     }
-    public class TtBlendSpaceAnimPlayNode : GamePlay.Scene.ULightWeightNodeBase
+    public class TtBlendSpaceAnimPlayNode : GamePlay.Scene.TtLightWeightNodeBase
     {
-        public class TtBlendSpaceAnimPlayNodeData : UNodeData
+        public class TtBlendSpaceAnimPlayNodeData : TtNodeData
         {
             [Rtti.Meta]
             [RName.PGRName(FilterExts = Animation.Asset.BlendSpace.TtBlendSpace2D.AssetExt)]
@@ -34,7 +34,7 @@ namespace EngineNS.Animation.SceneNode
         }
         public Animation.Player.TtBlendSpace2DPlayer Player { get; set; }
 
-        public override UNode Parent
+        public override TtNode Parent
         {
             get => base.Parent;
             set
@@ -44,7 +44,7 @@ namespace EngineNS.Animation.SceneNode
             }
         }
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             SetStyle(ENodeStyles.Invisible);
             if (!await base.InitializeNode(world, data, bvType, placementType))
@@ -77,7 +77,7 @@ namespace EngineNS.Animation.SceneNode
 
             return true;
         }
-        public void BindingTo(UMeshNode meshNode)
+        public void BindingTo(TtMeshNode meshNode)
         {
             System.Diagnostics.Debug.Assert(meshNode != null);
 
@@ -106,12 +106,12 @@ namespace EngineNS.Animation.SceneNode
             }
         }
 
-        public static async System.Threading.Tasks.Task<TtBlendSpaceAnimPlayNode> AddBlendSpace2DAnimPlayNode(GamePlay.UWorld world, UNode parent, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public static async System.Threading.Tasks.Task<TtBlendSpaceAnimPlayNode> AddBlendSpace2DAnimPlayNode(GamePlay.UWorld world, TtNode parent, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
-            System.Diagnostics.Debug.Assert(parent is UMeshNode);
+            System.Diagnostics.Debug.Assert(parent is TtMeshNode);
             var node = new Animation.SceneNode.TtBlendSpaceAnimPlayNode();
             await node.InitializeNode(world, data, bvType, placementType);
-            node.BindingTo(parent as UMeshNode);
+            node.BindingTo(parent as TtMeshNode);
             node.Parent = parent;
             return node;
         }

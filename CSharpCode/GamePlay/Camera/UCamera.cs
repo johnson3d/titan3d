@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Camera
 {
-    public class UCamera : GamePlay.Scene.ULightWeightNodeBase
+    public class UCamera : GamePlay.Scene.TtLightWeightNodeBase
     {
         Graphics.Pipeline.UCamera mCamera;
         public Graphics.Pipeline.UCamera Camera

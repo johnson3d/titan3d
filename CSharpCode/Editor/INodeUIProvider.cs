@@ -10,10 +10,10 @@ namespace EngineNS.Editor
         INodeUIProvider GetChildUI(int index);
         string NodeName { get; }
         bool Selected { get; set; }
-        bool DrawNode(UTreeNodeDrawer tree, int index, int NumOfChild);
+        bool DrawNode(TtTreeNodeDrawer tree, int index, int NumOfChild);
         GamePlay.UWorld GetWorld();
     }
-    public class UTreeNodeDrawer
+    public class TtTreeNodeDrawer
     {
         public void DrawTree(INodeUIProvider provider, int index)
         {
@@ -56,7 +56,7 @@ namespace EngineNS.Editor
 
 namespace EngineNS.GamePlay.Scene
 {
-    public partial class UNode : Editor.INodeUIProvider
+    public partial class TtNode : Editor.INodeUIProvider
     {
         public virtual void OnCommand(object cmd)
         {
@@ -72,7 +72,7 @@ namespace EngineNS.GamePlay.Scene
         {
             return Children[index];
         }
-        public virtual bool DrawNode(Editor.UTreeNodeDrawer tree, int index, int NumOfChild)
+        public virtual bool DrawNode(Editor.TtTreeNodeDrawer tree, int index, int NumOfChild)
         {
             ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
             if (this.Selected)

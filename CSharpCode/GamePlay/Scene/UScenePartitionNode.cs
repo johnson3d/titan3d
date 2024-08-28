@@ -3,14 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using static EngineNS.Bricks.Terrain.CDLOD.UTerrainNode;
+using static EngineNS.Bricks.Terrain.CDLOD.TtTerrainNode;
 
 namespace EngineNS.GamePlay.Scene
 {
     /// <summary>
     /// 包含Scene中该Level的node指针，用来
     /// </summary>
-    public partial class UScenePartitionLevel : UNode
+    public partial class UScenePartitionLevel : TtNode
     {
 
     }
@@ -22,9 +22,9 @@ namespace EngineNS.GamePlay.Scene
     /// 非partial的Node仍然在Scene的Children中
     /// </summary>
     //[DependencyNode(UTerrainNode)]
-    public partial class UScenePartitionNode : UNode
+    public partial class UScenePartitionNode : TtNode
     {
-        public class UScenePartitionNodeData : USceneData
+        public class UScenePartitionNodeData : TtSceneData
         {
             [Rtti.Meta]
             public int NumOfLevelX { get; set; } = 100;
@@ -41,7 +41,7 @@ namespace EngineNS.GamePlay.Scene
         public DVector3 EyeCenter;
         public Vector3 EyeLocalCenter;
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             return await base.InitializeNode(world, data, bvType, placementType);
         }
@@ -79,8 +79,8 @@ namespace EngineNS.GamePlay.Scene
 
         void PartitioningScene()
         {
-            System.Diagnostics.Debug.Assert(Parent is UScene);
-            var parentScene = Parent as UScene;
+            System.Diagnostics.Debug.Assert(Parent is TtScene);
+            var parentScene = Parent as TtScene;
             foreach (var i in parentScene.Children)
             {
                 if (i == this)

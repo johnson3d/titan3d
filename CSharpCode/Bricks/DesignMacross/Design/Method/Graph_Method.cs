@@ -157,7 +157,7 @@ namespace EngineNS.DesignMacross.Design
 
 
 
-        public void ConstructLinkedPinContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
+        public override void ConstructLinkedPinContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
         {
             popupMenu.bHasSearchBox = true;
             TtMethodGraphLinkedPinContextMenuUtil.ConstructMenuItemsAboutAssembly(ref context, popupMenu, this);

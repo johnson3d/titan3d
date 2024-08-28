@@ -1,4 +1,5 @@
-﻿using EngineNS.Bricks.CodeBuilder;
+﻿using EngineNS.Animation.Macross;
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.StateMachine.Macross.StateAttachment;
 using EngineNS.Bricks.StateMachine.Macross.StateTransition;
 using EngineNS.DesignMacross;
@@ -84,17 +85,9 @@ namespace EngineNS.Bricks.StateMachine.Macross.SubState
         #region Internal AST Build
         private UMethodDeclaration BuildOverrideInitializeMethod()
         {
-            UMethodDeclaration methodDeclaration = new UMethodDeclaration();
-            methodDeclaration.IsOverride = true;
-            methodDeclaration.MethodName = "Initialize";
-            methodDeclaration.ReturnValue = new UVariableDeclaration()
-            {
-                VariableType = new UTypeReference(typeof(bool)),
-                InitValue = new UDefaultValueExpression(typeof(bool)),
-                VariableName = "result"
-            };
+            var methodDeclaration = TtStateMachineASTBuildUtil.CreateOverridedInitMethodStatement();
 
-            foreach(var attachment in Attachments)
+            foreach (var attachment in Attachments)
             {
                 var stateAddAttachMentMethodInvoke = new UMethodInvokeStatement();
                 stateAddAttachMentMethodInvoke.Host = new USelfReferenceExpression();
@@ -103,9 +96,9 @@ namespace EngineNS.Bricks.StateMachine.Macross.SubState
                 methodDeclaration.MethodBody.Sequence.Add(stateAddAttachMentMethodInvoke);
             }
 
-            UAssignOperatorStatement returnValueAssign = new UAssignOperatorStatement();
-            returnValueAssign.To = new UVariableReferenceExpression("result");
-            returnValueAssign.From = new UPrimitiveExpression(true);
+            var returnValueAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
+                                        new UVariableReferenceExpression(methodDeclaration.ReturnValue.VariableName),
+                                        new UPrimitiveExpression(true));
             methodDeclaration.MethodBody.Sequence.Add(returnValueAssign);
             return methodDeclaration;
         }

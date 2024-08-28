@@ -5,11 +5,11 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene
 {
-    [Bricks.CodeBuilder.ContextMenu("Bezier", "BezierSpline", UNode.EditorKeyword)]
-    [UNode(NodeDataType = typeof(UBezierSplineNode.UBezierSplineNodeData), DefaultNamePrefix = "BzSpline")]
-    public class UBezierSplineNode : USceneActorNode
+    [Bricks.CodeBuilder.ContextMenu("Bezier", "BezierSpline", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(UBezierSplineNode.UBezierSplineNodeData), DefaultNamePrefix = "BzSpline")]
+    public class UBezierSplineNode : TtSceneActorNode
     {
-        public class UBezierSplineNodeData : UNodeData
+        public class UBezierSplineNodeData : TtNodeData
         {
             [Rtti.Meta]
             public UBezier3DSpline Spline { get; set; }
@@ -223,7 +223,7 @@ namespace EngineNS.GamePlay.Scene
             UpdateAABB();
             Parent?.UpdateAABB();
         }
-        public override void OnNodeLoaded(UNode parent)
+        public override void OnNodeLoaded(TtNode parent)
         {
             base.OnNodeLoaded(parent);
             UpdateAbsTransform();

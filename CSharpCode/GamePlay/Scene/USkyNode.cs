@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 namespace EngineNS.GamePlay.Scene
 {
     //https://zhuanlan.zhihu.com/p/621412675
-    [Bricks.CodeBuilder.ContextMenu("Sky", "Sky", UNode.EditorKeyword)]
-    [UNode(NodeDataType = typeof(USkyNode.TtSkyNodeData), DefaultNamePrefix = "Sky")]
-    public class USkyNode : UMeshNode
+    [Bricks.CodeBuilder.ContextMenu("Sky", "Sky", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtSkyNode.TtSkyNodeData), DefaultNamePrefix = "Sky")]
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.USkyNode@EngineCore" })]
+    public class TtSkyNode : TtMeshNode
     {
-        public class TtSkyNodeData : UMeshNodeData
+        [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.USkyNode.TtSkyNodeData@EngineCore" })]
+        public class TtSkyNodeData : TtMeshNodeData
         {
             public TtSkyNodeData()
             {
@@ -50,7 +52,7 @@ namespace EngineNS.GamePlay.Scene
         }
 
         public Graphics.Mesh.TtMesh SunMesh = new Graphics.Mesh.TtMesh();
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var skyData = data as TtSkyNodeData;
             if (skyData == null)

@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace EngineNS.GamePlay.Scene
 {
-    [Bricks.CodeBuilder.ContextMenu("Sun", "Sun", UNode.EditorKeyword)]
-    [UNode(NodeDataType = typeof(TtSunNode.TtSunNodeData), DefaultNamePrefix = "Sun")]
-    public class TtSunNode : USceneActorNode
+    [Bricks.CodeBuilder.ContextMenu("Sun", "Sun", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtSunNode.TtSunNodeData), DefaultNamePrefix = "Sun")]
+    public class TtSunNode : TtSceneActorNode
     {
-        public class TtSunNodeData : UNodeData
+        public class TtSunNodeData : TtNodeData
         {
             public TtSunNodeData()
             {
@@ -21,7 +21,7 @@ namespace EngineNS.GamePlay.Scene
             [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt)]
             public RName SunMaterialName { get; set; }
         }
-        protected override void OnParentChanged(UNode prev, UNode cur)
+        protected override void OnParentChanged(TtNode prev, TtNode cur)
         {
             if (cur == null)
             {
@@ -53,7 +53,7 @@ namespace EngineNS.GamePlay.Scene
                 action();
             }
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
 

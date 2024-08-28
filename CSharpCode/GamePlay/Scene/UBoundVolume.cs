@@ -19,10 +19,10 @@ namespace EngineNS.GamePlay.Scene
         }
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
-            HostNode = tagObject as UNode;
+            HostNode = tagObject as TtNode;
         }
         public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
-        public UNode HostNode { get; set; } = null;
+        public TtNode HostNode { get; set; } = null;
         public BoundingBox mLocalAABB;
         public BoundingBox LocalAABB
         {
@@ -33,6 +33,8 @@ namespace EngineNS.GamePlay.Scene
                 OnVolumeChanged();
             }
         }
+        public DBoundingBox AABB;//包含HostNode Child的AABB
+        public DBoundingBox AbsAABB;//经过AbsTransform变换的AABB
         protected virtual void OnVolumeChanged()
         {
             HostNode.UpdateAABB();

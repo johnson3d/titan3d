@@ -110,33 +110,33 @@ namespace EngineNS.GamePlay
         }
 
         [Rtti.Meta]
-        public async System.Threading.Tasks.Task<GamePlay.Scene.UScene> LoadScene(
-            [RName.PGRName(FilterExts = GamePlay.Scene.UScene.AssetExt)]
+        public async System.Threading.Tasks.Task<GamePlay.Scene.TtScene> LoadScene(
+            [RName.PGRName(FilterExts = GamePlay.Scene.TtScene.AssetExt)]
             RName mapName)
         {
             var viewport = this.WorldViewportSlate;
             var world = viewport.World;
 
-            var scene = await GamePlay.Scene.UScene.LoadScene(world, mapName);
+            var scene = await GamePlay.Scene.TtScene.LoadScene(world, mapName);
             if (scene != null)
             {
                 world.Root.ClearChildren();
-                world.Root.SetStyle(GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
+                world.Root.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
                 scene.Parent = world.Root;
                 return scene;
             }
             return null;
         }
         [Rtti.Meta]
-        public async System.Threading.Tasks.Task<UScene> InitViewportSlateWithScene(
-            [RName.PGRName(FilterExts = GamePlay.Scene.UScene.AssetExt)]
+        public async System.Threading.Tasks.Task<TtScene> InitViewportSlateWithScene(
+            [RName.PGRName(FilterExts = GamePlay.Scene.TtScene.AssetExt)]
             RName mapName,
             float zMin = 0, float zMax = 1, bool bSetToWorld = true)
         {
             var viewport = this.WorldViewportSlate;
             var world = viewport.World;
 
-            var scene = await GamePlay.Scene.UScene.LoadScene(world, mapName);
+            var scene = await GamePlay.Scene.TtScene.LoadScene(world, mapName);
             if (scene == null)
             {
                 return null;
@@ -155,22 +155,22 @@ namespace EngineNS.GamePlay
             return scene;
         }
         [Rtti.Meta]
-        public void SetSceneToWorld(UScene scene)
+        public void SetSceneToWorld(TtScene scene)
         {
             var viewport = this.WorldViewportSlate;
             var world = viewport.World;
 
             world.Root.ClearChildren();
-            world.Root.SetStyle(GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
+            world.Root.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
             scene.Parent = world.Root;
         }
         [Rtti.Meta]
         public GamePlay.Scene.Actor.UActor ChiefPlayer { get; set; }
         [Rtti.Meta]
-        public async System.Threading.Tasks.Task CreateCharacter(Scene.UScene scene)
+        public async System.Threading.Tasks.Task CreateCharacter(Scene.TtScene scene)
         {
             var playerStart = scene.FindFirstChild<TtPlayerStart>();
-            EngineNS.GamePlay.Scene.UNode root = scene;
+            EngineNS.GamePlay.Scene.TtNode root = scene;
             var playerData = new EngineNS.GamePlay.Scene.Actor.UActor.UActorData();
             ChiefPlayer = new EngineNS.GamePlay.Scene.Actor.UActor();
             await ChiefPlayer.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
@@ -178,7 +178,7 @@ namespace EngineNS.GamePlay
             ChiefPlayer.NodeData.Name = "UActor";
             ChiefPlayer.HitproxyType = EngineNS.Graphics.Pipeline.UHitProxy.EHitproxyType.None;
             ChiefPlayer.IsCastShadow = true;
-            ChiefPlayer.SetStyle(EngineNS.GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
+            ChiefPlayer.SetStyle(EngineNS.GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
             if(playerStart == null)
             {
                 ChiefPlayer.Placement.SetTransform(new DVector3(0, 0, 0), Vector3.One, Quaternion.Identity);
@@ -188,11 +188,11 @@ namespace EngineNS.GamePlay
                 ChiefPlayer.Placement.SetTransform(playerStart.Placement.TransformData);
             }
 
-            var meshData1 = new EngineNS.GamePlay.Scene.UMeshNode.UMeshNodeData();
+            var meshData1 = new EngineNS.GamePlay.Scene.TtMeshNode.TtMeshNodeData();
             meshData1.MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
             meshData1.MdfQueueType = EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh)).TypeString;
             meshData1.AtomType = EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Graphics.Mesh.TtMesh.TtAtom)).TypeString;
-            var meshNode1 = new EngineNS.GamePlay.Scene.UMeshNode();
+            var meshNode1 = new EngineNS.GamePlay.Scene.TtMeshNode();
             await meshNode1.InitializeNode(scene.World, meshData1, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
             meshNode1.NodeData.Name = "Robot1";
             meshNode1.Parent = ChiefPlayer;
@@ -216,7 +216,7 @@ namespace EngineNS.GamePlay
             await EngineNS.Animation.SceneNode.TtBlendSpaceAnimPlayNode.AddBlendSpace2DAnimPlayNode(scene.World, meshNode1, sapnd, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UIdentityPlacement));
 
             var characterController = new EngineNS.GamePlay.Controller.UCharacterController();
-            await characterController.InitializeNode(scene.World, new EngineNS.GamePlay.Scene.UNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            await characterController.InitializeNode(scene.World, new EngineNS.GamePlay.Scene.TtNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
             characterController.Parent = root;
             characterController.ControlledCharacter = ChiefPlayer;
 
@@ -231,7 +231,7 @@ namespace EngineNS.GamePlay
             characterController.CameraControlNode = springArm;
 
             var camera = new EngineNS.GamePlay.Camera.UCamera();
-            await camera.InitializeNode(WorldViewportSlate.World, new EngineNS.GamePlay.Scene.UNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            await camera.InitializeNode(WorldViewportSlate.World, new EngineNS.GamePlay.Scene.TtNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
             camera.Parent = springArm;
             camera.Camera = WorldViewportSlate.RenderPolicy.DefaultCamera;
 
@@ -244,15 +244,15 @@ namespace EngineNS.GamePlay
 
             var movement = new EngineNS.GamePlay.Movemnet.UCharacterMovement();
             //movement.EnableGravity = true;
-            await movement.InitializeNode(scene.World, new EngineNS.GamePlay.Scene.UNodeData() { Name = "Movement" }, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            await movement.InitializeNode(scene.World, new EngineNS.GamePlay.Scene.TtNodeData() { Name = "Movement" }, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
             movement.Parent = ChiefPlayer;
 
             characterController.MovementNode = movement;
         }
 
-        public async System.Threading.Tasks.Task CreateSpereActor(Scene.UScene scene)
+        public async System.Threading.Tasks.Task CreateSpereActor(Scene.TtScene scene)
         {
-            EngineNS.GamePlay.Scene.UNode root = scene;
+            EngineNS.GamePlay.Scene.TtNode root = scene;
             var playerData = new EngineNS.GamePlay.Scene.Actor.UActor.UActorData();
             var actor = new EngineNS.GamePlay.Scene.Actor.UActor();
             await actor.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
@@ -260,7 +260,7 @@ namespace EngineNS.GamePlay
             actor.NodeData.Name = "UActor";
             actor.HitproxyType = EngineNS.Graphics.Pipeline.UHitProxy.EHitproxyType.None;
             actor.IsCastShadow = true;
-            actor.SetStyle(EngineNS.GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
+            actor.SetStyle(EngineNS.GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
             actor.Placement.SetTransform(new DVector3(100, 10, 50), Vector3.One, Quaternion.Identity);
 
             var phyControl = new TtPhySphereCollisionNode();
@@ -269,9 +269,9 @@ namespace EngineNS.GamePlay
             await phyControl.InitializeNode(scene.World, phyNodeData, Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
             phyControl.Parent = actor;
         }
-        public async System.Threading.Tasks.Task CreateBoxActor(Scene.UScene scene)
+        public async System.Threading.Tasks.Task CreateBoxActor(Scene.TtScene scene)
         {
-            EngineNS.GamePlay.Scene.UNode root = scene;
+            EngineNS.GamePlay.Scene.TtNode root = scene;
             var playerData = new EngineNS.GamePlay.Scene.Actor.UActor.UActorData();
             var actor = new EngineNS.GamePlay.Scene.Actor.UActor();
             await actor.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
@@ -279,7 +279,7 @@ namespace EngineNS.GamePlay
             actor.NodeData.Name = "UActor";
             actor.HitproxyType = EngineNS.Graphics.Pipeline.UHitProxy.EHitproxyType.None;
             actor.IsCastShadow = true;
-            actor.SetStyle(EngineNS.GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
+            actor.SetStyle(EngineNS.GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
             actor.Placement.SetTransform(new DVector3(100, 2, 50), Vector3.One, Quaternion.Identity);
 
             var phyControl = new TtPhyBoxCollisionNode();

@@ -60,10 +60,10 @@ namespace EngineNS.Bricks.Procedure
                 srv.SrvObject = this.PreviewSRV;
             }
             mesh.Initialize(vms, materials1, Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh)));
-            var nodeData = new GamePlay.Scene.UMeshNode.UMeshNodeData();
+            var nodeData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
             nodeData.Name = "TexturePreivew";
-            var prevMesh = await GamePlay.Scene.UMeshNode.AddMeshNode(graph.GraphEditor.PreviewViewport.World, graph.GraphEditor.PreviewRoot, 
-                    new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh,
+            var prevMesh = await GamePlay.Scene.TtMeshNode.AddMeshNode(graph.GraphEditor.PreviewViewport.World, graph.GraphEditor.PreviewRoot, 
+                    new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.UPlacement), mesh,
                     DVector3.Zero, Vector3.One, Quaternion.Identity);
             prevMesh.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
             prevMesh.IsCastShadow = true;

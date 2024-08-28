@@ -5,17 +5,19 @@ using System.ComponentModel;
 
 namespace EngineNS.GamePlay.Scene
 {
-    [Bricks.CodeBuilder.ContextMenu("MeshNode", "MeshNode", UNode.EditorKeyword)]
-    [UNode(NodeDataType = typeof(UMeshNode.UMeshNodeData), DefaultNamePrefix = "Mesh")]
+    [Bricks.CodeBuilder.ContextMenu("MeshNode", "MeshNode", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtMeshNode.TtMeshNodeData), DefaultNamePrefix = "Mesh")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public partial class UMeshNode : TtGpuSceneNode
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UMeshNode@EngineCore", "EngineNS.GamePlay.Scene.UMeshNode" })]
+    public partial class TtMeshNode : TtGpuSceneNode
     {
         public override void Dispose()
         {
             CoreSDK.DisposeObject(ref mMesh);
             base.Dispose();
         }
-        public class UMeshNodeData : UNodeData
+        [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UMeshNode.UMeshNodeData@EngineCore" })]
+        public class TtMeshNodeData : TtNodeData
         {
             [Rtti.Meta]
             [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
@@ -55,16 +57,16 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
-            if (data as UMeshNodeData == null)
+            if (data as TtMeshNodeData == null)
             {
-                data = new UMeshNodeData();
+                data = new TtMeshNodeData();
             }
             if (await base.InitializeNode(world, data, bvType, placementType) == false)
                 return false;
 
-            var meshData = data as UMeshNodeData;
+            var meshData = data as TtMeshNodeData;
             var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
             if (materialMesh != null)
             {
@@ -73,6 +75,7 @@ namespace EngineNS.GamePlay.Scene
                 this.Mesh = mesh;
                 //await materialMesh.Mesh.TryLoadClusteredMesh();
             }
+            
             return true;
         }
         public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
@@ -145,10 +148,10 @@ namespace EngineNS.GamePlay.Scene
                 mMesh.IsAcceptShadow = value;
             }
         }
-        public static async System.Threading.Tasks.Task<UMeshNode> AddMeshNode(GamePlay.UWorld world, UNode parent, UNodeData data, Type placementType, Graphics.Mesh.TtMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
+        public static async System.Threading.Tasks.Task<TtMeshNode> AddMeshNode(GamePlay.UWorld world, TtNode parent, TtNodeData data, Type placementType, Graphics.Mesh.TtMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
-            var meshNode = await scene.NewNode(world, typeof(UMeshNode), data, EBoundVolumeType.Box, placementType) as UMeshNode;
+            var meshNode = await scene.NewNode(world, typeof(TtMeshNode), data, EBoundVolumeType.Box, placementType) as TtMeshNode;
             if (mesh.MaterialMesh.AssetName != null)
                 meshNode.NodeData.Name = mesh.MaterialMesh.AssetName.Name;
             else
@@ -160,9 +163,9 @@ namespace EngineNS.GamePlay.Scene
 
             return meshNode;
         }
-        public static async System.Threading.Tasks.Task<UMeshNode> AddMeshNode(GamePlay.UWorld world, UNode parent, UNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
+        public static async System.Threading.Tasks.Task<TtMeshNode> AddMeshNode(GamePlay.UWorld world, TtNode parent, TtNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
         {
-            var meshData = data as UMeshNodeData;
+            var meshData = data as TtMeshNodeData;
             var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
             if (materialMesh == null)
                 return null;
@@ -216,7 +219,7 @@ namespace EngineNS.GamePlay.Scene
                 else
                     BoundVolume.LocalAABB.InitEmptyBox();
 
-                var meshData = NodeData as UMeshNodeData;
+                var meshData = NodeData as TtMeshNodeData;
                 if (meshData != null)
                 {
                     meshData.MeshName = mMesh.MaterialMesh.AssetName;
@@ -236,14 +239,14 @@ namespace EngineNS.GamePlay.Scene
         {
             get
             {
-                var meshData = NodeData as UMeshNodeData;
+                var meshData = NodeData as TtMeshNodeData;
                 if (meshData == null)
                     return null;
                 return meshData.MeshName;
             }
             set
             {
-                var meshData = NodeData as UMeshNodeData;
+                var meshData = NodeData as TtMeshNodeData;
                 if (meshData == null)
                     return;
                 meshData.MeshName = value;
@@ -272,12 +275,12 @@ namespace EngineNS.GamePlay.Scene
                 action();
             }
         }
-        public override void OnNodeLoaded(UNode parent)
+        public override void OnNodeLoaded(TtNode parent)
         {
             base.OnNodeLoaded(parent);
 
             UpdateAbsTransform();
-            var meshData = NodeData as UMeshNodeData;
+            var meshData = NodeData as TtMeshNodeData;
             if (meshData == null || meshData.MeshName == null)
             {
                 var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeBoxWireframe(0, 0, 0, 5, 5, 5).ToMesh();

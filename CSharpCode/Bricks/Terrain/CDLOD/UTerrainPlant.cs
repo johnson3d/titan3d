@@ -38,7 +38,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 i.Value.Mesh.Dispose();
             }
         }
-        public class UPlantInstance : GamePlay.Scene.UNode //Graphics.Pipeline.IProxiable
+        public class UPlantInstance : GamePlay.Scene.TtNode //Graphics.Pipeline.IProxiable
         {
             public UPlantInstance()
             {
@@ -86,7 +86,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         public class UPlantType
         {
-            public Bricks.Terrain.CDLOD.UTerrainNode Terrain;
+            public Bricks.Terrain.CDLOD.TtTerrainNode Terrain;
             public UTerrainPlant PlantDesc { get; set; }
             public List<UPlantInstance> ObjInstances { get; } = new List<UPlantInstance>();
             public Graphics.Mesh.TtMaterialMesh MaterialMesh;
@@ -94,7 +94,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             public Graphics.Mesh.UMdfInstanceStaticMesh InstanceMdf;
             public DVector3 InstanceOffset;
             public bool CreateFinished = false;
-            public async System.Threading.Tasks.Task Create(Bricks.Terrain.CDLOD.UTerrainNode trn, DVector3 levelOffset, UTerrainPlant desc)
+            public async System.Threading.Tasks.Task Create(Bricks.Terrain.CDLOD.TtTerrainNode trn, DVector3 levelOffset, UTerrainPlant desc)
             {
                 Terrain = trn;
                 PlantDesc = desc;
@@ -143,7 +143,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             //    }
             //}
         }
-        public void AddPlant(Bricks.Terrain.CDLOD.UTerrainNode trn, in DVector3 levelOffset, UTerrainPlant plant, in FTransform trans, int capacity)
+        public void AddPlant(Bricks.Terrain.CDLOD.TtTerrainNode trn, in DVector3 levelOffset, UTerrainPlant plant, in FTransform trans, int capacity)
         {
             UPlantType type;
             if (PlantTypes.TryGetValue(plant, out type) == false)

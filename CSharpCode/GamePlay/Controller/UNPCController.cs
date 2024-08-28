@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Controller
 {
-    public class UNPCController : UNode, IController
+    public class UNPCController : TtNode, IController
     {
         //UE NavMesh 寻路接口放在Movement里面，我觉得有些不合理，
         //Movement的在设计上应该保持简单，只管移动就好。

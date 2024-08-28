@@ -164,9 +164,9 @@ namespace EngineNS.Editor.Forms
         {
             //throw new NotImplementedException();
         }
-        EngineNS.GamePlay.Scene.UMeshNode mCurrentMeshNode;
+        EngineNS.GamePlay.Scene.TtMeshNode mCurrentMeshNode;
         public float PlaneScale = 5.0f;
-        EngineNS.GamePlay.Scene.UMeshNode PlaneMeshNode;
+        EngineNS.GamePlay.Scene.TtMeshNode PlaneMeshNode;
         protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
@@ -189,7 +189,7 @@ namespace EngineNS.Editor.Forms
                 tMaterials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(TtEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName);
                 PlaneMesh.Initialize(Graphics.Mesh.UMeshDataProvider.MakePlane(10, 10).ToMesh(), tMaterials,
                     Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-                PlaneMeshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), PlaneMesh, new DVector3(0, -0.0001f, 0), Vector3.One, Quaternion.Identity);
+                PlaneMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.UPlacement), PlaneMesh, new DVector3(0, -0.0001f, 0), Vector3.One, Quaternion.Identity);
                 PlaneMeshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
                 PlaneMeshNode.NodeData.Name = "Plane";
                 PlaneMeshNode.IsAcceptShadow = true;
@@ -233,14 +233,14 @@ namespace EngineNS.Editor.Forms
                 materials[i] = mtl;
             }
 
-            var meshData = new EngineNS.GamePlay.Scene.UMeshNode.UMeshNodeData();
+            var meshData = new EngineNS.GamePlay.Scene.TtMeshNode.TtMeshNodeData();
             meshData.MeshName = meshPrimitives.AssetName;
             meshData.MdfQueueType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh));
             meshData.AtomType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.TtMesh.TtAtom));
             var mesh = new Graphics.Mesh.TtMesh();
             mesh.Initialize(meshPrimitives, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfSkinMesh>.TypeDesc);
 
-            var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(PreviewViewport.World, PreviewViewport.World.Root, meshData, typeof(GamePlay.UPlacement), mesh,
+            var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(PreviewViewport.World, PreviewViewport.World.Root, meshData, typeof(GamePlay.UPlacement), mesh,
                         DVector3.Zero, Vector3.One, Quaternion.Identity);
             meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
             meshNode.NodeData.Name = "PreviewObject";

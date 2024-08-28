@@ -1,0 +1,1 @@
+EngineNS.Animation.Macross.BlendTree.TtPoseInPinDescription@EngineCore

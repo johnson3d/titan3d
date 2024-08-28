@@ -49,6 +49,8 @@ namespace EngineNS
         [Rtti.Meta]
         public EMultiRenderMode MultiRenderMode { get; set; } = EMultiRenderMode.QueueNextFrame;
         [Rtti.Meta]
+        public bool UsePhysxMT { get; set; } = true;
+        [Rtti.Meta]
         public bool UseRenderDoc { get; set; } = false;
         [Rtti.Meta]
         public bool Feature_UseRVT { get; set; } = false;

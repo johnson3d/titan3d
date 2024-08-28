@@ -177,7 +177,7 @@ namespace EngineNS.Bricks.VXGI
         private NxRHI.UComputeDraw CollectVxDebuggerDrawcall;
 
         public Graphics.Mesh.TtMesh VxDebugMesh;
-        public GamePlay.Scene.UMeshNode VxDebugMeshNode;
+        public GamePlay.Scene.TtMeshNode VxDebugMeshNode;
 
         private unsafe void ResetComputeDrawcall()
         {
@@ -212,8 +212,8 @@ namespace EngineNS.Bricks.VXGI
         }
         public async System.Threading.Tasks.Task AddDebugMeshNodeToWorld(GamePlay.UWorld world)
         {
-            var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(world, world.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), VxDebugMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
-            meshNode.SetStyle(GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
+            var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, world.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.UPlacement), VxDebugMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+            meshNode.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
             meshNode.NodeData.Name = "Debug_VoxelDebugMeshNode";
             meshNode.IsAcceptShadow = false;
             meshNode.IsCastShadow = false;
@@ -265,11 +265,11 @@ namespace EngineNS.Bricks.VXGI
                 mDebugVoxels = value;
                 if (value)
                 {
-                    VxDebugMeshNode?.UnsetStyle(GamePlay.Scene.UNode.ENodeStyles.Invisible);
+                    VxDebugMeshNode?.UnsetStyle(GamePlay.Scene.TtNode.ENodeStyles.Invisible);
                 }
                 else
                 {
-                    VxDebugMeshNode?.SetStyle(GamePlay.Scene.UNode.ENodeStyles.Invisible);
+                    VxDebugMeshNode?.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.Invisible);
                 }
             }
         }

@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene.Actor
 {
-    public partial class UActor : USceneActorNode
+    public partial class UActor : TtSceneActorNode
     {
-        public partial class UActorData : UNodeData
+        public partial class UActorData : TtNodeData
         {
             [Rtti.Meta]
             public float Radius { get; set; } = 1.0f;
@@ -22,7 +22,7 @@ namespace EngineNS.GamePlay.Scene.Actor
         }
         public UCenterData CenterData { get; } = new UCenterData();
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (await base.InitializeNode(world, data, bvType, placementType) == false)
             {
@@ -31,8 +31,8 @@ namespace EngineNS.GamePlay.Scene.Actor
 
             return true;
         }
-        partial void CreatePxCapsuleActor(ref bool result, Scene.UScene scene, float radius, float height);
-        protected override void OnParentSceneChanged(UScene prev, UScene cur)
+        partial void CreatePxCapsuleActor(ref bool result, Scene.TtScene scene, float radius, float height);
+        protected override void OnParentSceneChanged(TtScene prev, TtScene cur)
         {
             if (cur != null)
             {

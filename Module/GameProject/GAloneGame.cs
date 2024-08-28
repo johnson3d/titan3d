@@ -55,11 +55,11 @@ namespace GameProject
         //    ChiefPlayer.IsCastShadow = true;
         //    ChiefPlayer.SetStyle(EngineNS.GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
 
-        //    var meshData1 = new EngineNS.GamePlay.Scene.UMeshNode.UMeshNodeData();
+        //    var meshData1 = new EngineNS.GamePlay.Scene.TtMeshNode.UMeshNodeData();
         //    meshData1.MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
         //    meshData1.MdfQueueType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh));
         //    meshData1.AtomType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.TtMesh.UAtom));
-        //    var meshNode1 = new EngineNS.GamePlay.Scene.UMeshNode();
+        //    var meshNode1 = new EngineNS.GamePlay.Scene.TtMeshNode();
         //    await meshNode1.InitializeNode(world, meshData1, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
         //    meshNode1.NodeData.Name = "Robot1";
         //    meshNode1.Parent = ChiefPlayer;

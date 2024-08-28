@@ -5,11 +5,11 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Player
 {
-    [Bricks.CodeBuilder.ContextMenu("PlayerStart", "PlayerStart", UNode.EditorKeyword)]
-    [UNode(NodeDataType = typeof(TtPlayerStart.TtPlayerStartData), DefaultNamePrefix = "PlayerStart")]
-    public partial class TtPlayerStart : USceneActorNode
+    [Bricks.CodeBuilder.ContextMenu("PlayerStart", "PlayerStart", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtPlayerStart.TtPlayerStartData), DefaultNamePrefix = "PlayerStart")]
+    public partial class TtPlayerStart : TtSceneActorNode
     {
-        public partial class TtPlayerStartData : UNodeData
+        public partial class TtPlayerStartData : TtNodeData
         {
 
         }

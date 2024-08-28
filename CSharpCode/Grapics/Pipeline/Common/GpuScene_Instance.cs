@@ -286,7 +286,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 i.GpuSceneIndex = -1;
             }
             GpuSceneActors.Clear();
-            world.Root.DFS_VisitNodeTree(static (GamePlay.Scene.UNode node, object arg) =>
+            world.Root.DFS_VisitNodeTree(static (GamePlay.Scene.TtNode node, object arg) =>
             {
                 var actor = node as GamePlay.Scene.TtGpuSceneNode;
                 if (actor == null)

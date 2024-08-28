@@ -3,7 +3,7 @@
     [EngineNS.Macross.UMacross]
     public partial class game01 : EngineNS.GamePlay.UMacrossGame
     {
-        public EngineNS.Macross.UMacrossBreak breaker_InitViewportSlateWithScene_2483316995 = new EngineNS.Macross.UMacrossBreak("breaker_InitViewportSlateWithScene_2483316995");
+        public EngineNS.Macross.UMacrossBreak breaker_InitViewportSlateWithScene_2752037395 = new EngineNS.Macross.UMacrossBreak("breaker_InitViewportSlateWithScene_2752037395");
         public EngineNS.Macross.UMacrossBreak breaker_return_1838318065 = new EngineNS.Macross.UMacrossBreak("breaker_return_1838318065");
         EngineNS.Macross.UMacrossStackFrame mFrame_BeginPlay = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("tutorials/viewinstance/game01.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.MetaAttribute]
@@ -13,14 +13,14 @@
             {
                 System.Boolean ret_1749063466 = default(System.Boolean);
                 mFrame_BeginPlay.SetWatchVariable("host", host);
-                EngineNS.GamePlay.Scene.UScene tmp_r_InitViewportSlateWithScene_2483316995 = default(EngineNS.GamePlay.Scene.UScene);
-                mFrame_BeginPlay.SetWatchVariable("v_mapName_InitViewportSlateWithScene_2483316995", EngineNS.RName.GetRName("tutorials/viewinstance/test01.scene", EngineNS.RName.ERNameType.Game));
-                mFrame_BeginPlay.SetWatchVariable("v_zMin_InitViewportSlateWithScene_2483316995", 0f);
-                mFrame_BeginPlay.SetWatchVariable("v_zMax_InitViewportSlateWithScene_2483316995", 1f);
-                mFrame_BeginPlay.SetWatchVariable("v_bSetToWorld_InitViewportSlateWithScene_2483316995", true);
-                breaker_InitViewportSlateWithScene_2483316995.TryBreak();
-                tmp_r_InitViewportSlateWithScene_2483316995 = (EngineNS.GamePlay.Scene.UScene)await host.InitViewportSlateWithScene(EngineNS.RName.GetRName("tutorials/viewinstance/test01.scene", EngineNS.RName.ERNameType.Game),0f,1f,true);
-                mFrame_BeginPlay.SetWatchVariable("tmp_r_InitViewportSlateWithScene_2483316995", tmp_r_InitViewportSlateWithScene_2483316995);
+                EngineNS.GamePlay.Scene.TtScene tmp_r_InitViewportSlateWithScene_2752037395 = default(EngineNS.GamePlay.Scene.TtScene);
+                mFrame_BeginPlay.SetWatchVariable("v_mapName_InitViewportSlateWithScene_2752037395", EngineNS.RName.GetRName("tutorials/viewinstance/test01.scene", EngineNS.RName.ERNameType.Game));
+                mFrame_BeginPlay.SetWatchVariable("v_zMin_InitViewportSlateWithScene_2752037395", 0f);
+                mFrame_BeginPlay.SetWatchVariable("v_zMax_InitViewportSlateWithScene_2752037395", 1f);
+                mFrame_BeginPlay.SetWatchVariable("v_bSetToWorld_InitViewportSlateWithScene_2752037395", true);
+                breaker_InitViewportSlateWithScene_2752037395.TryBreak();
+                tmp_r_InitViewportSlateWithScene_2752037395 = (EngineNS.GamePlay.Scene.TtScene)await host.InitViewportSlateWithScene(EngineNS.RName.GetRName("tutorials/viewinstance/test01.scene", EngineNS.RName.ERNameType.Game),0f,1f,true);
+                mFrame_BeginPlay.SetWatchVariable("tmp_r_InitViewportSlateWithScene_2752037395", tmp_r_InitViewportSlateWithScene_2752037395);
                 ret_1749063466 = true;
                 mFrame_BeginPlay.SetWatchVariable("ret_1749063466_1838318065", ret_1749063466);
                 breaker_return_1838318065.TryBreak();

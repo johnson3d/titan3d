@@ -15,7 +15,7 @@ namespace EngineNS.GamePlay.Scene.Actor
         public Bricks.PhysicsCore.TtPhyScene GetPxScene() {
             return this.ParentScene?.PxSceneMB.PxScene;
         }
-        partial void CreatePxCapsuleActor(ref bool result, Scene.UScene scene, float radius, float height)
+        partial void CreatePxCapsuleActor(ref bool result, Scene.TtScene scene, float radius, float height)
         {
             var pc = TtEngine.Instance.PhyModule.PhyContext;
             ref var transform = ref Placement.TransformRef;

@@ -53,7 +53,7 @@ namespace EngineNS.DesignMacross
     [DesignMacross]
     public class TtDesignMacrossBase
     {
-        public UNode MacrossNode{ get; set; } = null;
+        public TtNode MacrossNode{ get; set; } = null;
         public virtual bool Initialize() { return false; }
         public virtual void Tick(float elapseSecond) { }
     }

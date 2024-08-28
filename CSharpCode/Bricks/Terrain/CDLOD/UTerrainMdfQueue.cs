@@ -8,7 +8,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 {
     public class TtTerrainModifier : Graphics.Pipeline.Shader.IMeshModifier
     {
-        public UTerrainNode TerrainNode;
+        public TtTerrainNode TerrainNode;
         public TtPatch Patch;
         public int Dimension = 64;
         public bool IsWater = false;

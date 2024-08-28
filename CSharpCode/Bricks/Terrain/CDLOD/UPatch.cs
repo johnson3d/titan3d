@@ -74,7 +74,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public TtPatchLayers Layers = new TtPatchLayers();
 
         public UTerrainLevelData Level;
-        public UTerrainNode TerrainNode
+        public TtTerrainNode TerrainNode
         {
             get => Level.Level.Node;
         }
@@ -297,7 +297,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             StartPosition.Z = (float)(((double)(IndexZ * patchSize)) + CameraOffset.Z);
             StartPosition.Y = (float)(Level.HeightMapMinHeight + CameraOffset.Y);
         }        
-        public void OnAbsTransformChanged(UTerrainNode node, GamePlay.UWorld world)
+        public void OnAbsTransformChanged(TtTerrainNode node, GamePlay.UWorld world)
         {
             ref var transform = ref node.Placement.AbsTransform;
             foreach (var i in TerrainMesh)

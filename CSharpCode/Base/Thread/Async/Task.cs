@@ -12,10 +12,12 @@ namespace EngineNS.Thread.Async
     public struct AsyncFiberMethodBuilder<T>
     {
         private TtTask<T> mTask;
-        private bool mIsTaskVailid;
 
         #region mandatory methods for async state machine builder
-
+        public AsyncFiberMethodBuilder()
+        {
+            mTask = new TtTask<T>();
+        }
         public static AsyncFiberMethodBuilder<T> Create()
         {
             return new AsyncFiberMethodBuilder<T>();
@@ -25,11 +27,6 @@ namespace EngineNS.Thread.Async
         {
             get
             {
-                if (mIsTaskVailid == false)
-                {
-                    mIsTaskVailid = true;
-                    mTask = new TtTask<T>();
-                }
                 return mTask;
             }
         }
@@ -465,10 +462,12 @@ namespace EngineNS.Thread.Async
     public struct AsyncFiberMethodBuilder
     {
         private TtTask mTask;
-        private bool mIsTaskVailid;
 
         #region mandatory methods for async state machine builder
-
+        public AsyncFiberMethodBuilder()
+        {
+            mTask = new TtTask();
+        }
         public static AsyncFiberMethodBuilder Create()
         {
             return new AsyncFiberMethodBuilder();
@@ -478,16 +477,14 @@ namespace EngineNS.Thread.Async
         {
             get
             {
-                if (mIsTaskVailid == false)
-                {
-                    mIsTaskVailid = true;
-                    mTask = new TtTask();
-                }
                 return mTask;
             }
         }
         public void SetException(Exception e) => Task.TrySetException(e);
-        public void SetResult() => Task.TrySetResult();
+        public void SetResult()
+        {
+            Task.TrySetResult();
+        }
         public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
             where TAwaiter : INotifyCompletion
             where TStateMachine : IAsyncStateMachine

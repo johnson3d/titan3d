@@ -9,18 +9,18 @@ namespace EngineNS.Animation
 {
     public class TtAnimUtil
     {
-        public TtAnimatableSkeletonPose CreateAnimatableSkeletonPoseFromeNode(UNode node)
+        public static TtAnimatableSkeletonPose CreateAnimatableSkeletonPoseFromeNode(TtNode node)
         {
-            if(node is UMeshNode meshNode)
+            if(node is TtMeshNode meshNode)
             {
                 var animatablePose = meshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
                 return animatablePose;
             }
             return null;
         }
-        public TtLocalSpaceRuntimePose BindRuntimeSkeletonPoseToNode(UNode node)
+        public static TtLocalSpaceRuntimePose BindRuntimeSkeletonPoseToNode(TtNode node)
         {
-            if (node is UMeshNode meshNode)
+            if (node is TtMeshNode meshNode)
             {
                 var animatablePose = meshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
                 var skinMDfQueue = meshNode.Mesh.MdfQueue as Graphics.Mesh.UMdfSkinMesh;

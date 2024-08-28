@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace EngineNS.GamePlay.Camera
 {
-    public class UCameraSpringArm : ULightWeightNodeBase, ICameraControlNode
+    public class UCameraSpringArm : TtLightWeightNodeBase, ICameraControlNode
     {
-        public class UCameraSpringArmData : UNodeData
+        public class UCameraSpringArmData : TtNodeData
         {
             [Rtti.Meta]
             public DVector3 TargetOffset { get; set; } = DVector3.Zero;

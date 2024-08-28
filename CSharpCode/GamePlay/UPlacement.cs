@@ -12,7 +12,7 @@ namespace EngineNS.GamePlay
         }
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
-            HostNode = tagObject as Scene.UNode;
+            HostNode = tagObject as Scene.TtNode;
         }
         public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
         public virtual DVector3 Position
@@ -83,7 +83,7 @@ namespace EngineNS.GamePlay
             }
         }
 
-        public Scene.UNode HostNode { get; set; }
+        public Scene.TtNode HostNode { get; set; }
         public virtual ref FTransform AbsTransform
         {
             get

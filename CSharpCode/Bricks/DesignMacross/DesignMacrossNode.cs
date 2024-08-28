@@ -8,18 +8,18 @@ using System.Text;
 
 namespace EngineNS.DesignMacross
 {
-    [Bricks.CodeBuilder.ContextMenu("DesignMacrossNode", "DesignMacrossNode", UNode.EditorKeyword)]
-    [UNode(NodeDataType = typeof(TtDesignMacrossNodeData), DefaultNamePrefix = "DM")]
-    public class TtDesignMacrossNode : USceneActorNode
+    [Bricks.CodeBuilder.ContextMenu("DesignMacrossNode", "DesignMacrossNode", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtDesignMacrossNodeData), DefaultNamePrefix = "DM")]
+    public class TtDesignMacrossNode : TtSceneActorNode
     {
-        public class TtDesignMacrossNodeData : UNodeData
+        public class TtDesignMacrossNodeData : TtNodeData
         {
             [Rtti.Meta]
             [RName.PGRName(FilterExts = EngineNS.DesignMacross.UDesignMacross.AssetExt)]
             public RName DesignMacrossName { get; set; }
         }
         Macross.UMacrossGetter<TtDesignMacrossBase> mMacrossGetter = null;
-        public override TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if(DesignMacross!=null && !RName.IsEmpty(DesignMacross))
             {

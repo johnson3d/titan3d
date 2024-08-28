@@ -1,4 +1,5 @@
-﻿using EngineNS.Bricks.CodeBuilder;
+﻿using EngineNS.Animation.Macross;
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.StateMachine.Macross.SubState;
 using EngineNS.DesignMacross;
 using EngineNS.DesignMacross.Base.Description;
@@ -89,30 +90,16 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
         #region Internal AST Build
         private UMethodDeclaration BuildOverrideInitializeMethod()
         {
-            UMethodDeclaration methodDeclaration = new UMethodDeclaration();
-            methodDeclaration.IsOverride = true;
-            methodDeclaration.MethodName = "Initialize";
-            methodDeclaration.ReturnValue = new UVariableDeclaration()
-            {
-                VariableType = new UTypeReference(typeof(bool)),
-                InitValue = new UDefaultValueExpression(typeof(bool)),
-                VariableName = "result"
-            };
-
-           
+            var methodDeclaration = TtStateMachineASTBuildUtil.CreateOverridedInitMethodStatement();
 
             bool bIsSetInitialActiveState = false;
             foreach (var state in States)
             {
-                var subStateVarDec = new UVariableDeclaration();
-                subStateVarDec.VariableName = state.VariableName;
-                subStateVarDec.VariableType = state.VariableType;
-                subStateVarDec.InitValue = new UCreateObjectExpression(state.VariableType.TypeFullName);
-                methodDeclaration.MethodBody.Sequence.Add(subStateVarDec);
+                TtStateMachineASTBuildUtil.CreateNewAndInitInvokeStatement(state, methodDeclaration);
 
-                UAssignOperatorStatement stateMachineAssign = new();
-                stateMachineAssign.To = new UVariableReferenceExpression("StateMachine", new UVariableReferenceExpression(state.VariableName));
-                stateMachineAssign.From = new UVariableReferenceExpression("mStateMachine");
+                var stateMachineAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
+                                            new UVariableReferenceExpression("StateMachine", new UVariableReferenceExpression(state.VariableName)),
+                                            new UVariableReferenceExpression("mStateMachine"));
                 methodDeclaration.MethodBody.Sequence.Add(stateMachineAssign);
 
                 if (state.bInitialActive)
@@ -137,21 +124,17 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
                 Debug.Assert(state_TransitionTo != null);
                 var transitionToVariableName = state_TransitionTo.VariableName;
 
-                var tansitionVarDec = new UVariableDeclaration();
-                tansitionVarDec.VariableName = transition.VariableName;
-                tansitionVarDec.VariableType = transition.VariableType;
-                tansitionVarDec.InitValue = new UCreateObjectExpression(transition.VariableType.TypeFullName);
-                methodDeclaration.MethodBody.Sequence.Add(tansitionVarDec);
+                var attachmentAssign = TtASTBuildUtil.CreateAssignOperatorStatement(new UVariableReferenceExpression(transition.Name), new UCreateObjectExpression(transition.VariableType.TypeFullName));
+                methodDeclaration.MethodBody.Sequence.Add(attachmentAssign);
 
-                UAssignOperatorStatement tansitionFromAssign = new();
-                tansitionFromAssign.To = new UVariableReferenceExpression("From", new UVariableReferenceExpression(transition.VariableName));
-                tansitionFromAssign.From = new USelfReferenceExpression();
+                var tansitionFromAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
+                                            new UVariableReferenceExpression("From", new UVariableReferenceExpression(transition.VariableName)),
+                                            new USelfReferenceExpression());
                 methodDeclaration.MethodBody.Sequence.Add(tansitionFromAssign);
 
-                UAssignOperatorStatement tansitionToAssign = new();
-                tansitionToAssign.To = new UVariableReferenceExpression("To", new UVariableReferenceExpression(transition.VariableName));
-
-                tansitionToAssign.From = new UVariableReferenceExpression(transitionToVariableName);
+                var tansitionToAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
+                                            new UVariableReferenceExpression("To", new UVariableReferenceExpression(transition.VariableName)),
+                                            new UVariableReferenceExpression(transitionToVariableName));
                 methodDeclaration.MethodBody.Sequence.Add(tansitionToAssign);
 
                 var hubAddTransionMethodInvoke = new UMethodInvokeStatement();
@@ -194,21 +177,18 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
                         }
                         Debug.Assert(!string.IsNullOrEmpty(transitionToVariableName));
                     }
-                    
-                    var tansitionVarDec = new UVariableDeclaration();
-                    tansitionVarDec.VariableName = transition.VariableName;
-                    tansitionVarDec.VariableType = transition.VariableType;
-                    tansitionVarDec.InitValue = new UCreateObjectExpression(transition.VariableType.TypeFullName);
-                    methodDeclaration.MethodBody.Sequence.Add(tansitionVarDec);
 
-                    UAssignOperatorStatement tansitionFromAssign = new();
-                    tansitionFromAssign.To = new UVariableReferenceExpression("From", new UVariableReferenceExpression(transition.VariableName));
-                    tansitionFromAssign.From = new UVariableReferenceExpression(transitionFromVariableName);
+                    var tansitionDec = TtASTBuildUtil.CreateVariableDeclaration(transition.VariableName, transition.VariableType, new UCreateObjectExpression(transition.VariableType.TypeFullName));
+                    methodDeclaration.MethodBody.Sequence.Add(tansitionDec);
+
+                    var tansitionFromAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
+                                                    new UVariableReferenceExpression("From", new UVariableReferenceExpression(transition.VariableName)),
+                                                    new UVariableReferenceExpression(transitionFromVariableName));
                     methodDeclaration.MethodBody.Sequence.Add(tansitionFromAssign);
 
-                    UAssignOperatorStatement tansitionToAssign = new();
-                    tansitionToAssign.To = new UVariableReferenceExpression("To", new UVariableReferenceExpression(transition.VariableName));
-                    tansitionToAssign.From = tansitionToAssignFrom;
+                    var tansitionToAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
+                                                    new UVariableReferenceExpression("To", new UVariableReferenceExpression(transition.VariableName)),
+                                                    tansitionToAssignFrom);
                     methodDeclaration.MethodBody.Sequence.Add(tansitionToAssign);
 
                     var stateAddTransionMethodInvoke = new UMethodInvokeStatement();
@@ -218,9 +198,9 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
                     methodDeclaration.MethodBody.Sequence.Add(stateAddTransionMethodInvoke);
                 }
             }
-            UAssignOperatorStatement returnValueAssign = new UAssignOperatorStatement();
-            returnValueAssign.To = new UVariableReferenceExpression("result");
-            returnValueAssign.From = new UPrimitiveExpression(true);
+            var returnValueAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
+                                        new UVariableReferenceExpression(methodDeclaration.ReturnValue.VariableName),
+                                        new UPrimitiveExpression(true));
             methodDeclaration.MethodBody.Sequence.Add(returnValueAssign);
             return methodDeclaration;
         }

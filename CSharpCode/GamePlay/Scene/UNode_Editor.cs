@@ -5,9 +5,9 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene
 {
-    public partial class UNode : Graphics.Pipeline.IProxiable
+    public partial class TtNode : Graphics.Pipeline.IProxiable
     {
-        ~UNode()
+        ~TtNode()
         {
             TtEngine.Instance?.GfxDevice.HitproxyManager.UnmapProxy(this);
         }

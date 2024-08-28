@@ -302,7 +302,7 @@ namespace EngineNS.Bricks.Particle.Editor
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"NebulaPreview:{AssetName}";
             PreviewViewport.OnInitialize = Initialize_PreviewParticle;
-            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
+            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.SimpleRPolicyName, 0, 1);
 
             TtEngine.Instance.TickableManager.AddTickable(this);
 

@@ -19,8 +19,8 @@ namespace EngineNS.GamePlay.Character
                 return NodeData as UCharacterData;
             }
         }
-        partial void CreatePxCapsuleController(ref bool result, Scene.UScene scene, float radius, float height);
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        partial void CreatePxCapsuleController(ref bool result, Scene.TtScene scene, float radius, float height);
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (await base.InitializeNode(world, data, bvType, placementType) == false)
             {
@@ -33,7 +33,7 @@ namespace EngineNS.GamePlay.Character
         {
             base.OnGatherVisibleMeshes(rp);
         }
-        protected override void OnParentSceneChanged(UScene prev, UScene cur)
+        protected override void OnParentSceneChanged(TtScene prev, TtScene cur)
         {
             if (cur != null)
             {

@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Bricks.Font.TtFontSDFAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="75644621-5452-4b96-ac0a-67b109c61978" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.Font.TtFontSDFAMeta&#xA;" />
-  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">

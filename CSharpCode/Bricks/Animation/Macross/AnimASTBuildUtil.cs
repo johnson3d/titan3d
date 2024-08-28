@@ -10,13 +10,13 @@ namespace EngineNS.Animation.Macross
     {
         public static void CreateNewAndInitInvokeStatement(TtDesignableVariableDescription description, UMethodDeclaration method)
         {
-            var attachmentAssign = TtASTBuildUtil.CreateAssignOperatorStatement(new UVariableReferenceExpression(description.Name), new UCreateObjectExpression(description.VariableType.TypeFullName));
-            method.MethodBody.Sequence.Add(attachmentAssign);
-            var attachmentInitializeInvoke = new UMethodInvokeStatement("Initialize",
+            var createAssign = TtASTBuildUtil.CreateAssignOperatorStatement(new UVariableReferenceExpression(description.Name), new UCreateObjectExpression(description.VariableType.TypeFullName));
+            method.MethodBody.Sequence.Add(createAssign);
+            var initializeInvoke = new UMethodInvokeStatement("Initialize",
                 null, new UVariableReferenceExpression(description.Name),
                 new UMethodInvokeArgumentExpression { Expression = new UVariableReferenceExpression("context") });
-            attachmentInitializeInvoke.IsAsync = true;
-            method.MethodBody.Sequence.Add(attachmentInitializeInvoke);
+            initializeInvoke.IsAsync = true;
+            method.MethodBody.Sequence.Add(initializeInvoke);
         }
 
         public static UMethodDeclaration CreateOverridedInitMethodStatement()
@@ -33,11 +33,11 @@ namespace EngineNS.Animation.Macross
 
         public static void CreateBaseInitInvokeStatement(UMethodDeclaration method)
         {
-            var attachmentInitializeInvoke = new UMethodInvokeStatement("Initialize",
+            var baseInitializeInvoke = new UMethodInvokeStatement("Initialize",
                 null, new UBaseReferenceExpression(),
                 new UMethodInvokeArgumentExpression { Expression = new UVariableReferenceExpression("context") });
-            attachmentInitializeInvoke.IsAsync = true;
-            method.MethodBody.Sequence.Add(attachmentInitializeInvoke);
+            baseInitializeInvoke.IsAsync = true;
+            method.MethodBody.Sequence.Add(baseInitializeInvoke);
         }
     }
 }

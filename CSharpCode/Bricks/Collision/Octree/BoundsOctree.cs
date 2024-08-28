@@ -277,14 +277,14 @@ namespace EngineNS.Bricks.Collision.Octree
 
     public class TtSceneOctree : IMemberTickable
     {
-        Bricks.Collision.Octree.TtBoundsOctree<GamePlay.Scene.UNode> mOctree;
+        Bricks.Collision.Octree.TtBoundsOctree<GamePlay.Scene.TtNode> mOctree;
         public NxRHI.TtTransientBuffer TransientVB = new();
         public NxRHI.TtTransientBuffer TransientIB = new();
         public bool IsDrawBounds { get; set; } = false;
         public async System.Threading.Tasks.Task<bool> Initialize(object host)
         {
-            var scene = host as GamePlay.Scene.UScene;
-            mOctree = new Bricks.Collision.Octree.TtBoundsOctree<GamePlay.Scene.UNode>(0.5f, scene.Placement.AbsTransform.Position, 1, 1.25f);
+            var scene = host as GamePlay.Scene.TtScene;
+            mOctree = new Bricks.Collision.Octree.TtBoundsOctree<GamePlay.Scene.TtNode>(0.5f, scene.Placement.AbsTransform.Position, 1, 1.25f);
             return true;
         }
 
@@ -303,7 +303,7 @@ namespace EngineNS.Bricks.Collision.Octree
             {
                 case "OnSceneLoaded":
                     {
-                        var scene = host as GamePlay.Scene.UScene;
+                        var scene = host as GamePlay.Scene.TtScene;
                         var nodes = scene.GetManagedNodes();
                         foreach (var i in nodes)
                         {
@@ -313,23 +313,23 @@ namespace EngineNS.Bricks.Collision.Octree
                     break;
                 case "OnSceneAllocId":
                     {
-                        var scene = host as GamePlay.Scene.UScene;
-                        var node = notify.Parameter as GamePlay.Scene.UNode;
+                        var scene = host as GamePlay.Scene.TtScene;
+                        var node = notify.Parameter as GamePlay.Scene.TtNode;
                         var aabb = new Aabb(node.AABB);
                         mOctree.Add(node, aabb);
                     }
                     break;
                 case "OnSceneFreeId":
                     {
-                        var scene = host as GamePlay.Scene.UScene;
-                        var node = notify.Parameter as GamePlay.Scene.UNode;
+                        var scene = host as GamePlay.Scene.TtScene;
+                        var node = notify.Parameter as GamePlay.Scene.TtNode;
                     }
                     break;
                 case "OnGatherVisibleMeshes":
                     {
                         if (IsDrawBounds)
                         {
-                            var scene = host as GamePlay.Scene.UScene;
+                            var scene = host as GamePlay.Scene.TtScene;
                             var vp = notify.Parameter as GamePlay.UWorld.UVisParameter;
                             vp.TransientVB = TransientVB;
                             vp.TransientIB = TransientIB;
@@ -345,7 +345,7 @@ namespace EngineNS.Bricks.Collision.Octree
 
 namespace EngineNS.GamePlay.Scene
 {
-    public partial class UScene
+    public partial class TtScene
     {
         public Bricks.Collision.Octree.TtSceneOctree SceneOctree { get; } = new Bricks.Collision.Octree.TtSceneOctree();
     }

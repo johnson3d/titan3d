@@ -28,7 +28,7 @@ namespace EngineNS.Bricks.Particle
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName + ".BasePass");
         }
-        public List<GamePlay.Scene.UMeshNode> ParticleNodes = new List<GamePlay.Scene.UMeshNode>();
+        public List<GamePlay.Scene.TtMeshNode> ParticleNodes = new List<GamePlay.Scene.TtMeshNode>();
         public override unsafe void BeginTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
             var cmd = BasePass.DrawCmdList;

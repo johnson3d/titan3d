@@ -115,9 +115,9 @@ namespace EngineNS.Bricks.Procedure
 
     public class PgcSceneNodeManager
     {
-        List<GamePlay.Scene.UNode> mNodes = new List<GamePlay.Scene.UNode>();
+        List<GamePlay.Scene.TtNode> mNodes = new List<GamePlay.Scene.TtNode>();
 
-        public void RemoveAll(GamePlay.Scene.UNode node)
+        public void RemoveAll(GamePlay.Scene.TtNode node)
         {
             for(int i=0; i< mNodes.Count; i++)
             {
@@ -125,7 +125,7 @@ namespace EngineNS.Bricks.Procedure
             }
             mNodes.Clear();
         }
-        public bool UpdatePgcSceneNodes(UBufferComponent buffer, GamePlay.Scene.UNode node)
+        public bool UpdatePgcSceneNodes(UBufferComponent buffer, GamePlay.Scene.TtNode node)
         {
             if (buffer.BufferCreator.ElementType != Rtti.UTypeDesc.TypeOf(typeof(PgcSpawnSceneNodeDesc)))
                 return false;
@@ -135,7 +135,7 @@ namespace EngineNS.Bricks.Procedure
             {
                 var desc = buffer.GetPixel<PgcSpawnSceneNodeDesc>(i);
                 // todo: get node from TypeId
-                var tagNode = new GamePlay.Scene.UMeshNode();
+                var tagNode = new GamePlay.Scene.TtMeshNode();
                 tagNode.Parent = node;
                 tagNode.Placement.SetTransform(desc.Location, desc.Scale, desc.Rotation);
                 tagNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;

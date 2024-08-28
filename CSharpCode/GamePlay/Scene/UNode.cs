@@ -6,12 +6,13 @@ using System.ComponentModel;
 
 namespace EngineNS.GamePlay.Scene
 {
-    public class UNodeAttribute : Attribute
+    public class TtNodeAttribute : Attribute
     {
-        public System.Type NodeDataType = typeof(UNodeData);
+        public System.Type NodeDataType = typeof(TtNodeData);
         public string DefaultNamePrefix = "Node";
     }
-    public class UNodeData : IO.BaseSerializer
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UNodeData@EngineCore" })]
+    public class TtNodeData : IO.BaseSerializer
     {
         public int GetStructSize()
         {
@@ -19,7 +20,7 @@ namespace EngineNS.GamePlay.Scene
             return 1024;
         }
         public bool IsDirty { get; set; } = false;
-        public void CheckDirty(UNode node)
+        public void CheckDirty(TtNode node)
         {
             if (IsDirty)
             {
@@ -28,7 +29,7 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         [Rtti.Meta]
-        public UNode.ENodeStyles NodeStyles { get; set; } = 0;
+        public TtNode.ENodeStyles NodeStyles { get; set; } = 0;
         [Rtti.Meta(Order = 0)]
         public string Name { get; set; }
         UBoundVolume mBoundVolume;
@@ -49,22 +50,22 @@ namespace EngineNS.GamePlay.Scene
             }
         }
 
-        public bool HasStyle(UNode.ENodeStyles style)
+        public bool HasStyle(TtNode.ENodeStyles style)
         {
             return (NodeStyles & style) == style;
         }
-        public void SetStyle(UNode.ENodeStyles style)
+        public void SetStyle(TtNode.ENodeStyles style)
         {
             NodeStyles |= style;
         }
-        public void UnsetStyle(UNode.ENodeStyles style)
+        public void UnsetStyle(TtNode.ENodeStyles style)
         {
             NodeStyles &= ~style;
         }
     }
     [Rtti.Meta()]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public partial class UNode : IDisposable
+    public partial class TtNode : IDisposable
     {
         public virtual void Dispose()
         {
@@ -82,7 +83,7 @@ namespace EngineNS.GamePlay.Scene
             this.Dispose();
         }
         public const string EditorKeyword = "UNode";
-        public virtual async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public virtual async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             NodeData = data;
 
@@ -266,19 +267,21 @@ namespace EngineNS.GamePlay.Scene
             {
                 if (value)
                 {
-                    SetStyle(ENodeStyles.SceneManaged);
-                    if (this.SceneId == UInt32.MaxValue)
+                    if (ParentScene != null && this.SceneId == UInt32.MaxValue)
                     {
-                        ParentScene?.AllocId(this);
+                        if (ParentScene.AllocId(this))
+                        {
+                            SetStyle(ENodeStyles.SceneManaged);
+                        }
                     }
                 }
                 else
                 {
-                    UnsetStyle(ENodeStyles.SceneManaged);
                     if (this.SceneId != UInt32.MaxValue)
                     {
                         ParentScene?.FreeId(this);
                     }
+                    UnsetStyle(ENodeStyles.SceneManaged);
                 }
             }
         }
@@ -314,8 +317,8 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        protected UNode mParent;
-        public virtual UNode Parent
+        protected TtNode mParent;
+        public virtual TtNode Parent
         {
             get => mParent;
             set
@@ -354,7 +357,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        public UScene ParentScene
+        public TtScene ParentScene
         {
             get
             {
@@ -370,10 +373,10 @@ namespace EngineNS.GamePlay.Scene
         }
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.Unserializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public UWorld HostWorld { get => GetWorld(); }
-        public List<UNode> Children { get; } = new List<UNode>();
-        UNodeData mNodeData = null;
-        UNodeData mTemplateNodeData = null;
-        public void SetPrefabTemplate(UNodeData data)
+        public List<TtNode> Children { get; } = new List<TtNode>();
+        TtNodeData mNodeData = null;
+        TtNodeData mTemplateNodeData = null;
+        public void SetPrefabTemplate(TtNodeData data)
         {
             mTemplateNodeData = data;
             mIsPrefab = true;
@@ -394,7 +397,7 @@ namespace EngineNS.GamePlay.Scene
                 mIsPrefab = value;
             }
         }
-        public UNodeData NodeData
+        public TtNodeData NodeData
         {
             get
             {
@@ -414,7 +417,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        public T GetNodeData<T>() where T : UNodeData
+        public T GetNodeData<T>() where T : TtNodeData
         {
             return NodeData as T;
         }
@@ -438,19 +441,39 @@ namespace EngineNS.GamePlay.Scene
         {
             get { return NodeData?.BoundVolume; }
         }
-        public DBoundingBox AABB;//包含Child的AABB
+        private static DBoundingBox Empty = DBoundingBox.Empty;
+        public ref DBoundingBox AABB
+        {
+            get
+            {
+                if (BoundVolume == null)
+                    return ref Empty;
+                else
+                    return ref BoundVolume.AABB;
+            }
+        }
+        public ref DBoundingBox AbsAABB
+        {
+            get
+            {
+                if (BoundVolume == null)
+                    return ref Empty;
+                else
+                    return ref BoundVolume.AbsAABB;
+            }
+        }
         #endregion
 
         #region Virtual Interface
-        private void ParentChanged(UNode prev, UNode cur)
+        private void ParentChanged(TtNode prev, TtNode cur)
         {
             OnParentChanged(prev, cur);
         }
-        protected virtual void OnParentChanged(UNode prev, UNode cur)
+        protected virtual void OnParentChanged(TtNode prev, TtNode cur)
         {
 
         }
-        private void ParentSceneChanged(UScene prev, UScene cur)
+        private void ParentSceneChanged(TtScene prev, TtScene cur)
         {
             OnParentSceneChanged(prev, cur);
             foreach(var i in Children)
@@ -458,9 +481,13 @@ namespace EngineNS.GamePlay.Scene
                 i.ParentSceneChanged(prev, cur);
             }
         }
-        protected virtual void OnParentSceneChanged(UScene prev, UScene cur)
+        protected virtual void OnParentSceneChanged(TtScene prev, TtScene cur)
         {
 
+        }
+        public virtual bool TreeGatherVisibleMeshes(UWorld.UVisParameter rp)
+        {
+            return true;
         }
         public virtual void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
         {
@@ -487,8 +514,8 @@ namespace EngineNS.GamePlay.Scene
             UpdateAABB();
         }
         [Rtti.Meta]
-        public UNode FindFirstChild(string name,
-            [Rtti.MetaParameter(FilterType = typeof(UNode), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
+        public TtNode FindFirstChild(string name,
+            [Rtti.MetaParameter(FilterType = typeof(TtNode), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type type = null, bool bRecursive = false)
         {
             foreach (var i in Children)
@@ -518,7 +545,7 @@ namespace EngineNS.GamePlay.Scene
             return null;
         }
 
-        public UNode FindFirstChild<T>(string name = null, bool bRecursive = false)
+        public TtNode FindFirstChild<T>(string name = null, bool bRecursive = false)
         {
             foreach (var i in Children)
             {
@@ -544,16 +571,16 @@ namespace EngineNS.GamePlay.Scene
             }
             return null;
         }
-        public UScene GetNearestParentScene()
+        public TtScene GetNearestParentScene()
         {
-            if (GetType() == typeof(UScene) || GetType().IsSubclassOf(typeof(UScene)))
-                return this as UScene;
+            if (GetType() == typeof(TtScene) || GetType().IsSubclassOf(typeof(TtScene)))
+                return this as TtScene;
             if (mParent != null)
                 return mParent.GetNearestParentScene();
             else
                 return null;
         }
-        public delegate bool FOnVisitNode(UNode node, object arg);
+        public delegate bool FOnVisitNode(TtNode node, object arg);
         public bool DFS_VisitNodeTree(FOnVisitNode visitor, object arg)
         {
             if (!HasStyle(ENodeStyles.SelfInvisible) && visitor(this, arg))
@@ -581,7 +608,7 @@ namespace EngineNS.GamePlay.Scene
             IsNodeDesc = 1,
             IgnoreNodeDesc = (1 << 1),
         }
-        public unsafe void SaveChildNode(UNode scene, EngineNS.XndHolder xnd, EngineNS.XndNode node)
+        public unsafe void SaveChildNode(TtNode scene, EngineNS.XndHolder xnd, EngineNS.XndNode node)
         {
             foreach(var i in Children)
             {
@@ -616,9 +643,11 @@ namespace EngineNS.GamePlay.Scene
                 }   
             }
         }
-        public async System.Threading.Tasks.Task<bool> LoadChildNode(GamePlay.UWorld world, UNode scene, EngineNS.XndNode node, bool bTryFindNode)
+        public async System.Threading.Tasks.Task<bool> LoadChildNode(GamePlay.UWorld world, TtNode scene, EngineNS.XndNode node, bool bTryFindNode)
         {
-            for(uint i = 0; i < node.GetNumOfNode(); i++)
+            var isNoAABB = this.HasStyle(ENodeStyles.DiscardAABB);
+            this.SetStyle(ENodeStyles.DiscardAABB);
+            for (uint i = 0; i < node.GetNumOfNode(); i++)
             {
                 var cld = node.GetNode(i);
                 var cldTypeStr = cld.NativeSuper.Name;
@@ -633,8 +662,8 @@ namespace EngineNS.GamePlay.Scene
                     this.mIsPrefab = true;
                 }
                 var nodeTypeDesc = Rtti.UTypeDesc.TypeOf(attr.Name);
-                UNodeData nodeData = Rtti.UTypeDescManager.CreateInstance(nodeTypeDesc) as UNodeData;
-                var nd = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(cldTypeStr)) as UNode;
+                TtNodeData nodeData = Rtti.UTypeDescManager.CreateInstance(nodeTypeDesc) as TtNodeData;
+                var nd = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(cldTypeStr)) as TtNode;
                 if (nd == null || nodeData == null)
                 {
                     Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"SceneNode Load failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
@@ -691,9 +720,14 @@ namespace EngineNS.GamePlay.Scene
                 }
                 nd.OnNodeLoaded(this);
             }
+            if (isNoAABB == false)
+            {
+                this.UnsetStyle(ENodeStyles.DiscardAABB);
+                this.UpdateAABB();
+            }
             return true;
         }
-        public virtual void OnNodeLoaded(UNode parent)
+        public virtual void OnNodeLoaded(TtNode parent)
         {
             
         }
@@ -743,6 +777,8 @@ namespace EngineNS.GamePlay.Scene
                 //var matrix = Placement.AbsTransform.ToMatrixNoScale();
                 //Placement.AbsTransformInv = Matrix.Invert(in matrix);
                 OnAbsTransformChanged();
+                if (BoundVolume != null)
+                    DBoundingBox.TransformNoScale(in AABB, in Placement.AbsTransform, out AbsAABB);
             }
             UpdateChildrenAbsTransform();
         }
@@ -755,9 +791,9 @@ namespace EngineNS.GamePlay.Scene
         }
         public virtual void UpdateAABB()
         {
-            if (NodeData == null || BoundVolume == null || Placement == null)
+            if (NodeData == null || BoundVolume == null || Placement == null || HasStyle(ENodeStyles.DiscardAABB))
                 return;
-            if (BoundVolume != null && BoundVolume.mLocalAABB.IsEmpty() == false && HasStyle(ENodeStyles.DiscardAABB) == false)
+            if (BoundVolume != null && BoundVolume.mLocalAABB.IsEmpty() == false)
             {
                 //BoundingBox.Transform(ref BoundVolume.mLocalAABB, ref Placement.AbsTransform, out AABB);
                 AABB.FromSingle(in BoundVolume.mLocalAABB);
@@ -801,6 +837,8 @@ namespace EngineNS.GamePlay.Scene
                     AABB = DBoundingBox.Merge(AABB, i.AABB);
                 }
             }
+            if (BoundVolume != null)
+                DBoundingBox.TransformNoScale(in AABB, in Placement.AbsTransform, out AbsAABB);
             if (Parent != null)
             {
                 Parent.UpdateAABB();
@@ -901,12 +939,12 @@ namespace EngineNS.GamePlay.Scene
         }
         #endregion
 
-        public async System.Threading.Tasks.Task<UNode> CloneNode(UWorld world)
+        public async System.Threading.Tasks.Task<TtNode> CloneNode(UWorld world)
         {
-            var data = Rtti.UTypeDescManager.CreateInstance(this.NodeData.GetType()) as UNodeData;
+            var data = Rtti.UTypeDescManager.CreateInstance(this.NodeData.GetType()) as TtNodeData;
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeOf(this.NodeData.GetType()));
             meta.CopyObjectMetaField(data, NodeData);
-            var node = Rtti.UTypeDescManager.CreateInstance(this.GetType()) as UNode;
+            var node = Rtti.UTypeDescManager.CreateInstance(this.GetType()) as TtNode;
             EBoundVolumeType bvType = EBoundVolumeType.None;
             if (NodeData.BoundVolume != null)
             {
@@ -928,7 +966,7 @@ namespace EngineNS.GamePlay.Scene
             return node;
         }
     }
-    public partial class USceneActorNode : UNode
+    public partial class TtSceneActorNode : TtNode
     {
         UInt32 mSceneId = UInt32.MaxValue;
         public override UInt32 SceneId
@@ -958,8 +996,12 @@ namespace EngineNS.GamePlay.Scene
 
         }
     }
-    public partial class TtGpuSceneNode : USceneActorNode
+    public partial class TtGpuSceneNode : TtSceneActorNode
     {
+        public TtGpuSceneNode()
+        {
+            IsSceneManaged = true;
+        }
         public int GpuSceneIndex = -1;
         
         public List<TtClusteredMesh> ClusteredMeshs = new List<TtClusteredMesh>();
@@ -968,8 +1010,8 @@ namespace EngineNS.GamePlay.Scene
         { 
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("SubTree", "SubTree", UNode.EditorKeyword)]
-    public partial class USubTreeRootNode : USceneActorNode
+    [Bricks.CodeBuilder.ContextMenu("SubTree", "SubTree", TtNode.EditorKeyword)]
+    public partial class TtSubTreeRootNode : TtSceneActorNode
     {
         public override unsafe bool IsTreeContain(DVector3* localStart, DVector3* dir, DBoundingBox* pBox)
         {
@@ -977,17 +1019,17 @@ namespace EngineNS.GamePlay.Scene
         }
     }
 
-    public partial class ULightWeightNodeBase : UNode
+    public partial class TtLightWeightNodeBase : TtNode
     {
         public override bool IsSceneManagedType()
         {
             return false;
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)            
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)            
         {
             return await base.InitializeNode(world, data, bvType, placementType);
         }
-        public override UNode Parent
+        public override TtNode Parent
         {
             set
             {

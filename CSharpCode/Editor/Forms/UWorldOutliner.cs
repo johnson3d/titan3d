@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UWorldOutliner : UTreeNodeDrawer, IRootForm
+    public class UWorldOutliner : TtTreeNodeDrawer, IRootForm
     {
         public GamePlay.UWorld World
         {
@@ -135,7 +135,7 @@ namespace EngineNS.Editor.Forms
         }
         #region PopMenu
         System.Action OnDrawMenu = null;
-        GamePlay.Scene.UNode mAddToNode;
+        GamePlay.Scene.TtNode mAddToNode;
         bool mNodeMenuShow = false;
         bool mAddNodeMenuFilterFocused = false;
         string mAddNodeMenuFilterStr = "";
@@ -145,19 +145,19 @@ namespace EngineNS.Editor.Forms
             menuName = menuString;
             nodeName = menuName;
         }
-        private async System.Threading.Tasks.Task<GamePlay.Scene.UNode> NewNode(Rtti.UClassMeta i)
+        private async System.Threading.Tasks.Task<GamePlay.Scene.TtNode> NewNode(Rtti.UClassMeta i)
         {
             if (mAddToNode == null)
                 return null;
             var ntype = Rtti.UTypeDesc.TypeOf(i.ClassType.TypeString);
-            var newNode = Rtti.UTypeDescManager.CreateInstance(ntype) as GamePlay.Scene.USceneActorNode;
-            var attrs = newNode.GetType().GetCustomAttributes(typeof(GamePlay.Scene.UNodeAttribute), false);
-            GamePlay.Scene.UNodeData nodeData = null;
+            var newNode = Rtti.UTypeDescManager.CreateInstance(ntype) as GamePlay.Scene.TtSceneActorNode;
+            var attrs = newNode.GetType().GetCustomAttributes(typeof(GamePlay.Scene.TtNodeAttribute), false);
+            GamePlay.Scene.TtNodeData nodeData = null;
             string prefix = "Node";
             if (attrs.Length > 0)
             {
-                nodeData = Rtti.UTypeDescManager.CreateInstance((attrs[0] as GamePlay.Scene.UNodeAttribute).NodeDataType) as GamePlay.Scene.UNodeData;
-                prefix = (attrs[0] as GamePlay.Scene.UNodeAttribute).DefaultNamePrefix;
+                nodeData = Rtti.UTypeDescManager.CreateInstance((attrs[0] as GamePlay.Scene.TtNodeAttribute).NodeDataType) as GamePlay.Scene.TtNodeData;
+                prefix = (attrs[0] as GamePlay.Scene.TtNodeAttribute).DefaultNamePrefix;
             }
             await newNode.InitializeNode(World, nodeData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
             newNode.NodeData.Name = $"{prefix}_{newNode.SceneId}";
@@ -167,7 +167,7 @@ namespace EngineNS.Editor.Forms
         public void UpdateAddNodeMenu()
         {
             mAddNodeMenus = new TtMenuItem();
-            var typeDesc = Rtti.UTypeDescGetter<GamePlay.Scene.UNode>.TypeDesc;
+            var typeDesc = Rtti.UTypeDescGetter<GamePlay.Scene.TtNode>.TypeDesc;
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
             var subClasses = meta.SubClasses;
             foreach (var i in subClasses)
@@ -178,7 +178,7 @@ namespace EngineNS.Editor.Forms
                     var parentMenu = mAddNodeMenus;
                     var att = atts[0] as Bricks.CodeBuilder.ContextMenuAttribute;
 
-                    if (!att.HasKeyString(GamePlay.Scene.UNode.EditorKeyword))
+                    if (!att.HasKeyString(GamePlay.Scene.TtNode.EditorKeyword))
                         continue;
 
                     for (var menuIdx = 0; menuIdx < att.MenuPaths.Length; menuIdx++)
@@ -242,14 +242,14 @@ namespace EngineNS.Editor.Forms
 
         public override void OnNodeUI_RClick(INodeUIProvider provider)
         {
-            var node = provider as GamePlay.Scene.UNode;
+            var node = provider as GamePlay.Scene.TtNode;
             if (node == null)
             {
                 mNodeMenuShow = false;
                 OnDrawMenu = null;
                 return;
             }
-            var scene = provider as GamePlay.Scene.UScene;
+            var scene = provider as GamePlay.Scene.TtScene;
             OnDrawMenu = async () =>
             {
                 if (ImGuiAPI.BeginPopupContextWindow(null, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
@@ -271,7 +271,7 @@ namespace EngineNS.Editor.Forms
             };
         }
 
-        protected virtual void DrawBaseMenu(GamePlay.Scene.UNode node)
+        protected virtual void DrawBaseMenu(GamePlay.Scene.TtNode node)
         {
             if (ImGuiAPI.MenuItem($"Goto", null, false, true))
             {
@@ -300,7 +300,7 @@ namespace EngineNS.Editor.Forms
                 }
             }
         }
-        public List<GamePlay.Scene.UNode> SelectedNodes = new List<GamePlay.Scene.UNode>();
+        public List<GamePlay.Scene.TtNode> SelectedNodes = new List<GamePlay.Scene.TtNode>();
         public override void OnNodeUI_LClick(INodeUIProvider provider)
         {
             //var ctrlKeyDown = TtEngine.Instance.InputSystem.IsCtrlKeyDown();
@@ -326,7 +326,7 @@ namespace EngineNS.Editor.Forms
             //appliction.mMainInspector.PropertyGrid.Target = provider;
             //appliction.WorldViewportSlate.OnHitproxySelected((GamePlay.Scene.UNode)provider);
 
-            var node = provider as GamePlay.Scene.UNode;
+            var node = provider as GamePlay.Scene.TtNode;
             if (node == null)
                 return;
 

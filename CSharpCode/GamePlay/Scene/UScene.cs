@@ -5,12 +5,12 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene
 {
-    [Rtti.Meta]
-    public class USceneAMeta : IO.IAssetMeta
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.USceneAMeta@EngineCore" })]
+    public class TtSceneAMeta : IO.IAssetMeta
     {
         public override string GetAssetExtType()
         {
-            return UScene.AssetExt;
+            return TtScene.AssetExt;
         }
         public override string GetAssetTypeName()
         {
@@ -36,15 +36,17 @@ namespace EngineNS.GamePlay.Scene
         //    cmdlist.AddText(in start, 0xFFFFFFFF, "scene", null);
         //}
     }
-    public class USceneData : UNodeData
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.USceneData@EngineCore" })]
+    public class TtSceneData : TtNodeData
     {
         [Rtti.Meta]
         [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]
         public RName RPolicyName { get; set; }
     }
-    [UScene.SceneCreateAttribute]
+    [TtScene.SceneCreateAttribute]
     [IO.AssetCreateMenu(MenuName = "Scene")]
-    public partial class UScene : UNode, IO.IAsset
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UScene@EngineCore" })]
+    public partial class TtScene : TtNode, IO.IAsset
     {
         public const string AssetExt = ".scene";
         public override string ToString()
@@ -66,15 +68,15 @@ namespace EngineNS.GamePlay.Scene
                 mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IO.IAsset;
                 var world = new UWorld(null);
                 await world.InitWorld();
-                var task = (mAsset as UScene).InitializeNode(world, new USceneData(), EBoundVolumeType.Box, typeof(UPlacement));
+                var task = (mAsset as TtScene).InitializeNode(world, new TtSceneData(), EBoundVolumeType.Box, typeof(UPlacement));
                 PGAsset.Target = mAsset;
             }
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data == null)
             {
-                data = new USceneData();
+                data = new TtSceneData();
             }
             if (await base.InitializeNode(world, data, bvType, placementType) == false)
                 return false;
@@ -85,11 +87,11 @@ namespace EngineNS.GamePlay.Scene
             var task = mMemberTickables.InitializeMembers(this);
             return true;
         }
-        public UScene()
+        public TtScene()
         {
             mMemberTickables.CollectMembers(this);
         }
-        ~UScene()
+        ~TtScene()
         {
             Cleanup();
         }
@@ -98,17 +100,17 @@ namespace EngineNS.GamePlay.Scene
             ClearChildren();
             TtEngine.Instance?.SceneManager.UnloadScene(this.AssetName);
         }
-        public USceneData SceneData
+        public TtSceneData SceneData
         {
             get
             {
-                return NodeData as USceneData;
+                return NodeData as TtSceneData;
             }
         }
         [Category("Option")]
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]
-        public RName RPolicyName 
+        public RName RPolicyName
         {
             get => SceneData?.RPolicyName;
             set
@@ -121,17 +123,17 @@ namespace EngineNS.GamePlay.Scene
         public UWorld World;
         #region Allocator
         int PrevAllocId = 0;
-        private UNode[] ManagedNodes = new UNode[UInt16.MaxValue];
-        public UNode[] GetManagedNodes()
+        private TtNode[] ManagedNodes = new TtNode[UInt16.MaxValue];
+        public TtNode[] GetManagedNodes()
         {
             return ManagedNodes;
         }
-        public void AllocId(UNode node)
+        public bool AllocId(TtNode node)
         {
             lock (ManagedNodes)
             {
-                if (node is ULightWeightNodeBase)
-                    return;
+                if (node is TtLightWeightNodeBase)
+                    return false;
                 for (int i = PrevAllocId; i < ManagedNodes.Length; i++)
                 {
                     if (ManagedNodes[i] == null)
@@ -144,7 +146,7 @@ namespace EngineNS.GamePlay.Scene
                         notify.Info = "OnSceneAllocId";
                         notify.Parameter = node;
                         mMemberTickables.SendNotify(this, in notify);
-                        return;
+                        return true;
                     }
                 }
                 for (int i = 0; i < ManagedNodes.Length; i++)
@@ -159,21 +161,22 @@ namespace EngineNS.GamePlay.Scene
                         notify.Info = "OnSceneAllocId";
                         notify.Parameter = node;
                         mMemberTickables.SendNotify(this, in notify);
-                        return;
+                        return true;
                     }
                 }
                 System.Diagnostics.Debug.Assert(false);
+                return false;
             }
         }
-        public void FreeId(UNode node)
+        public void FreeId(TtNode node)
         {
-            if (node is ULightWeightNodeBase)
+            if (node is TtLightWeightNodeBase)
                 return;
             lock (ManagedNodes)
             {
                 if (node.SceneId >= UInt16.MaxValue)
                     return;
-                
+
                 var notify = new FHostNotify();
                 notify.Info = "OnSceneFreeId";
                 notify.Parameter = node;
@@ -184,18 +187,18 @@ namespace EngineNS.GamePlay.Scene
                 node.SceneId = UInt32.MaxValue;
             }
         }
-        public async Thread.Async.TtTask<USceneActorNode> NewNode(GamePlay.UWorld world, string nodeType, UNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
+        public async Thread.Async.TtTask<TtSceneActorNode> NewNode(GamePlay.UWorld world, string nodeType, TtNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
         {
             var ntype = Rtti.UTypeDesc.TypeOf(nodeType);
             return await NewNode(world, ntype.SystemType, data, bvType, placementType, false);
         }
-        public async Thread.Async.TtTask<USceneActorNode> NewNodeSimple(GamePlay.UWorld world, Type nodeType, UNodeData data, bool isSceneManaged = false)
+        public async Thread.Async.TtTask<TtSceneActorNode> NewNodeSimple(GamePlay.UWorld world, Type nodeType, TtNodeData data, bool isSceneManaged = false)
         {
             return await NewNode(world, nodeType, data, EBoundVolumeType.Box, typeof(GamePlay.UPlacement), isSceneManaged);
         }
-        public async Thread.Async.TtTask<USceneActorNode> NewNode(GamePlay.UWorld world, Type nodeType, UNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
+        public async Thread.Async.TtTask<TtSceneActorNode> NewNode(GamePlay.UWorld world, Type nodeType, TtNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
         {
-            var node = Rtti.UTypeDescManager.CreateInstance(nodeType) as USceneActorNode;
+            var node = Rtti.UTypeDescManager.CreateInstance(nodeType) as TtSceneActorNode;
             if (node != null)
             {
                 if (await node.InitializeNode(world, data, bvType, placementType) == false)
@@ -205,7 +208,7 @@ namespace EngineNS.GamePlay.Scene
             return node;
         }
         #endregion
-        
+
         #region IAsset
         public RName AssetName { get; set; }
         public const uint SceneDescAttributeFlags = 1;
@@ -239,7 +242,7 @@ namespace EngineNS.GamePlay.Scene
             xndHolder.SaveXnd(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
         }
-        internal static async System.Threading.Tasks.Task<UScene> LoadScene(GamePlay.UWorld world, RName name)
+        internal static async System.Threading.Tasks.Task<TtScene> LoadScene(GamePlay.UWorld world, RName name)
         {
             using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
             {
@@ -249,11 +252,11 @@ namespace EngineNS.GamePlay.Scene
                     return null;
                 }
 
-                USceneData nodeData = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(descAttr.Name)) as USceneData;
+                TtSceneData nodeData = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(descAttr.Name)) as TtSceneData;
 
                 //UScene don't have construct with params
                 //UScene scene = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(xnd.RootNode.Name), nodeData) as UScene;
-                UScene scene = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(xnd.RootNode.Name)) as UScene;
+                TtScene scene = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(xnd.RootNode.Name)) as TtScene;
                 if (scene == null)
                     return null;
 
@@ -280,7 +283,7 @@ namespace EngineNS.GamePlay.Scene
                 if (await scene.LoadChildNode(world, scene, xnd.RootNode.mCoreObject, false) == false)
                     return null;
 
-                scene.DFS_VisitNodeTree((UNode inNode, object inArg) =>
+                scene.DFS_VisitNodeTree((TtNode inNode, object inArg) =>
                 {
                     inNode.OnSceneLoaded();
                     return false;
@@ -293,7 +296,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public IO.IAssetMeta CreateAMeta()
         {
-            var result = new USceneAMeta();
+            var result = new TtSceneAMeta();
             return result;
         }
 
@@ -308,7 +311,7 @@ namespace EngineNS.GamePlay.Scene
 
             UpdateNodeAssetReferences(this, ameta);
         }
-        protected void UpdateNodeAssetReferences(UNode node, IO.IAssetMeta ameta)
+        protected void UpdateNodeAssetReferences(TtNode node, IO.IAssetMeta ameta)
         {
             node.AddAssetReferences(ameta);
             foreach (var i in node.Children)
@@ -325,6 +328,30 @@ namespace EngineNS.GamePlay.Scene
             mMemberTickables.TickLogic(this, TtEngine.Instance.ElapseTickCountMS);
             return true;
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtScene), nameof(TickLogic));
+        public override void TickLogic(TtNodeTickParameters args)
+        {
+            if (this.IsNoTick)
+                return;
+            using (new Profiler.TimeScopeHelper(ScopeTick))
+            {
+                if (OnTickLogic(args.World, args.Policy) == false)
+                    return;
+
+                if (args.IsTickChildren)
+                {
+                    {
+                        for (int i = 0; i < Children.Count; i++)
+                        {
+                            Children[i].TickLogic(args);
+                        }
+                    }
+                }
+            }
+
+            //base.TickLogic(args);
+        }
         public override unsafe bool IsTreeContain(DVector3* localStart, DVector3* dir, DBoundingBox* pBox)
         {
             return true;
@@ -337,7 +364,39 @@ namespace EngineNS.GamePlay.Scene
             mMemberTickables.SendNotify(this, in notify);
             base.OnGatherVisibleMeshes(rp);
         }
-
+        [Category("Option")]
+        public bool IsGatherVisibleByManagedNodes { get; set; } = false;
+        public override bool TreeGatherVisibleMeshes(UWorld.UVisParameter rp)
+        {
+            if (IsGatherVisibleByManagedNodes == false)
+                return true;
+            if (!this.HasStyle(Scene.TtNode.ENodeStyles.SelfInvisible))
+            {
+                this.OnGatherVisibleMeshes(rp);
+            }
+            if (!this.HasStyle(Scene.TtNode.ENodeStyles.ChildrenInvisible))
+            {
+                foreach (var i in ManagedNodes)
+                {
+                    if (i == null)
+                        continue;
+                    var type = rp.CullCamera.WhichContainTypeFast(World, in i.AbsAABB, false);
+                    switch (type)
+                    {
+                        case CONTAIN_TYPE.CONTAIN_TEST_OUTER:
+                            continue;
+                        case CONTAIN_TYPE.CONTAIN_TEST_INNER:
+                        case CONTAIN_TYPE.CONTAIN_TEST_REFER:
+                            {
+                                i.OnGatherVisibleMeshes(rp);
+                                //World.OnVisitNode_GatherVisibleMeshes(i, rp);
+                            }
+                            break;
+                    }
+                }
+            }
+            return false;
+        }
     }
 
     public class USceneManager : UModule<TtEngine>
@@ -346,13 +405,13 @@ namespace EngineNS.GamePlay.Scene
         {
             Scenes.Clear();
         }
-        public Dictionary<RName, WeakReference<UScene>> Scenes { get; } = new Dictionary<RName, WeakReference<UScene>>();
-        public async System.Threading.Tasks.Task<UScene> GetScene(GamePlay.UWorld world, RName name)
+        public Dictionary<RName, WeakReference<TtScene>> Scenes { get; } = new Dictionary<RName, WeakReference<TtScene>>();
+        public async System.Threading.Tasks.Task<TtScene> GetScene(GamePlay.UWorld world, RName name)
         {
             //return await UScene.LoadScene(world, name);
             System.GC.Collect();
-            UScene scene;
-            WeakReference<UScene> result;
+            TtScene scene;
+            WeakReference<TtScene> result;
             if (Scenes.TryGetValue(name, out result))
             {
                 result.TryGetTarget(out scene);
@@ -366,7 +425,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
 
-            scene = await UScene.LoadScene(world, name);
+            scene = await TtScene.LoadScene(world, name);
             if (scene == null)
                 return null;
 
@@ -382,14 +441,14 @@ namespace EngineNS.GamePlay.Scene
                     Scenes.Remove(name);
                 }
             }
-            Scenes.Add(name, new WeakReference<UScene>(scene));
+            Scenes.Add(name, new WeakReference<TtScene>(scene));
             return scene;
         }
-        public async System.Threading.Tasks.Task<UScene> CreateScene(GamePlay.UWorld world, RName name)
+        public async System.Threading.Tasks.Task<TtScene> CreateScene(GamePlay.UWorld world, RName name)
         {
             System.GC.Collect();
-            UScene scene;
-            scene = await UScene.LoadScene(world, name);
+            TtScene scene;
+            scene = await TtScene.LoadScene(world, name);
             if (scene == null)
                 return null;
 

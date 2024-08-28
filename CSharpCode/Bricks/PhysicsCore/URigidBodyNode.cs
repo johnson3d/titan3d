@@ -7,12 +7,12 @@ using System.ComponentModel;
 
 namespace EngineNS.Bricks.PhysicsCore
 {
-    [Bricks.CodeBuilder.ContextMenu("PxMeshNode", "PxMeshNode", GamePlay.Scene.UNode.EditorKeyword)]
-    [GamePlay.Scene.UNode(NodeDataType = typeof(TtRigidBodyNode.TtRigidBodyNodeData), DefaultNamePrefix = "PxMesh")]
+    [Bricks.CodeBuilder.ContextMenu("PxMeshNode", "PxMeshNode", GamePlay.Scene.TtNode.EditorKeyword)]
+    [GamePlay.Scene.TtNode(NodeDataType = typeof(TtRigidBodyNode.TtRigidBodyNodeData), DefaultNamePrefix = "PxMesh")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public class TtRigidBodyNode : GamePlay.Scene.USceneActorNode
+    public class TtRigidBodyNode : GamePlay.Scene.TtSceneActorNode
     {
-        public class TtRigidBodyNodeData : GamePlay.Scene.UNodeData
+        public class TtRigidBodyNodeData : GamePlay.Scene.TtNodeData
         {
             [Rtti.Meta]
             public EPhyActorType PxActorType { get; set; }
@@ -56,7 +56,7 @@ namespace EngineNS.Bricks.PhysicsCore
             }
             public List<TtPhyShape> PxShapes { get; set; } = new List<TtPhyShape>();
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, GamePlay.Scene.UNodeData data, GamePlay.Scene.EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, GamePlay.Scene.TtNodeData data, GamePlay.Scene.EBoundVolumeType bvType, Type placementType)
         {
             if (data==null)
             {
@@ -113,7 +113,7 @@ namespace EngineNS.Bricks.PhysicsCore
             }
             UpdateAABB();
         }
-        protected override void OnParentSceneChanged(GamePlay.Scene.UScene prev, GamePlay.Scene.UScene cur)
+        protected override void OnParentSceneChanged(GamePlay.Scene.TtScene prev, GamePlay.Scene.TtScene cur)
         {
             PxActor.AddToScene(cur.PxSceneMB.PxScene);
         }

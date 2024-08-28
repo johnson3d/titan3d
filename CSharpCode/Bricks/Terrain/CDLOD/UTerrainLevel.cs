@@ -7,7 +7,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 {
     public class UTerrainLevel
     {
-        public UTerrainNode Node;
+        public TtTerrainNode Node;
         public int LevelX = 0;
         public int LevelZ = 0;
         public DVector3 StartPosition;
@@ -34,7 +34,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             streaming.PushUnloadLevel(this);
         }
-        public void CreateLevel(int levelX, int levelZ, int patchSide, UTerrainNode node)
+        public void CreateLevel(int levelX, int levelZ, int patchSide, TtTerrainNode node)
         {
             Node = node;
             LevelX = levelX;
@@ -117,7 +117,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             CoreSDK.DisposeObject(ref NormalMapSRV);
             CoreSDK.DisposeObject(ref MaterialIdMapSRV);
         }
-        public UTerrainNode GetTerrainNode()
+        public TtTerrainNode GetTerrainNode()
         {
             return Level.Node;
         }
@@ -127,13 +127,13 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             
             if (bForce)
             {
-                BuildLevelDataFromPGC(Level.Node.GetNodeData<UTerrainNode.UTerrainData>());
+                BuildLevelDataFromPGC(Level.Node.GetNodeData<TtTerrainNode.TtTerrainData>());
             }
             else
             {
                 await TtEngine.Instance.EventPoster.Post((state) =>
                 {
-                    BuildLevelDataFromPGC(Level.Node.GetNodeData<UTerrainNode.UTerrainData>());
+                    BuildLevelDataFromPGC(Level.Node.GetNodeData<TtTerrainNode.TtTerrainData>());
                     return true;
                 }, Thread.Async.EAsyncTarget.AsyncIO);
             }
@@ -616,7 +616,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 xnd.SaveXnd(file);
             }   
         }
-        protected void BuildLevelDataFromPGC(UTerrainNode.UTerrainData nodeData)
+        protected void BuildLevelDataFromPGC(TtTerrainNode.TtTerrainData nodeData)
         {
             RName terrainName = nodeData.PgcName;
             if (terrainName == null)
@@ -758,7 +758,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 i.SetAcceptShadow(value);
             }
         }
-        public void OnAbsTransformChanged(UTerrainNode node, GamePlay.UWorld world)
+        public void OnAbsTransformChanged(TtTerrainNode node, GamePlay.UWorld world)
         {
             foreach (var i in TiledPatch)
             {
@@ -788,7 +788,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 i.Tick(world, policy);
             }
         }
-        public void OnParentSceneChanged(GamePlay.Scene.UScene prev, GamePlay.Scene.UScene cur)
+        public void OnParentSceneChanged(GamePlay.Scene.TtScene prev, GamePlay.Scene.TtScene cur)
         {
             if (PhyActor == null)
                 return;

@@ -84,7 +84,7 @@ namespace EngineNS.Editor.Forms
 
                 foreach(var prox in proxies)
                 {
-                    var uNode = prox as UNode;
+                    var uNode = prox as TtNode;
                     if (uNode == null)
                         continue;
                     uNode.Selected = false;
@@ -102,7 +102,7 @@ namespace EngineNS.Editor.Forms
                     ShowBoundVolumes(true, false, null);
                     for(int i=0; i<proxies.Length; i++)
                     {
-                        var node = proxies[i] as UNode;
+                        var node = proxies[i] as TtNode;
                         if (node == null)
                             continue;
                         if (node.Selected)
@@ -121,7 +121,7 @@ namespace EngineNS.Editor.Forms
                     HostEditor.mWorldOutliner.SelectedNodes.Clear();
                     for(int i=0; i<proxies.Length; i++)
                     {
-                        var uNode = proxies[i] as UNode;
+                        var uNode = proxies[i] as TtNode;
                         if (uNode == null)
                             continue;
                         uNode.Selected = true;
@@ -130,10 +130,10 @@ namespace EngineNS.Editor.Forms
                 }
                 else
                 {
-                    List<UNode> needAddNodes = new List<UNode>();
+                    List<TtNode> needAddNodes = new List<TtNode>();
                     foreach(var i in proxies)
                     {
-                        var n = i as UNode;
+                        var n = i as TtNode;
                         if (n == null)
                             continue;
                         bool bFind = false;
@@ -150,13 +150,13 @@ namespace EngineNS.Editor.Forms
                             needAddNodes.Add(n);
                         }
                     }
-                    var needDelNodes = new List<UNode>();
+                    var needDelNodes = new List<TtNode>();
                     foreach (var i in HostEditor.mWorldOutliner.SelectedNodes)
                     {
                         bool bFind = false;
                         foreach (var j in proxies)
                         {
-                            var n = j as UNode;
+                            var n = j as TtNode;
                             if (n == null)
                                 continue;
                             if (n == j)
@@ -175,7 +175,7 @@ namespace EngineNS.Editor.Forms
                     
                     foreach (var node in needDelNodes)
                     {
-                        var uNode = node as UNode;
+                        var uNode = node as TtNode;
                         if (uNode == null)
                             continue;
                         uNode.Selected = false;
@@ -183,7 +183,7 @@ namespace EngineNS.Editor.Forms
                     }
                     foreach(var node in needAddNodes)
                     {
-                        var uNode = node as UNode;
+                        var uNode = node as TtNode;
                         if (uNode == null)
                             continue;
                         uNode.Selected = true;
@@ -213,7 +213,7 @@ namespace EngineNS.Editor.Forms
         {
             return Scene;
         }
-        public GamePlay.Scene.UScene Scene;
+        public GamePlay.Scene.TtScene Scene;
         public USceneEditorViewport PreviewViewport = new USceneEditorViewport();
         public UWorldOutliner mWorldOutliner;
         EGui.Controls.UContentBrowser mContentBrowser = new EGui.Controls.UContentBrowser();
@@ -445,8 +445,8 @@ namespace EngineNS.Editor.Forms
                 {
                     var gridNode = UMeshDataProvider.MakeGridPlane(TtEngine.Instance.GfxDevice.RenderContext, new Vector2(-50, -50), new Vector2(50, 50), 1).ToMesh();
 
-                    var meshNodeData = new UMeshNode.UMeshNodeData();
-                    var meshNode = await Scene.NewNode(Scene.World, typeof(UMeshNode), meshNodeData, EBoundVolumeType.Box, typeof(UPlacement)) as UMeshNode;
+                    var meshNodeData = new TtMeshNode.TtMeshNodeData();
+                    var meshNode = await Scene.NewNode(Scene.World, typeof(TtMeshNode), meshNodeData, EBoundVolumeType.Box, typeof(UPlacement)) as TtMeshNode;
 
                 },
             };
@@ -1037,7 +1037,7 @@ namespace EngineNS.Editor.Forms
         {
 
         }
-        protected override void DrawBaseMenu(GamePlay.Scene.UNode node)
+        protected override void DrawBaseMenu(GamePlay.Scene.TtNode node)
         {
             base.DrawBaseMenu(node);
         }
@@ -1111,7 +1111,7 @@ namespace EngineNS.Editor.Forms
 namespace EngineNS.GamePlay.Scene
 {
     [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.TtSceneEditor))]
-    public partial class UScene
+    public partial class TtScene
     {
     }
 

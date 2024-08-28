@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Movemnet
 {
-    public class UMovement : Scene.ULightWeightNodeBase
+    public class UMovement : Scene.TtLightWeightNodeBase
     {
         public Vector3 LinearVelocity { get; private set; }
 

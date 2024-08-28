@@ -72,7 +72,7 @@ namespace EngineNS.DesignMacross.Base.Graph
                 PopupMenu.Draw(ref elementRenderingContext);
             }
         }
-        public void HandleLinkedPinContextMenu(TtGraph_Method graph, ref FGraphElementRenderingContext elementRenderingContext)
+        public void HandleLinkedPinContextMenu(TtGraph graph, ref FGraphElementRenderingContext elementRenderingContext)
         {
             if (graph is IContextMeunable meunable)
             {

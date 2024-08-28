@@ -61,16 +61,16 @@ namespace EngineNS.Editor.Forms
             {
                 if (GridNode == null)
                     return false;
-                return !GridNode.HasStyle(GamePlay.Scene.UNode.ENodeStyles.Invisible);
+                return !GridNode.HasStyle(GamePlay.Scene.TtNode.ENodeStyles.Invisible);
             }
             set
             {
                 if (mCurrentMeshNode == null)
                     return;
                 if(value==true)
-                    GridNode.UnsetStyle(GamePlay.Scene.UNode.ENodeStyles.Invisible);
+                    GridNode.UnsetStyle(GamePlay.Scene.TtNode.ENodeStyles.Invisible);
                 else
-                    GridNode.SetStyle(GamePlay.Scene.UNode.ENodeStyles.Invisible);
+                    GridNode.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.Invisible);
             }
         }
 
@@ -138,9 +138,9 @@ namespace EngineNS.Editor.Forms
             return this;
         }
         public float PlaneScale = 5.0f;
-        EngineNS.GamePlay.Scene.UMeshNode PlaneMeshNode;
-        EngineNS.GamePlay.Scene.UMeshNode mCurrentMeshNode;
-        EngineNS.GamePlay.Scene.UMeshNode mArrowMeshNode;
+        EngineNS.GamePlay.Scene.TtMeshNode PlaneMeshNode;
+        EngineNS.GamePlay.Scene.TtMeshNode mCurrentMeshNode;
+        EngineNS.GamePlay.Scene.TtMeshNode mArrowMeshNode;
         EngineNS.GamePlay.Scene.UGridNode GridNode;
         float mCurrentMeshRadius = 1.0f;
         protected async System.Threading.Tasks.Task Initialize_PreviewMesh(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
@@ -167,7 +167,7 @@ namespace EngineNS.Editor.Forms
             var ok = mesh.Initialize(Mesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
-                var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+                var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
                 meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "PreviewObject";
                 meshNode.IsAcceptShadow = true;
@@ -180,7 +180,7 @@ namespace EngineNS.Editor.Forms
             ok = arrowMesh.Initialize(arrowMaterialMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
-                mArrowMeshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), arrowMesh, DVector3.UnitX*3, Vector3.One, Quaternion.Identity);
+                mArrowMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.UPlacement), arrowMesh, DVector3.UnitX*3, Vector3.One, Quaternion.Identity);
                 mArrowMeshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                 mArrowMeshNode.NodeData.Name = "PreviewArrow";
                 mArrowMeshNode.IsAcceptShadow = false;
@@ -209,7 +209,7 @@ namespace EngineNS.Editor.Forms
                 tMaterials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
                 PlaneMesh.Initialize(box, tMaterials,
                     Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-                PlaneMeshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), PlaneMesh, new DVector3(0, boxStart.Y, 0), Vector3.One, Quaternion.Identity);
+                PlaneMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.UPlacement), PlaneMesh, new DVector3(0, boxStart.Y, 0), Vector3.One, Quaternion.Identity);
                 PlaneMeshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
                 PlaneMeshNode.NodeData.Name = "Plane";
                 PlaneMeshNode.IsAcceptShadow = true;
@@ -249,7 +249,7 @@ namespace EngineNS.Editor.Forms
             var ok = mesh.Initialize(Mesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
-                var meshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(sdfViewport.World, sdfViewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+                var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(sdfViewport.World, sdfViewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
                 meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
                 meshNode.NodeData.Name = "PreviewObject";
                 meshNode.IsAcceptShadow = false;

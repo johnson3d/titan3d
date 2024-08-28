@@ -6,9 +6,10 @@ using System.Text;
 
 namespace EngineNS.Bricks.Terrain.CDLOD
 {
-    [Bricks.CodeBuilder.ContextMenu("TerrainNode", "TerrainNode", GamePlay.Scene.UNode.EditorKeyword)]
-    [GamePlay.Scene.UNode(NodeDataType = typeof(UTerrainData), DefaultNamePrefix = "Terrain")]
-    public class UTerrainNode : GamePlay.Scene.USceneActorNode
+    [Bricks.CodeBuilder.ContextMenu("TerrainNode", "TerrainNode", GamePlay.Scene.TtNode.EditorKeyword)]
+    [GamePlay.Scene.TtNode(NodeDataType = typeof(TtTerrainData), DefaultNamePrefix = "Terrain")]
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.Terrain.CDLOD.UTerrainNode@EngineCore" })]
+    public class TtTerrainNode : GamePlay.Scene.TtSceneActorNode
     {
         public override void Dispose()
         {
@@ -27,9 +28,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             TerrainMaterialIdManager?.Cleanup();
             TerrainMaterialIdManager = null;
         }
-        public class UTerrainData : GamePlay.Scene.UNodeData
+        [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.Terrain.CDLOD.UTerrainNode.UTerrainData@EngineCore" })]
+        public class TtTerrainData : GamePlay.Scene.TtNodeData
         {
-            public UTerrainData()
+            public TtTerrainData()
             {
                 LODRangeFloat.Add(100.0f);
                 LODRangeFloat.Add(200.0f);
@@ -134,23 +136,23 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             get
             {
-                return GetNodeData<UTerrainData>()?.PgcName?.Name;
+                return GetNodeData<TtTerrainData>()?.PgcName?.Name;
             }
         }
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, GamePlay.Scene.UNodeData data, GamePlay.Scene.EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, GamePlay.Scene.TtNodeData data, GamePlay.Scene.EBoundVolumeType bvType, Type placementType)
         {
-            if (data as UTerrainData == null)
+            if (data as TtTerrainData == null)
             {
-                data = new UTerrainData();
+                data = new TtTerrainData();
             }
             if (await base.InitializeNode(world, data, bvType, placementType) == false)
                 return false;
 
-            if (await Terrain.Initialize(GetNodeData<UTerrainData>().MipLevels) == false)
+            if (await Terrain.Initialize(GetNodeData<TtTerrainData>().MipLevels) == false)
                 return false;
 
-            var trData = data as UTerrainData;
+            var trData = data as TtTerrainData;
             PatchSide = trData.PatchSide;
             PatchSize = trData.PatchSize;
             LevelSize = PatchSize * PatchSide;
@@ -171,9 +173,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             int NumOfActiveLevel = 1 + trData.ActiveLevel * 2;
             ActiveLevels = new UTerrainLevel[NumOfActiveLevel, NumOfActiveLevel];
 
-            SetStyle(GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
+            SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
 
-            MorphRange = new Vector2[(data as UTerrainData).LODRangeFloat.Count];
+            MorphRange = new Vector2[(data as TtTerrainData).LODRangeFloat.Count];
 
             IsAcceptShadow = true;
 
@@ -257,7 +259,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.MorphLODs, i, in tmp);
             }
         }
-        protected override void OnParentSceneChanged(GamePlay.Scene.UScene prev, GamePlay.Scene.UScene cur)
+        protected override void OnParentSceneChanged(GamePlay.Scene.TtScene prev, GamePlay.Scene.TtScene cur)
         {
             if (ActiveLevels == null)
                 return;
@@ -394,7 +396,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         //bool DebugPrintLOD = false;
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UTerrainNode), nameof(TickLogic));
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtTerrainNode), nameof(TickLogic));
         public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
@@ -475,7 +477,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             FrustumCull(rp, VisiblePatches);
             if (rp.CullType == 0)
-                UpdateRangeLOD((NodeData as UTerrainData).LODRangeFloat, EyeCenter - this.Location, VisiblePatches);
+                UpdateRangeLOD((NodeData as TtTerrainData).LODRangeFloat, EyeCenter - this.Location, VisiblePatches);
 
             foreach (var i in VisiblePatches)
             {

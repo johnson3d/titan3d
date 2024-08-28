@@ -8,11 +8,11 @@ using System.Text;
 
 namespace EngineNS.NxPhysics
 {
-    [Bricks.CodeBuilder.ContextMenu("NxSceneDbg", "NxSceneDbg", UNode.EditorKeyword)]
-    [UNode(NodeDataType = typeof(GamePlay.Scene.UNodeData), DefaultNamePrefix = "NxSceneDbg")]
-    public class NxSceneDebugger : GamePlay.Scene.USceneActorNode
+    [Bricks.CodeBuilder.ContextMenu("NxSceneDbg", "NxSceneDbg", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(GamePlay.Scene.TtNodeData), DefaultNamePrefix = "NxSceneDbg")]
+    public class NxSceneDebugger : GamePlay.Scene.TtSceneActorNode
     {
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
 

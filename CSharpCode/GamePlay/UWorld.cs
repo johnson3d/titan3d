@@ -24,24 +24,24 @@ namespace EngineNS.GamePlay
             mOnVisitNode_GatherVisibleMeshesAll = this.OnVisitNode_GatherVisibleMeshesAll;
             mOnVisitNode_GatherBoundShapes = this.OnVisitNode_GatherBoundShapes;
 
-            mRoot = new Scene.UScene();
+            mRoot = new Scene.TtScene();
             mRoot.World = this;
         }
         UMemberTickables mMemberTickables = new UMemberTickables();
         Graphics.Pipeline.Shader.TtMaterialInstance mBoundingDebugMaterial;
         public async System.Threading.Tasks.Task<bool> InitWorld()
         {
-            Scene.UNodeData data = new Scene.UNodeData();
+            Scene.TtNodeData data = new Scene.TtNodeData();
             await mRoot.InitializeNode(this, data, Scene.EBoundVolumeType.Box, typeof(UPlacement));
-            mRoot.SetStyle(GamePlay.Scene.UNode.ENodeStyles.VisibleFollowParent);
+            mRoot.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
 
             mBoundingDebugMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
 
             await mMemberTickables.InitializeMembers(this);
             return true;
         }
-        public List<UNode> ActiveNodes { get; } = new List<UNode>();
-        public void RegActiveNode(UNode node)
+        public List<TtNode> ActiveNodes { get; } = new List<TtNode>();
+        public void RegActiveNode(TtNode node)
         {
             lock (ActiveNodes)
             {
@@ -66,8 +66,8 @@ namespace EngineNS.GamePlay
                 CameralOffsetSerialId++;
             }
         }
-        Scene.UScene mRoot;
-        public Scene.UScene Root
+        Scene.TtScene mRoot;
+        public Scene.TtScene Root
         {
             get => mRoot;
             set => mRoot = value;
@@ -130,9 +130,9 @@ namespace EngineNS.GamePlay
 
             public DBoundingBox AABB;
             public List<Graphics.Pipeline.FVisibleMesh> VisibleMeshes = new List<Graphics.Pipeline.FVisibleMesh>();
-            public List<GamePlay.Scene.UNode> VisibleNodes = new List<UNode>();
+            public List<GamePlay.Scene.TtNode> VisibleNodes = new List<TtNode>();
             
-            public delegate bool FOnVisitNode(Scene.UNode node, UVisParameter arg);
+            public delegate bool FOnVisitNode(Scene.TtNode node, UVisParameter arg);
             public FOnVisitNode OnVisitNode = null;
             public void Reset()
             {
@@ -194,45 +194,74 @@ namespace EngineNS.GamePlay
                 OnVisitNode_GatherVisibleMeshes(Root, rp);
             }   
         }
-        private unsafe bool OnVisitNode_GatherVisibleMeshes(Scene.UNode node, object arg)
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeGatherVisibleMeshes_Cull = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(GatherVisibleMeshes)+".Cull");
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeOnVisitNode = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(GatherVisibleMeshes) + ".OnVisitNode");
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeOnGatherVisibleMeshes = Profiler.TimeScopeManager.GetTimeScope(typeof(TtNode), "OnGatherVisibleMeshes");
+        internal unsafe bool OnVisitNode_GatherVisibleMeshes(Scene.TtNode node, object arg)
         {
             var rp = arg as UVisParameter;
 
             if (rp.OnVisitNode != null)
             {
-                if (rp.OnVisitNode(node, rp) == false)
-                    return false;
+                using (new Profiler.TimeScopeHelper(ScopeOnVisitNode))
+                {
+                    if (rp.OnVisitNode(node, rp) == false)
+                        return false;
+                }   
             }
             
             CONTAIN_TYPE type;
-            if (node.HasStyle(Scene.UNode.ENodeStyles.VisibleFollowParent))
+
+            using (new Profiler.TimeScopeHelper(ScopeGatherVisibleMeshes_Cull))
             {
-                type = CONTAIN_TYPE.CONTAIN_TEST_REFER;
+                if (node.HasStyle(Scene.TtNode.ENodeStyles.VisibleFollowParent))
+                {
+                    type = CONTAIN_TYPE.CONTAIN_TEST_REFER;
+                }
+                else
+                {
+                    type = rp.CullCamera.WhichContainTypeFast(this, in node.AbsAABB, true);
+
+                    //var absAABB = DBoundingBox.TransformNoScale(in node.AABB, in node.Placement.AbsTransform);
+                    //type = rp.CullCamera.WhichContainTypeFast(this, in absAABB, true);
+                    
+                    //这里还没想明白，把Frustum的6个平面变换到AABB所在坐标为啥不行
+                    //type = frustom->whichContainTypeFast(ref node.AABB, ref node.Placement.AbsTransformInv, 1);
+                }
             }
-            else
-            {
-                //var matrix = node.Placement.AbsTransform.ToMatrixNoScale();
-                var absAABB = DBoundingBox.TransformNoScale(in node.AABB, in node.Placement.AbsTransform);
-                type = rp.CullCamera.WhichContainTypeFast(this, in absAABB, true);
-                //这里还没想明白，把Frustum的6个平面变换到AABB所在坐标为啥不行
-                //type = frustom->whichContainTypeFast(ref node.AABB, ref node.Placement.AbsTransformInv, 1);
-            }
+
             switch (type)
             {
                 case CONTAIN_TYPE.CONTAIN_TEST_OUTER:
                     break;
                 case CONTAIN_TYPE.CONTAIN_TEST_INNER:
-                    node.DFS_VisitNodeTree(mOnVisitNode_GatherVisibleMeshesAll, rp);
+                    {
+                        if (node.TreeGatherVisibleMeshes(rp))
+                        {
+                            node.DFS_VisitNodeTree(mOnVisitNode_GatherVisibleMeshesAll, rp);
+                        }
+                    }
                     break;
                 case CONTAIN_TYPE.CONTAIN_TEST_REFER:
                     {
-                        if(!node.HasStyle(Scene.UNode.ENodeStyles.SelfInvisible))
-                            node.OnGatherVisibleMeshes(rp);
-                        if (!node.HasStyle(Scene.UNode.ENodeStyles.ChildrenInvisible))
+                        if (node.TreeGatherVisibleMeshes(rp))
                         {
-                            foreach (var i in node.Children)
+                            if (!node.HasStyle(Scene.TtNode.ENodeStyles.SelfInvisible))
                             {
-                                OnVisitNode_GatherVisibleMeshes(i, arg);
+                                using (new Profiler.TimeScopeHelper(ScopeOnGatherVisibleMeshes))
+                                {
+                                    node.OnGatherVisibleMeshes(rp);
+                                }
+                            }
+                            if (!node.HasStyle(Scene.TtNode.ENodeStyles.ChildrenInvisible))
+                            {
+                                foreach (var i in node.Children)
+                                {
+                                    OnVisitNode_GatherVisibleMeshes(i, arg);
+                                }
                             }
                         }
                     }
@@ -240,28 +269,32 @@ namespace EngineNS.GamePlay
             }
             return false;
         }
-        Scene.UNode.FOnVisitNode mOnVisitNode_GatherVisibleMeshesAll;
-        private unsafe bool OnVisitNode_GatherVisibleMeshesAll(Scene.UNode node, object arg)
+        Scene.TtNode.FOnVisitNode mOnVisitNode_GatherVisibleMeshesAll;
+        private unsafe bool OnVisitNode_GatherVisibleMeshesAll(Scene.TtNode node, object arg)
         {
             var rp = arg as UVisParameter;
-            
-            node.OnGatherVisibleMeshes(rp);
+
+            using (new Profiler.TimeScopeHelper(ScopeOnGatherVisibleMeshes))
+            {
+                node.OnGatherVisibleMeshes(rp);
+            }
+                
             return false;
         }
         #endregion
 
         #region DebugAssist
         
-        public void GatherBoundShapes(List<Graphics.Pipeline.FVisibleMesh> boundVolumes, Scene.UNode node = null)
+        public void GatherBoundShapes(List<Graphics.Pipeline.FVisibleMesh> boundVolumes, Scene.TtNode node = null)
         {
             if (node == null)
                 node = Root;
             node.DFS_VisitNodeTree(mOnVisitNode_GatherBoundShapes, boundVolumes);
         }
-        Scene.UNode.FOnVisitNode mOnVisitNode_GatherBoundShapes;
-        private unsafe bool OnVisitNode_GatherBoundShapes(Scene.UNode node, object arg)
+        Scene.TtNode.FOnVisitNode mOnVisitNode_GatherBoundShapes;
+        private unsafe bool OnVisitNode_GatherBoundShapes(Scene.TtNode node, object arg)
         {
-            if (node.HasStyle(Scene.UNode.ENodeStyles.HideBoundShape))
+            if (node.HasStyle(Scene.TtNode.ENodeStyles.HideBoundShape))
                 return false;
 
             var bvs = arg as List<Graphics.Pipeline.FVisibleMesh>;
@@ -328,7 +361,9 @@ namespace EngineNS.GamePlay
         }
         [ThreadStatic]
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(TickLogic));
-        private UNode.TtNodeTickParameters NodeTickParameters = new UNode.TtNodeTickParameters();
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick_After = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(TickLogic) + ".After");
+        private TtNode.TtNodeTickParameters NodeTickParameters = new TtNode.TtNodeTickParameters();
         public virtual void TickLogic(Graphics.Pipeline.TtRenderPolicy policy, float ellapse)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
@@ -356,11 +391,14 @@ namespace EngineNS.GamePlay
 
                 mMemberTickables.TickLogic(this, TtEngine.Instance.ElapseTickCountMS);
 
-                foreach (var i in mAfterTicks)
+                using (new Profiler.TimeScopeHelper(ScopeTick_After))
                 {
-                    i();
+                    foreach (var i in mAfterTicks)
+                    {
+                        i();
+                    }
+                    mAfterTicks.Clear();
                 }
-                mAfterTicks.Clear();
             }
         }
         private List<System.Action> mAfterTicks = new List<System.Action>();

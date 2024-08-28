@@ -40,9 +40,7 @@
       <Name Type="System.String@Unknown" Value="EnvMapNode" />
       <NodeId Type="System.Guid@Unknown" Value="353b082f-7045-4c6e-827c-4a928cf62de5" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="300.3726,291.4182" />
-      <GraphNode Type="EngineNS.Graphics.Pipeline.Common.UImageAssetNode@EngineCore">
-        <ImageName Type="EngineNS.RName@EngineCore" Value="Engine,texture/hdri_epic_courtyard_daylight.srv,1fbfef87-ba8b-4990-90d0-33d9b0a60e8f" />
-      </GraphNode>
+      <GraphNode Type="EngineNS.Graphics.Pipeline.Common.UImageAssetNode@EngineCore" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_3>
     <e_4 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
@@ -51,9 +49,7 @@
       <Name Type="System.String@Unknown" Value="VignetteNode" />
       <NodeId Type="System.Guid@Unknown" Value="a4a38911-2885-4e41-a849-b60a581774fb" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="60.709015,358.0727" />
-      <GraphNode Type="EngineNS.Graphics.Pipeline.Common.UImageAssetNode@EngineCore">
-        <ImageName Type="EngineNS.RName@EngineCore" Value="Engine,texture/hdri_epic_courtyard_daylight.srv,1fbfef87-ba8b-4990-90d0-33d9b0a60e8f" />
-      </GraphNode>
+      <GraphNode Type="EngineNS.Graphics.Pipeline.Common.UImageAssetNode@EngineCore" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_4>
     <e_5 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">

@@ -48,9 +48,9 @@ namespace EngineNS.Editor.Forms
             return !(left == right);
         }
     }
-    public class USkeletonShowNode : USceneActorNode
+    public class USkeletonShowNode : TtSceneActorNode
     {
-        public static async System.Threading.Tasks.Task<USkeletonShowNode> AddNode(GamePlay.UWorld world, UNode parent, UNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
+        public static async System.Threading.Tasks.Task<USkeletonShowNode> AddNode(GamePlay.UWorld world, TtNode parent, TtNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
             var node = await scene.NewNode(world, typeof(USkeletonShowNode), data, EBoundVolumeType.Box, placementType) as USkeletonShowNode;
@@ -62,7 +62,7 @@ namespace EngineNS.Editor.Forms
             return node;
         }
 
-        public class USkeletonShowNodeData : UNodeData
+        public class USkeletonShowNodeData : TtNodeData
         {
             public TtSkeletonAsset SkeletonAsset { get; set; } = null;
         }
@@ -70,7 +70,7 @@ namespace EngineNS.Editor.Forms
         Dictionary<FBoneLine, TtMesh> BoneLineMeshes = new();
         public TtSkeletonAsset SkeletonAsset { get; set; } = null;
         public TtLocalSpaceRuntimePose CurrentPose = null;
-        public override Thread.Async.TtTask<bool> InitializeNode(UWorld world, UNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var nodeData = data as USkeletonShowNodeData;
             SkeletonAsset = nodeData.SkeletonAsset;
@@ -288,7 +288,7 @@ namespace EngineNS.Editor.Forms
         {
 
         }
-        EngineNS.GamePlay.Scene.UMeshNode PlaneMeshNode;
+        EngineNS.GamePlay.Scene.TtMeshNode PlaneMeshNode;
         USkeletonShowNode SkeletonShowNode = null;
         protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
@@ -315,7 +315,7 @@ namespace EngineNS.Editor.Forms
                 tMaterials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(TtEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName);
                 PlaneMesh.Initialize(Graphics.Mesh.UMeshDataProvider.MakePlane(10, 10).ToMesh(), tMaterials,
                     Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-                PlaneMeshNode = await GamePlay.Scene.UMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), PlaneMesh, new DVector3(0, -0.0001f, 0), Vector3.One, Quaternion.Identity);
+                PlaneMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.UPlacement), PlaneMesh, new DVector3(0, -0.0001f, 0), Vector3.One, Quaternion.Identity);
                 PlaneMeshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
                 PlaneMeshNode.NodeData.Name = "Plane";
                 PlaneMeshNode.IsAcceptShadow = true;

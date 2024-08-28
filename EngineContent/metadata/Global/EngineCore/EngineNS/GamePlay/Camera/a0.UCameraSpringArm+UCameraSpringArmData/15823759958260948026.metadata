@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_15823759958260948026 Type="EngineNS.GamePlay.Camera.UCameraSpringArm.UCameraSpringArmData@EngineCore">
+  <ArmLength Type="System.Single@Unknown" Order="0" />
+  <DoCollisionTest Type="System.Boolean@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.TtNode.ENodeStyles@EngineCore" Order="0" />
+  <ProbeSize Type="System.Single@Unknown" Order="0" />
+  <SpringDamping Type="System.Single@Unknown" Order="0" />
+  <TargetOffset Type="EngineNS.DVector3@EngineCore" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.UBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.UPlacementBase@EngineCore" Order="2" />
+</Hash_15823759958260948026>

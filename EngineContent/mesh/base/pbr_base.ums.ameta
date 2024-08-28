@@ -11,7 +11,7 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
-    <e_0 Value="Engine,mesh/base/sphere.vms,d10ee00a-40c9-4e34-8e37-9c18adc9fdde" />
+    <e_0 Value="Engine,mesh/base/sphere.vms,333d06d5-49a5-4799-b15d-15f8fcfe3de1" />
     <e_1 Value="Engine,material/brdf_base.material,55041983-a501-45bd-a1a6-704daa6f6b28" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />

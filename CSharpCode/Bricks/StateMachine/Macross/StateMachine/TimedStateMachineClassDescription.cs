@@ -1,4 +1,5 @@
-﻿using EngineNS.Bricks.CodeBuilder;
+﻿using EngineNS.Animation.Macross;
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.StateMachine.Macross.CompoundState;
 using EngineNS.Bricks.StateMachine.TimedSM;
 using EngineNS.DesignMacross;
@@ -66,15 +67,8 @@ namespace EngineNS.Bricks.StateMachine.Macross
         #region Internal AST Build
         private UMethodDeclaration BuildOverrideInitializeMethod()
         {
-            UMethodDeclaration methodDeclaration = new UMethodDeclaration();
-            methodDeclaration.IsOverride = true;
-            methodDeclaration.MethodName = "Initialize";
-            methodDeclaration.ReturnValue = new UVariableDeclaration()
-            {
-                VariableType = new UTypeReference(typeof(bool)),
-                InitValue = new UDefaultValueExpression(typeof(bool)),
-                VariableName = "result"
-            };
+            var methodDeclaration = TtStateMachineASTBuildUtil.CreateOverridedInitMethodStatement();
+
             foreach (var compoundState in CompoundStates)
             {
                 UAssignOperatorStatement compoundStateAssign = new();
@@ -92,11 +86,13 @@ namespace EngineNS.Bricks.StateMachine.Macross
                 var initializeMethodInvoke = new UMethodInvokeStatement();
                 initializeMethodInvoke.Host = new UVariableReferenceExpression(compoundState.VariableName);
                 initializeMethodInvoke.MethodName = "Initialize";
+                initializeMethodInvoke.Arguments.Add(new UMethodInvokeArgumentExpression { Expression = new UVariableReferenceExpression("context") });
+                initializeMethodInvoke.IsAsync = true;
                 methodDeclaration.MethodBody.Sequence.Add(initializeMethodInvoke);
             }
-            UAssignOperatorStatement returnValueAssign = new UAssignOperatorStatement();
-            returnValueAssign.To = new UVariableReferenceExpression("result");
-            returnValueAssign.From = new UPrimitiveExpression(true);
+            var returnValueAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
+                                        new UVariableReferenceExpression(methodDeclaration.ReturnValue.VariableName),
+                                        new UPrimitiveExpression(true));
             methodDeclaration.MethodBody.Sequence.Add(returnValueAssign);
             return methodDeclaration;
         }

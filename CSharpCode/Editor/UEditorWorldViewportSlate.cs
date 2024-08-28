@@ -23,7 +23,7 @@ namespace EngineNS.Editor
                 this.ShowBoundVolumes(true, false, null);
                 return;
             }
-            var node = proxy as GamePlay.Scene.UNode;
+            var node = proxy as GamePlay.Scene.TtNode;
             if (node != null)
             {
                 this.ShowBoundVolumes(true, true, node);

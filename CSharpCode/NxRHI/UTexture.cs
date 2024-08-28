@@ -2620,17 +2620,17 @@ namespace EngineNS.NxRHI
                     {
                         var pngNode = node.TryGetChildNode("PngMips");
                         if (pngNode.IsValidPointer)
-                            return LoadPngTexture2DMipLevel(node.mCoreObject, desc, level);
+                            return LoadPngTexture2DMipLevel(node, desc, level);
                         else
                         {
                             var hdrNode = node.TryGetChildNode("HdrMips");
                             if (hdrNode.IsValidPointer)
-                                return LoadHdrTexture2DMipLevel(node.mCoreObject, desc, level);
+                                return LoadHdrTexture2DMipLevel(node, desc, level);
                             else
                             {
                                 var exrNode = node.TryGetChildNode("ExrMips");
                                 if (exrNode.IsValidPointer)
-                                    return LoadExrTexture2DMipLevel(node.mCoreObject, desc, level);
+                                    return LoadExrTexture2DMipLevel(node, desc, level);
                             }
                         }
                         return null;
@@ -2644,7 +2644,7 @@ namespace EngineNS.NxRHI
                 case ETextureCompressFormat.TCF_BC6_FLOAT:
                     {
                         oldTexture = null;
-                        return LoadDxtTexture2DMipLevel(node.mCoreObject, desc, level, oldTexture);
+                        return LoadDxtTexture2DMipLevel(node, desc, level, oldTexture);
                     }
                 default:
                     return null;
@@ -2658,17 +2658,17 @@ namespace EngineNS.NxRHI
                     {
                         var pngNode = node.TryGetChildNode("PngMips");
                         if (pngNode.IsValidPointer)
-                            return LoadPngTexture2DMipLevel(node.mCoreObject, desc, level);
+                            return LoadPngTexture2DMipLevel(node, desc, level);
                         else
                         {
                             var hdrNode = node.TryGetChildNode("HdrMips");
                             if (hdrNode.IsValidPointer)
-                                return LoadHdrTexture2DMipLevel(node.mCoreObject, desc, level);
+                                return LoadHdrTexture2DMipLevel(node, desc, level);
                             else
                             {
                                 var exrNode = node.TryGetChildNode("ExrMips");
                                 if (exrNode.IsValidPointer)
-                                    return LoadExrTexture2DMipLevel(node.mCoreObject, desc, level, channelR, channelG, channelB, channelA);
+                                    return LoadExrTexture2DMipLevel(node, desc, level, channelR, channelG, channelB, channelA);
                             }
                         }
                         return null;
@@ -2680,14 +2680,14 @@ namespace EngineNS.NxRHI
                 case ETextureCompressFormat.TCF_BC6:
                 case ETextureCompressFormat.TCF_BC6_FLOAT:
                     {
-                        return LoadDxtTexture2DMipLevel(node.mCoreObject, desc, level);
+                        return LoadDxtTexture2DMipLevel(node, desc, level);
                     }
                 default:
                     return null;
             }
         }
         #region Load Mips
-        private static unsafe UTexture LoadExrTexture2DMipLevel(XndNode node, UPicDesc desc, int mipLevel)
+        private static unsafe UTexture LoadExrTexture2DMipLevel(TtXndNode node, UPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
                 return null;
@@ -2747,7 +2747,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        private static unsafe UTexture LoadExrTexture2DMipLevel(XndNode node, UPicDesc desc, int mipLevel, int channelR, int channelG, int channelB, int channelA)
+        private static unsafe UTexture LoadExrTexture2DMipLevel(TtXndNode node, UPicDesc desc, int mipLevel, int channelR, int channelG, int channelB, int channelA)
         {
             if (mipLevel == 0)
                 return null;
@@ -2886,7 +2886,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        private static unsafe UTexture LoadHdrTexture2DMipLevel(XndNode node, UPicDesc desc, int mipLevel)
+        private static unsafe UTexture LoadHdrTexture2DMipLevel(TtXndNode node, UPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
                 return null;
@@ -2962,7 +2962,7 @@ namespace EngineNS.NxRHI
             }
         }
 
-        private static unsafe UTexture LoadPngTexture2DMipLevel(XndNode node, UPicDesc desc, int mipLevel)
+        private static unsafe UTexture LoadPngTexture2DMipLevel(TtXndNode node, UPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
                 return null;
@@ -3032,7 +3032,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        private static unsafe UTexture LoadDxtTexture2DMipLevel(XndNode node, UPicDesc desc, int mipLevel)
+        private static unsafe UTexture LoadDxtTexture2DMipLevel(TtXndNode node, UPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
                 return null;
@@ -3112,7 +3112,7 @@ namespace EngineNS.NxRHI
             }
         }
 
-        private static unsafe UTexture LoadDxtTexture2DMipLevel(XndNode node, UPicDesc desc, int mipLevel, UTexture oldTexture)
+        private static unsafe UTexture LoadDxtTexture2DMipLevel(TtXndNode node, UPicDesc desc, int mipLevel, UTexture oldTexture)
         {
             if (oldTexture == null)
             {

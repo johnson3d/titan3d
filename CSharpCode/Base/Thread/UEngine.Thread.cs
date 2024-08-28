@@ -195,6 +195,16 @@ namespace EngineNS
                 Profiler.Log.WriteException(ex);
             }
         }
+        private List<System.Action> mAfterTicks = new List<System.Action>();
+        public void RegAfterTickAction(System.Action action)
+        {
+            lock (mAfterTicks)
+            {
+                mAfterTicks.Add(action);
+            }
+        }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick_After = Profiler.TimeScopeManager.GetTimeScope(typeof(TtEngine), nameof(TryTickLogic) + ".After");
         public void TryTickLogic()
         {
             try
@@ -218,6 +228,18 @@ namespace EngineNS
                     catch (Exception ex)
                     {
                         Profiler.Log.WriteException(ex);
+                    }
+                }
+
+                using (new Profiler.TimeScopeHelper(ScopeTick_After))
+                {
+                    lock (mAfterTicks)
+                    {
+                        foreach (var i in mAfterTicks)
+                        {
+                            i();
+                        }
+                        mAfterTicks.Clear();
                     }
                 }
             }

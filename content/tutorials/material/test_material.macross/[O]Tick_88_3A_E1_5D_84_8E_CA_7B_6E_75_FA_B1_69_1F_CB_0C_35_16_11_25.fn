@@ -198,7 +198,7 @@
     </e_5>
     <e_6 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.NotEqualNode@EngineCore">
       <Label Type="System.String@Unknown" Value="!=" />
-      <LeftTypeString Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.UMeshNode@EngineCore" />
+      <LeftTypeString Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtMeshNode@EngineCore" />
       <Name Type="System.String@Unknown" Value="!=" />
       <NodeId Type="System.Guid@Unknown" Value="7e2206af-60df-4a81-963c-34d9423bb2e8" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="300,344" />
