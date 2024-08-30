@@ -433,11 +433,7 @@ namespace EngineNS.GamePlay.Scene
                 mCurrMeshMatrix.AddRange(mMeshMatrix);
             }
 
-
-            if (rp.VisibleNodes != null)
-            {
-                rp.VisibleNodes.Add(this);
-            }
+            rp.AddVisibleNode(this);
         }
         protected override void OnCameralOffsetChanged(UWorld world)
         {

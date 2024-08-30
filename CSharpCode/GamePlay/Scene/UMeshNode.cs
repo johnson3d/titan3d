@@ -324,10 +324,7 @@ namespace EngineNS.GamePlay.Scene
             NodeData.CheckDirty(this);
 
             rp.AddVisibleMesh(mMesh);
-            if (rp.VisibleNodes != null)
-            {
-                rp.VisibleNodes.Add(this);
-            }
+            rp.AddVisibleNode(this);
         }
         protected override void OnCameralOffsetChanged(UWorld world)
         {

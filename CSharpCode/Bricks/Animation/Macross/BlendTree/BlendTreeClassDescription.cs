@@ -15,6 +15,7 @@ using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.Rtti;
 using System.Linq.Expressions;
 using EngineNS.Animation.Macross.BlendTree.Node;
+using EngineNS.DesignMacross.Base.Description;
 
 namespace EngineNS.Animation.Macross.BlendTree
 {
@@ -90,6 +91,28 @@ namespace EngineNS.Animation.Macross.BlendTree
                 }
             }
             return null;
+        }
+
+        public override List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
+        {
+            SupperClassNames.Clear();
+            SupperClassNames.Add($"EngineNS.Animation.BlendTree.TtLocalSpacePoseBlendTree");
+            List<UClassDeclaration> classDeclarationsBuilded = new List<UClassDeclaration>();
+            var thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
+
+            classDeclarationsBuilded.Add(thisClassDeclaration);
+            return classDeclarationsBuilded;
+        }
+
+        public override UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
+        {
+            return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
+        }
+        public override void GenerateCodeInClass(UClassDeclaration classDeclaration)
+        {
+            base.GenerateCodeInClass(classDeclaration);
+
+
         }
     }
 }

@@ -74,7 +74,7 @@ namespace EngineNS.Editor.Forms
                         var builder = meshProvider.mCoreObject;
                         var pPos = (Vector3*)builder.GetStream(NxRHI.EVertexStreamType.VST_Position).GetData();
                         var pNor = (Vector3*)builder.GetStream(NxRHI.EVertexStreamType.VST_Normal).GetData();
-                        var pTangent = (Vector3*)builder.GetStream(NxRHI.EVertexStreamType.VST_Tangent).GetData();
+                        var pTangent = (Vector4*)builder.GetStream(NxRHI.EVertexStreamType.VST_Tangent).GetData();
 
                         for (int i = 0; i < (int)builder.VertexNumber; i++)
                         {
@@ -89,7 +89,8 @@ namespace EngineNS.Editor.Forms
                                 if (pTangent != null)
                                 {
                                     TangentList.Add(pPos[i]);
-                                    TangentList.Add(pPos[i] + pTangent[i] * 0.05f);
+                                    Vector3 tangent = new Vector3(pTangent[i].X, pTangent[i].Y, pTangent[i].Z);
+                                    TangentList.Add(pPos[i] + tangent * 0.05f);
                                 }
                             }
                         }

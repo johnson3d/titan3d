@@ -67,10 +67,7 @@ namespace EngineNS.Bricks.Particle
                     rp.AddVisibleMesh(i.Mesh);
                 }
             }
-            if (rp.VisibleNodes != null)
-            {
-                rp.VisibleNodes.Add(this);
-            }
+            rp.AddVisibleNode(this);
         }
         protected override void OnCameralOffsetChanged(UWorld world)
         {

@@ -42,6 +42,8 @@ namespace EngineNS.GamePlay.Scene
             
             var ret = await base.InitializeNode(world, data, bvType, placementType);
             GetNodeData<ULightNodeData>().HostNode = this;
+
+            this.IsForceGatherNode = true;
             return ret;
         }
         public static async Thread.Async.TtTask<UPointLightNode> AddPointLightNode(UWorld world, TtNode parent, ULightNodeData data, DVector3 pos)
@@ -119,10 +121,8 @@ namespace EngineNS.GamePlay.Scene
         }
         public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
         {
-            if (rp.VisibleNodes != null)
-            {//灯光比较特殊，无论是否debug都要加入visnode列表，否则Tiling过程得不到可见灯光集
-                rp.VisibleNodes.Add(this);
-            }
+            //灯光比较特殊，无论是否debug都要加入visnode列表，否则Tiling过程得不到可见灯光集
+            rp.AddVisibleNode(this);
 
             //if (TtEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug) == false)
             //    return;

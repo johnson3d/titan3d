@@ -46,7 +46,7 @@ namespace EngineNS.Thread
                 {
                     if (events.Count > 0 && numOfEvent > 0)
                     {
-                        e = events.Dequeue();
+                        e = events.Pop();
                         numOfEvent--;
                     }
                     else
@@ -64,7 +64,7 @@ namespace EngineNS.Thread
                         {
                             lock (events)
                             {
-                                events.Enqueue(e);
+                                events.Push(e);
                             }
                             return;
                         }

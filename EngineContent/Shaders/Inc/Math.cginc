@@ -98,20 +98,20 @@ half3 Linear2sRGB(half3 LinearColor)
 	return V_Select(LinearColor > 0.0031308h, 1.055h * pow(LinearColor, 0.4166667h) - 0.055h, LinearColor * 12.92h);
 }
 
-half Pow2(half x)
+float Pow2(float x)
 {
 	return x * x;
 }
 
-half Pow4(half x)
+float Pow4(float x)
 {
-	half x2 = x * x;
+	float x2 = x * x;
 	return x2 * x2;
 }
 
-half Pow5(half x)
+float Pow5(float x)
 {
-	half x2 = x * x;
+	float x2 = x * x;
 	return x2 * x2 * x;
 }
 

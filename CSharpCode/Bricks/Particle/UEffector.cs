@@ -163,7 +163,7 @@ namespace EngineNS.Bricks.Particle
                 else
                 {
                     ForParameters.effector = e;
-                    TtEngine.Instance.EventPoster.ParrallelFor((int)aliveNum, static (i, arg1, arg2) =>
+                    TtEngine.Instance.EventPoster.ParrallelFor((int)aliveNum, static (i, arg1, arg2, state) =>
                     {
                         var ForParameters = (TtForParameters)arg1;
                         var index = ForParameters.pAlives[i];
@@ -191,7 +191,7 @@ namespace EngineNS.Bricks.Particle
             }
             else
             {   
-                TtEngine.Instance.EventPoster.ParrallelFor((int)aliveNum, static (i, arg1, arg2) =>
+                TtEngine.Instance.EventPoster.ParrallelFor((int)aliveNum, static (i, arg1, arg2, state) =>
                 {
                     var ForParameters = (TtForParameters)arg1;
                     var index = ForParameters.pAlives[i];

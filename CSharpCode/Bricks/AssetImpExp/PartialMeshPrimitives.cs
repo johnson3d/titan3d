@@ -35,6 +35,8 @@ namespace EngineNS.Graphics.Mesh
         public bool ApplyTransformToVertex { get; set; } = false;
         [Category("ImportSetting")]
         public bool GenerateUMS { get; set; } = true;
+        [Category("ImportSetting")]
+        public bool JoinIdenticalVertices { get; set; } = true;
         [Category("ImportSetting"), Browsable(false)]
         public TtAssetImporter AssetImporter { get; set; } = null;
     }
@@ -334,6 +336,11 @@ namespace EngineNS.Graphics.Mesh
             {
                 foreach(var importSetting in MeshImprotSettings)
                 {
+                    if(importSetting.JoinIdenticalVertices)
+                    {
+                        var sceneFlags = TtAssetImporter.DefaultSceneFlags | PostProcessSteps.JoinIdenticalVertices;
+                        importSetting.AssetImporter.ReImport(sceneFlags);
+                    }
                     await ImportAndSaveMesh(importSetting);
                 }
                 return true;

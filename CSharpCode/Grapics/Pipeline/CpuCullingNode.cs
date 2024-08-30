@@ -46,14 +46,19 @@ namespace EngineNS.Graphics.Pipeline
         {
             get => mVisParameter;
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtCpuCullingNode), nameof(TickLogic));
         public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
             //if (GetInput(0).FindInLinker() == null)
             //{
 
             //}
-            mVisParameter.World = world;
-            world.GatherVisibleMeshes(mVisParameter);
+            using (new Profiler.TimeScopeHelper(ScopeTick))
+            {
+                mVisParameter.World = world;
+                world.GatherVisibleMeshes(mVisParameter);
+            }   
         }
     }
 }

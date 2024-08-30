@@ -300,6 +300,10 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UShadowMapNode), nameof(TickLogic));
         [ThreadStatic]
         private static Profiler.TimeScope ScopePushGpuDraw = Profiler.TimeScopeManager.GetTimeScope(typeof(UShadowMapNode), "PushGpuDraw");
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeFlushDraw = Profiler.TimeScopeManager.GetTimeScope(typeof(UShadowMapNode), "FlushDraw");
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeCull = Profiler.TimeScopeManager.GetTimeScope(typeof(UShadowMapNode), "Cull");
         public override unsafe void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             foreach (var i in CSMCullingNode)
@@ -308,6 +312,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 {
                     i.VisParameter.CullType = GamePlay.UWorld.UVisParameter.EVisCull.Shadow;
                     i.VisParameter.World = world;
+                    i.VisParameter.IsGatherVisibleNodes = false;
                 }
             }
             DVector3* AABBCorners = stackalloc DVector3[8];
@@ -336,6 +341,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                     }
                     //先得到阴影裁剪摄像机，确保CSM区段内看得到的对象都产生投影 
                     var aabb = new DBoundingBox();
+                    using (new Profiler.TimeScopeHelper(ScopeCull))
                     {
                         CullCamera.PerspectiveFovLH(ViewerCamera.Fov, ViewerCamera.Width, ViewerCamera.Height, ViewerCamera.ZNear, mSumDistanceFarArray[CsmIdx]);
                         CullCamera.LookAtLH(ViewerCamera.GetPosition(), ViewerCamera.GetLookAt(), in Vector3.UnitY);
@@ -344,6 +350,11 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                         mVisParameter.IsBuildAABB = true;
                         mVisParameter.World = world;
                         mVisParameter.CullCamera = CullCamera;
+                        mVisParameter.IsGatherVisibleNodes = false;
+                        mVisParameter.OnVisitNode = static (node, arg) =>
+                        {
+                            return node.IsCastShadow || node.Children.Count > 0;
+                        };
                         world.GatherVisibleMeshes(mVisParameter);
 
                         aabb = mVisParameter.AABB;
@@ -454,6 +465,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                             }
                         }
 
+                        using (new Profiler.TimeScopeHelper(ScopeFlushDraw)) 
                         {
                             FViewPort Viewport = new FViewPort();
                             Viewport.MinDepth = GBuffersArray[CsmIdx].Viewport.MinDepth;

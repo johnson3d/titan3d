@@ -3,12 +3,14 @@ using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Description;
 using System.Text;
 using System.Diagnostics;
+using EngineNS.DesignMacross.Design;
 
 namespace EngineNS.DesignMacross.Editor
 {
     public class TtDesignMacrossEditor : IO.ISerializer, EngineNS.Editor.IAssetEditor, IRootForm
     {
         private UDesignMacross mDesignMacross = null;
+        public UDesignMacross DesignMacross { get => mDesignMacross; }
         //private TtClassDescription mClassDescription = new TtClassDescription();
         //public TtClassDescription ClassDescription { get => mClassDescription; set => mClassDescription = value; }
         public TtOutlineEditPanel DeclarationEditPanel { get; set; } = new TtOutlineEditPanel();

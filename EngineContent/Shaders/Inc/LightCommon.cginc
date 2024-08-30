@@ -86,18 +86,6 @@ void SphereMaxNoH( inout BxDFContext Context, float SinAlpha, bool bNewtonIterat
 
 ////////////////////// high-level begin ///////////////////////////////
 
-float4 Pow4( float4 x )
-{
-	float4 xx = x*x;
-	return xx * xx;
-}
-
-float Pow5( float x )
-{
-	float xx = x*x;
-	return xx * xx * x;
-}
-
 // GGX / Trowbridge-Reitz
 // [Walter et al. 2007, "Microfacet models for refraction through rough surfaces"]
 float D_GGX( float a2, float NoH )

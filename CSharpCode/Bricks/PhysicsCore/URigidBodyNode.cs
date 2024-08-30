@@ -293,10 +293,7 @@ namespace EngineNS.Bricks.PhysicsCore
             if ((rp.CullFilters & GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug) == 0)
                 return;
 
-            if (rp.VisibleNodes != null)
-            {
-                rp.VisibleNodes.Add(this);
-            }
+            rp.AddVisibleNode(this);
 
             var nodeTransform = this.Placement.AbsTransform;
             foreach (var i in Shapes)

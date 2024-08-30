@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UCpuProfiler : IRootForm
+    public class TtCpuProfiler : IRootForm
     {
-        public UCpuProfiler()
+        public TtCpuProfiler()
         {
             TtEngine.RootFormManager.RegRootForm(this);
         }
@@ -33,7 +33,7 @@ namespace EngineNS.Editor.Forms
         Task<Profiler.URpcProfiler.RpcProfilerThreads> mRpcProfilerThreads;
         List<string> ProfilerThreadNames = new List<string>();
         List<Profiler.URpcProfiler.RpcProfilerData.ScopeInfo> Scopes = new List<Profiler.URpcProfiler.RpcProfilerData.ScopeInfo>();
-        void SetCopes(List<Profiler.URpcProfiler.RpcProfilerData.ScopeInfo> src)
+        void SetTimeList(List<Profiler.URpcProfiler.RpcProfilerData.ScopeInfo> src)
         {
             if (mSortMode != ESortMode.None)
             {
@@ -133,7 +133,7 @@ namespace EngineNS.Editor.Forms
         string CurrentThreadName = null;
         string CurrentName = null;
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeOnDraw = Profiler.TimeScopeManager.GetTimeScope(typeof(UCpuProfiler), nameof(OnDraw));
+        private static Profiler.TimeScope ScopeOnDraw = Profiler.TimeScopeManager.GetTimeScope(typeof(TtCpuProfiler), nameof(OnDraw));
         public void OnDraw()
         {
             using (new Profiler.TimeScopeHelper(ScopeOnDraw))
@@ -180,153 +180,46 @@ namespace EngineNS.Editor.Forms
                                 CurrentThreadName = i;
                                 CurrentName = null;
                                 Scopes.Clear();
+                                TimeScopeTree.Reset();
                             }
                             
                             if (mRpcProfilerData == null || mRpcProfilerData.IsCompleted)
                             {
                                 if (mRpcProfilerData != null && mRpcProfilerData.Result != null)
-                                    SetCopes(mRpcProfilerData.Result.Scopes);
+                                {
+                                    SetTimeList(mRpcProfilerData.Result.Scopes);
+                                    TimeScopeTree.SetTreeNodes(mRpcProfilerData.Result.Scopes);
+                                }
                                 mRpcProfilerData = Profiler.URpcProfiler_RpcCaller.GetProfilerData(i);
                             }
                             if (ImGuiAPI.BeginChild("TimeScope", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                             {
-                                if (ImGuiAPI.BeginTable("TimeScope", 5, ImGuiTableFlags_.ImGuiTableFlags_Resizable | ImGuiTableFlags_.ImGuiTableFlags_ScrollY, in Vector2.Zero, 0.0f))
+                                if (ImGuiAPI.BeginTabBar("ShowMode", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
                                 {
-                                    var startY = ImGuiAPI.GetItemRectMax().Y;
-                                    ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_Headers, 0);
-                                    ImGuiAPI.TableSetColumnIndex(0);
-                                    ImGuiAPI.Text("Name");
-                                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                                    if (ImGuiAPI.BeginTabItem("ByList", null, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
                                     {
-                                        mSortMode = ESortMode.ByName;
-                                        SortScopes();
-                                        CurrentName = null;
+                                        if (ImGuiAPI.BeginChild("ShowList", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                                        {
+                                            DrawByList(cmdlst, i);
+                                        }
+                                        ImGuiAPI.EndChild();
+                                        ImGuiAPI.EndTabItem();
                                     }
-                                    ImGuiAPI.TableSetColumnIndex(1);
-                                    ImGuiAPI.Text("AvgTime");
-                                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+
+                                    if (ImGuiAPI.BeginTabItem("ByTree", null, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
                                     {
-                                        mSortMode = ESortMode.ByTime;
-                                        SortScopes();
-                                        CurrentName = null;
+                                        if (ImGuiAPI.BeginChild("ShowTree", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                                        {
+                                            DrawByTree(cmdlst, i);
+                                        }
+                                        ImGuiAPI.EndChild();
+                                        ImGuiAPI.EndTabItem();
                                     }
-                                    ImGuiAPI.TableSetColumnIndex(2);
-                                    ImGuiAPI.Text("AvgHit");
-                                    ImGuiAPI.TableSetColumnIndex(3);
-                                    ImGuiAPI.Text("MaxTime");
-                                    ImGuiAPI.TableSetColumnIndex(4);
-                                    ImGuiAPI.Text("Parent");
-
-                                    //ImGuiAPI.TableSetupColumn("Name", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_.ImGuiTableColumnFlags_NoHide, 0.0f, 0);
-                                    //if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
-                                    //{
-                                    //    mSortMode = ESortMode.ByName;
-                                    //    SortScopes();
-                                    //    CurrentName = null;
-                                    //}
-                                    //ImGuiAPI.TableSetupColumn("AvgTime", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_.ImGuiTableColumnFlags_NoHide, 0.0f, 1);
-                                    //if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
-                                    //{
-                                    //    mSortMode = ESortMode.ByTime;
-                                    //    SortScopes();
-                                    //    CurrentName = null;
-                                    //}
-                                    //ImGuiAPI.TableSetupColumn("AvgHit", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_.ImGuiTableColumnFlags_NoHide, 0.0f, 2);
-                                    //ImGuiAPI.TableSetupColumn("MaxTime", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_.ImGuiTableColumnFlags_NoHide, 0.0f, 3);
-                                    //ImGuiAPI.TableSetupColumn("Parent", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_.ImGuiTableColumnFlags_NoHide, 0.0f, 4);
-                                    //ImGuiAPI.TableSetupScrollFreeze(1, 1);
-                                    //ImGuiAPI.TableHeadersRow();
-
-                                    //ImGuiTableSortSpecs* sorts_specs = ImGuiAPI.TableGetSortSpecs();
-                                    //if (sorts_specs != IntPtr.Zero.ToPointer() && sorts_specs->SpecsDirty)
-                                    //{
-
-                                    //}
-                                    //bool sorts_specs_using_name = (ImGuiAPI.TableGetColumnFlags(0) & (int)ImGuiTableColumnFlags_.ImGuiTableColumnFlags_IsSorted) != 0;
-                                    //if (sorts_specs_using_name)
-                                    //{
-                                    //    mSortMode = ESortMode.ByName;
-                                    //    SortScopes();
-                                    //    CurrentName = null;
-                                    //}
-
-                                    foreach (var j in Scopes)
-                                    {
-                                        if (string.IsNullOrEmpty(mFilter) == false && j.ShowName.Contains(mFilter) == false)
-                                            continue;
-
-                                        ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0);
-
-                                        ImGuiAPI.TableSetColumnIndex(0);
-                                        ImGuiAPI.Text(j.ShowName);
-                                        if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
-                                        {
-                                            ImGuiAPI.SetTooltip(j.ShowName);
-                                        }
-                                        if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
-                                        {
-                                            CurrentName = j.ShowName;
-                                        }
-                                        if (j.ShowName == CurrentName)
-                                        {
-                                            var start = ImGuiAPI.GetItemRectMin();
-                                            if (startY <= start.Y)
-                                            {
-                                                var textSize = ImGuiAPI.CalcTextSize(j.ShowName, false, 0);
-                                                var end = new Vector2(start.X + ImGuiAPI.GetWindowContentRegionWidth(), start.Y + textSize.Y);
-                                                cmdlst.AddRectFilled(in start, in end, 0x80808080, 1, ImDrawFlags_.ImDrawFlags_None);
-                                            }
-                                        }
-
-                                        ImGuiAPI.TableSetColumnIndex(1);
-                                        ImGuiAPI.Text(j.AvgTime.ToString());
-                                        if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
-                                        {
-                                            PopItemMenu(i, j, "AvgTime");
-                                        }
-                                        ImGuiAPI.TableSetColumnIndex(2);
-                                        ImGuiAPI.Text(j.AvgHit.ToString());
-                                        if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
-                                        {
-                                            PopItemMenu(i, j, "AvgHit");
-                                        }
-                                        ImGuiAPI.TableSetColumnIndex(3);
-                                        ImGuiAPI.Text(j.MaxTime.ToString());
-                                        if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
-                                        {
-                                            PopItemMenu(i, j, "MaxTime");
-                                        }
-                                        ImGuiAPI.TableSetColumnIndex(4);
-                                        Vector4 clr = new Vector4(0.5f, 0.69f, 0.93f, 1);
-                                        if (j.Parent != "null")
-                                        {
-                                            ImGuiAPI.TextColored(in clr, j.Parent);
-                                            if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
-                                            {
-                                                ImGuiAPI.SetTooltip(j.Parent);
-                                            }
-                                            var min = ImGuiAPI.GetItemRectMin();
-                                            var max = ImGuiAPI.GetItemRectMax();
-                                            min.Y = max.Y;
-                                            var cmdlist = ImGuiAPI.GetWindowDrawList();
-                                            cmdlist.AddLine(in min, in max, EGui.UIProxy.StyleConfig.Instance.LinkStringColor, 1);
-                                            if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
-                                            {
-                                                CurrentName = j.Parent;
-                                            }
-                                        }
-                                        else
-                                            ImGuiAPI.TextColored(in clr, "null");
-                                        if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
-                                        {
-                                            PopItemMenu(i, j, "Parent");
-                                        }
-                                    }
-                                    ImGuiAPI.EndTable();
+                                    ImGuiAPI.EndTabBar();
                                 }
-                                
-                                ImGuiAPI.EndChild();
                             }
+                            ImGuiAPI.EndChild();
+
                             ImGuiAPI.EndTabItem();
                         }
                     }
@@ -337,6 +230,244 @@ namespace EngineNS.Editor.Forms
                     OnDrawMenu();
             }
             EGui.UIProxy.DockProxy.EndMainForm(result);
+        }
+        private void DrawByList(ImDrawList cmdlst, string i)
+        {
+            if (ImGuiAPI.BeginTable("ByList", 5, ImGuiTableFlags_.ImGuiTableFlags_Resizable | ImGuiTableFlags_.ImGuiTableFlags_ScrollY, in Vector2.Zero, 0.0f))
+            {
+                var startY = ImGuiAPI.GetItemRectMax().Y;
+                ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_Headers, 0);
+                ImGuiAPI.TableSetColumnIndex(0);
+                ImGuiAPI.Text("Name");
+                if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                {
+                    mSortMode = ESortMode.ByName;
+                    SortScopes();
+                    CurrentName = null;
+                }
+                ImGuiAPI.TableSetColumnIndex(1);
+                ImGuiAPI.Text("AvgTime");
+                if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                {
+                    mSortMode = ESortMode.ByTime;
+                    SortScopes();
+                    CurrentName = null;
+                }
+                ImGuiAPI.TableSetColumnIndex(2);
+                ImGuiAPI.Text("AvgHit");
+                ImGuiAPI.TableSetColumnIndex(3);
+                ImGuiAPI.Text("MaxTime");
+                ImGuiAPI.TableSetColumnIndex(4);
+                ImGuiAPI.Text("Parent");
+
+                foreach (var j in Scopes)
+                {
+                    if (string.IsNullOrEmpty(mFilter) == false && j.ShowName.Contains(mFilter) == false)
+                        continue;
+
+                    ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0);
+
+                    ImGuiAPI.TableSetColumnIndex(0);
+                    ImGuiAPI.Text(j.ShowName);
+                    if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                    {
+                        ImGuiAPI.SetTooltip(j.ShowName);
+                    }
+                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                    {
+                        CurrentName = j.ShowName;
+                    }
+                    if (j.ShowName == CurrentName)
+                    {
+                        var start = ImGuiAPI.GetItemRectMin();
+                        if (startY <= start.Y)
+                        {
+                            var textSize = ImGuiAPI.CalcTextSize(j.ShowName, false, 0);
+                            var end = new Vector2(start.X + ImGuiAPI.GetWindowContentRegionWidth(), start.Y + textSize.Y);
+                            cmdlst.AddRectFilled(in start, in end, 0x80808080, 1, ImDrawFlags_.ImDrawFlags_None);
+                        }
+                    }
+
+                    ImGuiAPI.TableSetColumnIndex(1);
+                    ImGuiAPI.Text(j.AvgTime.ToString());
+                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
+                    {
+                        PopItemMenu(i, j, "AvgTime");
+                    }
+                    ImGuiAPI.TableSetColumnIndex(2);
+                    ImGuiAPI.Text(j.AvgHit.ToString());
+                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
+                    {
+                        PopItemMenu(i, j, "AvgHit");
+                    }
+                    ImGuiAPI.TableSetColumnIndex(3);
+                    ImGuiAPI.Text(j.MaxTime.ToString());
+                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
+                    {
+                        PopItemMenu(i, j, "MaxTime");
+                    }
+                    ImGuiAPI.TableSetColumnIndex(4);
+                    Vector4 clr = new Vector4(0.5f, 0.69f, 0.93f, 1);
+                    if (j.Parent != "null")
+                    {
+                        ImGuiAPI.TextColored(in clr, j.Parent);
+                        if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                        {
+                            ImGuiAPI.SetTooltip(j.Parent);
+                        }
+                        var min = ImGuiAPI.GetItemRectMin();
+                        var max = ImGuiAPI.GetItemRectMax();
+                        min.Y = max.Y;
+                        var cmdlist = ImGuiAPI.GetWindowDrawList();
+                        cmdlist.AddLine(in min, in max, EGui.UIProxy.StyleConfig.Instance.LinkStringColor, 1);
+                        if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                        {
+                            CurrentName = j.Parent;
+                        }
+                    }
+                    else
+                        ImGuiAPI.TextColored(in clr, "null");
+                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
+                    {
+                        PopItemMenu(i, j, "Parent");
+                    }
+                }
+                ImGuiAPI.EndTable();
+            }
+        }
+
+        internal class TtTimeScopeTree : TtTreeNodeDrawer
+        {
+            internal class TtTimeScopeNode : Editor.INodeUIProvider
+            {
+                public Profiler.URpcProfiler.RpcProfilerData.ScopeInfo TimeInfo;
+                public List<TtTimeScopeNode> Children = new List<TtTimeScopeNode>();
+                public int NumOfChildUI()
+                {
+                    return Children.Count;
+                }
+                public INodeUIProvider GetChildUI(int index)
+                {
+                    return Children[index];
+                }
+                public string NodeName
+                {
+                    get
+                    {
+                        return TimeInfo.ShowName;
+                    }
+                }
+                public bool Selected { get; set; }
+                public bool DrawNode(TtTreeNodeDrawer tree, int index, int NumOfChild)
+                {
+                    ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
+                    if (this.Selected)
+                        flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
+                    bool ret = false;
+                    var name = (string.IsNullOrEmpty(NodeName) ? "EmptyName" : NodeName) + "##" + index;
+                    if (NumOfChild == 0)
+                    {
+                        flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
+                    }
+                    ret = ImGuiAPI.TreeNodeEx(name, flags);
+                    ImGuiAPI.SameLine(0, -1);
+                    var txt = $"[Time={TimeInfo.AvgTime},Hit={TimeInfo.AvgHit}]";
+                    ImGuiAPI.TextColored(Color4b.DarkGoldenrod.ToColor4Float(), txt);
+                    //var txtSize = ImGuiAPI.CalcTextSize(txt, false, 0.0f);
+                    //ImGuiAPI.ItemSize(in txtSize, 0);
+                    if (ImGuiAPI.IsItemActivated())
+                    {
+                        tree.OnNodeUI_Activated(this);
+                    }
+                    if (ImGuiAPI.IsItemDeactivated())
+                    {
+                    }
+                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                    {
+                        tree.OnNodeUI_LClick(this);
+                    }
+                    if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
+                    {
+                        tree.OnNodeUI_RClick(this);
+                    }
+                    return ret;
+                }
+                public GamePlay.UWorld GetWorld()
+                {
+                    return null;
+                }
+            }
+            internal TtTimeScopeNode TimeScopeRootNode = new TtTimeScopeNode();
+            internal Dictionary<string, TtTimeScopeNode> TreeNodes = new Dictionary<string, TtTimeScopeNode>();
+            internal TtTimeScopeTree()
+            {
+                TimeScopeRootNode.TimeInfo.ShowName = "Root";
+            }
+            internal void Reset()
+            {
+                TimeScopeRootNode.Children.Clear();
+                TreeNodes.Clear();
+            }
+            internal unsafe void OnDraw()
+            {
+                DrawTree(TimeScopeRootNode, 0);
+            }
+            internal void SetTreeNodes(List<Profiler.URpcProfiler.RpcProfilerData.ScopeInfo> src)
+            {
+                bool bAdd = false;
+                foreach (var i in src)
+                {
+                    TtTimeScopeNode node;
+                    if (TreeNodes.TryGetValue(i.ShowName, out node))
+                    {
+                        node.TimeInfo = i;
+                    }
+                    else
+                    {
+                        node = new TtTimeScopeNode();
+                        node.TimeInfo = i;
+                        TreeNodes.Add(i.ShowName, node);
+                        bAdd = true;
+                    }
+                }
+                if (bAdd)
+                {
+                    TimeScopeRootNode.Children.Clear();
+                    foreach (var i in TreeNodes)
+                    {
+                        i.Value.Children.Clear();
+                    }
+                    foreach (var i in TreeNodes)
+                    {
+                        TtTimeScopeNode node;
+                        if (TreeNodes.TryGetValue(i.Value.TimeInfo.Parent, out node))
+                        {
+                            node.Children.Add(i.Value);
+                        }
+                        else
+                        {
+                            TimeScopeRootNode.Children.Add(i.Value);
+                        }
+                    }
+                }
+            }
+            internal void SortNodes()
+            {
+                foreach (var i in TreeNodes)
+                {
+                    i.Value.Children.Sort((x, y) =>
+                    {
+                        return y.TimeInfo.AvgTime.CompareTo(x.TimeInfo.AvgTime);
+                    });
+                }
+            }
+        }
+        TtTimeScopeTree TimeScopeTree = new TtTimeScopeTree();
+        
+        private void DrawByTree(ImDrawList cmdlst, string i)
+        {
+            TimeScopeTree.SortNodes();
+            TimeScopeTree.OnDraw();
         }
         bool mMenuShow = false;
         private unsafe void PopItemMenu(string watchingThread, Profiler.URpcProfiler.RpcProfilerData.ScopeInfo scope, string column)

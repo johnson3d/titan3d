@@ -395,7 +395,7 @@ namespace EngineNS.UI
             param.AddVisibleMesh(mDrawMesh);
             if(param.VisibleNodes != null && SceneNode != null)
             {
-                param.VisibleNodes.Add(SceneNode);
+                param.AddVisibleNode(SceneNode);
             }
 
             foreach (var i in mPopupUIHost)

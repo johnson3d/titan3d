@@ -376,22 +376,69 @@ namespace EngineNS.GamePlay.Scene
             }
             if (!this.HasStyle(Scene.TtNode.ENodeStyles.ChildrenInvisible))
             {
-                foreach (var i in ManagedNodes)
+                if (TtEngine.Instance.Config.IsParrallelWorldGather)
                 {
-                    if (i == null)
-                        continue;
-                    var type = rp.CullCamera.WhichContainTypeFast(World, in i.AbsAABB, false);
-                    switch (type)
+                    var numTask = TtEngine.Instance.EventPoster.NumOfPool;
+                    numTask = Math.Min(ManagedNodes.Length, numTask);
+                    TtEngine.Instance.EventPoster.ParrallelFor(numTask, static (int index, object arg1, object arg2, Thread.Async.TtAsyncTaskStateBase state) =>
                     {
-                        case CONTAIN_TYPE.CONTAIN_TEST_OUTER:
-                            continue;
-                        case CONTAIN_TYPE.CONTAIN_TEST_INNER:
-                        case CONTAIN_TYPE.CONTAIN_TEST_REFER:
+                        var node = arg1 as TtScene;
+                        var rp = arg2 as UWorld.UVisParameter;
+                        int stride = node.Children.Count / (int)state.UserArguments.NumOfParrallelFor + 1;
+                        var start = index * stride;
+                        for (int n = 0; n < stride; n++)
+                        {
+                            var nn = start + n;
+                            if (nn >= node.ManagedNodes.Length)
+                                break;
+                            var i = node.ManagedNodes[nn];
+                            if (i == null)
+                                continue;
+                            if (rp.OnVisitNode != null)
                             {
-                                i.OnGatherVisibleMeshes(rp);
-                                //World.OnVisitNode_GatherVisibleMeshes(i, rp);
+                                if (rp.OnVisitNode(i, rp) == false)
+                                    continue;
                             }
-                            break;
+                            var type = rp.CullCamera.WhichContainTypeFast(rp.World, in i.AbsAABB, false);
+                            switch (type)
+                            {
+                                case CONTAIN_TYPE.CONTAIN_TEST_OUTER:
+                                    continue;
+                                case CONTAIN_TYPE.CONTAIN_TEST_INNER:
+                                case CONTAIN_TYPE.CONTAIN_TEST_REFER:
+                                    {
+                                        i.OnGatherVisibleMeshes(rp);
+                                        //World.OnVisitNode_GatherVisibleMeshes(i, rp);
+                                    }
+                                    break;
+                            }
+                        }
+                    }, this, rp);
+                }
+                else
+                {
+                    foreach (var i in ManagedNodes)
+                    {
+                        if (i == null)
+                            continue;
+                        if (rp.OnVisitNode != null)
+                        {
+                            if (rp.OnVisitNode(i, rp) == false)
+                                continue;
+                        }
+                        var type = rp.CullCamera.WhichContainTypeFast(World, in i.AbsAABB, false);
+                        switch (type)
+                        {
+                            case CONTAIN_TYPE.CONTAIN_TEST_OUTER:
+                                continue;
+                            case CONTAIN_TYPE.CONTAIN_TEST_INNER:
+                            case CONTAIN_TYPE.CONTAIN_TEST_REFER:
+                                {
+                                    i.OnGatherVisibleMeshes(rp);
+                                    //World.OnVisitNode_GatherVisibleMeshes(i, rp);
+                                }
+                                break;
+                        }
                     }
                 }
             }

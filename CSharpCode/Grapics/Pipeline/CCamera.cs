@@ -77,16 +77,18 @@ namespace EngineNS.Graphics.Pipeline
         {
             mCoreObject.PerspectiveFovLH(mCoreObject.mFov, mCoreObject.mWidth, mCoreObject.mHeight, zNear, zFar);
         }
-        public CONTAIN_TYPE WhichContainTypeFast(GamePlay.UWorld world, in EngineNS.DBoundingBox dAabb, bool testInner)
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeWhichContainTypeFast = Profiler.TimeScopeManager.GetTimeScope(typeof(UCamera), nameof(WhichContainTypeFast));
+        public unsafe CONTAIN_TYPE WhichContainTypeFast(GamePlay.UWorld world, in EngineNS.DBoundingBox dAabb, bool testInner)
         {
-            unsafe
+            using (new Profiler.TimeScopeHelper(ScopeWhichContainTypeFast))
             {
                 var frustum = mCoreObject.GetFrustum();
 
                 BoundingBox aabb;
                 DBoundingBox.OffsetToSingleBox(in world.mCameraOffset, in dAabb, out aabb);
                 return frustum->whichContainTypeFast(in aabb, testInner ? 1 : 0);
-            }
+            }   
         }
 
         #region Fields

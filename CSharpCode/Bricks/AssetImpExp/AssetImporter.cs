@@ -54,15 +54,14 @@ namespace EngineNS.Bricks.AssetImpExp
     {
         public Assimp.Scene AiScene { get; set; } = null;
         public string FilePath { get; set; } = null;
+        public static Assimp.PostProcessSteps DefaultSceneFlags = PostProcessSteps.MakeLeftHanded | PostProcessSteps.FlipUVs | PostProcessSteps.FlipWindingOrder | PostProcessSteps.Triangulate | PostProcessSteps.CalculateTangentSpace;
         public TtAssetDescription PreImport(string filePath)
         {
             FilePath = filePath;
-            Assimp.PostProcessSteps convertToLeftHanded = Assimp.PostProcessSteps.MakeLeftHanded | Assimp.PostProcessSteps.FlipUVs | Assimp.PostProcessSteps.FlipWindingOrder;
             Assimp.AssimpContext assimpContext = new Assimp.AssimpContext();
-            Assimp.PostProcessSteps sceneFlags = convertToLeftHanded | Assimp.PostProcessSteps.Triangulate | Assimp.PostProcessSteps.CalculateTangentSpace;
             try
             {
-                AiScene = assimpContext.ImportFile(filePath, sceneFlags);
+                AiScene = assimpContext.ImportFile(filePath, DefaultSceneFlags);
                 if (AiScene == null)
                 {
                     return null;
@@ -101,6 +100,22 @@ namespace EngineNS.Bricks.AssetImpExp
             assetsGenerateDescription.Generator = (String)AiScene.Metadata["SourceAsset_Generator"].Data;
 
             return assetsGenerateDescription;
+        }
+        public void ReImport(Assimp.PostProcessSteps sceneFlags)
+        {
+            try
+            {
+                Assimp.AssimpContext assimpContext = new Assimp.AssimpContext();
+                AiScene = assimpContext.ImportFile(FilePath, sceneFlags);
+                if (AiScene == null)
+                {
+                    return;
+                }
+            }
+            catch (Exception)
+            {
+                return;
+            }
         }
         public List<Assimp.Animation> GetAnimations()
         {
@@ -806,13 +821,12 @@ namespace EngineNS.Bricks.AssetImpExp
 
                     if (subMesh.HasTangentBasis)
                     {
-                        var normal = AssimpSceneUtil.ConvertVector3(subMesh.Normals[j]);
-                        var tangent = AssimpSceneUtil.ConvertVector3(subMesh.Tangents[j]);
-                        var binTan = AssimpSceneUtil.ConvertVector3(subMesh.BiTangents[j]);
+                        var normal = vertexPreTransform.TransformVector3NoScale(AssimpSceneUtil.ConvertVector3(subMesh.Normals[j]));
+                        var tangent = vertexPreTransform.TransformVector3NoScale(AssimpSceneUtil.ConvertVector3(subMesh.Tangents[j]));
+                        var binTan = vertexPreTransform.TransformVector3NoScale(AssimpSceneUtil.ConvertVector3(subMesh.BiTangents[j]));
                         float dp = Vector3.Dot(Vector3.Cross(normal, tangent), binTan);
-                        var transformedTangent = vertexPreTransform.TransformVector3NoScale(tangent);
                         float w = dp > 0.0f ? 1.0f : -1.0f;
-                        tangentStream[vertexIndex] = new Vector4(transformedTangent, w);
+                        tangentStream[vertexIndex] = new Vector4(tangent, w);
                     }
                     if (hasVertexColor)
                     {

@@ -21,7 +21,6 @@ namespace EngineNS.GamePlay
         {
             mMemberTickables.CollectMembers(this);
 
-            mOnVisitNode_GatherVisibleMeshesAll = this.OnVisitNode_GatherVisibleMeshesAll;
             mOnVisitNode_GatherBoundShapes = this.OnVisitNode_GatherBoundShapes;
 
             mRoot = new Scene.TtScene();
@@ -130,7 +129,8 @@ namespace EngineNS.GamePlay
 
             public DBoundingBox AABB;
             public List<Graphics.Pipeline.FVisibleMesh> VisibleMeshes = new List<Graphics.Pipeline.FVisibleMesh>();
-            public List<GamePlay.Scene.TtNode> VisibleNodes = new List<TtNode>();
+            public List<GamePlay.Scene.TtNode> VisibleNodes { get; } = new List<TtNode>();
+            public bool IsGatherVisibleNodes { get; set; } = false;
             
             public delegate bool FOnVisitNode(Scene.TtNode node, UVisParameter arg);
             public FOnVisitNode OnVisitNode = null;
@@ -157,7 +157,19 @@ namespace EngineNS.GamePlay
                 {
                     AABB = DBoundingBox.Merge(in AABB, mesh.WorldAABB);
                 }
-                VisibleMeshes.Add(new Graphics.Pipeline.FVisibleMesh() { Mesh = mesh });
+                lock (VisibleMeshes)
+                {
+                    VisibleMeshes.Add(new Graphics.Pipeline.FVisibleMesh() { Mesh = mesh });
+                }
+            }
+            public void AddVisibleNode(TtNode node)
+            {
+                if (IsGatherVisibleNodes == false && node.IsForceGatherNode == false)
+                    return;
+                lock (VisibleNodes)
+                {
+                    VisibleNodes.Add(node);
+                }
             }
             public NxRHI.TtTransientBuffer TransientVB = null;
             public NxRHI.TtTransientBuffer TransientIB = null;
@@ -200,10 +212,10 @@ namespace EngineNS.GamePlay
         private static Profiler.TimeScope ScopeOnVisitNode = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(GatherVisibleMeshes) + ".OnVisitNode");
         [ThreadStatic]
         private static Profiler.TimeScope ScopeOnGatherVisibleMeshes = Profiler.TimeScopeManager.GetTimeScope(typeof(TtNode), "OnGatherVisibleMeshes");
-        internal unsafe bool OnVisitNode_GatherVisibleMeshes(Scene.TtNode node, object arg)
+        [ThreadStatic]
+        private static Profiler.TimeScope ScopeChildren = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(GatherVisibleMeshes) + ".Children");
+        internal unsafe static bool OnVisitNode_GatherVisibleMeshes(Scene.TtNode node, UVisParameter rp)
         {
-            var rp = arg as UVisParameter;
-
             if (rp.OnVisitNode != null)
             {
                 using (new Profiler.TimeScopeHelper(ScopeOnVisitNode))
@@ -223,7 +235,7 @@ namespace EngineNS.GamePlay
                 }
                 else
                 {
-                    type = rp.CullCamera.WhichContainTypeFast(this, in node.AbsAABB, true);
+                    type = rp.CullCamera.WhichContainTypeFast(rp.World, in node.AbsAABB, true);
 
                     //var absAABB = DBoundingBox.TransformNoScale(in node.AABB, in node.Placement.AbsTransform);
                     //type = rp.CullCamera.WhichContainTypeFast(this, in absAABB, true);
@@ -258,9 +270,34 @@ namespace EngineNS.GamePlay
                             }
                             if (!node.HasStyle(Scene.TtNode.ENodeStyles.ChildrenInvisible))
                             {
-                                foreach (var i in node.Children)
+                                using (new Profiler.TimeScopeHelper(ScopeChildren))
                                 {
-                                    OnVisitNode_GatherVisibleMeshes(i, arg);
+                                    if (TtEngine.Instance.Config.IsParrallelWorldGather)
+                                    {
+                                        var numTask = TtEngine.Instance.EventPoster.NumOfPool;
+                                        numTask = Math.Min(node.Children.Count, numTask);
+                                        TtEngine.Instance.EventPoster.ParrallelFor(numTask, static (int index, object arg1, object arg2, Thread.Async.TtAsyncTaskStateBase state) =>
+                                        {
+                                            var node = arg1 as TtNode;
+                                            var rp = arg2 as UVisParameter;
+                                            int stride = node.Children.Count / (int)state.UserArguments.NumOfParrallelFor + 1;
+                                            var start = index * stride;
+                                            for (int n = 0; n < stride; n++)
+                                            {
+                                                var nn = start + n;
+                                                if (nn >= node.Children.Count)
+                                                    break;
+                                                OnVisitNode_GatherVisibleMeshes(node.Children[nn], rp);
+                                            }
+                                        }, node, rp);
+                                    }
+                                    else
+                                    {
+                                        foreach (var i in node.Children)
+                                        {
+                                            OnVisitNode_GatherVisibleMeshes(i, rp);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -269,8 +306,8 @@ namespace EngineNS.GamePlay
             }
             return false;
         }
-        Scene.TtNode.FOnVisitNode mOnVisitNode_GatherVisibleMeshesAll;
-        private unsafe bool OnVisitNode_GatherVisibleMeshesAll(Scene.TtNode node, object arg)
+        static Scene.TtNode.FOnVisitNode mOnVisitNode_GatherVisibleMeshesAll = OnVisitNode_GatherVisibleMeshesAll;
+        private unsafe static bool OnVisitNode_GatherVisibleMeshesAll(Scene.TtNode node, object arg)
         {
             var rp = arg as UVisParameter;
 

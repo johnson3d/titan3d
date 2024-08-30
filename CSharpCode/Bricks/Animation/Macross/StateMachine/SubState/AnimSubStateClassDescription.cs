@@ -1,4 +1,5 @@
-﻿using EngineNS.Animation.Macross;
+﻿using EngineNS.Animation;
+using EngineNS.Animation.Macross;
 using EngineNS.Animation.StateMachine;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.StateMachine;
@@ -11,6 +12,7 @@ using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Outline;
 using EngineNS.DesignMacross.Design;
+using EngineNS.Graphics.Mesh;
 using EngineNS.Rtti;
 using System.ComponentModel;
 

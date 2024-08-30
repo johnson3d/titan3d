@@ -25,7 +25,7 @@ namespace EngineNS.Editor
         public UMainEditorApplication()
         {
             mLogWatcher = new EGui.Controls.ULogWatcher();
-            mCpuProfiler = new Editor.Forms.UCpuProfiler();
+            mCpuProfiler = new Editor.Forms.TtCpuProfiler();
             mGpuProfiler = new Editor.Forms.TtGpuProfiler();
             mMemProfiler = new Forms.TtMemoryProfiler();
             mMainInspector = new Forms.UInspector();
@@ -39,7 +39,7 @@ namespace EngineNS.Editor
         private bool IsVisible = true;
         //public Editor.Forms.UWorldOutliner mWorldOutliner;
         public EGui.Controls.ULogWatcher mLogWatcher;
-        public Editor.Forms.UCpuProfiler mCpuProfiler;
+        public Editor.Forms.TtCpuProfiler mCpuProfiler;
         public Editor.Forms.TtGpuProfiler mGpuProfiler;
         public Editor.Forms.TtMemoryProfiler mMemProfiler;
         public Editor.Forms.UInspector mMainInspector;

@@ -168,6 +168,7 @@ namespace EngineNS.GamePlay.Scene
             Transient = (1 << 12),
             NoTick = (1 << 13),
             NotRegActiveNode = (1 << 14),
+            ForceGatherNode = (1 << 15),
             Invisible = SelfInvisible | ChildrenInvisible,
         }
         public ENodeStyles NodeStyles
@@ -253,6 +254,25 @@ namespace EngineNS.GamePlay.Scene
                 else
                 {
                     UnsetStyle(ENodeStyles.AcceptShadow);
+                }
+            }
+        }
+        [Category("Option")]
+        public virtual bool IsForceGatherNode
+        {
+            get
+            {
+                return HasStyle(ENodeStyles.ForceGatherNode);
+            }
+            set
+            {
+                if (value)
+                {
+                    SetStyle(ENodeStyles.ForceGatherNode);
+                }
+                else
+                {
+                    UnsetStyle(ENodeStyles.ForceGatherNode);
                 }
             }
         }
@@ -491,10 +511,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public virtual void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
         {
-            if (rp.VisibleNodes != null)
-            {
-                rp.VisibleNodes.Add(this);
-            }
+            rp.AddVisibleNode(this);
         }
         #endregion
 

@@ -910,7 +910,7 @@ namespace EngineNS.Bricks.Procedure
             }
             else
             {
-                TtEngine.Instance.EventPoster.ParrallelFor(Width * Height * Depth, static (index, arg1, arg2) =>
+                TtEngine.Instance.EventPoster.ParrallelFor(Width * Height * Depth, static (index, arg1, arg2, state) =>
                 {
                     var pThis = arg1 as UBufferComponent;
                     var onPerPiexel = arg2 as FOnPerPixel;

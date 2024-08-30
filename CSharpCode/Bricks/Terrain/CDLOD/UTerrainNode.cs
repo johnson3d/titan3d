@@ -491,10 +491,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 i.LevelData?.PlantManager.OnGatherVisibleMeshes(rp);
             }
 
-            if (rp.VisibleNodes != null)
-            {
-                rp.VisibleNodes.Add(this);
-            }
+            rp.AddVisibleNode(this);
         }
         public List<TtPatch> VisiblePatches = new List<TtPatch>();
         public void FrustumCull(GamePlay.UWorld.UVisParameter rp, List<TtPatch> patches)

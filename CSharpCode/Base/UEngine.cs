@@ -57,6 +57,8 @@ namespace EngineNS
         public string ConfigName;
         [Rtti.Meta]
         public int NumOfThreadPool { get; set; } = -1;
+        [Rtti.Meta]
+        public bool IsParrallelWorldGather { get; set; } = true;
         int mInterval = 15;
         [Rtti.Meta]
         public int Interval {

@@ -9,6 +9,7 @@ using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Outline;
 using EngineNS.DesignMacross.Design;
 using EngineNS.Rtti;
+using System.ComponentModel;
 
 namespace EngineNS.Bricks.Animation.Macross.StateMachine
 {
@@ -17,6 +18,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine
     public class TtAnimStateMachineClassDescription : TtTimedStateMachineClassDescription
     {
         [Rtti.Meta]
+        [Category("Option")]
         public override string Name { get; set; } = "AnimStateMachine";
         [Rtti.Meta]
         [OutlineElement_List(typeof(TtOutlineElementsList_AnimCompoundStates), true)]

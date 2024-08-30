@@ -30,13 +30,17 @@ namespace EngineNS.Animation.Macross.Postprocessing
             SupperClassNames.Clear();
             SupperClassNames.Add($"EngineNS.Animation.BlendTree.TtLocalSpacePoseBlendTree");
             List<UClassDeclaration> classDeclarationsBuilded = new List<UClassDeclaration>();
-
+            var thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
+            foreach(var blendTreeNode in Nodes)
+            {
+                classDeclarationsBuilded.AddRange(blendTreeNode.BuildClassDeclarations(ref classBuildContext));
+                thisClassDeclaration.Properties.Add(blendTreeNode.BuildVariableDeclaration(ref classBuildContext));
+            }
+            classDeclarationsBuilded.Add(thisClassDeclaration);
             return classDeclarationsBuilded;
         }
         public override UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
-            TtVariableDescription outPoseVarable = new TtVariableDescription();
-            outPoseVarable.Name = "OutPose";
             return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
         void GenerateCodeInInitMethod(UClassDeclaration classDeclaration)

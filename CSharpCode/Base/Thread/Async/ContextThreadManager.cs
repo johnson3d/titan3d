@@ -63,6 +63,14 @@ namespace EngineNS.Thread.Async
             public object Obj1;
             public object Obj2;
             public object Obj3;
+            public uint IndexOfParrallelFor
+            {
+                get => Value0.X;
+            }
+            public uint NumOfParrallelFor
+            {
+                get => Value0.Y;
+            }
             public void Dispose()
             {
                 Obj0 = null;
@@ -233,7 +241,7 @@ namespace EngineNS.Thread.Async
             return false;
         }
 
-        internal Queue<TtAsyncTaskStateBase> TPoolEvents = new Queue<TtAsyncTaskStateBase>();
+        internal Stack<TtAsyncTaskStateBase> TPoolEvents = new Stack<TtAsyncTaskStateBase>();
         internal System.Threading.AutoResetEvent mTPoolTrigger = new System.Threading.AutoResetEvent(false);
         internal TtThreadPool[] ContextPools;
         internal List<TtAsyncTaskStateBase> AsyncIOEmptys = new List<TtAsyncTaskStateBase>();
@@ -243,7 +251,7 @@ namespace EngineNS.Thread.Async
         }
 
         #region for each
-        public delegate void Delegate_ParrallelForAction(int index, object arg1, object arg2);
+        public delegate void Delegate_ParrallelForAction(int index, object arg1, object arg2, TtAsyncTaskStateBase state);
         public bool EnableMTForeach = true;
         private TtPooledSemaphoreAllocator ParrallelForSmpAllocator = new TtPooledSemaphoreAllocator();
         public void ParrallelFor(int num, Delegate_ParrallelForAction action, object userData1 = null, object userData2 = null)
@@ -254,25 +262,26 @@ namespace EngineNS.Thread.Async
             {
                 for (int i = 0; i < num; i++)
                 {
-                    action(i, userData1, userData2);
+                    action(i, userData1, userData2, null);
                 }
             }
             else
             {
                 var smp = ParrallelForSmpAllocator.QueryObjectSync();
                 smp.Reset(num);
+                var userArgs = new TtAsyncTaskStateBase.FUserArguments();
+                userArgs.Obj0 = action;
+                userArgs.Obj1 = smp;
+                userArgs.Obj2 = userData1;
+                userArgs.Obj3 = userData2;
+                userArgs.Value0.Y = (uint)num;
                 for (int i = 0; i < num; i++)
                 {
-                    var userArgs = new TtAsyncTaskStateBase.FUserArguments();
-                    userArgs.Obj0 = action;
-                    userArgs.Obj1 = smp;
-                    userArgs.Obj2 = userData1;
-                    userArgs.Obj3 = userData2;
                     userArgs.Value0.X = (uint)i;
                     TtEngine.Instance.EventPoster.RunParallel(static (state) =>
                     {
                         var action = (Delegate_ParrallelForAction)state.UserArguments.Obj0;
-                        action((int)state.UserArguments.Value0.X, state.UserArguments.Obj2, state.UserArguments.Obj3);
+                        action((int)state.UserArguments.Value0.X, state.UserArguments.Obj2, state.UserArguments.Obj3, state);
                         ((TtPooledSemaphore)state.UserArguments.Obj1).Semaphore.Release();
                         return true;
                     }, in userArgs/*, smp.WaitEvent*/);
@@ -282,7 +291,13 @@ namespace EngineNS.Thread.Async
             }
         }
         #endregion
-
+        public int NumOfPool
+        {
+            get
+            {
+                return ContextPools.Length;
+            }
+        }
         public void StartPools(int count)
         {
             if (count == -1)
@@ -342,7 +357,7 @@ namespace EngineNS.Thread.Async
 
             lock (TPoolEvents)
             {
-                TPoolEvents.Enqueue(eh);
+                TPoolEvents.Push(eh);
                 mTPoolTrigger.Set();
             }
         }
@@ -366,7 +381,7 @@ namespace EngineNS.Thread.Async
             {
                 lock (TPoolEvents)
                 {
-                    TPoolEvents.Enqueue(eh);
+                    TPoolEvents.Push(eh);
                     mTPoolTrigger.Set();
                 }
             }
@@ -587,7 +602,7 @@ namespace EngineNS.Thread.Async
                     {
                         lock (TtEngine.Instance.ContextThreadManager.TPoolEvents)
                         {
-                            TtEngine.Instance.ContextThreadManager.TPoolEvents.Enqueue(PEvent);
+                            TtEngine.Instance.ContextThreadManager.TPoolEvents.Push(PEvent);
                             TtEngine.Instance.ContextThreadManager.mTPoolTrigger.Set();
                         }
                     }
