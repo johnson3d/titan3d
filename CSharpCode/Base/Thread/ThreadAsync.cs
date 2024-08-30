@@ -8,7 +8,16 @@ namespace EngineNS.Thread
     public class TtThreadAsync : TtContextThread
     {
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtThreadAsync), nameof(Tick));
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick 
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(TtThreadAsync), nameof(Tick));
+                return mScopeTick;
+            }
+        }
         public override void Tick()
         {
             //把异步事件做完

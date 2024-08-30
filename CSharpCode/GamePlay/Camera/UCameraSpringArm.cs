@@ -65,7 +65,16 @@ namespace EngineNS.GamePlay.Camera
 
         private Quaternion Rotation = Quaternion.Identity;
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UCameraSpringArm), nameof(TickLogic));
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(UCameraSpringArm), nameof(TickLogic));
+                return mScopeTick;
+            }
+        }
         public override bool OnTickLogic(UWorld world, TtRenderPolicy policy)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))

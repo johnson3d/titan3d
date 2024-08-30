@@ -210,9 +210,17 @@ namespace EngineNS.EGui.Slate
             }
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtWorldViewportSlate), nameof(TickLogic));
-        [ThreadStatic]
-        private static Profiler.TimeScope ScopeRPolicyTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtWorldViewportSlate), "TickRPolicy");
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(TtWorldViewportSlate), nameof(TickLogic));
+                return mScopeTick;
+            }
+        }
+        
         public override unsafe void TickLogic(float ellapse)
         {
             base.TickLogic(ellapse);
@@ -220,27 +228,18 @@ namespace EngineNS.EGui.Slate
             {
                 if (IsDrawing)
                 {
-                    using (new Profiler.TimeScopeHelper(ScopeRPolicyTick))
-                    {
-                        RenderPolicy?.BeginTickLogic(World);
-                    }
-
                     if (this.IsFocused)
                     {
                         TickOnFocus();
                     }
 
-                    using (new Profiler.TimeScopeHelper(ScopeRPolicyTick))
-                    {
-                        RenderPolicy?.TickLogic(World, null);
-                    }
+                    RenderPolicy?.BeginTickLogic(World);
 
                     World.TickLogic(this.RenderPolicy, ellapse);
 
-                    using (new Profiler.TimeScopeHelper(ScopeRPolicyTick))
-                    {
-                        RenderPolicy?.EndTickLogic(World);
-                    }
+                    RenderPolicy?.TickLogic(World, null);
+
+                    RenderPolicy?.EndTickLogic(World);
 
                     IsDrawing = false;
                 }

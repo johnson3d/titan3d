@@ -152,7 +152,16 @@ namespace EngineNS.EGui
         }
 
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeRenderImDrawData = Profiler.TimeScopeManager.GetTimeScope(typeof(UImDrawDataRHI), nameof(RenderImDrawData));
+        private static Profiler.TimeScope mScopeRenderImDrawData;
+        private static Profiler.TimeScope ScopeRenderImDrawData
+        {
+            get
+            {
+                if (mScopeRenderImDrawData == null)
+                    mScopeRenderImDrawData = new Profiler.TimeScope(typeof(UImDrawDataRHI), nameof(RenderImDrawData));
+                return mScopeRenderImDrawData;
+            }
+        }
         public unsafe static void RenderImDrawData(ref ImDrawData draw_data, Graphics.Pipeline.UPresentWindow presentWindow, UImDrawDataRHI rhiData)
         {
             using (new Profiler.TimeScopeHelper(ScopeRenderImDrawData))
@@ -161,9 +170,27 @@ namespace EngineNS.EGui
             }
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeUpdateBuffer = Profiler.TimeScopeManager.GetTimeScope(typeof(UImDrawDataRHI), "RenderImDrawData.UpdateBuffer");
+        private static Profiler.TimeScope mScopeUpdateBuffer;
+        private static Profiler.TimeScope ScopeUpdateBuffer
+        {
+            get
+            {
+                if (mScopeUpdateBuffer == null)
+                    mScopeUpdateBuffer = new Profiler.TimeScope(typeof(UImDrawDataRHI), "RenderImDrawData.UpdateBuffer");
+                return mScopeUpdateBuffer;
+            }
+        }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeDrawPass = Profiler.TimeScopeManager.GetTimeScope(typeof(UImDrawDataRHI), "RenderImDrawData.DrawPass");
+        private static Profiler.TimeScope mScopeDrawPass;
+        private static Profiler.TimeScope ScopeDrawPass
+        {
+            get
+            {
+                if (mScopeDrawPass == null)
+                    mScopeDrawPass = new Profiler.TimeScope(typeof(UImDrawDataRHI), "RenderImDrawData.DrawPass");
+                return mScopeDrawPass;
+            }
+        }
         private unsafe static void RenderImDrawDataImpl(ref ImDrawData draw_data, Graphics.Pipeline.UPresentWindow presentWindow, UImDrawDataRHI rhiData)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;

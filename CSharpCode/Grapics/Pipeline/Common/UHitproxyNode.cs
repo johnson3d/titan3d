@@ -266,7 +266,16 @@ namespace EngineNS.Graphics.Pipeline.Common
         NxRHI.FSubResourceFootPrint CopyBufferFootPrint = new NxRHI.FSubResourceFootPrint();
         bool IsHitproxyBuilding = false;
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UHitproxyNode), nameof(TickLogic));
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(UHitproxyNode), nameof(TickLogic));
+                return mScopeTick;
+            }
+        }
         public override unsafe void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             if (IsHitproxyBuilding)

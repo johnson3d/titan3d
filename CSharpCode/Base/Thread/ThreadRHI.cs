@@ -7,9 +7,19 @@ namespace EngineNS.Thread
     public class TtThreadRHI : TtContextThread
     {
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtThreadRHI), nameof(Tick));
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(TtThreadRHI), nameof(Tick));
+                return mScopeTick;
+            }
+        }
+        
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTickAwaitEvent = Profiler.TimeScopeManager.GetTimeScope(typeof(TtThreadRHI), nameof(TickAwaitEvent));
+        private static Profiler.TimeScope ScopeTickAwaitEvent = new Profiler.TimeScope(typeof(TtThreadRHI), nameof(TickAwaitEvent));
         public override void Tick()
         {
             TickStage = 2;

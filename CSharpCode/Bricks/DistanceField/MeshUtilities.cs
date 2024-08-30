@@ -82,7 +82,16 @@ namespace EngineNS.DistanceField
         }
 
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeSparseMeshSDF = Profiler.TimeScopeManager.GetTimeScope(typeof(FSparseMeshDistanceFieldAsyncTask), nameof(DoWork));
+        private static Profiler.TimeScope mScopeSparseMeshSDF;
+        private static Profiler.TimeScope ScopeSparseMeshSDF
+        {
+            get
+            {
+                if (mScopeSparseMeshSDF == null)
+                    mScopeSparseMeshSDF = new Profiler.TimeScope(typeof(FSparseMeshDistanceFieldAsyncTask), nameof(DoWork));
+                return mScopeSparseMeshSDF;
+            }
+        } 
         public void DoWork()
         {
             using (new Profiler.TimeScopeHelper(ScopeSparseMeshSDF))

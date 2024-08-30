@@ -1007,7 +1007,16 @@ namespace EngineNS.Editor.Forms
         }
         #region Tickable
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtSceneEditor), nameof(TickLogic));
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(TtSceneEditor), nameof(TickLogic));
+                return mScopeTick;
+            }
+        }
         public void TickLogic(float ellapse)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))

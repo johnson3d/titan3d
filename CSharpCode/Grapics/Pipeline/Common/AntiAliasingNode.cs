@@ -338,7 +338,16 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
 
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtAntiAliasingNode), nameof(TickCopyLogic));
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(TtAntiAliasingNode), nameof(TickCopyLogic));
+                return mScopeTick;
+            }
+        }
         public unsafe void TickCopyLogic(TtRenderPolicy policy)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))

@@ -199,11 +199,38 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
 
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UDeferredBasePassNode), nameof(TickLogic));
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(UDeferredBasePassNode), nameof(TickLogic));
+                return mScopeTick;
+            }
+        }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopePushGpuDraw = Profiler.TimeScopeManager.GetTimeScope(typeof(UDeferredBasePassNode), "PushGpuDraw");
+        private static Profiler.TimeScope mScopePushGpuDraw;
+        private static Profiler.TimeScope ScopePushGpuDraw
+        {
+            get
+            {
+                if (mScopePushGpuDraw == null)
+                    mScopePushGpuDraw = new Profiler.TimeScope(typeof(UDeferredBasePassNode), "PushGpuDraw");
+                return mScopePushGpuDraw;
+            }
+        }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeFlushDraw = Profiler.TimeScopeManager.GetTimeScope(typeof(UDeferredBasePassNode), "FlushDraw");
+        private static Profiler.TimeScope mScopeFlushDraw;
+        private static Profiler.TimeScope ScopeFlushDraw
+        {
+            get
+            {
+                if (mScopeFlushDraw == null)
+                    mScopeFlushDraw = new Profiler.TimeScope(typeof(UDeferredBasePassNode), "FlushDraw");
+                return mScopeFlushDraw;
+            }
+        }
         public unsafe override void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))

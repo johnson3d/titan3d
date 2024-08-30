@@ -10,12 +10,12 @@ namespace EngineNS.Editor.Forms
         public TtCpuProfiler()
         {
             TtEngine.RootFormManager.RegRootForm(this);
+            ExcludeThreads.Add("TPool");
         }
 
         public async Thread.Async.TtTask<bool> Initialize()
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
-            ExcludeThreads.Add("TPool");
             return true;
         }
 
@@ -133,7 +133,17 @@ namespace EngineNS.Editor.Forms
         string CurrentThreadName = null;
         string CurrentName = null;
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeOnDraw = Profiler.TimeScopeManager.GetTimeScope(typeof(TtCpuProfiler), nameof(OnDraw));
+        private static Profiler.TimeScope mScopeOnDraw;
+        private static Profiler.TimeScope ScopeOnDraw
+        {
+            get
+            {
+                if (mScopeOnDraw == null)
+                    mScopeOnDraw = new Profiler.TimeScope(typeof(TtCpuProfiler), nameof(OnDraw));
+                return mScopeOnDraw;
+            }
+        }
+        
         public void OnDraw()
         {
             using (new Profiler.TimeScopeHelper(ScopeOnDraw))
@@ -208,7 +218,7 @@ namespace EngineNS.Editor.Forms
 
                                     if (ImGuiAPI.BeginTabItem("ByTree", null, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
                                     {
-                                        if (ImGuiAPI.BeginChild("ShowTree", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                                        if (ImGuiAPI.BeginChild("ShowTree", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_HorizontalScrollbar))
                                         {
                                             DrawByTree(cmdlst, i);
                                         }
@@ -340,6 +350,8 @@ namespace EngineNS.Editor.Forms
         {
             internal class TtTimeScopeNode : Editor.INodeUIProvider
             {
+                public System.DateTime LastAccessTime;
+                public long NotCountedTime = 0;
                 public Profiler.URpcProfiler.RpcProfilerData.ScopeInfo TimeInfo;
                 public List<TtTimeScopeNode> Children = new List<TtTimeScopeNode>();
                 public int NumOfChildUI()
@@ -373,8 +385,12 @@ namespace EngineNS.Editor.Forms
                     ImGuiAPI.SameLine(0, -1);
                     var txt = $"[Time={TimeInfo.AvgTime},Hit={TimeInfo.AvgHit}]";
                     ImGuiAPI.TextColored(Color4b.DarkGoldenrod.ToColor4Float(), txt);
-                    //var txtSize = ImGuiAPI.CalcTextSize(txt, false, 0.0f);
-                    //ImGuiAPI.ItemSize(in txtSize, 0);
+                    if (this.Children.Count > 0)
+                    {
+                        txt = $"NC={NotCountedTime}";
+                        ImGuiAPI.SameLine(0, -1);
+                        ImGuiAPI.TextColored(Color4b.OrangeRed.ToColor4Float(), txt);
+                    }
                     if (ImGuiAPI.IsItemActivated())
                     {
                         tree.OnNodeUI_Activated(this);
@@ -412,25 +428,49 @@ namespace EngineNS.Editor.Forms
             {
                 DrawTree(TimeScopeRootNode, 0);
             }
+            private List<string> rmvNodes = new List<string>();
             internal void SetTreeNodes(List<Profiler.URpcProfiler.RpcProfilerData.ScopeInfo> src)
             {
+                var now = System.DateTime.UtcNow;
                 bool bAdd = false;
+                //update
                 foreach (var i in src)
                 {
                     TtTimeScopeNode node;
                     if (TreeNodes.TryGetValue(i.ShowName, out node))
                     {
                         node.TimeInfo = i;
+                        node.LastAccessTime = now;
                     }
                     else
                     {
                         node = new TtTimeScopeNode();
                         node.TimeInfo = i;
+                        node.LastAccessTime = now;
                         TreeNodes.Add(i.ShowName, node);
                         bAdd = true;
                     }
                 }
-                if (bAdd)
+
+                //remove timeout
+                {
+                    rmvNodes.Clear();
+                    foreach (var i in TreeNodes)
+                    {
+                        var timeSpan = now - i.Value.LastAccessTime;
+                        if (timeSpan.Seconds > 3)
+                        {
+                            rmvNodes.Add(i.Key);
+                        }
+                    }
+                    foreach (var i in rmvNodes)
+                    {
+                        TreeNodes.Remove(i);
+                    }
+                }
+
+                //rebuild tree
+                if (bAdd || rmvNodes.Count > 0)
                 {
                     TimeScopeRootNode.Children.Clear();
                     foreach (var i in TreeNodes)
@@ -449,6 +489,18 @@ namespace EngineNS.Editor.Forms
                             TimeScopeRootNode.Children.Add(i.Value);
                         }
                     }
+                }
+                rmvNodes.Clear();
+
+                //count delta
+                foreach (var i in TreeNodes)
+                {
+                    long t = 0;
+                    foreach(var j in i.Value.Children)
+                    {
+                        t += j.TimeInfo.AvgTime;
+                    }
+                    i.Value.NotCountedTime = i.Value.TimeInfo.AvgTime - t;
                 }
             }
             internal void SortNodes()

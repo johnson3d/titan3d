@@ -99,6 +99,7 @@ namespace EngineNS.Thread
                 if (waitAction != null)
                     waitAction();
                 System.Threading.Thread.Sleep(5);
+                mEnqueueTrigger.Set();
             }
             mThread = null;
         }
@@ -173,7 +174,16 @@ namespace EngineNS.Thread
             CurrentContext = null;
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtContextThread), nameof(Tick));
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(TtContextThread), nameof(Tick));
+                return mScopeTick;
+            }
+        } 
         public virtual void Tick()
         {
             if(TickAction!=null)
@@ -216,6 +226,7 @@ namespace EngineNS.Thread
         {
             get;
         } = new Queue<Async.TtAsyncTaskStateBase>();
+        internal System.Threading.AutoResetEvent mEnqueueTrigger = new System.Threading.AutoResetEvent(false);
         public void EnqueuePriority(Async.TtAsyncTaskStateBase evt)
         {
             System.Diagnostics.Debug.Assert(IsFinished == false);
@@ -223,6 +234,7 @@ namespace EngineNS.Thread
             {
                 PriorityEvents.Enqueue(evt);
             }
+            mEnqueueTrigger.Set();
         }
         [Browsable(false)]
         protected Queue<Async.TtAsyncTaskStateBase> AsyncEvents
@@ -236,6 +248,7 @@ namespace EngineNS.Thread
             {
                 AsyncEvents.Enqueue(evt);
             }
+            mEnqueueTrigger.Set();
         }
         [Browsable(false)]
         protected Queue<Async.TtAsyncTaskStateBase> ContinueEvents
@@ -249,6 +262,7 @@ namespace EngineNS.Thread
             {
                 ContinueEvents.Enqueue(evt);
             }
+            mEnqueueTrigger.Set();
         }
         [Browsable(false)]
         public List<Async.TtAsyncTaskStateBase> RunUntilFinishEvents

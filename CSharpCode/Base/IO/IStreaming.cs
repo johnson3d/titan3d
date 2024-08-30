@@ -17,7 +17,17 @@ namespace EngineNS.IO
     public class TtStreamingManager
     {
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeUpdateStreamingState = Profiler.TimeScopeManager.GetTimeScope(typeof(TtStreamingManager), nameof(UpdateStreamingState));
+        private static Profiler.TimeScope mScopeUpdateStreamingState;
+        private static Profiler.TimeScope ScopeUpdateStreamingState
+        {
+            get
+            {
+                if (mScopeUpdateStreamingState == null)
+                    mScopeUpdateStreamingState = new Profiler.TimeScope(typeof(TtStreamingManager), nameof(UpdateStreamingState));
+                return mScopeUpdateStreamingState;
+            }
+        }
+        
         public Dictionary<RName, IStreaming> StreamingAssets { get; } = new Dictionary<RName, IStreaming>();
         public void UpdateStreamingState()
         {

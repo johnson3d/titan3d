@@ -91,7 +91,16 @@ namespace EngineNS.Animation.SceneNode
         }
         GamePlay.Movemnet.UMovement Movement = null;
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtBlendSpaceAnimPlayNode), nameof(TickLogic));
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(TtBlendSpaceAnimPlayNode), nameof(TickLogic));
+                return mScopeTick;
+            }
+        }
         public override void TickLogic(TtNodeTickParameters args)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))

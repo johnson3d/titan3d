@@ -130,7 +130,16 @@ namespace EngineNS.Graphics.Pipeline
             return hitproxyNode.GetHitproxy(MouseX, MouseY);
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTickSync = Profiler.TimeScopeManager.GetTimeScope(typeof(TtRenderPolicy), nameof(TickSync));
+        private static Profiler.TimeScope mScopeTickSync;
+        private static Profiler.TimeScope ScopeTickSync
+        {
+            get
+            {
+                if (mScopeTickSync == null)
+                    mScopeTickSync = new Profiler.TimeScope(typeof(TtRenderPolicy), nameof(TickSync));
+                return mScopeTickSync;
+            }
+        }
         public void UpdateCameraAttachements(NxRHI.UCbView.EUpdateMode mode = NxRHI.UCbView.EUpdateMode.Auto)
         {
             foreach (var i in CameraAttachments)

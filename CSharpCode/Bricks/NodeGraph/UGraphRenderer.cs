@@ -759,7 +759,8 @@ namespace EngineNS.Bricks.NodeGraph
                                 var id = ImGuiAPI.GetID("GraphContextMenu");
                                 if(ImGuiAPI.BeginChild(id, wsize, false, 
                                     ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | 
-                                    ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
+                                    ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings |
+                                    ImGuiWindowFlags_.ImGuiWindowFlags_HorizontalScrollbar))
                                 {
                                     if (mGraph.CanvasMenuDirty)
                                     {

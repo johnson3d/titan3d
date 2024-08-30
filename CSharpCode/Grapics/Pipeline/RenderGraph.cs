@@ -270,82 +270,120 @@ namespace EngineNS.Graphics.Pipeline
                 i.Value.FrameBuild(policy);
             }
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeBeginTickLogic;
+        private static Profiler.TimeScope ScopeBeginTickLogic
+        {
+            get
+            {
+                if (mScopeBeginTickLogic == null)
+                    mScopeBeginTickLogic = new Profiler.TimeScope(typeof(TtRenderGraph), nameof(BeginTickLogic));
+                return mScopeBeginTickLogic;
+            }
+        }
         public virtual void BeginTickLogic(GamePlay.UWorld world)
         {
-            FrameBuild(this as TtRenderPolicy);
-
-            if (NodeLayers != null)
+            using (new Profiler.TimeScopeHelper(ScopeBeginTickLogic))
             {
-                foreach (var i in NodeLayers)
+                FrameBuild(this as TtRenderPolicy);
+
+                if (NodeLayers != null)
                 {
-                    foreach (var j in i)
+                    foreach (var i in NodeLayers)
                     {
-                        if (j.IsUsed == false)
-                            continue;
-                        if (j.Enable)
-                            j.BeginTickLogic(world, this as TtRenderPolicy, true);
+                        foreach (var j in i)
+                        {
+                            if (j.IsUsed == false)
+                                continue;
+                            if (j.Enable)
+                                j.BeginTickLogic(world, this as TtRenderPolicy, true);
+                        }
                     }
                 }
+            }   
+        }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeEndTickLogic;
+        private static Profiler.TimeScope ScopeEndTickLogic
+        {
+            get
+            {
+                if (mScopeEndTickLogic == null)
+                    mScopeEndTickLogic = new Profiler.TimeScope(typeof(TtRenderGraph), nameof(EndTickLogic));
+                return mScopeEndTickLogic;
             }
         }
         public virtual void EndTickLogic(GamePlay.UWorld world)
         {
-            if (NodeLayers != null)
+            using (new Profiler.TimeScopeHelper(ScopeEndTickLogic))
             {
-                foreach (var i in NodeLayers)
+                if (NodeLayers != null)
                 {
-                    foreach (var j in i)
+                    foreach (var i in NodeLayers)
                     {
-                        if (j.IsUsed == false)
-                            continue;
-                        if (j.Enable)
-                            j.EndTickLogic(world, this as TtRenderPolicy, true);
-                    }
-                }
-            }
-        }
-        private List<TtRenderGraphLinker> mTempTryReleaseLinkers = new List<TtRenderGraphLinker>();
-        public virtual void TickLogic(GamePlay.UWorld world, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
-        {
-            //FrameBuild();
-
-            //BeginTickLogic(world);
-
-            if (NodeLayers != null)
-            {
-                foreach (var i in NodeLayers)
-                {
-                    foreach (var j in i)
-                    {
-                        if (j.IsUsed == false)
-                            continue;
-                        if (j.Enable)
+                        foreach (var j in i)
                         {
-                            j.BeforeTickLogic((TtRenderPolicy)this);
-
-                            j.TickLogic(world, (TtRenderPolicy)this, true);
-
-                            j.TryReleaseBufers(mTempTryReleaseLinkers, onRemove);
-
-                            //int NunOfRefZero = 0; 
-                            //foreach (var ca in this.AttachmentCache.CachedAttachments)
-                            //{
-                            //    if(ca.Value.RefCount == 0 && ca.Value.LifeMode == UAttachBuffer.ELifeMode.Transient)
-                            //    {
-                            //        NunOfRefZero++;
-                            //    }
-                            //}
-                            //if(NunOfRefZero!=0)
-                            //{
-                            //    int xxx = 0;
-                            //}
+                            if (j.IsUsed == false)
+                                continue;
+                            if (j.Enable)
+                                j.EndTickLogic(world, this as TtRenderPolicy, true);
                         }
                     }
                 }
+            }   
+        }
+        private List<TtRenderGraphLinker> mTempTryReleaseLinkers = new List<TtRenderGraphLinker>();
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeTickLogic;
+        private static Profiler.TimeScope ScopeTickLogic
+        {
+            get
+            {
+                if (mScopeTickLogic == null)
+                    mScopeTickLogic = new Profiler.TimeScope(typeof(TtRenderGraph), nameof(TickLogic));
+                return mScopeTickLogic;
             }
-            //EndTickLogic(world);
+        }
+        public virtual void TickLogic(GamePlay.UWorld world, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
+        {
+            using (new Profiler.TimeScopeHelper(ScopeTickLogic))
+            {
+                if (NodeLayers != null)
+                {
+                    foreach (var i in NodeLayers)
+                    {
+                        foreach (var j in i)
+                        {
+                            if (j.IsUsed == false)
+                                continue;
+                            if (j.Enable)
+                            {
+                                j.BeforeTickLogic((TtRenderPolicy)this);
 
-            mTempTryReleaseLinkers.Clear();
+                                j.TickLogic(world, (TtRenderPolicy)this, true);
+
+                                j.TryReleaseBufers(mTempTryReleaseLinkers, onRemove);
+
+                                //int NunOfRefZero = 0; 
+                                //foreach (var ca in this.AttachmentCache.CachedAttachments)
+                                //{
+                                //    if(ca.Value.RefCount == 0 && ca.Value.LifeMode == UAttachBuffer.ELifeMode.Transient)
+                                //    {
+                                //        NunOfRefZero++;
+                                //    }
+                                //}
+                                //if(NunOfRefZero!=0)
+                                //{
+                                //    int xxx = 0;
+                                //}
+                            }
+                        }
+                    }
+                }
+                //EndTickLogic(world);
+
+                mTempTryReleaseLinkers.Clear();
+            }   
         }
         public virtual void TickSync()
         {

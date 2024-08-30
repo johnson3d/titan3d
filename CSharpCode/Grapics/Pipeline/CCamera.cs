@@ -78,7 +78,17 @@ namespace EngineNS.Graphics.Pipeline
             mCoreObject.PerspectiveFovLH(mCoreObject.mFov, mCoreObject.mWidth, mCoreObject.mHeight, zNear, zFar);
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeWhichContainTypeFast = Profiler.TimeScopeManager.GetTimeScope(typeof(UCamera), nameof(WhichContainTypeFast));
+        private static Profiler.TimeScope mScopeWhichContainTypeFast;
+        private static Profiler.TimeScope ScopeWhichContainTypeFast
+        {
+            get
+            {
+                if (mScopeWhichContainTypeFast == null)
+                    mScopeWhichContainTypeFast = new Profiler.TimeScope(typeof(UCamera), nameof(WhichContainTypeFast));
+                return mScopeWhichContainTypeFast;
+            }
+        }
+        
         public unsafe CONTAIN_TYPE WhichContainTypeFast(GamePlay.UWorld world, in EngineNS.DBoundingBox dAabb, bool testInner)
         {
             using (new Profiler.TimeScopeHelper(ScopeWhichContainTypeFast))

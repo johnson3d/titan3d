@@ -2,7 +2,7 @@
 ## 1.ÐÔÄÜ·ÖÎö
 ```C#
 [ThreadStatic]
-private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UMovement), nameof(TickLogic));
+private static Profiler.TimeScope ScopeTick = new Profiler.TimeScope(typeof(UMovement), nameof(TickLogic));
 using (new Profiler.TimeScopeHelper(ScopeTick))
 {
 	//do sth

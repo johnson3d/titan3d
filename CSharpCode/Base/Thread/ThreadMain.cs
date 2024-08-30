@@ -7,9 +7,27 @@ namespace EngineNS.Thread
     public class TtThreadMain : TtContextThread
     {
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTickSync = Profiler.TimeScopeManager.GetTimeScope(typeof(TtThreadMain), nameof(TickSync));
+        private static Profiler.TimeScope mScopeTickSync;
+        private static Profiler.TimeScope ScopeTickSync
+        {
+            get
+            {
+                if (mScopeTickSync == null)
+                    mScopeTickSync = new Profiler.TimeScope(typeof(TtThreadMain), nameof(TickSync));
+                return mScopeTickSync;
+            }
+        }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeWaitTickLogic = Profiler.TimeScopeManager.GetTimeScope(typeof(TtThreadMain), "WaitTickLogic");
+        private static Profiler.TimeScope mScopeWaitTickLogic;
+        private static Profiler.TimeScope ScopeWaitTickLogic
+        {
+            get
+            {
+                if (mScopeWaitTickLogic == null)
+                    mScopeWaitTickLogic = new Profiler.TimeScope(typeof(TtThreadMain), "WaitTickLogic");
+                return mScopeWaitTickLogic;
+            }
+        } 
         public override void Tick()
         {
             BeforeFrame();
@@ -41,23 +59,37 @@ namespace EngineNS.Thread
                 TickStage = 0;
             }
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeTickRenderMT;
+        private static Profiler.TimeScope ScopeTickRenderMT
+        {
+            get
+            {
+                if (mScopeTickRenderMT == null)
+                    mScopeTickRenderMT = new Profiler.TimeScope(typeof(TtThreadMain), nameof(RenderMT));
+                return mScopeTickRenderMT;
+            }
+        }
         private void RenderMT()
         {
-            TtEngine.Instance.ThreadLogic.LogicEnd.Reset();
-            TtEngine.Instance.ThreadLogic.LogicBegin.Set();
-
-            TtEngine.Instance.ThreadRHI.Tick();
-
-            using (new Profiler.TimeScopeHelper(ScopeWaitTickLogic))
+            using (new Profiler.TimeScopeHelper(ScopeTickRenderMT))
             {
-                var evtIndex = System.Threading.WaitHandle.WaitAny(TtEngine.Instance.ThreadLogic.LogicEndEvents);
-                if (evtIndex == (int)TtThreadLogic.EEndEvent.MacrossDebug)
-                {
-                    System.Diagnostics.Debug.Assert(Macross.UMacrossDebugger.Instance.CurrrentBreak != null);
-                }
-                //TtEngine.Instance.ThreadLogic.mLogicEnd.WaitOne();
                 TtEngine.Instance.ThreadLogic.LogicEnd.Reset();
-            }
+                TtEngine.Instance.ThreadLogic.LogicBegin.Set();
+
+                TtEngine.Instance.ThreadRHI.Tick();
+
+                using (new Profiler.TimeScopeHelper(ScopeWaitTickLogic))
+                {
+                    var evtIndex = System.Threading.WaitHandle.WaitAny(TtEngine.Instance.ThreadLogic.LogicEndEvents);
+                    if (evtIndex == (int)TtThreadLogic.EEndEvent.MacrossDebug)
+                    {
+                        System.Diagnostics.Debug.Assert(Macross.UMacrossDebugger.Instance.CurrrentBreak != null);
+                    }
+                    //TtEngine.Instance.ThreadLogic.mLogicEnd.WaitOne();
+                    TtEngine.Instance.ThreadLogic.LogicEnd.Reset();
+                }
+            }   
         }
     }
 }

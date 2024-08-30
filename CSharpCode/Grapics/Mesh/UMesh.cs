@@ -356,7 +356,16 @@ namespace EngineNS.Graphics.Mesh
                 return drawCalls;
             }
             [ThreadStatic]
-            private static Profiler.TimeScope ScopeOnDrawCall = Profiler.TimeScopeManager.GetTimeScope(typeof(TtAtom), "OnDrawCall");
+            private static Profiler.TimeScope mScopeOnDrawCall;
+            private static Profiler.TimeScope ScopeOnDrawCall
+            {
+                get
+                {
+                    if (mScopeOnDrawCall == null)
+                        mScopeOnDrawCall = new Profiler.TimeScope(typeof(TtAtom), "OnDrawCall");
+                    return mScopeOnDrawCall;
+                }
+            } 
             public unsafe virtual NxRHI.UGraphicDraw GetDrawCall(NxRHI.ICommandList cmd, Pipeline.TtGraphicsBuffers targetView, Pipeline.TtRenderPolicy policy,
                 Pipeline.TtRenderGraphNode node)
             {

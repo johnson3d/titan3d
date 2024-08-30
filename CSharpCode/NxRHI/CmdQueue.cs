@@ -150,7 +150,16 @@ namespace EngineNS.NxRHI
 
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeRenderTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtRenderSwapQueue), nameof(TickRender));
+        private static Profiler.TimeScope mScopeRenderTick;
+        private static Profiler.TimeScope ScopeRenderTick
+        {
+            get
+            {
+                if (mScopeRenderTick == null)
+                    mScopeRenderTick = new Profiler.TimeScope(typeof(TtRenderSwapQueue), nameof(TickRender));
+                return mScopeRenderTick;
+            }
+        }
         public void TickRender(float ellapse)
         {
             var cmdQueue = TtEngine.Instance.GfxDevice.RenderContext.GpuQueue;
@@ -204,10 +213,19 @@ namespace EngineNS.NxRHI
 
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeSyncTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtRenderSwapQueue), nameof(TickRender));
+        private static Profiler.TimeScope mScopeSyncTick;
+        private static Profiler.TimeScope ScopeSyncTick
+        {
+            get
+            {
+                if (mScopeSyncTick == null)
+                    mScopeSyncTick = new Profiler.TimeScope(typeof(TtRenderSwapQueue), nameof(TickSync));
+                return mScopeSyncTick;
+            }
+        }
         public void TickSync(float ellapse)
         {
-            using (new Profiler.TimeScopeHelper(ScopeRenderTick))
+            using (new Profiler.TimeScopeHelper(ScopeSyncTick))
             {
                 var cmdQueue = TtEngine.Instance.GfxDevice.RenderContext.GpuQueue;
 

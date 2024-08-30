@@ -6,8 +6,14 @@
 
 NS_BEGIN
 
+SampResult* v3dSampMgr::GetCurrentSamp()
+{
+	return m_CurSamp;
+}
+
 struct ThreadInstanceManager
 {
+	VSLLock SampMgrLocker;
 	std::vector<v3dSampMgr*> AllInstance;
 	ThreadInstanceManager()
 	{
@@ -24,6 +30,7 @@ struct ThreadInstanceManager
 	}
 	void RegInstance(v3dSampMgr* p)
 	{
+		VAutoVSLLock lk(SampMgrLocker);
 		for (size_t i = 0; i < AllInstance.size(); i++)
 		{
 			if (AllInstance[i] == p)
@@ -34,6 +41,7 @@ struct ThreadInstanceManager
 	}
 	void UnregInstance(v3dSampMgr* p)
 	{
+		VAutoVSLLock lk(SampMgrLocker);
 		for (size_t i = 0; i < AllInstance.size(); i++)
 		{
 			if (AllInstance[i] == p)
@@ -78,10 +86,6 @@ v3dSampMgr::~v3dSampMgr()
 
 void v3dSampMgr::Cleanup()
 {
-	for (auto i = m_Samps.begin(); i != m_Samps.end(); ++i)
-	{
-		EngineNS::Safe_Release(i->second);
-	}
 	m_Samps.clear();
 
 	m_CurSamp = NULL;
@@ -94,7 +98,7 @@ SampResult* v3dSampMgr::FindSamp(const char* name)
 	auto i = m_Samps.find(name);
 	if (i == m_Samps.end())
 	{
-		SampResult* sr = new SampResult();
+		auto sr = MakeWeakRef(new SampResult());
 		sr->mEnable = TRUE;
 		sr->mName = name;
 		m_Samps.insert(std::make_pair(name, sr));
@@ -105,7 +109,7 @@ SampResult* v3dSampMgr::FindSamp(const char* name)
 
 SampResult* v3dSampMgr::PureFindSamp(const char* name)
 {
-	std::map<HashString, SampResult*, StringCompare>::iterator i = m_Samps.find(name);
+	auto i = m_Samps.find(name);
 	if (i == m_Samps.end())
 	{
 		return NULL;
@@ -130,7 +134,7 @@ void v3dSampMgr::Update()
 		UpdateCount = 0;
 		NeedUpdate = true;
 	}
-	for (std::map<HashString, SampResult*, StringCompare>::iterator i = m_Samps.begin(); i != m_Samps.end(); ++i)
+	for (auto i = m_Samps.begin(); i != m_Samps.end(); ++i)
 	{
 		SampResult* pSamp = i->second;
 

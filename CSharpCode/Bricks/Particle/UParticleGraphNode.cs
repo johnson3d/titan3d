@@ -29,19 +29,47 @@ namespace EngineNS.Bricks.Particle
             BasePass.Initialize(rc, debugName + ".BasePass");
         }
         public List<GamePlay.Scene.TtMeshNode> ParticleNodes = new List<GamePlay.Scene.TtMeshNode>();
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeBeginTickLogic;
+        private static Profiler.TimeScope ScopeBeginTickLogic
+        {
+            get
+            {
+                if (mScopeBeginTickLogic == null)
+                    mScopeBeginTickLogic = new Profiler.TimeScope(typeof(UParticleGraphNode), nameof(BeginTickLogic));
+                return mScopeBeginTickLogic;
+            }
+        }
         public override unsafe void BeginTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
-            var cmd = BasePass.DrawCmdList;
-            cmd.BeginCommand();
-            cmd.BeginEvent("NebulaUpdate");
+            using (new Profiler.TimeScopeHelper(ScopeBeginTickLogic))
+            {
+                var cmd = BasePass.DrawCmdList;
+                cmd.BeginCommand();
+                cmd.BeginEvent("NebulaUpdate");
+            }   
+        }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeEndTickLogic;
+        private static Profiler.TimeScope ScopeEndTickLogic
+        {
+            get
+            {
+                if (mScopeEndTickLogic == null)
+                    mScopeEndTickLogic = new Profiler.TimeScope(typeof(UParticleGraphNode), nameof(EndTickLogic));
+                return mScopeEndTickLogic;
+            }
         }
         public override unsafe void EndTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
-            var cmd = BasePass.DrawCmdList;
-            cmd.FlushDraws();
-            cmd.EndEvent();
-            cmd.EndCommand();
-            policy.CommitCommandList(cmd);
+            using (new Profiler.TimeScopeHelper(ScopeEndTickLogic))
+            {
+                var cmd = BasePass.DrawCmdList;
+                cmd.FlushDraws();
+                cmd.EndEvent();
+                cmd.EndCommand();
+                policy.CommitCommandList(cmd);
+            }   
         }
         public override void FrameBuild(TtRenderPolicy policy)
         {

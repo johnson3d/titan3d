@@ -195,7 +195,16 @@ namespace EngineNS.GamePlay
             }
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeGatherVisibleMeshes = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(GatherVisibleMeshes));
+        private static Profiler.TimeScope mScopeGatherVisibleMeshes;
+        private static Profiler.TimeScope ScopeGatherVisibleMeshes
+        {
+            get
+            {
+                if (mScopeGatherVisibleMeshes == null)
+                    mScopeGatherVisibleMeshes = new Profiler.TimeScope(typeof(UWorld), nameof(GatherVisibleMeshes));
+                return mScopeGatherVisibleMeshes;
+            }
+        }
         public virtual void GatherVisibleMeshes(UVisParameter rp)
         {
             rp.CullCamera.VisParameter = rp;
@@ -207,13 +216,49 @@ namespace EngineNS.GamePlay
             }   
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeGatherVisibleMeshes_Cull = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(GatherVisibleMeshes)+".Cull");
+        private static Profiler.TimeScope mScopeGatherVisibleMeshes_Cull;
+        private static Profiler.TimeScope ScopeGatherVisibleMeshes_Cull
+        {
+            get
+            {
+                if (mScopeGatherVisibleMeshes_Cull == null)
+                    mScopeGatherVisibleMeshes_Cull = new Profiler.TimeScope(typeof(UWorld), nameof(GatherVisibleMeshes) + ".Cull");
+                return mScopeGatherVisibleMeshes_Cull;
+            }
+        }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeOnVisitNode = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(GatherVisibleMeshes) + ".OnVisitNode");
+        private static Profiler.TimeScope mScopeOnVisitNode;
+        private static Profiler.TimeScope ScopeOnVisitNode
+        {
+            get
+            {
+                if (mScopeOnVisitNode == null)
+                    mScopeOnVisitNode = new Profiler.TimeScope(typeof(UWorld), nameof(GatherVisibleMeshes) + ".OnVisitNode");
+                return mScopeOnVisitNode;
+            }
+        }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeOnGatherVisibleMeshes = Profiler.TimeScopeManager.GetTimeScope(typeof(TtNode), "OnGatherVisibleMeshes");
+        private static Profiler.TimeScope mScopeOnGatherVisibleMeshes;
+        private static Profiler.TimeScope ScopeOnGatherVisibleMeshes
+        {
+            get
+            {
+                if (mScopeOnGatherVisibleMeshes == null)
+                    mScopeOnGatherVisibleMeshes = new Profiler.TimeScope(typeof(TtNode), "OnGatherVisibleMeshes");
+                return mScopeOnGatherVisibleMeshes;
+            }
+        }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeChildren = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(GatherVisibleMeshes) + ".Children");
+        private static Profiler.TimeScope mScopeChildren;
+        private static Profiler.TimeScope ScopeChildren
+        {
+            get
+            {
+                if (mScopeChildren == null)
+                    mScopeChildren = new Profiler.TimeScope(typeof(UWorld), nameof(GatherVisibleMeshes) + ".Children");
+                return mScopeChildren;
+            }
+        }
         internal unsafe static bool OnVisitNode_GatherVisibleMeshes(Scene.TtNode node, UVisParameter rp)
         {
             if (rp.OnVisitNode != null)
@@ -397,9 +442,27 @@ namespace EngineNS.GamePlay
             mDeltaTimeMillisecond = 0;
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(TickLogic));
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(UWorld), nameof(TickLogic));
+                return mScopeTick;
+            }
+        }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick_After = Profiler.TimeScopeManager.GetTimeScope(typeof(UWorld), nameof(TickLogic) + ".After");
+        private static Profiler.TimeScope mScopeTick_After;
+        private static Profiler.TimeScope ScopeTick_After
+        {
+            get
+            {
+                if (mScopeTick_After == null)
+                    mScopeTick_After = new Profiler.TimeScope(typeof(UWorld), nameof(TickLogic) + ".After");
+                return mScopeTick_After;
+            }
+        } 
         private TtNode.TtNodeTickParameters NodeTickParameters = new TtNode.TtNodeTickParameters();
         public virtual void TickLogic(Graphics.Pipeline.TtRenderPolicy policy, float ellapse)
         {

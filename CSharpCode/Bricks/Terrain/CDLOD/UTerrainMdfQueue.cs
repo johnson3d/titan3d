@@ -98,7 +98,16 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             public NxRHI.TtEffectBinder cbPerTerrain;
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeOnDrawCall = Profiler.TimeScopeManager.GetTimeScope(typeof(UTerrainMdfQueue), nameof(OnDrawCall));
+        private static Profiler.TimeScope mScopeOnDrawCall;
+        private static Profiler.TimeScope ScopeOnDrawCall
+        {
+            get
+            {
+                if (mScopeOnDrawCall == null)
+                    mScopeOnDrawCall = new Profiler.TimeScope(typeof(UTerrainMdfQueue), nameof(OnDrawCall));
+                return mScopeOnDrawCall;
+            }
+        }
         public unsafe void OnDrawCall(TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             bool bUseRVT = TtEngine.Instance.Config.Feature_UseRVT;

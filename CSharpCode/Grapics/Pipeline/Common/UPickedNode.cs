@@ -105,7 +105,16 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         List<Mesh.TtMesh> mPickedMeshes = new List<Mesh.TtMesh>();
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UPickedNode), nameof(TickLogic));
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(UPickedNode), nameof(TickLogic));
+                return mScopeTick;
+            }
+        } 
         public override unsafe void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))

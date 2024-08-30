@@ -3592,7 +3592,16 @@ namespace EngineNS.NxRHI
         float TickInterval = 150;
         float EllapsedRemainTime = 150;
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UTextureManager), nameof(TickLogic));
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(UTextureManager), nameof(TickLogic));
+                return mScopeTick;
+            }
+        }
         public void TickLogic(float ellapse)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))

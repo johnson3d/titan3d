@@ -290,6 +290,8 @@ namespace EngineNS.Graphics.Pipeline
             cmdlst.AddText(v2Center + v2X, (uint)Color4b.Red.ToAbgr(), "x", null);
             cmdlst.AddText(v2Center + v2Y, (uint)Color4b.Green.ToAbgr(), "y", null);
             cmdlst.AddText(v2Center + v2Z, (uint)Color4b.Blue.ToAbgr(), "z", null);
+
+            cmdlst.AddText(v2Center, Color4b.LightPink.ToAbgr(), string.Format("fps={0:F2}", TtEngine.Instance.FPS), null);
         }
         protected virtual void OnViewportClosed()
         {

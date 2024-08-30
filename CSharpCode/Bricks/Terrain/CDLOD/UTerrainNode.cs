@@ -396,7 +396,17 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
         //bool DebugPrintLOD = false;
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtTerrainNode), nameof(TickLogic));
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(TtTerrainNode), nameof(TickLogic));
+                return mScopeTick;
+            }
+        }
+        
         public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))

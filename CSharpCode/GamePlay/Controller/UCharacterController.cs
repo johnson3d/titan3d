@@ -64,7 +64,16 @@ namespace EngineNS.GamePlay.Controller
         float HInput = 0;
         float VInput = 0;
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UCharacterController), nameof(TickLogic));
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(UCharacterController), nameof(TickLogic));
+                return mScopeTick;
+            }
+        } 
         public override void TickLogic(TtNodeTickParameters args)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))

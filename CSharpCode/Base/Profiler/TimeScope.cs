@@ -7,6 +7,7 @@ using EngineNS.IO;
 using EngineNS.Rtti;
 using EngineNS.Bricks.Network.RPC;
 using static EngineNS.EGui.UIProxy.SingleInputDialog;
+using EngineNS.Animation.Macross.BlendTree;
 
 namespace EngineNS.Profiler
 {
@@ -37,7 +38,7 @@ namespace EngineNS.Profiler
         }
         private static void Test()
         {
-            var tt = Profiler.TimeScopeManager.GetTimeScope(typeof(TtStreamingManager), nameof(Test));
+            var tt = new Profiler.TimeScope(typeof(TtStreamingManager), nameof(Test));
             using var a = new TimeScopeRAII(tt);
             //do sth
         }
@@ -114,6 +115,11 @@ namespace EngineNS.Profiler
     }
     public class TimeScope : AuxPtrType<SampResult>
     {
+        public override void Dispose()
+        {
+            if (NeedDispose)
+                base.Dispose();
+        }
         [Flags]
         public enum EProfileFlag : byte
         {
@@ -123,6 +129,13 @@ namespace EngineNS.Profiler
 
             FlagsAll = 0xFF,
         }
+        private bool NeedDispose = true;
+        public TimeScope(Type t, string method, TimeScope.EProfileFlag flags = TimeScope.EProfileFlag.FlagsAll, bool createWhenNotFound = true)
+        {
+            Flags = flags;
+            ShowName = t.FullName + "." + method;
+            NeedDispose = false;
+        }
         public TimeScope(SampResult self, EProfileFlag flag)
         {
             mCoreObject = self;
@@ -130,6 +143,7 @@ namespace EngineNS.Profiler
             mEnable = mCoreObject.mEnable;
 
             this.Core_AddRef();
+            NeedDispose = true;
         }
         public string GetFriendName()
         {
@@ -156,25 +170,34 @@ namespace EngineNS.Profiler
         Int64 mBeginTime;
         public void Begin(bool bPushParent = true)
         {
+            if (TimeScopeManager.IsFinalCleanup)
+                return;
+            if (mCoreObject.IsValidPointer == false)
+            {
+                mCoreObject = TimeScopeManager.GetTimeScope(ShowName, Flags);
+                //Core_AddRef();
+                NeedDispose = false;
+                mEnable = mCoreObject.mEnable;
+            }
             if (mEnable == false)
                 return;
-            unsafe
-            {
-                mBeginTime = mCoreObject.Begin(TimeScopeManager.Instance.mCoreObject, bPushParent);
-            }
+
+            mBeginTime = mCoreObject.Begin(TimeScopeManager.Instance.mCoreObject, bPushParent);
         }
         public void End()
         {
+            if (TimeScopeManager.IsFinalCleanup)
+                return;
+
             if (mEnable == false)
                 return;
-            unsafe
-            {
-                mCoreObject.End(TimeScopeManager.Instance.mCoreObject, mBeginTime);
-            }
+
+            mCoreObject.End(TimeScopeManager.Instance.mCoreObject, mBeginTime);
         }
     }
     public class TimeScopeManager
     {
+        public static bool IsFinalCleanup { get; private set; } = false;
         #region ThreadInstance
         public static List<TimeScopeManager> AllThreadInstance { get; } = new List<TimeScopeManager>();
         public unsafe static void UpdateAllInstance()
@@ -202,7 +225,8 @@ namespace EngineNS.Profiler
         }
         public static void FinalCleanup()
         {
-            foreach(var i in AllThreadInstance)
+            IsFinalCleanup = true;
+            foreach (var i in AllThreadInstance)
             {
                 i.Cleanup();
             }
@@ -263,38 +287,37 @@ namespace EngineNS.Profiler
             }
             mInstance = null;
         }
-        static bool EnableScopeAfterGet = true;
-        public static TimeScope GetTimeScope(Type t, string method, string showName = null, TimeScope.EProfileFlag flags = TimeScope.EProfileFlag.FlagsAll, bool createWhenNotFound = true)
-        {
-            var result = GetTimeScope(t.FullName + "." + method, flags, createWhenNotFound);
-            result.Enable = EnableScopeAfterGet;
-            result.ShowName = showName;
-            return result;
-        }
-        public static TimeScope GetTimeScope(string name, TimeScope.EProfileFlag flags = TimeScope.EProfileFlag.FlagsAll, bool createWhenNotFound = true)
+        public static SampResult GetTimeScope(string name, TimeScope.EProfileFlag flags = TimeScope.EProfileFlag.FlagsAll, bool createWhenNotFound = true)
         {
             TimeScope result;
             if (Instance.Scopes.TryGetValue(name, out result))
-                return result;
-
-            unsafe
             {
-                EngineNS.SampResult samp;
-                if (createWhenNotFound)
-                {
-                    samp = Instance.mCoreObject.FindSamp(name);
-                }
-                else
-                {
-                    samp = Instance.mCoreObject.PureFindSamp(name);
-                }
-
-                if (samp.NativePointer == IntPtr.Zero)
-                    return null;
-                result = new TimeScope(samp, flags);
-                Instance.Scopes.Add(name, result);
-                return result;
+                return result.mCoreObject;
             }
+
+            EngineNS.SampResult samp;
+            if (createWhenNotFound)
+            {
+                samp = Instance.mCoreObject.FindSamp(name);
+            }
+            else
+            {
+                samp = Instance.mCoreObject.PureFindSamp(name);
+            }
+
+            if (samp.NativePointer == IntPtr.Zero)
+                return new SampResult();
+            result = new TimeScope(samp, flags);
+            Instance.Scopes.Add(name, result);
+            return result.mCoreObject;
+        }
+        public string GetCurrentTimeScopeName()
+        {
+            var samp = mCoreObject.GetCurrentSamp();
+            if (samp.IsValidPointer)
+                return samp.GetName();
+            else
+                return "";
         }
     }
 

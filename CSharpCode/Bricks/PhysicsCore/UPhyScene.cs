@@ -20,8 +20,26 @@ namespace EngineNS.Bricks.PhysicsCore
             mCoreObject = self;
         }
         public bool IsPxFetchingPose { get; protected set; }
-        private static Profiler.TimeScope ScopeTickSimulate = Profiler.TimeScopeManager.GetTimeScope(typeof(TtPhyScene), "Tick.Simulate");
-        private static Profiler.TimeScope ScopeTickUpdateActor = Profiler.TimeScopeManager.GetTimeScope(typeof(TtPhyScene), "Tick.UpdateActor");
+        private static Profiler.TimeScope mScopeTickSimulate;
+        private static Profiler.TimeScope ScopeTickSimulate
+        {
+            get
+            {
+                if (mScopeTickSimulate == null)
+                    mScopeTickSimulate = new Profiler.TimeScope(typeof(TtPhyScene), "Tick.Simulate");
+                return mScopeTickSimulate;
+            }
+        }
+        private static Profiler.TimeScope mScopeTickUpdateActor;
+        private static Profiler.TimeScope ScopeTickUpdateActor
+        {
+            get
+            {
+                if (mScopeTickUpdateActor == null)
+                    mScopeTickUpdateActor = new Profiler.TimeScope(typeof(TtPhyScene), "Tick.UpdateActor");
+                return mScopeTickUpdateActor;
+            }
+        } 
         public unsafe void Tick(float elapsedSecond)
         {
             var elapse = elapsedSecond;
@@ -138,7 +156,27 @@ namespace EngineNS.Bricks.PhysicsCore
             mPxScene = null;
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UPhySceneMember), nameof(TickLogic));
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(UPhySceneMember), nameof(TickLogic));
+                return mScopeTick;
+            }
+        }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeWaitPx;
+        private static Profiler.TimeScope ScopeWaitPx
+        {
+            get
+            {
+                if (mScopeWaitPx == null)
+                    mScopeWaitPx = new Profiler.TimeScope(typeof(UPhySceneMember), nameof(TickLogic) + ".WaitPX");
+                return mScopeWaitPx;
+            }
+        }
         System.Threading.AutoResetEvent PxSceneTickEndEvent = new System.Threading.AutoResetEvent(false);
         private float TickLogic_ellapse;
         public void TickLogic(object host, float ellapse)
@@ -158,7 +196,10 @@ namespace EngineNS.Bricks.PhysicsCore
                 //hostNode.GetWorld().RegAfterTickAction(() =>
                 TtEngine.Instance.RegAfterTickAction(() =>
                 {
-                    PxSceneTickEndEvent?.WaitOne();
+                    using (new Profiler.TimeScopeHelper(ScopeWaitPx))
+                    {
+                        PxSceneTickEndEvent?.WaitOne();
+                    }
                 });
             }
             else

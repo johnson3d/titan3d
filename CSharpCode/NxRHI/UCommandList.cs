@@ -174,7 +174,16 @@ namespace EngineNS.NxRHI
             }
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(UCommandList), nameof(FlushDraws));
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(UCommandList), nameof(FlushDraws));
+                return mScopeTick;
+            }
+        }
         public void FlushDraws()
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
@@ -202,8 +211,7 @@ namespace EngineNS.NxRHI
         //{
         //    mCoreObject.PushGpuDraw(draw.NativeSuper);
         //}
-        //[ThreadStatic]
-        //private static Profiler.TimeScope ScopePushGpuDraw = Profiler.TimeScopeManager.GetTimeScope(typeof(UCommandList), nameof(PushGpuDraw));
+        
         public void PushGpuDraw(UGraphicDraw draw)
         {
             mCoreObject.GetCmdRecorder().PushGpuDraw(draw);

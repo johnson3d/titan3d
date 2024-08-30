@@ -9,12 +9,13 @@ namespace EngineNS.Thread
         public TtThreadPhysics()
         {
             this.LimitTime = long.MaxValue;
-            Interval = 15;
+            Interval = 0;
         }
         long mPrevFrameCount;
         long mPrevTestTime = 0;
         public override void Tick()
         {
+            mEnqueueTrigger.WaitOne();
             var now = Support.Time.GetTickCount();
             if(now - mPrevTestTime>100)
             {

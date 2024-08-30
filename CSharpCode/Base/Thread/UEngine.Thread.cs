@@ -164,36 +164,50 @@ namespace EngineNS
             ThreadLogic.LogicBegin.Set();
             ThreadRender.mRenderBegin.Set();
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeTryTickRender;
+        private static Profiler.TimeScope ScopeTryTickRender
+        {
+            get
+            {
+                if (mScopeTryTickRender == null)
+                    mScopeTryTickRender = new Profiler.TimeScope(typeof(TtEngine), nameof(TryTickRender));
+                return mScopeTryTickRender;
+            }
+        }
         public void TryTickRender()
         {
-            try
+            using (new Profiler.TimeScopeHelper(ScopeTryTickRender))
             {
-                TickRenderModules();
-                for (int i = 0; i < TickableManager.Tickables.Count; i++)
+                try
                 {
-                    try
+                    TickRenderModules();
+                    for (int i = 0; i < TickableManager.Tickables.Count; i++)
                     {
-                        ITickable cur;
-                        if (TickableManager.Tickables[i].TryGetTarget(out cur))
+                        try
                         {
-                            cur.TickRender(ElapseTickCountMS);
+                            ITickable cur;
+                            if (TickableManager.Tickables[i].TryGetTarget(out cur))
+                            {
+                                cur.TickRender(ElapseTickCountMS);
+                            }
+                            else
+                            {
+                                TickableManager.Tickables.RemoveAt(i);
+                                i--;
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            TickableManager.Tickables.RemoveAt(i);
-                            i--;
+                            Profiler.Log.WriteException(ex);
                         }
-                    }
-                    catch(Exception ex)
-                    {
-                        Profiler.Log.WriteException(ex);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                Profiler.Log.WriteException(ex);
-            }
+                catch (Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                }
+            }   
         }
         private List<System.Action> mAfterTicks = new List<System.Action>();
         public void RegAfterTickAction(System.Action action)
@@ -204,30 +218,69 @@ namespace EngineNS
             }
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick_After = Profiler.TimeScopeManager.GetTimeScope(typeof(TtEngine), nameof(TryTickLogic) + ".After");
+        private static Profiler.TimeScope mScopeTick_After;
+        private static Profiler.TimeScope ScopeTick_After
+        {
+            get
+            {
+                if (mScopeTick_After == null)
+                    mScopeTick_After = new Profiler.TimeScope(typeof(TtEngine), nameof(TryTickLogic) + ".After");
+                return mScopeTick_After;
+            }
+        }
+
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeTick_Module;
+        private static Profiler.TimeScope ScopeTick_Module
+        {
+            get
+            {
+                if (mScopeTick_Module == null)
+                    mScopeTick_Module = new Profiler.TimeScope(typeof(TtEngine), nameof(TryTickLogic) + ".Module");
+                return mScopeTick_Module;
+            }
+        }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeTick_TickManager;
+        private static Profiler.TimeScope ScopeTick_TickManager
+        {
+            get
+            {
+                if (mScopeTick_TickManager == null)
+                    mScopeTick_TickManager = new Profiler.TimeScope(typeof(TtEngine), nameof(TryTickLogic) + ".Manager");
+                return mScopeTick_TickManager;
+            }
+        }
         public void TryTickLogic()
         {
             try
             {
-                TickLogicModules();
-                for (int i = 0; i < TickableManager.Tickables.Count; i++)
+                using (new Profiler.TimeScopeHelper(ScopeTick_Module))
                 {
-                    try
+                    TickLogicModules();
+                }
+
+                using (new Profiler.TimeScopeHelper(ScopeTick_TickManager))
+                {
+                    for (int i = 0; i < TickableManager.Tickables.Count; i++)
                     {
-                        ITickable cur;
-                        if (TickableManager.Tickables[i].TryGetTarget(out cur))
+                        try
                         {
-                            cur.TickLogic(ElapseTickCountMS);
+                            ITickable cur;
+                            if (TickableManager.Tickables[i].TryGetTarget(out cur))
+                            {
+                                cur.TickLogic(ElapseTickCountMS);
+                            }
+                            else
+                            {
+                                TickableManager.Tickables.RemoveAt(i);
+                                i--;
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            TickableManager.Tickables.RemoveAt(i);
-                            i--;
+                            Profiler.Log.WriteException(ex);
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        Profiler.Log.WriteException(ex);
                     }
                 }
 
@@ -248,102 +301,130 @@ namespace EngineNS
                 Profiler.Log.WriteException(ex);
             }
         }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeTickBeginFrame;
+        private static Profiler.TimeScope ScopeTickBeginFrame
+        {
+            get
+            {
+                if (mScopeTickBeginFrame == null)
+                    mScopeTickBeginFrame = new Profiler.TimeScope(typeof(TtEngine), nameof(TickBeginFrame));
+                return mScopeTickBeginFrame;
+            }
+        }
         public void TickBeginFrame()
         {
-            try
+            using (new Profiler.TimeScopeHelper(ScopeTickBeginFrame))
             {
-                for (int i = 0; i < TickableManager.Tickables.Count; i++)
+                try
                 {
-                    try
+                    for (int i = 0; i < TickableManager.Tickables.Count; i++)
                     {
-                        ITickable cur;
-                        if (TickableManager.Tickables[i].TryGetTarget(out cur))
+                        try
                         {
-                            cur.TickBeginFrame(ElapseTickCountMS);
+                            ITickable cur;
+                            if (TickableManager.Tickables[i].TryGetTarget(out cur))
+                            {
+                                cur.TickBeginFrame(ElapseTickCountMS);
+                            }
+                            else
+                            {
+                                TickableManager.Tickables.RemoveAt(i);
+                                i--;
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            TickableManager.Tickables.RemoveAt(i);
-                            i--;
+                            Profiler.Log.WriteException(ex);
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        Profiler.Log.WriteException(ex);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                Profiler.Log.WriteException(ex);
-            }
+                catch (Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                }
 
-            try
-            {
-                //using (new Profiler.TimeScopeHelper(ScopeDrawSlateWindow))
-                //{
-                //    DrawSlateWindow();
-                //    TtEngine.Instance.GfxDevice.SlateApplication?.OnDrawSlate();
-                //}
-                if (this.PlayMode != EPlayMode.Game)
+                try
                 {
-                    TtEngine.Instance.AssetMetaManager.EditorCheckShowIconTimeout();
+                    //using (new Profiler.TimeScopeHelper(ScopeDrawSlateWindow))
+                    //{
+                    //    DrawSlateWindow();
+                    //    TtEngine.Instance.GfxDevice.SlateApplication?.OnDrawSlate();
+                    //}
+                    if (this.PlayMode != EPlayMode.Game)
+                    {
+                        TtEngine.Instance.AssetMetaManager.EditorCheckShowIconTimeout();
+                    }
                 }
-            }
-            catch (Exception ex)
+                catch (Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                }
+            }   
+        }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeTickSync;
+        private static Profiler.TimeScope ScopeTickSync
+        {
+            get
             {
-                Profiler.Log.WriteException(ex);
+                if (mScopeTickSync == null)
+                    mScopeTickSync = new Profiler.TimeScope(typeof(TtEngine), nameof(TickSync));
+                return mScopeTickSync;
             }
         }
         public void TickSync()
         {
-            try
+            using (new Profiler.TimeScopeHelper(ScopeTickSync))
             {
-                for (int i = 0; i < TickableManager.Tickables.Count; i++)
+                try
                 {
-                    try
+                    for (int i = 0; i < TickableManager.Tickables.Count; i++)
                     {
-                        ITickable cur;
-                        if (TickableManager.Tickables[i].TryGetTarget(out cur))
+                        try
                         {
-                            cur.TickSync(ElapseTickCountMS);
+                            ITickable cur;
+                            if (TickableManager.Tickables[i].TryGetTarget(out cur))
+                            {
+                                cur.TickSync(ElapseTickCountMS);
+                            }
+                            else
+                            {
+                                TickableManager.Tickables.RemoveAt(i);
+                                i--;
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            TickableManager.Tickables.RemoveAt(i);
-                            i--;
+                            Profiler.Log.WriteException(ex);
                         }
                     }
-                    catch (Exception ex)
+
+                    TickableManager.ProcessTicSync();
+                }
+                catch (Exception ex)
+                {
+                    Profiler.Log.WriteException(ex);
+                }
+
+                try
+                {
+                    using (new Profiler.TimeScopeHelper(ScopeDrawSlateWindow))
                     {
-                        Profiler.Log.WriteException(ex);
+                        DrawSlateWindow();
+                        TtEngine.Instance.GfxDevice.SlateApplication?.OnDrawSlate();
+                    }
+                    if (this.PlayMode != EPlayMode.Game)
+                    {
+                        TtEngine.Instance.AssetMetaManager.EditorCheckShowIconTimeout();
                     }
                 }
-
-                TickableManager.ProcessTicSync();
-            }
-            catch (Exception ex)
-            {
-                Profiler.Log.WriteException(ex);
-            }
-
-            try
-            {
-                using (new Profiler.TimeScopeHelper(ScopeDrawSlateWindow))
+                catch (Exception ex)
                 {
-                    DrawSlateWindow();
-                    TtEngine.Instance.GfxDevice.SlateApplication?.OnDrawSlate();
+                    Profiler.Log.WriteException(ex);
                 }
-                if (this.PlayMode != EPlayMode.Game)
-                {
-                    TtEngine.Instance.AssetMetaManager.EditorCheckShowIconTimeout();
-                }
+                GfxDevice?.TickSync(this);
             }
-            catch (Exception ex)
-            {
-                Profiler.Log.WriteException(ex);
-            }
-            GfxDevice?.TickSync(this);
         }
 
         public static async System.Threading.Tasks.Task RunCoroutine<T>(IAsyncEnumerable<T> enumerable)
@@ -354,7 +435,16 @@ namespace EngineNS
             }
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeDrawSlateWindow = Profiler.TimeScopeManager.GetTimeScope(typeof(TtEngine), nameof(DrawSlateWindow));
+        private static Profiler.TimeScope mScopeDrawSlateWindow;
+        private static Profiler.TimeScope ScopeDrawSlateWindow
+        {
+            get
+            {
+                if( mScopeDrawSlateWindow == null)
+                    mScopeDrawSlateWindow = new Profiler.TimeScope(typeof(TtEngine), nameof(DrawSlateWindow));
+                return mScopeDrawSlateWindow;
+            }
+        }
         partial void DrawSlateWindow();
     }
 }

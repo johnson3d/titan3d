@@ -329,7 +329,16 @@ namespace EngineNS.GamePlay.Scene
             return true;
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtScene), nameof(TickLogic));
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(TtScene), nameof(TickLogic));
+                return mScopeTick;
+            }
+        }
         public override void TickLogic(TtNodeTickParameters args)
         {
             if (this.IsNoTick)

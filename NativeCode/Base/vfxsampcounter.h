@@ -108,10 +108,10 @@ public:
 	typedef vfxHashString	HashString;
 	typedef _HashStringCompare	StringCompare;
 
-	typedef std::map<HashString, SampResult*, StringCompare> SampsMap;
+	typedef std::map<HashString, AutoRef<SampResult>, StringCompare> SampsMap;
 	SampsMap				m_Samps;
 
-	SampResult*				m_CurSamp;
+	AutoRef<SampResult>		m_CurSamp;
 	int						m_AvgCounter;
 	INT64					m_Freq;
 
@@ -149,6 +149,7 @@ public:
 		}
 		return Freq;
 	}
+	SampResult* GetCurrentSamp();
 public:
 	v3dSampMgr();
 	~v3dSampMgr();

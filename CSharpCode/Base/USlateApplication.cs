@@ -253,9 +253,29 @@ namespace EngineNS
         #endregion
 
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeOnDrawUI = Profiler.TimeScopeManager.GetTimeScope(typeof(USlateApplication), nameof(OnDrawUI));
+        private static Profiler.TimeScope mScopeOnDrawUI;
+        private static Profiler.TimeScope ScopeOnDrawUI
+        {
+            get
+            {
+                if (mScopeOnDrawUI == null)
+                    mScopeOnDrawUI = new Profiler.TimeScope(typeof(USlateApplication), nameof(OnDrawUI));
+                return mScopeOnDrawUI;
+            }
+        }
+
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeImGuiRender = Profiler.TimeScopeManager.GetTimeScope(typeof(ImGuiAPI), "Render");
+        private static Profiler.TimeScope mScopeImGuiRender;
+        private static Profiler.TimeScope ScopeImGuiRender
+        {
+            get
+            {
+                if (mScopeImGuiRender == null)
+                    mScopeImGuiRender = new Profiler.TimeScope(typeof(ImGuiAPI), "Render");
+                return mScopeImGuiRender;
+            }
+        }
+        
         public unsafe virtual void OnDrawSlate()
         {
             if (mImGuiContext == IntPtr.Zero)

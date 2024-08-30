@@ -11,7 +11,16 @@ namespace EngineNS.Thread
             Interval = 0;
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeTick = Profiler.TimeScopeManager.GetTimeScope(typeof(TtThreadRender), nameof(Tick));
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(TtThreadRender), nameof(Tick));
+                return mScopeTick;
+            }
+        }
         public override void Tick()
         {
             mRenderBegin.WaitOne();
@@ -51,7 +60,17 @@ namespace EngineNS.Thread
             mRenderBegin.Set();
         }
         [ThreadStatic]
-        private static Profiler.TimeScope ScopeWaitRender = Profiler.TimeScopeManager.GetTimeScope(typeof(TtThreadRender), nameof(WaitRender));
+        private static Profiler.TimeScope mScopeWaitRender;
+        private static Profiler.TimeScope ScopeWaitRender
+        {
+            get
+            {
+                if (mScopeWaitRender == null)
+                    mScopeWaitRender = new Profiler.TimeScope(typeof(TtThreadRender), nameof(WaitRender));
+                return mScopeWaitRender;
+            }
+        }
+        
         public void WaitRender()
         {
             using (new Profiler.TimeScopeHelper(ScopeWaitRender))
