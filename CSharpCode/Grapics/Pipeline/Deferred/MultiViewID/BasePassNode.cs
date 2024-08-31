@@ -263,7 +263,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
                 return mScopePushGpuDraw;
             }
         } 
-        public unsafe override void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {

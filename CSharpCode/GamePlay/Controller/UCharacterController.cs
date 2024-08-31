@@ -25,7 +25,7 @@ namespace EngineNS.GamePlay.Controller
 
         public bool OrientCameraRoation = true;
 
-        public override Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             UAxis2DAction axis2D = IAction.Create<UAxis2DAction>(new UAxis2DAction.UAxis2DActionData());
             var upControl = IControl.Create<UKey>(new UKey.UKeyData() { Keycode = Bricks.Input.Keycode.KEY_w });

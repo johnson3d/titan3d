@@ -179,7 +179,7 @@ namespace EngineNS.Bricks.Network.RPC
 		{
 			return true;
 		}
-        Profiler.URpcProfiler RpcProfiler = new Profiler.URpcProfiler();
+        Profiler.TtRpcProfiler RpcProfiler = new Profiler.TtRpcProfiler();
         [URpcMethod(Index = 0)]
         public int TestBaseRpc1(float arg, UCallContext context)
         {

@@ -178,7 +178,7 @@ namespace EngineNS.GamePlay
 
         public class UAxisNode : Scene.TtSceneActorNode
         {
-            public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, Scene.TtNodeData data, Scene.EBoundVolumeType bvType, Type placementType)                
+            public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, Scene.TtNodeData data, Scene.EBoundVolumeType bvType, Type placementType)                
             {
                 return await base.InitializeNode(world, data, bvType, placementType);
             }
@@ -187,7 +187,7 @@ namespace EngineNS.GamePlay
             {
                 return false;
             }
-            public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+            public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
             {
                 base.OnGatherVisibleMeshes(rp);
             }
@@ -242,7 +242,7 @@ namespace EngineNS.GamePlay
                 mesh.IsAcceptShadow = false;
                 return ok ? mesh : null;
             }
-            public async System.Threading.Tasks.Task Initialize(enAxisType type, GamePlay.UWorld world)
+            public async System.Threading.Tasks.Task Initialize(enAxisType type, GamePlay.TtWorld world)
             {
                 Graphics.Mesh.TtMesh axisMesh = null;
                 var meshNodeData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
@@ -889,7 +889,7 @@ namespace EngineNS.GamePlay
         }
         #endregion
 
-        GamePlay.UWorld mHostWorld;
+        GamePlay.TtWorld mHostWorld;
         UAxisNode mRootNode;
         public UAxisNode RootNode { get => mRootNode; }
         float mRootNodeScaleValue = 1.0f;
@@ -897,7 +897,7 @@ namespace EngineNS.GamePlay
         bool mInitialized = false;
         Graphics.Pipeline.ICameraController mCameraController;
 
-        public async System.Threading.Tasks.Task Initialize(GamePlay.UWorld world, Graphics.Pipeline.ICameraController cameraController)
+        public async System.Threading.Tasks.Task Initialize(GamePlay.TtWorld world, Graphics.Pipeline.ICameraController cameraController)
         {
             if (world == mHostWorld && mInitialized)
                 return;

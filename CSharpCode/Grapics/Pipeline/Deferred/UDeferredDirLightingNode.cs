@@ -312,7 +312,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 return mScopeTick;
             }
         } 
-        public override void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {

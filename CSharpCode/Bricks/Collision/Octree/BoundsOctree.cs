@@ -207,7 +207,7 @@ namespace EngineNS.Bricks.Collision.Octree
         /// Draws node boundaries visually for debugging.
         /// Must be called from OnDrawGizmos externally. See also: DrawAllObjects.
         /// </summary>
-        public void DrawAllBounds(GamePlay.UPlacementBase Placement, GamePlay.UWorld.UVisParameter vp)
+        public void DrawAllBounds(GamePlay.UPlacementBase Placement, GamePlay.TtWorld.UVisParameter vp)
         {
             if (Placement == null)
                 return;
@@ -218,7 +218,7 @@ namespace EngineNS.Bricks.Collision.Octree
         /// Draws the bounds of all objects in the tree visually for debugging.
         /// Must be called from OnDrawGizmos externally. See also: DrawAllBounds.
         /// </summary>
-        public void DrawAllObjects(GamePlay.UPlacementBase Placement, GamePlay.UWorld.UVisParameter vp)
+        public void DrawAllObjects(GamePlay.UPlacementBase Placement, GamePlay.TtWorld.UVisParameter vp)
         {
             if (Placement == null)
                 return;
@@ -330,7 +330,7 @@ namespace EngineNS.Bricks.Collision.Octree
                         if (IsDrawBounds)
                         {
                             var scene = host as GamePlay.Scene.TtScene;
-                            var vp = notify.Parameter as GamePlay.UWorld.UVisParameter;
+                            var vp = notify.Parameter as GamePlay.TtWorld.UVisParameter;
                             vp.TransientVB = TransientVB;
                             vp.TransientIB = TransientIB;
 

@@ -8,7 +8,7 @@ namespace EngineNS.Editor.Forms
 {
     public class UWorldOutliner : TtTreeNodeDrawer, IRootForm
     {
-        public GamePlay.UWorld World
+        public GamePlay.TtWorld World
         {
             get
             {

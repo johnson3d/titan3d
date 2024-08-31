@@ -276,7 +276,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 return mScopeTick;
             }
         }
-        public override unsafe void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             if (IsHitproxyBuilding)
                 return;

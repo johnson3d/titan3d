@@ -152,7 +152,7 @@ namespace EngineNS.Graphics.Pipeline
             GpuCullFlushShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Mesh.Modifier.TtGpuCullFlushShading>();
             GpuCullShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Mesh.Modifier.TtGpuCullShading>();
         }
-        public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
             var cmd = BasePass.DrawCmdList;
             using (new NxRHI.TtCmdListScope(cmd))

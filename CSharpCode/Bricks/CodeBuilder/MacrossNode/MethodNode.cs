@@ -421,6 +421,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
+        public void SetSelfMethod()
+        {
+            Self.LinkDesc.SetColor(MacrossStyles.Instance.SelfLinkColor);
+        }
+
         private void Initialize(Rtti.UClassMeta.TtMethodMeta m)
         {
             //Method = m;
@@ -437,6 +442,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 Self.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
                 Self.LinkDesc.CanLinks.Add("Value");
                 Self.Name = "Self";
+                Self.LinkDesc.SetColor(MacrossStyles.Instance.HostClassLinkColor);
                 AddPinIn(Self);
             }
 
@@ -1182,7 +1188,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 }
 
                                 UExpressionBase fexp = texp;
-                                if (srcType != tagType && srcType != null && tagType != null)
+                                if (srcType != tagType && srcType != null && tagType != null &&
+                                    pinData.OpType != EMethodArgumentAttribute.Ref)
                                 {
                                     fexp = new UCastExpression()
                                     {
@@ -1613,7 +1620,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 if (iPin == Arguments[i].PinIn)
                 {
                     var testType = nodeExpr.GetOutPinType(oPin);
-                    return UCodeGeneratorBase.CanConvert(testType, Method.GetParameter(i).ParameterType);
+                    switch(Arguments[i].OpType)
+                    {
+                        case EMethodArgumentAttribute.Default:
+                        case EMethodArgumentAttribute.In:
+                            return UCodeGeneratorBase.CanConvert(testType, Method.GetParameter(i).ParameterType);
+                        default:
+                            return (testType == Method.GetParameter(i).ParameterType);
+                    }
                 }
             }
             return true;

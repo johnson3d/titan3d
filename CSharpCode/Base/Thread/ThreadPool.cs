@@ -6,86 +6,101 @@ namespace EngineNS.Thread
 {
     public class TtThreadPool : TtContextThread
     {
+        private static int mNumOfActiveThreads = 0;
+        public static int NumOfActiveThreads { get => mNumOfActiveThreads; }
+        private static int mMaxActiveThreads = 0;
+        internal static int MaxActiveThreads
+        {
+            get
+            {
+                return mMaxActiveThreads;
+            }
+        }
+        internal static void ResetMaxActiveThreads()
+        {
+            mMaxActiveThreads = 0;
+        }
+        private static object mLocker = "lockObject";
         public TtThreadPool()
         {
             Interval = 0;
         }
-        Queue<Async.IJobThread> mJobThreads = new Queue<Async.IJobThread>();
-        public void AddJobThread(Async.IJobThread job)
-        {
-            lock (mJobThreads)
-            {
-                mJobThreads.Enqueue(job);
-            }
-        }
-        private void TickJobThread()
-        {
-            while (mJobThreads.Count > 0)
-            {
-                Async.IJobThread jobs = null;
-                lock (mJobThreads)
-                {
-                    jobs = mJobThreads.Dequeue();
-                }
-                jobs.DoWorks();
-            }
-        }
+        //Queue<Async.IJobThread> mJobThreads = new Queue<Async.IJobThread>();
+        //public void AddJobThread(Async.IJobThread job)
+        //{
+        //    lock (mJobThreads)
+        //    {
+        //        mJobThreads.Enqueue(job);
+        //    }
+        //}
+        //private void TickJobThread()
+        //{
+        //    while (mJobThreads.Count > 0)
+        //    {
+        //        Async.IJobThread jobs = null;
+        //        lock (mJobThreads)
+        //        {
+        //            jobs = mJobThreads.Dequeue();
+        //        }
+        //        jobs.DoWorks();
+        //    }
+        //}
+        private List<Async.TtAsyncTaskStateBase> Suspended = new List<Async.TtAsyncTaskStateBase>();
         public override void Tick()
         {
-            TtEngine.Instance.ContextThreadManager.mTPoolTrigger.WaitOne(5);
-            
-            var events = TtEngine.Instance.ContextThreadManager.TPoolEvents;
-            var numOfEvent = events.Count;
-            while (true)
+            TtEngine.Instance.ContextThreadManager.mTPoolTrigger.WaitOne();
+            var e = TtEngine.Instance.ContextThreadManager.PopPoolEvent();
+            if (e == null)
             {
-                TickJobThread();
+                return;
+            }
 
-                Async.TtAsyncTaskStateBase e = null;
-                
-                lock (events)
+            System.Threading.Interlocked.Increment(ref mNumOfActiveThreads);
+#if DEBUG
+            lock (mLocker)
+            {
+                if (mNumOfActiveThreads > mMaxActiveThreads)
+                    mMaxActiveThreads = mNumOfActiveThreads;
+            }
+#endif
+
+            while (e != null)
+            {
+                //TickJobThread();
+
                 {
-                    if (events.Count > 0 && numOfEvent > 0)
-                    {
-                        e = events.Pop();
-                        numOfEvent--;
-                    }
-                    else
-                    {
-                        TtEngine.Instance.ContextThreadManager.mTPoolTrigger.Reset();
-                        break;
-                    }
-                }
-                if (e != null)
-                {
+                    Async.TtAsyncTaskStateBase state = null;
                     try
                     {
-                        var state = e.ExecutePostEvent();
-                        if (state.TaskState == Async.EAsyncTaskState.Suspended)
-                        {
-                            lock (events)
-                            {
-                                events.Push(e);
-                            }
-                            return;
-                        }
+                        state = e.ExecutePostEvent();
                     }
                     catch (Exception ex)
                     {
                         Profiler.Log.WriteException(ex);
                         e.ExceptionInfo = ex;
                     }
-                    e.TaskState = Async.EAsyncTaskState.Completed;
-                    e.CompletedEvent?.Set();
-                    e.Dispose();
+                    if (state.TaskState == Async.EAsyncTaskState.Suspended)
+                    {
+                        Suspended.Add(e);
+                    }
+                    else
+                    {
+                        e.TaskState = Async.EAsyncTaskState.Completed;
+                        e.CompletedEvent?.Set();
+                        e.Dispose();
+                    }
                 }
+                e = TtEngine.Instance.ContextThreadManager.PopPoolEvent();
             }
 
-            //lock (events)
-            //{
-            //    if (events.Count == 0)
-            //        TtEngine.Instance.ContextThreadManager.mTPoolTrigger.Reset();
-            //}
-            TickAwaitEvent();
+            foreach(var i in Suspended)
+            {
+                TtEngine.Instance.ContextThreadManager.PushPoolEvent(i);
+            }
+            Suspended.Clear();
+
+            //TickAwaitEvent();
+            System.Threading.Interlocked.Decrement(ref mNumOfActiveThreads);
         }
         protected override void OnThreadStart()
         {

@@ -279,7 +279,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             return true;
         }
-        public void BuildInstances(GamePlay.UWorld world)
+        public void BuildInstances(GamePlay.TtWorld world)
         {
             foreach (var i in GpuSceneActors)
             {
@@ -358,7 +358,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             // TODO CullInstancesBuffer
         }
-        private void TickLogic_Instance(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, UCommandList cmd)
+        private void TickLogic_Instance(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, UCommandList cmd)
         {
             //GpuInstances.Clear(); Fixd
 

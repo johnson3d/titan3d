@@ -7,7 +7,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    public partial class UWorld : IDisposable
+    public partial class TtWorld : IDisposable
     {
         public void Dispose()
         {
@@ -17,7 +17,7 @@ namespace EngineNS.GamePlay
 
             mMemberTickables.CleanupMembers(this);
         }
-        public UWorld(Graphics.Pipeline.TtViewportSlate viewport)
+        public TtWorld(Graphics.Pipeline.TtViewportSlate viewport)
         {
             mMemberTickables.CollectMembers(this);
 
@@ -125,7 +125,7 @@ namespace EngineNS.GamePlay
             public EVisCull CullType = EVisCull.Normal;
             public EVisCullFilter CullFilters = EVisCullFilter.None;// EVisCullFilter.All;
             public bool IsBuildAABB = false;
-            public UWorld World;
+            public TtWorld World;
 
             public DBoundingBox AABB;
             public List<Graphics.Pipeline.FVisibleMesh> VisibleMeshes = new List<Graphics.Pipeline.FVisibleMesh>();
@@ -201,7 +201,7 @@ namespace EngineNS.GamePlay
             get
             {
                 if (mScopeGatherVisibleMeshes == null)
-                    mScopeGatherVisibleMeshes = new Profiler.TimeScope(typeof(UWorld), nameof(GatherVisibleMeshes));
+                    mScopeGatherVisibleMeshes = new Profiler.TimeScope(typeof(TtWorld), nameof(GatherVisibleMeshes));
                 return mScopeGatherVisibleMeshes;
             }
         }
@@ -222,7 +222,7 @@ namespace EngineNS.GamePlay
             get
             {
                 if (mScopeGatherVisibleMeshes_Cull == null)
-                    mScopeGatherVisibleMeshes_Cull = new Profiler.TimeScope(typeof(UWorld), nameof(GatherVisibleMeshes) + ".Cull");
+                    mScopeGatherVisibleMeshes_Cull = new Profiler.TimeScope(typeof(TtWorld), nameof(GatherVisibleMeshes) + ".Cull");
                 return mScopeGatherVisibleMeshes_Cull;
             }
         }
@@ -233,7 +233,7 @@ namespace EngineNS.GamePlay
             get
             {
                 if (mScopeOnVisitNode == null)
-                    mScopeOnVisitNode = new Profiler.TimeScope(typeof(UWorld), nameof(GatherVisibleMeshes) + ".OnVisitNode");
+                    mScopeOnVisitNode = new Profiler.TimeScope(typeof(TtWorld), nameof(GatherVisibleMeshes) + ".OnVisitNode");
                 return mScopeOnVisitNode;
             }
         }
@@ -255,7 +255,7 @@ namespace EngineNS.GamePlay
             get
             {
                 if (mScopeChildren == null)
-                    mScopeChildren = new Profiler.TimeScope(typeof(UWorld), nameof(GatherVisibleMeshes) + ".Children");
+                    mScopeChildren = new Profiler.TimeScope(typeof(TtWorld), nameof(GatherVisibleMeshes) + ".Children");
                 return mScopeChildren;
             }
         }
@@ -448,7 +448,7 @@ namespace EngineNS.GamePlay
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UWorld), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtWorld), nameof(TickLogic));
                 return mScopeTick;
             }
         }
@@ -459,7 +459,7 @@ namespace EngineNS.GamePlay
             get
             {
                 if (mScopeTick_After == null)
-                    mScopeTick_After = new Profiler.TimeScope(typeof(UWorld), nameof(TickLogic) + ".After");
+                    mScopeTick_After = new Profiler.TimeScope(typeof(TtWorld), nameof(TickLogic) + ".After");
                 return mScopeTick_After;
             }
         } 

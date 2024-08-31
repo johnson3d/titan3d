@@ -16,7 +16,7 @@ namespace EngineNS.Bricks.Collision.DDA
     [TtNode(NodeDataType = typeof(TtNodeData), DefaultNamePrefix = "HVX")]
     public class TtHierarchicalVoxelSpace3D : GamePlay.Scene.TtSceneActorNode
     {
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
             
@@ -135,7 +135,7 @@ namespace EngineNS.Bricks.Collision.DDA
             }
         }
 
-        public async System.Threading.Tasks.Task CreateDebugMesh(GamePlay.UWorld world)
+        public async System.Threading.Tasks.Task CreateDebugMesh(GamePlay.TtWorld world)
         {
             var material = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
             VxDebugMesh = new Graphics.Mesh.TtMesh();
@@ -182,7 +182,7 @@ namespace EngineNS.Bricks.Collision.DDA
                 }
             }
         }
-        public async System.Threading.Tasks.Task SetDebugLine(GamePlay.UWorld world, Vector3 from, Vector3 to)
+        public async System.Threading.Tasks.Task SetDebugLine(GamePlay.TtWorld world, Vector3 from, Vector3 to)
         {
             if (HVXDebugLineNode != null)
             {

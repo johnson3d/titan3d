@@ -1479,6 +1479,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             (TtMenuItem item, object sender) =>
                             {
                                 var node = MethodNode.NewMethodNode(method);
+                                node.SetSelfMethod();
                                 var nodeName = GetSerialFinalString(menuStr, GenSerialId());
                                 if (nodeName != null)
                                     node.Name = nodeName;

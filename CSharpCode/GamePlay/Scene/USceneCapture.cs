@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static EngineNS.GamePlay.UWorld;
+using static EngineNS.GamePlay.TtWorld;
 
 namespace EngineNS.GamePlay.Scene
 {
@@ -38,9 +38,9 @@ namespace EngineNS.GamePlay.Scene
         }
         public Graphics.Pipeline.TtRenderPolicy RenderPolicy { get; set; }
         public Editor.Controller.EditorCameraController CameraController = new Editor.Controller.EditorCameraController();
-        public GamePlay.UWorld CaptureWorld { get; set; }
-        GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public GamePlay.TtWorld CaptureWorld { get; set; }
+        GamePlay.TtWorld.UVisParameter mVisParameter = new GamePlay.TtWorld.UVisParameter();
+        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
 

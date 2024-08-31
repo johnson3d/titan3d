@@ -1,4 +1,5 @@
-﻿using EngineNS.EGui.Controls;
+﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
+using EngineNS.EGui.Controls;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -603,19 +604,53 @@ namespace EngineNS.Bricks.NodeGraph
 
             int num_segs = (int)(delta.Length() / styles.BezierPixelPerSegement + 1);
 
+            float thicknessDelta = 1.5f;
             var lineColor = styles.LinkerColor;
-            if (linker.InDebuggerLine)
-                lineColor = 0xFF0000FF;
-            else if (linker.OutPin.LinkDesc != null)
-                lineColor = linker.OutPin.LinkDesc.LineColor;
-            else if (linker.InPin.LinkDesc != null)
-                lineColor = linker.InPin.LinkDesc.LineColor;
-
             var thinkness = styles.LinkerThinkness;
-            if (linker.OutPin.LinkDesc != null)
-                thinkness = linker.OutPin.LinkDesc.LineThinkness;
+            if (linker.InDebuggerLine)
+                lineColor = MacrossStyles.Instance.DebugLineColor;
+            else if (linker.OutPin.LinkDesc != null)
+            {
+                if(mGraph.LinkingOp.HoverPin != null)
+                {
+                    if (mGraph.LinkingOp.HoverPin == linker.OutPin || mGraph.LinkingOp.HoverPin == linker.InPin)
+                    {
+                        lineColor = LinkDesc.GetHighlight(linker.OutPin.LinkDesc.LineColor);
+                        thinkness = linker.OutPin.LinkDesc.LineThinkness * thicknessDelta;
+                    }
+                    else
+                    {
+                        lineColor = LinkDesc.GetLowLight(linker.OutPin.LinkDesc.LineColor);
+                        thinkness = linker.OutPin.LinkDesc.LineThinkness * thicknessDelta;
+                    }
+                }
+                else
+                {
+                    lineColor = linker.OutPin.LinkDesc.LineColor;
+                    thinkness = linker.OutPin.LinkDesc.LineThinkness;
+                }
+            }
             else if (linker.InPin.LinkDesc != null)
-                thinkness = linker.InPin.LinkDesc.LineThinkness;
+            {
+                if(mGraph.LinkingOp.HoverPin != null)
+                {
+                    if (mGraph.LinkingOp.HoverPin == linker.OutPin || mGraph.LinkingOp.HoverPin == linker.InPin)
+                    {
+                        lineColor = LinkDesc.GetHighlight(linker.InPin.LinkDesc.LineColor);
+                        thinkness = linker.InPin.LinkDesc.LineThinkness * thicknessDelta;
+                    }
+                    else
+                    {
+                        lineColor = LinkDesc.GetLowLight(linker.InPin.LinkDesc.LineColor);
+                        thinkness = linker.InPin.LinkDesc.LineThinkness * thicknessDelta;
+                    }
+                }
+                else
+                {
+                    lineColor = linker.InPin.LinkDesc.LineColor;
+                    thinkness = linker.InPin.LinkDesc.LineThinkness;
+                }
+            }
 
             p1 = mGraph.CanvasToViewport(in p1);
             p2 = mGraph.CanvasToViewport(in p2);
@@ -709,6 +744,7 @@ namespace EngineNS.Bricks.NodeGraph
                 }
                 if(!contain)
                 {
+                    mGraph.LinkingOp.StartPin = null;
                     mGraph.CurMenuType = UNodeGraph.EGraphMenu.None;
                     return;
                 }

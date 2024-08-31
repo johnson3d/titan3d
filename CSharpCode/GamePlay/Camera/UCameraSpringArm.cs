@@ -75,7 +75,7 @@ namespace EngineNS.GamePlay.Camera
                 return mScopeTick;
             }
         }
-        public override bool OnTickLogic(UWorld world, TtRenderPolicy policy)
+        public override bool OnTickLogic(TtWorld world, TtRenderPolicy policy)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {

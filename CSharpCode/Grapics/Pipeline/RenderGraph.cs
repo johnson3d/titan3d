@@ -281,7 +281,7 @@ namespace EngineNS.Graphics.Pipeline
                 return mScopeBeginTickLogic;
             }
         }
-        public virtual void BeginTickLogic(GamePlay.UWorld world)
+        public virtual void BeginTickLogic(GamePlay.TtWorld world)
         {
             using (new Profiler.TimeScopeHelper(ScopeBeginTickLogic))
             {
@@ -313,7 +313,7 @@ namespace EngineNS.Graphics.Pipeline
                 return mScopeEndTickLogic;
             }
         }
-        public virtual void EndTickLogic(GamePlay.UWorld world)
+        public virtual void EndTickLogic(GamePlay.TtWorld world)
         {
             using (new Profiler.TimeScopeHelper(ScopeEndTickLogic))
             {
@@ -344,7 +344,7 @@ namespace EngineNS.Graphics.Pipeline
                 return mScopeTickLogic;
             }
         }
-        public virtual void TickLogic(GamePlay.UWorld world, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
+        public virtual void TickLogic(GamePlay.TtWorld world, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
         {
             using (new Profiler.TimeScopeHelper(ScopeTickLogic))
             {

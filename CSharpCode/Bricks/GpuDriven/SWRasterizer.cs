@@ -445,7 +445,7 @@ namespace EngineNS.Bricks.GpuDriven
             idArg.Z = 1;
             IndirectArgBuffer.SetSize(size + 1, &idArg, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_IndirectArgs);
         }
-        public unsafe override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             var attachment = GetAttachBuffer(ClustersPinIn);
             if (attachment.Srv != null)

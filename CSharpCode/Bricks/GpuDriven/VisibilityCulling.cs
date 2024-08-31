@@ -252,7 +252,7 @@ namespace EngineNS.Bricks.GpuDriven
             }
 
         }
-        public unsafe override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             if (CBCameraFrustum != null)
             {
@@ -316,7 +316,7 @@ namespace EngineNS.Bricks.GpuDriven
             mFrustumCullingData.FrustumMinPoint = frustumAABB.Minimum;
             mFrustumCullingData.FrustumMaxPoint = frustumAABB.Maximum;
         }
-        public void PrepareCullClusterInfos(NxRHI.ICommandList cmd, GamePlay.UWorld world, GamePlay.UWorld.UVisParameter rp)
+        public void PrepareCullClusterInfos(NxRHI.ICommandList cmd, GamePlay.TtWorld world, GamePlay.TtWorld.UVisParameter rp)
         {
             List<FClusterData> clusters = new List<FClusterData>();
             List<Vector3> position = new List<Vector3>();

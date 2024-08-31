@@ -754,7 +754,7 @@ namespace EngineNS.Graphics.Mesh
 
             return true;
         }
-        public void UpdateCameraOffset(GamePlay.UWorld world)
+        public void UpdateCameraOffset(GamePlay.TtWorld world)
         {
             if (PerMeshCBuffer == null || world == null)
                 return;
@@ -778,7 +778,7 @@ namespace EngineNS.Graphics.Mesh
             }
         }
         public FTransform mTransform = FTransform.Identity;
-        public void SetWorldTransform(in FTransform transform, GamePlay.UWorld world, bool isNoScale)
+        public void SetWorldTransform(in FTransform transform, GamePlay.TtWorld world, bool isNoScale)
         {
             mTransform = transform;
             if (world != null)

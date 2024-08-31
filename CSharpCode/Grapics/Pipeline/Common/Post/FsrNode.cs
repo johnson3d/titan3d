@@ -221,7 +221,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 }
             }
         }
-        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             const uint threadGroupWorkRegionDim = 16;
             var dispatchX = MathHelper.Roundup(UpSamplePinOut.Attachement.Width, threadGroupWorkRegionDim);

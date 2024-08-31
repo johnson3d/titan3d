@@ -36,7 +36,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             attachement.Srv = PointLights.Srv;
             attachement.Uav = PointLights.Uav;
         }
-        private void TickLogic_Light(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.UCommandList cmd)
+        private void TickLogic_Light(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.UCommandList cmd)
         {
             PointLights.Clear();
             if (policy.DisablePointLight == false)

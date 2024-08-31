@@ -50,7 +50,7 @@ namespace EngineNS.Editor.Forms
     }
     public class USkeletonShowNode : TtSceneActorNode
     {
-        public static async System.Threading.Tasks.Task<USkeletonShowNode> AddNode(GamePlay.UWorld world, TtNode parent, TtNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
+        public static async System.Threading.Tasks.Task<USkeletonShowNode> AddNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
             var node = await scene.NewNode(world, typeof(USkeletonShowNode), data, EBoundVolumeType.Box, placementType) as USkeletonShowNode;
@@ -70,7 +70,7 @@ namespace EngineNS.Editor.Forms
         Dictionary<FBoneLine, TtMesh> BoneLineMeshes = new();
         public TtSkeletonAsset SkeletonAsset { get; set; } = null;
         public TtLocalSpaceRuntimePose CurrentPose = null;
-        public override Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var nodeData = data as USkeletonShowNodeData;
             SkeletonAsset = nodeData.SkeletonAsset;
@@ -100,7 +100,7 @@ namespace EngineNS.Editor.Forms
                 CreateBoneLineMesh(child);
             }
         }
-        void ShowBoneLine(ILimb limb, TtMeshSpaceRuntimePose runtimePose, UWorld.UVisParameter rp)
+        void ShowBoneLine(ILimb limb, TtMeshSpaceRuntimePose runtimePose, TtWorld.UVisParameter rp)
         {
             var startIndex = limb.Index.Value;
             var startTransform = runtimePose.Transforms[startIndex];
@@ -122,7 +122,7 @@ namespace EngineNS.Editor.Forms
                 ShowBoneLine(child, runtimePose, rp);
             }
         }
-        public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
         {
             var runtimePose = TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(CurrentPose);
             foreach(var bone in SkeletonAsset.Skeleton.Limbs)

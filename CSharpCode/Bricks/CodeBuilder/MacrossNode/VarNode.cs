@@ -97,6 +97,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             Name = "self";
             OutPin.MultiLinks = true;
+            OutPin.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
+            OutPin.LinkDesc.SetColor(MacrossStyles.Instance.SelfLinkColor);
+            OutPin.LinkDesc.CanLinks.Add("Value");
             AddPinOut(OutPin);
         }
 

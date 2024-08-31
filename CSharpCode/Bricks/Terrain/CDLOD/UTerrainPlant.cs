@@ -173,7 +173,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 type.PushInstance(inst, capacity);
             }
         }
-        public void OnGatherVisibleMeshes(GamePlay.UWorld.UVisParameter rp)
+        public void OnGatherVisibleMeshes(GamePlay.TtWorld.UVisParameter rp)
         {
             foreach (var i in PlantTypes.Values)
             {

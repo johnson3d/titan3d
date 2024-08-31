@@ -272,11 +272,11 @@ namespace EngineNS.Graphics.Pipeline
         {
 
         }
-        public virtual void BeginTickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
+        public virtual void BeginTickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
         {
 
         }
-        public virtual void EndTickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
+        public virtual void EndTickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
         {
 
         }
@@ -284,7 +284,7 @@ namespace EngineNS.Graphics.Pipeline
         {
 
         }
-        public virtual void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
+        public virtual void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
         {
 
         }

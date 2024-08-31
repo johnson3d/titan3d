@@ -66,13 +66,13 @@ namespace EngineNS.GamePlay.Scene
                 PGAssetInitTask = PGAsset.Initialize();
                 //mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType, new USceneData()) as IO.IAsset;
                 mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IO.IAsset;
-                var world = new UWorld(null);
+                var world = new TtWorld(null);
                 await world.InitWorld();
                 var task = (mAsset as TtScene).InitializeNode(world, new TtSceneData(), EBoundVolumeType.Box, typeof(UPlacement));
                 PGAsset.Target = mAsset;
             }
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data == null)
             {
@@ -120,7 +120,7 @@ namespace EngineNS.GamePlay.Scene
                 SceneData.RPolicyName = value;
             }
         }
-        public UWorld World;
+        public TtWorld World;
         #region Allocator
         int PrevAllocId = 0;
         private TtNode[] ManagedNodes = new TtNode[UInt16.MaxValue];
@@ -187,16 +187,16 @@ namespace EngineNS.GamePlay.Scene
                 node.SceneId = UInt32.MaxValue;
             }
         }
-        public async Thread.Async.TtTask<TtSceneActorNode> NewNode(GamePlay.UWorld world, string nodeType, TtNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
+        public async Thread.Async.TtTask<TtSceneActorNode> NewNode(GamePlay.TtWorld world, string nodeType, TtNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
         {
             var ntype = Rtti.UTypeDesc.TypeOf(nodeType);
             return await NewNode(world, ntype.SystemType, data, bvType, placementType, false);
         }
-        public async Thread.Async.TtTask<TtSceneActorNode> NewNodeSimple(GamePlay.UWorld world, Type nodeType, TtNodeData data, bool isSceneManaged = false)
+        public async Thread.Async.TtTask<TtSceneActorNode> NewNodeSimple(GamePlay.TtWorld world, Type nodeType, TtNodeData data, bool isSceneManaged = false)
         {
             return await NewNode(world, nodeType, data, EBoundVolumeType.Box, typeof(GamePlay.UPlacement), isSceneManaged);
         }
-        public async Thread.Async.TtTask<TtSceneActorNode> NewNode(GamePlay.UWorld world, Type nodeType, TtNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
+        public async Thread.Async.TtTask<TtSceneActorNode> NewNode(GamePlay.TtWorld world, Type nodeType, TtNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
         {
             var node = Rtti.UTypeDescManager.CreateInstance(nodeType) as TtSceneActorNode;
             if (node != null)
@@ -242,7 +242,7 @@ namespace EngineNS.GamePlay.Scene
             xndHolder.SaveXnd(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
         }
-        internal static async System.Threading.Tasks.Task<TtScene> LoadScene(GamePlay.UWorld world, RName name)
+        internal static async System.Threading.Tasks.Task<TtScene> LoadScene(GamePlay.TtWorld world, RName name)
         {
             using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
             {
@@ -323,7 +323,7 @@ namespace EngineNS.GamePlay.Scene
         #endregion
 
         UMemberTickables mMemberTickables = new UMemberTickables();
-        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             mMemberTickables.TickLogic(this, TtEngine.Instance.ElapseTickCountMS);
             return true;
@@ -365,7 +365,7 @@ namespace EngineNS.GamePlay.Scene
         {
             return true;
         }
-        public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
         {
             FHostNotify notify = new FHostNotify();
             notify.Info = "OnGatherVisibleMeshes";
@@ -375,7 +375,7 @@ namespace EngineNS.GamePlay.Scene
         }
         [Category("Option")]
         public bool IsGatherVisibleByManagedNodes { get; set; } = false;
-        public override bool TreeGatherVisibleMeshes(UWorld.UVisParameter rp)
+        public override bool TreeGatherVisibleMeshes(TtWorld.UVisParameter rp)
         {
             if (IsGatherVisibleByManagedNodes == false)
                 return true;
@@ -392,7 +392,7 @@ namespace EngineNS.GamePlay.Scene
                     TtEngine.Instance.EventPoster.ParrallelFor(numTask, static (int index, object arg1, object arg2, Thread.Async.TtAsyncTaskStateBase state) =>
                     {
                         var node = arg1 as TtScene;
-                        var rp = arg2 as UWorld.UVisParameter;
+                        var rp = arg2 as TtWorld.UVisParameter;
                         int stride = node.Children.Count / (int)state.UserArguments.NumOfParrallelFor + 1;
                         var start = index * stride;
                         for (int n = 0; n < stride; n++)
@@ -462,7 +462,7 @@ namespace EngineNS.GamePlay.Scene
             Scenes.Clear();
         }
         public Dictionary<RName, WeakReference<TtScene>> Scenes { get; } = new Dictionary<RName, WeakReference<TtScene>>();
-        public async System.Threading.Tasks.Task<TtScene> GetScene(GamePlay.UWorld world, RName name)
+        public async System.Threading.Tasks.Task<TtScene> GetScene(GamePlay.TtWorld world, RName name)
         {
             //return await UScene.LoadScene(world, name);
             System.GC.Collect();
@@ -500,7 +500,7 @@ namespace EngineNS.GamePlay.Scene
             Scenes.Add(name, new WeakReference<TtScene>(scene));
             return scene;
         }
-        public async System.Threading.Tasks.Task<TtScene> CreateScene(GamePlay.UWorld world, RName name)
+        public async System.Threading.Tasks.Task<TtScene> CreateScene(GamePlay.TtWorld world, RName name)
         {
             System.GC.Collect();
             TtScene scene;

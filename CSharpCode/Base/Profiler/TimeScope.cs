@@ -6,8 +6,6 @@ using System.ComponentModel;
 using EngineNS.IO;
 using EngineNS.Rtti;
 using EngineNS.Bricks.Network.RPC;
-using static EngineNS.EGui.UIProxy.SingleInputDialog;
-using EngineNS.Animation.Macross.BlendTree;
 
 namespace EngineNS.Profiler
 {
@@ -322,7 +320,7 @@ namespace EngineNS.Profiler
     }
 
     [URpcClassAttribute(RunTarget = ERunTarget.None, Executer = EExecuter.Profiler, CallerInClass = true)]
-    public partial class URpcProfiler : IRpcHost
+    public partial class TtRpcProfiler : IRpcHost
     {
         static URpcClass smRpcClass = null;
         public URpcClass GetRpcClass()
@@ -359,7 +357,7 @@ namespace EngineNS.Profiler
         }
         RpcProfilerThreads mRpcProfilerThreads = new RpcProfilerThreads();
         [URpcMethod(Index = 0)]
-        public EngineNS.Profiler.URpcProfiler.RpcProfilerThreads GetProfilerThreads(sbyte arg, UCallContext context)
+        public EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads GetProfilerThreads(sbyte arg, UCallContext context)
         {
             mRpcProfilerThreads.ThreadNames.Clear();
             return mRpcProfilerThreads;
@@ -417,7 +415,7 @@ namespace EngineNS.Profiler
         }        
         RpcProfilerData mRpcProfilerData = new RpcProfilerData();
         [URpcMethod(Index = 1)]
-        public EngineNS.Profiler.URpcProfiler.RpcProfilerData GetProfilerData(string name, UCallContext context)
+        public EngineNS.Profiler.TtRpcProfiler.RpcProfilerData GetProfilerData(string name, UCallContext context)
         {
             foreach (var i in Profiler.TimeScopeManager.AllThreadInstance)
             {
@@ -438,7 +436,7 @@ namespace EngineNS.Profiler
             public string ScopeName { get; set; }
         }
         [URpcMethod(Index = 2)]
-        public void ResetMaxTime(EngineNS.Profiler.URpcProfiler.ResetMaxTimeArg arg, UCallContext context)
+        public void ResetMaxTime(EngineNS.Profiler.TtRpcProfiler.ResetMaxTimeArg arg, UCallContext context)
         {
             foreach (var i in Profiler.TimeScopeManager.AllThreadInstance)
             {
@@ -483,9 +481,9 @@ namespace EngineNS
 
 namespace EngineNS.Profiler
 {
-	public partial class URpcProfiler_RpcCaller
+	public partial class TtRpcProfiler_RpcCaller
 	{
-		public static async System.Threading.Tasks.Task<EngineNS.Profiler.URpcProfiler.RpcProfilerThreads> GetProfilerThreads(sbyte arg, uint Timeout = uint.MaxValue, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
+		public static async System.Threading.Tasks.Task<EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads> GetProfilerThreads(sbyte arg, uint Timeout = uint.MaxValue, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
 		{
 			if (ExeIndex == UInt16.MaxValue)
 			{
@@ -495,7 +493,7 @@ namespace EngineNS.Profiler
 			{
 				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
-			var retContext = UReturnAwaiter<EngineNS.Profiler.URpcProfiler.RpcProfilerThreads>.CreateInstance(Timeout);
+			var retContext = UReturnAwaiter<EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads>.CreateInstance(Timeout);
 			if (NetConnect != null)
 			{
 				retContext.Context.Index = ExeIndex;
@@ -518,9 +516,9 @@ namespace EngineNS.Profiler
 				pkg.CoreWriter.SurePkgHeader();
 				NetConnect?.Send(in pkg);
 			}
-			return await URpcAwaiter.AwaitReturn<EngineNS.Profiler.URpcProfiler.RpcProfilerThreads>(retContext);
+			return await URpcAwaiter.AwaitReturn<EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads>(retContext);
 		}
-		public static async System.Threading.Tasks.Task<EngineNS.Profiler.URpcProfiler.RpcProfilerData> GetProfilerData(string name, uint Timeout = uint.MaxValue, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
+		public static async System.Threading.Tasks.Task<EngineNS.Profiler.TtRpcProfiler.RpcProfilerData> GetProfilerData(string name, uint Timeout = uint.MaxValue, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
 		{
 			if (ExeIndex == UInt16.MaxValue)
 			{
@@ -530,7 +528,7 @@ namespace EngineNS.Profiler
 			{
 				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
-			var retContext = UReturnAwaiter<EngineNS.Profiler.URpcProfiler.RpcProfilerData>.CreateInstance(Timeout);
+			var retContext = UReturnAwaiter<EngineNS.Profiler.TtRpcProfiler.RpcProfilerData>.CreateInstance(Timeout);
 			if (NetConnect != null)
 			{
 				retContext.Context.Index = ExeIndex;
@@ -553,9 +551,9 @@ namespace EngineNS.Profiler
 				pkg.CoreWriter.SurePkgHeader();
 				NetConnect?.Send(in pkg);
 			}
-			return await URpcAwaiter.AwaitReturn<EngineNS.Profiler.URpcProfiler.RpcProfilerData>(retContext);
+			return await URpcAwaiter.AwaitReturn<EngineNS.Profiler.TtRpcProfiler.RpcProfilerData>(retContext);
 		}
-		public static void ResetMaxTime(EngineNS.Profiler.URpcProfiler.ResetMaxTimeArg arg, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
+		public static void ResetMaxTime(EngineNS.Profiler.TtRpcProfiler.ResetMaxTimeArg arg, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
 		{
 			if (ExeIndex == UInt16.MaxValue)
 			{
@@ -589,7 +587,7 @@ namespace EngineNS.Profiler
 
 namespace EngineNS.Profiler
 {
-	partial class URpcProfiler
+	partial class TtRpcProfiler
 	{
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_GetProfilerThreads = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
 		{
@@ -597,7 +595,7 @@ namespace EngineNS.Profiler
 			reader.Read(out arg);
 			UReturnContext retContext;
 			reader.Read(out retContext);
-			var ret = ((EngineNS.Profiler.URpcProfiler)host).GetProfilerThreads(arg, context);
+			var ret = ((EngineNS.Profiler.TtRpcProfiler)host).GetProfilerThreads(arg, context);
 			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
@@ -616,7 +614,7 @@ namespace EngineNS.Profiler
 			reader.Read(out name);
 			UReturnContext retContext;
 			reader.Read(out retContext);
-			var ret = ((EngineNS.Profiler.URpcProfiler)host).GetProfilerData(name, context);
+			var ret = ((EngineNS.Profiler.TtRpcProfiler)host).GetProfilerData(name, context);
 			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
 			{
 				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
@@ -631,9 +629,9 @@ namespace EngineNS.Profiler
 		};
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_ResetMaxTime = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
 		{
-			EngineNS.Profiler.URpcProfiler.ResetMaxTimeArg arg;
+			EngineNS.Profiler.TtRpcProfiler.ResetMaxTimeArg arg;
 			reader.Read(out arg);
-			((EngineNS.Profiler.URpcProfiler)host).ResetMaxTime(arg, context);
+			((EngineNS.Profiler.TtRpcProfiler)host).ResetMaxTime(arg, context);
 		};
 	}
 }

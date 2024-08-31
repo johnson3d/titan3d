@@ -18,14 +18,17 @@ namespace ProjectCooker.Command
         public override async System.Threading.Tasks.Task ExecuteCommand(string[] args)
         {
             AssetTypes.Clear();
+            System.Console.WriteLine("Begin AssetType");
             EngineNS.Rtti.UTypeDescManager.Instance.InterateTypes((cb) =>
             {
                 if (cb.SystemType.IsSubclassOf(typeof(EngineNS.IO.IAssetMeta)))
                 {
                     var ameta = EngineNS.Rtti.UTypeDescManager.CreateInstance(cb) as EngineNS.IO.IAssetMeta;
                     AssetTypes[ameta.GetAssetTypeName()] = cb.SystemType;
+                    System.Console.WriteLine(ameta.GetAssetTypeName());
                 }
             });
+            System.Console.WriteLine("End AssetType");
             var assetTypes = GetArguments(args, Param_Types);
             if (assetTypes == null)
             {
@@ -415,7 +418,7 @@ namespace ProjectCooker.Command
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
-                var world = new EngineNS.GamePlay.UWorld(null);
+                var world = new EngineNS.GamePlay.TtWorld(null);
                 await world.InitWorld();
                 var asset = await EngineNS.TtEngine.Instance.SceneManager.GetScene(world, rn);
                 if (asset != null)
@@ -434,7 +437,7 @@ namespace ProjectCooker.Command
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
-                var world = new EngineNS.GamePlay.UWorld(null);
+                var world = new EngineNS.GamePlay.TtWorld(null);
                 await world.InitWorld();
                 var asset = await EngineNS.TtEngine.Instance.SceneManager.GetScene(world, rn);
                 if (asset != null)
@@ -455,7 +458,7 @@ namespace ProjectCooker.Command
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
-                var world = new EngineNS.GamePlay.UWorld(null);
+                var world = new EngineNS.GamePlay.TtWorld(null);
                 await world.InitWorld();
                 var asset = await EngineNS.TtEngine.Instance.PrefabManager.GetPrefab(rn);
                 if (asset != null)
@@ -474,7 +477,7 @@ namespace ProjectCooker.Command
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
-                var world = new EngineNS.GamePlay.UWorld(null);
+                var world = new EngineNS.GamePlay.TtWorld(null);
                 await world.InitWorld();
                 var asset = await EngineNS.TtEngine.Instance.PrefabManager.GetPrefab(rn);
                 if (asset != null)

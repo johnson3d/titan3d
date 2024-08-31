@@ -733,7 +733,7 @@ namespace EngineNS.Editor
         //    await TtEngine.Instance.StartPlayInEditor(TtEngine.Instance.GfxDevice.SlateApplication, assetName);
         //}
         #region TestCode
-        public static async System.Threading.Tasks.Task TestCreateScene(Graphics.Pipeline.TtViewportSlate vpSlate,GamePlay.UWorld world, GamePlay.Scene.TtNode root, bool hideTerrain = false)
+        public static async System.Threading.Tasks.Task TestCreateScene(Graphics.Pipeline.TtViewportSlate vpSlate,GamePlay.TtWorld world, GamePlay.Scene.TtNode root, bool hideTerrain = false)
         {
             var materials = new Graphics.Pipeline.Shader.TtMaterialInstance[2];
             materials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ddd.uminst"));
@@ -919,7 +919,7 @@ namespace EngineNS.Editor
 
         }
 
-        public static async System.Threading.Tasks.Task TestCreateCharacter(GamePlay.UWorld world, GamePlay.Scene.TtNode root, bool hideTerrain = false)
+        public static async System.Threading.Tasks.Task TestCreateCharacter(GamePlay.TtWorld world, GamePlay.Scene.TtNode root, bool hideTerrain = false)
         {
             var characterController = new GamePlay.Controller.UCharacterController();
             var player = new GamePlay.Player.TtPlayer();

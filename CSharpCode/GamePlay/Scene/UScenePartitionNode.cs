@@ -41,7 +41,7 @@ namespace EngineNS.GamePlay.Scene
         public DVector3 EyeCenter;
         public Vector3 EyeLocalCenter;
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             return await base.InitializeNode(world, data, bvType, placementType);
         }
@@ -130,7 +130,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        public override bool OnTickLogic(UWorld world, TtRenderPolicy policy)
+        public override bool OnTickLogic(TtWorld world, TtRenderPolicy policy)
         {
             EyeCenter = policy.DefaultCamera.mCoreObject.GetPosition();
             EyeLocalCenter = policy.DefaultCamera.mCoreObject.GetLocalPosition();
@@ -144,7 +144,7 @@ namespace EngineNS.GamePlay.Scene
             return base.OnTickLogic(world, policy);
         }
 
-        public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
         {
             foreach (var i in ActiveLevels)
             {

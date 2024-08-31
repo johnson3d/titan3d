@@ -9,7 +9,7 @@ namespace EngineNS.Graphics.Pipeline
     {
         public TtViewportSlate()
         {
-            World = new GamePlay.UWorld(this);
+            World = new GamePlay.TtWorld(this);
             TtEngine.Instance.ViewportSlateManager.AddViewport(this);
         }
         ~TtViewportSlate()
@@ -22,9 +22,9 @@ namespace EngineNS.Graphics.Pipeline
         {
             CoreSDK.DisposeObject(ref mWorld);
         }
-        GamePlay.UWorld mWorld;
+        GamePlay.TtWorld mWorld;
         [Rtti.Meta()]
-        public GamePlay.UWorld World { get => mWorld; protected set => mWorld = value; }
+        public GamePlay.TtWorld World { get => mWorld; protected set => mWorld = value; }
         public void SetCameraOffset(in DVector3 offset)
         {
             World.CameraOffset = offset;
@@ -552,8 +552,8 @@ namespace EngineNS.Graphics.Pipeline
     public partial class TtOffscreenRenderer
     {
         public Graphics.Pipeline.TtRenderPolicy RenderPolicy { get; set; }
-        public GamePlay.UWorld World { get; set; }
-        public GamePlay.UWorld.UVisParameter VisParameter = new GamePlay.UWorld.UVisParameter();
+        public GamePlay.TtWorld World { get; set; }
+        public GamePlay.TtWorld.UVisParameter VisParameter = new GamePlay.TtWorld.UVisParameter();
         public void SetCameraOffset(in DVector3 offset)
         {
             World.CameraOffset = offset;
@@ -564,7 +564,7 @@ namespace EngineNS.Graphics.Pipeline
             RenderPolicy = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(policyName).CreateRenderPolicy(null);
             await RenderPolicy.Initialize(null);
 
-            World = new GamePlay.UWorld(null);
+            World = new GamePlay.TtWorld(null);
             await this.World.InitWorld();
             World.DirectionLight.Direction = new Vector3(0, 0, 1);
             SetCameraOffset(in DVector3.Zero);

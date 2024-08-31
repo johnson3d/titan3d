@@ -148,7 +148,7 @@ namespace EngineNS.GamePlay.Scene
                 TypeSlt.SelectedType = type;
 
                 PGAssetInitTask = PGAsset.Initialize();
-                var world = new UWorld(null);
+                var world = new TtWorld(null);
                 await world.InitWorld();
                 PGAsset.Target = mAsset;
 
@@ -191,7 +191,7 @@ namespace EngineNS.GamePlay.Scene
 
             xndHolder.SaveXnd(name.Address);
         }
-        internal static async System.Threading.Tasks.Task<TtPrefab> LoadPrefab(GamePlay.UWorld world, RName name)
+        internal static async System.Threading.Tasks.Task<TtPrefab> LoadPrefab(GamePlay.TtWorld world, RName name)
         {
             using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
             {
@@ -245,7 +245,7 @@ namespace EngineNS.GamePlay.Scene
                 return prefab;
             }
         }
-        internal static async System.Threading.Tasks.Task ReLoadPrefab(GamePlay.UWorld world, TtPrefab prefab, RName name)
+        internal static async System.Threading.Tasks.Task ReLoadPrefab(GamePlay.TtWorld world, TtPrefab prefab, RName name)
         {
             using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
             {
@@ -321,7 +321,7 @@ namespace EngineNS.GamePlay.Scene
         }
         #endregion
 
-        private static async Thread.Async.TtTask<TtNode> ConcreateNode(UWorld world, TtNode tarNode, TtNode node)
+        private static async Thread.Async.TtTask<TtNode> ConcreateNode(TtWorld world, TtNode tarNode, TtNode node)
         {
             TtNode result = tarNode;
             if (result == null)
@@ -348,7 +348,7 @@ namespace EngineNS.GamePlay.Scene
             return result;
         }
 
-        public async Thread.Async.TtTask<TtNode> ConcreatePrefab(UWorld world, TtNode tarNode)
+        public async Thread.Async.TtTask<TtNode> ConcreatePrefab(TtWorld world, TtNode tarNode)
         {
             return await ConcreateNode(world, tarNode, Root);
         }
@@ -376,11 +376,11 @@ namespace EngineNS.GamePlay.Scene
         }
         public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine host)
         {
-            PrefabWorld = new UWorld(null);
+            PrefabWorld = new TtWorld(null);
             return await PrefabWorld.InitWorld();
         }
         public Dictionary<RName, TtPrefab> Prefabs { get; } = new Dictionary<RName, TtPrefab>();
-        public GamePlay.UWorld PrefabWorld;
+        public GamePlay.TtWorld PrefabWorld;
         public async System.Threading.Tasks.Task<TtPrefab> GetPrefab(RName name)
         {
             TtPrefab scene;

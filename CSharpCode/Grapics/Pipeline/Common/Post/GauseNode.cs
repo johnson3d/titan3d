@@ -121,7 +121,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             set => mGaussStruct.BlurSigma = value;
         }
         public NxRHI.UCbView CBShadingEnv;
-        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             base.TickLogic(world, policy, bClear);
             if (CBShadingEnv != null)
@@ -280,7 +280,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             set => mGaussStruct.BlurSigma = value;
         }
         public NxRHI.UCbView CBShadingEnv;
-        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             base.TickLogic(world, policy, bClear);
             if (CBShadingEnv != null)

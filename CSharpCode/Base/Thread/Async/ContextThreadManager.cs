@@ -11,6 +11,7 @@ namespace EngineNS.Thread.Async
     public enum EAsyncTarget
     {
         AsyncIO,
+        AsyncIOAfterEmpty,//特殊的，当ThreadAsync的所有任务清空后执行
         Physics,
         Logic,
         Render,
@@ -25,8 +26,7 @@ namespace EngineNS.Thread.Async
     {
         Normal,
         Semaphore,
-        JobSystem,
-        AsyncIOEmpty,
+        AsyncIOAfterEmpty,//特殊的，当ThreadAsync的所有任务清空后执行
         ParallelTasks,
     }
     public enum EAsyncTaskState
@@ -241,8 +241,33 @@ namespace EngineNS.Thread.Async
             return false;
         }
 
-        internal Stack<TtAsyncTaskStateBase> TPoolEvents = new Stack<TtAsyncTaskStateBase>();
-        internal System.Threading.AutoResetEvent mTPoolTrigger = new System.Threading.AutoResetEvent(false);
+        private Stack<TtAsyncTaskStateBase> mTPoolEvents = new Stack<TtAsyncTaskStateBase>();
+        internal System.Threading.ManualResetEvent mTPoolTrigger = new System.Threading.ManualResetEvent(false);
+        internal void PushPoolEvent(TtAsyncTaskStateBase ev)
+        {
+            lock (mTPoolEvents)
+            {
+                mTPoolEvents.Push(ev);
+                mTPoolTrigger.Set();
+            }
+        }
+        internal TtAsyncTaskStateBase PopPoolEvent()
+        {
+            lock (mTPoolEvents)
+            {
+                if (mTPoolEvents.Count == 0)
+                {
+                    mTPoolTrigger.Reset();
+                    return null;
+                }
+                var result = mTPoolEvents.Pop();
+                if (mTPoolEvents.Count == 0)
+                {
+                    mTPoolTrigger.Reset();
+                }
+                return result;
+            }
+        }
         internal TtThreadPool[] ContextPools;
         internal List<TtAsyncTaskStateBase> AsyncIOEmptys = new List<TtAsyncTaskStateBase>();
         public int PooledThreadNum
@@ -319,7 +344,10 @@ namespace EngineNS.Thread.Async
         {
             foreach(var i in ContextPools)
             {
-                i.StopThread(null);
+                i.StopThread(()=>
+                {
+                    this.mTPoolTrigger.Set();
+                });
             }
         }
         public TtContextThread GetContext(EAsyncTarget target)
@@ -355,11 +383,7 @@ namespace EngineNS.Thread.Async
             eh.UserArguments = userArgs;
             eh.CompletedEvent = completedEvent;
 
-            lock (TPoolEvents)
-            {
-                TPoolEvents.Push(eh);
-                mTPoolTrigger.Set();
-            }
+            this.PushPoolEvent(eh);
         }
         public void RunOn<T>(FPostEvent<T> evt, EAsyncTarget target = EAsyncTarget.AsyncIO, object userArgs = null, System.Threading.AutoResetEvent completedEvent = null)
         {
@@ -379,11 +403,7 @@ namespace EngineNS.Thread.Async
 
             if (target == EAsyncTarget.TPools)
             {
-                lock (TPoolEvents)
-                {
-                    TPoolEvents.Push(eh);
-                    mTPoolTrigger.Set();
-                }
+                this.PushPoolEvent(eh);
             }
             else
             {
@@ -434,6 +454,10 @@ namespace EngineNS.Thread.Async
                 }
             }
             eh.PostAction = evt;
+            if (target == EAsyncTarget.AsyncIOAfterEmpty)
+            {
+                eh.AsyncType = EAsyncType.AsyncIOAfterEmpty;
+            }
             return new FTaskAwaiter<T>(eh);
             //return await TaskExtensionForPost.AwaitPost(eh);
         }
@@ -453,19 +477,6 @@ namespace EngineNS.Thread.Async
             return new FTaskAwaiter<bool>(eh);
             //return TtTask<bool>.CreateInstance(new FTaskAwaiter<bool>(eh));
             //smp = null;
-        }
-        public FTaskAwaiter<bool> AwaitJobSystem(Async.IJobSystem smp)
-        {
-            var eh = TtAsyncTaskState<bool>.CreateInstance();
-            eh.AsyncType = EAsyncType.JobSystem;
-            if (smp == null)
-            {
-                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Error, $"AwaitSemaphore is null");
-                return new FTaskAwaiter<bool>(eh);
-            }
-            eh.Tag = smp;
-            smp.PostEvent = eh;
-            return new FTaskAwaiter<bool>(eh);
         }
         #endregion
 
@@ -558,14 +569,13 @@ namespace EngineNS.Thread.Async
                         PEvent.AsyncTarget.EnqueueAsync(PEvent);
                     }
                     break;
-                case EAsyncType.AsyncIOEmpty:
+                case EAsyncType.AsyncIOAfterEmpty:
                     {
-                        System.Diagnostics.Debug.Assert(PEvent.AsyncTarget == null);
-                        System.Diagnostics.Debug.Assert(PEvent.PostAction == null);
                         lock (TtEngine.Instance.ContextThreadManager.AsyncIOEmptys)
                         {
                             TtEngine.Instance.ContextThreadManager.AsyncIOEmptys.Add(PEvent);
                         }
+                        TtEngine.Instance.ThreadAsync.mEnqueueTrigger.Set();
                     }
                     break;
                 case EAsyncType.Semaphore:
@@ -582,29 +592,9 @@ namespace EngineNS.Thread.Async
                         }
                     }
                     break;
-                case EAsyncType.JobSystem:
-                    {
-                        var smp = PEvent.Tag as Async.IJobSystem;
-                        if (smp.IsFinshed())
-                        {
-                            try
-                            {
-                                continuation();
-                            }
-                            finally 
-                            {
-                                PEvent.Dispose(); 
-                            }
-                        }
-                    }
-                    break;
                 case EAsyncType.ParallelTasks:
                     {
-                        lock (TtEngine.Instance.ContextThreadManager.TPoolEvents)
-                        {
-                            TtEngine.Instance.ContextThreadManager.TPoolEvents.Push(PEvent);
-                            TtEngine.Instance.ContextThreadManager.mTPoolTrigger.Set();
-                        }
+                        TtEngine.Instance.ContextThreadManager.PushPoolEvent(PEvent);
                     }
                     break;
             }

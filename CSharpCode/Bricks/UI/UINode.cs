@@ -75,7 +75,7 @@ namespace EngineNS.UI
             public RName UIName { get; set; }
         }
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data as TtUINodeData == null)
                 data = new TtUINodeData();
@@ -122,7 +122,7 @@ namespace EngineNS.UI
                 // todo: load ui
             }
         }
-        public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
         {
             foreach (var i in mUIHost)
             {
@@ -153,7 +153,7 @@ namespace EngineNS.UI
             if(UIName != null)
                 ameta.AddReferenceAsset(UIName);
         }
-        public static async TtTask<TtUINode> AddUINode(GamePlay.UWorld world, TtNode parent, TtNodeData data, Type placementType, TtUIHost uiHost, DVector3 pos, Vector3 scale, Quaternion quat)
+        public static async TtTask<TtUINode> AddUINode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, TtUIHost uiHost, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
             var uiNode = await scene.NewNode(world, typeof(TtUINode), data, EBoundVolumeType.Box, placementType) as TtUINode;

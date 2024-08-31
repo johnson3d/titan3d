@@ -33,7 +33,7 @@ namespace EngineNS.GamePlay.Scene
             [Rtti.Meta]
             public float Radius { get; set; }
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data == null)
             {
@@ -46,7 +46,7 @@ namespace EngineNS.GamePlay.Scene
             this.IsForceGatherNode = true;
             return ret;
         }
-        public static async Thread.Async.TtTask<UPointLightNode> AddPointLightNode(UWorld world, TtNode parent, ULightNodeData data, DVector3 pos)
+        public static async Thread.Async.TtTask<UPointLightNode> AddPointLightNode(TtWorld world, TtNode parent, ULightNodeData data, DVector3 pos)
         {
             var scene = parent.GetNearestParentScene();
             var scale = new Vector3(data.Radius);
@@ -119,14 +119,14 @@ namespace EngineNS.GamePlay.Scene
                     i.GetHitProxyDrawMesh(meshes);
             }
         }
-        public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
         {
             //灯光比较特殊，无论是否debug都要加入visnode列表，否则Tiling过程得不到可见灯光集
             rp.AddVisibleNode(this);
 
             //if (TtEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug) == false)
             //    return;
-            if ((rp.CullFilters & GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug) == 0)
+            if ((rp.CullFilters & GamePlay.TtWorld.UVisParameter.EVisCullFilter.LightDebug) == 0)
                 return;
 
             if (DebugMesh != null)
@@ -166,7 +166,7 @@ namespace EngineNS.GamePlay.Scene
                 mDebugMesh.IsDrawHitproxy = false;
             }
         }
-        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             //test temp code 
             LightData.Intensity = 120 * (float)Math.Sin(TtEngine.Instance.TickCountSecond * 0.005f);

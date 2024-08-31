@@ -11,7 +11,7 @@ namespace EngineNS.GamePlay.Scene
         {
         }
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data == null)
             {
@@ -26,7 +26,7 @@ namespace EngineNS.GamePlay.Scene
         public Graphics.Pipeline.TtViewportSlate ViewportSlate;
         public Graphics.Pipeline.Shader.TtMaterialInstance mGridlineMaterial;
         public Graphics.Mesh.UMdfGridUVMesh GridUVModifier;
-        public static async Thread.Async.TtTask<UGridNode> AddGridNode(GamePlay.UWorld world, TtNode parent)
+        public static async Thread.Async.TtTask<UGridNode> AddGridNode(GamePlay.TtWorld world, TtNode parent)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var material = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/gridline.material", RName.ERNameType.Engine));
@@ -93,7 +93,7 @@ namespace EngineNS.GamePlay.Scene
         //private static RHI.FNameVarIndex ShaderIdx_UVMin = new RHI.FNameVarIndex("UVMin");
         //private static RHI.FNameVarIndex ShaderIdx_UVMax = new RHI.FNameVarIndex("UVMax");
         double WorldToUVScale = 0.0001f;
-        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             if (mGridlineMaterial == null || mGridlineMaterial.PerMaterialCBuffer == null)
                 return true;
@@ -168,7 +168,7 @@ namespace EngineNS.GamePlay.Scene
         {
             base.GetHitProxyDrawMesh(meshes);
         }
-        public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
         {
             base.OnGatherVisibleMeshes(rp);
         }

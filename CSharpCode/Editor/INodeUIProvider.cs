@@ -11,7 +11,7 @@ namespace EngineNS.Editor
         string NodeName { get; }
         bool Selected { get; set; }
         bool DrawNode(TtTreeNodeDrawer tree, int index, int NumOfChild);
-        GamePlay.UWorld GetWorld();
+        GamePlay.TtWorld GetWorld();
     }
     public class TtTreeNodeDrawer
     {

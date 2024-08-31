@@ -56,7 +56,7 @@ namespace EngineNS.Bricks.PhysicsCore
             }
             public List<TtPhyShape> PxShapes { get; set; } = new List<TtPhyShape>();
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, GamePlay.Scene.TtNodeData data, GamePlay.Scene.EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, GamePlay.Scene.TtNodeData data, GamePlay.Scene.EBoundVolumeType bvType, Type placementType)
         {
             if (data==null)
             {
@@ -285,12 +285,12 @@ namespace EngineNS.Bricks.PhysicsCore
 
             }
         }
-        public override void OnGatherVisibleMeshes(GamePlay.UWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(GamePlay.TtWorld.UVisParameter rp)
         {
             //if (TtEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug) == false)
             //    return;
 
-            if ((rp.CullFilters & GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug) == 0)
+            if ((rp.CullFilters & GamePlay.TtWorld.UVisParameter.EVisCullFilter.PhyxDebug) == 0)
                 return;
 
             rp.AddVisibleNode(this);

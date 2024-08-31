@@ -12,7 +12,7 @@ namespace EngineNS.NxPhysics
     [TtNode(NodeDataType = typeof(GamePlay.Scene.TtNodeData), DefaultNamePrefix = "NxSceneDbg")]
     public class NxSceneDebugger : GamePlay.Scene.TtSceneActorNode
     {
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
 
@@ -59,7 +59,7 @@ namespace EngineNS.NxPhysics
         public TtScene mScene;
         public NxReal mSumElapsedTime = NxReal.ByF32(0.0f);
         public NxReal mStepTime = NxReal.ByF32(0.01f);
-        public unsafe override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public unsafe override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             bool bSteped = false;
             mSumElapsedTime = mSumElapsedTime + NxReal.ByF32(world.DeltaTimeSecond);
@@ -98,7 +98,7 @@ namespace EngineNS.NxPhysics
 
             return base.OnTickLogic(world, policy);
         }
-        public override void OnGatherVisibleMeshes(GamePlay.UWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(GamePlay.TtWorld.UVisParameter rp)
         {
             foreach (var i in mScene.mRigidBodies)
             {

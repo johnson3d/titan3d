@@ -188,7 +188,7 @@ namespace EngineNS.Bricks.VXGI
             CoreSDK.DisposeObject(ref CollectVxDebuggerDrawcall);
             CollectVxDebuggerDrawcall = rc.CreateComputeDraw();
         }
-        public void ResetDebugMeshNode(GamePlay.UWorld world)
+        public void ResetDebugMeshNode(GamePlay.TtWorld world)
         {
             var node = world.Root.FindFirstChild("Debug_VoxelDebugMeshNode");
             if (node != null)
@@ -210,7 +210,7 @@ namespace EngineNS.Bricks.VXGI
 
             var task = AddDebugMeshNodeToWorld(world);
         }
-        public async System.Threading.Tasks.Task AddDebugMeshNodeToWorld(GamePlay.UWorld world)
+        public async System.Threading.Tasks.Task AddDebugMeshNodeToWorld(GamePlay.TtWorld world)
         {
             var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, world.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.UPlacement), VxDebugMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
             meshNode.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
@@ -274,7 +274,7 @@ namespace EngineNS.Bricks.VXGI
             }
         }
 
-        private unsafe void TickVxDebugger(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        private unsafe void TickVxDebugger(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             if (DebugVoxels == false)
             {

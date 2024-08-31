@@ -29,11 +29,11 @@ namespace EngineNS.Editor.Forms
         public uint DockId { get; set; }
         public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
-        Task<Profiler.URpcProfiler.RpcProfilerData> mRpcProfilerData;
-        Task<Profiler.URpcProfiler.RpcProfilerThreads> mRpcProfilerThreads;
+        Task<Profiler.TtRpcProfiler.RpcProfilerData> mRpcProfilerData;
+        Task<Profiler.TtRpcProfiler.RpcProfilerThreads> mRpcProfilerThreads;
         List<string> ProfilerThreadNames = new List<string>();
-        List<Profiler.URpcProfiler.RpcProfilerData.ScopeInfo> Scopes = new List<Profiler.URpcProfiler.RpcProfilerData.ScopeInfo>();
-        void SetTimeList(List<Profiler.URpcProfiler.RpcProfilerData.ScopeInfo> src)
+        List<Profiler.TtRpcProfiler.RpcProfilerData.ScopeInfo> Scopes = new List<Profiler.TtRpcProfiler.RpcProfilerData.ScopeInfo>();
+        void SetTimeList(List<Profiler.TtRpcProfiler.RpcProfilerData.ScopeInfo> src)
         {
             if (mSortMode != ESortMode.None)
             {
@@ -159,7 +159,7 @@ namespace EngineNS.Editor.Forms
                 {
                     if (mRpcProfilerThreads != null)
                         ProfilerThreadNames = mRpcProfilerThreads.Result.ThreadNames;
-                    mRpcProfilerThreads = Profiler.URpcProfiler_RpcCaller.GetProfilerThreads(0);
+                    mRpcProfilerThreads = Profiler.TtRpcProfiler_RpcCaller.GetProfilerThreads(0);
                 }
             }
                 
@@ -174,7 +174,8 @@ namespace EngineNS.Editor.Forms
             {
                 var cmdlst = ImGuiAPI.GetWindowDrawList();
                 var stats = TtEngine.Instance.GfxDevice.RenderSwapQueue.GetStat();
-                ImGuiAPI.Text($"CmdList = {stats.NumOfCmdlist};Drawcall = {stats.NumOfDrawcall};Primitive = {stats.NumOfPrimitive};");
+                ImGuiAPI.Text($"CmdList = {stats.NumOfCmdlist};Drawcall = {stats.NumOfDrawcall};Primitive = {stats.NumOfPrimitive}; WorkThreads = {Thread.TtThreadPool.MaxActiveThreads}");
+                Thread.TtThreadPool.ResetMaxActiveThreads();
                 EGui.UIProxy.SearchBarProxy.OnDraw(ref mFilterFocusd, cmdlst, "filter", ref mFilter, ImGuiAPI.GetWindowContentRegionWidth());
                 DockId = ImGuiAPI.GetWindowDockID();
                 if (ImGuiAPI.BeginTabBar("CPU", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
@@ -200,7 +201,7 @@ namespace EngineNS.Editor.Forms
                                     SetTimeList(mRpcProfilerData.Result.Scopes);
                                     TimeScopeTree.SetTreeNodes(mRpcProfilerData.Result.Scopes);
                                 }
-                                mRpcProfilerData = Profiler.URpcProfiler_RpcCaller.GetProfilerData(i);
+                                mRpcProfilerData = Profiler.TtRpcProfiler_RpcCaller.GetProfilerData(i);
                             }
                             if (ImGuiAPI.BeginChild("TimeScope", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                             {
@@ -352,7 +353,7 @@ namespace EngineNS.Editor.Forms
             {
                 public System.DateTime LastAccessTime;
                 public long NotCountedTime = 0;
-                public Profiler.URpcProfiler.RpcProfilerData.ScopeInfo TimeInfo;
+                public Profiler.TtRpcProfiler.RpcProfilerData.ScopeInfo TimeInfo;
                 public List<TtTimeScopeNode> Children = new List<TtTimeScopeNode>();
                 public int NumOfChildUI()
                 {
@@ -408,7 +409,7 @@ namespace EngineNS.Editor.Forms
                     }
                     return ret;
                 }
-                public GamePlay.UWorld GetWorld()
+                public GamePlay.TtWorld GetWorld()
                 {
                     return null;
                 }
@@ -429,7 +430,7 @@ namespace EngineNS.Editor.Forms
                 DrawTree(TimeScopeRootNode, 0);
             }
             private List<string> rmvNodes = new List<string>();
-            internal void SetTreeNodes(List<Profiler.URpcProfiler.RpcProfilerData.ScopeInfo> src)
+            internal void SetTreeNodes(List<Profiler.TtRpcProfiler.RpcProfilerData.ScopeInfo> src)
             {
                 var now = System.DateTime.UtcNow;
                 bool bAdd = false;
@@ -522,7 +523,7 @@ namespace EngineNS.Editor.Forms
             TimeScopeTree.OnDraw();
         }
         bool mMenuShow = false;
-        private unsafe void PopItemMenu(string watchingThread, Profiler.URpcProfiler.RpcProfilerData.ScopeInfo scope, string column)
+        private unsafe void PopItemMenu(string watchingThread, Profiler.TtRpcProfiler.RpcProfilerData.ScopeInfo scope, string column)
         {
             switch (column)
             {
@@ -545,10 +546,10 @@ namespace EngineNS.Editor.Forms
                                 mMenuShow = true;
                                 if (ImGuiAPI.MenuItem($"Reset", null, false, true))
                                 {
-                                    var arg = new Profiler.URpcProfiler.ResetMaxTimeArg();
+                                    var arg = new Profiler.TtRpcProfiler.ResetMaxTimeArg();
                                     arg.ThreadName = watchingThread;
                                     arg.ScopeName = scope.ShowName;
-                                    Profiler.URpcProfiler_RpcCaller.ResetMaxTime(arg);
+                                    Profiler.TtRpcProfiler_RpcCaller.ResetMaxTime(arg);
                                     OnDrawMenu = null;
                                 }
                                 ImGuiAPI.EndPopup();

@@ -119,7 +119,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             return GBuffers[0];
         }
 
-        public unsafe override void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             int MrtNum = OutputRT;
             if (MrtNum == 0)

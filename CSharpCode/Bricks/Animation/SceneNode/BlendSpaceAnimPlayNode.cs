@@ -44,7 +44,7 @@ namespace EngineNS.Animation.SceneNode
             }
         }
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             SetStyle(ENodeStyles.Invisible);
             if (!await base.InitializeNode(world, data, bvType, placementType))
@@ -115,7 +115,7 @@ namespace EngineNS.Animation.SceneNode
             }
         }
 
-        public static async System.Threading.Tasks.Task<TtBlendSpaceAnimPlayNode> AddBlendSpace2DAnimPlayNode(GamePlay.UWorld world, TtNode parent, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public static async System.Threading.Tasks.Task<TtBlendSpaceAnimPlayNode> AddBlendSpace2DAnimPlayNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             System.Diagnostics.Debug.Assert(parent is TtMeshNode);
             var node = new Animation.SceneNode.TtBlendSpaceAnimPlayNode();

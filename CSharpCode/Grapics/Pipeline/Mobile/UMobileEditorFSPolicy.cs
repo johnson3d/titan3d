@@ -214,7 +214,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
                     return;
             }
         }
-        public unsafe override void TickLogic(GamePlay.UWorld world, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
+        public unsafe override void TickLogic(GamePlay.TtWorld world, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
         {
             base.TickLogic(world, onRemove);
 

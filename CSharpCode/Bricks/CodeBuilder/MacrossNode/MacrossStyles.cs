@@ -19,6 +19,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public uint VarBGColor = 0x80808080;
 
         public uint FlowControlTitleColor = 0xFF299325;
+        public uint SelfLinkColor = 0xAABB008C;
+        public uint HostClassLinkColor = Color4b.FromArgb(100, 0, 100, 0).ToAbgr();
+        public uint DefaultPinColor = 0xFF00FF00;
+        public uint DebugLineColor = 0xFF0000FF;
 
         public LinkDesc NewExecPinDesc()
         {
@@ -48,7 +52,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             result.ExtPadding = 0;
             result.LineThinkness = 3;
-            result.LineColor = 0xFFFF0000;
+            result.SetColor(DefaultPinColor);
             return result;
         }
     }

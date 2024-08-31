@@ -383,7 +383,7 @@ namespace EngineNS.UI
         }
 
         protected uint mCameralOffsetSerialId = 0;
-        public void GatherVisibleMeshes(UWorld.UVisParameter param)
+        public void GatherVisibleMeshes(TtWorld.UVisParameter param)
         {
             if (IsScreenSpace)
                 return;
@@ -404,7 +404,7 @@ namespace EngineNS.UI
             }
         }
 
-        public void UpdateCameraOffset(UWorld world)
+        public void UpdateCameraOffset(TtWorld world)
         {
             if (world == null)
                 return;
@@ -420,7 +420,7 @@ namespace EngineNS.UI
             }
         }
 
-        public void OnHostNodeAbsTransformChanged(TtUINode hostNode, UWorld world)
+        public void OnHostNodeAbsTransformChanged(TtUINode hostNode, TtWorld world)
         {
             if (mDrawMesh == null)
                 return;

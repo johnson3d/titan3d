@@ -259,7 +259,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 return mScopeTick;
             }
         }
-        public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
             if (SetupDrawcall == null)
                 return;

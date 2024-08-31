@@ -238,8 +238,8 @@ namespace EngineNS.Editor
                 CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, -step, true);
             }
         }
-        GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
-        public GamePlay.UWorld.UVisParameter VisParameter
+        GamePlay.TtWorld.UVisParameter mVisParameter = new GamePlay.TtWorld.UVisParameter();
+        public GamePlay.TtWorld.UVisParameter VisParameter
         {
             get => mVisParameter;
         }

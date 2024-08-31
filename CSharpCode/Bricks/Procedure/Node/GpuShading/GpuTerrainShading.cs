@@ -113,7 +113,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             mDrawcall = rc.CreateComputeDraw();
             mDrawcall.TagObject = this;
         }
-        public unsafe override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new NxRHI.TtCmdListScope(mCmdList))
             {
@@ -209,7 +209,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             mDrawcall = rc.CreateComputeDraw();
             mDrawcall.TagObject = this;
         }
-        public unsafe override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new NxRHI.TtCmdListScope(mCmdList))
             {
@@ -325,7 +325,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             }
             mCopyDrawcall.Copy(PrevWaterTexture.GpuBuffer, water.Buffer as NxRHI.UBuffer);
         }
-        public unsafe override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new NxRHI.TtCmdListScope(mCmdList))
             {

@@ -57,6 +57,7 @@ namespace EngineNS
             Thread.TtContextThread ctx = null;
             switch (target)
             {
+                case Thread.Async.EAsyncTarget.AsyncIOAfterEmpty:
                 case Thread.Async.EAsyncTarget.AsyncIO:
                     ctx = this.ThreadAsync;
                     break;
@@ -125,6 +126,8 @@ namespace EngineNS
         }
         private void StopSystemThreads()
         {
+            EventPoster.StopPools();
+
             ThreadRender.StopThread(null);
             ThreadLogic.StopThread(null);
             ThreadAsync.StopThread(null);
@@ -134,19 +137,17 @@ namespace EngineNS
                 ThreadAsyncEditor.StopThread(null);
                 ThreadAsyncEditorSlow.StopThread(null);
             }
-
-            EventPoster.StopPools();
         }
         private void PauseSystemThreads()
         {
+            EventPoster.StopPools();
+
             ThreadRender.StopThread(null);
             ThreadLogic.StopThread(null);
             ThreadAsync.StopThread(null);
             ThreadPhysics.StopThread(null);
             if (PlayMode != EPlayMode.Game)
                 ThreadAsyncEditor.StopThread(null);
-
-            EventPoster.StopPools();
         }
         private void ResumeSystemThreads()
         {

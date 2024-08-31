@@ -20,7 +20,7 @@ namespace EngineNS.GamePlay.Character
             }
         }
         partial void CreatePxCapsuleController(ref bool result, Scene.TtScene scene, float radius, float height);
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (await base.InitializeNode(world, data, bvType, placementType) == false)
             {
@@ -29,7 +29,7 @@ namespace EngineNS.GamePlay.Character
 
             return true;
         }
-        public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
         {
             base.OnGatherVisibleMeshes(rp);
         }

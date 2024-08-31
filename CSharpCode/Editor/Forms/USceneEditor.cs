@@ -502,7 +502,7 @@ namespace EngineNS.Editor.Forms
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
         public Graphics.Pipeline.TtCpuCullingNode CpuCullNode = null;
-        public GamePlay.UWorld.UVisParameter.EVisCullFilter CullFilters 
+        public GamePlay.TtWorld.UVisParameter.EVisCullFilter CullFilters 
         { 
             get
             {
@@ -712,15 +712,15 @@ namespace EngineNS.Editor.Forms
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList);
             //ImGuiAPI.BeginGroup();
             
-            for (int i = 0; i < (int)GamePlay.UWorld.UVisParameter.EVisCullFilter.FilterTypeCount; i++)
+            for (int i = 0; i < (int)GamePlay.TtWorld.UVisParameter.EVisCullFilter.FilterTypeCount; i++)
             {
-                var type = (GamePlay.UWorld.UVisParameter.EVisCullFilter)(1 << i);
+                var type = (GamePlay.TtWorld.UVisParameter.EVisCullFilter)(1 << i);
                 ImGuiAPI.SameLine(0, -1);
                 bool checkValue = (CullFilters & type) != 0;
                 var name = type.ToString();
                 if (name == "FilterTypeCount")
                 {
-                    name = GamePlay.UWorld.UVisParameter.FilterTypeCountAs;
+                    name = GamePlay.TtWorld.UVisParameter.FilterTypeCountAs;
                 }
                 if(EGui.UIProxy.CustomButton.ToggleButton(name, in btSize, ref checkValue))
                 {

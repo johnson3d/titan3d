@@ -113,7 +113,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 }
             }
         }
-        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             foreach (var i in DownSampleNodes)
             {

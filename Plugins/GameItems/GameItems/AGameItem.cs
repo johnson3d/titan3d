@@ -75,7 +75,7 @@ namespace EngineNS.Plugins.GameItems
         }
         public override string GetAssetTypeName()
         {
-            return "Item";
+            return "GameItem";
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {

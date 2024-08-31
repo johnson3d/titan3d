@@ -83,7 +83,7 @@ namespace EngineNS.GamePlay.Scene
             this.Dispose();
         }
         public const string EditorKeyword = "UNode";
-        public virtual async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public virtual async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             NodeData = data;
 
@@ -384,7 +384,7 @@ namespace EngineNS.GamePlay.Scene
                 return GetNearestParentScene();
             }
         }
-        public UWorld GetWorld()
+        public TtWorld GetWorld()
         {
             var scene = ParentScene;
             if (scene != null)
@@ -392,7 +392,7 @@ namespace EngineNS.GamePlay.Scene
             return null;
         }
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.Unserializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
-        public UWorld HostWorld { get => GetWorld(); }
+        public TtWorld HostWorld { get => GetWorld(); }
         public List<TtNode> Children { get; } = new List<TtNode>();
         TtNodeData mNodeData = null;
         TtNodeData mTemplateNodeData = null;
@@ -505,11 +505,11 @@ namespace EngineNS.GamePlay.Scene
         {
 
         }
-        public virtual bool TreeGatherVisibleMeshes(UWorld.UVisParameter rp)
+        public virtual bool TreeGatherVisibleMeshes(TtWorld.UVisParameter rp)
         {
             return true;
         }
-        public virtual void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+        public virtual void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
         {
             rp.AddVisibleNode(this);
         }
@@ -660,7 +660,7 @@ namespace EngineNS.GamePlay.Scene
                 }   
             }
         }
-        public async System.Threading.Tasks.Task<bool> LoadChildNode(GamePlay.UWorld world, TtNode scene, EngineNS.XndNode node, bool bTryFindNode)
+        public async System.Threading.Tasks.Task<bool> LoadChildNode(GamePlay.TtWorld world, TtNode scene, EngineNS.XndNode node, bool bTryFindNode)
         {
             var isNoAABB = this.HasStyle(ENodeStyles.DiscardAABB);
             this.SetStyle(ENodeStyles.DiscardAABB);
@@ -930,7 +930,7 @@ namespace EngineNS.GamePlay.Scene
         #region GamePlay
         public class TtNodeTickParameters
         {
-            public GamePlay.UWorld World;
+            public GamePlay.TtWorld World;
             public Graphics.Pipeline.TtRenderPolicy Policy;
             public bool IsTickChildren = true;
         }
@@ -950,13 +950,13 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        public virtual bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public virtual bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             return true;
         }
         #endregion
 
-        public async System.Threading.Tasks.Task<TtNode> CloneNode(UWorld world)
+        public async System.Threading.Tasks.Task<TtNode> CloneNode(TtWorld world)
         {
             var data = Rtti.UTypeDescManager.CreateInstance(this.NodeData.GetType()) as TtNodeData;
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeOf(this.NodeData.GetType()));
@@ -1000,7 +1000,7 @@ namespace EngineNS.GamePlay.Scene
             get { return Guid.Empty; }
         }
         protected uint CameralOffsetSerialId = 0;
-        public void UpdateCameralOffset(UWorld world)
+        public void UpdateCameralOffset(TtWorld world)
         {
             if (world.CameralOffsetSerialId != CameralOffsetSerialId)
             {
@@ -1008,7 +1008,7 @@ namespace EngineNS.GamePlay.Scene
                 OnCameralOffsetChanged(world);
             }
         }
-        protected virtual void OnCameralOffsetChanged(UWorld world)
+        protected virtual void OnCameralOffsetChanged(TtWorld world)
         {
 
         }
@@ -1042,7 +1042,7 @@ namespace EngineNS.GamePlay.Scene
         {
             return false;
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)            
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)            
         {
             return await base.InitializeNode(world, data, bvType, placementType);
         }

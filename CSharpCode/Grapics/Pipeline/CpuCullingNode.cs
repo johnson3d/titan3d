@@ -41,8 +41,8 @@ namespace EngineNS.Graphics.Pipeline
                 mVisParameter.CullCamera = camera;
             }
         }
-        GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
-        public GamePlay.UWorld.UVisParameter VisParameter
+        GamePlay.TtWorld.UVisParameter mVisParameter = new GamePlay.TtWorld.UVisParameter();
+        public GamePlay.TtWorld.UVisParameter VisParameter
         {
             get => mVisParameter;
         }
@@ -57,7 +57,7 @@ namespace EngineNS.Graphics.Pipeline
                 return mScopeTick;
             }
         } 
-        public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
             //if (GetInput(0).FindInLinker() == null)
             //{

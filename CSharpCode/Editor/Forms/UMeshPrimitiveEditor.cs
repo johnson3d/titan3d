@@ -59,7 +59,7 @@ namespace EngineNS.Editor.Forms
         public EngineNS.GamePlay.Scene.TtMeshNode TangentNode;
         public Graphics.Mesh.TtMesh TangentMesh;
 
-        public async System.Threading.Tasks.Task Initialize(List<Graphics.Mesh.TtMeshPrimitives> MeshPrimitivesList, GamePlay.UWorld world)
+        public async System.Threading.Tasks.Task Initialize(List<Graphics.Mesh.TtMeshPrimitives> MeshPrimitivesList, GamePlay.TtWorld world)
         {
             List<Vector3> PositionList = new List<Vector3>();
             List<Vector3> NormalList = new List<Vector3>();
@@ -346,7 +346,7 @@ namespace EngineNS.Editor.Forms
                 }
             }
         }
-        public async System.Threading.Tasks.Task CreateSdfDebugMesh(GamePlay.UWorld world, DistanceField.TtSdfAsset sdfAsset)
+        public async System.Threading.Tasks.Task CreateSdfDebugMesh(GamePlay.TtWorld world, DistanceField.TtSdfAsset sdfAsset)
         {
             if (sdfAsset == null || sdfAsset.Mips.Count < 0)
                 return;

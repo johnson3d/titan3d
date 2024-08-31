@@ -56,7 +56,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
             }
             public TtMeshNode AnimatedMeshNode = null;
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             SetStyle(ENodeStyles.Invisible);
             if (!await base.InitializeNode(world, data, bvType, placementType))

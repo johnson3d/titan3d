@@ -11,7 +11,7 @@ namespace EngineNS.Graphics.Pipeline
             mCoreObject = ICamera.CreateInstance();
         }
         public string Name { get; set; }
-        public GamePlay.UWorld.UVisParameter VisParameter;
+        public GamePlay.TtWorld.UVisParameter VisParameter;
         public TtGraphicsBuffers.TtTargetViewIdentifier TargetViewIdentifier = new TtGraphicsBuffers.TtTargetViewIdentifier();
         NxRHI.UCbView mPerCameraCBuffer;
         public NxRHI.UCbView PerCameraCBuffer
@@ -89,7 +89,7 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         
-        public unsafe CONTAIN_TYPE WhichContainTypeFast(GamePlay.UWorld world, in EngineNS.DBoundingBox dAabb, bool testInner)
+        public unsafe CONTAIN_TYPE WhichContainTypeFast(GamePlay.TtWorld world, in EngineNS.DBoundingBox dAabb, bool testInner)
         {
             using (new Profiler.TimeScopeHelper(ScopeWhichContainTypeFast))
             {

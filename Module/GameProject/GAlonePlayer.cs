@@ -19,7 +19,7 @@ namespace GameProject
         {
 
         }
-        public override async EngineNS.Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async EngineNS.Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (await base.InitializeNode(world, data, bvType, placementType) == false)
                 return false;

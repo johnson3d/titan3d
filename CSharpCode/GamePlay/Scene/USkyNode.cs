@@ -52,7 +52,7 @@ namespace EngineNS.GamePlay.Scene
         }
 
         public Graphics.Mesh.TtMesh SunMesh = new Graphics.Mesh.TtMesh();
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var skyData = data as TtSkyNodeData;
             if (skyData == null)
@@ -77,7 +77,7 @@ namespace EngineNS.GamePlay.Scene
             SunMesh.UserShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Shader.CommanShading.UDrawViewportShading>();
             return true;
         }
-        public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
         {
             base.OnGatherVisibleMeshes(rp);
 
@@ -86,7 +86,7 @@ namespace EngineNS.GamePlay.Scene
                 //rp.VisibleMeshes.Add(SunMesh);
             }
         }
-        public override bool OnTickLogic(UWorld world, TtRenderPolicy policy)
+        public override bool OnTickLogic(TtWorld world, TtRenderPolicy policy)
         {
             SunMesh.IsUnlit = true;
             this.Mesh.IsUnlit = true;

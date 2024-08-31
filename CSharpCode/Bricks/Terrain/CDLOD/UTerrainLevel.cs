@@ -758,21 +758,21 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 i.SetAcceptShadow(value);
             }
         }
-        public void OnAbsTransformChanged(TtTerrainNode node, GamePlay.UWorld world)
+        public void OnAbsTransformChanged(TtTerrainNode node, GamePlay.TtWorld world)
         {
             foreach (var i in TiledPatch)
             {
                 i.OnAbsTransformChanged(node, world);
             }
         }
-        public void UpdateCameraOffset(GamePlay.UWorld world)
+        public void UpdateCameraOffset(GamePlay.TtWorld world)
         {
             foreach (var i in TiledPatch)
             {
                 i.UpdateCameraOffset(world);
             }
         }
-        public unsafe void OnGatherVisibleMeshes(GamePlay.UWorld.UVisParameter rp)
+        public unsafe void OnGatherVisibleMeshes(GamePlay.TtWorld.UVisParameter rp)
         {
             foreach (var i in TiledPatch)
             {
@@ -781,7 +781,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 i.OnGatherVisibleMeshes(rp);
             }
         }
-        public void Tick(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public void Tick(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             foreach (var i in TiledPatch)
             {
@@ -808,7 +808,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
         }
 
-        public void FrustumCull(GamePlay.UWorld.UVisParameter rp, List<TtPatch> patches)
+        public void FrustumCull(GamePlay.TtWorld.UVisParameter rp, List<TtPatch> patches)
         {
             foreach (var i in TiledPatch)
             {

@@ -59,7 +59,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             //AddOutput(ColorPinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddOutput(DepthPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         }
-        public GamePlay.UWorld.UVisParameter mVisParameter = new GamePlay.UWorld.UVisParameter();
+        public GamePlay.TtWorld.UVisParameter mVisParameter = new GamePlay.TtWorld.UVisParameter();
         // public CCamera ShadowCamera;
         private UCamera[] mShadowCameraArray;
         public UCamera ViewerCamera;
@@ -340,13 +340,13 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 return mScopeCull;
             }
         }
-        public override unsafe void TickLogic(GamePlay.UWorld world, TtRenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             foreach (var i in CSMCullingNode)
             {
                 if (i != null)
                 {
-                    i.VisParameter.CullType = GamePlay.UWorld.UVisParameter.EVisCull.Shadow;
+                    i.VisParameter.CullType = GamePlay.TtWorld.UVisParameter.EVisCull.Shadow;
                     i.VisParameter.World = world;
                     i.VisParameter.IsGatherVisibleNodes = false;
                 }
@@ -382,7 +382,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                         CullCamera.PerspectiveFovLH(ViewerCamera.Fov, ViewerCamera.Width, ViewerCamera.Height, ViewerCamera.ZNear, mSumDistanceFarArray[CsmIdx]);
                         CullCamera.LookAtLH(ViewerCamera.GetPosition(), ViewerCamera.GetLookAt(), in Vector3.UnitY);
                         //收集本csm阶段可投影Mesh
-                        mVisParameter.CullType = GamePlay.UWorld.UVisParameter.EVisCull.Shadow;
+                        mVisParameter.CullType = GamePlay.TtWorld.UVisParameter.EVisCull.Shadow;
                         mVisParameter.IsBuildAABB = true;
                         mVisParameter.World = world;
                         mVisParameter.CullCamera = CullCamera;

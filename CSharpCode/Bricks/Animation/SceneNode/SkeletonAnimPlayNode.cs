@@ -17,7 +17,7 @@ namespace EngineNS.Animation.SceneNode
         }
         public Animation.Player.TtSkeletonAnimationPlayer Player { get; set; }
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             SetStyle(ENodeStyles.Invisible);
             if (!await base.InitializeNode(world, data, bvType, placementType))
@@ -47,7 +47,7 @@ namespace EngineNS.Animation.SceneNode
             TtRuntimePoseUtility.CopyPose(ref mAnimatedPose, Player.OutPose);
         }
 
-        public static async Thread.Async.TtTask<TtSkeletonAnimPlayNode> AddSkeletonAnimPlayNode(GamePlay.UWorld world, TtNode parent, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public static async Thread.Async.TtTask<TtSkeletonAnimPlayNode> AddSkeletonAnimPlayNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             System.Diagnostics.Debug.Assert(parent is TtMeshNode);
             var node = new Animation.SceneNode.TtSkeletonAnimPlayNode();
@@ -62,7 +62,7 @@ namespace EngineNS.Animation.SceneNode
     {
         public Animation.Player.TtAnimStateMachinePlayer Player { get; set; }
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             SetStyle(ENodeStyles.Invisible);
             if (!await base.InitializeNode(world, data, bvType, placementType))
@@ -93,7 +93,7 @@ namespace EngineNS.Animation.SceneNode
             TtRuntimePoseUtility.CopyPose(ref mAnimatedPose, Player.OutPose);
         }
 
-        public static async System.Threading.Tasks.Task<TtAnimStateMachinePlayNode> Add(GamePlay.UWorld world, TtNode parent, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public static async System.Threading.Tasks.Task<TtAnimStateMachinePlayNode> Add(GamePlay.TtWorld world, TtNode parent, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             System.Diagnostics.Debug.Assert(parent is TtMeshNode);
             var node = new Animation.SceneNode.TtAnimStateMachinePlayNode();

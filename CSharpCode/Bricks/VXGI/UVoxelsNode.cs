@@ -371,7 +371,7 @@ namespace EngineNS.Bricks.VXGI
                 return mScopeTick;
             }
         } 
-        public override unsafe void TickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {

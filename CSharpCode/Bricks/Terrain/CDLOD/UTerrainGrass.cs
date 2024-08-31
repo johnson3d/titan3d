@@ -455,7 +455,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             else
                 UpdateGrass(mHostPatch, type);
         }
-        public void OnGatherVisibleMeshes(GamePlay.UWorld.UVisParameter rp)
+        public void OnGatherVisibleMeshes(GamePlay.TtWorld.UVisParameter rp)
         {
             if(mCurrentPatchLOD != mHostPatch.CurrentLOD)
             {

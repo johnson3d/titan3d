@@ -910,16 +910,27 @@ namespace EngineNS.Bricks.Procedure
             }
             else
             {
-                TtEngine.Instance.EventPoster.ParrallelFor(Width * Height * Depth, static (index, arg1, arg2, state) =>
+                var numTask = TtEngine.Instance.EventPoster.NumOfPool;
+                TtEngine.Instance.EventPoster.ParrallelFor(numTask, static (i, arg1, arg2, state) =>
                 {
                     var pThis = arg1 as UBufferComponent;
                     var onPerPiexel = arg2 as FOnPerPixel;
-                    int pitch = pThis.Height * pThis.Width;
-                    int z = index / pitch;
-                    int y = (index % pitch) / pThis.Width;
-                    int x = (index % pitch) % pThis.Width;
+                    int TotalNum = (int)(pThis.Width * pThis.Height * pThis.Depth);
+                    int stride = TotalNum / (int)state.UserArguments.NumOfParrallelFor + 1;
+                    var start = i * stride;
+                    for (int n = 0; n < stride; n++)
+                    {
+                        var nn = start + n;
+                        if (nn >= TotalNum)
+                            break;
 
-                    onPerPiexel(pThis, x, y, z);
+                        int pitch = pThis.Height * pThis.Width;
+                        int z = nn / pitch;
+                        int y = (nn % pitch) / pThis.Width;
+                        int x = (nn % pitch) % pThis.Width;
+
+                        onPerPiexel(pThis, x, y, z);
+                    }   
                 }, this, onPerPiexel);
 
                 //var evt = new System.Threading.AutoResetEvent(false);

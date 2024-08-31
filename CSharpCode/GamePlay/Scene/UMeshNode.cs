@@ -57,7 +57,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data as TtMeshNodeData == null)
             {
@@ -148,7 +148,7 @@ namespace EngineNS.GamePlay.Scene
                 mMesh.IsAcceptShadow = value;
             }
         }
-        public static async System.Threading.Tasks.Task<TtMeshNode> AddMeshNode(GamePlay.UWorld world, TtNode parent, TtNodeData data, Type placementType, Graphics.Mesh.TtMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
+        public static async System.Threading.Tasks.Task<TtMeshNode> AddMeshNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, Graphics.Mesh.TtMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
             var meshNode = await scene.NewNode(world, typeof(TtMeshNode), data, EBoundVolumeType.Box, placementType) as TtMeshNode;
@@ -163,7 +163,7 @@ namespace EngineNS.GamePlay.Scene
 
             return meshNode;
         }
-        public static async System.Threading.Tasks.Task<TtMeshNode> AddMeshNode(GamePlay.UWorld world, TtNode parent, TtNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
+        public static async System.Threading.Tasks.Task<TtMeshNode> AddMeshNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var meshData = data as TtMeshNodeData;
             var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
@@ -314,7 +314,7 @@ namespace EngineNS.GamePlay.Scene
                 action();
             }
         }
-        public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
         {
             UpdateCameralOffset(rp.World);
 
@@ -326,7 +326,7 @@ namespace EngineNS.GamePlay.Scene
             rp.AddVisibleMesh(mMesh);
             rp.AddVisibleNode(this);
         }
-        protected override void OnCameralOffsetChanged(UWorld world)
+        protected override void OnCameralOffsetChanged(TtWorld world)
         {
             mMesh?.UpdateCameraOffset(world);
         }
@@ -340,7 +340,7 @@ namespace EngineNS.GamePlay.Scene
         }
         static Macross.UMacrossStackFrame mLogicTickFrame = new Macross.UMacrossStackFrame();
         static Macross.UMacrossBreak mTestBreak = new Macross.UMacrossBreak("UMeshNode.OnTickLogic", false);
-        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             //using (var guard = new Macross.UMacrossStackGuard(mLogicTickFrame))
             //{

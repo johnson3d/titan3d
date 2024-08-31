@@ -459,7 +459,7 @@ namespace EngineNS.Graphics.Pipeline
                 return mPerViewportCBuffer;
             }
         }
-        public void SetViewportCBuffer(GamePlay.UWorld world, TtRenderPolicy mobilePolicy)
+        public void SetViewportCBuffer(GamePlay.TtWorld world, TtRenderPolicy mobilePolicy)
         {
             NxRHI.UCbView cBuffer = PerViewportCBuffer;
             if (cBuffer == null)

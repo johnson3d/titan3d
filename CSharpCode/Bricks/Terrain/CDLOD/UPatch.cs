@@ -283,7 +283,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 mMesh.IsAcceptShadow = value;
             }
         }
-        public void Tick(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public void Tick(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             if (TerrainMesh == null)
                 return;
@@ -297,7 +297,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             StartPosition.Z = (float)(((double)(IndexZ * patchSize)) + CameraOffset.Z);
             StartPosition.Y = (float)(Level.HeightMapMinHeight + CameraOffset.Y);
         }        
-        public void OnAbsTransformChanged(TtTerrainNode node, GamePlay.UWorld world)
+        public void OnAbsTransformChanged(TtTerrainNode node, GamePlay.TtWorld world)
         {
             ref var transform = ref node.Placement.AbsTransform;
             foreach (var i in TerrainMesh)
@@ -313,7 +313,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 i.SetWorldTransform(in transform, world, false);
             }
         }
-        public void UpdateCameraOffset(GamePlay.UWorld world)
+        public void UpdateCameraOffset(GamePlay.TtWorld world)
         {
             foreach (var i in TerrainMesh)
             {
@@ -328,7 +328,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 i.UpdateCameraOffset(world);
             }
         }
-        public void OnGatherVisibleMeshes(GamePlay.UWorld.UVisParameter rp)
+        public void OnGatherVisibleMeshes(GamePlay.TtWorld.UVisParameter rp)
         {
             if (CurrentLOD >= TerrainMesh.Length)
                 return;

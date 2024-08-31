@@ -84,6 +84,26 @@ namespace EngineNS.Bricks.NodeGraph
             Icon.Color = color;
             DisconnectIcon.Color = color;
         }
+        static public uint GetHighlight(uint color)
+        {
+            //var a = (color & 0xFF000000) >> 24;
+            var g = (color & 0x00FF0000) >> 16;
+            var b = (color & 0x0000FF00) >> 8;
+            var r = (color & 0x000000FF);
+            var delta = 1 + (255 - Math.Max(Math.Max(g, b), r)) / 255.0f;
+            return ((uint)(0xFF) << 24) |
+                   ((uint)(g * delta) << 16) |
+                   ((uint)(b * delta) << 8) |
+                   ((uint)(r * delta));
+        }
+        static public uint GetLowLight(uint color)
+        {
+            uint delta = 3;
+            return ((((color & 0xFF000000) >> 24) / delta) << 24) |
+                   ((((color & 0x00FF0000) >> 16) / delta) << 16) |
+                   ((((color & 0x0000FF00) >> 8) / delta) << 8) |
+                     ((color & 0x000000FF) / delta);
+        }
     }
     public class NodePin
     {

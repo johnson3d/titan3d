@@ -140,7 +140,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
         }
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.UWorld world, GamePlay.Scene.TtNodeData data, GamePlay.Scene.EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, GamePlay.Scene.TtNodeData data, GamePlay.Scene.EBoundVolumeType bvType, Type placementType)
         {
             if (data as TtTerrainData == null)
             {
@@ -407,7 +407,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
         }
         
-        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -465,7 +465,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 i.LevelData?.PlantManager.GetHitProxyDrawMesh(meshes);
             }
         }
-        protected override void OnCameralOffsetChanged(UWorld world)
+        protected override void OnCameralOffsetChanged(TtWorld world)
         {
             foreach (var i in ActiveLevels)
             {
@@ -474,7 +474,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 i.LevelData?.UpdateCameraOffset(world);
             }
         }
-        public override void OnGatherVisibleMeshes(GamePlay.UWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(GamePlay.TtWorld.UVisParameter rp)
         {
             UpdateCameralOffset(rp.World);
             //todo: QTree culling?
@@ -504,7 +504,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             rp.AddVisibleNode(this);
         }
         public List<TtPatch> VisiblePatches = new List<TtPatch>();
-        public void FrustumCull(GamePlay.UWorld.UVisParameter rp, List<TtPatch> patches)
+        public void FrustumCull(GamePlay.TtWorld.UVisParameter rp, List<TtPatch> patches)
         {
             patches.Clear();
             foreach (var i in ActiveLevels)

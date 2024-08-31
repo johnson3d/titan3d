@@ -53,14 +53,14 @@ namespace EngineNS.GamePlay.Scene
                 action();
             }
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
 
             world.mSuns.Add(this);
             return true;
         }
-        public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
         {
             base.OnGatherVisibleMeshes(rp);
 

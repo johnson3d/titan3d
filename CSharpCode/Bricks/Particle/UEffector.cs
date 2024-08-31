@@ -140,6 +140,7 @@ namespace EngineNS.Bricks.Particle
                 ForParameters.emitter = emitter;
                 ForParameters.This = this;
                 ForParameters.pParticles = pParticles;
+                ForParameters.aliveNum = aliveNum;
                 ForParameters.pAlives = pAlives;
                 ForParameters.elapsed = elapsed;
             }
@@ -163,17 +164,26 @@ namespace EngineNS.Bricks.Particle
                 else
                 {
                     ForParameters.effector = e;
-                    TtEngine.Instance.EventPoster.ParrallelFor((int)aliveNum, static (i, arg1, arg2, state) =>
+                    var numTask = TtEngine.Instance.EventPoster.NumOfPool;
+                    TtEngine.Instance.EventPoster.ParrallelFor((int)numTask, static (i, arg1, arg2, state) =>
                     {
                         var ForParameters = (TtForParameters)arg1;
-                        var index = ForParameters.pAlives[i];
-                        var cur = (FParticle*)&ForParameters.pParticles[index];
-                        if (cur->Life <= 0)
+                        int stride = (int)ForParameters.aliveNum / (int)state.UserArguments.NumOfParrallelFor + 1;
+                        var start = i * stride;
+                        for (int n = 0; n < stride; n++)
                         {
-                            ForParameters.emitter.OnDeadParticle(index, ref *cur);
-                            return;
+                            var nn = start + n;
+                            if (nn >= ForParameters.aliveNum)
+                                break;
+                            var index = ForParameters.pAlives[nn];
+                            var cur = (FParticle*)&ForParameters.pParticles[index];
+                            if (cur->Life <= 0)
+                            {
+                                ForParameters.emitter.OnDeadParticle(index, ref *cur);
+                                continue;
+                            }
+                            ForParameters.effector.DoEffect(ForParameters.emitter, ForParameters.elapsed, cur);
                         }
-                        ForParameters.effector.DoEffect(ForParameters.emitter, ForParameters.elapsed, cur);
                     }, ForParameters);
                     ForParameters.effector = null;
                 }
@@ -190,14 +200,23 @@ namespace EngineNS.Bricks.Particle
                 }
             }
             else
-            {   
-                TtEngine.Instance.EventPoster.ParrallelFor((int)aliveNum, static (i, arg1, arg2, state) =>
+            {
+                var numTask = TtEngine.Instance.EventPoster.NumOfPool;
+                TtEngine.Instance.EventPoster.ParrallelFor(numTask, static (i, arg1, arg2, state) =>
                 {
                     var ForParameters = (TtForParameters)arg1;
-                    var index = ForParameters.pAlives[i];
-                    var cur = (FParticle*)&ForParameters.pParticles[index];
-                    ForParameters.emitter.OnParticleTick(ForParameters.emitter, ForParameters.elapsed, ref *cur);
-                    cur->Location += cur->Velocity * ForParameters.elapsed;
+                    int stride = (int)ForParameters.aliveNum / (int)state.UserArguments.NumOfParrallelFor + 1;
+                    var start = i * stride;
+                    for (int n = 0; n < stride; n++)
+                    {
+                        var nn = start + n;
+                        if (nn >= ForParameters.aliveNum)
+                            break;
+                        var index = ForParameters.pAlives[nn];
+                        var cur = (FParticle*)&ForParameters.pParticles[index];
+                        ForParameters.emitter.OnParticleTick(ForParameters.emitter, ForParameters.elapsed, ref *cur);
+                        cur->Location += cur->Velocity * ForParameters.elapsed;
+                    }   
                 }, ForParameters);
             }
             ForParameters.Reset();
@@ -208,6 +227,7 @@ namespace EngineNS.Bricks.Particle
             public TtEffectorQueue This;
             public TtEffector effector;
             public FParticle* pParticles;
+            public uint aliveNum;
             public uint* pAlives;
             public float elapsed;
             public void Reset()

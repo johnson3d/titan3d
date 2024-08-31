@@ -40,7 +40,7 @@ namespace EngineNS.Bricks.Particle
                 return mScopeBeginTickLogic;
             }
         }
-        public override unsafe void BeginTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
+        public override unsafe void BeginTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeBeginTickLogic))
             {
@@ -60,7 +60,7 @@ namespace EngineNS.Bricks.Particle
                 return mScopeEndTickLogic;
             }
         }
-        public override unsafe void EndTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
+        public override unsafe void EndTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeEndTickLogic))
             {
@@ -75,7 +75,7 @@ namespace EngineNS.Bricks.Particle
         {
             base.FrameBuild(policy);
         }
-        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             base.TickLogic(world, policy, bClear);
         }

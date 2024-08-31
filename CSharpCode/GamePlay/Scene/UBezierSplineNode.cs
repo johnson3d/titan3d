@@ -55,7 +55,7 @@ namespace EngineNS.GamePlay.Scene
                 return mDebugPointMesh;
             }
         }
-        public override bool OnTickLogic(UWorld world, TtRenderPolicy policy)
+        public override bool OnTickLogic(TtWorld world, TtRenderPolicy policy)
         {
             //if (TtEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.UtilityDebug) == false)
             //    return true;
@@ -241,7 +241,7 @@ namespace EngineNS.GamePlay.Scene
                     i.GetHitProxyDrawMesh(meshes);
             }
         }
-        public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
         {
             if (mDebugSplineMesh == null)
                 return;
@@ -249,7 +249,7 @@ namespace EngineNS.GamePlay.Scene
             //if (TtEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.UtilityDebug) == false)
             //    return;
 
-            if ((rp.CullFilters & GamePlay.UWorld.UVisParameter.EVisCullFilter.UtilityDebug) == 0)
+            if ((rp.CullFilters & GamePlay.TtWorld.UVisParameter.EVisCullFilter.UtilityDebug) == 0)
                 return;
 
             if (DebugSplineMesh != null)

@@ -186,7 +186,7 @@ namespace EngineNS.Thread
         } 
         public virtual void Tick()
         {
-            if(TickAction!=null)
+            if (TickAction != null)
             {
                 using (new Profiler.TimeScopeHelper(ScopeTick))
                 {

@@ -36,7 +36,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         public NxRHI.UFence mFinishFence;
         public NxRHI.UCommandList mCmdList;
         public NxRHI.IBuffer ReadableTexture;
-        public override void TickLogic(UWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             using (new NxRHI.TtCmdListScope(mCmdList))
             {

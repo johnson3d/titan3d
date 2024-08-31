@@ -45,7 +45,7 @@ namespace EngineNS.Bricks.Particle
         }
         TtNebulaParticle mNebulaParticle;
         public TtNebulaParticle NebulaParticle { get=> mNebulaParticle; }
-        public override async Thread.Async.TtTask<bool> InitializeNode(UWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var ret = await base.InitializeNode(world, data, bvType, placementType);
             if (GetNodeData<TtNebulaNodeData>().NebulaParticle != null)
@@ -54,7 +54,7 @@ namespace EngineNS.Bricks.Particle
                 mNebulaParticle = await TtEngine.Instance.NebulaTemplateManager.GetParticle(GetNodeData<TtNebulaNodeData>().NebulaName);
             return ret;
         }
-        public override void OnGatherVisibleMeshes(UWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
         {
             if (mNebulaParticle == null)
                 return;
@@ -69,7 +69,7 @@ namespace EngineNS.Bricks.Particle
             }
             rp.AddVisibleNode(this);
         }
-        protected override void OnCameralOffsetChanged(UWorld world)
+        protected override void OnCameralOffsetChanged(TtWorld world)
         {
             foreach (var i in mNebulaParticle.Emitter.Values)
             {
@@ -78,7 +78,7 @@ namespace EngineNS.Bricks.Particle
                 i.Mesh.UpdateCameraOffset(world);
             }
         }
-        public override bool OnTickLogic(GamePlay.UWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             //var particleNode = policy.FindNode("ParticleNode") as UParticleGraphNode;
             var particleNode = policy.FindFirstNode<UParticleGraphNode>();
