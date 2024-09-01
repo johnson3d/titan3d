@@ -42,11 +42,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             public UPlantInstance()
             {
-                mPlacement = new GamePlay.UPlacement();
+                mPlacement = new GamePlay.TtPlacement();
                 mPlacement.HostNode = this;
             }
-            GamePlay.UPlacement mPlacement;
-            public override GamePlay.UPlacementBase Placement
+            GamePlay.TtPlacement mPlacement;
+            public override GamePlay.TtPlacementBase Placement
             {
                 get { return mPlacement; }
             }
@@ -115,14 +115,17 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
                 CreateFinished = true;
             }
+            private List<UPlantInstance> WaitPushInstances = new List<UPlantInstance>();
             public void PushInstance(UPlantInstance obj, int capacity)
             {
                 obj.PlantType = this;
+                ObjInstances.Add(obj);
                 if (InstanceMdf == null)
+                {
                     return;
+                }
                 InstanceMdf.InstanceModifier.SetCapacity((uint)capacity, false);
                 TtEngine.Instance.GfxDevice.HitproxyManager.MapProxy(obj);
-                ObjInstances.Add(obj);
             }
             public void OnHitProxyChanged()
             {
@@ -149,34 +152,21 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             if (PlantTypes.TryGetValue(plant, out type) == false)
             {
                 type = new UPlantType();
-                var task = type.Create(trn, levelOffset, plant);
                 PlantTypes.Add(plant, type);
+
+                _ = type.Create(trn, levelOffset, plant);
             }
-            if(type.CreateFinished == false)
-            {
-                var tempTrans = trans;
-                TtEngine.Instance.EventPoster.RunOnUntilFinish((Thread.Async.TtAsyncTaskStateBase state) =>
-                {
-                    if (type.CreateFinished)
-                    {
-                        var inst = new UPlantInstance();
-                        inst.Placement.TransformData = tempTrans;
-                        type.PushInstance(inst, capacity);
-                    }
-                    return type.CreateFinished;
-                }, Thread.Async.EAsyncTarget.Logic);
-            }
-            else
-            {
-                var inst = new UPlantInstance();
-                inst.Placement.TransformData = trans;
-                type.PushInstance(inst, capacity);
-            }
+
+            var inst = new UPlantInstance();
+            inst.Placement.TransformData = trans;
+            type.PushInstance(inst, capacity);
         }
         public void OnGatherVisibleMeshes(GamePlay.TtWorld.UVisParameter rp)
         {
             foreach (var i in PlantTypes.Values)
             {
+                if (i.CreateFinished == false)
+                    continue;
                 if (i.Mesh == null)
                     continue;
                 if (i.ObjInstances.Count == 0)

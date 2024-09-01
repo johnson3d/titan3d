@@ -54,7 +54,7 @@ namespace EngineNS.GamePlay
         }
 
         [Rtti.Meta]
-        public UGameViewportSlate WorldViewportSlate { get; } = new UGameViewportSlate(true);
+        public TtGameViewportSlate WorldViewportSlate { get; } = new TtGameViewportSlate(true);
         [Rtti.Meta]
         public Graphics.Pipeline.UCamera DefaultCamera 
         {
@@ -173,7 +173,7 @@ namespace EngineNS.GamePlay
             EngineNS.GamePlay.Scene.TtNode root = scene;
             var playerData = new EngineNS.GamePlay.Scene.Actor.UActor.UActorData();
             ChiefPlayer = new EngineNS.GamePlay.Scene.Actor.UActor();
-            await ChiefPlayer.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            await ChiefPlayer.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             ChiefPlayer.Parent = root;
             ChiefPlayer.NodeData.Name = "UActor";
             ChiefPlayer.HitproxyType = EngineNS.Graphics.Pipeline.UHitProxy.EHitproxyType.None;
@@ -193,7 +193,7 @@ namespace EngineNS.GamePlay
             meshData1.MdfQueueType = EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh)).TypeString;
             meshData1.AtomType = EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Graphics.Mesh.TtMesh.TtAtom)).TypeString;
             var meshNode1 = new EngineNS.GamePlay.Scene.TtMeshNode();
-            await meshNode1.InitializeNode(scene.World, meshData1, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            await meshNode1.InitializeNode(scene.World, meshData1, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             meshNode1.NodeData.Name = "Robot1";
             meshNode1.Parent = ChiefPlayer;
             meshNode1.Placement.SetTransform(new DVector3(0.0f), new Vector3(1.0f), Quaternion.Identity);
@@ -213,10 +213,10 @@ namespace EngineNS.GamePlay
             sapnd.Axises.Add(new EngineNS.Animation.Asset.BlendSpace.TtBlendSpace_Axis("V"));
             sapnd.Points.Add(new EngineNS.Animation.SceneNode.FBlendSpacePoint(RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip"), Vector3.Zero));
             sapnd.Points.Add(new EngineNS.Animation.SceneNode.FBlendSpacePoint(RName.GetRName("utest/puppet/animation/w2_run_f_loop_ip.animclip"), new Vector3(3, 0, 0)));
-            await EngineNS.Animation.SceneNode.TtBlendSpaceAnimPlayNode.AddBlendSpace2DAnimPlayNode(scene.World, meshNode1, sapnd, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UIdentityPlacement));
+            await EngineNS.Animation.SceneNode.TtBlendSpaceAnimPlayNode.AddBlendSpace2DAnimPlayNode(scene.World, meshNode1, sapnd, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtIdentityPlacement));
 
             var characterController = new EngineNS.GamePlay.Controller.UCharacterController();
-            await characterController.InitializeNode(scene.World, new EngineNS.GamePlay.Scene.TtNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            await characterController.InitializeNode(scene.World, new EngineNS.GamePlay.Scene.TtNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             characterController.Parent = root;
             characterController.ControlledCharacter = ChiefPlayer;
 
@@ -224,14 +224,14 @@ namespace EngineNS.GamePlay
             var springArmData = new EngineNS.GamePlay.Camera.UCameraSpringArm.UCameraSpringArmData();
             springArmData.TargetOffset = DVector3.Up * 1.0f;
             springArmData.ArmLength = 5;
-            await springArm.InitializeNode(scene.World, springArmData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            await springArm.InitializeNode(scene.World, springArmData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
 
             springArm.Parent = ChiefPlayer;
 
             characterController.CameraControlNode = springArm;
 
             var camera = new EngineNS.GamePlay.Camera.UCamera();
-            await camera.InitializeNode(WorldViewportSlate.World, new EngineNS.GamePlay.Scene.TtNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            await camera.InitializeNode(WorldViewportSlate.World, new EngineNS.GamePlay.Scene.TtNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             camera.Parent = springArm;
             camera.Camera = WorldViewportSlate.RenderPolicy.DefaultCamera;
 
@@ -239,12 +239,12 @@ namespace EngineNS.GamePlay
             var phyNodeData = new TtCapsulePhyControllerNode.TtCapsulePhyControllerNodeData();
             phyNodeData.Height = 1.5f;
             phyNodeData.Radius = 0.5f;
-            await phyControl.InitializeNode(scene.World, phyNodeData, Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            await phyControl.InitializeNode(scene.World, phyNodeData, Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             //phyControl.Parent = ChiefPlayer;
 
             var movement = new EngineNS.GamePlay.Movemnet.UCharacterMovement();
             //movement.EnableGravity = true;
-            await movement.InitializeNode(scene.World, new EngineNS.GamePlay.Scene.TtNodeData() { Name = "Movement" }, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            await movement.InitializeNode(scene.World, new EngineNS.GamePlay.Scene.TtNodeData() { Name = "Movement" }, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             movement.Parent = ChiefPlayer;
 
             characterController.MovementNode = movement;
@@ -255,7 +255,7 @@ namespace EngineNS.GamePlay
             EngineNS.GamePlay.Scene.TtNode root = scene;
             var playerData = new EngineNS.GamePlay.Scene.Actor.UActor.UActorData();
             var actor = new EngineNS.GamePlay.Scene.Actor.UActor();
-            await actor.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            await actor.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             actor.Parent = root;
             actor.NodeData.Name = "UActor";
             actor.HitproxyType = EngineNS.Graphics.Pipeline.UHitProxy.EHitproxyType.None;
@@ -266,7 +266,7 @@ namespace EngineNS.GamePlay
             var phyControl = new TtPhySphereCollisionNode();
             var phyNodeData = new TtPhySphereCollisionNode.UPhySphereCollisionNodeData();
             phyNodeData.Radius = 0.5f;
-            await phyControl.InitializeNode(scene.World, phyNodeData, Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            await phyControl.InitializeNode(scene.World, phyNodeData, Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             phyControl.Parent = actor;
         }
         public async System.Threading.Tasks.Task CreateBoxActor(Scene.TtScene scene)
@@ -274,7 +274,7 @@ namespace EngineNS.GamePlay
             EngineNS.GamePlay.Scene.TtNode root = scene;
             var playerData = new EngineNS.GamePlay.Scene.Actor.UActor.UActorData();
             var actor = new EngineNS.GamePlay.Scene.Actor.UActor();
-            await actor.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            await actor.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             actor.Parent = root;
             actor.NodeData.Name = "UActor";
             actor.HitproxyType = EngineNS.Graphics.Pipeline.UHitProxy.EHitproxyType.None;
@@ -285,7 +285,7 @@ namespace EngineNS.GamePlay
             var phyControl = new TtPhyBoxCollisionNode();
             var phyNodeData = new TtPhyBoxCollisionNode.UPhyBoxCollisionNodeData();
             phyNodeData.PhyActorType = EPhyActorType.PAT_Static;
-            await phyControl.InitializeNode(scene.World, phyNodeData, Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
+            await phyControl.InitializeNode(scene.World, phyNodeData, Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             phyControl.Parent = actor;
         }
     }

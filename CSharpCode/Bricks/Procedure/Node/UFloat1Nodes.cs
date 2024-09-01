@@ -144,7 +144,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 //UpdatePerlin();
             }
         }
-        int mSeed = (int)Support.Time.GetTickCount();
+        int mSeed = (int)Support.TtTime.GetTickCount();
         [Rtti.Meta]
         public int Seed
         {
@@ -175,7 +175,7 @@ namespace EngineNS.Bricks.Procedure.Node
         [Rtti.Meta]
         public float Border { get; set; } = 3.0f;
         [Rtti.Meta]
-        public Support.UPerlin.EFbmMode FbmMode { get; set; } = Support.UPerlin.EFbmMode.Classic;
+        public Support.TtPerlin2.EFbmMode FbmMode { get; set; } = Support.TtPerlin2.EFbmMode.Classic;
         [Rtti.Meta]
         public float Lacumarity { get; set; } = 2.0f;
         [Rtti.Meta]
@@ -183,11 +183,11 @@ namespace EngineNS.Bricks.Procedure.Node
         [Rtti.Meta]
         public float Rotator { get; set; } = 0.0f;
         //protected Support.CPerlin mPerlin;
-        protected Support.UPerlin mPerlin;
+        protected Support.TtPerlin2 mPerlin;
         protected void UpdatePerlin()
         {
             //mPerlin = new Support.CPerlin(Octaves, Freq, Amptitude, Seed, SamplerSize);
-            mPerlin = new Support.UPerlin(Seed, SamplerSize);
+            mPerlin = new Support.TtPerlin2(Seed, SamplerSize);
         }
         public DVector3 StartPosition = DVector3.Zero;
         public override UBufferCreator GetOutBufferCreator(PinOut pin)

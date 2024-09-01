@@ -9,7 +9,7 @@ namespace EngineNS.Plugins.CSCommon
     public interface ISyncActor
     {
         uint SyncId { get; set; }
-        UPlacementBase Placement { get; }
+        TtPlacementBase Placement { get; }
         void Tick();
     }
     public enum ESyncIdType

@@ -16,7 +16,7 @@ namespace EngineNS.Bricks.VirtualTexture
     {
         public NxRHI.FTextureDesc TexDesc = new NxRHI.FTextureDesc();
         public NxRHI.UTexture TextureArray = null;
-        public NxRHI.USrView TextureArraySRV = null;
+        public NxRHI.TtSrView TextureArraySRV = null;
         public Stack<TtTextureSlot> FreeSlots = new Stack<TtTextureSlot>();
         public void Dispose()
         {
@@ -82,11 +82,11 @@ namespace EngineNS.Bricks.VirtualTexture
         }
         public uint UniqueTexID;
         public TtTextureSlot Slot = null;
-        public NxRHI.USrView Texture;
+        public NxRHI.TtSrView Texture;
         public RName TextureName;
         public TtVirtualTextureBase Owner;
         public bool IsDirty = false;
-        public void UpdateTexture(NxRHI.USrView texture)
+        public void UpdateTexture(NxRHI.TtSrView texture)
         {
             Texture.Rvt = null;
             Texture = texture;
@@ -106,7 +106,7 @@ namespace EngineNS.Bricks.VirtualTexture
         private List<uint> RemoveTexIDs = new List<uint>();
         private List<uint> DirtyTexIDs = new List<uint>();
         internal NxRHI.FTextureDesc TexDesc = new NxRHI.FTextureDesc();
-        public void ActiveRVT(NxRHI.USrView tex)
+        public void ActiveRVT(NxRHI.TtSrView tex)
         {
             if (tex == null)
                 return;
@@ -148,7 +148,7 @@ namespace EngineNS.Bricks.VirtualTexture
                 return TextureSlotAllocator.MaxActive;
             }
         }
-        public TtRVT RegRVT(NxRHI.USrView tex)
+        public TtRVT RegRVT(NxRHI.TtSrView tex)
         {
             if (tex == null)
                 return null;
@@ -272,7 +272,7 @@ namespace EngineNS.Bricks.VirtualTexture
 
 namespace EngineNS.NxRHI
 {
-    partial class USrView
+    partial class TtSrView
     {
         public Bricks.VirtualTexture.TtRVT Rvt = null;
     }

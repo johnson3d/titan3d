@@ -150,7 +150,7 @@ namespace EngineNS.Thread
             OnThreadStart();
             while (mIsRun || TotalEvents > 0)
             {
-                var time1 = Support.Time.GetTickCount();
+                var time1 = Support.TtTime.GetTickCount();
                 try
                 {
                     FContextTickableManager.GetInstance().ThreadTick();
@@ -164,7 +164,7 @@ namespace EngineNS.Thread
                 {
                     TtContextThread.CurrentContext.ExitWhenFrameFinished();
                 }
-                var time2 = Support.Time.GetTickCount();
+                var time2 = Support.TtTime.GetTickCount();
                 if (time2 - time1 < Interval)
                     System.Threading.Thread.Sleep(Interval - (int)(time2 - time1));
             }
@@ -264,11 +264,6 @@ namespace EngineNS.Thread
             }
             mEnqueueTrigger.Set();
         }
-        [Browsable(false)]
-        public List<Async.TtAsyncTaskStateBase> RunUntilFinishEvents
-        {
-            get;
-        } = new List<Async.TtAsyncTaskStateBase>();
         public long LimitTime
         {
             get;
@@ -276,21 +271,21 @@ namespace EngineNS.Thread
         } = 5 * 1000;//5 ms
         internal bool TimeOut = false;
 
-        private bool TestTimeOut(long start, long t1, long limit, Async.TtAsyncTaskStateBase state)
+        private bool TestTimeOut(long start, long limit, Async.TtAsyncTaskStateBase state)
         {
-            var cur = Support.Time.HighPrecision_GetTickCount();
+            var cur = Support.TtTime.HighPrecision_GetTickCount();
             var delta = cur - start;
             if (delta > limit)
             {
-                if (cur - t1 > 4 * limit)//20 ms
+                if (cur - cur > 4 * limit)//20 ms
                 {
                     if (TtEngine.Instance.EventPoster.IsThread(Async.EAsyncTarget.Logic))
                     {
-                        Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Logic Thread[Async] is Blocked({(cur - t1)/1000}ms > {limit / 1000}):\n{state.ToString()}");
+                        Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Logic Thread[Async] is Blocked({(cur - start)/1000}ms > {limit / 1000}):\n{state.ToString()}");
                     }
                     else if (TtEngine.Instance.EventPoster.IsThread(Async.EAsyncTarget.Render))
                     {
-                        Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Render Thread[Async] is Blocked({(cur - t1)/1000}ms > {limit / 1000}):\n{state.ToString()}");
+                        Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Render Thread[Async] is Blocked({(cur - start) /1000}ms > {limit / 1000}):\n{state.ToString()}");
                         //if (cur.CallStackTrace != null)
                         //{
                         //    Profiler.Log.WriteLine(Profiler.ELogTag.Warning, "Async", $"StackInof=>{cur.CallStackTrace}");
@@ -305,23 +300,24 @@ namespace EngineNS.Thread
         public void TickAwaitEvent()
         {
             Async.TtAsyncTaskStateBase cur;
-            var start = Support.Time.HighPrecision_GetTickCount();
-            long t1 = 0;
-            while ((t1 = Support.Time.HighPrecision_GetTickCount())>0 && DoOnePriorityEvent(out cur))
+            var start = Support.TtTime.HighPrecision_GetTickCount();
+            while (DoOnePriorityEvent(out cur))
             {
                 cur.Dispose();
-                if (TestTimeOut(start, t1, LimitTime, cur))
+                if (TestTimeOut(start, LimitTime, cur))
                 {
                     TimeOut = true;
+                    mEnqueueTrigger.Set();
                     return;
                 }
             }
             
-            while ((t1 = Support.Time.HighPrecision_GetTickCount()) > 0 && DoOneAsyncEvent(out cur))
+            while (DoOneAsyncEvent(out cur))
             {
-                if (TestTimeOut(start, t1, LimitTime, cur))
+                if (TestTimeOut(start, LimitTime, cur))
                 {
                     TimeOut = true;
+                    mEnqueueTrigger.Set();
                     return;
                 }
             }
@@ -337,26 +333,6 @@ namespace EngineNS.Thread
             //        return;
             //    }
             //}
-            lock(RunUntilFinishEvents)
-            {
-                for (int i = RunUntilFinishEvents.Count - 1; i >= 0; i--)
-                {
-                    t1 = Support.Time.HighPrecision_GetTickCount();
-                    var e = RunUntilFinishEvents[i];
-                    bool bFinish = e.ExecutePostEventCondition();
-                    if (bFinish)
-                    {
-                        RunUntilFinishEvents.RemoveAt(i);
-                        e.Dispose();
-                    }
-
-                    if (TestTimeOut(start, t1, LimitTime, e))
-                    {
-                        TimeOut = true;
-                        return;
-                    }
-                }
-            }
             TimeOut = false;
         }
         public bool DoOnePriorityEvent(out Async.TtAsyncTaskStateBase oe)

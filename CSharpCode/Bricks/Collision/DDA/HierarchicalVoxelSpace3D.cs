@@ -146,7 +146,7 @@ namespace EngineNS.Bricks.Collision.DDA
             VxDebugMesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfInstanceStaticMesh>.TypeDesc);
             VxDebugMesh.MdfQueue.MdfDatas = this;
 
-            var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, world.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.UPlacement), VxDebugMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+            var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, world.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), VxDebugMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
             meshNode.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
             meshNode.NodeData.Name = "Debug_HVXMeshNode";
             meshNode.IsAcceptShadow = false;
@@ -215,7 +215,7 @@ namespace EngineNS.Bricks.Collision.DDA
                 sphereDebugMesh.Initialize(sphereMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 sphereDebugMesh.MdfQueue.MdfDatas = this;
 
-                var meshNode1 = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, this, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.UPlacement), sphereDebugMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+                var meshNode1 = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, this, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), sphereDebugMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
                 meshNode1.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
                 meshNode1.NodeData.Name = "Debug_HVXHitNode";
                 meshNode1.IsAcceptShadow = false;
@@ -232,7 +232,7 @@ namespace EngineNS.Bricks.Collision.DDA
             lineMesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             lineMesh.MdfQueue.MdfDatas = this;
 
-            var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, this, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.UPlacement), lineMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+            var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, this, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), lineMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
             meshNode.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
             meshNode.NodeData.Name = "Debug_HVXLineNode";
             meshNode.IsAcceptShadow = false;

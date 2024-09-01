@@ -294,7 +294,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var btSize = Vector2.Zero;
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
-                var blob = new Support.UBlobObject();
+                var blob = new Support.TtBlobObject();
                 mShaderEditor.mCoreObject.GetText(blob.mCoreObject);
                 ShaderAsset.ShaderCode = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)blob.mCoreObject.GetData(), (int)blob.mCoreObject.GetSize());
                 ShaderAsset.SaveAssetTo(AssetName);

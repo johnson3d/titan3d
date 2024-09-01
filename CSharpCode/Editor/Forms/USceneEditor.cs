@@ -446,7 +446,7 @@ namespace EngineNS.Editor.Forms
                     var gridNode = UMeshDataProvider.MakeGridPlane(TtEngine.Instance.GfxDevice.RenderContext, new Vector2(-50, -50), new Vector2(50, 50), 1).ToMesh();
 
                     var meshNodeData = new TtMeshNode.TtMeshNodeData();
-                    var meshNode = await Scene.NewNode(Scene.World, typeof(TtMeshNode), meshNodeData, EBoundVolumeType.Box, typeof(UPlacement)) as TtMeshNode;
+                    var meshNode = await Scene.NewNode(Scene.World, typeof(TtMeshNode), meshNodeData, EBoundVolumeType.Box, typeof(TtPlacement)) as TtMeshNode;
 
                 },
             };
@@ -488,7 +488,7 @@ namespace EngineNS.Editor.Forms
         {
             return this;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewScene(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 

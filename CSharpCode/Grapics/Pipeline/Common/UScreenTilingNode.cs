@@ -58,7 +58,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
         public NxRHI.UBuffer TileBuffer;
         public NxRHI.UUaView TileUAV;
-        public NxRHI.USrView TileSRV;
+        public NxRHI.TtSrView TileSRV;
 
         public class SetupTileDataShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
         {

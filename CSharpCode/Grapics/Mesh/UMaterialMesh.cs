@@ -49,7 +49,7 @@ namespace EngineNS.Graphics.Mesh
             var ok = mesh.Initialize(Mesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
-                var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(renderer.World, renderer.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.UPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
+                var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(renderer.World, renderer.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
                 meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
                 meshNode.NodeData.Name = "PreviewObject";
                 meshNode.IsAcceptShadow = false;
@@ -135,7 +135,7 @@ namespace EngineNS.Graphics.Mesh
                 var meshNodeData = new TtMeshNode.TtMeshNodeData();
                 meshNodeData.Name = mAssetName.PureName;
                 meshNodeData.MeshName = mAssetName;
-                var node = await worldViewport.World.Root.ParentScene.NewNode(worldViewport.World, typeof(TtMeshNode), meshNodeData, EBoundVolumeType.Box, typeof(UPlacement));
+                var node = await worldViewport.World.Root.ParentScene.NewNode(worldViewport.World, typeof(TtMeshNode), meshNodeData, EBoundVolumeType.Box, typeof(TtPlacement));
                 node.Parent = worldViewport.World.Root;
                 node.Placement.Position = hitPos;
                 node.HitproxyType = Pipeline.UHitProxy.EHitproxyType.Root;
@@ -159,7 +159,7 @@ namespace EngineNS.Graphics.Mesh
                 var meshNodeData = new TtMeshNode.TtMeshNodeData();
                 meshNodeData.Name = mAssetName.PureName;
                 meshNodeData.MeshName = mAssetName;
-                mPreviewNodeTask = worldViewport.World.Root.ParentScene.NewNode(worldViewport.World, typeof(TtMeshNode), meshNodeData, EBoundVolumeType.Box, typeof(UPlacement));
+                mPreviewNodeTask = worldViewport.World.Root.ParentScene.NewNode(worldViewport.World, typeof(TtMeshNode), meshNodeData, EBoundVolumeType.Box, typeof(TtPlacement));
                 return;
             }
             else if (mPreviewNodeTask.Value.IsCompleted == false)

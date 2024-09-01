@@ -29,7 +29,7 @@ namespace EngineNS.Bricks.Procedure.Node
         public float evaporate_speed { get; set; } = 0.01f;
         [Rtti.Meta]
         public float gravity { get; set; } = 4;
-        int mSeed = (int)Support.Time.GetTickCount();
+        int mSeed = (int)Support.TtTime.GetTickCount();
         [Rtti.Meta]
         public int Seed
         {
@@ -44,7 +44,7 @@ namespace EngineNS.Bricks.Procedure.Node
             var Input = graph.BufferCache.FindBuffer(SrcPin);
             var Output = graph.BufferCache.FindBuffer(ResultPin);
 
-            var rnd = new Support.URandom(Seed);
+            var rnd = new Support.TtRandom(Seed);
             for (int i = 0; i < Input.Width; i++)
             {
                 for (int j = 0; j < Input.Height; j++)

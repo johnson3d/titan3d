@@ -44,7 +44,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         #endregion
         public UMobileOpaqueNode BasePassNode = new UMobileOpaqueNode();
         public Shadow.UShadowMapNode mShadowMapNode = new Shadow.UShadowMapNode();        
-        public override NxRHI.USrView GetFinalShowRSV()
+        public override NxRHI.TtSrView GetFinalShowRSV()
         {
             return this.AttachmentCache.FindAttachement(BasePassNode.GBuffers.RenderTargets[0].Attachement.AttachmentName).Srv;
         }

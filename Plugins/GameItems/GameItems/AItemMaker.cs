@@ -36,7 +36,7 @@ namespace EngineNS.Plugins.GameItems
         [Rtti.Meta]
         public List<AItemMakeSuccess> OutputItems { get; set; } = new List<AItemMakeSuccess>();
         
-        public virtual List<AGameItemBox> MakeItems(AGameItemInventory inventory, Support.URandom rd)
+        public virtual List<AGameItemBox> MakeItems(AGameItemInventory inventory, Support.TtRandom rd)
         {
             var consumes = new List<AGameItemBox>();
             var catalyzers = new List<AGameItemBox>();

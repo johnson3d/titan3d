@@ -30,7 +30,7 @@ namespace EngineNS.EGui
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
-            if (ameta.GetAssetExtType() == NxRHI.USrView.AssetExt)
+            if (ameta.GetAssetExtType() == NxRHI.TtSrView.AssetExt)
                 return true;
             //必须是TextureAsset
             return false;
@@ -77,7 +77,7 @@ namespace EngineNS.EGui
 
             //cmdlist.AddText(in start, 0xFFFFFFFF, "UVAnim", null);
         }
-        Thread.Async.TtTask<NxRHI.USrView>? SnapTask;
+        Thread.Async.TtTask<NxRHI.TtSrView>? SnapTask;
     }
     //[Rtti.Meta(NameAlias = new string[] { "EngineNS.EGui.UUvAnim@EngineCore" })]
     [Rtti.Meta]
@@ -200,7 +200,7 @@ namespace EngineNS.EGui
         public Vector2 Size { get; set; } = new Vector2(50, 50);
         RName mTextureName;
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
+        [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName TextureName 
         { 
             get=> mTextureName; 
@@ -215,9 +215,9 @@ namespace EngineNS.EGui
                 }
             }
         }
-        Thread.Async.TtTask<NxRHI.USrView>? mTextureTask;
+        Thread.Async.TtTask<NxRHI.TtSrView>? mTextureTask;
         [Browsable(false)]
-        public NxRHI.USrView Texture
+        public NxRHI.TtSrView Texture
         {
             get
             {

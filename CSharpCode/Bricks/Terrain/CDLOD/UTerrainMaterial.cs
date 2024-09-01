@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
-using static EngineNS.NxRHI.USrView;
+using static EngineNS.NxRHI.TtSrView;
 
 namespace EngineNS.Bricks.Terrain.CDLOD
 {
@@ -29,10 +29,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
 
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
+        [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName TexDiffuse { get; set; }
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
+        [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName TexNormal { get; set; }
         [Rtti.Meta]
         public float TransitionRange { get; set; } = 5.0f;
@@ -177,8 +177,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public List<Terrain.CDLOD.UTerrainMaterialId> MaterialIdArray { get; set; } = new List<Terrain.CDLOD.UTerrainMaterialId>();
         public NxRHI.UTexture DiffuseTextureArray;
         public NxRHI.UTexture NormalTextureArray;
-        public NxRHI.USrView DiffuseTextureArraySRV;
-        public NxRHI.USrView NormalTextureArraySRV;
+        public NxRHI.TtSrView DiffuseTextureArraySRV;
+        public NxRHI.TtSrView NormalTextureArraySRV;
         public void Cleanup()
         {
             DiffuseTextureArraySRV?.Dispose();
@@ -201,7 +201,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 return false;
             var dftLayer = MaterialIdArray[0];
             {
-                var txDesc = NxRHI.USrView.LoadPictureDesc(dftLayer.TexDiffuse);
+                var txDesc = NxRHI.TtSrView.LoadPictureDesc(dftLayer.TexDiffuse);
 
                 var desc = new NxRHI.FTextureDesc();
                 desc.SetDefault();
@@ -230,7 +230,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 {
                     for (int i = 0; i < MaterialIdArray.Count; i++)
                     {
-                        var mipDatas = NxRHI.USrView.LoadPixelMipLevels(MaterialIdArray[i].TexDiffuse, 0, txDesc);
+                        var mipDatas = NxRHI.TtSrView.LoadPixelMipLevels(MaterialIdArray[i].TexDiffuse, 0, txDesc);
                         if (txDesc.Width != desc.Width || txDesc.Height != desc.Height || mipDatas.Length != desc.m_MipLevels)
                         {
                             continue;
@@ -257,7 +257,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
             if (dftLayer.TexNormal != null)
             {
-                var txDesc = NxRHI.USrView.LoadPictureDesc(dftLayer.TexNormal);
+                var txDesc = NxRHI.TtSrView.LoadPictureDesc(dftLayer.TexNormal);
 
                 var desc = new NxRHI.FTextureDesc();
                 desc.SetDefault();
@@ -286,7 +286,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     for (int i = 0; i < MaterialIdArray.Count; i++)
                     {
                         //var mipDatas = NxRHI.USrView.LoadImageLevels(MaterialIdArray[i].TexNormal, 0, ref txDesc);
-                        var mipDatas = NxRHI.USrView.LoadPixelMipLevels(MaterialIdArray[i].TexNormal, 0, txDesc);
+                        var mipDatas = NxRHI.TtSrView.LoadPixelMipLevels(MaterialIdArray[i].TexNormal, 0, txDesc);
                         if (txDesc.Width != desc.Width || txDesc.Height != desc.Height || mipDatas.Length != desc.m_MipLevels)
                         {
                             continue;

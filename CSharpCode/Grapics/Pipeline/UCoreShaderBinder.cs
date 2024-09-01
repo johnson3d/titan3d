@@ -311,9 +311,9 @@ namespace EngineNS.Graphics.Pipeline
             public NxRHI.TtEffectBinder cbPreFramePerMesh;
             [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.UBuffer))]
             public NxRHI.TtEffectBinder cbPerMaterial;
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.USrView))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.TtSrView))]
             public NxRHI.TtEffectBinder gEnvMap;
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.USrView))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.TtSrView))]
             public NxRHI.TtEffectBinder gShadowMap;
             [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.USampler))]
             public NxRHI.TtEffectBinder Samp_gEnvMap;

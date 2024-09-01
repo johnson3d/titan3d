@@ -218,7 +218,7 @@ namespace EngineNS.UI.Canvas
             set => mCoreObject.IsDirty = value;
         }
 
-        public void SetSrv(NxRHI.USrView texture)
+        public void SetSrv(NxRHI.TtSrView texture)
         {
             if (texture == null)
                 return;

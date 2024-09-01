@@ -140,7 +140,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 return null;
             return new TtPhyConvexMesh(self);
         }
-        public TtPhyTriMesh CookTriMesh(Graphics.Mesh.UMeshDataProvider mesh, Support.UBlobObject uvblob, Support.UBlobObject faceblob, Support.UBlobObject posblob)
+        public TtPhyTriMesh CookTriMesh(Graphics.Mesh.UMeshDataProvider mesh, Support.TtBlobObject uvblob, Support.TtBlobObject faceblob, Support.TtBlobObject posblob)
         {
             var self = mCoreObject.CookTriMesh(mesh.mCoreObject, (uvblob != null) ? uvblob.mCoreObject : new IBlobObject(),
                 (faceblob != null) ? faceblob.mCoreObject : new IBlobObject(),

@@ -14,7 +14,7 @@ namespace EngineNS.EGui
         {
             get
             {
-                var blob = new Support.UBlobObject();
+                var blob = new Support.TtBlobObject();
                 mCoreObject.GetText(blob.mCoreObject);
                 return System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)blob.mCoreObject.GetData(), (int)blob.mCoreObject.GetSize());
             }

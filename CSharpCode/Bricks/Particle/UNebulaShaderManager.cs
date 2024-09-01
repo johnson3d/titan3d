@@ -74,9 +74,9 @@ namespace EngineNS.Bricks.Particle
     {
         public uint ShaderRandomPoolSize = 65535;
         public NxRHI.UBuffer RandomPoolBuffer;
-        public Random mRandom = new Random((int)Support.Time.GetTickCount());
+        public Random mRandom = new Random((int)Support.TtTime.GetTickCount());
 
-        public NxRHI.USrView RandomPoolSrv;
+        public NxRHI.TtSrView RandomPoolSrv;
         public UNebulaShaderManager NebulaShaderManager { get; } = new UNebulaShaderManager();
         public Dictionary<RName, TtNebulaParticle> Particles { get; } = new Dictionary<RName, TtNebulaParticle>();
         public float RandomSignedUnit()//[-1,1]

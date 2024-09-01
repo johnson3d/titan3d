@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Support
 {
-    public class UBlobObject : AuxPtrType<IBlobObject>
+    public class TtBlobObject : AuxPtrType<IBlobObject>
     {
-        public UBlobObject()
+        public TtBlobObject()
         {
             mCoreObject = IBlobObject.CreateInstance();
         }

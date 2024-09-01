@@ -18,10 +18,10 @@ namespace EngineNS
         ImGuiCond_ DockCond { get; set; }
         Thread.Async.TtTask<bool> Initialize();
     }
-    public class URootFormManager
+    public class TtRootFormManager
     {
-        internal static URootFormManager Insance = new URootFormManager();
-        private URootFormManager()
+        internal static TtRootFormManager Insance = new TtRootFormManager();
+        private TtRootFormManager()
         {
 
         }
@@ -125,7 +125,7 @@ namespace EngineNS
         #endregion
     }
 
-    public partial class USlateApplication
+    public partial class TtSlateApplication
     {
         public UPresentWindow NativeWindow;
         //public virtual EGui.Slate.UWorldViewportSlate GetWorldViewportSlate() { return null; }
@@ -259,7 +259,7 @@ namespace EngineNS
             get
             {
                 if (mScopeOnDrawUI == null)
-                    mScopeOnDrawUI = new Profiler.TimeScope(typeof(USlateApplication), nameof(OnDrawUI));
+                    mScopeOnDrawUI = new Profiler.TimeScope(typeof(TtSlateApplication), nameof(OnDrawUI));
                 return mScopeOnDrawUI;
             }
         }
@@ -323,7 +323,7 @@ namespace EngineNS
         }
     }
 
-    public class USlateAppBase : USlateApplication, ITickable
+    public class TtSlateAppBase : TtSlateApplication, ITickable
     {
         public int GetTickOrder()
         {
@@ -385,11 +385,11 @@ namespace EngineNS
 
     partial class TtEngine
     {
-        public static URootFormManager RootFormManager
+        public static TtRootFormManager RootFormManager
         {
             get
             {
-                return URootFormManager.Insance;
+                return TtRootFormManager.Insance;
             }
         }
     }

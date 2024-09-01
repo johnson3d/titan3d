@@ -16,7 +16,7 @@ namespace EngineNS.Thread
         public override void Tick()
         {
             mEnqueueTrigger.WaitOne();
-            var now = Support.Time.GetTickCount();
+            var now = Support.TtTime.GetTickCount();
             if(now - mPrevTestTime>100)
             {
                 mPrevFrameCount = TtEngine.Instance.FrameCount;

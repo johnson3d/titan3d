@@ -11,7 +11,7 @@ namespace EngineNS.Bricks.Procedure
         protected int mPreviewResultIndex = -1;
         public float ScaleForPreview { get; set; } = 1.0f;
         protected NxRHI.UTexture PreviewTexture;
-        protected NxRHI.USrView PreviewSRV;
+        protected NxRHI.TtSrView PreviewSRV;
         public class UCompileButton
         {
             internal UPgcNodeBase HostNode;
@@ -63,7 +63,7 @@ namespace EngineNS.Bricks.Procedure
             var nodeData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
             nodeData.Name = "TexturePreivew";
             var prevMesh = await GamePlay.Scene.TtMeshNode.AddMeshNode(graph.GraphEditor.PreviewViewport.World, graph.GraphEditor.PreviewRoot, 
-                    new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.UPlacement), mesh,
+                    new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh,
                     DVector3.Zero, Vector3.One, Quaternion.Identity);
             prevMesh.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
             prevMesh.IsCastShadow = true;

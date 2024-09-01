@@ -42,7 +42,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             attachement.BufferDesc.Width = (uint)ImageSrv.PicDesc.Width;
             attachement.BufferDesc.Height = (uint)ImageSrv.PicDesc.Height;
         }
-        public NxRHI.USrView ImageSrv;
+        public NxRHI.TtSrView ImageSrv;
         [Rtti.Meta]
         [Category("Image")]
         public RName ImageName

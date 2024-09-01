@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace EngineNS.GamePlay
 {
-    public class UGameViewportSlate : EngineNS.EGui.Slate.TtWorldViewportSlate, IRootForm
+    public class TtGameViewportSlate : EngineNS.EGui.Slate.TtWorldViewportSlate, IRootForm
     {
-        public UGameViewportSlate(bool regRoot)
+        public TtGameViewportSlate(bool regRoot)
         {
             if (regRoot)
                 TtEngine.RootFormManager.RegRootForm(this);

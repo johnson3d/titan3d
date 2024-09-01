@@ -174,7 +174,7 @@ namespace EngineNS.Bricks.Procedure
             }
         }
 
-        public NxRHI.USrView CreateRGBA8Texture2D(bool bNormalized = true)
+        public NxRHI.TtSrView CreateRGBA8Texture2D(bool bNormalized = true)
         {
             NxRHI.UTexture texture;
             unsafe
@@ -300,11 +300,11 @@ namespace EngineNS.Bricks.Procedure
                 rsvDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
                 rsvDesc.Texture2D.MipLevels = desc.MipLevels;
                 var result = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(texture, in rsvDesc);
-                result.PicDesc = new NxRHI.USrView.UPicDesc();
+                result.PicDesc = new NxRHI.TtSrView.TtPicDesc();
                 return result;
             }
         }
-        public NxRHI.USrView CreateRGBA8Texture2DAsNormal(out NxRHI.UTexture texture)
+        public NxRHI.TtSrView CreateRGBA8Texture2DAsNormal(out NxRHI.UTexture texture)
         {
             unsafe
             {
@@ -366,7 +366,7 @@ namespace EngineNS.Bricks.Procedure
                 rsvDesc.Texture2D.MipLevels = desc.MipLevels;
                 var result = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(texture, in rsvDesc);
                 if (result != null)
-                    result.PicDesc = new NxRHI.USrView.UPicDesc();
+                    result.PicDesc = new NxRHI.TtSrView.TtPicDesc();
                 return result;
             }
         }

@@ -112,7 +112,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             return FindFirstNode<Common.UGpuSceneNode>();
         }
-        public virtual NxRHI.USrView GetFinalShowRSV()
+        public virtual NxRHI.TtSrView GetFinalShowRSV()
         {
             if (RootNode.ColorAttachement == null)
                 return null;

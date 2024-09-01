@@ -39,9 +39,9 @@ namespace EngineNS.GamePlay.Scene
             get => mBoundVolume;
             set => mBoundVolume = value;
         }
-        UPlacementBase mPlacement = null;
+        TtPlacementBase mPlacement = null;
         [Rtti.Meta(Order = 2)]
-        public UPlacementBase Placement
+        public TtPlacementBase Placement
         {
             get => mPlacement;
             set
@@ -91,7 +91,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 if (NodeData.Placement == null && placementType != null)
                 {
-                    NodeData.Placement = Rtti.UTypeDescManager.CreateInstance(placementType) as UPlacementBase;
+                    NodeData.Placement = Rtti.UTypeDescManager.CreateInstance(placementType) as TtPlacementBase;
                     NodeData.Placement.HostNode = this;
                     switch (bvType)
                     {
@@ -452,7 +452,7 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         [Category("Option")]
-        public virtual UPlacementBase Placement
+        public virtual TtPlacementBase Placement
         {
             get { return NodeData?.Placement; }
         }
@@ -693,7 +693,7 @@ namespace EngineNS.GamePlay.Scene
                     try
                     {
                         //ar.Tag = nd;
-                        System.Type placementType = typeof(UPlacement);
+                        System.Type placementType = typeof(TtPlacement);
                         if (this.mIsPrefab == false)
                         {
                             if (false == ar.ReadTo(data, this))
@@ -829,7 +829,7 @@ namespace EngineNS.GamePlay.Scene
                     continue;
                 if (i.Placement.IsIdentity == false)
                 {
-                    var uplc = i.Placement as UPlacement;
+                    var uplc = i.Placement as TtPlacement;
                     if (uplc != null)
                     {
                         DBoundingBox tmp;

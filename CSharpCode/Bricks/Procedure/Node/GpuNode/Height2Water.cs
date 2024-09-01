@@ -9,7 +9,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
     public class TtWaterBasinNode : TtGpuNodeBase
     {
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
+        [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName RainMap
         {
             get;
@@ -61,7 +61,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
 
             ending.mFinishFence.WaitToExpect();
             var readTexture = ending.ReadableTexture;
-            var blob = new Support.UBlobObject();
+            var blob = new Support.TtBlobObject();
             readTexture.FetchGpuData(0, blob.mCoreObject);
             using (var reader = IO.UMemReader.CreateInstance((byte*)blob.DataPointer, blob.Size))
             {

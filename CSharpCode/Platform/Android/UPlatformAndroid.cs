@@ -14,9 +14,9 @@ namespace EngineNS
             }
         }
     }
-    public partial class UNativeWindow
+    public partial class TtNativeWindow
     {
-        ~UNativeWindow()
+        ~TtNativeWindow()
         {
             Cleanup();
         }
@@ -152,7 +152,7 @@ namespace EngineNS
         }
     }
 
-    public partial class USlateApplication
+    public partial class TtSlateApplication
     {
         public bool CreateNativeWindow(TtEngine engine, string title, int x, int y, int w, int h)
         {

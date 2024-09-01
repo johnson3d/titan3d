@@ -87,7 +87,7 @@ namespace EngineNS.UI.Editor
 
             return true;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -97,7 +97,7 @@ namespace EngineNS.UI.Editor
 
             var scene = PreviewViewport.World.Root.GetNearestParentScene();
             mUINode = await scene.NewNode(PreviewViewport.World, typeof(TtUINode), new TtUINode.TtUINodeData(),
-                EBoundVolumeType.Box, typeof(GamePlay.UPlacement)) as TtUINode;
+                EBoundVolumeType.Box, typeof(GamePlay.TtPlacement)) as TtUINode;
             mUINode.NodeData.Name = "UI";
             mUINode.Parent = PreviewViewport.World.Root;
             mUINode.Placement.SetTransform(DVector3.Zero, Vector3.One, Quaternion.Identity);

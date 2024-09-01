@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    public class UGameApplication : USlateApplication, ITickable
+    public class TtGameApplication : TtSlateApplication, ITickable
     {
         public int GetTickOrder()
         {

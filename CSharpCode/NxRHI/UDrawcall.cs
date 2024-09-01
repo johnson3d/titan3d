@@ -71,23 +71,23 @@ namespace EngineNS.NxRHI
                 return;
             BindCBuffer(binder.mCoreObject, buffer);
         }
-        public bool BindSRV(string name, USrView srv)
+        public bool BindSRV(string name, TtSrView srv)
         {
             return BindSRV(VNameString.FromString(name), srv);
         }
-        public bool BindSRV(VNameString name, USrView srv)
+        public bool BindSRV(VNameString name, TtSrView srv)
         {
             if (srv == null)
                 return false;
             return mCoreObject.BindResource(name, srv.mCoreObject.NativeSuper);
         }
-        public void BindSRV(FEffectBinder binder, USrView srv)
+        public void BindSRV(FEffectBinder binder, TtSrView srv)
         {
             if (binder.IsValidPointer == false || srv == null)
                 return;
             mCoreObject.BindResource(binder, srv.mCoreObject.NativeSuper);
         }
-        public void BindSRV(NxRHI.TtEffectBinder binder, USrView srv)
+        public void BindSRV(NxRHI.TtEffectBinder binder, TtSrView srv)
         {
             if (binder == null || srv == null)
                 return;
@@ -213,13 +213,13 @@ namespace EngineNS.NxRHI
             }
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }
-        public void BindSrv(FShaderBinder binder, USrView resource)
+        public void BindSrv(FShaderBinder binder, TtSrView resource)
         {
             if (resource == null || binder.IsValidPointer == false)
                 return;
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }
-        public void BindSrv(string name, USrView resource)
+        public void BindSrv(string name, TtSrView resource)
         {
             var binder = mCoreObject.FindBinder(EShaderBindType.SBT_SRV, name);
             if (binder.IsValidPointer)

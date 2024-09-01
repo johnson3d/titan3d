@@ -37,7 +37,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             DepthPinInOut.IsAllowInputNull = true;
         }
         #region GetHitproxy
-        private Support.UBlobObject mHitProxyData = new Support.UBlobObject();
+        private Support.TtBlobObject mHitProxyData = new Support.TtBlobObject();
         unsafe private NxRHI.UGpuResource mReadableHitproxyTexture;
         private NxRHI.UFence mCopyFence;
         private Int32 Clamp(Int32 ValueIn, Int32 MinValue, Int32 MaxValue)
@@ -379,12 +379,12 @@ namespace EngineNS.Graphics.Pipeline.Common
             policy.CommitCommandList(HitproxyPass.PostCmds.DrawCmdList);
 
             var fence = mCopyFence;
-            TtEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
+            TtEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmd((NxRHI.FRenderCmd)((NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
             {
                 rc.GpuQueue.IncreaseSignal(fence);
                 var targetValue = fence.ExpectValue;
-                var postTime = Support.Time.GetTickCount();
-                TtEngine.Instance.EventPoster.PostTickSyncEvent((tickCount) =>
+                var postTime = Support.TtTime.GetTickCount();
+                TtEngine.Instance.EventPoster.PostTickSyncEvent((Thread.Async.TtContextThreadManager.FPostTickSync)((tickCount) =>
                 {
                     if (readTexture != mReadableHitproxyTexture || tickCount - postTime > 1000)
                     {
@@ -393,8 +393,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                     }
                     if (fence.CompletedValue >= targetValue)
                     {
-                        var gpuDataBlob = new Support.UBlobObject();
-                        readTexture.GetGpuBufferDataPointer().FetchGpuData(0, gpuDataBlob.mCoreObject);
+                        var gpuDataBlob = new Support.TtBlobObject();
+                        readTexture.GetGpuBufferDataPointer().FetchGpuData(0, (IBlobObject)gpuDataBlob.mCoreObject);
                         //var ptr = (uint*)gpuDataBlob.mCoreObject.GetData();
                         //var num = gpuDataBlob.mCoreObject.GetSize() / 4;
                         //for (int i = 2; i < num; i++)
@@ -404,7 +404,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                         //        int xxx = 0;
                         //    }
                         //}
-                        NxRHI.ITexture.BuildImage2DBlob(mHitProxyData.mCoreObject, gpuDataBlob.mCoreObject, in CopyTexDesc);
+                        NxRHI.ITexture.BuildImage2DBlob(mHitProxyData.mCoreObject, (IBlobObject)gpuDataBlob.mCoreObject, in CopyTexDesc);
                         IsHitproxyBuilding = false;
 
                         return true;
@@ -413,8 +413,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                     {
                         return false;
                     }
-                });
-            }, "Signal Ready");
+                }));
+            }), "Signal Ready");
 
             
 

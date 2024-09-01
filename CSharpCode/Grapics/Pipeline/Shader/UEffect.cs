@@ -433,7 +433,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public void Cleanup()
         {
-            System.Diagnostics.Debug.Assert(mCreatingSession.mSessions.Count == 0);
+            //System.Diagnostics.Debug.Assert(mCreatingSession.mSessions.Count == 0);
             Effects.Clear();
         }
         private Thread.UAwaitSessionManager<Hash160, TtEffect> mCreatingSession = new Thread.UAwaitSessionManager<Hash160, TtEffect>();

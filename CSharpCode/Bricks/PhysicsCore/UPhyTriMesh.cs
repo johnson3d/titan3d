@@ -186,7 +186,7 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 System.Diagnostics.Debug.Assert(propName == "MeshDataSave");
                 var mesh = host as TtPhyTriMesh;
-                var blob = new Support.UBlobObject();
+                var blob = new Support.TtBlobObject();
                 uint size;
                 ar.Read(out size);
                 blob.mCoreObject.ReSize(size);

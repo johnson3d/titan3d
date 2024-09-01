@@ -188,7 +188,7 @@ namespace EngineNS.Macross
         int StartUpdateIndex = 0;
         public void UpdateRefercences(int limitTime, bool bReset = false)
         {
-            var t1 = Support.Time.HighPrecision_GetTickCount();
+            var t1 = Support.TtTime.HighPrecision_GetTickCount();
             lock (mGetters)
             {
                 UMacrossGetterBase tmp;
@@ -204,7 +204,7 @@ namespace EngineNS.Macross
                     {
                         tmp.Reset(this);
                     }
-                    var t2 = Support.Time.HighPrecision_GetTickCount();
+                    var t2 = Support.TtTime.HighPrecision_GetTickCount();
                     if ((int)(t2 - t1) > limitTime)
                         return;
                 }

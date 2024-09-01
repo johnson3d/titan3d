@@ -199,7 +199,7 @@ namespace EngineNS.UI
                 HostElement.MeshDirty = true;
         }
 
-        Thread.Async.TtTask<NxRHI.USrView>? mDefaultTextureTask = null;
+        Thread.Async.TtTask<NxRHI.TtSrView>? mDefaultTextureTask = null;
         public bool IsReadyToDraw()
         {
             if (mDefaultTextureTask == null)

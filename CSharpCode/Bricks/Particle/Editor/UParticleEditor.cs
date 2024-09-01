@@ -229,7 +229,7 @@ namespace EngineNS.Bricks.Particle.Editor
         public TtGraphRenderer GraphRenderer { get; } = new TtGraphRenderer();
         //public CodeBuilder.UClassLayoutBuilder ParticleStructBuilder { get; } = new CodeBuilder.UClassLayoutBuilder();
         bool IsStarting = false;
-        protected async System.Threading.Tasks.Task Initialize_PreviewParticle(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task Initialize_PreviewParticle(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -239,7 +239,7 @@ namespace EngineNS.Bricks.Particle.Editor
             nebulaData.NebulaName = AssetName;
             nebulaData.NebulaParticle = await TtEngine.Instance.NebulaTemplateManager.CreateParticle(AssetName);
             var meshNode = new Bricks.Particle.TtNebulaNode();
-            await meshNode.InitializeNode(viewport.World, nebulaData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+            await meshNode.InitializeNode(viewport.World, nebulaData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
             meshNode.Parent = viewport.World.Root;
             meshNode.Placement.Position = DVector3.Zero;
             meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;

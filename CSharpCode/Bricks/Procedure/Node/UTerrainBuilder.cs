@@ -137,7 +137,7 @@ namespace EngineNS.Bricks.Procedure.Node
             var rangeX = (bzNode.MaxX - bzNode.MinX);
             var rangeY = (bzNode.MaxY - bzNode.MinY);
 
-            var randObj = new Support.URandom();
+            var randObj = new Support.TtRandom();
             randObj.mCoreObject.SetSeed(20);
             resultComp.DispatchPixels((result, x, y, z) =>
             {
@@ -348,7 +348,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 terrainData.LODRangeFloat.Add(4096.0f);
                 terrainData.Name = "TerrainGen";
                 terrainData.PgcName = graph.GraphEditor.PreviewPGC;
-                await terrainNode.InitializeNode(viewport.World, terrainData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                await terrainNode.InitializeNode(viewport.World, terrainData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
                 terrainNode.Parent = graph.GraphEditor.PreviewRoot;
                 terrainNode.Placement.Position = DVector3.Zero;
                 terrainNode.IsCastShadow = false;

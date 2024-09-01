@@ -17,7 +17,6 @@ namespace EngineNS.Thread.Async
         Render,
         Main,
         AsyncEditor,
-        AsyncEditorSlow,
         TPools,//塞在这个队列的异步处理，必须相互之间没有依赖，可以并行，因为线程池会有多条线程去取出来执行
     }
     public delegate T FPostEvent<T>(TtAsyncTaskStateBase state);
@@ -257,7 +256,7 @@ namespace EngineNS.Thread.Async
             {
                 if (mTPoolEvents.Count == 0)
                 {
-                    mTPoolTrigger.Reset();
+                    //mTPoolTrigger.Reset();
                     return null;
                 }
                 var result = mTPoolEvents.Pop();
@@ -411,26 +410,6 @@ namespace EngineNS.Thread.Async
                 if (ctx != null)
                 {
                     ctx.EnqueuePriority(eh);
-                }
-            }
-        }
-        public void RunOnUntilFinish(FPostEventCondition evt, EAsyncTarget target = EAsyncTarget.AsyncIO, object userArgs = null)
-        {
-            var eh = TtAsyncTaskState<bool>.CreateInstance();
-            eh.PostActionCondition = evt;
-            eh.ContinueThread = null;
-            eh.AsyncType = EAsyncType.ParallelTasks;
-            eh.UserArguments.Obj0 = userArgs;
-
-            if (target != EAsyncTarget.TPools)
-            {
-                TtContextThread ctx = GetContext(target);
-                if(ctx != null)
-                {
-                    lock(ctx.RunUntilFinishEvents)
-                    {
-                        ctx.RunUntilFinishEvents.Add(eh);
-                    }
                 }
             }
         }

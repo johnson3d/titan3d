@@ -159,7 +159,7 @@ namespace EngineNS.Editor.Forms
                 nodeData = Rtti.UTypeDescManager.CreateInstance((attrs[0] as GamePlay.Scene.TtNodeAttribute).NodeDataType) as GamePlay.Scene.TtNodeData;
                 prefix = (attrs[0] as GamePlay.Scene.TtNodeAttribute).DefaultNamePrefix;
             }
-            await newNode.InitializeNode(World, nodeData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+            await newNode.InitializeNode(World, nodeData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
             newNode.NodeData.Name = $"{prefix}_{newNode.SceneId}";
             newNode.Parent = mAddToNode;
             return newNode;

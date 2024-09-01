@@ -14,7 +14,7 @@ namespace EngineNS.Graphics.Pipeline
         public NxRHI.UBuffer GpuBuffer;
         public NxRHI.EBufferType BufferTypes { get; private set; } = NxRHI.EBufferType.BFT_SRV;
         public NxRHI.UUaView Uav;
-        public NxRHI.USrView Srv;
+        public NxRHI.TtSrView Srv;
         public NxRHI.UCbView Cbv;
         private bool Dirty = false;
         public bool Initialize(NxRHI.EBufferType types)
@@ -167,7 +167,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public uint NumElement { get; protected set; }
         public NxRHI.UUaView Uav;
-        public NxRHI.USrView Srv;
+        public NxRHI.TtSrView Srv;
         public NxRHI.UCbView Cbv;
         public NxRHI.URenderTargetView Rtv;
         public NxRHI.UDepthStencilView Dsv;

@@ -72,7 +72,7 @@ namespace EngineNS.GamePlay.Scene
 
             var data = new UGridNodeData();
             var scene = parent.GetNearestParentScene();
-            var meshNode = await scene.NewNode(world, typeof(UGridNode), data, EBoundVolumeType.Box, typeof(UPlacement)) as UGridNode;
+            var meshNode = await scene.NewNode(world, typeof(UGridNode), data, EBoundVolumeType.Box, typeof(TtPlacement)) as UGridNode;
             meshNode.NodeData.Name = "GridLine";
             meshNode.Mesh = gridMesh;
             meshNode.Parent = parent;

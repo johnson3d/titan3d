@@ -722,7 +722,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("SaveShader", in btSize))
             {
-                var blob = new Support.UBlobObject();
+                var blob = new Support.TtBlobObject();
                 mShaderEditor.mCoreObject.GetText(blob.mCoreObject);
                 var code = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)blob.mCoreObject.GetData(), (int)blob.mCoreObject.GetSize());
                 IO.TtFileManager.WriteAllText(ShaderAsset.CodeName.Address, code);

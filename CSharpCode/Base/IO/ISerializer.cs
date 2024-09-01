@@ -42,7 +42,7 @@ namespace EngineNS.IO
         }
     }
 
-    public class IOException : UException
+    public class IOException : TtException
     {
         public string ErrorInfo;
         public IOException(string info,

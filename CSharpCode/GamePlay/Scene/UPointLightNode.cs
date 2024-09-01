@@ -51,7 +51,7 @@ namespace EngineNS.GamePlay.Scene
             var scene = parent.GetNearestParentScene();
             var scale = new Vector3(data.Radius);
 
-            var meshNode = await scene.NewNode(world, typeof(UPointLightNode), data, EBoundVolumeType.Box, typeof(UPlacement)) as UPointLightNode;            
+            var meshNode = await scene.NewNode(world, typeof(UPointLightNode), data, EBoundVolumeType.Box, typeof(TtPlacement)) as UPointLightNode;            
             meshNode.Parent = parent;
             
             meshNode.Placement.SetTransform(in pos, in scale, in Quaternion.Identity);

@@ -27,8 +27,8 @@ using Mono.Cecil.Cil;
 
 namespace EngineNS.NxRHI
 {
-    [Rtti.Meta]
-    public class USrViewAMeta : IO.IAssetMeta
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.NxRHI.USrViewAMeta@EngineCore", "EngineNS.NxRHI.USrViewAMeta" })]
+    public class TtSrViewAMeta : IO.IAssetMeta
     {
         protected override Color4b GetBorderColor()
         {
@@ -36,7 +36,7 @@ namespace EngineNS.NxRHI
         }
         public override string GetAssetExtType()
         {
-            return USrView.AssetExt;
+            return TtSrView.AssetExt;
         }
         public override string GetAssetTypeName()
         {
@@ -48,15 +48,15 @@ namespace EngineNS.NxRHI
         }
         public override void OnBeforeRenamedAsset(IAsset asset, RName name)
         {
-            ((USrView)asset).LoadOriginImageObject();
+            ((TtSrView)asset).LoadOriginImageObject();
             CoreSDK.CheckResult(TtEngine.Instance.GfxDevice.TextureManager.UnsafeRemove(name) == asset);
         }
         public override void OnAfterRenamedAsset(IAsset asset, RName name)
         {
-            ((USrView)asset).FreeOriginImageObject();
-            TtEngine.Instance.GfxDevice.TextureManager.UnsafeAdd(name, (USrView)asset);
+            ((TtSrView)asset).FreeOriginImageObject();
+            TtEngine.Instance.GfxDevice.TextureManager.UnsafeAdd(name, (TtSrView)asset);
         }
-        Thread.Async.TtTask<USrView>? SnapTask;
+        Thread.Async.TtTask<TtSrView>? SnapTask;
         Thread.Async.TtTask<EngineNS.Graphics.Pipeline.Shader.TtEffect>? EffectTask;
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -212,14 +212,14 @@ namespace EngineNS.NxRHI
                 "IsNormal: " + SnapTask.Value.Result.PicDesc.IsNormal);
         }
     }
-    [Rtti.Meta]
-    [USrView.Import]
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.NxRHI.USrView@EngineCore", "EngineNS.NxRHI.USrView" })]
+    [TtSrView.Import]
     [IO.AssetCreateMenu(MenuName = "Texture")]
-    public partial class USrView : AuxPtrType<NxRHI.ISrView>, IO.IAsset, IO.IStreaming
+    public partial class TtSrView : AuxPtrType<NxRHI.ISrView>, IO.IAsset, IO.IStreaming
     {
-        public class UPicDesc
+        public class TtPicDesc
         {
-            public UPicDesc()
+            public TtPicDesc()
             {
                 Desc.SetDefault();
             }
@@ -271,7 +271,7 @@ namespace EngineNS.NxRHI
                 return mCoreObject.GetBufferAsTexture().Desc.Format;
             }
         }
-        public UPicDesc PicDesc { get; set; }
+        public TtPicDesc PicDesc { get; set; }
         public UTexture StreamingTexture { get; private set; } = null;
         public object TagObject;
         public static int NumOfInstance = 0;
@@ -717,7 +717,7 @@ namespace EngineNS.NxRHI
             RName mDir;
             string mName;
             string mSourceFile;
-            public UPicDesc mDesc = new UPicDesc();
+            public TtPicDesc mDesc = new TtPicDesc();
             ImGui.ImGuiFileDialog mFileDialog = TtEngine.Instance.EditorInstance.FileDialog.mFileDialog;
             EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
             public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
@@ -798,7 +798,7 @@ namespace EngineNS.NxRHI
                         if (mName != name)
                         {
                             mName = name;
-                            bFileExisting = IO.TtFileManager.FileExists(mDir.Address + mName + NxRHI.USrView.AssetExt);
+                            bFileExisting = IO.TtFileManager.FileExists(mDir.Address + mName + NxRHI.TtSrView.AssetExt);
                         }
                     }
 
@@ -839,7 +839,7 @@ namespace EngineNS.NxRHI
                         return false;
 
                     var extName = IO.TtFileManager.GetExtName(mSourceFile);
-                    var rn = RName.GetRName(mDir.Name + mName + USrView.AssetExt, mDir.RNameType);
+                    var rn = RName.GetRName(mDir.Name + mName + TtSrView.AssetExt, mDir.RNameType);
                     var xnd = new IO.TtXndHolder("USrView", 0, 0);
 
                     if (extName.ToLower() == ".hdr")
@@ -851,12 +851,12 @@ namespace EngineNS.NxRHI
                         StbImageSharp.ImageResultFloat processedImage = null;
                         if (mDesc.CubeFaces == 6)
                         {
-                            USrView.GenerateBaseCubeMipFromLongitudeLatitude2D(ref processedImage, imageFloat, 512);
+                            TtSrView.GenerateBaseCubeMipFromLongitudeLatitude2D(ref processedImage, imageFloat, 512);
                         }
                         else
                             processedImage = imageFloat;
 
-                        USrView.SaveTexture(rn, xnd.RootNode.mCoreObject, processedImage, mDesc);
+                        TtSrView.SaveTexture(rn, xnd.RootNode.mCoreObject, processedImage, mDesc);
                     }
                     else if (extName.ToLower() == ".exr")
                     {
@@ -864,7 +864,7 @@ namespace EngineNS.NxRHI
                         if (file.Parts.Count == 0)
                             return false;
 
-                        USrView.SaveTexture(rn, xnd.RootNode.mCoreObject, file, mDesc);
+                        TtSrView.SaveTexture(rn, xnd.RootNode.mCoreObject, file, mDesc);
                     }
                     else
                     {
@@ -885,16 +885,16 @@ namespace EngineNS.NxRHI
                                 mDesc.MipLevel = 1;
                         }
 
-                        USrView.SaveTexture(rn, xnd.RootNode.mCoreObject, image, mDesc);
+                        TtSrView.SaveTexture(rn, xnd.RootNode.mCoreObject, image, mDesc);
                     }
 
                     xnd.SaveXnd(rn.Address);
 
-                    var ameta = new USrViewAMeta();
+                    var ameta = new TtSrViewAMeta();
                     ameta.SetAssetName(rn);
                     ameta.AssetId = Guid.NewGuid();
-                    ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(USrView));
-                    ameta.Description = $"This is a {typeof(USrView).FullName}\n";
+                    ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtSrView));
+                    ameta.Description = $"This is a {typeof(TtSrView).FullName}\n";
                     ameta.SaveAMeta((IAsset)null);
 
                     TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
@@ -902,7 +902,7 @@ namespace EngineNS.NxRHI
                 return true;
             }
 
-            public static bool ImportImage(string sourceFile, RName dir, UPicDesc desc)
+            public static bool ImportImage(string sourceFile, RName dir, TtPicDesc desc)
             {
                 using (var stream = System.IO.File.OpenRead(sourceFile))
                 {
@@ -913,13 +913,13 @@ namespace EngineNS.NxRHI
                         return false;
 
                     var name = IO.TtFileManager.GetPureName(sourceFile);
-                    var rn = RName.GetRName(dir.Name.TrimEnd('\\').TrimEnd('/') + "/" + name + USrView.AssetExt, dir.RNameType);
+                    var rn = RName.GetRName(dir.Name.TrimEnd('\\').TrimEnd('/') + "/" + name + TtSrView.AssetExt, dir.RNameType);
 
                     return SaveSrv(image, rn, desc);
                 }
             }
 
-            public static bool SaveSrv(Jither.OpenEXR.EXRFile file, RName rn, UPicDesc desc)
+            public static bool SaveSrv(Jither.OpenEXR.EXRFile file, RName rn, TtPicDesc desc)
             {
                 var part = file.Parts[0];
                 System.Diagnostics.Debug.Assert(part.DataReader != null);
@@ -928,14 +928,14 @@ namespace EngineNS.NxRHI
                 desc.Height = part.DisplayWindow.Height;
 
                 var xnd = new IO.TtXndHolder("USrView", 0, 0);
-                USrView.SaveTexture(rn, xnd.RootNode.mCoreObject, file, desc);
+                TtSrView.SaveTexture(rn, xnd.RootNode.mCoreObject, file, desc);
                 xnd.SaveXnd(rn.Address);
 
-                var ameta = new USrViewAMeta();
+                var ameta = new TtSrViewAMeta();
                 ameta.SetAssetName(rn);
                 ameta.AssetId = Guid.NewGuid();
-                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(USrView));
-                ameta.Description = $"This is a {typeof(USrView).FullName}\n";
+                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtSrView));
+                ameta.Description = $"This is a {typeof(TtSrView).FullName}\n";
                 ameta.SaveAMeta((IO.IAsset)null);
 
                 TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
@@ -944,20 +944,20 @@ namespace EngineNS.NxRHI
                 return true;
             }
 
-            public static bool SaveSrv(StbImageSharp.ImageResultFloat image, RName rn, UPicDesc desc)
+            public static bool SaveSrv(StbImageSharp.ImageResultFloat image, RName rn, TtPicDesc desc)
             {
                 desc.Width = image.Width;
                 desc.Height = image.Height;
 
                 var xnd = new IO.TtXndHolder("USrView", 0, 0);
-                USrView.SaveTexture(rn, xnd.RootNode.mCoreObject, image, desc);
+                TtSrView.SaveTexture(rn, xnd.RootNode.mCoreObject, image, desc);
                 xnd.SaveXnd(rn.Address);
 
-                var ameta = new USrViewAMeta();
+                var ameta = new TtSrViewAMeta();
                 ameta.SetAssetName(rn);
                 ameta.AssetId = Guid.NewGuid();
-                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(USrView));
-                ameta.Description = $"This is a {typeof(USrView).FullName}\n";
+                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtSrView));
+                ameta.Description = $"This is a {typeof(TtSrView).FullName}\n";
                 ameta.SaveAMeta((IO.IAsset)null);
 
                 TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
@@ -965,20 +965,20 @@ namespace EngineNS.NxRHI
                 return true;
             }
 
-            public static bool SaveSrv(StbImageSharp.ImageResult image, RName rn, UPicDesc desc)
+            public static bool SaveSrv(StbImageSharp.ImageResult image, RName rn, TtPicDesc desc)
             {
                 desc.Width = image.Width;
                 desc.Height = image.Height;
 
                 var xnd = new IO.TtXndHolder("USrView", 0, 0);
-                USrView.SaveTexture(rn, xnd.RootNode.mCoreObject, image, desc);
+                TtSrView.SaveTexture(rn, xnd.RootNode.mCoreObject, image, desc);
                 xnd.SaveXnd(rn.Address);
 
-                var ameta = new USrViewAMeta();
+                var ameta = new TtSrViewAMeta();
                 ameta.SetAssetName(rn);
                 ameta.AssetId = Guid.NewGuid();
-                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(USrView));
-                ameta.Description = $"This is a {typeof(USrView).FullName}\n";
+                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtSrView));
+                ameta.Description = $"This is a {typeof(TtSrView).FullName}\n";
                 ameta.SaveAMeta((IO.IAsset)null);
 
                 TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
@@ -1005,7 +1005,7 @@ namespace EngineNS.NxRHI
             }
             public override void ImportSource(string sourceFile, RName dir)
             {
-                ImportImage(sourceFile, dir, new UPicDesc());
+                ImportImage(sourceFile, dir, new TtPicDesc());
             }
         }
 
@@ -1022,7 +1022,7 @@ namespace EngineNS.NxRHI
         public const string AssetExt = ".srv";
         public IO.IAssetMeta CreateAMeta()
         {
-            var result = new USrViewAMeta();
+            var result = new TtSrViewAMeta();
             return result;
         }
         public IO.IAssetMeta GetAMeta()
@@ -1402,7 +1402,7 @@ namespace EngineNS.NxRHI
             while (true);
             return mipLevel;
         }
-        public static unsafe void SaveTexture(RName assetName, XndNode node, Jither.OpenEXR.EXRFile file, UPicDesc desc)
+        public static unsafe void SaveTexture(RName assetName, XndNode node, Jither.OpenEXR.EXRFile file, TtPicDesc desc)
         {
             var part = file.Parts[0];
             System.Diagnostics.Debug.Assert(part.DataReader != null);
@@ -1497,7 +1497,7 @@ namespace EngineNS.NxRHI
             }
         }
         
-        public static unsafe void SaveTexture(RName assetName, XndNode node, StbImageSharp.ImageResultFloat image, UPicDesc desc)
+        public static unsafe void SaveTexture(RName assetName, XndNode node, StbImageSharp.ImageResultFloat image, TtPicDesc desc)
         {
             var writeComp = UStbImageUtility.ConvertColorComponent(image.Comp);
             desc.Height = image.Height;
@@ -1643,7 +1643,7 @@ namespace EngineNS.NxRHI
             }
             return StbImageWriteSharp.ColorComponents.RedGreenBlue;
         }
-        public static unsafe void SaveTexture(RName assetName, XndNode node, StbImageSharp.ImageResult image, UPicDesc desc)
+        public static unsafe void SaveTexture(RName assetName, XndNode node, StbImageSharp.ImageResult image, TtPicDesc desc)
         {
             desc.Height = image.Height;
             desc.Width = image.Width;
@@ -1846,7 +1846,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        public static int SaveExrMips(XndNode pngMipsNode, Jither.OpenEXR.EXRFile file, UPicDesc desc)
+        public static int SaveExrMips(XndNode pngMipsNode, Jither.OpenEXR.EXRFile file, TtPicDesc desc)
         {
             int mipLevel = 0;
             var part = file.Parts[0];
@@ -1992,7 +1992,7 @@ namespace EngineNS.NxRHI
             return mipLevel;
         }
 
-        public static int SaveHdrMips(XndNode pngMipsNode, StbImageSharp.ImageResultFloat curImage, UPicDesc desc)
+        public static int SaveHdrMips(XndNode pngMipsNode, StbImageSharp.ImageResultFloat curImage, TtPicDesc desc)
         {
             int mipLevel = 0;
             int height = curImage.Height;
@@ -2054,7 +2054,7 @@ namespace EngineNS.NxRHI
             return mipLevel;
         }
 
-        public static int SavePngMips(XndNode pngMipsNode, StbImageSharp.ImageResult curImage, UPicDesc desc)
+        public static int SavePngMips(XndNode pngMipsNode, StbImageSharp.ImageResult curImage, TtPicDesc desc)
         {
             int mipLevel = 0;
             int height = curImage.Height;
@@ -2092,7 +2092,7 @@ namespace EngineNS.NxRHI
 
             return mipLevel;
         }
-        public unsafe static int SaveDxtMips(XndNode mipsNode, StbImageSharp.ImageResult curImage, UPicDesc desc)
+        public unsafe static int SaveDxtMips(XndNode mipsNode, StbImageSharp.ImageResult curImage, TtPicDesc desc)
         {
             System.Diagnostics.Debug.Assert(desc.DontCompress == false);
 
@@ -2100,7 +2100,7 @@ namespace EngineNS.NxRHI
             fixed (byte* pImageData = &curImage.Data[0])
             {
                 srcImage.m_Image0 = (uint*)pImageData;
-                var blobResult = new Support.UBlobObject();
+                var blobResult = new Support.TtBlobObject();
                 if (TextureCompress.CrunchWrap.CompressPixels(16, blobResult.mCoreObject, (uint)curImage.Width, (uint)curImage.Height, in srcImage, desc.CompressFormat, true, desc.sRGB, 0, 255))
                 {
                     using (var reader = blobResult.CreateReader())
@@ -2143,7 +2143,7 @@ namespace EngineNS.NxRHI
             }
             return desc.MipLevel;
         }
-        public unsafe static int SaveDxtMips_BcEncoder(XndNode mipsNode, StbImageSharp.ImageResultFloat curImage, UPicDesc desc)
+        public unsafe static int SaveDxtMips_BcEncoder(XndNode mipsNode, StbImageSharp.ImageResultFloat curImage, TtPicDesc desc)
         {
             System.Diagnostics.Debug.Assert(desc.DontCompress == false);
 
@@ -2221,7 +2221,7 @@ namespace EngineNS.NxRHI
             return desc.MipLevel;
         }
 
-        public unsafe static int SaveDxtMips_BcEncoder(XndNode mipsNode, StbImageSharp.ImageResult curImage, UPicDesc desc)
+        public unsafe static int SaveDxtMips_BcEncoder(XndNode mipsNode, StbImageSharp.ImageResult curImage, TtPicDesc desc)
         {
             System.Diagnostics.Debug.Assert(desc.DontCompress == false);
 
@@ -2385,7 +2385,7 @@ namespace EngineNS.NxRHI
 
             return desc.MipLevel;
         }
-        public unsafe static int SaveAstcMips_ActcEncoder(XndNode mipsNode, StbImageSharp.ImageResult curImage, UPicDesc desc)
+        public unsafe static int SaveAstcMips_ActcEncoder(XndNode mipsNode, StbImageSharp.ImageResult curImage, TtPicDesc desc)
         {
             System.Diagnostics.Debug.Assert(desc.DontCompress == false);
             System.Diagnostics.Debug.Assert(false);
@@ -2458,7 +2458,7 @@ namespace EngineNS.NxRHI
             }
         }
         */
-        public static unsafe Support.UBlobObject[] LoadPixelMipLevels(RName name, uint mipLevel, UPicDesc desc)
+        public static unsafe Support.TtBlobObject[] LoadPixelMipLevels(RName name, uint mipLevel, TtPicDesc desc)
         {
             using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
             {
@@ -2475,7 +2475,7 @@ namespace EngineNS.NxRHI
                         mipLevel = pngNode.GetNumOfAttribute();
                     }
                     var result = new StbImageSharp.ImageResult[mipLevel];
-                    var blobs = new Support.UBlobObject[mipLevel];
+                    var blobs = new Support.TtBlobObject[mipLevel];
                     for (uint i = 0; i < mipLevel; i++)
                     {
                         var mipAttr = pngNode.TryGetAttribute($"PngMip{i}");
@@ -2491,7 +2491,7 @@ namespace EngineNS.NxRHI
                         using (var memStream = new System.IO.MemoryStream(data, false))
                         {
                             result[i] = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
-                            blobs[i] = new Support.UBlobObject();
+                            blobs[i] = new Support.TtBlobObject();
                             fixed (byte* p = &result[i].Data[0])
                             {
                                 blobs[i].PushData(p, (uint)result[i].Data.Length);
@@ -2517,7 +2517,7 @@ namespace EngineNS.NxRHI
                             {
                                 mipLevel = faceNode.GetNumOfAttribute();
                             }
-                            var blobs = new Support.UBlobObject[mipLevel];
+                            var blobs = new Support.TtBlobObject[mipLevel];
                             for (uint i = 0; i < mipLevel; i++)
                             {
                                 var realLevel = desc.MipLevel - mipLevel + i;
@@ -2531,7 +2531,7 @@ namespace EngineNS.NxRHI
                                     ar.ReadNoSize(out data, (int)mipAttr.GetReaderLength());
                                 }
 
-                                blobs[i] = new Support.UBlobObject();
+                                blobs[i] = new Support.TtBlobObject();
                                 fixed (byte* p = &data[0])
                                 {
                                     blobs[i].PushData(p, (uint)data.Length);
@@ -2544,14 +2544,14 @@ namespace EngineNS.NxRHI
                 return null;
             }
         }
-        public static unsafe UPicDesc LoadPictureDesc(RName name)
+        public static unsafe TtPicDesc LoadPictureDesc(RName name)
         {
             using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
             {
                 return LoadPictureDesc(xnd.RootNode);
             }
         }
-        public static unsafe void LoadPictureDesc(IO.TtXndNode node, UPicDesc desc)
+        public static unsafe void LoadPictureDesc(IO.TtXndNode node, TtPicDesc desc)
         {
             var attr = node.TryGetAttribute("Desc");
             using (var ar = attr.GetReader(null))
@@ -2606,13 +2606,13 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        public static unsafe UPicDesc LoadPictureDesc(IO.TtXndNode node)
+        public static unsafe TtPicDesc LoadPictureDesc(IO.TtXndNode node)
         {
-            UPicDesc desc = new UPicDesc();
+            TtPicDesc desc = new TtPicDesc();
             LoadPictureDesc(node, desc);
             return desc;
         }
-        public static unsafe UTexture LoadTexture2DMipLevel(IO.TtXndNode node, UPicDesc desc, int level, UTexture oldTexture)
+        public static unsafe UTexture LoadTexture2DMipLevel(IO.TtXndNode node, TtPicDesc desc, int level, UTexture oldTexture)
         {
             switch (desc.CompressFormat)
             {
@@ -2650,7 +2650,7 @@ namespace EngineNS.NxRHI
                     return null;
             }
         }
-        public static unsafe UTexture LoadTexture2DMipLevel(IO.TtXndNode node, UPicDesc desc, int level, int channelR, int channelG, int channelB, int channelA)
+        public static unsafe UTexture LoadTexture2DMipLevel(IO.TtXndNode node, TtPicDesc desc, int level, int channelR, int channelG, int channelB, int channelA)
         {
             switch (desc.CompressFormat)
             {
@@ -2687,7 +2687,7 @@ namespace EngineNS.NxRHI
             }
         }
         #region Load Mips
-        private static unsafe UTexture LoadExrTexture2DMipLevel(TtXndNode node, UPicDesc desc, int mipLevel)
+        private static unsafe UTexture LoadExrTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
                 return null;
@@ -2747,7 +2747,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        private static unsafe UTexture LoadExrTexture2DMipLevel(TtXndNode node, UPicDesc desc, int mipLevel, int channelR, int channelG, int channelB, int channelA)
+        private static unsafe UTexture LoadExrTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel, int channelR, int channelG, int channelB, int channelA)
         {
             if (mipLevel == 0)
                 return null;
@@ -2886,7 +2886,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        private static unsafe UTexture LoadHdrTexture2DMipLevel(TtXndNode node, UPicDesc desc, int mipLevel)
+        private static unsafe UTexture LoadHdrTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
                 return null;
@@ -2962,7 +2962,7 @@ namespace EngineNS.NxRHI
             }
         }
 
-        private static unsafe UTexture LoadPngTexture2DMipLevel(TtXndNode node, UPicDesc desc, int mipLevel)
+        private static unsafe UTexture LoadPngTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
                 return null;
@@ -3032,7 +3032,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        private static unsafe UTexture LoadDxtTexture2DMipLevel(TtXndNode node, UPicDesc desc, int mipLevel)
+        private static unsafe UTexture LoadDxtTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
                 return null;
@@ -3112,7 +3112,7 @@ namespace EngineNS.NxRHI
             }
         }
 
-        private static unsafe UTexture LoadDxtTexture2DMipLevel(TtXndNode node, UPicDesc desc, int mipLevel, UTexture oldTexture)
+        private static unsafe UTexture LoadDxtTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel, UTexture oldTexture)
         {
             if (oldTexture == null)
             {
@@ -3295,9 +3295,9 @@ namespace EngineNS.NxRHI
                     break;
             }
         }
-        public static async System.Threading.Tasks.Task<USrView> LoadSrvMipmap(RName rn, int mipLevel, UTexture oldTexture)
+        public static async System.Threading.Tasks.Task<TtSrView> LoadSrvMipmap(RName rn, int mipLevel, UTexture oldTexture)
         {
-            UPicDesc desc = null;
+            TtPicDesc desc = null;
             var tex2d = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 var xnd = IO.TtXndHolder.LoadXnd(rn.Address);
@@ -3314,8 +3314,11 @@ namespace EngineNS.NxRHI
 
             if (tex2d == null)
             {
+                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"LoadSrvMipmap {rn} failed");
                 if (TtEngine.Instance.PlayMode == EPlayMode.Editor)
-                    SaveOriginImage(rn);
+                {
+                    //SaveOriginImage(rn);
+                }
                 return null;
             }
 
@@ -3346,9 +3349,9 @@ namespace EngineNS.NxRHI
             result.SetDebugName(rn.Name);
             return result;
         }
-        public static async System.Threading.Tasks.Task<USrView> LoadSrvMipmap(RName rn, int mipLevel, int channelR, int channelG, int channelB, int channelA)
+        public static async System.Threading.Tasks.Task<TtSrView> LoadSrvMipmap(RName rn, int mipLevel, int channelR, int channelG, int channelB, int channelA)
         {
-            UPicDesc desc = null;
+            TtPicDesc desc = null;
             var tex2d = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 var xnd = IO.TtXndHolder.LoadXnd(rn.Address);
@@ -3421,21 +3424,21 @@ namespace EngineNS.NxRHI
         {
             foreach (var i in StreamingAssets)
             {
-                var srv = i.Value as USrView;
+                var srv = i.Value as TtSrView;
                 if (srv == null)
                     continue;
                 srv.Dispose();
             }
             StreamingAssets.Clear();
         }
-        public USrView DefaultTexture;
+        public TtSrView DefaultTexture;
         public async System.Threading.Tasks.Task Initialize(TtEngine engine)
         {
             DefaultTexture = await GetTexture(engine.Config.DefaultTexture);
         }
-        private Thread.UAwaitSessionManager<RName, USrView> mCreatingSession = new Thread.UAwaitSessionManager<RName, USrView>();
+        private Thread.UAwaitSessionManager<RName, TtSrView> mCreatingSession = new Thread.UAwaitSessionManager<RName, TtSrView>();
         List<RName> mWaitRemoves = new List<RName>();
-        public async Thread.Async.TtTask<USrView> CreateTexture(string file)
+        public async Thread.Async.TtTask<TtSrView> CreateTexture(string file)
         {
             if (EngineNS.IO.TtFileManager.FileExists(file) == false)
                 return null;
@@ -3453,7 +3456,7 @@ namespace EngineNS.NxRHI
 
             return CreateTexture(image, file);
         }
-        private unsafe USrView CreateTexture(StbImageSharp.ImageResult image, string file)
+        private unsafe TtSrView CreateTexture(StbImageSharp.ImageResult image, string file)
         {
             var texDesc = new FTextureDesc();
             texDesc.SetDefault();
@@ -3494,25 +3497,25 @@ namespace EngineNS.NxRHI
                 return result;
             }
         }
-        public async Thread.Async.TtTask<USrView> GetOrNewTexture(RName rn, int mipLevel = 1)
+        public async Thread.Async.TtTask<TtSrView> GetOrNewTexture(RName rn, int mipLevel = 1)
         {
             var result = await GetTexture(rn, mipLevel);
             if (result != null)
                 return result;
 
-            return await USrView.LoadSrvMipmap(rn, mipLevel, null);
+            return await TtSrView.LoadSrvMipmap(rn, mipLevel, null);
         }
-        public async Thread.Async.TtTask<USrView> GetTexture(RName rn, int mipLevel = 1)
+        public async Thread.Async.TtTask<TtSrView> GetTexture(RName rn, int mipLevel = 1)
         {
             if (rn == null)
                 return null;
-            USrView srv = null;
+            TtSrView srv = null;
             IO.IStreaming result;
             lock (StreamingAssets)
             {
                 if (StreamingAssets.TryGetValue(rn, out result))
                 {
-                    srv = result as USrView;
+                    srv = result as TtSrView;
                     if (srv == null)
                         return null;
                     srv.TargetLOD = mipLevel;
@@ -3529,7 +3532,7 @@ namespace EngineNS.NxRHI
 
             try
             {
-                srv = await USrView.LoadSrvMipmap(rn, mipLevel, null);
+                srv = await TtSrView.LoadSrvMipmap(rn, mipLevel, null);
                 if (srv == null)
                     return srv;
                 lock (StreamingAssets)
@@ -3540,7 +3543,7 @@ namespace EngineNS.NxRHI
                     }
                     else
                     {
-                        srv = result as USrView;
+                        srv = result as TtSrView;
                     }
                 }
 
@@ -3551,17 +3554,17 @@ namespace EngineNS.NxRHI
                 mCreatingSession.FinishSession(rn, session, srv);
             }
         }
-        public USrView TryGetTexture(RName rn)
+        public TtSrView TryGetTexture(RName rn)
         {
             if (rn == null)
                 return null;
             lock (StreamingAssets)
             {
-                USrView srv;
+                TtSrView srv;
                 IO.IStreaming result;
                 if (StreamingAssets.TryGetValue(rn, out result))
                 {
-                    srv = result as USrView;
+                    srv = result as TtSrView;
                     if (srv == null)
                         return null;
                     return srv;
@@ -3571,7 +3574,7 @@ namespace EngineNS.NxRHI
         }
         public unsafe override bool UpdateTargetLOD(IO.IStreaming asset)
         {
-            var srv = asset as USrView;
+            var srv = asset as TtSrView;
             if (srv == null)
                 return false;
 

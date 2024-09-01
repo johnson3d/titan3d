@@ -188,7 +188,7 @@ namespace EngineNS.Bricks.Procedure
         public int Slice { get; private set; }
         public int ElementSize { get; private set; }
         public Vector3 UVWStep = Vector3.Zero;
-        public Support.UBlobObject SuperPixels = new Support.UBlobObject();
+        public Support.TtBlobObject SuperPixels = new Support.TtBlobObject();
         private TtGpuBufferBase GpuBuffer;
         public unsafe TtGpuBufferBase GetGpuBuffer<T>() where T : unmanaged
         {
@@ -330,7 +330,7 @@ namespace EngineNS.Bricks.Procedure
             }
             return false;
         }
-        public virtual unsafe NxRHI.USrView CreateVector2Texture2D(Vector2 min, Vector2 max)
+        public virtual unsafe NxRHI.TtSrView CreateVector2Texture2D(Vector2 min, Vector2 max)
         {
             NxRHI.UTexture texture;
             if(min.X >= 0 && min.X <= 1 && max.X >= 0 && max.X <= 1)
@@ -386,7 +386,7 @@ namespace EngineNS.Bricks.Procedure
                 return result;
             }
         }
-        public virtual unsafe NxRHI.USrView CreateVector3Texture2D(Vector3 minHeight, Vector3 maxHeight)
+        public virtual unsafe NxRHI.TtSrView CreateVector3Texture2D(Vector3 minHeight, Vector3 maxHeight)
         {
             NxRHI.UTexture texture;
             if (minHeight.X >= 0 && minHeight.X <= 1 && maxHeight.X >= 0 && maxHeight.X <= 1)
@@ -450,7 +450,7 @@ namespace EngineNS.Bricks.Procedure
                 return result;
             }
         }
-        public virtual unsafe NxRHI.USrView CreateAsHeightMapTexture2D(out NxRHI.UTexture texture, float minHeight, float maxHeight, EPixelFormat format = EPixelFormat.PXF_R32_FLOAT, float finalScale = 1.0f, bool bNomalized = false)
+        public virtual unsafe NxRHI.TtSrView CreateAsHeightMapTexture2D(out NxRHI.UTexture texture, float minHeight, float maxHeight, EPixelFormat format = EPixelFormat.PXF_R32_FLOAT, float finalScale = 1.0f, bool bNomalized = false)
         {
             texture = null;
             if (minHeight >= 0 && minHeight <= 1 && maxHeight >= 0 && maxHeight <= 1)

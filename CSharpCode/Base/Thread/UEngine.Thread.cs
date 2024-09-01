@@ -41,10 +41,6 @@ namespace EngineNS
         {
             get;
         } = new Thread.TtThreadAsyncForEditor();
-        public Thread.ThreadAsyncEditorSlow ThreadAsyncEditorSlow
-        {
-            get;
-        } = new Thread.ThreadAsyncEditorSlow();
         public Thread.Async.TtContextThreadManager EventPoster
         {
             get
@@ -76,9 +72,6 @@ namespace EngineNS
                 case Thread.Async.EAsyncTarget.AsyncEditor:
                     ctx = this.ThreadAsyncEditor;
                     break;
-                case Thread.Async.EAsyncTarget.AsyncEditorSlow:
-                    ctx = this.ThreadAsyncEditorSlow;
-                    break;
             }
             return ctx;
         }
@@ -99,8 +92,6 @@ namespace EngineNS
                     return ctx == this.ThreadMain;
                 case Thread.Async.EAsyncTarget.AsyncEditor:
                     return ctx == this.ThreadAsyncEditor;
-                case Thread.Async.EAsyncTarget.AsyncEditorSlow:
-                    return ctx == this.ThreadAsyncEditorSlow;
                 case Thread.Async.EAsyncTarget.TPools:
                     break;
             }
@@ -119,7 +110,6 @@ namespace EngineNS
             if (PlayMode != EPlayMode.Game)
             {
                 ThreadAsyncEditor.StartThread("AsyncEditor", null);
-                ThreadAsyncEditorSlow.StartThread("AsyncEditorSlow", null);
             }
 
             EventPoster.StartPools(Config.NumOfThreadPool);
@@ -135,7 +125,6 @@ namespace EngineNS
             if (PlayMode != EPlayMode.Game)
             {
                 ThreadAsyncEditor.StopThread(null);
-                ThreadAsyncEditorSlow.StopThread(null);
             }
         }
         private void PauseSystemThreads()

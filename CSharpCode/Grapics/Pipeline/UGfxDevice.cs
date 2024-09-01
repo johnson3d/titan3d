@@ -37,7 +37,7 @@ namespace EngineNS.Graphics.Pipeline
             {
                 wtType = typeof(EngineNS.Editor.UMainEditorApplication);
             }
-            SlateApplication = Rtti.UTypeDescManager.CreateInstance(wtType) as USlateApplication;
+            SlateApplication = Rtti.UTypeDescManager.CreateInstance(wtType) as TtSlateApplication;
             var winRect = engine.Config.MainWindow;
 
             if(engine.Config.SupportMultWindows)
@@ -105,7 +105,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public void TickSync(TtEngine host)
         {
-            var testTime = Support.Time.GetTickCount();
+            var testTime = Support.TtTime.GetTickCount();
             TtEngine.Instance.EventPoster.TickPostTickSyncEvents(testTime);
             TtEngine.Instance.GfxDevice.RenderContext.TickPostEvents();
 
@@ -149,7 +149,7 @@ namespace EngineNS.Graphics.Pipeline
             while (RenderContext.mCoreObject.IsFinalized() == false)
             {
                 AttachBufferManager.Tick();
-                var testTime = Support.Time.GetTickCount();
+                var testTime = Support.TtTime.GetTickCount();
                 TtEngine.Instance.EventPoster.TickPostTickSyncEvents(testTime);
                 RenderContext.GpuQueue.Flush(NxRHI.EQueueType.QU_ALL);
                 RenderContext.TickPostEvents();
@@ -162,7 +162,7 @@ namespace EngineNS.Graphics.Pipeline
             SDL.SDL_Quit();
 #endif
         }
-        public USlateApplication SlateApplication { get; set; }
+        public TtSlateApplication SlateApplication { get; set; }
         public NxRHI.UGpuSystem RenderSystem { get; private set; }
         public NxRHI.UGpuDevice RenderContext { get; private set; }
         protected async System.Threading.Tasks.Task<bool> InitGPU(TtEngine engine, int Adapter, NxRHI.ERhiType rhi, IntPtr window, bool bDebugLayer, bool useRenderDoc)

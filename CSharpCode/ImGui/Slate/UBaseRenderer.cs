@@ -13,7 +13,7 @@ namespace EngineNS.EGui.Slate
         public NxRHI.UInputLayout InputLayout { get; private set; }
         public NxRHI.USampler SamplerState;
         public NxRHI.UTexture FontTexture;
-        public NxRHI.USrView FontSRV;
+        public NxRHI.TtSrView FontSRV;
         public async System.Threading.Tasks.Task Initialize()
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
@@ -91,8 +91,8 @@ namespace EngineNS.EGui.Slate
             }
             public ImFont Font;
             public NxRHI.UTexture FontTexture;
-            NxRHI.USrView mFontSRV;
-            public NxRHI.USrView FontSRV
+            NxRHI.TtSrView mFontSRV;
+            public NxRHI.TtSrView FontSRV
             {
                 get => mFontSRV;
                 set

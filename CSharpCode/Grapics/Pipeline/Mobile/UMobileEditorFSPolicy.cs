@@ -25,7 +25,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         {
             return GpuSceneNode;
         }
-        public override NxRHI.USrView GetFinalShowRSV()
+        public override NxRHI.TtSrView GetFinalShowRSV()
         {
             return this.AttachmentCache.FindAttachement(FinalCopyNode.GBuffers.RenderTargets[0].Attachement.AttachmentName).Srv;
         }

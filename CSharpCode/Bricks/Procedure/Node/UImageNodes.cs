@@ -46,7 +46,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         RName mImageName;
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
+        [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName ImageName
         {
             get => mImageName;
@@ -60,7 +60,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 exec();
             }
         }
-        private NxRHI.USrView TextureSRV;
+        private NxRHI.TtSrView TextureSRV;
         public override int PreviewResultIndex
         {
             get => mPreviewResultIndex;

@@ -31,7 +31,7 @@ namespace EngineNS.GamePlay
         public async System.Threading.Tasks.Task<bool> InitWorld()
         {
             Scene.TtNodeData data = new Scene.TtNodeData();
-            await mRoot.InitializeNode(this, data, Scene.EBoundVolumeType.Box, typeof(UPlacement));
+            await mRoot.InitializeNode(this, data, Scene.EBoundVolumeType.Box, typeof(TtPlacement));
             mRoot.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
 
             mBoundingDebugMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));

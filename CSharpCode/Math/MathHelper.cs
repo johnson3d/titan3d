@@ -729,7 +729,7 @@ namespace EngineNS
             return (float)System.Math.Pow(x, y);
         }
 
-        private static System.Random sRandom = new Random((int)Support.Time.GetTickCount());
+        private static System.Random sRandom = new Random((int)Support.TtTime.GetTickCount());
         [Rtti.Meta]
         public static int Random()
         {

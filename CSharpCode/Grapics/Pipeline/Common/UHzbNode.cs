@@ -29,7 +29,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public readonly Vector3ui Dispatch_SetupDimArray2 = new Vector3ui(32, 32, 1);
 
         public NxRHI.UTexture HzbTexture;
-        public NxRHI.USrView HzbSRV;
+        public NxRHI.TtSrView HzbSRV;
         public NxRHI.UUaView[] HzbMipsUAVs;
 
         public class SetupShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
@@ -218,7 +218,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
             }
 
-            HzbMipsUAVs = new NxRHI.UUaView[NxRHI.USrView.CalcMipLevel((int)x, (int)y, true)];
+            HzbMipsUAVs = new NxRHI.UUaView[NxRHI.TtSrView.CalcMipLevel((int)x, (int)y, true)];
             var dsTexDesc = new NxRHI.FTextureDesc();
             dsTexDesc.SetDefault();
             dsTexDesc.Width = (uint)x;

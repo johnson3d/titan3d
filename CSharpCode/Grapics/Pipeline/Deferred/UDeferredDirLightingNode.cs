@@ -455,7 +455,7 @@ namespace EngineNS
             }
         }
 
-        public USrView GetPreIntegratedDFSrv(NxRHI.ICommandList cmd)
+        public TtSrView GetPreIntegratedDFSrv(NxRHI.ICommandList cmd)
         {
             if (PreIntegratedDFTexture == null || PreIntegratedDFSrv == null)
             {
@@ -495,6 +495,6 @@ namespace EngineNS
         }
 
         UTexture PreIntegratedDFTexture = null;
-        USrView PreIntegratedDFSrv = null;
+        TtSrView PreIntegratedDFSrv = null;
     }
 }

@@ -121,7 +121,7 @@ namespace EngineNS.Bricks.Network.RPC
 			result.IsCompleted = false;
             result.Context.Handle = System.Threading.Interlocked.Increment(ref TtReturnAwaiterBase.CurrentId);
 			result.Context.RunTarget = TtEngine.Instance.RpcModule.RpcManager.CurrentTarget;
-			result.BeginWaitTime = Support.Time.GetTickCount();
+			result.BeginWaitTime = Support.TtTime.GetTickCount();
 			result.Timeout = timeOut;
 			TtEngine.Instance.RpcModule.PushReturnAwaiter(result);
 			return result;
@@ -236,7 +236,7 @@ namespace EngineNS.Bricks.Network.RPC
         public unsafe override void TickModule(TtEngine host)
         {
             NetPackageManager.Tick();
-			var now = Support.Time.GetTickCount();
+			var now = Support.TtTime.GetTickCount();
 			var nullPkg = new IO.AuxReader<EngineNS.IO.UMemReader>();
             lock (ReturnAwaiters)
 			{

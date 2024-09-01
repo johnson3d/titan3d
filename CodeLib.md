@@ -2,8 +2,17 @@
 ## 1.ÐÔÄÜ·ÖÎö
 ```C#
 [ThreadStatic]
-private static Profiler.TimeScope ScopeTick = new Profiler.TimeScope(typeof(UMovement), nameof(TickLogic));
-using (new Profiler.TimeScopeHelper(ScopeTick))
+private static Profiler.TimeScope mScopeChildren;
+private static Profiler.TimeScope ScopeChildren
+{
+    get
+    {
+        if (mScopeChildren == null)
+            mScopeChildren = new Profiler.TimeScope(typeof(TtWorld), nameof(GatherVisibleMeshes) + ".Children");
+        return mScopeChildren;
+    }
+}
+using (new Profiler.TimeScopeHelper(ScopeChildren))
 {
 	//do sth
 }

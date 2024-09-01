@@ -63,8 +63,8 @@ namespace EngineNS.Editor.Forms
 
         TtTextureViewerCmdParams CmdParameters;
         public Graphics.Pipeline.Shader.TtEffect SlateEffect;
-        public NxRHI.USrView TextureSRV;
-        public NxRHI.USrView ShowTextureSRV;
+        public NxRHI.TtSrView TextureSRV;
+        public NxRHI.TtSrView ShowTextureSRV;
         public EGui.Controls.PropertyGrid.PropertyGrid TexturePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         ~UTextureViewer()
         {
@@ -207,16 +207,16 @@ namespace EngineNS.Editor.Forms
             var btSize = Vector2.Zero;
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
-                var imgType = NxRHI.USrView.GetOriginImageType(AssetName);
+                var imgType = NxRHI.TtSrView.GetOriginImageType(AssetName);
 
                 switch (imgType)
                 {
                     case EngienNS.Bricks.ImageDecoder.UImageType.PNG:
                         {
-                            StbImageSharp.ImageResult image = NxRHI.USrView.LoadOriginPng(AssetName);
+                            StbImageSharp.ImageResult image = NxRHI.TtSrView.LoadOriginPng(AssetName);
                             using (var xnd = new IO.TtXndHolder("USrView", 0, 0))
                             {
-                                NxRHI.USrView.SaveTexture(AssetName, xnd.RootNode.mCoreObject, image, this.TextureSRV.PicDesc);
+                                NxRHI.TtSrView.SaveTexture(AssetName, xnd.RootNode.mCoreObject, image, this.TextureSRV.PicDesc);
                                 xnd.SaveXnd(AssetName.Address);
                             }
                         }
@@ -224,10 +224,10 @@ namespace EngineNS.Editor.Forms
                     case EngienNS.Bricks.ImageDecoder.UImageType.HDR:
                         {
                             StbImageSharp.ImageResultFloat imageFloat = new StbImageSharp.ImageResultFloat();
-                            NxRHI.USrView.LoadOriginHdr(AssetName, ref imageFloat);
+                            NxRHI.TtSrView.LoadOriginHdr(AssetName, ref imageFloat);
                             using (var xnd = new IO.TtXndHolder("USrView", 0, 0))
                             {
-                                NxRHI.USrView.SaveTexture(AssetName, xnd.RootNode.mCoreObject, imageFloat, this.TextureSRV.PicDesc);
+                                NxRHI.TtSrView.SaveTexture(AssetName, xnd.RootNode.mCoreObject, imageFloat, this.TextureSRV.PicDesc);
                                 xnd.SaveXnd(AssetName.Address);
                             }
                         }
@@ -235,10 +235,10 @@ namespace EngineNS.Editor.Forms
                     case EngienNS.Bricks.ImageDecoder.UImageType.EXR:
                         {
                             System.IO.Stream outStream = null;
-                            var file = NxRHI.USrView.LoadOriginExr(AssetName, ref outStream);
+                            var file = NxRHI.TtSrView.LoadOriginExr(AssetName, ref outStream);
                             using (var xnd = new IO.TtXndHolder("USrView", 0, 0))
                             {
-                                NxRHI.USrView.SaveTexture(AssetName, xnd.RootNode.mCoreObject, file, this.TextureSRV.PicDesc);
+                                NxRHI.TtSrView.SaveTexture(AssetName, xnd.RootNode.mCoreObject, file, this.TextureSRV.PicDesc);
                                 xnd.SaveXnd(AssetName.Address);
                             }
                         }
@@ -248,7 +248,7 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("SaveOriginFile", in btSize))
             {
-                USrView.SaveOriginImage(AssetName);
+                TtSrView.SaveOriginImage(AssetName);
             }
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.ToggleButton("R", ref mShowR, in btSize, 0))
@@ -344,7 +344,7 @@ namespace EngineNS.Editor.Forms
 namespace EngineNS.NxRHI
 {
     [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.UTextureViewer))]
-    public partial class USrView
+    public partial class TtSrView
     {
     }
 }

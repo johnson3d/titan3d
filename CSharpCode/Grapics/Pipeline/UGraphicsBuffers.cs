@@ -120,7 +120,7 @@ namespace EngineNS.Graphics.Pipeline
         public NxRHI.URenderTargetView Rtv;
         public NxRHI.UDepthStencilView Dsv;
         public NxRHI.UUaView Uav;
-        public NxRHI.USrView Srv;
+        public NxRHI.TtSrView Srv;
         public NxRHI.UCbView Cbv;
         public void SetImportedBuffer(TtGpuBufferBase gpuBuffer)
         {

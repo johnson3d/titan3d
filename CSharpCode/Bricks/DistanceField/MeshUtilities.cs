@@ -290,7 +290,7 @@ namespace EngineNS.DistanceField
             if (DistanceFieldResolutionScale <= 0)
                 return;
 
-            var StartTime = Support.Time.GetTickCount();
+            var StartTime = Support.TtTime.GetTickCount();
 
             var embreeScene = new DistanceField.UEmbreeScene();
             var embreeManager = new DistanceField.UEmbreeManager();
@@ -472,7 +472,7 @@ namespace EngineNS.DistanceField
 
             embreeManager.DeleteEmbreeScene(embreeScene);
 
-            float BuildTime = (float)(Support.Time.GetTickCount() - StartTime)/1000.0f;
+            float BuildTime = (float)(Support.TtTime.GetTickCount() - StartTime)/1000.0f;
 
             if (BuildTime > 0.0f)
             {

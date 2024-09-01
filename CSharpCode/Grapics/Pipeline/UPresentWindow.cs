@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public class UPresentWindow : UNativeWindow
+    public class UPresentWindow : TtNativeWindow
     {
         public UPresentWindow()
         {

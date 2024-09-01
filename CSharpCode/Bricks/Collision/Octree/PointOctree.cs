@@ -188,7 +188,7 @@ namespace EngineNS.Bricks.Collision.Octree
         /// Draws node boundaries visually for debugging.
         /// Must be called from OnDrawGizmos externally. See also: DrawAllObjects.
         /// </summary>
-        public void DrawAllBounds(GamePlay.TtWorld.UVisParameter vp, GamePlay.UPlacement placement)
+        public void DrawAllBounds(GamePlay.TtWorld.UVisParameter vp, GamePlay.TtPlacement placement)
         {
             rootNode.DrawAllBounds(vp, placement, 0);
         }

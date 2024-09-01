@@ -68,7 +68,7 @@ namespace EngineNS.GamePlay.Scene
                 mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IO.IAsset;
                 var world = new TtWorld(null);
                 await world.InitWorld();
-                var task = (mAsset as TtScene).InitializeNode(world, new TtSceneData(), EBoundVolumeType.Box, typeof(UPlacement));
+                var task = (mAsset as TtScene).InitializeNode(world, new TtSceneData(), EBoundVolumeType.Box, typeof(TtPlacement));
                 PGAsset.Target = mAsset;
             }
         }
@@ -194,7 +194,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public async Thread.Async.TtTask<TtSceneActorNode> NewNodeSimple(GamePlay.TtWorld world, Type nodeType, TtNodeData data, bool isSceneManaged = false)
         {
-            return await NewNode(world, nodeType, data, EBoundVolumeType.Box, typeof(GamePlay.UPlacement), isSceneManaged);
+            return await NewNode(world, nodeType, data, EBoundVolumeType.Box, typeof(GamePlay.TtPlacement), isSceneManaged);
         }
         public async Thread.Async.TtTask<TtSceneActorNode> NewNode(GamePlay.TtWorld world, Type nodeType, TtNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
         {

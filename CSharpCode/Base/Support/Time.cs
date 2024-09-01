@@ -4,10 +4,10 @@ using System.Text;
 
 namespace EngineNS.Support
 {
-    public class Time
+    public class TtTime
     {
         private static System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-        static Time()
+        static TtTime()
         {
             stopwatch.Start();
         }
@@ -82,12 +82,12 @@ namespace EngineNS.Support
         }
     }
 
-    public class ULogicTimer
+    public class TtLogicTimer
     {
         public string Name { get; set; }
         public float Interval { get; set; } = 1.0f;
         float RemainTimer;
-        public delegate bool FOnTimer(ULogicTimer timer);
+        public delegate bool FOnTimer(TtLogicTimer timer);
         FOnTimer OnTimer;
         public void SetOnTimer(FOnTimer cb)
         {
@@ -108,10 +108,10 @@ namespace EngineNS.Support
             }
         }
     }
-    public class ULogicTimerManager
+    public class TtLogicTimerManager
     {
-        public Dictionary<string, ULogicTimer> Timers { get; } = new Dictionary<string, ULogicTimer>();
-        public void SetTimer(ULogicTimer timer)
+        public Dictionary<string, TtLogicTimer> Timers { get; } = new Dictionary<string, TtLogicTimer>();
+        public void SetTimer(TtLogicTimer timer)
         {
             Timers[timer.Name] = timer;
         }

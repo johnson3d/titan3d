@@ -56,7 +56,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         public Vector3ui DispatchThread = new Vector3ui(1, 1, 1);
         public RName mRain;
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
+        [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName Rain 
         {
             get => mRain;
@@ -70,7 +70,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
                 action();
             }
         }
-        internal NxRHI.USrView mRainTexture;
+        internal NxRHI.TtSrView mRainTexture;
         [Rtti.Meta]
         public float RainScalar { get; set; } = 10.0f;
         public int TextureWidth { get; set; } = 1;

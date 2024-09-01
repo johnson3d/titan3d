@@ -24,17 +24,13 @@ namespace EngineNS.Thread
         }
         public override void Tick()
         {
-            mEnqueueTrigger.WaitOne();
+            mEnqueueTrigger.WaitOne(5);
             //把异步事件做完
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
                 this.TickAwaitEvent();
             }
 
-            //if (TtEngine.Instance.TextureManager.WaitStreamingCount == 0 &&
-            //    TtEngine.Instance.SkeletonActionManager.PendingActions.Count == 0 &&
-            //    TtEngine.Instance.MeshPrimitivesManager.PendingMeshPrimitives.Count == 0 &&
-            //    (AsyncEvents.Count + ContinueEvents.Count == 0))
             if (AsyncEvents.Count + ContinueEvents.Count == 0)
             {
                 lock (TtEngine.Instance.ContextThreadManager.AsyncIOEmptys)

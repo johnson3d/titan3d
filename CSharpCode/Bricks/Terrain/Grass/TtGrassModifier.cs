@@ -177,7 +177,7 @@ namespace EngineNS.Bricks.Terrain.Grass
         {
             public FVSGrassData[] InstData;
             public NxRHI.UBuffer InstantBuffer;
-            public NxRHI.USrView InstantSRV;
+            public NxRHI.TtSrView InstantSRV;
             public bool IsDirty { get; private set; } = true;
             public void Dispose()
             {

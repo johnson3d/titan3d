@@ -4,9 +4,10 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    public partial class UPlacementBase : IO.ISerializer
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.UPlacementBase@EngineCore", "EngineNS.GamePlay.UPlacementBase" })]
+    public partial class TtPlacementBase : IO.ISerializer
     {
-        public UPlacementBase()
+        public TtPlacementBase()
         {
             //HostNode = node;
         }
@@ -93,9 +94,10 @@ namespace EngineNS.GamePlay
         }
     }
 
-    public partial class UIdentityPlacement : UPlacementBase
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.UIdentityPlacement@EngineCore", "EngineNS.GamePlay.UIdentityPlacement" })]
+    public partial class TtIdentityPlacement : TtPlacementBase
     {
-        public UIdentityPlacement()
+        public TtIdentityPlacement()
         {
             
         }
@@ -109,9 +111,10 @@ namespace EngineNS.GamePlay
         }
     }
 
-    public partial class UPlacement : UIdentityPlacement
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.UPlacement@EngineCore", "EngineNS.GamePlay.UPlacement" })]
+    public partial class TtPlacement : TtIdentityPlacement
     {
-        public UPlacement()
+        public TtPlacement()
         {
             mTransformData.InitData();
             mIsIdentity = true;

@@ -236,7 +236,7 @@ namespace EngineNS.IO
         {
             if (Task != null)
             {
-                if (Task.Result != null)
+                if (Task.IsCompleted && Task.Result != null)
                     Task.Result.mTextureRSV = null;
                 Task = null;
             }

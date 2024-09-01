@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_14125795831621722917 Type="EngineNS.GamePlay.Scene.UScenePartitionNode.UScenePartitionNodeData@EngineCore">
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.TtNode.ENodeStyles@EngineCore" Order="0" />
+  <NumOfLevelX Type="System.Int32@Unknown" Order="0" />
+  <NumOfLevelZ Type="System.Int32@Unknown" Order="0" />
+  <RPolicyName Type="EngineNS.RName@EngineCore" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.UBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.TtPlacementBase@EngineCore" Order="2" />
+</Hash_14125795831621722917>

@@ -194,7 +194,7 @@ namespace ProjectCooker.Command
         async System.Threading.Tasks.Task ProcTextures()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
-            var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.NxRHI.USrView.AssetExt, true);
+            var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.NxRHI.TtSrView.AssetExt, true);
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -208,12 +208,12 @@ namespace ProjectCooker.Command
                 //    asset.PicDesc.CompressFormat = EngineNS.NxRHI.ETextureCompressFormat.TCF_None;
 
 
-                asset.SaveAssetTo(rn);
-                //asset.GetAMeta().SaveAMeta();
+                //asset.SaveAssetTo(rn);
+                asset.GetAMeta().SaveAMeta(asset);
             }
 
             root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
-            files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.NxRHI.USrView.AssetExt, true);
+            files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.NxRHI.TtSrView.AssetExt, true);
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -226,8 +226,8 @@ namespace ProjectCooker.Command
                 //else
                 //    asset.PicDesc.CompressFormat = EngineNS.NxRHI.ETextureCompressFormat.TCF_None;
 
-                asset.SaveAssetTo(rn);
-                //asset.GetAMeta().SaveAMeta();
+                //asset.SaveAssetTo(rn);
+                asset.GetAMeta().SaveAMeta(asset);
             }
         }
         async System.Threading.Tasks.Task ProcUMesh()

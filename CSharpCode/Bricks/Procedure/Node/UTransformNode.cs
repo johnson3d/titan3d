@@ -263,7 +263,7 @@ namespace EngineNS.Bricks.Procedure.Node
             trans.ResizePixels(0, 1, 1);
             plants.ResizePixels(0, 1, 1);
             //grasses.ResizePixels(0, 1, 1);
-            var randObj = new Support.URandom();
+            var randObj = new Support.TtRandom();
             randObj.mCoreObject.SetSeed(FinalRandomSeed);
             for (int i = 0; i < heightResult.Depth; i++)
             {

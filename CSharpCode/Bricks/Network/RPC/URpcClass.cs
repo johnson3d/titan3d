@@ -20,7 +20,7 @@ namespace EngineNS.Bricks.Network.RPC
         {
             var attrs = type.GetCustomAttributes(typeof(URpcClassAttribute), true);
             if (attrs.Length == 0)
-                throw new UException("");
+                throw new TtException("");
 
             var kls = attrs[0] as URpcClassAttribute;
             RunTarget = kls.RunTarget;
@@ -35,20 +35,20 @@ namespace EngineNS.Bricks.Network.RPC
 
                 if (CheckDefine(i) == false)
                 {
-                    throw new UException("");
+                    throw new TtException("");
                 }
 
                 var dlgt = GetFieldInherit(type, $"rpc_{i.Name}", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
                 if (dlgt == null)
-                    throw new UException("");
+                    throw new TtException("");
 
                 var fun = dlgt.GetValue(null) as FCallMethod;
                 if (fun == null)
-                    throw new UException("");
+                    throw new TtException("");
 
                 var mtd = attrs[0] as URpcMethodAttribute;
                 if (Methods[mtd.Index].Method != null)
-                    throw new UException("");
+                    throw new TtException("");
                 Methods[mtd.Index].Name = i.Name;
                 Methods[mtd.Index].Method = fun;
                 Methods[mtd.Index].Attribute = mtd;

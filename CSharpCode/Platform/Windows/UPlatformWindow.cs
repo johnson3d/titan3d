@@ -18,7 +18,7 @@ namespace EngineNS
         }
     }
 
-    public partial class UNativeWindow
+    public partial class TtNativeWindow
     {
         public enum DwmWindowAttribute : uint
         {
@@ -52,7 +52,7 @@ namespace EngineNS
         [DllImport("dwmapi.dll", PreserveSig = true)]
         public static extern int DwmSetWindowAttribute(IntPtr hwnd, DwmWindowAttribute attr, ref int attrValue, int attrSize);
 
-        ~UNativeWindow()
+        ~TtNativeWindow()
         {
             Cleanup();
         }
@@ -224,7 +224,7 @@ namespace EngineNS
         }
     }
 
-    public partial class UEventProcessorManager
+    public partial class TtEventProcessorManager
     {
         partial void OnTickWindow(in Bricks.Input.Event evt)
         {
@@ -249,7 +249,7 @@ namespace EngineNS
 
 namespace EngineNS
 {
-    public partial class USlateApplication
+    public partial class TtSlateApplication
     {
         public bool CreateNativeWindow(TtEngine engine, string title, int x, int y, int w, int h)
         {

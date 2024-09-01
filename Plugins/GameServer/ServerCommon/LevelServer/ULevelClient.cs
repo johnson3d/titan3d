@@ -32,7 +32,7 @@ namespace EngineNS.Plugins.LevelServer
         public Bricks.Network.INetConnect ClientConnect { get; set; }
 		public UInt16 IndexInGame { get; set; } = UInt16.MaxValue;//IndexInGate
 		public CSCommon.UClientAutoSyncData AutoSyncData { get; } = new CSCommon.UClientAutoSyncData();
-        public UPlacementBase Placement { get; } = new UPlacement();
+        public TtPlacementBase Placement { get; } = new TtPlacement();
 
         public override void Tick()
 		{

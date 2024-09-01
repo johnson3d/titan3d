@@ -8,7 +8,7 @@ namespace EngineNS.Plugins.ClientCommon
     public class UGhostActor : CSCommon.ISyncActor
     {
         public uint SyncId { get; set; }
-        public UPlacementBase Placement { get; } = new UPlacement();
+        public TtPlacementBase Placement { get; } = new TtPlacement();
         public void Tick()
         {
 

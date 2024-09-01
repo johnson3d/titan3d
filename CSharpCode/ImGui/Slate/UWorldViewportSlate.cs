@@ -41,13 +41,13 @@ namespace EngineNS.EGui.Slate
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
-        public async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.TtViewportSlate viewport, USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        public async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             RenderPolicy = policy;
 
             CameraController.ControlCamera(RenderPolicy.DefaultCamera);
         }
-        public override async System.Threading.Tasks.Task Initialize(USlateApplication application, RName policyName, float zMin, float zMax)
+        public override async System.Threading.Tasks.Task Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
         {
             TtRenderPolicy policy = null;
             var rpAsset = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(policyName);
@@ -59,7 +59,7 @@ namespace EngineNS.EGui.Slate
 
             IsInlitialized = true;
         }
-        private async Thread.Async.TtTask InitializeImpl(USlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        private async Thread.Async.TtTask InitializeImpl(TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             await Initialize();
             

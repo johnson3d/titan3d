@@ -71,13 +71,13 @@ namespace EngineNS.Profiler
         {
 #if PWindow
             mClip = clip;
-            mStartTime = Support.Time.HighPrecision_GetTickCount();
+            mStartTime = Support.TtTime.HighPrecision_GetTickCount();
 #endif
         }
         public void Dispose()
         {
 #if PWindow
-            var now = Support.Time.HighPrecision_GetTickCount();
+            var now = Support.TtTime.HighPrecision_GetTickCount();
             if (now - mStartTime> mClip.MaxElapse)
             {
                 mClip.OnTimeOut(now - mStartTime);

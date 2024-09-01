@@ -139,7 +139,7 @@ namespace EngineNS.UI.Canvas
             }
 #endif
         }
-        public unsafe void AddText(string text, float x, float y, in EngineNS.Canvas.FDrawCmdInstanceData data, UBlobObject outCmds)
+        public unsafe void AddText(string text, float x, float y, in EngineNS.Canvas.FDrawCmdInstanceData data, TtBlobObject outCmds)
         {
 #if PWindow
             fixed (char* p = text)

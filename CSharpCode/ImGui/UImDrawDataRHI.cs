@@ -317,7 +317,7 @@ namespace EngineNS.EGui
                                     if (handle.IsAllocated)
                                     {
                                         drawcall = rhiData.Drawcall;
-                                        var rsv = handle.Target as NxRHI.USrView;
+                                        var rsv = handle.Target as NxRHI.TtSrView;
                                         if (rsv != null)
                                         {
                                             drawcall.BindSRV(rhiData.FontTextureBindInfo.mCoreObject, rsv);

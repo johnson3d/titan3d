@@ -627,7 +627,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             public string Name { get; set; }
             RName mValue;
             [Rtti.Meta]
-            [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
+            [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
             public RName Value
             {
                 get => mValue;
@@ -676,21 +676,21 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return null;
             return UsedRSView[index]?.Name;
         }
-        public virtual async System.Threading.Tasks.Task<NxRHI.USrView> GetSRV(int index)
+        public virtual async System.Threading.Tasks.Task<NxRHI.TtSrView> GetSRV(int index)
         {
-            var srv = UsedRSView[index].SrvObject as NxRHI.USrView;
+            var srv = UsedRSView[index].SrvObject as NxRHI.TtSrView;
             if (srv != null)
                 return srv;
             UsedRSView[index].SrvObject = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(UsedRSView[index].Value);
-            return UsedRSView[index].SrvObject as NxRHI.USrView;
+            return UsedRSView[index].SrvObject as NxRHI.TtSrView;
         }
-        public NxRHI.USrView TryGetSRV(int index)
+        public NxRHI.TtSrView TryGetSRV(int index)
         {
-            var srv = UsedRSView[index].SrvObject as NxRHI.USrView;
+            var srv = UsedRSView[index].SrvObject as NxRHI.TtSrView;
             if (srv != null)
                 return srv;
             UsedRSView[index].SrvObject = TtEngine.Instance.GfxDevice.TextureManager.TryGetTexture(UsedRSView[index].Value);
-            return UsedRSView[index].SrvObject as NxRHI.USrView;
+            return UsedRSView[index].SrvObject as NxRHI.TtSrView;
         }
         #endregion
         #region Sampler

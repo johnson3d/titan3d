@@ -35,12 +35,12 @@ namespace EngineNS
                 if (i.IsModuleRun(TtEngine.Instance.PlayMode) == false)
                     continue;
 
-                var t1 = Support.Time.HighPrecision_GetTickCount();
+                var t1 = Support.TtTime.HighPrecision_GetTickCount();
                 if (false == await i.Initialize(host))
                 {
                     Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Error, $"Module {i.GetType()} init failed");
                 }
-                var t2 = Support.Time.HighPrecision_GetTickCount();
+                var t2 = Support.TtTime.HighPrecision_GetTickCount();
 
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"InitializeModules {i.GetType().FullName}:{(t2 - t1) / 1000} ms");
             }
@@ -50,12 +50,12 @@ namespace EngineNS
                 if (i.IsModuleRun(TtEngine.Instance.PlayMode) == false)
                     continue;
 
-                var t1 = Support.Time.HighPrecision_GetTickCount();
+                var t1 = Support.TtTime.HighPrecision_GetTickCount();
                 if (false == await i.PostInitialize(host))
                 {
                     Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Error, $"Module {i.GetType()} PostInit failed");
                 }
-                var t2 = Support.Time.HighPrecision_GetTickCount();
+                var t2 = Support.TtTime.HighPrecision_GetTickCount();
 
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"PostInitializeModules {i.GetType().FullName}:{(t2 - t1) / 1000} ms");
             }

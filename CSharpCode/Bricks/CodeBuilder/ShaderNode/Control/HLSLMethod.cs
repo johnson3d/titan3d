@@ -584,7 +584,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta]
         public string TextureVarName { get; set; }
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
+        [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName AssetName
         {
             get
@@ -618,7 +618,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         public NxRHI.FSamplerDesc Sampler { 
             get => mSampler; 
             set => mSampler = value; }
-        private NxRHI.USrView TextureSRV;
+        private NxRHI.TtSrView TextureSRV;
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
             if (TextureSRV == null || mSlateEffect == null)
@@ -795,7 +795,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta]
         public string TextureVarName { get; set; }
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
+        [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName AssetName
         {
             get
@@ -828,7 +828,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta]
         public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
-        private NxRHI.USrView TextureSRV;
+        private NxRHI.TtSrView TextureSRV;
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
             if (TextureSRV == null || mSlateEffect == null)
@@ -1011,7 +1011,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta]
         public string TextureVarName { get; set; }
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
+        [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName AssetName
         {
             get
@@ -1037,7 +1037,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta]
         public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
-        private NxRHI.USrView TextureSRV;
+        private NxRHI.TtSrView TextureSRV;
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
             if (TextureSRV == null)
@@ -1180,7 +1180,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta]
         public string TextureVarName { get; set; }
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
+        [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName AssetName
         {
             get
@@ -1206,7 +1206,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta]
         public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
-        private NxRHI.USrView TextureSRV;
+        private NxRHI.TtSrView TextureSRV;
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
             if (TextureSRV == null)

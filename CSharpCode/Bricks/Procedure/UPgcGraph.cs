@@ -166,10 +166,10 @@ namespace EngineNS.Bricks.Procedure
                 {
                     //AssetGraph.BufferCache .... clear
                     //AssetGraph.BufferCache .... SaveBuffferToTempFile
-                    var t1 = Support.Time.HighPrecision_GetTickCount();
+                    var t1 = Support.TtTime.HighPrecision_GetTickCount();
                     j.DoProcedure(this);
                     this.McProgram?.Get().OnNodeProcedureFinished(this, j);
-                    var t2 = Support.Time.HighPrecision_GetTickCount();
+                    var t2 = Support.TtTime.HighPrecision_GetTickCount();
                     Profiler.Log.WriteLine<Profiler.TtPgcGategory>(Profiler.ELogTag.Info, $"Node:{j.Name} = {(t2 - t1) / 1000000.0f}");
                 }
             }

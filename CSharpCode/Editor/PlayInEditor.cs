@@ -148,7 +148,7 @@ namespace EngineNS
         public Editor.UPIEModule PIEModule { get; } = new Editor.UPIEModule();
         public readonly static System.Version Version = System.Environment.Version;
         public static string DotNetVersion { get; private set; } = "net7.0";
-        public virtual async System.Threading.Tasks.Task<bool> StartPlayInEditor(USlateApplication application, RName main)
+        public virtual async System.Threading.Tasks.Task<bool> StartPlayInEditor(TtSlateApplication application, RName main)
         {
             if (this.GameInstance != null)
                 return false;

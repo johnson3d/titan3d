@@ -119,12 +119,12 @@ namespace MainEditor
             }
 
             int GCTimes = 0;
-            while (EngineNS.NxRHI.USrView.NumOfInstance > 0)
+            while (EngineNS.NxRHI.TtSrView.NumOfInstance > 0)
             {
                 if (GCTimes >= 20)
                 {
-                    Console.WriteLine($"CSV.NumOfInstance = {EngineNS.NxRHI.USrView.NumOfInstance}/{EngineNS.NxRHI.USrView.NumOfGCHandle}");
-                    System.Diagnostics.Trace.WriteLine($"CSV.NumOfInstance = {EngineNS.NxRHI.USrView.NumOfInstance}/{EngineNS.NxRHI.USrView.NumOfGCHandle}");
+                    Console.WriteLine($"CSV.NumOfInstance = {EngineNS.NxRHI.TtSrView.NumOfInstance}/{EngineNS.NxRHI.TtSrView.NumOfGCHandle}");
+                    System.Diagnostics.Trace.WriteLine($"CSV.NumOfInstance = {EngineNS.NxRHI.TtSrView.NumOfInstance}/{EngineNS.NxRHI.TtSrView.NumOfGCHandle}");
                     //Thread.Sleep(1000 * 30);
                     break;
                 }

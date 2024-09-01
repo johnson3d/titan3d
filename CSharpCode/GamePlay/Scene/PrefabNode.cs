@@ -156,7 +156,7 @@ namespace EngineNS.GamePlay.Scene
                 
                 var prefab = mAsset as TtPrefab;
                 prefab.Root = new TtPrefabNode();
-                _ = prefab.Root.InitializeNode(world, new TtPrefabNode.TtPrefabNodeData() { PrefabName = dir, }, EBoundVolumeType.Box, typeof(GamePlay.UIdentityPlacement));
+                _ = prefab.Root.InitializeNode(world, new TtPrefabNode.TtPrefabNodeData() { PrefabName = dir, }, EBoundVolumeType.Box, typeof(GamePlay.TtIdentityPlacement));
             }
         }
         [Category("Option")]
@@ -210,7 +210,7 @@ namespace EngineNS.GamePlay.Scene
                 if (prefab == null)
                     return null;
                 var node = new TtPrefabNode();
-                await node.InitializeNode(world, new TtPrefabNode.TtPrefabNodeData(), EBoundVolumeType.Box, typeof(GamePlay.UIdentityPlacement));
+                await node.InitializeNode(world, new TtPrefabNode.TtPrefabNodeData(), EBoundVolumeType.Box, typeof(GamePlay.TtIdentityPlacement));
                 prefab.Root = node;
                 prefab.AssetName = name;
 

@@ -134,7 +134,7 @@ namespace EngineNS.Bricks.Font
                         if (mName != name)
                         {
                             mName = name;
-                            bFileExisting = IO.TtFileManager.FileExists(mDir.Address + mName + NxRHI.USrView.AssetExt);
+                            bFileExisting = IO.TtFileManager.FileExists(mDir.Address + mName + NxRHI.TtSrView.AssetExt);
                         }
                     }
 

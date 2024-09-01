@@ -299,7 +299,7 @@ namespace EngineNS.UI.Controls
             batch.Middleground.PushFont(FontAsset);
             batch.Middleground.PushMatrix(mat);
             batch.Middleground.PushClip(in mCurFinalRect);
-            Support.UBlobObject blobObj = new UBlobObject();
+            Support.TtBlobObject blobObj = new TtBlobObject();
             blobObj.PushValue((int)0);
             blobObj.PushValue((int)0);
             for(int i=0; i<mBrushes.Count; i++)

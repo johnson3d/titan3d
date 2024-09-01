@@ -348,7 +348,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             if (type.WeightMap == null || type.WeightStride == 0)
                 return;
 
-            var randObj = new Support.URandom();
+            var randObj = new Support.TtRandom();
             randObj.mCoreObject.SetSeed(type.RandomSeed);
             var terrainNode = patch.Level.GetTerrainNode();
             var patchSize = terrainNode.PatchSize;
@@ -439,21 +439,20 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             if(GrassTypes.TryGetValue(grass, out type) == false)
             {
                 type = new UGrassType();
-                var task = type.Create(mHostPatch, patchOffset, weightDatas, weightStride, grass);
                 GrassTypes.Add(grass, type);
-            }
-            if(type.CreateFinished == false)
-            {
-                TtEngine.Instance.EventPoster.RunOnUntilFinish((Thread.Async.TtAsyncTaskStateBase state) =>
+                var p_offset = patchOffset;
+                Action action = async () =>
                 {
-                    var isFinish = type.CreateFinished;
-                    if(isFinish)
-                        UpdateGrass(mHostPatch, type);
-                    return isFinish;
-                }, Thread.Async.EAsyncTarget.Logic);
+                    await type.Create(mHostPatch, p_offset, weightDatas, weightStride, grass);
+                    UpdateGrass(mHostPatch, type);
+                };
+                action();
             }
-            else
+            
+            if(type.CreateFinished)
+            {
                 UpdateGrass(mHostPatch, type);
+            }
         }
         public void OnGatherVisibleMeshes(GamePlay.TtWorld.UVisParameter rp)
         {

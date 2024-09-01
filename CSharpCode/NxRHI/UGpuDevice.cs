@@ -194,13 +194,13 @@ namespace EngineNS.NxRHI
             ptr.NativeSuper.NativeSuper.Release();
             return result;
         }
-        public USrView CreateSRV(UBuffer buffer, in FSrvDesc desc)
+        public TtSrView CreateSRV(UBuffer buffer, in FSrvDesc desc)
         {
             if (buffer == null)
                 return null;
             if (desc.Type == ESrvType.ST_BufferSRV)
             {
-                var result = new USrView();
+                var result = new TtSrView();
                 result.mCoreObject = mCoreObject.CreateSRV(buffer.mCoreObject.NativeSuper, in desc);
                 if (result.mCoreObject.IsValidPointer == false)
                     return null;
@@ -208,13 +208,13 @@ namespace EngineNS.NxRHI
             }
             return null;
         }
-        public USrView CreateSRV(UTexture texture, in FSrvDesc desc)
+        public TtSrView CreateSRV(UTexture texture, in FSrvDesc desc)
         {
             if (texture == null)
                 return null;
             if (desc.Type == ESrvType.ST_BufferSRV)
                 return null;
-            var result = new USrView();
+            var result = new TtSrView();
             result.mCoreObject = mCoreObject.CreateSRV(texture.mCoreObject.NativeSuper, in desc);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;

@@ -2,9 +2,10 @@
 <Root Type="EngineNS.Bricks.CodeBuilder.UMacrossAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="15889cf3-0ce5-4b3d-b65d-1bb774080e19" />
   <BaseTypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.UProgram@EngineCore" />
-  <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.CodeBuilder.UMacross&#xA;Hahah" />
-  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+  <Description Type="System.String@Unknown" Value="MacrossType:EngineNS.Bricks.Procedure.Node.UProgram@EngineCore&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
       <e_0 Value="0,0,1,1" />
     </FrameUVs>

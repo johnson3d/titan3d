@@ -30,7 +30,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //必须是TextureAsset
-            if (ameta.GetAssetExtType() == NxRHI.USrView.AssetExt)
+            if (ameta.GetAssetExtType() == NxRHI.TtSrView.AssetExt)
                 return true;
             return false;
         }

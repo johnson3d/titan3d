@@ -7,7 +7,7 @@ namespace EngineNS.Editor
 {
     public class USnapshot
     {
-        public NxRHI.USrView mTextureRSV;
+        public NxRHI.TtSrView mTextureRSV;
         public enum ESnapSide
         {
             Center,
@@ -30,31 +30,31 @@ namespace EngineNS.Editor
                 TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.IncreaseSignal(fence);
             }, "Copy Snap Texture");
 
-            TtEngine.Instance.EventPoster.RunOn((state) =>
+            TtEngine.Instance.EventPoster.RunOn((Thread.Async.FPostEvent<bool>)((state) =>
             {
                 fence.Wait(1);
-                TtEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmd((NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
+                TtEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmd((FRenderCmd)((NxRHI.ICommandList im_cmd, ref NxRHI.FRCmdInfo info) =>
                 {
-                    var gpuDataBlob = new Support.UBlobObject();
-                    var bufferData = new Support.UBlobObject();
-                    readable.FetchGpuData(0, gpuDataBlob.mCoreObject);
-                    NxRHI.ITexture.BuildImage2DBlob(bufferData.mCoreObject, gpuDataBlob.mCoreObject, tex.Desc);
-                    TtEngine.Instance.EventPoster.RunOn((state) =>
+                    var gpuDataBlob = new Support.TtBlobObject();
+                    var bufferData = new Support.TtBlobObject();
+                    readable.FetchGpuData(0, (IBlobObject)gpuDataBlob.mCoreObject);
+                    NxRHI.ITexture.BuildImage2DBlob((IBlobObject)bufferData.mCoreObject, (IBlobObject)gpuDataBlob.mCoreObject, tex.Desc);
+                    TtEngine.Instance.EventPoster.RunOn((Thread.Async.FPostEvent<bool>)((state) =>
                     {
-                        SavePng(ameta, file, bufferData, side);
+                        USnapshot.SavePng(ameta, file, (Support.TtBlobObject)bufferData, side);
                         return true;
-                    }, Thread.Async.EAsyncTarget.AsyncEditor);
-                }, "Fetch");
+                    }), Thread.Async.EAsyncTarget.AsyncEditor);
+                }), "Fetch");
                 return true;
-            }, Thread.Async.EAsyncTarget.AsyncEditor);
+            }), Thread.Async.EAsyncTarget.AsyncEditor);
         }
-        public unsafe static void Save(RName rname, IO.IAssetMeta ameta, NxRHI.USrView srv)
+        public unsafe static void Save(RName rname, IO.IAssetMeta ameta, NxRHI.TtSrView srv)
         {
             uint w = srv.GetTexture().Desc.Width;
             uint h = srv.GetTexture().Desc.Height;
             Save(rname, ameta, srv.GetTexture(),0,0,w,h);
         }
-        public unsafe static bool SavePng(IO.IAssetMeta ameta, string file, Support.UBlobObject bufferData, ESnapSide side = ESnapSide.Center)
+        public unsafe static bool SavePng(IO.IAssetMeta ameta, string file, Support.TtBlobObject bufferData, ESnapSide side = ESnapSide.Center)
         {
             byte* pPixelData = (byte*)bufferData.mCoreObject.GetData();
             if (pPixelData == (byte*)0)
@@ -95,7 +95,7 @@ namespace EngineNS.Editor
             TtEngine.Instance.SourceControlModule.AddFile(file);
             return true;
         }
-        public unsafe static bool SavePng(IO.IAssetMeta ameta, string file, Support.UBlobObject bufferData, uint TarW, uint TarH, uint SrcX, uint SrcY)
+        public unsafe static bool SavePng(IO.IAssetMeta ameta, string file, Support.TtBlobObject bufferData, uint TarW, uint TarH, uint SrcX, uint SrcY)
         {
             byte* pPixelData = (byte*)bufferData.mCoreObject.GetData();
             if (pPixelData == (byte*)0)

@@ -667,7 +667,7 @@ namespace EngineNS.GamePlay
                     //case enAxisType.Edge_Z_MaxPlane:  break;
                 }
 
-                MeshNode = (Scene.TtMeshNode) await world.Root.NewNode(world, typeof(Scene.TtMeshNode), meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                MeshNode = (Scene.TtMeshNode) await world.Root.NewNode(world, typeof(Scene.TtMeshNode), meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
                 MeshNode.SetStyle(Scene.TtNode.ENodeStyles.HideBoundShape | Scene.TtNode.ENodeStyles.NoPickedDraw);
                 if(axisMesh != null)
                 {
@@ -675,7 +675,7 @@ namespace EngineNS.GamePlay
                     MeshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
                     MeshNode.IsCastShadow = false;
                 }
-                var placement = MeshNode.Placement as GamePlay.UPlacement;
+                var placement = MeshNode.Placement as GamePlay.TtPlacement;
                 placement.Position = pos;
                 placement.Quat = rot;
                 placement.Scale = scale;
@@ -709,7 +709,7 @@ namespace EngineNS.GamePlay
                             {
                                 if (mCenterAxisMode)
                                 {
-                                    mAxisOrigionTransformBeforeCenterOperation = ((UPlacement)mRootNode.Placement).TransformData;
+                                    mAxisOrigionTransformBeforeCenterOperation = ((TtPlacement)mRootNode.Placement).TransformData;
                                     mRootNode.Placement.Position = GetCenterAxisPosition();
                                 }
                                 else
@@ -969,11 +969,11 @@ namespace EngineNS.GamePlay
                 {
                     Name = "AxisRootNode"
                 },
-                Scene.EBoundVolumeType.None, typeof(GamePlay.UPlacement));
+                Scene.EBoundVolumeType.None, typeof(GamePlay.TtPlacement));
             mRootNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
             mRootNode.IsCastShadow = false;
             mRootNode.Parent = world.Root;
-            ((GamePlay.UPlacement)mRootNode.Placement).InheritScale = true;
+            ((GamePlay.TtPlacement)mRootNode.Placement).InheritScale = true;
 
             var rotArrowAssetMat = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d);
             var rotArrowAssetMesh = new Graphics.Mesh.TtMesh();
@@ -986,7 +986,7 @@ namespace EngineNS.GamePlay
                 var meshNodeData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
                 meshNodeData.MeshName = mAxisMeshMoveX;
                 meshNodeData.Name = "RotArrowAsset";
-                mRotArrowAssetNode = (Scene.TtMeshNode)await world.Root.NewNode(world, typeof(Scene.TtMeshNode), meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacement));
+                mRotArrowAssetNode = (Scene.TtMeshNode)await world.Root.NewNode(world, typeof(Scene.TtMeshNode), meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
                 mRotArrowAssetNode.SetStyle(Scene.TtNode.ENodeStyles.HideBoundShape | Scene.TtNode.ENodeStyles.NoPickedDraw);
                 mRotArrowAssetNode.Mesh = rotArrowAssetMesh;
                 mRotArrowAssetNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
@@ -1021,7 +1021,7 @@ namespace EngineNS.GamePlay
                     mHostWorld,
                     mHostWorld.Root,
                     new Scene.TtMeshNode.TtMeshNodeData(),
-                    typeof(UPlacement),
+                    typeof(TtPlacement),
                     mesh,
                     DVector3.Zero,
                     Vector3.One,
@@ -1045,7 +1045,7 @@ namespace EngineNS.GamePlay
                     mHostWorld,
                     mHostWorld.Root,
                     new Scene.TtMeshNode.TtMeshNodeData(),
-                    typeof(UPlacement),
+                    typeof(TtPlacement),
                     mesh,
                     DVector3.Zero,
                     Vector3.One,
@@ -1523,7 +1523,7 @@ namespace EngineNS.GamePlay
 
                                 if(CenterAxisMode)
                                 {
-                                    mAxisOrigionTransformBeforeCenterOperation = ((UPlacement)mRootNode.Placement).TransformData;
+                                    mAxisOrigionTransformBeforeCenterOperation = ((TtPlacement)mRootNode.Placement).TransformData;
                                     mRootNode.Placement.Position = GetCenterAxisPosition();
                                 }
 
@@ -1709,7 +1709,7 @@ namespace EngineNS.GamePlay
                         else
                             mStartEdgeBB = mEdgeAxisBB;
 
-                        var transformData = ((UPlacement)(mAxisMeshDatas[(int)mCurrentAxisType].MeshNode.Placement)).TransformData;
+                        var transformData = ((TtPlacement)(mAxisMeshDatas[(int)mCurrentAxisType].MeshNode.Placement)).TransformData;
                         switch(mCurrentAxisType)
                         {
                             case enAxisType.Edge_X_Min:
@@ -1739,12 +1739,12 @@ namespace EngineNS.GamePlay
                             switch (mAxisSpace)
                             {
                                 case enAxisSpace.Local:
-                                    mCurrentAxisStartTransform = ((UPlacement)posNode.Placement).TransformData;
+                                    mCurrentAxisStartTransform = ((TtPlacement)posNode.Placement).TransformData;
                                     mPosNodeStartTransform = mCurrentAxisStartTransform;
                                     break;
                                 case enAxisSpace.World:
                                     mCurrentAxisStartTransform = FTransform.Identity;
-                                    mPosNodeStartTransform = ((UPlacement)posNode.Placement).TransformData;
+                                    mPosNodeStartTransform = ((TtPlacement)posNode.Placement).TransformData;
                                     break;
                             }
                         }
@@ -1760,9 +1760,9 @@ namespace EngineNS.GamePlay
                         if (CenterAxisMode)
                             mStartTransAxisWorldTransform = mAxisOrigionTransformBeforeCenterOperation;
                         else
-                            mStartTransAxisWorldTransform = ((UPlacement)mRootNode.Placement).TransformData;
+                            mStartTransAxisWorldTransform = ((TtPlacement)mRootNode.Placement).TransformData;
 
-                        mCurrentAxisStartTransform = ((UPlacement)mRootNode.Placement).TransformData;
+                        mCurrentAxisStartTransform = ((TtPlacement)mRootNode.Placement).TransformData;
                     }
                     break;
             }
@@ -1944,8 +1944,8 @@ namespace EngineNS.GamePlay
             {
                 for (int i = 0; i < mSelectedNodes.Count; i++)
                 {
-                    mSelectedNodes[i].StartAbsTransform = ((UPlacement)mSelectedNodes[i].Node.Placement).AbsTransform;// .TransformData;
-                    mSelectedNodes[i].StartTransform = ((UPlacement)mSelectedNodes[i].Node.Placement).TransformData;
+                    mSelectedNodes[i].StartAbsTransform = ((TtPlacement)mSelectedNodes[i].Node.Placement).AbsTransform;// .TransformData;
+                    mSelectedNodes[i].StartTransform = ((TtPlacement)mSelectedNodes[i].Node.Placement).TransformData;
                 }
             }
         }

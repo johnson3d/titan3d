@@ -4,13 +4,13 @@ using System.Text;
 
 namespace EngineNS.Support
 {
-    public class URandom : AuxPtrType<vfxRandom>
+    public class TtRandom : AuxPtrType<vfxRandom>
     {
-        public URandom()
+        public TtRandom()
         {
             mCoreObject = vfxRandom.CreateInstance();
         }
-        public URandom(int seed)
+        public TtRandom(int seed)
         {
             mCoreObject = vfxRandom.CreateInstance();
             SetSeed(seed);
@@ -53,19 +53,19 @@ namespace EngineNS.Support
             return value < probability;
         }
     }
-    public class CPerlin : AuxPtrType<Perlin>
+    public class TtPerlin : AuxPtrType<Perlin>
     {
-        public CPerlin(int octaves, float freq, float amp, int seed, int samplerSize = 1024)
+        public TtPerlin(int octaves, float freq, float amp, int seed, int samplerSize = 1024)
         {
             mCoreObject = Perlin.CreateInstance(octaves, freq, amp, seed, samplerSize);
         }
     }
 
-    public class UPerlin
+    public class TtPerlin2
     {
-        public UPerlin(int seed, int rdPoolSize = 255)
+        public TtPerlin2(int seed, int rdPoolSize = 255)
         {
-            var rd = new URandom();
+            var rd = new TtRandom();
             rd.mCoreObject.SetSeed(seed);
             mPerm = new int[rdPoolSize + 1];
             for (int i = 0; i < rdPoolSize + 1; i++)

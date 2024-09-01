@@ -184,10 +184,10 @@ namespace EngineNS
         {
             get;
         } = new UTickableManager();
-        public UEventProcessorManager EventProcessorManager
+        public TtEventProcessorManager EventProcessorManager
         {
             get;
-        } = new UEventProcessorManager();
+        } = new TtEventProcessorManager();
 
         public ulong CurrentTickFrame { get; set; } = 0;
         public long EngineStartTickCountUS { get; set; }
@@ -245,23 +245,23 @@ namespace EngineNS
         #endregion
         public async System.Threading.Tasks.Task<bool> PreInitEngine(string cfgFile)
         {
-            EngineStartTickCountUS = Support.Time.HighPrecision_GetTickCount();
+            EngineStartTickCountUS = Support.TtTime.HighPrecision_GetTickCount();
             RttiStructManager.GetInstance().BuildRtti();
 
             CoreSDK.SetAssertEvent(OnNativeAssertEvent);
             CoreSDK.InitF2MManager();
             NativeMemory.BeginProfiler();
 
-            var t1 = Support.Time.HighPrecision_GetTickCount();
+            var t1 = Support.TtTime.HighPrecision_GetTickCount();
             EngineNS.Rtti.UTypeDescManager.Instance.InitTypes();
-            var t2 = Support.Time.HighPrecision_GetTickCount();
+            var t2 = Support.TtTime.HighPrecision_GetTickCount();
 
             EngineNS.Rtti.TtClassMetaManager.Instance.LoadMetas();
-            var t3 = Support.Time.HighPrecision_GetTickCount();
+            var t3 = Support.TtTime.HighPrecision_GetTickCount();
             
             EngineNS.Profiler.Log.InitLogger();
             TtEngine.Instance.AssetMetaManager.LoadMetas();
-            var t4 = Support.Time.HighPrecision_GetTickCount();
+            var t4 = Support.TtTime.HighPrecision_GetTickCount();
             
             EngineNS.UCs2CppBase.InitializeNativeCoreProvider();
 
@@ -340,15 +340,15 @@ namespace EngineNS
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             if (Config.DoUnitTest)
             {
-                t2 = Support.Time.HighPrecision_GetTickCount();
+                t2 = Support.TtTime.HighPrecision_GetTickCount();
                 EngineNS.UTest.UnitTestManager.DoUnitTests();
-                t3 = Support.Time.HighPrecision_GetTickCount();
+                t3 = Support.TtTime.HighPrecision_GetTickCount();
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Unit Test:{(t3 - t2) / 1000} ms");
             }
 
             InitPreIntegratedDF();
 
-            var tEnd = Support.Time.HighPrecision_GetTickCount();
+            var tEnd = Support.TtTime.HighPrecision_GetTickCount();
             Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Engine PreInit Time:{(tEnd - t1) / 1000} ms");
 
             return true;
@@ -401,7 +401,7 @@ namespace EngineNS
         {
             using(new Profiler.TimeScopeHelper(Scope_Tick))
             {
-                var t1 = Support.Time.HighPrecision_GetTickCount();
+                var t1 = Support.TtTime.HighPrecision_GetTickCount();
                 var newTickCount = t1 - EngineStartTickCountUS;
                 ElapseTickCountMS = (newTickCount - CurrentTickCountUS) * 0.001f;
                 CurrentTickCountUS = newTickCount;
@@ -456,7 +456,7 @@ namespace EngineNS
                     Profiler.TimeScopeManager.UpdateAllInstance();
                 }
 
-                var t2 = Support.Time.HighPrecision_GetTickCount();
+                var t2 = Support.TtTime.HighPrecision_GetTickCount();
                 var delta = (int)((t2 - t1) / 1000);
                 var idleTime = Config.Interval - delta;
                 if (idleTime > 0)

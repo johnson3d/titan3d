@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace EngineNS
 {
-    public partial class UNativeWindow
+    public partial class TtNativeWindow
     {
     }
 
@@ -13,7 +13,7 @@ namespace EngineNS
     {
         unsafe bool OnEvent(in Bricks.Input.Event e);
     }
-    public partial class UEventProcessorManager
+    public partial class TtEventProcessorManager
     {
         public List<IEventProcessor> Processors { get; } = new List<IEventProcessor>();
         private List<IEventProcessor> WaitRemoved { get; } = new List<IEventProcessor>();

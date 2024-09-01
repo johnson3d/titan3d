@@ -105,7 +105,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.SetCBV(type, binder, buffer.mCoreObject);
         }
-        public void SetSrv(EShaderType type, FShaderBinder binder, USrView view)
+        public void SetSrv(EShaderType type, FShaderBinder binder, TtSrView view)
         {
             mCoreObject.SetSrv(type, binder, view.mCoreObject);
         }

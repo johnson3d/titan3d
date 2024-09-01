@@ -302,7 +302,7 @@ namespace EngineNS.Bricks.Particle
         }
         public Dictionary<string, TtEffectorQueue> EffectorQueues { get; } = new Dictionary<string, TtEffectorQueue>();
         public TtEffectorQueue CurrentQueue { get; set; }
-        public Support.ULogicTimerManager Timers { get; } = new Support.ULogicTimerManager();
+        public Support.TtLogicTimerManager Timers { get; } = new Support.TtLogicTimerManager();
         public List<TtShape> EmitterShapes { get; } = new List<TtShape>();
         public TtEmitter()
         {

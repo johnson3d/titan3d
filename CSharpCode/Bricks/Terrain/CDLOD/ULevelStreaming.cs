@@ -50,10 +50,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 {
                     if (bForce)
                     {
-                        var t1 = Support.Time.GetTickCount();
+                        var t1 = Support.TtTime.GetTickCount();
                         while (level.LevelData != null)
                         {
-                            var t2 = Support.Time.GetTickCount();
+                            var t2 = Support.TtTime.GetTickCount();
                             if (t2 - t1 > 1000 * 15)
                             {
                                 Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"CreateLevelData({level.LevelX},{level.LevelX}, force = true) time out");

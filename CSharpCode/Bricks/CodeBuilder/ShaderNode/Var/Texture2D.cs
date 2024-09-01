@@ -12,7 +12,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         [Browsable(false)]
         public PinOut OutTex { get; set; } = new PinOut();
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = NxRHI.USrView.AssetExt)]
+        [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         public RName AssetName
         {
             get
@@ -30,7 +30,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 exec();
             }
         }
-        private NxRHI.USrView TextureSRV;
+        private NxRHI.TtSrView TextureSRV;
         public Texture2D()
         {
             VarType = Rtti.UTypeDescGetter<Texture2D>.TypeDesc;

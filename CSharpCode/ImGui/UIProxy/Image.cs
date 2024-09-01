@@ -24,7 +24,7 @@ namespace EngineNS.EGui.UIProxy
         public UInt32 Color = 0xFFFFFFFF;
         public bool IntersectWithCurrentClipRect = true;
 
-        protected Thread.Async.TtTask<NxRHI.USrView>? mTask;
+        protected Thread.Async.TtTask<NxRHI.TtSrView>? mTask;
         public unsafe virtual IntPtr GetImagePtrPointer()
         {
             if (mTask == null)
