@@ -222,7 +222,7 @@ namespace EngineNS.UI.Editor
             {
                 DrawType = enDrawType.Designer;
             }
-            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             toolBarItemIdx++;
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
                 ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Save"))
@@ -230,7 +230,7 @@ namespace EngineNS.UI.Editor
                 Save();
             }
             toolBarItemIdx++;
-            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
                 ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "GenCode", false, -1, 0, spacing))
             {
@@ -239,7 +239,7 @@ namespace EngineNS.UI.Editor
             }
 
             toolBarItemIdx++;
-            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             if (Macross.UMacrossDebugger.Instance.CurrrentBreak != null)
             {
                 if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,

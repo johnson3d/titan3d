@@ -98,7 +98,7 @@ namespace EngineNS.Animation
                 }
                 if (!ImGuiAPI.IsAnyItemActive() && !ImGuiAPI.IsMouseClicked(0, false))
                     ImGuiAPI.SetKeyboardFocusHere(0);
-                searchBar.OnDraw(in comboDrawList, in Support.UAnyPointer.Default);
+                searchBar.OnDraw(in comboDrawList, in Support.TtAnyPointer.Default);
                 bool bSelected = true;
                 List<(string Name, Guid Id)> SMIdName = new List<(string, Guid)>();
                 SMIdName.Add(("None", Guid.Empty));

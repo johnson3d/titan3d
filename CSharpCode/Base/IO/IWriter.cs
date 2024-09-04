@@ -23,7 +23,7 @@ namespace EngineNS.IO
         void Write(byte[] v);
         void Write(VNameString v);
         void Write(RName v);
-        void Write(Support.UBitset v);
+        void Write(Support.TtBitset v);
 
         void Write<T>(T v) where T : unmanaged;
     }
@@ -186,7 +186,7 @@ namespace EngineNS.IO
         {
             SerializerHelper.Write(this, v);
         }
-        public void Write(Support.UBitset v)
+        public void Write(Support.TtBitset v)
         {
             Write(v.BitCount);
             unsafe

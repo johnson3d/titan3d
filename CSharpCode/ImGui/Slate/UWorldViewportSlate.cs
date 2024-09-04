@@ -116,6 +116,7 @@ namespace EngineNS.EGui.Slate
         Vector2 mStartMousePt;
         public float CameraMoveSpeed { get; set; } = 1.0f;
         public float CameraMouseWheelSpeed { get; set; } = 1.0f;
+        public bool CameralWheelMoveWithLookAt { get; set; } = false;
         public unsafe override bool OnEvent(in Bricks.Input.Event e)
         {
             mAxis?.OnEvent(this, in e);
@@ -165,7 +166,7 @@ namespace EngineNS.EGui.Slate
                     }
                     else
                     {
-                        CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, e.MouseWheel.Y * CameraMouseWheelSpeed, false);
+                        CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, e.MouseWheel.Y * CameraMouseWheelSpeed, CameralWheelMoveWithLookAt);
                     }
                 }
             }

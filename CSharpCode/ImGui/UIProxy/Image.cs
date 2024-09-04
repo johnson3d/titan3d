@@ -77,7 +77,7 @@ namespace EngineNS.EGui.UIProxy
                 mTask = null;
             }
         }
-        public unsafe virtual bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
+        public unsafe virtual bool OnDraw(in ImDrawList drawList, in Support.TtAnyPointer drawData)
         {
             var startPos = ImGuiAPI.GetCursorScreenPos();
             var endPos = startPos + ImageSize;
@@ -134,7 +134,7 @@ namespace EngineNS.EGui.UIProxy
         unsafe void DrawBoxImage(in ImDrawList drawList, in Vector2 startPos, in Vector2 endPos)
         {
         }
-        public unsafe override bool OnDraw(in ImDrawList drawList, in UAnyPointer drawData)
+        public unsafe override bool OnDraw(in ImDrawList drawList, in TtAnyPointer drawData)
         {
             var startPos = ImGuiAPI.GetCursorScreenPos();
             var endPos = startPos + ImageSize;

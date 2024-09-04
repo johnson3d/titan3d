@@ -54,7 +54,7 @@ namespace EngineNS.Bricks.Particle
                 mNebulaParticle = await TtEngine.Instance.NebulaTemplateManager.GetParticle(GetNodeData<TtNebulaNodeData>().NebulaName);
             return ret;
         }
-        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             if (mNebulaParticle == null)
                 return;

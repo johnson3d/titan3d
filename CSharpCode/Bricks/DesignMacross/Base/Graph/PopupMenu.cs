@@ -134,7 +134,7 @@ namespace EngineNS.DesignMacross.Base.Graph
                             clicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
                             break;
                         case eMenuStyle.Menu:
-                            clicked = EGui.UIProxy.MenuItemProxy.MenuItem(item.Text, "", false, null, cmdList, Support.UAnyPointer.Default, ref item.MenuState);
+                            clicked = EGui.UIProxy.MenuItemProxy.MenuItem(item.Text, "", false, null, cmdList, Support.TtAnyPointer.Default, ref item.MenuState);
                             break;
                     }
                     if (clicked)
@@ -171,7 +171,7 @@ namespace EngineNS.DesignMacross.Base.Graph
                         }
                         break;
                     case eMenuStyle.Menu:
-                        if (EGui.UIProxy.MenuItemProxy.BeginMenuItem(item.Text, "", null, cmdList, Support.UAnyPointer.Default, ref item.MenuState))
+                        if (EGui.UIProxy.MenuItemProxy.BeginMenuItem(item.Text, "", null, cmdList, Support.TtAnyPointer.Default, ref item.MenuState))
                         {
                             for (int menuIdx = 0; menuIdx < item.SubMenuItems.Count; menuIdx++)
                             {

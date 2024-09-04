@@ -34,15 +34,15 @@ namespace EngineNS.Support
         }
         public bool Add(K key, V value)
         {
-            UAnyValue tKey = new UAnyValue();
-            UAnyValue tValue = new UAnyValue();
+            TtAnyValue tKey = new TtAnyValue();
+            TtAnyValue tValue = new TtAnyValue();
             tKey.SetValue<K>(key);
             tValue.SetValue<V>(value);
             return mCoreObject.Add(in tKey, in tValue);
         }
         public void Remove(K key)
         {
-            UAnyValue tKey = new UAnyValue();
+            TtAnyValue tKey = new TtAnyValue();
             tKey.SetValue<K>(key);
             mCoreObject.Remove(in tKey);
         }
@@ -53,9 +53,9 @@ namespace EngineNS.Support
         public bool Find(K key, out V value)
         {
             value = default(V);
-            UAnyValue tKey = new UAnyValue();
+            TtAnyValue tKey = new TtAnyValue();
             tKey.SetValue<K>(key);
-            UAnyValue tValue = new UAnyValue();
+            TtAnyValue tValue = new TtAnyValue();
             var ret = mCoreObject.Find(in tKey, ref tValue);
             if (ret == false)
                 return false;
@@ -99,8 +99,8 @@ namespace EngineNS.Support
             {
                 get
                 {
-                    UAnyValue key = new UAnyValue();
-                    UAnyValue value = new UAnyValue();
+                    TtAnyValue key = new TtAnyValue();
+                    TtAnyValue value = new TtAnyValue();
                     mIterator->GetKeyValue(ref key, ref value);
                     K kk = default(K);
                     key.GetValue<K>(ref kk);

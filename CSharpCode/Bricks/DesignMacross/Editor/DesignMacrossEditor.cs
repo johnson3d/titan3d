@@ -229,7 +229,7 @@ namespace EngineNS.DesignMacross.Editor
                 CompileCode();
             }
             toolBarItemIdx++;
-            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
                 ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "GenCode", false, -1, 0, spacing))
             {
@@ -237,7 +237,7 @@ namespace EngineNS.DesignMacross.Editor
                 CompileCode();
             }
             toolBarItemIdx++;
-            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
                 ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "ClassSettings", false, -1, 0, spacing))
             {
@@ -260,7 +260,7 @@ namespace EngineNS.DesignMacross.Editor
             //}
             ////////////////////////
             toolBarItemIdx++;
-            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             if (Macross.UMacrossDebugger.Instance.CurrrentBreak != null)
             {
                 if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
@@ -391,7 +391,7 @@ namespace EngineNS.DesignMacross.Editor
             {
                 var drawList = ImGuiAPI.GetWindowDrawList();
                 for (int i = 0; i < mMenuItems.Count; i++)
-                    mMenuItems[i].OnDraw(in drawList, in Support.UAnyPointer.Default);
+                    mMenuItems[i].OnDraw(in drawList, in Support.TtAnyPointer.Default);
 
                 ImGuiAPI.EndMenuBar();
             }

@@ -22,95 +22,7 @@ namespace EngineNS.Profiler
             mTime?.End();
         }
     }
-    public ref struct TimeScopeRAII
-    {
-        public TimeScope mTime;
-        public TimeScopeRAII(TimeScope t)
-        {
-            mTime = t;
-            mTime.Begin(true);
-        }
-        public void Dispose()
-        {
-            mTime.End();
-        }
-        private static void Test()
-        {
-            var tt = new Profiler.TimeScope(typeof(TtStreamingManager), nameof(Test));
-            using var a = new TimeScopeRAII(tt);
-            //do sth
-        }
-    }
-
-    public struct TimeScopeWindows : IDisposable
-    {
-#if PWindow
-        public TimeScope mTime;
-#endif
-        public TimeScopeWindows(TimeScope t)
-        {
-#if PWindow
-            mTime = t;
-            mTime.Begin();
-#endif
-        }
-        public void Dispose()
-        {
-#if PWindow
-            mTime.End();
-#endif
-        }
-    }
-    public struct TimeClipHelper : IDisposable
-    {
-#if PWindow
-        public TimeClip mClip;
-        long mStartTime;
-#endif
-        public TimeClipHelper(TimeClip clip)
-        {
-#if PWindow
-            mClip = clip;
-            mStartTime = Support.TtTime.HighPrecision_GetTickCount();
-#endif
-        }
-        public void Dispose()
-        {
-#if PWindow
-            var now = Support.TtTime.HighPrecision_GetTickCount();
-            if (now - mStartTime> mClip.MaxElapse)
-            {
-                mClip.OnTimeOut(now - mStartTime);
-            }
-#endif
-        }
-    }
-    public class TimeClip
-    {
-        public TimeClip(string n, long time, Action<TimeClip, long> onTimeout)
-        {
-            Name = n;
-            MaxElapse = time;
-            TimeOutAction = onTimeout;
-        }
-        public TimeClip(string n, long time)
-        {
-            Name = n;
-            MaxElapse = time;
-        }
-        public TimeClip(long time, Action<TimeClip, long> onTimeout)
-        {
-            MaxElapse = time;
-            TimeOutAction = onTimeout;
-        }
-        public string Name;
-        public long MaxElapse;
-        public Action<TimeClip, long> TimeOutAction = (clip, time)=>{System.Diagnostics.Debug.WriteLine($"TimeClip {clip.Name} time out: {time}/{clip.MaxElapse}");};
-        public virtual void OnTimeOut(long time)
-        {
-            TimeOutAction(this, time);
-        }
-    }
+    
     public class TimeScope : AuxPtrType<SampResult>
     {
         public override void Dispose()
@@ -229,6 +141,7 @@ namespace EngineNS.Profiler
                 i.Cleanup();
             }
             AllThreadInstance.Clear();
+            EngineNS.v3dSampMgr.FinalCleanup();
         }
         public static TimeScopeManager FindManager(string name)
         {
@@ -333,7 +246,7 @@ namespace EngineNS.Profiler
         #region RPC
         public class RpcProfilerThreads : IO.BaseSerializer
         {
-            public override void OnWriteMember(IWriter ar, ISerializer obj, UMetaVersion metaVersion)
+            public override void OnWriteMember(IWriter ar, ISerializer obj, TtMetaVersion metaVersion)
             {
                 ar.Write((int)Profiler.TimeScopeManager.AllThreadInstance.Count);
                 foreach (var i in Profiler.TimeScopeManager.AllThreadInstance)
@@ -342,7 +255,7 @@ namespace EngineNS.Profiler
                 }
             }
             public List<string> ThreadNames = new List<string>();
-            public override void OnReadMember(IReader ar, ISerializer obj, UMetaVersion metaVersion)
+            public override void OnReadMember(IReader ar, ISerializer obj, TtMetaVersion metaVersion)
             {
                 int count = 0;
                 ar.Read(out count);
@@ -366,7 +279,7 @@ namespace EngineNS.Profiler
         public class RpcProfilerData : IO.BaseSerializer
         {
             public Profiler.TimeScopeManager Manager;
-            public override void OnWriteMember(IWriter ar, ISerializer obj, UMetaVersion metaVersion)
+            public override void OnWriteMember(IWriter ar, ISerializer obj, TtMetaVersion metaVersion)
             {
                 if (Manager == null)
                 {
@@ -395,7 +308,7 @@ namespace EngineNS.Profiler
                 public string Parent;
             }
             public List<ScopeInfo> Scopes = new List<ScopeInfo>();
-            public override void OnReadMember(IReader ar, ISerializer obj, UMetaVersion metaVersion)
+            public override void OnReadMember(IReader ar, ISerializer obj, TtMetaVersion metaVersion)
             {
                 int count = 0;
                 ar.Read(out count);

@@ -160,16 +160,16 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var PassDesc = new NxRHI.FRenderPassDesc();
-            PassDesc.NumOfMRT = 1;
+            PassDesc.NumOfMRT = 2;
             PassDesc.AttachmentMRTs[0].Format = format;
             PassDesc.AttachmentMRTs[0].Samples = 1;
             PassDesc.AttachmentMRTs[0].LoadAction = ClearMRT ? NxRHI.EFrameBufferLoadAction.LoadActionClear : NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
             PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             
-            //PassDesc.AttachmentMRTs[1].Format = format;
-            //PassDesc.AttachmentMRTs[1].Samples = 1;
-            //PassDesc.AttachmentMRTs[1].LoadAction = ClearMRT ? NxRHI.EFrameBufferLoadAction.LoadActionClear : NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
-            //PassDesc.AttachmentMRTs[1].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
+            PassDesc.AttachmentMRTs[1].Format = format;
+            PassDesc.AttachmentMRTs[1].Samples = 1;
+            PassDesc.AttachmentMRTs[1].LoadAction = ClearMRT ? NxRHI.EFrameBufferLoadAction.LoadActionClear : NxRHI.EFrameBufferLoadAction.LoadActionDontCare;
+            PassDesc.AttachmentMRTs[1].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
 
             PassDesc.m_AttachmentDepthStencil.Format = DepthStencilPinOut.Attachement.Format;
             PassDesc.m_AttachmentDepthStencil.Samples = 1;
@@ -192,7 +192,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
 
             GBuffers.Initialize(policy, RenderPass);
             GBuffers.SetRenderTarget(policy, 0, Rt0PinOut);
-            //GBuffers.SetRenderTarget(policy, 1, Rt1PinOut);
+            GBuffers.SetRenderTarget(policy, 1, Rt1PinOut);
             GBuffers.SetDepthStencil(policy, DepthStencilPinOut);
             GBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
 

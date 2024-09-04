@@ -14,7 +14,7 @@ namespace EngineNS.Bricks.Network.AutoSync
     }
     public interface IAutoSyncObject
     {
-        ref Support.UBitset Flags { get; }
+        ref Support.TtBitset Flags { get; }
         bool IsDirty { get; set; }
         void AutoSyncWriteValue(IO.IWriter ar, int index);
         void AutoSyncReadValue(IO.IReader ar, int index, bool bSet = true);
@@ -51,7 +51,7 @@ namespace EngineNS.Bricks.Network.AutoSync
             return true;
         }
         [ThreadStatic]
-        private static Support.UBitset SyncFlags = null;
+        private static Support.TtBitset SyncFlags = null;
         public static bool SyncValues(IAutoSyncObject host, IO.IReader ar, bool bSet = true)
         {
             ar.Read(ref SyncFlags);
@@ -164,8 +164,8 @@ namespace EngineNS.Bricks.Network.AutoSync
 				}
 			}
 		}
-		EngineNS.Support.UBitset mFlags = new EngineNS.Support.UBitset(2);
-		public ref EngineNS.Support.UBitset Flags { get => ref mFlags; }
+		EngineNS.Support.TtBitset mFlags = new EngineNS.Support.TtBitset(2);
+		public ref EngineNS.Support.TtBitset Flags { get => ref mFlags; }
 		public bool IsGhostSyncObject { get; set; }
 	}
 }

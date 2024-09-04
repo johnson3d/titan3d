@@ -553,7 +553,7 @@ namespace EngineNS.Graphics.Pipeline
     {
         public Graphics.Pipeline.TtRenderPolicy RenderPolicy { get; set; }
         public GamePlay.TtWorld World { get; set; }
-        public GamePlay.TtWorld.UVisParameter VisParameter = new GamePlay.TtWorld.UVisParameter();
+        public GamePlay.TtWorld.TtVisParameter VisParameter = new GamePlay.TtWorld.TtVisParameter();
         public void SetCameraOffset(in DVector3 offset)
         {
             World.CameraOffset = offset;

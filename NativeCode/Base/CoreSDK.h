@@ -10,7 +10,7 @@ namespace NxRHI
 {
 	struct FShaderDesc;
 }
-struct UAnyValue;
+struct TtAnyValue;
 
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void(*FWriteLogString)(const void* threadName, const void* logStr, ELevelTraceType level, const void* file, int line);
@@ -22,7 +22,7 @@ typedef void(* FOnNativeMemFree)(size_t size, const char* file, size_t line, siz
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void(* FOnNativeMemLeak)(void* ptr, size_t size, const char* file, size_t line, size_t id, const char* debugInfo);
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
-typedef void* (*FCreateManagedObject)(const char* fullname, UAnyValue* args, int NumOfArg, int refType);
+typedef void* (*FCreateManagedObject)(const char* fullname, TtAnyValue* args, int NumOfArg, int refType);
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void (*FFreeManagedObjectGCHandle)(void* handle);
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)

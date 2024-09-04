@@ -161,7 +161,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             inst.Placement.TransformData = trans;
             type.PushInstance(inst, capacity);
         }
-        public void OnGatherVisibleMeshes(GamePlay.TtWorld.UVisParameter rp)
+        public void OnGatherVisibleMeshes(GamePlay.TtWorld.TtVisParameter rp)
         {
             foreach (var i in PlantTypes.Values)
             {

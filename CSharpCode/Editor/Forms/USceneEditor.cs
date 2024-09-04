@@ -257,7 +257,7 @@ namespace EngineNS.Editor.Forms
                         {
                             MenuName = "DisableShadow",
                             Selected = false,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 PreviewViewport.RenderPolicy.DisableShadow = !PreviewViewport.RenderPolicy.DisableShadow;
                                 item.Selected = PreviewViewport.RenderPolicy.DisableShadow;
@@ -267,7 +267,7 @@ namespace EngineNS.Editor.Forms
                         {
                             MenuName = "DisableAO",
                             Selected = false,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 PreviewViewport.RenderPolicy.DisableAO = !PreviewViewport.RenderPolicy.DisableAO;
                                 item.Selected = PreviewViewport.RenderPolicy.DisableAO;
@@ -277,7 +277,7 @@ namespace EngineNS.Editor.Forms
                         {
                             MenuName = "DisableHDR",
                             Selected = false,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 PreviewViewport.RenderPolicy.DisableHDR = !this.PreviewViewport.RenderPolicy.DisableHDR;
                                 item.Selected = PreviewViewport.RenderPolicy.DisableHDR;
@@ -292,7 +292,7 @@ namespace EngineNS.Editor.Forms
                                 {
                                     MenuName = "None",
                                     //Selected = PreviewViewport.RenderPolicy.TypeAA == Graphics.Pipeline.URenderPolicy.ETypeAA.None,
-                                    Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                                    Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                                     {
                                         PreviewViewport.RenderPolicy.TypeAA = Graphics.Pipeline.TtRenderPolicy.ETypeAA.None;
                                         item.Selected = PreviewViewport.RenderPolicy.TypeAA == Graphics.Pipeline.TtRenderPolicy.ETypeAA.None;
@@ -310,7 +310,7 @@ namespace EngineNS.Editor.Forms
                                 {
                                     MenuName = "FSAA",
                                     //Selected = PreviewViewport.RenderPolicy.TypeAA == Graphics.Pipeline.URenderPolicy.ETypeAA.Fsaa,
-                                    Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                                    Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                                     {
                                         PreviewViewport.RenderPolicy.TypeAA = Graphics.Pipeline.TtRenderPolicy.ETypeAA.Fsaa;
                                         item.Selected = PreviewViewport.RenderPolicy.TypeAA == Graphics.Pipeline.TtRenderPolicy.ETypeAA.Fsaa;
@@ -328,7 +328,7 @@ namespace EngineNS.Editor.Forms
                                 {
                                     MenuName = "TAA",
                                     //Selected = PreviewViewport.RenderPolicy.TypeAA == Graphics.Pipeline.URenderPolicy.ETypeAA.Taa,
-                                    Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                                    Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                                     {
                                         PreviewViewport.RenderPolicy.TypeAA = Graphics.Pipeline.TtRenderPolicy.ETypeAA.Taa;
                                         item.Selected = PreviewViewport.RenderPolicy.TypeAA == Graphics.Pipeline.TtRenderPolicy.ETypeAA.Taa;
@@ -348,7 +348,7 @@ namespace EngineNS.Editor.Forms
                         {
                             MenuName = "DisablePointLight",
                             Selected = false,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 //var prop = this.WorldViewportSlate.RenderPolicy.GetType().GetProperty("DisablePointLight");
                                 //if(prop !=null && prop.PropertyType==typeof(bool))
@@ -502,7 +502,7 @@ namespace EngineNS.Editor.Forms
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
         public Graphics.Pipeline.TtCpuCullingNode CpuCullNode = null;
-        public GamePlay.TtWorld.UVisParameter.EVisCullFilter CullFilters 
+        public GamePlay.TtWorld.TtVisParameter.EVisCullFilter CullFilters 
         { 
             get
             {
@@ -521,13 +521,14 @@ namespace EngineNS.Editor.Forms
                 return false;
             var rpolicy = Scene.RPolicyName;
             if (rpolicy == null)
-                rpolicy = TtEngine.Instance.Config.MainRPolicyName;
+                rpolicy = TtEngine.Instance.Config.SimpleRPolicyName;
             //PreviewViewport.PreviewAsset = name;
             PreviewViewport.Title = $"Scene:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewScene;
-            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.SimpleRPolicyName, 0, 1);
+            PreviewViewport.CameralWheelMoveWithLookAt = true;
+            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, rpolicy, 0, 1);
             var camPos = new DVector3(10, 10, 10);
-            PreviewViewport.CameraController.Camera.mCoreObject.LookAtLH(in camPos, in DVector3.Zero, in Vector3.Up);
+            PreviewViewport.CameraController.Camera?.mCoreObject.LookAtLH(in camPos, in DVector3.Zero, in Vector3.Up);
 
             PreviewViewport.Axis.RootNode.Parent = Scene;
             PreviewViewport.World.Root = Scene;
@@ -712,15 +713,15 @@ namespace EngineNS.Editor.Forms
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList);
             //ImGuiAPI.BeginGroup();
             
-            for (int i = 0; i < (int)GamePlay.TtWorld.UVisParameter.EVisCullFilter.FilterTypeCount; i++)
+            for (int i = 0; i < (int)GamePlay.TtWorld.TtVisParameter.EVisCullFilter.FilterTypeCount; i++)
             {
-                var type = (GamePlay.TtWorld.UVisParameter.EVisCullFilter)(1 << i);
+                var type = (GamePlay.TtWorld.TtVisParameter.EVisCullFilter)(1 << i);
                 ImGuiAPI.SameLine(0, -1);
                 bool checkValue = (CullFilters & type) != 0;
                 var name = type.ToString();
                 if (name == "FilterTypeCount")
                 {
-                    name = GamePlay.TtWorld.UVisParameter.FilterTypeCountAs;
+                    name = GamePlay.TtWorld.TtVisParameter.FilterTypeCountAs;
                 }
                 if(EGui.UIProxy.CustomButton.ToggleButton(name, in btSize, ref checkValue))
                 {
@@ -741,7 +742,7 @@ namespace EngineNS.Editor.Forms
         {
             MenuName = "SceneDetails",
             Selected = true,
-            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data) =>
+            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
             {
                 item.Selected = !item.Selected;
             },
@@ -750,7 +751,7 @@ namespace EngineNS.Editor.Forms
         {
             MenuName = "NodeDetails",
             Selected = true,
-            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data) =>
+            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
             {
                 item.Selected = !item.Selected;
             },
@@ -759,7 +760,7 @@ namespace EngineNS.Editor.Forms
         {
             MenuName = "Editor Settings",
             Selected = false,
-            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data) =>
+            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
             {
                 item.Selected = !item.Selected;
             },
@@ -768,7 +769,7 @@ namespace EngineNS.Editor.Forms
         {
             MenuName = "Camera Settings",
             Selected = false,
-            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data) =>
+            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
             {
                 item.Selected = !item.Selected;
             },
@@ -777,7 +778,7 @@ namespace EngineNS.Editor.Forms
         {
             MenuName = "Outliner",
             Selected = true,
-            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data) =>
+            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
             {
                 item.Selected = !item.Selected;
             },
@@ -786,7 +787,7 @@ namespace EngineNS.Editor.Forms
         {
             MenuName = "Preview",
             Selected = true,
-            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data) =>
+            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
             {
                 item.Selected = !item.Selected;
             },
@@ -795,7 +796,7 @@ namespace EngineNS.Editor.Forms
         {
             MenuName = "Content Browser",
             Selected = true,
-            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data) =>
+            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
             {
                 item.Selected = !item.Selected;
             },
@@ -804,7 +805,7 @@ namespace EngineNS.Editor.Forms
         {
             MenuName = "Place Items",
             Selected = false,
-            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data) =>
+            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
             {
                 item.Selected = !item.Selected;
             },
@@ -1080,6 +1081,7 @@ namespace EngineNS.Editor.Forms
             //PreviewViewport.PreviewAsset = name;
             PreviewViewport.Title = $"Prefab:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewScene;
+            PreviewViewport.CameralWheelMoveWithLookAt = true;
             await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.SimpleRPolicyName, 0, 1);
 
             Prefab.Root.Parent = PreviewViewport.World.Root;

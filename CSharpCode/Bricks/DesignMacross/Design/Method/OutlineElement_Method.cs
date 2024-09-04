@@ -96,7 +96,7 @@ namespace EngineNS.DesignMacross.Design
             if (ImGuiAPI.BeginPopup("DMCMethodSelectPopup", ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 var drawList = ImGuiAPI.GetWindowDrawList();
-                var menuData = new Support.UAnyPointer();
+                var menuData = new Support.TtAnyPointer();
                 if (EGui.UIProxy.MenuItemProxy.MenuItem("New Method", null, false, null, in drawList, in menuData, ref mNewMethodMenuState))
                 {
                     const string methodName = "New_Method";

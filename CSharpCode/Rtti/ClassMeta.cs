@@ -75,10 +75,10 @@ namespace EngineNS.Rtti
         public bool IsUnserializable => (Flags & EMetaFlags.Unserializable) != 0;
         public bool IsCanRefForMacross => (Flags & EMetaFlags.CanRefForMacross) != 0; 
     }
-    public class UClassMeta
+    public class TtClassMeta
     {
         public MetaAttribute MetaAttribute { get; private set; }
-        private List<UClassMeta> mSubClasses = null;
+        private List<TtClassMeta> mSubClasses = null;
         public void CopyObjectMetaField(object tar, object src)
         {
             if(tar is System.Collections.IList && src.GetType() == tar.GetType())
@@ -183,14 +183,14 @@ namespace EngineNS.Rtti
                 srcProp.SetValue(tar, i.Value);
             }
         }
-        public List<UClassMeta> SubClasses
+        public List<TtClassMeta> SubClasses
         {
             get
             {
                 if (mSubClasses != null)
                     return mSubClasses;
 
-                mSubClasses = new List<UClassMeta>();
+                mSubClasses = new List<TtClassMeta>();
                 foreach (var i in Rtti.UTypeDescManager.Instance.Services)
                 {
                     foreach (var j in i.Value.Types)
@@ -208,7 +208,7 @@ namespace EngineNS.Rtti
                 return mSubClasses;
             }
         }
-        public bool CanConvertTo(UClassMeta tarKls)
+        public bool CanConvertTo(TtClassMeta tarKls)
         {
             if (tarKls == null)
                 return false;
@@ -216,7 +216,7 @@ namespace EngineNS.Rtti
                 return true;
             return ClassType.IsSubclassOf(tarKls.ClassType);
         }
-        public bool CanConvertFrom(UClassMeta srcKls)
+        public bool CanConvertFrom(TtClassMeta srcKls)
         {
             if (srcKls == null)
                 return false;
@@ -224,7 +224,7 @@ namespace EngineNS.Rtti
                 return true;
             return srcKls.ClassType.IsSubclassOf(ClassType);
         }
-        public UClassMeta(UTypeDesc t)
+        public TtClassMeta(UTypeDesc t)
         {
             ClassType = t;
         }
@@ -247,12 +247,12 @@ namespace EngineNS.Rtti
                 return Hash160.CreateHash160(ClassMetaName).ToString();
             }
         }
-        public Dictionary<UInt64, UMetaVersion> MetaVersions
+        public Dictionary<UInt64, TtMetaVersion> MetaVersions
         {
             get;
-        } = new Dictionary<UInt64, UMetaVersion>();
-        UMetaVersion mCurrentVersion;
-        public UMetaVersion CurrentVersion
+        } = new Dictionary<UInt64, TtMetaVersion>();
+        TtMetaVersion mCurrentVersion;
+        public TtMetaVersion CurrentVersion
         {
             get { return mCurrentVersion; }
         }
@@ -267,9 +267,9 @@ namespace EngineNS.Rtti
                 i.ResetSystemRef();
             }
         }
-        public UMetaVersion GetMetaVersion(UInt64 hash)
+        public TtMetaVersion GetMetaVersion(UInt64 hash)
         {
-            UMetaVersion result;
+            TtMetaVersion result;
             if (MetaVersions.TryGetValue(hash, out result))
             {
                 return result;
@@ -296,7 +296,7 @@ namespace EngineNS.Rtti
                     var filename = EngineNS.IO.TtFileManager.GetPureName(i);
                     var myXmlDoc = new System.Xml.XmlDocument();
                     myXmlDoc.Load(i);
-                    var ver = new UMetaVersion(this);
+                    var ver = new TtMetaVersion(this);
                     ver.LoadVersion(System.Convert.ToUInt64(filename), myXmlDoc.LastChild);
                     MetaVersions[ver.MetaHash] = ver;
                 }
@@ -330,7 +330,7 @@ namespace EngineNS.Rtti
             EngineNS.IO.TtFileManager.WriteAllText(txtFilepath, ClassType.TypeString);
             TtEngine.Instance.SourceControlModule.AddFile(txtFilepath);
         }
-        public UMetaVersion BuildCurrentVersion()
+        public TtMetaVersion BuildCurrentVersion()
         {
             var type = ClassType;
             {
@@ -342,7 +342,7 @@ namespace EngineNS.Rtti
                         MetaAttribute = att;
                 }
             }
-            var result = new UMetaVersion(this);
+            var result = new TtMetaVersion(this);
             var props = type.SystemType.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static);
             foreach(var i in props)
             {
@@ -746,7 +746,7 @@ namespace EngineNS.Rtti
         }
         // MetaVersion中只存储能够保存的property，所以这里需要单独一份包含所有metaattribute的property列表
         public List<TtPropertyMeta> Properties { get; } = new List<TtPropertyMeta>();
-        public UClassMeta.TtPropertyMeta GetProperty(string declString)
+        public TtClassMeta.TtPropertyMeta GetProperty(string declString)
         {
             for(int i=0; i<Properties.Count; i++)
             {
@@ -834,7 +834,7 @@ namespace EngineNS.Rtti
                 }
             }
             
-            public void Build(UMetaVersion metaVersion, UTypeDesc propType, string name, bool bUpdateOrder)
+            public void Build(TtMetaVersion metaVersion, UTypeDesc propType, string name, bool bUpdateOrder)
             {
                 mHostType = metaVersion.HostClass.ClassType;
                 mPropertyName = name;
@@ -960,13 +960,13 @@ namespace EngineNS.Rtti
         //}
     }
     [Editor.UAssetEditor(EditorType = typeof(Editor.UMetaVersionViewer))]
-    public class UMetaVersion
+    public class TtMetaVersion
     {
-        public UMetaVersion(UClassMeta kls)
+        public TtMetaVersion(TtClassMeta kls)
         {
             HostClass = kls;
         }
-        public UClassMeta HostClass
+        public TtClassMeta HostClass
         {
             get;
             private set;
@@ -983,11 +983,11 @@ namespace EngineNS.Rtti
                 i.ResetSystemRef();
             }
         }
-        public List<UClassMeta.TtPropertyMeta> Propertys
+        public List<TtClassMeta.TtPropertyMeta> Propertys
         {
             get;
-        } = new List<UClassMeta.TtPropertyMeta>();
-        public UClassMeta.TtPropertyMeta GetProperty(string declString)
+        } = new List<TtClassMeta.TtPropertyMeta>();
+        public TtClassMeta.TtPropertyMeta GetProperty(string declString)
         {
             for (int i = 0; i < Propertys.Count; i++)
             {
@@ -1048,7 +1048,7 @@ namespace EngineNS.Rtti
             MetaHash = hash;
             foreach (System.Xml.XmlNode i in node.ChildNodes)
             {
-                var fd = new UClassMeta.TtPropertyMeta();
+                var fd = new TtClassMeta.TtPropertyMeta();
                 string fieldTypeStr = null;
                 foreach (System.Xml.XmlAttribute j in i.Attributes)
                 {
@@ -1126,12 +1126,12 @@ namespace EngineNS.Rtti
     public class TtClassMetaManager
     {
         public static TtClassMetaManager Instance { get; } = new TtClassMetaManager();
-        Dictionary<string, UClassMeta> mMetas = new Dictionary<string, UClassMeta>();
-        public Dictionary<string, UClassMeta> Metas
+        Dictionary<string, TtClassMeta> mMetas = new Dictionary<string, TtClassMeta>();
+        public Dictionary<string, TtClassMeta> Metas
         {
             get => mMetas;
         }
-        Dictionary<Hash64, UClassMeta> mHashMetas = new Dictionary<Hash64, UClassMeta>();
+        Dictionary<Hash64, TtClassMeta> mHashMetas = new Dictionary<Hash64, TtClassMeta>();
         public UTypeTreeManager TreeManager = new UTypeTreeManager();
         public string MetaRoot;
         public void LoadMetas(string moduleName = null)
@@ -1162,7 +1162,7 @@ namespace EngineNS.Rtti
                             {
                                 if (moduleName == null || (moduleName != null && type.Assembly.Name == moduleName))
                                 {
-                                    var meta = new UClassMeta(type);
+                                    var meta = new TtClassMeta(type);
                                     meta.LoadClass(k);
 
                                     //mMetas.Add(meta.ClassMetaName, meta);
@@ -1180,7 +1180,7 @@ namespace EngineNS.Rtti
             foreach (var i in mMetas)
             {
                 var hashCode = Hash64.FromString(i.Key);
-                UClassMeta meta;
+                TtClassMeta meta;
                 if (mHashMetas.TryGetValue(hashCode, out meta))
                 {
                     if (i.Value.ClassMetaName != meta.ClassMetaName)
@@ -1233,7 +1233,7 @@ namespace EngineNS.Rtti
         {
             foreach (var i in UTypeDescManager.Instance.Services)
             {
-                var klsColloector = new List<UClassMeta>();
+                var klsColloector = new List<TtClassMeta>();
 
                 bool bFinished = false;
                 while (bFinished == false)
@@ -1255,11 +1255,11 @@ namespace EngineNS.Rtti
                                 meta = attrs[0] as MetaAttribute;
                             }
 
-                            UClassMeta kls = null;
+                            TtClassMeta kls = null;
                             var metaName = j.Value.TypeString;// Rtti.UTypeDescManager.Instance.GetTypeStringFromType(j.Value.SystemType);
                             if (mMetas.TryGetValue(metaName, out kls) == false)
                             {
-                                kls = new UClassMeta(j.Value);
+                                kls = new TtClassMeta(j.Value);
                                 kls.Path = GetPath(kls);
                                 var ver = kls.BuildCurrentVersion();
                                 mMetas.Add(metaName, kls);
@@ -1312,7 +1312,7 @@ namespace EngineNS.Rtti
                 }
             }
         }
-        string GetPath(UClassMeta classMeta)
+        string GetPath(TtClassMeta classMeta)
         {
             string root = "";
             if (classMeta.ClassType.Assembly.IsGameModule)
@@ -1346,9 +1346,9 @@ namespace EngineNS.Rtti
                 return dir + "/a0." + classMeta.MetaDirectoryName;
             }
         }
-        public UClassMeta GetMeta(string name, bool bTryBuild = true)
+        public TtClassMeta GetMeta(string name, bool bTryBuild = true)
         {
-            UClassMeta meta;
+            TtClassMeta meta;
             if (mMetas.TryGetValue(name, out meta))
                 return meta;
             if (bTryBuild == false)
@@ -1358,14 +1358,14 @@ namespace EngineNS.Rtti
                 var type = Rtti.UTypeDesc.TypeOf(name);
                 if (type == null)
                     return null;
-                UClassMeta result;
+                TtClassMeta result;
                 if (TypeMetas.TryGetValue(type, out result))
                 {
                     return result;
                 }
                 else
                 {
-                    result = new UClassMeta(type);
+                    result = new TtClassMeta(type);
                     result.Path = GetPath(result);
                     result.BuildMethods();
                     result.BuildFields();
@@ -1375,21 +1375,21 @@ namespace EngineNS.Rtti
                 }
             }
         }
-        public Dictionary<UTypeDesc, UClassMeta> TypeMetas { get; } = new Dictionary<UTypeDesc, UClassMeta>();
-        public UClassMeta GetMetaFromFullName(string fname)
+        public Dictionary<UTypeDesc, TtClassMeta> TypeMetas { get; } = new Dictionary<UTypeDesc, TtClassMeta>();
+        public TtClassMeta GetMetaFromFullName(string fname)
         {
             var desc = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(fname);
             if (desc == null)
                 return null;
             return GetMeta(desc);
         }
-        public UClassMeta GetMeta(UTypeDesc type)
+        public TtClassMeta GetMeta(UTypeDesc type)
         {
             if (type == null)
                 return null;
             lock (this)
             {
-                UClassMeta result;
+                TtClassMeta result;
                 if (TypeMetas.TryGetValue(type, out result))
                 {
                     return result;
@@ -1398,9 +1398,9 @@ namespace EngineNS.Rtti
                 return GetMeta(typeStr);
             }
         }
-        public UClassMeta GetMeta(in Hash64 hash)
+        public TtClassMeta GetMeta(in Hash64 hash)
         {
-            UClassMeta meta;
+            TtClassMeta meta;
             if (mHashMetas.TryGetValue(hash, out meta))
                 return meta;
             return null;

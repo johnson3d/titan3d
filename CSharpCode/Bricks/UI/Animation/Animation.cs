@@ -466,7 +466,7 @@ namespace EngineNS.UI.Animation
             }
         }
 
-        public UAnyValue UserData;
+        public TtAnyValue UserData;
 
         public delegate void Delegate_OnCompleted(AnimationTimeline<T> animTimeline);
         public event Delegate_OnCompleted OnCompleted = null;

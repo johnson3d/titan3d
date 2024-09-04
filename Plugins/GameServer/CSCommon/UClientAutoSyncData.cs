@@ -89,8 +89,8 @@ namespace EngineNS.Plugins.CSCommon
 				}
 			}
 		}
-		EngineNS.Support.UBitset mFlags = new EngineNS.Support.UBitset(2);
-		public ref EngineNS.Support.UBitset Flags { get => ref mFlags; }
+		EngineNS.Support.TtBitset mFlags = new EngineNS.Support.TtBitset(2);
+		public ref EngineNS.Support.TtBitset Flags { get => ref mFlags; }
 		public bool IsGhostSyncObject { get; set; }
 	}
 }

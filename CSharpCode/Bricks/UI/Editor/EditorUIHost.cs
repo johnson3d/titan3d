@@ -38,7 +38,7 @@ namespace EngineNS.UI.Editor
             set
             {
                 mSnapTile = value;
-                var anyValue = new Support.UAnyValue();
+                var anyValue = new Support.TtAnyValue();
                 anyValue.SetValue(value);
                 mGridBrush.SetValue("SnapTile", in anyValue);
             }
@@ -54,7 +54,7 @@ namespace EngineNS.UI.Editor
             get => mUVOffset;
             set
             {
-                var anyValue = new Support.UAnyValue();
+                var anyValue = new Support.TtAnyValue();
                 anyValue.SetValue(value);
                 mGridBrush.SetValue("UVOffset", in anyValue);
                 mUVOffset = value;

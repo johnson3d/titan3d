@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Profiler
 {
-    public class UNativeMemory
+    public class TtNativeMemory
     {
-        ~UNativeMemory()
+        ~TtNativeMemory()
         {
             EndProfiler();
         }

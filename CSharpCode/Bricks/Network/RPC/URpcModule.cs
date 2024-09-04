@@ -353,11 +353,11 @@ namespace EngineNS.UTest
         {
             [Rtti.Meta]
             public int AA { get; set; } = 100 + 3;
-            public override void OnWriteMember(IO.IWriter ar, IO.ISerializer obj, UMetaVersion metaVersion)
+            public override void OnWriteMember(IO.IWriter ar, IO.ISerializer obj, TtMetaVersion metaVersion)
             {
                 ar.Write(AA);
             }
-            public override void OnReadMember(IO.IReader ar, IO.ISerializer obj, Rtti.UMetaVersion metaVersion)
+            public override void OnReadMember(IO.IReader ar, IO.ISerializer obj, Rtti.TtMetaVersion metaVersion)
             {
                 AA = ar.Read<int>();
             }

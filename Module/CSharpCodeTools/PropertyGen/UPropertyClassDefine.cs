@@ -103,8 +103,8 @@ namespace CSharpCodeTools.PropertyGen
                     }
                     PopBrackets();
 
-                    AddLine($"EngineNS.Support.UBitset mFlags = new EngineNS.Support.UBitset({numOfProp + 1});");
-                    AddLine($"public ref EngineNS.Support.UBitset Flags {{ get => ref mFlags; }}");
+                    AddLine($"EngineNS.Support.TtBitset mFlags = new EngineNS.Support.TtBitset({numOfProp + 1});");
+                    AddLine($"public ref EngineNS.Support.TtBitset Flags {{ get => ref mFlags; }}");
                     AddLine($"public bool IsGhostSyncObject {{ get; set; }}");
                 }
                 PopBrackets();

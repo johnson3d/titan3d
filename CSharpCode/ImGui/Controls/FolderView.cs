@@ -178,7 +178,7 @@ namespace EngineNS.EGui.Controls
             {
                 if (mDirContextMenu != null)
                 {
-                    Support.UAnyPointer menuData = new Support.UAnyPointer();
+                    Support.TtAnyPointer menuData = new Support.TtAnyPointer();
                     menuData.RefObject = path;
                     menuData.Value.SetStruct<stDirMenuData>(new stDirMenuData());
                     var drawList = ImGuiAPI.GetWindowDrawList();

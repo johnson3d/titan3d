@@ -61,7 +61,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public List<PinData> Arguments = new List<PinData>();
 
-        private Rtti.UClassMeta.TtMethodMeta Method
+        private Rtti.TtClassMeta.TtMethodMeta Method
         {
             get
             {
@@ -76,7 +76,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return null;
             }
         }
-        private Rtti.UClassMeta HostClass
+        private Rtti.TtClassMeta HostClass
         {
             get
             {
@@ -116,7 +116,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
         }
-        Rtti.UClassMeta.TtMethodMeta GetMethodMeta(string metaStr)
+        Rtti.TtClassMeta.TtMethodMeta GetMethodMeta(string metaStr)
         {
             var segs = metaStr.Split('#');
             if (segs.Length != 2)
@@ -246,7 +246,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 OnPositionChanged();
             }
         }
-        public static MethodNode NewMethodNode(Rtti.UClassMeta.TtMethodMeta m)
+        public static MethodNode NewMethodNode(Rtti.TtClassMeta.TtMethodMeta m)
         {
             var result = new MethodNode();
             result.Initialize(m);
@@ -426,7 +426,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Self.LinkDesc.SetColor(MacrossStyles.Instance.SelfLinkColor);
         }
 
-        private void Initialize(Rtti.UClassMeta.TtMethodMeta m)
+        private void Initialize(Rtti.TtClassMeta.TtMethodMeta m)
         {
             //Method = m;
             if (string.IsNullOrEmpty(mMethodMeta))
@@ -507,7 +507,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         pin.LinkDesc.CanLinks.Add("Value");
                         pin.Name = i.Name;
                         pin.Tag = i.ParameterType;
-                        var ev = UEditableValue.CreateEditableValue(this, i.ParameterType, pin);
+                        var ev = UEditableValue.CreateEditableValue(this, i.ParameterType, pin, i.DefaultValue);
                         if (ev != null)
                         {
                             //ev.ControlWidth = InputControlWidth;
@@ -964,7 +964,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public override void OnShowPinMenu(NodePin pin)
         {
             var drawList = ImGuiAPI.GetWindowDrawList();
-            var menuData = new Support.UAnyPointer();
+            var menuData = new Support.TtAnyPointer();
             bool processed = false;
             for(int i=0; i<Arguments.Count; i++)
             {
@@ -1551,7 +1551,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return null;
         }
-        public Rtti.UClassMeta.TtMethodMeta.TtParamMeta GetInPinParamMeta(PinIn pin)
+        public Rtti.TtClassMeta.TtMethodMeta.TtParamMeta GetInPinParamMeta(PinIn pin)
         {
             for (int i = 0; i < Arguments.Count; i++)
             {
@@ -1670,9 +1670,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             public uint SubClassColor = 0xFF5340FF;
         }
         public MethodSelectorStyle Styles = MethodSelectorStyle.Instance;
-        public Rtti.UClassMeta.TtMethodMeta mSltMethod;
-        public Rtti.UClassMeta.TtFieldMeta mSltField;
-        public Rtti.UClassMeta.TtPropertyMeta mSltMember;
+        public Rtti.TtClassMeta.TtMethodMeta mSltMethod;
+        public Rtti.TtClassMeta.TtFieldMeta mSltField;
+        public Rtti.TtClassMeta.TtPropertyMeta mSltMember;
         public unsafe void OnDraw(Vector2 pos)
         {
             var pivot = new Vector2(0, 0);
@@ -1773,11 +1773,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
     public class MacrossSelector
     {
-        public Rtti.UClassMeta KlsMeta;
-        public Rtti.UClassMeta.TtMethodMeta mSltMethod;
-        public Rtti.UClassMeta.TtFieldMeta mSltField;
-        public Rtti.UClassMeta.TtPropertyMeta mSltMember;
-        public Rtti.UClassMeta mSltSubClass;
+        public Rtti.TtClassMeta KlsMeta;
+        public Rtti.TtClassMeta.TtMethodMeta mSltMethod;
+        public Rtti.TtClassMeta.TtFieldMeta mSltField;
+        public Rtti.TtClassMeta.TtPropertyMeta mSltMember;
+        public Rtti.TtClassMeta mSltSubClass;
         public unsafe void OnDraw(Vector2 pos)
         {
             var Styles = MethodSelector.MethodSelectorStyle.Instance;

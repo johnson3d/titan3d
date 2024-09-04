@@ -125,7 +125,7 @@ namespace EngineNS.Editor
                                 UVMin = new Vector2(140.0f/1024, 265.0f/1024),
                                 UVMax = new Vector2(156.0f/1024, 281.0f/1024),
                             },
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 // Do sth
                             },
@@ -141,7 +141,7 @@ namespace EngineNS.Editor
                                 UVMin = new Vector2(124.0f/1024, 305.0f/1024),
                                 UVMax = new Vector2(140.0f/1024, 321.0f/1024),
                             },
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 // Do sth
                             },
@@ -157,7 +157,7 @@ namespace EngineNS.Editor
                         new EGui.UIProxy.MenuItemProxy()
                         {
                             MenuName = "CompileMacross",
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 var csFilesPath = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
                                 var projectFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameProject;
@@ -175,7 +175,7 @@ namespace EngineNS.Editor
                         new EGui.UIProxy.MenuItemProxy()
                         {
                             MenuName = "PrintAttachmentPool",
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 TtEngine.Instance.GfxDevice.AttachBufferManager.PrintCachedBuffer = true;
                             },
@@ -183,7 +183,7 @@ namespace EngineNS.Editor
                         new EGui.UIProxy.MenuItemProxy()
                         {
                             MenuName = "Cap",
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 unsafe
                                 {
@@ -196,7 +196,7 @@ namespace EngineNS.Editor
                         new EGui.UIProxy.MenuItemProxy()
                         {
                             MenuName = "CapMem",
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 var save = PrevMemCapture;
                                 PrevMemCapture = new EngineNS.Profiler.TtNativeMemCapture();
@@ -213,7 +213,7 @@ namespace EngineNS.Editor
                         new EGui.UIProxy.MenuItemProxy()
                         {
                             MenuName = "ShowConsole",
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 item.Selected = !item.Selected;
 #if PWindow
@@ -234,7 +234,7 @@ namespace EngineNS.Editor
                         {
                             MenuName = "GC",
                             Selected = false,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 System.GC.Collect();
                             },
@@ -243,7 +243,7 @@ namespace EngineNS.Editor
                         {
                             MenuName = "ContentBrowser",
                             Selected = true,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 ContentBrowser.Visible = !ContentBrowser.Visible;
                                 var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
@@ -254,7 +254,7 @@ namespace EngineNS.Editor
                         {
                             MenuName = "LogWatcher",
                             Selected = true,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 mLogWatcher.Visible = !mLogWatcher.Visible;
                                 var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
@@ -265,7 +265,7 @@ namespace EngineNS.Editor
                         {
                             MenuName = "CpuProfiler",
                             Selected = true,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 mCpuProfiler.Visible = !mCpuProfiler.Visible;
                                 var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
@@ -277,7 +277,7 @@ namespace EngineNS.Editor
                         {
                             MenuName = "GpuProfiler",
                             Selected = true,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 mGpuProfiler.Visible = !mGpuProfiler.Visible;
                                 var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
@@ -289,7 +289,7 @@ namespace EngineNS.Editor
                         {
                             MenuName = "MemProfiler",
                             Selected = true,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 mMemProfiler.Visible = !mMemProfiler.Visible;
                                 var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
@@ -300,7 +300,7 @@ namespace EngineNS.Editor
                         {
                             MenuName = "MainInspector",
                             Selected = true,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 mMainInspector.Visible = !mMainInspector.Visible;
                                 item.Selected = mMainInspector.Visible;
@@ -310,7 +310,7 @@ namespace EngineNS.Editor
                         {
                             MenuName = "BrickManager",
                             Selected = false,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 mBrickManager.Visible = !mBrickManager.Visible;
                                 item.Selected = mBrickManager.Visible;
@@ -324,7 +324,7 @@ namespace EngineNS.Editor
                         {
                             MenuName = "PIE Controller",
                             Selected = false,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 mPIEController.Visible = !mPIEController.Visible;
                                 item.Selected = mPIEController.Visible;
@@ -336,7 +336,7 @@ namespace EngineNS.Editor
                         {
                             MenuName = "Settings",
                             Selected = false,
-                            Action = (EGui.UIProxy.MenuItemProxy item, Support.UAnyPointer data)=>
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 mEditorSettings.Visible = !mEditorSettings.Visible;
                                 item.Selected = mEditorSettings.Visible;
@@ -590,7 +590,7 @@ namespace EngineNS.Editor
                 var drawList = ImGuiAPI.GetWindowDrawList();
                 for (int i = 0; i < mMenuItems.Count; i++)
                 {
-                    mMenuItems[i].OnDraw(in drawList, in Support.UAnyPointer.Default);
+                    mMenuItems[i].OnDraw(in drawList, in Support.TtAnyPointer.Default);
                 }
                 ImGuiAPI.EndMenuBar();
             }

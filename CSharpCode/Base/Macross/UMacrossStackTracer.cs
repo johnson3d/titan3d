@@ -12,7 +12,7 @@ namespace EngineNS.Macross
             get;
             set;
         }
-        public Dictionary<string, Support.UAnyPointer> mFrameStates = new Dictionary<string, Support.UAnyPointer>();
+        public Dictionary<string, Support.TtAnyPointer> mFrameStates = new Dictionary<string, Support.TtAnyPointer>();
         public UMacrossStackFrame()
         {
 
@@ -36,7 +36,7 @@ namespace EngineNS.Macross
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetWatchVariable<T>(string name, T value) where T : unmanaged
         {
-            Support.UAnyPointer tmp;
+            Support.TtAnyPointer tmp;
             if (mFrameStates.TryGetValue(name, out tmp))
             {
                 tmp.SetValue(value);
@@ -50,7 +50,7 @@ namespace EngineNS.Macross
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void SetWatchVariable(string name, void* value, bool dummy = false)
         {
-            Support.UAnyPointer tmp;
+            Support.TtAnyPointer tmp;
             if (mFrameStates.TryGetValue(name, out tmp))
             {
                 tmp.SetValue(value);
@@ -64,7 +64,7 @@ namespace EngineNS.Macross
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetWatchVariable<T>(string name, T value, bool dummy = false) where T : struct
         {
-            Support.UAnyPointer tmp;
+            Support.TtAnyPointer tmp;
             if (mFrameStates.TryGetValue(name, out tmp))
             {
                 tmp.SetValue(value);
@@ -78,7 +78,7 @@ namespace EngineNS.Macross
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetWatchVariable(string name, object value)
         {
-            Support.UAnyPointer tmp = new Support.UAnyPointer();
+            Support.TtAnyPointer tmp = new Support.TtAnyPointer();
             tmp.SetValue(value);
             mFrameStates[name] = tmp;
         }
@@ -95,12 +95,12 @@ namespace EngineNS.Macross
         }
         public object GetWatchVariable(string name)
         {
-            Support.UAnyPointer tmp;
+            Support.TtAnyPointer tmp;
             if (mFrameStates.TryGetValue(name, out tmp) == false)
             {
                 return null;
             }
-            if (tmp.Value.ValueType != Support.UAnyValue.EValueType.Unknown)
+            if (tmp.Value.ValueType != Support.TtAnyValue.EValueType.Unknown)
             {
                 return tmp.Value.ToObject();
             }

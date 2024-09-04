@@ -145,7 +145,7 @@ namespace EngineNS.Editor.Forms
             menuName = menuString;
             nodeName = menuName;
         }
-        private async System.Threading.Tasks.Task<GamePlay.Scene.TtNode> NewNode(Rtti.UClassMeta i)
+        private async System.Threading.Tasks.Task<GamePlay.Scene.TtNode> NewNode(Rtti.TtClassMeta i)
         {
             if (mAddToNode == null)
                 return null;

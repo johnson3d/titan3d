@@ -40,7 +40,7 @@ namespace EngineNS.EGui.UIProxy
             return true;
         }
 
-        public unsafe bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
+        public unsafe bool OnDraw(in ImDrawList drawList, in Support.TtAnyPointer drawData)
         {
             return OnDraw(ref mFocused, in drawList, InfoText, ref SearchText, Width);
         }
@@ -65,6 +65,10 @@ namespace EngineNS.EGui.UIProxy
 
             var itemMin = ImGuiAPI.GetItemRectMin();
             var itemMax = ImGuiAPI.GetItemRectMax();
+
+            //Bricks.Input.UInputSystem.StartTextInput();
+            //Bricks.Input.UInputSystem.IMEHandler.SetIMEStatus(true, itemMin);
+
             var icon = TtEngine.Instance.UIProxyManager[SearchBarIconKey] as ImageProxy;
             if (icon != null)
             {

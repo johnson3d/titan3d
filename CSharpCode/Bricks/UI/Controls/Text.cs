@@ -403,7 +403,7 @@ namespace EngineNS.UI.Controls
         }
 
         void CalculateLines(string text, 
-            in UNativeArray<FTWord> words, 
+            in TtNativeArray<FTWord> words, 
             int startIndex, 
             in SizeF areaSize, 
             float fontScaleDelta, 
@@ -566,7 +566,7 @@ namespace EngineNS.UI.Controls
         }
 
         bool CalculateTextTrimming(string text,
-            in UNativeArray<FTWord> words,
+            in TtNativeArray<FTWord> words,
             in SizeF areaSize,
             float fontScaleDelta,
             int startIndex,
@@ -580,7 +580,7 @@ namespace EngineNS.UI.Controls
             if (TextTrimming == ETextTrimming.None)
                 return false;
 
-            using (var trimmingWords = new UNativeArray<FTWord>())
+            using (var trimmingWords = new TtNativeArray<FTWord>())
             {
                 FontAsset.GetWords(in trimmingWords, TrimmingText);
 
@@ -668,7 +668,7 @@ namespace EngineNS.UI.Controls
             SizeF linesSize = SizeF.Empty;
             var scaleDelta = mFontSize * 1.0f / FontAsset.FontSize;
             var lineHeight = mFontSize * mLineSpacingScale;
-            using (var words = new UNativeArray<FTWord>())
+            using (var words = new TtNativeArray<FTWord>())
             {
                 FontAsset.GetWords(in words, mText);
                 CalculateLines(mText, in words, 0, availableSize, scaleDelta, lineHeight, FlowDirection, ref mTextInLines, false, ref linesSize);
@@ -684,7 +684,7 @@ namespace EngineNS.UI.Controls
             var linesSize = SizeF.Empty;
             var scaleDelta = mFontSize * 1.0f / FontAsset.FontSize;
             var lineHeight = mFontSize * mLineSpacingScale;
-            using (var words = new UNativeArray<FTWord>())
+            using (var words = new TtNativeArray<FTWord>())
             {
                 FontAsset.GetWords(in words, mText);
                 CalculateLines(mText, in words, 0, arrangeSize.Size, scaleDelta, lineHeight, FlowDirection, ref mTextInLines, true, ref linesSize);

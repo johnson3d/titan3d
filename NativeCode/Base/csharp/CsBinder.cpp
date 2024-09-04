@@ -35,7 +35,7 @@ UCs2CppBase::~UCs2CppBase()
 	FreeManagedObjectGCHandle();
 }
 
-void UCs2CppBase::CreateManagedObject(UAnyValue* args, int NumOfArg, int retType)
+void UCs2CppBase::CreateManagedObject(TtAnyValue* args, int NumOfArg, int retType)
 {
 	FreeManagedObjectGCHandle();
 
@@ -56,7 +56,7 @@ void* UCs2CppBase::GetManagedObject()
 	return CoreSDK::GetManagedObjectFromGCHandle(mCSharpHandle);
 }
 
-void UAnyValue::FreeManagedHandle()
+void TtAnyValue::FreeManagedHandle()
 {
 	if (mGCHandle.Handle != nullptr)
 	{
@@ -198,7 +198,7 @@ void UCs2CppBase::UnitTest()
 		list_int.CreateManagedObject();
 		if (list_int.mCSharpHandle != nullptr)
 		{
-			EngineNS::UAnyValue v;
+			EngineNS::TtAnyValue v;
 			//v.SetI32(8);
 
 			v.SetStruct(v3dxMatrix4::IDENTITY, "EngineNS.Matrix@EngineCore");
@@ -210,7 +210,7 @@ void UCs2CppBase::UnitTest()
 
 		UCs2CppBase list_matrix;
 		list_matrix.mCSFullName = "EngineNS.Matrix[]@EngineCore";
-		EngineNS::UAnyValue elemNum;
+		EngineNS::TtAnyValue elemNum;
 		elemNum.SetI32(8);
 		list_matrix.CreateManagedObject(&elemNum, 1);
 		if (list_int.mCSharpHandle != nullptr)

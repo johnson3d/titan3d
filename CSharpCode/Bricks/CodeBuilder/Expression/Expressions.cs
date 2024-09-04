@@ -572,7 +572,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 return EMethodArgumentAttribute.Ref;
             return EMethodArgumentAttribute.Default;
         }
-        public static EMethodArgumentAttribute GetOperationType(Rtti.UClassMeta.TtMethodMeta.TtParamMeta info)
+        public static EMethodArgumentAttribute GetOperationType(Rtti.TtClassMeta.TtMethodMeta.TtParamMeta info)
         {
             if (info.IsIn)
                 return EMethodArgumentAttribute.In;
@@ -589,7 +589,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 return true;
             return false;
         }
-        public static bool GetIsParamArray(Rtti.UClassMeta.TtMethodMeta.TtParamMeta info)
+        public static bool GetIsParamArray(Rtti.TtClassMeta.TtMethodMeta.TtParamMeta info)
         {
             return info.IsParamArray;
         }
@@ -610,7 +610,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 retVal.Meta = attrs[0] as Rtti.MetaParameterAttribute;
             return retVal;
         }
-        public static UMethodArgumentDeclaration GetParam(Rtti.UClassMeta.TtMethodMeta.TtParamMeta info)
+        public static UMethodArgumentDeclaration GetParam(Rtti.TtClassMeta.TtMethodMeta.TtParamMeta info)
         {
             var retVal = new UMethodArgumentDeclaration()
             {
@@ -773,7 +773,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
     public class UMethodDeclaration : UCodeObject, IO.ISerializer
     {
-        public Rtti.UClassMeta.TtMethodMeta OverrideMethod = null;
+        public Rtti.TtClassMeta.TtMethodMeta OverrideMethod = null;
         [Rtti.Meta]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
         [Rtti.Meta]
@@ -869,7 +869,7 @@ namespace EngineNS.Bricks.CodeBuilder
             retStr = retStr.TrimEnd(',') + ")";
             return retStr;
         }
-        public static string GetKeyword(Rtti.UClassMeta.TtMethodMeta method)
+        public static string GetKeyword(Rtti.TtClassMeta.TtMethodMeta method)
         {
             var retStr = method.MethodName + "(";
             var parameters = method.Parameters;
@@ -922,7 +922,7 @@ namespace EngineNS.Bricks.CodeBuilder
             }
             return retVal;
         }
-        public static UMethodDeclaration GetMethodDeclaration(Rtti.UClassMeta.TtMethodMeta method)
+        public static UMethodDeclaration GetMethodDeclaration(Rtti.TtClassMeta.TtMethodMeta method)
         {
             var retVal = new UMethodDeclaration();
             retVal.IsOverride = true;
@@ -1338,7 +1338,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
     public class UMethodInvokeStatement : UStatementBase, IO.ISerializer
     {
-        public Rtti.UClassMeta.TtMethodMeta Method = null;
+        public Rtti.TtClassMeta.TtMethodMeta Method = null;
         [Rtti.Meta]
         public UExpressionBase Host { get; set; }
         [Rtti.Meta]

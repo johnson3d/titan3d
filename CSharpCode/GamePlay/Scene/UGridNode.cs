@@ -168,7 +168,7 @@ namespace EngineNS.GamePlay.Scene
         {
             base.GetHitProxyDrawMesh(meshes);
         }
-        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             base.OnGatherVisibleMeshes(rp);
         }

@@ -13,13 +13,13 @@ namespace EngineNS.DesignMacross.Design.Statement
     public class TtMethodInvokeReflectedDescription : TtStatementDescription
     {
         [Rtti.Meta]
-        public UClassMeta.TtMethodMeta MethodMeta { get; set; } = null;
+        public TtClassMeta.TtMethodMeta MethodMeta { get; set; } = null;
         public TtMethodInvokeReflectedDescription()
         {
             AddExecutionInPin(new());
             AddExecutionOutPin(new());
         }
-        public void SetMethodMeta(UClassMeta.TtMethodMeta methodMeta)
+        public void SetMethodMeta(TtClassMeta.TtMethodMeta methodMeta)
         {
             MethodMeta = methodMeta;
             Name = MethodMeta.MethodName;

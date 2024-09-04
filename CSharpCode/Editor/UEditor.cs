@@ -62,7 +62,7 @@ namespace EngineNS.Editor
         public Color4b PgcBoderColor { get; set; } = Color4b.Khaki;
     }
 
-    public partial class UEditor : UModule<TtEngine>
+    public partial class TtEditor : UModule<TtEngine>
     {
         public TtEditorConfig Config { get; set; } = new TtEditorConfig();
         public EGui.TtUVAnim PhyMaterialIcon { get; set; }
@@ -125,7 +125,7 @@ namespace EngineNS
 {
     public partial class TtEngine
     {
-        public Editor.UEditor EditorInstance { get; } = new Editor.UEditor();
+        public Editor.TtEditor EditorInstance { get; } = new Editor.TtEditor();
     }
 
 }

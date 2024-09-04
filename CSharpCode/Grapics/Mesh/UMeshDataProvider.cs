@@ -1423,12 +1423,12 @@ namespace EngineNS.Graphics.Mesh
             dpDesc.NumPrimitives = tileCount * tileCount * 2;
             builder.PushAtomLOD(0, in dpDesc);
 
-            using (var posArray = Support.UNativeArray<Vector3>.CreateInstance())
-            using (var normalArray = Support.UNativeArray<Vector3>.CreateInstance())
-            using (var tangentArray = Support.UNativeArray<Vector4>.CreateInstance())
-            using (var lightmapUVArray = Support.UNativeArray<Vector4>.CreateInstance())
-            using (var uvArray = Support.UNativeArray<Vector2>.CreateInstance())
-            using (var indexArray = Support.UNativeArray<UInt32>.CreateInstance())
+            using (var posArray = Support.TtNativeArray<Vector3>.CreateInstance())
+            using (var normalArray = Support.TtNativeArray<Vector3>.CreateInstance())
+            using (var tangentArray = Support.TtNativeArray<Vector4>.CreateInstance())
+            using (var lightmapUVArray = Support.TtNativeArray<Vector4>.CreateInstance())
+            using (var uvArray = Support.TtNativeArray<Vector2>.CreateInstance())
+            using (var indexArray = Support.TtNativeArray<UInt32>.CreateInstance())
             {
                 // -> tileCount * tileCount * 2 triangles
                 float Step = 2.0f / tileCount;

@@ -163,6 +163,7 @@ public:
 		}
 		return ThreadInstance;
 	}
+	static void FinalCleanup();
 
 	inline INT64 Begin(SampResult* pSampResult, bool bPushParent)
 	{

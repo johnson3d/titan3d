@@ -22,7 +22,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         //public List<PinIn> Arguments = new List<PinIn>();
         //public List<PinOut> OutArguments = new List<PinOut>();
         public List<PinData> Arguments = new List<PinData>();
-        public Rtti.UClassMeta.TtMethodMeta Method;
+        public Rtti.TtClassMeta.TtMethodMeta Method;
         [Rtti.Meta]
         public string MethodDeclString
         {
@@ -40,13 +40,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 Method = TtEngine.Instance.HLSLMethodManager.GetMethodByDeclString(value);
                 if (Method == null)
                 {
-                    var name = Rtti.UClassMeta.GetNameByDeclstring(value);
+                    var name = Rtti.TtClassMeta.GetNameByDeclstring(value);
                     Method = TtEngine.Instance.HLSLMethodManager.GetMethod(name);
                 }
                 this.Initialize(Method);
             }
         }
-        public static CallNode NewMethodNode(Rtti.UClassMeta.TtMethodMeta m)
+        public static CallNode NewMethodNode(Rtti.TtClassMeta.TtMethodMeta m)
         {
             CallNode result = null;
             if (m.MethodName == "Sample2D")
@@ -66,7 +66,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             TitleColor = UShaderEditorStyles.Instance.FunctionTitleColor;
             BackColor = UShaderEditorStyles.Instance.FunctionBGColor;
         }
-        internal void Initialize(Rtti.UClassMeta.TtMethodMeta m)
+        internal void Initialize(Rtti.TtClassMeta.TtMethodMeta m)
         {
             Method = m;
             Name = m.MethodName;
@@ -181,7 +181,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             //    }
             //}
         }
-        public Rtti.UClassMeta.TtMethodMeta.TtParamMeta GetInPinParamMeta(PinIn pin)
+        public Rtti.TtClassMeta.TtMethodMeta.TtParamMeta GetInPinParamMeta(PinIn pin)
         {
             for (int i = 0; i < Arguments.Count; i++)
             {

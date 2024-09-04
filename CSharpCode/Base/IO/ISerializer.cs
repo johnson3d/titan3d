@@ -32,11 +32,11 @@ namespace EngineNS.IO
         {
 
         }
-        public virtual void OnWriteMember(IWriter ar, ISerializer obj, Rtti.UMetaVersion metaVersion)
+        public virtual void OnWriteMember(IWriter ar, ISerializer obj, Rtti.TtMetaVersion metaVersion)
         {
             SerializerHelper.WriteMember(ar, obj, metaVersion);
         }
-        public virtual void OnReadMember(IReader ar, ISerializer obj, Rtti.UMetaVersion metaVersion)
+        public virtual void OnReadMember(IReader ar, ISerializer obj, Rtti.TtMetaVersion metaVersion)
         {
             SerializerHelper.ReadMember(ar, obj, metaVersion);
         }
@@ -116,7 +116,7 @@ namespace EngineNS.IO
             {
                 throw new Exception($"Meta Type lost:{typeHash}");
             }
-            Rtti.UMetaVersion metaVersion = meta.GetMetaVersion(versionHash);
+            Rtti.TtMetaVersion metaVersion = meta.GetMetaVersion(versionHash);
             if (metaVersion == null)
             {
                 throw new Exception($"MetaVersion lost:{versionHash}");
@@ -136,7 +136,7 @@ namespace EngineNS.IO
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
             Write(ar, obj, meta.CurrentVersion);
         }
-        public static bool Read(IReader ar, ISerializer obj, Rtti.UMetaVersion metaVersion = null)
+        public static bool Read(IReader ar, ISerializer obj, Rtti.TtMetaVersion metaVersion = null)
         {
             var baseSerializer = obj as BaseSerializer;
             if (baseSerializer != null)
@@ -150,7 +150,7 @@ namespace EngineNS.IO
                 return true;
             }
         }
-        public static void ReadMember(IReader ar, ISerializer obj, Rtti.UMetaVersion metaVersion = null)
+        public static void ReadMember(IReader ar, ISerializer obj, Rtti.TtMetaVersion metaVersion = null)
         {
 #if UseSerializerCodeGen
             var srName = metaVersion.HostClass.ClassType.SystemType.FullName.Replace("+", "_CIC_") + "_Serializer";
@@ -213,7 +213,7 @@ namespace EngineNS.IO
                 }
             }
         }
-        public static bool Write(IWriter ar, ISerializer obj, Rtti.UMetaVersion metaVersion)
+        public static bool Write(IWriter ar, ISerializer obj, Rtti.TtMetaVersion metaVersion)
         {
             bool isNull = false;
             if (obj == null)
@@ -267,7 +267,7 @@ namespace EngineNS.IO
             ar.Seek(nowPos);
             return true;
         }
-        public static void WriteMember(IWriter ar, ISerializer obj, Rtti.UMetaVersion metaVersion)
+        public static void WriteMember(IWriter ar, ISerializer obj, Rtti.TtMetaVersion metaVersion)
         {
             foreach (var i in metaVersion.Propertys)
             {
@@ -575,7 +575,7 @@ namespace EngineNS.IO
                 savePos += ObjDataSize;
 
                 var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
-                Rtti.UMetaVersion metaVersion;
+                Rtti.TtMetaVersion metaVersion;
                 if (meta != null && (metaVersion = meta.GetMetaVersion(versionHash)) != null)
                 {
                     var obj = Rtti.UTypeDescManager.CreateInstance(meta.ClassType) as ISerializer;

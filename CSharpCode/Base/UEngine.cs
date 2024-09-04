@@ -141,7 +141,8 @@ namespace EngineNS
         public bool IsWriteShaderDebugFile { get; set; } = false;
         public TtEngineConfig()
         {
-            EditorFont = RName.GetRName("fonts/Roboto-Regular.ttf", RName.ERNameType.Engine);
+            //EditorFont = RName.GetRName("fonts/Roboto-Regular.ttf", RName.ERNameType.Engine);
+            EditorFont = RName.GetRName("fonts/NotoSansSC-Regular.otf", RName.ERNameType.Engine);
             UIDefaultTexture = RName.GetRName("texture/white.srv", RName.ERNameType.Engine);
         }
     }
@@ -211,10 +212,10 @@ namespace EngineNS
         {
             return this;
         }
-        public Profiler.UNativeMemory NativeMemory
+        public Profiler.TtNativeMemory NativeMemory
         {
             get;
-        } = new Profiler.UNativeMemory();
+        } = new Profiler.TtNativeMemory();
         public static async System.Threading.Tasks.Task<bool> StartEngine(TtEngine engine, string cfgFile)
         {
             System.Threading.Thread.CurrentThread.Name = "Main";
@@ -484,7 +485,6 @@ namespace EngineNS
             TickableManager.Cleanup();
             StopSystemThreads();
 
-            Profiler.TimeScopeManager.FinalCleanup();
             AssetMetaManager.Cleanup();
             EngineNS.Profiler.Log.FinalLogger();
 
@@ -503,7 +503,8 @@ namespace EngineNS
                 }
                 FinalCleanupActions.Clear();
             }
-
+            
+            Profiler.TimeScopeManager.FinalCleanup();
             mInstance = null;
         }
         List<System.Action> FinalCleanupActions = new List<Action>();

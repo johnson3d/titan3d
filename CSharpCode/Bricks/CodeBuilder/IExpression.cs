@@ -121,7 +121,7 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(GetFullName());
         }
-        public Rtti.UClassMeta TryGetTypeMeta()
+        public Rtti.TtClassMeta TryGetTypeMeta()
         {
             var desc = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(GetFullName());
             if (desc == null)

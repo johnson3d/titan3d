@@ -39,7 +39,7 @@ namespace EngineNS.GamePlay.Scene
         public Graphics.Pipeline.TtRenderPolicy RenderPolicy { get; set; }
         public Editor.Controller.EditorCameraController CameraController = new Editor.Controller.EditorCameraController();
         public GamePlay.TtWorld CaptureWorld { get; set; }
-        GamePlay.TtWorld.UVisParameter mVisParameter = new GamePlay.TtWorld.UVisParameter();
+        GamePlay.TtWorld.TtVisParameter mVisParameter = new GamePlay.TtWorld.TtVisParameter();
         public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
@@ -70,7 +70,7 @@ namespace EngineNS.GamePlay.Scene
             mVisParameter.OnVisitNode = this.OnVisitNode;
             return true;
         }
-        bool OnVisitNode(Scene.TtNode node, UVisParameter arg)
+        bool OnVisitNode(Scene.TtNode node, TtVisParameter arg)
         {
             switch (CaptureMode)
             {

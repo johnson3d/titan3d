@@ -86,7 +86,7 @@ StructuredBuffer<FTileData> TilingBuffer DX_AUTOBIND;
 struct PS_OUTPUT
 {
     float4 RT0 : SV_Target0;
-    //float4 RT1 : SV_Target1;
+    float4 RT1 : SV_Target1;
 };
 
 /**Meta Begin:(PS_Main)
@@ -233,7 +233,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 
 		//sphere env mapping;
         half3 R = 2 * dot(V, N) * N - V;
-        R = GetOffSpecularPeakReflectionDir(N, R, GBuffer.Roughness);
+        R = GetOffSpecularPeakReflectionDir(N, R, Roughness);
         half EnvMipLevel = GetTexMipLevelFromRoughness(Roughness, (half)gEnvMapMaxMipLevel);
         half3 EnvSpecLightColor = (half3) gEnvMap.SampleLevel(Samp_gEnvMap, R, EnvMipLevel).rgb;
         half Ihdr = max(0.6h, CalcLuminanceYCbCr(EnvSpecLightColor));
@@ -284,7 +284,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 #endif
 
         output.RT0 = half4(BaseShading, PerPixelViewerDistance * rcp((half) gZFar));
-        //output.RT1 = half4(BaseShading, PerPixelViewerDistance * rcp((half) gZFar));
+        output.RT1 = half4(1, 1, 0, 1);
         //if (input.psCustomUV1.x == 0)
         //{
         //    output.RT0 = half4(1, 0, 0, 1);

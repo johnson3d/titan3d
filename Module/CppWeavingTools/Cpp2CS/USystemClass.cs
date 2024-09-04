@@ -107,7 +107,7 @@ namespace CppWeaving.Cpp2CS
 			RegClass("ImVec2", new USystemTypeStruct() { CppName = "ImVec2", CSName = "EngineNS.Vector2", RetPodName = "v3dVector2_t" });
 			RegClass("ImGuiPlatformIO.ImVec2_t", new USystemTypeStruct() { CppName = "ImGuiPlatformIO::ImVec2_t", CSName = "EngineNS.Vector2", RetPodName = "v3dVector2_t" });
 			RegClass("ImVec4", new USystemTypeStruct() { CppName = "ImVec4", CSName = "EngineNS.Vector4", RetPodName = "v3dVector4_t" });
-			RegClass("EngineNS.UAnyValue", new USystemTypeStruct() { CppName = "EngineNS::UAnyValue", CSName = "EngineNS.Support.UAnyValue", RetPodName = "EngineNS::UAnyValue_t" });
+			RegClass("EngineNS.TtAnyValue", new USystemTypeStruct() { CppName = "EngineNS::TtAnyValue", CSName = "EngineNS.Support.TtAnyValue", RetPodName = "EngineNS::TtAnyValue_t" });
 			RegClass("ImWchar16", new USystemTypeStruct() { CppName = "ImWchar", CSName = "Wchar16", RetPodName = "ImWchar16" });
 			RegClass("ImWchar32", new USystemTypeStruct() { CppName = "ImWchar", CSName = "Wchar32", RetPodName = "ImWchar32" });
 

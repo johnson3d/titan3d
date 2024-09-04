@@ -9,7 +9,7 @@ namespace EngineNS.Bricks.Network
         public UTcpClient()
         {
             mCoreObject = EngineNS.TcpClient.CreateInstance();
-            mRcvBuffer = Support.UNativeArray<byte>.CreateInstance();
+            mRcvBuffer = Support.TtNativeArray<byte>.CreateInstance();
         }
         ~UTcpClient()
         {
@@ -46,7 +46,7 @@ namespace EngineNS.Bricks.Network
             mCoreObject.Disconnect();            
         }
         private System.Threading.Thread mRcvThread;
-        public Support.UNativeArray<byte> mRcvBuffer;
+        public Support.TtNativeArray<byte> mRcvBuffer;
         public async System.Threading.Tasks.Task<bool> Connect(string ip, UInt16 port, UNetPackageManager pkgManager = null, UInt16 connId = UInt16.MinValue, int timeOut = 2000)
         {
             if (pkgManager != null)

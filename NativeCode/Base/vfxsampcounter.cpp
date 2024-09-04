@@ -21,6 +21,10 @@ struct ThreadInstanceManager
 	}
 	~ThreadInstanceManager()
 	{
+		ClearAll();
+	}
+	void ClearAll()
+	{
 		for (auto i : AllInstance)
 		{
 			i->Cleanup();
@@ -65,6 +69,11 @@ INT64 SampResult::Begin(v3dSampMgr* mgr, bool bPushParent)
 void SampResult::End(v3dSampMgr* mgr, INT64 begin)
 {
 	mgr->End(begin, this);
+}
+
+void v3dSampMgr::FinalCleanup()
+{
+	GInstanceOfSampMgrs.ClearAll();
 }
 
 v3dSampMgr::v3dSampMgr()

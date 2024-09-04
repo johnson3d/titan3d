@@ -31,7 +31,7 @@ struct FDNObjectHandle
 	void* Handle;
 };
 
-struct UAnyValue;
+struct TtAnyValue;
 
 struct TR_CLASS(SV_LayoutStruct = 8)
 UCs2CppBase
@@ -43,7 +43,7 @@ UCs2CppBase
 		return FDNObjectHandle(mCSharpHandle);
 	}
 	VNameString mCSFullName;
-	void CreateManagedObject(UAnyValue* args = nullptr, int NumOfArg = 0, int retType = 2);
+	void CreateManagedObject(TtAnyValue* args = nullptr, int NumOfArg = 0, int retType = 2);
 	void FreeManagedObjectGCHandle();
 	void* GetManagedObject();
 
@@ -62,7 +62,7 @@ struct VTypeGetCSDesc
 
 #pragma pack(push)
 #pragma pack(4)
-struct UAnyValue
+struct TtAnyValue
 {
 	enum EValueType : char
 	{
@@ -108,11 +108,11 @@ struct UAnyValue
 			mStructSize = 0;
 		}
 	};
-	UAnyValue()
+	TtAnyValue()
 	{
 		/*mValueType = EValueType::Unknown;
 		mStructSize = 0;*/
-		memset(this, 0, sizeof(UAnyValue));
+		memset(this, 0, sizeof(TtAnyValue));
 	}
 	char mValueType;
 	char mUnused[3];
@@ -394,7 +394,7 @@ struct UAnyValue
 	{
 		SetManagedHandle(v);
 	}
-	friend constexpr bool operator ==(const UAnyValue& lh, const UAnyValue& rh)
+	friend constexpr bool operator ==(const TtAnyValue& lh, const TtAnyValue& rh)
 	{
 		if (lh.mValueType != rh.mValueType)
 			return false;
@@ -440,11 +440,11 @@ struct UAnyValue
 		}
 		return false;
 	}
-	friend constexpr bool operator !=(const UAnyValue& lh, const UAnyValue& rh)
+	friend constexpr bool operator !=(const TtAnyValue& lh, const TtAnyValue& rh)
 	{
 		return !(lh == rh);
 	}
-	friend constexpr bool operator < (const UAnyValue& lh, const UAnyValue& rh)
+	friend constexpr bool operator < (const TtAnyValue& lh, const TtAnyValue& rh)
 	{
 		if (lh.mValueType < rh.mValueType)
 			return true;
@@ -543,9 +543,9 @@ struct UAnyValue
 	}
 };
 
-struct UAnyValue_t
+struct TtAnyValue_t
 {
-	static constexpr int StructSize = sizeof(UAnyValue);
+	static constexpr int StructSize = sizeof(TtAnyValue);
 	char MemData[StructSize];
 };
 #pragma pack(pop)

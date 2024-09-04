@@ -129,7 +129,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
             {
                 var stateVarName = "AnimCompoundState";
                 var drawList = ImGuiAPI.GetWindowDrawList();
-                var menuData = new Support.UAnyPointer();
+                var menuData = new Support.TtAnyPointer();
                 EGui.UIProxy.MenuItemProxy.MenuState newMethodMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
                 newMethodMenuState.Reset();
                 if (EGui.UIProxy.MenuItemProxy.MenuItem("New" + stateVarName, null, false, null, in drawList, in menuData, ref newMethodMenuState))

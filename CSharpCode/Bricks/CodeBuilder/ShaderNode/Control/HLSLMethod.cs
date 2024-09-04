@@ -499,7 +499,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
     }
     public partial class TtHLSLMethodManager
     {
-        public Dictionary<string, Rtti.UClassMeta.TtMethodMeta> Methods { get; } = new Dictionary<string, Rtti.UClassMeta.TtMethodMeta>();
+        public Dictionary<string, Rtti.TtClassMeta.TtMethodMeta> Methods { get; } = new Dictionary<string, Rtti.TtClassMeta.TtMethodMeta>();
         public void SureMethods()
         {
             if (Methods.Count > 0)
@@ -519,7 +519,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 }
             }
         }
-        public Rtti.UClassMeta.TtMethodMeta GetMethod(string fun)
+        public Rtti.TtClassMeta.TtMethodMeta GetMethod(string fun)
         {
             SureMethods();
             if(Methods.TryGetValue(fun, out var result))
@@ -528,10 +528,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             return null;
         }
-        public Rtti.UClassMeta.TtMethodMeta GetMethodByDeclString(string declStr)
+        public Rtti.TtClassMeta.TtMethodMeta GetMethodByDeclString(string declStr)
         {
             SureMethods();
-            declStr = Rtti.UClassMeta.RemoveDeclstringDllVersion(declStr);
+            declStr = Rtti.TtClassMeta.RemoveDeclstringDllVersion(declStr);
             foreach (var i in Methods)
             {
                 if (i.Value.GetMethodDeclareString(true) == declStr)

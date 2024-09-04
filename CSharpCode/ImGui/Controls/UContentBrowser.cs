@@ -276,7 +276,7 @@ namespace EngineNS.EGui.Controls
             if (metafiles.Length > 0)
             {
                 var ameta = new Rtti.UMetaVersionMeta();
-                ameta.TypeStr = Rtti.UTypeDescGetter<Rtti.UMetaVersion>.TypeDesc.TypeString;
+                ameta.TypeStr = Rtti.UTypeDescGetter<Rtti.TtMetaVersion>.TypeDesc.TypeString;
                 foreach (var i in metafiles)
                 {
                     var name = IO.TtFileManager.GetPureName(i);
@@ -605,7 +605,7 @@ namespace EngineNS.EGui.Controls
             {
                 if(mFilterMenus != null)
                 {
-                    var menuData = new Support.UAnyPointer();
+                    var menuData = new Support.TtAnyPointer();
                     var drawList = ImGuiAPI.GetWindowDrawList();
                     foreach(var menu in mFilterMenus.Values)
                     {
@@ -781,7 +781,7 @@ namespace EngineNS.EGui.Controls
                     if (mSearchBar != null)
                     {
                         mSearchBar.Width = ImGuiAPI.GetColumnWidth(1) - (style->WindowPadding.X) * 2 - 24;
-                        if (mSearchBar.OnDraw(in cmd, in Support.UAnyPointer.Default))
+                        if (mSearchBar.OnDraw(in cmd, in Support.TtAnyPointer.Default))
                             FilterText = mSearchBar.SearchText;
                     }
                     else

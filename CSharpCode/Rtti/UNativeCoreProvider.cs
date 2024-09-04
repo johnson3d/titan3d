@@ -24,54 +24,54 @@ namespace EngineNS.Rtti
         {
             return System.Runtime.InteropServices.Marshal.PtrToStringAnsi(ptr);
         }
-        public static object BoxValue(ref Support.UAnyValue v)
+        public static object BoxValue(ref Support.TtAnyValue v)
         {
             switch (v.ValueType)
             {
-                case Support.UAnyValue.EValueType.Unknown:
+                case Support.TtAnyValue.EValueType.Unknown:
                     return null;
-                case Support.UAnyValue.EValueType.Struct:
+                case Support.TtAnyValue.EValueType.Struct:
                     {
                         var type = Rtti.UTypeDesc.TypeOf(v.Struct.mTypeName.c_str());
                         if (type == null)
                             return null;
                         return System.Runtime.InteropServices.Marshal.PtrToStructure(v.Struct.mStructPointer, type.SystemType);
                     }
-                case Support.UAnyValue.EValueType.ManagedHandle:
+                case Support.TtAnyValue.EValueType.ManagedHandle:
                     return v.GCHandle.Target;
-                case Support.UAnyValue.EValueType.I8:
+                case Support.TtAnyValue.EValueType.I8:
                     return v.I8Value;
-                case Support.UAnyValue.EValueType.I16:
+                case Support.TtAnyValue.EValueType.I16:
                     return v.I16Value;
-                case Support.UAnyValue.EValueType.I32:
+                case Support.TtAnyValue.EValueType.I32:
                     return v.I32Value;
-                case Support.UAnyValue.EValueType.I64:
+                case Support.TtAnyValue.EValueType.I64:
                     return v.I64Value;
-                case Support.UAnyValue.EValueType.UI8:
+                case Support.TtAnyValue.EValueType.UI8:
                     return v.UI8Value;
-                case Support.UAnyValue.EValueType.UI16:
+                case Support.TtAnyValue.EValueType.UI16:
                     return v.UI16Value;
-                case Support.UAnyValue.EValueType.UI32:
+                case Support.TtAnyValue.EValueType.UI32:
                     return v.UI32Value;
-                case Support.UAnyValue.EValueType.UI64:
+                case Support.TtAnyValue.EValueType.UI64:
                     return v.UI64Value;
-                case Support.UAnyValue.EValueType.F32:
+                case Support.TtAnyValue.EValueType.F32:
                     return v.F32Value;
-                case Support.UAnyValue.EValueType.F64:
+                case Support.TtAnyValue.EValueType.F64:
                     return v.F64Value;
-                case Support.UAnyValue.EValueType.Ptr:
+                case Support.TtAnyValue.EValueType.Ptr:
                     return v.Pointer;
-                case Support.UAnyValue.EValueType.V2:
+                case Support.TtAnyValue.EValueType.V2:
                     return v.V2;
-                case Support.UAnyValue.EValueType.V3:
+                case Support.TtAnyValue.EValueType.V3:
                     return v.V3;
-                case Support.UAnyValue.EValueType.V4:
+                case Support.TtAnyValue.EValueType.V4:
                     return v.V4;
                 default:
                     return null;
             }
         }
-        public static unsafe void UnboxObject(object obj, Support.UAnyValue* v)
+        public static unsafe void UnboxObject(object obj, Support.TtAnyValue* v)
         {
             var t = obj.GetType();
             if (t == typeof(sbyte))
@@ -145,7 +145,7 @@ namespace EngineNS.Rtti
             return lst.Count;
         }
         [Editor.UCs2Cpp]
-        public unsafe void List_Add(IList lst, Support.UAnyValue* v)
+        public unsafe void List_Add(IList lst, Support.TtAnyValue* v)
         {
             lst.Add(BoxValue(ref *v));
         }
@@ -160,7 +160,7 @@ namespace EngineNS.Rtti
             lst.RemoveAt(index);
         }
         [Editor.UCs2Cpp]
-        public unsafe void List_GetValue(IList lst, int index, Support.UAnyValue* v)
+        public unsafe void List_GetValue(IList lst, int index, Support.TtAnyValue* v)
         {
             UnboxObject(lst[index], v);
         }
@@ -183,7 +183,7 @@ namespace EngineNS.Rtti
             handle.Free();
         }
         [Editor.UCs2Cpp]
-        public unsafe void GetPropertyValue(IntPtr hostHandle, string propName, Support.UAnyValue* outValue)
+        public unsafe void GetPropertyValue(IntPtr hostHandle, string propName, Support.TtAnyValue* outValue)
         {
             var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(hostHandle);
             if (handle.Target == null)
@@ -198,7 +198,7 @@ namespace EngineNS.Rtti
             UnboxObject(propValue, outValue);
         }
         [Editor.UCs2Cpp]
-        public unsafe void SetPropertyValue(IntPtr hostHandle, string propName, Support.UAnyValue* v)
+        public unsafe void SetPropertyValue(IntPtr hostHandle, string propName, Support.TtAnyValue* v)
         {
             var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(hostHandle);
             if (handle.Target == null)

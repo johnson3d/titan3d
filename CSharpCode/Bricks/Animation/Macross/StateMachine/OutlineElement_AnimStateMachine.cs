@@ -56,7 +56,7 @@ namespace EngineNS.Bricks.Animation.Macross
             {
                 var menuItemName = "AnimCompoundState";
                 var drawList = ImGuiAPI.GetWindowDrawList();
-                var menuData = new Support.UAnyPointer();
+                var menuData = new Support.TtAnyPointer();
                 EGui.UIProxy.MenuItemProxy.MenuState newMethodMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
                 newMethodMenuState.Reset();
                 if (EGui.UIProxy.MenuItemProxy.MenuItem("New" + menuItemName, null, false, null, in drawList, in menuData, ref newMethodMenuState))

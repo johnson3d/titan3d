@@ -455,7 +455,7 @@ namespace EngineNS.IO
             var createNewAssetValueStore = ContentBrowser.CreateNewAssets;
             ContentBrowser.CreateNewAssets = false;
             var drawList = ImGuiAPI.GetWindowDrawList();
-            Support.UAnyPointer menuData = new Support.UAnyPointer();
+            Support.TtAnyPointer menuData = new Support.TtAnyPointer();
 
             if (EGui.UIProxy.MenuItemProxy.MenuItem("ExplorerTo", null, false, null, in drawList, in menuData, ref mExplorerToMenuState))
             {

@@ -17,11 +17,11 @@ namespace EngineNS.Bricks.NodeGraph
         {
 
         }
-        public virtual void OnWriteMember(IO.IWriter ar, IO.ISerializer obj, Rtti.UMetaVersion metaVersion)
+        public virtual void OnWriteMember(IO.IWriter ar, IO.ISerializer obj, Rtti.TtMetaVersion metaVersion)
         {
             IO.SerializerHelper.WriteMember(ar, obj, metaVersion);
         }
-        public virtual void OnReadMember(IO.IReader ar, IO.ISerializer obj, Rtti.UMetaVersion metaVersion)
+        public virtual void OnReadMember(IO.IReader ar, IO.ISerializer obj, Rtti.TtMetaVersion metaVersion)
         {
             IO.SerializerHelper.ReadMember(ar, obj, metaVersion);
         }
@@ -44,100 +44,145 @@ namespace EngineNS.Bricks.NodeGraph
             result.Tag = tag;
             return result;
         }
-        public static UEditableValue CreateEditableValue(IValueEditNotify notify, Type type, object tag)
+        public static UEditableValue CreateEditableValue(IValueEditNotify notify, Type type, object tag, object defaultValue = null)
         {
-            return CreateEditableValue(notify, Rtti.UTypeDesc.TypeOf(type), tag);
+            return CreateEditableValue(notify, Rtti.UTypeDesc.TypeOf(type), tag, defaultValue);
         }
-        public static UEditableValue CreateEditableValue(IValueEditNotify notify, Rtti.UTypeDesc type, object tag)
+        public static UEditableValue CreateEditableValue(IValueEditNotify notify, Rtti.UTypeDesc type, object tag, object defaultValue = null)
         {
             if (type.IsEqual(typeof(bool)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = false;
+                if (defaultValue == null)
+                    result.Value = false;
+                else
+                    result.Value = defaultValue;
                 return result;
             }
             if (type.IsEqual(typeof(SByte)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = (SByte)0;
+                if (defaultValue == null)
+                    result.Value = (SByte)0;
+                else
+                    result.Value = defaultValue;
                 return result;
             }
             if (type.IsEqual(typeof(Int16)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = (Int16)0;
+                if (defaultValue == null)
+                    result.Value = (Int16)0;
+                else
+                    result.Value = defaultValue;
                 return result;
             }
             if (type.IsEqual(typeof(Int32)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = (Int32)0;
+                if (defaultValue == null)
+                    result.Value = (Int32)0;
+                else
+                    result.Value = defaultValue;
                 return result;
             }
             if (type.IsEqual(typeof(Int64)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = (Int64)0;
+                if (defaultValue == null)
+                    result.Value = (Int64)0;
+                else
+                    result.Value = defaultValue;
                 return result;
             }
             if (type.IsEqual(typeof(byte)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = (byte)0;
+                if (defaultValue == null)
+                    result.Value = (byte)0;
+                else
+                    result.Value = defaultValue;
                 return result;
             }
             if (type.IsEqual(typeof(UInt16)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = (UInt16)0;
+                if (defaultValue == null)
+                    result.Value = (UInt16)0;
+                else
+                    result.Value = defaultValue;
                 return result;
             }
             if (type.IsEqual(typeof(UInt32)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = (UInt32)0;
+                if (defaultValue == null)
+                    result.Value = (UInt32)0;
+                else
+                    result.Value = defaultValue;
                 return result;
             }
             if (type.IsEqual(typeof(UInt64)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = (UInt64)0;
+                if (defaultValue == null)
+                    result.Value = (UInt64)0;
+                else
+                    result.Value = defaultValue;
                 return result;
             }
             if (type.IsEqual(typeof(float)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = (float)0;
+                if (defaultValue == null)
+                    result.Value = (float)0;
+                else
+                    result.Value = defaultValue;
                 return result;
             }
             if (type.IsEqual(typeof(double)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = (double)0;
+                if (defaultValue == null)
+                    result.Value = (double)0;
+                else
+                    result.Value = defaultValue;
                 return result;
             }
             if (type.IsEqual(typeof(string)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = "";
+                if (defaultValue == null)
+                    result.Value = "";
+                else
+                    result.Value = defaultValue;
                 return result;
             }
             if (type.IsEqual(typeof(Vector2)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = Vector2.Zero;
+                if (defaultValue == null)
+                    result.Value = Vector2.Zero;
+                else
+                    result.Value = defaultValue;
                 return result;
             }
             if (type.IsEqual(typeof(Vector3)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = Vector3.Zero;
+                if (defaultValue == null)
+                    result.Value = Vector3.Zero;
+                else
+                    result.Value = defaultValue;
                 return result;
             }
             if (type.IsEqual(typeof(Vector4)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = Vector4.Zero;
+                if (defaultValue == null)
+                    result.Value = Vector4.Zero;
+                else
+                    result.Value = defaultValue;
                 return result;
             }
             else if (type.IsEqual(typeof(System.Type)))
@@ -146,6 +191,7 @@ namespace EngineNS.Bricks.NodeGraph
                 result.ValueType = type;
                 result.Selector.CtrlId = result.LabelName;
                 result.Tag = tag;
+                result.Value = defaultValue;
                 return result;
             }
             else if (type.IsEqual(typeof(RName)))
@@ -153,24 +199,34 @@ namespace EngineNS.Bricks.NodeGraph
                 var result = new URNameEValue(notify);
                 result.ValueType = type;
                 result.Tag = tag;
+                result.Value = defaultValue;
                 return result; 
             }
             else if (type.IsEqual(typeof(Color3f)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = Color3f.FromColor(Color4b.White);
+                if (defaultValue == null)
+                    result.Value = Color3f.FromColor(Color4b.White);
+                else
+                    result.Value = defaultValue;
                 return result;
             }
             else if(type.IsEqual(typeof(Color4f)))
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = Color4f.FromColor4b(Color4b.White);
+                if (defaultValue == null)
+                    result.Value = Color4f.FromColor4b(Color4b.White);
+                else
+                    result.Value = defaultValue;
                 return result;
             }
             else if(type.IsEnum)
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
-                result.Value = System.Enum.GetValues(type.SystemType).GetValue(0);
+                if (defaultValue == null)
+                    result.Value = System.Enum.GetValues(type.SystemType).GetValue(0);
+                else
+                    result.Value = defaultValue;
                 result.UserDraw = false;
                 return result;
             }
@@ -180,7 +236,7 @@ namespace EngineNS.Bricks.NodeGraph
         [Rtti.Meta]
         public Rtti.UTypeDesc ValueType { get; set; }
         [Rtti.Meta]
-        public virtual object Value { get; set; }   // todo: change value to UAnyValue
+        public virtual object Value { get; set; } = null;   // todo: change value to TtAnyValue
         public string GetValueString()
         {
             if (Value.GetType() == typeof(bool))
@@ -461,7 +517,7 @@ namespace EngineNS.Bricks.NodeGraph
 
             if (ContentBrowser == null)
             {
-                ContentBrowser = Editor.UEditor.NewPopupContentBrowser();//TtEngine.Instance.EditorInstance.RNamePopupContentBrowser
+                ContentBrowser = Editor.TtEditor.NewPopupContentBrowser();//TtEngine.Instance.EditorInstance.RNamePopupContentBrowser
             }
 
             if (AssetName != null)

@@ -505,11 +505,11 @@ namespace EngineNS.GamePlay.Scene
         {
 
         }
-        public virtual bool TreeGatherVisibleMeshes(TtWorld.UVisParameter rp)
+        public virtual bool TreeGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             return true;
         }
-        public virtual void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
+        public virtual void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             rp.AddVisibleNode(this);
         }

@@ -120,9 +120,9 @@ namespace CSharpCodeTools.Cs2Cpp
                 prop.Type = "EngineNS.Matrix";
                 return true;
             }
-            else if (pureTypeName == "UAnyValue" || pureTypeName == "Support.UAnyValue" || pureTypeName == "EngineNS.Support.UAnyValue")
+            else if (pureTypeName == "TtAnyValue" || pureTypeName == "Support.TtAnyValue" || pureTypeName == "EngineNS.Support.TtAnyValue")
             {
-                prop.Type = "EngineNS.Support.UAnyValue";
+                prop.Type = "EngineNS.Support.TtAnyValue";
                 return true;
             }
             else

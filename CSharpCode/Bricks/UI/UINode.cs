@@ -122,7 +122,7 @@ namespace EngineNS.UI
                 // todo: load ui
             }
         }
-        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             foreach (var i in mUIHost)
             {

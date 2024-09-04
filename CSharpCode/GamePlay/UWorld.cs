@@ -99,7 +99,7 @@ namespace EngineNS.GamePlay
             } 
         }
         #region Culling
-        public class UVisParameter
+        public class TtVisParameter
         {
             public enum EVisCull
             {
@@ -132,7 +132,7 @@ namespace EngineNS.GamePlay
             public List<GamePlay.Scene.TtNode> VisibleNodes { get; } = new List<TtNode>();
             public bool IsGatherVisibleNodes { get; set; } = false;
             
-            public delegate bool FOnVisitNode(Scene.TtNode node, UVisParameter arg);
+            public delegate bool FOnVisitNode(Scene.TtNode node, TtVisParameter arg);
             public FOnVisitNode OnVisitNode = null;
             public void Reset()
             {
@@ -205,7 +205,7 @@ namespace EngineNS.GamePlay
                 return mScopeGatherVisibleMeshes;
             }
         }
-        public virtual void GatherVisibleMeshes(UVisParameter rp)
+        public virtual void GatherVisibleMeshes(TtVisParameter rp)
         {
             rp.CullCamera.VisParameter = rp;
             using (new Profiler.TimeScopeHelper(ScopeGatherVisibleMeshes))
@@ -259,7 +259,7 @@ namespace EngineNS.GamePlay
                 return mScopeChildren;
             }
         }
-        internal unsafe static bool OnVisitNode_GatherVisibleMeshes(Scene.TtNode node, UVisParameter rp)
+        internal unsafe static bool OnVisitNode_GatherVisibleMeshes(Scene.TtNode node, TtVisParameter rp)
         {
             if (rp.OnVisitNode != null)
             {
@@ -324,7 +324,7 @@ namespace EngineNS.GamePlay
                                         TtEngine.Instance.EventPoster.ParrallelFor(numTask, static (int index, object arg1, object arg2, Thread.Async.TtAsyncTaskStateBase state) =>
                                         {
                                             var node = arg1 as TtNode;
-                                            var rp = arg2 as UVisParameter;
+                                            var rp = arg2 as TtVisParameter;
                                             int stride = node.Children.Count / (int)state.UserArguments.NumOfParrallelFor + 1;
                                             var start = index * stride;
                                             for (int n = 0; n < stride; n++)
@@ -354,7 +354,7 @@ namespace EngineNS.GamePlay
         static Scene.TtNode.FOnVisitNode mOnVisitNode_GatherVisibleMeshesAll = OnVisitNode_GatherVisibleMeshesAll;
         private unsafe static bool OnVisitNode_GatherVisibleMeshesAll(Scene.TtNode node, object arg)
         {
-            var rp = arg as UVisParameter;
+            var rp = arg as TtVisParameter;
 
             using (new Profiler.TimeScopeHelper(ScopeOnGatherVisibleMeshes))
             {

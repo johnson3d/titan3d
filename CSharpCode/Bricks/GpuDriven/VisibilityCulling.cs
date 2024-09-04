@@ -316,7 +316,7 @@ namespace EngineNS.Bricks.GpuDriven
             mFrustumCullingData.FrustumMinPoint = frustumAABB.Minimum;
             mFrustumCullingData.FrustumMaxPoint = frustumAABB.Maximum;
         }
-        public void PrepareCullClusterInfos(NxRHI.ICommandList cmd, GamePlay.TtWorld world, GamePlay.TtWorld.UVisParameter rp)
+        public void PrepareCullClusterInfos(NxRHI.ICommandList cmd, GamePlay.TtWorld world, GamePlay.TtWorld.TtVisParameter rp)
         {
             List<FClusterData> clusters = new List<FClusterData>();
             List<Vector3> position = new List<Vector3>();

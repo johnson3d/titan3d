@@ -33,14 +33,14 @@ namespace EngineNS.Support
     
     [DebuggerTypeProxy(typeof(TtCollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
-    public struct UNativeArray<T> : IDisposable, IList<T> where T : unmanaged
+    public struct TtNativeArray<T> : IDisposable, IList<T> where T : unmanaged
     {
         public CsValueList mCoreObject;
-        public UNativeArray(CsValueList ptr)
+        public TtNativeArray(CsValueList ptr)
         {
             mCoreObject = ptr;
         }
-        public UNativeArray()
+        public TtNativeArray()
         {
             unsafe
             {
@@ -49,13 +49,13 @@ namespace EngineNS.Support
             }
         }
 
-        public static UNativeArray<T> CreateInstance()
+        public static TtNativeArray<T> CreateInstance()
         {
-            return new UNativeArray<T>();
+            return new TtNativeArray<T>();
         }
-        public static UNativeArray<T> CreateInstance(CsValueList nativeObject)
+        public static TtNativeArray<T> CreateInstance(CsValueList nativeObject)
         {
-            UNativeArray<T> result = new UNativeArray<T>(nativeObject);
+            TtNativeArray<T> result = new TtNativeArray<T>(nativeObject);
             return result;
         }
         public struct UNativeArrayEnumerator : IEnumerator<T>
@@ -63,7 +63,7 @@ namespace EngineNS.Support
             int Index;
             int Count;
             unsafe T* ArrayAddress;
-            public UNativeArrayEnumerator(UNativeArray<T> obj)
+            public UNativeArrayEnumerator(TtNativeArray<T> obj)
             {
                 Index = -1;
                 Count = obj.Count;
@@ -191,7 +191,7 @@ namespace EngineNS.Support
                 mCoreObject.AddValue((byte*)(&item));
             }
         }
-        public void Append(UNativeArray<T> src)
+        public void Append(TtNativeArray<T> src)
         {
             unsafe
             {

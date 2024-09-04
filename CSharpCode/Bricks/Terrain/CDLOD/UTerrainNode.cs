@@ -474,7 +474,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 i.LevelData?.UpdateCameraOffset(world);
             }
         }
-        public override void OnGatherVisibleMeshes(GamePlay.TtWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(GamePlay.TtWorld.TtVisParameter rp)
         {
             UpdateCameralOffset(rp.World);
             //todo: QTree culling?
@@ -504,7 +504,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             rp.AddVisibleNode(this);
         }
         public List<TtPatch> VisiblePatches = new List<TtPatch>();
-        public void FrustumCull(GamePlay.TtWorld.UVisParameter rp, List<TtPatch> patches)
+        public void FrustumCull(GamePlay.TtWorld.TtVisParameter rp, List<TtPatch> patches)
         {
             patches.Clear();
             foreach (var i in ActiveLevels)

@@ -274,7 +274,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public UMethodStartNode StartNode;
         [Rtti.Meta]
         public UMethodDeclaration MethodDec { get; set; }
-        public Rtti.UClassMeta.TtMethodMeta Method;
+        public Rtti.TtClassMeta.TtMethodMeta Method;
         [Rtti.Meta]
         public bool IsDelegate { get; set; } = false;
 
@@ -1298,7 +1298,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return false;
             return true;
         }
-        private void UpdateMenuWithClassMeta(Rtti.UClassMeta classMeta, TtMenuItem menu)
+        private void UpdateMenuWithClassMeta(Rtti.TtClassMeta classMeta, TtMenuItem menu)
         {
             for (int proIdx = 0; proIdx < classMeta.Properties.Count; proIdx++)
             {

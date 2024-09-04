@@ -772,7 +772,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 i.UpdateCameraOffset(world);
             }
         }
-        public unsafe void OnGatherVisibleMeshes(GamePlay.TtWorld.UVisParameter rp)
+        public unsafe void OnGatherVisibleMeshes(GamePlay.TtWorld.TtVisParameter rp)
         {
             foreach (var i in TiledPatch)
             {
@@ -808,7 +808,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
         }
 
-        public void FrustumCull(GamePlay.TtWorld.UVisParameter rp, List<TtPatch> patches)
+        public void FrustumCull(GamePlay.TtWorld.TtVisParameter rp, List<TtPatch> patches)
         {
             foreach (var i in TiledPatch)
             {

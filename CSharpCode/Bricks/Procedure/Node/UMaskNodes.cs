@@ -435,7 +435,7 @@ namespace EngineNS.Bricks.Procedure.Node
             var curComp = graph.BufferCache.FindBuffer(SrcPin);
             var resultComp = graph.BufferCache.FindBuffer(ResultPin);
             var closestComp = graph.BufferCache.FindBuffer(ClosestPin);
-            var sdfGrid = new Support.USdfGrid();
+            var sdfGrid = new Support.TtSdfGrid();
             sdfGrid.mCoreObject.InitGrid(curComp.Width, curComp.Height);
             for (int j = 0; j < curComp.Height; j++)
             {

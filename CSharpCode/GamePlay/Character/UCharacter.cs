@@ -29,7 +29,7 @@ namespace EngineNS.GamePlay.Character
 
             return true;
         }
-        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             base.OnGatherVisibleMeshes(rp);
         }

@@ -100,7 +100,7 @@ namespace EngineNS.Editor.Forms
                 CreateBoneLineMesh(child);
             }
         }
-        void ShowBoneLine(ILimb limb, TtMeshSpaceRuntimePose runtimePose, TtWorld.UVisParameter rp)
+        void ShowBoneLine(ILimb limb, TtMeshSpaceRuntimePose runtimePose, TtWorld.TtVisParameter rp)
         {
             var startIndex = limb.Index.Value;
             var startTransform = runtimePose.Transforms[startIndex];
@@ -122,7 +122,7 @@ namespace EngineNS.Editor.Forms
                 ShowBoneLine(child, runtimePose, rp);
             }
         }
-        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             var runtimePose = TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(CurrentPose);
             foreach(var bone in SkeletonAsset.Skeleton.Limbs)

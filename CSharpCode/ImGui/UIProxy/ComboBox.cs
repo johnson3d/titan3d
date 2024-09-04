@@ -19,7 +19,7 @@ namespace EngineNS.EGui.UIProxy
             ImGuiWindowFlags_.ImGuiWindowFlags_NoMove;
         public float Width = -1;
 
-        public delegate void Delegate_ComboOpenAction(in Support.UAnyPointer data);
+        public delegate void Delegate_ComboOpenAction(in Support.TtAnyPointer data);
         public Delegate_ComboOpenAction ComboOpenAction;
 
         //ImageProxy mImage;
@@ -41,7 +41,7 @@ namespace EngineNS.EGui.UIProxy
             await Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
-        public unsafe bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
+        public unsafe bool OnDraw(in ImDrawList drawList, in Support.TtAnyPointer drawData)
         {
             //if (mImage == null)
             //    return false;

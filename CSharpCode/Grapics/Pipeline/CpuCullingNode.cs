@@ -41,8 +41,8 @@ namespace EngineNS.Graphics.Pipeline
                 mVisParameter.CullCamera = camera;
             }
         }
-        GamePlay.TtWorld.UVisParameter mVisParameter = new GamePlay.TtWorld.UVisParameter();
-        public GamePlay.TtWorld.UVisParameter VisParameter
+        GamePlay.TtWorld.TtVisParameter mVisParameter = new GamePlay.TtWorld.TtVisParameter();
+        public GamePlay.TtWorld.TtVisParameter VisParameter
         {
             get => mVisParameter;
         }

@@ -59,7 +59,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             //AddOutput(ColorPinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddOutput(DepthPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         }
-        public GamePlay.TtWorld.UVisParameter mVisParameter = new GamePlay.TtWorld.UVisParameter();
+        public GamePlay.TtWorld.TtVisParameter mVisParameter = new GamePlay.TtWorld.TtVisParameter();
         // public CCamera ShadowCamera;
         private UCamera[] mShadowCameraArray;
         public UCamera ViewerCamera;
@@ -346,7 +346,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             {
                 if (i != null)
                 {
-                    i.VisParameter.CullType = GamePlay.TtWorld.UVisParameter.EVisCull.Shadow;
+                    i.VisParameter.CullType = GamePlay.TtWorld.TtVisParameter.EVisCull.Shadow;
                     i.VisParameter.World = world;
                     i.VisParameter.IsGatherVisibleNodes = false;
                 }
@@ -382,7 +382,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                         CullCamera.PerspectiveFovLH(ViewerCamera.Fov, ViewerCamera.Width, ViewerCamera.Height, ViewerCamera.ZNear, mSumDistanceFarArray[CsmIdx]);
                         CullCamera.LookAtLH(ViewerCamera.GetPosition(), ViewerCamera.GetLookAt(), in Vector3.UnitY);
                         //收集本csm阶段可投影Mesh
-                        mVisParameter.CullType = GamePlay.TtWorld.UVisParameter.EVisCull.Shadow;
+                        mVisParameter.CullType = GamePlay.TtWorld.TtVisParameter.EVisCull.Shadow;
                         mVisParameter.IsBuildAABB = true;
                         mVisParameter.World = world;
                         mVisParameter.CullCamera = CullCamera;

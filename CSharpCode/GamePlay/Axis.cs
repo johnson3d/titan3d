@@ -187,7 +187,7 @@ namespace EngineNS.GamePlay
             {
                 return false;
             }
-            public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
+            public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
             {
                 base.OnGatherVisibleMeshes(rp);
             }
@@ -2727,7 +2727,7 @@ namespace EngineNS.GamePlay
 
             Vector2 btnSize = new Vector2(24, 24);
             mSelectButton.IsChecked = mAxisOperationType == enAxisOperationType.Select;
-            if(mSelectButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
+            if(mSelectButton.OnDraw(in drawList, in Support.TtAnyPointer.Default))
             {
                 SetAxisOperationType(enAxisOperationType.Select);
                 retValue = true;
@@ -2739,7 +2739,7 @@ namespace EngineNS.GamePlay
             slate.IsHoverGuiItem |= ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None);
             ImGuiAPI.SameLine(0, 4);
             mMoveButton.IsChecked = mAxisOperationType == enAxisOperationType.Move;
-            if(mMoveButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
+            if(mMoveButton.OnDraw(in drawList, in Support.TtAnyPointer.Default))
             {
                 SetAxisOperationType(enAxisOperationType.Move);
                 retValue = true;
@@ -2751,7 +2751,7 @@ namespace EngineNS.GamePlay
 
             ImGuiAPI.SameLine(0, 4);
             mRotButton.IsChecked = mAxisOperationType == enAxisOperationType.Rot;
-            if (mRotButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
+            if (mRotButton.OnDraw(in drawList, in Support.TtAnyPointer.Default))
             {
                 SetAxisOperationType(enAxisOperationType.Rot);
                 retValue = true;
@@ -2763,7 +2763,7 @@ namespace EngineNS.GamePlay
 
             ImGuiAPI.SameLine(0, 4);
             mScaleButton.IsChecked = mAxisOperationType == enAxisOperationType.Scale;
-            if (mScaleButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
+            if (mScaleButton.OnDraw(in drawList, in Support.TtAnyPointer.Default))
             {
                 SetAxisOperationType(enAxisOperationType.Scale);
                 retValue = true;
@@ -2775,7 +2775,7 @@ namespace EngineNS.GamePlay
 
             ImGuiAPI.SameLine(0, 4);
             mEdgeButton.IsChecked = mAxisOperationType == enAxisOperationType.Edge;
-            if (mEdgeButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
+            if (mEdgeButton.OnDraw(in drawList, in Support.TtAnyPointer.Default))
             {
                 SetAxisOperationType(enAxisOperationType.Edge);
                 retValue = true;
@@ -2787,7 +2787,7 @@ namespace EngineNS.GamePlay
 
             ImGuiAPI.SameLine(0, 10);
             mAxisLocalButton.IsChecked = mAxisSpace == enAxisSpace.Local;
-            if(mAxisLocalButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
+            if(mAxisLocalButton.OnDraw(in drawList, in Support.TtAnyPointer.Default))
             {
                 SetAxisSpace(enAxisSpace.Local);
                 retValue = true;
@@ -2806,7 +2806,7 @@ namespace EngineNS.GamePlay
                     {
                         ImGuiAPI.SameLine(0, 4);
                         mAxisWorldButton.IsChecked = mAxisSpace == enAxisSpace.World;
-                        if (mAxisWorldButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
+                        if (mAxisWorldButton.OnDraw(in drawList, in Support.TtAnyPointer.Default))
                         {
                             SetAxisSpace(enAxisSpace.World);
                             retValue = true;

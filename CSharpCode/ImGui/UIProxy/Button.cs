@@ -54,7 +54,7 @@ namespace EngineNS.EGui.UIProxy
             await mImage.Initialize();
             return true;
         }
-        public unsafe bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
+        public unsafe bool OnDraw(in ImDrawList drawList, in Support.TtAnyPointer drawData)
         {
             bool retValue = false;
             var rectStart = ImGuiAPI.GetCursorScreenPos();
@@ -183,7 +183,7 @@ namespace EngineNS.EGui.UIProxy
             return true;
         }
 
-        public unsafe bool OnDraw(in ImDrawList drawList, in UAnyPointer drawData)
+        public unsafe bool OnDraw(in ImDrawList drawList, in TtAnyPointer drawData)
         {
             if (!IsReadToDraw())
                 return false;

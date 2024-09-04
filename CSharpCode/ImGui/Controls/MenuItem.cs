@@ -259,7 +259,7 @@ namespace EngineNS.EGui.Controls
                             clicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
                             break;
                         case EMenuStyle.Menu:
-                            clicked = EGui.UIProxy.MenuItemProxy.MenuItem(item.Text, "", false, null, in cmdList, Support.UAnyPointer.Default, ref item.MenuState);
+                            clicked = EGui.UIProxy.MenuItemProxy.MenuItem(item.Text, "", false, null, in cmdList, Support.TtAnyPointer.Default, ref item.MenuState);
                             break;
                     }
                     if (clicked)
@@ -295,7 +295,7 @@ namespace EngineNS.EGui.Controls
                             item.MenuState.Opened = false;
                         break;
                     case EMenuStyle.Menu:
-                        if (EGui.UIProxy.MenuItemProxy.BeginMenuItem(item.Text, "", null, cmdList, Support.UAnyPointer.Default, ref item.MenuState))
+                        if (EGui.UIProxy.MenuItemProxy.BeginMenuItem(item.Text, "", null, cmdList, Support.TtAnyPointer.Default, ref item.MenuState))
                         {
                             for (int menuIdx = 0; menuIdx < item.SubMenuItems.Count; menuIdx++)
                             {

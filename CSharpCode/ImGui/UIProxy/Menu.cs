@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.EGui.UIProxy
 {
-    using MenuItemAction = Action<MenuItemProxy, Support.UAnyPointer>;
+    using MenuItemAction = Action<MenuItemProxy, Support.TtAnyPointer>;
 
     public class MenuItemProxy : IUIProxyBase
     {
@@ -86,7 +86,7 @@ namespace EngineNS.EGui.UIProxy
             return true;
         }
 
-        public bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
+        public bool OnDraw(in ImDrawList drawList, in Support.TtAnyPointer drawData)
         {
             if (!Visible)
                 return false;
@@ -184,7 +184,7 @@ namespace EngineNS.EGui.UIProxy
             bool selected,
             ImageProxy icon, 
             in ImDrawList drawList, 
-            in Support.UAnyPointer drawData,
+            in Support.TtAnyPointer drawData,
             ref MenuState state)
         {
             bool colorPushed = false;
@@ -260,7 +260,7 @@ namespace EngineNS.EGui.UIProxy
             string shortcut,
             ImageProxy icon,
             in ImDrawList drawList,
-            in Support.UAnyPointer drawData,
+            in Support.TtAnyPointer drawData,
             ref MenuState state,
             bool isTopMenuItem = false
             )
@@ -396,7 +396,7 @@ namespace EngineNS.EGui.UIProxy
             return true;
         }
 
-        public bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
+        public bool OnDraw(in ImDrawList drawList, in Support.TtAnyPointer drawData)
         {
             return OnDraw(Name, drawList, Thickness);
         }

@@ -186,7 +186,7 @@ namespace Canvas
 		AutoRef<NxRHI::ISrView>		SrView;
 		VNameString					Name;
 		FColor						Color;
-		std::map<VNameString, UAnyValue>	ExtValues;
+		std::map<VNameString, TtAnyValue>	ExtValues;
 		bool						IsDirty;
 		void SetUV(const v3dxVector2 & uv0, const v3dxVector2 & uv1)
 		{
@@ -232,7 +232,7 @@ namespace Canvas
 		void SetIsDirty(bool isDirty) {
 			IsDirty = isDirty;
 		}
-		void SetValue(const char* name, const UAnyValue& value)
+		void SetValue(const char* name, const TtAnyValue& value)
 		{
 			VNameString nameStr(name);
 			auto iter = ExtValues.find(nameStr);
@@ -242,7 +242,7 @@ namespace Canvas
 				ExtValues.insert(std::make_pair(nameStr, value));
 			IsDirty = true;
 		}
-		bool GetValue(const char* name, UAnyValue& value)
+		bool GetValue(const char* name, TtAnyValue& value)
 		{
 			VNameString nameStr(name);
 			auto iter = ExtValues.find(nameStr);

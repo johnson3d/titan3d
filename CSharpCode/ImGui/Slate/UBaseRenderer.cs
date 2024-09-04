@@ -150,7 +150,7 @@ namespace EngineNS.EGui.Slate
 
             //io.Fonts.ClearTexData();
 
-            using (var ranges = UNativeArray<Wchar16>.CreateInstance())
+            using (var ranges = TtNativeArray<Wchar16>.CreateInstance())
             {
                 // Basic Latin + Latin Supplement
                 ranges.Add(new Wchar16(0x0020));
@@ -168,15 +168,15 @@ namespace EngineNS.EGui.Slate
                 ranges.Add(new Wchar16(0xFF00));
                 ranges.Add(new Wchar16(0xFFEF));
                 // CJK Ideograms
-                switch (TtEngine.Instance.Config.EditorLanguage)
-                {
-                    case "Chinese":
+                //switch (TtEngine.Instance.Config.EditorLanguage)
+                //{
+                //    case "Chinese":
                         {
                             ranges.Add(new Wchar16(0x4e00));
                             ranges.Add(new Wchar16(0x9FAF));
                         }
-                        break;
-                }
+                //        break;
+                //}
                 //push end
                 ranges.Add(new Wchar16(0));
 

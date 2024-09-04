@@ -474,7 +474,7 @@ namespace EngineNS.Rtti
             OnTypeChanged?.Invoke();
         }
         unsafe static CoreSDK.FDelegate_FCreateManagedObject CreateObject = CreateObjectImpl;
-        unsafe static void* CreateObjectImpl(sbyte* arg0, EngineNS.Support.UAnyValue* arg1, int NumOfArg, int WeakType)
+        unsafe static void* CreateObjectImpl(sbyte* arg0, EngineNS.Support.TtAnyValue* arg1, int NumOfArg, int WeakType)
         {
             var className = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)arg0);
 

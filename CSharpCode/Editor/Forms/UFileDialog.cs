@@ -24,7 +24,7 @@ namespace EngineNS.Editor.Forms
 
 namespace EngineNS.Editor
 {
-    public partial class UEditor
+    public partial class TtEditor
     {
         public Forms.UFileDialog FileDialog { get; set; } = new Forms.UFileDialog();
         //public EGui.Controls.UContentBrowser RNamePopupContentBrowser = new EGui.Controls.UContentBrowser()

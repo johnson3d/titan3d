@@ -9,7 +9,7 @@ namespace EngineNS.Graphics.Pipeline
 {
     public class TtCpu2GpuBuffer<T> : IDisposable where T : unmanaged
     {
-        public Support.UNativeArray<T> DataArray;
+        public Support.TtNativeArray<T> DataArray;
         private uint GpuCapacity = 0;
         public NxRHI.UBuffer GpuBuffer;
         public NxRHI.EBufferType BufferTypes { get; private set; } = NxRHI.EBufferType.BFT_SRV;
@@ -21,7 +21,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             BufferTypes = types;
             Dispose();
-            DataArray = Support.UNativeArray<T>.CreateInstance();
+            DataArray = Support.TtNativeArray<T>.CreateInstance();
             return true;
         }
         public TtCpu2GpuBuffer()

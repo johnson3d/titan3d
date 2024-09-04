@@ -608,13 +608,13 @@ namespace EngineNS.Algorithm
             }
         }
 
-        public Support.UNativeArray<Triangle> Triangles;
-        public Support.UNativeArray<Tetrahedron> Tetrahedrons;
+        public Support.TtNativeArray<Triangle> Triangles;
+        public Support.TtNativeArray<Tetrahedron> Tetrahedrons;
 
         public void Reset()
         {
-            Triangles = Support.UNativeArray<Triangle>.CreateInstance();
-            Tetrahedrons = Support.UNativeArray<Tetrahedron>.CreateInstance();
+            Triangles = Support.TtNativeArray<Triangle>.CreateInstance();
+            Tetrahedrons = Support.TtNativeArray<Tetrahedron>.CreateInstance();
         }
         public void Clear()
         {
@@ -725,7 +725,7 @@ namespace EngineNS.Algorithm
             unsafe
             {
                 var tetPtr = Tetrahedrons.UnsafeGetElementAddress(tetIdx);
-                var removeTriIdxes = Support.UNativeArray<int>.CreateInstance();
+                var removeTriIdxes = Support.TtNativeArray<int>.CreateInstance();
                 if(Triangles.Count > 0)
                 {
                     var triPtr = Triangles.UnsafeGetElementAddress(0);
@@ -1110,20 +1110,20 @@ namespace EngineNS.Algorithm
             }
         }
 
-        public Support.UNativeArray<Edge> Edges;
-        public Support.UNativeArray<Triangle> Triangles;
+        public Support.TtNativeArray<Edge> Edges;
+        public Support.TtNativeArray<Triangle> Triangles;
 
         public void Reset()
         {
-            Edges = Support.UNativeArray<Edge>.CreateInstance();
-            Triangles = Support.UNativeArray<Triangle>.CreateInstance();
+            Edges = Support.TtNativeArray<Edge>.CreateInstance();
+            Triangles = Support.TtNativeArray<Triangle>.CreateInstance();
         }
         public void Clear()
         {
             Edges.Clear();
             Triangles.Clear();
         }
-        static unsafe int FindEdge(in Support.UNativeArray<Edge> edges, in Edge srcEdge)
+        static unsafe int FindEdge(in Support.TtNativeArray<Edge> edges, in Edge srcEdge)
         {
             for(int i=0; i<edges.Count; i++)
             {
@@ -1216,7 +1216,7 @@ namespace EngineNS.Algorithm
             unsafe
             {
                 var triPtr = Triangles.UnsafeGetElementAddress(triIdx);
-                var removeEdgeIdxes = Support.UNativeArray<int>.CreateInstance();
+                var removeEdgeIdxes = Support.TtNativeArray<int>.CreateInstance();
                 if(Edges.Count > 0)
                 {
                     var edgePtr = Edges.UnsafeGetElementAddress(0);
@@ -1733,7 +1733,7 @@ namespace EngineNS.Algorithm
                 return false;
 
             NumUniqueVertices = 0;
-            var processed = Support.UNativeArray<byte>.CreateInstance();
+            var processed = Support.TtNativeArray<byte>.CreateInstance();
             var byteCount = points.Length / 8 + 1;
             processed.mCoreObject.SetSize(byteCount);
             CoreSDK.MemorySet(processed.UnsafeGetElementAddress(0), 0, (uint)byteCount);
@@ -1772,7 +1772,7 @@ namespace EngineNS.Algorithm
 
             return true;
         }
-        unsafe bool GetAndRemoveInsertionPolygon(int idx, Vector2[] points, ref Support.UNativeArray<int> candidates, ref Support.UNativeArray<int> boundary)
+        unsafe bool GetAndRemoveInsertionPolygon(int idx, Vector2[] points, ref Support.TtNativeArray<int> candidates, ref Support.TtNativeArray<int> boundary)
         {
             // Locate the triangles that make up the insertion polygon.
             var polygon = new EdgeTriangleMesh();
@@ -1842,12 +1842,12 @@ namespace EngineNS.Algorithm
                 // The hull does not change.
 
                 // Use a depth-first search for those triangles whose circumcircles contain point i.
-                var candidates = Support.UNativeArray<int>.CreateInstance();
+                var candidates = Support.TtNativeArray<int>.CreateInstance();
                 candidates.Add(triIdx);
 
                 // Get the boundary of the insertion polygon C that contains the triangles whose circumcircles contain point i.
                 // Polygon C contains the point i.
-                var boundary = Support.UNativeArray<int>.CreateInstance();
+                var boundary = Support.TtNativeArray<int>.CreateInstance();
                 if (!GetAndRemoveInsertionPolygon(idx, points, ref candidates, ref boundary))
                     return false;
 
@@ -1871,7 +1871,7 @@ namespace EngineNS.Algorithm
                 // current triangulation whose circumcircles contain point i.
 
                 // Locate the convex hull of the triangles.
-                Support.UNativeArray<int> hull = Support.UNativeArray<int>.CreateInstance();
+                Support.TtNativeArray<int> hull = Support.TtNativeArray<int>.CreateInstance();
                 var triPtr = Graph.Triangles.UnsafeGetElementAddress(0);
                 var edgePtr = Graph.Edges.UnsafeGetElementAddress(0);
                 for(int i=0; i<Graph.Triangles.Count; i++)
@@ -1889,8 +1889,8 @@ namespace EngineNS.Algorithm
                         hull.Add(triPtr[i].EdgeIndex2);
                 }
 
-                Support.UNativeArray<int> candidates = Support.UNativeArray<int>.CreateInstance();
-                Support.UNativeArray<int> visible = Support.UNativeArray<int>.CreateInstance();
+                Support.TtNativeArray<int> candidates = Support.TtNativeArray<int>.CreateInstance();
+                Support.TtNativeArray<int> visible = Support.TtNativeArray<int>.CreateInstance();
                 foreach(var edgeIdx in hull)
                 {
                     var edge = edgePtr[edgeIdx];
@@ -1915,7 +1915,7 @@ namespace EngineNS.Algorithm
                 }
 
                 // Get the boundary of the insertion subpolygon C that contains the triangles whose circumcircles contain point i.
-                Support.UNativeArray<int> boundary = Support.UNativeArray<int>.CreateInstance();
+                Support.TtNativeArray<int> boundary = Support.TtNativeArray<int>.CreateInstance();
                 if(!GetAndRemoveInsertionPolygon(idx, points, ref candidates, ref boundary))
                     return false;
 
@@ -1973,7 +1973,7 @@ namespace EngineNS.Algorithm
             if (Graph.Insert(ptInfo.Extreme0, ptInfo.Extreme1, ptInfo.Extreme2, ptInfo.Extreme3) < 0)
                 return false;
 
-            var processed = Support.UNativeArray<byte>.CreateInstance();
+            var processed = Support.TtNativeArray<byte>.CreateInstance();
             var byteCount = points.Length / 8 + 1;
             processed.mCoreObject.SetSize(byteCount);
             CoreSDK.MemorySet(processed.UnsafeGetElementAddress(0), 0, (uint)byteCount);
@@ -2017,7 +2017,7 @@ namespace EngineNS.Algorithm
 
             return true;
         }
-        unsafe bool GetAndRemoveInsertionPolyhedron(int idx, Vector3[] points, ref Support.UNativeArray<int> candidates, ref Support.UNativeArray<int> boundary)
+        unsafe bool GetAndRemoveInsertionPolyhedron(int idx, Vector3[] points, ref Support.TtNativeArray<int> candidates, ref Support.TtNativeArray<int> boundary)
         {
             var polygon = new TriangleTetrahedronMesh();
             while(candidates.Count > 0)
@@ -2088,10 +2088,10 @@ namespace EngineNS.Algorithm
             var tetIdx = Graph.GetContainingTetrahedron(idx, points);
             if(tetIdx >= 0)
             {
-                var candidates = Support.UNativeArray<int>.CreateInstance();
+                var candidates = Support.TtNativeArray<int>.CreateInstance();
                 candidates.Add(tetIdx);
 
-                var boundary = Support.UNativeArray<int>.CreateInstance();
+                var boundary = Support.TtNativeArray<int>.CreateInstance();
                 if (!GetAndRemoveInsertionPolyhedron(idx, points, ref candidates, ref boundary))
                     return false;
 
@@ -2110,7 +2110,7 @@ namespace EngineNS.Algorithm
             }
             else
             {
-                Support.UNativeArray<int> hull = Support.UNativeArray<int>.CreateInstance();
+                Support.TtNativeArray<int> hull = Support.TtNativeArray<int>.CreateInstance();
                 var tetPtr = Graph.Tetrahedrons.UnsafeGetElementAddress(0);
                 var triPtr = Graph.Triangles.UnsafeGetElementAddress(0);
                 for(int i=0; i<Graph.Tetrahedrons.Count; i++)
@@ -2129,8 +2129,8 @@ namespace EngineNS.Algorithm
                         hull.Add(tetPtr[i].Tri3);
                 }
 
-                var candidates = Support.UNativeArray<int>.CreateInstance();
-                var visible = Support.UNativeArray<int>.CreateInstance();
+                var candidates = Support.TtNativeArray<int>.CreateInstance();
+                var visible = Support.TtNativeArray<int>.CreateInstance();
                 foreach(var triIdx in hull)
                 {
                     var tri = triPtr[triIdx];
@@ -2155,7 +2155,7 @@ namespace EngineNS.Algorithm
                     }
                 }
 
-                var boundary = Support.UNativeArray<int>.CreateInstance();
+                var boundary = Support.TtNativeArray<int>.CreateInstance();
                 if (!GetAndRemoveInsertionPolyhedron(idx, points, ref candidates, ref boundary))
                     return false;
 

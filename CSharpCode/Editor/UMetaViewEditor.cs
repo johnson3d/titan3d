@@ -14,7 +14,7 @@ namespace EngineNS.Editor
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public EGui.Controls.PropertyGrid.PropertyGrid VersionPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
-        public Rtti.UMetaVersion CurrentMetaVersion;
+        public Rtti.TtMetaVersion CurrentMetaVersion;
         public void Dispose()
         {
             VersionPropGrid.Target = null;

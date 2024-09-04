@@ -9,7 +9,7 @@ namespace EngineNS.EGui.UIProxy
     {
         void Cleanup();
         System.Threading.Tasks.Task<bool> Initialize();
-        bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData);
+        bool OnDraw(in ImDrawList drawList, in Support.TtAnyPointer drawData);
     }
     public class UIManager : UModule<TtEngine>
     {

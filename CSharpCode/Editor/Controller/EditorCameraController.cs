@@ -89,7 +89,7 @@ namespace EngineNS.Editor.Controller
                     break;
             }
         }
-        public void Move(Graphics.Pipeline.ECameraAxis axis, float step, bool moveWithLookAt = false)
+        public unsafe void Move(Graphics.Pipeline.ECameraAxis axis, float step, bool moveWithLookAt = false)
         {
             if (Camera == null)
                 return;
@@ -107,11 +107,7 @@ namespace EngineNS.Editor.Controller
                             var temp = dir * step;
                             var eye = pos - temp;
                             var at = lookAt - temp;
-                            unsafe
-                            {
-                                var uy = EngineNS.Vector3.UnitY;
-                                Camera.mCoreObject.LookAtLH(&eye, &at, &uy);
-                            }
+                            Camera.mCoreObject.LookAtLH(in eye, in at, in EngineNS.Vector3.UnitY);
                         }
                         else
                         {
@@ -120,11 +116,7 @@ namespace EngineNS.Editor.Controller
                             {
                                 dir.Normalize();
                                 var newPos = pos - dir * step;
-                                var uy = EngineNS.Vector3.UnitY;
-                                unsafe
-                                {
-                                    Camera.mCoreObject.LookAtLH(&newPos, &lookAt, &uy);
-                                }
+                                Camera.mCoreObject.LookAtLH(in newPos, in lookAt, in EngineNS.Vector3.UnitY);
                             }
                         }
                     }
@@ -138,20 +130,14 @@ namespace EngineNS.Editor.Controller
                             var temp = up * step;
                             var eye = pos - temp;
                             var at = lookAt - temp;
-                            unsafe
-                            {
-                                Camera.mCoreObject.LookAtLH(&eye, &at, &up);
-                            }
+                            Camera.mCoreObject.LookAtLH(in eye, in at, in up);
                         }
                         else
                         {
                             var delta = up * step;
                             var newPos = pos + delta;
                             var newLookAt = lookAt + delta;
-                            unsafe
-                            {
-                                Camera.mCoreObject.LookAtLH(&newPos, &newLookAt, &up);
-                            }
+                            Camera.mCoreObject.LookAtLH(in newPos, in newLookAt, in up);
                         }
                     }
                     break;
@@ -165,20 +151,14 @@ namespace EngineNS.Editor.Controller
                             var eye = pos - delta;
                             var at = lookAt - delta;
                             var up = Camera.mCoreObject.GetUp();
-                            unsafe
-                            {
-                                Camera.mCoreObject.LookAtLH(&eye, &at, &up);
-                            }
+                            Camera.mCoreObject.LookAtLH(in eye, in at, in up);
                         }
                         else
                         {
                             var newPos = pos - delta;
                             var newLookAt = lookAt - delta;
                             var up = Camera.mCoreObject.GetUp();
-                            unsafe
-                            {
-                                Camera.mCoreObject.LookAtLH(&newPos, &newLookAt, &up);
-                            }
+                            Camera.mCoreObject.LookAtLH(in newPos, in newLookAt, in up);
                         }
                     }
                     break;

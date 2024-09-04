@@ -33,7 +33,7 @@ namespace EngineNS.IO
         void Read(out byte[] v);
         void Read(out VNameString v);
         void Read(out RName v);
-        void Read(ref Support.UBitset v);
+        void Read(ref Support.TtBitset v);
         void Read<T>(out T v) where T : unmanaged;
         T Read<T>() where T : unmanaged;
     }
@@ -183,13 +183,13 @@ namespace EngineNS.IO
             Read(out name);
             v = RName.GetRName(name, type);
         }
-        public void Read(ref Support.UBitset v)
+        public void Read(ref Support.TtBitset v)
         {
             uint bitCount = 0;
             Read(out bitCount);
             if (v == null)
             {
-                v = new Support.UBitset(bitCount);
+                v = new Support.TtBitset(bitCount);
             }
             else if(v.BitCount != bitCount)
             {
@@ -318,7 +318,7 @@ namespace EngineNS.IO
                 Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"Meta Type lost:{typeHash}");
                 throw new Exception($"Meta Type lost:{typeHash}");
             }
-            Rtti.UMetaVersion metaVersion = meta.GetMetaVersion(versionHash);
+            Rtti.TtMetaVersion metaVersion = meta.GetMetaVersion(versionHash);
             if (metaVersion == null)
             {
                 Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"Meta Type lost in direct:{meta.ClassMetaName}");
@@ -369,7 +369,7 @@ namespace EngineNS.IO
                 Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"Meta Type lost:{typeHash}");
                 throw new Exception($"Meta Type lost:{typeHash}");
             }
-            Rtti.UMetaVersion metaVersion = meta.GetMetaVersion(versionHash);
+            Rtti.TtMetaVersion metaVersion = meta.GetMetaVersion(versionHash);
             if (metaVersion == null)
             {
                 Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"Meta Type lost in direct:{meta.ClassMetaName}");

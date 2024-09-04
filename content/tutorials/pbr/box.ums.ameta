@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
-  <AssetId Type="System.Guid@Unknown" Value="099ebd2d-0dda-4ca1-bc23-6b754f41b31d" />
+  <AssetId Type="System.Guid@Unknown" Value="aa14efdf-f3f8-429d-973f-9a8a76639366" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.TtMaterialMesh&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
@@ -11,8 +11,8 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
-    <e_0 Value="Engine,mesh/base/sphere.vms,7a5a0469-7899-40d9-aa67-7be6e33824d1" />
-    <e_1 Value="Game,utest/ddd.uminst,da21bb21-134c-4d00-bdbb-00459e7a91c1" />
+    <e_0 Value="Engine,mesh/base/box.vms,5355ee7f-de0b-4e29-bb7d-ed4ca9d6b0cf" />
+    <e_1 Value="Engine,material/brdf_base.uminst,3e020129-4798-46f7-b1f9-c37c1c869ec7" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
 </Root>

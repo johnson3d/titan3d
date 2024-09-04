@@ -605,7 +605,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 var drawList = ImGuiAPI.GetWindowDrawList();
                 for (int i = 0; i < mMenuItems.Count; i++)
-                    mMenuItems[i].OnDraw(in drawList, in Support.UAnyPointer.Default);
+                    mMenuItems[i].OnDraw(in drawList, in Support.TtAnyPointer.Default);
 
                 ImGuiAPI.EndMenuBar();
             }
@@ -678,13 +678,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 CompileCode();
             }
             toolBarItemIdx++;
-            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawCheckBox(in drawList, null, "EditorDebug", ref mCSCodeGen.IsEditorDebug))
             {
                 
             }
             toolBarItemIdx++;
-            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
                 ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "GenCode", false, -1, 0, spacing))
             {
@@ -692,7 +692,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 CompileCode();
             }
             toolBarItemIdx++;
-            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
                 ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "MethodCustum", false, -1, 0, spacing))
             {
@@ -700,7 +700,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     CurrentTextoutMethod.CustumCode = mCodeEditor.Text;
             }
             toolBarItemIdx++;
-            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
                 ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "ClassSettings", false, -1, 0, spacing))
             {
@@ -723,7 +723,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //}
             ////////////////////////
             toolBarItemIdx++;
-            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             if(Macross.UMacrossDebugger.Instance.CurrrentBreak != null)
             {
                 if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
@@ -954,7 +954,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 if(ImGuiAPI.BeginPopup("MacrossMethodSelectPopup", ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     var drawList = ImGuiAPI.GetWindowDrawList();
-                    var menuData = new Support.UAnyPointer();
+                    var menuData = new Support.TtAnyPointer();
                     if(EGui.UIProxy.MenuItemProxy.MenuItem("New Method", null, false, null, in drawList, in menuData, ref mNewMethodMenuState))
                     {
                         var num = 0;

@@ -8,7 +8,7 @@
 struct GBufferData
 {
 	half3	MtlColorRaw;
-	half3	WorldNormal;
+	float3	WorldNormal;
 	half	Metallicity;
 	// half	Emissive;
 	half	Specular;	
@@ -33,12 +33,12 @@ struct GBufferData
         return normalize(mul(float4(WorldNormal.xyz, 0), CameraViewMatrix).xyz);
     }
 
-	static half3 EncodeNormalXYZ(half3 n)
+    static float3 EncodeNormalXYZ(float3 n)
 	{
-		return half3(n.xyz * 0.5f + 0.5f);
-	}
+        return float3(n.xyz * 0.5f + 0.5f);
+    }
 
-	static half3 DecodeNormalXYZ(half3 enc)
+    static float3 DecodeNormalXYZ(float3 enc)
 	{
 		return enc.xyz * 2 - 1;
 	}
@@ -74,7 +74,7 @@ struct GBufferData
         rt1.rg = ViewSpaceNorm;
         rt1.b = ((half) RenderFlags_10Bit) / 1023.0h; //asfloat(RenderFlags_10Bit); //
 		#else
-		rt1.rgb = EncodeNormalXYZ(WorldNormal.xyz);
+		rt1.rgb = (half3)EncodeNormalXYZ(WorldNormal.xyz);
 		#endif	
         rt1.w = ((half) ObjectFlags_2Bit) / 3.0h; //asfloat(ObjectFlags_2Bit); //
 

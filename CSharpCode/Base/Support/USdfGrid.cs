@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Support
 {
-    public class USdfGrid : AuxPtrType<EngineNS.SdfGrid>
+    public class TtSdfGrid : AuxPtrType<EngineNS.SdfGrid>
     {
-        public USdfGrid()
+        public TtSdfGrid()
         {
             mCoreObject = EngineNS.SdfGrid.CreateInstance();
         }

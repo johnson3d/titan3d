@@ -144,7 +144,7 @@ namespace EngineNS.GamePlay.Scene
             return base.OnTickLogic(world, policy);
         }
 
-        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             foreach (var i in ActiveLevels)
             {

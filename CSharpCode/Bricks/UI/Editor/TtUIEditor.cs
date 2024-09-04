@@ -288,7 +288,7 @@ namespace EngineNS.UI.Editor
 
             }
             ImGuiAPI.SameLine(0, -1);
-            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Undo", in btSize))
             {
@@ -300,7 +300,7 @@ namespace EngineNS.UI.Editor
 
             }
             ImGuiAPI.SameLine(0, -1);
-            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.UAnyPointer.Default);
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             ImGuiAPI.SameLine(0, -1);
             if(EGui.UIProxy.CustomButton.ToggleButton("Simulate", in btSize, ref mIsSimulateMode))
             {
@@ -725,7 +725,7 @@ namespace EngineNS.UI.Editor
             if(ImGuiAPI.BeginPopup("##ContextMenu_" + name, ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
             {
                 var drawList = ImGuiAPI.GetWindowDrawList();
-                Support.UAnyPointer menuData = new Support.UAnyPointer();
+                Support.TtAnyPointer menuData = new Support.TtAnyPointer();
                 string menuName = "Delete ";
                 if (mSelectedElements.Count == 1)
                     menuName += name;
@@ -1524,10 +1524,10 @@ namespace EngineNS.UI.Editor
             mMessages.Add(data);
         }
 
-        Support.UBitset mNameIndexBits = new Support.UBitset(512);
+        Support.TtBitset mNameIndexBits = new Support.TtBitset(512);
         struct ValidNameData
         {
-            public Support.UBitset Bits;
+            public Support.TtBitset Bits;
             public TtUIElement Element;
             public string CheckName;
             public bool FindEqual;

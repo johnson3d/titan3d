@@ -15,7 +15,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     }
     public partial class TypeConverterVar : Monocular//, UEditableValue.IValueEditNotify
     {
-        public static TypeConverterVar NewTypeConverterVar(Rtti.UClassMeta src, Rtti.UClassMeta tar)
+        public static TypeConverterVar NewTypeConverterVar(Rtti.TtClassMeta src, Rtti.TtClassMeta tar)
         {
             if (tar.CanConvertTo(src) == false)
                 return null;
@@ -32,8 +32,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             return result;
         }
-        public Rtti.UClassMeta SrcType;
-        public Rtti.UClassMeta TarType;
+        public Rtti.TtClassMeta SrcType;
+        public Rtti.TtClassMeta TarType;
         //public PinIn ToType { get; set; } = new PinIn();
         public TypeConverterVar()
         {

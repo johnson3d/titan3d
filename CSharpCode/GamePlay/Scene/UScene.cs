@@ -365,7 +365,7 @@ namespace EngineNS.GamePlay.Scene
         {
             return true;
         }
-        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             FHostNotify notify = new FHostNotify();
             notify.Info = "OnGatherVisibleMeshes";
@@ -375,7 +375,7 @@ namespace EngineNS.GamePlay.Scene
         }
         [Category("Option")]
         public bool IsGatherVisibleByManagedNodes { get; set; } = false;
-        public override bool TreeGatherVisibleMeshes(TtWorld.UVisParameter rp)
+        public override bool TreeGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             if (IsGatherVisibleByManagedNodes == false)
                 return true;
@@ -392,7 +392,7 @@ namespace EngineNS.GamePlay.Scene
                     TtEngine.Instance.EventPoster.ParrallelFor(numTask, static (int index, object arg1, object arg2, Thread.Async.TtAsyncTaskStateBase state) =>
                     {
                         var node = arg1 as TtScene;
-                        var rp = arg2 as TtWorld.UVisParameter;
+                        var rp = arg2 as TtWorld.TtVisParameter;
                         int stride = node.Children.Count / (int)state.UserArguments.NumOfParrallelFor + 1;
                         var start = index * stride;
                         for (int n = 0; n < stride; n++)

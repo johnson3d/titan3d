@@ -77,7 +77,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 for (int z = 0; z < meshCount; ++z)
                 {
-                    var meshPrimitive = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.CreateMeshPrimitive(RName.GetRName("mesh/base/sphere.vms", RName.ERNameType.Engine));
+                    var meshPrimitive = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.CreateMeshPrimitive(RName.GetRName("tutorials/pbr/cube.vms", RName.ERNameType.Game));
                     var mtlInst = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/brdf_base.uminst", RName.ERNameType.Engine));
                     var mtlInstList = new List<Graphics.Pipeline.Shader.TtMaterial>();
                     mtlInstList.Add(mtlInst);
@@ -412,7 +412,7 @@ namespace EngineNS.GamePlay.Scene
                 action();
             }
         }
-        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             UpdateCameralOffset(rp.World);
 

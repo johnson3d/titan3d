@@ -119,14 +119,14 @@ namespace EngineNS.GamePlay.Scene
                     i.GetHitProxyDrawMesh(meshes);
             }
         }
-        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             //灯光比较特殊，无论是否debug都要加入visnode列表，否则Tiling过程得不到可见灯光集
             rp.AddVisibleNode(this);
 
             //if (TtEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.LightDebug) == false)
             //    return;
-            if ((rp.CullFilters & GamePlay.TtWorld.UVisParameter.EVisCullFilter.LightDebug) == 0)
+            if ((rp.CullFilters & GamePlay.TtWorld.TtVisParameter.EVisCullFilter.LightDebug) == 0)
                 return;
 
             if (DebugMesh != null)

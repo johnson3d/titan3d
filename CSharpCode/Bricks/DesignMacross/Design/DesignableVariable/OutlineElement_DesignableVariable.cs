@@ -63,7 +63,7 @@ namespace EngineNS.DesignMacross.Design
                 {
                     var typeShowName = designableType.ShowClassName;
                     var drawList = ImGuiAPI.GetWindowDrawList();
-                    var menuData = new Support.UAnyPointer();
+                    var menuData = new Support.TtAnyPointer();
                     EGui.UIProxy.MenuItemProxy.MenuState newMethodMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
                     newMethodMenuState.Reset();
                     //newMethodMenuState.Opened =true;

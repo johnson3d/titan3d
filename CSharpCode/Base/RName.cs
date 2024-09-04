@@ -49,7 +49,7 @@ namespace EngineNS
             public float MinWidth = -1;
             protected override async Task<bool> Initialize_Override()
             {
-                ContentBrowser = Editor.UEditor.NewPopupContentBrowser();
+                ContentBrowser = Editor.TtEditor.NewPopupContentBrowser();
                 mComboBox = new EGui.UIProxy.ComboBox()
                 {
                     ComboOpenAction = ComboOpenAction
@@ -67,7 +67,7 @@ namespace EngineNS
                 mComboBox?.Cleanup();
                 base.Cleanup_Override();
             }
-            void ComboOpenAction(in Support.UAnyPointer data)
+            void ComboOpenAction(in Support.TtAnyPointer data)
             {
                 ContentBrowser.OnDraw();
                 //TtEngine.Instance.EditorInstance.RNamePopupContentBrowser.OnDraw();
@@ -95,7 +95,7 @@ namespace EngineNS
                 var textSize = ImGuiAPI.CalcTextSize(preViewStr, false, 0);
                 var preViewStrDrawPos = cursorPos + new Vector2(snapSize.X + 8, 0);
                 ImGuiAPI.SetCursorScreenPos(in preViewStrDrawPos);
-                Support.UAnyPointer anyPt = new Support.UAnyPointer()
+                Support.TtAnyPointer anyPt = new Support.TtAnyPointer()
                 {
                     RefObject = mDrawData,
                 };

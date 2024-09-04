@@ -40,7 +40,7 @@ namespace EngineNS.EGui.UIProxy
             ToolbarItems.Remove(item);
         }
 
-        public bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
+        public bool OnDraw(in ImDrawList drawList, in Support.TtAnyPointer drawData)
         {
             var cursorPos = ImGuiAPI.GetCursorScreenPos();
             var windowWidth = ImGuiAPI.GetWindowWidth();
@@ -108,7 +108,7 @@ namespace EngineNS.EGui.UIProxy
             return true;
         }
 
-        public bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
+        public bool OnDraw(in ImDrawList drawList, in Support.TtAnyPointer drawData)
         {
             if(DrawButton(drawList, ref IsMouseDown, ref IsMouseHover, Icon, Name, IsDisable, NextItemOffset, NextItemSpacing))
             {
@@ -262,15 +262,15 @@ namespace EngineNS.EGui.UIProxy
             return true;
         }
 
-        public bool OnDraw(in ImDrawList drawList, in Support.UAnyPointer drawData)
+        public bool OnDraw(in ImDrawList drawList, in Support.TtAnyPointer drawData)
         {
             return DrawSeparator(drawList, drawData, NextItemOffset, NextItemSpacing);
         }
         public static bool DrawSeparator(in ImDrawList drawList, float itemOffset = 0, float itemSpacing = -1)
         {
-            return DrawSeparator(in drawList, in Support.UAnyPointer.Default, itemOffset, itemSpacing);
+            return DrawSeparator(in drawList, in Support.TtAnyPointer.Default, itemOffset, itemSpacing);
         }
-        public static bool DrawSeparator(in ImDrawList drawList, in Support.UAnyPointer drawData, float itemOffset = 0, float itemSpacing = -1)
+        public static bool DrawSeparator(in ImDrawList drawList, in Support.TtAnyPointer drawData, float itemOffset = 0, float itemSpacing = -1)
         {
             ImGuiAPI.SameLine(itemOffset, itemSpacing);
 

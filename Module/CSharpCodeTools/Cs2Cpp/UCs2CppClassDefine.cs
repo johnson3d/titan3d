@@ -65,8 +65,8 @@ namespace CSharpCodeTools.Cs2Cpp
                 case "Matrix":
                 case "EngineNS.Matrix":
                     return "v3dxMatrix4";
-                case "EngineNS.Support.UAnyValue":
-                    return "EngineNS::UAnyValue";
+                case "EngineNS.Support.TtAnyValue":
+                    return "EngineNS::TtAnyValue";
                 default:
                     {
                         if (Kind != ETypeKind.Predefine)

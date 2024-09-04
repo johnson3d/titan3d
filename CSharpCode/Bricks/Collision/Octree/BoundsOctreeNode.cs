@@ -330,7 +330,7 @@ namespace EngineNS.Bricks.Collision.Octree
         /// Must be called from OnDrawGizmos externally. See also: DrawAllObjects.
         /// </summary>
         /// <param name="depth">Used for recurcive calls to this method.</param>
-        public void DrawAllBounds(GamePlay.TtWorld.UVisParameter vp, GamePlay.TtPlacementBase placement, float depth)
+        public void DrawAllBounds(GamePlay.TtWorld.TtVisParameter vp, GamePlay.TtPlacementBase placement, float depth)
         {
             float tintVal = depth / 7; // Will eventually get values > 1. Color rounds to 1 automatically
             var color = new Color4f(tintVal, 0, 1.0f - tintVal);
@@ -352,7 +352,7 @@ namespace EngineNS.Bricks.Collision.Octree
         /// Draws the bounds of all objects in the tree visually for debugging.
         /// Must be called from OnDrawGizmos externally. See also: DrawAllBounds.
         /// </summary>
-        public void DrawAllObjects(GamePlay.TtWorld.UVisParameter vp, GamePlay.TtPlacementBase placement)
+        public void DrawAllObjects(GamePlay.TtWorld.TtVisParameter vp, GamePlay.TtPlacementBase placement)
         {
             float tintVal = BaseLength / 20;
             var color = new Color4f(1.0f - tintVal, tintVal, 0.25f);

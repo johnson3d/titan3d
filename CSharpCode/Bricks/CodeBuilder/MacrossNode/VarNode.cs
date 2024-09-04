@@ -629,7 +629,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
     public partial class ClassPropertyVar : VarNode, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode, EGui.Controls.PropertyGrid.IPropertyCustomization
     {
-        public static ClassPropertyVar NewClassProperty(Rtti.UClassMeta.TtPropertyMeta meta, bool isGet)
+        public static ClassPropertyVar NewClassProperty(Rtti.TtClassMeta.TtPropertyMeta meta, bool isGet)
         {
             var result = new ClassPropertyVar();
             result.Initialize(meta, isGet);
@@ -664,7 +664,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
         }
-        public Rtti.UClassMeta HostClass
+        public Rtti.TtClassMeta HostClass
         {
             get
             {
@@ -674,7 +674,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return Rtti.TtClassMetaManager.Instance.GetMeta(segs[0]);
             }
         }
-        public Rtti.UClassMeta.TtPropertyMeta ClassProperty
+        public Rtti.TtClassMeta.TtPropertyMeta ClassProperty
         {
             get
             {
@@ -725,7 +725,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
             AfterExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
         }
-        private void Initialize(Rtti.UClassMeta.TtPropertyMeta pro, bool isGet)
+        private void Initialize(Rtti.TtClassMeta.TtPropertyMeta pro, bool isGet)
         {
             if(string.IsNullOrEmpty(mClassPropertyMeta))
             {
@@ -932,7 +932,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
     public partial class ClassFieldVar : VarNode, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode, IPropertyCustomization
     {   
-        public static ClassFieldVar NewClassMemberVar(Rtti.UClassMeta.TtFieldMeta meta, bool isGet)
+        public static ClassFieldVar NewClassMemberVar(Rtti.TtClassMeta.TtFieldMeta meta, bool isGet)
         {
             var result = new ClassFieldVar();
             result.Initialize(meta, isGet);
@@ -940,7 +940,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public PinIn Self { get; set; }
 
-        public Rtti.UClassMeta HostClass
+        public Rtti.TtClassMeta HostClass
         {
             get
             {
@@ -951,7 +951,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        public Rtti.UClassMeta.TtFieldMeta ClassField
+        public Rtti.TtClassMeta.TtFieldMeta ClassField
         {
             get
             {
@@ -1029,7 +1029,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
             AfterExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
         }
-        private void Initialize(Rtti.UClassMeta.TtFieldMeta m, bool isGet)
+        private void Initialize(Rtti.TtClassMeta.TtFieldMeta m, bool isGet)
         {
             if (string.IsNullOrEmpty(mClassFieldMeta))
                 mClassFieldMeta = m.DeclaringType.TypeString + "#" + m.FieldName;

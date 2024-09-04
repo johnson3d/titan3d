@@ -6,9 +6,9 @@ using System.Runtime.CompilerServices;
 
 namespace EngineNS.Support
 {
-    public class UBitset : AuxPtrType<FBitset>
+    public class TtBitset : AuxPtrType<FBitset>
     {
-        public UBitset()
+        public TtBitset()
         {
             mCoreObject = FBitset.CreateInstance();
         }
@@ -34,7 +34,7 @@ namespace EngineNS.Support
         {
             mCoreObject.SetBitCount(Count);
         }
-        public UBitset(uint Count)
+        public TtBitset(uint Count)
         {
             mCoreObject = FBitset.CreateInstance();
             SetBitCount(Count);
@@ -57,7 +57,7 @@ namespace EngineNS.Support
         }
     }
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit, Pack = 4)]
-    public struct UAnyValue : IDisposable
+    public struct TtAnyValue : IDisposable
     {
         public enum EValueType : sbyte
         {
@@ -163,7 +163,7 @@ namespace EngineNS.Support
                 CoreSDK.MemoryCopy(tar, (void*)p, (uint)size);
             }
         }
-        public unsafe bool IsEqual(in UAnyValue val)
+        public unsafe bool IsEqual(in TtAnyValue val)
         {
             if (ValueType != val.ValueType)
                 return false;
@@ -729,14 +729,14 @@ namespace EngineNS.Support
             mBoolValue = v;
         }
     }
-    public struct UAnyPointer : IDisposable
+    public struct TtAnyPointer : IDisposable
     {
-        public UAnyValue Value;
+        public TtAnyValue Value;
         public object RefObject;
 
-        public static UAnyPointer Default = new UAnyPointer();
+        public static TtAnyPointer Default = new TtAnyPointer();
 
-        public UAnyPointer(int v)
+        public TtAnyPointer(int v)
         {
             SetValue(v);
         }
@@ -754,7 +754,7 @@ namespace EngineNS.Support
         }
         public object ToObject()
         {
-            if (Value.ValueType == UAnyValue.EValueType.Unknown)
+            if (Value.ValueType == TtAnyValue.EValueType.Unknown)
                 return RefObject;
             return Value.ToObject();
         }

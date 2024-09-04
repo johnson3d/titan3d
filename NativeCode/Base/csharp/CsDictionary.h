@@ -15,14 +15,14 @@ CsDictionaryImpl : public IWeakReference
 	{
 
 	}
-	struct UAnyValue_less
+	struct TtAnyValue_less
 	{
-		constexpr bool operator()(const UAnyValue& _Left, const UAnyValue& _Right) const {
+		constexpr bool operator()(const TtAnyValue& _Left, const TtAnyValue& _Right) const {
 			return _Left < _Right;
 		}
 	};
-	std::map<UAnyValue, UAnyValue, UAnyValue_less>		mContain;
-	bool Add(const UAnyValue* key, const UAnyValue* value)
+	std::map<TtAnyValue, TtAnyValue, TtAnyValue_less>		mContain;
+	bool Add(const TtAnyValue* key, const TtAnyValue* value)
 	{
 		auto iter = mContain.find(*key);
 		if (iter == mContain.end())
@@ -30,7 +30,7 @@ CsDictionaryImpl : public IWeakReference
 		mContain.insert(std::make_pair(*key, *value));
 		return true;
 	}
-	void Remove(const UAnyValue* key)
+	void Remove(const TtAnyValue* key)
 	{
 		auto iter = mContain.find(*key);
 		if (iter == mContain.end())
@@ -41,7 +41,7 @@ CsDictionaryImpl : public IWeakReference
 	{
 		mContain.clear();
 	}
-	bool Find(const UAnyValue* key, UAnyValue* value)
+	bool Find(const TtAnyValue* key, TtAnyValue* value)
 	{
 		auto iter = mContain.find(*key);
 		if (iter == mContain.end())
@@ -61,7 +61,7 @@ CsDictionaryImpl : public IWeakReference
 struct TR_CLASS(SV_Dispose = delete self)
 	FCsDictionaryIterator
 {
-	std::map<UAnyValue, UAnyValue, CsDictionaryImpl::UAnyValue_less>::iterator It;
+	std::map<TtAnyValue, TtAnyValue, CsDictionaryImpl::TtAnyValue_less>::iterator It;
 	void MoveNext()
 	{
 		It++;
@@ -70,7 +70,7 @@ struct TR_CLASS(SV_Dispose = delete self)
 	{
 		return (It == contain->mContain.end());
 	}
-	void GetKeyValue(UAnyValue * pKey, UAnyValue * pValue)
+	void GetKeyValue(TtAnyValue * pKey, TtAnyValue * pValue)
 	{
 		if (pKey != nullptr)
 		{
@@ -93,15 +93,15 @@ struct CsDictionary
 	CsDictionaryImpl			mImpl;
 	bool Add(const _KeyType& key, const _ValueType& value)
 	{
-		UAnyValue tKey;
+		TtAnyValue tKey;
 		tKey.SetValue(key);
-		UAnyValue tValue;
+		TtAnyValue tValue;
 		tValue.SetValue(value);
 		mImpl.Add(&tKey, &tValue);
 	}
 	void Remove(const _KeyType& key)
 	{
-		UAnyValue tKey;
+		TtAnyValue tKey;
 		tKey.SetValue(key);
 		mImpl.Remove(&tKey);
 	}
@@ -115,10 +115,10 @@ struct CsDictionary
 	}
 	bool Find(const _KeyType& key, _ValueType* value = nullptr)
 	{
-		UAnyValue tKey;
+		TtAnyValue tKey;
 		tKey.SetValue(key);
 
-		UAnyValue tValue;
+		TtAnyValue tValue;
 		if (mImpl.Find(&tKey, &tValue))
 		{
 			if (value != nullptr)

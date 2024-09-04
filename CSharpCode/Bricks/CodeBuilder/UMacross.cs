@@ -154,7 +154,7 @@ namespace EngineNS.Bricks.CodeBuilder
                         }
                         if(!ImGuiAPI.IsAnyItemActive() && !ImGuiAPI.IsMouseClicked(0, false))
                             ImGuiAPI.SetKeyboardFocusHere(0);
-                        searchBar.OnDraw(in comboDrawList, in Support.UAnyPointer.Default);
+                        searchBar.OnDraw(in comboDrawList, in Support.TtAnyPointer.Default);
                         bool bSelected = true;
                         foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
                         {

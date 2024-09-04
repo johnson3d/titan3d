@@ -228,11 +228,11 @@ namespace EngineNS.UI.Canvas
         {
             mCoreObject.SetUV(in uv0, in uv1);
         }
-        public void SetValue(string name, in UAnyValue value)
+        public void SetValue(string name, in TtAnyValue value)
         {
             mCoreObject.SetValue(name, in value);
         }
-        public bool GetValue(string name, ref UAnyValue value)
+        public bool GetValue(string name, ref TtAnyValue value)
         {
             return mCoreObject.GetValue(name, ref value);
         }

@@ -8,7 +8,7 @@ namespace EngineNS.Rtti
     {
         public string Name;
         public List<UNameSpace> ChildrenNS = new List<UNameSpace>();
-        public List<UClassMeta> Types = new List<UClassMeta>();
+        public List<TtClassMeta> Types = new List<TtClassMeta>();
         public UNameSpace GetNS(string n)
         {
             foreach(var i in ChildrenNS)
@@ -60,7 +60,7 @@ namespace EngineNS.Rtti
             RootNS.Name = "global";
         }
         public UNameSpace RootNS = new UNameSpace();
-        public void RegType(UClassMeta kls)
+        public void RegType(TtClassMeta kls)
         {
             var fname = kls.ClassType.FullName.Replace('+', '.');
             var segs = fname.Split('.');

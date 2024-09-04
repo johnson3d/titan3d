@@ -357,7 +357,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             var div = 1.0f / maxGrassStride;
             var patchPosX = patch.IndexX * patchSize;
             var patchPosZ = patch.IndexZ * patchSize;
-            Support.UNativeArray<GrassInsData> tempArray = Support.UNativeArray<GrassInsData>.CreateInstance();
+            Support.TtNativeArray<GrassInsData> tempArray = Support.TtNativeArray<GrassInsData>.CreateInstance();
             for (int x=0; x< maxGrassStride; x++)
             {
                 for(int z=0; z< maxGrassStride; z++)
@@ -454,7 +454,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 UpdateGrass(mHostPatch, type);
             }
         }
-        public void OnGatherVisibleMeshes(GamePlay.TtWorld.UVisParameter rp)
+        public void OnGatherVisibleMeshes(GamePlay.TtWorld.TtVisParameter rp)
         {
             if(mCurrentPatchLOD != mHostPatch.CurrentLOD)
             {

@@ -285,12 +285,12 @@ namespace EngineNS.Bricks.PhysicsCore
 
             }
         }
-        public override void OnGatherVisibleMeshes(GamePlay.TtWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(GamePlay.TtWorld.TtVisParameter rp)
         {
             //if (TtEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.PhyxDebug) == false)
             //    return;
 
-            if ((rp.CullFilters & GamePlay.TtWorld.UVisParameter.EVisCullFilter.PhyxDebug) == 0)
+            if ((rp.CullFilters & GamePlay.TtWorld.TtVisParameter.EVisCullFilter.PhyxDebug) == 0)
                 return;
 
             rp.AddVisibleNode(this);

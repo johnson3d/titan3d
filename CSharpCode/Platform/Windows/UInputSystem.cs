@@ -1,4 +1,5 @@
-﻿using SDL2;
+﻿using EngineNS.Graphics.Pipeline;
+using SDL2;
 using SixLabors.ImageSharp.Advanced;
 using System;
 using System.Collections.Generic;
@@ -351,29 +352,36 @@ namespace EngineNS.Bricks.Input
             // 设置IME状态
             public static unsafe void SetIMEStatus(bool open, in Vector2 pos)
             {
-                var hwnd = new IntPtr(EngineNS.TtEngine.Instance.GfxDevice.SlateApplication.NativeWindow.HWindow.ToPointer());
-                IntPtr hIMC = ImmGetContext(hwnd);
-                if(hIMC != IntPtr.Zero)
+                //var hwnd = new IntPtr(EngineNS.TtEngine.Instance.GfxDevice.SlateApplication.NativeWindow.HWindow.ToPointer());
+                var imViewport = ImGuiAPI.GetWindowViewport();
+                if((IntPtr)imViewport->PlatformUserData != IntPtr.Zero)
                 {
-                    var result = ImmSetOpenStatus(hIMC, open);
-                    var compos = new COMPOSITIONFORM()
+                    var gcHandle = GCHandle.FromIntPtr((IntPtr)imViewport->PlatformUserData);
+                    var win = gcHandle.Target as UPresentWindow;
+                    var hwnd = win.HWindow;
+                    IntPtr hIMC = ImmGetContext(hwnd);
+                    if(hIMC != IntPtr.Zero)
                     {
-                        dwStyle = 2,
-                        ptCurrentPos = new POINT()
+                        //var result = ImmSetOpenStatus(hIMC, open);
+                        var compos = new COMPOSITIONFORM()
                         {
-                            x = (int)pos.X,
-                            y = (int)pos.Y,
-                        },
-                        rcArea = new RECT()
-                        {
-                            left = 0,
-                            top = 0,
-                            right = 1920,
-                            bottom = 1080,
-                        },
-                    };
-                    ImmSetCompositionWindow(hIMC, ref compos);
-                    ImmReleaseContext(hwnd, hIMC);
+                            dwStyle = 2,
+                            ptCurrentPos = new POINT()
+                            {
+                                x = (int)pos.X,
+                                y = (int)pos.Y,
+                            },
+                            //rcArea = new RECT()
+                            //{
+                            //    left = 0,
+                            //    top = 0,
+                            //    right = 1920,
+                            //    bottom = 1080,
+                            //},
+                        };
+                        ImmSetCompositionWindow(hIMC, ref compos);
+                        ImmReleaseContext(hwnd, hIMC);
+                    }
                 }
             }
         }

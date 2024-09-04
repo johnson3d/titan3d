@@ -33,7 +33,7 @@ namespace EngineNS.GamePlay.Player
             TtEngine.Instance.EventProcessorManager.RegProcessor(this);
             return true;
         }
-        public override void OnGatherVisibleMeshes(TtWorld.UVisParameter rp)
+        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             base.OnGatherVisibleMeshes(rp);
         }

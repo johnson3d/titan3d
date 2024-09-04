@@ -77,8 +77,8 @@ namespace EngineNS.EGui
         #region TriangleData
         public NxRHI.UVbView VertexBuffer;
         public NxRHI.UIbView IndexBuffer;
-        public Support.UNativeArray<ImDrawVert> DataVB = Support.UNativeArray<ImDrawVert>.CreateInstance();
-        public Support.UNativeArray<ushort> DataIB = Support.UNativeArray<ushort>.CreateInstance();
+        public Support.TtNativeArray<ImDrawVert> DataVB = Support.TtNativeArray<ImDrawVert>.CreateInstance();
+        public Support.TtNativeArray<ushort> DataIB = Support.TtNativeArray<ushort>.CreateInstance();
         #endregion
         public unsafe bool InitializeGraphics(EPixelFormat format, EPixelFormat dsFormat)
         {

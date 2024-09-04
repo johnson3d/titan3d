@@ -40,7 +40,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Button, EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGColor);
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonActive, EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGActiveColor);
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonHovered, EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGHoverColor);
-                if (mImageButton.OnDraw(in drawList, in Support.UAnyPointer.Default))
+                if (mImageButton.OnDraw(in drawList, in Support.TtAnyPointer.Default))
                 {
                     newValue = Rtti.UTypeDescManager.CreateInstance(info.Type.SystemType);
                     valueChanged = true;
@@ -932,7 +932,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             base.Cleanup_Override();
         }
 
-        unsafe void ComboOpenAction(in Support.UAnyPointer drawData)
+        unsafe void ComboOpenAction(in Support.TtAnyPointer drawData)
         {
             var data = drawData.RefObject as DrawData;
             var propertyType = data.Type.SystemType;
@@ -1032,7 +1032,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             mDrawData.NewValue = info.Value;
             mDrawData.Readonly = info.Readonly;
             mDrawData.ValueChanged = false;
-            Support.UAnyPointer anyPointer = new Support.UAnyPointer();
+            Support.TtAnyPointer anyPointer = new Support.TtAnyPointer();
             anyPointer.RefObject = mDrawData;
             var winSize = new Vector2(mComboBox.Width, -1);
             ImGuiAPI.SetNextWindowSize(in winSize, ImGuiCond_.ImGuiCond_Always);

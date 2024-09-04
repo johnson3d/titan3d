@@ -383,7 +383,7 @@ namespace EngineNS.UI
         }
 
         protected uint mCameralOffsetSerialId = 0;
-        public void GatherVisibleMeshes(TtWorld.UVisParameter param)
+        public void GatherVisibleMeshes(TtWorld.TtVisParameter param)
         {
             if (IsScreenSpace)
                 return;

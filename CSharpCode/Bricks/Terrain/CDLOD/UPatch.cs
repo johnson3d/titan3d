@@ -328,7 +328,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 i.UpdateCameraOffset(world);
             }
         }
-        public void OnGatherVisibleMeshes(GamePlay.TtWorld.UVisParameter rp)
+        public void OnGatherVisibleMeshes(GamePlay.TtWorld.TtVisParameter rp)
         {
             if (CurrentLOD >= TerrainMesh.Length)
                 return;

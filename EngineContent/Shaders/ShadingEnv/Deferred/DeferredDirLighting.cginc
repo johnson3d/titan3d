@@ -257,9 +257,10 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	BxDFContext Context;
 	Init(Context, N, V, L);
 	// todo: calc SphereSinAlpha from light parameters
-	float AreaLightSphereSinAlpha = 0.3f;
+	float AreaLightSphereSinAlpha = 0.00467f * (1-Pow2(Roughness));
 	// float AreaLightSphereSinAlpha = 0.405f;
 	SphereMaxNoH(Context, AreaLightSphereSinAlpha, true);
+	Context.NoV = saturate(abs( Context.NoV ) + 1e-5);
 	half3 DirLightSpecShading = NoL * Idir * Cdir * SpecularGGX( Roughness, OptSpecShading, Context, NoL, AreaLightSphereSinAlpha );
 	// half3 DirLightSpecShading = NoL * Idir * Cdir * SpecularGGX( Roughness, OptSpecShading, NoH, NoV, NoL, VoH );
 
