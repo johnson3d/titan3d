@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_1653994100 Type="EngineNS.DistanceField.TtSdfAsset@EngineCore">
-  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
-  <bMostlyTwoSided Type="System.Boolean@Unknown" Order="0" />
-  <LocalSpaceMeshBounds Type="EngineNS.BoundingBox@EngineCore" Order="0" />
-  <Mips Type="System.Collections.Generic.List&lt;EngineNS.DistanceField.TtSparseSdfMip@EngineCore,&gt;@Unknown" Order="0" />
-</Hash_1653994100>

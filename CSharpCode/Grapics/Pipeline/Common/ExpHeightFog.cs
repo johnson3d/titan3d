@@ -8,7 +8,7 @@ namespace EngineNS.Graphics.Pipeline.Common
     //https://zhuanlan.zhihu.com/p/497976692
     public partial class TtFogShading
     {
-        private void OnDrawcallEHF(NxRHI.UGraphicDraw drawcall, TtRenderPolicy deferredPolicy, TtFogNode aaNode)
+        private void OnDrawcallEHF(NxRHI.TtGraphicDraw drawcall, TtRenderPolicy deferredPolicy, TtFogNode aaNode)
         {
             if ((uint)deferredPolicy.TypeFog != TypeFog.GetValue())
             {
@@ -156,7 +156,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public float InscatterStartDistance { get => mFogStruct.InscatterStartDistance; set => mFogStruct.InscatterStartDistance = value; }
         #endregion
 
-        private void UpdateFogStruct(UCamera camera)
+        private void UpdateFogStruct(TtCamera camera)
         {
             if (CBShadingEnv != null)
             {

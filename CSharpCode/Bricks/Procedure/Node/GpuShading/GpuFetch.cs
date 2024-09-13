@@ -33,7 +33,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             mFinishFence = rc.CreateFence(in fenceDesc, "GpuFetch");
             mCmdList = rc.CreateCommandList();
         }
-        public NxRHI.UFence mFinishFence;
+        public NxRHI.TtFence mFinishFence;
         public NxRHI.UCommandList mCmdList;
         public NxRHI.IBuffer ReadableTexture;
         public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)

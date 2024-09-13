@@ -29,7 +29,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
 
         }
-        public virtual UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public virtual TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
             return null;
         }
@@ -187,8 +187,8 @@ namespace EngineNS.DesignMacross.Design.Expressions
 
         public string ClassName => throw new NotImplementedException();
         public EVisisMode VisitMode { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public UCommentStatement Comment { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public UNamespaceDeclaration Namespace { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public TtCommentStatement Comment { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public TtNamespaceDeclaration Namespace { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public bool IsStruct { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public List<string> SupperClassNames { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public List<IVariableDescription> Variables { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
@@ -200,7 +200,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         List<IVariableDescription> IClassDescription.Variables { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         List<IMethodDescription> IClassDescription.Methods { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
+        public List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
             throw new NotImplementedException();
         }

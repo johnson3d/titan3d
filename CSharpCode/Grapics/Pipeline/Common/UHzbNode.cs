@@ -6,11 +6,12 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("Hzb", "Hzb", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UHzbNode : Graphics.Pipeline.TtRenderGraphNode
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UHzbNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UHzbNode" })]
+    public class TtHzbNode : Graphics.Pipeline.TtRenderGraphNode
     {
         public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");
         public TtRenderGraphPin HzbPinOut = TtRenderGraphPin.CreateOutput("Hzb", false, EPixelFormat.PXF_UNKNOWN);
-        public UHzbNode()
+        public TtHzbNode()
         {
             Name = "Hzb";
         }
@@ -28,9 +29,9 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public readonly Vector3ui Dispatch_SetupDimArray2 = new Vector3ui(32, 32, 1);
 
-        public NxRHI.UTexture HzbTexture;
+        public NxRHI.TtTexture HzbTexture;
         public NxRHI.TtSrView HzbSRV;
-        public NxRHI.UUaView[] HzbMipsUAVs;
+        public NxRHI.TtUaView[] HzbMipsUAVs;
 
         public class SetupShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
         {
@@ -45,19 +46,19 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 this.UpdatePermutation();
             }
-            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+            public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
-                var node = drawcall.TagObject as UHzbNode;
+                var node = drawcall.TagObject as TtHzbNode;
 
                 
             }
         }
         private SetupShading Setup;
-        private NxRHI.UComputeDraw SetupDrawcall;
+        private NxRHI.TtComputeDraw SetupDrawcall;
 
         public class DownSampleShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
         {
@@ -72,19 +73,19 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 this.UpdatePermutation();
             }
-            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+            public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
-                var node = drawcall.TagObject as UHzbNode;
+                var node = drawcall.TagObject as TtHzbNode;
 
 
             }
         }
         private DownSampleShading DownSample;
-        private NxRHI.UComputeDraw[] MipsDrawcalls;
+        private NxRHI.TtComputeDraw[] MipsDrawcalls;
         
         public async override System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
@@ -94,7 +95,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             BasePass.Initialize(rc, debugName);
 
-            var defines = new NxRHI.UShaderDefinitions();
+            var defines = new NxRHI.TtShaderDefinitions();
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray2.Z}");
@@ -133,7 +134,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     i.Dispose();
                 }
             }
-            MipsDrawcalls = new NxRHI.UComputeDraw[HzbMipsUAVs.Length - 1];
+            MipsDrawcalls = new NxRHI.TtComputeDraw[HzbMipsUAVs.Length - 1];
             uint width = MaxSRVWidth;
             uint height = MaxSRVHeight;
             for (int i = 1; i < HzbMipsUAVs.Length; i++)
@@ -218,7 +219,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
             }
 
-            HzbMipsUAVs = new NxRHI.UUaView[NxRHI.TtSrView.CalcMipLevel((int)x, (int)y, true)];
+            HzbMipsUAVs = new NxRHI.TtUaView[NxRHI.TtSrView.CalcMipLevel((int)x, (int)y, true)];
             var dsTexDesc = new NxRHI.FTextureDesc();
             dsTexDesc.SetDefault();
             dsTexDesc.Width = (uint)x;
@@ -255,7 +256,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UHzbNode), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtHzbNode), nameof(TickLogic));
                 return mScopeTick;
             }
         }

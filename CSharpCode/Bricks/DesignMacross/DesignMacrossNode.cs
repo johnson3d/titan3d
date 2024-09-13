@@ -19,16 +19,22 @@ namespace EngineNS.DesignMacross
             public RName DesignMacrossName { get; set; }
         }
         Macross.UMacrossGetter<TtDesignMacrossBase> mMacrossGetter = null;
-        public override TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        public override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
-            if(DesignMacross!=null && !RName.IsEmpty(DesignMacross))
+            NodeData = data;
+            return await base.InitializeNode(world, data, bvType, placementType);
+        }
+
+        public override void OnNodeLoaded(TtNode parent)
+        {
+            base.OnNodeLoaded(parent);
+            if (DesignMacross != null && !RName.IsEmpty(DesignMacross))
             {
                 mMacrossGetter = Macross.UMacrossGetter<TtDesignMacrossBase>.NewInstance();
                 mMacrossGetter.Name = DesignMacross;
                 mMacrossGetter.Get().MacrossNode = this;
-                mMacrossGetter.Get().Initialize();
+                _ = mMacrossGetter.Get().Initialize();
             }
-            return base.InitializeNode(world, data, bvType, placementType);
         }
         [RName.PGRName(FilterExts = UDesignMacross.AssetExt)]
         [Category("Option")]
@@ -53,7 +59,7 @@ namespace EngineNS.DesignMacross
                 if(mMacrossGetter.Get() != null)
                 {
                     mMacrossGetter.Get().MacrossNode = this;
-                    mMacrossGetter.Get().Initialize();
+                    _ = mMacrossGetter.Get().Initialize();
                 }
             }
         }
@@ -61,7 +67,7 @@ namespace EngineNS.DesignMacross
         {
             if(mMacrossGetter!= null && mMacrossGetter.Get() != null)
             {
-                mMacrossGetter.Get().Tick(args.World.TimeSecond);
+                mMacrossGetter.Get().Tick(args.World.DeltaTimeSecond);
             }
             base.TickLogic(args);
         }

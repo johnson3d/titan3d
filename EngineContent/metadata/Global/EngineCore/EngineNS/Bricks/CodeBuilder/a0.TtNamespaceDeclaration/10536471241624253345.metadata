@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_10536471241624253345 Type="EngineNS.Bricks.CodeBuilder.TtNamespaceDeclaration@EngineCore">
+  <Classes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtClassDeclaration@EngineCore,&gt;@Unknown" Order="0" />
+  <Namespace Type="System.String@Unknown" Order="0" />
+</Hash_10536471241624253345>

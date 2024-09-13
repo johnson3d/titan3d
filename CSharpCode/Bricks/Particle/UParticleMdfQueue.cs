@@ -76,8 +76,19 @@ namespace EngineNS.Bricks.Particle
                 return RName.GetRName("shaders/Bricks/Particle/NebulaParticle.cginc", RName.ERNameType.Engine);
             }
         }
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
         static NxRHI.UShaderCode ParticleVarCode = new NxRHI.UShaderCode();
         static NxRHI.UShaderCode ParticleEmitterCode = new NxRHI.UShaderCode();
+        static string UniqueText = null;
+在此之后:
+        static NxRHI.TtShaderCode ParticleVarCode = new NxRHI.UShaderCode();
+        static NxRHI.TtShaderCode ParticleEmitterCode = new NxRHI.UShaderCode();
+        static string UniqueText = null;
+*/
+        static NxRHI.TtShaderCode ParticleVarCode = new NxRHI.TtShaderCode();
+        static NxRHI.TtShaderCode ParticleEmitterCode = new NxRHI.TtShaderCode();
         static string UniqueText = null;
         public unsafe NxRHI.FShaderCode* GetHLSLCode(string includeName, string includeOriName)
         {
@@ -111,7 +122,7 @@ namespace EngineNS.Bricks.Particle
         {
 
         }
-        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, TtMesh.TtAtom atom)
         {
 
         }
@@ -125,7 +136,7 @@ namespace EngineNS.Bricks.Particle
             Emitter = (mdf as TtParticleMdfQueue).Emitter;
         }
         public TtEmitter Emitter;
-        public override unsafe void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
+        public override unsafe void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 

@@ -14,13 +14,13 @@ namespace EngineNS.Graphics.Pipeline
             //CoreSDK.DisposeObject(ref mCmdLists[1]);
         }
         private NxRHI.UCommandList[] mCmdLists = new NxRHI.UCommandList[2];
-        public void Initialize(NxRHI.UGpuDevice rc, string debugName)
+        public void Initialize(NxRHI.TtGpuDevice rc, string debugName)
         {
             mCmdLists[0] = rc.CreateCommandList();
             mCmdLists[1] = rc.CreateCommandList();
             SetDebugName(debugName);
         }
-        public void SetPipeline(in NxRHI.UGpuPipeline pipeline)
+        public void SetPipeline(in NxRHI.TtGpuPipeline pipeline)
         {
             if (pipeline == null)
             {
@@ -88,10 +88,10 @@ namespace EngineNS.Graphics.Pipeline
                 DrawBuffers = null;
             }
         }
-        public NxRHI.UGpuPipeline mPipeline;
+        public NxRHI.TtGpuPipeline mPipeline;
         public UDrawBuffers[] PassBuffers = new UDrawBuffers[(int)ERenderLayer.RL_Num];
         public UDrawBuffers PostCmds = new UDrawBuffers();
-        public void Initialize(NxRHI.UGpuDevice rc, string debugName)
+        public void Initialize(NxRHI.TtGpuDevice rc, string debugName)
         {
             for (ERenderLayer i = ERenderLayer.RL_Begin; i < ERenderLayer.RL_Num; i++)
             {
@@ -223,7 +223,7 @@ namespace EngineNS.Graphics.Pipeline
                 }
 
                 //frameBuffers.BuildFrameBuffers(policy);
-                NxRHI.UFrameBuffers fb = null;
+                NxRHI.TtFrameBuffers fb = null;
                 if (i == ERenderLayer.RL_Gizmos || i == ERenderLayer.RL_TranslucentGizmos)
                 {
                     fb = gizmosFrameBuffers.FrameBuffers;
@@ -248,7 +248,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             PostCmds.SwapBuffer();
         }
-        public void PushDrawCall(ERenderLayer layer, NxRHI.UGraphicDraw drawcall)
+        public void PushDrawCall(ERenderLayer layer, NxRHI.TtGraphicDraw drawcall)
         {
             unsafe
             {

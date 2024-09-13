@@ -131,6 +131,11 @@ namespace EngineNS
                 else
                 {
                     var sz = new Vector2(0, 0);
+                    if(ImGuiAPI.Button("F", in sz))
+                    {
+                        EGui.Controls.UContentBrowser.GlobalFocusAsset = mDrawData.NewValue;
+                    }
+                    ImGuiAPI.SameLine(0, 8);
                     if (ImGuiAPI.Button("<", in sz))
                     {
                         mDrawData.NewValue = EGui.Controls.UContentBrowser.GlobalSelectedAsset.GetAssetName();
@@ -318,6 +323,12 @@ namespace EngineNS
             if (rName == null)
                 return -1;
             return Name.CompareTo(rName.Name);
+        }
+
+        public RName GetDirectoryRName()
+        {
+            var dir = IO.TtFileManager.GetBaseDirectory(mName);
+            return GetRName(dir, RNameType);
         }
 
         internal class RNameManager

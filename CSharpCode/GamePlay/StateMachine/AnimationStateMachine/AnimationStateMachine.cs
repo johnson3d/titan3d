@@ -9,11 +9,11 @@ using System.Text;
 
 namespace EngineNS.GamePlay.StateMachine.AnimationStateMachine
 {
-    public class TtAnimationStateMachine<T> : TtTimedStateMachine<T>, IAnimationState
+    public class TtAnimationStateMachine<T> : TtTimedStateMachine<T>, IAnimationState<T>
     {
         
 
-        public TtAnimationCommand<TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
+        public TtAnimationCommand<T, TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
             throw new NotImplementedException();
         }

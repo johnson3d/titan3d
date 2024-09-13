@@ -15,10 +15,10 @@ namespace EngineNS.Bricks.Particle
         public string Name;
         public List<TtEffector> Effectors { get; } = new List<TtEffector>();
         public TtNebulaShader Shader { get; set; }
-        public NxRHI.UCbView CBuffer;
-        public NxRHI.UComputeDraw mParticleUpdateDrawcall;
+        public NxRHI.TtCbView CBuffer;
+        public NxRHI.TtComputeDraw mParticleUpdateDrawcall;
 
-        public unsafe void UpdateComputeDrawcall(NxRHI.UGpuDevice rc, TtEmitter emitter)
+        public unsafe void UpdateComputeDrawcall(NxRHI.TtGpuDevice rc, TtEmitter emitter)
         {
             TtGpuParticleResources gpuResources = emitter.GpuResources;
 
@@ -288,7 +288,7 @@ namespace EngineNS.Bricks.Particle
         {
             return "";
         }
-        public virtual void SetCBuffer(uint index, NxRHI.UCbView CBuffer)
+        public virtual void SetCBuffer(uint index, NxRHI.TtCbView CBuffer)
         {
 
         }
@@ -311,7 +311,7 @@ namespace EngineNS.Bricks.Particle
         {
             AddParameters(codeBuilder, ref sourceCode, typeof(T));
         }
-        public override void SetCBuffer(uint index, NxRHI.UCbView CBuffer)
+        public override void SetCBuffer(uint index, NxRHI.TtCbView CBuffer)
         {
             CBuffer.SetValue($"EffectorParameters{index}", in mEffectorParameter);
         }

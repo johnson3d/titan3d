@@ -10,7 +10,7 @@ namespace EngineNS.DesignMacross.Design.Expressions.ValueOperator
         public TtSubtractOperatorDescription()
         {
             Name = "Subtract";
-            Op = UBinaryOperatorExpression.EBinaryOperation.Subtract;
+            Op = TtBinaryOperatorExpression.EBinaryOperation.Subtract;
         }
     }
 }

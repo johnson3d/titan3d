@@ -10,9 +10,8 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
-    <e_0 Value="Engine,mesh/sphere001.vms,59c6a06b-59ae-48e3-a509-dbabfe1900f9" />
-    <e_1 Value="Game,tutorials/material/instance.uminst,1891a922-33b9-426e-8237-2e0d60d27dda" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 IsNull="True" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
 </Root>

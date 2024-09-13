@@ -10,7 +10,7 @@ namespace EngineNS.DesignMacross.Design.Expressions.ValueOperator
         public TtModOperatorDescription() 
         {
             Name = "Mod";
-            Op = UBinaryOperatorExpression.EBinaryOperation.Modulus;
+            Op = TtBinaryOperatorExpression.EBinaryOperation.Modulus;
         }
     }
 }

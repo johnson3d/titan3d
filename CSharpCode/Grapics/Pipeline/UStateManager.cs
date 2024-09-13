@@ -1,6 +1,48 @@
-﻿using System;
+﻿using NPOI.SS.Formula.Functions;
+using System;
 using System.Collections.Generic;
 using System.Text;
+
+namespace EngineNS.NxRHI
+{
+    public unsafe partial struct FSamplerDesc : IHash64
+    { 
+        public unsafe Hash64 GetHash64()
+        {
+            Hash64 result = new Hash64();
+            fixed (FSamplerDesc* p = &this)
+            {
+                Hash64.CalcHash64(&result, (byte*)p, sizeof(FSamplerDesc));
+            }
+            return result;
+        }
+    }
+    public unsafe partial struct FRenderPassDesc : IHash64
+    {
+        public unsafe Hash64 GetHash64()
+        {
+            Hash64 result = new Hash64();
+            fixed (FRenderPassDesc* p = &this)
+            {
+                Hash64.CalcHash64(&result, (byte*)p, sizeof(FRenderPassDesc));
+            }
+            return result;
+        }
+    }
+    public unsafe partial struct FGpuPipelineDesc : IHash64
+    {
+        public unsafe Hash64 GetHash64()
+        {
+            Hash64 result = new Hash64();
+            fixed (FGpuPipelineDesc* p = &this)
+            {
+                Hash64.CalcHash64(&result, (byte*)p, sizeof(FGpuPipelineDesc));
+            }
+            return result;
+        }
+    }
+    
+}
 
 namespace EngineNS.Graphics.Pipeline
 {
@@ -10,26 +52,19 @@ namespace EngineNS.Graphics.Pipeline
         {
             get;
         } = new Dictionary<Hash64, T>(new Hash64.EqualityComparer());
-        public T GetPipelineState<D>(NxRHI.UGpuDevice rc, in D desc) where D : unmanaged
+        public unsafe T GetPipelineState<D>(NxRHI.TtGpuDevice rc, in D desc) where D : unmanaged, IHash64
         {
-            Hash64 hash = new Hash64();
-            unsafe
+            Hash64 hash = desc.GetHash64();
+            T state;
+            if (States.TryGetValue(hash, out state) == false)
             {
-                fixed (D* p = &desc)
-                {
-                    Hash64.CalcHash64(&hash, (byte*)p, sizeof(D));
-
-                    T state;
-                    if (States.TryGetValue(hash, out state) == false)
-                    {
-                        state = CreateState(rc, p);
-                        if (state == null)
-                            return null;
-                        States.Add(hash, state);
-                    }
-                    return state;
-                }
+                var t = desc;
+                state = CreateState(rc, &t);
+                if (state == null)
+                    return null;
+                States.Add(hash, state);
             }
+            return state;
         }
         public void Cleanup()
         {
@@ -39,7 +74,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             States.Clear();
         }
-        protected unsafe virtual T CreateState(NxRHI.UGpuDevice rc, void* desc)
+        protected unsafe virtual T CreateState(NxRHI.TtGpuDevice rc, void* desc)
         {
             return null;
         }
@@ -48,10 +83,10 @@ namespace EngineNS.Graphics.Pipeline
 
         }
     }
-    public class UGpuPipelineManager : UStateManager<NxRHI.UGpuPipeline>
+    public class UGpuPipelineManager : UStateManager<NxRHI.TtGpuPipeline>
     {
-        NxRHI.UGpuPipeline mDefaultState;
-        public NxRHI.UGpuPipeline DefaultState
+        NxRHI.TtGpuPipeline mDefaultState;
+        public NxRHI.TtGpuPipeline DefaultState
         {
             get
             {
@@ -65,19 +100,19 @@ namespace EngineNS.Graphics.Pipeline
                 return mDefaultState;
             }
         }
-        protected unsafe override NxRHI.UGpuPipeline CreateState(NxRHI.UGpuDevice rc, void* desc)
+        protected unsafe override NxRHI.TtGpuPipeline CreateState(NxRHI.TtGpuDevice rc, void* desc)
         {
             return rc.CreatePipeline(in *(NxRHI.FGpuPipelineDesc*)desc);
         }
-        protected override void ReleaseState(NxRHI.UGpuPipeline state)
+        protected override void ReleaseState(NxRHI.TtGpuPipeline state)
         {
             state?.Dispose();
         }
     }
-    public class USamplerStateManager : UStateManager<NxRHI.USampler>
+    public class USamplerStateManager : UStateManager<NxRHI.TtSampler>
     {
-        NxRHI.USampler mDefaultState;
-        public NxRHI.USampler DefaultState
+        NxRHI.TtSampler mDefaultState;
+        public NxRHI.TtSampler DefaultState
         {
             get
             {
@@ -100,8 +135,8 @@ namespace EngineNS.Graphics.Pipeline
                 return mDefaultState;
             }
         }
-        NxRHI.USampler mLinearClampState;
-        public NxRHI.USampler LinearClampState
+        NxRHI.TtSampler mLinearClampState;
+        public NxRHI.TtSampler LinearClampState
         {
             get
             {
@@ -124,8 +159,8 @@ namespace EngineNS.Graphics.Pipeline
                 return mLinearClampState;
             }
         }
-        NxRHI.USampler mPointState;
-        public NxRHI.USampler PointState
+        NxRHI.TtSampler mPointState;
+        public NxRHI.TtSampler PointState
         {
             get
             {
@@ -148,16 +183,16 @@ namespace EngineNS.Graphics.Pipeline
                 return mPointState;
             }
         }
-        protected unsafe override NxRHI.USampler CreateState(NxRHI.UGpuDevice rc, void* desc)
+        protected unsafe override NxRHI.TtSampler CreateState(NxRHI.TtGpuDevice rc, void* desc)
         {
             return rc.CreateSampler(in *(NxRHI.FSamplerDesc*)desc);
         }
-        protected override void ReleaseState(NxRHI.USampler state)
+        protected override void ReleaseState(NxRHI.TtSampler state)
         {
             state.Dispose();
         }
     }
-    public class URenderPassManager : UStateManager<NxRHI.URenderPass>
+    public class URenderPassManager : UStateManager<NxRHI.TtRenderPass>
     {
         //public NxRHI.URenderPass DefaultRenderPass { get; private set; }
         public void Initialize(TtEngine engine)
@@ -180,11 +215,11 @@ namespace EngineNS.Graphics.Pipeline
             //}
             //DefaultRenderPass = this.GetPipelineState(engine.GfxDevice.RenderContext, in desc);
         }
-        protected unsafe override NxRHI.URenderPass CreateState(NxRHI.UGpuDevice rc, void* desc)
+        protected unsafe override NxRHI.TtRenderPass CreateState(NxRHI.TtGpuDevice rc, void* desc)
         {
             return rc.CreateRenderPass(in *(NxRHI.FRenderPassDesc*)desc);
         }
-        protected override void ReleaseState(NxRHI.URenderPass state)
+        protected override void ReleaseState(NxRHI.TtRenderPass state)
         {
             state.Dispose();
         }
@@ -192,17 +227,17 @@ namespace EngineNS.Graphics.Pipeline
 
     public class UInputLayoutManager
     {
-        public Dictionary<UInt64, NxRHI.UInputLayoutDesc> States
+        public Dictionary<UInt64, NxRHI.TtInputLayoutDesc> States
         {
             get;
-        } = new Dictionary<UInt64, NxRHI.UInputLayoutDesc>();
-        public NxRHI.UInputLayoutDesc GetPipelineState(NxRHI.UGpuDevice rc, NxRHI.UInputLayoutDesc desc)
+        } = new Dictionary<UInt64, NxRHI.TtInputLayoutDesc>();
+        public NxRHI.TtInputLayoutDesc GetPipelineState(NxRHI.TtGpuDevice rc, NxRHI.TtInputLayoutDesc desc)
         {
             unsafe
             {
                 var key = desc.GetLayoutHash64();
                 {
-                    NxRHI.UInputLayoutDesc state;
+                    NxRHI.TtInputLayoutDesc state;
                     if (States.TryGetValue(key, out state) == false)
                     {
                         States.Add(key, desc);

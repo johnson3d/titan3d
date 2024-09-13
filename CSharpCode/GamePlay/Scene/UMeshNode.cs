@@ -224,7 +224,14 @@ namespace EngineNS.GamePlay.Scene
                 {
                     meshData.MeshName = mMesh.MaterialMesh.AssetName;
                     meshData.MdfQueueType = mMesh.MdfQueueType;
-                    meshData.AtomType = Rtti.UTypeDesc.TypeStr(mMesh.SubMeshes[0].Atoms[0].GetType());
+                    if (mMesh.SubMeshes[0].Atoms.Count == 0)
+                    {
+                        meshData.AtomType = Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfStaticMesh));
+                    }
+                    else
+                    {
+                        meshData.AtomType = Rtti.UTypeDesc.TypeStr(mMesh.SubMeshes[0].Atoms[0].GetType());
+                    }
                 }
                 this.UpdateAbsTransform();
                 UpdateAABB();
@@ -273,6 +280,52 @@ namespace EngineNS.GamePlay.Scene
                     OnHitProxyChanged();
                 };
                 action();
+            }
+        }
+
+        [Category("Option")]
+        [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Pipeline.Shader.TtMdfQueueBase))]
+        public Rtti.UTypeDesc MdfQueue
+        {
+            get
+            {
+                if(NodeData is TtMeshNodeData meshNodeData)
+                {
+                    return meshNodeData.MdfQueue;
+
+                }
+                return Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh));
+            }
+            set
+            {
+                if (NodeData is TtMeshNodeData meshNodeData)
+                {
+                    if(meshNodeData.MdfQueue != null)
+                    {
+                        meshNodeData.MdfQueue = value;
+                        System.Action action = async () =>
+                        {
+                            var mesh = new Graphics.Mesh.TtMesh();
+
+                            var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(MeshName);
+                            var ok = mesh.Initialize(materialMesh, meshNodeData.MdfQueue, meshNodeData.Atom);
+                            if (ok == false)
+                                return;
+                            Mesh = mesh;
+                            var world = this.GetWorld();
+                            if (world != null)
+                            {
+                                Mesh.SetWorldTransform(in Placement.AbsTransform, world, false);
+                            }
+                            else
+                            {
+                                Mesh.SetWorldTransform(in Placement.AbsTransform, null, false);
+                            }
+                            OnHitProxyChanged();
+                        };
+                        action();
+                    }
+                }
             }
         }
         public override void OnNodeLoaded(TtNode parent)

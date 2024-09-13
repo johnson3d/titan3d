@@ -50,15 +50,15 @@ namespace EngineNS.UI
         TtUIHost mActiveHost = null;
         TtUIElement mKeyboardFocusUIElement = null;
         public TtUIElement KeyboardFocusUIElement => mKeyboardFocusUIElement;
-        TtUIElement[] mCapturedElements = new TtUIElement[UInputSystem.MaxMultiTouchNumber + 1];
-        TtUIElement[] mHoveredElements = new TtUIElement[UInputSystem.MaxMultiTouchNumber + 1];
+        TtUIElement[] mCapturedElements = new TtUIElement[TtInputSystem.MaxMultiTouchNumber + 1];
+        TtUIElement[] mHoveredElements = new TtUIElement[TtInputSystem.MaxMultiTouchNumber + 1];
         public bool IsMouseDirectlyHover(TtUIElement element)
         {
-            return mHoveredElements[UInputSystem.MaxMultiTouchNumber] == element;
+            return mHoveredElements[TtInputSystem.MaxMultiTouchNumber] == element;
         }
         public bool IsTouchDirectlyHover(TtUIElement element)
         {
-            for(int i=0; i<UInputSystem.MaxMultiTouchNumber; i++)
+            for(int i=0; i<TtInputSystem.MaxMultiTouchNumber; i++)
             {
                 if (mHoveredElements[i] == element)
                     return true;
@@ -141,10 +141,10 @@ namespace EngineNS.UI
             }
         }
 
-        public TtUIElement MouseCaptured => mCapturedElements[UInputSystem.MaxMultiTouchNumber];
+        public TtUIElement MouseCaptured => mCapturedElements[TtInputSystem.MaxMultiTouchNumber];
         public unsafe void CaptureMouse(TtRoutedEventArgs eventArgs, TtUIElement element)
         {
-            var old = mCapturedElements[UInputSystem.MaxMultiTouchNumber];
+            var old = mCapturedElements[TtInputSystem.MaxMultiTouchNumber];
             if (old != null)
             {
                 //old.ProcessOnLostMouseCapture(eventArgs, element, old);
@@ -156,7 +156,7 @@ namespace EngineNS.UI
                 mKeyboardFocusUIElement.RaiseEvent(arg);
                 TtEngine.Instance.UIManager.ReleaseEventSync(arg);
             }
-            mCapturedElements[UInputSystem.MaxMultiTouchNumber] = element;
+            mCapturedElements[TtInputSystem.MaxMultiTouchNumber] = element;
             if (element != null)
             {
                 //element.ProcessOnMouseCapture(eventArgs, element, old);
@@ -171,7 +171,7 @@ namespace EngineNS.UI
         }
         public void CaptureTouch(int index, TtUIElement element)
         {
-            if (index < 0 || index > UInputSystem.MaxMultiTouchNumber)
+            if (index < 0 || index > TtInputSystem.MaxMultiTouchNumber)
                 return;
             mCapturedElements[index] = element;
         }
@@ -204,7 +204,7 @@ namespace EngineNS.UI
                 case EventType.MOUSEMOTION:
                     {
                         pt = new Vector2(e.MouseButton.X, e.MouseButton.Y);
-                        index = UInputSystem.MaxMultiTouchNumber;
+                        index = TtInputSystem.MaxMultiTouchNumber;
                     }
                     break;
                 case EventType.CONTROLLERTOUCHPADDOWN:
@@ -285,7 +285,7 @@ namespace EngineNS.UI
                             deviceLeaveArg.InputEventPtr = ePtr;
                     }
 
-                    if(index == UInputSystem.MaxMultiTouchNumber)
+                    if(index == TtInputSystem.MaxMultiTouchNumber)
                     {
                         var mouseDirLeaveArg = QueryEventSync();
                         ReleaseEventSync(mouseDirLeaveArg);
@@ -361,7 +361,7 @@ namespace EngineNS.UI
                             deviceEnterArg.InputEventPtr = ePtr;
                     }
 
-                    if(index == UInputSystem.MaxMultiTouchNumber)
+                    if(index == TtInputSystem.MaxMultiTouchNumber)
                     {
                         var mouseEnterArg = QueryEventSync();
                         mouseEnterArg.Source = hoveredUIElement;

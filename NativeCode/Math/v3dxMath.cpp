@@ -359,6 +359,35 @@ extern "C"
 		return pOut;
 	}
 
+	VFX_API v3dMatrix4_t* v3dxMatrix4Perspective_InvZ(v3dMatrix4_t* pOut,
+		float fovy,
+		float Aspect,
+		float zn,
+		float zf)
+	{
+		/*
+		h = cos(fov/2) / sin(fov/2);
+		w = h / aspect;
+
+		2*zn/w  0       0              0
+		0       2*zn/h  0              0
+		0       0       zn/(zn-zf)   1
+		0       0       -zn*zf/(zn-zf) 0
+		*/
+		double dtZ = zn - zf;
+		float Ys = 1.0f / tanf(fovy * 0.5f);
+		float Xs = Ys / Aspect;
+		float m33 = float(double(zn) / dtZ);
+		float m43 = - (float(double(zn) * double(zf) / dtZ));
+
+		pOut->m11 = Xs;		 pOut->m12 = 0.f;	  pOut->m13 = 0.f;	 pOut->m14 = 0.f;
+		pOut->m21 = 0.f;	 pOut->m22 = Ys;	  pOut->m23 = 0.f;	 pOut->m24 = 0.f;
+		pOut->m31 = 0.f;	 pOut->m32 = 0.f;	  pOut->m33 = m33;   pOut->m34 = 1.0f;
+		pOut->m41 = 0.f;	 pOut->m42 = 0.f;	  pOut->m43 = m43;   pOut->m44 = 0.f;
+
+		return pOut;
+	}
+
 	VFX_API v3dMatrix4_t* v3dxMatrix4Ortho( v3dMatrix4_t* pOut,
 								  float w,
 								  float h,

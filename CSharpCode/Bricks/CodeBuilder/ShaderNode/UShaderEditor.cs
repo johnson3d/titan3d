@@ -254,7 +254,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(GetWindowsName(), this, ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
             if (IsDrawing)
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
@@ -302,10 +302,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             uint leftId = 0;
             uint rightUpId = 0;
             uint rightDownId = 0;
-            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.8f, ref middleId, ref rightId);
-            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Down, 0.5f, ref rightDownId, ref rightUpId);
-            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
-            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Left, 0.8f, ref middleId, ref rightId);
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Down, 0.5f, ref rightDownId, ref rightUpId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("ShaderGraph", mDockKeyClass), middleId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("TextEditor", mDockKeyClass), middleId);
@@ -455,9 +455,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             Material.UsedUniformVars.Clear();
             Material.UsedSamplerStates.Clear();
 
-            var MaterialClass = new UClassDeclaration();
+            var MaterialClass = new TtClassDeclaration();
 
-            var gen = mHLSLCodeGen.GetCodeObjectGen(Rtti.UTypeDescGetter<UMethodDeclaration>.TypeDesc);
+            var gen = mHLSLCodeGen.GetCodeObjectGen(Rtti.UTypeDescGetter<TtMethodDeclaration>.TypeDesc);
             BuildCodeStatementsData data = new BuildCodeStatementsData()
             {
                 ClassDec = MaterialClass,
@@ -468,7 +468,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             MaterialOutput.BuildStatements(null, ref data);
             string code = "";
             var incGen = mHLSLCodeGen.GetCodeObjectGen(Rtti.UTypeDescGetter<TtIncludeDeclaration>.TypeDesc);
-            UCodeGeneratorData genData = new UCodeGeneratorData()
+            TtCodeGeneratorData genData = new TtCodeGeneratorData()
             {
                 Method = null,
                 CodeGen = mHLSLCodeGen,
@@ -480,14 +480,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 incGen.GenCodes(i, ref code, ref genData);
                 Material.IncludeFiles.Add(i.FilePath);
             }
-            genData = new UCodeGeneratorData()
+            genData = new TtCodeGeneratorData()
             {
                 Method = MaterialOutput.VSFunction,
                 CodeGen = mHLSLCodeGen,
                 UserData = Material,
             };
             gen.GenCodes(MaterialOutput.VSFunction, ref code, ref genData);
-            genData = new UCodeGeneratorData()
+            genData = new TtCodeGeneratorData()
             {
                 Method = MaterialOutput.PSFunction,
                 CodeGen = mHLSLCodeGen,
@@ -523,6 +523,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             mShaderEditor.mCoreObject.SetText(code);
             return code;
+        }
+
+        public string GetWindowsName()
+        {
+            return AssetName.Name;
         }
         //[Obsolete]
         //private string GenHLSLCode_Old()
@@ -574,7 +579,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         //            node.OnMaterialEditorGenCode(Material);
         //        }
         //    }
-            
+
         //    var expr = this.MaterialOutput.GetExpr(MaterialGraph, gen, null, false);
 
         //    var funGen = gen.GetGen(typeof(DefineFunction));

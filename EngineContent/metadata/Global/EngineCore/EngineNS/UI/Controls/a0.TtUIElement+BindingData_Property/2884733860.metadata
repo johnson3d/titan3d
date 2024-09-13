@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_2884733860 Type="EngineNS.UI.Controls.TtUIElement.BindingData_Property@EngineCore">
-  <Mode Type="EngineNS.UI.Bind.EBindingMode@EngineCore" Order="0" />
-  <Source Type="EngineNS.UI.Controls.TtUIElement.UIBindingData_Element@EngineCore" Order="0" />
-  <Target Type="EngineNS.UI.Controls.TtUIElement.UIBindingData_Element@EngineCore" Order="0" />
-</Hash_2884733860>

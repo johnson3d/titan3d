@@ -7,7 +7,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public partial class UGpuSceneNode
+    public partial class TtGpuSceneNode
     {
         public TtRenderGraphPin InstancePinOut = TtRenderGraphPin.CreateOutput("Instances", false, EPixelFormat.PXF_UNKNOWN);
         public List<GamePlay.Scene.TtGpuSceneNode> GpuSceneActors = new List<GamePlay.Scene.TtGpuSceneNode>();
@@ -127,13 +127,13 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 this.UpdatePermutation();
             }
-            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+            public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
-                var node = drawcall.TagObject as UGpuSceneNode;
+                var node = drawcall.TagObject as TtGpuSceneNode;
 
                 node.cbPerHZBCullData_CullInstance = CurrentEffect.FindBinder("cbPerPatchHZBCullData");
 
@@ -164,13 +164,13 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 this.UpdatePermutation();
             }
-            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+            public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
-                var node = drawcall.TagObject as UGpuSceneNode;
+                var node = drawcall.TagObject as TtGpuSceneNode;
 
                 drawcall.BindUav("CullClusterIndirectArgs", node.CullClusterIndirectArgs.Uav);
                 drawcall.BindSrv("NumberVisibilityGpuActorBuffer", node.NumberVisibilityGpuActorBuffer.Srv);
@@ -192,13 +192,13 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 this.UpdatePermutation();
             }
-            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+            public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
-                var node = drawcall.TagObject as UGpuSceneNode;
+                var node = drawcall.TagObject as TtGpuSceneNode;
 
                 drawcall.BindSrv("NumberVisibilityGpuActorBuffer", node.NumberVisibilityGpuActorBuffer.Srv);
                 drawcall.BindUav("VisibleClusterMeshData", node.VisibleClusterMeshData.Uav);
@@ -221,13 +221,13 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 this.UpdatePermutation();
             }
-            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+            public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
-                var node = drawcall.TagObject as UGpuSceneNode;
+                var node = drawcall.TagObject as TtGpuSceneNode;
 
                 drawcall.BindSrv("NumnerVisibleClusterMeshData", node.NumnerVisibleClusterMeshData.Srv);
                 drawcall.BindUav("DrawClusterIndirectArgs", node.SetupDrawClusterIndirectArgs.Uav);
@@ -235,11 +235,11 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public SetupDrawClusterArgsBufferShading Cull_SetupDrawClusterArgsBuffer;
 
-        public NxRHI.UComputeDraw Cull_CullGpuIndexsDrawcall;
-        public NxRHI.UComputeDraw Cull_SetupCullClusterArgsDrawcall;
+        public NxRHI.TtComputeDraw Cull_CullGpuIndexsDrawcall;
+        public NxRHI.TtComputeDraw Cull_SetupCullClusterArgsDrawcall;
 
-        public NxRHI.UComputeDraw Cull_CullClusterDrawcall;
-        public NxRHI.UComputeDraw Cull_SetupDrawClusterArgsDrawcall;
+        public NxRHI.TtComputeDraw Cull_CullClusterDrawcall;
+        public NxRHI.TtComputeDraw Cull_SetupDrawClusterArgsDrawcall;
 
         public NxRHI.TtShaderBinder cbPerHZBCullData_CullInstance;
         public NxRHI.TtShaderBinder cbPerHZBCullData_CullCluster;
@@ -247,8 +247,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         public UCBufferHZBCullData HZBCullInstanceData = new UCBufferHZBCullData();
         public UCBufferHZBCullData HZBCullClusterData = new UCBufferHZBCullData();
 
-        public NxRHI.UCbView HZBCullInstanceCBuffer;
-        public NxRHI.UCbView HZBCullClusterCBuffer;
+        public NxRHI.TtCbView HZBCullInstanceCBuffer;
+        public NxRHI.TtCbView HZBCullClusterCBuffer;
 
         //public UDrawBuffers BasePass = new UDrawBuffers();
 
@@ -262,7 +262,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
 
             //After BuildInstances function..
-            var defines = new NxRHI.UShaderDefinitions();
+            var defines = new NxRHI.TtShaderDefinitions();
             
             Cull_CullGpuIndexs = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<CullGpuIndexsShading>();
 
@@ -291,7 +291,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 var actor = node as GamePlay.Scene.TtGpuSceneNode;
                 if (actor == null)
                     return false;
-                var This = arg as UGpuSceneNode;
+                var This = arg as TtGpuSceneNode;
                 This.GpuSceneActors.Add(actor);
 
                 return false;
@@ -387,7 +387,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             CullInstancesBuffer.Flush2GPU(cmd.mCoreObject);
         }
 
-        private unsafe void Cull(NxRHI.UGpuDevice rcj, Graphics.Pipeline.TtRenderPolicy policy)
+        private unsafe void Cull(NxRHI.TtGpuDevice rcj, Graphics.Pipeline.TtRenderPolicy policy)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var cmd = BasePass.DrawCmdList;

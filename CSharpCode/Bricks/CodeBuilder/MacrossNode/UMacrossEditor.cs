@@ -60,7 +60,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     var method = methods[methodIdx];
 
                     bool hasMethod = false;
-                    var keyWord = UMethodDeclaration.GetKeyword(method);
+                    var keyWord = TtMethodDeclaration.GetKeyword(method);
                     for(int mI = 0; mI < Methods.Count; mI++)
                     {
                         for(int dataIdx =0; dataIdx < Methods[mI].MethodDatas.Count; dataIdx++)
@@ -90,7 +90,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                     menuItem.Action = (proxy, data) =>
                     {
-                        var f = UMethodDeclaration.GetMethodDeclaration(method);
+                        var f = TtMethodDeclaration.GetMethodDeclaration(method);
                         var func = AddMethod(f);
                         func.AssetName = this.AssetName;
                         menuItem.Visible = false;
@@ -108,7 +108,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
         public void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
         [Rtti.Meta(Order = 0)]
-        public UClassDeclaration DefClass { get; } = new UClassDeclaration();
+        public TtClassDeclaration DefClass { get; } = new TtClassDeclaration();
         //public DefineClass DefClass { get; } = new DefineClass();
         //[Rtti.Meta(Order = 1)]
         public List<UMacrossMethodGraph> Methods { get; } = new List<UMacrossMethodGraph>();
@@ -136,7 +136,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         UHLSLCodeGenerator mHlslCodeGen = new UHLSLCodeGenerator();
         public UHLSLCodeGenerator HlslCodeGen => mHlslCodeGen;
 
-        public UCodeGeneratorBase CodeGen
+        public TtCodeGeneratorBase CodeGen
         {
             get
             {
@@ -230,10 +230,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                 var nsName = IO.TtFileManager.GetBaseDirectory(rn.Name).TrimEnd('/').Replace("/", ".");
                 if (Regex.IsMatch(nsName, "[A-Za-z0-9_]"))
-                    DefClass.Namespace = new UNamespaceDeclaration("NS_" + nsName);
+                    DefClass.Namespace = new TtNamespaceDeclaration("NS_" + nsName);
                 else
                 {
-                    DefClass.Namespace = new UNamespaceDeclaration("NS_" + ((UInt32)nsName.GetHashCode()).ToString());
+                    DefClass.Namespace = new TtNamespaceDeclaration("NS_" + ((UInt32)nsName.GetHashCode()).ToString());
                     Profiler.Log.WriteLine<Profiler.TtMacrossCategory>(Profiler.ELogTag.Warning, $"Get namespace failed, {rn.Name} has invalid char!");
                 }    
                 DefClass.ClearMethods();
@@ -308,7 +308,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
         }
-        public Action<UClassDeclaration> BeforeGenerateCode;
+        public Action<TtClassDeclaration> BeforeGenerateCode;
         public string GenerateCode()
         {
             try
@@ -343,7 +343,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 continue;
                             }
                             string funcCode = "";
-                            var data = new UCodeGeneratorData(DefClass.Namespace, DefClass, mHlslCodeGen, null);
+                            var data = new TtCodeGeneratorData(DefClass.Namespace, DefClass, mHlslCodeGen, null);
                             var methodDecGen = data.CodeGen.GetCodeObjectGen(j.MethodDec.GetType());
                             methodDecGen.GenCodes(j.MethodDec, ref funcCode, ref data);
                             code += funcCode;
@@ -389,7 +389,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return "";
             }
         }
-        public string GenerateMethodCode(UCodeGeneratorBase gen, int methodIndex)
+        public string GenerateMethodCode(TtCodeGeneratorBase gen, int methodIndex)
         {
             if (methodIndex < 0 || methodIndex >= DefClass.Methods.Count)
                 return "";
@@ -414,7 +414,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     }
                 }
                 
-                var data = new UCodeGeneratorData(DefClass.Namespace, DefClass, gen, null);
+                var data = new TtCodeGeneratorData(DefClass.Namespace, DefClass, gen, null);
                 var methodDecGen = data.CodeGen.GetCodeObjectGen(mtd.GetType());
                 methodDecGen.GenCodes(mtd, ref funcCode, ref data);
             }
@@ -630,11 +630,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             var graphId = id;
             uint leftId = 0;
-            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref graphId);
+            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref graphId);
             uint propertyId = 0;
-            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Right, 0.2f, ref propertyId, ref graphId);
+            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir.ImGuiDir_Right, 0.2f, ref propertyId, ref graphId);
             uint unionConfigId = 0;
-            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Right, 0.4f, ref unionConfigId, ref graphId);
+            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir.ImGuiDir_Right, 0.4f, ref unionConfigId, ref graphId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("GraphWindow", mDockKeyClass), graphId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("CodeEditor", mDockKeyClass), graphId);
@@ -735,13 +735,19 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 
             EGui.UIProxy.Toolbar.EndToolbar();
         }
+
+        public string GetWindowsName()
+        {
+            return string.IsNullOrEmpty(FormName) ? $"Macross:{IO.TtFileManager.GetPureName(AssetName != null ? AssetName.Name : "NoName")}" : FormName;
+        }
+
         public IRootForm RootForm = null;
         public string FormName = null;
         public virtual unsafe void OnDraw()
         {
             //ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             var result = EGui.UIProxy.DockProxy.BeginMainForm(
-                string.IsNullOrEmpty(FormName) ? $"Macross:{IO.TtFileManager.GetPureName(AssetName != null ? AssetName.Name : "NoName")}" : FormName,
+                GetWindowsName(),
                 (RootForm != null) ? RootForm : this,
                 ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar);
             if (result)
@@ -778,7 +784,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        public void RemoveMethod(UMethodDeclaration methodDesc)
+        public void RemoveMethod(TtMethodDeclaration methodDesc)
         {
             for(var methodIdx = Methods.Count - 1; methodIdx >= 0; methodIdx--)
             {
@@ -830,11 +836,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         }
 
-        public UMacrossMethodGraph AddMethod(UMethodDeclaration methodDesc)
+        public UMacrossMethodGraph AddMethod(TtMethodDeclaration methodDesc)
         {
             var metaAtt = new TtAttribute()
             {
-                AttributeType = new UTypeReference(typeof(Rtti.MetaAttribute)),
+                AttributeType = new TtTypeReference(typeof(Rtti.MetaAttribute)),
             };
             if(!methodDesc.Attributes.Contains(metaAtt))
                 methodDesc.Attributes.Add(metaAtt);
@@ -849,11 +855,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return func;
         }
 
-        public Func<UVariableDeclaration, bool> OnAddMember;
-        public Func<UVariableDeclaration, bool> OnRemoveMember;
+        public Func<TtVariableDeclaration, bool> OnAddMember;
+        public Func<TtVariableDeclaration, bool> OnRemoveMember;
 
-        public Func<UVariableDeclaration, UMacrossMethodGraph, bool> OnAddMethodLocalVar;
-        public Func<UVariableDeclaration, UMacrossMethodGraph, bool> OnRemoveMethodLocalVar;
+        public Func<TtVariableDeclaration, UMacrossMethodGraph, bool> OnAddMethodLocalVar;
+        public Func<TtVariableDeclaration, UMacrossMethodGraph, bool> OnRemoveMethodLocalVar;
 
         bool mClassViewShow = true;
         EGui.UIProxy.MenuItemProxy.MenuState mNewMethodMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
@@ -895,12 +901,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 break;
                         }
 
-                        var mb = new UVariableDeclaration();
-                        mb.VariableType = new UTypeReference(selectedType);
+                        var mb = new TtVariableDeclaration();
+                        mb.VariableType = new TtTypeReference(selectedType);
                         mb.VariableName = $"Member_{num}";
                         mb.VisitMode = EVisisMode.Local;
-                        mb.InitValue = new UPrimitiveExpression(Rtti.UTypeDesc.TypeOf(selectedType), selectedType.IsValueType ? Rtti.UTypeDescManager.CreateInstance(selectedType) : null);
-                        mb.Comment = new UCommentStatement("");
+                        mb.InitValue = new TtPrimitiveExpression(Rtti.UTypeDesc.TypeOf(selectedType), selectedType.IsValueType ? Rtti.UTypeDescManager.CreateInstance(selectedType) : null);
+                        mb.Comment = new TtCommentStatement("");
                         bool result = true;
                         if (OnAddMember != null)
                             result = OnAddMember.Invoke(mb);
@@ -974,7 +980,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 break;
                         }
 
-                        var f = new UMethodDeclaration()
+                        var f = new TtMethodDeclaration()
                         {
                             MethodName = $"Method_{num}",
                         };
@@ -1096,12 +1102,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             break;
                     }
 
-                    var mb = new UVariableDeclaration();
-                    mb.VariableType = new UTypeReference(selectedType);
+                    var mb = new TtVariableDeclaration();
+                    mb.VariableType = new TtTypeReference(selectedType);
                     mb.VariableName = $"Local_{num}";
                     mb.VisitMode = EVisisMode.Local;
-                    mb.InitValue = new UPrimitiveExpression(Rtti.UTypeDesc.TypeOf(selectedType), selectedType.IsValueType ? Rtti.UTypeDescManager.CreateInstance(selectedType) : null);
-                    mb.Comment = new UCommentStatement("");
+                    mb.InitValue = new TtPrimitiveExpression(Rtti.UTypeDesc.TypeOf(selectedType), selectedType.IsValueType ? Rtti.UTypeDescManager.CreateInstance(selectedType) : null);
+                    mb.Comment = new TtCommentStatement("");
                     bool result = true;
                     if (OnAddMethodLocalVar != null)
                         result = OnAddMethodLocalVar.Invoke(mb, CurrentOpenMethod);
@@ -1274,7 +1280,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public void DrawFunctionGraph(UMacrossMethodGraph func, Vector2 size)
         {
-            if (ImGuiAPI.BeginChild("Function", in size, true, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
+            if (ImGuiAPI.BeginChild("Function", in size, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
             {
                 ((UMacrossMethodGraph)(func.GraphRenderer.Graph)).UpdateSelectPG();
                 func.GraphRenderer.OnDraw();                

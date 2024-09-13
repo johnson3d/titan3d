@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_1119432449 Type="EngineNS.Bricks.Procedure.Node.GpuShading.TtWaterBasinNode@EngineCore">
-  <RainScalar Type="System.Single@Unknown" Order="0" />
-  <Step Type="System.Int32@Unknown" Order="0" />
-</Hash_1119432449>

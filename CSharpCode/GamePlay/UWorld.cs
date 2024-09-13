@@ -120,7 +120,7 @@ namespace EngineNS.GamePlay
                 None = 0,
             }
             public const string FilterTypeCountAs = "PhyxDebug";
-            public Graphics.Pipeline.UCamera CullCamera;
+            public Graphics.Pipeline.TtCamera CullCamera;
 
             public EVisCull CullType = EVisCull.Normal;
             public EVisCullFilter CullFilters = EVisCullFilter.None;// EVisCullFilter.All;

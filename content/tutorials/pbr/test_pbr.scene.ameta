@@ -11,7 +11,7 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
-    <e_0 Value="Engine,mesh/base/pbr_base.ums,e5fd1f75-b3bd-4f63-bde5-50867224b202" />
+    <e_0 Value="Engine,mesh/base/pbr_base.ums,00000000-0000-0000-0000-000000000000" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
 </Root>

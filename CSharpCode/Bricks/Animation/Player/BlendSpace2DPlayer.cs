@@ -5,6 +5,7 @@ using EngineNS.Animation.BlendTree.Node;
 using EngineNS.Animation.Command;
 using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
 using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
+using EngineNS.Bricks.StateMachine.TimedSM;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -80,7 +81,7 @@ namespace EngineNS.Animation.Player
         {
             System.Diagnostics.Debug.Assert(blendSpace2D != null);
             BlendSpace2D = blendSpace2D;
-            mEvaluateCmd = new TtBlendSpaceEvaluateCommand();
+            mEvaluateCmd = new TtBlendSpaceEvaluateCommand<TtDefaultCenterData>();
             mEvaluateCmd.Desc = new TtBlendSpaceEvaluateCommandDesc();
         }
 
@@ -92,7 +93,7 @@ namespace EngineNS.Animation.Player
 
 
         }
-        TtBlendSpaceEvaluateCommand mEvaluateCmd = null;
+        TtBlendSpaceEvaluateCommand<TtDefaultCenterData> mEvaluateCmd = null;
         public void Update(float elapse)
         {
             UpdateRuntimeSamples();
@@ -104,7 +105,7 @@ namespace EngineNS.Animation.Player
                 TtAnimatableSkeletonPose clipPose = BindedPose.Clone() as TtAnimatableSkeletonPose;
                 var clip = mRuntimeBlendSamples[i].Animation as TtAnimationClip;
                 System.Diagnostics.Debug.Assert(clip != null);
-                TtExtractPoseFromClipCommand animEvaluateCmd = new TtExtractPoseFromClipCommand(ref clipPose,clip);
+                TtExtractPoseFromClipCommand<TtDefaultCenterData> animEvaluateCmd = new TtExtractPoseFromClipCommand<TtDefaultCenterData>(ref clipPose,clip);
                 animEvaluateCmd.Time = PlayPercent * clip.Duration;
 
                 mEvaluateCmd.AnimCmds.Add(animEvaluateCmd);

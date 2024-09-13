@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_497813532 Type="EngineNS.UI.Controls.TtUIElement@EngineCore">
-  <IsFocusable Type="System.Boolean@Unknown" Order="0" />
-  <Margin Type="EngineNS.Thickness@EngineCore" Order="0" />
-  <MinHeight Type="System.Single@Unknown" Order="0" />
-  <MinWidth Type="System.Single@Unknown" Order="0" />
-  <RenderTransform Type="EngineNS.FTransform@EngineCore" Order="0" />
-  <RenderTransformCenter Type="EngineNS.Vector2@EngineCore" Order="0" />
-</Hash_497813532>

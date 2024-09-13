@@ -177,7 +177,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             pin.Tag = ((UnionPinDefine)pinDef).Type;
         }
 
-        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             var unionNode = data.GraphHostNode as UnionNode;
             if (unionNode == null)
@@ -190,7 +190,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var tagPin = unionNode.Inputs[idx];
                 var opPin = data.NodeGraph.GetOppositePin(tagPin);
                 var opNode = data.NodeGraph.GetOppositePinNode(tagPin);
-                UExpressionBase retValue = null;
+                TtExpressionBase retValue = null;
                 if (opNode != null && opPin != null)
                 {
                     retValue = opNode.GetExpression(opPin, ref data);
@@ -205,7 +205,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var inPin = pin as PinIn;
                 var opPin = data.NodeGraph.GetOppositePin(inPin);
                 var opNode = data.NodeGraph.GetOppositePinNode(inPin);
-                UExpressionBase retValue = null;
+                TtExpressionBase retValue = null;
                 if(opNode != null && opPin != null)
                 {
                     retValue = opNode.GetExpression(opPin, ref data);
@@ -520,7 +520,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EGui.Controls.CtrlUtility.DrawHelper($"{valueString}({typeString})");
         }
 
-        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             if(pin is PinIn)
             {

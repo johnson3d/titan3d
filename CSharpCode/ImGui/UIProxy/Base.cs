@@ -57,7 +57,7 @@ namespace EngineNS.EGui.UIProxy
     {
         public static bool BeginPanel(string str_id, in Vector2 size, bool border, ImGuiWindowFlags_ flags)
         {
-            return ImGuiAPI.BeginChild(str_id, size, border, flags);
+            return ImGuiAPI.BeginChild(str_id, size, border? ImGuiChildFlags_.ImGuiChildFlags_None : ImGuiChildFlags_.ImGuiChildFlags_Borders, flags);
         }
     }
 }

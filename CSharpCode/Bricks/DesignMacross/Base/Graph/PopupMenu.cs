@@ -65,7 +65,7 @@ namespace EngineNS.DesignMacross.Base.Graph
                         EGui.UIProxy.SearchBarProxy.OnDraw(ref mCanvasMenuFilterFocused, in drawList, "search item", ref CanvasMenuFilterStr, width);
                         Vector2 wsize = new Vector2(200, 400);
                         var id = ImGuiAPI.GetID(popupMenu.StringId);
-                        if (ImGuiAPI.BeginChild(id, wsize, false,
+                        if (ImGuiAPI.BeginChild(id, wsize, ImGuiChildFlags_.ImGuiChildFlags_None,
                             ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar |
                             ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
                         {

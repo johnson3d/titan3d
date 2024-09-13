@@ -363,7 +363,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //Defines.AddDefine("USE_VS_Color", "1");
             foreach (var i in IncludeFiles)
             {
-                var incCode = EngineNS.Editor.ShaderCompiler.UHLSLCompiler.GetIncludeCode(i);
+                var incCode = EngineNS.Editor.ShaderCompiler.TtHLSLCompiler.GetIncludeCode(i);
                 if (incCode.IsValidPointer)
                 {
                     var t = UniHash32.XXHash(incCode.GetSourceCode());
@@ -500,11 +500,31 @@ namespace EngineNS.Graphics.Pipeline.Shader
             mMaterialHash = GetHash();
         }
         [Browsable(false)]
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
         public NxRHI.UShaderCode DefineCode { get; } = new NxRHI.UShaderCode();
         [Browsable(false)]
         public NxRHI.UShaderCode SourceCode { get; } = new NxRHI.UShaderCode();
         [Browsable(false)]
+在此之后:
+        public NxRHI.TtShaderCode DefineCode { get; } = new NxRHI.UShaderCode();
+        [Browsable(false)]
+        public NxRHI.TtShaderCode SourceCode { get; } = new NxRHI.UShaderCode();
+        [Browsable(false)]
+*/
+        public NxRHI.TtShaderCode DefineCode { get; } = new NxRHI.TtShaderCode();
+        [Browsable(false)]
+        public NxRHI.TtShaderCode SourceCode { get; } = new NxRHI.TtShaderCode();
+        [Browsable(false)]
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
         public NxRHI.UShaderDefinitions Defines { get; } = new NxRHI.UShaderDefinitions();
+在此之后:
+        public NxRHI.TtShaderDefinitions Defines { get; } = new NxRHI.UShaderDefinitions();
+*/
+        public NxRHI.TtShaderDefinitions Defines { get; } = new NxRHI.TtShaderDefinitions();
 
         public EngineNS.NxRHI.EVertexStreamType[] GetVSNeedStreams()
         {
@@ -748,7 +768,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return null;
             return mUsedSamplerStates[index].Name;
         }
-        public NxRHI.USampler GetSampler(int index)
+        public NxRHI.TtSampler GetSampler(int index)
         {
             if (mUsedSamplerStates[index].mValue.m_AddressU == 0)
             {
@@ -878,7 +898,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return null;
             return UsedUniformVars[index]?.Name;
         }
-        internal unsafe virtual void UpdateCBufferVars(NxRHI.UCbView cBuffer, NxRHI.FShaderBinder binder)
+        internal unsafe virtual void UpdateCBufferVars(NxRHI.TtCbView cBuffer, NxRHI.FShaderBinder binder)
         {
             foreach (var i in UsedUniformVars)
             {
@@ -965,8 +985,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
         #region RHIResource
         protected NxRHI.FGpuPipelineDesc mPipelineDesc;
-        NxRHI.UGpuPipeline mPipeline;
-        public NxRHI.UGpuPipeline Pipeline
+        NxRHI.TtGpuPipeline mPipeline;
+        public NxRHI.TtGpuPipeline Pipeline
         {
             get
             {
@@ -979,9 +999,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             mPipeline = TtEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(TtEngine.Instance.GfxDevice.RenderContext, in mPipelineDesc);
         }
-        NxRHI.UCbView mPerMaterialCBuffer;
+        NxRHI.TtCbView mPerMaterialCBuffer;
         [Browsable(false)]
-        public NxRHI.UCbView PerMaterialCBuffer 
+        public NxRHI.TtCbView PerMaterialCBuffer 
         {
             get
             {

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_9654493594664104684 Type="EngineNS.Bricks.CodeBuilder.TtCastExpression@EngineCore">
+  <Expression Type="EngineNS.Bricks.CodeBuilder.TtExpressionBase@EngineCore" Order="0" />
+  <SourceType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore" Order="0" />
+  <TargetType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore" Order="0" />
+</Hash_9654493594664104684>

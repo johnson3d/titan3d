@@ -6,7 +6,7 @@ using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
 
 namespace EngineNS.Animation.BlendTree.Node
 {
-    public class TtBlendTree_AdditiveBlendSpace1D : TtBlendTree<TtLPosMRotRuntimePose>
+    public class TtBlendTree_AdditiveBlendSpace1D<S> : TtBlendTree<S, TtLPosMRotRuntimePose>
     {
         //TODO : UAdditiveBlendSpace1D
 

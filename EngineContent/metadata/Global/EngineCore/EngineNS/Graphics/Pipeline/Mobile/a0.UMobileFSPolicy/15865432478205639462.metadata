@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_15865432478205639462 Type="EngineNS.Graphics.Pipeline.Mobile.UMobileFSPolicy@EngineCore">
-  <DisableHDR Type="System.Boolean@Unknown" Order="0" />
-  <TypeAA Type="EngineNS.Graphics.Pipeline.URenderPolicy.ETypeAA@EngineCore" Order="0" />
-  <TypeFog Type="EngineNS.Graphics.Pipeline.URenderPolicy.ETypeFog@EngineCore" Order="0" />
-</Hash_15865432478205639462>

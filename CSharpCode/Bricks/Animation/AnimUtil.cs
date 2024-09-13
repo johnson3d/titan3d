@@ -15,9 +15,28 @@ namespace EngineNS.Animation
 {
     public class TtAnimUtil
     {
+        public static TtMeshNode GetParentMeshNode(TtNode node)
+        {
+            if(node == null) return null;
+            if (node is TtMeshNode meshNode)
+            {
+                return meshNode;
+            }
+            if (node.Parent == null) return null;
+
+            if(node.Parent is TtMeshNode parentMeshNode)
+            {
+                return parentMeshNode;
+            }
+            else
+            {
+                return GetParentMeshNode(node.Parent);
+            }
+        }
         public static TtAnimatableSkeletonPose CreateAnimatableSkeletonPoseFromeNode(TtNode node)
         {
-            if (node is TtMeshNode meshNode)
+            var meshNode = GetParentMeshNode(node);
+            if (meshNode != null)
             {
                 var animatablePose = meshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
                 return animatablePose;
@@ -26,7 +45,8 @@ namespace EngineNS.Animation
         }
         public static TtLocalSpaceRuntimePose BindRuntimeSkeletonPoseToNode(TtNode node)
         {
-            if (node is TtMeshNode meshNode)
+            var meshNode = GetParentMeshNode(node);
+            if (meshNode != null)
             {
                 var animatablePose = meshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
                 var skinMDfQueue = meshNode.Mesh.MdfQueue as Graphics.Mesh.UMdfSkinMesh;

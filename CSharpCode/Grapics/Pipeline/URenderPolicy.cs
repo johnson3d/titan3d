@@ -80,16 +80,16 @@ namespace EngineNS.Graphics.Pipeline
         //TagObject通常用来处理ShadingEnv.OnDrawCall的特殊参数设置
         //public TtRenderGraphNode TagObject;
         public object TagObject;
-        protected UCamera mDefaultCamera;
+        protected TtCamera mDefaultCamera;
         public TtViewportSlate ViewportSlate
         {
             get;
             internal set;
         }
         public bool IsInitialized { get; set; } = false;
-        public UCamera DefaultCamera { get => mDefaultCamera; }
-        public Dictionary<string, UCamera> CameraAttachments { get; } = new Dictionary<string, UCamera>();
-        public bool AddCamera(string name, UCamera camera)
+        public TtCamera DefaultCamera { get => mDefaultCamera; }
+        public Dictionary<string, TtCamera> CameraAttachments { get; } = new Dictionary<string, TtCamera>();
+        public bool AddCamera(string name, TtCamera camera)
         {
             if (CameraAttachments.ContainsKey(name))
                 return false;
@@ -97,9 +97,9 @@ namespace EngineNS.Graphics.Pipeline
             CameraAttachments.Add(name, camera);
             return true;
         }
-        public UCamera FindCamera(string name)
+        public TtCamera FindCamera(string name)
         {
-            UCamera result;
+            TtCamera result;
             if (CameraAttachments.TryGetValue(name, out result))
                 return result;
             return null;
@@ -108,9 +108,9 @@ namespace EngineNS.Graphics.Pipeline
         {
             mDefaultCamera = FindCamera(name);
         }
-        public virtual Common.UGpuSceneNode GetGpuSceneNode() 
+        public virtual Common.TtGpuSceneNode GetGpuSceneNode() 
         {
-            return FindFirstNode<Common.UGpuSceneNode>();
+            return FindFirstNode<Common.TtGpuSceneNode>();
         }
         public virtual NxRHI.TtSrView GetFinalShowRSV()
         {
@@ -124,7 +124,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual IProxiable GetHitproxy(UInt32 MouseX, UInt32 MouseY)
         {
-            var hitproxyNode = FindFirstNode<Common.UHitproxyNode>();
+            var hitproxyNode = FindFirstNode<Common.TtHitproxyNode>();
             if (hitproxyNode == null)
                 return null;
             return hitproxyNode.GetHitproxy(MouseX, MouseY);
@@ -140,7 +140,7 @@ namespace EngineNS.Graphics.Pipeline
                 return mScopeTickSync;
             }
         }
-        public void UpdateCameraAttachements(NxRHI.UCbView.EUpdateMode mode = NxRHI.UCbView.EUpdateMode.Auto)
+        public void UpdateCameraAttachements(NxRHI.TtCbView.EUpdateMode mode = NxRHI.TtCbView.EUpdateMode.Auto)
         {
             foreach (var i in CameraAttachments)
             {
@@ -151,13 +151,34 @@ namespace EngineNS.Graphics.Pipeline
         {
             using (new Profiler.TimeScopeHelper(ScopeTickSync))
             {
-                UpdateCameraAttachements(NxRHI.UCbView.EUpdateMode.Auto);
+                UpdateCameraAttachements(NxRHI.TtCbView.EUpdateMode.Auto);
                 base.TickSync();
             }
             PolicyOptionData.Clear();
         }
 
         #region Turn On/Off
+        public string mLookNodeName;
+        [Category("Option")]
+        public string LookNodeName
+        {
+            get
+            {
+                if (mLookNode != null)
+                    return mLookNode.Name;
+                return null;
+            }
+            set
+            {
+                mLookNode = this.FindNode<TtRenderGraphNode>(value, true);
+            }
+        }
+        protected TtRenderGraphNode mLookNode;
+        [Category("Option")]
+        public TtRenderGraphNode LookNode
+        {
+            get => mLookNode;
+        }
         protected bool mDisableShadow;
         [Category("Option")]
         [Rtti.Meta]
@@ -235,18 +256,18 @@ namespace EngineNS.Graphics.Pipeline
             return null;
         }
         #endregion
-        public Common.UPickedProxiableManager PickedProxiableManager { get; protected set; } = new Common.UPickedProxiableManager();
+        public Common.TtPickedProxiableManager PickedProxiableManager { get; protected set; } = new Common.TtPickedProxiableManager();
         
-        public virtual void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
+        public virtual void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
         {
             atom.MdfQueue.OnDrawCall(cmd, drawcall, this, atom);
         }
-        public virtual async System.Threading.Tasks.Task Initialize(UCamera camera)
+        public virtual async System.Threading.Tasks.Task Initialize(TtCamera camera)
         {
             IsInitialized = false;
             if (camera == null)
             {
-                camera = new UCamera();
+                camera = new TtCamera();
                 camera.mCoreObject.PerspectiveFovLH(3.14f / 4f, 1, 1, 0.3f, 1000.0f);
                 var eyePos = new DVector3(0, 0, -10);
                 camera.mCoreObject.LookAtLH(in eyePos, in DVector3.Zero, in Vector3.Up);
@@ -291,8 +312,8 @@ namespace EngineNS.Graphics.Pipeline
         }
 
         #region CommonState
-        NxRHI.USampler mClampState;
-        public NxRHI.USampler ClampState
+        NxRHI.TtSampler mClampState;
+        public NxRHI.TtSampler ClampState
         {
             get
             {
@@ -315,8 +336,8 @@ namespace EngineNS.Graphics.Pipeline
                 return mClampState;
             }
         }
-        NxRHI.USampler mClampPointState;
-        public NxRHI.USampler ClampPointState
+        NxRHI.TtSampler mClampPointState;
+        public NxRHI.TtSampler ClampPointState
         {
             get
             {
@@ -388,7 +409,7 @@ namespace EngineNS.Graphics.Pipeline
             set
             {
                 mDisableShadow = value;
-                var shading = this.FindFirstNode<Deferred.UDeferredDirLightingNode>()?.GetPassShading() as Deferred.UDeferredDirLightingShading;
+                var shading = this.FindFirstNode<Deferred.TtDeferredDirLightingNode>()?.GetPassShading() as Deferred.TtDeferredDirLightingShading;
                 //var shading = DirLightingNode.ScreenDrawPolicy.mBasePassShading as UDeferredDirLightingShading;
                 shading?.SetDisableShadow(value);
             }
@@ -404,7 +425,7 @@ namespace EngineNS.Graphics.Pipeline
             set
             {
                 mDisablePointLight = value;
-                var shading = this.FindFirstNode<Deferred.UDeferredDirLightingNode>()?.GetPassShading() as Deferred.UDeferredDirLightingShading;
+                var shading = this.FindFirstNode<Deferred.TtDeferredDirLightingNode>()?.GetPassShading() as Deferred.TtDeferredDirLightingShading;
                 //var shading = DirLightingNode.ScreenDrawPolicy.mBasePassShading as UDeferredDirLightingShading;
                 shading?.SetDisablePointLights(value);
             }
@@ -420,7 +441,7 @@ namespace EngineNS.Graphics.Pipeline
             set
             {
                 mDisableHDR = value;
-                var shading = this.FindFirstNode<Deferred.UDeferredDirLightingNode>()?.GetPassShading() as Deferred.UDeferredDirLightingShading;
+                var shading = this.FindFirstNode<Deferred.TtDeferredDirLightingNode>()?.GetPassShading() as Deferred.TtDeferredDirLightingShading;
                 //var shading = DirLightingNode.ScreenDrawPolicy.mBasePassShading as UDeferredDirLightingShading;
                 shading?.SetDisableHDR(value);
             }
@@ -443,26 +464,26 @@ namespace EngineNS.Graphics.Pipeline
         }
         #endregion
         
-        Shadow.UShadowMapNode mShadowMapNode;
-        Shadow.UShadowMapNode ShadowMapNode
+        Shadow.TtShadowMapNode mShadowMapNode;
+        Shadow.TtShadowMapNode ShadowMapNode
         {
             get
             {
                 if (mShadowMapNode == null)
                 {
-                    mShadowMapNode = FindFirstNode<Shadow.UShadowMapNode>();
+                    mShadowMapNode = FindFirstNode<Shadow.TtShadowMapNode>();
                 }
                 return mShadowMapNode;
             }
         }
-        Common.UHitproxyNode mHitproxyNode;
-        Common.UHitproxyNode HitproxyNode
+        Common.TtHitproxyNode mHitproxyNode;
+        Common.TtHitproxyNode HitproxyNode
         {
             get
             {
                 if (mHitproxyNode == null)
                 {
-                    mHitproxyNode = FindFirstNode<Common.UHitproxyNode>();
+                    mHitproxyNode = FindFirstNode<Common.TtHitproxyNode>();
                 }
                 return mHitproxyNode;
             }
@@ -543,26 +564,26 @@ namespace EngineNS.Graphics.Pipeline
                 return mTranslucentNode;
             }
         }
-        Shadow.UShadowMapNode mShadowMapNode;
-        Shadow.UShadowMapNode ShadowMapNode
+        Shadow.TtShadowMapNode mShadowMapNode;
+        Shadow.TtShadowMapNode ShadowMapNode
         {
             get
             {
                 if (mShadowMapNode == null)
                 {
-                    mShadowMapNode = FindFirstNode<Shadow.UShadowMapNode>();
+                    mShadowMapNode = FindFirstNode<Shadow.TtShadowMapNode>();
                 }
                 return mShadowMapNode;
             }
         }
-        Common.UHitproxyNode mHitproxyNode;
-        Common.UHitproxyNode HitproxyNode
+        Common.TtHitproxyNode mHitproxyNode;
+        Common.TtHitproxyNode HitproxyNode
         {
             get
             {
                 if (mHitproxyNode == null)
                 {
-                    mHitproxyNode = FindFirstNode<Common.UHitproxyNode>();
+                    mHitproxyNode = FindFirstNode<Common.TtHitproxyNode>();
                 }
                 return mHitproxyNode;
             }

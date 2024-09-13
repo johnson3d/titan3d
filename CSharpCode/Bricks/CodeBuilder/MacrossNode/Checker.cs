@@ -97,25 +97,25 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     OutPin.Tag = TargetType;
             }
         }
-        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             if(pin == null || pin == OutPin)
             {
                 if(!InPin.HasLinker())
                 {
-                    return new UPrimitiveExpression(false);
+                    return new TtPrimitiveExpression(false);
                 }
                 var leftExp = data.NodeGraph.GetOppositePinExpression(InPin, ref data);
                 UTypeDesc finalType = TargetType;
                 if (TypePin.HasLinker())
                     finalType = data.NodeGraph.GetOppositePinType(TypePin);
-                var rightExp = new UPrimitiveExpression(finalType, false);
+                var rightExp = new TtPrimitiveExpression(finalType, false);
 
-                return new UBinaryOperatorExpression()
+                return new TtBinaryOperatorExpression()
                 {
                     Left = leftExp,
                     Right = rightExp,
-                    Operation = UBinaryOperatorExpression.EBinaryOperation.Is,
+                    Operation = TtBinaryOperatorExpression.EBinaryOperation.Is,
                 };
             }
             return null;
@@ -188,10 +188,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
-            var ifStatement = new UIfStatement();
+            var ifStatement = new TtIfStatement();
             ifStatement.Condition = GetExpression(null, ref data);
             data.CurrentStatements.Add(ifStatement);
-            var trueStatement = new UExecuteSequenceStatement();
+            var trueStatement = new TtExecuteSequenceStatement();
             ifStatement.TrueStatement = trueStatement;
             if(TrueExec.HasLinker())
             {
@@ -211,7 +211,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var falseOpNode = data.NodeGraph.GetOppositePinNode(FalseExec);
                 if (falseOpNode != null)
                 {
-                    var falseStatement = new UExecuteSequenceStatement();
+                    var falseStatement = new TtExecuteSequenceStatement();
                     ifStatement.FalseStatement = falseStatement;
                     var falseData = new BuildCodeStatementsData();
                     data.CopyTo(ref falseData);
@@ -266,26 +266,26 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 EGui.Controls.CtrlUtility.DrawHelper("bool");
         }
 
-        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             if(pin == null || pin == OutPin)
             {
                 if (!InPin.HasLinker())
-                    return new UPrimitiveExpression(false);
+                    return new TtPrimitiveExpression(false);
                 var inType = data.NodeGraph.GetOppositePinType(InPin);
                 if(inType.IsValueType)
                 {
-                    return new UPrimitiveExpression(true);
+                    return new TtPrimitiveExpression(true);
                 }
                 else
                 {
                     var leftExp = data.NodeGraph.GetOppositePinExpression(InPin, ref data);
-                    var rightExp = new UNullValueExpression();
-                    return new UBinaryOperatorExpression()
+                    var rightExp = new TtNullValueExpression();
+                    return new TtBinaryOperatorExpression()
                     {
                         Left = leftExp,
                         Right = rightExp,
-                        Operation = UBinaryOperatorExpression.EBinaryOperation.NotEquality,
+                        Operation = TtBinaryOperatorExpression.EBinaryOperation.NotEquality,
                     };
                 }
             }
@@ -346,10 +346,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
-            var ifStatement = new UIfStatement();
+            var ifStatement = new TtIfStatement();
             ifStatement.Condition = GetExpression(null, ref data);
             data.CurrentStatements.Add(ifStatement);
-            var trueStatement = new UExecuteSequenceStatement();
+            var trueStatement = new TtExecuteSequenceStatement();
             ifStatement.TrueStatement = trueStatement;
             if(TrueExec.HasLinker())
             {
@@ -369,7 +369,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var falseOpNode = data.NodeGraph.GetOppositePinNode(FalseExec);
                 if(falseOpNode != null)
                 {
-                    var falseStatement = new UExecuteSequenceStatement();
+                    var falseStatement = new TtExecuteSequenceStatement();
                     ifStatement.FalseStatement = falseStatement;
                     var falseData = new BuildCodeStatementsData();
                     data.CopyTo(ref falseData);

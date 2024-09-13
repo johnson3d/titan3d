@@ -10,13 +10,13 @@ namespace EngineNS.Bricks.NodeGraph
 {
     public struct BuildCodeStatementsData
     {
-        public CodeBuilder.UNamespaceDeclaration NsDec;
-        public CodeBuilder.UClassDeclaration ClassDec;
-        public CodeBuilder.UMethodDeclaration MethodDec;
-        public CodeBuilder.UCodeGeneratorBase CodeGen;
+        public CodeBuilder.TtNamespaceDeclaration NsDec;
+        public CodeBuilder.TtClassDeclaration ClassDec;
+        public CodeBuilder.TtMethodDeclaration MethodDec;
+        public CodeBuilder.TtCodeGeneratorBase CodeGen;
         public UNodeGraph NodeGraph;
         public UNodeBase GraphHostNode;
-        public List<CodeBuilder.UStatementBase> CurrentStatements;
+        public List<CodeBuilder.TtStatementBase> CurrentStatements;
         public object UserData;
         
         public void CopyTo(ref BuildCodeStatementsData data)
@@ -457,14 +457,14 @@ namespace EngineNS.Bricks.NodeGraph
             }
             return linker.InPin.HostNode;
         }
-        public CodeBuilder.UExpressionBase GetOppositePinExpression(PinIn pin, ref BuildCodeStatementsData data)
+        public CodeBuilder.TtExpressionBase GetOppositePinExpression(PinIn pin, ref BuildCodeStatementsData data)
         {
             var linker = GetFirstLinker(pin);
             if (linker == null)
                 return null;
             return linker.OutPin.HostNode.GetExpression(linker.OutPin, ref data);
         }
-        public CodeBuilder.UExpressionBase GetOppositePinExpression(PinOut pin, ref BuildCodeStatementsData data)
+        public CodeBuilder.TtExpressionBase GetOppositePinExpression(PinOut pin, ref BuildCodeStatementsData data)
         {
             var linker = GetFirstLinker(pin);
             if (linker == null)

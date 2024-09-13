@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_15177421823817192383 Type="EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore">
-  <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore,&gt;@Unknown" Order="0" />
-  <AttributeType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore" Order="0" />
-</Hash_15177421823817192383>

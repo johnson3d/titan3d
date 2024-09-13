@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_4157260684 Type="EngineNS.MathHelper@EngineCore">
-  <Deg2Rad Type="System.Single@Unknown" Order="0" />
-  <Invc2PI Type="System.Single@Unknown" Order="0" />
-  <PI Type="System.Single@Unknown" Order="0" />
-  <Rad2Deg Type="System.Single@Unknown" Order="0" />
-</Hash_4157260684>

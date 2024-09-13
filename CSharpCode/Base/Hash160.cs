@@ -174,6 +174,10 @@ namespace EngineNS
     public struct Hash64 : IComparable<Hash64>
     {
         [FieldOffset(0)]
+        public unsafe fixed byte Data[8];
+        [FieldOffset(0)]
+        public UInt64 AllData;
+        [FieldOffset(0)]
         public byte Data0;
         [FieldOffset(1)]
         public byte Data1;
@@ -189,8 +193,7 @@ namespace EngineNS
         public byte Data6;
         [FieldOffset(7)]
         public byte Data7;
-        [FieldOffset(0)]
-        public UInt64 AllData;
+        
         private static int CmpImpl(ref Hash64 lh, ref Hash64 rh)
         {
             if (lh.AllData > rh.AllData)
@@ -352,6 +355,11 @@ namespace EngineNS
         [System.Runtime.InteropServices.DllImport(ModuleNC, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         private extern static unsafe void SDK_HashHelper_CalcHash64(Hash64* hash, byte* key, int len);
         #endregion
+    }
+
+    public interface IHash64
+    {
+        Hash64 GetHash64();
     }
 
     [StructLayout(LayoutKind.Explicit, Pack = 4)]

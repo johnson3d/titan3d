@@ -42,7 +42,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, UGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, TtGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtSunShaftDepthThresholeNode;
             if (aaNode == null)
@@ -84,7 +84,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
     }
     [Bricks.CodeBuilder.ContextMenu("SunShaftDepthThreshole", "Post\\SunShaftDepthThreshole", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class TtSunShaftDepthThresholeNode : USceenSpaceNode
+    public class TtSunShaftDepthThresholeNode : TtSceenSpaceNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
         public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");
@@ -145,7 +145,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 mSunShaftStruct.SunPosition.W = value;
             }
         }
-        public NxRHI.UCbView CBShadingEnv;
+        public NxRHI.TtCbView CBShadingEnv;
         public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             base.TickLogic(world, policy, bClear);
@@ -191,7 +191,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, UGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, TtGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtSunShaftRadialBlurNode;
             if (aaNode == null)
@@ -223,7 +223,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
     }
     [Bricks.CodeBuilder.ContextMenu("SunShaftRadialBlur", "Post\\SunShaftRadialBlur", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class TtSunShaftRadialBlurNode : USceenSpaceNode
+    public class TtSunShaftRadialBlurNode : TtSceenSpaceNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
         public TtSunShaftRadialBlurNode()
@@ -278,7 +278,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 mSunShaftStruct.BlurRadius4.Y = value.Y;
             }
         }
-        public NxRHI.UCbView CBShadingEnv;
+        public NxRHI.TtCbView CBShadingEnv;
         public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             var toViewport = policy.DefaultCamera.GetViewProjection();

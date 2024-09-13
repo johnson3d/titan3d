@@ -77,10 +77,13 @@ namespace NxRHI
 		void SetDefault()
 		{
 			ViewInstanceCount = 0;
-			pViewInstanceLocations = nullptr;
+			for (int i = 0; i < 4; i++)
+			{
+				pViewInstanceLocations[i].SetDefault();
+			}
 		}
 		UINT ViewInstanceCount;
-		const FViewInstanceLocation* pViewInstanceLocations;
+		FViewInstanceLocation pViewInstanceLocations[4];
 	};
 
 	struct TR_CLASS(SV_LayoutStruct = 8)
@@ -131,15 +134,15 @@ namespace NxRHI
 	{
 		FRenderPassClears()
 		{
-			SetDefault();
+			SetDefault(false);
 		}
-		void SetDefault()
+		void SetDefault(bool bReverseZ)
 		{
 			for (int i = 0; i < 8; i++)
 			{
 				ClearColor[i] = v3dxColor4(0, 0, 0, 0);
 			}
-			DepthClearValue = 1.0f;
+			DepthClearValue = bReverseZ ? 0 : 1.0f;
 			StencilClearValue = 0;
 			ClearFlags = ERenderPassClearFlags::CLEAR_ALL;
 		}
@@ -161,14 +164,8 @@ namespace NxRHI
 
 		void SetViewInstanceLocations()
 		{
-			ViewInstanceLocations.clear();
-			for (size_t i = 0; i < Desc.ViewInstanceDesc.ViewInstanceCount; i++)
-			{
-				ViewInstanceLocations.push_back(Desc.ViewInstanceDesc.pViewInstanceLocations[i]);
-			}
-			Desc.ViewInstanceDesc.pViewInstanceLocations = ViewInstanceLocations.data();
+			
 		}
-		std::vector<FViewInstanceLocation> ViewInstanceLocations;
 	};
 
 

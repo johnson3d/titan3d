@@ -1,4 +1,7 @@
-﻿using EngineNS.DesignMacross.Design;
+﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.DesignMacross.Base.Description;
+using EngineNS.DesignMacross.Design;
+using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.Rtti;
 using System;
 using System.Collections.Generic;
@@ -6,8 +9,21 @@ using System.Text;
 
 namespace EngineNS.Animation.Macross.BlendTree.Node
 {
+    public struct FBlendTreeBuildContext
+    {
+        public TtBlendTreeClassDescription BlendTreeDescription { get; set; }
+        public TtExecuteSequenceStatement ExecuteSequenceStatement { get; set; }
+        public void AddStatement(TtStatementBase statement)
+        {
+            if (ExecuteSequenceStatement == null)
+                return;
+            ExecuteSequenceStatement.Sequence.Add(statement);
+        }
+    }
     public class TtBlendTreeNodeClassDescription : TtDesignableVariableDescription
     {
+        [Rtti.Meta]
+        public List<TtDataInPinDescription> DataInPins { get; set; } = new();
         [Rtti.Meta]
         public List<TtPoseInPinDescription> PoseInPins { get; set; } = new();
         [Rtti.Meta]
@@ -93,6 +109,11 @@ namespace EngineNS.Animation.Macross.BlendTree.Node
                 }
             }
             return pins;
+        }
+
+        public virtual TtStatementBase BuildBlendTreeStatement(ref FBlendTreeBuildContext blendTreeBuildContext)
+        {
+            return null;
         }
     }
 }

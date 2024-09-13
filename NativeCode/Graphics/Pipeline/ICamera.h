@@ -145,11 +145,16 @@ public:
 		return mLogicData->mViewPortOffsetMatrix;
 	}
 	void UpdateConstBufferData(EngineNS::NxRHI::IGpuDevice* device, EngineNS::NxRHI::ICbView* buffer, bool bFlush, EngineNS::NxRHI::FCbvUpdater* pUpdater);
+	inline bool GetReverseZ() const {
+		return mIsReverseZ;
+	}
+	void SetReverseZ(bool bReverseZ);
 protected:
 	void UpdateFrustum();
 	void UpdateFrustumOrtho();
 protected:
 	VSLLock					mLocker;
+	bool					mIsReverseZ = false;
 	float					mFov;
 	float					mZNear;
 	float					mZFar;

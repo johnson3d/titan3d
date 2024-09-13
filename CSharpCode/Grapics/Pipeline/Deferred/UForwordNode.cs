@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace EngineNS.Graphics.Pipeline.Deferred
 {
-    public class UOpaqueShading : Shader.TtGraphicsShadingEnv
+    public class TtOpaqueShading : Shader.TtGraphicsShadingEnv
     {
         public UPermutationItem DisableAO
         {
@@ -24,7 +24,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get;
             set;
         }
-        public UOpaqueShading()
+        public TtOpaqueShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/forword/ForwordOpaque.cginc", RName.ERNameType.Engine);
 
@@ -64,9 +64,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             };
         }
     }
-    public class UTranslucentShading : Shader.TtGraphicsShadingEnv
+    public class TtTranslucentShading : Shader.TtGraphicsShadingEnv
     {
-        public UTranslucentShading()
+        public TtTranslucentShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Forword/ForwordTranslucent.cginc", RName.ERNameType.Engine);
         }
@@ -89,12 +89,13 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Forword", "Deferred\\Forword", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UForwordNode : Common.UBasePassNode
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.UForwordNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.UForwordNode" })]
+    public class TtForwordNode : Common.TtBasePassNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
         public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color");
         public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth");
-        public UForwordNode()
+        public TtForwordNode()
         {
             Name = "UForwordNode";
         }
@@ -104,10 +105,10 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             AddInputOutput(ColorPinInOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
             AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         }
-        public UOpaqueShading mOpaqueShading;
-        public UTranslucentShading mTranslucentShading;
+        public TtOpaqueShading mOpaqueShading;
+        public TtTranslucentShading mTranslucentShading;
         public TtLayerDrawBuffers LayerBasePass = new TtLayerDrawBuffers();
-        public NxRHI.URenderPass RenderPass;
+        public NxRHI.TtRenderPass RenderPass;
         public TtCpuCullingNode CpuCullNode = null;
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
@@ -119,8 +120,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             CreateGBuffers(policy, ColorPinInOut.Attachement.Format);
 
-            mOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UOpaqueShading>();
-            mTranslucentShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UTranslucentShading>();
+            mOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtOpaqueShading>();
+            mTranslucentShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtTranslucentShading>();
 
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
@@ -220,7 +221,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UForwordNode), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtForwordNode), nameof(TickLogic));
                 return mScopeTick;
             }
         }
@@ -293,19 +294,19 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     }
 
     [Bricks.CodeBuilder.ContextMenu("Gizmos", "Deferred\\Gizmos", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class TtGizmosNode : Common.UBasePassNode
+    public class TtGizmosNode : Common.TtBasePassNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
         public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color");
         public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth");
         public TtRenderGraphPin GizmosDepthPinOut = TtRenderGraphPin.CreateOutput("GizmosDepth", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
 
-        public UOpaqueShading mOpaqueShading;
-        public UTranslucentShading mTranslucentShading;
+        public TtOpaqueShading mOpaqueShading;
+        public TtTranslucentShading mTranslucentShading;
         public TtLayerDrawBuffers LayerBasePass = new TtLayerDrawBuffers();
-        public NxRHI.URenderPass GizmosRenderPass;
+        public NxRHI.TtRenderPass GizmosRenderPass;
 
-        public NxRHI.URenderPass WithDepthRenderPass;
+        public NxRHI.TtRenderPass WithDepthRenderPass;
         public TtGraphicsBuffers WithDepthGBuffers { get; protected set; } = new TtGraphicsBuffers();
         public TtGizmosNode()
         {
@@ -329,8 +330,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             CreateGBuffers(policy, ColorPinInOut.Attachement.Format);
 
-            mOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UOpaqueShading>();
-            mTranslucentShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UTranslucentShading>();
+            mOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtOpaqueShading>();
+            mTranslucentShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtTranslucentShading>();
 
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
@@ -449,7 +450,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UForwordNode), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtForwordNode), nameof(TickLogic));
                 return mScopeTick;
             }
         }

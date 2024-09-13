@@ -4,6 +4,7 @@ using EngineNS.Animation.Command;
 using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
 using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
 using EngineNS.Animation.StateMachine;
+using EngineNS.Bricks.StateMachine.TimedSM;
 using EngineNS.Thread.Async;
 using System;
 using System.Collections.Generic;
@@ -84,8 +85,8 @@ namespace EngineNS.Animation.Player
         {
             var ss = new TestState();
             await ss.Initialize(context);
-            BlendTree = new BlendTree.Node.TtBlendTree_CrossfadePose<TtLocalSpaceRuntimePose>();
-            BlendTree.Initialize(ref context.BlendTreeContext);
+            BlendTree = new BlendTree.Node.TtBlendTree_CrossfadePose<TestData, TtLocalSpaceRuntimePose>();
+            await BlendTree.Initialize(context.BlendTreeContext);
             SetDefaultState(ss);
             return await base.Initialize(context);
         }

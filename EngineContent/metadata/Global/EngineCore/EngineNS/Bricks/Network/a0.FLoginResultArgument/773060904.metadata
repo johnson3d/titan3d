@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_773060904 Type="EngineNS.Bricks.Network.FLoginResultArgument@EngineCore">
-  <GatewayURL Type="EngineNS.Bricks.Network.FNetworkPoint@EngineCore" Order="0" />
-  <Sessiond Type="System.Guid@Unknown" Order="0" />
-</Hash_773060904>

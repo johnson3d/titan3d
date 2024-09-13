@@ -69,7 +69,7 @@ namespace EngineNS.Bricks.Input
     {
         public uint Type;
         public uint Timestamp;
-        public long TouchId;
+        public ulong TouchId;
         public long GestureId;
         public uint NumFingers;
         public float Error;
@@ -790,7 +790,7 @@ namespace EngineNS.Bricks.Input
         public Scancode Scancode;
         public Keycode Sym;
         public Keymod Mod;
-        public uint Unicode;
+        //public uint Unicode;
     }
     public enum WindowEventID : byte
     {
@@ -886,7 +886,7 @@ namespace EngineNS.Bricks.Input
     {
         public abstract bool CanTrigging(ref Event e);
         public void OnTrigging(ref Event e);
-        public void RegSelf(UInputSystem inputSystem);
+        public void RegSelf(TtInputSystem inputSystem);
     }
 
     public interface IMessageData : IEventData

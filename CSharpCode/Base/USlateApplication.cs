@@ -142,7 +142,7 @@ namespace EngineNS
         partial void ImGui_UpdateMousePosAndButtons(ImGuiIO io);
         partial void ImGui_UpdateMouseCursor(ImGuiIO io);
 
-        public virtual async Task<bool> InitializeApplication(NxRHI.UGpuDevice rc, RName rpName)
+        public virtual async Task<bool> InitializeApplication(NxRHI.TtGpuDevice rc, RName rpName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
@@ -334,7 +334,7 @@ namespace EngineNS
             TtEngine.Instance.TickableManager.RemoveTickable(this);
             base.Cleanup();
         }
-        public override async System.Threading.Tasks.Task<bool> InitializeApplication(NxRHI.UGpuDevice rc, RName rpName)
+        public override async System.Threading.Tasks.Task<bool> InitializeApplication(NxRHI.TtGpuDevice rc, RName rpName)
         {
             await base.InitializeApplication(rc, rpName);
 

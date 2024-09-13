@@ -7,7 +7,8 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("AvgBrightness", "AvgBrightness", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UAvgBrightnessNode : Graphics.Pipeline.TtRenderGraphNode
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UAvgBrightnessNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UAvgBrightnessNode" })]
+    public class TtAvgBrightnessNode : Graphics.Pipeline.TtRenderGraphNode
     {
         public override void Dispose()
         {
@@ -17,7 +18,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public TtRenderGraphPin GpuScenePinInOut = TtRenderGraphPin.CreateInputOutput("GpuScene");
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
-        public UAvgBrightnessNode()
+        public TtAvgBrightnessNode()
         {
             Name = "AvgBrightnessNode";
         }
@@ -42,14 +43,14 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 this.UpdatePermutation();
             }
-            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+            public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var gpuScene = policy.GetGpuSceneNode();
-                var node = drawcall.TagObject as UAvgBrightnessNode;
+                var node = drawcall.TagObject as TtAvgBrightnessNode;
                 var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerFrame");
                 if (srvIdx.IsValidPointer)
                 {
@@ -69,7 +70,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
         private SetupAvgBrightnessShading SetupAvgBrightness;
-        private NxRHI.UComputeDraw SetupAvgBrightnessDrawcall;
+        private NxRHI.TtComputeDraw SetupAvgBrightnessDrawcall;
 
         public class CountAvgBrightnessShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
         {
@@ -84,13 +85,13 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 this.UpdatePermutation();
             }
-            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+            public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
-                var node = drawcall.TagObject as UAvgBrightnessNode;
+                var node = drawcall.TagObject as TtAvgBrightnessNode;
                 var attachment = node.GetAttachBuffer(node.ColorPinIn);
                 var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "TargetBuffer");
                 if (srvIdx.IsValidPointer)
@@ -106,7 +107,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
         private CountAvgBrightnessShading CountAvgBrightness;
-        private NxRHI.UComputeDraw CountAvgBrightnessDrawcall;
+        private NxRHI.TtComputeDraw CountAvgBrightnessDrawcall;
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
@@ -147,7 +148,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UAvgBrightnessNode), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtAvgBrightnessNode), nameof(TickLogic));
                 return mScopeTick;
             }
         }

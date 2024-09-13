@@ -33,17 +33,17 @@ namespace EngineNS.UI.Controls
                         (Id == data.Id));
             }
 
-            public void GenerateStatement(TtUIEditor editor, List<UStatementBase> statements)
+            public void GenerateStatement(TtUIEditor editor, List<TtStatementBase> statements)
             {
-                var findElementInvokeStatement = new UMethodInvokeStatement(
+                var findElementInvokeStatement = new TtMethodInvokeStatement(
                     "FindBindObject",
-                    new UVariableDeclaration()
+                    new TtVariableDeclaration()
                     {
                         VariableName = "object_" + Id,
-                        VariableType = new UTypeReference(typeof(IBindableObject)),
+                        VariableType = new TtTypeReference(typeof(IBindableObject)),
                     },
-                    new UVariableReferenceExpression("HostElement"),
-                    new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Id)))
+                    new TtVariableReferenceExpression("HostElement"),
+                    new TtMethodInvokeArgumentExpression(new TtPrimitiveExpression(Id)))
                 {
                     DeclarationReturnValue = true,
                 };
@@ -54,9 +54,9 @@ namespace EngineNS.UI.Controls
                 }
                 statements.Add(findElementInvokeStatement);
             }
-            public UExpressionBase GetVariableExpression()
+            public TtExpressionBase GetVariableExpression()
             {
-                return new UVariableReferenceExpression("object_" + Id);
+                return new TtVariableReferenceExpression("object_" + Id);
             }
             public Rtti.UTypeDesc GetVariableType()
             {
@@ -92,7 +92,7 @@ namespace EngineNS.UI.Controls
         public abstract class BindingDataBase : IO.BaseSerializer
         {
             public virtual void DrawBindInfo(Editor.EditorUIHost host, in ImDrawList drawList) { }
-            public virtual void GenerateStatement(TtUIEditor editor, List<UStatementBase> sequence) { }
+            public virtual void GenerateStatement(TtUIEditor editor, List<TtStatementBase> sequence) { }
             public virtual void OnRemove(TtUIEditor editor) { }
             public abstract bool IsSame(BindingDataBase target);
         }
@@ -113,22 +113,22 @@ namespace EngineNS.UI.Controls
                 ImGuiAPI.SameLine(0, -1);
                 ImGuiAPI.Text(" (" + Mode.ToString() + ")");
             }
-            public override void GenerateStatement(TtUIEditor editor, List<UStatementBase> sequence)
+            public override void GenerateStatement(TtUIEditor editor, List<TtStatementBase> sequence)
             {
                 Source.GenerateStatement(editor, sequence);
                 Target.GenerateStatement(editor, sequence);
-                var bindCall = new UMethodInvokeStatement()
+                var bindCall = new TtMethodInvokeStatement()
                 {
                     MethodName = "SetBinding",
-                    Host = new UClassReferenceExpression(Rtti.UTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
+                    Host = new TtClassReferenceExpression(Rtti.UTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
                 };
                 bindCall.GenericTypes.Add(Target.GetVariableType());
                 bindCall.GenericTypes.Add(Source.GetVariableType());
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(Target.GetVariableExpression()));
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Target.GetBindPath())));
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(Source.GetVariableExpression()));
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Source.GetBindPath())));
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Mode)));
+                bindCall.Arguments.Add(new TtMethodInvokeArgumentExpression(Target.GetVariableExpression()));
+                bindCall.Arguments.Add(new TtMethodInvokeArgumentExpression(new TtPrimitiveExpression(Target.GetBindPath())));
+                bindCall.Arguments.Add(new TtMethodInvokeArgumentExpression(Source.GetVariableExpression()));
+                bindCall.Arguments.Add(new TtMethodInvokeArgumentExpression(new TtPrimitiveExpression(Source.GetBindPath())));
+                bindCall.Arguments.Add(new TtMethodInvokeArgumentExpression(new TtPrimitiveExpression(Mode)));
                 for (int i = 0; i < sequence.Count; i++)
                 {
                     if (bindCall.Equals(sequence[i]))
@@ -176,20 +176,20 @@ namespace EngineNS.UI.Controls
                 ImGuiAPI.Text(" (" + Mode.ToString() + ")");
             }
 
-            public override void GenerateStatement(TtUIEditor editor, List<UStatementBase> sequence)
+            public override void GenerateStatement(TtUIEditor editor, List<TtStatementBase> sequence)
             {
                 Target.GenerateStatement(editor, sequence);
-                var bindCall = new UMethodInvokeStatement()
+                var bindCall = new TtMethodInvokeStatement()
                 {
                     MethodName = "SetMethodBinding",
-                    Host = new UClassReferenceExpression(Rtti.UTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
+                    Host = new TtClassReferenceExpression(Rtti.UTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
                 };
                 bindCall.GenericTypes.Add(Target.GetVariableType());
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(Target.GetVariableExpression()));
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Target.GetBindPath())));
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(string.IsNullOrEmpty(GetMethodName)? (new UNullValueExpression()) : (new UVariableReferenceExpression(GetMethodName))));
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(string.IsNullOrEmpty(SetMethodName)? (new UNullValueExpression()) : (new UVariableReferenceExpression(SetMethodName))));
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Mode)));
+                bindCall.Arguments.Add(new TtMethodInvokeArgumentExpression(Target.GetVariableExpression()));
+                bindCall.Arguments.Add(new TtMethodInvokeArgumentExpression(new TtPrimitiveExpression(Target.GetBindPath())));
+                bindCall.Arguments.Add(new TtMethodInvokeArgumentExpression(string.IsNullOrEmpty(GetMethodName)? (new TtNullValueExpression()) : (new TtVariableReferenceExpression(GetMethodName))));
+                bindCall.Arguments.Add(new TtMethodInvokeArgumentExpression(string.IsNullOrEmpty(SetMethodName)? (new TtNullValueExpression()) : (new TtVariableReferenceExpression(SetMethodName))));
+                bindCall.Arguments.Add(new TtMethodInvokeArgumentExpression(new TtPrimitiveExpression(Mode)));
                 for (int i = 0; i < sequence.Count; i++)
                 {
                     if (bindCall.Equals(sequence[i]))
@@ -249,32 +249,32 @@ namespace EngineNS.UI.Controls
                     ImGuiAPI.Text(" (" + Mode.ToString() + ")");
                 }
             }
-            public override void GenerateStatement(TtUIEditor editor, List<UStatementBase> sequence)
+            public override void GenerateStatement(TtUIEditor editor, List<TtStatementBase> sequence)
             {
                 var prop = editor.UIAsset.MacrossEditor.DefClass.FindMember(PropertyName);
                 if (prop == null)
                     return;
                 Target.GenerateStatement(editor, sequence);
-                var bindCall = new UMethodInvokeStatement()
+                var bindCall = new TtMethodInvokeStatement()
                 {
                     MethodName = "SetBinding",
-                    Host = new UClassReferenceExpression(Rtti.UTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
+                    Host = new TtClassReferenceExpression(Rtti.UTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
                 };
                 bindCall.GenericTypes.Add(Target.GetVariableType());
                 bindCall.GenericTypes.Add(prop.VariableType.TypeDesc);
                 var targetVariableExp = Target.GetVariableExpression();
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(targetVariableExp));
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Target.GetBindPath())));
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new USelfReferenceExpression()));
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(PropertyName)));
-                bindCall.Arguments.Add(new UMethodInvokeArgumentExpression(new UPrimitiveExpression(Mode)));
-                var conditionStatement = new UIfStatement()
+                bindCall.Arguments.Add(new TtMethodInvokeArgumentExpression(targetVariableExp));
+                bindCall.Arguments.Add(new TtMethodInvokeArgumentExpression(new TtPrimitiveExpression(Target.GetBindPath())));
+                bindCall.Arguments.Add(new TtMethodInvokeArgumentExpression(new TtSelfReferenceExpression()));
+                bindCall.Arguments.Add(new TtMethodInvokeArgumentExpression(new TtPrimitiveExpression(PropertyName)));
+                bindCall.Arguments.Add(new TtMethodInvokeArgumentExpression(new TtPrimitiveExpression(Mode)));
+                var conditionStatement = new TtIfStatement()
                 {
-                    Condition = new UBinaryOperatorExpression()
+                    Condition = new TtBinaryOperatorExpression()
                     {
                         Left = targetVariableExp,
-                        Right = new UNullValueExpression(),
-                        Operation = UBinaryOperatorExpression.EBinaryOperation.Equality,
+                        Right = new TtNullValueExpression(),
+                        Operation = TtBinaryOperatorExpression.EBinaryOperation.Equality,
                     },
                     TrueStatement = bindCall,
                 };
@@ -378,7 +378,7 @@ namespace EngineNS.UI.Controls
                 HostObject = hostObject as IBindableObject;
             }
 
-            public virtual string GetDisplayName(Bricks.CodeBuilder.UMethodDeclaration desc)
+            public virtual string GetDisplayName(Bricks.CodeBuilder.TtMethodDeclaration desc)
             {
                 if (desc == null)
                     return "none";
@@ -389,11 +389,11 @@ namespace EngineNS.UI.Controls
         // 用于辅助记录event绑定到macross函数
         public class MacrossEventMethodData : MacrossMethodData
         {
-            public Bricks.CodeBuilder.UMethodDeclaration Desc;
+            public Bricks.CodeBuilder.TtMethodDeclaration Desc;
             [Rtti.Meta]
             public string EventName { get; set; }
             string mDisplayName;
-            public override string GetDisplayName(UMethodDeclaration desc)
+            public override string GetDisplayName(TtMethodDeclaration desc)
             {
                 if(DisplayNameDirty)
                 {
@@ -410,11 +410,11 @@ namespace EngineNS.UI.Controls
             [Rtti.Meta]
             public string PropertyName { get; set; }
 
-            public Bricks.CodeBuilder.UMethodDeclaration GetDesc;
-            public Bricks.CodeBuilder.UMethodDeclaration SetDesc;
+            public Bricks.CodeBuilder.TtMethodDeclaration GetDesc;
+            public Bricks.CodeBuilder.TtMethodDeclaration SetDesc;
             string mGetMethodDisplayName;
             string mSetMethodDisplayName;
-            public override string GetDisplayName(UMethodDeclaration desc)
+            public override string GetDisplayName(TtMethodDeclaration desc)
             {
                 if (DisplayNameDirty)
                 {
@@ -510,7 +510,7 @@ namespace EngineNS.UI.Controls
         //    mMethodDisplayNames[desc] = data;
         //}
 
-        public string GetVariableDisplayName(Bricks.CodeBuilder.UVariableDeclaration desc)
+        public string GetVariableDisplayName(Bricks.CodeBuilder.TtVariableDeclaration desc)
         {
             return this.Name;
         }

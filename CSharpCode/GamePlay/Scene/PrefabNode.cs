@@ -190,6 +190,7 @@ namespace EngineNS.GamePlay.Scene
             }
 
             xndHolder.SaveXnd(name.Address);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
         }
         internal static async System.Threading.Tasks.Task<TtPrefab> LoadPrefab(GamePlay.TtWorld world, RName name)
         {

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_3482504972 Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
-  <IsEnum Type="System.Boolean@Unknown" Order="0" />
-  <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Order="0" />
-  <TypeFullName Type="System.String@Unknown" Order="1" />
-</Hash_3482504972>

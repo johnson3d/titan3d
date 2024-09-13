@@ -1406,7 +1406,7 @@ namespace EngineNS.Graphics.Mesh
         {
             return start + factor * (end - start);
         }
-        public static UMeshDataProvider MakeGridPlane(NxRHI.UGpuDevice rc, Vector2 uvMin, Vector2 uvMax, UInt32 tileCount = 10)
+        public static UMeshDataProvider MakeGridPlane(NxRHI.TtGpuDevice rc, Vector2 uvMin, Vector2 uvMax, UInt32 tileCount = 10)
         {//reference:DrawGridline
             UMeshDataProvider meshBuilder = new Graphics.Mesh.UMeshDataProvider();
             meshBuilder.AssetName = RName.GetRName("@MakeGridPlane", RName.ERNameType.Transient);

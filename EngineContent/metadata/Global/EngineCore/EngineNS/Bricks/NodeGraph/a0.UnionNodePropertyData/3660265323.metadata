@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_3660265323 Type="EngineNS.Bricks.NodeGraph.UnionNodePropertyData@EngineCore">
-  <Category Type="System.String@Unknown" Order="0" />
-  <DisplayName Type="System.String@Unknown" Order="0" />
-  <Name Type="System.String@Unknown" Order="0" />
-  <NodeId Type="System.Guid@Unknown" Order="0" />
-  <ReadOnly Type="System.Boolean@Unknown" Order="0" />
-</Hash_3660265323>

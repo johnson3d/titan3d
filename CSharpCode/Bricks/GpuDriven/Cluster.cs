@@ -124,8 +124,8 @@ namespace EngineNS.Bricks.GpuDriven
             return result;
         }
        
-        public NxRHI.UVertexArray ClusterVertexArray;
-        public NxRHI.UIbView ClusterIndexView;
+        public NxRHI.TtVertexArray ClusterVertexArray;
+        public NxRHI.TtIbView ClusterIndexView;
         public int NumVertices;
         public int NumIndices;
         public BoundingBox AABB = new BoundingBox();
@@ -144,8 +144,8 @@ namespace EngineNS.Bricks.GpuDriven
             uint Streams = 0;
             int TotalVertices = 0;
             int TotalIndices = 0;
-            var cpVbDrawcalls = new List<KeyValuePair<NxRHI.EVertexStreamType, NxRHI.UCopyDraw>>();
-            var cpIbDrawcalls = new List<NxRHI.UCopyDraw>();
+            var cpVbDrawcalls = new List<KeyValuePair<NxRHI.EVertexStreamType, NxRHI.TtCopyDraw>>();
+            var cpIbDrawcalls = new List<NxRHI.TtCopyDraw>();
             NxRHI.FSubResourceFootPrint footPrint = new NxRHI.FSubResourceFootPrint();
             foreach (var mesh in meshes)
             {
@@ -165,7 +165,7 @@ namespace EngineNS.Bricks.GpuDriven
                         footPrint.Width = (uint)mesh.NumVertices * stride;
                         drawcall.mCoreObject.FootPrint = footPrint;
 
-                        var t = new KeyValuePair<NxRHI.EVertexStreamType, NxRHI.UCopyDraw>(i, drawcall);
+                        var t = new KeyValuePair<NxRHI.EVertexStreamType, NxRHI.TtCopyDraw>(i, drawcall);
                         cpVbDrawcalls.Add(t);
                     }
                 }

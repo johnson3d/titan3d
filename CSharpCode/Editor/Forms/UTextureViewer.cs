@@ -122,7 +122,7 @@ namespace EngineNS.Editor.Forms
                     await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<USlateTextureViewerShading>(),
                     TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
             }
-            var iptDesc = new NxRHI.UInputLayoutDesc();
+            var iptDesc = new NxRHI.TtInputLayoutDesc();
             unsafe
             {
                 iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
@@ -172,7 +172,7 @@ namespace EngineNS.Editor.Forms
 
             var rightId = id;
             uint leftId = 0;
-            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Left", mDockKeyClass), leftId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("TextureView", mDockKeyClass), rightId);
@@ -189,7 +189,7 @@ namespace EngineNS.Editor.Forms
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            var result = EGui.UIProxy.DockProxy.BeginMainForm(TextureSRV.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(GetWindowsName(), this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
             if (result)
             {
@@ -325,11 +325,16 @@ namespace EngineNS.Editor.Forms
         {
 
         }
+
+        public string GetWindowsName()
+        {
+            return TextureSRV.AssetName.Name;
+        }
     }
 
     public class TtTextureViewerCmdParams : EGui.TtImDrawCmdParameters
     {
-        public NxRHI.UCbView CBuffer;
+        public NxRHI.TtCbView CBuffer;
         public Vector4i ColorMask = new Vector4i(1,1,1,0);
         public int IsNormalMap = 0; 
         public override void OnDraw(in Matrix mvp)

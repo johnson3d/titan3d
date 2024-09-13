@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UPickedProxiableManager
+    public class TtPickedProxiableManager
     {
         public List<IProxiable> PickedProxies = new List<IProxiable>();
         public void Selected(IProxiable obj)

@@ -402,11 +402,12 @@ namespace EngineNS.UI.Controls
 
         }
 
-        private void TtEditableText_OnFocus(object sender, TtRoutedEventArgs args)
+        private unsafe void TtEditableText_OnFocus(object sender, TtRoutedEventArgs args)
         {
             args.Handled = true;
-            UInputSystem.StartTextInput();
-            UInputSystem.SetTextInputRect(in mDesignRect);
+            
+            TtInputSystem.StartTextInput();
+            TtInputSystem.SetTextInputRect(in mDesignRect);
 
             if(SelectAllWhenFocused)
             {
@@ -418,7 +419,7 @@ namespace EngineNS.UI.Controls
         {
             args.Handled = true;
             CursorIndex = -1;
-            UInputSystem.StopTextInput();
+            TtInputSystem.StopTextInput();
         }
         private unsafe void TtEditableText_TextInput(object sender, TtRoutedEventArgs args)
         {

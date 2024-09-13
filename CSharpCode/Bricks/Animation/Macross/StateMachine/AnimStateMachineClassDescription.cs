@@ -1,4 +1,7 @@
-﻿using EngineNS.Animation.Macross;
+﻿using EngineNS.Animation.BlendTree;
+using EngineNS.Animation;
+using EngineNS.Animation.Macross;
+using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
 using EngineNS.Animation.StateMachine;
 using EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState;
 using EngineNS.Bricks.CodeBuilder;
@@ -23,13 +26,12 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine
         [Rtti.Meta]
         [OutlineElement_List(typeof(TtOutlineElementsList_AnimCompoundStates), true)]
         public override List<TtTimedCompoundStateClassDescription> CompoundStates { get; set; } = new();
-        public override List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
+        public override List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
             SupperClassNames.Clear();
             SupperClassNames.Add($"EngineNS.Animation.StateMachine.TtAnimStateMachine<{classBuildContext.MainClassDescription.ClassName}>");
-            List<UClassDeclaration> classDeclarationsBuilded = new List<UClassDeclaration>();
-            UClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
-
+            List<TtClassDeclaration> classDeclarationsBuilded = new();
+            TtClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
 
             foreach (var compoundState in CompoundStates)
             {
@@ -42,73 +44,122 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine
             classDeclarationsBuilded.Add(thisClassDeclaration);
             return classDeclarationsBuilded;
         }
-        bool TryInitializeMethodInClassDescription(ref FClassBuildContext classBuildContext, out UMethodDeclaration initMethodDescription)
+        public override TtVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
-            foreach (var initMethod in classBuildContext.ClassDeclaration.Methods)
-            {
-                if (initMethod.MethodName == "Initialize")
-                {
-                    initMethodDescription = initMethod;
-                    return true;
-                }
-            }
-            initMethodDescription = null;
-            return false;
-        }
-        public override UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
-        {
-            //generate code in initialize method for binding pose
-            if(!classBuildContext.IsGenerateBindingPoseInit)
-            {
-                classBuildContext.IsGenerateBindingPoseInit = true;
-                UMethodDeclaration initMethodDescription = null;
-                if (TryInitializeMethodInClassDescription(ref classBuildContext, out var existInitMethodDescription))
-                {
-                    initMethodDescription = existInitMethodDescription;
-                }
-                else
-                {
-                    initMethodDescription = TtASTBuildUtil.CreateMethodDeclaration("Initialize", null, null);
-                    classBuildContext.ClassDeclaration.Methods.Add(initMethodDescription);
-                }
-                var animStateMachineContextVar = TtASTBuildUtil.CreateVariableDeclaration("AnimStateMachineContext", new UTypeReference(typeof(TtAnimStateMachineContext)), new UNullValueExpression());
-                classBuildContext.ClassDeclaration.Properties.Add(animStateMachineContextVar);
-                initMethodDescription.MethodBody.Sequence.Insert(0, animStateMachineContextVar);
-            }
-            //generate code in tick method for anim
-
             return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
 
-        #region Internal AST Build
-        private UMethodDeclaration BuildOverrideInitializeMethod(ref FClassBuildContext classBuildContext)
+        void GenerateCodeInMainClassInitMethod(TtClassDeclaration classDeclaration, ref FClassBuildContext classBuildContext)
         {
-            var methodDeclaration = TtAnimASTBuildUtil.CreateOverridedInitMethodStatement();
+            var initMethod = classDeclaration.FindMethod("Initialize");
+            if (initMethod == null)
+            {
+                initMethod = TtASTBuildUtil.CreateInitMethodDeclaration();
+                classDeclaration.AddMethod(initMethod);
+            }
 
+            var animSMContext_VarName = "animStateMachineContext" + VariableName;
+
+            var animSMContextCreate = TtASTBuildUtil.CreateVariableDeclaration(animSMContext_VarName, 
+                new TtTypeReference(typeof(TtAnimStateMachineContext)), 
+                new TtCreateObjectExpression(typeof(TtAnimStateMachineContext).FullName));
+
+            initMethod.MethodBody.Sequence.Add(animSMContextCreate);
+
+            var blendTreeContext_VarName = "blendTreeContext" + VariableName;
+
+            var blendTreeContextCreate = TtASTBuildUtil.CreateVariableDeclaration(blendTreeContext_VarName, 
+                new TtTypeReference(typeof(FAnimBlendTreeContext)), 
+                new TtCreateObjectExpression(typeof(FAnimBlendTreeContext).FullName));
+
+            initMethod.MethodBody.Sequence.Add(blendTreeContextCreate);
+
+            var animatableSkeletonPose_VarName = "animatableSkeletonPose" + VariableName;
+
+            var animatableSkeletonPoseCreate = TtASTBuildUtil.CreateVariableDeclaration(animatableSkeletonPose_VarName, 
+                new TtTypeReference(typeof(TtAnimatableSkeletonPose)), new TtNullValueExpression());
+            initMethod.MethodBody.Sequence.Add(animatableSkeletonPoseCreate);
+
+            var getAnimatablePoseFromNode = new TtMethodInvokeStatement("CreateAnimatableSkeletonPoseFromeNode",
+                animatableSkeletonPoseCreate,
+                new TtClassReferenceExpression(UTypeDesc.TypeOf<TtAnimUtil>()),
+                new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression("MacrossNode") }
+                );
+            initMethod.MethodBody.Sequence.Add(getAnimatablePoseFromNode);
+
+            var blendTreeContextAnimatablePoseAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
+                new TtVariableReferenceExpression("AnimatableSkeletonPose", new TtVariableReferenceExpression(blendTreeContext_VarName)),
+                new TtVariableReferenceExpression(animatableSkeletonPose_VarName));
+            initMethod.MethodBody.Sequence.Add(blendTreeContextAnimatablePoseAssign);
+
+            var animSMBlendTreeAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
+                new TtVariableReferenceExpression("BlendTreeContext", new TtVariableReferenceExpression(animSMContext_VarName)),
+                new TtVariableReferenceExpression(blendTreeContext_VarName));
+            initMethod.MethodBody.Sequence.Add(animSMBlendTreeAssign);
+
+            var finalPoseAssign = TtASTBuildUtil.CreateAssignOperatorStatement(new TtVariableReferenceExpression(VariableName), 
+                new TtCreateObjectExpression(VariableType.TypeFullName));
+            initMethod.MethodBody.Sequence.Add(finalPoseAssign);
+
+            var centerDataAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
+                new TtVariableReferenceExpression("CenterData", new TtVariableReferenceExpression(VariableName)),
+                new TtSelfReferenceExpression());
+            initMethod.MethodBody.Sequence.Add(centerDataAssign);
+
+            var finalPoseInitializeInvoke = new TtMethodInvokeStatement("Initialize",
+                null, new TtVariableReferenceExpression(VariableName),
+                new TtMethodInvokeArgumentExpression { OperationType = EMethodArgumentAttribute.Default, Expression = new TtVariableReferenceExpression(animSMContext_VarName) });
+            finalPoseInitializeInvoke.IsAsync = true;
+            initMethod.MethodBody.Sequence.Add(finalPoseInitializeInvoke);
+
+            var bindRuntimeSkeletonPoseToNode = new TtMethodInvokeStatement("BindRuntimeSkeletonPoseToNode",
+                null,
+                new TtClassReferenceExpression(UTypeDesc.TypeOf<TtAnimUtil>()),
+                new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression("MacrossNode") }
+                );
+            initMethod.MethodBody.Sequence.Add(bindRuntimeSkeletonPoseToNode);
+
+        }
+        public override void GenerateCodeInClass(TtClassDeclaration classDeclaration, ref FClassBuildContext classBuildContext)
+        {
+            base.GenerateCodeInClass(classDeclaration, ref classBuildContext);
+
+            GenerateCodeInMainClassInitMethod(classDeclaration, ref classBuildContext);
+
+        }
+
+        #region Internal AST Build
+        private TtMethodDeclaration BuildOverrideInitializeMethod(ref FClassBuildContext classBuildContext)
+        {
+            var methodDeclaration = TtAnimASTBuildUtil.CreateStateMachineOverridedInitMethodStatement();
+            TtAnimASTBuildUtil.CreateBaseInitInvokeStatement(methodDeclaration);
             foreach (var compoundState in CompoundStates)
             {
-                var compoundStateAssignLH = new UVariableReferenceExpression(compoundState.VariableName);
-                var compoundStateAssignRH = new UCreateObjectExpression(compoundState.VariableType.TypeFullName);
+                var compoundStateAssignLH = new TtVariableReferenceExpression(compoundState.VariableName);
+                var compoundStateAssignRH = new TtCreateObjectExpression(compoundState.VariableType.TypeFullName);
                 var compoundStateAssign = TtASTBuildUtil.CreateAssignOperatorStatement(compoundStateAssignLH, compoundStateAssignRH);
                 methodDeclaration.MethodBody.Sequence.Add(compoundStateAssign);
 
-                var stateMachineAssignLH = new UVariableReferenceExpression("StateMachine", new UVariableReferenceExpression(compoundState.VariableName));
-                var stateMachineAssignRH = new USelfReferenceExpression();
+                var stateMachineAssignLH = new TtVariableReferenceExpression("StateMachine", new TtVariableReferenceExpression(compoundState.VariableName));
+                var stateMachineAssignRH = new TtSelfReferenceExpression();
                 var stateMachineAssign = TtASTBuildUtil.CreateAssignOperatorStatement(stateMachineAssignLH, stateMachineAssignRH);
                 methodDeclaration.MethodBody.Sequence.Add(stateMachineAssign);
+
+                TtAnimASTBuildUtil.CreateCenterDataAssignStatement(compoundState, methodDeclaration);
+
             }
             foreach (var compoundState in CompoundStates)
             {
-                var initializeMethodInvoke = new UMethodInvokeStatement();
-                initializeMethodInvoke.Host = new UVariableReferenceExpression(compoundState.VariableName);
+                var initializeMethodInvoke = new TtMethodInvokeStatement();
+                initializeMethodInvoke.Host = new TtVariableReferenceExpression(compoundState.VariableName);
                 initializeMethodInvoke.MethodName = "Initialize";
-                initializeMethodInvoke.Arguments.Add(new UMethodInvokeArgumentExpression { Expression = new UVariableReferenceExpression("context") });
+                initializeMethodInvoke.Arguments.Add(new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression("context") });
                 initializeMethodInvoke.IsAsync = true;
                 methodDeclaration.MethodBody.Sequence.Add(initializeMethodInvoke);
             }
             var returnValueAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
-                                        new UVariableReferenceExpression(methodDeclaration.ReturnValue.VariableName),
-                                        new UPrimitiveExpression(true));
+                                        new TtVariableReferenceExpression(methodDeclaration.ReturnValue.VariableName),
+                                        new TtPrimitiveExpression(true));
             methodDeclaration.MethodBody.Sequence.Add(returnValueAssign);
             return methodDeclaration;
         }

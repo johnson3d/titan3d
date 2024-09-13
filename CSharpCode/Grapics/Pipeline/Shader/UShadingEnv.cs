@@ -38,6 +38,16 @@ namespace EngineNS.Graphics.Pipeline.Shader
     }
     public class TtShadingEnv
     {
+        public static int GetBitWidth(int num)
+        {
+            int result = 0;
+            while (num > 0)
+            {
+                result++;
+                num = num / 2;
+            }
+            return result;
+        }
         public TtShadingEnv()
         {
             //var flds = this.GetType().GetFields();
@@ -233,8 +243,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             get => mCurrentPermutationId;
         }
         public virtual RName CodeName { get; set; }
-        public NxRHI.UCbView PerShadingCBuffer;                
-        public bool GetShaderDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+        public NxRHI.TtCbView PerShadingCBuffer;                
+        public bool GetShaderDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
             for (int i = 0; i < PermutationValues.Count; i++)
             {
@@ -245,7 +255,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             EnvShadingDefines(id, defines);
             return true;
         }
-        protected virtual void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+        protected virtual void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
 
         }
@@ -277,8 +287,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 EPixelShaderInput.PST_SpecialData,
             };
         }
-        public virtual void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall) { }
-        public virtual void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public virtual void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall) { }
+        public virtual void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
 
         }
@@ -313,11 +323,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             return true;
         }
-        public virtual void OnDrawCall(NxRHI.UComputeDraw drawcall, TtRenderPolicy policy)
+        public virtual void OnDrawCall(NxRHI.TtComputeDraw drawcall, TtRenderPolicy policy)
         {
 
         }
-        public void SetDrawcallDispatch(object tagObject, TtRenderPolicy policy, NxRHI.UComputeDraw drawcall, uint x, uint y, uint z, bool bRoundupXYZ)
+        public void SetDrawcallDispatch(object tagObject, TtRenderPolicy policy, NxRHI.TtComputeDraw drawcall, uint x, uint y, uint z, bool bRoundupXYZ)
         {
             drawcall.TagObject = tagObject;
             
@@ -335,7 +345,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             this.OnDrawCall(drawcall, policy);
         }
-        public void SetDrawcallIndirectDispatch(object tagObject, TtRenderPolicy policy, NxRHI.UComputeDraw drawcall, NxRHI.UBuffer indirectBuffer)
+        public void SetDrawcallIndirectDispatch(object tagObject, TtRenderPolicy policy, NxRHI.TtComputeDraw drawcall, NxRHI.TtBuffer indirectBuffer)
         {
             drawcall.TagObject = tagObject;
             drawcall.SetComputeEffect(CurrentEffect);
@@ -343,7 +353,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             this.OnDrawCall(drawcall, policy);
         }
-        protected override void EnvShadingDefines(in FPermutationId id, UShaderDefinitions defines)
+        protected override void EnvShadingDefines(in FPermutationId id, TtShaderDefinitions defines)
         {
             defines.AddDefine("DispatchX", (int)DispatchArg.X);
             defines.AddDefine("DispatchY", (int)DispatchArg.Y);
@@ -351,9 +361,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
     }
     
-    public class UDummyShading : Shader.TtGraphicsShadingEnv
+    public class TtDummyShading : Shader.TtGraphicsShadingEnv
     {
-        public UDummyShading()
+        public TtDummyShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/DummyShading.cginc", RName.ERNameType.Engine);
         }
@@ -516,7 +526,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 }
             }
         }
-        protected override void EnvShadingDefines(in FPermutationId id, UShaderDefinitions defines)
+        protected override void EnvShadingDefines(in FPermutationId id, TtShaderDefinitions defines)
         {
             base.EnvShadingDefines(in id, defines);
 
@@ -661,7 +671,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(GetWindowsName(), this, ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
             if (IsDrawing)
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
@@ -702,10 +712,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
             uint leftId = 0;
             uint rightUpId = 0;
             uint rightDownId = 0;
-            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.8f, ref middleId, ref rightId);
-            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Down, 0.5f, ref rightDownId, ref rightUpId);
-            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
-            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Left, 0.8f, ref middleId, ref rightId);
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Down, 0.5f, ref rightDownId, ref rightUpId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeDetails", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("TextEditor", mDockKeyClass), middleId);
@@ -786,6 +796,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }
+
+        public string GetWindowsName()
+        {
+            return AssetName.Name;
+        }
         #endregion
 
         [Category("Option")]
@@ -840,7 +855,7 @@ namespace EngineNS
 
     namespace NxRHI
     {
-        public partial class UGraphicDraw
+        public partial class TtGraphicDraw
         {
             public Graphics.Pipeline.Shader.TtEffect Effect { get; private set; }
             internal Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId PermutationId;

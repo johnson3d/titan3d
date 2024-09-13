@@ -7,15 +7,15 @@ namespace EngineNS.NxRHI
 {
     partial struct ICmdRecorder
     {
-        public void PushGpuDraw(UGraphicDraw draw)
+        public void PushGpuDraw(TtGraphicDraw draw)
         {
             PushGpuDraw(draw.mCoreObject.NativeSuper);
         }
-        public void PushGpuDraw(UComputeDraw draw)
+        public void PushGpuDraw(TtComputeDraw draw)
         {
             PushGpuDraw(draw.mCoreObject.NativeSuper);
         }
-        public void PushGpuDraw(UCopyDraw draw)
+        public void PushGpuDraw(TtCopyDraw draw)
         {
             PushGpuDraw(draw.mCoreObject.NativeSuper);
         }
@@ -59,16 +59,20 @@ namespace EngineNS.NxRHI
             mCoreObject.EndCommand();
         }
         private NxRHI.TtGpuScope CurrentGpuScope;
-        public void BeginPass(UFrameBuffers fb, in FRenderPassClears passClears, string name)
+        public unsafe bool BeginPass(TtFrameBuffers fb, in FRenderPassClears passClears, string name)
         {
             CurrentGpuScope = TtEngine.Instance.ProfilerModule.GpuTimeScopeManager.GetGpuScope(name);
             if (CurrentGpuScope != null)
                 CurrentGpuScope.Begin(this);
-            mCoreObject.BeginPass(fb.mCoreObject, in passClears, name);
-            unsafe
-            {
-                mCoreObject.SetScissor(0, (NxRHI.FScissorRect*)IntPtr.Zero.ToPointer());
-            }
+
+            var cp = passClears;
+            if (TtEngine.Instance.Config.IsReverseZ)
+                cp.m_DepthClearValue = 0;
+            else
+                cp.m_DepthClearValue = 1;
+            var ret = mCoreObject.BeginPass(fb.mCoreObject, in cp, name);
+            mCoreObject.SetScissor(0, (NxRHI.FScissorRect*)IntPtr.Zero.ToPointer());
+            return ret;
         }
         public unsafe void SetViewport(uint Num, FViewPort* pViewports)
         {
@@ -101,7 +105,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.SetShader(shader.mCoreObject);
         }
-        public void SetCBV(EShaderType type, FShaderBinder binder, UCbView buffer)
+        public void SetCBV(EShaderType type, FShaderBinder binder, TtCbView buffer)
         {
             mCoreObject.SetCBV(type, binder, buffer.mCoreObject);
         }
@@ -109,23 +113,23 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.SetSrv(type, binder, view.mCoreObject);
         }
-        public void SetUav(EShaderType type, FShaderBinder binder, UUaView view)
+        public void SetUav(EShaderType type, FShaderBinder binder, TtUaView view)
         {
             mCoreObject.SetUav(type, binder, view.mCoreObject);
         }
-        public void SetSampler(EShaderType type, FShaderBinder binder, USampler sampler)
+        public void SetSampler(EShaderType type, FShaderBinder binder, TtSampler sampler)
         {
             mCoreObject.SetSampler(type, binder, sampler.mCoreObject);
         }
-        public void SetVertexBuffer(uint slot, UVbView buffer, uint Offset, uint Stride)
+        public void SetVertexBuffer(uint slot, TtVbView buffer, uint Offset, uint Stride)
         {
             mCoreObject.SetVertexBuffer(slot, buffer.mCoreObject, Offset, Stride);
         }
-        public void SetIndexBuffer(UIbView buffer, bool IsBit32 = false)
+        public void SetIndexBuffer(TtIbView buffer, bool IsBit32 = false)
         {
             mCoreObject.SetIndexBuffer(buffer.mCoreObject, IsBit32);
         }
-        public void SetInputLayout(UInputLayout layout)
+        public void SetInputLayout(TtInputLayout layout)
         {
             mCoreObject.SetInputLayout(layout.mCoreObject);
         }
@@ -139,7 +143,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.DrawIndexed(topology, BaseVertex, StartIndex, DrawCount, Instance);
         }
-        public void IndirectDrawIndexed(EPrimitiveType topology, UBuffer indirectArg, uint indirectArgOffset = 0, UBuffer countBuffer = null)
+        public void IndirectDrawIndexed(EPrimitiveType topology, TtBuffer indirectArg, uint indirectArgOffset = 0, TtBuffer countBuffer = null)
         {
             mCoreObject.IndirectDrawIndexed(topology, indirectArg.mCoreObject, indirectArgOffset, countBuffer.mCoreObject);
         }
@@ -147,15 +151,15 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.Dispatch(x, y, z);
         }
-        public void CopyBufferRegion(UBuffer target, ulong DstOffset, UBuffer src, ulong SrcOffset, ulong Size)
+        public void CopyBufferRegion(TtBuffer target, ulong DstOffset, TtBuffer src, ulong SrcOffset, ulong Size)
         {
             mCoreObject.CopyBufferRegion(target.mCoreObject, DstOffset, src.mCoreObject, SrcOffset, Size);
         }
-        public void CopyTextureRegion(UTexture target, uint tarSubRes, uint DstX, uint DstY, uint DstZ, UTexture src, uint srcSubRes, in EngineNS.NxRHI.FSubresourceBox box)
+        public void CopyTextureRegion(TtTexture target, uint tarSubRes, uint DstX, uint DstY, uint DstZ, TtTexture src, uint srcSubRes, in EngineNS.NxRHI.FSubresourceBox box)
         {
             mCoreObject.CopyTextureRegion(target.mCoreObject, tarSubRes, DstX, DstY, DstZ, src.mCoreObject, srcSubRes, in box);
         }
-        public unsafe void CopyTexture(UTexture target, uint tarSubRes, UTexture src, uint srcSubRes)
+        public unsafe void CopyTexture(TtTexture target, uint tarSubRes, TtTexture src, uint srcSubRes)
         {
             mCoreObject.CopyTextureRegion(target.mCoreObject, tarSubRes, 0, 0, 0, src.mCoreObject, srcSubRes, (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer());
         }
@@ -211,16 +215,20 @@ namespace EngineNS.NxRHI
         //{
         //    mCoreObject.PushGpuDraw(draw.NativeSuper);
         //}
-        
-        public void PushGpuDraw(UGraphicDraw draw)
+        public void DirectGpuDraw(TtGraphicDraw draw)
+        {
+            mCoreObject.DirectGpuDraw(draw.mCoreObject.NativeSuper);
+        }
+
+        public void PushGpuDraw(TtGraphicDraw draw)
         {
             mCoreObject.GetCmdRecorder().PushGpuDraw(draw);
         }
-        public void PushGpuDraw(UComputeDraw draw)
+        public void PushGpuDraw(TtComputeDraw draw)
         {
             mCoreObject.GetCmdRecorder().PushGpuDraw(draw);
         }
-        public void PushGpuDraw(UCopyDraw draw)
+        public void PushGpuDraw(TtCopyDraw draw)
         {
             mCoreObject.GetCmdRecorder().PushGpuDraw(draw);
         }

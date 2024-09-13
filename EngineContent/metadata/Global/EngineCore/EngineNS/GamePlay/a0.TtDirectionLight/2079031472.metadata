@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_2079031472 Type="EngineNS.GamePlay.TtDirectionLight@EngineCore">
-  <Direction Type="EngineNS.Vector3@EngineCore" Order="0" />
-  <GroundLightColor Type="EngineNS.Vector3@EngineCore" Order="0" />
-  <SkyLightColor Type="EngineNS.Vector3@EngineCore" Order="0" />
-  <SunLightColor Type="EngineNS.Vector3@EngineCore" Order="0" />
-</Hash_2079031472>

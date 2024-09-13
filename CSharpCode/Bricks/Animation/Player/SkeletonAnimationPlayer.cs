@@ -2,6 +2,7 @@
 using EngineNS.Animation.Command;
 using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
 using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
+using EngineNS.Bricks.StateMachine.TimedSM;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -35,10 +36,10 @@ namespace EngineNS.Animation.Player
         public void BindingPose(TtAnimatableSkeletonPose bindedPose)
         {
             System.Diagnostics.Debug.Assert(bindedPose != null);
-            mAnimEvaluateCommand = new TtExtractPoseFromClipCommand(ref bindedPose, SkeletonAnimClip);
+            mAnimEvaluateCommand = new TtExtractPoseFromClipCommand<TtDefaultCenterData>(ref bindedPose, SkeletonAnimClip);
         }
 
-        TtExtractPoseFromClipCommand mAnimEvaluateCommand = null;
+        TtExtractPoseFromClipCommand<TtDefaultCenterData> mAnimEvaluateCommand = null;
         public void Update(float elapse)
         {
             System.Diagnostics.Debug.Assert(SkeletonAnimClip.Duration != 0.0f);

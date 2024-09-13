@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_2969265710 Type="EngineNS.DesignMacross.TimedStateMachine.CompoundState.TtTimedCompoundStateEntryClassDescription@EngineCore">
-  <Id Type="System.Guid@Unknown" Order="0" />
-  <Transitions Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.TimedStateMachine.TtTimedStateTransitionClassDescription@EngineCore,&gt;@Unknown" Order="0" />
-</Hash_2969265710>

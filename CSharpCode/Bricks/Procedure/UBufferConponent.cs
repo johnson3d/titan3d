@@ -332,7 +332,7 @@ namespace EngineNS.Bricks.Procedure
         }
         public virtual unsafe NxRHI.TtSrView CreateVector2Texture2D(Vector2 min, Vector2 max)
         {
-            NxRHI.UTexture texture;
+            NxRHI.TtTexture texture;
             if(min.X >= 0 && min.X <= 1 && max.X >= 0 && max.X <= 1)
             {
                 min.X = 0;
@@ -388,7 +388,7 @@ namespace EngineNS.Bricks.Procedure
         }
         public virtual unsafe NxRHI.TtSrView CreateVector3Texture2D(Vector3 minHeight, Vector3 maxHeight)
         {
-            NxRHI.UTexture texture;
+            NxRHI.TtTexture texture;
             if (minHeight.X >= 0 && minHeight.X <= 1 && maxHeight.X >= 0 && maxHeight.X <= 1)
             {
                 minHeight.X = 0;
@@ -450,7 +450,7 @@ namespace EngineNS.Bricks.Procedure
                 return result;
             }
         }
-        public virtual unsafe NxRHI.TtSrView CreateAsHeightMapTexture2D(out NxRHI.UTexture texture, float minHeight, float maxHeight, EPixelFormat format = EPixelFormat.PXF_R32_FLOAT, float finalScale = 1.0f, bool bNomalized = false)
+        public virtual unsafe NxRHI.TtSrView CreateAsHeightMapTexture2D(out NxRHI.TtTexture texture, float minHeight, float maxHeight, EPixelFormat format = EPixelFormat.PXF_R32_FLOAT, float finalScale = 1.0f, bool bNomalized = false)
         {
             texture = null;
             if (minHeight >= 0 && minHeight <= 1 && maxHeight >= 0 && maxHeight <= 1)

@@ -26,7 +26,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        protected override void EnvShadingDefines(in FPermutationId id, UShaderDefinitions defines)
+        protected override void EnvShadingDefines(in FPermutationId id, TtShaderDefinitions defines)
         {
             defines.AddDefine("ETypeAA_None", (int)Graphics.Pipeline.TtRenderPolicy.ETypeAA.None);
             defines.AddDefine("TETypeAA_Fsaa", (int)Graphics.Pipeline.TtRenderPolicy.ETypeAA.Fsaa);
@@ -37,7 +37,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             get;
             set;
         }
-        private void OnDrawcallTAA(NxRHI.UGraphicDraw drawcall, TtRenderPolicy deferredPolicy, TtAntiAliasingNode aaNode)
+        private void OnDrawcallTAA(NxRHI.TtGraphicDraw drawcall, TtRenderPolicy deferredPolicy, TtAntiAliasingNode aaNode)
         {
             if (deferredPolicy.TypeAA == TtRenderPolicy.ETypeAA.Taa)
             {
@@ -133,7 +133,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
 
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
@@ -143,7 +143,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
     [Bricks.CodeBuilder.ContextMenu("AntiAliasing", "Post\\AntiAliasing", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class TtAntiAliasingNode : USceenSpaceNode
+    public class TtAntiAliasingNode : TtSceenSpaceNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
         public TtRenderGraphPin PreColorPinIn = TtRenderGraphPin.CreateInput("PreColor");
@@ -151,8 +151,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         public TtRenderGraphPin PreDepthPinIn = TtRenderGraphPin.CreateInput("PreDepth");
         public TtRenderGraphPin MotionVectorPinIn = TtRenderGraphPin.CreateInput("MotionVector");
 
-        public NxRHI.UCopyDraw mCopyColorDrawcall;
-        public NxRHI.UCopyDraw mCopyDepthDrawcall;
+        public NxRHI.TtCopyDraw mCopyColorDrawcall;
+        public NxRHI.TtCopyDraw mCopyDepthDrawcall;
         public UDrawBuffers CopyPass = new UDrawBuffers();
 
         public TtAttachBuffer[] ResultBuffer = new TtAttachBuffer[2];
@@ -193,7 +193,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             CopyPass.Initialize(rc, debugName + ".CopyPrev");
         }
 
-        public NxRHI.UCbView CBShadingEnv;
+        public NxRHI.TtCbView CBShadingEnv;
 
         //double[] mOffsetHaltonSequencer;
         //private double[] OffsetHaltonSequencer
@@ -308,23 +308,23 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
 
-        public void CopyAttachBuff(TtRenderGraphPin SrcPin, TtAttachBuffer DesAttachBuffer, NxRHI.UCopyDraw CopyDrawcall, NxRHI.UCommandList DrawCommandList)
+        public void CopyAttachBuff(TtRenderGraphPin SrcPin, TtAttachBuffer DesAttachBuffer, NxRHI.TtCopyDraw CopyDrawcall, NxRHI.UCommandList DrawCommandList)
         {
             var srcPin = GetAttachBuffer(SrcPin);
 
-            if (srcPin.GpuResource.GetType() == typeof(NxRHI.UBuffer) && DesAttachBuffer.GpuResource.GetType() == typeof(NxRHI.UBuffer))
+            if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer) && DesAttachBuffer.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
             {
                 CopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Buffer;
             }
-            else if (srcPin.GpuResource.GetType() == typeof(NxRHI.UTexture) && DesAttachBuffer.GpuResource.GetType() == typeof(NxRHI.UTexture))
+            else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && DesAttachBuffer.GpuResource.GetType() == typeof(NxRHI.TtTexture))
             {
                 CopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
             }
-            else if (srcPin.GpuResource.GetType() == typeof(NxRHI.UTexture) && DesAttachBuffer.GpuResource.GetType() == typeof(NxRHI.UBuffer))
+            else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && DesAttachBuffer.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
             {
                 CopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
             }
-            else if (srcPin.GpuResource.GetType() == typeof(NxRHI.UTexture) && DesAttachBuffer.GpuResource.GetType() == typeof(NxRHI.UBuffer))
+            else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && DesAttachBuffer.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
             {
                 CopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Texture;
             }

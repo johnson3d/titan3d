@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_15973283787149584434 Type="EngineNS.Bricks.CodeBuilder.UWhileLoopStatement@EngineCore">
-  <Condition Type="EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore" Order="0" />
-  <LoopBody Type="EngineNS.Bricks.CodeBuilder.UStatementBase@EngineCore" Order="0" />
-</Hash_15973283787149584434>

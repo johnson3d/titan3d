@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_1148457643 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.AnyVar@EngineCore">
-  <Name Type="System.String@Unknown" Order="0" />
-  <NodeId Type="System.Guid@Unknown" Order="0" />
-  <Position Type="EngineNS.Vector2@EngineCore" Order="0" />
-  <VarTypeString Type="System.String@Unknown" Order="0" />
-  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Order="1" />
-</Hash_1148457643>

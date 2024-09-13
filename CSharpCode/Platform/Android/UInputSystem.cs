@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.Input
 {
-    public partial class UInputSystem
+    public partial class TtInputSystem
     {
         public unsafe bool PullEvent(ref Input.Event evt)
         {

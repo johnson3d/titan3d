@@ -50,7 +50,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             var arg = DelegateGraph.MethodDatas[0].MethodDec.Arguments[i];
                             if(arg.VariableName == pin.Name)
                             {
-                                arg.VariableType = new UTypeReference(type);
+                                arg.VariableType = new TtTypeReference(type);
                                 break;
                             }
                         }
@@ -86,7 +86,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return Rtti.TtClassMetaManager.Instance.GetMeta(segs[0]);
             }
         }
-        public UMethodDeclaration MethodDesc;
+        public TtMethodDeclaration MethodDesc;
         public string mMethodMeta;
         [Rtti.Meta(Order = 0)]
         public string MethodMeta
@@ -252,7 +252,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             result.Initialize(m);
             return result;
         }
-        public static MethodNode NewMethodNode(UMethodDeclaration methodDef)
+        public static MethodNode NewMethodNode(TtMethodDeclaration methodDef)
         {
             var result = new MethodNode();
             result.Initialize(methodDef);
@@ -614,7 +614,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
         }
-        public static string GetMethodMeta(UMethodDeclaration m)
+        public static string GetMethodMeta(TtMethodDeclaration m)
         {
             var methodMeta = "@";
             if(m.HostClass != null)
@@ -625,7 +625,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             methodMeta += "#" + m.GetKeyword();
             return methodMeta;
         }
-        private void Initialize(UMethodDeclaration m)
+        private void Initialize(TtMethodDeclaration m)
         {
             if (string.IsNullOrEmpty(mMethodMeta))
             {
@@ -854,7 +854,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         if(showGraph == null)
                         {
                             var invokeMethod = method.Parameters[i].ParameterType.SystemType.GetMethod("Invoke");
-                            var f = UMethodDeclaration.GetMethodDeclaration(invokeMethod);
+                            var f = TtMethodDeclaration.GetMethodDeclaration(invokeMethod);
                             f.MethodName = GetDelegateParamMethodName(hitPin.Name);
                             f.IsOverride = false;
                             for(int subPinIdx = 0; subPinIdx < Arguments[i].SubPins.Count; subPinIdx++)
@@ -865,10 +865,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 var name = Arguments[i].SubPins[subPinIdx].PinIn.Name;
                                 var type = Arguments[i].SubPins[subPinIdx].PinIn.Tag as Rtti.UTypeDesc;
 
-                                f.Arguments.Add(new UMethodArgumentDeclaration()
+                                f.Arguments.Add(new TtMethodArgumentDeclaration()
                                 {
                                     VariableName = name,
-                                    VariableType = new UTypeReference(type),
+                                    VariableType = new TtTypeReference(type),
                                 });
                             }
                             showGraph = UMacrossMethodGraph.NewGraph(macrossGraph.MacrossEditor, f);
@@ -996,9 +996,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             if (pinData.DelegateGraph != null)
                             {
                                 var methodData = pinData.DelegateGraph.MethodDatas[0];
-                                var newMethodArg = new UMethodArgumentDeclaration()
+                                var newMethodArg = new TtMethodArgumentDeclaration()
                                 {
-                                    VariableType = new UTypeReference(typeof(int)),
+                                    VariableType = new TtTypeReference(typeof(int)),
                                     VariableName = pinName,
                                 };
                                 if (idx >= 0 && idx < methodData.MethodDec.Arguments.Count)
@@ -1060,10 +1060,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return $"dm_{paramName}_{Method.MethodName}_{(uint)NodeId.GetHashCode()}";
         }
 
-        void GenArgumentCodes(int argIdx, ref BuildCodeStatementsData data, out UExpressionBase exp, 
-            UMethodInvokeStatement invokeStatement = null,
-            List<UStatementBase> beforeStatements = null, 
-            List<UStatementBase> afterStatements = null)
+        void GenArgumentCodes(int argIdx, ref BuildCodeStatementsData data, out TtExpressionBase exp, 
+            TtMethodInvokeStatement invokeStatement = null,
+            List<TtStatementBase> beforeStatements = null, 
+            List<TtStatementBase> afterStatements = null)
         {
             var pinData = Arguments[argIdx];
             var pinType = ((pinData.PinIn != null) ? pinData.PinIn.Tag : pinData.PinOut.Tag) as Rtti.UTypeDesc;
@@ -1075,18 +1075,18 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var inPin = pinData.PinIn;
                 var paramName = GetParamValueName(inPin.Name);
                 var delegateMethod = pinType.SystemType.GetMethod("Invoke");
-                var lambdaExp = new ULambdaExpression();
+                var lambdaExp = new TtLambdaExpression();
                 exp = lambdaExp;
                 if (delegateMethod.ReturnType != typeof(void) && delegateMethod.ReturnType != typeof(System.Threading.Tasks.Task))
                 {
                     if (delegateMethod.ReturnType.IsSubclassOf(typeof(System.Threading.Tasks.Task)) ||
                         delegateMethod.ReturnType.IsSubclassOf(typeof(Thread.Async.TtTask)))
                     {
-                        lambdaExp.ReturnType = new UTypeReference(delegateMethod.ReturnType.GetGenericArguments()[0]);
+                        lambdaExp.ReturnType = new TtTypeReference(delegateMethod.ReturnType.GetGenericArguments()[0]);
                         lambdaExp.IsAsync = true;
                     }
                     else
-                        lambdaExp.ReturnType = new UTypeReference(delegateMethod.ReturnType);
+                        lambdaExp.ReturnType = new TtTypeReference(delegateMethod.ReturnType);
                 }
                 else if ((delegateMethod.ReturnType == typeof(System.Threading.Tasks.Task)) ||
                          (delegateMethod.ReturnType == typeof(Thread.Async.TtTask)))
@@ -1095,8 +1095,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var delegateMethodParams = delegateMethod.GetParameters();
                 foreach(var param in delegateMethodParams)
                 {
-                    var lambdaArg = new UMethodInvokeArgumentExpression();
-                    lambdaArg.Expression = new UVariableReferenceExpression("___" + param.Name);
+                    var lambdaArg = new TtMethodInvokeArgumentExpression();
+                    lambdaArg.Expression = new TtVariableReferenceExpression("___" + param.Name);
                     if (param.IsIn)
                         lambdaArg.OperationType = EMethodArgumentAttribute.In;
                     else if (param.IsOut)
@@ -1110,13 +1110,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                 if(pinData.DelegateGraph != null)
                 {
-                    var methodInvokeExp = new UMethodInvokeStatement();
+                    var methodInvokeExp = new TtMethodInvokeStatement();
                     lambdaExp.MethodInvoke = methodInvokeExp;
                     methodInvokeExp.MethodName = GetDelegateParamMethodName(inPin.Name);
                     methodInvokeExp.IsAsync = lambdaExp.IsAsync;
                     for(int i=0; i< pinData.SubPins.Count; i++)
                     {
-                        var argExp = new UMethodInvokeArgumentExpression()
+                        var argExp = new TtMethodInvokeArgumentExpression()
                         {
                             OperationType = pinData.SubPins[i].OpType,
                         };
@@ -1124,14 +1124,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         if (i < delegateMethodParams.Length)
                         {
                             pinName = "___" + pinName;
-                            argExp.Expression = new UVariableReferenceExpression(pinName);
+                            argExp.Expression = new TtVariableReferenceExpression(pinName);
                         }
                         else
                         {
                             if (data.NodeGraph.PinHasLinker(pinData.SubPins[i].PinIn))
                                 argExp.Expression = data.NodeGraph.GetOppositePinExpression(pinData.SubPins[i].PinIn, ref data);
                             else
-                                argExp.Expression = new UDefaultValueExpression(pinData.SubPins[i].PinIn.Tag as Rtti.UTypeDesc);
+                                argExp.Expression = new TtDefaultValueExpression(pinData.SubPins[i].PinIn.Tag as Rtti.UTypeDesc);
                         }
                         methodInvokeExp.Arguments.Add(argExp);
                     }
@@ -1145,18 +1145,18 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         {
                             var outPin = pinData.PinOut;
                             var paramName = GetParamValueName(outPin.Name);
-                            exp = new UVariableReferenceExpression(paramName);
+                            exp = new TtVariableReferenceExpression(paramName);
                             if (beforeStatements != null)
                             {
-                                var typeRef = new UTypeReference(pinType);
-                                var varDec = new UVariableDeclaration()
+                                var typeRef = new TtTypeReference(pinType);
+                                var varDec = new TtVariableDeclaration()
                                 {
                                     VariableType = typeRef,
                                     VariableName = paramName,
-                                    InitValue = new UDefaultValueExpression(typeRef.TypeDesc),
+                                    InitValue = new TtDefaultValueExpression(typeRef.TypeDesc),
                                 };
                                 beforeStatements.Add(varDec);
-                                beforeStatements.Add(new UDebuggerSetWatchVariable()
+                                beforeStatements.Add(new TtDebuggerSetWatchVariable()
                                 {
                                     VariableType = typeRef,
                                     VariableName = paramName,
@@ -1176,31 +1176,31 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 var tagType = GetPinType(inPin);
                                 var texp = data.NodeGraph.GetOppositePinExpression(inPin, ref data);
 
-                                if (texp is UCastExpression)
+                                if (texp is TtCastExpression)
                                 {
-                                    var castExp = texp as UCastExpression;
+                                    var castExp = texp as TtCastExpression;
                                     while (castExp != null)
                                     {
                                         texp = castExp.Expression;
                                         srcType = castExp.SourceType.TypeDesc;
-                                        castExp = texp as UCastExpression;
+                                        castExp = texp as TtCastExpression;
                                     }
                                 }
 
-                                UExpressionBase fexp = texp;
+                                TtExpressionBase fexp = texp;
                                 if (srcType != tagType && srcType != null && tagType != null &&
                                     pinData.OpType != EMethodArgumentAttribute.Ref)
                                 {
-                                    fexp = new UCastExpression()
+                                    fexp = new TtCastExpression()
                                     {
-                                        SourceType = new UTypeReference(srcType),
-                                        TargetType = new UTypeReference(tagType),
+                                        SourceType = new TtTypeReference(srcType),
+                                        TargetType = new TtTypeReference(tagType),
                                         Expression = texp,
                                     };
                                 }
-                                if (texp is UVariableReferenceExpression)
+                                if (texp is TtVariableReferenceExpression)
                                 {
-                                    var refExpr = ((UVariableReferenceExpression)texp);
+                                    var refExpr = ((TtVariableReferenceExpression)texp);
                                     bool IsRefVar = false;
                                     if (refExpr.PropertyDeclClass != null)
                                     {
@@ -1220,18 +1220,18 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     }
                                     if (refExpr.IsProperty && IsRefVar == false)
                                     {
-                                        exp = new UVariableReferenceExpression(paramName);
-                                        var typeRef = new UTypeReference(pinType);
+                                        exp = new TtVariableReferenceExpression(paramName);
+                                        var typeRef = new TtTypeReference(pinType);
                                         if (beforeStatements != null)
                                         {
-                                            var varDec = new UVariableDeclaration()
+                                            var varDec = new TtVariableDeclaration()
                                             {
                                                 VariableType = typeRef,
                                                 VariableName = paramName,
                                                 InitValue = fexp,
                                             };
                                             beforeStatements.Add(varDec);
-                                            beforeStatements.Add(new UDebuggerSetWatchVariable()
+                                            beforeStatements.Add(new TtDebuggerSetWatchVariable()
                                             {
                                                 VariableType = typeRef,
                                                 VariableName = paramName,
@@ -1240,13 +1240,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                         }
                                         if (afterStatements != null && pinData.OpType == EMethodArgumentAttribute.Ref)
                                         {
-                                            var assign = new UAssignOperatorStatement()
+                                            var assign = new TtAssignOperatorStatement()
                                             {
                                                 From = exp,
                                                 To = fexp,
                                             };
                                             afterStatements.Add(assign);
-                                            afterStatements.Add(new UDebuggerSetWatchVariable()
+                                            afterStatements.Add(new TtDebuggerSetWatchVariable()
                                             {
                                                 VariableType = typeRef,
                                                 VariableName = paramName,
@@ -1259,10 +1259,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                         exp = fexp;
                                         if (beforeStatements != null)
                                         {
-                                            var varName = ((UVariableReferenceExpression)texp).VariableName;
-                                            beforeStatements?.Add(new UDebuggerSetWatchVariable()
+                                            var varName = ((TtVariableReferenceExpression)texp).VariableName;
+                                            beforeStatements?.Add(new TtDebuggerSetWatchVariable()
                                             {
-                                                VariableType = new UTypeReference(pinType),
+                                                VariableType = new TtTypeReference(pinType),
                                                 VariableName = varName,
                                                 VariableValue = exp,
                                             });
@@ -1271,18 +1271,18 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 }
                                 else
                                 {
-                                    exp = new UVariableReferenceExpression(paramName);
+                                    exp = new TtVariableReferenceExpression(paramName);
                                     if (beforeStatements != null)
                                     {
-                                        var typeRef = new UTypeReference(pinType);
-                                        var varDec = new UVariableDeclaration()
+                                        var typeRef = new TtTypeReference(pinType);
+                                        var varDec = new TtVariableDeclaration()
                                         {
                                             VariableType = typeRef,
                                             VariableName = paramName,
                                             InitValue = fexp,
                                         };
                                         beforeStatements.Add(varDec);
-                                        beforeStatements.Add(new UDebuggerSetWatchVariable()
+                                        beforeStatements.Add(new TtDebuggerSetWatchVariable()
                                         {
                                             VariableType = typeRef,
                                             VariableName = paramName,
@@ -1293,18 +1293,18 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             }
                             else
                             {
-                                exp = new UVariableReferenceExpression(paramName);
+                                exp = new TtVariableReferenceExpression(paramName);
                                 if (beforeStatements != null)
                                 {
-                                    var typeRef = new UTypeReference(pinType);
-                                    var varDec = new UVariableDeclaration()
+                                    var typeRef = new TtTypeReference(pinType);
+                                    var varDec = new TtVariableDeclaration()
                                     {
                                         VariableType = typeRef,
                                         VariableName = paramName,
                                         InitValue = GetNoneLinkedParameterExp(inPin, argIdx, ref data),
                                     };
                                     beforeStatements.Add(varDec);
-                                    beforeStatements.Add(new UDebuggerSetWatchVariable()
+                                    beforeStatements.Add(new TtDebuggerSetWatchVariable()
                                     {
                                         VariableType = typeRef,
                                         VariableName = paramName,
@@ -1324,10 +1324,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 exp = data.NodeGraph.GetOppositePinExpression(inPin, ref data);
                                 if (srcType != tagType && srcType != null && tagType != null)
                                 {
-                                    exp = new UCastExpression()
+                                    exp = new TtCastExpression()
                                     {
-                                        SourceType = new UTypeReference(srcType),
-                                        TargetType = new UTypeReference(tagType),
+                                        SourceType = new TtTypeReference(srcType),
+                                        TargetType = new TtTypeReference(tagType),
                                         Expression = exp,
                                     };
                                 }
@@ -1337,9 +1337,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                             if(beforeStatements != null)
                             {
-                                beforeStatements.Add(new UDebuggerSetWatchVariable()
+                                beforeStatements.Add(new TtDebuggerSetWatchVariable()
                                 {
-                                    VariableType = new UTypeReference(pinType),
+                                    VariableType = new TtTypeReference(pinType),
                                     VariableName = GetParamValueName(inPin.Name),
                                     VariableValue = exp,
                                 });
@@ -1349,7 +1349,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
         }
-        protected virtual UExpressionBase GetNoneLinkedParameterExp(PinIn pin, int argIdx, ref BuildCodeStatementsData data)
+        protected virtual TtExpressionBase GetNoneLinkedParameterExp(PinIn pin, int argIdx, ref BuildCodeStatementsData data)
         {
             //if (pin.EditValue.ValueType == Rtti.UTypeDescGetter<System.Type>.TypeDesc &&
             //    pin.EditValue.Value != null)
@@ -1365,13 +1365,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     var type = pin.HostNode.GetInPinType(pin);
                     if (type.SystemType.IsValueType == false)
-                        return new UPrimitiveExpression(type, null);
+                        return new TtPrimitiveExpression(type, null);
                     else
-                        return new UDefaultValueExpression(type);// UPrimitiveExpression(type, pin.EditValue.Value);
+                        return new TtDefaultValueExpression(type);// UPrimitiveExpression(type, pin.EditValue.Value);
                 }
                 else
                 {
-                    return new UPrimitiveExpression(pin.EditValue.ValueType, pin.EditValue.Value);
+                    return new TtPrimitiveExpression(pin.EditValue.ValueType, pin.EditValue.Value);
                 }
             }
         }
@@ -1384,7 +1384,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         private void BuildStatementsWithMethodDesc(NodePin pin, ref BuildCodeStatementsData data)
         {
-            var methodInvokeExp = new UMethodInvokeStatement()
+            var methodInvokeExp = new TtMethodInvokeStatement()
             {
                 MethodName = MethodDesc.MethodName,
                 Method = null,
@@ -1400,31 +1400,31 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 // method is static
                 if (HostClass != null)
-                    methodInvokeExp.Host = new UClassReferenceExpression() { Class = HostClass.ClassType };
+                    methodInvokeExp.Host = new TtClassReferenceExpression() { Class = HostClass.ClassType };
             }
 
             if (MethodDesc.ReturnValue != null)
             {
                 var retValName = GetReturnValueName();
-                methodInvokeExp.ReturnValue = new UVariableDeclaration()
+                methodInvokeExp.ReturnValue = new TtVariableDeclaration()
                 {
                     VariableType = MethodDesc.ReturnValue.VariableType,
                     VariableName = retValName,
-                    InitValue = new UDefaultValueExpression(MethodDesc.ReturnValue.VariableType),
+                    InitValue = new TtDefaultValueExpression(MethodDesc.ReturnValue.VariableType),
                 };
                 if (!data.MethodDec.HasLocalVariable(retValName))
                     data.MethodDec.AddLocalVar(methodInvokeExp.ReturnValue);
             }
 
-            List<UStatementBase> beforeSt = new List<UStatementBase>();
-            List<UStatementBase> afterSt = new List<UStatementBase>();
+            List<TtStatementBase> beforeSt = new List<TtStatementBase>();
+            List<TtStatementBase> afterSt = new List<TtStatementBase>();
             for (int i = 0; i < Arguments.Count; i++)
             {
-                var arg = new UMethodInvokeArgumentExpression()
+                var arg = new TtMethodInvokeArgumentExpression()
                 {
                     OperationType = Arguments[i].OpType,
                 };
-                UExpressionBase exp;
+                TtExpressionBase exp;
                 GenArgumentCodes(i, ref data, out exp, methodInvokeExp, beforeSt, afterSt);
                 arg.Expression = exp;
                 methodInvokeExp.Arguments.Add(arg);
@@ -1437,11 +1437,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (MethodDesc.ReturnValue != null)
             {
                 var retName = GetReturnValueName();
-                data.CurrentStatements.Add(new UDebuggerSetWatchVariable()
+                data.CurrentStatements.Add(new TtDebuggerSetWatchVariable()
                 {
                     VariableType = MethodDesc.ReturnValue.VariableType,
                     VariableName = retName,
-                    VariableValue = new UVariableReferenceExpression(retName),
+                    VariableValue = new TtVariableReferenceExpression(retName),
                 });
             }
 
@@ -1453,7 +1453,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         private void BuildStatementsWithMethodMeta(NodePin pin, ref BuildCodeStatementsData data)
         {
             var method = Method;
-            var methodInvokeExp = new UMethodInvokeStatement()
+            var methodInvokeExp = new TtMethodInvokeStatement()
             {
                 MethodName = method.MethodName,
                 Method = method,
@@ -1469,7 +1469,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 // method is static
                 if(HostClass != null)
-                    methodInvokeExp.Host = new UClassReferenceExpression() { Class = HostClass.ClassType };
+                    methodInvokeExp.Host = new TtClassReferenceExpression() { Class = HostClass.ClassType };
             }
 
             if(method.HasReturnValue())
@@ -1484,11 +1484,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 if (type.IsPointer)
                     methodInvokeExp.IsUnsafe = true;
                 methodInvokeExp.ForceCastReturnType = type != method.ReturnType;
-                methodInvokeExp.ReturnValue = new UVariableDeclaration()
+                methodInvokeExp.ReturnValue = new TtVariableDeclaration()
                 {
-                    VariableType = new UTypeReference(type),
+                    VariableType = new TtTypeReference(type),
                     VariableName = retValName,
-                    InitValue = new UDefaultValueExpression(type),
+                    InitValue = new TtDefaultValueExpression(type),
                 };
                 if(!data.MethodDec.HasLocalVariable(retValName))
                     data.MethodDec.AddLocalVar(methodInvokeExp.ReturnValue);
@@ -1496,15 +1496,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             else if(method.IsAsync())
                 methodInvokeExp.IsAsync = true;
 
-            List<UStatementBase> beforeSt = new List<UStatementBase>();
-            List<UStatementBase> afterSt = new List<UStatementBase>();
+            List<TtStatementBase> beforeSt = new List<TtStatementBase>();
+            List<TtStatementBase> afterSt = new List<TtStatementBase>();
             for (int i=0; i<Arguments.Count; i++)
             {
-                var arg = new UMethodInvokeArgumentExpression()
+                var arg = new TtMethodInvokeArgumentExpression()
                 {
                     OperationType = Arguments[i].OpType,
                 };
-                UExpressionBase exp;
+                TtExpressionBase exp;
                 GenArgumentCodes(i, ref data, out exp, methodInvokeExp, beforeSt, afterSt);
                 arg.Expression = exp;
                 methodInvokeExp.Arguments.Add(arg);
@@ -1517,11 +1517,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (method.HasReturnValue())
             {
                 var retName = GetReturnValueName();
-                data.CurrentStatements.Add(new UDebuggerSetWatchVariable()
+                data.CurrentStatements.Add(new TtDebuggerSetWatchVariable()
                 {
-                    VariableType = new UTypeReference(Result.Tag as Rtti.UTypeDesc),
+                    VariableType = new TtTypeReference(Result.Tag as Rtti.UTypeDesc),
                     VariableName = retName,
-                    VariableValue = new UVariableReferenceExpression(retName),
+                    VariableValue = new TtVariableReferenceExpression(retName),
                 });
             }
 
@@ -1530,11 +1530,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (nextNode != null)
                 nextNode.BuildStatements(nextNodePin, ref data);
         }
-        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             if(pin == Result)
             {
-                return new UVariableReferenceExpression(GetReturnValueName());
+                return new TtVariableReferenceExpression(GetReturnValueName());
             }
             else
             {
@@ -1543,7 +1543,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     if (pin == Arguments[i].PinIn || 
                         pin == Arguments[i].PinOut)
                     {
-                        UExpressionBase retVal;
+                        TtExpressionBase retVal;
                         GenArgumentCodes(i, ref data, out retVal);
                         return retVal;
                     }
@@ -1613,7 +1613,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (iPin == Self)
             {
                 var testType = nodeExpr.GetOutPinType(oPin);
-                return UCodeGeneratorBase.CanConvert(testType, Method.DeclaringType);
+                return TtCodeGeneratorBase.CanConvert(testType, Method.DeclaringType);
             }
             for (int i = 0; i < Arguments.Count; i++)
             {
@@ -1624,7 +1624,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     {
                         case EMethodArgumentAttribute.Default:
                         case EMethodArgumentAttribute.In:
-                            return UCodeGeneratorBase.CanConvert(testType, Method.GetParameter(i).ParameterType);
+                            return TtCodeGeneratorBase.CanConvert(testType, Method.GetParameter(i).ParameterType);
                         default:
                             return (testType == Method.GetParameter(i).ParameterType);
                     }

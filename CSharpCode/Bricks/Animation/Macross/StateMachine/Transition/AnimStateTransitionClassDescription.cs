@@ -22,27 +22,27 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
             };
         }
 
-        public override List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
+        public override List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
             SupperClassNames.Clear();
             SupperClassNames.Add($"EngineNS.Animation.StateMachine.TtAnimStateTransition<{classBuildContext.MainClassDescription.ClassName}>");
-            UClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
+            TtClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
             FClassBuildContext transitionClassBuildContext = new FClassBuildContext()
             {
                 MainClassDescription = classBuildContext.MainClassDescription,
                 ClassDeclaration = thisClassDeclaration,
             };
             thisClassDeclaration.AddMethod(BuildOverrideCheckConditionMethod(ref transitionClassBuildContext));
-            return new List<UClassDeclaration>() { thisClassDeclaration };
+            return new List<TtClassDeclaration>() { thisClassDeclaration };
         }
 
-        public override UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
+        public override TtVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
             return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
 
         #region Internal AST Build
-        private UMethodDeclaration BuildOverrideCheckConditionMethod(ref FClassBuildContext classBuildContext)
+        private TtMethodDeclaration BuildOverrideCheckConditionMethod(ref FClassBuildContext classBuildContext)
         {
             return CheckConditionMethodDescription.BuildMethodDeclaration(ref classBuildContext);
         }

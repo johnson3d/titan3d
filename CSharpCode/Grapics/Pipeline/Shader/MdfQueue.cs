@@ -148,15 +148,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public unsafe NxRHI.FShaderCode* GetHLSLCode(string includeName, string includeOriName);
         public string GetUniqueText();
         public void Initialize(Graphics.Mesh.TtMaterialMesh materialMesh);
-        public void OnDrawCall(TtMdfQueueBase mdfQueue, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom);
+        public void OnDrawCall(TtMdfQueueBase mdfQueue, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom);
     }
 
     public abstract class TtMdfQueueBase : AuxPtrType<IMdfQueue>, IShaderCodeProvider
     {
         public List<IMeshModifier> Modifiers { get; } = new List<IMeshModifier>();
         public RName CodeName { get; set; }
-        public NxRHI.UShaderCode DefineCode { get; protected set; }
-        public NxRHI.UShaderCode SourceCode { get; protected set; }
+        public NxRHI.TtShaderCode DefineCode { get; protected set; }
+        public NxRHI.TtShaderCode SourceCode { get; protected set; }
         public object MdfDatas;
         public override void Dispose()
         {
@@ -265,7 +265,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             PreBuildMdfFunctions(ref codeString, codeBuilder);
             BuildMdfFunctions(ref codeString, codeBuilder);
 
-            SourceCode = new NxRHI.UShaderCode();
+            SourceCode = new NxRHI.TtShaderCode();
             SourceCode.TextCode = codeString;
         }
 
@@ -316,9 +316,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             OnDrawCallCallback = mdf.OnDrawCallCallback;
         }
         
-        public delegate void FOnDrawCall(NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom);
+        public delegate void FOnDrawCall(NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom);
         public FOnDrawCall OnDrawCallCallback = null;
-        public virtual void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public virtual void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             if (OnDrawCallCallback != null)
                 OnDrawCallCallback(drawcall, policy, atom);

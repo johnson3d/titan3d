@@ -25,7 +25,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
                 EPixelShaderInput.PST_Color,
             };
         }
-        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
+        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall)
         {
             //var gpuProgram = drawcall.Effect.GraphicsEffect;
             //var cbIndex = drawcall.mCoreObject.FindCBufferIndex("cbPerShadingEnv");
@@ -62,7 +62,7 @@ namespace EngineNS.Graphics.Pipeline.Shader.CommanShading
                 EPixelShaderInput.PST_Color,
             };
         }
-        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
+        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall)
         {
             
         }

@@ -82,10 +82,10 @@ namespace EngineNS.Bricks.Terrain.Grass
             public UInt32[] mData = null;
             public float[] mHeight = null;
 
-            public NxRHI.UVbView mDataVB;
-            public NxRHI.UVbView mHeightVB;
+            public NxRHI.TtVbView mDataVB;
+            public NxRHI.TtVbView mHeightVB;
 
-            public NxRHI.UVertexArray mAttachVBs = null;
+            public NxRHI.TtVertexArray mAttachVBs = null;
             public void Dispose()
             {
                 mDataVB?.Dispose();
@@ -176,7 +176,7 @@ namespace EngineNS.Bricks.Terrain.Grass
         public class UInstantSSBO : IDisposable
         {
             public FVSGrassData[] InstData;
-            public NxRHI.UBuffer InstantBuffer;
+            public NxRHI.TtBuffer InstantBuffer;
             public NxRHI.TtSrView InstantSRV;
             public bool IsDirty { get; private set; } = true;
             public void Dispose()
@@ -352,7 +352,7 @@ namespace EngineNS.Bricks.Terrain.Grass
             public NxRHI.TtEffectBinder cbPerGrassType;
             public NxRHI.TtEffectBinder VSGrassDataArray;
         }
-        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             var pat = GrassType.Patch;
             pat.SureCBuffer(drawcall.mCoreObject.GetGraphicsEffect(), ref pat.PatchCBuffer);

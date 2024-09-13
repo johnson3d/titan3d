@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_2999015458 Type="EngineNS.Bricks.CodeBuilder.UForLoopStatement@EngineCore">
-  <BeginExpression Type="EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore" Order="0" />
-  <EndExpression Type="EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore" Order="0" />
-  <IncludeEnd Type="System.Boolean@Unknown" Order="0" />
-  <LoopBody Type="EngineNS.Bricks.CodeBuilder.UStatementBase@EngineCore" Order="0" />
-  <LoopIndexName Type="System.String@Unknown" Order="0" />
-  <StepExpression Type="EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore" Order="0" />
-</Hash_2999015458>

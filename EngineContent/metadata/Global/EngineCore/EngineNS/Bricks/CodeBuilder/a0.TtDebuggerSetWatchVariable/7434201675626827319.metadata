@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_7434201675626827319 Type="EngineNS.Bricks.CodeBuilder.TtDebuggerSetWatchVariable@EngineCore">
+  <VariableName Type="System.String@Unknown" Order="0" />
+  <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore" Order="0" />
+  <VariableValue Type="EngineNS.Bricks.CodeBuilder.TtExpressionBase@EngineCore" Order="0" />
+</Hash_7434201675626827319>

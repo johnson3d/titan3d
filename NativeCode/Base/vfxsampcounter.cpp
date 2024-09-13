@@ -25,6 +25,7 @@ struct ThreadInstanceManager
 	}
 	void ClearAll()
 	{
+		VAutoVSLLock lk(SampMgrLocker);
 		for (auto i : AllInstance)
 		{
 			i->Cleanup();
@@ -56,9 +57,24 @@ struct ThreadInstanceManager
 			}
 		}
 	}
+
+	static ThreadInstanceManager* Instance;
+	static ThreadInstanceManager* GetInstance()
+	{
+		if (Instance == nullptr)
+			Instance = new ThreadInstanceManager();
+		return Instance;
+	}
+	static void FinalCleanup()
+	{
+		ASSERT(Instance != nullptr);
+		Instance->ClearAll();
+		Safe_Delete(Instance);
+	}
 };
 
-ThreadInstanceManager GInstanceOfSampMgrs;
+ThreadInstanceManager* ThreadInstanceManager::Instance = nullptr;
+
 thread_local AutoRef<v3dSampMgr> v3dSampMgr::ThreadInstance = nullptr;
 
 INT64 SampResult::Begin(v3dSampMgr* mgr, bool bPushParent)
@@ -73,7 +89,7 @@ void SampResult::End(v3dSampMgr* mgr, INT64 begin)
 
 void v3dSampMgr::FinalCleanup()
 {
-	GInstanceOfSampMgrs.ClearAll();
+	ThreadInstanceManager::FinalCleanup();
 }
 
 v3dSampMgr::v3dSampMgr()
@@ -83,7 +99,7 @@ v3dSampMgr::v3dSampMgr()
 	m_Freq = _GetPfmFreq();
 	UpdateCount = 0;
 
-	GInstanceOfSampMgrs.RegInstance(this);
+	ThreadInstanceManager::GetInstance()->RegInstance(this);
 }
 
 //#define PushSampStack
@@ -99,7 +115,7 @@ void v3dSampMgr::Cleanup()
 
 	m_CurSamp = NULL;
 
-	GInstanceOfSampMgrs.UnregInstance(this);
+	//GInstanceOfSampMgrs.UnregInstance(this);
 }
 
 SampResult* v3dSampMgr::FindSamp(const char* name)
@@ -128,7 +144,7 @@ SampResult* v3dSampMgr::PureFindSamp(const char* name)
 
 void v3dSampMgr::UpdateAllThreadInstance()
 {
-	for (auto i : GInstanceOfSampMgrs.AllInstance)
+	for (auto i : ThreadInstanceManager::GetInstance()->AllInstance)
 	{
 		i->Update();
 	}

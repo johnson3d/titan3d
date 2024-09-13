@@ -10,7 +10,7 @@
         public EngineNS.Macross.UMacrossBreak breaker_DispatchPixels_2032038249 = new EngineNS.Macross.UMacrossBreak("breaker_DispatchPixels_2032038249");
         public EngineNS.Macross.UMacrossBreak breaker_return_484331367 = new EngineNS.Macross.UMacrossBreak("breaker_return_484331367");
         EngineNS.Macross.UMacrossStackFrame mFrame_OnPerPixel = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("utest/pgc/testprog.macross", EngineNS.RName.ERNameType.Game));
-        public override void OnPerPixel(EngineNS.Bricks.Procedure.UPgcGraph graph,EngineNS.Bricks.Procedure.Node.UProgramNode node, EngineNS.Bricks.Procedure.UBufferComponent resuilt,System.Int32 x,System.Int32 y,System.Int32 z,System.Object tag)
+        public override void OnPerPixel(EngineNS.Bricks.Procedure.UPgcGraph graph,EngineNS.Bricks.Procedure.Node.UProgramNode node,EngineNS.Bricks.Procedure.UBufferComponent resuilt,System.Int32 x,System.Int32 y,System.Int32 z,System.Object tag)
         {
             using(var guard_OnPerPixel = new EngineNS.Macross.UMacrossStackGuard(mFrame_OnPerPixel))
             {

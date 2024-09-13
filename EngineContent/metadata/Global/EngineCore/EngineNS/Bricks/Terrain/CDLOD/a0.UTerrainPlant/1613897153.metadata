@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_1613897153 Type="EngineNS.Bricks.Terrain.CDLOD.UTerrainPlant@EngineCore">
-  <Density Type="System.Int32@Unknown" Order="0" />
-  <MaxBiasAngle Type="System.Single@Unknown" Order="0" />
-  <MaxScale Type="System.Single@Unknown" Order="0" />
-  <MeshName Type="EngineNS.RName@EngineCore" Order="0" />
-  <MinScale Type="System.Single@Unknown" Order="0" />
-</Hash_1613897153>

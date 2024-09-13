@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_6028541220637098383 Type="EngineNS.Graphics.Pipeline.Shader.UMaterial.NameRNamePair@EngineCore">
-  <Name Type="System.String@Unknown" Order="0" />
-  <ShaderType Type="System.String@Unknown" Order="0" />
-  <Value Type="EngineNS.RName@EngineCore" Order="0" />
-</Hash_6028541220637098383>

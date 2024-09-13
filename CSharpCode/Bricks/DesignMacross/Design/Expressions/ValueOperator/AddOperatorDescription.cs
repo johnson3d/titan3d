@@ -10,7 +10,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public TtAddOperatorDescription()
         {
             Name = "Add";
-            Op = UBinaryOperatorExpression.EBinaryOperation.Add;
+            Op = TtBinaryOperatorExpression.EBinaryOperation.Add;
         }
     }
 }

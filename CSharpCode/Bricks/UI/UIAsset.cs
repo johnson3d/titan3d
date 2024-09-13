@@ -91,7 +91,7 @@ namespace EngineNS.UI
 
             MacrossEditor.AssetName = name;
             MacrossEditor.DefClass.ClassName = name.PureName;
-            MacrossEditor.DefClass.Namespace = new Bricks.CodeBuilder.UNamespaceDeclaration(IO.TtFileManager.GetParentPathName(AssetName.Name).TrimEnd('/').Replace('/', '.'));
+            MacrossEditor.DefClass.Namespace = new Bricks.CodeBuilder.TtNamespaceDeclaration(IO.TtFileManager.GetParentPathName(AssetName.Name).TrimEnd('/').Replace('/', '.'));
             MacrossEditor.DefClass.SupperClassNames.Add(typeof(TtUIMacrossBase).FullName);
             MacrossEditor.SaveClassGraph(AssetName);
             MacrossEditor.GenerateCode();

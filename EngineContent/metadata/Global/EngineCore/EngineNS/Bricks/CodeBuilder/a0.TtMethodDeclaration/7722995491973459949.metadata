@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_7722995491973459949 Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration@EngineCore">
+  <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore,&gt;@Unknown" Order="0" />
+  <AsyncType Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration.EAsyncType@EngineCore" Order="0" />
+  <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Order="0" />
+  <Comment Type="EngineNS.Bricks.CodeBuilder.TtCommentStatement@EngineCore" Order="0" />
+  <IsOverride Type="System.Boolean@Unknown" Order="0" />
+  <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Order="0" />
+  <MethodName Type="System.String@Unknown" Order="0" />
+  <ReturnValue Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore" Order="0" />
+  <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Order="0" />
+</Hash_7722995491973459949>

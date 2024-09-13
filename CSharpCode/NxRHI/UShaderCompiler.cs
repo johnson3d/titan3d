@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.NxRHI
 {
-    public class UShaderCode : AuxPtrType<NxRHI.FShaderCode>
+    public class TtShaderCode : AuxPtrType<NxRHI.FShaderCode>
     {
-        public UShaderCode()
+        public TtShaderCode()
         {
             mCoreObject = FShaderCode.CreateInstance();
         }
@@ -22,9 +22,9 @@ namespace EngineNS.NxRHI
             }
         }
     }
-    public class UShaderDefinitions : AuxPtrType<NxRHI.IShaderDefinitions> , IDisposable
+    public class TtShaderDefinitions : AuxPtrType<NxRHI.IShaderDefinitions> , IDisposable
     {
-        public UShaderDefinitions()
+        public TtShaderDefinitions()
         {
             mCoreObject = IShaderDefinitions.CreateInstance();
         }
@@ -66,7 +66,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.RemoveDefine(name);
         }
-        public void MergeDefinitions(UShaderDefinitions def)
+        public void MergeDefinitions(TtShaderDefinitions def)
         {
             mCoreObject.MergeDefinitions(def.mCoreObject);
         }
@@ -106,7 +106,7 @@ namespace EngineNS.NxRHI
             mCoreObject.SetCallback(fn);
         }
         
-        public bool CompileShader(TtShaderDesc shaderDesc, string shader, string entry, EShaderType type, string sm, UShaderDefinitions defines, EShaderLanguage sl, bool bDebugShader, string extHlslVersion, string dxcArgs)
+        public bool CompileShader(TtShaderDesc shaderDesc, string shader, string entry, EShaderType type, string sm, TtShaderDefinitions defines, EShaderLanguage sl, bool bDebugShader, string extHlslVersion, string dxcArgs)
         {
             return mCoreObject.CompileShader(shaderDesc.mCoreObject, shader, entry, type, sm, defines.mCoreObject, sl, bDebugShader, extHlslVersion, dxcArgs);
         }

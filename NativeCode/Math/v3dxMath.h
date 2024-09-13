@@ -1213,6 +1213,12 @@ extern "C"
 								  float zn,
 								  float zf);
 
+	 VFX_API v3dMatrix4_t* v3dxMatrix4Perspective_InvZ(v3dMatrix4_t* pOut,
+								 float fovy,
+								 float Aspect,
+								 float zn,
+								 float zf);
+
 	 VFX_API v3dMatrix4_t* v3dxMatrix4Ortho(
 								  v3dMatrix4_t* pOut,
 								  float w,

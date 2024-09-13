@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace EngineNS.Graphics.Pipeline.Deferred
 {
-    public class USdfOpaqueShading : Shader.TtGraphicsShadingEnv
+    public class TtSdfOpaqueShading : Shader.TtGraphicsShadingEnv
     {
         public UPermutationItem DisableAO
         {
@@ -23,7 +23,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get;
             set;
         }
-        public USdfOpaqueShading()
+        public TtSdfOpaqueShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/forword/ForwordOpaque.cginc", RName.ERNameType.Engine);
 
@@ -63,9 +63,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             };
         }
     }
-    public class USdfTranslucentShading : Shader.TtGraphicsShadingEnv
+    public class TtSdfTranslucentShading : Shader.TtGraphicsShadingEnv
     {
-        public USdfTranslucentShading()
+        public TtSdfTranslucentShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Forword/ForwordTranslucent.cginc", RName.ERNameType.Engine);
         }
@@ -88,14 +88,15 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
     }
     [Bricks.CodeBuilder.ContextMenu("SdfForword", "Deferred\\SdfForword", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class USdfForwordNode : Common.UBasePassNode
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.USdfForwordNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.USdfForwordNode" })]
+    public class TtSdfForwordNode : Common.TtBasePassNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
         public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color");
         public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth");
         public TtRenderGraphPin VoxelPinOut = TtRenderGraphPin.CreateOutput("Voxel", true, EPixelFormat.PXF_R8G8B8A8_UNORM);
 
-        public USdfForwordNode()
+        public TtSdfForwordNode()
         {
             Name = "USdfForwordNode";
         }
@@ -106,10 +107,10 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
             AddOutput(VoxelPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         }
-        public USdfOpaqueShading mOpaqueShading;
-        public USdfTranslucentShading mTranslucentShading;
+        public TtSdfOpaqueShading mOpaqueShading;
+        public TtSdfTranslucentShading mTranslucentShading;
         public TtLayerDrawBuffers LayerBasePass = new TtLayerDrawBuffers();
-        public NxRHI.URenderPass RenderPass;
+        public NxRHI.TtRenderPass RenderPass;
         public TtCpuCullingNode CpuCullNode = null;
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
@@ -121,8 +122,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             CreateGBuffers(policy, ColorPinInOut.Attachement.Format);
 
-            mOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<USdfOpaqueShading>();
-            mTranslucentShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<USdfTranslucentShading>();
+            mOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSdfOpaqueShading>();
+            mTranslucentShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtSdfTranslucentShading>();
 
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
@@ -221,7 +222,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(USdfForwordNode), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtSdfForwordNode), nameof(TickLogic));
                 return mScopeTick;
             }
         }

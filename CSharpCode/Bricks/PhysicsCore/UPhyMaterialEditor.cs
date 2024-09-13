@@ -67,7 +67,7 @@ namespace EngineNS.Bricks.PhysicsCore
 
             var rightId = id;
             uint leftId = 0;
-            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Left", mDockKeyClass), leftId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Right", mDockKeyClass), rightId);
@@ -82,7 +82,7 @@ namespace EngineNS.Bricks.PhysicsCore
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            var result = EGui.UIProxy.DockProxy.BeginMainForm(Material.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(GetWindowsName(), this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
             if (result)
             {
@@ -137,6 +137,11 @@ namespace EngineNS.Bricks.PhysicsCore
         public void OnEvent(in Bricks.Input.Event e)
         {
             //throw new NotImplementedException();
+        }
+
+        public string GetWindowsName()
+        {
+            return Material.AssetName.Name;
         }
     }
 }

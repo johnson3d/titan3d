@@ -38,7 +38,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
             this.UpdatePermutation();
         }
-        protected override void EnvShadingDefines(in FPermutationId id, UShaderDefinitions defines)
+        protected override void EnvShadingDefines(in FPermutationId id, TtShaderDefinitions defines)
         {
             base.EnvShadingDefines(in id, defines);
 
@@ -46,7 +46,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             defines.AddDefine("UpSampleMode_Bilinear", (int)EUpSampleMode.Bilinear);
             defines.AddDefine("UpSampleMode_EASU", (int)EUpSampleMode.EASU);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, TtRenderPolicy policy)
+        public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, TtRenderPolicy policy)
         {
             var aaNode = drawcall.TagObject as TtFsrNode;
             if (aaNode == null)
@@ -94,13 +94,13 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
             this.UpdatePermutation();
         }
-        protected override void EnvShadingDefines(in FPermutationId id, UShaderDefinitions defines)
+        protected override void EnvShadingDefines(in FPermutationId id, TtShaderDefinitions defines)
         {
             base.EnvShadingDefines(in id, defines);
 
             defines.AddDefine("USE_RCAS", (int)1);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, TtRenderPolicy policy)
+        public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, TtRenderPolicy policy)
         {
             var aaNode = drawcall.TagObject as TtFsrNode;
 
@@ -138,11 +138,11 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public TtRenderGraphPin RcasPinOut = TtRenderGraphPin.CreateOutput("Rcas", false, EPixelFormat.PXF_R8G8B8A8_UNORM);
         [Rtti.Meta]
         public float Scale { get; set; } = 2.0f;
-        public NxRHI.UCbView CBShadingEnv;
+        public NxRHI.TtCbView CBShadingEnv;
         public TtFsrUpSampleShading UpSampleShadingEnv;
         public TtRCASShading RCASShading;
-        private NxRHI.UComputeDraw UpSampleDrawcall;
-        private NxRHI.UComputeDraw RCASDrawcall;
+        private NxRHI.TtComputeDraw UpSampleDrawcall;
+        private NxRHI.TtComputeDraw RCASDrawcall;
         public TtFsrNode()
         {
             Name = "FsrNode";

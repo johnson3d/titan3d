@@ -203,7 +203,7 @@ namespace EngineNS.GamePlay.Scene
             var result = EGui.UIProxy.DockProxy.BeginMainForm($"Capture:{this.NodeName}", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (result)
             {
-                if (ImGuiAPI.BeginChild("FinalTexture", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                if (ImGuiAPI.BeginChild("FinalTexture", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     var pos = ImGuiAPI.GetWindowPos();
                     var drawlist = new ImDrawList(ImGuiAPI.GetWindowDrawList());

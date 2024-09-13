@@ -13,7 +13,7 @@ namespace EngineNS.EGui.Slate
         NxRHI.FScissorRect mScissorRect = new NxRHI.FScissorRect();
         public NxRHI.FScissorRect ScissorRect { get=> mScissorRect; }
 
-        public NxRHI.URenderPass SwapChainPassDesc;
+        public NxRHI.TtRenderPass SwapChainPassDesc;
 
         protected GamePlay.UAxis mAxis;
         public GamePlay.UAxis Axis

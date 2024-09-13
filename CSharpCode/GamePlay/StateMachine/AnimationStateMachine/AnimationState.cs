@@ -11,11 +11,11 @@ using NPOI.SS.Formula.Functions;
 
 namespace EngineNS.GamePlay.StateMachine.AnimationStateMachine
 {
-    public class TtAnimationState<T> : TtTimedState<T>, IAnimationState
+    public class TtAnimationState<T> : TtTimedState<T>, IAnimationState<T>
     {
         public Animation.Asset.TtAnimationClip Animation { get; set; }
-        public TtExtractPoseFromClipCommand mExtractPoseFromClipCommand { get; set; } = null;
-        internal IBlendTree<TtLocalSpaceRuntimePose> BlendTreeRoot = null;
+        public TtExtractPoseFromClipCommand<T> mExtractPoseFromClipCommand { get; set; } = null;
+        internal IBlendTree<T, TtLocalSpaceRuntimePose> BlendTreeRoot = null;
 
         public TtAnimationState(TtGamePlayStateMachine<T> stateMachine, string name = "AnimationState") : base(stateMachine, name)
         {
@@ -27,7 +27,7 @@ namespace EngineNS.GamePlay.StateMachine.AnimationStateMachine
             mExtractPoseFromClipCommand.Time = StateTime;
         }
 
-        public TtAnimationCommand<TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
+        public TtAnimationCommand<T, TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
             context.AddCommand(context.TreeDepth, mExtractPoseFromClipCommand);
             context.TreeDepth++;

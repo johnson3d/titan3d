@@ -34,12 +34,12 @@ namespace EngineNS.Bricks.StateMachine.Macross
             compoundState.Parent = null;
             return true;
         }
-        public override List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
+        public override List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
             SupperClassNames.Clear();
             SupperClassNames.Add($"EngineNS.Bricks.StateMachine.TimedSM.TtTimedStateMachine<{classBuildContext.MainClassDescription.ClassName}>");
-            List<UClassDeclaration> classDeclarationsBuilded = new List<UClassDeclaration>();
-            UClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
+            List<TtClassDeclaration> classDeclarationsBuilded = new();
+            TtClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
 
 
             foreach (var compoundState in CompoundStates)
@@ -54,45 +54,45 @@ namespace EngineNS.Bricks.StateMachine.Macross
             return classDeclarationsBuilded;
         }
 
-        public override UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
+        public override TtVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
             return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
 
-        public override void GenerateCodeInClass(UClassDeclaration classDeclaration)
+        public override void GenerateCodeInClass(TtClassDeclaration classDeclaration, ref FClassBuildContext classBuildContext)
         {
-            base.GenerateCodeInClass(classDeclaration);
+            base.GenerateCodeInClass(classDeclaration, ref classBuildContext);
         }
 
         #region Internal AST Build
-        private UMethodDeclaration BuildOverrideInitializeMethod()
+        private TtMethodDeclaration BuildOverrideInitializeMethod()
         {
             var methodDeclaration = TtStateMachineASTBuildUtil.CreateOverridedInitMethodStatement();
 
             foreach (var compoundState in CompoundStates)
             {
-                UAssignOperatorStatement compoundStateAssign = new();
-                compoundStateAssign.To = new UVariableReferenceExpression(compoundState.VariableName);
-                compoundStateAssign.From = new UCreateObjectExpression(compoundState.VariableType.TypeFullName);
+                TtAssignOperatorStatement compoundStateAssign = new();
+                compoundStateAssign.To = new TtVariableReferenceExpression(compoundState.VariableName);
+                compoundStateAssign.From = new TtCreateObjectExpression(compoundState.VariableType.TypeFullName);
                 methodDeclaration.MethodBody.Sequence.Add(compoundStateAssign);
 
-                UAssignOperatorStatement stateMachineAssign = new();
-                stateMachineAssign.To = new UVariableReferenceExpression("StateMachine", new UVariableReferenceExpression(compoundState.VariableName));
-                stateMachineAssign.From = new USelfReferenceExpression();
+                TtAssignOperatorStatement stateMachineAssign = new();
+                stateMachineAssign.To = new TtVariableReferenceExpression("StateMachine", new TtVariableReferenceExpression(compoundState.VariableName));
+                stateMachineAssign.From = new TtSelfReferenceExpression();
                 methodDeclaration.MethodBody.Sequence.Add(stateMachineAssign);
             }
             foreach (var compoundState in CompoundStates)
             {
-                var initializeMethodInvoke = new UMethodInvokeStatement();
-                initializeMethodInvoke.Host = new UVariableReferenceExpression(compoundState.VariableName);
+                var initializeMethodInvoke = new TtMethodInvokeStatement();
+                initializeMethodInvoke.Host = new TtVariableReferenceExpression(compoundState.VariableName);
                 initializeMethodInvoke.MethodName = "Initialize";
-                initializeMethodInvoke.Arguments.Add(new UMethodInvokeArgumentExpression { Expression = new UVariableReferenceExpression("context") });
+                initializeMethodInvoke.Arguments.Add(new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression("context") });
                 initializeMethodInvoke.IsAsync = true;
                 methodDeclaration.MethodBody.Sequence.Add(initializeMethodInvoke);
             }
             var returnValueAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
-                                        new UVariableReferenceExpression(methodDeclaration.ReturnValue.VariableName),
-                                        new UPrimitiveExpression(true));
+                                        new TtVariableReferenceExpression(methodDeclaration.ReturnValue.VariableName),
+                                        new TtPrimitiveExpression(true));
             methodDeclaration.MethodBody.Sequence.Add(returnValueAssign);
             return methodDeclaration;
         }

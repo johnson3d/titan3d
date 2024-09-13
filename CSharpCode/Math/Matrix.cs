@@ -240,12 +240,13 @@ namespace EngineNS
         /// <summary>
         /// 标准矩阵
         /// </summary>
-        public readonly static Matrix Identity = InitStaticMatrix();
+        public readonly static Matrix Identity = InitIdentityMatrix();
+        public readonly static Matrix Zero = InitZeroMatrix();
         /// <summary>
         /// 初始化矩阵为单位矩阵
         /// </summary>
         /// <returns>返回单位矩阵</returns>
-        public static Matrix InitStaticMatrix()
+        public static Matrix InitIdentityMatrix()
         {
             Matrix matrix;
             unsafe
@@ -261,6 +262,20 @@ namespace EngineNS
             matrix.M22 = 1.0f;
             matrix.M33 = 1.0f;
             matrix.M44 = 1.0f;
+            return matrix;
+        }
+        public static Matrix InitZeroMatrix()
+        {
+            Matrix matrix;
+            unsafe
+            {
+                Matrix* pMatrix = &matrix;
+                float* pFloat = (float*)pMatrix;
+                for (int i = 0; i < 16; i++)
+                {
+                    pFloat[i] = 0;
+                }
+            }
             return matrix;
         }
 

@@ -492,23 +492,23 @@ namespace EngineNS.UI.Bind
                             void ConfigSetMethod(in ExternalInfo info)
                             {
                                 //var setMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, true);
-                                var setMethodDesc = new UMethodDeclaration();
+                                var setMethodDesc = new TtMethodDeclaration();
                                 //setMethodDesc.MethodName = setMethodName;
                                 //setMethodDesc.GetDisplayNameFunc = bindObj.GetMethodDisplayName;
-                                setMethodDesc.Arguments.Add(new UMethodArgumentDeclaration()
+                                setMethodDesc.Arguments.Add(new TtMethodArgumentDeclaration()
                                 {
                                     VariableName = "obj",
-                                    VariableType = new UTypeReference(typeof(IBindableObject)),
+                                    VariableType = new TtTypeReference(typeof(IBindableObject)),
                                 });
-                                setMethodDesc.Arguments.Add(new UMethodArgumentDeclaration()
+                                setMethodDesc.Arguments.Add(new TtMethodArgumentDeclaration()
                                 {
                                     VariableName = "prop",
-                                    VariableType = new UTypeReference(typeof(TtBindableProperty)),
+                                    VariableType = new TtTypeReference(typeof(TtBindableProperty)),
                                 });
-                                setMethodDesc.Arguments.Add(new UMethodArgumentDeclaration()
+                                setMethodDesc.Arguments.Add(new TtMethodArgumentDeclaration()
                                 {
                                     VariableName = "valueIn",
-                                    VariableType = new UTypeReference(info.PropertyDescriptor.PropertyType),
+                                    VariableType = new TtTypeReference(info.PropertyDescriptor.PropertyType),
                                     OperationType = EMethodArgumentAttribute.In,
                                 });
                                 bindObj.InitialMethodDeclaration(info.PropertyDescriptor.Name, setMethodDesc, true);
@@ -519,24 +519,24 @@ namespace EngineNS.UI.Bind
                             void ConfigGetMethod(in ExternalInfo info)
                             {
                                 //var getMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, false);
-                                var getMethodDesc = new UMethodDeclaration();
+                                var getMethodDesc = new TtMethodDeclaration();
                                 //getMethodDesc.MethodName = getMethodName;
                                 //getMethodDesc.GetDisplayNameFunc = bindObj.GetMethodDisplayName;
-                                getMethodDesc.ReturnValue = new UVariableDeclaration()
+                                getMethodDesc.ReturnValue = new TtVariableDeclaration()
                                 {
                                     VariableName = "tempReturnValue",
-                                    VariableType = new UTypeReference(info.PropertyDescriptor.PropertyType),
-                                    InitValue = new UDefaultValueExpression(info.PropertyDescriptor.PropertyType),
+                                    VariableType = new TtTypeReference(info.PropertyDescriptor.PropertyType),
+                                    InitValue = new Bricks.CodeBuilder.TtDefaultValueExpression(info.PropertyDescriptor.PropertyType),
                                 };
-                                getMethodDesc.Arguments.Add(new UMethodArgumentDeclaration()
+                                getMethodDesc.Arguments.Add(new TtMethodArgumentDeclaration()
                                 {
                                     VariableName = "obj", 
-                                    VariableType = new UTypeReference(typeof(IBindableObject)),
+                                    VariableType = new TtTypeReference(typeof(IBindableObject)),
                                 });
-                                getMethodDesc.Arguments.Add(new UMethodArgumentDeclaration()
+                                getMethodDesc.Arguments.Add(new TtMethodArgumentDeclaration()
                                 {
                                     VariableName = "prop",
-                                    VariableType = new UTypeReference(typeof(TtBindableProperty)),
+                                    VariableType = new TtTypeReference(typeof(TtBindableProperty)),
                                 });
                                 bindObj.InitialMethodDeclaration(info.PropertyDescriptor.Name, getMethodDesc, false);
                                 var getGraph = host.HostEditor.UIAsset.MacrossEditor.AddMethod(getMethodDesc);

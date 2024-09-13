@@ -29,7 +29,7 @@ namespace EngineNS.Bricks.DataSet
             return null;
         }
         partial void GetCellText(int row, int col, ref string outText);
-        public void CheckSheetLinks(UDataSet dataSet, int index)
+        public void CheckSheetLinks(TtDataSet dataSet, int index)
         {
             var data = GetData(index);
             if (data == null)

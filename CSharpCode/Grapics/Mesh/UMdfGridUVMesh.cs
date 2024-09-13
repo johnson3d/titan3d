@@ -43,7 +43,7 @@ namespace EngineNS.Graphics.Mesh
         {
 
         }
-        public unsafe void OnDrawCall(TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             UMdfGridUVMesh mdfQueue = mdfQueue1 as UMdfGridUVMesh;
             var binder = drawcall.FindBinder("cbGridUVMesh");
@@ -61,7 +61,7 @@ namespace EngineNS.Graphics.Mesh
 
     public class UMdfGridUVMesh : Graphics.Pipeline.Shader.TtMdfQueue1<TtGridUVModifier>
     {
-        public NxRHI.UCbView PerGridUVMeshCBuffer { get; set; }
+        public NxRHI.TtCbView PerGridUVMeshCBuffer { get; set; }
         public void SetUVMinAndMax(in Vector2 min, in Vector2 max)
         {
             if (PerGridUVMeshCBuffer == null)

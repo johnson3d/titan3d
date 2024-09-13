@@ -21,6 +21,7 @@ namespace EngineNS.Editor.Forms
 
         public Graphics.Mesh.TtMaterialMesh Mesh;
         public Editor.TtPreviewViewport PreviewViewport = new Editor.TtPreviewViewport();
+        [Category("Option")]
         public TtRenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
         public EGui.Controls.PropertyGrid.PropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
@@ -85,7 +86,9 @@ namespace EngineNS.Editor.Forms
         {
             viewport.RenderPolicy = policy;
 
-            var subMesh = Mesh.GetMeshPrimitives(0);            
+            var subMesh = Mesh.GetMeshPrimitives(0);
+            if (subMesh == null)
+                return;
             var noExtName = subMesh.AssetName.Name.Substring(0, subMesh.AssetName.Name.Length - subMesh.AssetName.ExtName.Length);
             var rn = RName.GetRName(noExtName + DistanceField.TtSdfAsset.AssetExt, Mesh.AssetName.RNameType);
             MeshSdfAsset = await TtEngine.Instance.SdfAssetManager.GetSdfAsset(rn);
@@ -103,7 +106,7 @@ namespace EngineNS.Editor.Forms
             var boxCenter = MeshSdfAsset.LocalSpaceMeshBounds.GetCenter();
             var boxExtent = MeshSdfAsset.LocalSpaceMeshBounds.GetExtent();
 
-            var sdfCamera = new UCamera();
+            var sdfCamera = new TtCamera();
             var center = mCurrentMeshNode.Location + boxCenter.AsDVector();
             var eye = center - new DVector3(0, 0, boxExtent.Z);
             sdfCamera.LookAtLH(eye, center, Vector3.Up);
@@ -218,6 +221,7 @@ namespace EngineNS.Editor.Forms
 
             GridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             GridNode.ViewportSlate = this.PreviewViewport;
+            this.RenderPolicy.LookNodeName = "DirLightingNode";
         }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
@@ -261,7 +265,6 @@ namespace EngineNS.Editor.Forms
             MeshPropGrid.Target = Mesh;
             EditorPropGrid.Target = this;
             TtEngine.Instance.TickableManager.AddTickable(this);
-
             return true;
         }
         public void OnCloseEditor()
@@ -280,7 +283,7 @@ namespace EngineNS.Editor.Forms
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
+            IsDrawing = EGui.UIProxy.DockProxy.BeginMainForm(GetWindowsName(), this, ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
             if (IsDrawing)
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
@@ -324,10 +327,10 @@ namespace EngineNS.Editor.Forms
             uint leftId = 0;
             uint rightUpId = 0;
             uint rightDownId = 0;
-            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.8f, ref middleId, ref rightId);
-            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Down, 0.5f, ref rightDownId, ref rightUpId);
-            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
-            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Left, 0.8f, ref middleId, ref rightId);
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Down, 0.5f, ref rightDownId, ref rightUpId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir.ImGuiDir_Down, 0.3f, ref downId, ref middleId);
+            ImGuiAPI.DockBuilderSplitNode(middleId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref middleId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), middleId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("sdfPreview", mDockKeyClass), middleId);
@@ -397,13 +400,25 @@ namespace EngineNS.Editor.Forms
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "MeshDetails", ref ShowMeshPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
-                MeshPropGrid.OnDraw(true, false, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize);
+                MeshPropGrid.OnDraw(true, false, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar, 
+                    ImGuiChildFlags_.ImGuiChildFlags_AlwaysAutoResize | ImGuiChildFlags_.ImGuiChildFlags_AutoResizeX | ImGuiChildFlags_.ImGuiChildFlags_AutoResizeY);
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }
         bool ShowPreview = true;
         protected unsafe void DrawPreview()
         {
+            #region mesh
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Preview", ref ShowPreview, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if (show)
+            {
+                PreviewViewport.ViewportType = Graphics.Pipeline.TtViewportSlate.EViewportType.ChildWindow;
+                PreviewViewport.OnDraw();
+            }
+            this.PreviewViewport.Visible = show;
+            EGui.UIProxy.DockProxy.EndPanel(show);
+            #endregion
+
             #region sdf
             var showSdf = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "sdfPreview", ref ShowPreview, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (showSdf)
@@ -414,16 +429,6 @@ namespace EngineNS.Editor.Forms
             sdfViewport.Visible = true;
             EGui.UIProxy.DockProxy.EndPanel(showSdf);
             #endregion
-
-            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "Preview", ref ShowPreview, ImGuiWindowFlags_.ImGuiWindowFlags_None);
-            if (show)
-            {
-                PreviewViewport.ViewportType = Graphics.Pipeline.TtViewportSlate.EViewportType.ChildWindow;
-                PreviewViewport.OnDraw();
-            }
-            this.PreviewViewport.Visible = show;
-            EGui.UIProxy.DockProxy.EndPanel(show);
-
         }
         #endregion
 
@@ -502,6 +507,11 @@ namespace EngineNS.Editor.Forms
         {
             PreviewViewport.TickSync(ellapse);
             sdfViewport.TickSync(ellapse);
+        }
+
+        public string GetWindowsName()
+        {
+            return AssetName.Name;
         }
         #endregion
     }

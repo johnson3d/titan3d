@@ -18,7 +18,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
+        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall)
         {
             //var cbIndex = drawcall.mCoreObject.FindCBufferIndex("cbPerShadingEnv");
             //if (cbIndex != 0xFFFFFFFF)
@@ -33,7 +33,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             //    drawcall.mCoreObject.BindCBufferAll(cbIndex, PerShadingCBuffer.mCoreObject.Ptr);
             //}
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
@@ -52,7 +52,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
     [Bricks.CodeBuilder.ContextMenu("PickBlur", "Pick\\PickBlur", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UPickBlurNode : USceenSpaceNode
+    public class UPickBlurNode : TtSceenSpaceNode
     {
         public TtRenderGraphPin PickedPinIn = TtRenderGraphPin.CreateInput("Picked");
         public UPickBlurNode()
@@ -88,7 +88,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             float scaleFactor = 1.0f;
-            var hitProxyNode = policy.FindFirstNode<UHitproxyNode>();
+            var hitProxyNode = policy.FindFirstNode<TtHitproxyNode>();
             if (hitProxyNode != null)
             {
                 scaleFactor = hitProxyNode.ScaleFactor;
@@ -101,7 +101,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
-            var PickedManager = policy.GetOptionData("PickedManager") as UPickedProxiableManager;
+            var PickedManager = policy.GetOptionData("PickedManager") as TtPickedProxiableManager;
             if (PickedManager != null && PickedManager.PickedProxies.Count == 0)
                 return;
             base.TickLogic(world, policy, bClear);

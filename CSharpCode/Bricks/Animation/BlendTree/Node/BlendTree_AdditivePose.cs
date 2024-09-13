@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Text;
 using EngineNS.Animation.Command;
 using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
+using EngineNS.Thread.Async;
 
 namespace EngineNS.Animation.BlendTree.Node
 {
-    public class TtAdditivePoseCommand : TtAnimationCommand<TtLocalSpaceRuntimePose>
+    public class TtAdditivePoseCommand<S> : TtAnimationCommand<S, TtLocalSpaceRuntimePose>
     {
-        public TtAnimationCommand<TtLPosMRotRuntimePose> AdditiveNode { get; set; }
-        public TtAnimationCommand<TtLocalSpaceRuntimePose> BaseNode { get; set; }
+        public TtAnimationCommand<S, TtLPosMRotRuntimePose> AdditiveNode { get; set; }
+        public TtAnimationCommand<S, TtLocalSpaceRuntimePose> BaseNode { get; set; }
         TtLPosMRotRuntimePose mLPosMRotBasePose = null;
         TtLPosMRotRuntimePose mLPosMRotResultPose = null;
         public TtAdditivePoseCommandDesc Desc { get; set; }
@@ -33,17 +34,25 @@ namespace EngineNS.Animation.BlendTree.Node
     {
         public float Alpha { get; set; }
     }
-    public class TtBlendTree_AdditivePose : TtBlendTree<TtLocalSpaceRuntimePose>
+    public class TtBlendTree_AdditivePose<S> : TtBlendTree<S, TtLocalSpaceRuntimePose>
     {
-        public IBlendTree<TtLPosMRotRuntimePose> AdditiveNode { get; set; }
-        public IBlendTree<TtLocalSpaceRuntimePose> BaseNode { get; set; }
+        public IBlendTree<S, TtLPosMRotRuntimePose> AdditiveNode { get; set; }
+        public IBlendTree<S, TtLocalSpaceRuntimePose> BaseNode { get; set; }
         public Func<float> EvaluateAlpha { get; set; } = null;
 
-        TtAdditivePoseCommand mAnimationCommand = null;
-        public override TtAnimationCommand<TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
+        TtAdditivePoseCommand<S> mAnimationCommand = null;
+        public override TtTask<bool> Initialize(FAnimBlendTreeContext context)
         {
-            mAnimationCommand = new TtAdditivePoseCommand();
+            mAnimationCommand = new TtAdditivePoseCommand<S>();
             mAnimationCommand.Desc = new TtAdditivePoseCommandDesc();
+            return base.Initialize(context);
+        }
+        public override TtAnimationCommand<S, TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
+        {
+            System.Diagnostics.Debug.Assert(AdditiveNode != null && BaseNode != null);
+            if (AdditiveNode == null || BaseNode == null)
+                return null;
+
             context.AddCommand(context.TreeDepth, mAnimationCommand);
 
             context.TreeDepth++;

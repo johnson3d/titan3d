@@ -23,9 +23,9 @@ namespace EngineNS.Graphics.Pipeline
         public TtRenderGraphNode HostNode { get; set; }
         public T GetNakedHostNode<T>() where T : TtRenderGraphNode
         {
-            if (HostNode is UFindNode)
+            if (HostNode is TtFindNode)
             {
-                return (HostNode as UFindNode).GetReferNode() as T;
+                return (HostNode as TtFindNode).GetReferNode() as T;
             }
             else
             {

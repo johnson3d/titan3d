@@ -1,1 +1,0 @@
-EngineNS.Bricks.RenderPolicyEditor.URenderPolicyAsset@EngineCore

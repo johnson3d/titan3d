@@ -7,7 +7,8 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class USceenSpaceNode : TtRenderGraphNode
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.USceenSpaceNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.USceenSpaceNode" })]
+    public class TtSceenSpaceNode : TtRenderGraphNode
     {
         public override void Dispose()
         {
@@ -17,7 +18,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             base.Dispose();
         }
         public TtRenderGraphPin ResultPinOut = TtRenderGraphPin.CreateOutput("Result", true, EPixelFormat.PXF_R8G8B8A8_UNORM);
-        public USceenSpaceNode()
+        public TtSceenSpaceNode()
         {
             Name = "USceenSpaceNode";
         }
@@ -30,7 +31,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public float OutputScaleFactor { get; set; } = 1.0f;
         public Graphics.Mesh.TtMesh ScreenMesh;
         public TtGraphicsBuffers GBuffers { get; protected set; } = new TtGraphicsBuffers();
-        public NxRHI.URenderPass RenderPass;
+        public NxRHI.TtRenderPass RenderPass;
         public string DebugName;
         //public override Graphics.Pipeline.Shader.UGraphicsShadingEnv GetPassShading(URenderPolicy.EShadingType type = URenderPolicy.EShadingType.Count, Graphics.Mesh.TtMesh.TtAtom atom = null) abstract;
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
@@ -119,7 +120,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(USceenSpaceNode), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtSceenSpaceNode), nameof(TickLogic));
                 return mScopeTick;
             }
         }

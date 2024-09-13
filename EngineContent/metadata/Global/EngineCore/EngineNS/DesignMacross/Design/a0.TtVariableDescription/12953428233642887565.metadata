@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_12953428233642887565 Type="EngineNS.DesignMacross.Design.TtVariableDescription@EngineCore">
+  <Comment Type="EngineNS.Bricks.CodeBuilder.TtCommentStatement@EngineCore" Order="0" />
+  <Id Type="System.Guid@Unknown" Order="0" />
+  <InitValue Type="EngineNS.Bricks.CodeBuilder.TtExpressionBase@EngineCore" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore" Order="0" />
+  <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Order="0" />
+</Hash_12953428233642887565>

@@ -9,9 +9,9 @@ using EngineNS.GamePlay;
 
 namespace EngineNS.Graphics.Pipeline.Deferred
 {
-    public class UDeferredOpaque : Shader.TtGraphicsShadingEnv
+    public class TtDeferredOpaque : Shader.TtGraphicsShadingEnv
     {
-        public UDeferredOpaque()
+        public TtDeferredOpaque()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Deferred/DeferredOpaque.cginc", RName.ERNameType.Engine);
         }
@@ -36,7 +36,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
     }
     [Bricks.CodeBuilder.ContextMenu("BassPass", "Deferred\\BassPass", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UDeferredBasePassNode : Common.UBasePassNode
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.UDeferredBasePassNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.UDeferredBasePassNode" })]
+    public class TtDeferredBasePassNode : Common.TtBasePassNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
         public TtRenderGraphPin GpuCullPinIn = TtRenderGraphPin.CreateInput("GpuCull");
@@ -44,7 +45,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public TtRenderGraphPin Rt1PinOut = TtRenderGraphPin.CreateInputOutput("MRT1", true, EPixelFormat.PXF_R10G10B10A2_UNORM);//normal - Flags
         public TtRenderGraphPin Rt2PinOut = TtRenderGraphPin.CreateInputOutput("MRT2", true, EPixelFormat.PXF_R8G8B8A8_UNORM);//Roughness,Emissive,Specular,unused
         public TtRenderGraphPin Rt3PinOut = TtRenderGraphPin.CreateInputOutput("MRT3", true, EPixelFormat.PXF_R16G16_UNORM);//EPixelFormat.PXF_R10G10B10A2_UNORM//motionXY
-        public TtRenderGraphPin DepthStencilPinOut = TtRenderGraphPin.CreateInputOutput("DepthStencil", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
+        public TtRenderGraphPin DepthStencilPinOut = TtRenderGraphPin.CreateInputOutput("DepthStencil", true, EPixelFormat.PXF_D32_FLOAT);//EPixelFormat.PXF_D24_UNORM_S8_UINT Stencil is not necessity
 
         public TtCpuCullingNode CpuCullNode = null;
         public TtGpuCullingNode GpuCullNode = null;
@@ -56,7 +57,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get;
             set;
         } = true;
-        public UDeferredBasePassNode()
+        public TtDeferredBasePassNode()
         {
             Name = "UDeferredBasePassNode";
         }
@@ -92,8 +93,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             
         }
         
-        public UDeferredOpaque mOpaqueShading;
-        public NxRHI.URenderPass RenderPass;
+        public TtDeferredOpaque mOpaqueShading;
+        public NxRHI.TtRenderPass RenderPass;
 
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
@@ -105,7 +106,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             CreateGBuffers(policy, Rt0PinOut.Attachement.Format);
             
-            mOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredOpaque>();
+            mOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDeferredOpaque>();
 
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
@@ -205,7 +206,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UDeferredBasePassNode), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtDeferredBasePassNode), nameof(TickLogic));
                 return mScopeTick;
             }
         }
@@ -216,7 +217,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get
             {
                 if (mScopePushGpuDraw == null)
-                    mScopePushGpuDraw = new Profiler.TimeScope(typeof(UDeferredBasePassNode), "PushGpuDraw");
+                    mScopePushGpuDraw = new Profiler.TimeScope(typeof(TtDeferredBasePassNode), "PushGpuDraw");
                 return mScopePushGpuDraw;
             }
         }
@@ -227,7 +228,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get
             {
                 if (mScopeFlushDraw == null)
-                    mScopeFlushDraw = new Profiler.TimeScope(typeof(UDeferredBasePassNode), "FlushDraw");
+                    mScopeFlushDraw = new Profiler.TimeScope(typeof(TtDeferredBasePassNode), "FlushDraw");
                 return mScopeFlushDraw;
             }
         }

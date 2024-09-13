@@ -5,7 +5,7 @@ using NPOI.HSSF.UserModel;
 
 namespace EngineNS.Bricks.DataSet
 {
-    public partial class UDataSet
+    public partial class TtDataSet
     {
         internal HSSFWorkbook mWorkbook;
         partial void LoadDataSet_Exel(ref bool isOk, RName name, Type objType)
@@ -69,7 +69,7 @@ namespace EngineNS.Bricks.DataSet
     public partial class UTable
     {
         HSSFSheet mSheet;
-        internal bool LoadTableFromExcel(UDataSet dataSet, string sheetName, Type objType)
+        internal bool LoadTableFromExcel(TtDataSet dataSet, string sheetName, Type objType)
         {
             HSSFWorkbook workbook = dataSet.mWorkbook;
             Binder = dataSet.BinderManager.GetBinder(objType);
@@ -107,7 +107,7 @@ namespace EngineNS.Bricks.DataSet
             mSheet = sheet;
             return true;
         }
-        internal void SaveTableToExcel(UDataSet dataSet, HSSFSheet sheet)
+        internal void SaveTableToExcel(TtDataSet dataSet, HSSFSheet sheet)
         {
             foreach (var i in DataProviders)
             {

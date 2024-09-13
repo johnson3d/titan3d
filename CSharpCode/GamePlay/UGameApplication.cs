@@ -20,7 +20,7 @@ namespace EngineNS.GamePlay
             TtEngine.Instance.TickableManager.RemoveTickable(this);
             base.Cleanup();
         }
-        public override async System.Threading.Tasks.Task<bool> InitializeApplication(NxRHI.UGpuDevice rc, RName rpName)
+        public override async System.Threading.Tasks.Task<bool> InitializeApplication(NxRHI.TtGpuDevice rc, RName rpName)
         {
             await base.InitializeApplication(rc, rpName);
             await TtEngine.Instance.StartPlayInEditor(this, rpName);

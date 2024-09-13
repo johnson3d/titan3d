@@ -10,7 +10,7 @@ namespace EngineNS.DesignMacross.Design.Expressions.ValueOperator
         public TtDivideOperatorDescription()
         {
             Name = "Divide";
-            Op = UBinaryOperatorExpression.EBinaryOperation.Divide;
+            Op = TtBinaryOperatorExpression.EBinaryOperation.Divide;
         }
     }
 }

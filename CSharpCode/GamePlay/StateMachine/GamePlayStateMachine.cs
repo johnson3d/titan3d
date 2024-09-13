@@ -11,7 +11,7 @@ namespace EngineNS.GamePlay.StateMachine
 {
     public class TtGamePlayStateMachine<T> : TtTimedStateMachine<T>
     {
-        public TtAnimationCommand<TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
+        public TtAnimationCommand<T, TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
             return (CurrentState as TtGamePlayState<T>).AnimationState.ConstructAnimationCommandTree(parentNode, ref context);
         }

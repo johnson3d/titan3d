@@ -10,7 +10,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public TtBitOrOperatorDescription()
         {
             Name = "BitOr";
-            Op = UBinaryOperatorExpression.EBinaryOperation.BitwiseOr;
+            Op = TtBinaryOperatorExpression.EBinaryOperation.BitwiseOr;
         }
     }
 }

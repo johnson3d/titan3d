@@ -286,10 +286,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             var opPin = data.NodeGraph.GetOppositePin(pin);
             pinNode.BuildStatements(opPin, ref data);
 
-            var assignStatment = new UAssignOperatorStatement()
+            var assignStatment = new TtAssignOperatorStatement()
             {
                 From = pinNode.GetExpression(opPin, ref data),
-                To = new UVariableReferenceExpression(varName, new UVariableReferenceExpression(Name)),
+                To = new TtVariableReferenceExpression(varName, new TtVariableReferenceExpression(Name)),
             };
             if (!data.CurrentStatements.Contains(assignStatment))
                 data.CurrentStatements.Add(assignStatment);
@@ -302,10 +302,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var pinNode = data.NodeGraph.GetOppositePinNode(InValue);
                 var opPin = data.NodeGraph.GetOppositePin(InValue);
                 pinNode.BuildStatements(opPin, ref data);
-                var assignStatement = new UAssignOperatorStatement()
+                var assignStatement = new TtAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression(Name),
+                    To = new TtVariableReferenceExpression(Name),
                 };
                 if (!data.CurrentStatements.Contains(assignStatement))
                     data.CurrentStatements.Add(assignStatement);
@@ -348,11 +348,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             if(!data.MethodDec.HasLocalVariable(Name))
             {
-                var val = new UVariableDeclaration()
+                var val = new TtVariableDeclaration()
                 {
-                    VariableType = new UTypeReference(Type2HLSLType(VarType, IsHalfPrecision)),
+                    VariableType = new TtTypeReference(Type2HLSLType(VarType, IsHalfPrecision)),
                     VariableName = Name,
-                    InitValue = new UPrimitiveExpression(Value),
+                    InitValue = new TtPrimitiveExpression(Value),
                 };
                 if(IsUniform)
                 {
@@ -363,46 +363,46 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                     data.MethodDec.AddLocalVar(val);
             }
         }
-        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             if (pin == OutValue)
-                return new UVariableReferenceExpression(Name);
+                return new TtVariableReferenceExpression(Name);
 
             else if (pin == Out11)
-                return new UVariableReferenceExpression("_11", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("_11", new TtVariableReferenceExpression(Name));
             else if (pin == Out12)
-                return new UVariableReferenceExpression("_12", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("_12", new TtVariableReferenceExpression(Name));
             else if (pin == Out13)
-                return new UVariableReferenceExpression("_13", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("_13", new TtVariableReferenceExpression(Name));
             else if (pin == Out14)
-                return new UVariableReferenceExpression("_14", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("_14", new TtVariableReferenceExpression(Name));
 
             else if (pin == Out21)
-                return new UVariableReferenceExpression("_21", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("_21", new TtVariableReferenceExpression(Name));
             else if (pin == Out22)
-                return new UVariableReferenceExpression("_22", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("_22", new TtVariableReferenceExpression(Name));
             else if (pin == Out23)
-                return new UVariableReferenceExpression("_23", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("_23", new TtVariableReferenceExpression(Name));
             else if (pin == Out24)
-                return new UVariableReferenceExpression("_24", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("_24", new TtVariableReferenceExpression(Name));
 
             else if (pin == Out31)
-                return new UVariableReferenceExpression("_31", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("_31", new TtVariableReferenceExpression(Name));
             else if (pin == Out32)
-                return new UVariableReferenceExpression("_32", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("_32", new TtVariableReferenceExpression(Name));
             else if (pin == Out33)
-                return new UVariableReferenceExpression("_33", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("_33", new TtVariableReferenceExpression(Name));
             else if (pin == Out34)
-                return new UVariableReferenceExpression("_34", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("_34", new TtVariableReferenceExpression(Name));
 
             else if (pin == Out41)
-                return new UVariableReferenceExpression("_41", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("_41", new TtVariableReferenceExpression(Name));
             else if (pin == Out42)
-                return new UVariableReferenceExpression("_42", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("_42", new TtVariableReferenceExpression(Name));
             else if (pin == Out43)
-                return new UVariableReferenceExpression("_43", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("_43", new TtVariableReferenceExpression(Name));
             else if (pin == Out44)
-                return new UVariableReferenceExpression("_44", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("_44", new TtVariableReferenceExpression(Name));
             return null;
         }
     }

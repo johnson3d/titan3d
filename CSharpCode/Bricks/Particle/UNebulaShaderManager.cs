@@ -11,10 +11,10 @@ namespace EngineNS.Bricks.Particle
 
         public TtEmitter Emitter;
         public RName NebulaName;
-        public NxRHI.UShaderCode CBufferVar;
-        public NxRHI.UShaderCode HLSLDefine;
-        public NxRHI.UShaderCode HLSLCode;
-        public class UNebulaInclude : EngineNS.Editor.ShaderCompiler.UHLSLInclude
+        public NxRHI.TtShaderCode CBufferVar;
+        public NxRHI.TtShaderCode HLSLDefine;
+        public NxRHI.TtShaderCode HLSLCode;
+        public class UNebulaInclude : EngineNS.Editor.ShaderCompiler.TtHLSLInclude
         {
             public TtNebulaShader Host;
             public override unsafe NxRHI.FShaderCode* GetHLSLCode(string includeName, out bool bIncluded)
@@ -44,17 +44,17 @@ namespace EngineNS.Bricks.Particle
 
         public async Thread.Async.TtTask<bool> Init(Hash160 codeHash, RName nebula, TtEmitter emitter, string cbVar, string define, string code)
         {
-            var defines = new NxRHI.UShaderDefinitions();
+            var defines = new NxRHI.TtShaderDefinitions();
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray1.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray1.Y}");
             defines.mCoreObject.AddDefine("DispatchZ", $"{Dispatch_SetupDimArray1.Z}");
             defines.mCoreObject.AddDefine("NebulaCodeHash", $"{codeHash}");
 
-            HLSLDefine = new NxRHI.UShaderCode();
+            HLSLDefine = new NxRHI.TtShaderCode();
             HLSLDefine.TextCode = define;
-            HLSLCode = new NxRHI.UShaderCode();
+            HLSLCode = new NxRHI.TtShaderCode();
             HLSLCode.TextCode = code;
-            CBufferVar = new NxRHI.UShaderCode();
+            CBufferVar = new NxRHI.TtShaderCode();
             CBufferVar.TextCode = cbVar;
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
@@ -73,7 +73,7 @@ namespace EngineNS.Bricks.Particle
     public class UNebulaTemplateManager : UModule<TtEngine>
     {
         public uint ShaderRandomPoolSize = 65535;
-        public NxRHI.UBuffer RandomPoolBuffer;
+        public NxRHI.TtBuffer RandomPoolBuffer;
         public Random mRandom = new Random((int)Support.TtTime.GetTickCount());
 
         public NxRHI.TtSrView RandomPoolSrv;

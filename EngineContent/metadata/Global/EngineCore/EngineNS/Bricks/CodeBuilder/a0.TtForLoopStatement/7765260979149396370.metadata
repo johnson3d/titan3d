@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_7765260979149396370 Type="EngineNS.Bricks.CodeBuilder.TtForLoopStatement@EngineCore">
+  <BeginExpression Type="EngineNS.Bricks.CodeBuilder.TtExpressionBase@EngineCore" Order="0" />
+  <EndExpression Type="EngineNS.Bricks.CodeBuilder.TtExpressionBase@EngineCore" Order="0" />
+  <IncludeEnd Type="System.Boolean@Unknown" Order="0" />
+  <LoopBody Type="EngineNS.Bricks.CodeBuilder.TtStatementBase@EngineCore" Order="0" />
+  <LoopIndexName Type="System.String@Unknown" Order="0" />
+  <StepExpression Type="EngineNS.Bricks.CodeBuilder.TtExpressionBase@EngineCore" Order="0" />
+</Hash_7765260979149396370>

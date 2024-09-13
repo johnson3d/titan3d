@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_17423731128962330776 Type="EngineNS.Graphics.Pipeline.Shader.CommanShading.UBasePassPolicy@EngineCore">
-  <DisableAO Type="System.Boolean@Unknown" Order="0" />
-  <DisableHDR Type="System.Boolean@Unknown" Order="0" />
-  <DisablePointLight Type="System.Boolean@Unknown" Order="0" />
-  <DisableShadow Type="System.Boolean@Unknown" Order="0" />
-  <TypeAA Type="EngineNS.Graphics.Pipeline.URenderPolicy.ETypeAA@EngineCore" Order="0" />
-  <TypeFog Type="EngineNS.Graphics.Pipeline.URenderPolicy.ETypeFog@EngineCore" Order="0" />
-</Hash_17423731128962330776>

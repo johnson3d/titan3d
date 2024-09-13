@@ -363,16 +363,16 @@ namespace EngineNS.Bricks.NodeGraph
         {
             if (mUnionNode == null)
                 return;
-            if (ImGuiAPI.BeginChild("Config", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
+            if (ImGuiAPI.BeginChild("Config", in Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
             {
                 var min = ImGuiAPI.GetWindowContentRegionMin();
                 var max = ImGuiAPI.GetWindowContentRegionMax();
                 var size = max - min;
                 size.Y -= 40;
-                if (ImGuiAPI.BeginChild("Setting", size, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+                if (ImGuiAPI.BeginChild("Setting", size, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
                 {
                     ImGuiAPI.Columns(2, "SettingColumns", true);
-                    if (ImGuiAPI.BeginChild("Properties", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                    if (ImGuiAPI.BeginChild("Properties", in Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                     {
                         for (int i = 0; i < mEditingDatas.Count; i++)
                         {
@@ -427,7 +427,7 @@ namespace EngineNS.Bricks.NodeGraph
                         ImGuiAPI.EndDragDropTarget();
                     }
                     ImGuiAPI.NextColumn();
-                    if (ImGuiAPI.BeginChild("Details", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                    if (ImGuiAPI.BeginChild("Details", in Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                     {
                         mPGMember.OnDraw(false, false, false);
                     }

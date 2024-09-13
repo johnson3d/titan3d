@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_7789728201145737263 Type="EngineNS.Animation.Macross.BlendTree.TtBlendTreeClassDescription@EngineCore">
+  <Comment Type="EngineNS.Bricks.CodeBuilder.TtCommentStatement@EngineCore" Order="0" />
+  <DesignedClassDescription Type="EngineNS.DesignMacross.Base.Description.IClassDescription@EngineCore" Order="0" />
+  <Id Type="System.Guid@Unknown" Order="0" />
+  <InitValue Type="EngineNS.Bricks.CodeBuilder.TtExpressionBase@EngineCore" Order="0" />
+  <IsStruct Type="System.Boolean@Unknown" Order="0" />
+  <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <Namespace Type="EngineNS.Bricks.CodeBuilder.TtNamespaceDeclaration@EngineCore" Order="0" />
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Animation.Macross.BlendTree.Node.TtBlendTreeNodeClassDescription@EngineCore,&gt;@Unknown" Order="0" />
+  <PoseLines Type="System.Collections.Generic.List&lt;EngineNS.Animation.Macross.BlendTree.TtPoseLineDescription@EngineCore,&gt;@Unknown" Order="0" />
+  <PoseOutput Type="EngineNS.Animation.Macross.BlendTree.TtBlendTree_PoseOutputClassDescription@EngineCore" Order="0" />
+  <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Order="0" />
+  <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Order="0" />
+  <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore" Order="0" />
+  <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Order="0" />
+</Hash_7789728201145737263>

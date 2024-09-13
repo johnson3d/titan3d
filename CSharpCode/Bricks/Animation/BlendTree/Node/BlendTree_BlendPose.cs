@@ -6,9 +6,9 @@ using System.Text;
 
 namespace EngineNS.Animation.BlendTree.Node
 {
-    public class TtBlendPoseCommand<T> : TtAnimationCommand<T> where T : IRuntimePose
+    public class TtBlendPoseCommand<S, T> : TtAnimationCommand<S, T> where T : IRuntimePose
     {
-        public List<TtAnimationCommand<T>> WeightedBlendPoses = new List<TtAnimationCommand<T>>();
+        public List<TtAnimationCommand<S, T>> WeightedBlendPoses = new List<TtAnimationCommand<S, T>>();
         public TtBlendPoseCommandDesc Desc { get; set; }
         public override void Execute()
         {
@@ -25,20 +25,21 @@ namespace EngineNS.Animation.BlendTree.Node
         public List<float> Weights { get; set; }
     }
 
-    public class TtBlendTree_BlendPose<T> : TtBlendTree<T> where T : IRuntimePose
+    public class TtBlendTree_BlendPose<S, T> : TtBlendTree<S, T> where T : IRuntimePose
     {
-        public List<IBlendTree<T>> WeightedTree = new List<IBlendTree<T>>();
+        public List<IBlendTree<S, T>> WeightedTree = new List<IBlendTree<S, T>>();
 
         public List<float> Weights { get; set; }
 
-        TtBlendPoseCommand<T> mAnimationCommand = null;
-        public override void Initialize(ref FAnimBlendTreeContext context)
+        TtBlendPoseCommand<S, T> mAnimationCommand = null;
+        public override async Thread.Async.TtTask<bool> Initialize(FAnimBlendTreeContext context)
         {
-            mAnimationCommand = new TtBlendPoseCommand<T>();
+            mAnimationCommand = new TtBlendPoseCommand<S, T>();
+            return true;
         }
-        public override TtAnimationCommand<T> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
+        public override TtAnimationCommand<S, T> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
-            mAnimationCommand = new TtBlendPoseCommand<T>();
+            mAnimationCommand = new TtBlendPoseCommand<S, T>();
             var desc = new TtBlendPoseCommandDesc();
             desc.Weights = Weights;
             context.AddCommand(context.TreeDepth, mAnimationCommand);

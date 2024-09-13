@@ -176,7 +176,7 @@ namespace EngineNS.Bricks.Procedure
 
         public NxRHI.TtSrView CreateRGBA8Texture2D(bool bNormalized = true)
         {
-            NxRHI.UTexture texture;
+            NxRHI.TtTexture texture;
             unsafe
             {
                 var desc = new NxRHI.FTextureDesc();
@@ -304,7 +304,7 @@ namespace EngineNS.Bricks.Procedure
                 return result;
             }
         }
-        public NxRHI.TtSrView CreateRGBA8Texture2DAsNormal(out NxRHI.UTexture texture)
+        public NxRHI.TtSrView CreateRGBA8Texture2DAsNormal(out NxRHI.TtTexture texture)
         {
             unsafe
             {

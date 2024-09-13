@@ -150,7 +150,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
             if (timedStatesHubGraph == null)
                 return;
 
-            if (ImGuiAPI.BeginChild(timedStatesHubGraph.Name + "_Graph", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
+            if (ImGuiAPI.BeginChild(timedStatesHubGraph.Name + "_Graph", in Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
             {
                 var cmd = ImGuiAPI.GetWindowDrawList();
 

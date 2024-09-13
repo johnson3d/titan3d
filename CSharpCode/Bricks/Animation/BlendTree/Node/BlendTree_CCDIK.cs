@@ -6,9 +6,9 @@ using System.Text;
 
 namespace EngineNS.Animation.BlendTree.Node
 {
-    public class TtBlendTree_CCDIK : TtBlendTree<TtLocalSpaceRuntimePose>
+    public class TtBlendTree_CCDIK<S> : TtBlendTree<S, TtLocalSpaceRuntimePose>
     {
-        public IBlendTree<TtLocalSpaceRuntimePose> InPoseNode { get; set; }
+        public IBlendTree<S, TtLocalSpaceRuntimePose> InPoseNode { get; set; }
         public TtCCDIK CCDIK { get; set; } = new TtCCDIK();
         public float Alpha
         {

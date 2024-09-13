@@ -134,7 +134,7 @@ namespace EngineNS.NxRHI
                     var rc = TtEngine.Instance.GfxDevice.RenderContext;
                     var SlateEffect = EffectTask.Value.Result;
 
-                    var iptDesc = new NxRHI.UInputLayoutDesc();
+                    var iptDesc = new NxRHI.TtInputLayoutDesc();
                     unsafe
                     {
                         iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
@@ -272,7 +272,7 @@ namespace EngineNS.NxRHI
             }
         }
         public TtPicDesc PicDesc { get; set; }
-        public UTexture StreamingTexture { get; private set; } = null;
+        public TtTexture StreamingTexture { get; private set; } = null;
         public object TagObject;
         public static int NumOfInstance = 0;
         public static int NumOfGCHandle = 0;
@@ -2612,7 +2612,7 @@ namespace EngineNS.NxRHI
             LoadPictureDesc(node, desc);
             return desc;
         }
-        public static unsafe UTexture LoadTexture2DMipLevel(IO.TtXndNode node, TtPicDesc desc, int level, UTexture oldTexture)
+        public static unsafe TtTexture LoadTexture2DMipLevel(IO.TtXndNode node, TtPicDesc desc, int level, TtTexture oldTexture)
         {
             switch (desc.CompressFormat)
             {
@@ -2650,7 +2650,7 @@ namespace EngineNS.NxRHI
                     return null;
             }
         }
-        public static unsafe UTexture LoadTexture2DMipLevel(IO.TtXndNode node, TtPicDesc desc, int level, int channelR, int channelG, int channelB, int channelA)
+        public static unsafe TtTexture LoadTexture2DMipLevel(IO.TtXndNode node, TtPicDesc desc, int level, int channelR, int channelG, int channelB, int channelA)
         {
             switch (desc.CompressFormat)
             {
@@ -2687,7 +2687,7 @@ namespace EngineNS.NxRHI
             }
         }
         #region Load Mips
-        private static unsafe UTexture LoadExrTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel)
+        private static unsafe TtTexture LoadExrTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
                 return null;
@@ -2747,7 +2747,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        private static unsafe UTexture LoadExrTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel, int channelR, int channelG, int channelB, int channelA)
+        private static unsafe TtTexture LoadExrTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel, int channelR, int channelG, int channelB, int channelA)
         {
             if (mipLevel == 0)
                 return null;
@@ -2886,7 +2886,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        private static unsafe UTexture LoadHdrTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel)
+        private static unsafe TtTexture LoadHdrTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
                 return null;
@@ -2962,7 +2962,7 @@ namespace EngineNS.NxRHI
             }
         }
 
-        private static unsafe UTexture LoadPngTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel)
+        private static unsafe TtTexture LoadPngTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
                 return null;
@@ -3032,7 +3032,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        private static unsafe UTexture LoadDxtTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel)
+        private static unsafe TtTexture LoadDxtTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
                 return null;
@@ -3112,7 +3112,7 @@ namespace EngineNS.NxRHI
             }
         }
 
-        private static unsafe UTexture LoadDxtTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel, UTexture oldTexture)
+        private static unsafe TtTexture LoadDxtTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel, TtTexture oldTexture)
         {
             if (oldTexture == null)
             {
@@ -3295,7 +3295,7 @@ namespace EngineNS.NxRHI
                     break;
             }
         }
-        public static async System.Threading.Tasks.Task<TtSrView> LoadSrvMipmap(RName rn, int mipLevel, UTexture oldTexture)
+        public static async System.Threading.Tasks.Task<TtSrView> LoadSrvMipmap(RName rn, int mipLevel, TtTexture oldTexture)
         {
             TtPicDesc desc = null;
             var tex2d = await TtEngine.Instance.EventPoster.Post((state) =>
@@ -3389,33 +3389,33 @@ namespace EngineNS.NxRHI
         }
         #endregion
     }
-    public class URenderTargetView : AuxPtrType<NxRHI.IRenderTargetView>
+    public class TtRenderTargetView : AuxPtrType<NxRHI.IRenderTargetView>
     {
-        public URenderTargetView(IRenderTargetView ptr)
+        public TtRenderTargetView(IRenderTargetView ptr)
         {
             mCoreObject = ptr;
             mCoreObject.NativeSuper.AddRef();
         }
-        public URenderTargetView()
+        public TtRenderTargetView()
         {
 
         }
     }
-    public class UDepthStencilView : AuxPtrType<NxRHI.IDepthStencilView>
+    public class TtDepthStencilView : AuxPtrType<NxRHI.IDepthStencilView>
     {
     }
 
-    public class UTextureManager : IO.TtStreamingManager, ITickable
+    public class TtTextureManager : IO.TtStreamingManager, ITickable
     {
         public int GetTickOrder()
         {
             return 0;
         }
-        public UTextureManager()
+        public TtTextureManager()
         {
 
         }
-        ~UTextureManager()
+        ~TtTextureManager()
         {
             Cleanup();
             TtEngine.Instance?.TickableManager.RemoveTickable(this);
@@ -3601,7 +3601,7 @@ namespace EngineNS.NxRHI
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UTextureManager), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtTextureManager), nameof(TickLogic));
                 return mScopeTick;
             }
         }

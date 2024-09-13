@@ -6,9 +6,9 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UHdrShading : Shader.TtGraphicsShadingEnv
+    public class TtHdrShading : Shader.TtGraphicsShadingEnv
     {
-        public UHdrShading()
+        public TtHdrShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/screenspace/hdr.cginc", RName.ERNameType.Engine);
         }
@@ -17,14 +17,14 @@ namespace EngineNS.Graphics.Pipeline.Common
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
+        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
-            var node = drawcall.TagObject as UHdrNode;
+            var node = drawcall.TagObject as TtHdrNode;
             var lightSRV = node.GetAttachBuffer(node.ColorPinIn).Srv;
             var gpuSceneDescSRV = node.GetAttachBuffer(node.GpuScenePinIn).Srv;
             
@@ -45,11 +45,12 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Hdr", "Post\\Hdr", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UHdrNode : USceenSpaceNode
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UHdrNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UHdrNode" })]
+    public class TtHdrNode : TtSceenSpaceNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
         public TtRenderGraphPin GpuScenePinIn = TtRenderGraphPin.CreateInput("GpuScene");
-        public UHdrNode()
+        public TtHdrNode()
         {
             Name = "HdrNode";            
         }
@@ -62,7 +63,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             base.InitNodePins();
             //base Result
         }
-        public UHdrShading mBasePassShading;
+        public TtHdrShading mBasePassShading;
         public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mBasePassShading;
@@ -70,7 +71,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UHdrShading>();
+            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtHdrShading>();
         }
     }
 }

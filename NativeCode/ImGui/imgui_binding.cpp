@@ -182,6 +182,7 @@ static const ImGuiDataTypeInfo GDataTypeInfo[] =
 #endif
 	{ sizeof(float),            "float", "%.3f","%f"    },  // ImGuiDataType_Float (float are promoted to double in va_arg)
 	{ sizeof(double),           "double","%f",  "%lf"   },  // ImGuiDataType_Double
+	{ sizeof(bool),				"bool","%d",	"%lf"   },  // ImGuiDataType_Bool
 };
 IM_STATIC_ASSERT(IM_ARRAYSIZE(GDataTypeInfo) == ImGuiDataType_COUNT); 
 bool ImGuiAPI::DragScalar2(const char* label, ImGuiDataType data_type, void* p_data, float v_speed, const void* p_min, const void* p_max, const char* format, ImGuiSliderFlags_ flags)
@@ -212,7 +213,7 @@ bool ImGuiAPI::DragScalar2(const char* label, ImGuiDataType data_type, void* p_d
 		format = PatchFormatStringFloatToInt(format);
 
 	// Tabbing or CTRL-clicking on Drag turns it into an InputText
-	const bool hovered = ImGui::ItemHoverable(frame_bb, id);
+	const bool hovered = ImGui::ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
 	if(hovered)
 		ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
 	bool temp_input_is_active = temp_input_allowed && ImGui::TempInputIsActive(id);
@@ -223,7 +224,7 @@ bool ImGuiAPI::DragScalar2(const char* label, ImGuiDataType data_type, void* p_d
 		const bool focus_requested = temp_input_allowed && lastFocused;
 		const bool clicked = (hovered && g.IO.MouseClicked[0]);
 		const bool double_clicked = (hovered && g.IO.MouseDoubleClicked[0]);
-		if (focus_requested || clicked || double_clicked || g.NavActivateId == id || g.NavActivateInputId == id)
+		if (focus_requested || clicked || double_clicked || g.NavActivateId == id)
 		{
 			ImGui::SetActiveID(id, window);
 			ImGui::SetFocusID(id, window);
@@ -237,7 +238,7 @@ bool ImGuiAPI::DragScalar2(const char* label, ImGuiDataType data_type, void* p_d
 		if (temp_input_allowed && !temp_input_is_active)
 			if (g.ActiveId == id && hovered && g.IO.MouseReleased[0] && !ImGui::IsMouseDragPastThreshold(0, g.IO.MouseDragThreshold * DRAG_MOUSE_THRESHOLD_FACTOR))
 			{
-				g.NavActivateInputId = id;
+				g.NavActivateId = id;
 				temp_input_is_active = true;
 			}
 	}
@@ -330,8 +331,8 @@ bool ImGuiAPI::CollapsingHeader_SpanAllColumns(const char* label, ImGuiTreeNodeF
 		ImGui::PushColumnsBackground();
 	else if (g.CurrentTable)
 	{
-		cellPaddingYStore = g.CurrentTable->CellPaddingY;
-		g.CurrentTable->CellPaddingY = 0;
+		cellPaddingYStore = g.CurrentTable->RowCellPaddingY;
+		g.CurrentTable->RowCellPaddingY = 0;
 		ImGui::TablePushBackgroundChannel();
 	}
 
@@ -342,7 +343,7 @@ bool ImGuiAPI::CollapsingHeader_SpanAllColumns(const char* label, ImGuiTreeNodeF
 	else if (g.CurrentTable)
 	{
 		ImGui::TablePopBackgroundChannel();
-		g.CurrentTable->CellPaddingY = cellPaddingYStore;
+		g.CurrentTable->RowCellPaddingY = cellPaddingYStore;
 	}
 
 	window->WorkRect.Max.x = workRectMaxXStore;
@@ -354,12 +355,12 @@ void ImGuiAPI::TableNextRow(const ImGuiTableRowData* rowData)
 {
 	ImGuiContext& g = *GImGui;
 	ImGuiTable* table = g.CurrentTable;
-	auto cellPaddingY = table->CellPaddingY;
+	auto cellPaddingY = table->RowCellPaddingY;
 	if (!table->IsLayoutLocked)
 		ImGui::TableUpdateLayout(table);
 	if (table->IsInsideRow)
 	{
-		table->CellPaddingY = rowData->CellPaddingYEnd;
+		table->RowCellPaddingY = rowData->CellPaddingYEnd;
 		ImGui::TableEndRow(table);
 	}
 
@@ -390,18 +391,18 @@ void ImGuiAPI::TableNextRow(const ImGuiTableRowData* rowData)
 	table->LastRowFlags = table->RowFlags;
 	table->RowFlags = rowData->Flags;
 	table->RowMinHeight = rowData->MinHeight;
-	table->CellPaddingY = rowData->CellPaddingYBegin;
+	table->RowCellPaddingY = rowData->CellPaddingYBegin;
 	ImGui::TableBeginRow(table);
 
 	// We honor min_row_height requested by user, but cannot guarantee per-row maximum height,
 	// because that would essentially require a unique clipping rectangle per-cell.
-	table->RowPosY2 += table->CellPaddingY * 2.0f;
+	table->RowPosY2 += table->RowCellPaddingY * 2.0f;
 	table->RowPosY2 = ImMax(table->RowPosY2, table->RowPosY1 + rowData->MinHeight);
 
 	// Disable output until user calls TableNextColumn()
 	table->InnerWindow->SkipItems = true;
 
-	table->CellPaddingY = cellPaddingY;
+	table->RowCellPaddingY = cellPaddingY;
 }
 void ImGuiAPI::TableNextRow_FirstColumn(const ImGuiTableRowData* rowData)
 {
@@ -412,10 +413,10 @@ void ImGuiAPI::TableNextRow_FirstColumn(const ImGuiTableRowData* rowData)
 		return;
 
 	TableNextRow(rowData);
-	auto cellPaddingYStore = table->CellPaddingY;
-	table->CellPaddingY = rowData->CellPaddingYBegin;
+	auto cellPaddingYStore = table->RowCellPaddingY;
+	table->RowCellPaddingY = rowData->CellPaddingYBegin;
 	ImGui::TableSetColumnIndex(0);
-	table->CellPaddingY = cellPaddingYStore;
+	table->RowCellPaddingY = cellPaddingYStore;
 }
 bool ImGuiAPI::ToggleButton(const char* label, bool* v, const ImVec2* size_arg, ImGuiButtonFlags flags)
 {

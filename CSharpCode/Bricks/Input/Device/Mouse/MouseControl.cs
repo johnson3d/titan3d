@@ -39,7 +39,7 @@ namespace EngineNS.Bricks.Input.Device.Mouse
         {
             EventFire?.Invoke(this);
         }
-        public override void RegSelf(UInputSystem inputSystem)
+        public override void RegSelf(TtInputSystem inputSystem)
         {
             inputSystem.RegEvent(EventType.MOUSEBUTTONDOWN, this);
         }
@@ -77,7 +77,7 @@ namespace EngineNS.Bricks.Input.Device.Mouse
         {
             EventFire?.Invoke(this);
         }
-        public override void RegSelf(UInputSystem inputSystem)
+        public override void RegSelf(TtInputSystem inputSystem)
         {
             inputSystem.RegEvent(EventType.MOUSEBUTTONUP, this);
         }
@@ -107,7 +107,7 @@ namespace EngineNS.Bricks.Input.Device.Mouse
         {
             EventFire?.Invoke(this, e.MouseMotion.X, e.MouseMotion.Y, e.MouseMotion.xRel, e.MouseMotion.yRel);
         }
-        public override void RegSelf(UInputSystem inputSystem)
+        public override void RegSelf(TtInputSystem inputSystem)
         {
             inputSystem.RegEvent(EventType.MOUSEMOTION, this);
         }

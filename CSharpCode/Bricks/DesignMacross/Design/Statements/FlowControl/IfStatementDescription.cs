@@ -19,9 +19,9 @@ namespace EngineNS.DesignMacross.Design.Statement
             AddExecutionOutPin(new() { Name = "False" });
             AddDataInPin(new() { TypeDesc = UTypeDesc.TypeOf<bool>()});
         }
-        public override UStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
+        public override TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
-            var ifStatement = new UIfStatement();
+            var ifStatement = new TtIfStatement();
             var methodDesc = statementBuildContext.MethodDescription as TtMethodDescription;
             
             
@@ -29,7 +29,7 @@ namespace EngineNS.DesignMacross.Design.Statement
             if(linkedDataPin == null)
             {
                 //默认为false
-                ifStatement.Condition = new UPrimitiveExpression(false);
+                ifStatement.Condition = new TtPrimitiveExpression(false);
             }
             else
             {
@@ -46,7 +46,7 @@ namespace EngineNS.DesignMacross.Design.Statement
                 //空语句
                 //ifStatement.TrueStatement = new UEmptyStatement()
 
-                ifStatement.TrueStatement = new UExecuteSequenceStatement();
+                ifStatement.TrueStatement = new TtExecuteSequenceStatement();
             }
             else
             {

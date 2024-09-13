@@ -13,6 +13,7 @@
 #include "../NativeCode/Base/CoreRtti.h"
 #include "../NativeCode/Base/CSharpAPI.h"
 #include "../NativeCode/Base/xnd/vfxxnd.h"
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "../NativeCode/ImGui/imgui.h"
 #include "../NativeCode/Base/debug/vfxnew.h"
 #include "../NativeCode/Math/vfxgeometry.h"

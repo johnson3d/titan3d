@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.DataSet
 {
-    public partial class UDataSet
+    public partial class TtDataSet
     {
         public UDataProviderBinderManager BinderManager = new UDataProviderBinderManager();
         public Dictionary<string, UTable> Tables { get; } = new Dictionary<string, UTable>();
@@ -91,7 +91,7 @@ namespace EngineNS.UTest
         }
         public void UnitTestEntrance()
         {
-            var dataSet = new Bricks.DataSet.UDataSet();
+            var dataSet = new Bricks.DataSet.TtDataSet();
             if(dataSet.LoadDataSet(RName.GetRName("UTest/dataset/testdatatype.xls"), typeof(TestDataType)))
             {
                 var obj = dataSet.MainTable.GetData(0) as TestDataType;

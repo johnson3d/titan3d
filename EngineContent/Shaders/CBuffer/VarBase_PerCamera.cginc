@@ -87,28 +87,37 @@ inline matrix GetPreFrameViewPrjMtx(bool bJitter = true)
 
 inline float LinearFromDepth(float z)
 {
+#if USE_INVERSE_Z == 1
+	return (gZNear * gZFar) / (gZNear - z * (gZNear - gZFar));
+#else
 	//需要优化成 1 / (arg1 - z * arg2)形式，可以减少两个数学运算
-	return (gZNear * gZFar) / (gZFar - z * (gZFar - gZNear));
+    return (gZNear * gZFar) / (gZFar - z * (gZFar - gZNear));
+#endif
 }
 
 inline float NormalizedLinearFromDepth(float z)
 {
-	//wait for optimize
-	return (LinearFromDepth(z) - gZNear) / (gZFar - gZNear);
+    return (LinearFromDepth(z) - gZNear) / (gZFar - gZNear);
 }
 
 inline float2 LinearFromDepth(float2 z)
 {
-	float2 t = float2(gZFar, gZFar) - z * (gZFar - gZNear);
+#if USE_INVERSE_Z == 1
+	float2 t = float2(gZNear, gZNear) - z * (gZNear - gZFar);
 	float t2 = gZNear * gZFar;
 	return float2(t2,t2) / t;
+#else
+    float2 t = float2(gZFar, gZFar) - z * (gZFar - gZNear);
+    float t2 = gZNear * gZFar;
+    return float2(t2, t2) / t;
+#endif
 }
 
-float4 GetWorldPositionFromDepthValue(float2 uv, float depth, bool bJitter = true)
+float4 GetWorldPositionFromDepthValue(float2 uv, float depthNdc, bool bJitter = true)
 {
-	float4 H = float4(uv.x * 2.0f - 1.0f, 1.0f - uv.y * 2.0f, depth, 1.0f);
-	float4 D = mul(H, GetViewPrjMtxInverse(bJitter));
-	return D / D.w;
+    float4 H = float4(uv.x * 2.0f - 1.0f, 1.0f - uv.y * 2.0f, depthNdc, 1.0f);
+    float4 D = mul(H, GetViewPrjMtxInverse(bJitter));
+    return D / D.w;
 }
 
 float3 GetViewPositionFromDepthValue(float3 ray, float Depth, bool IsLinear)

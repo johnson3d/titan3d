@@ -35,21 +35,21 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateAttachment
             TickMethodDescription.AddArgument(contextMethodArgument);
         }
 
-        public override List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
+        public override List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
             SupperClassNames.Clear();
             SupperClassNames.Add($"EngineNS.Bricks.StateMachine.TimedSM.TtTimedStateAttachment<{classBuildContext.MainClassDescription.ClassName}>");
-            UClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
+            TtClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
             FClassBuildContext transitionClassBuildContext = new FClassBuildContext()
             {
                 MainClassDescription = classBuildContext.MainClassDescription,
                 ClassDeclaration = thisClassDeclaration,
             };
             thisClassDeclaration.AddMethod(TickMethodDescription.BuildMethodDeclaration(ref transitionClassBuildContext));
-            return new List<UClassDeclaration>() { thisClassDeclaration };
+            return new List<TtClassDeclaration>() { thisClassDeclaration };
         }
 
-        public override UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
+        public override TtVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
             return base.BuildVariableDeclaration(ref classBuildContext);
         }

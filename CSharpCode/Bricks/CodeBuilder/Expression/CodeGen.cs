@@ -4,16 +4,16 @@ using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder
 {
-    public struct UCodeGeneratorData
+    public struct TtCodeGeneratorData
     {
-        public UNamespaceDeclaration Namespace;
-        public UClassDeclaration Class;
-        public UMethodDeclaration Method;
-        public UCodeGeneratorBase CodeGen;
+        public TtNamespaceDeclaration Namespace;
+        public TtClassDeclaration Class;
+        public TtMethodDeclaration Method;
+        public TtCodeGeneratorBase CodeGen;
         public RName AssetName;
         public object UserData;
 
-        public UCodeGeneratorData(UNamespaceDeclaration ns, UClassDeclaration cls, UCodeGeneratorBase codeGen, in RName assetName)
+        public TtCodeGeneratorData(TtNamespaceDeclaration ns, TtClassDeclaration cls, TtCodeGeneratorBase codeGen, in RName assetName)
         {
             Namespace = ns;
             Class = cls;
@@ -26,10 +26,11 @@ namespace EngineNS.Bricks.CodeBuilder
 
     public interface ICodeObjectGen
     {
-        void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data);
+        void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data);
     }
 
-    public class UCodeCreator
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UCodeCreator@EngineCore", "EngineNS.Bricks.CodeBuilder.UCodeCreator" })]
+    public class TtCodeCreator
     {
         protected byte mIndentCount = 0;
         protected string mSegmentStartStr = "";
@@ -66,7 +67,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 AddLine(mSegmentStartStr, ref sourceCode);
             PushIndent();
         }
-        public void PushSegment(ref string sourceCode, in UCodeGeneratorData data)
+        public void PushSegment(ref string sourceCode, in TtCodeGeneratorData data)
         {
             PushSegment(ref sourceCode);
             if (data.Method != null)
@@ -78,7 +79,7 @@ namespace EngineNS.Bricks.CodeBuilder
             if (!string.IsNullOrEmpty(mSegmentEndStr))
                 AddLine(mSegmentEndStr + (bSemicolon ? ";" : ""), ref sourceCode);
         }
-        public void PopSegment(ref string sourceCode, in UCodeGeneratorData data, bool bSemicolon = false)
+        public void PopSegment(ref string sourceCode, in TtCodeGeneratorData data, bool bSemicolon = false)
         {
             if (data.Method != null)
                 data.Method.MethodSegmentDeep--;
@@ -86,7 +87,8 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
-    public abstract class UCodeGeneratorBase : UCodeCreator
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UCodeGeneratorBase@EngineCore", "EngineNS.Bricks.CodeBuilder.UCodeGeneratorBase" })]
+    public abstract class TtCodeGeneratorBase : TtCodeCreator
     {
         public bool IsEditorDebug = true;
         public abstract ICodeObjectGen GetCodeObjectGen(Rtti.UTypeDesc type);
@@ -94,13 +96,13 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return GetCodeObjectGen(Rtti.UTypeDesc.TypeOf(type));
         }
-        public void GenerateClassCode(UNamespaceDeclaration ns, UClassDeclaration cls, in RName assetName, ref string code)
+        public void GenerateClassCode(TtNamespaceDeclaration ns, TtClassDeclaration cls, in RName assetName, ref string code)
         {
-            var gen = GetCodeObjectGen(Rtti.UTypeDescGetter<UClassDeclaration>.TypeDesc);
-            var data = new UCodeGeneratorData(ns, cls, this, assetName);
+            var gen = GetCodeObjectGen(Rtti.UTypeDescGetter<TtClassDeclaration>.TypeDesc);
+            var data = new TtCodeGeneratorData(ns, cls, this, assetName);
             gen.GenCodes(cls, ref code, ref data);
         }
-        public void GenerateClassCode(UClassDeclaration cls, in RName assetName, ref string code)
+        public void GenerateClassCode(TtClassDeclaration cls, in RName assetName, ref string code)
         {
             GenerateClassCode(cls.Namespace, cls, assetName, ref code);
         }
@@ -140,7 +142,7 @@ namespace EngineNS.Bricks.CodeBuilder
             }
             return false;
         }
-        public virtual string GetTypeString(UTypeReference t)
+        public virtual string GetTypeString(TtTypeReference t)
         {
             return t.TypeFullName;
         }

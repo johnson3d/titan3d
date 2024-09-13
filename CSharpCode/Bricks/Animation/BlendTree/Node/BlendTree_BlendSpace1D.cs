@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Animation.BlendTree.Node
 {
-    public class TtBlendTree_BlendSpace1D : TtBlendTree<TtLocalSpaceRuntimePose>
+    public class TtBlendTree_BlendSpace1D<S> : TtBlendTree<S, TtLocalSpaceRuntimePose>
     {
         public Func<Vector3> EvaluateInput { get; set; } = null;
 

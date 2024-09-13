@@ -83,8 +83,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public Graphics.Mesh.TtMesh[] WireFrameTerrainMesh;
         //public Graphics.Pipeline.Shader.UMaterialInstance Material;
         //public Graphics.Pipeline.Shader.UMaterialInstance WaterMaterial;
-        public NxRHI.UCbView PatchCBuffer;
-        public void SureCBuffer(NxRHI.IGraphicsEffect shaderProg, ref NxRHI.UCbView cbuffer)
+        public NxRHI.TtCbView PatchCBuffer;
+        public void SureCBuffer(NxRHI.IGraphicsEffect shaderProg, ref NxRHI.TtCbView cbuffer)
         {
             var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
             if (cbuffer == null)

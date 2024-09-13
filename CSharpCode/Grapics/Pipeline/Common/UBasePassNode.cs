@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UBasePassNode : TtRenderGraphNode
+    public class TtBasePassNode : TtRenderGraphNode
     {
         public TtGraphicsBuffers GBuffers { get; protected set; } = new TtGraphicsBuffers();
     }

@@ -226,7 +226,7 @@ namespace EngineNS.BehaviorTree.Macross
                 BehaviorTreeMacrossEditor = new UBehaviorTreeMacrossEditor();
             BehaviorTreeMacrossEditor.AssetName = name;
             BehaviorTreeMacrossEditor.DefClass.ClassName = name.PureName;
-            BehaviorTreeMacrossEditor.DefClass.Namespace = new UNamespaceDeclaration(IO.TtFileManager.GetParentPathName(name.Name).TrimEnd('/').Replace('/', '.'));
+            BehaviorTreeMacrossEditor.DefClass.Namespace = new TtNamespaceDeclaration(IO.TtFileManager.GetParentPathName(name.Name).TrimEnd('/').Replace('/', '.'));
             if (mSelectedType != null)
                 BehaviorTreeMacrossEditor.DefClass.SupperClassNames.Add(mSelectedType.FullName);
             BehaviorTreeMacrossEditor.SaveClassGraph(name);

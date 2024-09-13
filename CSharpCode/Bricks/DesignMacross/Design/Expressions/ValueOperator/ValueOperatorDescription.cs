@@ -14,7 +14,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     public class TtValueOperatorDescription : TtExpressionDescription
     {
         [Rtti.Meta]
-        public UBinaryOperatorExpression.EBinaryOperation Op { get; set; }
+        public TtBinaryOperatorExpression.EBinaryOperation Op { get; set; }
         public TtValueOperatorDescription()
         {
             AddDtaInPin(new() { Name = "L" });
@@ -23,11 +23,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
             
         }
 
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
             var methodDesc = expressionBuildContext.MethodDescription as TtMethodDescription;
 
-            UBinaryOperatorExpression expression = new();
+            TtBinaryOperatorExpression expression = new();
             expression.Operation = Op;
             var dataInPin_Left = DataInPins[0];
             var dataInPin_Right = DataInPins[1];

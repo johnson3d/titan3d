@@ -22,7 +22,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             AddDtaOutPin(new() { Name = "Get", TypeDesc = UTypeDesc.TypeOf<bool>() });
         }
 
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
             return base.BuildExpression(ref expressionBuildContext);
         }

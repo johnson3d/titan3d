@@ -62,7 +62,7 @@ namespace EngineNS.Editor
 #endif
             base.Cleanup();
         }
-        public override async System.Threading.Tasks.Task<bool> InitializeApplication(NxRHI.UGpuDevice rc, RName rpName)
+        public override async System.Threading.Tasks.Task<bool> InitializeApplication(NxRHI.TtGpuDevice rc, RName rpName)
         {
             await base.InitializeApplication(rc, rpName);
 
@@ -353,6 +353,17 @@ namespace EngineNS.Editor
         bool _showDemoWindow = false;
         public float LeftWidth = 0;
         public float CenterWidth = 0;
+        static string mNeedFocusWindowName;
+        static int mFrameDelay = 0;
+        public static string NeedFocusWindowName
+        {
+            get => mNeedFocusWindowName;
+            set
+            {
+                mNeedFocusWindowName = value;
+                mFrameDelay = 2;
+            }
+        }
 
         ////////////////////////
 #if (UseWindowTest)
@@ -408,7 +419,7 @@ namespace EngineNS.Editor
             var io = ImGuiAPI.GetIO();
             if ((io.ConfigFlags & ImGuiConfigFlags_.ImGuiConfigFlags_DockingEnable) != 0)
             {
-                ImGuiAPI.DockSpaceOverViewport(ImGuiAPI.GetMainViewport(), ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, null);
+                //ImGuiAPI.DockSpaceOverViewport(0, ImGuiAPI.GetMainViewport(), ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, null);
                 
                 //var dockspace_id = ImGuiAPI.GetID("MyDockSpace");
                 //ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
@@ -453,7 +464,7 @@ namespace EngineNS.Editor
                     //ImGuiAPI.NextColumn();
 
                     //ImGuiAPI.Columns(1, null, true);
-                    if (ImGuiAPI.BeginChild("CenterWindow", in Vector2.MinusOne, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                    if (ImGuiAPI.BeginChild("CenterWindow", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                     {
                         ImGuiDockNodeFlags_ dockspace_flags = ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None;
                         var sz = new Vector2(0.0f, 0.0f);
@@ -497,6 +508,17 @@ namespace EngineNS.Editor
 
             AssetEditorManager.OnDrawTopMost();
             TickToOperationMenus();
+
+            if(!string.IsNullOrEmpty(NeedFocusWindowName))
+            {
+                // 延迟几帧重新focus，避免打开的dock窗口没有显示在前面
+                mFrameDelay--;
+                if(mFrameDelay <= 0)
+                {
+                    ImGuiAPI.SetWindowFocus(NeedFocusWindowName);
+                    NeedFocusWindowName = null;
+                }
+            }
         }
         List<EGui.UIProxy.MenuItemProxy> mMenuItems = new List<EGui.UIProxy.MenuItemProxy>();
         List<EGui.UIProxy.MenuItemProxy> mMenusToRemove = new List<EGui.UIProxy.MenuItemProxy>();

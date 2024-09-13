@@ -10,9 +10,10 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
     <e_0 Value="Game,utest/mesh/unit_sphere.ums,887ddcfe-6da8-4cdc-b3c7-150ce117b94d" />
-    <e_1 Value="Game,utest/mesh/skysphere001.ums,d654ba19-6ad2-4dcc-8255-7e650faf6527" />
+    <e_1 Value="Game,utest/mesh/skysphere001.ums,099ebd2d-0dda-4ca1-bc23-6b754f41b31d" />
+    <e_2 Value="Engine,material/gridline.material,fe431749-ed31-45b1-93d8-34462bd00922" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
 </Root>

@@ -415,17 +415,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             var nodeId = (uint)NodeId.GetHashCode();
-            var ifStatement = new UIfStatement();
+            var ifStatement = new TtIfStatement();
             for(int i=0; i<ConditionResultPairs.Count; i++)
             {
-                UExpressionBase condition;
+                TtExpressionBase condition;
                 if (data.NodeGraph.PinHasLinker(ConditionResultPairs[i].Key))
                     condition = data.NodeGraph.GetOppositePinExpression(ConditionResultPairs[i].Key, ref data);
                 else
-                    condition = new UPrimitiveExpression(true);
+                    condition = new TtPrimitiveExpression(true);
                 var opPin = data.NodeGraph.GetOppositePin(ConditionResultPairs[i].Value);
                 var node = data.NodeGraph.GetOppositePinNode(ConditionResultPairs[i].Value);
-                var trueStatement = new UExecuteSequenceStatement();
+                var trueStatement = new TtExecuteSequenceStatement();
                 if(node != null)
                 {
                     var trueData = new BuildCodeStatementsData();
@@ -440,7 +440,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
                 else
                 {
-                    var elseIfStatement = new UIfStatement()
+                    var elseIfStatement = new TtIfStatement()
                     {
                         Condition = condition,
                         TrueStatement = trueStatement,
@@ -448,9 +448,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     ifStatement.ElseIfs.Add(elseIfStatement);
                 }
 
-                data.CurrentStatements.Add(new UDebuggerSetWatchVariable()
+                data.CurrentStatements.Add(new TtDebuggerSetWatchVariable()
                 {
-                    VariableType = new UTypeReference(typeof(bool)),
+                    VariableType = new TtTypeReference(typeof(bool)),
                     VariableName = ConditionResultPairs[i].Key.Name + "_" + nodeId,
                     VariableValue = condition,
                 });
@@ -459,7 +459,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             AddDebugBreakerStatement(BreakerName, ref data);
 
             data.CurrentStatements.Add(ifStatement);
-            var falseStatement = new UExecuteSequenceStatement();
+            var falseStatement = new TtExecuteSequenceStatement();
             ifStatement.FalseStatement = falseStatement;
             var falseOpPin = data.NodeGraph.GetOppositePin(FalsePin);
             var falseNode = data.NodeGraph.GetOppositePinNode(FalsePin);
@@ -581,7 +581,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public List<PinIn> Arguments = new List<PinIn>();
         List<PinIn> mTemplateArguments = new List<PinIn>();
-        public void UpdateMethodDefine(UMethodDeclaration methodDec)
+        public void UpdateMethodDefine(TtMethodDeclaration methodDec)
         {
             mTemplateArguments.Clear();
             if (methodDec.ReturnValue != null)
@@ -589,7 +589,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 PinIn retPin = null;
                 if(Arguments.Count > 0)
                 {
-                    var defType = Arguments[0].Tag as UTypeReference;
+                    var defType = Arguments[0].Tag as TtTypeReference;
                     if(Inputs[0].Name == methodDec.ReturnValue.VariableName &&
                        defType == methodDec.ReturnValue.VariableType)
                     {
@@ -618,7 +618,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     PinIn argPin = null;
                     for(int argIdx= Arguments.Count - 1; argIdx >= 0; argIdx--)
                     {
-                        var defType = Arguments[argIdx].Tag as UTypeReference;
+                        var defType = Arguments[argIdx].Tag as TtTypeReference;
                         if(Arguments[argIdx].Name == argDec.VariableName && defType == argDec.VariableType)
                         {
                             argPin = Arguments[argIdx];
@@ -686,7 +686,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     continue;
 
                 var valueString = GetRuntimeValueString(Inputs[i].Name + "_" + (uint)NodeId.GetHashCode());
-                var typeString = (Inputs[i].Tag as UTypeReference).TypeFullName;
+                var typeString = (Inputs[i].Tag as TtTypeReference).TypeFullName;
                 EGui.Controls.CtrlUtility.DrawHelper($"{valueString}({typeString})");
             }
         }
@@ -731,26 +731,26 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var exp = data.NodeGraph.GetOppositePinExpression(Inputs[i], ref data);
                 if(exp == null)
                 {
-                    var typeRef = Inputs[i].Tag as UTypeReference;
+                    var typeRef = Inputs[i].Tag as TtTypeReference;
                     if(typeRef != null)
-                        exp = new UDefaultValueExpression(typeRef);
+                        exp = new TtDefaultValueExpression(typeRef);
                 }
-                var st = new UAssignOperatorStatement()
+                var st = new TtAssignOperatorStatement()
                 {
                     From = exp,
-                    To = new UVariableReferenceExpression(Inputs[i].Name)
+                    To = new TtVariableReferenceExpression(Inputs[i].Name)
                 };
                 data.CurrentStatements.Add(st);
 
-                data.CurrentStatements.Add(new UDebuggerSetWatchVariable()
+                data.CurrentStatements.Add(new TtDebuggerSetWatchVariable()
                 {
-                    VariableType = Inputs[i].Tag as UTypeReference,
+                    VariableType = Inputs[i].Tag as TtTypeReference,
                     VariableName = Inputs[i].Name + "_" + (uint)NodeId.GetHashCode(),
-                    VariableValue = new UVariableReferenceExpression(Inputs[i].Name)
+                    VariableValue = new TtVariableReferenceExpression(Inputs[i].Name)
                 });
             }
             AddDebugBreakerStatement(BreakerName, ref data);
-            data.CurrentStatements.Add(new UReturnStatement());
+            data.CurrentStatements.Add(new TtReturnStatement());
         }
         //public override IExpression GetExpr(UMacrossMethodGraph funGraph, ICodeGen cGen, bool bTakeResult)
         //{
@@ -918,7 +918,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             var nodeId = (uint)NodeId.GetHashCode();
-            var forStatement = new UForLoopStatement()
+            var forStatement = new TtForLoopStatement()
             {
                 LoopIndexName = mLoopIdxName,
             };
@@ -926,10 +926,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (beginIdxExp != null)
                 forStatement.BeginExpression = beginIdxExp;
             else
-                forStatement.BeginExpression = new UPrimitiveExpression(BeginIdx);
-            data.CurrentStatements.Add(new UDebuggerSetWatchVariable()
+                forStatement.BeginExpression = new TtPrimitiveExpression(BeginIdx);
+            data.CurrentStatements.Add(new TtDebuggerSetWatchVariable()
             {
-                VariableType = new UTypeReference(typeof(UInt64)),
+                VariableType = new TtTypeReference(typeof(UInt64)),
                 VariableName = BeginIdxPin.Name + "_" + nodeId,
                 VariableValue = forStatement.BeginExpression,
             });
@@ -938,10 +938,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (endIdxExp != null)
                 forStatement.EndExpression = endIdxExp;
             else
-                forStatement.EndExpression = new UPrimitiveExpression(EndIdx);
-            data.CurrentStatements.Add(new UDebuggerSetWatchVariable()
+                forStatement.EndExpression = new TtPrimitiveExpression(EndIdx);
+            data.CurrentStatements.Add(new TtDebuggerSetWatchVariable()
             {
-                VariableType = new UTypeReference(typeof(UInt64)),
+                VariableType = new TtTypeReference(typeof(UInt64)),
                 VariableName = EndIdxPin.Name + "_" + nodeId,
                 VariableValue = forStatement.EndExpression,
             });
@@ -950,10 +950,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (stepExp != null)
                 forStatement.StepExpression = stepExp;
             else
-                forStatement.StepExpression = new UPrimitiveExpression(StepIdx);
-            data.CurrentStatements.Add(new UDebuggerSetWatchVariable()
+                forStatement.StepExpression = new TtPrimitiveExpression(StepIdx);
+            data.CurrentStatements.Add(new TtDebuggerSetWatchVariable()
             {
-                VariableType = new UTypeReference(typeof(UInt64)),
+                VariableType = new TtTypeReference(typeof(UInt64)),
                 VariableName = StepPin.Name + "_" + nodeId,
                 VariableValue = forStatement.StepExpression,
             });
@@ -964,12 +964,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var bodyNode = data.NodeGraph.GetOppositePinNode(LoopBodyPin);
             if(bodyNode != null)
             {
-                var bodyStatements = new UExecuteSequenceStatement();
-                bodyStatements.Sequence.Add(new UDebuggerSetWatchVariable()
+                var bodyStatements = new TtExecuteSequenceStatement();
+                bodyStatements.Sequence.Add(new TtDebuggerSetWatchVariable()
                 {
-                    VariableType = new UTypeReference(typeof(UInt64)),
+                    VariableType = new TtTypeReference(typeof(UInt64)),
                     VariableName = mLoopIdxName + "_" + nodeId,
-                    VariableValue = new UVariableReferenceExpression(mLoopIdxName),
+                    VariableValue = new TtVariableReferenceExpression(mLoopIdxName),
                 });
                 forStatement.LoopBody = bodyStatements;
                 var loopData = new BuildCodeStatementsData();
@@ -983,10 +983,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (nextNode != null)
                 nextNode.BuildStatements(nextNodePin, ref data);
         }
-        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             if (pin == null || pin == IndexPin)
-                return new UVariableReferenceExpression(mLoopIdxName);
+                return new TtVariableReferenceExpression(mLoopIdxName);
             return null;
         }
 
@@ -1073,15 +1073,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
-            var whileStatement = new UWhileLoopStatement();
+            var whileStatement = new TtWhileLoopStatement();
             if (data.NodeGraph.PinHasLinker(ConditionPin))
                 whileStatement.Condition = data.NodeGraph.GetOppositePinExpression(ConditionPin, ref data);
             else
-                whileStatement.Condition = new UPrimitiveExpression(false);
+                whileStatement.Condition = new TtPrimitiveExpression(false);
 
-            data.CurrentStatements.Add(new UDebuggerSetWatchVariable()
+            data.CurrentStatements.Add(new TtDebuggerSetWatchVariable()
             {
-                VariableType = new UTypeReference(typeof(bool)),
+                VariableType = new TtTypeReference(typeof(bool)),
                 VariableName = ConditionPin.Name + "_" + (uint)NodeId.GetHashCode(),
                 VariableValue = whileStatement.Condition,
             });
@@ -1091,7 +1091,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var bodyNode = data.NodeGraph.GetOppositePinNode(LoopBodyPin);
             if(bodyNode != null)
             {
-                var bodyStatement = new UExecuteSequenceStatement();
+                var bodyStatement = new TtExecuteSequenceStatement();
                 whileStatement.LoopBody = bodyStatement;
                 var loopData = new BuildCodeStatementsData();
                 data.CopyTo(ref loopData);
@@ -1179,7 +1179,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             AddDebugBreakerStatement(BreakerName, ref data);
-            data.CurrentStatements.Add(new UContinueStatement());
+            data.CurrentStatements.Add(new TtContinueStatement());
         }
 
         public void LightDebuggerLine()
@@ -1252,7 +1252,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
-            data.CurrentStatements.Add(new UBreakStatement());
+            data.CurrentStatements.Add(new TtBreakStatement());
         }
 
         public void LightDebuggerLine()

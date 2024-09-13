@@ -14,10 +14,11 @@ namespace EngineNS.Animation.StateMachine
 {
     public class TtAnimState<S> : Bricks.StateMachine.TimedSM.TtTimedState<S, TtAnimStateMachineContext>
     {
-        public TtBlendTree_CopyPose<TtLocalSpaceRuntimePose> BlendTree = null;
+        public TtBlendTree_CopyPose<S, TtLocalSpaceRuntimePose> BlendTree = null;
         public override async Thread.Async.TtTask<bool> Initialize(TtAnimStateMachineContext context)
         {
-            BlendTree = new TtBlendTree_CopyPose<TtLocalSpaceRuntimePose>();
+            BlendTree = new TtBlendTree_CopyPose<S, TtLocalSpaceRuntimePose>();
+            await BlendTree.Initialize(context.BlendTreeContext);
             // BlendTree initialize now single animAttachment
             foreach (var attachment in Attachments)
             {
@@ -32,7 +33,7 @@ namespace EngineNS.Animation.StateMachine
         public override void Tick(float elapseSecond, in TtAnimStateMachineContext context)
         {
             base.Tick(elapseSecond, context);
-            BlendTree.Tick(elapseSecond, ref context.BlendTreeContext);
+            //BlendTree.Tick(elapseSecond, ref context.BlendTreeContext);
         }
     }
 }

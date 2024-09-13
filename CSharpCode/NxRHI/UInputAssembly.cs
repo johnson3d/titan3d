@@ -4,13 +4,13 @@ using System.Text;
 
 namespace EngineNS.NxRHI
 {
-    public class UInputLayoutDesc : AuxPtrType<NxRHI.FInputLayoutDesc>
+    public class TtInputLayoutDesc : AuxPtrType<NxRHI.FInputLayoutDesc>
     {
-        public UInputLayoutDesc(FInputLayoutDesc ptr)
+        public TtInputLayoutDesc(FInputLayoutDesc ptr)
         {
             mCoreObject = ptr;
         }
-        public UInputLayoutDesc()
+        public TtInputLayoutDesc()
         {
             mCoreObject = FInputLayoutDesc.CreateInstance();
         }
@@ -30,7 +30,7 @@ namespace EngineNS.NxRHI
             return mCoreObject.GetLayoutHash64();
         }
     }
-    public class UInputLayout : AuxPtrType<NxRHI.IInputLayout>
+    public class TtInputLayout : AuxPtrType<NxRHI.IInputLayout>
     {
     }
 }

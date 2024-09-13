@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_4170862264 Type="EngineNS.Bricks.CodeBuilder.UVariableReferenceExpression@EngineCore">
-  <Host Type="EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore" Order="0" />
-  <IsProperty Type="System.Boolean@Unknown" Order="0" />
-  <VariableName Type="System.String@Unknown" Order="0" />
-</Hash_4170862264>

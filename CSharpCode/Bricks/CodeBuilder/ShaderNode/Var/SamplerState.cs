@@ -60,9 +60,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 material.UsedSamplerStates.Add(tmp);
             }
         }
-        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
-            return new UVariableReferenceExpression(Name);
+            return new TtVariableReferenceExpression(Name);
         }
     }
 }

@@ -86,10 +86,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             DisableHdr.SetValue(value);
             UpdatePermutation();
         }
-        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
+        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
@@ -125,7 +125,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
     }
     [Bricks.CodeBuilder.ContextMenu("FinalCopy", "Mobile\\FinalCopy", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UFinalCopyNode : Common.USceenSpaceNode
+    public class UFinalCopyNode : Common.TtSceenSpaceNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
         //public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");

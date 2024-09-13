@@ -4,6 +4,7 @@ using EngineNS.Animation.BlendTree.Node;
 using EngineNS.Animation.Command;
 using EngineNS.Animation.BlendTree;
 using EngineNS.Bricks.StateMachine;
+using EngineNS.Thread.Async;
 
 namespace EngineNS.Animation.StateMachine
 {
@@ -13,7 +14,13 @@ namespace EngineNS.Animation.StateMachine
     }
     public class TtAnimStateMachine<S> : Bricks.StateMachine.TimedSM.TtTimedStateMachine<S, TtAnimStateMachineContext>
     {
-        public TtBlendTree_CrossfadePose<TtLocalSpaceRuntimePose> BlendTree;
+        public TtBlendTree_CrossfadePose<S, TtLocalSpaceRuntimePose> BlendTree;
+        public override async TtTask<bool> Initialize(TtAnimStateMachineContext context)
+        {
+            BlendTree = new();
+            await BlendTree.Initialize(context.BlendTreeContext);
+            return await base.Initialize(context);
+        }
         public override void Tick(float elapseSecond, in TtAnimStateMachineContext context)
         {
             base.Tick(elapseSecond, context);
@@ -36,7 +43,7 @@ namespace EngineNS.Animation.StateMachine
             }
             else
             {
-                var cf = new TtBlendTree_CrossfadePose<TtLocalSpaceRuntimePose>();
+                var cf = new TtBlendTree_CrossfadePose<S, TtLocalSpaceRuntimePose>();
                 cf.FromNode = BlendTree;
                 cf.ToNode = (CurrentState as TtAnimState<S>).BlendTree;
                 BlendTree = cf;

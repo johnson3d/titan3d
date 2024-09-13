@@ -40,7 +40,7 @@ namespace EngineNS.Bricks.VXGI
         {
 
         }
-        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             UMdfVoxelDebugMesh mdfQueue = mdfQueue1 as UMdfVoxelDebugMesh;
             var vxNode = mdfQueue.MdfDatas as UVoxelsNode;
@@ -87,7 +87,7 @@ namespace EngineNS.Bricks.VXGI
                 
                 this.UpdatePermutation();
             }
-            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
             {
                 base.EnvShadingDefines(in id, defines);
                 defines.AddDefine("VxSize", $"{VxSize}");
@@ -97,7 +97,7 @@ namespace EngineNS.Bricks.VXGI
                 defines.AddDefine("VxSceneY", $"{VxSceneY}");
                 defines.AddDefine("VxSceneZ", $"{VxSceneZ}");
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+            public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var node = drawcall.TagObject as UVoxelsNode;
 
@@ -127,7 +127,7 @@ namespace EngineNS.Bricks.VXGI
 
                 this.UpdatePermutation();
             }
-            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
             {
                 base.EnvShadingDefines(in id, defines);
                 defines.AddDefine("VxSize", $"{VxSize}");
@@ -137,7 +137,7 @@ namespace EngineNS.Bricks.VXGI
                 defines.AddDefine("VxSceneY", $"{VxSceneY}");
                 defines.AddDefine("VxSceneZ", $"{VxSceneZ}");
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+            public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var node = drawcall.TagObject as UVoxelsNode;
                 // renwind test
@@ -171,10 +171,10 @@ namespace EngineNS.Bricks.VXGI
         }
 
         private SetupVxDebuggerShading SetupVxDebugger;
-        private NxRHI.UComputeDraw SetupVxDebuggerDrawcall;
+        private NxRHI.TtComputeDraw SetupVxDebuggerDrawcall;
 
         private CollectVxDebuggerShading CollectVxDebugger;
-        private NxRHI.UComputeDraw CollectVxDebuggerDrawcall;
+        private NxRHI.TtComputeDraw CollectVxDebuggerDrawcall;
 
         public Graphics.Mesh.TtMesh VxDebugMesh;
         public GamePlay.Scene.TtMeshNode VxDebugMeshNode;

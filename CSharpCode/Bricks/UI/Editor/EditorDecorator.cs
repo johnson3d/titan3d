@@ -37,7 +37,7 @@ namespace EngineNS.UI.Editor
         SelectedDecorator mSelectedDecoratorUIHost;
         internal TtUINode SelectedRect;
         internal TtUINode PointAtRect;
-        internal UHitproxyNode HitProxyNode;
+        internal TtHitproxyNode HitProxyNode;
         Dictionary<Rtti.UTypeDesc, IUIEditorDecorator> mDecorators = new Dictionary<UTypeDesc, IUIEditorDecorator>();
         internal IUIEditorDecorator CurrentDecorator;
 
@@ -56,7 +56,7 @@ namespace EngineNS.UI.Editor
                 typeof(GamePlay.TtPlacement), pointAtHost, DVector3.Zero, Vector3.One, Quaternion.Identity);
             PointAtRect.Parent = null;
 
-            HitProxyNode = PreviewViewport.RenderPolicy.FindFirstNode<Graphics.Pipeline.Common.UHitproxyNode>();
+            HitProxyNode = PreviewViewport.RenderPolicy.FindFirstNode<Graphics.Pipeline.Common.TtHitproxyNode>();
         }
 
         async Thread.Async.TtTask UpdateDecorator()

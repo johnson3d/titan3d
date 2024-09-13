@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder
 {
-    public class UHLSLCodeGenerator : UCodeGeneratorBase
+    public class UHLSLCodeGenerator : TtCodeGeneratorBase
     {
         public UHLSLCodeGenerator()
         {
@@ -14,7 +14,7 @@ namespace EngineNS.Bricks.CodeBuilder
             mIndentStr = "    ";
         }
 
-        public static void GenCommentCodes(UCommentStatement comment, ref UCodeGeneratorData data, ref string sourceCode)
+        public static void GenCommentCodes(TtCommentStatement comment, ref TtCodeGeneratorData data, ref string sourceCode)
         {
             if (comment == null)
                 return;
@@ -25,9 +25,9 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UVariableDeclarationCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var varDec = obj as UVariableDeclaration;
+                var varDec = obj as TtVariableDeclaration;
                 GenCommentCodes(varDec.Comment, ref data, ref sourceCode);
                 string codeStr = "";
                 codeStr += data.CodeGen.GetTypeString(varDec.VariableType) + " " + varDec.VariableName;
@@ -55,7 +55,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class TtIncludeDeclarationCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
                 var varDec = obj as TtIncludeDeclaration;
                 string codeStr = $"#include \"{varDec.FilePath}\"";
@@ -65,9 +65,9 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UMethodDeclarationCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var methodDec = obj as UMethodDeclaration;
+                var methodDec = obj as TtMethodDeclaration;
                 GenCommentCodes(methodDec.Comment, ref data, ref sourceCode);
                 data.Method = methodDec;
                 string methodDecStr = (methodDec.ReturnValue != null) ? data.CodeGen.GetTypeString(methodDec.ReturnValue.VariableType) : "void" + " " + data.Method.MethodName + "(";
@@ -137,9 +137,9 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UClassDeclarationCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var classDec = obj as UClassDeclaration;
+                var classDec = obj as TtClassDeclaration;
                 var codeGen = data.CodeGen as UCSharpCodeGenerator;
                 GenCommentCodes(classDec.Comment, ref data, ref sourceCode);
                 string tempCode = "struct ";
@@ -173,7 +173,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UClassReferenceExpressionCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
                 //HLSL don't have static function
                 //var clsRefExp = obj as UClassReferenceExpression;
@@ -183,9 +183,9 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UVariableReferenceExpressionCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var varRefExp = obj as UVariableReferenceExpression;
+                var varRefExp = obj as TtVariableReferenceExpression;
                 if(varRefExp.Host != null)
                 {
                     var hostGen = data.CodeGen.GetCodeObjectGen(varRefExp.Host.GetType());
@@ -211,24 +211,24 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class USelfReferenceExpressionCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
             }
         }
         class UMethodInvokeArgumentExpressionCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var miArgExp = obj as UMethodInvokeArgumentExpression;
+                var miArgExp = obj as TtMethodInvokeArgumentExpression;
                 var argExp = data.CodeGen.GetCodeObjectGen(miArgExp.Expression.GetType());
                 argExp.GenCodes(miArgExp.Expression, ref sourceCode, ref data);
             }
         }
         class UMethodInvokeStatementCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var methodInvokeExp = obj as UMethodInvokeStatement;
+                var methodInvokeExp = obj as TtMethodInvokeStatement;
                 string invokeStr = "";
                 if(methodInvokeExp.ReturnValue != null)
                 {
@@ -240,7 +240,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 {
                     var hostGen = data.CodeGen.GetCodeObjectGen(methodInvokeExp.Host.GetType());
                     hostGen.GenCodes(methodInvokeExp.Host, ref invokeStr, ref data);
-                    var klsRef = methodInvokeExp.Host as UClassReferenceExpression;
+                    var klsRef = methodInvokeExp.Host as TtClassReferenceExpression;
                     if (klsRef == null)
                         invokeStr += ".";
                 }
@@ -272,9 +272,9 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UAssignOperatorStatementCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var assignOpExp = obj as UAssignOperatorStatement;
+                var assignOpExp = obj as TtAssignOperatorStatement;
                 string assignStr = "";
                 var toGen = data.CodeGen.GetCodeObjectGen(assignOpExp.To.GetType());
                 toGen.GenCodes(assignOpExp.To, ref assignStr, ref data);
@@ -294,73 +294,73 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UBinaryOperatorExpressionCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var binOpExp = obj as UBinaryOperatorExpression;
+                var binOpExp = obj as TtBinaryOperatorExpression;
                 if (binOpExp.Cell)
                     sourceCode += "(";
                 var leftGen = data.CodeGen.GetCodeObjectGen(binOpExp.Left.GetType());
                 leftGen.GenCodes(binOpExp.Left, ref sourceCode, ref data);
                 switch(binOpExp.Operation)
                 {
-                    case UBinaryOperatorExpression.EBinaryOperation.Add:
+                    case TtBinaryOperatorExpression.EBinaryOperation.Add:
                         sourceCode += " + ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.Subtract:
+                    case TtBinaryOperatorExpression.EBinaryOperation.Subtract:
                         sourceCode += " - ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.Multiply:
+                    case TtBinaryOperatorExpression.EBinaryOperation.Multiply:
                         sourceCode += " * ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.Divide:
+                    case TtBinaryOperatorExpression.EBinaryOperation.Divide:
                         sourceCode += " / ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.Modulus:
+                    case TtBinaryOperatorExpression.EBinaryOperation.Modulus:
                         sourceCode += " % ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.Inequality:
+                    case TtBinaryOperatorExpression.EBinaryOperation.Inequality:
                         sourceCode += " != ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.Equality:
+                    case TtBinaryOperatorExpression.EBinaryOperation.Equality:
                         sourceCode += " == ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.BitwiseOr:
+                    case TtBinaryOperatorExpression.EBinaryOperation.BitwiseOr:
                         sourceCode += " | ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.BitwiseXOR:
+                    case TtBinaryOperatorExpression.EBinaryOperation.BitwiseXOR:
                         sourceCode += " ^ ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.BitwiseAnd:
+                    case TtBinaryOperatorExpression.EBinaryOperation.BitwiseAnd:
                         sourceCode += " & ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.BitwiseLeftShift:
+                    case TtBinaryOperatorExpression.EBinaryOperation.BitwiseLeftShift:
                         sourceCode += " << ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.BitwiseRightShift:
+                    case TtBinaryOperatorExpression.EBinaryOperation.BitwiseRightShift:
                         sourceCode += " >> ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.BooleanOr:
+                    case TtBinaryOperatorExpression.EBinaryOperation.BooleanOr:
                         sourceCode += " || ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.BooleanAnd:
+                    case TtBinaryOperatorExpression.EBinaryOperation.BooleanAnd:
                         sourceCode += " && ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.LessThan:
+                    case TtBinaryOperatorExpression.EBinaryOperation.LessThan:
                         sourceCode += " < ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.LessThanOrEqual:
+                    case TtBinaryOperatorExpression.EBinaryOperation.LessThanOrEqual:
                         sourceCode += " <= ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.GreaterThan:
+                    case TtBinaryOperatorExpression.EBinaryOperation.GreaterThan:
                         sourceCode += " > ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.GreaterThanOrEqual:
+                    case TtBinaryOperatorExpression.EBinaryOperation.GreaterThanOrEqual:
                         sourceCode += " >= ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.AddAssignment:
+                    case TtBinaryOperatorExpression.EBinaryOperation.AddAssignment:
                         sourceCode += " += ";
                         break;
-                    case UBinaryOperatorExpression.EBinaryOperation.SubtractAssignment:
+                    case TtBinaryOperatorExpression.EBinaryOperation.SubtractAssignment:
                         sourceCode += " -= ";
                         break;
                 }
@@ -373,27 +373,27 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UUnaryOperatorExpressionCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var unaryOpExp = obj as UUnaryOperatorExpression;
+                var unaryOpExp = obj as TtUnaryOperatorExpression;
                 var valGen = data.CodeGen.GetCodeObjectGen(unaryOpExp.Value.GetType());
                 switch (unaryOpExp.Operation)
                 {
-                    case UUnaryOperatorExpression.EUnaryOperation.Negative:
+                    case TtUnaryOperatorExpression.EUnaryOperation.Negative:
                         {
                             sourceCode += "(-";
                             valGen.GenCodes(unaryOpExp.Value, ref sourceCode, ref data);
                             sourceCode += ")";
                         }
                         break;
-                    case UUnaryOperatorExpression.EUnaryOperation.BooleanNot:
+                    case TtUnaryOperatorExpression.EUnaryOperation.BooleanNot:
                         {
                             sourceCode += "(!";
                             valGen.GenCodes(unaryOpExp.Value, ref sourceCode, ref data);
                             sourceCode += ")";
                         }
                         break;
-                    case UUnaryOperatorExpression.EUnaryOperation.BitwiseNot:
+                    case TtUnaryOperatorExpression.EUnaryOperation.BitwiseNot:
                         {
                             sourceCode += "(~";
                             valGen.GenCodes(unaryOpExp.Value, ref sourceCode, ref data);
@@ -406,9 +406,9 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UIndexerOperatorExpressionCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var indexerOpExp = obj as UIndexerOperatorExpression;
+                var indexerOpExp = obj as TtIndexerOperatorExpression;
                 var tagGen = data.CodeGen.GetCodeObjectGen(indexerOpExp.Target.GetType());
                 tagGen.GenCodes(indexerOpExp.Target, ref sourceCode, ref data);
                 for (int i = 0; i < indexerOpExp.Indices.Count; i++)
@@ -423,9 +423,9 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UPrimitiveExpressionCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var primitiveExp = obj as UPrimitiveExpression;
+                var primitiveExp = obj as TtPrimitiveExpression;
                 var typeStr = data.CodeGen.GetTypeString(primitiveExp.Type);
                 switch(typeStr)
                 {
@@ -486,9 +486,9 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UCastExpressionCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var castExp = obj as UCastExpression;
+                var castExp = obj as TtCastExpression;
                 sourceCode += "(" + data.CodeGen.GetTypeString(castExp.TargetType) + ")";
                 var expGen = data.CodeGen.GetCodeObjectGen(castExp.Expression.GetType());
                 expGen.GenCodes(castExp.Expression, ref sourceCode, ref data);
@@ -497,9 +497,9 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UCreateObjectExpressionCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var createExp = obj as UCreateObjectExpression;
+                var createExp = obj as TtCreateObjectExpression;
                 sourceCode += createExp.TypeName + "(";
                 for (int i = 0; i < createExp.Parameters.Count; i++)
                 {
@@ -514,9 +514,9 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UDefaultValueExpressionCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var defaultValExp = obj as UDefaultValueExpression;
+                var defaultValExp = obj as TtDefaultValueExpression;
                 switch(data.CodeGen.GetTypeString(defaultValExp.Type))
                 {
                     case "float":
@@ -581,7 +581,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UNullValueExpressionCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
                 sourceCode += "NULL";
             }
@@ -589,9 +589,9 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UExecuteSequenceStatementCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var exeSeqExp = obj as UExecuteSequenceStatement;
+                var exeSeqExp = obj as TtExecuteSequenceStatement;
                 for (int i = 0; i < exeSeqExp.Sequence.Count; i++)
                 {
                     var seqGen = data.CodeGen.GetCodeObjectGen(exeSeqExp.Sequence[i].GetType());
@@ -602,9 +602,9 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UReturnStatementCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var retExp = obj as UReturnStatement;
+                var retExp = obj as TtReturnStatement;
                 string retStr = "return";
                 if (data.Method.ReturnValue != null)
                 {
@@ -622,9 +622,9 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UIfStatementCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var ifExp = obj as UIfStatement;
+                var ifExp = obj as TtIfStatement;
                 string ifStr = "if (";
                 var condGen = data.CodeGen.GetCodeObjectGen(ifExp.Condition.GetType());
                 condGen.GenCodes(ifExp.Condition, ref ifStr, ref data);
@@ -671,9 +671,9 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UForLoopStatementCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var forExp = obj as UForLoopStatement;
+                var forExp = obj as TtForLoopStatement;
                 string forStr = "for (" + forExp.LoopIndexName + " = ";
                 var beginGen = data.CodeGen.GetCodeObjectGen(forExp.BeginExpression.GetType());
                 beginGen.GenCodes(forExp.BeginExpression, ref forStr, ref data);
@@ -702,9 +702,9 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UWhileLoopStatementCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var whileExp = obj as UWhileLoopStatement;
+                var whileExp = obj as TtWhileLoopStatement;
                 string whileStr = "while (";
                 var condExpGen = data.CodeGen.GetCodeObjectGen(whileExp.Condition.GetType());
                 condExpGen.GenCodes(whileExp.Condition, ref whileStr, ref data);
@@ -721,7 +721,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UContinueStatementCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
                 data.CodeGen.AddLine("continue;", ref sourceCode);
             }
@@ -729,7 +729,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UBreakStatementCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
                 data.CodeGen.AddLine("break;", ref sourceCode);
             }
@@ -737,9 +737,9 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UCommentStatementCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var commentExp = obj as UCommentStatement;
+                var commentExp = obj as TtCommentStatement;
                 if(!string.IsNullOrEmpty(commentExp.CommentString))
                 {
                     var comment = "//" + commentExp.CommentString;
@@ -750,9 +750,9 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UExpressionStatementCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var expSt = obj as UExpressionStatement;
+                var expSt = obj as TtExpressionStatement;
                 var expGen = data.CodeGen.GetCodeObjectGen(expSt.Expression.GetType());
                 string tempCode = "";
                 expGen.GenCodes(expSt.Expression, ref tempCode, ref data);
@@ -769,17 +769,17 @@ namespace EngineNS.Bricks.CodeBuilder
 
         class UDebuggerTryBreakCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var exp = obj as UDebuggerTryBreak;
+                var exp = obj as TtDebuggerTryBreak;
             }
         }
 
         class UDebuggerSetWatchVariableCodeGen : ICodeObjectGen
         {
-            public void GenCodes(UCodeObject obj, ref string sourceCode, ref UCodeGeneratorData data)
+            public void GenCodes(TtCodeObject obj, ref string sourceCode, ref TtCodeGeneratorData data)
             {
-                var exp = obj as UDebuggerSetWatchVariable;
+                var exp = obj as TtDebuggerSetWatchVariable;
             }
         }
 
@@ -814,63 +814,63 @@ namespace EngineNS.Bricks.CodeBuilder
         UDebuggerSetWatchVariableCodeGen mDebuggerSetWatchVariableCodeGen = new UDebuggerSetWatchVariableCodeGen();
         public override ICodeObjectGen GetCodeObjectGen(Rtti.UTypeDesc type)
         {
-            if (type.IsEqual(typeof(UVariableDeclaration)))
+            if (type.IsEqual(typeof(TtVariableDeclaration)))
                 return mVariableDeclarationCodeGen;
             if (type.IsEqual(typeof(TtIncludeDeclaration)))
                 return mIncludeDeclarationCodeGen;
-            else if (type.IsEqual(typeof(UMethodDeclaration)))
+            else if (type.IsEqual(typeof(TtMethodDeclaration)))
                 return mMethodDeclarationCodeGen;
-            else if (type.IsEqual(typeof(UClassDeclaration)))
+            else if (type.IsEqual(typeof(TtClassDeclaration)))
                 return mClassDeclarationCodeGen;
-            else if (type.IsEqual(typeof(UClassReferenceExpression)))
+            else if (type.IsEqual(typeof(TtClassReferenceExpression)))
                 return mClassReferenceExpressionCodeGen;
-            else if (type.IsEqual(typeof(UVariableReferenceExpression)))
+            else if (type.IsEqual(typeof(TtVariableReferenceExpression)))
                 return mVariableReferenceExpressionCodeGen;
-            else if (type.IsEqual(typeof(USelfReferenceExpression)))
+            else if (type.IsEqual(typeof(TtSelfReferenceExpression)))
                 return mSelfReferenceExpressionCodeGen;
-            else if (type.IsEqual(typeof(UMethodInvokeArgumentExpression)))
+            else if (type.IsEqual(typeof(TtMethodInvokeArgumentExpression)))
                 return mMethodInvokeArgumentExpressionCodeGen;
-            else if (type.IsEqual(typeof(UMethodInvokeStatement)))
+            else if (type.IsEqual(typeof(TtMethodInvokeStatement)))
                 return mMethodInvokeStatementCodeGen;
-            else if (type.IsEqual(typeof(UAssignOperatorStatement)))
+            else if (type.IsEqual(typeof(TtAssignOperatorStatement)))
                 return mAssignOperatorStatementCodeGen;
-            else if (type.IsEqual(typeof(UBinaryOperatorExpression)))
+            else if (type.IsEqual(typeof(TtBinaryOperatorExpression)))
                 return mBinaryOperatorExpressionCodeGen;
-            else if (type.IsEqual(typeof(UUnaryOperatorExpression)))
+            else if (type.IsEqual(typeof(TtUnaryOperatorExpression)))
                 return mUnaryOperatorExpressionCodeGen;
-            else if (type.IsEqual(typeof(UIndexerOperatorExpression)))
+            else if (type.IsEqual(typeof(TtIndexerOperatorExpression)))
                 return mIndexerOperatorExpressionCodeGen;
-            else if (type.IsEqual(typeof(UPrimitiveExpression)))
+            else if (type.IsEqual(typeof(TtPrimitiveExpression)))
                 return mPrimitiveExpressionCodeGen;
-            else if (type.IsEqual(typeof(UCastExpression)))
+            else if (type.IsEqual(typeof(TtCastExpression)))
                 return mCastExpressionCodeGen;
-            else if (type.IsEqual(typeof(UCreateObjectExpression)))
+            else if (type.IsEqual(typeof(TtCreateObjectExpression)))
                 return mCreateObjectExpressionCodeGen;
-            else if (type.IsEqual(typeof(UDefaultValueExpression)))
+            else if (type.IsEqual(typeof(TtDefaultValueExpression)))
                 return mDefaultValueExpressionCodeGen;
-            else if (type.IsEqual(typeof(UDefaultValueExpression)))
+            else if (type.IsEqual(typeof(TtDefaultValueExpression)))
                 return mNullValueExpressionCodeGen;
-            else if (type.IsEqual(typeof(UExecuteSequenceStatement)))
+            else if (type.IsEqual(typeof(TtExecuteSequenceStatement)))
                 return mExecuteSequenceStatementCodeGen;
-            else if (type.IsEqual(typeof(UReturnStatement)))
+            else if (type.IsEqual(typeof(TtReturnStatement)))
                 return mReturnStatementCodeGen;
-            else if (type.IsEqual(typeof(UIfStatement)))
+            else if (type.IsEqual(typeof(TtIfStatement)))
                 return mIfStatementCodeGen;
-            else if (type.IsEqual(typeof(UForLoopStatement)))
+            else if (type.IsEqual(typeof(TtForLoopStatement)))
                 return mForLoopStatementCodeGen;
-            else if (type.IsEqual(typeof(UWhileLoopStatement)))
+            else if (type.IsEqual(typeof(TtWhileLoopStatement)))
                 return mWhileLoopStatementCodeGen;
-            else if (type.IsEqual(typeof(UContinueStatement)))
+            else if (type.IsEqual(typeof(TtContinueStatement)))
                 return mContinueStatementCodeGen;
-            else if (type.IsEqual(typeof(UBreakStatement)))
+            else if (type.IsEqual(typeof(TtBreakStatement)))
                 return mBreakStatementCodeGen;
-            else if (type.IsEqual(typeof(UCommentStatement)))
+            else if (type.IsEqual(typeof(TtCommentStatement)))
                 return mCommentStatementCodeGen;
-            else if (type.IsEqual(typeof(UExpressionStatement)))
+            else if (type.IsEqual(typeof(TtExpressionStatement)))
                 return mExpressionStatementCodeGen;
-            else if (type.IsEqual(typeof(UDebuggerTryBreak)))
+            else if (type.IsEqual(typeof(TtDebuggerTryBreak)))
                 return mDebuggerTryBreakCodeGen;
-            else if (type.IsEqual(typeof(UDebuggerSetWatchVariable)))
+            else if (type.IsEqual(typeof(TtDebuggerSetWatchVariable)))
                 return mDebuggerSetWatchVariableCodeGen; 
             System.Diagnostics.Debug.Assert(false);
             return null;
@@ -913,7 +913,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 return "SamplerState";
             return t.FullName;
         }
-        public override string GetTypeString(UTypeReference t)
+        public override string GetTypeString(TtTypeReference t)
         {
             if (t.TypeDesc != null)
             {

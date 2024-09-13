@@ -137,7 +137,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            mOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Deferred.UDeferredOpaque>();
+            mOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Deferred.TtDeferredOpaque>();
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName);
 

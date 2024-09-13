@@ -14,6 +14,7 @@ namespace ProjectCooker
         static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 #endif
 
+        static bool IsRun = true;
         static void Main(string[] args)
         {
             var handle = GetConsoleWindow();
@@ -137,10 +138,11 @@ namespace ProjectCooker
                         break;
                 }
                 EngineNS.TtEngine.Instance.PostQuitMessage();
+                IsRun = false;
             };
 
             bool isExcuteAction = false;
-            while (true)
+            while (IsRun)
             {
                 if (EngineNS.TtEngine.Instance.Tick() == false)
                     break;

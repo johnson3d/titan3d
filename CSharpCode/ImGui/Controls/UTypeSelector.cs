@@ -153,7 +153,7 @@ namespace EngineNS.EGui.Controls
             var textSize = ImGuiAPI.CalcTextSize(text, false, -1);
             drawList.AddText(pos + new Vector2(0, (frameHeight - textSize.Y) * 0.5f), UIProxy.StyleConfig.Instance.TextColor, text, null);
             var sizeDelta = ImGuiAPI.GetFontSize() * 0.4f;
-            ImGuiAPI.Arrow(drawList, pos + new Vector2(UIProxy.StyleConfig.Instance.ItemSpacing.X + textSize.X, (frameHeight - sizeDelta) * 0.5f - 2.0f), UIProxy.StyleConfig.Instance.TextColor, ImGuiDir_.ImGuiDir_Down, 1.0f);
+            ImGuiAPI.Arrow(drawList, pos + new Vector2(UIProxy.StyleConfig.Instance.ItemSpacing.X + textSize.X, (frameHeight - sizeDelta) * 0.5f - 2.0f), UIProxy.StyleConfig.Instance.TextColor, ImGuiDir.ImGuiDir_Down, 1.0f);
             if(ImGuiAPI.InvisibleButton(CtrlId + "InvBtn",
                 new Vector2(Math.Max(itemWidth, UIProxy.StyleConfig.Instance.ItemSpacing.X + textSize.X + sizeDelta), frameHeight),
                 ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft))
@@ -173,7 +173,7 @@ namespace EngineNS.EGui.Controls
                 var sz = new Vector2(0, 0);
                 var popDrawList = ImGuiAPI.GetWindowDrawList();
                 UIProxy.SearchBarProxy.OnDraw(ref mSearchBarFocused, popDrawList, "search types", ref mFilterText, ImGuiAPI.GetWindowContentRegionWidth());
-                ImGuiAPI.BeginChild("typesWin", in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+                ImGuiAPI.BeginChild("typesWin", in sz, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_None);
                 {
                     mFilterText = mFilterText.ToLower();
                     ImGuiAPI.Separator();

@@ -18,20 +18,18 @@ struct BxDFContext
 	float VoL;
 	float NoH;
 	float VoH;
+    void Init(half3 N, half3 V, half3 L)
+    {
+        NoL = dot(N, L);
+        NoV = dot(N, V);
+        VoL = dot(V, L);
+        float InvLenH = rsqrt(2 + 2 * VoL);
+        NoH = saturate((NoL + NoV) * InvLenH);
+        VoH = saturate(InvLenH + InvLenH * VoL);
+		//NoL = saturate( NoL );
+		//NoV = saturate( abs( NoV ) + 1e-5 );
+    }
 };
-
-void Init( inout BxDFContext Context, half3 N, half3 V, half3 L )
-{
-	Context.NoL = dot(N, L);
-	Context.NoV = dot(N, V);
-	Context.VoL = dot(V, L);
-	float InvLenH = rsqrt( 2 + 2 * Context.VoL );
-	Context.NoH = saturate( ( Context.NoL + Context.NoV ) * InvLenH );
-	Context.VoH = saturate( InvLenH + InvLenH * Context.VoL );
-	//NoL = saturate( NoL );
-	//NoV = saturate( abs( NoV ) + 1e-5 );
-}
-
 // [ de Carpentier 2017, "Decima Engine: Advances in Lighting and AA" ]
 void SphereMaxNoH( inout BxDFContext Context, float SinAlpha, bool bNewtonIteration )
 {
@@ -88,10 +86,17 @@ void SphereMaxNoH( inout BxDFContext Context, float SinAlpha, bool bNewtonIterat
 
 // GGX / Trowbridge-Reitz
 // [Walter et al. 2007, "Microfacet models for refraction through rough surfaces"]
-float D_GGX( float a2, float NoH )
+float D_GGX(float a2, float NoH, out float t)
 {
-	float d = ( NoH * a2 - NoH ) * NoH + 1;	// 2 mad
-	return a2 / ( Pi*d*d );					// 4 mul, 1 rcp
+    //Roughness = 0.1f;
+    //a2 = 0.0001f;
+    //NoH = clamp(NoH, 0.99f, 1.0f);
+    
+    float d = ( NoH * a2 - NoH ) * NoH + 1;	// 2 mad
+    //d = 1.0f - 0.9999 * NoH * NoH;
+    t = a2 / (PI * d * d);
+    //t = a2 / d;
+    return a2 / ( PI*d*d );					// 4 mul, 1 rcp
 }
 // Appoximation of joint Smith term for GGX
 // [Heitz 2014, "Understanding the Masking-Shadowing Function in Microfacet-Based BRDFs"]
@@ -112,13 +117,13 @@ float3 F_Schlick( float3 SpecularColor, float VoH )
 	return saturate( 50.0 * SpecularColor.g ) * Fc + (1 - Fc) * SpecularColor;	
 }
 
-float3 SpecularGGX( float Roughness, float3 SpecularColor, float NoH, float NoV, float NoL, float VoH )
+float3 SpecularGGX(float Roughness, float3 SpecularColor, float NoH, float NoV, float NoL, float VoH, out float t)
 {
     float a2 = (float)Pow4(Roughness);
 	// float Energy = EnergyNormalization( a2, Context.VoH, AreaLight );
 	
 	// Generalized microfacet specular
-	float D = D_GGX( a2, NoH );
+    float D = D_GGX(a2, NoH, t);
 	// float D = D_GGX( a2, Context.NoH ) * Energy;
 	float Vis = Vis_SmithJointApprox( a2, NoV, NoL );
 	float3 F = F_Schlick( SpecularColor, VoH );
@@ -145,13 +150,16 @@ float EnergyNormalization( inout float a2, float VoH, float AreaLightSphereSinAl
 
 	return Energy;
 }
-float3 SpecularGGX( float Roughness, float3 SpecularColor, BxDFContext Context, float NoL, float AreaLightSphereSinAlpha )
+float3 SpecularGGX(float Roughness, float3 SpecularColor, BxDFContext Context, float NoL, float AreaLightSphereSinAlpha, out float t)
 {
-	float a2 = Pow4( Roughness );
+    float a2 = Pow4( Roughness );
 	float Energy = EnergyNormalization( a2, Context.VoH, AreaLightSphereSinAlpha );
+    //return float3(Energy, Energy, Energy);
 	
 	// Generalized microfacet specular
-	float D = D_GGX( a2, Context.NoH ) * Energy;
+    //return float3(a2, a2, a2);
+    float D = D_GGX(a2, Context.NoH, t) * Energy;
+    //return float3(D, D, D);
 	float Vis = Vis_SmithJointApprox( a2, Context.NoV, NoL );
 	float3 F = F_Schlick( SpecularColor, Context.VoH );
 

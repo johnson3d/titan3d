@@ -21,7 +21,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             RegRenderNode2("HzbNode", HzbNode);
             RegRenderNode2("TranslucentNode", TranslucentNode);
         }
-        public override Common.UGpuSceneNode GetGpuSceneNode()
+        public override Common.TtGpuSceneNode GetGpuSceneNode()
         {
             return GpuSceneNode;
         }
@@ -69,20 +69,65 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
         public UMobileTranslucentNode TranslucentNode = new UMobileTranslucentNode();
         public UFinalCopyNode FinalCopyNode = new UFinalCopyNode();
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
         public Common.UHitproxyNode HitproxyNode = new Common.UHitproxyNode();
+        public Common.UPickedNode PickedNode = new Common.UPickedNode();
+在此之后:
+        public Common.TtHitproxyNode HitproxyNode = new Common.UHitproxyNode();
+        public Common.UPickedNode PickedNode = new Common.UPickedNode();
+*/
+        public Common.TtHitproxyNode HitproxyNode = new Common.TtHitproxyNode();
         public Common.UPickedNode PickedNode = new Common.UPickedNode();
         public Common.UPickBlurNode PickBlurNode = new Common.UPickBlurNode();
         public Common.UPickHollowNode PickHollowNode = new Common.UPickHollowNode();
 
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
         public Common.UGpuSceneNode GpuSceneNode = new Common.UGpuSceneNode();
         public Common.UScreenTilingNode ScreenTilingNode = new Common.UScreenTilingNode();
+在此之后:
+        public Common.TtGpuSceneNode GpuSceneNode = new Common.UGpuSceneNode();
+        public Common.UScreenTilingNode ScreenTilingNode = new Common.UScreenTilingNode();
+*/
+        public Common.TtGpuSceneNode GpuSceneNode = new Common.TtGpuSceneNode();
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
+        public Common.UScreenTilingNode ScreenTilingNode = new Common.UScreenTilingNode();
+在此之后:
+        public Common.TtScreenTilingNode ScreenTilingNode = new Common.UScreenTilingNode();
+*/
+        public Common.TtScreenTilingNode ScreenTilingNode = new Common.TtScreenTilingNode();
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
         public Common.UHzbNode HzbNode = new Common.UHzbNode();
+        public Common.UImageAssetNode EnvMapNode { get; set; } = new Common.UImageAssetNode();
+在此之后:
+        public Common.TtHzbNode HzbNode = new Common.UHzbNode();
+        public Common.UImageAssetNode EnvMapNode { get; set; } = new Common.UImageAssetNode();
+*/
+        public Common.TtHzbNode HzbNode = new Common.TtHzbNode();
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
         public Common.UImageAssetNode EnvMapNode { get; set; } = new Common.UImageAssetNode();
         public Common.UImageAssetNode VignetteNode { get; set; } = new Common.UImageAssetNode();
         //for test
+在此之后:
+        public Common.TtImageAssetNode EnvMapNode { get; set; } = new Common.UImageAssetNode();
+        public Common.TtImageAssetNode VignetteNode { get; set; } = new Common.UImageAssetNode();
+        //for test
+*/
+        public Common.TtImageAssetNode EnvMapNode { get; set; } = new Common.TtImageAssetNode();
+        public Common.TtImageAssetNode VignetteNode { get; set; } = new Common.TtImageAssetNode();
+        //for test
         public Bricks.VXGI.UVoxelsNode VoxelsNode = new Bricks.VXGI.UVoxelsNode();
 
-        public override async System.Threading.Tasks.Task Initialize(UCamera camera)
+        public override async System.Threading.Tasks.Task Initialize(TtCamera camera)
         {
             await base.Initialize(camera);
 
@@ -200,7 +245,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             base.Dispose();
         }
         //渲染DrawCall的时候调用，如果产生了对应的ShadingType的Drawcall，则会callback到这里设置一些这个shading的特殊参数
-        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
         {
             atom.MdfQueue.OnDrawCall(cmd, drawcall, this, atom);
             //drawcall.Effect.ShadingEnv

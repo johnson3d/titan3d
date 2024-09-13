@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_2089835629 Type="EngineNS.Animation.Notify.TtEffectAnimNotify@EngineCore">
-  <Particle Type="EngineNS.RName@EngineCore" Order="0" />
-  <Position Type="EngineNS.Vector3@EngineCore" Order="0" />
-  <Rotation Type="EngineNS.Vector3@EngineCore" Order="0" />
-  <Scale Type="EngineNS.Vector3@EngineCore" Order="0" />
-  <SocketName Type="System.String@Unknown" Order="0" />
-  <WorldSpace Type="System.Boolean@Unknown" Order="0" />
-</Hash_2089835629>

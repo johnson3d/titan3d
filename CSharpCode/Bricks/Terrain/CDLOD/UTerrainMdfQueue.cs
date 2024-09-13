@@ -108,7 +108,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 return mScopeOnDrawCall;
             }
         }
-        public unsafe void OnDrawCall(TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             bool bUseRVT = TtEngine.Instance.Config.Feature_UseRVT;
             using (new Profiler.TimeScopeHelper(ScopeOnDrawCall))

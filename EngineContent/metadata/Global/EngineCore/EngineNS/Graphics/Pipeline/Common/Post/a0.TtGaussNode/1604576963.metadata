@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_1604576963 Type="EngineNS.Graphics.Pipeline.Common.Post.TtGaussNode@EngineCore">
-  <BlurSigma Type="System.Single@Unknown" Order="0" />
-  <BlurSize Type="System.Int32@Unknown" Order="0" />
-  <OutputScaleFactor Type="System.Single@Unknown" Order="0" />
-  <Stride Type="System.Single@Unknown" Order="0" />
-</Hash_1604576963>

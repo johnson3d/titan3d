@@ -8,9 +8,9 @@ using NPOI.SS.Formula.Functions;
 
 namespace EngineNS.Graphics.Pipeline.Shadow
 {
-    public class UShadowShading : Shader.TtGraphicsShadingEnv
+    public class TtShadowShading : Shader.TtGraphicsShadingEnv
     {
-        public UShadowShading()
+        public TtShadowShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/SSM.cginc", RName.ERNameType.Engine);
         }
@@ -24,9 +24,9 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 EPixelShaderInput.PST_Position,
             };
         }
-        public override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
+        public override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall)
         {
-            var shadowMapNode = policy.FindFirstNode<UShadowMapNode>();
+            var shadowMapNode = policy.FindFirstNode<TtShadowMapNode>();
             if (shadowMapNode == null)
                 return;
 
@@ -34,7 +34,8 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         }
     }
     [Bricks.CodeBuilder.ContextMenu("CSM", "Shadow\\CSM", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UShadowMapNode : TtRenderGraphNode
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shadow.UShadowMapNode@EngineCore", "EngineNS.Graphics.Pipeline.Shadow.UShadowMapNode" })]
+    public class TtShadowMapNode : TtRenderGraphNode
     {
         public TtRenderGraphPin[] VisiblePinIn = new TtRenderGraphPin[]{
             TtRenderGraphPin.CreateInput("Visible0"),
@@ -43,8 +44,19 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             TtRenderGraphPin.CreateInput("Visible3"),
         };
         //public TtRenderGraphPin ColorPinOut = TtRenderGraphPin.CreateOutput("Color", false, EPixelFormat.PXF_B8G8R8A8_UNORM);
-        public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D24_UNORM_S8_UINT);
-        public UShadowMapNode()
+        public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D16_UNORM);//or D32
+        bool mIsDepth32 = false;
+        [Rtti.Meta]
+        public bool IsDepth32 
+        {
+            get => mIsDepth32;
+            set
+            {
+                mIsDepth32 = value;
+                DepthPinOut.Attachement.Format = value ? EPixelFormat.PXF_D32_FLOAT : EPixelFormat.PXF_D16_UNORM;
+            }
+        }
+        public TtShadowMapNode()
         {
             Name = "ShadowMap";
         }
@@ -61,15 +73,15 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         }
         public GamePlay.TtWorld.TtVisParameter mVisParameter = new GamePlay.TtWorld.TtVisParameter();
         // public CCamera ShadowCamera;
-        private UCamera[] mShadowCameraArray;
-        public UCamera ViewerCamera;
-        public UCamera CullCamera;
+        private TtCamera[] mShadowCameraArray;
+        public TtCamera ViewerCamera;
+        public TtCamera CullCamera;
         public TtGraphicsBuffers[] GBuffersArray;
         public UDrawBuffers[] CSMPass = new UDrawBuffers[4];
 
         TtCpuCullingNode[] CSMCullingNode = new TtCpuCullingNode[4];
 
-        public NxRHI.UGpuPipeline DepthRaster;
+        public NxRHI.TtGpuPipeline DepthRaster;
 
         private UInt32 mResolutionX = 1024; //3072
         protected UInt32 mResolutionY = 1024; //4096;
@@ -98,11 +110,11 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         public float mShadowTransitionScale = 1000.0f;
         public Vector4 mShadowMapSizeAndRcp = new Vector4();
         public Matrix[] mViewer2ShadowMtxArray = new Matrix[4];
-        public Matrix mViewer2ShadowMtx = new Matrix();
-        private Matrix mOrtho2UVMtx = new Matrix();
+        public Matrix mViewer2ShadowMtx = Matrix.Identity;
+        private Matrix mOrtho2UVMtx = Matrix.Identity;
         private Matrix[] mUVAdjustedMtxArray = new Matrix[4];
 
-        public UShadowShading mShadowShading;
+        public TtShadowShading mShadowShading;
 
         public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
@@ -113,15 +125,15 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             await Thread.TtAsyncDummyClass.DummyFunc();
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-            mShadowShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Shadow.UShadowShading>();
+            mShadowShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Shadow.TtShadowShading>();
 
-            mShadowCameraArray = new UCamera[4];
+            mShadowCameraArray = new TtCamera[4];
             for (UInt32 CamIdx = 0; CamIdx < mCsmNum; CamIdx++)
             {
-                mShadowCameraArray[CamIdx] = new UCamera();
-                mShadowCameraArray[CamIdx] .mCoreObject.PerspectiveFovLH(3.14f / 4f, 1, 1, 0.3f, 1000.0f);
+                mShadowCameraArray[CamIdx] = new TtCamera();
+                mShadowCameraArray[CamIdx].PerspectiveFovLH(3.14f / 4f, 1, 1, 0.3f, 1000.0f);
                 var eyePos = new DVector3(0, 0, -10);
-                mShadowCameraArray[CamIdx] .mCoreObject.LookAtLH(in eyePos, in DVector3.Zero, in Vector3.Up);
+                mShadowCameraArray[CamIdx].LookAtLH(in eyePos, in DVector3.Zero, in Vector3.Up);
 
                 policy.AddCamera($"CSM_Camera_{CamIdx}", mShadowCameraArray[CamIdx]);
             }
@@ -154,7 +166,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 //PassDesc.mFBClearColorRT0 = TempClearColor;
                 //PassDesc.mDepthClearValue = 1.0f;
                 //PassDesc.mStencilClearValue = 0u;
-                NxRHI.URenderPass RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
+                NxRHI.TtRenderPass RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
 
                 GBuffersArray[0] = new TtGraphicsBuffers();
                 GBuffersArray[0].Initialize(policy, RenderPass);
@@ -177,7 +189,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 PassDescTwo.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
                 PassDescTwo.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionLoad;
                 PassDescTwo.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-                NxRHI.URenderPass RenderPassTwo = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDescTwo);
+                NxRHI.TtRenderPass RenderPassTwo = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDescTwo);
 
                 for (UInt32 CamIdx = 1; CamIdx < mCsmNum; CamIdx++)
                 {
@@ -253,6 +265,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
             for (UInt32 UVAdjustIdx = 0; UVAdjustIdx < mCsmNum; UVAdjustIdx++)
             {
+                mUVAdjustedMtxArray[UVAdjustIdx] = Matrix.Zero;
                 mUVAdjustedMtxArray[UVAdjustIdx].M11 = (float)mInnerResolutionX / (float)mWholeReslutionX;
                 mUVAdjustedMtxArray[UVAdjustIdx].M22 = (float)mInnerResolutionY / (float)mWholeReslutionY;
                 mUVAdjustedMtxArray[UVAdjustIdx].M33 = 1.0f;
@@ -276,7 +289,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             mSumDistanceFarVec.Z = mSumDistanceFarArray[2];
             mSumDistanceFarVec.W = mSumDistanceFarArray[3];
 
-            CullCamera = new UCamera();
+            CullCamera = new TtCamera();
         }
         public override void Dispose()
         {
@@ -303,7 +316,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UShadowMapNode), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtShadowMapNode), nameof(TickLogic));
                 return mScopeTick;
             }
         }
@@ -314,7 +327,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             get
             {
                 if (mScopePushGpuDraw == null)
-                    mScopePushGpuDraw = new Profiler.TimeScope(typeof(UShadowMapNode), "PushGpuDraw");
+                    mScopePushGpuDraw = new Profiler.TimeScope(typeof(TtShadowMapNode), "PushGpuDraw");
                 return mScopePushGpuDraw;
             }
         }
@@ -325,7 +338,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             get
             {
                 if (mScopeFlushDraw == null)
-                    mScopeFlushDraw = new Profiler.TimeScope(typeof(UShadowMapNode), "FlushDraw");
+                    mScopeFlushDraw = new Profiler.TimeScope(typeof(TtShadowMapNode), "FlushDraw");
                 return mScopeFlushDraw;
             }
         }
@@ -336,7 +349,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             get
             {
                 if (mScopeCull == null)
-                    mScopeCull = new Profiler.TimeScope(typeof(UShadowMapNode), "Cull");
+                    mScopeCull = new Profiler.TimeScope(typeof(TtShadowMapNode), "Cull");
                 return mScopeCull;
             }
         }

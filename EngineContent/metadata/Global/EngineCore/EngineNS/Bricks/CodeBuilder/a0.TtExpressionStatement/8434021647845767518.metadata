@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_8434021647845767518 Type="EngineNS.Bricks.CodeBuilder.TtExpressionStatement@EngineCore">
+  <Expression Type="EngineNS.Bricks.CodeBuilder.TtExpressionBase@EngineCore" Order="0" />
+  <NextStatement Type="EngineNS.Bricks.CodeBuilder.TtStatementBase@EngineCore" Order="0" />
+</Hash_8434021647845767518>

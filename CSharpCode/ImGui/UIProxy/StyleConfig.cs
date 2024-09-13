@@ -423,7 +423,7 @@ namespace EngineNS.EGui.UIProxy
             style->WindowBorderSize = 1.0f;
             style->WindowMinSize = new Vector2(32, 32);
             style->WindowTitleAlign = new Vector2(0, 0.5f);
-            style->WindowMenuButtonPosition = ImGuiDir_.ImGuiDir_Left;
+            style->WindowMenuButtonPosition = ImGuiDir.ImGuiDir_Left;
             style->ChildRounding = 0.0f;
             style->ChildBorderSize = 1.0f;
             style->PopupRounding = 0.0f;
@@ -443,7 +443,7 @@ namespace EngineNS.EGui.UIProxy
             style->GrabRounding = 0.0f;
             style->TabRounding = 4.0f;
             style->TabBorderSize = 0.0f;
-            style->ColorButtonPosition = ImGuiDir_.ImGuiDir_Right;
+            style->ColorButtonPosition = ImGuiDir.ImGuiDir_Right;
             style->ButtonTextAlign = new Vector2(0.5f, 0.5f);
             style->SelectableTextAlign = new Vector2(0.0f, 0.0f);
             style->DisplayWindowPadding = new Vector2(19.0f, 19.0f);

@@ -10,6 +10,7 @@ ENGINE_RTTI_IMPL(EngineNS::ICamera);
 ICamera::ICamera()
 {
 	mIsOrtho = false;
+	mIsReverseZ = false;
 	mWidth = 0;
 	mHeight = 0;
 	
@@ -235,6 +236,12 @@ void ICamera::UpdateFrustumOrtho()
 //	}
 //}
 
+void ICamera::SetReverseZ(bool bReverseZ)
+{
+	mIsReverseZ = bReverseZ;
+	PerspectiveFovLH(mFov, mWidth, mHeight, mZNear, mZFar);
+}
+
 void ICamera::PerspectiveFovLH(float fov, float width, float height, float zMin, float zMax)
 {
 	VAutoVSLLock lk(mLocker);
@@ -251,6 +258,19 @@ void ICamera::PerspectiveFovLH(float fov, float width, float height, float zMin,
 	mAspect = width / height;
 
 	v3dxMatrix4Perspective(&mLogicData->mProjectionMatrix, fov, mAspect, zMin, zMax);
+	if (mIsReverseZ)
+	{
+		v3dxMatrix4Perspective_InvZ(&mLogicData->mProjectionMatrix, fov, mAspect, zMin, zMax);
+		/*v3dxMatrix4	reverse_z(  1.0, 0, 0, 0,
+								0, 1.0, 0, 0,
+								0, 0, -1.0, 0,
+								0, 0, 1.0, 1.0);
+		v3dxMatrix4Mul(&mLogicData->mProjectionMatrix, &mLogicData->mProjectionMatrix, &reverse_z);*/
+	}
+	else
+	{
+		v3dxMatrix4Perspective(&mLogicData->mProjectionMatrix, fov, mAspect, zMin, zMax);
+	}
 	mLogicData->mJitterProjectionMatrix = mLogicData->mProjectionMatrix;
 	auto jitterUV = GetJitterUV();
 	mLogicData->mJitterProjectionMatrix.m31 += jitterUV.X * 2.0f;
@@ -284,7 +304,20 @@ void ICamera::MakeOrtho(float w, float h, float zn, float zf)
 	
 	//ClampZfar(mZNear, mZFar);
 
-	v3dxMatrix4Ortho(&mLogicData->mProjectionMatrix, w, h, zn, zf);
+	if (mIsReverseZ)
+	{
+		v3dxMatrix4Ortho(&mLogicData->mProjectionMatrix, w, h, zn, zf);
+		v3dxMatrix4	reverse_z(1.0, 0, 0, 0,
+			0, 1.0, 0, 0,
+			0, 0, -1.0, 0,
+			0, 0, 1.0, 1.0);
+		v3dxMatrix4Mul(&mLogicData->mProjectionMatrix, &mLogicData->mProjectionMatrix, &reverse_z);
+	}
+	else
+	{
+		v3dxMatrix4Ortho(&mLogicData->mProjectionMatrix, w, h, zn, zf);
+	}
+	
 	v3dxMatrix4Inverse(&mLogicData->mProjectionInverse, &mLogicData->mProjectionMatrix, NULL);
 
 	mLogicData->mViewProjection = mLogicData->mViewMatrix * mLogicData->mProjectionMatrix;
@@ -310,7 +343,19 @@ void ICamera::DoOrthoProjectionForShadow(float w, float h, float znear, float zf
 	
 	//ClampZfar(mZNear, mZFar);
 
-	v3dxMatrix4OrthoForDirLightShadow(&mLogicData->mProjectionMatrix, w, h, znear, zfar, TexelOffsetNdcX,TexelOffsetNdcY);
+	if (mIsReverseZ)
+	{
+		v3dxMatrix4OrthoForDirLightShadow(&mLogicData->mProjectionMatrix, w, h, znear, zfar, TexelOffsetNdcX, TexelOffsetNdcY);
+		v3dxMatrix4	reverse_z(  1.0, 0, 0, 0,
+									0, 1.0, 0, 0,
+									0, 0, -1.0, 0,
+									0, 0, 1.0, 1.0);
+		v3dxMatrix4Mul(&mLogicData->mProjectionMatrix, &mLogicData->mProjectionMatrix, &reverse_z);
+	}
+	else
+	{
+		v3dxMatrix4OrthoForDirLightShadow(&mLogicData->mProjectionMatrix, w, h, znear, zfar, TexelOffsetNdcX,TexelOffsetNdcY);
+	}
 	v3dxMatrix4Inverse(&mLogicData->mProjectionInverse, &mLogicData->mProjectionMatrix, NULL);
 
 	mLogicData->mViewProjection = mLogicData->mViewMatrix * mLogicData->mProjectionMatrix;

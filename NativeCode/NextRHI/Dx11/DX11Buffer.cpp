@@ -470,6 +470,10 @@ namespace NxRHI
 						case EPixelFormat::PXF_D16_UNORM:
 							td.Format = DXGI_FORMAT_R16_TYPELESS;
 							break;
+						case EPixelFormat::PXF_R32G8X24_TYPELESS:
+						case EPixelFormat::PXF_D32_FLOAT_S8X24_UINT:
+							td.Format = DXGI_FORMAT_R32G8X24_TYPELESS;
+							break;
 						case EPixelFormat::PXF_UNKNOWN:
 							td.Format = DXGI_FORMAT_R16_TYPELESS;
 							break;
@@ -831,7 +835,7 @@ namespace NxRHI
 	void SrvDesc2DX(D3D11_SHADER_RESOURCE_VIEW_DESC* tar, const FSrvDesc* src)
 	{
 		memset(tar, 0, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
-		tar->Format = FormatToDXFormat(src->Format);
+		tar->Format = FormatToDXFormat(TypelessToViewDefaultFormat(src->Format));
 		switch (src->Type)
 		{
 		case ST_BufferSRV:
@@ -1027,7 +1031,7 @@ namespace NxRHI
 	static void UavDesc2DX(IGpuResource* pBuffer, D3D11_UNORDERED_ACCESS_VIEW_DESC* tar, const FUavDesc* src)
 	{
 		//memset(tar, 0, sizeof(D3D12_SHADER_RESOURCE_VIEW_DESC));
-		tar->Format = FormatToDXFormat(src->Format);
+		tar->Format = FormatToDXFormat(TypelessToViewDefaultFormat(src->Format));
 		switch (src->ViewDimension)
 		{
 			case EDimensionUAV::UAV_DIMENSION_BUFFER:
@@ -1247,6 +1251,8 @@ namespace NxRHI
 		case DXGI_FORMAT_D24_UNORM_S8_UINT:
 		case DXGI_FORMAT_D32_FLOAT:
 		case DXGI_FORMAT_D16_UNORM:
+		case DXGI_FORMAT_R32G8X24_TYPELESS:
+		case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
 			DSVDesc.Format = dxPixelFormat;
 			break;
 		default:

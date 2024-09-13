@@ -6,10 +6,10 @@ using System.Text;
 
 namespace EngineNS.Animation.BlendTree.Node
 {
-    public class TtCrossfadePoseCommand<T> : TtAnimationCommand<T> where T : IRuntimePose
+    public class TtCrossfadePoseCommand<S, T> : TtAnimationCommand<S, T> where T : IRuntimePose
     {
-        public TtAnimationCommand<T> FromNode { get; set; }
-        public TtAnimationCommand<T> ToNode { get; set; }
+        public TtAnimationCommand<S, T> FromNode { get; set; }
+        public TtAnimationCommand<S, T> ToNode { get; set; }
         public TtCrossfadePoseCommandDesc Desc { get; set; }
         public override void Execute()
         {
@@ -36,23 +36,28 @@ namespace EngineNS.Animation.BlendTree.Node
     {
         public float Weight { get; set; }
     }
-    public class TtBlendTree_CrossfadePose<T> : TtBlendTree<T> where T : IRuntimePose
+    public class TtBlendTree_CrossfadePose<S, T> : TtBlendTree<S, T> where T : IRuntimePose
     {
-        public IBlendTree<T> FromNode { get; set; }
-        public IBlendTree<T> ToNode { get; set; }
+        public IBlendTree<S, T> FromNode { get; set; }
+        public IBlendTree<S, T> ToNode { get; set; }
         public float BlendTime { get; set; } = 0.1f;
         public bool BlendCompelete = false;
         float mCurrentTime = 0.0f;
 
-        TtCrossfadePoseCommand<T> mAnimationCommand = null;
-        public override void Initialize(ref FAnimBlendTreeContext context)
+        TtCrossfadePoseCommand<S, T> mAnimationCommand = null;
+        public override async Thread.Async.TtTask<bool> Initialize(FAnimBlendTreeContext context)
         {
-            mAnimationCommand = new TtCrossfadePoseCommand<T>();
+            mAnimationCommand = new TtCrossfadePoseCommand<S, T>();
             mAnimationCommand.Desc = new();
-            base.Initialize(ref context);
+            await base.Initialize(context);
+            return true;
         }
-        public override TtAnimationCommand<T> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
+        public override TtAnimationCommand<S, T> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
+            System.Diagnostics.Debug.Assert(ToNode != null);
+            if (ToNode == null)
+                return null;
+
             base.ConstructAnimationCommandTree(parentNode, ref context);
             mAnimationCommand.Desc = new();
             context.AddCommand(context.TreeDepth, mAnimationCommand);
@@ -78,7 +83,7 @@ namespace EngineNS.Animation.BlendTree.Node
         }
     }
 
-    public class TtBlendTree_ClipCrossfadeWithPose<T> : TtBlendTree_CrossfadePose<T> where T : IRuntimePose
+    public class TtBlendTree_ClipCrossfadeWithPose<S, T> : TtBlendTree_CrossfadePose<S, T> where T : IRuntimePose
     {
 
     }

@@ -5,11 +5,12 @@ using EngineNS.NxRHI;
 using Microsoft.CodeAnalysis.Host;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Deferred
 {
-    public partial class UDeferredDirLightingShading : Shader.TtGraphicsShadingEnv
+    public partial class TtDeferredDirLightingShading : Shader.TtGraphicsShadingEnv
     {
         #region Permutation
         public UPermutationItem DisableAO
@@ -42,8 +43,39 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get;
             set;
         }
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "EDebugShowMode")]
+        public enum EDebugShowMode : uint
+        {
+            None = 0,
+            N,
+            NoH,
+            LoH,
+            NoV,
+            VoH,
+            NoL,
+            Specular,
+            Num,
+        }
+        public UPermutationItem DebugShowModePermutation
+        {
+            get;
+            set;
+        }
+        [Category("Option")]
+        public EDebugShowMode DebugShowMode
+        {
+            get
+            {
+                return (EDebugShowMode)DebugShowModePermutation.Value.GetValue(DebugShowModePermutation);
+            }
+            set
+            {
+                DebugShowModePermutation.SetValue((uint)value);
+                this.UpdatePermutation();
+            }
+        }
         #endregion
-        public UDeferredDirLightingShading()
+        public TtDeferredDirLightingShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Deferred/DeferredDirLighting.cginc", RName.ERNameType.Engine);
 
@@ -59,10 +91,12 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             DisableAO.SetValue((int)Shader.EPermutation_Bool.FalseValue);
             DisableShadow.SetValue((int)Shader.EPermutation_Bool.FalseValue);
             DisablePointLights.SetValue((int)Shader.EPermutation_Bool.FalseValue);
-
             DisableSunshaft.SetValue((int)Shader.EPermutation_Bool.TrueValue);
             DisableBloom.SetValue((int)Shader.EPermutation_Bool.TrueValue);
             DisableHdr.SetValue((int)Shader.EPermutation_Bool.TrueValue);
+
+            DebugShowModePermutation = this.PushPermutation<EDebugShowMode>("ENV_EDebugShowMode", GetBitWidth((int)EDebugShowMode.Num));
+            DebugShowModePermutation.SetValue((int)EDebugShowMode.None);
 
             this.UpdatePermutation();
         }
@@ -81,14 +115,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 EPixelShaderInput.PST_LightMap,
             };
         }
-        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
+        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
-            var dirLightingNode = drawcall.TagObject as UDeferredDirLightingNode;
+            var dirLightingNode = drawcall.TagObject as TtDeferredDirLightingNode;
 
             var index = drawcall.FindBinder("cbPerGpuScene");
             if (index.IsValidPointer)
@@ -250,7 +284,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
     }
     [Bricks.CodeBuilder.ContextMenu("DirLighting", "Deferred\\DirLighting", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public partial class UDeferredDirLightingNode : Common.USceenSpaceNode
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.UDeferredDirLightingNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.UDeferredDirLightingNode" })]
+    public partial class TtDeferredDirLightingNode : Common.TtSceenSpaceNode
     {
         public TtRenderGraphPin Rt0PinIn = TtRenderGraphPin.CreateInput("MRT0");
         public TtRenderGraphPin Rt1PinIn = TtRenderGraphPin.CreateInput("MRT1");
@@ -265,7 +300,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public TtRenderGraphPin GpuScenePinIn = TtRenderGraphPin.CreateInput("GpuScene");
         public TtRenderGraphPin PointLightsPinIn = TtRenderGraphPin.CreateInput("PointLights");
 
-        public UDeferredDirLightingNode()
+        public TtDeferredDirLightingNode()
         {
             Name = "UDeferredDirLightingNode";
         }
@@ -291,7 +326,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             base.FrameBuild(policy);
         }
-        public UDeferredDirLightingShading mBasePassShading;
+        public TtDeferredDirLightingShading mBasePassShading;
         public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mBasePassShading;
@@ -299,7 +334,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UDeferredDirLightingShading>();
+            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDeferredDirLightingShading>();
         }
         [ThreadStatic]
         private static Profiler.TimeScope mScopeTick;
@@ -308,7 +343,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UDeferredDirLightingNode), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtDeferredDirLightingNode), nameof(TickLogic));
                 return mScopeTick;
             }
         } 
@@ -323,6 +358,18 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public override void TickSync(TtRenderPolicy policy)
         {
             base.TickSync(policy);
+        }
+        [Category("Option")]
+        public TtDeferredDirLightingShading.EDebugShowMode DebugShowMode
+        {
+            get
+            {
+                return mBasePassShading.DebugShowMode;
+            }
+            set
+            {
+                mBasePassShading.DebugShowMode = value;
+            }
         }
     }
 }
@@ -494,7 +541,7 @@ namespace EngineNS
             return PreIntegratedDFSrv;
         }
 
-        UTexture PreIntegratedDFTexture = null;
+        TtTexture PreIntegratedDFTexture = null;
         TtSrView PreIntegratedDFSrv = null;
     }
 }

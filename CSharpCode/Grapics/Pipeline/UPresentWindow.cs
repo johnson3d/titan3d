@@ -15,7 +15,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public bool IsCreatedByImGui = false;
         public bool IsClosed = false;
-        public NxRHI.USwapChain SwapChain { get; set; }
+        public NxRHI.TtSwapChain SwapChain { get; set; }
         
         public void BeginFrame()
         {
@@ -31,7 +31,7 @@ namespace EngineNS.Graphics.Pipeline
 
             return true;
         }
-        public unsafe void InitSwapChain(NxRHI.UGpuDevice rc)
+        public unsafe void InitSwapChain(NxRHI.TtGpuDevice rc)
         {
             var scDesc = new NxRHI.FSwapChainDesc();
             scDesc.SetDefault();
@@ -63,7 +63,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             return EPixelFormat.PXF_D24_UNORM_S8_UINT;
         }
-        public virtual async System.Threading.Tasks.Task<bool> InitializeGraphics(NxRHI.UGpuDevice rc, Type rpType)
+        public virtual async System.Threading.Tasks.Task<bool> InitializeGraphics(NxRHI.TtGpuDevice rc, Type rpType)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 

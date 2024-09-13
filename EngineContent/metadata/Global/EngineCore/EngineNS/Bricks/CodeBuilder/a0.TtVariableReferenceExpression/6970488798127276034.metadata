@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_6970488798127276034 Type="EngineNS.Bricks.CodeBuilder.TtVariableReferenceExpression@EngineCore">
+  <Host Type="EngineNS.Bricks.CodeBuilder.TtExpressionBase@EngineCore" Order="0" />
+  <PropertyDeclClass Type="EngineNS.Rtti.UTypeDesc@EngineCore" Order="0" />
+  <VariableName Type="System.String@Unknown" Order="0" />
+</Hash_6970488798127276034>

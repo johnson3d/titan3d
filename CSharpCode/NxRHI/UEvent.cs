@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.NxRHI
 {
-    public class UEvent : AuxPtrType<NxRHI.IEvent>
+    public class TtEvent : AuxPtrType<NxRHI.IEvent>
     {
         public string Name
         {
@@ -27,7 +27,7 @@ namespace EngineNS.NxRHI
         }
     }
 
-    public class UFence : AuxPtrType<NxRHI.IFence>
+    public class TtFence : AuxPtrType<NxRHI.IFence>
     {
         public string Name
         {

@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_2432397069 Type="EngineNS.Bricks.CodeBuilder.UCreateObjectExpression@EngineCore">
-  <Parameters Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore,&gt;@Unknown" Order="0" />
-  <TypeName Type="System.String@Unknown" Order="0" />
-</Hash_2432397069>

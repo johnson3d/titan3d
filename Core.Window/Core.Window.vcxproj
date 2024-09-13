@@ -174,7 +174,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>PTR_64;_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NOMINMAX;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;FT2_BUILD_LIBRARY;_DEBUG;TINYEXR_USE_MINIZ=0</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NOMINMAX;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;FT2_BUILD_LIBRARY;PTR_64;_DEBUG;TINYEXR_USE_MINIZ=0</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -236,7 +236,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>PTR_64;_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NOMINMAX;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;FT2_BUILD_LIBRARY;NDEBUG</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;VFX_EXPORTS;GLEW_STATIC;AS_DLLMODULE;PLATFORM_WIN;NOMINMAX;COREWINDOW_EXPORTS;_WINDOWS;_USRDLL;FBXSDK_SHARED;FT2_BUILD_LIBRARY;PTR_64;NDEBUG</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>

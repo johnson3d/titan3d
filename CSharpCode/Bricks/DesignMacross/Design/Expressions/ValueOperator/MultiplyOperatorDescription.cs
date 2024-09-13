@@ -10,7 +10,7 @@ namespace EngineNS.DesignMacross.Design.Expressions.ValueOperator
         public TtMultiplyOperatorDescription()
         {
             Name = "Multiply";
-            Op = UBinaryOperatorExpression.EBinaryOperation.Multiply;
+            Op = TtBinaryOperatorExpression.EBinaryOperation.Multiply;
         }
     }
 }

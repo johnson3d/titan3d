@@ -630,7 +630,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 {
                     var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-                    var iptDesc = new NxRHI.UInputLayoutDesc();
+                    var iptDesc = new NxRHI.TtInputLayoutDesc();
                     unsafe
                     {
                         iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
@@ -693,12 +693,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         //    return base.OnNoneLinkedParameter(funGraph, cGen, i);
         //}
 
-        protected override UExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
+        protected override TtExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
         {
             var method = Method;
             if (method.Parameters[argIdx].Name == "texture")
             {
-                var retVal = new UVariableReferenceExpression()
+                var retVal = new TtVariableReferenceExpression()
                 {
                     VariableName = TextureVarName
                 };
@@ -706,7 +706,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             else if (method.Parameters[argIdx].Name == "sampler")
             {
-                var retVal = new UVariableReferenceExpression()
+                var retVal = new TtVariableReferenceExpression()
                 {
                     VariableName = "Samp_" + TextureVarName
                 };
@@ -714,7 +714,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             else if (method.Parameters[argIdx].Name == "uv")
             {
-                var retVal = new UVariableReferenceExpression()
+                var retVal = new TtVariableReferenceExpression()
                 {
                     VariableName = "input.vUV"
                 };
@@ -840,7 +840,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 {
                     var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-                    var iptDesc = new NxRHI.UInputLayoutDesc();
+                    var iptDesc = new NxRHI.TtInputLayoutDesc();
                     unsafe
                     {
                         iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
@@ -910,12 +910,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
         //    return base.OnNoneLinkedParameter(funGraph, cGen, i);
         //}
-        protected override UExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
+        protected override TtExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
         {
             var method = Method;
             if(method.Parameters[argIdx].Name == "texture")
             {
-                var retVal = new UVariableReferenceExpression()
+                var retVal = new TtVariableReferenceExpression()
                 {
                     VariableName = TextureVarName
                 };
@@ -923,7 +923,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             else if(method.Parameters[argIdx].Name == "sampler")
             {
-                var retVal = new UVariableReferenceExpression()
+                var retVal = new TtVariableReferenceExpression()
                 {
                     VariableName = "Samp_" + TextureVarName
                 };
@@ -931,7 +931,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             else if(method.Parameters[argIdx].Name == "uv")
             {
-                var retVal = new UVariableReferenceExpression()
+                var retVal = new TtVariableReferenceExpression()
                 {
                     VariableName = "input.vUV"
                 };
@@ -1079,12 +1079,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
         //    return base.OnNoneLinkedParameter(funGraph, cGen, i);
         //}
-        protected override UExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
+        protected override TtExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
         {
             var method = Method;
             if (method.Parameters[argIdx].Name == "texture")
             {
-                var retVal = new UVariableReferenceExpression()
+                var retVal = new TtVariableReferenceExpression()
                 {
                     VariableName = TextureVarName
                 };
@@ -1092,7 +1092,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             else if (method.Parameters[argIdx].Name == "sampler")
             {
-                var retVal = new UVariableReferenceExpression()
+                var retVal = new TtVariableReferenceExpression()
                 {
                     VariableName = "Samp_" + TextureVarName
                 };
@@ -1100,7 +1100,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             else if (method.Parameters[argIdx].Name == "uv")
             {
-                var retVal = new UVariableReferenceExpression()
+                var retVal = new TtVariableReferenceExpression()
                 {
                     VariableName = "input.vUV"
                 };
@@ -1248,12 +1248,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
         //    return base.OnNoneLinkedParameter(funGraph, cGen, i);
         //}
-        protected override UExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
+        protected override TtExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
         {
             var method = Method;
             if (method.Parameters[argIdx].Name == "texture")
             {
-                var retVal = new UVariableReferenceExpression()
+                var retVal = new TtVariableReferenceExpression()
                 {
                     VariableName = TextureVarName
                 };
@@ -1261,7 +1261,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             else if (method.Parameters[argIdx].Name == "sampler")
             {
-                var retVal = new UVariableReferenceExpression()
+                var retVal = new TtVariableReferenceExpression()
                 {
                     VariableName = "Samp_" + TextureVarName
                 };
@@ -1269,7 +1269,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             else if (method.Parameters[argIdx].Name == "uv")
             {
-                var retVal = new UVariableReferenceExpression()
+                var retVal = new TtVariableReferenceExpression()
                 {
                     VariableName = "input.vUV"
                 };

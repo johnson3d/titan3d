@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public partial class UGpuSceneNode
+    public partial class TtGpuSceneNode
     {
         public TtRenderGraphPin PointLightsPinOut = TtRenderGraphPin.CreateOutput("PointLights", false, EPixelFormat.PXF_UNKNOWN);
         public struct FPointLight

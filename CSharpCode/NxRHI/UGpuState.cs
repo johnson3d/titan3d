@@ -4,6 +4,20 @@ using System.Text;
 
 namespace EngineNS.NxRHI
 {
+    public partial struct FDepthStencilDesc
+    {
+        public void SetDefault()
+        {
+            SetDefault(TtEngine.Instance.Config.IsReverseZ);
+        }
+    }
+    public partial struct FGpuPipelineDesc
+    {
+        public void SetDefault()
+        {
+            SetDefault(TtEngine.Instance.Config.IsReverseZ);
+        }
+    }
     public partial struct FBlendDesc
     {
         public unsafe EngineNS.NxRHI.FRenderTargetBlendDesc RenderTarget0
@@ -51,10 +65,10 @@ namespace EngineNS.NxRHI
             }
         }
     }
-    public class USampler : AuxPtrType<NxRHI.ISampler>
+    public class TtSampler : AuxPtrType<NxRHI.ISampler>
     {
     }
-    public class UGpuPipeline : AuxPtrType<NxRHI.IGpuPipeline>
+    public class TtGpuPipeline : AuxPtrType<NxRHI.IGpuPipeline>
     {
     }
 }

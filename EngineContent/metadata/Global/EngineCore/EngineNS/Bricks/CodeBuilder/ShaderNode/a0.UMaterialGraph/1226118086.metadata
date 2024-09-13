@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_1226118086 Type="EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialGraph@EngineCore">
-  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
-  <GraphName Type="System.String@Unknown" Order="0" />
-  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Order="0" />
-  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Order="1" />
-</Hash_1226118086>

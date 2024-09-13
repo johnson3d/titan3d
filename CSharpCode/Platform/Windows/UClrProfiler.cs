@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Windows
 {
-    public class UClrProfiler : IRootForm
+    public class TtClrProfiler : IRootForm
     {
-        public UClrProfiler()
+        public TtClrProfiler()
         {
             TtEngine.RootFormManager.RegRootForm(this);
         }
@@ -65,7 +65,7 @@ namespace EngineNS.Editor
 {
     public partial class UMainEditorApplication
     {
-        public EngineNS.Windows.UClrProfiler mClrProfiler = new Windows.UClrProfiler();
+        public EngineNS.Windows.TtClrProfiler mClrProfiler = new Windows.TtClrProfiler();
     }
 }
 

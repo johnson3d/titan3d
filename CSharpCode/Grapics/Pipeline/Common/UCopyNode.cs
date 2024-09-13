@@ -5,11 +5,12 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("Copy", "Copy", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UCopyNode : Graphics.Pipeline.TtRenderGraphNode
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UCopyNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UCopyNode" })]
+    public class TtCopyNode : Graphics.Pipeline.TtRenderGraphNode
     {
         public TtRenderGraphPin SrcPinIn = TtRenderGraphPin.CreateInput("Src");
         public TtRenderGraphPin DestPinOut = TtRenderGraphPin.CreateOutput("Dest", false, EPixelFormat.PXF_UNKNOWN);
-        public UCopyNode()
+        public TtCopyNode()
         {
             Name = "CopyNode";
         }
@@ -29,7 +30,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public TtAttachBuffer ResultBuffer;
         public bool IsCpuAceesResult { get; set; } = false;
-        public NxRHI.UCopyDraw mCopyDrawcall;
+        public NxRHI.TtCopyDraw mCopyDrawcall;
         public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             var attachement = RenderGraph.AttachmentCache.ImportAttachment(DestPinOut);
@@ -63,7 +64,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UCopyNode), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtCopyNode), nameof(TickLogic));
                 return mScopeTick;
             }
         }
@@ -80,19 +81,19 @@ namespace EngineNS.Graphics.Pipeline.Common
                     var srcPin = GetAttachBuffer(SrcPinIn);
                     var tarPin = GetAttachBuffer(DestPinOut);
 
-                    if (srcPin.GpuResource.GetType() == typeof(NxRHI.UBuffer) && tarPin.GpuResource.GetType() == typeof(NxRHI.UBuffer))
+                    if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
                     {
                         mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Buffer;
                     }
-                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.UTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.UTexture))
+                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtTexture))
                     {
                         mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
                     }
-                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.UTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.UBuffer))
+                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
                     {
                         mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
                     }
-                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.UTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.UBuffer))
+                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
                     {
                         mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Texture;
                     }
@@ -149,7 +150,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public TtAttachBuffer Current { get => ResultBuffer[0]; }
         public TtAttachBuffer Previos { get => ResultBuffer[1]; }
         public bool IsCpuAceesResult { get; set; } = false;
-        public NxRHI.UCopyDraw mCopyDrawcall;
+        public NxRHI.TtCopyDraw mCopyDrawcall;
         public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             var attachement = RenderGraph.AttachmentCache.ImportAttachment(PrevPinOut);
@@ -184,7 +185,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UCopyNode), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtCopyNode), nameof(TickLogic));
                 return mScopeTick;
             }
         }
@@ -199,19 +200,19 @@ namespace EngineNS.Graphics.Pipeline.Common
                 {
                     var srcPin = GetAttachBuffer(SrcPinIn);
 
-                    if (srcPin.GpuResource.GetType() == typeof(NxRHI.UBuffer) && Current.GpuResource.GetType() == typeof(NxRHI.UBuffer))
+                    if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer) && Current.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
                     {
                         mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Buffer;
                     }
-                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.UTexture) && Current.GpuResource.GetType() == typeof(NxRHI.UTexture))
+                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && Current.GpuResource.GetType() == typeof(NxRHI.TtTexture))
                     {
                         mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
                     }
-                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.UTexture) && Current.GpuResource.GetType() == typeof(NxRHI.UBuffer))
+                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && Current.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
                     {
                         mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
                     }
-                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.UTexture) && Current.GpuResource.GetType() == typeof(NxRHI.UBuffer))
+                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && Current.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
                     {
                         mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Texture;
                     }

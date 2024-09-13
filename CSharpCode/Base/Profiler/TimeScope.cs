@@ -112,26 +112,29 @@ namespace EngineNS.Profiler
         public static List<TimeScopeManager> AllThreadInstance { get; } = new List<TimeScopeManager>();
         public unsafe static void UpdateAllInstance()
         {
-            foreach (var i in AllThreadInstance)
+            lock(AllThreadInstance)
             {
-                var num = i.mCoreObject.GetSampNum();
-                if (num != i.Scopes.Count)
+                foreach (var i in AllThreadInstance)
                 {
-                    EngineNS.SampResult** pOuts = (EngineNS.SampResult**)CoreSDK.Alloc((uint)sizeof(EngineNS.SampResult*) * num, null, 0);
-                    i.mCoreObject.GetAllSamps(pOuts, num);
-                    for (int j = 0; j < (uint)num; j++)
+                    var num = i.mCoreObject.GetSampNum();
+                    if (num != i.Scopes.Count)
                     {
-                        var pCur = new EngineNS.SampResult(pOuts[j]);
-                        var name = pCur.GetName();
-                        if (i.Scopes.ContainsKey(name))
-                            continue;
-                        var result = new TimeScope(pCur, TimeScope.EProfileFlag.FlagsAll);
-                        i.Scopes.Add(name, result);
+                        EngineNS.SampResult** pOuts = (EngineNS.SampResult**)CoreSDK.Alloc((uint)sizeof(EngineNS.SampResult*) * num, null, 0);
+                        i.mCoreObject.GetAllSamps(pOuts, num);
+                        for (int j = 0; j < (uint)num; j++)
+                        {
+                            var pCur = new EngineNS.SampResult(pOuts[j]);
+                            var name = pCur.GetName();
+                            if (i.Scopes.ContainsKey(name))
+                                continue;
+                            var result = new TimeScope(pCur, TimeScope.EProfileFlag.FlagsAll);
+                            i.Scopes.Add(name, result);
+                        }
+                        CoreSDK.Free(pOuts);
                     }
-                    CoreSDK.Free(pOuts);
                 }
+                EngineNS.v3dSampMgr.UpdateAllThreadInstance();
             }
-            EngineNS.v3dSampMgr.UpdateAllThreadInstance();
         }
         public static void FinalCleanup()
         {
@@ -145,12 +148,15 @@ namespace EngineNS.Profiler
         }
         public static TimeScopeManager FindManager(string name)
         {
-            foreach (var i in AllThreadInstance)
+            lock (AllThreadInstance)
             {
-                if (i.ThreadName == name)
-                    return i;
+                foreach (var i in AllThreadInstance)
+                {
+                    if (i.ThreadName == name)
+                        return i;
+                }
+                return null;
             }
-            return null;
         }
         #endregion
 
@@ -178,7 +184,10 @@ namespace EngineNS.Profiler
                 mCoreObject.NativeSuper.AddRef();
             }
             ThreadName = System.Threading.Thread.CurrentThread.Name;
-            AllThreadInstance.Add(this);
+            lock (AllThreadInstance)
+            {
+                AllThreadInstance.Add(this);
+            }
         }
         public void Cleanup()
         {

@@ -142,33 +142,33 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         {
         }
 
-        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             if(pin == OutXY)
             {
-                return new UVariableReferenceExpression("xy", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("xy", new TtVariableReferenceExpression(Name));
             }
             else if (pin == OutXYZ)
             {
-                return new UVariableReferenceExpression("xyz", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("xyz", new TtVariableReferenceExpression(Name));
             }
             else if (pin == OutX)
             {
-                return new UVariableReferenceExpression("x", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("x", new TtVariableReferenceExpression(Name));
             }
             else if (pin == OutY)
             {
-                return new UVariableReferenceExpression("y", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("y", new TtVariableReferenceExpression(Name));
             }
             else if (pin == OutZ)
             {
-                return new UVariableReferenceExpression("z", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("z", new TtVariableReferenceExpression(Name));
             }
             else if (pin == OutW)
             {
-                return new UVariableReferenceExpression("w", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("w", new TtVariableReferenceExpression(Name));
             }
-            return new UVariableReferenceExpression(Name);
+            return new TtVariableReferenceExpression(Name);
         }
     }
 }

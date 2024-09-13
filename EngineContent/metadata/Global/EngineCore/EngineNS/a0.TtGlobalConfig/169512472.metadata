@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_169512472 Type="EngineNS.TtGlobalConfig@EngineCore">
-  <ConfigType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Order="0" />
-  <Name Type="System.String@Unknown" Order="0" />
-  <Value Type="System.String@Unknown" Order="0" />
-  <ValueType Type="EngineNS.NxRHI.EShaderVarType@EngineCore" Order="0" />
-</Hash_169512472>

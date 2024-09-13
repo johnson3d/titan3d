@@ -56,7 +56,16 @@ namespace EngineNS.Editor.ShaderCompiler
                     }
 
                     var curPath = IO.TtFileManager.GetParentPathName(CodeName.Name);
-                    var file = IO.TtFileManager.CombinePath(curPath, inc);
+                    string file;
+                    if (!inc.StartsWith("@"))
+                    {
+                        file = IO.TtFileManager.CombinePath(curPath, inc);
+                    }
+                    else
+                    {
+                        file = inc;
+                    }
+                    
                     var rn = TtShaderCodeManager.Instance.GetShaderCode(RName.GetRName(file, CodeName.RNameType));
                     if (rn != null)
                     {
@@ -106,8 +115,19 @@ namespace EngineNS.Editor.ShaderCompiler
             CodeHash = Hash160.CreateHash160(fullCode);
         }
         public RName CodeName { get; set; }
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
         public NxRHI.UShaderCode DefineCode { get; private set; } = new NxRHI.UShaderCode();
         public NxRHI.UShaderCode SourceCode { get; private set; } = new NxRHI.UShaderCode();
+        public Hash160 CodeHash { get; private set; }
+在此之后:
+        public NxRHI.TtShaderCode DefineCode { get; private set; } = new NxRHI.UShaderCode();
+        public NxRHI.TtShaderCode SourceCode { get; private set; } = new NxRHI.UShaderCode();
+        public Hash160 CodeHash { get; private set; }
+*/
+        public NxRHI.TtShaderCode DefineCode { get; private set; } = new NxRHI.TtShaderCode();
+        public NxRHI.TtShaderCode SourceCode { get; private set; } = new NxRHI.TtShaderCode();
         public Hash160 CodeHash { get; private set; }
         public List<TtShaderSourceCode> DependencyCodes { get; } = new List<TtShaderSourceCode>();
     }

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_3050896511 Type="EngineNS.UI.TtBrush@EngineCore">
-  <BindingDatas Type="System.Collections.Generic.Dictionary&lt;System.String@Unknown,EngineNS.UI.Controls.TtUIElement.BindingDataBase@EngineCore,&gt;@Unknown" Order="0" />
-  <BrushType Type="EngineNS.UI.TtBrush.EBrushType@EngineCore" Order="0" />
-  <Color Type="EngineNS.Color@EngineCore" Order="0" />
-  <Id Type="System.UInt64@Unknown" Order="0" />
-  <MacrossMethods Type="System.Collections.Generic.Dictionary&lt;System.String@Unknown,EngineNS.UI.Controls.TtUIElement.MacrossMethodData@EngineCore,&gt;@Unknown" Order="0" />
-  <UVAnimAsset Type="EngineNS.RName@EngineCore" Order="0" />
-</Hash_3050896511>

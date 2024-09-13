@@ -13,7 +13,7 @@ namespace EngineNS.Animation.StateMachine
 {
     public class TtAnimStateAttachment<S> : Bricks.StateMachine.TimedSM.TtTimedStateAttachment<S, TtAnimStateMachineContext>
     {
-        public IBlendTree<TtLocalSpaceRuntimePose> BlendTree = null;
+        public IBlendTree<S, TtLocalSpaceRuntimePose> BlendTree = null;
 
     }
     public class TtClipPlayStateAttachment<S> : TtAnimStateAttachment<S>
@@ -21,10 +21,10 @@ namespace EngineNS.Animation.StateMachine
         public RName AnimationClipName;
         public override async TtTask<bool> Initialize(TtAnimStateMachineContext context)
         {
-            var animClipBlendTree = new TtBlendTree_AnimationClip();
+            var animClipBlendTree = new TtBlendTree_AnimationClip<S>();
             animClipBlendTree.Clip = await TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(AnimationClipName);
             BlendTree = animClipBlendTree;
-            BlendTree.Initialize(ref context.BlendTreeContext);
+            await BlendTree.Initialize(context.BlendTreeContext);
             return await base.Initialize(context);
         }
 

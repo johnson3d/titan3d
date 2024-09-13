@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_3042401821 Type="EngineNS.GamePlay.Scene.USkyNode@EngineCore">
-  <Mesh Type="EngineNS.Graphics.Mesh.TtMesh@EngineCore" Order="0" />
-  <SunDirection Type="EngineNS.Vector3@EngineCore" Order="0" />
-  <SunMaterialName Type="EngineNS.RName@EngineCore" Order="0" />
-</Hash_3042401821>

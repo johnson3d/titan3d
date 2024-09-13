@@ -785,7 +785,7 @@ namespace EngineNS.Bricks.NodeGraph
         {
             throw new InvalidOperationException("Invalid build statements");
         }
-        public virtual CodeBuilder.UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data) 
+        public virtual CodeBuilder.TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data) 
         {
             throw new NotImplementedException("Invalid get expression");
         }
@@ -831,15 +831,15 @@ namespace EngineNS.Bricks.NodeGraph
         public static void AddDebugBreakerStatement(string breakName, ref BuildCodeStatementsData data)
         {
             var breakType = Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Macross.UMacrossBreak));
-            var breakDef = new CodeBuilder.UVariableDeclaration()
+            var breakDef = new CodeBuilder.TtVariableDeclaration()
             {
-                VariableType = new CodeBuilder.UTypeReference(breakType),
+                VariableType = new CodeBuilder.TtTypeReference(breakType),
                 VariableName = breakName,
-                InitValue = new CodeBuilder.UCreateObjectExpression(data.CodeGen.GetTypeString(breakType), new CodeBuilder.UPrimitiveExpression(breakName))
+                InitValue = new CodeBuilder.TtCreateObjectExpression(data.CodeGen.GetTypeString(breakType), new CodeBuilder.TtPrimitiveExpression(breakName))
             };
             if (!data.ClassDec.PreDefineVariables.Contains(breakDef))
                 data.ClassDec.PreDefineVariables.Add(breakDef);
-            data.CurrentStatements.Add(new CodeBuilder.UDebuggerTryBreak(breakName));
+            data.CurrentStatements.Add(new CodeBuilder.TtDebuggerTryBreak(breakName));
         }
         public static string GetRuntimeValueString(string name)
         {

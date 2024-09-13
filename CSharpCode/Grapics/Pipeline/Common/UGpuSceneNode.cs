@@ -7,11 +7,12 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("GpuScene", "GpuScene", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public partial class UGpuSceneNode : Graphics.Pipeline.TtRenderGraphNode
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UGpuSceneNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UGpuSceneNode" })]
+    public partial class TtGpuSceneNode : Graphics.Pipeline.TtRenderGraphNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
         public TtRenderGraphPin GpuScenePinOut = TtRenderGraphPin.CreateOutput("GpuScene", false, EPixelFormat.PXF_UNKNOWN);
-        public UGpuSceneNode()
+        public TtGpuSceneNode()
         {
             Name = "GpuSceneNode";
         }
@@ -62,7 +63,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public TtGpuBuffer<FGpuSceneDesc> GpuSceneDescBuffer;
 
-        public NxRHI.UCbView PerGpuSceneCbv { get; set; }
+        public NxRHI.TtCbView PerGpuSceneCbv { get; set; }
 
         #region SceneConfig
         float mExposure = 1.0f;
@@ -189,7 +190,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UGpuSceneNode), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtGpuSceneNode), nameof(TickLogic));
                 return mScopeTick;
             }
         } 

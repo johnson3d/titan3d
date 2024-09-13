@@ -21,11 +21,11 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        protected override void EnvShadingDefines(in FPermutationId id, UShaderDefinitions defines)
+        protected override void EnvShadingDefines(in FPermutationId id, TtShaderDefinitions defines)
         {
             defines.AddDefine("ENV_OUT_COLOR", "1");
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, UGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, TtGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtLuminanceThresholeNode;
             if (aaNode == null)
@@ -58,7 +58,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
     }
     [Bricks.CodeBuilder.ContextMenu("LuminanceThreshole", "Post\\LuminanceThreshole", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class TtLuminanceThresholeNode : USceenSpaceNode
+    public class TtLuminanceThresholeNode : TtSceenSpaceNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
         public TtLuminanceThresholeNode()
@@ -100,7 +100,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             get => mLuminanceThresholeStruct.Threshole;
             set => mLuminanceThresholeStruct.Threshole = value;
         }
-        public NxRHI.UCbView CBShadingEnv;
+        public NxRHI.TtCbView CBShadingEnv;
         public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             base.TickLogic(world, policy, bClear);
@@ -133,7 +133,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             return base.ToString() + "[OutLum]";
         }
-        protected override void EnvShadingDefines(in FPermutationId id, UShaderDefinitions defines)
+        protected override void EnvShadingDefines(in FPermutationId id, TtShaderDefinitions defines)
         {
             defines.AddDefine("ENV_OUT_LUMINANCE", "1");
         }

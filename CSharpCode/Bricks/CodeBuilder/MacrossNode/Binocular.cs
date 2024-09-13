@@ -8,7 +8,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class Binocular : UNodeBase
     {
         public Rtti.UTypeDesc LeftType;
-        public UBinaryOperatorExpression.EBinaryOperation Op { get; set; }
+        public TtBinaryOperatorExpression.EBinaryOperation Op { get; set; }
 
         [Rtti.Meta]
         public string LeftTypeString
@@ -31,7 +31,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             MultiLinks = true,
         };
-        public Binocular(UBinaryOperatorExpression.EBinaryOperation InOp, string name)
+        public Binocular(TtBinaryOperatorExpression.EBinaryOperation InOp, string name)
         {
             Op = InOp;
             Name = name;
@@ -66,11 +66,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             return null;
         }
-        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             if (pin == null || pin != Result)
                 return null;
-            var binOp = new UBinaryOperatorExpression()
+            var binOp = new TtBinaryOperatorExpression()
             {
                 Operation = this.Op,
                 Left = data.NodeGraph.GetOppositePinExpression(Left, ref data),
@@ -136,7 +136,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     #region ValueOp
     public partial class ValueOpNode : Binocular
     {
-        public ValueOpNode(UBinaryOperatorExpression.EBinaryOperation op, string name)
+        public ValueOpNode(TtBinaryOperatorExpression.EBinaryOperation op, string name)
             : base(op, name)
         {
         }
@@ -163,7 +163,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 if (nodeExpr == null)
                     return true;
                 var testType = nodeExpr.GetOutPinType(oPin);
-                return UCodeGeneratorBase.CanConvert(testType, LeftType);
+                return TtCodeGeneratorBase.CanConvert(testType, LeftType);
             }
             return true;
         }
@@ -191,7 +191,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class AddNode : ValueOpNode
     {
         public AddNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.Add, "+")
+            : base(TtBinaryOperatorExpression.EBinaryOperation.Add, "+")
         {
         }
     }
@@ -199,7 +199,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class SubNode : ValueOpNode
     {
         public SubNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.Subtract, "-")
+            : base(TtBinaryOperatorExpression.EBinaryOperation.Subtract, "-")
         {
         }
     }
@@ -207,7 +207,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class MulNode : ValueOpNode
     {
         public MulNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.Multiply, "*")
+            : base(TtBinaryOperatorExpression.EBinaryOperation.Multiply, "*")
         {
         }
     }
@@ -215,7 +215,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class DivNode : ValueOpNode
     {
         public DivNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.Divide, "/")
+            : base(TtBinaryOperatorExpression.EBinaryOperation.Divide, "/")
         {
         }
     }
@@ -223,7 +223,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class ModNode : ValueOpNode
     {
         public ModNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.Modulus, "%")
+            : base(TtBinaryOperatorExpression.EBinaryOperation.Modulus, "%")
         {
         }
     }
@@ -231,7 +231,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class BitAndNode : ValueOpNode
     {
         public BitAndNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.BitwiseAnd, "&")
+            : base(TtBinaryOperatorExpression.EBinaryOperation.BitwiseAnd, "&")
         {
          
         }
@@ -240,7 +240,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class BitOrNode : ValueOpNode
     {
         public BitOrNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.BitwiseOr, "|")
+            : base(TtBinaryOperatorExpression.EBinaryOperation.BitwiseOr, "|")
         {
         }
     }
@@ -248,7 +248,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class BitXorNode : ValueOpNode
     {
         public BitXorNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.BitwiseXOR, "^")
+            : base(TtBinaryOperatorExpression.EBinaryOperation.BitwiseXOR, "^")
         {
         }
     }
@@ -256,7 +256,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class BitLeftshiftNode : ValueOpNode
     {
         public BitLeftshiftNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.BitwiseLeftShift, "<<")
+            : base(TtBinaryOperatorExpression.EBinaryOperation.BitwiseLeftShift, "<<")
         {
         }
     }
@@ -264,7 +264,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class BitRightshiftNode : ValueOpNode
     {
         public BitRightshiftNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.BitwiseRightShift, ">>")
+            : base(TtBinaryOperatorExpression.EBinaryOperation.BitwiseRightShift, ">>")
         {
         }
     }
@@ -274,7 +274,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     #region Cmp
     public partial class CmpNode : Binocular
     {
-        public CmpNode(UBinaryOperatorExpression.EBinaryOperation op, string name)
+        public CmpNode(TtBinaryOperatorExpression.EBinaryOperation op, string name)
             : base(op, name)
         {
         }
@@ -331,7 +331,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 if (nodeExpr == null)
                     return true;
                 var testType = nodeExpr.GetOutPinType(oPin);
-                return UCodeGeneratorBase.CanConvert(testType, LeftType);
+                return TtCodeGeneratorBase.CanConvert(testType, LeftType);
             }
             return true;
         }
@@ -340,7 +340,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class EqualNode : CmpNode
     {
         public EqualNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.Equality, "==")
+            : base(TtBinaryOperatorExpression.EBinaryOperation.Equality, "==")
         {
             
         }
@@ -349,7 +349,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class NotEqualNode : CmpNode
     {
         public NotEqualNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.NotEquality, "!=")
+            : base(TtBinaryOperatorExpression.EBinaryOperation.NotEquality, "!=")
         {
             
         }
@@ -358,7 +358,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class GreateNode : CmpNode
     {
         public GreateNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.GreaterThan, ">")
+            : base(TtBinaryOperatorExpression.EBinaryOperation.GreaterThan, ">")
         {
             
         }
@@ -367,7 +367,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class GreateEqualNode : CmpNode
     {
         public GreateEqualNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.GreaterThanOrEqual, ">=")
+            : base(TtBinaryOperatorExpression.EBinaryOperation.GreaterThanOrEqual, ">=")
         {
             
         }
@@ -376,7 +376,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class LessNode : CmpNode
     {
         public LessNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.LessThan, "<")
+            : base(TtBinaryOperatorExpression.EBinaryOperation.LessThan, "<")
         {
             
         }
@@ -385,7 +385,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class LessEqualNode : CmpNode
     {
         public LessEqualNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.LessThanOrEqual, "<=")
+            : base(TtBinaryOperatorExpression.EBinaryOperation.LessThanOrEqual, "<=")
         {
             
         }
@@ -395,7 +395,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     #region Bool
     public partial class BoolNode : Binocular
     {
-        public BoolNode(UBinaryOperatorExpression.EBinaryOperation op, string name)
+        public BoolNode(TtBinaryOperatorExpression.EBinaryOperation op, string name)
             : base(op, name)
         {
             LeftType = Rtti.UTypeDescGetter<bool>.TypeDesc;
@@ -423,7 +423,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class AndNode : BoolNode
     {
         public AndNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.BooleanAnd, "&&")
+            : base(TtBinaryOperatorExpression.EBinaryOperation.BooleanAnd, "&&")
         {
         }
     }
@@ -431,7 +431,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class OrNode : BoolNode
     {
         public OrNode()
-            : base(UBinaryOperatorExpression.EBinaryOperation.BooleanOr, "||")
+            : base(TtBinaryOperatorExpression.EBinaryOperation.BooleanOr, "||")
         {
         }
     }

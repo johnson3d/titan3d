@@ -25,9 +25,9 @@ namespace EngineNS.DesignMacross.Design.Statement
             ReturnType = typeDesc;
             AddDataInPin(new() { TypeDesc = typeDesc });
         }
-        public override UStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
+        public override TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
-            UReturnStatement returnStatement = new()
+            TtReturnStatement returnStatement = new()
             {
 
             };

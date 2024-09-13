@@ -21,17 +21,17 @@ namespace EngineNS.DesignMacross.Design
         public string Name { get; set; } = "Variable";
         public string VariableName { get => TtASTBuildUtil.VariableNamePrefix + Name; }
         [Rtti.Meta]
-        public UTypeReference VariableType { get; set; } = new UTypeReference(UTypeDesc.TypeOf<bool>());
+        public TtTypeReference VariableType { get; set; } = new TtTypeReference(UTypeDesc.TypeOf<bool>());
         [Rtti.Meta]
-        public UExpressionBase InitValue { get; set; }
+        public TtExpressionBase InitValue { get; set; }
         [Rtti.Meta]
-        public UCommentStatement Comment { get; set; }
+        public TtCommentStatement Comment { get; set; }
         [Rtti.Meta]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
 
         public bool IsPropertyVisibleDirty { get; set; } = false;
 
-        public UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
+        public TtVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
             return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
@@ -95,7 +95,7 @@ namespace EngineNS.DesignMacross.Design
                     return VariableType.TypeDesc;
                 case "InitValue":
                     {
-                        var pe = InitValue as UPrimitiveExpression;
+                        var pe = InitValue as TtPrimitiveExpression;
                         if (pe != null)
                             return pe.GetValue();
                     }
@@ -115,7 +115,7 @@ namespace EngineNS.DesignMacross.Design
 
         public void OnValueChanged(UEditableValue ev)
         {
-            var pe = InitValue as UPrimitiveExpression;
+            var pe = InitValue as TtPrimitiveExpression;
             if (pe != null)
             {
                 pe.CalculateValueString(pe.Type, ev.Value);
@@ -131,14 +131,14 @@ namespace EngineNS.DesignMacross.Design
                         var tagType = value as Rtti.UTypeDesc;
                         if (tagType != VariableType.TypeDesc)
                         {
-                            InitValue = new UPrimitiveExpression(tagType, tagType.IsValueType ? Rtti.UTypeDescManager.CreateInstance(tagType) : null);
+                            InitValue = new TtPrimitiveExpression(tagType, tagType.IsValueType ? Rtti.UTypeDescManager.CreateInstance(tagType) : null);
                             VariableType.TypeDesc = tagType;
                         }
                     }
                     break;
                 case "InitValue":
                     {
-                        var pe = InitValue as UPrimitiveExpression;
+                        var pe = InitValue as TtPrimitiveExpression;
                         if (pe != null)
                             pe.CalculateValueString(pe.Type, value);
                     }

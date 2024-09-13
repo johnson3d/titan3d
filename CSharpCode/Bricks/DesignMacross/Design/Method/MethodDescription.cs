@@ -53,7 +53,7 @@ namespace EngineNS.DesignMacross.Design
         {
             AddExecutionOutPin(new());
         }
-        public override UStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
+        public override TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
             var methodDesc = statementBuildContext.MethodDescription as TtMethodDescription;
             var executionOutPin = ExecutionOutPins[0];
@@ -97,11 +97,11 @@ namespace EngineNS.DesignMacross.Design
         [Rtti.Meta]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
         [Rtti.Meta]
-        public UCommentStatement Comment { get; set; }
+        public TtCommentStatement Comment { get; set; }
         [Rtti.Meta]
         public bool IsOverride { get; set; } = false;
         [Rtti.Meta]
-        public UMethodDeclaration.EAsyncType AsyncType { get; set; } = UMethodDeclaration.EAsyncType.None;
+        public TtMethodDeclaration.EAsyncType AsyncType { get; set; } = TtMethodDeclaration.EAsyncType.None;
         [Rtti.Meta]
         public List<TtMethodArgumentDescription> Arguments { get; set; } = new List<TtMethodArgumentDescription>();
         [Rtti.Meta]
@@ -195,7 +195,7 @@ namespace EngineNS.DesignMacross.Design
         {
             Start = new() { Parent = this };
         }
-        public virtual UMethodDeclaration BuildMethodDeclaration(ref FClassBuildContext classBuildContext)
+        public virtual TtMethodDeclaration BuildMethodDeclaration(ref FClassBuildContext classBuildContext)
         {
             var declaration = TtASTBuildUtil.CreateMethodDeclaration(this, ref classBuildContext);
             FStatementBuildContext buildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = this };

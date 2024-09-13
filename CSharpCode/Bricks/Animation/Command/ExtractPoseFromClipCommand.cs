@@ -7,7 +7,7 @@ using System.Text;
 
 namespace EngineNS.Animation.Command
 {
-    public class TtExtractPoseFromClipCommand : TtAnimationCommand<TtLocalSpaceRuntimePose>
+    public class TtExtractPoseFromClipCommand<S> : TtAnimationCommand<S, TtLocalSpaceRuntimePose>
     {
         public float Time { get; set; } = 0;
         TtAnimatableSkeletonPose ExtractedPose = null;

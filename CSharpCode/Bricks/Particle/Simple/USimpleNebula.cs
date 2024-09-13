@@ -15,7 +15,7 @@ namespace EngineNS.Bricks.Particle.Simple
         {
             return RName.GetRName("Shaders/Bricks/Particle/SimpleEmitter/Emitter.compute", RName.ERNameType.Engine);
         }
-        public override unsafe void InitEmitter(NxRHI.UGpuDevice rc, Graphics.Mesh.TtMesh mesh, uint maxParticle)
+        public override unsafe void InitEmitter(NxRHI.TtGpuDevice rc, Graphics.Mesh.TtMesh mesh, uint maxParticle)
         {
             EmitterData.Flags = 0;
             base.InitEmitter(rc, mesh, maxParticle);

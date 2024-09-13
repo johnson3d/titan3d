@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace EngineNS
 {
+    //https://github.com/libsdl-org/SDL/blob/main/docs/README-migration.md
     public partial class TtNativeWindow
     {
     }

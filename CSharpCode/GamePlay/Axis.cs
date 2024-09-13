@@ -1,4 +1,5 @@
 ﻿using EngineNS.GamePlay.Action;
+using EngineNS.GamePlay.Scene;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -180,9 +181,15 @@ namespace EngineNS.GamePlay
         {
             public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, Scene.TtNodeData data, Scene.EBoundVolumeType bvType, Type placementType)                
             {
-                return await base.InitializeNode(world, data, bvType, placementType);
+                var result = await base.InitializeNode(world, data, bvType, placementType);
+                SetStyle(ENodeStyles.Transient);
+                return result;
             }
-
+            public override void OnNodeLoaded(TtNode parent)
+            {
+                SetStyle(ENodeStyles.Transient);
+                base.OnNodeLoaded(parent);
+            }
             public override bool DrawNode(EngineNS.Editor.TtTreeNodeDrawer tree, int index, int NumOfChild)
             {
                 return false;
@@ -969,7 +976,7 @@ namespace EngineNS.GamePlay
                 {
                     Name = "AxisRootNode"
                 },
-                Scene.EBoundVolumeType.None, typeof(GamePlay.TtPlacement));
+                Scene.EBoundVolumeType.Sphere, typeof(GamePlay.TtPlacement));
             mRootNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
             mRootNode.IsCastShadow = false;
             mRootNode.Parent = world.Root;

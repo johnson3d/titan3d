@@ -1,5 +1,6 @@
 ﻿using EngineNS.Animation.Animatable;
 using EngineNS.Animation.Command;
+using EngineNS.Bricks.StateMachine.TimedSM;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -23,7 +24,7 @@ namespace EngineNS.Animation.Player
         public void Evaluate()
         {
             //make command
-            TtExtractPoseFromClipCommand command = new TtExtractPoseFromClipCommand()
+            TtExtractPoseFromClipCommand<TtDefaultCenterData> command = new TtExtractPoseFromClipCommand<TtDefaultCenterData>()
             {
                 Time = Time
             };

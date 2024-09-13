@@ -8,7 +8,7 @@ using System.Text;
 
 namespace EngineNS.NxRHI
 {
-    public partial class UGraphicDraw
+    public partial class TtGraphicDraw
     {
         public byte SubMesh;
         public void SetSourceAtom(Graphics.Mesh.TtMesh.TtAtom atom)
@@ -66,7 +66,7 @@ namespace EngineNS.Graphics.Mesh
         }
 
         public Pipeline.Shader.TtMdfQueueBase MdfQueue { get; private set; }
-        NxRHI.UCbView mPerMeshCBuffer;
+        NxRHI.TtCbView mPerMeshCBuffer;
         protected System.Action OnAfterCBufferCreated;
 
         int ObjectFlags_2Bit = 0;
@@ -108,7 +108,7 @@ namespace EngineNS.Graphics.Mesh
                 PerMeshCBuffer.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.ObjectFLags_2Bit, in ObjectFlags_2Bit);
             }
         }
-        public NxRHI.UCbView PerMeshCBuffer 
+        public NxRHI.TtCbView PerMeshCBuffer 
         {
             get
             {
@@ -131,7 +131,7 @@ namespace EngineNS.Graphics.Mesh
                 return mPerMeshCBuffer;
             }
         }
-        public void UnsafeSetPerMeshCBuffer(NxRHI.UCbView cbv)
+        public void UnsafeSetPerMeshCBuffer(NxRHI.TtCbView cbv)
         {
             mPerMeshCBuffer = cbv;
         }
@@ -211,7 +211,7 @@ namespace EngineNS.Graphics.Mesh
                 }
                 internal int State = 0;
                 public WeakReference<Pipeline.TtGraphicsBuffers.TtTargetViewIdentifier> TargetView;
-                public NxRHI.UGraphicDraw DrawCalls;
+                public NxRHI.TtGraphicDraw DrawCalls;
                 //不同的View上可以有不同的渲染策略，同一个模型，可以渲染在不同视口上，比如装备预览的策略可以和GameView不一样
                 public Pipeline.TtRenderPolicy Policy;                
             }
@@ -366,7 +366,7 @@ namespace EngineNS.Graphics.Mesh
                     return mScopeOnDrawCall;
                 }
             } 
-            public unsafe virtual NxRHI.UGraphicDraw GetDrawCall(NxRHI.ICommandList cmd, Pipeline.TtGraphicsBuffers targetView, Pipeline.TtRenderPolicy policy,
+            public unsafe virtual NxRHI.TtGraphicDraw GetDrawCall(NxRHI.ICommandList cmd, Pipeline.TtGraphicsBuffers targetView, Pipeline.TtRenderPolicy policy,
                 Pipeline.TtRenderGraphNode node)
             {
                 if (Material == null)

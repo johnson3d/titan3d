@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_3582613528 Type="EngineNS.DesignMacross.UDesignMacross@EngineCore">
-  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
-  <DesignedClassDescription Type="EngineNS.DesignMacross.Design.TtClassDescription@EngineCore" Order="0" />
-  <DesignMacrossBaseClass Type="EngineNS.Rtti.UTypeDesc@EngineCore" Order="0" />
-</Hash_3582613528>

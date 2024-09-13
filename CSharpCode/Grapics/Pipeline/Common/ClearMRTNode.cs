@@ -24,7 +24,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             new Color4f(1, 0, 0, 0),
             new Color4f(1, 0, 0, 0)
         };
-        public NxRHI.URenderPass[] RenderPass = new NxRHI.URenderPass[4];
+        public NxRHI.TtRenderPass[] RenderPass = new NxRHI.TtRenderPass[4];
         public TtGraphicsBuffers[] GBuffers = new TtGraphicsBuffers[4];
         public NxRHI.ERenderPassClearFlags[] ClearFlags = new NxRHI.ERenderPassClearFlags[4];
 

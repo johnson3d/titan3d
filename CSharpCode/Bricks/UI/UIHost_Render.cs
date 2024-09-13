@@ -29,7 +29,7 @@ namespace EngineNS.UI
         protected Graphics.Mesh.UMeshDataProvider mMeshProvider;
         protected Graphics.Mesh.TtMeshPrimitives mMesh = null;
         protected Canvas.TtCanvasDrawBatch mDrawBatch = null;
-        public Graphics.Pipeline.UCamera RenderCamera;
+        public Graphics.Pipeline.TtCamera RenderCamera;
         public bool BoundingBoxDirty = true;
         struct AABBQueryData
         {

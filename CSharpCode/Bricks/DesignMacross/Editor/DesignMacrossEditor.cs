@@ -36,7 +36,7 @@ namespace EngineNS.DesignMacross.Editor
         public unsafe void OnDraw()
         {
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            var result = EGui.UIProxy.DockProxy.BeginMainForm($"Macross:{IO.TtFileManager.GetPureName(AssetName != null ? AssetName.Name : "NoName")}", this, ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar);
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(GetWindowsName(), this, ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_MenuBar);
             if (result)
             {
                 DrawToolbar();
@@ -153,7 +153,7 @@ namespace EngineNS.DesignMacross.Editor
         #endregion Save Load
 
         #region CodeGen
-        List<UClassDeclaration> ClassDeclarationsForGenerateCompileCode = new List<UClassDeclaration>();
+        List<TtClassDeclaration> ClassDeclarationsForGenerateCompileCode = new List<TtClassDeclaration>();
         public string GenerateCode()
         {
             ClassDeclarationsForGenerateCompileCode.Clear();
@@ -296,11 +296,11 @@ namespace EngineNS.DesignMacross.Editor
 
             var graphId = id;
             uint leftId = 0;
-            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref graphId);
+            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref graphId);
             uint propertyId = 0;
-            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Right, 0.2f, ref propertyId, ref graphId);
+            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir.ImGuiDir_Right, 0.2f, ref propertyId, ref graphId);
             uint unionConfigId = 0;
-            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir_.ImGuiDir_Right, 0.4f, ref unionConfigId, ref graphId);
+            ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir.ImGuiDir_Right, 0.4f, ref unionConfigId, ref graphId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("GraphWindow", mDockKeyClass), graphId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeProperty", mDockKeyClass), propertyId);
@@ -395,6 +395,11 @@ namespace EngineNS.DesignMacross.Editor
 
                 ImGuiAPI.EndMenuBar();
             }
+        }
+
+        public string GetWindowsName()
+        {
+            return $"Macross:{IO.TtFileManager.GetPureName(AssetName != null ? AssetName.Name : "NoName")}";
         }
         #endregion
     }

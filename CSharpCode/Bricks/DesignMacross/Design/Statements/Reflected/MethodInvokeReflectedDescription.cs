@@ -44,15 +44,15 @@ namespace EngineNS.DesignMacross.Design.Statement
                 AddDataOutPin(pin);
             }
         }
-        public override UStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
+        public override TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
             var methodDesc = statementBuildContext.MethodDescription as TtMethodDescription;
 
-            UMethodInvokeStatement methodInvoke = new UMethodInvokeStatement()
+            TtMethodInvokeStatement methodInvoke = new TtMethodInvokeStatement()
             {
                 MethodName = MethodMeta.MethodName,
                 Method = MethodMeta,
-                Host = new UClassReferenceExpression() { Class = MethodMeta.DeclaringType }
+                Host = new TtClassReferenceExpression() { Class = MethodMeta.DeclaringType }
             };
             foreach(var pin in DataInPins)
             {
@@ -66,7 +66,7 @@ namespace EngineNS.DesignMacross.Design.Statement
                     System.Diagnostics.Debug.Assert(linkedPin is TtDataOutPinDescription);
                     var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, Sequence = statementBuildContext.ExecuteSequenceStatement };
                     var expression = (linkedPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
-                    methodInvoke.Arguments.Add(new UMethodInvokeArgumentExpression(expression));
+                    methodInvoke.Arguments.Add(new TtMethodInvokeArgumentExpression(expression));
                 }
             }
             statementBuildContext.AddStatement(methodInvoke);

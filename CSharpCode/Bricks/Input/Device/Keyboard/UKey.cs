@@ -39,7 +39,7 @@ namespace EngineNS.Bricks.Input.Device.Keyboard
         {
             EventFire?.Invoke(this);
         }
-        public override void RegSelf(UInputSystem inputSystem)
+        public override void RegSelf(TtInputSystem inputSystem)
         {
             inputSystem.RegEvent(EventType.KEYDOWN, this);
         }
@@ -77,7 +77,7 @@ namespace EngineNS.Bricks.Input.Device.Keyboard
         {
             EventFire?.Invoke(this);
         }
-        public override void RegSelf(UInputSystem inputSystem)
+        public override void RegSelf(TtInputSystem inputSystem)
         {
             inputSystem.RegEvent(EventType.KEYUP, this);
         }

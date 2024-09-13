@@ -203,13 +203,13 @@ namespace EngineNS.Editor.Forms
                                 }
                                 mRpcProfilerData = Profiler.TtRpcProfiler_RpcCaller.GetProfilerData(i);
                             }
-                            if (ImGuiAPI.BeginChild("TimeScope", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                            if (ImGuiAPI.BeginChild("TimeScope", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                             {
                                 if (ImGuiAPI.BeginTabBar("ShowMode", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
                                 {
                                     if (ImGuiAPI.BeginTabItem("ByList", null, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
                                     {
-                                        if (ImGuiAPI.BeginChild("ShowList", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                                        if (ImGuiAPI.BeginChild("ShowList", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                                         {
                                             DrawByList(cmdlst, i);
                                         }
@@ -219,7 +219,7 @@ namespace EngineNS.Editor.Forms
 
                                     if (ImGuiAPI.BeginTabItem("ByTree", null, ImGuiTabItemFlags_.ImGuiTabItemFlags_None))
                                     {
-                                        if (ImGuiAPI.BeginChild("ShowTree", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_HorizontalScrollbar))
+                                        if (ImGuiAPI.BeginChild("ShowTree", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_HorizontalScrollbar))
                                         {
                                             DrawByTree(cmdlst, i);
                                         }

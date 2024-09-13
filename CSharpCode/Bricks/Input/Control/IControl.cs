@@ -31,7 +31,7 @@ namespace EngineNS.Bricks.Input.Control
         {
             mControlData = controlData;
         }
-        public abstract void RegSelf(UInputSystem inputSystem);
+        public abstract void RegSelf(TtInputSystem inputSystem);
     }
 
     #endregion Event

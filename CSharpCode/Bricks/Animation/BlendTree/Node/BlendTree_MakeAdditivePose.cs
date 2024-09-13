@@ -6,10 +6,10 @@ using System.Text;
 
 namespace EngineNS.Animation.BlendTree.Node
 {
-    public class TtMakeAdditivePoseCommand : TtAnimationCommand<TtLPosMRotRuntimePose>
+    public class TtMakeAdditivePoseCommand<S> : TtAnimationCommand<S, TtLPosMRotRuntimePose>
     {
-        public TtAnimationCommand<TtLocalSpaceRuntimePose> AdditiveNode { get; set; }
-        public TtAnimationCommand<TtLocalSpaceRuntimePose> RefNode { get; set; }
+        public TtAnimationCommand<S, TtLocalSpaceRuntimePose> AdditiveNode { get; set; }
+        public TtAnimationCommand<S, TtLocalSpaceRuntimePose> RefNode { get; set; }
         TtLPosMRotRuntimePose mAddPose = null;
         TtLPosMRotRuntimePose mRefPose = null;
         public TtMakeAdditivePoseCommandDesc Desc { get; set; }
@@ -29,15 +29,19 @@ namespace EngineNS.Animation.BlendTree.Node
     {
      
     }
-    public class TtBlendTree_MakeAdditivePose : TtBlendTree<TtLPosMRotRuntimePose>
+    public class TtBlendTree_MakeAdditivePose<S> : TtBlendTree<S, TtLPosMRotRuntimePose>
     {
-        public IBlendTree<TtLocalSpaceRuntimePose> AdditiveNode { get; set; }
-        public IBlendTree<TtLocalSpaceRuntimePose> RefNode { get; set; }
+        public IBlendTree<S, TtLocalSpaceRuntimePose> AdditiveNode { get; set; }
+        public IBlendTree<S, TtLocalSpaceRuntimePose> RefNode { get; set; }
 
-        TtMakeAdditivePoseCommand mAnimationCommand = null;
-        public override TtAnimationCommand<TtLPosMRotRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
+        TtMakeAdditivePoseCommand<S> mAnimationCommand = null;
+        public override TtAnimationCommand<S, TtLPosMRotRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
-            mAnimationCommand = new TtMakeAdditivePoseCommand();
+            System.Diagnostics.Debug.Assert(AdditiveNode != null && RefNode != null);
+            if (AdditiveNode == null || RefNode == null)
+                return null;
+
+            mAnimationCommand = new TtMakeAdditivePoseCommand<S>();
             mAnimationCommand.Desc = new TtMakeAdditivePoseCommandDesc();
             context.AddCommand(context.TreeDepth, mAnimationCommand);
 

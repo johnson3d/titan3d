@@ -172,7 +172,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
                 return;
             FConstructAnimationCommandTreeContext context = new FConstructAnimationCommandTreeContext();
             context.Create();
-            TtAnimationCommand<TtLocalSpaceRuntimePose> cmd = null;
+            TtAnimationCommand<TtDefaultCenterData, TtLocalSpaceRuntimePose> cmd = null;
             var root = mGamePlayStateMachine.ConstructAnimationCommandTree(cmd, ref context);
             if (root == null)
                 return;
@@ -209,7 +209,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
         {
             FConstructAnimationCommandTreeContext context = new FConstructAnimationCommandTreeContext();
             context.Create();
-            TtAnimationCommand<TtLocalSpaceRuntimePose> cmd = null;
+            TtAnimationCommand<TtDefaultCenterData ,TtLocalSpaceRuntimePose> cmd = null;
             var root = mGamePlayStateMachine.ConstructAnimationCommandTree(cmd, ref context);
             context.CmdExecuteStack.Execute();
             TtRuntimePoseUtility.CopyPose(ref mRuntimePose, root.OutPose);

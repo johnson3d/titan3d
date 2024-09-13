@@ -3,10 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using EngineNS.NxRHI;
 
-#if PWindow
-using SDL2;
-#endif
-
 namespace EngineNS.Graphics.Pipeline
 {
     public partial class UGfxDevice : UModule<TtEngine>
@@ -28,8 +24,9 @@ namespace EngineNS.Graphics.Pipeline
             }
 
 #if PWindow
-            if (SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING) == -1)
+            if (SDL.SDL3.SDL_Init(SDL.SDL_InitFlags.SDL_INIT_TIMER| SDL.SDL_InitFlags.SDL_INIT_EVENTS) == -1)
                 return false;
+            TtNativeWindow.PropertiesID_WindowData = SDL.SDL3.SDL_CreateProperties();
 #endif
 
             var wtType = Rtti.UTypeDesc.TypeOf(engine.Config.MainWindowType).SystemType;
@@ -134,7 +131,7 @@ namespace EngineNS.Graphics.Pipeline
             RenderPassManager.Cleanup();
             InputLayoutManager.Cleanup();
 
-            EffectManager.Cleanup();
+            EffectManager.Dispose();
 
             HitproxyManager.Cleanup();
             
@@ -159,12 +156,12 @@ namespace EngineNS.Graphics.Pipeline
             RenderSystem?.Dispose();
             RenderSystem = null;
 #if PWindow
-            SDL.SDL_Quit();
+            SDL.SDL3.SDL_Quit();
 #endif
         }
         public TtSlateApplication SlateApplication { get; set; }
-        public NxRHI.UGpuSystem RenderSystem { get; private set; }
-        public NxRHI.UGpuDevice RenderContext { get; private set; }
+        public NxRHI.TtGpuSystem RenderSystem { get; private set; }
+        public NxRHI.TtGpuDevice RenderContext { get; private set; }
         protected async System.Threading.Tasks.Task<bool> InitGPU(TtEngine engine, int Adapter, NxRHI.ERhiType rhi, IntPtr window, bool bDebugLayer, bool useRenderDoc)
         {
             if (TtEngine.Instance.PlayMode != EPlayMode.Game)
@@ -186,7 +183,7 @@ namespace EngineNS.Graphics.Pipeline
                 var renderDoc = engine.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource);
                 renderDoc += "3rd/native/renderdoc/bin/renderdoc.dll";
                 gpuDesc.RenderDocPath = VNameString.FromString(renderDoc);
-                RenderSystem = NxRHI.UGpuSystem.CreateGpuSystem(rhi, in gpuDesc);
+                RenderSystem = NxRHI.TtGpuSystem.CreateGpuSystem(rhi, in gpuDesc);
                 if (RenderSystem == null)
                     return false;
 
@@ -231,7 +228,16 @@ namespace EngineNS.Graphics.Pipeline
         }
 
         #region Manager
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
         public NxRHI.UTextureManager TextureManager { get; } = new NxRHI.UTextureManager();
+        public Shader.TtMaterialManager MaterialManager { get; private set; } = new Shader.TtMaterialManager();
+在此之后:
+        public NxRHI.TtTextureManager TextureManager { get; } = new NxRHI.UTextureManager();
+        public Shader.TtMaterialManager MaterialManager { get; private set; } = new Shader.TtMaterialManager();
+*/
+        public NxRHI.TtTextureManager TextureManager { get; } = new NxRHI.TtTextureManager();
         public Shader.TtMaterialManager MaterialManager { get; private set; } = new Shader.TtMaterialManager();
         public Shader.TtMaterialInstanceManager MaterialInstanceManager { get; private set; } = new Shader.TtMaterialInstanceManager();
         public EGui.Slate.UBaseRenderer SlateRenderer { get; private set; }
@@ -263,15 +269,15 @@ namespace EngineNS.Graphics.Pipeline
         {
             get;
         } = new TtAttachBufferManager();
-        public UCbView.TrCbcUpdater CbvUpdater
+        public TtCbView.TrCbcUpdater CbvUpdater
         {
             get;
-        } = new UCbView.TrCbcUpdater();
+        } = new TtCbView.TrCbcUpdater();
         #endregion
 
         #region GraphicsData
-        NxRHI.UCbView mPerFrameCBuffer;
-        public NxRHI.UCbView PerFrameCBuffer 
+        NxRHI.TtCbView mPerFrameCBuffer;
+        public NxRHI.TtCbView PerFrameCBuffer 
         { 
             get
             {

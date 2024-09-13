@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_483038894 Type="EngineNS.Animation.SkeletonAnimation.Skeleton.TtSkinSkeleton@EngineCore">
-  <Limbs Type="System.Collections.Generic.List&lt;EngineNS.Animation.SkeletonAnimation.Skeleton.Limb.ILimb@EngineCore,&gt;@Unknown" Order="0" />
-  <RootPreTransform Type="EngineNS.FTransform@EngineCore" Order="0" />
-</Hash_483038894>

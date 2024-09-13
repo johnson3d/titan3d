@@ -2,34 +2,32 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using EngineNS.Graphics.Pipeline;
-using SDL2;
 
 namespace EngineNS.EGui
 {
     public class UDockWindowSDL
     {
         #region SDL
-        public static unsafe void ImGui_ImplSDL2_UpdateMonitors()
+        public static unsafe void ImGui_ImplSDL2_UpdateMonitors(IntPtr window)
         {
             var platform_io = ImGuiAPI.GetPlatformIO();
             ImGuiAPI.PlatformIO_Monitor_Resize(platform_io, 0);
-            int display_count = SDL.SDL_GetNumVideoDisplays();
-            for (int n = 0; n < display_count; n++)
+            //int display_count = SDL.SDL3.SDL_GetDisplays();
+            var dspl = SDL.SDL3.SDL_GetDisplays();
+            for (int n = 0; n < dspl.Count; n++)
             {
                 // Warning: the validity of monitor DPI information on Windows depends on the application DPI awareness settings, which generally needs to be set in the manifest or at runtime.
                 ImGuiPlatformMonitor monitor = new ImGuiPlatformMonitor();
                 monitor.UnsafeCallConstructor();
                 SDL.SDL_Rect r;
-                SDL.SDL_GetDisplayBounds(n, out r);
+                SDL.SDL3.SDL_GetDisplayBounds(dspl[n], &r);
                 monitor.MainPos = monitor.WorkPos = new Vector2((float)r.x, (float)r.y);
                 monitor.MainSize = monitor.WorkSize = new Vector2((float)r.w, (float)r.h);
-                SDL.SDL_GetDisplayUsableBounds(n, out r);
+                SDL.SDL3.SDL_GetDisplayUsableBounds(dspl[n], &r);
                 monitor.WorkPos = new Vector2((float)r.x, (float)r.y);
                 monitor.WorkSize = new Vector2((float)r.w, (float)r.h);
-                float dpi = 0.0f;
-                float hdpi, vdpi;
-                if (SDL.SDL_GetDisplayDPI(n, out dpi, out hdpi, out vdpi) != 0)
-                    monitor.DpiScale = dpi / 96.0f;
+                var dpi = SDL.SDL3.SDL_GetDisplayContentScale(dspl[n]);
+                monitor.DpiScale = dpi / 96.0f;
                 ImGuiAPI.PlatformIO_Monitor_PushBack(platform_io, monitor);
             }
         }
@@ -61,7 +59,7 @@ namespace EngineNS.EGui
             //platform_io.Platform_CreateVkSurface = ImGui_ImplSDL2_CreateVkSurface;
 
             // SDL2 by default doesn't pass mouse clicks to the application when the click focused a window. This is getting in the way of our interactions and we disable that behavior.
-            SDL.SDL_SetHint(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
+            SDL.SDL3.SDL_SetHint(SDL.SDL3.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
         }
         public static unsafe ImGuiIO.FDelegate_GetClipboardTextFn ImGui_ImplSDL2_GetClipboardText = ImGui_ImplSDL2_GetClipboardText_Impl;
         static unsafe sbyte* ImGui_ImplSDL2_GetClipboardText_Impl(void* dummy)
@@ -70,7 +68,7 @@ namespace EngineNS.EGui
             {
                 System.Runtime.InteropServices.Marshal.FreeHGlobal(g_ClipboardTextData);
             }
-            var text = SDL.SDL_GetClipboardText();
+            var text = SDL.SDL3.SDL_GetClipboardText();
             g_ClipboardTextData = System.Runtime.InteropServices.Marshal.StringToHGlobalAnsi(text);
             return (sbyte*)g_ClipboardTextData.ToPointer();
         }
@@ -78,7 +76,7 @@ namespace EngineNS.EGui
         public static unsafe ImGuiIO.FDelegate_SetClipboardTextFn ImGui_ImplSDL2_SetClipboardText = ImGui_ImplSDL2_SetClipboardText_Impl;
         static unsafe void ImGui_ImplSDL2_SetClipboardText_Impl(void* dummy, sbyte* text)
         {
-            SDL.SDL_SetClipboardText(System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)text));
+            SDL.SDL3.SDL_SetClipboardText(System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)text));
         }
         static bool[] g_MousePressed = new bool[]{ false, false, false };
         public static unsafe bool ImGui_ImplSDL2_ProcessEvent(in SDL.SDL_Event ev)
@@ -86,7 +84,7 @@ namespace EngineNS.EGui
             var io = ImGuiAPI.GetIO();
             switch (ev.type)
             {
-                case SDL.SDL_EventType.SDL_MOUSEWHEEL:
+                case (int)SDL.SDL_EventType.SDL_EVENT_MOUSE_WHEEL:
                     {
                         if (ev.wheel.x > 0) io.MouseWheelH += 1;
                         if (ev.wheel.x < 0) io.MouseWheelH -= 1;
@@ -94,61 +92,69 @@ namespace EngineNS.EGui
                         if (ev.wheel.y < 0) io.MouseWheel -= 1;
                         return true;
                     }
-                case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
+                case (int)SDL.SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN:
                     {
-                        if (ev.button.button == SDL.SDL_BUTTON_LEFT) g_MousePressed[0] = true;
-                        if (ev.button.button == SDL.SDL_BUTTON_RIGHT) g_MousePressed[1] = true;
-                        if (ev.button.button == SDL.SDL_BUTTON_MIDDLE) g_MousePressed[2] = true;
+                        if (ev.button.button == (byte)SDL.SDLButton.SDL_BUTTON_LEFT)
+                            g_MousePressed[0] = true;
+                        if (ev.button.button == (byte)SDL.SDLButton.SDL_BUTTON_RIGHT) 
+                            g_MousePressed[1] = true;
+                        if (ev.button.button == (byte)SDL.SDLButton.SDL_BUTTON_MIDDLE) 
+                            g_MousePressed[2] = true;
                         return true;
                     }
-                case SDL.SDL_EventType.SDL_TEXTINPUT:
+                case (int)SDL.SDL_EventType.SDL_EVENT_TEXT_INPUT:
                     {
                         var text = ev.text;
                         var pText = (sbyte*)text.text;
                         io.AddInputCharactersUTF8(pText);
                         return true;
                     }
-                case SDL.SDL_EventType.SDL_KEYDOWN:
-                case SDL.SDL_EventType.SDL_KEYUP:
+                case (int)SDL.SDL_EventType.SDL_EVENT_KEY_DOWN:
+                case (int)SDL.SDL_EventType.SDL_EVENT_KEY_UP:
                     {
-                        var key = (int)ev.key.keysym.scancode;
+                        var key = (int)ev.key.scancode;
                         bool* keysDown = (bool*)&io.UnsafeAsLayout->KeysDown;
                         //IM_ASSERT(key >= 0 && key<IM_ARRAYSIZE(io.KeysDown));
-                        keysDown[key] = (ev.type == SDL.SDL_EventType.SDL_KEYDOWN);
-                        io.KeyShift = ((SDL.SDL_GetModState() & SDL.SDL_Keymod.KMOD_SHIFT) != 0);
-                        io.KeyCtrl = ((SDL.SDL_GetModState() & SDL.SDL_Keymod.KMOD_CTRL) != 0);
-                        io.KeyAlt = ((SDL.SDL_GetModState() & SDL.SDL_Keymod.KMOD_ALT) != 0);
+                        keysDown[key] = (ev.type == (uint)SDL.SDL_EventType.SDL_EVENT_KEY_DOWN);
+                        io.KeyShift = ((SDL.SDL3.SDL_GetModState() & SDL.SDL_Keymod.SDL_KMOD_SHIFT) != 0);
+                        io.KeyCtrl = ((SDL.SDL3.SDL_GetModState() & SDL.SDL_Keymod.SDL_KMOD_CTRL) != 0);
+                        io.KeyAlt = ((SDL.SDL3.SDL_GetModState() & SDL.SDL_Keymod.SDL_KMOD_ALT) != 0);
                         io.KeySuper = false;
                         //io.KeySuper = ((SDL_GetModState() & KMOD_GUI) != 0);
                         return true;
                     }
                 // Multi-viewport support
-                case SDL.SDL_EventType.SDL_WINDOWEVENT:
+                default:
                     {
-                        var window_event = ev.window.windowEvent;
-                        if (window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE || window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_MOVED || window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED)
+                        if (ev.type >= (uint)SDL.SDL_EventType.SDL_EVENT_WINDOW_FIRST && ev.type <= (uint)SDL.SDL_EventType.SDL_EVENT_WINDOW_LAST)
                         {
-                            ImGuiViewport* viewport = ImGuiAPI.FindViewportByPlatformHandle((void*)SDL.SDL_GetWindowFromID(ev.window.windowID));
-                            if (viewport != (ImGuiViewport*)0)
+                            var window_event = ev.window.type;
+                            if (window_event == SDL.SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED || 
+                                window_event == SDL.SDL_EventType.SDL_EVENT_WINDOW_MOVED || 
+                                window_event == SDL.SDL_EventType.SDL_EVENT_WINDOW_RESIZED)
                             {
-                                if (window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE)
+                                ImGuiViewport* viewport = ImGuiAPI.FindViewportByPlatformHandle((void*)SDL.SDL3.SDL_GetWindowFromID(ev.window.windowID));
+                                if (viewport != (ImGuiViewport*)0)
                                 {
-                                    viewport->PlatformRequestClose = true;
-                                    if ((IntPtr)viewport->PlatformUserData != IntPtr.Zero)
+                                    if (window_event == SDL.SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED)
                                     {
-                                        var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
-                                        var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
-                                        myWindow.IsClosed = true;
+                                        viewport->PlatformRequestClose = true;
+                                        if ((IntPtr)viewport->PlatformUserData != IntPtr.Zero)
+                                        {
+                                            var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
+                                            var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
+                                            myWindow.IsClosed = true;
+                                        }
+                                        //var closeEvent = new SDL.SDL_Event();
+                                        //closeEvent.type = SDL.SDL_EventType.SDL_QUIT;
+                                        //SDL.SDL_PushEvent(ref closeEvent);
                                     }
-                                    //var closeEvent = new SDL.SDL_Event();
-                                    //closeEvent.type = SDL.SDL_EventType.SDL_QUIT;
-                                    //SDL.SDL_PushEvent(ref closeEvent);
+                                    if (window_event == SDL.SDL_EventType.SDL_EVENT_WINDOW_MOVED)
+                                        viewport->PlatformRequestMove = true;
+                                    if (window_event == SDL.SDL_EventType.SDL_EVENT_WINDOW_RESIZED)
+                                        viewport->PlatformRequestResize = true;
+                                    return true;
                                 }
-                                if (window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_MOVED)
-                                    viewport->PlatformRequestMove = true;
-                                if (window_event == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED)
-                                    viewport->PlatformRequestResize = true;
-                                return true;
                             }
                         }
                     }
@@ -165,7 +171,7 @@ namespace EngineNS.EGui
         {
             SDL.SDL_WindowFlags sdl_flags = 0;
             
-            sdl_flags |= (SDL.SDL_WindowFlags)SDL.SDL_GetWindowFlags(TtEngine.Instance.GfxDevice.SlateApplication.NativeWindow.Window) & SDL.SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
+            sdl_flags |= (SDL.SDL_WindowFlags)SDL.SDL3.SDL_GetWindowFlags(TtEngine.Instance.GfxDevice.SlateApplication.NativeWindow.WindowSDL) & SDL.SDL_WindowFlags.SDL_WINDOW_HIGH_PIXEL_DENSITY;
             sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN;
             sdl_flags |= ((viewport->Flags & ImGuiViewportFlags_.ImGuiViewportFlags_NoDecoration) != 0) ? SDL.SDL_WindowFlags.SDL_WINDOW_BORDERLESS : 0;
             sdl_flags |= ((viewport->Flags & ImGuiViewportFlags_.ImGuiViewportFlags_NoDecoration) != 0) ? 0 : SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE;
@@ -187,8 +193,8 @@ namespace EngineNS.EGui
             if (myWindow.IsCreatedByImGui == false)
             {
                 var closeEvent = new SDL.SDL_Event();
-                closeEvent.type = SDL.SDL_EventType.SDL_QUIT;
-                SDL.SDL_PushEvent(ref closeEvent);
+                closeEvent.type = (uint)SDL.SDL_EventType.SDL_EVENT_QUIT;
+                SDL.SDL3.SDL_PushEvent(&closeEvent);
                 return;
             }
             myWindow.Cleanup();
@@ -328,13 +334,13 @@ namespace EngineNS.EGui
         }
         #endregion
         #region Renderer
-        public class ViewportData
+        public class ViewportData : IDisposable
         {
             public Graphics.Pipeline.UPresentWindow PresentWindow;
             
             public UImDrawDataRHI DrawData = new UImDrawDataRHI();
 
-            public void Cleanup()
+            public void Dispose()
             {
                 //PresentWindow?.Cleanup();
                 PresentWindow = null;
@@ -366,7 +372,7 @@ namespace EngineNS.EGui
                 return;
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->RendererUserData);
             var vpData = gcHandle.Target as ViewportData;
-            vpData.Cleanup();
+            vpData.Dispose();
             gcHandle.Free();
             viewport->RendererUserData = IntPtr.Zero.ToPointer();
         }
@@ -413,13 +419,16 @@ namespace EngineNS.Bricks.Input.Device.Mouse
         partial void OnSetShowCursor()
         {
             if (bShowCursor)
-                SDL2.SDL.SDL_SetRelativeMouseMode(SDL2.SDL.SDL_bool.SDL_FALSE);
+                SDL.SDL3.SDL_SetRelativeMouseMode(SDL.SDL_bool.SDL_FALSE);
             else
-                SDL2.SDL.SDL_SetRelativeMouseMode(SDL2.SDL.SDL_bool.SDL_TRUE);
+                SDL.SDL3.SDL_SetRelativeMouseMode(SDL.SDL_bool.SDL_TRUE);
         }
         partial void WarpMouseInWindow(IntPtr window, int x, int y)
         {
-            SDL2.SDL.SDL_WarpMouseInWindow(window, x, y);
+            unsafe
+            {
+                SDL.SDL3.SDL_WarpMouseInWindow((SDL.SDL_Window*)window.ToPointer(), x, y);
+            }
         }
     }
 }

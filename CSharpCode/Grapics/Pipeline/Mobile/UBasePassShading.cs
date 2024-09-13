@@ -62,10 +62,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             }
             return true;
         }
-        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
+        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
@@ -143,7 +143,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Forword", "Mobile\\Forword", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UMobileForwordNodeBase : Common.UBasePassNode
+    public class UMobileForwordNodeBase : Common.TtBasePassNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
         public TtRenderGraphPin ShadowMapPinIn = TtRenderGraphPin.CreateInput("ShadowMap");
@@ -186,8 +186,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public UBasePassOpaque mOpaqueShading;
         public TtLayerDrawBuffers LayerBasePass = new TtLayerDrawBuffers();
-        public NxRHI.URenderPass RenderPass;
-        public NxRHI.URenderPass GizmosRenderPass;
+        public NxRHI.TtRenderPass RenderPass;
+        public NxRHI.TtRenderPass GizmosRenderPass;
 
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
@@ -357,7 +357,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
     }
 
     [Bricks.CodeBuilder.ContextMenu("Translucent", "Mobile\\Translucent", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UMobileTranslucentNode : Common.UBasePassNode
+    public class UMobileTranslucentNode : Common.TtBasePassNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
         public Graphics.Pipeline.TtRenderGraphPin AlbedoPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Albedo");
@@ -385,8 +385,8 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public UBasePassTranslucent mTranslucentShading;
         public TtLayerDrawBuffers LayerBasePass = new TtLayerDrawBuffers();
-        public NxRHI.URenderPass RenderPass;
-        public NxRHI.URenderPass GizmosRenderPass;
+        public NxRHI.TtRenderPass RenderPass;
+        public NxRHI.TtRenderPass GizmosRenderPass;
         public TtCpuCullingNode CpuCullNode = null;
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {

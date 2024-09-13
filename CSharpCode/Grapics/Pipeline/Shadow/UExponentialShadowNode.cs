@@ -7,9 +7,9 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Shadow
 {
-    public class UExponentialShadowShading : Shader.TtGraphicsShadingEnv
+    public class TtExponentialShadowShading : Shader.TtGraphicsShadingEnv
     {
-        public UExponentialShadowShading()
+        public TtExponentialShadowShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/ESM.cginc", RName.ERNameType.Engine);
         }
@@ -18,7 +18,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
+        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall)
         {
             //var cbIndex = drawcall.mCoreObject.FindCBufferIndex("cbPerShadingEnv");
             //if (cbIndex != 0xFFFFFFFF)
@@ -33,11 +33,11 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             //    drawcall.mCoreObject.BindCBufferAll(cbIndex, PerShadingCBuffer.mCoreObject.Ptr);
             //}
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
-            var ESMNode = drawcall.TagObject as UExponentialShadowNode;
+            var ESMNode = drawcall.TagObject as TtExponentialShadowNode;
 
             var index = drawcall.FindBinder("GShadowMap");
             //var attachBuffer = ESMNode.GetAttachBuffer(ESMNode.ShadowMapPinIn);
@@ -54,11 +54,12 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         }
     }
     [Bricks.CodeBuilder.ContextMenu("ESM", "Shadow\\ESM", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UExponentialShadowNode : USceenSpaceNode
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shadow.UExponentialShadowNode@EngineCore", "EngineNS.Graphics.Pipeline.Shadow.UExponentialShadowNode" })]
+    public class TtExponentialShadowNode : TtSceenSpaceNode
     {
         public TtRenderGraphPin ShadowMapPinIn = TtRenderGraphPin.CreateInput("ShadowMap");
         //public TtRenderGraphPin ExponentialShadowMapPinOut = TtRenderGraphPin.CreateOutput("ExponentialShadowMap", false, EPixelFormat.PXF_R32G32B32A32_FLOAT); //EPixelFormat.. Debug
-        public UExponentialShadowNode()
+        public TtExponentialShadowNode()
         {
             Name = "ExponentialShadowMap";
         }
@@ -71,7 +72,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16_FLOAT;
             base.InitNodePins();
         }
-        public UExponentialShadowShading mBasePassShading;
+        public TtExponentialShadowShading mBasePassShading;
         public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mBasePassShading;
@@ -79,7 +80,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UExponentialShadowShading>();
+            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtExponentialShadowShading>();
         }
         public override void OnLinkIn(TtRenderGraphLinker linker)
         {
@@ -92,7 +93,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             float scaleFactor = 1.0f;
-            var hitProxyNode = policy.FindFirstNode<UHitproxyNode>();
+            var hitProxyNode = policy.FindFirstNode<TtHitproxyNode>();
             if (hitProxyNode != null)
             {
                 scaleFactor = hitProxyNode.ScaleFactor;

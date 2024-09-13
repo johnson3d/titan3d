@@ -6,6 +6,7 @@ using EngineNS.DesignMacross.Editor;
 using EngineNS.DesignMacross.Design;
 using System.Text.RegularExpressions;
 using EngineNS.GamePlay.Scene;
+using EngineNS.Thread.Async;
 
 namespace EngineNS.DesignMacross
 {
@@ -54,7 +55,7 @@ namespace EngineNS.DesignMacross
     public class TtDesignMacrossBase
     {
         public TtNode MacrossNode{ get; set; } = null;
-        public virtual bool Initialize() { return false; }
+        public virtual async TtTask<bool> Initialize() { return false; }
         public virtual void Tick(float elapseSecond) { }
     }
     public partial class TtDesignMacrossAMeta : IO.IAssetMeta
@@ -270,10 +271,10 @@ namespace EngineNS.DesignMacross
             DesignedClassDescription.Name = name.PureName;
             var nsName = IO.TtFileManager.GetBaseDirectory(name.Name).TrimEnd('/').Replace("/", ".");
             if (Regex.IsMatch(nsName, "[A-Za-z0-9_]"))
-                DesignedClassDescription.Namespace = new UNamespaceDeclaration("NS_" + nsName);
+                DesignedClassDescription.Namespace = new TtNamespaceDeclaration("NS_" + nsName);
             else
             {
-                DesignedClassDescription.Namespace = new UNamespaceDeclaration("NS_" + ((UInt32)nsName.GetHashCode()).ToString());
+                DesignedClassDescription.Namespace = new TtNamespaceDeclaration("NS_" + ((UInt32)nsName.GetHashCode()).ToString());
                 Profiler.Log.WriteLine<Profiler.TtMacrossCategory>(Profiler.ELogTag.Warning, $"Get namespace failed, {name.Name} has invalid char!");
             }
             Save(name);

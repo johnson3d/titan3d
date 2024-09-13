@@ -24,7 +24,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
             defines.AddDefine("TypeFog_None", (int)Graphics.Pipeline.TtRenderPolicy.ETypeFog.None);
             defines.AddDefine("TypeFog_ExpHeight", (int)Graphics.Pipeline.TtRenderPolicy.ETypeFog.ExpHeight);
@@ -35,7 +35,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             get;
             set;
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
@@ -57,7 +57,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public partial class TtFogNode : USceenSpaceNode
+    public partial class TtFogNode : TtSceenSpaceNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
         public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");
@@ -109,7 +109,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
             }
         }
-        public NxRHI.UCbView CBShadingEnv;
+        public NxRHI.TtCbView CBShadingEnv;
         public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             if (policy.TypeFog == TtRenderPolicy.ETypeFog.None)

@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_439654454 Type="EngineNS.Plugins.GameItems.AItemRequirement@GameItems">
-  <Items Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Order="0" />
-  <RequireCount Type="System.Int32@Unknown" Order="0" />
-</Hash_439654454>

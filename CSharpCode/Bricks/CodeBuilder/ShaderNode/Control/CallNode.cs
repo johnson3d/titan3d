@@ -236,7 +236,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 if (iPin == Arguments[i].PinIn)
                 {
                     var testType = nodeExpr.GetOutPinType(oPin);
-                    return CodeBuilder.UCodeGeneratorBase.CanConvert(testType, Method.GetParameter(i).ParameterType);
+                    return CodeBuilder.TtCodeGeneratorBase.CanConvert(testType, Method.GetParameter(i).ParameterType);
                 }
             }
             return true;
@@ -402,28 +402,28 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             return $"tmp_o_{paramName}_{Method.MethodName}_{(uint)NodeId.GetHashCode()}";
         }
 
-        protected virtual UExpressionBase GetNoneLinkedParameterExp(PinIn pin, int argIdx, ref BuildCodeStatementsData data)
+        protected virtual TtExpressionBase GetNoneLinkedParameterExp(PinIn pin, int argIdx, ref BuildCodeStatementsData data)
         {
             var paramName = GetParamValueName(pin.Name);
             if (!data.MethodDec.HasLocalVariable(paramName))
             {
                 var arg = Method.FindParameter(pin.Name);
                 var type = pin.Tag as Rtti.UTypeDesc;
-                var varDec = new UVariableDeclaration()
+                var varDec = new TtVariableDeclaration()
                 {
-                    VariableType = new UTypeReference(type),
+                    VariableType = new TtTypeReference(type),
                     VariableName = paramName,
-                    InitValue = (type.IsPrimitive && arg.DefaultValue != null && arg.DefaultValue.GetType()!=typeof(System.DBNull)) ? new UPrimitiveExpression(type, arg.DefaultValue) : new UDefaultValueExpression(type),
+                    InitValue = (type.IsPrimitive && arg.DefaultValue != null && arg.DefaultValue.GetType()!=typeof(System.DBNull)) ? new TtPrimitiveExpression(type, arg.DefaultValue) : new TtDefaultValueExpression(type),
                 };
                 data.MethodDec.AddLocalVar(varDec);
             }
-            var retVal = new UVariableReferenceExpression(paramName);
+            var retVal = new TtVariableReferenceExpression(paramName);
             return retVal;
         }
 
-        void GenArgumentCodes(int argIdx, ref BuildCodeStatementsData data, out UExpressionBase exp,
-            List<UStatementBase> beforeStatements = null,
-            List<UStatementBase> afterStatements = null)
+        void GenArgumentCodes(int argIdx, ref BuildCodeStatementsData data, out TtExpressionBase exp,
+            List<TtStatementBase> beforeStatements = null,
+            List<TtStatementBase> afterStatements = null)
         {
             var pinData = Arguments[argIdx];
             switch(pinData.OpType)
@@ -432,16 +432,16 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     {
                         var outPin = pinData.PinOut;
                         var paramName = GetParamValueName(outPin.Name);
-                        exp = new UVariableReferenceExpression(paramName);
+                        exp = new TtVariableReferenceExpression(paramName);
 
                         if(!data.MethodDec.HasLocalVariable(paramName))
                         {
                             var type = outPin.Tag as Rtti.UTypeDesc;
-                            var varDec = new UVariableDeclaration()
+                            var varDec = new TtVariableDeclaration()
                             {
-                                VariableType = new UTypeReference(type),
+                                VariableType = new TtTypeReference(type),
                                 VariableName = paramName,
-                                InitValue = new UDefaultValueExpression(type),
+                                InitValue = new TtDefaultValueExpression(type),
                             };
                             data.MethodDec.AddLocalVar(varDec);
                         }
@@ -491,7 +491,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 data.ClassDec.PushPreInclude(incAttr.Include);
             }
 
-            var methodInvokeExp = new UMethodInvokeStatement()
+            var methodInvokeExp = new TtMethodInvokeStatement()
             {
                 MethodName = method.MethodName,
                 Method = method,
@@ -500,25 +500,25 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             if(method.HasReturnValue())
             {
                 var retValName = GetReturnValueName();
-                methodInvokeExp.ReturnValue = new UVariableDeclaration()
+                methodInvokeExp.ReturnValue = new TtVariableDeclaration()
                 {
-                    VariableType = new UTypeReference(method.ReturnType),
+                    VariableType = new TtTypeReference(method.ReturnType),
                     VariableName = retValName,
-                    InitValue = new UDefaultValueExpression(method.ReturnType),
+                    InitValue = new TtDefaultValueExpression(method.ReturnType),
                 };
                 if (!data.MethodDec.HasLocalVariable(retValName))
                     data.MethodDec.AddLocalVar(methodInvokeExp.ReturnValue);
             }
 
-            List<UStatementBase> beforeSt = new List<UStatementBase>();
-            List<UStatementBase> afterSt = new List<UStatementBase>();
+            List<TtStatementBase> beforeSt = new List<TtStatementBase>();
+            List<TtStatementBase> afterSt = new List<TtStatementBase>();
             for (int i=0; i<Arguments.Count; i++)
             {
-                var arg = new UMethodInvokeArgumentExpression()
+                var arg = new TtMethodInvokeArgumentExpression()
                 {
                     OperationType = Arguments[i].OpType,
                 };
-                UExpressionBase exp;
+                TtExpressionBase exp;
                 GenArgumentCodes(i, ref data, out exp, beforeSt, afterSt);
                 arg.Expression = exp;
                 methodInvokeExp.Arguments.Add(arg);
@@ -531,12 +531,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             data.CurrentStatements.Add(methodInvokeExp);
             data.CurrentStatements.AddRange(afterSt);
         }
-        public override CodeBuilder.UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override CodeBuilder.TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             var method = Method;
             if (pin == Result)
             {
-                return new UVariableReferenceExpression(GetReturnValueName());
+                return new TtVariableReferenceExpression(GetReturnValueName());
             }
             else
             {
@@ -547,7 +547,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     {
                         System.Diagnostics.Debug.Assert(parameters[i].IsOut);
                         var mth_outarg_temp_name = GetParamValueName(parameters[i].Name);// $"tmp_o_{parameters[i].Name}_{method.MethodName}_{(uint)this.NodeId.GetHashCode()}";
-                        return new UVariableReferenceExpression(mth_outarg_temp_name);
+                        return new TtVariableReferenceExpression(mth_outarg_temp_name);
                     }
                 }
             }

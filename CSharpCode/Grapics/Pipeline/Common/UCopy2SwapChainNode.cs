@@ -24,7 +24,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         public TtAttachBuffer ColorAttachement = null;
     }
     [Bricks.CodeBuilder.ContextMenu("Copy2SwapChain", "Copy2SwapChain", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UCopy2SwapChainNode : TtEndingNode
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UCopy2SwapChainNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UCopy2SwapChainNode" })]
+    public class TtCopy2SwapChainNode : TtEndingNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
         public TtRenderGraphPin HitIdPinIn = TtRenderGraphPin.CreateInput("HitId");
@@ -32,9 +33,9 @@ namespace EngineNS.Graphics.Pipeline.Common
         public TtRenderGraphPin SavedPinIn0 = TtRenderGraphPin.CreateInput("Save0");
         public TtRenderGraphPin ColorPinOut = TtRenderGraphPin.CreateOutput("Color", true, EPixelFormat.PXF_R8G8B8A8_UNORM);
 
-        public NxRHI.UCopyDraw mCopyDrawcall;
+        public NxRHI.TtCopyDraw mCopyDrawcall;
 
-        public UCopy2SwapChainNode()
+        public TtCopy2SwapChainNode()
         {
             ColorAttachement = new TtAttachBuffer();
             Name = "Copy2SwapChainNode";

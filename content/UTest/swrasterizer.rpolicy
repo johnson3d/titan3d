@@ -4,12 +4,12 @@
   <GraphName Type="System.String@Unknown" Value="NodeGraph" />
   <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
-      <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.UCopy2SwapChainNode@EngineCore" />
+      <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.TtCopy2SwapChainNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="Copy2SwapChainNode" />
       <Name Type="System.String@Unknown" Value="Copy2SwapChainNode" />
       <NodeId Type="System.Guid@Unknown" Value="9f1f1cbc-9cfe-4392-93a3-fbf7f992c628" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="865,223.99998" />
-      <GraphNode Type="EngineNS.Graphics.Pipeline.Common.UCopy2SwapChainNode@EngineCore" />
+      <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtCopy2SwapChainNode@EngineCore" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
     <e_1 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">

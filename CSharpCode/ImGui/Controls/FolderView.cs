@@ -51,7 +51,7 @@ namespace EngineNS.EGui.Controls
         public void Draw(in Vector2 size)
         {
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ChildBg, 0xFF1A1A1A);
-            if (ImGuiAPI.BeginChild("LeftWindow", in size, true, ImGuiWindowFlags_.ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+            if (ImGuiAPI.BeginChild("LeftWindow", in size, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
             {
                 //var winMin = ImGuiAPI.GetWindowPos();
                 //var winMax = winMin + ImGuiAPI.GetWindowSize();

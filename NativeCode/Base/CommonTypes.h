@@ -87,7 +87,9 @@ enum TR_ENUM(SV_EnumNoFlags = true)
 		PXF_R32G32B32_TYPELESS,
 		PXF_R16G16B16A16_TYPELESS,
 		PXF_R32G32_TYPELESS,
+
 		PXF_R32G8X24_TYPELESS,
+		PXF_R32_FLOAT_X8X24_TYPELESS,
 		
 		PXF_R10G10B10A2_TYPELESS,
 		PXF_R10G10B10A2_UNORM,
@@ -299,6 +301,7 @@ inline unsigned int GetPixelByteWidth(EPixelFormat fmt)
 	case PXF_B10G10R10A2_UNORM:
 		return 4;
 	case PXF_D32_FLOAT_S8X24_UINT:
+	case PXF_R32G8X24_TYPELESS:
 		return 8;
 	case PXF_D16_UNORM:
 		return 2;
@@ -334,6 +337,7 @@ inline unsigned int GetPixelChannelCount(EPixelFormat fmt)
 	case PXF_R32G32_FLOAT:
 	case PXF_D24_UNORM_S8_UINT:
 	case PXF_D32_FLOAT_S8X24_UINT:
+	case PXF_R32G8X24_TYPELESS:
 		return 2;
 	case PXF_R32G32B32_UINT:
 	case PXF_R32G32B32_SINT:

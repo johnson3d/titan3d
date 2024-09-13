@@ -9,19 +9,19 @@ namespace EngineNS.NxRHI
     {
     }
 
-    public class UGpuSystem : AuxPtrType<NxRHI.IGpuSystem>
+    public class TtGpuSystem : AuxPtrType<NxRHI.IGpuSystem>
     {
-        public static UGpuSystem CreateGpuSystem(ERhiType type, in FGpuSystemDesc desc)
+        public static TtGpuSystem CreateGpuSystem(ERhiType type, in FGpuSystemDesc desc)
         {
-            var result = new UGpuSystem();
+            var result = new TtGpuSystem();
             result.mCoreObject = NxRHI.IGpuSystem.CreateGpuSystem(type, in desc);
             return result;
         }
-        public UGpuDevice CreateGpuDevice(in FGpuDeviceDesc desc)
+        public TtGpuDevice CreateGpuDevice(in FGpuDeviceDesc desc)
         {
-            var result = new UGpuDevice();
+            var result = new TtGpuDevice();
             result.mCoreObject = mCoreObject.CreateDevice(in desc);
-            result.mGpuQueue = new UGpuQueue(result, result.mCoreObject.GetCmdQueue());
+            result.mGpuQueue = new TtGpuQueue(result, result.mCoreObject.GetCmdQueue());
             result.InitShaderGlobalEnv();
             return result;
         }
@@ -56,7 +56,7 @@ namespace EngineNS.NxRHI
             return result;
         }
     }
-    public class UGpuDevice : AuxPtrType<NxRHI.IGpuDevice>
+    public class TtGpuDevice : AuxPtrType<NxRHI.IGpuDevice>
     {
         public override void Dispose()
         {
@@ -77,7 +77,16 @@ namespace EngineNS.NxRHI
                 return mCoreObject.mCaps;
             }
         }
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
         public UShaderDefinitions GlobalEnvDefines { get; } = new UShaderDefinitions();
+        Hash160 mGlobalEnvHash;
+在此之后:
+        public TtShaderDefinitions GlobalEnvDefines { get; } = new UShaderDefinitions();
+        Hash160 mGlobalEnvHash;
+*/
+        public TtShaderDefinitions GlobalEnvDefines { get; } = new TtShaderDefinitions();
         Hash160 mGlobalEnvHash;
         public Hash160 GlobalEnvHash
         {
@@ -85,6 +94,8 @@ namespace EngineNS.NxRHI
         }
         internal void InitShaderGlobalEnv()
         {
+            GlobalEnvDefines.AddDefine("USE_INVERSE_Z", TtEngine.Instance.Config.IsReverseZ ? "1" : "0");
+            
             var caps = DeviceCaps;
             if (caps.IsSupportSSBO_VS)
             {
@@ -116,33 +127,33 @@ namespace EngineNS.NxRHI
                 return null;
             return result;
         }
-        public UBuffer CreateBuffer(in FBufferDesc desc)
+        public TtBuffer CreateBuffer(in FBufferDesc desc)
         {
-            var result = new UBuffer();
+            var result = new TtBuffer();
             result.mCoreObject = mCoreObject.CreateBuffer(in desc);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public UCbView CreateCBV(TtEffectBinder binder)
+        public TtCbView CreateCBV(TtEffectBinder binder)
         {
             if (binder == null)
                 return null;
             return CreateCBV(binder.mCoreObject.GetShaderBinder(EShaderType.SDT_Unknown));
         }
-        public UCbView CreateCBV(FEffectBinder binder)
+        public TtCbView CreateCBV(FEffectBinder binder)
         {
             return CreateCBV(binder.GetShaderBinder(EShaderType.SDT_Unknown));
         }
-        public UCbView CreateCBV(FShaderBinder binder)
+        public TtCbView CreateCBV(FShaderBinder binder)
         {
             return CreateCBV(null, binder);
         }
-        public UCbView CreateCBV(UBuffer buffer, FShaderBinder binder)
+        public TtCbView CreateCBV(TtBuffer buffer, FShaderBinder binder)
         {
             var cbvDesc = new FCbvDesc();
             cbvDesc.ShaderBinder = binder;
-            var result = new UCbView();
+            var result = new TtCbView();
             if (buffer == null)
             {
                 result.mCoreObject = mCoreObject.CreateCBV(new IBuffer(), in cbvDesc);
@@ -155,9 +166,9 @@ namespace EngineNS.NxRHI
                 return null;
             return result;
         }
-        public UVbView CreateVBV(UBuffer buffer, in FVbvDesc desc)
+        public TtVbView CreateVBV(TtBuffer buffer, in FVbvDesc desc)
         {
-            var result = new UVbView();
+            var result = new TtVbView();
             if (buffer == null)
             {
                 result.mCoreObject = mCoreObject.CreateVBV(new IBuffer(), in desc);
@@ -170,9 +181,9 @@ namespace EngineNS.NxRHI
                 return null;
             return result;
         }
-        public UIbView CreateIBV(UBuffer buffer, in FIbvDesc desc)
+        public TtIbView CreateIBV(TtBuffer buffer, in FIbvDesc desc)
         {
-            var result = new UIbView();
+            var result = new TtIbView();
             if (buffer == null)
             {
                 result.mCoreObject = mCoreObject.CreateIBV(new IBuffer(), in desc);
@@ -185,16 +196,16 @@ namespace EngineNS.NxRHI
                 return null;
             return result;
         }
-        public UTexture CreateTexture(in FTextureDesc desc)
+        public TtTexture CreateTexture(in FTextureDesc desc)
         {
             var ptr = mCoreObject.CreateTexture(in desc);
             if (ptr.IsValidPointer == false)
                 return null;
-            var result = new UTexture(ptr);
+            var result = new TtTexture(ptr);
             ptr.NativeSuper.NativeSuper.Release();
             return result;
         }
-        public TtSrView CreateSRV(UBuffer buffer, in FSrvDesc desc)
+        public TtSrView CreateSRV(TtBuffer buffer, in FSrvDesc desc)
         {
             if (buffer == null)
                 return null;
@@ -208,7 +219,7 @@ namespace EngineNS.NxRHI
             }
             return null;
         }
-        public TtSrView CreateSRV(UTexture texture, in FSrvDesc desc)
+        public TtSrView CreateSRV(TtTexture texture, in FSrvDesc desc)
         {
             if (texture == null)
                 return null;
@@ -220,66 +231,66 @@ namespace EngineNS.NxRHI
                 return null;
             return result;
         }
-        public UUaView CreateUAV(UBuffer buffer, in FUavDesc desc)
+        public TtUaView CreateUAV(TtBuffer buffer, in FUavDesc desc)
         {
-            var result = new UUaView();
+            var result = new TtUaView();
             result.mCoreObject = mCoreObject.CreateUAV(buffer.mCoreObject.NativeSuper, in desc);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public UUaView CreateUAV(UTexture texture, in FUavDesc desc)
+        public TtUaView CreateUAV(TtTexture texture, in FUavDesc desc)
         {
-            var result = new UUaView();
+            var result = new TtUaView();
             result.mCoreObject = mCoreObject.CreateUAV(texture.mCoreObject.NativeSuper, in desc);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public URenderTargetView CreateRTV(UTexture buffer, in FRtvDesc desc)
+        public TtRenderTargetView CreateRTV(TtTexture buffer, in FRtvDesc desc)
         {
-            var result = new URenderTargetView();
+            var result = new TtRenderTargetView();
             result.mCoreObject = mCoreObject.CreateRTV(buffer.mCoreObject, in desc);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public UDepthStencilView CreateDSV(UTexture buffer, in FDsvDesc desc)
+        public TtDepthStencilView CreateDSV(TtTexture buffer, in FDsvDesc desc)
         {
-            var result = new UDepthStencilView();
+            var result = new TtDepthStencilView();
             result.mCoreObject = mCoreObject.CreateDSV(buffer.mCoreObject, in desc);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public USampler CreateSampler(in FSamplerDesc desc)
+        public TtSampler CreateSampler(in FSamplerDesc desc)
         {
-            var result = new USampler();
+            var result = new TtSampler();
             result.mCoreObject = mCoreObject.CreateSampler(in desc);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public USwapChain CreateSwapChain(in FSwapChainDesc desc)
+        public TtSwapChain CreateSwapChain(in FSwapChainDesc desc)
         {
-            var result = new USwapChain();
+            var result = new TtSwapChain();
             result.mCoreObject = mCoreObject.CreateSwapChain(in desc);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             result.InitRenderPass();
             return result;
         }
-        public URenderPass CreateRenderPass(in FRenderPassDesc desc)
+        public TtRenderPass CreateRenderPass(in FRenderPassDesc desc)
         {
-            var result = new URenderPass();
+            var result = new TtRenderPass();
             result.mCoreObject = mCoreObject.CreateRenderPass(in desc);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public UFrameBuffers CreateFrameBuffers(URenderPass rpass)
+        public TtFrameBuffers CreateFrameBuffers(TtRenderPass rpass)
         {
-            var result = new UFrameBuffers();
+            var result = new TtFrameBuffers();
             result.mCoreObject = mCoreObject.CreateFrameBuffers(rpass.mCoreObject);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
@@ -313,43 +324,48 @@ namespace EngineNS.NxRHI
             result.mCoreObject.BuildState(mCoreObject);
             return result;
         }
-        public UGpuPipeline CreatePipeline(in FGpuPipelineDesc desc)
+        public TtGpuPipeline CreatePipeline(in FGpuPipelineDesc desc)
         {
-            var result = new UGpuPipeline();
-            result.mCoreObject = mCoreObject.CreatePipeline(in desc);
+            var result = new TtGpuPipeline();
+            var cp = desc;
+            if (TtEngine.Instance.Config.IsReverseZ)
+                cp.m_DepthStencil.m_DepthFunc = EComparisionMode.CMP_GREATER_EQUAL;
+            else
+                cp.m_DepthStencil.m_DepthFunc = EComparisionMode.CMP_LESS_EQUAL;
+            result.mCoreObject = mCoreObject.CreatePipeline(in cp);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public UInputLayout CreateInputLayout(UInputLayoutDesc desc)
+        public TtInputLayout CreateInputLayout(TtInputLayoutDesc desc)
         {
-            var result = new UInputLayout();
+            var result = new TtInputLayout();
             result.mCoreObject = mCoreObject.CreateInputLayout(desc.mCoreObject);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public UGraphicDraw CreateGraphicDraw()
+        public TtGraphicDraw CreateGraphicDraw()
         {
-            var result = new UGraphicDraw();
+            var result = new TtGraphicDraw();
             result.mCoreObject = mCoreObject.CreateGraphicDraw();
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             TtStatistic.Instance.GraphicsDrawcall++;
             return result;
         }
-        public UComputeDraw CreateComputeDraw()
+        public TtComputeDraw CreateComputeDraw()
         {
-            var result = new UComputeDraw();
+            var result = new TtComputeDraw();
             result.mCoreObject = mCoreObject.CreateComputeDraw();
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             TtStatistic.Instance.ComputeDrawcall++;
             return result;
         }
-        public UCopyDraw CreateCopyDraw()
+        public TtCopyDraw CreateCopyDraw()
         {
-            var result = new UCopyDraw();
+            var result = new TtCopyDraw();
             result.mCoreObject = mCoreObject.CreateCopyDraw();
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
@@ -365,33 +381,33 @@ namespace EngineNS.NxRHI
             TtStatistic.Instance.ActionDrawcall++;
             return result;
         }
-        public UEvent CreateGpuEvent(in FEventDesc desc, string name)
+        public TtEvent CreateGpuEvent(in FEventDesc desc, string name)
         {
-            var result = new UEvent();
+            var result = new TtEvent();
             result.mCoreObject = mCoreObject.CreateGpuEvent(in desc, name);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             return result;
         }
-        public UVertexArray CreateVertexArray()
+        public TtVertexArray CreateVertexArray()
         {
             var ptr = mCoreObject.CreateVertexArray();
             if (ptr.IsValidPointer == false)
                 return null;
-            var result = new UVertexArray(ptr);
+            var result = new TtVertexArray(ptr);
             return result;
         }
-        public UGeomMesh CreateGeomMesh()
+        public TtGeomMesh CreateGeomMesh()
         {
             var ptr = mCoreObject.CreateGeomMesh();
             if (ptr.IsValidPointer == false)
                 return null;
-            var result = new UGeomMesh(ptr);
+            var result = new TtGeomMesh(ptr);
             return result;
         }
-        public UFence CreateFence(in FFenceDesc desc, string name)
+        public TtFence CreateFence(in FFenceDesc desc, string name)
         {
-            var result = new UFence();
+            var result = new TtFence();
             result.mCoreObject = mCoreObject.CreateFence(in desc, name);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
@@ -402,15 +418,15 @@ namespace EngineNS.NxRHI
             mCoreObject.SetBreakOnID(id, open);
         }
 
-        internal UGpuQueue mGpuQueue;
-        public UGpuQueue GpuQueue { get => mGpuQueue; }
+        internal TtGpuQueue mGpuQueue;
+        public TtGpuQueue GpuQueue { get => mGpuQueue; }
 
         public void TickPostEvents()
         {
             mCoreObject.TickPostEvents();
         }
     }
-    public class UGpuQueue : AuxPtrType<NxRHI.ICmdQueue>
+    public class TtGpuQueue : AuxPtrType<NxRHI.ICmdQueue>
     {
         public override void Dispose()
         {
@@ -418,7 +434,7 @@ namespace EngineNS.NxRHI
             base.Dispose();
         }
         //public UCommandList FramePostCmdList { get; set; } = null;
-        public UGpuQueue(UGpuDevice device, ICmdQueue ptr)
+        public TtGpuQueue(TtGpuDevice device, ICmdQueue ptr)
         {
             mCoreObject = ptr;
             mCoreObject.NativeSuper.AddRef();
@@ -438,7 +454,7 @@ namespace EngineNS.NxRHI
                 return;
             mCoreObject.ExecuteCommandListSingle(Cmdlist, type);
         }
-        public ulong IncreaseSignal(UFence fence, EngineNS.NxRHI.EQueueType type = EQueueType.QU_Default)
+        public ulong IncreaseSignal(TtFence fence, EngineNS.NxRHI.EQueueType type = EQueueType.QU_Default)
         {
             return mCoreObject.IncreaseSignal(fence.mCoreObject, type);
         }

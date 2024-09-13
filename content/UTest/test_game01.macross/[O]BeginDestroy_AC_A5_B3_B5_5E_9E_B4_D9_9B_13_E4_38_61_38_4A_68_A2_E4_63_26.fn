@@ -3,15 +3,15 @@
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/test_game01.macross,bc3c0fba-c5f7-4c79-ad88-7c09531cb90b" />
   <GraphName Type="System.String@Unknown" Value="NodeGraph" />
   <IsUseCustumCode Type="System.Boolean@Unknown" Value="False" />
-  <LocalVars Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
+  <LocalVars Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
   <MethodDatas Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.MacrossNode.MethodData@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodData@EngineCore">
       <IsDelegate Type="System.Boolean@Unknown" Value="False" />
-      <MethodDec Type="EngineNS.Bricks.CodeBuilder.UMethodDeclaration@EngineCore">
-        <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UMethodArgumentDeclaration@EngineCore,&gt;@Unknown" Count="1">
-          <e_0 Type="EngineNS.Bricks.CodeBuilder.UMethodArgumentDeclaration@EngineCore">
+      <MethodDec Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration@EngineCore">
+        <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore,&gt;@Unknown" Count="1">
+          <e_0 Type="EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore">
             <HasDefaultValue Type="System.Boolean@Unknown" Value="True" />
-            <InitValue Type="EngineNS.Bricks.CodeBuilder.UPrimitiveExpression@EngineCore">
+            <InitValue Type="EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore">
               <Type Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.DBNull@Unknown" />
               <TypeIsTypeof Type="System.Boolean@Unknown" Value="False" />
             </InitValue>
@@ -20,17 +20,17 @@
             <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="Default" />
             <OperationVisible Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="host" />
-            <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
               <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.GamePlay.UGameInstance@EngineCore" />
               <TypeFullName Type="System.String@Unknown" Value="EngineNS.GamePlay.UGameInstance" />
             </VariableType>
           </e_0>
         </Arguments>
-        <AsyncType Type="EngineNS.Bricks.CodeBuilder.UMethodDeclaration.EAsyncType@EngineCore" Value="None" />
+        <AsyncType Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration.EAsyncType@EngineCore" Value="None" />
         <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
         <IsOverride Type="System.Boolean@Unknown" Value="True" />
-        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
+        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
         <MethodName Type="System.String@Unknown" Value="BeginDestroy" />
         <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
       </MethodDec>

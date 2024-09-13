@@ -59,11 +59,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     {
         public UTerrainLevel Level;
         public TtPatch[,] TiledPatch;
-        public NxRHI.UTexture HeightMap;
+        public NxRHI.TtTexture HeightMap;
         public NxRHI.TtSrView HeightMapSRV;
-        public NxRHI.UTexture WaterHMap;
+        public NxRHI.TtTexture WaterHMap;
         public NxRHI.TtSrView WaterHMapSRV;
-        public NxRHI.UTexture NormalMap;
+        public NxRHI.TtTexture NormalMap;
         public NxRHI.TtSrView NormalMapSRV;
         public NxRHI.TtSrView MaterialIdMapSRV;
         public float HeightMapMinHeight;

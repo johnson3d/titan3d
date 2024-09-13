@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossEditor@EngineCore">
-  <DefClass Type="EngineNS.Bricks.CodeBuilder.UClassDeclaration@EngineCore">
+  <DefClass Type="EngineNS.Bricks.CodeBuilder.TtClassDeclaration@EngineCore">
     <ClassName Type="System.String@Unknown" Value="hello" />
     <IsStruct Type="System.Boolean@Unknown" Value="False" />
     <IsUnsafe Type="System.Boolean@Unknown" Value="True" />
-    <Methods Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UMethodDeclaration@EngineCore,&gt;@Unknown" Count="1">
-      <e_0 Type="EngineNS.Bricks.CodeBuilder.UMethodDeclaration@EngineCore">
-        <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UMethodArgumentDeclaration@EngineCore,&gt;@Unknown" Count="2">
-          <e_0 Type="EngineNS.Bricks.CodeBuilder.UMethodArgumentDeclaration@EngineCore">
+    <Methods Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtMethodDeclaration@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration@EngineCore">
+        <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore,&gt;@Unknown" Count="2">
+          <e_0 Type="EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore">
             <HasDefaultValue Type="System.Boolean@Unknown" Value="False" />
-            <InitValue Type="EngineNS.Bricks.CodeBuilder.UPrimitiveExpression@EngineCore">
+            <InitValue Type="EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore">
               <Type Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.Int32@Unknown" />
               <TypeIsTypeof Type="System.Boolean@Unknown" Value="True" />
               <ValueStr Type="System.String@Unknown" Value="0" />
@@ -19,15 +19,15 @@
             <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="Default" />
             <OperationVisible Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="sender" />
-            <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
               <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.Object@Unknown" />
               <TypeFullName Type="System.String@Unknown" Value="System.Object" />
             </VariableType>
           </e_0>
-          <e_1 Type="EngineNS.Bricks.CodeBuilder.UMethodArgumentDeclaration@EngineCore">
+          <e_1 Type="EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore">
             <HasDefaultValue Type="System.Boolean@Unknown" Value="False" />
-            <InitValue Type="EngineNS.Bricks.CodeBuilder.UPrimitiveExpression@EngineCore">
+            <InitValue Type="EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore">
               <Type Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.Int32@Unknown" />
               <TypeIsTypeof Type="System.Boolean@Unknown" Value="True" />
               <ValueStr Type="System.String@Unknown" Value="0" />
@@ -37,22 +37,22 @@
             <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="Default" />
             <OperationVisible Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="args" />
-            <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
               <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.UI.Controls.TtRoutedEventArgs@EngineCore" />
               <TypeFullName Type="System.String@Unknown" Value="EngineNS.UI.Controls.TtRoutedEventArgs" />
             </VariableType>
           </e_1>
         </Arguments>
-        <AsyncType Type="EngineNS.Bricks.CodeBuilder.UMethodDeclaration.EAsyncType@EngineCore" Value="None" />
+        <AsyncType Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration.EAsyncType@EngineCore" Value="None" />
         <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
         <IsOverride Type="System.Boolean@Unknown" Value="False" />
-        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
+        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
         <MethodName Type="System.String@Unknown" Value="On_Click_2240035251220394824" />
         <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
       </e_0>
     </Methods>
-    <Properties Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
+    <Properties Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
     <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
       <e_0 Value="EngineNS.UI.TtUIMacrossBase" />
     </SupperClassNames>

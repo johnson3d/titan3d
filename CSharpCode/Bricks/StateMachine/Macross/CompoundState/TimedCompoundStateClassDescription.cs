@@ -56,16 +56,16 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
             return true;
         }
 
-        public override UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
+        public override TtVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
             return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
 
-        public override List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
+        public override List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
             SupperClassNames.Clear();
             SupperClassNames.Add($"EngineNS.Bricks.StateMachine.TimedSM.TtTimedCompoundState<{classBuildContext.MainClassDescription.ClassName}>");
-            List<UClassDeclaration> classDeclarationsBuilded = new List<UClassDeclaration>();
+            List<TtClassDeclaration> classDeclarationsBuilded = new List<TtClassDeclaration>();
             var thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
             foreach (var state in States)
             {
@@ -88,7 +88,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
         }
 
         #region Internal AST Build
-        private UMethodDeclaration BuildOverrideInitializeMethod()
+        private TtMethodDeclaration BuildOverrideInitializeMethod()
         {
             var methodDeclaration = TtStateMachineASTBuildUtil.CreateOverridedInitMethodStatement();
 
@@ -98,20 +98,20 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
                 TtStateMachineASTBuildUtil.CreateNewAndInitInvokeStatement(state, methodDeclaration);
 
                 var stateMachineAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
-                                            new UVariableReferenceExpression("StateMachine", new UVariableReferenceExpression(state.VariableName)),
-                                            new UVariableReferenceExpression("mStateMachine"));
+                                            new TtVariableReferenceExpression("StateMachine", new TtVariableReferenceExpression(state.VariableName)),
+                                            new TtVariableReferenceExpression("mStateMachine"));
                 methodDeclaration.MethodBody.Sequence.Add(stateMachineAssign);
 
                 if (state.bInitialActive)
                 {
                     Debug.Assert(!bIsSetInitialActiveState);
-                    UCastExpression castToSMExp = new UCastExpression();
+                    TtCastExpression castToSMExp = new TtCastExpression();
                     castToSMExp.TargetType = StateMachineClassDescription.VariableType;
-                    castToSMExp.Expression = new UVariableReferenceExpression("mStateMachine");
-                    var setDefaultStateMethodInvoke = new UMethodInvokeStatement();
+                    castToSMExp.Expression = new TtVariableReferenceExpression("mStateMachine");
+                    var setDefaultStateMethodInvoke = new TtMethodInvokeStatement();
                     setDefaultStateMethodInvoke.Host = castToSMExp;
                     setDefaultStateMethodInvoke.MethodName = "SetDefaultState";
-                    setDefaultStateMethodInvoke.Arguments.Add(new UMethodInvokeArgumentExpression { Expression = new UVariableReferenceExpression(state.VariableName) });
+                    setDefaultStateMethodInvoke.Arguments.Add(new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression(state.VariableName) });
                     methodDeclaration.MethodBody.Sequence.Add(setDefaultStateMethodInvoke);
                 }
             }
@@ -124,23 +124,23 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
                 Debug.Assert(state_TransitionTo != null);
                 var transitionToVariableName = state_TransitionTo.VariableName;
 
-                var attachmentAssign = TtASTBuildUtil.CreateAssignOperatorStatement(new UVariableReferenceExpression(transition.Name), new UCreateObjectExpression(transition.VariableType.TypeFullName));
+                var attachmentAssign = TtASTBuildUtil.CreateAssignOperatorStatement(new TtVariableReferenceExpression(transition.Name), new TtCreateObjectExpression(transition.VariableType.TypeFullName));
                 methodDeclaration.MethodBody.Sequence.Add(attachmentAssign);
 
                 var tansitionFromAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
-                                            new UVariableReferenceExpression("From", new UVariableReferenceExpression(transition.VariableName)),
-                                            new USelfReferenceExpression());
+                                            new TtVariableReferenceExpression("From", new TtVariableReferenceExpression(transition.VariableName)),
+                                            new TtSelfReferenceExpression());
                 methodDeclaration.MethodBody.Sequence.Add(tansitionFromAssign);
 
                 var tansitionToAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
-                                            new UVariableReferenceExpression("To", new UVariableReferenceExpression(transition.VariableName)),
-                                            new UVariableReferenceExpression(transitionToVariableName));
+                                            new TtVariableReferenceExpression("To", new TtVariableReferenceExpression(transition.VariableName)),
+                                            new TtVariableReferenceExpression(transitionToVariableName));
                 methodDeclaration.MethodBody.Sequence.Add(tansitionToAssign);
 
-                var hubAddTransionMethodInvoke = new UMethodInvokeStatement();
-                hubAddTransionMethodInvoke.Host = new USelfReferenceExpression();
+                var hubAddTransionMethodInvoke = new TtMethodInvokeStatement();
+                hubAddTransionMethodInvoke.Host = new TtSelfReferenceExpression();
                 hubAddTransionMethodInvoke.MethodName = "AddTransition";
-                hubAddTransionMethodInvoke.Arguments.Add(new UMethodInvokeArgumentExpression { Expression = new UVariableReferenceExpression(transition.VariableName) });
+                hubAddTransionMethodInvoke.Arguments.Add(new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression(transition.VariableName) });
                 methodDeclaration.MethodBody.Sequence.Add(hubAddTransionMethodInvoke);
             }
 
@@ -152,14 +152,14 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
                     Debug.Assert(transitionFrom != null);
                     var transitionFromVariableName = transitionFrom.VariableName;
 
-                    UExpressionBase tansitionToAssignFrom = null;
+                    TtExpressionBase tansitionToAssignFrom = null;
                     {
                         string transitionToVariableName = string.Empty;
                         var state_TransitionTo = States.Find((candidate) => { return candidate.Id == transition.ToId; });
                         if (state_TransitionTo != null)
                         {
                             transitionToVariableName = state_TransitionTo.VariableName;
-                            tansitionToAssignFrom = new UVariableReferenceExpression(transitionToVariableName);
+                            tansitionToAssignFrom = new TtVariableReferenceExpression(transitionToVariableName);
                         }
                         else
                         {
@@ -169,38 +169,38 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
                             if (compoundState_TransitionTo != null)
                             {
                                 transitionToVariableName = compoundState_TransitionTo.VariableName;
-                                UCastExpression castToSMExp = new UCastExpression();
+                                TtCastExpression castToSMExp = new TtCastExpression();
                                 castToSMExp.TargetType = StateMachineClassDescription.VariableType;
-                                castToSMExp.Expression = new UVariableReferenceExpression("mStateMachine");
-                                tansitionToAssignFrom = new UVariableReferenceExpression(transitionToVariableName, castToSMExp);
+                                castToSMExp.Expression = new TtVariableReferenceExpression("mStateMachine");
+                                tansitionToAssignFrom = new TtVariableReferenceExpression(transitionToVariableName, castToSMExp);
                             }
                         }
                         Debug.Assert(!string.IsNullOrEmpty(transitionToVariableName));
                     }
 
-                    var tansitionDec = TtASTBuildUtil.CreateVariableDeclaration(transition.VariableName, transition.VariableType, new UCreateObjectExpression(transition.VariableType.TypeFullName));
+                    var tansitionDec = TtASTBuildUtil.CreateVariableDeclaration(transition.VariableName, transition.VariableType, new TtCreateObjectExpression(transition.VariableType.TypeFullName));
                     methodDeclaration.MethodBody.Sequence.Add(tansitionDec);
 
                     var tansitionFromAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
-                                                    new UVariableReferenceExpression("From", new UVariableReferenceExpression(transition.VariableName)),
-                                                    new UVariableReferenceExpression(transitionFromVariableName));
+                                                    new TtVariableReferenceExpression("From", new TtVariableReferenceExpression(transition.VariableName)),
+                                                    new TtVariableReferenceExpression(transitionFromVariableName));
                     methodDeclaration.MethodBody.Sequence.Add(tansitionFromAssign);
 
                     var tansitionToAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
-                                                    new UVariableReferenceExpression("To", new UVariableReferenceExpression(transition.VariableName)),
+                                                    new TtVariableReferenceExpression("To", new TtVariableReferenceExpression(transition.VariableName)),
                                                     tansitionToAssignFrom);
                     methodDeclaration.MethodBody.Sequence.Add(tansitionToAssign);
 
-                    var stateAddTransionMethodInvoke = new UMethodInvokeStatement();
-                    stateAddTransionMethodInvoke.Host = new UVariableReferenceExpression(state.VariableName);
+                    var stateAddTransionMethodInvoke = new TtMethodInvokeStatement();
+                    stateAddTransionMethodInvoke.Host = new TtVariableReferenceExpression(state.VariableName);
                     stateAddTransionMethodInvoke.MethodName = "AddTransition";
-                    stateAddTransionMethodInvoke.Arguments.Add(new UMethodInvokeArgumentExpression { Expression = new UVariableReferenceExpression(transition.VariableName) });
+                    stateAddTransionMethodInvoke.Arguments.Add(new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression(transition.VariableName) });
                     methodDeclaration.MethodBody.Sequence.Add(stateAddTransionMethodInvoke);
                 }
             }
             var returnValueAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
-                                        new UVariableReferenceExpression(methodDeclaration.ReturnValue.VariableName),
-                                        new UPrimitiveExpression(true));
+                                        new TtVariableReferenceExpression(methodDeclaration.ReturnValue.VariableName),
+                                        new TtPrimitiveExpression(true));
             methodDeclaration.MethodBody.Sequence.Add(returnValueAssign);
             return methodDeclaration;
         }

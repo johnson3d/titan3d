@@ -113,14 +113,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //        cvtExpr.UseAs = true;
         //    return cvtExpr;
         //}
-        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             if (pin != Result)
                 return null;
-            var exp = new UCastExpression()
+            var exp = new TtCastExpression()
             {
-                SourceType = new UTypeReference(SrcType.ClassType),
-                TargetType = new UTypeReference(TarType.ClassType),
+                SourceType = new TtTypeReference(SrcType.ClassType),
+                TargetType = new TtTypeReference(TarType.ClassType),
                 Expression = data.NodeGraph.GetOppositePinExpression(Left, ref data),
             };
             return exp;

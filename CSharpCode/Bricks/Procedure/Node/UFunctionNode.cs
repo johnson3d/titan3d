@@ -631,7 +631,7 @@ namespace EngineNS.Bricks.Procedure.Node
                         PreviewSRV = null;
                     }
 
-                    NxRHI.UTexture texture;
+                    NxRHI.TtTexture texture;
                     unsafe
                     {
                         Vector3 minV = Vector3.MaxValue;

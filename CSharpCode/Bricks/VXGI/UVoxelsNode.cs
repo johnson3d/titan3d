@@ -83,10 +83,10 @@ namespace EngineNS.Bricks.VXGI
         
         #region VoxelInject        
         
-        public NxRHI.UCbView CBuffer;
+        public NxRHI.TtCbView CBuffer;
 
-        public NxRHI.UBuffer VoxelPool;//(group = VxGroupCubeSide*VxGroupCubeSide*VxGroupCubeSide) * VxGroupPoolSize;
-        public NxRHI.UUaView UavVoxelPool;
+        public NxRHI.TtBuffer VoxelPool;//(group = VxGroupCubeSide*VxGroupCubeSide*VxGroupCubeSide) * VxGroupPoolSize;
+        public NxRHI.TtUaView UavVoxelPool;
         
         public uint DiffuseRTWidth;
         public uint DiffuseRTHeight;
@@ -105,7 +105,7 @@ namespace EngineNS.Bricks.VXGI
 
                 this.UpdatePermutation();
             }
-            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
             {
                 base.EnvShadingDefines(in id, defines);
                 defines.mCoreObject.AddDefine("VxSize", $"{VxSize}");
@@ -115,7 +115,7 @@ namespace EngineNS.Bricks.VXGI
                 defines.mCoreObject.AddDefine("VxSceneY", $"{VxSceneY}");
                 defines.mCoreObject.AddDefine("VxSceneZ", $"{VxSceneZ}");
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+            public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var node = drawcall.TagObject as UVoxelsNode;
 
@@ -133,7 +133,7 @@ namespace EngineNS.Bricks.VXGI
             }
         }
         private SetupVoxelGroupAllocatorShading SetupVoxelGroupAllocator;
-        private NxRHI.UComputeDraw SetupVoxelGroupAllocatorDrawcall;
+        private NxRHI.TtComputeDraw SetupVoxelGroupAllocatorDrawcall;
 
         public class InjectVoxelsShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
         {
@@ -148,7 +148,7 @@ namespace EngineNS.Bricks.VXGI
 
                 this.UpdatePermutation();
             }
-            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
             {
                 base.EnvShadingDefines(in id, defines);
                 defines.mCoreObject.AddDefine("VxSize", $"{VxSize}");
@@ -158,7 +158,7 @@ namespace EngineNS.Bricks.VXGI
                 defines.mCoreObject.AddDefine("VxSceneY", $"{VxSceneY}");
                 defines.mCoreObject.AddDefine("VxSceneZ", $"{VxSceneZ}");
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+            public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var node = drawcall.TagObject as UVoxelsNode;
 
@@ -203,7 +203,7 @@ namespace EngineNS.Bricks.VXGI
             }
         }
         private InjectVoxelsShading InjectVoxels;
-        private NxRHI.UComputeDraw InjectVoxelsDrawcall;
+        private NxRHI.TtComputeDraw InjectVoxelsDrawcall;
 
         public class EraseVoxelGroupShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
         {
@@ -218,7 +218,7 @@ namespace EngineNS.Bricks.VXGI
 
                 this.UpdatePermutation();
             }
-            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
             {
                 base.EnvShadingDefines(in id, defines);
                 defines.mCoreObject.AddDefine("VxSize", $"{VxSize}");
@@ -228,7 +228,7 @@ namespace EngineNS.Bricks.VXGI
                 defines.mCoreObject.AddDefine("VxSceneY", $"{VxSceneY}");
                 defines.mCoreObject.AddDefine("VxSceneZ", $"{VxSceneZ}");
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+            public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var node = drawcall.TagObject as UVoxelsNode;
 
@@ -257,7 +257,7 @@ namespace EngineNS.Bricks.VXGI
             }
         }
         private EraseVoxelGroupShading EraseVoxelGroup;
-        private NxRHI.UComputeDraw EraseVoxelGroupDrawcall;
+        private NxRHI.TtComputeDraw EraseVoxelGroupDrawcall;
         #endregion
 
         public override async System.Threading.Tasks.Task Initialize(Graphics.Pipeline.TtRenderPolicy policy, string debugName)

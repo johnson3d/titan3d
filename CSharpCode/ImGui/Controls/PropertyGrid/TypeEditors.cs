@@ -1164,7 +1164,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     //ImGuiAPI.OpenPopupOnItemClick("AddItem", ImGuiPopupFlags_.ImGuiPopupFlags_None);
                     //var pos = ImGuiAPI.GetItemRectMin();
                     //var size = ImGuiAPI.GetItemRectSize();
-                    //if (ImGuiAPI.ArrowButton("##OpenAddItemList", ImGuiDir_.ImGuiDir_Down))
+                    //if (ImGuiAPI.ArrowButton("##OpenAddItemList", ImGuiDir.ImGuiDir_Down))
                     //{
                     //    ImGuiAPI.OpenPopup("AddItem", ImGuiPopupFlags_.ImGuiPopupFlags_None);
                     //}
@@ -1345,7 +1345,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     //ImGuiAPI.SameLine(0, -1);
                     //var sz = new Vector2(0, 0);
                     //ImGuiAPI.PushID(info.Name);
-                    if (ImGuiAPI.ArrowButton("##OpenAddItemDict", ImGuiDir_.ImGuiDir_Down))
+                    if (ImGuiAPI.ArrowButton("##OpenAddItemDict", ImGuiDir.ImGuiDir_Down))
                     {
                         //ImGuiAPI.PopID();
                         ImGuiAPI.OpenPopup("AddDictElement", ImGuiPopupFlags_.ImGuiPopupFlags_None);

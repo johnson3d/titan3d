@@ -184,7 +184,7 @@ namespace EngineNS.DesignMacross.Design
             var methodGraph = renderableElement as TtGraph_Method;
             if (methodGraph == null)
                 return;
-            if (ImGuiAPI.BeginChild(methodGraph.Name + "_Graph", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
+            if (ImGuiAPI.BeginChild(methodGraph.Name + "_Graph", in Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
             {
                 var cmd = ImGuiAPI.GetWindowDrawList();
 

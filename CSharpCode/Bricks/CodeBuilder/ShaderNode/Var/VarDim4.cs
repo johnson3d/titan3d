@@ -209,10 +209,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InXYZW);
                 pinNode.BuildStatements(opPin, ref data);
 
-                var assignStatment = new UAssignOperatorStatement()
+                var assignStatment = new TtAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression(Name),
+                    To = new TtVariableReferenceExpression(Name),
                 };
                 if(!data.CurrentStatements.Contains(assignStatment))
                     data.CurrentStatements.Add(assignStatment);
@@ -223,10 +223,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InX);
                 pinNode.BuildStatements(opPin, ref data);
 
-                var assignStatment = new UAssignOperatorStatement()
+                var assignStatment = new TtAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression("x", new UVariableReferenceExpression(Name)),
+                    To = new TtVariableReferenceExpression("x", new TtVariableReferenceExpression(Name)),
                 };
                 if(!data.CurrentStatements.Contains(assignStatment))
                     data.CurrentStatements.Add(assignStatment);
@@ -237,10 +237,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InY);
                 pinNode.BuildStatements(opPin, ref data);
 
-                var assignStatment = new UAssignOperatorStatement()
+                var assignStatment = new TtAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression("y", new UVariableReferenceExpression(Name)),
+                    To = new TtVariableReferenceExpression("y", new TtVariableReferenceExpression(Name)),
                 };
                 if(!data.CurrentStatements.Contains(assignStatment))
                     data.CurrentStatements.Add(assignStatment);
@@ -251,10 +251,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InZ);
                 pinNode.BuildStatements(opPin, ref data);
 
-                var assignStatment = new UAssignOperatorStatement()
+                var assignStatment = new TtAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression("z", new UVariableReferenceExpression(Name)),
+                    To = new TtVariableReferenceExpression("z", new TtVariableReferenceExpression(Name)),
                 };
                 if(!data.CurrentStatements.Contains(assignStatment))
                     data.CurrentStatements.Add(assignStatment);
@@ -265,20 +265,20 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InW);
                 pinNode.BuildStatements(opPin, ref data);
 
-                data.CurrentStatements.Add(new UAssignOperatorStatement()
+                data.CurrentStatements.Add(new TtAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression(Name),
+                    To = new TtVariableReferenceExpression(Name),
                 });
             }
 
             if (!data.MethodDec.HasLocalVariable(Name))
             {
-                var val = new UVariableDeclaration()
+                var val = new TtVariableDeclaration()
                 {
-                    VariableType = new UTypeReference(Type2HLSLType(VarType, IsHalfPrecision)),
+                    VariableType = new TtTypeReference(Type2HLSLType(VarType, IsHalfPrecision)),
                     VariableName = Name,
-                    InitValue = new UPrimitiveExpression(Value),
+                    InitValue = new TtPrimitiveExpression(Value),
                 };
                 if (IsUniform)
                 {
@@ -289,20 +289,20 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                     data.MethodDec.AddLocalVar(val);
             }
         }
-        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             if (pin == OutXYZW)
-                return new UVariableReferenceExpression(Name);
+                return new TtVariableReferenceExpression(Name);
             else if (pin == OutXYZ)
-                return new UVariableReferenceExpression("xyz", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("xyz", new TtVariableReferenceExpression(Name));
             else if (pin == OutX)
-                return new UVariableReferenceExpression("x", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("x", new TtVariableReferenceExpression(Name));
             else if (pin == OutY)
-                return new UVariableReferenceExpression("y", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("y", new TtVariableReferenceExpression(Name));
             else if (pin == OutZ)
-                return new UVariableReferenceExpression("z", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("z", new TtVariableReferenceExpression(Name));
             else if (pin == OutW)
-                return new UVariableReferenceExpression("w", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("w", new TtVariableReferenceExpression(Name));
             return null;
         }
         protected Vector4 mValue = Vector4.Zero;
@@ -419,10 +419,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             //Graph.ShaderEditor.NodePropGrid.HideInheritDeclareType = Rtti.UTypeDescGetter<VarDimF4>.TypeDesc;
         }
-        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             if (pin == OutXYZ)
-                return new UVariableReferenceExpression("xyz", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("xyz", new TtVariableReferenceExpression(Name));
             else
                 return base.GetExpression(pin, ref data);
         }
@@ -483,10 +483,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InXYZW);
                 pinNode.BuildStatements(opPin, ref data);
 
-                var assignStatment = new UAssignOperatorStatement()
+                var assignStatment = new TtAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression(Name),
+                    To = new TtVariableReferenceExpression(Name),
                 };
                 if (!data.CurrentStatements.Contains(assignStatment))
                     data.CurrentStatements.Add(assignStatment);
@@ -497,10 +497,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InX);
                 pinNode.BuildStatements(opPin, ref data);
 
-                var assignStatment = new UAssignOperatorStatement()
+                var assignStatment = new TtAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression("x", new UVariableReferenceExpression(Name)),
+                    To = new TtVariableReferenceExpression("x", new TtVariableReferenceExpression(Name)),
                 };
                 if (!data.CurrentStatements.Contains(assignStatment))
                     data.CurrentStatements.Add(assignStatment);
@@ -511,10 +511,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InY);
                 pinNode.BuildStatements(opPin, ref data);
 
-                var assignStatment = new UAssignOperatorStatement()
+                var assignStatment = new TtAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression("y", new UVariableReferenceExpression(Name)),
+                    To = new TtVariableReferenceExpression("y", new TtVariableReferenceExpression(Name)),
                 };
                 if (!data.CurrentStatements.Contains(assignStatment))
                     data.CurrentStatements.Add(assignStatment);
@@ -525,10 +525,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InZ);
                 pinNode.BuildStatements(opPin, ref data);
 
-                var assignStatment = new UAssignOperatorStatement()
+                var assignStatment = new TtAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression("z", new UVariableReferenceExpression(Name)),
+                    To = new TtVariableReferenceExpression("z", new TtVariableReferenceExpression(Name)),
                 };
                 if (!data.CurrentStatements.Contains(assignStatment))
                     data.CurrentStatements.Add(assignStatment);
@@ -539,20 +539,20 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InW);
                 pinNode.BuildStatements(opPin, ref data);
 
-                data.CurrentStatements.Add(new UAssignOperatorStatement()
+                data.CurrentStatements.Add(new TtAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression(Name),
+                    To = new TtVariableReferenceExpression(Name),
                 });
             }
 
             if (!data.MethodDec.HasLocalVariable(Name))
             {
-                var val = new UVariableDeclaration()
+                var val = new TtVariableDeclaration()
                 {
-                    VariableType = new UTypeReference(Type2HLSLType(VarType, IsHalfPrecision)),
+                    VariableType = new TtTypeReference(Type2HLSLType(VarType, IsHalfPrecision)),
                     VariableName = Name,
-                    InitValue = new UPrimitiveExpression(Value),
+                    InitValue = new TtPrimitiveExpression(Value),
                 };
                 if (IsUniform)
                 {
@@ -563,20 +563,20 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                     data.MethodDec.AddLocalVar(val);
             }
         }
-        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             if (pin == OutXYZW)
-                return new UVariableReferenceExpression(Name);
+                return new TtVariableReferenceExpression(Name);
             else if (pin == OutXYZ)
-                return new UVariableReferenceExpression("xyz", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("xyz", new TtVariableReferenceExpression(Name));
             else if (pin == OutX)
-                return new UVariableReferenceExpression("x", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("x", new TtVariableReferenceExpression(Name));
             else if (pin == OutY)
-                return new UVariableReferenceExpression("y", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("y", new TtVariableReferenceExpression(Name));
             else if (pin == OutZ)
-                return new UVariableReferenceExpression("z", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("z", new TtVariableReferenceExpression(Name));
             else if (pin == OutW)
-                return new UVariableReferenceExpression("w", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("w", new TtVariableReferenceExpression(Name));
             return null;
         }
         protected Vector4i mValue = Vector4i.Zero;

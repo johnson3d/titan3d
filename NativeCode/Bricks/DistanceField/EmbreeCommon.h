@@ -43,6 +43,7 @@ public:
 	// Embree
 	RTCDevice EmbreeDevice = nullptr;
 	RTCScene EmbreeScene = nullptr;
+	TR_MEMBER(SV_NoBind)
 	FEmbreeGeometry Geometry;
 };
 

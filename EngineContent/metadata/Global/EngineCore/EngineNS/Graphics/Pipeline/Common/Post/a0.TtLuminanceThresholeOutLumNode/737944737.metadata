@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_737944737 Type="EngineNS.Graphics.Pipeline.Common.Post.TtLuminanceThresholeOutLumNode@EngineCore">
-  <OutputScaleFactor Type="System.Single@Unknown" Order="0" />
-  <Threshole Type="System.Single@Unknown" Order="0" />
-</Hash_737944737>

@@ -11,11 +11,11 @@ namespace EngineNS.Graphics.Pipeline
     {
         public Support.TtNativeArray<T> DataArray;
         private uint GpuCapacity = 0;
-        public NxRHI.UBuffer GpuBuffer;
+        public NxRHI.TtBuffer GpuBuffer;
         public NxRHI.EBufferType BufferTypes { get; private set; } = NxRHI.EBufferType.BFT_SRV;
-        public NxRHI.UUaView Uav;
+        public NxRHI.TtUaView Uav;
         public NxRHI.TtSrView Srv;
-        public NxRHI.UCbView Cbv;
+        public NxRHI.TtCbView Cbv;
         private bool Dirty = false;
         public bool Initialize(NxRHI.EBufferType types)
         {
@@ -156,21 +156,21 @@ namespace EngineNS.Graphics.Pipeline
     }
     public class TtGpuBufferBase : IDisposable
     {
-        public NxRHI.UGpuResource GpuResource;
-        public NxRHI.UBuffer GpuBuffer
+        public NxRHI.TtGpuResource GpuResource;
+        public NxRHI.TtBuffer GpuBuffer
         {
-            get => GpuResource as NxRHI.UBuffer;
+            get => GpuResource as NxRHI.TtBuffer;
         }
-        public NxRHI.UTexture GpuTexture
+        public NxRHI.TtTexture GpuTexture
         {
-            get => GpuResource as NxRHI.UTexture;
+            get => GpuResource as NxRHI.TtTexture;
         }
         public uint NumElement { get; protected set; }
-        public NxRHI.UUaView Uav;
+        public NxRHI.TtUaView Uav;
         public NxRHI.TtSrView Srv;
-        public NxRHI.UCbView Cbv;
-        public NxRHI.URenderTargetView Rtv;
-        public NxRHI.UDepthStencilView Dsv;
+        public NxRHI.TtCbView Cbv;
+        public NxRHI.TtRenderTargetView Rtv;
+        public NxRHI.TtDepthStencilView Dsv;
 
         ~TtGpuBufferBase()
         {

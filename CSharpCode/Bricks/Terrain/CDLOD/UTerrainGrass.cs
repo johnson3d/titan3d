@@ -203,7 +203,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             public Graphics.Mesh.TtMaterialMesh MaterialMesh;
             public Graphics.Mesh.TtMesh Mesh;
             public Grass.UMdfGrassStaticMesh InstanceMdf;
-            public NxRHI.UCbView GrassCBuffer;
+            public NxRHI.TtCbView GrassCBuffer;
             public int RandomSeed;
             public int WeightStride;
             public byte[] WeightMap;

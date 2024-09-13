@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace EngineNS.Editor.ShaderCompiler
 {
-    public class UHLSLInclude
+    public class TtHLSLInclude
     {
         public unsafe virtual NxRHI.FShaderCode* GetHLSLCode(string includeName, out bool bIncluded)
         {
@@ -15,7 +15,7 @@ namespace EngineNS.Editor.ShaderCompiler
             return (NxRHI.FShaderCode*)0;
         }
     }
-    public unsafe class UHLSLCompiler
+    public unsafe class TtHLSLCompiler
     {
         public bool IsWriteDebugFile
         {
@@ -49,11 +49,11 @@ namespace EngineNS.Editor.ShaderCompiler
                 }
             }
         }
-        static UHLSLCompiler()
+        static TtHLSLCompiler()
         {
             CoreSDK.SetOnShaderTranslated(OnShaderTranslated);
         }
-        public UHLSLCompiler()
+        public TtHLSLCompiler()
         {
             GetShaderCodeStream = this.GetHLSLCode;
             mShaderCompiler = new NxRHI.TtShaderCompiler(GetShaderCodeStream);
@@ -214,7 +214,7 @@ namespace EngineNS.Editor.ShaderCompiler
             }
             return (NxRHI.FShaderCode*)0;
         }
-        private UHLSLInclude UserInclude;
+        private TtHLSLInclude UserInclude;
         private Graphics.Pipeline.Shader.TtMaterial Material;
         private Rtti.UTypeDesc MdfQueueType;
         private string GetVertexStreamDefine(NxRHI.EVertexStreamType type)
@@ -299,7 +299,7 @@ namespace EngineNS.Editor.ShaderCompiler
         }
         public unsafe NxRHI.TtShaderDesc CompileShader(string shader, string entry, NxRHI.EShaderType type,
             Graphics.Pipeline.Shader.TtShadingEnv shadingEnvshadingEnv, Graphics.Pipeline.Shader.TtMaterial mtl, Type mdfType,
-            NxRHI.UShaderDefinitions defines, UHLSLInclude incProvider, string sm = null, bool bDebugShader = true, string extHlslVersion = null)
+            NxRHI.TtShaderDefinitions defines, TtHLSLInclude incProvider, string sm = null, bool bDebugShader = true, string extHlslVersion = null)
         {
             bool ignoreDXBC = false;
             bool ignoreDXIR = false;
@@ -371,7 +371,7 @@ namespace EngineNS.Editor.ShaderCompiler
             Material = mtl;
             MdfQueueType = Rtti.UTypeDesc.TypeOf(mdfType);
             //IShaderDefinitions defPtr = new IShaderDefinitions((void*)0);
-            using (var defPtr = new NxRHI.UShaderDefinitions())
+            using (var defPtr = new NxRHI.TtShaderDefinitions())
             {
                 if (defines != null)
                 {

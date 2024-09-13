@@ -28,7 +28,7 @@ namespace EngineNS.Graphics.Pipeline.Common
     }
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     [Bricks.CodeBuilder.ContextMenu("ScreenUI", "ScreenUI", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public partial class TtScreenSpaceUINode : USceenSpaceNode
+    public partial class TtScreenSpaceUINode : TtSceenSpaceNode
     {
         public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color");
         public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth");

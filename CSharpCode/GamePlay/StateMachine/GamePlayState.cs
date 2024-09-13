@@ -12,7 +12,7 @@ namespace EngineNS.GamePlay.StateMachine
     public class TtGamePlayState<T> : TtTimedState<T>
     {
         public ILogicalState LogicalState { get; set; }
-        public IAnimationState AnimationState { get; set; }
+        public IAnimationState<T> AnimationState { get; set; }
         public TtGamePlayState(TtGamePlayStateMachine<T> context, string name = "GamePlayState") : base(context, name)
         {
 

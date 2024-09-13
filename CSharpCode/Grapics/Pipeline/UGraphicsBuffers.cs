@@ -108,20 +108,20 @@ namespace EngineNS.Graphics.Pipeline
         }
         public ELifeMode LifeMode = ELifeMode.Imported;
         public FAttachBufferDesc BufferDesc;
-        public NxRHI.UGpuResource GpuResource;
-        public NxRHI.UBuffer Buffer
+        public NxRHI.TtGpuResource GpuResource;
+        public NxRHI.TtBuffer Buffer
         {
-            get { return GpuResource as NxRHI.UBuffer; }
+            get { return GpuResource as NxRHI.TtBuffer; }
         }
-        public NxRHI.UTexture Texture
+        public NxRHI.TtTexture Texture
         {
-            get { return GpuResource as NxRHI.UTexture; }
+            get { return GpuResource as NxRHI.TtTexture; }
         }
-        public NxRHI.URenderTargetView Rtv;
-        public NxRHI.UDepthStencilView Dsv;
-        public NxRHI.UUaView Uav;
+        public NxRHI.TtRenderTargetView Rtv;
+        public NxRHI.TtDepthStencilView Dsv;
+        public NxRHI.TtUaView Uav;
         public NxRHI.TtSrView Srv;
-        public NxRHI.UCbView Cbv;
+        public NxRHI.TtCbView Cbv;
         public void SetImportedBuffer(TtGpuBufferBase gpuBuffer)
         {
             GpuResource = gpuBuffer.GpuResource;
@@ -187,7 +187,9 @@ namespace EngineNS.Graphics.Pipeline
                 if (desc.Format == EPixelFormat.PXF_D24_UNORM_S8_UINT ||
                     desc.Format == EPixelFormat.PXF_D16_UNORM ||
                     desc.Format == EPixelFormat.PXF_D32_FLOAT ||
-                    desc.Format == EPixelFormat.PXF_D32_FLOAT_S8X24_UINT)
+                    desc.Format == EPixelFormat.PXF_D32_FLOAT_S8X24_UINT ||
+                    desc.Format == EPixelFormat.PXF_R32G8X24_TYPELESS
+                    )
                 {
                     desc.m_BindFlags |= NxRHI.EBufferType.BFT_DSV;
                 }
@@ -202,7 +204,8 @@ namespace EngineNS.Graphics.Pipeline
                     viewDesc.Width = BufferDesc.Width;
                     viewDesc.Height = BufferDesc.Height;
                     viewDesc.Texture2D.MipSlice = 0;
-                    Rtv = rc.CreateRTV(GpuResource as NxRHI.UTexture, in viewDesc);
+                    Rtv = rc.CreateRTV(GpuResource as NxRHI.TtTexture, in viewDesc);
+                    System.Diagnostics.Debug.Assert(Rtv != null);
                 }
                 if ((types & NxRHI.EBufferType.BFT_DSV) != 0)
                 {
@@ -212,7 +215,8 @@ namespace EngineNS.Graphics.Pipeline
                     viewDesc.Width = BufferDesc.Width;
                     viewDesc.Height = BufferDesc.Height;
                     viewDesc.MipLevel = 0;
-                    Dsv = rc.CreateDSV(GpuResource as NxRHI.UTexture, in viewDesc);
+                    Dsv = rc.CreateDSV(GpuResource as NxRHI.TtTexture, in viewDesc);
+                    System.Diagnostics.Debug.Assert(Dsv != null);
                 }
                 if ((types & NxRHI.EBufferType.BFT_SRV) != 0)
                 {
@@ -221,7 +225,8 @@ namespace EngineNS.Graphics.Pipeline
                     viewDesc.Type = NxRHI.ESrvType.ST_Texture2D;
                     viewDesc.Format = BufferDesc.Format;
                     viewDesc.Texture2D.MipLevels = 1;
-                    Srv = rc.CreateSRV(GpuResource as NxRHI.UTexture, in viewDesc);
+                    Srv = rc.CreateSRV(GpuResource as NxRHI.TtTexture, in viewDesc);
+                    System.Diagnostics.Debug.Assert(Srv != null);
                 }
                 if ((types & NxRHI.EBufferType.BFT_UAV) != 0)
                 {
@@ -229,7 +234,8 @@ namespace EngineNS.Graphics.Pipeline
                     viewDesc.SetTexture2D();
                     viewDesc.Format = BufferDesc.Format;
                     viewDesc.Texture2D.MipSlice = 0;
-                    Uav = rc.CreateUAV(GpuResource as NxRHI.UTexture, in viewDesc);
+                    Uav = rc.CreateUAV(GpuResource as NxRHI.TtTexture, in viewDesc);
+                    System.Diagnostics.Debug.Assert(Uav != null);
                 }
             }
             else
@@ -272,7 +278,8 @@ namespace EngineNS.Graphics.Pipeline
                     //viewDesc.Buffer.FirstElement = 1;
                     viewDesc.Buffer.NumElements = BufferDesc.Height;
                     viewDesc.Buffer.StructureByteStride = desc.StructureStride;
-                    Srv = rc.CreateSRV(GpuResource as NxRHI.UBuffer, in viewDesc);
+                    Srv = rc.CreateSRV(GpuResource as NxRHI.TtBuffer, in viewDesc);
+                    System.Diagnostics.Debug.Assert(Srv != null);
                 }
                 if ((types & NxRHI.EBufferType.BFT_UAV) != 0)
                 {
@@ -282,7 +289,8 @@ namespace EngineNS.Graphics.Pipeline
                     viewDesc.Buffer.FirstElement = 0;
                     viewDesc.Buffer.NumElements = BufferDesc.Height;
                     viewDesc.Buffer.StructureByteStride = desc.StructureStride;
-                    Uav = rc.CreateUAV(GpuResource as NxRHI.UBuffer, in viewDesc);
+                    Uav = rc.CreateUAV(GpuResource as NxRHI.TtBuffer, in viewDesc);
+                    System.Diagnostics.Debug.Assert(Uav != null);
                 }
             }
 
@@ -440,12 +448,12 @@ namespace EngineNS.Graphics.Pipeline
         }
         public TtTargetViewIdentifier TargetViewIdentifier;
         public NxRHI.FViewPort Viewport = new NxRHI.FViewPort();
-        NxRHI.UFrameBuffers mFrameBuffers;
-        public NxRHI.UFrameBuffers FrameBuffers { get => mFrameBuffers; set => mFrameBuffers = value; }
+        NxRHI.TtFrameBuffers mFrameBuffers;
+        public NxRHI.TtFrameBuffers FrameBuffers { get => mFrameBuffers; set => mFrameBuffers = value; }
         public TtRenderGraphPin[] RenderTargets;
         public TtRenderGraphPin DepthStencil;
-        NxRHI.UCbView mPerViewportCBuffer;
-        public NxRHI.UCbView PerViewportCBuffer
+        NxRHI.TtCbView mPerViewportCBuffer;
+        public NxRHI.TtCbView PerViewportCBuffer
         {
             get
             {
@@ -461,11 +469,11 @@ namespace EngineNS.Graphics.Pipeline
         }
         public void SetViewportCBuffer(GamePlay.TtWorld world, TtRenderPolicy mobilePolicy)
         {
-            NxRHI.UCbView cBuffer = PerViewportCBuffer;
+            NxRHI.TtCbView cBuffer = PerViewportCBuffer;
             if (cBuffer == null)
                 return;
             var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
-            var shadowNode = mobilePolicy.FindFirstNode<Shadow.UShadowMapNode>();
+            var shadowNode = mobilePolicy.FindFirstNode<Shadow.TtShadowMapNode>();
             if (shadowNode != null)
             {
                 cBuffer.SetValue(coreBinder.CBPerViewport.gFadeParam, in shadowNode.mFadeParam);
@@ -521,7 +529,7 @@ namespace EngineNS.Graphics.Pipeline
             FrameBuffers.FlushModify();
             //UpdateFrameBuffers(, y);
         }
-        public unsafe void Initialize(TtRenderPolicy policy, NxRHI.URenderPass renderPass)
+        public unsafe void Initialize(TtRenderPolicy policy, NxRHI.TtRenderPass renderPass)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             
@@ -536,7 +544,7 @@ namespace EngineNS.Graphics.Pipeline
             Viewport.m_MaxDepth = 1.0f;
             //UpdateFrameBuffers();
         }
-        public void SetRenderTarget(uint index, NxRHI.URenderTargetView rtv)
+        public void SetRenderTarget(uint index, NxRHI.TtRenderTargetView rtv)
         {
             if (RenderTargets[index] == null)
             {
@@ -547,7 +555,7 @@ namespace EngineNS.Graphics.Pipeline
             RenderTargets[index].ImportedBuffer.Rtv = rtv;
             FrameBuffers.BindRenderTargetView(index, rtv);
         }
-        public void SetDepthStencil(NxRHI.UDepthStencilView dsv)
+        public void SetDepthStencil(NxRHI.TtDepthStencilView dsv)
         {
             if (DepthStencil == null)
             {
@@ -615,9 +623,9 @@ namespace EngineNS.Graphics.Pipeline
 
 namespace EngineNS.NxRHI
 {
-    public partial class UGraphicDraw
+    public partial class TtGraphicDraw
     {
-        public void BindGBuffer(Graphics.Pipeline.UCamera camera, Graphics.Pipeline.TtGraphicsBuffers GBuffers)
+        public void BindGBuffer(Graphics.Pipeline.TtCamera camera, Graphics.Pipeline.TtGraphicsBuffers GBuffers)
         {
             //TtEngine.Instance.GfxDevice.CoreShaderBinder.ShaderResource.cbPerViewport
             //TtEngine.Instance.GfxDevice.CoreShaderBinder.ShaderResource.cbPerCamera

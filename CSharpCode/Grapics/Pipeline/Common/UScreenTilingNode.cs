@@ -5,12 +5,13 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("ScreenTiling", "ScreenTiling", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UScreenTilingNode : Graphics.Pipeline.TtRenderGraphNode
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UScreenTilingNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UScreenTilingNode" })]
+    public class TtScreenTilingNode : Graphics.Pipeline.TtRenderGraphNode
     {
         public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");
         public TtRenderGraphPin PointLightsPinIn = TtRenderGraphPin.CreateInputOutput("PointLights");
         public TtRenderGraphPin TilingPinOut = TtRenderGraphPin.CreateOutput("Tiling", false, EPixelFormat.PXF_UNKNOWN);
-        public UScreenTilingNode()
+        public TtScreenTilingNode()
         {
             Name = "ScreenTilingNode";
         }
@@ -56,8 +57,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             public fixed uint size[(int)MaxNumOfPointLight];
         }
 
-        public NxRHI.UBuffer TileBuffer;
-        public NxRHI.UUaView TileUAV;
+        public NxRHI.TtBuffer TileBuffer;
+        public NxRHI.TtUaView TileUAV;
         public NxRHI.TtSrView TileSRV;
 
         public class SetupTileDataShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
@@ -73,14 +74,14 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 this.UpdatePermutation();
             }
-            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+            public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCbv;
-                var node = drawcall.TagObject as UScreenTilingNode;
+                var node = drawcall.TagObject as TtScreenTilingNode;
 
                 var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
                 drawcall.BindCBuffer(srvIdx, ConfigCBuffer);
@@ -104,7 +105,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
         private SetupTileDataShading SetupTileData;
-        private NxRHI.UComputeDraw SetupTileDataDrawcall;
+        private NxRHI.TtComputeDraw SetupTileDataDrawcall;
 
         public class PushLightToTileDataShading : Graphics.Pipeline.Shader.TtComputeShadingEnv
         {
@@ -119,14 +120,14 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 this.UpdatePermutation();
             }
-            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+            protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
             {
                 base.EnvShadingDefines(in id, defines);
             }
-            public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+            public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
             {
                 var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCbv;
-                var node = drawcall.TagObject as UScreenTilingNode;
+                var node = drawcall.TagObject as TtScreenTilingNode;
 
                 var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
                 if (srvIdx.IsValidPointer)
@@ -150,7 +151,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
         private PushLightToTileDataShading PushLightToTileData;
-        private NxRHI.UComputeDraw PushLightToTileDataDrawcall;
+        private NxRHI.TtComputeDraw PushLightToTileDataDrawcall;
 
         public async override System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
@@ -232,7 +233,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UScreenTilingNode), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtScreenTilingNode), nameof(TickLogic));
                 return mScopeTick;
             }
         }

@@ -211,7 +211,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public Vector4 psCustomUV4;
 
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(Flags = Editor.ShaderCompiler.EShaderDefine.HasGet | Editor.ShaderCompiler.EShaderDefine.HasSet,
-            ShaderName = "vF4_1", Condition = "USE_PS_F4_1 == 1", Binder = "VK_LOCATION(13)", Semantic = "TEXCOORD10")]
+            ShaderName = "vF4_1", Condition = "USE_PS_F4_1 == 1", Binder = "VK_LOCATION(13) nointerpolation", Semantic = "TEXCOORD10")]
         public Vector4ui vF4_1;
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(Flags = Editor.ShaderCompiler.EShaderDefine.HasGet | Editor.ShaderCompiler.EShaderDefine.HasSet,
             ShaderName = "vF4_2", Condition = "USE_PS_F4_2 == 1", Binder = "VK_LOCATION(14)", Semantic = "TEXCOORD11")]
@@ -220,7 +220,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             ShaderName = "vF4_3", Condition = "USE_PS_F4_3 == 1", Binder = "VK_LOCATION(15)", Semantic = "TEXCOORD12")]
         public Vector4 vF4_3;
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(Flags = Editor.ShaderCompiler.EShaderDefine.HasGet | Editor.ShaderCompiler.EShaderDefine.HasSet,
-            ShaderName = "vSpecialData", Condition = "USE_PS_SpecialData == 1", Binder = "VK_LOCATION(16)", Semantic = "TEXCOORD13")]
+            ShaderName = "vSpecialData", Condition = "USE_PS_SpecialData == 1", Binder = "VK_LOCATION(16) nointerpolation", Semantic = "TEXCOORD13")]
         public Vector4ui vSpecialData;
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(Flags = Editor.ShaderCompiler.EShaderDefine.HasGet | Editor.ShaderCompiler.EShaderDefine.HasSet,
             ShaderName = "vInstanceId", Condition = "USE_PS_Instance == 1", Binder = "VK_LOCATION(17)", Semantic = "TEXCOORD14")]

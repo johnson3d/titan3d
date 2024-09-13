@@ -190,9 +190,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             return result;
         }
 
-        public UMethodDeclaration PSFunction { get; } = new UMethodDeclaration();
-        public UMethodDeclaration VSFunction { get; } = new UMethodDeclaration();
-        public List<UVariableDeclaration> UniformVars { get; } = new List<UVariableDeclaration>();
+        public TtMethodDeclaration PSFunction { get; } = new TtMethodDeclaration();
+        public TtMethodDeclaration VSFunction { get; } = new TtMethodDeclaration();
+        public List<TtVariableDeclaration> UniformVars { get; } = new List<TtVariableDeclaration>();
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             var graph = data.NodeGraph as UMaterialGraph;
@@ -200,17 +200,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             PSFunction.MethodName = "DO_PS_MATERIAL_IMPL";
             PSFunction.Arguments.Clear();
             PSFunction.Arguments.Add(
-                new UMethodArgumentDeclaration()
+                new TtMethodArgumentDeclaration()
                 {
                     OperationType = EMethodArgumentAttribute.In,
-                    VariableType = new UTypeReference("PS_INPUT"),
+                    VariableType = new TtTypeReference("PS_INPUT"),
                     VariableName = "input",
                 });
             PSFunction.Arguments.Add(
-                new UMethodArgumentDeclaration()
+                new TtMethodArgumentDeclaration()
                 {
                     OperationType = EMethodArgumentAttribute.Ref,
-                    VariableType = new UTypeReference("MTL_OUTPUT"),
+                    VariableType = new TtTypeReference("MTL_OUTPUT"),
                     VariableName = "mtl",
                 });
             PSFunction.LocalVariables.Clear();
@@ -228,10 +228,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     var pinNode = graph.GetOppositePinNode(i);
                     pinNode.BuildStatements(opPin, ref data);
                     var exp = graph.GetOppositePinExpression(i, ref data);
-                    var assign = new UAssignOperatorStatement()
+                    var assign = new TtAssignOperatorStatement()
                     {
                         From = exp,
-                        To = new UVariableReferenceExpression("m" + i.Name, new UVariableReferenceExpression("mtl")),
+                        To = new TtVariableReferenceExpression("m" + i.Name, new TtVariableReferenceExpression("mtl")),
                     };
                     PSFunction.MethodBody.Sequence.Add(assign);
                 }
@@ -241,17 +241,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             VSFunction.MethodName = "DO_VS_MATERIAL_IMPL";
             VSFunction.Arguments.Clear();
             VSFunction.Arguments.Add(
-                new UMethodArgumentDeclaration()
+                new TtMethodArgumentDeclaration()
                 {
                     OperationType = EMethodArgumentAttribute.In,
-                    VariableType = new UTypeReference("PS_INPUT"),
+                    VariableType = new TtTypeReference("PS_INPUT"),
                     VariableName = "input",
                 });
             VSFunction.Arguments.Add(
-                new UMethodArgumentDeclaration()
+                new TtMethodArgumentDeclaration()
                 {
                     OperationType = EMethodArgumentAttribute.Ref,
-                    VariableType = new UTypeReference("MTL_OUTPUT"),
+                    VariableType = new TtTypeReference("MTL_OUTPUT"),
                     VariableName = "mtl",
                 });
             VSFunction.LocalVariables.Clear();

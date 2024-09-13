@@ -17,7 +17,7 @@ namespace EngineNS.UI.Editor
 
         public struct MacrossEditorRemoveMethodQueryData
         {
-            public UMethodDeclaration Desc;
+            public TtMethodDeclaration Desc;
             public bool RemoveSuccess;
         };
 
@@ -68,7 +68,7 @@ namespace EngineNS.UI.Editor
             //}
             return false;
         }
-        bool OnMacrossEditorAddMember(Bricks.CodeBuilder.UVariableDeclaration variable)
+        bool OnMacrossEditorAddMember(Bricks.CodeBuilder.TtVariableDeclaration variable)
         {
             // 默认UI的class所有member增加bind attribute
             var bpaType = UTypeDesc.TypeOf(typeof(UI.Bind.BindPropertyAttribute));
@@ -83,13 +83,13 @@ namespace EngineNS.UI.Editor
 
             return true;
         }
-        bool OnMacrossEditorRemoveMember(Bricks.CodeBuilder.UVariableDeclaration variable)
+        bool OnMacrossEditorRemoveMember(Bricks.CodeBuilder.TtVariableDeclaration variable)
         {
             mUIHost.QueryElements(ElementOnRemoveMacrossMember, ref variable);
             return true;
         }
         List<string> mNeedDeletes = new List<string>();
-        bool ElementOnRemoveMacrossMember(TtUIElement element, ref UVariableDeclaration desc)
+        bool ElementOnRemoveMacrossMember(TtUIElement element, ref TtVariableDeclaration desc)
         {
             if(desc.VariableName == GetUIElementMacrossVariableName(element))
             {
@@ -264,16 +264,16 @@ namespace EngineNS.UI.Editor
                 element.Name = elementName;
             }
             var methodName = element.GetEventMethodName(name);
-            var methodDesc = new UMethodDeclaration();
+            var methodDesc = new TtMethodDeclaration();
             methodDesc.GetDisplayNameFunc = element.GetMethodDisplayName;
             methodDesc.MethodName = methodName;
             var pams = eventType.GetMethod("Invoke").GetParameters();
             for(int i=0; i<pams.Length; i++)
             {
-                methodDesc.Arguments.Add(new UMethodArgumentDeclaration()
+                methodDesc.Arguments.Add(new TtMethodArgumentDeclaration()
                 {
                     VariableName = pams[i].Name,
-                    VariableType = new UTypeReference(pams[i].ParameterType),
+                    VariableType = new TtTypeReference(pams[i].ParameterType),
                 });
             }
             var graph = UIAsset.MacrossEditor.AddMethod(methodDesc);
@@ -302,40 +302,40 @@ namespace EngineNS.UI.Editor
                 return null;
             return "ElementVar_" + element.Id;
         }
-        void GenericEventBindMethodCode(TtUIElement.MacrossEventMethodData data, TtUIElement element, ref UClassDeclaration cls)
+        void GenericEventBindMethodCode(TtUIElement.MacrossEventMethodData data, TtUIElement element, ref TtClassDeclaration cls)
         {
             var methodName = element.GetEventMethodName(data.EventName);
             var initEvtMethod = UIAsset.MacrossEditor.DefClass.FindMethod("InitializeEvents");
             var varName = $"var_{element.GetType().Name}_{element.Id}";
-            var findElementInvokeStatement = new UMethodInvokeStatement(
+            var findElementInvokeStatement = new TtMethodInvokeStatement(
                     "FindElement",
-                    new UVariableDeclaration()
+                    new TtVariableDeclaration()
                     {
                         VariableName = varName,
-                        VariableType = new UTypeReference(element.GetType()),
+                        VariableType = new TtTypeReference(element.GetType()),
                     },
-                    new UVariableReferenceExpression("HostObject"),
-                    new UMethodInvokeArgumentExpression(new UPrimitiveExpression(element.Id)))
+                    new TtVariableReferenceExpression("HostObject"),
+                    new TtMethodInvokeArgumentExpression(new TtPrimitiveExpression(element.Id)))
             {
                 DeclarationReturnValue = true,
                 ForceCastReturnType = true,
             };
             if (initEvtMethod.MethodBody.FindStatement(findElementInvokeStatement) == null)
                 initEvtMethod.MethodBody.Sequence.Add(findElementInvokeStatement);
-            UIfStatement ifStatement = null;
+            TtIfStatement ifStatement = null;
             for (int i = 0; i < initEvtMethod.MethodBody.Sequence.Count; i++)
             {
                 var seq = initEvtMethod.MethodBody.Sequence[i];
-                var ifSt = seq as UIfStatement;
+                var ifSt = seq as TtIfStatement;
                 if (ifSt != null)
                 {
-                    var cond = ifSt.Condition as UBinaryOperatorExpression;
+                    var cond = ifSt.Condition as TtBinaryOperatorExpression;
                     if (cond != null)
                     {
-                        var varRef = cond.Left as UVariableReferenceExpression;
+                        var varRef = cond.Left as TtVariableReferenceExpression;
                         if (varRef != null)
                         {
-                            if (varRef.VariableName == varName && cond.Operation == UBinaryOperatorExpression.EBinaryOperation.NotEquality)
+                            if (varRef.VariableName == varName && cond.Operation == TtBinaryOperatorExpression.EBinaryOperation.NotEquality)
                             {
                                 ifStatement = ifSt;
                                 break;
@@ -346,41 +346,41 @@ namespace EngineNS.UI.Editor
             }
             if (ifStatement == null)
             {
-                ifStatement = new UIfStatement()
+                ifStatement = new TtIfStatement()
                 {
-                    Condition = new UBinaryOperatorExpression()
+                    Condition = new TtBinaryOperatorExpression()
                     {
-                        Left = new UVariableReferenceExpression(varName),
-                        Right = new UNullValueExpression(),
-                        Operation = UBinaryOperatorExpression.EBinaryOperation.NotEquality,
+                        Left = new TtVariableReferenceExpression(varName),
+                        Right = new TtNullValueExpression(),
+                        Operation = TtBinaryOperatorExpression.EBinaryOperation.NotEquality,
                     },
-                    TrueStatement = new UExecuteSequenceStatement(),
+                    TrueStatement = new TtExecuteSequenceStatement(),
                 };
                 initEvtMethod.MethodBody.Sequence.Add(ifStatement);
             }
-            var seqStatements = ifStatement.TrueStatement as UExecuteSequenceStatement;
-            var subAssigStatement = new UExpressionStatement(
-                    new UBinaryOperatorExpression()
+            var seqStatements = ifStatement.TrueStatement as TtExecuteSequenceStatement;
+            var subAssigStatement = new TtExpressionStatement(
+                    new TtBinaryOperatorExpression()
                     {
-                        Operation = UBinaryOperatorExpression.EBinaryOperation.SubtractAssignment,
-                        Left = new UVariableReferenceExpression()
+                        Operation = TtBinaryOperatorExpression.EBinaryOperation.SubtractAssignment,
+                        Left = new TtVariableReferenceExpression()
                         {
-                            Host = new UVariableReferenceExpression(varName),
+                            Host = new TtVariableReferenceExpression(varName),
                             VariableName = data.EventName,
                         },
-                        Right = new UVariableReferenceExpression(methodName),
+                        Right = new TtVariableReferenceExpression(methodName),
                         Cell = false,
                     });
-            var addAssigStatement = new UExpressionStatement(
-                    new UBinaryOperatorExpression()
+            var addAssigStatement = new TtExpressionStatement(
+                    new TtBinaryOperatorExpression()
                     {
-                        Operation = UBinaryOperatorExpression.EBinaryOperation.AddAssignment,
-                        Left = new UVariableReferenceExpression()
+                        Operation = TtBinaryOperatorExpression.EBinaryOperation.AddAssignment,
+                        Left = new TtVariableReferenceExpression()
                         {
-                            Host = new UVariableReferenceExpression(varName),
+                            Host = new TtVariableReferenceExpression(varName),
                             VariableName = data.EventName,
                         },
-                        Right = new UVariableReferenceExpression(methodName),
+                        Right = new TtVariableReferenceExpression(methodName),
                         Cell = false,
                     });
             if (seqStatements.FindStatement(subAssigStatement) == null)
@@ -389,7 +389,7 @@ namespace EngineNS.UI.Editor
                 seqStatements.Sequence.Add(addAssigStatement);
         }
 
-        bool GenericElementVariableCode(TtUIElement element, ref UClassDeclaration cls)
+        bool GenericElementVariableCode(TtUIElement element, ref TtClassDeclaration cls)
         {
             foreach(var data in element.MacrossMethods)
             {
@@ -413,15 +413,15 @@ namespace EngineNS.UI.Editor
             if (element.IsVariable)
             {
                 var initMethod = UIAsset.MacrossEditor.DefClass.FindMethod("InitializeUIElementVariables");
-                var findElementInvokeStatement = new UMethodInvokeStatement(
+                var findElementInvokeStatement = new TtMethodInvokeStatement(
                         "FindElement",
-                        new UVariableDeclaration()
+                        new TtVariableDeclaration()
                         {
                             VariableName = GetUIElementMacrossVariableName(element),
-                            VariableType = new UTypeReference(element.GetType()),
+                            VariableType = new TtTypeReference(element.GetType()),
                         },
-                        new UVariableReferenceExpression("HostObject"),
-                        new UMethodInvokeArgumentExpression(new UPrimitiveExpression(element.Id)))
+                        new TtVariableReferenceExpression("HostObject"),
+                        new TtMethodInvokeArgumentExpression(new TtPrimitiveExpression(element.Id)))
                 {
                     DeclarationReturnValue = false,
                     ForceCastReturnType = true,
@@ -430,12 +430,12 @@ namespace EngineNS.UI.Editor
             }
             return false;
         }
-        void OnBeforeGenerateCode(UClassDeclaration cls)
+        void OnBeforeGenerateCode(TtClassDeclaration cls)
         {
             var initEvtMethod = UIAsset.MacrossEditor.DefClass.FindMethod("InitializeEvents");
             if (initEvtMethod == null)
             {
-                initEvtMethod = new UMethodDeclaration()
+                initEvtMethod = new TtMethodDeclaration()
                 {
                     MethodName = "InitializeEvents",
                     IsOverride = true,
@@ -447,7 +447,7 @@ namespace EngineNS.UI.Editor
             var bindInitMethod = UIAsset.MacrossEditor.DefClass.FindMethod("InitializeBindings");
             if (bindInitMethod == null)
             {
-                bindInitMethod = new UMethodDeclaration()
+                bindInitMethod = new TtMethodDeclaration()
                 {
                     MethodName = "InitializeBindings",
                     IsOverride = true,
@@ -459,7 +459,7 @@ namespace EngineNS.UI.Editor
             var initMethod = UIAsset.MacrossEditor.DefClass.FindMethod("InitializeUIElementVariables");
             if (initMethod == null)
             {
-                initMethod = new UMethodDeclaration()
+                initMethod = new TtMethodDeclaration()
                 {
                     MethodName = "InitializeUIElementVariables",
                     IsOverride = true,

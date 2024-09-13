@@ -14,13 +14,13 @@ namespace EngineNS.Graphics.Mesh
                 return this.Modifiers[0] as Mesh.Modifier.TtSkinModifier;
             }
         }
-        public NxRHI.UCbView PerSkinMeshCBuffer { get; set; }
+        public NxRHI.TtCbView PerSkinMeshCBuffer { get; set; }
         public override void CopyFrom(TtMdfQueueBase mdf)
         {
             base.CopyFrom(mdf);
             PerSkinMeshCBuffer = (mdf as UMdfSkinMesh).PerSkinMeshCBuffer;
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Pipeline.TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Pipeline.TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
             unsafe

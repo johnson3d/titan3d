@@ -31,7 +31,7 @@ namespace EngineNS.Animation.Macross.BlendTree
         {
             AddPoseOutPin(new TtPoseOutPinDescription());
         }
-        public override List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
+        public override List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
             var mainClass = classBuildContext.MainClassDescription as TtClassDescription;
             IDesignableVariableDescription stateMachine = null;
@@ -43,26 +43,56 @@ namespace EngineNS.Animation.Macross.BlendTree
                 }
             }
             SupperClassNames.Clear();
-            SupperClassNames.Add($"EngineNS.Animation.BlendTree.Node.TtBlendTree_AnimStateMachine<{classBuildContext.MainClassDescription.ClassName}>");
-            List<UClassDeclaration> classDeclarationsBuilded = new List<UClassDeclaration>();
+            SupperClassNames.Add($"EngineNS.Animation.BlendTree.Node.TtLocalSpaceBlendTree_AnimStateMachine<{classBuildContext.MainClassDescription.ClassName}>");
+            List<TtClassDeclaration> classDeclarationsBuilded = new();
             var thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
             if(stateMachine != null)
             {
                 thisClassDeclaration.Properties.Add(stateMachine.BuildVariableDeclaration(ref classBuildContext));
             }
+            thisClassDeclaration.AddMethod(BuildOverrideInitializeMethod(stateMachine));
             classDeclarationsBuilded.Add(thisClassDeclaration);
             return classDeclarationsBuilded;
         }
 
-        public override UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
+        public override TtVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
             return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
-        public override void GenerateCodeInClass(UClassDeclaration classDeclaration)
+        public override void GenerateCodeInClass(TtClassDeclaration classDeclaration, ref FClassBuildContext classBuildContext)
         {
-            base.GenerateCodeInClass(classDeclaration);
-
-
+            base.GenerateCodeInClass(classDeclaration, ref classBuildContext);
         }
+
+        public override TtStatementBase BuildBlendTreeStatement(ref FBlendTreeBuildContext blendTreeBuildContext)
+        {
+            return base.BuildBlendTreeStatement(ref blendTreeBuildContext);
+        }
+
+        #region Internal AST Build
+        private TtMethodDeclaration BuildOverrideInitializeMethod(IDesignableVariableDescription stateMachine)
+        {
+            var methodDeclaration = TtAnimASTBuildUtil.CreateBlendTreeOverridedInitMethodStatement();
+            TtAnimASTBuildUtil.CreateBaseInitInvokeStatement(methodDeclaration);
+
+            var stateMachineAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
+                new TtVariableReferenceExpression(stateMachine.VariableName),
+                new TtVariableReferenceExpression(stateMachine.VariableName, new TtVariableReferenceExpression("CenterData")));
+            methodDeclaration.MethodBody.Sequence.Add(stateMachineAssign);
+
+            TtAnimASTBuildUtil.CreateCenterDataAssignStatement(stateMachine, methodDeclaration);
+
+            var interalStateMachineAssin = TtASTBuildUtil.CreateAssignOperatorStatement(
+                new TtVariableReferenceExpression("AnimStateMachine"),
+                new TtVariableReferenceExpression(stateMachine.VariableName));
+            methodDeclaration.MethodBody.Sequence.Add(interalStateMachineAssin);
+
+            var returnValueAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
+                                        new TtVariableReferenceExpression(methodDeclaration.ReturnValue.VariableName),
+                                        new TtPrimitiveExpression(true));
+            methodDeclaration.MethodBody.Sequence.Add(returnValueAssign);
+            return methodDeclaration;
+        }
+        #endregion
     }
 }

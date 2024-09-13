@@ -10,7 +10,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public TtBitLeftshiftOperatorDescription()
         {
             Name = "BitLeftshift";
-            Op = UBinaryOperatorExpression.EBinaryOperation.BitwiseLeftShift;
+            Op = TtBinaryOperatorExpression.EBinaryOperation.BitwiseLeftShift;
         }
     }
 }

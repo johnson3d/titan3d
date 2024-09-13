@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_11974463585063497706 Type="EngineNS.Bricks.CodeBuilder.TtCreateObjectExpression@EngineCore">
+  <Parameters Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtExpressionBase@EngineCore,&gt;@Unknown" Order="0" />
+  <TypeName Type="System.String@Unknown" Order="0" />
+</Hash_11974463585063497706>

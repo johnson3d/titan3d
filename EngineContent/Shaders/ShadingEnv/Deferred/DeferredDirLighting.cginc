@@ -136,6 +136,8 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	half AbsSpecular = GBuffer.Specular;
 
 	half3 N = GBuffer.WorldNormal;
+    //N = half3(-0.46236, 0.38808, -0.79864);
+    //N = normalize(N);
 	half Metallic = (half)GBuffer.Metallicity;
 	half Roughness = GetRoughness((half)GBuffer.Roughness, GBuffer.WorldNormal);
     half AOs = GBuffer.AO;
@@ -182,10 +184,15 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 			if (PerPixelViewerDistance < (half)gCsmDistanceArray[CsmIdx])
 			{
 				ShadowMapUV = mul(float4(WorldPos, 1.0f), gViewer2ShadowMtxArray[CsmIdx]);
+                ShadowMapUV.z = ShadowMapUV.z / ShadowMapUV.w;
 				mSFD.mShadowTransitionScale = (half)gShadowTransitionScaleArray[CsmIdx];
                 if (ShadowMapUV.x > clip_u_max || ShadowMapUV.x < clip_u_min)
                 {
+					#if USE_INVERSE_Z == 1
+                    ShadowMapUV.z = 1;
+					#else
                     ShadowMapUV.z = 0;
+					#endif
                 }
 				break;
             }
@@ -193,7 +200,11 @@ PS_OUTPUT PS_Main(PS_INPUT input)
             clip_u_max += 0.25;
         }
 
+		#if USE_INVERSE_Z == 1
+		if (ShadowMapUV.z < 1.0f)
+		#else
 		if (ShadowMapUV.z > 0.0f)
+		#endif
 		{
 			mSFD.mViewer2ShadowDepth = (half)ShadowMapUV.z;
 			
@@ -239,6 +250,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	half LoH = saturate(dot(L, H));
 	half NoV = saturate(dot(N, V));
 	half VoH = saturate(dot(V, H));
+
 	// NoV = saturate( abs( NoV ) + 1e-5 );
     
 	// todo: remove Csky Cground
@@ -255,13 +267,14 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 
 	// SphereMaxNoH
 	BxDFContext Context;
-	Init(Context, N, V, L);
+    Context.Init(N, V, L);
 	// todo: calc SphereSinAlpha from light parameters
 	float AreaLightSphereSinAlpha = 0.00467f * (1-Pow2(Roughness));
 	// float AreaLightSphereSinAlpha = 0.405f;
 	SphereMaxNoH(Context, AreaLightSphereSinAlpha, true);
 	Context.NoV = saturate(abs( Context.NoV ) + 1e-5);
-	half3 DirLightSpecShading = NoL * Idir * Cdir * SpecularGGX( Roughness, OptSpecShading, Context, NoL, AreaLightSphereSinAlpha );
+    float SpecT;
+    half3 DirLightSpecShading = NoL * Idir * Cdir * SpecularGGX(Roughness, OptSpecShading, Context, NoL, AreaLightSphereSinAlpha, SpecT);
 	// half3 DirLightSpecShading = NoL * Idir * Cdir * SpecularGGX( Roughness, OptSpecShading, NoH, NoV, NoL, VoH );
 
 	// env mapping;
@@ -305,7 +318,24 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 #endif
 
  	half3 Color = BaseShading.rgb;
+#if ENV_EDebugShowMode == EDebugShowMode_None
 	output.RT0.rgb = Linear2sRGB(Color);
+#elif ENV_EDebugShowMode == EDebugShowMode_N
+	output.RT0.rgb = float3(SpecT,SpecT,SpecT);
+#elif ENV_EDebugShowMode == EDebugShowMode_NoH
+	output.RT0.rgb = NoH;
+#elif ENV_EDebugShowMode == EDebugShowMode_LoH
+	output.RT0.rgb = LoH;
+#elif ENV_EDebugShowMode == EDebugShowMode_NoV
+	output.RT0.rgb = NoV;
+#elif ENV_EDebugShowMode == EDebugShowMode_VoH
+	output.RT0.rgb = VoH;
+#elif ENV_EDebugShowMode == EDebugShowMode_NoL
+	output.RT0.rgb = NoL;
+#elif ENV_EDebugShowMode == EDebugShowMode_Specular
+	output.RT0.rgb = DirLightSpecShading;
+#endif
+	
 	return output;
 }
 

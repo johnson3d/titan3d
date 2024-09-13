@@ -7,7 +7,7 @@ namespace EngineNS.Bricks.Particle
     public abstract class TtShape
     {
         public virtual string Name { get; }
-        public virtual void SetCBuffer(uint index, NxRHI.UCbView cbuffer)
+        public virtual void SetCBuffer(uint index, NxRHI.TtCbView cbuffer)
         {
 
         }
@@ -114,7 +114,7 @@ namespace EngineNS.Bricks.Particle
             }
             particle->Location = Center + offset;
         }
-        public override void SetCBuffer(uint index, NxRHI.UCbView CBuffer)
+        public override void SetCBuffer(uint index, NxRHI.TtCbView CBuffer)
         {
             CBuffer.SetValue($"EmitShape{index}", in mShapeBox);
         }
@@ -169,7 +169,7 @@ namespace EngineNS.Bricks.Particle
             offset = emitter.RandomVector3(ref *particle) * (Radius - Radius * (Thinness * emitter.RandomUnit(ref *particle)));
             particle->Location = Center + offset;
         }
-        public override void SetCBuffer(uint index, NxRHI.UCbView CBuffer)
+        public override void SetCBuffer(uint index, NxRHI.TtCbView CBuffer)
         {
             CBuffer.SetValue($"EmitShape{index}", in mShapeSphere);
         }

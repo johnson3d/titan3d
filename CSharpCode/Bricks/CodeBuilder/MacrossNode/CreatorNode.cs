@@ -78,10 +78,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             OutPin.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
         }
 
-        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             if (pin == null || pin == OutPin)
-                return new UVariableReferenceExpression(VariableName);
+                return new TtVariableReferenceExpression(VariableName);
             return null;
         }
 
@@ -94,17 +94,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 resultType = data.NodeGraph.GetOppositePinType(TypePin);
             }
-            var varDecStatement = new UVariableDeclaration()
+            var varDecStatement = new TtVariableDeclaration()
             {
                 VariableName = VariableName,
-                VariableType = new UTypeReference(resultType),
-                InitValue = new UCreateObjectExpression(data.CodeGen.GetTypeString(resultType)),
+                VariableType = new TtTypeReference(resultType),
+                InitValue = new TtCreateObjectExpression(data.CodeGen.GetTypeString(resultType)),
             };
-            data.CurrentStatements.Add(new UDebuggerSetWatchVariable()
+            data.CurrentStatements.Add(new TtDebuggerSetWatchVariable()
             {
-                VariableType = new UTypeReference(typeof(Type)),
+                VariableType = new TtTypeReference(typeof(Type)),
                 VariableName = TypePin.Name + "_" + (uint)NodeId.GetHashCode(),
-                VariableValue = new UVariableReferenceExpression(VariableName),
+                VariableValue = new TtVariableReferenceExpression(VariableName),
             });
             AddDebugBreakerStatement(BreakerName, ref data);
             data.CurrentStatements.Add(varDecStatement);

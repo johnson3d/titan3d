@@ -59,8 +59,9 @@ namespace EngineNS.Animation.Command
     {
 
     }
-    public class TtAnimationCommand<T> : IAnimationCommand
+    public class TtAnimationCommand<S, T> : IAnimationCommand
     {
+        public S CenterData { get; set; }
         protected T mOutPose = default;
         public T OutPose { get => mOutPose; set => mOutPose = value; }
         public virtual void Execute()

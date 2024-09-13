@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_2292384679 Type="EngineNS.Graphics.Pipeline.TtGpuCullingNode@EngineCore">
-  <EnableGpuCulling Type="System.Boolean@Unknown" Order="0" />
-  <EnableStaticMeshBatch Type="System.Boolean@Unknown" Order="0" />
-</Hash_2292384679>

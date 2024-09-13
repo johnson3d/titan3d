@@ -4,17 +4,18 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public class UCamera : AuxPtrType<ICamera>, ITickable
+    public class TtCamera : AuxPtrType<ICamera>, ITickable
     {
-        public UCamera()
+        public TtCamera()
         {
             mCoreObject = ICamera.CreateInstance();
+            mCoreObject.SetReverseZ(TtEngine.Instance.Config.IsReverseZ);
         }
         public string Name { get; set; }
         public GamePlay.TtWorld.TtVisParameter VisParameter;
         public TtGraphicsBuffers.TtTargetViewIdentifier TargetViewIdentifier = new TtGraphicsBuffers.TtTargetViewIdentifier();
-        NxRHI.UCbView mPerCameraCBuffer;
-        public NxRHI.UCbView PerCameraCBuffer
+        NxRHI.TtCbView mPerCameraCBuffer;
+        public NxRHI.TtCbView PerCameraCBuffer
         {
             get
             {
@@ -84,7 +85,7 @@ namespace EngineNS.Graphics.Pipeline
             get
             {
                 if (mScopeWhichContainTypeFast == null)
-                    mScopeWhichContainTypeFast = new Profiler.TimeScope(typeof(UCamera), nameof(WhichContainTypeFast));
+                    mScopeWhichContainTypeFast = new Profiler.TimeScope(typeof(TtCamera), nameof(WhichContainTypeFast));
                 return mScopeWhichContainTypeFast;
             }
         }
@@ -300,7 +301,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             return mCoreObject.GetToViewPortMatrix();
         }
-        public void UpdateConstBufferData(NxRHI.UGpuDevice rc, NxRHI.UCbView.EUpdateMode mode = NxRHI.UCbView.EUpdateMode.Auto)
+        public void UpdateConstBufferData(NxRHI.TtGpuDevice rc, NxRHI.TtCbView.EUpdateMode mode = NxRHI.TtCbView.EUpdateMode.Auto)
         {
             if (PreFrameViewProjectionMatrix == null)
             {
@@ -312,7 +313,7 @@ namespace EngineNS.Graphics.Pipeline
             }
             PerCameraCBuffer.SetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.PreFrameViewPrjMtx, PreFrameViewProjectionMatrix.Value, true, mode);
             PerCameraCBuffer.SetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.JitterPreFrameViewPrjMtx, JitterPreFrameViewProjectionMatrix.Value, true, mode);
-            mCoreObject.UpdateConstBufferData(rc.mCoreObject, PerCameraCBuffer.mCoreObject, true, mode == NxRHI.UCbView.EUpdateMode.Immediately ? new NxRHI.FCbvUpdater() : TtEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
+            mCoreObject.UpdateConstBufferData(rc.mCoreObject, PerCameraCBuffer.mCoreObject, true, mode == NxRHI.TtCbView.EUpdateMode.Immediately ? new NxRHI.FCbvUpdater() : TtEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
             PreFrameViewProjectionMatrix = GetViewProjection();
             JitterPreFrameViewProjectionMatrix = GetJitterViewProjection();
         }
@@ -398,11 +399,11 @@ namespace EngineNS.Graphics.Pipeline
 
     public interface ICameraController
     {
-        UCamera Camera
+        TtCamera Camera
         {
             get;
         }
-        void ControlCamera(UCamera camera);
+        void ControlCamera(TtCamera camera);
         void Rotate(ECameraAxis axis, float angle, bool rotLookAt = false);
         void Move(ECameraAxis axis, float step, bool moveWithLookAt = false);
     }

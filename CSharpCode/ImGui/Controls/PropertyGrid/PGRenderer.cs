@@ -167,7 +167,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             OnDraw(false, true, false);
         }
         public Func<object, object, CustomPropertyDescriptor, bool> CanSetPropertyValueAction = null;
-        public void OnDraw(bool bShowReadOnly, bool bNewForm/*=true*/, bool bKeepColums/*=false*/, ImGuiWindowFlags_ flags = ImGuiWindowFlags_.ImGuiWindowFlags_None)
+        public void OnDraw(bool bShowReadOnly, bool bNewForm/*=true*/, bool bKeepColums/*=false*/, ImGuiWindowFlags_ flags = ImGuiWindowFlags_.ImGuiWindowFlags_None, ImGuiChildFlags_ child_flags = ImGuiChildFlags_.ImGuiChildFlags_None)
         {
             if (Visible == false)
                 return;
@@ -193,7 +193,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 var winPos = ImGuiAPI.GetWindowPos();
                 var winSize = ImGuiAPI.GetWindowSize();
                 var sz = new Vector2(-1);
-                if(ImGuiAPI.BeginChild($"{PGName}", in sz, false, flags))
+                if(ImGuiAPI.BeginChild($"{PGName}", in sz, child_flags, flags))
                 {
                     OnDrawContent(bShowReadOnly, in winPos, in winSize, bKeepColums);
                 }
@@ -274,7 +274,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
                 Vector2 size = Vector2.MinusOne;
                 //Vector2 size = Vector2.Zero;
-                if (ImGuiAPI.BeginChild($"{PGName}_Properties", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                if (ImGuiAPI.BeginChild($"{PGName}_Properties", in size, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     size = ImGuiAPI.GetWindowSize();
                     //Vector2 outerSize = Vector2.Zero;
@@ -301,7 +301,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             else
             {
                 Vector2 size = Vector2.Zero;
-                if(ImGuiAPI.BeginChild($"{PGName}_Properties", in size, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                if(ImGuiAPI.BeginChild($"{PGName}_Properties", in size, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     object newValue = null;
                     OnDraw(this.Target, out newValue);//, mCallstack);
@@ -545,6 +545,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     if (showCollection)
                     {
                         var collection = proDicValue.Value;
+                        // 多加0高度的一行，解决第一行鼠标指向行高亮会遮挡控件的问题
+                        ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_CellPadding, new Vector2(0, 0));
+                        ImGuiAPI.TableNextRow(ImGuiTableRowFlags_.ImGuiTableRowFlags_None, 0.0f);
+                        ImGuiAPI.PopStyleVar(1);
                         for (int i = 0; i < collection.Count; i++)
                         {
                             var propDesc = collection[i];
@@ -1288,7 +1292,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         //                ImGuiAPI.OpenPopupOnItemClick("AddItem", ImGuiPopupFlags_.ImGuiPopupFlags_None);
         //                //var pos = ImGuiAPI.GetItemRectMin();
         //                //var size = ImGuiAPI.GetItemRectSize();
-        //                if (ImGuiAPI.ArrowButton("##OpenAddItemList", ImGuiDir_.ImGuiDir_Down))
+        //                if (ImGuiAPI.ArrowButton("##OpenAddItemList", ImGuiDir.ImGuiDir_Down))
         //                {
         //                    ImGuiAPI.OpenPopup("AddItem", ImGuiPopupFlags_.ImGuiPopupFlags_None);
         //                }
@@ -1334,7 +1338,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         //                ImGuiAPI.SameLine(0, -1);
         //                var sz = new Vector2(0, 0);
         //                ImGuiAPI.PushID(i.Name);
-        //                if (ImGuiAPI.ArrowButton("##OpenAddItemDict", ImGuiDir_.ImGuiDir_Down))
+        //                if (ImGuiAPI.ArrowButton("##OpenAddItemDict", ImGuiDir.ImGuiDir_Down))
         //                {
         //                    ImGuiAPI.PopID();
         //                    ImGuiAPI.OpenPopup("AddDictElement", ImGuiPopupFlags_.ImGuiPopupFlags_None);

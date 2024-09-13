@@ -55,12 +55,12 @@ namespace EngineNS.Bricks.StateMachine.Macross.SubState
             attachment.Parent = null;
             return true;
         }
-        public override List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
+        public override List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
             SupperClassNames.Clear();
             SupperClassNames.Add($"EngineNS.Bricks.StateMachine.TimedSM.TtTimedState<{classBuildContext.MainClassDescription.ClassName}>");
-            List<UClassDeclaration> classDeclarationsBuilded = new();
-            UClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
+            List<TtClassDeclaration> classDeclarationsBuilded = new();
+            TtClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
             
             foreach (var transition in Transitions)
             {
@@ -77,28 +77,28 @@ namespace EngineNS.Bricks.StateMachine.Macross.SubState
             return classDeclarationsBuilded;
         }
 
-        public override UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
+        public override TtVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
             return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
 
         #region Internal AST Build
-        private UMethodDeclaration BuildOverrideInitializeMethod()
+        private TtMethodDeclaration BuildOverrideInitializeMethod()
         {
             var methodDeclaration = TtStateMachineASTBuildUtil.CreateOverridedInitMethodStatement();
 
             foreach (var attachment in Attachments)
             {
-                var stateAddAttachMentMethodInvoke = new UMethodInvokeStatement();
-                stateAddAttachMentMethodInvoke.Host = new USelfReferenceExpression();
+                var stateAddAttachMentMethodInvoke = new TtMethodInvokeStatement();
+                stateAddAttachMentMethodInvoke.Host = new TtSelfReferenceExpression();
                 stateAddAttachMentMethodInvoke.MethodName = "AddAttachment";
-                stateAddAttachMentMethodInvoke.Arguments.Add(new UMethodInvokeArgumentExpression { Expression = new UVariableReferenceExpression(attachment.VariableName) });
+                stateAddAttachMentMethodInvoke.Arguments.Add(new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression(attachment.VariableName) });
                 methodDeclaration.MethodBody.Sequence.Add(stateAddAttachMentMethodInvoke);
             }
 
             var returnValueAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
-                                        new UVariableReferenceExpression(methodDeclaration.ReturnValue.VariableName),
-                                        new UPrimitiveExpression(true));
+                                        new TtVariableReferenceExpression(methodDeclaration.ReturnValue.VariableName),
+                                        new TtPrimitiveExpression(true));
             methodDeclaration.MethodBody.Sequence.Add(returnValueAssign);
             return methodDeclaration;
         }

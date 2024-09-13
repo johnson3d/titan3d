@@ -16,7 +16,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             
         }
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
 
             return null;
@@ -33,11 +33,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
             bool value = false;
             bool.TryParse(StrValue, out value);
-            return new UPrimitiveExpression(value);
+            return new TtPrimitiveExpression(value);
         }
     }
     [ContextMenu("SByte", "Data\\POD\\SByte", UDesignMacross.MacrossScriptEditorKeyword)]
@@ -50,11 +50,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
             SByte value = 0;
             SByte.TryParse(StrValue, out value);
-            return new UPrimitiveExpression(TypeDesc, value);
+            return new TtPrimitiveExpression(TypeDesc, value);
         }
     }
     [ContextMenu("Int16", "Data\\POD\\Int16", UDesignMacross.MacrossScriptEditorKeyword)]
@@ -67,11 +67,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
             Int16 value = 0;
             Int16.TryParse(StrValue, out value);
-            return new UPrimitiveExpression(TypeDesc, value);
+            return new TtPrimitiveExpression(TypeDesc, value);
         }
     }
     [ContextMenu("Int32", "Data\\POD\\Int32", UDesignMacross.MacrossScriptEditorKeyword)]
@@ -84,11 +84,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
             Int32 value = 0;
             Int32.TryParse(StrValue, out value);
-            return new UPrimitiveExpression(TypeDesc, value);
+            return new TtPrimitiveExpression(TypeDesc, value);
         }
     }
     [ContextMenu("Int64", "Data\\POD\\Int64", UDesignMacross.MacrossScriptEditorKeyword)]
@@ -101,11 +101,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
             Int64 value = 0;
             Int64.TryParse(StrValue, out value);
-            return new UPrimitiveExpression(TypeDesc, value);
+            return new TtPrimitiveExpression(TypeDesc, value);
         }
     }
     [ContextMenu("Byte", "Data\\POD\\Byte", UDesignMacross.MacrossScriptEditorKeyword)]
@@ -118,11 +118,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
             Byte value = 0;
             Byte.TryParse(StrValue, out value);
-            return new UPrimitiveExpression(TypeDesc, value);
+            return new TtPrimitiveExpression(TypeDesc, value);
         }
     }
     [ContextMenu("UInt16", "Data\\POD\\UInt16", UDesignMacross.MacrossScriptEditorKeyword)]
@@ -135,11 +135,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
             UInt16 value = 0;
             UInt16.TryParse(StrValue, out value);
-            return new UPrimitiveExpression(TypeDesc, value);
+            return new TtPrimitiveExpression(TypeDesc, value);
         }
     }
     [ContextMenu("UInt32", "Data\\POD\\UInt32", UDesignMacross.MacrossScriptEditorKeyword)]
@@ -152,11 +152,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
             UInt32 value = 0;
             UInt32.TryParse(StrValue, out value);
-            return new UPrimitiveExpression(TypeDesc, value);
+            return new TtPrimitiveExpression(TypeDesc, value);
         }
     }
     [ContextMenu("UInt64", "Data\\POD\\UInt64", UDesignMacross.MacrossScriptEditorKeyword)]
@@ -169,11 +169,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
             UInt64 value = 0;
             UInt64.TryParse(StrValue, out value);
-            return new UPrimitiveExpression(TypeDesc, value);
+            return new TtPrimitiveExpression(TypeDesc, value);
         }
     }
     [ContextMenu("Float", "Data\\POD\\Float", UDesignMacross.MacrossScriptEditorKeyword)]
@@ -186,11 +186,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
             float value = 0;
             float.TryParse(StrValue, out value);
-            return new UPrimitiveExpression(TypeDesc, value);
+            return new TtPrimitiveExpression(TypeDesc, value);
         }
     }
     [ContextMenu("Double", "Data\\POD\\Double", UDesignMacross.MacrossScriptEditorKeyword)]
@@ -203,11 +203,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
             double value = 0;
             double.TryParse(StrValue, out value);
-            return new UPrimitiveExpression(TypeDesc, value);
+            return new TtPrimitiveExpression(TypeDesc, value);
         }
     }
     [ContextMenu("String", "Data\\POD\\String", UDesignMacross.MacrossScriptEditorKeyword)]
@@ -220,9 +220,9 @@ namespace EngineNS.DesignMacross.Design.Expressions
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
-            return new UPrimitiveExpression(TypeDesc, StrValue);
+            return new TtPrimitiveExpression(TypeDesc, StrValue);
         }
     }
     [ContextMenu("Vector2", "Data\\POD\\Vector2", UDesignMacross.MacrossScriptEditorKeyword)]
@@ -235,9 +235,9 @@ namespace EngineNS.DesignMacross.Design.Expressions
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
-            return new UPrimitiveExpression(TypeDesc, Vector2.FromString(StrValue));
+            return new TtPrimitiveExpression(TypeDesc, Vector2.FromString(StrValue));
         }
     }
     [ContextMenu("Vector3", "Data\\POD\\Vector3", UDesignMacross.MacrossScriptEditorKeyword)]
@@ -250,9 +250,9 @@ namespace EngineNS.DesignMacross.Design.Expressions
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
-            return new UPrimitiveExpression(TypeDesc, Vector3.FromString(StrValue));
+            return new TtPrimitiveExpression(TypeDesc, Vector3.FromString(StrValue));
         }
     }
     [ContextMenu("Vector4", "Data\\POD\\Vector4", UDesignMacross.MacrossScriptEditorKeyword)]
@@ -265,9 +265,9 @@ namespace EngineNS.DesignMacross.Design.Expressions
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
-            return new UPrimitiveExpression(TypeDesc, Vector4.FromString(StrValue));
+            return new TtPrimitiveExpression(TypeDesc, Vector4.FromString(StrValue));
         }
     }
     [ContextMenu("Color3f", "Data\\POD\\Color3f", UDesignMacross.MacrossScriptEditorKeyword)]
@@ -280,9 +280,9 @@ namespace EngineNS.DesignMacross.Design.Expressions
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
-            return new UPrimitiveExpression(TypeDesc, Color3f.FromString(StrValue));
+            return new TtPrimitiveExpression(TypeDesc, Color3f.FromString(StrValue));
         }
     }
     [ContextMenu("Color4f", "Data\\POD\\Color4f", UDesignMacross.MacrossScriptEditorKeyword)]
@@ -295,9 +295,9 @@ namespace EngineNS.DesignMacross.Design.Expressions
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
-            return new UPrimitiveExpression(TypeDesc, Color4f.FromString(StrValue));
+            return new TtPrimitiveExpression(TypeDesc, Color4f.FromString(StrValue));
         }
     }
 }

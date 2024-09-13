@@ -230,11 +230,11 @@ namespace EngineNS.Bricks.GpuDriven
 
             this.UpdatePermutation();
         }
-        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
             base.EnvShadingDefines(in id, defines);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+        public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
         {
             var node = drawcall.TagObject as TtSwRasterizeNode;
 
@@ -267,11 +267,11 @@ namespace EngineNS.Bricks.GpuDriven
 
             this.UpdatePermutation();
         }
-        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
             base.EnvShadingDefines(in id, defines);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+        public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
         {
             var node = drawcall.TagObject as TtSwRasterizeNode;
 
@@ -302,11 +302,11 @@ namespace EngineNS.Bricks.GpuDriven
 
             this.UpdatePermutation();
         }
-        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
             base.EnvShadingDefines(in id, defines);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+        public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
         {
             var node = drawcall.TagObject as TtSwRasterizeNode;
             if (node == null)
@@ -361,17 +361,17 @@ namespace EngineNS.Bricks.GpuDriven
             public Vector3ui DispatchArg;
         };
         FShadingStruct mShadingStruct = new FShadingStruct();
-        public NxRHI.UCbView CBShadingStruct;
+        public NxRHI.TtCbView CBShadingStruct;
 
         public TtGpuBuffer<int> IndirectArgBuffer = new TtGpuBuffer<int>();
         public TtSwRasterizeDispatchArgShading DispatchArgShading;
-        private NxRHI.UComputeDraw DispatchArgShadingDrawcall;
+        private NxRHI.TtComputeDraw DispatchArgShadingDrawcall;
 
         public TtSwRasterizeSetUpShading SetUpRasterizeShading;
-        private NxRHI.UComputeDraw SetUpRasterizeDrawcall;
+        private NxRHI.TtComputeDraw SetUpRasterizeDrawcall;
 
         public TtSwRasterizeShading SWRasterizer;
-        private NxRHI.UComputeDraw SWRasterizerDrawcall;
+        private NxRHI.TtComputeDraw SWRasterizerDrawcall;
 
         protected int QUARK_SUBPIXEL_SAMPLES = 256;
         public TtSwRasterizeNode()
@@ -498,11 +498,11 @@ namespace EngineNS.Bricks.GpuDriven
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
             NxRHI.EVertexStreamType.VST_UV,};
         }
-        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
 
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             var node = drawcall.TagObject as TtQuarkResolveNode;
 
@@ -519,12 +519,13 @@ namespace EngineNS.Bricks.GpuDriven
             base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
-    public class TtQuarkResolveNode : USceenSpaceNode
+    public class TtQuarkResolveNode : TtSceenSpaceNode
     {
         public TtRenderGraphPin QuarkRTPinIn = TtRenderGraphPin.CreateInput("QuarkRT");
 
         // TODO: for test
-        public TtRenderGraphPin DepthStencilPinIn = TtRenderGraphPin.CreateOutput("DepthStencil", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
+        public TtRenderGraphPin DepthStencilPinIn = TtRenderGraphPin.CreateOutput("DepthStencil", true, EPixelFormat.PXF_D32_FLOAT);
+        //public TtRenderGraphPin DepthStencilPinIn = TtRenderGraphPin.CreateOutput("DepthStencil", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
 
         public TtRenderGraphPin Rt0PinOut = TtRenderGraphPin.CreateOutput("MRT0", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);//rgb - metallicty
         public TtRenderGraphPin Rt1PinOut = TtRenderGraphPin.CreateOutput("MRT1", true, EPixelFormat.PXF_R10G10B10A2_UNORM);//normal - Flags
@@ -604,6 +605,10 @@ namespace EngineNS.Bricks.GpuDriven
             GBuffers.TargetViewIdentifier = policy.DefaultCamera.TargetViewIdentifier;
 
             return GBuffers;
+        }
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
+        {
+            base.TickLogic(world, policy, bClear);
         }
     }
 }

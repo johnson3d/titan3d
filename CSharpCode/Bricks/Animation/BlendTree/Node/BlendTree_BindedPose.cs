@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Animation.BlendTree.Node
 {
-    public class TtBindedPoseCommand<T> : TtAnimationCommand<T> where T : IRuntimePose
+    public class TtBindedPoseCommand<S, T> : TtAnimationCommand<S, T> where T : IRuntimePose
     {
         public TtBindedPoseCommandDesc Desc { get; set; }
 
@@ -20,16 +20,17 @@ namespace EngineNS.Animation.BlendTree.Node
     {
 
     }
-    public class TtBlendTree_BindedPose : TtBlendTree<TtLocalSpaceRuntimePose>
+    public class TtBlendTree_BindedPose<S> : TtBlendTree<S, TtLocalSpaceRuntimePose>
     {
-        TtBindedPoseCommand<TtLocalSpaceRuntimePose> mAnimationCommand = null;
-        public override void Initialize(ref FAnimBlendTreeContext context)
+        TtBindedPoseCommand<S, TtLocalSpaceRuntimePose> mAnimationCommand = null;
+        public override async Thread.Async.TtTask<bool> Initialize(FAnimBlendTreeContext context)
         {
-            mAnimationCommand = new TtBindedPoseCommand<TtLocalSpaceRuntimePose>();
+            mAnimationCommand = new TtBindedPoseCommand<S, TtLocalSpaceRuntimePose>();
+            return true;
         }
-        public override TtAnimationCommand<TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
+        public override TtAnimationCommand<S, TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
-            var mAnimationCommand = new TtBindedPoseCommand<TtLocalSpaceRuntimePose>();
+            var mAnimationCommand = new TtBindedPoseCommand<S, TtLocalSpaceRuntimePose>();
             var desc = new TtBindedPoseCommandDesc();
             mAnimationCommand.Desc = desc; 
             context.AddCommand(context.TreeDepth, mAnimationCommand);

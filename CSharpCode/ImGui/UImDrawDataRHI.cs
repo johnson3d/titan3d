@@ -52,7 +52,7 @@ namespace EngineNS.EGui
             CoreSDK.DisposeObject(ref Drawcall);
             NativeHandle.Free();
         }
-        public NxRHI.UGraphicDraw Drawcall;
+        public NxRHI.TtGraphicDraw Drawcall;
         private System.Runtime.InteropServices.GCHandle NativeHandle;
         public unsafe void* GetHandle()
         {
@@ -68,15 +68,15 @@ namespace EngineNS.EGui
     {
         public NxRHI.UCommandList CmdList;
         public NxRHI.TtEffectBinder FontTextureBindInfo;
-        public NxRHI.UCbView FontCBuffer;
-        public NxRHI.UGraphicDraw Drawcall;
+        public NxRHI.TtCbView FontCBuffer;
+        public NxRHI.TtGraphicDraw Drawcall;
 
-        public NxRHI.UGeomMesh GeomMesh;
+        public NxRHI.TtGeomMesh GeomMesh;
         public Graphics.Mesh.TtMeshPrimitives PrimitiveMesh;
 
         #region TriangleData
-        public NxRHI.UVbView VertexBuffer;
-        public NxRHI.UIbView IndexBuffer;
+        public NxRHI.TtVbView VertexBuffer;
+        public NxRHI.TtIbView IndexBuffer;
         public Support.TtNativeArray<ImDrawVert> DataVB = Support.TtNativeArray<ImDrawVert>.CreateInstance();
         public Support.TtNativeArray<ushort> DataIB = Support.TtNativeArray<ushort>.CreateInstance();
         #endregion
@@ -149,6 +149,7 @@ namespace EngineNS.EGui
             CoreSDK.DisposeObject(ref VertexBuffer);
             CoreSDK.DisposeObject(ref IndexBuffer);
             CoreSDK.DisposeObject(ref GeomMesh);
+            CoreSDK.DisposeObject(ref PrimitiveMesh);
         }
 
         [ThreadStatic]
@@ -194,7 +195,7 @@ namespace EngineNS.EGui
         private unsafe static void RenderImDrawDataImpl(ref ImDrawData draw_data, Graphics.Pipeline.UPresentWindow presentWindow, UImDrawDataRHI rhiData)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            var drawCmd = rhiData.CmdList.mCoreObject;
+            var drawCmd = rhiData.CmdList;
             uint vertexOffsetInVertices = 0;
             uint indexOffsetInElements = 0;
 
@@ -243,7 +244,7 @@ namespace EngineNS.EGui
                 rhiData.DataIB.Clear(false);
                 for (int i = 0; i < draw_data.CmdListsCount; i++)
                 {
-                    var cmd_list = new ImDrawList(draw_data.CmdLists[i]);
+                    var cmd_list = new ImDrawList(draw_data.GetCmdLists()[i]);
 
                     rhiData.DataVB.Append(cmd_list.VtxBufferData, cmd_list.VtxBufferSize);
                     rhiData.DataIB.Append(cmd_list.IdxBufferData, cmd_list.IdxBufferSize);
@@ -291,7 +292,7 @@ namespace EngineNS.EGui
                     passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
 
                     var swapChain = presentWindow.SwapChain;
-                    if (drawCmd.BeginPass(swapChain.BeginFrameBuffers(drawCmd).mCoreObject, in passClears, "ImGui"))
+                    if (drawCmd.BeginPass(swapChain.BeginFrameBuffers(drawCmd), in passClears, "ImGui"))
                     {
                         if (swapChain.Viewport.Width != 0 && swapChain.Viewport.Height != 0)
                             drawCmd.SetViewport(swapChain.Viewport);
@@ -302,8 +303,8 @@ namespace EngineNS.EGui
                         Vector2 clip_off = draw_data.DisplayPos;
                         for (int n = 0; n < draw_data.CmdListsCount; n++)
                         {
-                            NxRHI.UGraphicDraw drawcall = null;
-                            var cmd_list = new ImDrawList(draw_data.CmdLists[n]);
+                            NxRHI.TtGraphicDraw drawcall = null;
+                            var cmd_list = new ImDrawList(draw_data.GetCmdLists()[n]);
                             for (int cmd_i = 0; cmd_i < cmd_list.CmdBufferSize; cmd_i++)
                             {
                                 ImDrawCmd* pcmd = &cmd_list.CmdBufferData[cmd_i];
@@ -359,7 +360,7 @@ namespace EngineNS.EGui
                                 }
                                 else
                                 {
-                                    drawCmd.DirectGpuDraw(drawcall.mCoreObject.NativeSuper);
+                                    drawCmd.DirectGpuDraw(drawcall);
                                 }
                             }
                             idx_offset += (int)cmd_list.IdxBufferSize;

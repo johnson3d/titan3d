@@ -16,17 +16,17 @@ namespace EngineNS.DesignMacross.Design
         public string VariableName { get => TtASTBuildUtil.GenerateVariableName(this); }
         public string ClassName { get => TtASTBuildUtil.GenerateClassName(this); }
         [Rtti.Meta]
-        public UTypeReference VariableType { get => new UTypeReference(ClassName); set { } }
+        public TtTypeReference VariableType { get => new TtTypeReference(ClassName); set { } }
         [Rtti.Meta]
-        public UExpressionBase InitValue { get; set; }
+        public TtExpressionBase InitValue { get; set; }
         [Rtti.Meta]
-        public UCommentStatement Comment { get; set; }
+        public TtCommentStatement Comment { get; set; }
         [Rtti.Meta]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
         [Rtti.Meta]
         public IClassDescription DesignedClassDescription { get; set; }
         [Rtti.Meta]
-        public UNamespaceDeclaration Namespace { get; set; }
+        public TtNamespaceDeclaration Namespace { get; set; }
         [Rtti.Meta]
         public bool IsStruct { get; set; }
         [Rtti.Meta]
@@ -37,19 +37,19 @@ namespace EngineNS.DesignMacross.Design
         public List<IMethodDescription> Methods { get; set; } = new List<IMethodDescription>();
         public IDescription Parent { get; set; }
 
-        public virtual List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
+        public virtual List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
-            List<UClassDeclaration> classDeclarationsBuilded = new();
+            List<TtClassDeclaration> classDeclarationsBuilded = new();
             classDeclarationsBuilded.AddRange(DesignedClassDescription.BuildClassDeclarations(ref classBuildContext));
             return classDeclarationsBuilded;
         }
 
-        public virtual UVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
+        public virtual TtVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
             return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
 
-        public virtual void GenerateCodeInClass(UClassDeclaration classDeclaration)
+        public virtual void GenerateCodeInClass(TtClassDeclaration classDeclaration, ref FClassBuildContext classBuildContext)
         {
             
         }

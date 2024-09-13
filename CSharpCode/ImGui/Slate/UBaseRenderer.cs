@@ -10,9 +10,9 @@ namespace EngineNS.EGui.Slate
     {
         public Graphics.Pipeline.Shader.TtEffect SlateEffect;
 
-        public NxRHI.UInputLayout InputLayout { get; private set; }
-        public NxRHI.USampler SamplerState;
-        public NxRHI.UTexture FontTexture;
+        public NxRHI.TtInputLayout InputLayout { get; private set; }
+        public NxRHI.TtSampler SamplerState;
+        public NxRHI.TtTexture FontTexture;
         public NxRHI.TtSrView FontSRV;
         public async System.Threading.Tasks.Task Initialize()
         {
@@ -22,7 +22,7 @@ namespace EngineNS.EGui.Slate
                 await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Shader.CommanShading.USlateGUIShading>(),
                 TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
 
-            var iptDesc = new NxRHI.UInputLayoutDesc();
+            var iptDesc = new NxRHI.TtInputLayoutDesc();
             unsafe
             {
                 iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
@@ -90,7 +90,7 @@ namespace EngineNS.EGui.Slate
                 }
             }
             public ImFont Font;
-            public NxRHI.UTexture FontTexture;
+            public NxRHI.TtTexture FontTexture;
             NxRHI.TtSrView mFontSRV;
             public NxRHI.TtSrView FontSRV
             {
@@ -183,19 +183,19 @@ namespace EngineNS.EGui.Slate
                 var io = ImGuiAPI.GetIO();
                 var FontName = TtEngine.Instance.Config.EditorFont.Address;
                 //CreateFontTexture(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/NotoSansSC-Regular.otf", 15.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
-                var ftName = CreateFontTexture(FontName, 15.0f, (ImFontConfig*)0, ranges.UnsafeGetElementAddress(0));
+                var ftName = CreateFontTexture(FontName, 20.0f, (ImFontConfig*)0, ranges.UnsafeGetElementAddress(0));
 
-                ftName = CreateFontTexture(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/Roboto-Bold.ttf", 13.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
+                ftName = CreateFontTexture(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/Roboto-Bold.ttf", 15.0f, (ImFontConfig*)0, io.Fonts.GetGlyphRangesDefault());
                 //ftName = CreateFontTexture(FontName, 13.0f, (ImFontConfig*)0, ranges.UnsafeGetElementAddress(0));
 
-                ftName = CreateFontTexture(FontName, 13.0f, (ImFontConfig*)0, ranges.UnsafeGetElementAddress(0));
+                ftName = CreateFontTexture(FontName, 15.0f, (ImFontConfig*)0, ranges.UnsafeGetElementAddress(0));
 
                 var iconRange = stackalloc Wchar16[3];
                 iconRange[0] = new Wchar16(0xe005);
                 iconRange[1] = new Wchar16(0xf8ff);
                 iconRange[2] = new Wchar16(0);
                 //CreateFontTexture(TtEngine.Instance.FileManager.GetRoot(IO.FileManager.ERootDir.Engine) + "fonts/fa-solid-900.ttf", 15.0f, &fontConfig, iconRange);
-                ftName = CreateFontTexture(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/fa-solid-900.ttf", 15.0f, (ImFontConfig*)0, iconRange);
+                ftName = CreateFontTexture(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine) + "fonts/fa-solid-900.ttf", 20.0f, (ImFontConfig*)0, iconRange);
             }
         }
 

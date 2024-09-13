@@ -76,7 +76,7 @@ namespace EngineNS.Editor.Forms
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public virtual unsafe void DrawAsChildWindow(in Vector2 size)
         {
-            if (ImGuiAPI.BeginChild(Title, in size, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+            if (ImGuiAPI.BeginChild(Title, in size, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_None))
             {
                 if (ImGuiAPI.IsWindowDocked())
                 {

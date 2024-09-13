@@ -25,11 +25,11 @@ namespace EngineNS.Bricks.GpuDriven
 
             this.UpdatePermutation();
         }
-        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
             base.EnvShadingDefines(in id, defines);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+        public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
         {
             var node = drawcall.TagObject as TtCullClusterNode;
 
@@ -71,7 +71,7 @@ namespace EngineNS.Bricks.GpuDriven
         public TtRenderGraphPin VisibleClutersPinOut = TtRenderGraphPin.CreateOutput("VisibleClusters", false, EPixelFormat.PXF_UNKNOWN);
         
         public TtCullClusterShading CullClusterShading;
-        private NxRHI.UComputeDraw CullClusterShadingDrawcall;
+        private NxRHI.TtComputeDraw CullClusterShadingDrawcall;
 
         public TtCpu2GpuBuffer<float> Vertices = new TtCpu2GpuBuffer<float>();
         public TtCpu2GpuBuffer<uint> Indices = new TtCpu2GpuBuffer<uint>();
@@ -101,7 +101,7 @@ namespace EngineNS.Bricks.GpuDriven
             public Vector3 FrustumMaxPoint;
         };
         public FFrustumCullingParams mFrustumCullingData = new FFrustumCullingParams();
-        public NxRHI.UCbView CBCameraFrustum;
+        public NxRHI.TtCbView CBCameraFrustum;
 
         public TtCullClusterNode()
         {
@@ -153,7 +153,7 @@ namespace EngineNS.Bricks.GpuDriven
                 }
             }
         }
-        private unsafe void UpdateBuffers(NxRHI.ICommandList cmd, Vector3[] vb, uint[] ib, List<FClusterData> clusters, EngineNS.Graphics.Pipeline.UCamera camera)
+        private unsafe void UpdateBuffers(NxRHI.ICommandList cmd, Vector3[] vb, uint[] ib, List<FClusterData> clusters, EngineNS.Graphics.Pipeline.TtCamera camera)
         {
             // TODO: update once?
             if (vb.Length >0)
@@ -293,7 +293,7 @@ namespace EngineNS.Bricks.GpuDriven
 
             return vector;
         }
-        public unsafe void UpdateCameraInfo(EngineNS.Graphics.Pipeline.UCamera camera)
+        public unsafe void UpdateCameraInfo(EngineNS.Graphics.Pipeline.TtCamera camera)
         {
             if (camera == null)
                 return;

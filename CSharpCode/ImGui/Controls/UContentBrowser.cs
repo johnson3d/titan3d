@@ -63,6 +63,7 @@ namespace EngineNS.EGui.Controls
         }
         public string FilterText = "";
         public static IO.IAssetMeta GlobalSelectedAsset = null;
+        public static RName GlobalFocusAsset = null;
         public List<IO.IAssetMeta> SelectedAssets = new List<IO.IAssetMeta>();
         public Action<IO.IAssetMeta> ItemSelectedAction = null;
 
@@ -323,7 +324,7 @@ namespace EngineNS.EGui.Controls
                 var popMenuWidth = ImGuiAPI.GetWindowContentRegionWidth();
                 EGui.UIProxy.SearchBarProxy.OnDraw(ref mContextMenuFilterFocused, in drawList, "search items", ref mContextMenuFilterStr, popMenuWidth);
                 var wsize = new Vector2(200, 400);
-                if (ImGuiAPI.BeginChild("GraphContextMenu", in wsize, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
+                if (ImGuiAPI.BeginChild("GraphContextMenu", in wsize, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
                 {
                     for (var childIdx = 0; childIdx < mContextMenu.SubMenuItems.Count; childIdx++)
                     {
@@ -360,9 +361,23 @@ namespace EngineNS.EGui.Controls
             ImGuiAPI.PushID($"##{ameta.GetAssetName().Name}");
             bool isSelected = false;
             ImGuiAPI.Selectable("", ref isSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in sz);
+            if (GlobalFocusAsset != null && GlobalFocusAsset == ameta.GetAssetName())
+            {
+                ImGuiAPI.SetScrollHereX(0.5f);
+                ImGuiAPI.SetScrollHereY(0.5f);
+                GlobalSelectedAsset = ameta;
+                for (var i = 0; i < SelectedAssets.Count; i++)
+                {
+                    SelectedAssets[i].IsSelected = false;
+                }
+                SelectedAssets.Clear();
+                SelectedAssets.Add(ameta);
+                ameta.IsSelected = true;
+                GlobalFocusAsset = null;
+            }
             if (ImGuiAPI.IsItemVisible())
             {
-                if(ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows | ImGuiFocusedFlags_.ImGuiFocusedFlags_DockHierarchy))
+                //if(ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows | ImGuiFocusedFlags_.ImGuiFocusedFlags_DockHierarchy))
                 {
                     if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
                     {
@@ -413,7 +428,7 @@ namespace EngineNS.EGui.Controls
                             ItemSelectedAction?.Invoke(ameta);
                         }
                         //}
-                        if(ImGuiAPI.IsMouseReleased(ImGuiMouseButton_.ImGuiMouseButton_Left))
+                        else if(ImGuiAPI.IsMouseReleased(ImGuiMouseButton_.ImGuiMouseButton_Left))
                         //if(ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Left, false))
                         //if (ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                         {
@@ -457,6 +472,7 @@ namespace EngineNS.EGui.Controls
                     }
                 }
                 ameta.ShowIconTime = TtEngine.Instance.CurrentTickCountUS;
+
                 ameta.OnDraw(in cmdlist, in sz, this);
 
                 if (ImGuiAPI.BeginDragDropSource(ImGuiDragDropFlags_.ImGuiDragDropFlags_SourceNoDisableHover))
@@ -500,7 +516,7 @@ namespace EngineNS.EGui.Controls
                             totalCount = i + 1;
                         }
                         var winSize = sz + offset + new Vector2(0, 30);
-                        if (ImGuiAPI.BeginChild("ContentBrowserDrag", in winSize, false, 
+                        if (ImGuiAPI.BeginChild("ContentBrowserDrag", in winSize, ImGuiChildFlags_.ImGuiChildFlags_None, 
                             ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | 
                             ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | 
                             ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground))
@@ -765,13 +781,17 @@ namespace EngineNS.EGui.Controls
                 //                }
                 ImGuiAPI.Columns(2, null, true);
 
-                if (mFolderView.ContentSize.X == 0)
+                if (mFolderView.ContentSize.X <= 0)
                 {
                     var cltSize = ImGuiAPI.GetWindowContentRegionWidth();
                     ImGuiAPI.SetColumnWidth(0, ((float)cltSize) * 0.3f);
                 }
 
                 //bool open = true;
+                if(GlobalFocusAsset != null)
+                {
+                    mFolderView.CurrentDir = GlobalFocusAsset.GetDirectoryRName();
+                }
                 mFolderView.Draw(in Vector2.MinusOne);
                 ImGuiAPI.NextColumn();
 
@@ -804,7 +824,7 @@ namespace EngineNS.EGui.Controls
                     }
                     DrawFilterMenu();
 
-                    if (ImGuiAPI.BeginChild("RightWindow", in Vector2.MinusOne, false, ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+                    if (ImGuiAPI.BeginChild("RightWindow", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
                     {
                         var min = ImGuiAPI.GetWindowContentRegionMin();
                         var max = ImGuiAPI.GetWindowContentRegionMax();
@@ -940,7 +960,7 @@ namespace EngineNS.EGui.Controls
             ImGuiAPI.SetNextWindowSize(new Vector2(300, 500), ImGuiCond_.ImGuiCond_Appearing);
             if(ImGuiAPI.BeginPopupModal(keyName, (bool*)0, ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
             {
-                if(ImGuiAPI.BeginChild(keyName + "CWin", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
+                if(ImGuiAPI.BeginChild(keyName + "CWin", in Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
                 {
                     var winSize = new Vector2(ImGuiAPI.GetWindowWidth(), ImGuiAPI.GetWindowHeight() - mSelectFolderOKButtonHeight);
                     if (mOperationType == EAssetOperationType.MoveTo ||

@@ -3,15 +3,15 @@
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/particles/test01_move.macross,fea33170-dbce-4809-94ce-fd890ebf6fde" />
   <GraphName Type="System.String@Unknown" Value="OnUpdateEmitter" />
   <IsUseCustumCode Type="System.Boolean@Unknown" Value="False" />
-  <LocalVars Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
+  <LocalVars Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
   <MethodDatas Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.MacrossNode.MethodData@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodData@EngineCore">
       <IsDelegate Type="System.Boolean@Unknown" Value="False" />
-      <MethodDec Type="EngineNS.Bricks.CodeBuilder.UMethodDeclaration@EngineCore">
-        <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UMethodArgumentDeclaration@EngineCore,&gt;@Unknown" Count="4">
-          <e_0 Type="EngineNS.Bricks.CodeBuilder.UMethodArgumentDeclaration@EngineCore">
+      <MethodDec Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration@EngineCore">
+        <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore,&gt;@Unknown" Count="4">
+          <e_0 Type="EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore">
             <HasDefaultValue Type="System.Boolean@Unknown" Value="False" />
-            <InitValue Type="EngineNS.Bricks.CodeBuilder.UPrimitiveExpression@EngineCore">
+            <InitValue Type="EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore">
               <Type Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.Int32@Unknown" />
               <TypeIsTypeof Type="System.Boolean@Unknown" Value="True" />
               <ValueStr Type="System.String@Unknown" Value="0" />
@@ -21,15 +21,15 @@
             <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="Default" />
             <OperationVisible Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="nebula" />
-            <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
               <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Bricks.Particle.TtNebulaParticle@EngineCore" />
               <TypeFullName Type="System.String@Unknown" Value="EngineNS.Bricks.Particle.TtNebulaParticle" />
             </VariableType>
           </e_0>
-          <e_1 Type="EngineNS.Bricks.CodeBuilder.UMethodArgumentDeclaration@EngineCore">
+          <e_1 Type="EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore">
             <HasDefaultValue Type="System.Boolean@Unknown" Value="False" />
-            <InitValue Type="EngineNS.Bricks.CodeBuilder.UPrimitiveExpression@EngineCore">
+            <InitValue Type="EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore">
               <Type Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.Int32@Unknown" />
               <TypeIsTypeof Type="System.Boolean@Unknown" Value="True" />
               <ValueStr Type="System.String@Unknown" Value="0" />
@@ -39,15 +39,15 @@
             <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="Default" />
             <OperationVisible Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="emitter" />
-            <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
               <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Bricks.Particle.TtEmitter@EngineCore" />
               <TypeFullName Type="System.String@Unknown" Value="EngineNS.Bricks.Particle.TtEmitter" />
             </VariableType>
           </e_1>
-          <e_2 Type="EngineNS.Bricks.CodeBuilder.UMethodArgumentDeclaration@EngineCore">
+          <e_2 Type="EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore">
             <HasDefaultValue Type="System.Boolean@Unknown" Value="False" />
-            <InitValue Type="EngineNS.Bricks.CodeBuilder.UPrimitiveExpression@EngineCore">
+            <InitValue Type="EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore">
               <Type Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.Int32@Unknown" />
               <TypeIsTypeof Type="System.Boolean@Unknown" Value="True" />
               <ValueStr Type="System.String@Unknown" Value="0" />
@@ -57,15 +57,15 @@
             <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="Default" />
             <OperationVisible Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="particleSystem" />
-            <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
               <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Bricks.Particle.UParticleGraphNode@EngineCore" />
               <TypeFullName Type="System.String@Unknown" Value="EngineNS.Bricks.Particle.UParticleGraphNode" />
             </VariableType>
           </e_2>
-          <e_3 Type="EngineNS.Bricks.CodeBuilder.UMethodArgumentDeclaration@EngineCore">
+          <e_3 Type="EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore">
             <HasDefaultValue Type="System.Boolean@Unknown" Value="False" />
-            <InitValue Type="EngineNS.Bricks.CodeBuilder.UPrimitiveExpression@EngineCore">
+            <InitValue Type="EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore">
               <Type Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.Int32@Unknown" />
               <TypeIsTypeof Type="System.Boolean@Unknown" Value="True" />
               <ValueStr Type="System.String@Unknown" Value="0" />
@@ -75,18 +75,18 @@
             <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="Default" />
             <OperationVisible Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="elpased" />
-            <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
               <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.Single@Unknown" />
               <TypeFullName Type="System.String@Unknown" Value="System.Single" />
             </VariableType>
           </e_3>
         </Arguments>
-        <AsyncType Type="EngineNS.Bricks.CodeBuilder.UMethodDeclaration.EAsyncType@EngineCore" Value="None" />
+        <AsyncType Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration.EAsyncType@EngineCore" Value="None" />
         <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="1">
           <e_0 Type="EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore">
-            <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore,&gt;@Unknown" Count="0" />
-            <AttributeType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+            <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtExpressionBase@EngineCore,&gt;@Unknown" Count="0" />
+            <AttributeType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
               <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Rtti.MetaAttribute@EngineCore" />
               <TypeFullName Type="System.String@Unknown" Value="EngineNS.Rtti.MetaAttribute" />
@@ -94,11 +94,11 @@
           </e_0>
         </Attributes>
         <IsOverride Type="System.Boolean@Unknown" Value="True" />
-        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="2">
-          <e_0 Type="EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore">
+        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="2">
+          <e_0 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
             <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
-            <InitValue Type="EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore">
-              <Type Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+            <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
+              <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                 <IsEnum Type="System.Boolean@Unknown" Value="False" />
                 <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.Single@Unknown" />
                 <TypeFullName Type="System.String@Unknown" Value="System.Single" />
@@ -107,17 +107,17 @@
             <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
             <IsBindable Type="System.Boolean@Unknown" Value="False" />
             <VariableName Type="System.String@Unknown" Value="tmp_r_Sin_1051780063" />
-            <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
               <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.Single@Unknown" />
               <TypeFullName Type="System.String@Unknown" Value="System.Single" />
             </VariableType>
             <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
           </e_0>
-          <e_1 Type="EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore">
+          <e_1 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
             <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
-            <InitValue Type="EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore">
-              <Type Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+            <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
+              <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                 <IsEnum Type="System.Boolean@Unknown" Value="False" />
                 <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Vector3@EngineCore" />
                 <TypeFullName Type="System.String@Unknown" Value="EngineNS.Vector3" />
@@ -126,7 +126,7 @@
             <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
             <IsBindable Type="System.Boolean@Unknown" Value="False" />
             <VariableName Type="System.String@Unknown" Value="tmp_r_CreateVector3f_4100741359" />
-            <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
               <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Vector3@EngineCore" />
               <TypeFullName Type="System.String@Unknown" Value="EngineNS.Vector3" />

@@ -4,20 +4,20 @@ using System.Text;
 
 namespace EngineNS.NxRHI
 {
-    public class UVertexArray : AuxPtrType<NxRHI.FVertexArray>
+    public class TtVertexArray : AuxPtrType<NxRHI.FVertexArray>
     {
-        public UVertexArray(NxRHI.FVertexArray ptr)
+        public TtVertexArray(NxRHI.FVertexArray ptr)
         {
             mCoreObject = ptr;
         }
-        public void BindVB(EVertexStreamType stream, UVbView buffer)
+        public void BindVB(EVertexStreamType stream, TtVbView buffer)
         {
             mCoreObject.BindVB(stream, buffer.mCoreObject);
         }
     }    
-    public class UGeomMesh : AuxPtrType<NxRHI.FGeomMesh>
+    public class TtGeomMesh : AuxPtrType<NxRHI.FGeomMesh>
     {
-        public UGeomMesh(NxRHI.FGeomMesh ptr)
+        public TtGeomMesh(NxRHI.FGeomMesh ptr)
         {
             mCoreObject = ptr;
         }
@@ -36,11 +36,11 @@ namespace EngineNS.NxRHI
                 return ref *mCoreObject.GetAtomDesc(index, lod);
             }
         }
-        public void BindVertexArray(UVertexArray va)
+        public void BindVertexArray(TtVertexArray va)
         {
             mCoreObject.BindVertexArray(va.mCoreObject);
         }
-        public void BindIndexBuffer(UIbView buffer)
+        public void BindIndexBuffer(TtIbView buffer)
         {
             mCoreObject.BindIndexBuffer(buffer.mCoreObject);
         }

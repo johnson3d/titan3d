@@ -6,12 +6,13 @@ using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
 using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
 using System;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace EngineNS.Animation.BlendTree.Node
 {
-    public class TtAnimationClipCommand : TtAnimationCommand<TtLocalSpaceRuntimePose>
+    public class TtAnimationClipCommand<S> : TtAnimationCommand<S, TtLocalSpaceRuntimePose>
     {
         public TtAnimationClip AnimationClip { get; set; } = null;
         public TtAnimationClipCommandDesc Desc { get; set; }
@@ -44,7 +45,7 @@ namespace EngineNS.Animation.BlendTree.Node
     {
         public float Time { get; set; }
     }
-    public class TtBlendTree_AnimationClip : TtBlendTree<TtLocalSpaceRuntimePose>
+    public class TtBlendTree_AnimationClip<S> : TtBlendTree<S, TtLocalSpaceRuntimePose>
     {
         TtAnimationClip mClip = null;
         public TtAnimationClip Clip
@@ -57,16 +58,17 @@ namespace EngineNS.Animation.BlendTree.Node
         }
         public float Time { get; set; }
         //public ClipWarpMode WarpMode { get; set; } = ClipWarpMode.Loop;
-        TtAnimationClipCommand mAnimationCommand = null;
-        public override void Initialize(ref FAnimBlendTreeContext context)
+        TtAnimationClipCommand<S> mAnimationCommand = null;
+        public override async Thread.Async.TtTask<bool> Initialize(FAnimBlendTreeContext context)
         {
             mAnimationCommand = new();
             mAnimationCommand.Desc = new();
             mAnimationCommand.AnimationClip = mClip;
             mAnimationCommand.SetExtractedPose(context.AnimatableSkeletonPose);
-            base.Initialize(ref context);
+            await base.Initialize(context);
+            return true;
         }
-        public override TtAnimationCommand<TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
+        public override TtAnimationCommand<S, TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
             base.ConstructAnimationCommandTree(parentNode, ref context);
             context.AddCommand(context.TreeDepth, mAnimationCommand);

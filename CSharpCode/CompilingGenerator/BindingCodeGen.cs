@@ -1845,12 +1845,12 @@ namespace {namespaceName}
             {
                 source += $@"
         [System.ComponentModel.Browsable(false)]
-        public Dictionary<EngineNS.Bricks.CodeBuilder.UMethodDeclaration, EngineNS.UI.Controls.TtUIElement.MacrossMethodData> MethodDisplayNames = new Dictionary<EngineNS.Bricks.CodeBuilder.UMethodDeclaration, EngineNS.UI.Controls.TtUIElement.MacrossMethodData>();";
+        public Dictionary<EngineNS.Bricks.CodeBuilder.TtMethodDeclaration, EngineNS.UI.Controls.TtUIElement.MacrossMethodData> MethodDisplayNames = new Dictionary<EngineNS.Bricks.CodeBuilder.TtMethodDeclaration, EngineNS.UI.Controls.TtUIElement.MacrossMethodData>();";
             }
             if (!classSymbol.MemberNames.Any(name => "GetMethodDisplayName" == name))
             {
                 source += $@"
-        public {(baseHasBindObjectInterface ? "override" : "virtual")} string GetMethodDisplayName(EngineNS.Bricks.CodeBuilder.UMethodDeclaration desc)
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} string GetMethodDisplayName(EngineNS.Bricks.CodeBuilder.TtMethodDeclaration desc)
         {{
             EngineNS.UI.Controls.TtUIElement.MacrossMethodData val = null;
             if(MethodDisplayNames.TryGetValue(desc, out val))
@@ -1889,7 +1889,7 @@ namespace {namespaceName}
             if (!classSymbol.MemberNames.Any(name => "SetEventBindMethod" == name))
             {
                 source += $@"
-        public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetEventBindMethod(string eventName, EngineNS.Bricks.CodeBuilder.UMethodDeclaration desc)
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetEventBindMethod(string eventName, EngineNS.Bricks.CodeBuilder.TtMethodDeclaration desc)
         {{
             var data = new EngineNS.UI.Controls.TtUIElement.MacrossEventMethodData()
             {{
@@ -1919,7 +1919,7 @@ namespace {namespaceName}
         //    if (!classSymbol.MemberNames.Any(name => "SetPropertyBindMethod" == name))
         //    {
         //        source += $@"
-        //public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetPropertyBindMethod(string propertyName, EngineNS.Bricks.CodeBuilder.UMethodDeclaration desc, bool isSet)
+        //public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetPropertyBindMethod(string propertyName, EngineNS.Bricks.CodeBuilder.TtMethodDeclaration desc, bool isSet)
         //{{
         //    EngineNS.UI.Controls.TtUIElement.MacrossMethodData data;
         //    if(MacrossMethods.TryGetValue(propertyName, out data))
@@ -2003,7 +2003,7 @@ namespace {namespaceName}
             if (!classSymbol.MemberNames.Any(name => "BindMacross" == name))
             {
                 source += $@"
-        public {(baseHasBindObjectInterface ? "override" : "virtual")} void BindMacross(ref int temp, EngineNS.Bricks.CodeBuilder.UClassDeclaration defClass)
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void BindMacross(ref int temp, EngineNS.Bricks.CodeBuilder.TtClassDeclaration defClass)
         {{";
                 if(baseHasBindObjectInterface)
                 {
@@ -2153,7 +2153,7 @@ namespace {namespaceName}
             if (!classSymbol.MemberNames.Any(name => "GenerateBindingDataStatement" == name))
             {
                 source += $@"
-        public {(baseHasBindObjectInterface ? "override" : "virtual")} void GenerateBindingDataStatement(EngineNS.UI.Editor.TtUIEditor editor, List<EngineNS.Bricks.CodeBuilder.UStatementBase> sequence)
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void GenerateBindingDataStatement(EngineNS.UI.Editor.TtUIEditor editor, List<EngineNS.Bricks.CodeBuilder.TtStatementBase> sequence)
         {{";
                 foreach (var bindObj in bindObjectMemberSymbols)
                 {
@@ -2193,7 +2193,7 @@ namespace {namespaceName}
             if (!classSymbol.MemberNames.Any(name => "InitialMethodDeclaration" == name))
             {
                 source += $@"
-        public {(baseHasBindObjectInterface ? "override" : "virtual")} void InitialMethodDeclaration(string propertyName, EngineNS.Bricks.CodeBuilder.UMethodDeclaration desc, bool isSet)
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void InitialMethodDeclaration(string propertyName, EngineNS.Bricks.CodeBuilder.TtMethodDeclaration desc, bool isSet)
         {{
             desc.MethodName = GetPropertyBindMethodName(propertyName, isSet);
             desc.GetDisplayNameFunc = GetMethodDisplayName;

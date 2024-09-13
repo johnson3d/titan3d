@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_1270160248 Type="EngineNS.Animation.Asset.UAnimationClip@EngineCore">
-  <AnimationChunkName Type="EngineNS.RName@EngineCore" Order="0" />
-  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
-  <Duration Type="System.Single@Unknown" Order="0" />
-  <Notifies Type="System.Collections.Generic.List&lt;EngineNS.Animation.Notify.IAnimNotify@EngineCore,&gt;@Unknown" Order="0" />
-  <SampleRate Type="System.Single@Unknown" Order="0" />
-</Hash_1270160248>

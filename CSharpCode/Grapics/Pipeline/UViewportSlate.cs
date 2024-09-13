@@ -133,7 +133,7 @@ namespace EngineNS.Graphics.Pipeline
                 case EViewportType.ChildWindow:
                     //if(sz == Vector2.Zero)
                     //    sz = ImGuiAPI.GetWindowSize();
-                    bShow = ImGuiAPI.BeginChild(Title, in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_.ImGuiWindowFlags_NoNavFocus |
+                    bShow = ImGuiAPI.BeginChild(Title, in sz, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_.ImGuiWindowFlags_NoNavFocus |
                         ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse);
                     break;
             }
@@ -208,7 +208,7 @@ namespace EngineNS.Graphics.Pipeline
 
                 IsMouseIn = ImGuiAPI.IsMouseHoveringRect(in min, in max, true);
 
-                if(ImGuiAPI.BeginChild("ViewportClient", in sz, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove| ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground))
+                if(ImGuiAPI.BeginChild("ViewportClient", in sz, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove| ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground))
                 {
                     IsViewportSlateFocused = ImGuiAPI.IsHoverCurrentWindow() && ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows);
                     OnDrawViewportUI(in curPos);                    
@@ -247,7 +247,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public Vector2 WorldAxis { get; set; } = new Vector2(80, 50);
         public bool ShowWorldAxis { get; set; } = true;
-        public void DrawWorldAxis(UCamera camera)
+        public void DrawWorldAxis(TtCamera camera)
         {
             var cmdlst = ImGuiAPI.GetWindowDrawList();
             //var camera = this.CameraController.Camera;
@@ -581,7 +581,7 @@ namespace EngineNS.Graphics.Pipeline
             VisParameter.CullCamera = RenderPolicy.DefaultCamera;
             World.GatherVisibleMeshes(VisParameter);
 
-            RenderPolicy.UpdateCameraAttachements(NxRHI.UCbView.EUpdateMode.Auto);
+            RenderPolicy.UpdateCameraAttachements(NxRHI.TtCbView.EUpdateMode.Auto);
             
             RenderPolicy.BeginTickLogic(World);
             RenderPolicy.TickLogic(World, null);

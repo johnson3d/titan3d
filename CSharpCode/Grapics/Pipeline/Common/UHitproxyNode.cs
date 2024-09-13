@@ -6,9 +6,9 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
 {
-    public class UHitproxyShading : Shader.TtGraphicsShadingEnv
+    public class TtHitproxyShading : Shader.TtGraphicsShadingEnv
     {
-        public UHitproxyShading()
+        public TtHitproxyShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Sys/pick/HitProxy.cginc", RName.ERNameType.Engine);
         }
@@ -18,13 +18,14 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Hitproxy", "Hitproxy", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UHitproxyNode : TtRenderGraphNode
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UHitproxyNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UHitproxyNode" })]
+    public class TtHitproxyNode : TtRenderGraphNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
         public TtRenderGraphPin HitIdPinOut = TtRenderGraphPin.CreateOutput("HitId", false, EPixelFormat.PXF_R8G8B8A8_UNORM);
         public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth", false, EPixelFormat.PXF_D16_UNORM);
         public TtRenderGraphPin GizmosDepthPinOut = TtRenderGraphPin.CreateOutput("GizmosDepth", false, EPixelFormat.PXF_D16_UNORM);
-        public UHitproxyNode()
+        public TtHitproxyNode()
         {
             Name = "Hitproxy";
         }
@@ -38,8 +39,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         #region GetHitproxy
         private Support.TtBlobObject mHitProxyData = new Support.TtBlobObject();
-        unsafe private NxRHI.UGpuResource mReadableHitproxyTexture;
-        private NxRHI.UFence mCopyFence;
+        unsafe private NxRHI.TtGpuResource mReadableHitproxyTexture;
+        private NxRHI.TtFence mCopyFence;
         private Int32 Clamp(Int32 ValueIn, Int32 MinValue, Int32 MaxValue)
         {
             return ValueIn < MinValue ? MinValue : ValueIn < MaxValue ? ValueIn : MaxValue;
@@ -135,10 +136,10 @@ namespace EngineNS.Graphics.Pipeline.Common
         #endregion
         public TtGraphicsBuffers GHitproxyBuffers { get; protected set; } = new TtGraphicsBuffers();
         public TtGraphicsBuffers GGizmosBuffers { get; protected set; } = new TtGraphicsBuffers();
-        public Common.UHitproxyShading mHitproxyShading;
+        public Common.TtHitproxyShading mHitproxyShading;
         public TtLayerDrawBuffers HitproxyPass = new TtLayerDrawBuffers();
-        public NxRHI.URenderPass HitproxyRenderPass;
-        public NxRHI.URenderPass GizmosRenderPass;
+        public NxRHI.TtRenderPass HitproxyRenderPass;
+        public NxRHI.TtRenderPass GizmosRenderPass;
         [Rtti.Meta]
         public float ScaleFactor { get; set; } = 0.5f;
         public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
@@ -153,7 +154,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             HitproxyPass.Initialize(rc, debugName);
 
-            mHitproxyShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UHitproxyShading>();
+            mHitproxyShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtHitproxyShading>();
 
             CreateGBuffers(policy, DepthPinInOut.Attachement.Format, true);
             mCopyFence = rc.CreateFence(new NxRHI.FFenceDesc(), "Copy Hitproxy Texture");
@@ -272,7 +273,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UHitproxyNode), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtHitproxyNode), nameof(TickLogic));
                 return mScopeTick;
             }
         }
@@ -345,7 +346,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             if (mReadableHitproxyTexture == null)
             {
-                var rtTex = attachBuffer.GpuResource as NxRHI.UTexture;
+                var rtTex = attachBuffer.GpuResource as NxRHI.TtTexture;
                 mReadableHitproxyTexture = rtTex.CreateBufferData(0, NxRHI.ECpuAccess.CAS_READ, ref CopyBufferFootPrint);
             }
             var readTexture = mReadableHitproxyTexture;
@@ -353,8 +354,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             fixed(NxRHI.FSubResourceFootPrint* pFootprint = &CopyBufferFootPrint)
             {
                 var cpDraw = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
-                var dstTex = readTexture as NxRHI.UTexture;
-                var dstBf = readTexture as NxRHI.UBuffer;
+                var dstTex = readTexture as NxRHI.TtTexture;
+                var dstBf = readTexture as NxRHI.TtBuffer;
                 if (dstTex != null)
                 {
                     //cmdlist_post.CopyTextureRegion(dstTex.mCoreObject, 0, 0, 0, 0, attachBuffer.Srv.mCoreObject.GetBufferAsTexture(), 0, (NxRHI.FSubresourceBox*)IntPtr.Zero.ToPointer());

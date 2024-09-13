@@ -23,6 +23,7 @@ namespace EngineNS.Editor
         void OnEvent(in Bricks.Input.Event e);
         IRootForm GetRootForm();
         Thread.Async.TtTask<bool> Initialize();
+        string GetWindowsName();
     }
     public class TtAssetEditorOpenProgress : IRootForm
     {
@@ -91,6 +92,7 @@ namespace EngineNS.Editor
                 if (await editor.Initialize() == false)
                     return;
                 ok = await editor.OpenEditor(mainEditor, name, arg);
+                UMainEditorApplication.NeedFocusWindowName = editor.GetWindowsName();
             }
             catch (Exception exp)
             {

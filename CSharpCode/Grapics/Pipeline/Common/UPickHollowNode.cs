@@ -18,10 +18,10 @@ namespace EngineNS.Graphics.Pipeline.Common
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
+        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
@@ -49,7 +49,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
     }
     [Bricks.CodeBuilder.ContextMenu("PickHollow", "Pick\\PickHollow", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UPickHollowNode : USceenSpaceNode
+    public class UPickHollowNode : TtSceenSpaceNode
     {
         public TtRenderGraphPin PickedPinIn = TtRenderGraphPin.CreateInput("Picked");
         public TtRenderGraphPin BlurPinIn = TtRenderGraphPin.CreateInput("Blur");
@@ -87,7 +87,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             float scaleFactor = 1.0f;
-            var hitProxyNode = policy.FindFirstNode<UHitproxyNode>();
+            var hitProxyNode = policy.FindFirstNode<TtHitproxyNode>();
             if (hitProxyNode != null)
             {
                 scaleFactor = hitProxyNode.ScaleFactor;
@@ -99,7 +99,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
-            var PickedManager = policy.GetOptionData("PickedManager") as UPickedProxiableManager;
+            var PickedManager = policy.GetOptionData("PickedManager") as TtPickedProxiableManager;
             if (PickedManager != null && PickedManager.PickedProxies.Count == 0)
                 return;
             base.TickLogic(world, policy, bClear);
@@ -117,10 +117,10 @@ namespace EngineNS.Graphics.Pipeline.Common
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.UGraphicDraw drawcall)
+        public unsafe override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall)
         {
         }
-        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        public unsafe override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
@@ -159,7 +159,7 @@ namespace EngineNS.Graphics.Pipeline.Common
     }
 
     [Bricks.CodeBuilder.ContextMenu("PickHollowBlend", "Pick\\PickHollowBlend", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class TtPickHollowBlendNode : USceenSpaceNode
+    public class TtPickHollowBlendNode : TtSceenSpaceNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
         public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInputOutput("Depth");
@@ -196,7 +196,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void BeforeTickLogic(TtRenderPolicy policy)
         {
-            var PickedManager = policy.GetOptionData("PickedManager") as UPickedProxiableManager;
+            var PickedManager = policy.GetOptionData("PickedManager") as TtPickedProxiableManager;
             if (PickedManager != null && PickedManager.PickedProxies.Count == 0)
             {
                 this.MoveAttachment(ColorPinIn, ResultPinOut);
@@ -215,7 +215,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
-            var PickedManager = policy.GetOptionData("PickedManager") as UPickedProxiableManager;
+            var PickedManager = policy.GetOptionData("PickedManager") as TtPickedProxiableManager;
             if (PickedManager != null && PickedManager.PickedProxies.Count == 0)
                 return;
             base.TickLogic(world, policy, bClear);

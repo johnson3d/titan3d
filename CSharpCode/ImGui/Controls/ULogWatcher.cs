@@ -139,7 +139,7 @@ namespace EngineNS.EGui.Controls
                 }
                 #endregion
 
-                if (ImGuiAPI.BeginChild("LogContent", in Vector2.MinusOne, true, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                if (ImGuiAPI.BeginChild("LogContent", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     UpdateNewLogs();
                     

@@ -13,12 +13,20 @@ struct ShadowFilterData
 
 half4 CalcShadowValue(half4 ShadowmapDepth, ShadowFilterData SFD)
 {
-	return saturate((ShadowmapDepth - SFD.mViewer2ShadowDepth) * SFD.mShadowTransitionScale + 1.0h);
+#if USE_INVERSE_Z == 1
+	return saturate((SFD.mViewer2ShadowDepth - ShadowmapDepth) * SFD.mShadowTransitionScale + 1.0h);
+#else
+    return saturate((ShadowmapDepth - SFD.mViewer2ShadowDepth) * SFD.mShadowTransitionScale + 1.0h);
+#endif
 }
 
 half CalcShadowValue(half ShadowmapDepth, ShadowFilterData SFD)
 {
+#if USE_INVERSE_Z == 1
 	return saturate((ShadowmapDepth - SFD.mViewer2ShadowDepth) * SFD.mShadowTransitionScale + 1.0h);
+#else
+	return saturate((ShadowmapDepth - SFD.mViewer2ShadowDepth) * SFD.mShadowTransitionScale + 1.0h);
+#endif
 }
 
 half4 Fetch4SMValuePerRow(half2 TexelPos, half VerticalOffset, ShadowFilterData SFD)

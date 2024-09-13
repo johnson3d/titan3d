@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_2124335089 Type="EngineNS.UI.Editor.UIBindingData_Element@EngineCore">
-  <Id Type="System.UInt64@Unknown" Order="0" />
-  <PropertyName Type="System.String@Unknown" Order="0" />
-  <PropertyType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Order="0" />
-</Hash_2124335089>

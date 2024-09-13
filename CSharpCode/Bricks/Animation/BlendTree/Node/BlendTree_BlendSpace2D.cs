@@ -11,10 +11,10 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Animation.BlendTree.Node
 {
-    public class TtBlendSpaceEvaluateCommand : TtAnimationCommand<TtLocalSpaceRuntimePose>
+    public class TtBlendSpaceEvaluateCommand<S> : TtAnimationCommand<S, TtLocalSpaceRuntimePose>
     {
         // Array??
-        public List<TtExtractPoseFromClipCommand> AnimCmds { get; set; } = new List<TtExtractPoseFromClipCommand>();
+        public List<TtExtractPoseFromClipCommand<S>> AnimCmds { get; set; } = new List<TtExtractPoseFromClipCommand<S>>();
         public List<TtAnimatableSkeletonPose> AnimPoses { get; set; } = new List<TtAnimatableSkeletonPose>();
 
         public TtBlendSpaceEvaluateCommandDesc Desc { get; set; }
@@ -52,7 +52,7 @@ namespace EngineNS.Animation.BlendTree.Node
         public List<float> Times { get; set; } = new List<float>();
         public List<float> Weights { get; set; } = new List<float>();
     }
-    public class TtBlendTree_BlendSpace2D : TtBlendTree<TtLocalSpaceRuntimePose>
+    public class TtBlendTree_BlendSpace2D<S> : TtBlendTree<S, TtLocalSpaceRuntimePose>
     {
         public Func<Vector3> EvaluateInput { get; set; } = null;
 
@@ -67,13 +67,14 @@ namespace EngineNS.Animation.BlendTree.Node
         }
 
         public string SyncPlayPercentGrop { get; set; } = "";
-        TtBlendSpaceEvaluateCommand mAnimationCommand = null;
-        public override void Initialize(ref FAnimBlendTreeContext context)
+        TtBlendSpaceEvaluateCommand<S> mAnimationCommand = null;
+        public override async Thread.Async.TtTask<bool> Initialize(FAnimBlendTreeContext context)
         {
-            mAnimationCommand = new TtBlendSpaceEvaluateCommand();
-            base.Initialize(ref context);
+            mAnimationCommand = new TtBlendSpaceEvaluateCommand<S>();
+            await base.Initialize(context);
+            return true;
         }
-        public override TtAnimationCommand<TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
+        public override TtAnimationCommand<S, TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
             var desc = new TtBlendSpaceEvaluateCommandDesc();
             mAnimationCommand.Desc = desc;
@@ -83,7 +84,7 @@ namespace EngineNS.Animation.BlendTree.Node
             {
                 var clip = mRuntimeBlendSamples[i].Animation as TtAnimationClip;
                 System.Diagnostics.Debug.Assert(clip != null);
-                TtExtractPoseFromClipCommand animEvaluateCmd = new TtExtractPoseFromClipCommand(clip);
+                TtExtractPoseFromClipCommand<S> animEvaluateCmd = new TtExtractPoseFromClipCommand<S>(clip);
                 mAnimationCommand.AnimCmds.Add(animEvaluateCmd);
             }
             return mAnimationCommand;

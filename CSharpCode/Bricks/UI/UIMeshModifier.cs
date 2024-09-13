@@ -67,7 +67,7 @@ namespace EngineNS.UI
         {
 
         }
-        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
 
         }
@@ -75,13 +75,13 @@ namespace EngineNS.UI
     public class TtMdfUIMesh : Graphics.Pipeline.Shader.TtMdfQueue1<TtUIModifier>
     {
         public TtUIHost UIHost;
-        public NxRHI.UCbView PerUIMeshCBuffer { get; set; }
+        public NxRHI.TtCbView PerUIMeshCBuffer { get; set; }
         public override void CopyFrom(TtMdfQueueBase mdf)
         {
             base.CopyFrom(mdf);
             PerUIMeshCBuffer = (mdf as TtMdfUIMesh).PerUIMeshCBuffer;
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmdlist, UGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmdlist, TtGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmdlist, drawcall, policy, atom);
             unsafe

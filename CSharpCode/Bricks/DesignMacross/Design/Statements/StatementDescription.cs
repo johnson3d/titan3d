@@ -23,7 +23,7 @@ namespace EngineNS.DesignMacross.Design.Statement
         public List<TtDataInPinDescription> DataInPins { get; set; } = new();
         [Rtti.Meta]
         public List<TtDataOutPinDescription> DataOutPins { get; set; } = new();
-        public virtual  UStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
+        public virtual  TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
             return null;
         }

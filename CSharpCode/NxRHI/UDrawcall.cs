@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.NxRHI
 {
-    public partial class UGraphicDraw : AuxPtrType<NxRHI.IGraphicDraw>
+    public partial class TtGraphicDraw : AuxPtrType<NxRHI.IGraphicDraw>
     {
         public object TagObject = null;
         public override void Dispose()
@@ -51,21 +51,21 @@ namespace EngineNS.NxRHI
             return mCoreObject.FindBinder(name);
         }
         
-        public void BindPipeline(UGpuPipeline pipeline)
+        public void BindPipeline(TtGpuPipeline pipeline)
         {
             mCoreObject.BindPipeline(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, pipeline.mCoreObject);
         }
-        public bool BindCBuffer(VNameString name, UCbView buffer)
+        public bool BindCBuffer(VNameString name, TtCbView buffer)
         {
             return mCoreObject.BindResource(name, buffer.mCoreObject.NativeSuper);
         }
-        public void BindCBuffer(FEffectBinder binder, UCbView buffer)
+        public void BindCBuffer(FEffectBinder binder, TtCbView buffer)
         {
             if (binder.IsValidPointer == false || buffer == null)
                 return;
             mCoreObject.BindResource(binder, buffer.mCoreObject.NativeSuper);
         }
-        public void BindCBuffer(TtEffectBinder binder, UCbView buffer)
+        public void BindCBuffer(TtEffectBinder binder, TtCbView buffer)
         {
             if (binder == null || buffer == null)
                 return;
@@ -93,41 +93,41 @@ namespace EngineNS.NxRHI
                 return;
             BindSRV(binder.mCoreObject, srv);
         }
-        public bool BindUAV(VNameString name, UUaView uav)
+        public bool BindUAV(VNameString name, TtUaView uav)
         {
             return mCoreObject.BindResource(name, uav.mCoreObject.NativeSuper);
         }
-        public void BindUAV(FEffectBinder binder, UUaView uav)
+        public void BindUAV(FEffectBinder binder, TtUaView uav)
         {
             if (binder.IsValidPointer == false || uav == null)
                 return;
             mCoreObject.BindResource(binder, uav.mCoreObject.NativeSuper);
         }
-        public void BindUAV(TtEffectBinder binder, UUaView uav)
+        public void BindUAV(TtEffectBinder binder, TtUaView uav)
         {
             if (binder == null || uav == null)
                 return;
             BindUAV(binder.mCoreObject, uav);
         }
-        public bool BindSampler(VNameString name, USampler sampler)
+        public bool BindSampler(VNameString name, TtSampler sampler)
         {
             if (sampler == null)
                 return false;
             return mCoreObject.BindResource(name, sampler.mCoreObject.NativeSuper);
         }
-        public void BindSampler(FEffectBinder binder, USampler sampler)
+        public void BindSampler(FEffectBinder binder, TtSampler sampler)
         {
             if (binder.IsValidPointer == false || sampler == null)
                 return;
             mCoreObject.BindResource(binder, sampler.mCoreObject.NativeSuper);
         }
-        public void BindSampler(TtEffectBinder binder, USampler sampler)
+        public void BindSampler(TtEffectBinder binder, TtSampler sampler)
         {
             if (binder == null || sampler == null)
                 return;
             BindSampler(binder.mCoreObject, sampler);
         }
-        public void BindGeomMesh(UGeomMesh mesh)
+        public void BindGeomMesh(TtGeomMesh mesh)
         {
             mCoreObject.BindGeomMesh(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, mesh.mCoreObject);
         }
@@ -135,11 +135,11 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.BindGeomMesh(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, mesh);
         }
-        public void BindAttachVertexArray(UVertexArray va)
+        public void BindAttachVertexArray(TtVertexArray va)
         {
             mCoreObject.BindAttachVertexArray(va.mCoreObject);
         }
-        public void BindIndirectDrawArgsBuffer(UBuffer buffer, uint offset)
+        public void BindIndirectDrawArgsBuffer(TtBuffer buffer, uint offset)
         {
             if (buffer == null)
             {
@@ -153,7 +153,7 @@ namespace EngineNS.NxRHI
             mCoreObject.NativeSuper.SetDebugName(name);
         }
     }
-    public class UComputeDraw : AuxPtrType<NxRHI.IComputeDraw>
+    public class TtComputeDraw : AuxPtrType<NxRHI.IComputeDraw>
     {
         public object TagObject = null;
         public override void Dispose()
@@ -179,7 +179,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.SetDispatch(x, y, z);
         }
-        public void BindIndirectDispatchArgsBuffer(UBuffer buffer)
+        public void BindIndirectDispatchArgsBuffer(TtBuffer buffer)
         {
             if (buffer == null)
                 return;
@@ -190,19 +190,19 @@ namespace EngineNS.NxRHI
         {
             return mCoreObject.FindBinder(type, name);
         }
-        public void BindCBuffer(FShaderBinder binder, UCbView resource)
+        public void BindCBuffer(FShaderBinder binder, TtCbView resource)
         {
             if (resource == null || binder.IsValidPointer == false)
                 return;
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }
-        public void BindCBuffer(string name, UCbView resource)
+        public void BindCBuffer(string name, TtCbView resource)
         {
             var binder = mCoreObject.FindBinder(EShaderBindType.SBT_CBuffer, name);
             if (binder.IsValidPointer)
                 BindCBuffer(binder, resource);
         }
-        public void BindCBuffer(string name, ref UCbView resource)
+        public void BindCBuffer(string name, ref TtCbView resource)
         {
             var binder = mCoreObject.FindBinder(EShaderBindType.SBT_CBuffer, name);
             if (binder.IsValidPointer == false)
@@ -225,25 +225,25 @@ namespace EngineNS.NxRHI
             if (binder.IsValidPointer)
                 BindSrv(binder, resource);
         }
-        public void BindUav(FShaderBinder binder, UUaView resource)
+        public void BindUav(FShaderBinder binder, TtUaView resource)
         {
             if (resource == null || binder.IsValidPointer == false)
                 return;
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }
-        public void BindUav(string name, UUaView resource)
+        public void BindUav(string name, TtUaView resource)
         {
             var binder = mCoreObject.FindBinder(EShaderBindType.SBT_UAV, name);
             if (binder.IsValidPointer)
                 BindUav(binder, resource);
         }
-        public void BindSampler(FShaderBinder binder, USampler resource)
+        public void BindSampler(FShaderBinder binder, TtSampler resource)
         {
             if (resource == null || binder.IsValidPointer == false)
                 return;
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }
-        public void BindSampler(string name, USampler resource)
+        public void BindSampler(string name, TtSampler resource)
         {
             var binder = mCoreObject.FindBinder(EShaderBindType.SBT_Sampler, name);
             if (binder.IsValidPointer)
@@ -254,7 +254,7 @@ namespace EngineNS.NxRHI
             mCoreObject.NativeSuper.SetDebugName(name);
         }
     }
-    public class UCopyDraw : AuxPtrType<NxRHI.ICopyDraw>
+    public class TtCopyDraw : AuxPtrType<NxRHI.ICopyDraw>
     {
         public override void Dispose()
         {
@@ -316,43 +316,43 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        public void BindSrc(UGpuResource res)
+        public void BindSrc(TtGpuResource res)
         {
-            var bf = res as UBuffer;
+            var bf = res as TtBuffer;
             if (bf != null)
             {
                 mCoreObject.BindBufferSrc(bf.mCoreObject);
             }
             else
             {
-                var tex = res as UTexture;
+                var tex = res as TtTexture;
                 if (tex != null)
                 {
                     mCoreObject.BindTextureSrc(tex.mCoreObject);
                 }
             }
         }
-        public void BindDest(UGpuResource res)
+        public void BindDest(TtGpuResource res)
         {
-            var bf = res as UBuffer;
+            var bf = res as TtBuffer;
             if (bf != null)
             {
                 mCoreObject.BindBufferDest(bf.mCoreObject);
             }
             else
             {
-                var tex = res as UTexture;
+                var tex = res as TtTexture;
                 if (tex != null)
                 {
                     mCoreObject.BindTextureDest(tex.mCoreObject);
                 }
             }
         }
-        public void BindBufferSrc(UBuffer res)
+        public void BindBufferSrc(TtBuffer res)
         {
             mCoreObject.BindBufferSrc(res.mCoreObject);
         }
-        public void BindTextureSrc(UTexture res)
+        public void BindTextureSrc(TtTexture res)
         {
             mCoreObject.BindTextureSrc(res.mCoreObject);
         }
@@ -360,11 +360,11 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.BindTextureSrc(res);
         }
-        public void BindBufferDest(UBuffer res)
+        public void BindBufferDest(TtBuffer res)
         {
             mCoreObject.BindBufferDest(res.mCoreObject);
         }
-        public void BindTextureDest(UTexture res)
+        public void BindTextureDest(TtTexture res)
         {
             mCoreObject.BindTextureDest(res.mCoreObject);
         }
@@ -376,7 +376,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.NativeSuper.SetDebugName(name);
         }
-        public void Copy(UBuffer tar, UBuffer src, uint size = 0, uint tarOffset = 0, uint srcOffset = 0)
+        public void Copy(TtBuffer tar, TtBuffer src, uint size = 0, uint tarOffset = 0, uint srcOffset = 0)
         {
             if (size == 0)
             {

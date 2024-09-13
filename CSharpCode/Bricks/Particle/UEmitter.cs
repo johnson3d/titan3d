@@ -155,11 +155,11 @@ namespace EngineNS.Bricks.Particle
         public Graphics.Pipeline.TtGpuBuffer<uint> CurAlivesBuffer = new Graphics.Pipeline.TtGpuBuffer<uint>();
         public Graphics.Pipeline.TtGpuBuffer<uint> BackendAlivesBuffer = new Graphics.Pipeline.TtGpuBuffer<uint>();
         
-        public NxRHI.UBuffer DispatchArgBuffer;
-        public NxRHI.UUaView DispatchArgUav;
+        public NxRHI.TtBuffer DispatchArgBuffer;
+        public NxRHI.TtUaView DispatchArgUav;
 
-        public NxRHI.UBuffer DrawArgBuffer;
-        public NxRHI.UUaView DrawArgUav;
+        public NxRHI.TtBuffer DrawArgBuffer;
+        public NxRHI.TtUaView DrawArgUav;
         public unsafe void Initialize(TtEmitter emitter, in FParticleEmitter sysData) 
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
@@ -374,7 +374,7 @@ namespace EngineNS.Bricks.Particle
         [Rtti.Meta]
         public virtual async Thread.Async.TtTask<bool> InitEmitter(RName meshName, uint maxParticle)
         {
-            NxRHI.UGpuDevice rc = TtEngine.Instance.GfxDevice.RenderContext;
+            NxRHI.TtGpuDevice rc = TtEngine.Instance.GfxDevice.RenderContext;
             var umesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshName);
             if (umesh == null)
                 return false;
@@ -383,7 +383,7 @@ namespace EngineNS.Bricks.Particle
             InitEmitter(rc, mesh, maxParticle);
             return true;
         }
-        public virtual unsafe void InitEmitter(NxRHI.UGpuDevice rc, Graphics.Mesh.TtMesh mesh, uint maxParticle)
+        public virtual unsafe void InitEmitter(NxRHI.TtGpuDevice rc, Graphics.Mesh.TtMesh mesh, uint maxParticle)
         {
             MaxParticle = maxParticle;
             mCoreObject.InitEmitter((uint)sizeof(FParticle), maxParticle);
@@ -529,7 +529,7 @@ namespace EngineNS.Bricks.Particle
                 mGpuResources.CurAlivesBuffer.GpuBuffer.UpdateGpuData(cmd, 4, mCoreObject.GetCurrentAliveAddress(), mCoreObject.GetLiveNumber() * (uint)sizeof(uint));//mCoreObject.GetLiveNumber()
             }
         }
-        public void SetCBuffer(NxRHI.UCbView CBuffer)
+        public void SetCBuffer(NxRHI.TtCbView CBuffer)
         {
             CBuffer.SetValue("EmitterData", in EmitterData);
         }

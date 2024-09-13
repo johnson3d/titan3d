@@ -36,7 +36,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             float scaleFactor = 1.0f;
-            var hitProxyNode = policy.FindFirstNode<UHitproxyNode>();
+            var hitProxyNode = policy.FindFirstNode<TtHitproxyNode>();
             if (hitProxyNode != null)
             {
                 scaleFactor = hitProxyNode.ScaleFactor;
@@ -51,10 +51,10 @@ namespace EngineNS.Graphics.Pipeline.Common
             if (PickedBuffer != null)
                 PickedBuffer.SetSize(x * scaleFactor, y * scaleFactor);
         }
-        public UPickedProxiableManager PickedManager;
+        public TtPickedProxiableManager PickedManager;
         public UPickSetupShading PickedShading = null;
         public TtGraphicsBuffers PickedBuffer { get; protected set; } = new TtGraphicsBuffers();
-        public NxRHI.URenderPass RenderPass;
+        public NxRHI.TtRenderPass RenderPass;
         public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return PickedShading;

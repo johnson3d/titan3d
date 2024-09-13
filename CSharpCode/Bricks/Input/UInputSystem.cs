@@ -24,7 +24,7 @@ namespace EngineNS.Bricks.Input
     }
     #endregion EventTrigger
 
-    public partial class UInputSystem 
+    public partial class TtInputSystem 
     {
         public static readonly int MaxMultiTouchNumber = 10;    // 最多支持的触控点数量
         Dictionary<EventType, UEventTrigger> EventTriggerDic = new Dictionary<EventType, UEventTrigger>();
@@ -41,7 +41,7 @@ namespace EngineNS.Bricks.Input
 
         public Device.Mouse.UMouse Mouse;
 
-        public UInputSystem()
+        public TtInputSystem()
         {
             Initialize();
         }
@@ -226,9 +226,9 @@ namespace EngineNS
 {
     partial class TtEngine
     {
-        public Bricks.Input.UInputSystem InputSystem
+        public Bricks.Input.TtInputSystem InputSystem
         {
             get;
-        } = new Bricks.Input.UInputSystem();
+        } = new Bricks.Input.TtInputSystem();
     }
 }

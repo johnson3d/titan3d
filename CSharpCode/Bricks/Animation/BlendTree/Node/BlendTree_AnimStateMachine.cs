@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Animation.BlendTree.Node
 {
-    public class TtAnimStateMachineExtractPoseCommand<T> : TtAnimationCommand<T> where T : IRuntimePose
+    public class TtAnimStateMachineExtractPoseCommand<S, T> : TtAnimationCommand<S, T> where T : IRuntimePose
     {
-        public TtAnimationCommand<T> AnimStateMachineCmd { get; set; }
+        public TtAnimationCommand<S, T> AnimStateMachineCmd { get; set; }
         
         public override void Execute()
         {
@@ -22,16 +22,22 @@ namespace EngineNS.Animation.BlendTree.Node
     {
 
     }
-    public class TtBlendTree_AnimStateMachine<S> : TtBlendTree<TtLocalSpaceRuntimePose>
+    public class TtLocalSpaceBlendTree_AnimStateMachine<S> : TtBlendTree<S, TtLocalSpaceRuntimePose>
     {
-        TtAnimStateMachineExtractPoseCommand<TtLocalSpaceRuntimePose> mAnimationCommand = null;
-        internal TtAnimStateMachine<S> AnimStateMachine = null;
-        public override void Initialize(ref FAnimBlendTreeContext context)
+        TtAnimStateMachineExtractPoseCommand<S, TtLocalSpaceRuntimePose> mAnimationCommand = null;
+        public TtAnimStateMachine<S> AnimStateMachine { get; set; } = null;
+        public override async Thread.Async.TtTask<bool> Initialize(FAnimBlendTreeContext context)
         {
-            mAnimationCommand = new TtAnimStateMachineExtractPoseCommand<TtLocalSpaceRuntimePose>();
+            mAnimationCommand = new TtAnimStateMachineExtractPoseCommand<S, TtLocalSpaceRuntimePose>();
+            mAnimationCommand.OutPose = TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(context.AnimatableSkeletonPose);
+            return true;
         }
-        public override TtAnimationCommand<TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
+        public override TtAnimationCommand<S, TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
+            System.Diagnostics.Debug.Assert(AnimStateMachine != null);
+            if (AnimStateMachine == null)
+                return null;
+
             context.AddCommand(context.TreeDepth, mAnimationCommand);
             context.TreeDepth++;
             mAnimationCommand.AnimStateMachineCmd = AnimStateMachine.BlendTree.ConstructAnimationCommandTree(parentNode, ref context); 
@@ -40,8 +46,10 @@ namespace EngineNS.Animation.BlendTree.Node
         }
         public override void Tick(float elapseSecond, ref FAnimBlendTreeContext context)
         {
-            
-            //AnimStateMachine.Tick(elapseSecond, context);
+            System.Diagnostics.Debug.Assert(AnimStateMachine != null);
+            TtAnimStateMachineContext stateMachineContext = new();
+            stateMachineContext.BlendTreeContext = context;
+            AnimStateMachine.Tick(elapseSecond, stateMachineContext);
         }
     }
 }

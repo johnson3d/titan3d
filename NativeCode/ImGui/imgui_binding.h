@@ -172,13 +172,13 @@ public:
 		return ImGui::End();
 	}
 	// Child Windows
-	static bool          BeginChild(const char* str_id, const ImVec2* size/* = &ImVec2(0, 0)*/, bool border = false, ImGuiWindowFlags_ flags = (ImGuiWindowFlags_)0)
+	static bool          BeginChild(const char* str_id, const ImVec2* size/* = &ImVec2(0, 0)*/, ImGuiChildFlags_ child_flags = (ImGuiChildFlags_)0, ImGuiWindowFlags_ flags = (ImGuiWindowFlags_)0)
 	{
-		return ImGui::BeginChild(str_id, *size, border, flags);
+		return ImGui::BeginChild(str_id, *size, child_flags, flags);
 	}
-	static bool          BeginChild(unsigned int id, const ImVec2* size, bool border, ImGuiWindowFlags_ flags)
+	static bool          BeginChild(unsigned int id, const ImVec2* size, ImGuiChildFlags_ child_flags = (ImGuiChildFlags_)0, ImGuiWindowFlags_ flags = (ImGuiWindowFlags_)0)
 	{
-		return ImGui::BeginChild(id, *size, border, flags);
+		return ImGui::BeginChild(id, *size, child_flags, flags);
 	}
 	static void          EndChild()
 	{
@@ -280,6 +280,10 @@ public:
 	{
 		return ImGui::SetWindowFocus();
 	}
+	static void			 SetWindowFocus(const char* name)
+	{
+		ImGui::SetWindowFocus(name);
+	}
 	static void          SetWindowFontScale(float scale)
 	{
 		return ImGui::SetWindowFontScale(scale);
@@ -295,10 +299,6 @@ public:
 	static void          SetWindowCollapsed(const char* name, bool collapsed, ImGuiCond_ cond)
 	{
 		return ImGui::SetWindowCollapsed(name, collapsed, cond);
-	}
-	static void          SetWindowFocus(const char* name)
-	{
-		return ImGui::SetWindowFocus(name);
 	}
 	// Content region
 	TR_FUNCTION(SV_ReturnConverter=v3dVector2_t)
@@ -323,24 +323,24 @@ public:
 	}
 	static float         GetWindowContentRegionWidth()
 	{
-		return ImGui::GetWindowContentRegionWidth();
+		return ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x;
 	}
 	// Windows Scrolling
 	static float         GetScrollX()
 	{
-		return ImGui::GetWindowContentRegionWidth();
+		return GetWindowContentRegionWidth();
 	}
 	static float         GetScrollY()
 	{
-		return ImGui::GetWindowContentRegionWidth();
+		return GetWindowContentRegionWidth();
 	}
 	static float         GetScrollMaxX()
 	{
-		return ImGui::GetWindowContentRegionWidth();
+		return GetWindowContentRegionWidth();
 	}
 	static float         GetScrollMaxY()
 	{
-		return ImGui::GetWindowContentRegionWidth();
+		return GetWindowContentRegionWidth();
 	}
 	static void          SetScrollX(float scroll_x)
 	{
@@ -648,11 +648,11 @@ public:
 	{
 		return ImGui::InvisibleButton(str_id, *size, flags);
 	}
-	static bool          ArrowButton(const char* str_id, ImGuiDir_ dir)
+	static bool          ArrowButton(const char* str_id, ImGuiDir dir)
 	{
 		return ImGui::ArrowButton(str_id, dir);
 	}
-	static void			 Arrow(ImDrawList* draw_list, const ImVec2* pos, ImU32 col, ImGuiDir_ dir, float scale)
+	static void			 Arrow(ImDrawList* draw_list, const ImVec2* pos, ImU32 col, ImGuiDir dir, float scale)
 	{
 		ImGui::RenderArrow(draw_list, *pos, col, dir, scale);
 	}
@@ -660,9 +660,9 @@ public:
 	{
 		return ImGui::Image(user_texture_id, *size, *uv0, *uv1, *tint_col, *border_col);
 	}
-	static bool          ImageButton(ImTextureID user_texture_id, const ImVec2* size, const ImVec2* uv0, const ImVec2* uv1, int frame_padding, const ImVec4* bg_col, const ImVec4* tint_col)
+	static bool          ImageButton(const char* name, ImTextureID user_texture_id, const ImVec2* size, const ImVec2* uv0, const ImVec2* uv1, const ImVec4* bg_col, const ImVec4* tint_col)
 	{
-		return ImGui::ImageButton(user_texture_id, *size, *uv0, *uv1, frame_padding, *bg_col, *tint_col);
+		return ImGui::ImageButton(name, user_texture_id, *size, *uv0, *uv1, *bg_col, *tint_col);
 	}
 	static bool          Checkbox(const char* label, bool* v)
 	{
@@ -989,7 +989,7 @@ public:
 	{
 		return ImGui::ListBox(label, current_item, fn_getter, data, items_count, height_in_items);
 	}
-	static bool          ListBoxHeader(const char* label, const ImVec2* size) 
+	/*static bool          ListBoxHeader(const char* label, const ImVec2* size) 
 	{
 		return ImGui::ListBoxHeader(label, *size);
 	}
@@ -1000,7 +1000,7 @@ public:
 	static void          ListBoxFooter()
 	{
 		return ImGui::ListBoxFooter();
-	}
+	}*/
 	// Widgets: Data Plotting
 	static void          PlotLines(const char* label, const float* values, int values_count, int values_offset = 0, const char* overlay_text = NULL, float scale_min = FLT_MAX, float scale_max = FLT_MAX, ImVec2 graph_size = ImVec2(0, 0), int stride = sizeof(float))
 	{
@@ -1069,7 +1069,7 @@ public:
 		return ImGui::MenuItem(label, shortcut, p_selected, enabled);
 	}
 	// Tooltips
-	static void          BeginTooltip()
+	static bool          BeginTooltip()
 	{
 		return ImGui::BeginTooltip();
 	}
@@ -1256,9 +1256,9 @@ public:
 	{
 		return ImGui::DockSpace(id, size, flags, window_class);
 	}
-	static ImGuiID       DockSpaceOverViewport(ImGuiViewport* viewport = NULL, ImGuiDockNodeFlags flags = 0, const ImGuiWindowClass* window_class = NULL)
+	static ImGuiID       DockSpaceOverViewport(ImGuiID dock_id, ImGuiViewport* viewport = NULL, ImGuiDockNodeFlags flags = 0, const ImGuiWindowClass* window_class = NULL)
 	{
-		return ImGui::DockSpaceOverViewport(viewport, flags, window_class);
+		return ImGui::DockSpaceOverViewport(dock_id, viewport, flags, window_class);
 	}
 	static void          SetNextWindowDockID(ImGuiID dock_id, ImGuiCond_ cond = (ImGuiCond_)0)
 	{
@@ -1526,10 +1526,10 @@ public:
 	{
 		return ImGui::GetStateStorage();
 	}
-	static void          CalcListClipping(int items_count, float items_height, int* out_items_display_start, int* out_items_display_end)
+	/*static void          CalcListClipping(int items_count, float items_height, int* out_items_display_start, int* out_items_display_end)
 	{
 		return ImGui::CalcListClipping(items_count, items_height, out_items_display_start, out_items_display_end);
-	}
+	}*/
 	static bool          BeginChildFrame(ImGuiID id, const ImVec2* size, ImGuiWindowFlags_ flags = (ImGuiWindowFlags_)0)
 	{
 		return ImGui::BeginChildFrame(id, *size, flags);
@@ -1584,10 +1584,10 @@ public:
 	{
 		return ImGui::GetKeyPressedAmount(key_index, repeat_delay, rate);
 	}
-	static void          CaptureKeyboardFromApp(bool want_capture_keyboard_value = true)
+	/*static void          CaptureKeyboardFromApp(bool want_capture_keyboard_value = true)
 	{
 		return ImGui::CaptureKeyboardFromApp(want_capture_keyboard_value);
-	}
+	}*/
 	// Inputs Utilities: Mouse
 	static bool          IsMouseDown(ImGuiMouseButton_ button)
 	{
@@ -1604,6 +1604,10 @@ public:
 	static bool          IsMouseDoubleClicked(ImGuiMouseButton_ button)
 	{
 		return ImGui::IsMouseDoubleClicked(button);
+	}
+	static int          GetMouseClickedCount(ImGuiMouseButton_ button)
+	{
+		return ImGui::GetMouseClickedCount(button);
 	}
 	static bool          IsMouseHoveringRect(const ImVec2* r_min, const ImVec2* r_max, bool clip = true)
 	{
@@ -1648,10 +1652,10 @@ public:
 	{
 		return ImGui::SetMouseCursor(cursor_type);
 	}
-	static void          CaptureMouseFromApp(bool want_capture_mouse_value = true)
+	/*static void          CaptureMouseFromApp(bool want_capture_mouse_value = true)
 	{
 		return ImGui::CaptureMouseFromApp(want_capture_mouse_value);
-	}
+	}*/
 	// Clipboard Utilities
 	static const char*   GetClipboardText()
 	{
@@ -1887,13 +1891,13 @@ public:
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		return window->SkipItems;
 	}
-	static bool          ItemHoverable(const ImVec2* bbMin, const ImVec2* bbMax, ImGuiID id)
+	static bool          ItemHoverable(const ImVec2* bbMin, const ImVec2* bbMax, ImGuiID id, ImGuiItemFlags item_flags)
 	{
 		if (bbMin == nullptr || bbMax == nullptr)
 			return false;
 
 		ImRect rect(*bbMin, *bbMax);
-		return ImGui::ItemHoverable(rect, id);
+		return ImGui::ItemHoverable(rect, id, item_flags);
 	}
 	static bool             TempInputIsActive(ImGuiID id)
 	{
@@ -1916,14 +1920,14 @@ public:
 		if (window != nullptr)
 			ImGui::SetFocusID(id, window);
 	}
-	static void SetNavInputID(ImGuiID id)
-	{
-		auto context = ImGui::GetCurrentContext();
-		if (context == nullptr)
-			return;
-		context->NavActivateInputId = id;
-		//context->NavInputId = id;
-	}
+	//static void SetNavInputID(ImGuiID id)
+	//{
+	//	auto context = ImGui::GetCurrentContext();
+	//	if (context == nullptr)
+	//		return;
+	//	context->NavActivateInputId = id;
+	//	//context->NavInputId = id;
+	//}
 	static void SetTempInputID(ImGuiID id)
 	{
 		auto context = ImGui::GetCurrentContext();
@@ -1975,7 +1979,7 @@ public:
 		{
 			if (context->ActiveIdSource == ImGuiInputSource_Mouse && !context->IO.MouseDown[0])
 				ImGui::ClearActiveID();
-			else if (context->ActiveIdSource == ImGuiInputSource_Nav && context->NavActivatePressedId == id && !context->ActiveIdIsJustActivated)
+			else if (/*context->ActiveIdSource == ImGuiInputSource_Nav && */context->NavActivatePressedId == id && !context->ActiveIdIsJustActivated)
 				ImGui::ClearActiveID();
 		}
 		if (context->ActiveId != id)
@@ -2013,15 +2017,15 @@ public:
 	static bool CollapsingHeader_SpanAllColumns(const char* label, ImGuiTreeNodeFlags_ flags);
 	static void TableNextRow(const ImGuiTableRowData* rowData);
 	static void TableNextRow_FirstColumn(const ImGuiTableRowData* rowData);
-	static void TableSetCellPaddingY(float value)
-	{
-		ImGuiContext& g = *GImGui;
-		ImGuiTable* table = g.CurrentTable;
-		if (table == nullptr)
-			return;
+	//static void TableSetCellPaddingY(float value)
+	//{
+	//	ImGuiContext& g = *GImGui;
+	//	ImGuiTable* table = g.CurrentTable;
+	//	if (table == nullptr)
+	//		return;
 
-		table->CellPaddingY = value;
-	}
+	//	table->CellPaddingY = value;
+	//}
 	static bool CheckBoxTristate(const char* label, int* v_tristate)
 	{
 		bool ret = false;
@@ -2047,6 +2051,32 @@ public:
 	static bool ToggleButton(const char* label, bool* v, const ImVec2* size_arg, ImGuiButtonFlags flags);
 
 	static void SetKeyOwner(ImGuiKey key, ImGuiID owner_id, ImGuiInputFlags flags = 0);
+
+	static void MakeTabVisible(const char* window_name)
+	{
+		ImGuiWindow* window = ImGui::FindWindowByName(window_name);
+		if (window == NULL || window->DockNode == NULL || window->DockNode->TabBar == NULL)
+			return;
+		window->DockNode->TabBar->NextSelectedTabId = window->ID;
+	}
+	static bool IsFirstFrame(const char* window_name)
+	{
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* window = ImGui::FindWindowByName(window_name);
+		if (window == nullptr)
+			return false;
+
+		return (window->LastFrameActive != g.FrameCount);
+	}
+	static bool IsLastFrame(const char* window_name)
+	{
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* window = ImGui::FindWindowByName(window_name);
+		if (window == nullptr)
+			return false;
+
+		return (window->LastFrameActive + 1 != g.FrameCount);
+	}
 };
 
 NS_END

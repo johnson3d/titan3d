@@ -10,7 +10,7 @@ namespace EngineNS.Bricks.Procedure
         public int RootDistance;
         protected int mPreviewResultIndex = -1;
         public float ScaleForPreview { get; set; } = 1.0f;
-        protected NxRHI.UTexture PreviewTexture;
+        protected NxRHI.TtTexture PreviewTexture;
         protected NxRHI.TtSrView PreviewSRV;
         public class UCompileButton
         {

@@ -56,7 +56,7 @@ namespace EngineNS.GamePlay
         [Rtti.Meta]
         public TtGameViewportSlate WorldViewportSlate { get; } = new TtGameViewportSlate(true);
         [Rtti.Meta]
-        public Graphics.Pipeline.UCamera DefaultCamera 
+        public Graphics.Pipeline.TtCamera DefaultCamera 
         {
             get => WorldViewportSlate.RenderPolicy.DefaultCamera;
         }

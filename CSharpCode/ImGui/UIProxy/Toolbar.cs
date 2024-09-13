@@ -166,8 +166,8 @@ namespace EngineNS.EGui.UIProxy
                 hitRectMax.X = System.Math.Max(hitRectMax.X, tempScrPos.X + textSize.X);
                 hitRectMax.Y = System.Math.Max(hitRectMax.Y, tempScrPos.Y + textSize.Y);
             }
+            ImGuiAPI.ItemAdd(cursorScrPos, tempScrPos, 0, (int)ImGuiItemFlags_.ImGuiItemFlags_None);
             ImGuiAPI.SetCursorScreenPos(in tempScrPos);
-
             Vector4 color = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor);
             if(disable)
                 color = ImGuiAPI.ColorConvertU32ToFloat4(StyleConfig.Instance.ToolbarButtonTextColor_Disable);

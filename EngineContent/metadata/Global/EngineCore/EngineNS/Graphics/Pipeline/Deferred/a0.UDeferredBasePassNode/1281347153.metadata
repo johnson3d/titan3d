@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_1281347153 Type="EngineNS.Graphics.Pipeline.Deferred.UDeferredBasePassNode@EngineCore">
-  <ClearMRT Type="System.Boolean@Unknown" Order="0" />
-</Hash_1281347153>

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_3883519696 Type="EngineNS.Animation.Asset.BlendSpace.TtBlendSpace_Axis@EngineCore">
-  <AxisName Type="System.String@Unknown" Order="0" />
-  <GridNum Type="System.Int32@Unknown" Order="0" />
-  <Max Type="System.Single@Unknown" Order="0" />
-  <Min Type="System.Single@Unknown" Order="0" />
-</Hash_3883519696>

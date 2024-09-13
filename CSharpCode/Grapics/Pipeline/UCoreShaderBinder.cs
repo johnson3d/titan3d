@@ -299,25 +299,25 @@ namespace EngineNS.Graphics.Pipeline
 
         public class UShaderResourceIndexer : NxRHI.TtShader.UShaderBinderIndexer
         {
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.UBuffer))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.TtBuffer))]
             public NxRHI.TtEffectBinder cbPerViewport;
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.UBuffer))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.TtBuffer))]
             public NxRHI.TtEffectBinder cbPerFrame;
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.UBuffer))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.TtBuffer))]
             public NxRHI.TtEffectBinder cbPerCamera;
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.UBuffer))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.TtBuffer))]
             public NxRHI.TtEffectBinder cbPerMesh;
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.UBuffer))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.TtBuffer))]
             public NxRHI.TtEffectBinder cbPreFramePerMesh;
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.UBuffer))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.TtBuffer))]
             public NxRHI.TtEffectBinder cbPerMaterial;
             [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.TtSrView))]
             public NxRHI.TtEffectBinder gEnvMap;
             [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.TtSrView))]
             public NxRHI.TtEffectBinder gShadowMap;
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.USampler))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.TtSampler))]
             public NxRHI.TtEffectBinder Samp_gEnvMap;
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.USampler))]
+            [NxRHI.TtShader.UShaderVar(VarType = typeof(NxRHI.TtSampler))]
             public NxRHI.TtEffectBinder Samp_gShadowMap;
         }
         public readonly UShaderResourceIndexer CBufferCreator = new UShaderResourceIndexer();

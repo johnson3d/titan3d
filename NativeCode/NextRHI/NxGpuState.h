@@ -168,13 +168,13 @@ namespace NxRHI
 	{
 		FDepthStencilDesc()
 		{
-			SetDefault();
+			SetDefault(false);
 		}
-		void SetDefault()
+		void SetDefault(bool bInverseZ)
 		{
 			DepthEnable = TRUE;
 			DepthWriteMask = DSWM_ALL;
-			DepthFunc = CMP_LESS_EQUAL;
+			DepthFunc = bInverseZ ? CMP_GREATER_EQUAL :  CMP_LESS_EQUAL;
 			StencilEnable = FALSE;
 			StencilReadMask = 0xFF;
 			StencilWriteMask = 0xFF;
@@ -284,9 +284,9 @@ namespace NxRHI
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FGpuPipelineDesc
 	{
-		void SetDefault() {
+		void SetDefault(bool bReverseZ) {
 			Rasterizer.SetDefault();
-			DepthStencil.SetDefault();
+			DepthStencil.SetDefault(bReverseZ);
 			Blend.SetDefault();
 			StencilRef = 0;
 			SampleMask = 0xff;

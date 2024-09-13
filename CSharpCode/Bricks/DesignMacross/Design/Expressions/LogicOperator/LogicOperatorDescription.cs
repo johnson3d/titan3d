@@ -10,7 +10,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     public class TtLogicOperatorDescription : TtExpressionDescription
     {
         [Rtti.Meta]
-        public UBinaryOperatorExpression.EBinaryOperation Op { get; set; }
+        public TtBinaryOperatorExpression.EBinaryOperation Op { get; set; }
         public TtLogicOperatorDescription()
         {
             AddDtaInPin(new() { Name = "L" });
@@ -18,11 +18,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
             AddDtaOutPin(new() { Name = "=" });
         }
 
-        public override UExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
             var methodDesc = expressionBuildContext.MethodDescription as TtMethodDescription;
             
-            UBinaryOperatorExpression expression = new();
+            TtBinaryOperatorExpression expression = new();
             expression.Operation = Op;
             var dataInPin_Left = DataInPins[0];
             var dataInPin_Right = DataInPins[1];
@@ -51,7 +51,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public TtEqualOperatorDescription()
         {
             Name = "==";
-            Op = UBinaryOperatorExpression.EBinaryOperation.Equality;
+            Op = TtBinaryOperatorExpression.EBinaryOperation.Equality;
         }
     }
 
@@ -62,7 +62,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public TtNotEqualOperatorDescription()
         {
             Name = "!=";
-            Op = UBinaryOperatorExpression.EBinaryOperation.NotEquality;
+            Op = TtBinaryOperatorExpression.EBinaryOperation.NotEquality;
         }
     }
 
@@ -73,7 +73,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public TtGreateOperatorDescription()
         {
             Name = ">";
-            Op = UBinaryOperatorExpression.EBinaryOperation.GreaterThan;
+            Op = TtBinaryOperatorExpression.EBinaryOperation.GreaterThan;
         }
     }
 
@@ -84,7 +84,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public TtGreateEqualOperatorDescription()
         {
             Name = ">=";
-            Op = UBinaryOperatorExpression.EBinaryOperation.GreaterThanOrEqual;
+            Op = TtBinaryOperatorExpression.EBinaryOperation.GreaterThanOrEqual;
         }
     }
 
@@ -95,7 +95,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public TtLessOperatorDescription()
         {
             Name = "<";
-            Op = UBinaryOperatorExpression.EBinaryOperation.LessThan;
+            Op = TtBinaryOperatorExpression.EBinaryOperation.LessThan;
         }
     }
 
@@ -106,7 +106,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public TtLessEqualOperatorDescription()
         {
             Name = "<=";
-            Op = UBinaryOperatorExpression.EBinaryOperation.LessThanOrEqual;
+            Op = TtBinaryOperatorExpression.EBinaryOperation.LessThanOrEqual;
         }
     }
 
@@ -117,7 +117,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public TtAndOperatorDescription()
         {
             Name = "And";
-            Op = UBinaryOperatorExpression.EBinaryOperation.BooleanAnd;
+            Op = TtBinaryOperatorExpression.EBinaryOperation.BooleanAnd;
         }
     }
 
@@ -128,7 +128,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public TtOrOperatorDescription()
         {
             Name = "Or";
-            Op = UBinaryOperatorExpression.EBinaryOperation.BooleanOr;
+            Op = TtBinaryOperatorExpression.EBinaryOperation.BooleanOr;
         }
     }
 }

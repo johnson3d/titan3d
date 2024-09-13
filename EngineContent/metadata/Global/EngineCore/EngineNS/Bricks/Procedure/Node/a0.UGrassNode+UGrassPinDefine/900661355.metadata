@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_900661355 Type="EngineNS.Bricks.Procedure.Node.UGrassNode.UGrassPinDefine@EngineCore">
-  <GrassData Type="EngineNS.Bricks.Terrain.CDLOD.UTerrainGrass@EngineCore" Order="0" />
-  <Name Type="System.String@Unknown" Order="0" />
-  <TypeValue Type="System.String@Unknown" Order="0" />
-</Hash_900661355>

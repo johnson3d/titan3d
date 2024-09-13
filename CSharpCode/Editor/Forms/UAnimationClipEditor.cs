@@ -72,7 +72,7 @@ namespace EngineNS.Editor.Forms
 
             var rightId = id;
             uint leftId = 0;
-            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
+            ImGuiAPI.DockBuilderSplitNode(rightId, ImGuiDir.ImGuiDir_Left, 0.2f, ref leftId, ref rightId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Left", mDockKeyClass), leftId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Right", mDockKeyClass), rightId);
@@ -87,7 +87,7 @@ namespace EngineNS.Editor.Forms
 
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
-            var result = EGui.UIProxy.DockProxy.BeginMainForm(AnimationClip.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(GetWindowsName(), this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
             if (result)
             {
@@ -316,6 +316,11 @@ namespace EngineNS.Editor.Forms
         public void TickSync(float ellapse)
         {
             PreviewViewport.TickSync(ellapse);
+        }
+
+        public string GetWindowsName()
+        {
+            return AnimationClip.AssetName.Name;
         }
         #endregion ITickable
     }

@@ -48,6 +48,8 @@ namespace EngineNS
             IO.TtFileManager.SaveObjectToXml(sltFile, this);
         }
         [Rtti.Meta]
+        public bool IsReverseZ { get; set; } = true;
+        [Rtti.Meta]
         public EMultiRenderMode MultiRenderMode { get; set; } = EMultiRenderMode.QueueNextFrame;
         [Rtti.Meta]
         public bool UsePhysxMT { get; set; } = true;
@@ -146,10 +148,6 @@ namespace EngineNS
             UIDefaultTexture = RName.GetRName("texture/white.srv", RName.ERNameType.Engine);
         }
     }
-    public partial class URuntimeConfig
-    {
-        public bool VS_StructureBuffer { get; set; } = false;
-    }
     [Rtti.Meta]
     public partial class TtEngine : UModuleHost<TtEngine>
     {
@@ -174,7 +172,6 @@ namespace EngineNS
         public EPlayMode PlayMode { get; set; } = EPlayMode.Editor;
         [Rtti.Meta]
         public TtEngineConfig Config { get; set; }
-        public URuntimeConfig RuntimeConfig { get; set; }
         private IO.TtFileManager mFileManager;
         public IO.TtFileManager FileManager
         {
@@ -221,7 +218,6 @@ namespace EngineNS
             System.Threading.Thread.CurrentThread.Name = "Main";
             mInstance = engine;
             engine.Config = new TtEngineConfig();
-            engine.RuntimeConfig = new URuntimeConfig();
 
             return await mInstance.PreInitEngine(cfgFile);
         }
@@ -263,7 +259,15 @@ namespace EngineNS
             EngineNS.Profiler.Log.InitLogger();
             TtEngine.Instance.AssetMetaManager.LoadMetas();
             var t4 = Support.TtTime.HighPrecision_GetTickCount();
-            
+
+            {
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Collect Type Info:{(t2 - t1) / 1000} ms");
+
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Load Rtti MetaDatas:{(t3 - t2) / 1000} ms");
+
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Load AssetMetas:{(t4 - t3) / 1000} ms");
+            }
+
             EngineNS.UCs2CppBase.InitializeNativeCoreProvider();
 
             StartSystemThreads();
@@ -328,16 +332,6 @@ namespace EngineNS
 
             await base.InitializeModules();
 
-            {
-                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Collect Type Info:{(t2 - t1) / 1000} ms");
-
-                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Load Rtti MetaDatas:{(t3 - t2) / 1000} ms");
-
-                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Load AssetMetas:{(t4 - t3) / 1000} ms");
-
-                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, "PreInitEngine OK");
-            }
-
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             if (Config.DoUnitTest)
             {
@@ -351,6 +345,7 @@ namespace EngineNS
 
             var tEnd = Support.TtTime.HighPrecision_GetTickCount();
             Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Engine PreInit Time:{(tEnd - t1) / 1000} ms");
+            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, "PreInitEngine OK");
 
             return true;
         }
@@ -398,6 +393,7 @@ namespace EngineNS
                 return mScopeSleep;
             }
         }
+        int QuitFrame = -1;
         public bool Tick()
         {
             using(new Profiler.TimeScopeHelper(Scope_Tick))
@@ -421,7 +417,7 @@ namespace EngineNS
                     InputSystem.BeforeTick();
                     if (-1 == InputSystem.Tick(this))
                     {
-                        return false;
+                        QuitFrame = 2;
                     }
                 }
                 
@@ -472,12 +468,24 @@ namespace EngineNS
                 ElapsedSecond = ((float)ElapseTickCountMS) * 0.001f;
 
                 FrameCount++;
-                return true;
+                if (QuitFrame < 0)
+                {
+                    return true;
+                }
+                else if (QuitFrame == 0)
+                {
+                    return false;
+                }
+                else
+                {
+                    QuitFrame--;
+                    return true;
+                }
             }
         }
         public void PostQuitMessage()
         {
-            Bricks.Input.UInputSystem.PostQuitMessage();
+            Bricks.Input.TtInputSystem.PostQuitMessage();
         }
         public void FinalCleanup()
         {

@@ -16,6 +16,10 @@ namespace EngineNS.EGui.UIProxy
         {
             ImGuiAPI.SetNextWindowClass(MainFormDockClass);
             ImGuiAPI.SetNextWindowDockID(MainFormDockClass.m_ClassId, ImGuiCond_.ImGuiCond_FirstUseEver);
+            if(ImGuiAPI.IsLastFrame(name))
+            {
+                ImGuiAPI.SetNextWindowFocus();
+            }
             var vis = form.Visible;
             //var mainFlag = ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar;
             //if ((flags & ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar) == ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar)
@@ -101,7 +105,7 @@ namespace EngineNS.EGui.UIProxy
             var retValue = ImGuiAPI.Begin(name, ref open, flags);
             ImGuiAPI.PopStyleVar(1);
             if(retValue)
-                ImGuiAPI.BeginChild("###" + name, Vector2.Zero, false, flags | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove);
+                ImGuiAPI.BeginChild("###" + name, Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, flags | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove);
             return retValue;
         }
         public static unsafe bool BeginPanel(in ImGuiWindowClass dockClass, string name, bool* open, ImGuiWindowFlags_ flags)
@@ -115,7 +119,7 @@ namespace EngineNS.EGui.UIProxy
             var retValue = ImGuiAPI.Begin(name, open, flags);
             ImGuiAPI.PopStyleVar(1);
             if(retValue)
-                ImGuiAPI.BeginChild("###" + name, Vector2.Zero, false, flags | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove);
+                ImGuiAPI.BeginChild("###" + name, Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, flags | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove);
             return retValue;
         }
         // 可以dock到任何地方
@@ -129,7 +133,7 @@ namespace EngineNS.EGui.UIProxy
             var retValue = ImGuiAPI.Begin(name, ref open, flags);
             ImGuiAPI.PopStyleVar(1);
             if(retValue)
-                ImGuiAPI.BeginChild("###" + name, Vector2.Zero, false, flags | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove);
+                ImGuiAPI.BeginChild("###" + name, Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, flags | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove);
             return retValue;
         }
         public static unsafe bool BeginPanel(string name, bool* open, ImGuiWindowFlags_ flags)
@@ -142,7 +146,7 @@ namespace EngineNS.EGui.UIProxy
             var retValue = ImGuiAPI.Begin(name, open, flags);
             ImGuiAPI.PopStyleVar(1);
             if(retValue)
-                ImGuiAPI.BeginChild("###" + name, Vector2.Zero, false, flags | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove);
+                ImGuiAPI.BeginChild("###" + name, Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, flags | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove);
             return retValue;
         }
         public static void EndPanel(bool show)

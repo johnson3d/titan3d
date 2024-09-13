@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_4144644703 Type="EngineNS.Plugins.LoginServer.ULoginServer.FLoginResultArgument@GameServer">
-  <GatewayURL Type="System.String@Unknown" Order="0" />
-  <Sessiond Type="System.Guid@Unknown" Order="0" />
-</Hash_4144644703>

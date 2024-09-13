@@ -66,13 +66,13 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
         {
             return base.ToString() + $":USE_VS_ViewID=1";
         }
-        protected override void EnvShadingDefines(in FPermutationId id, UShaderDefinitions defines)
+        protected override void EnvShadingDefines(in FPermutationId id, TtShaderDefinitions defines)
         {
             base.EnvShadingDefines(id, defines);
             defines.AddDefine("USE_VS_ViewID", "1");
             //defines.AddDefine("USE_PS_ViewID", "0"); 
         }
-        public override void OnBuildDrawCall(TtRenderPolicy policy, UGraphicDraw drawcall)
+        public override void OnBuildDrawCall(TtRenderPolicy policy, TtGraphicDraw drawcall)
         {
             base.OnBuildDrawCall(policy, drawcall);
             drawcall.mCoreObject.ViewInstanceMask = (1 | (1 << 1));
@@ -80,7 +80,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
     }
 
     [Bricks.CodeBuilder.ContextMenu("BassPass", "Deferred\\MultiViewID\\BassPass", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class TtBasePassNode : Common.UBasePassNode
+    public class TtBasePassNode : Common.TtBasePassNode
     {
         public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
         public TtRenderGraphPin GpuCullPinIn = TtRenderGraphPin.CreateInput("GpuCull");
@@ -88,7 +88,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
         public TtRenderGraphPin Rt1PinOut = TtRenderGraphPin.CreateInputOutput("MRT1", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);//rgb - metallicty
         public TtRenderGraphPin DepthStencilPinOut = TtRenderGraphPin.CreateInputOutput("DepthStencil", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
         public TtBasePassShading mOpaqueShading;
-        public NxRHI.URenderPass RenderPass;
+        public NxRHI.TtRenderPass RenderPass;
         public TtLayerDrawBuffers LayerBasePass = new TtLayerDrawBuffers();
 
         public TtCpuCullingNode CpuCullNode = null;
@@ -177,17 +177,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
             PassDesc.m_AttachmentDepthStencil.StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             PassDesc.m_AttachmentDepthStencil.StencilLoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
             PassDesc.m_AttachmentDepthStencil.StencilStoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
-            
-            EngineNS.NxRHI.FViewInstanceLocation* viewInstance = stackalloc EngineNS.NxRHI.FViewInstanceLocation[2];
-            viewInstance[0].ViewportArrayIndex = 0;
-            viewInstance[0].RenderTargetArrayIndex = 0;
-
-            viewInstance[1].ViewportArrayIndex = 1;
-            viewInstance[1].RenderTargetArrayIndex = 0;
 
             PassDesc.m_ViewInstanceDesc.ViewInstanceCount = 2;
-            PassDesc.m_ViewInstanceDesc.m_pViewInstanceLocations = viewInstance;
-            
+            PassDesc.m_ViewInstanceDesc.pViewInstanceLocations[0].ViewportArrayIndex = 0;
+            PassDesc.m_ViewInstanceDesc.pViewInstanceLocations[0].RenderTargetArrayIndex = 0;
+
+            PassDesc.m_ViewInstanceDesc.pViewInstanceLocations[1].ViewportArrayIndex = 1;
+            PassDesc.m_ViewInstanceDesc.pViewInstanceLocations[1].RenderTargetArrayIndex = 0;
+
             RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in PassDesc);
 
             GBuffers.Initialize(policy, RenderPass);
@@ -248,7 +245,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UDeferredBasePassNode), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtDeferredBasePassNode), nameof(TickLogic));
                 return mScopeTick;
             }
         }
@@ -259,7 +256,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
             get
             {
                 if (mScopePushGpuDraw == null)
-                    mScopePushGpuDraw = new Profiler.TimeScope(typeof(UDeferredBasePassNode), "PushGpuDraw");
+                    mScopePushGpuDraw = new Profiler.TimeScope(typeof(TtDeferredBasePassNode), "PushGpuDraw");
                 return mScopePushGpuDraw;
             }
         } 

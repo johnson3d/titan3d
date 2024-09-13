@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Hash_952576493 Type="EngineNS.Bricks.PhysicsCore.TtPhyBoxShape.TtBoxSerializer@EngineCore">
-  <HalfExtent Type="EngineNS.Vector3@EngineCore" Order="0" />
-  <PxMaterialName Type="EngineNS.RName@EngineCore" Order="0" />
-</Hash_952576493>

@@ -18,11 +18,11 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
 
             this.UpdatePermutation();
         }
-        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
             base.EnvShadingDefines(in id, defines);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+        public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
         {
             var node = drawcall.TagObject as TtErosionIncWaterNode;
             var uav = policy.AttachmentCache.FindAttachement(node.WaterPinInOut).Uav;
@@ -52,7 +52,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
 
         public TtErosionIncWaterShading ShadingEnv;
         public NxRHI.UCommandList mCmdList;
-        private NxRHI.UComputeDraw mDrawcall;
+        private NxRHI.TtComputeDraw mDrawcall;
         public Vector3ui DispatchThread = new Vector3ui(1, 1, 1);
         public RName mRain;
         [Rtti.Meta]
@@ -75,8 +75,8 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         public float RainScalar { get; set; } = 10.0f;
         public int TextureWidth { get; set; } = 1;
         public int TextureHeight { get; set; } = 1;
-        public NxRHI.UCbView CBuffer = null;
-        public NxRHI.UCbView GetCBuffer(NxRHI.FShaderBinder binder)
+        public NxRHI.TtCbView CBuffer = null;
+        public NxRHI.TtCbView GetCBuffer(NxRHI.FShaderBinder binder)
         {
             if (CBuffer == null)
             {
@@ -142,11 +142,11 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
 
             this.UpdatePermutation();
         }
-        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
             base.EnvShadingDefines(in id, defines);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+        public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
         {
             var node = drawcall.TagObject as TtHeigh2FlowMapNode;
             
@@ -179,7 +179,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
 
         public TtHeigh2FlowMapShading ShadingEnv;
         public NxRHI.UCommandList mCmdList;
-        private NxRHI.UComputeDraw mDrawcall;
+        private NxRHI.TtComputeDraw mDrawcall;
         public Vector3ui DispatchThread = new Vector3ui(1,1,1);
         public TtHeigh2FlowMapNode()
         {
@@ -235,11 +235,11 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
 
             this.UpdatePermutation();
         }
-        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.UShaderDefinitions defines)
+        protected override void EnvShadingDefines(in FPermutationId id, NxRHI.TtShaderDefinitions defines)
         {
             base.EnvShadingDefines(in id, defines);
         }
-        public override void OnDrawCall(NxRHI.UComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
+        public override void OnDrawCall(NxRHI.TtComputeDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy)
         {
             var node = drawcall.TagObject as TtWaterBasinNode;
 
@@ -278,8 +278,8 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
 
         public TtWaterBasinShading ShadingEnv;
         public NxRHI.UCommandList mCmdList;
-        private NxRHI.UComputeDraw mDrawcall;
-        private NxRHI.UCopyDraw mCopyDrawcall;
+        private NxRHI.TtComputeDraw mDrawcall;
+        private NxRHI.TtCopyDraw mCopyDrawcall;
         public Vector3ui DispatchThread = new Vector3ui(1, 1, 1);
 
         public Graphics.Pipeline.TtGpuBuffer<uint> PrevWaterTexture = new TtGpuBuffer<uint>();
@@ -323,7 +323,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             {
                 PrevWaterTexture.SetSize(count, IntPtr.Zero.ToPointer(), NxRHI.EBufferType.BFT_SRV);
             }
-            mCopyDrawcall.Copy(PrevWaterTexture.GpuBuffer, water.Buffer as NxRHI.UBuffer);
+            mCopyDrawcall.Copy(PrevWaterTexture.GpuBuffer, water.Buffer as NxRHI.TtBuffer);
         }
         public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {

@@ -15,7 +15,7 @@ namespace EngineNS.Bricks.VirtualTexture
     public class TtTextureSlotAllocator : IDisposable
     {
         public NxRHI.FTextureDesc TexDesc = new NxRHI.FTextureDesc();
-        public NxRHI.UTexture TextureArray = null;
+        public NxRHI.TtTexture TextureArray = null;
         public NxRHI.TtSrView TextureArraySRV = null;
         public Stack<TtTextureSlot> FreeSlots = new Stack<TtTextureSlot>();
         public void Dispose()

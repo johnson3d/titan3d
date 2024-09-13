@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_15188708433374201128 Type="EngineNS.Animation.Macross.BlendTree.TtBlendTree_AnimStateMachineClassDescription@EngineCore">
+  <AnimStateMachineId Type="System.Guid@Unknown" Order="0" />
+  <Comment Type="EngineNS.Bricks.CodeBuilder.TtCommentStatement@EngineCore" Order="0" />
+  <DataInPins Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Design.ConnectingLine.TtDataInPinDescription@EngineCore,&gt;@Unknown" Order="0" />
+  <DesignedClassDescription Type="EngineNS.DesignMacross.Base.Description.IClassDescription@EngineCore" Order="0" />
+  <Id Type="System.Guid@Unknown" Order="0" />
+  <InitValue Type="EngineNS.Bricks.CodeBuilder.TtExpressionBase@EngineCore" Order="0" />
+  <IsStruct Type="System.Boolean@Unknown" Order="0" />
+  <Methods Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IMethodDescription@EngineCore,&gt;@Unknown" Order="0" />
+  <Namespace Type="EngineNS.Bricks.CodeBuilder.TtNamespaceDeclaration@EngineCore" Order="0" />
+  <PoseInPins Type="System.Collections.Generic.List&lt;EngineNS.Animation.Macross.BlendTree.TtPoseInPinDescription@EngineCore,&gt;@Unknown" Order="0" />
+  <PoseOutPins Type="System.Collections.Generic.List&lt;EngineNS.Animation.Macross.BlendTree.TtPoseOutPinDescription@EngineCore,&gt;@Unknown" Order="0" />
+  <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Order="0" />
+  <Variables Type="System.Collections.Generic.List&lt;EngineNS.DesignMacross.Base.Description.IVariableDescription@EngineCore,&gt;@Unknown" Order="0" />
+  <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore" Order="0" />
+  <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Order="0" />
+</Hash_15188708433374201128>

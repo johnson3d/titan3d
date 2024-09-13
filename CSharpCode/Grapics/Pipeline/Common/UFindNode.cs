@@ -5,7 +5,8 @@ using System.Text;
 namespace EngineNS.Graphics.Pipeline.Common
 {
     [Bricks.CodeBuilder.ContextMenu("Find", "Find", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UFindNode : TtRenderGraphNode
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UFindNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UFindNode" })]
+    public class TtFindNode : TtRenderGraphNode
     {
         public TtRenderGraphPin InputPinInOut = TtRenderGraphPin.CreateInputOutput("Input");
         public TtRenderGraphPin ResultPinOut = TtRenderGraphPin.CreateOutput("Result", false, EPixelFormat.PXF_UNKNOWN);
@@ -18,7 +19,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             set
             {
                 mProxyNodeName = value;
-                mNode = RenderGraph?.FindNodeIgnore(mProxyNodeName, typeof(UFindNode));
+                mNode = RenderGraph?.FindNodeIgnore(mProxyNodeName, typeof(TtFindNode));
             }
         }
         public TtRenderGraphNode GetReferNode()
@@ -38,7 +39,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             get; set;
         } = "";
-        public UFindNode()
+        public TtFindNode()
         {
             
         }

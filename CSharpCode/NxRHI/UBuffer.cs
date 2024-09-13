@@ -73,7 +73,7 @@ namespace EngineNS.NxRHI
         [System.Runtime.InteropServices.FieldOffset(UnionOffset)]
         public FTex2DArrayRTV Texture2DArray;
     }
-    public interface UGpuResource : IDisposable
+    public interface TtGpuResource : IDisposable
     {
         IGpuBufferData GetGpuBufferDataPointer();
         unsafe void Map(uint subRes, FMappedSubResource* mapped, bool forRead);
@@ -88,13 +88,13 @@ namespace EngineNS.NxRHI
         }
         NxRHI.IBuffer CreateReadable(int subRes, EngineNS.NxRHI.ICopyDraw cpDraw);
     }
-    public class UBuffer : AuxPtrType<NxRHI.IBuffer>, UGpuResource
+    public class TtBuffer : AuxPtrType<NxRHI.IBuffer>, TtGpuResource
     {
-        public UBuffer()
+        public TtBuffer()
         {
 
         }
-        public UBuffer(IBuffer ptr)
+        public TtBuffer(IBuffer ptr)
         {
             mCoreObject = ptr;
             mCoreObject.NativeSuper.NativeSuper.AddRef();
@@ -171,15 +171,15 @@ namespace EngineNS.NxRHI
         {
             return mCoreObject.Alloc(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, size, bGrow);
         }
-        public UVbView AllocVBV(uint stride, uint size, bool bGrow)
+        public TtVbView AllocVBV(uint stride, uint size, bool bGrow)
         {
             var ptr = mCoreObject.AllocVBV(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, stride, size, bGrow);
-            return new UVbView(ptr);
+            return new TtVbView(ptr);
         }
-        public UIbView AllocIBV(uint stride, uint size, bool bGrow)
+        public TtIbView AllocIBV(uint stride, uint size, bool bGrow)
         {
             var ptr = mCoreObject.AllocIBV(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, stride, size, bGrow);
-            return new UIbView(ptr);
+            return new TtIbView(ptr);
         }
         public void Reset()
         {
@@ -190,7 +190,7 @@ namespace EngineNS.NxRHI
             return mCoreObject.GetBuffer();
         }
     }
-    public class UTexture : AuxPtrType<NxRHI.ITexture>, UGpuResource
+    public class TtTexture : AuxPtrType<NxRHI.ITexture>, TtGpuResource
     {
         //public static UTexture CreateTexture2D(EPixelFormat format, uint w, uint h)
         //{
@@ -201,7 +201,7 @@ namespace EngineNS.NxRHI
         //    texDesc.Format = format;
         //    return TtEngine.Instance.GfxDevice.RenderContext.CreateTexture(in texDesc);
         //}
-        public UTexture(ITexture ptr)
+        public TtTexture(ITexture ptr)
         {
             mCoreObject = ptr;
             mCoreObject.NativeSuper.NativeSuper.AddRef();
@@ -242,7 +242,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.NativeSuper.TransitionTo(cmd.mCoreObject, state);
         }
-        public unsafe UGpuResource CreateBufferData(uint mipIndex, ECpuAccess cpuAccess, ref EngineNS.NxRHI.FSubResourceFootPrint outFootPrint)
+        public unsafe TtGpuResource CreateBufferData(uint mipIndex, ECpuAccess cpuAccess, ref EngineNS.NxRHI.FSubResourceFootPrint outFootPrint)
         {
             var device = TtEngine.Instance.GfxDevice.RenderContext;
             var ptr = mCoreObject.CreateBufferData(device.mCoreObject, mipIndex, cpuAccess, ref outFootPrint);
@@ -250,13 +250,13 @@ namespace EngineNS.NxRHI
                 return null;
             if (device.RhiType == ERhiType.RHI_D3D11)
             {
-                var result = new UTexture(new ITexture(ptr.CppPointer));
+                var result = new TtTexture(new ITexture(ptr.CppPointer));
                 ptr.Release();
                 return result;
             }
             else
             {
-                var result = new UBuffer(new IBuffer(ptr.CppPointer));
+                var result = new TtBuffer(new IBuffer(ptr.CppPointer));
                 ptr.Release();
                 return result;
             }
@@ -270,7 +270,7 @@ namespace EngineNS.NxRHI
             get => mCoreObject.NativeSuper.GpuState;
         }
     }
-    public class UCbView : AuxPtrType<NxRHI.ICbView>
+    public class TtCbView : AuxPtrType<NxRHI.ICbView>
     {
         public void SetDebugName(string name)
         {
@@ -403,13 +403,13 @@ namespace EngineNS.NxRHI
             }
         }
     }
-    public class UVbView : AuxPtrType<NxRHI.IVbView>
+    public class TtVbView : AuxPtrType<NxRHI.IVbView>
     {
-        public UVbView()
+        public TtVbView()
         {
 
         }
-        public UVbView(IVbView ptr)
+        public TtVbView(IVbView ptr)
         {
             mCoreObject = ptr;
         }
@@ -422,13 +422,13 @@ namespace EngineNS.NxRHI
             mCoreObject.UpdateGpuData(offset, pData, size);
         }
     }
-    public class UIbView : AuxPtrType<NxRHI.IIbView>
+    public class TtIbView : AuxPtrType<NxRHI.IIbView>
     {
-        public UIbView()
+        public TtIbView()
         {
 
         }
-        public UIbView(IIbView ptr)
+        public TtIbView(IIbView ptr)
         {
             mCoreObject = ptr;
         }
@@ -441,7 +441,7 @@ namespace EngineNS.NxRHI
             mCoreObject.UpdateGpuData(offset, pData, size);
         }
     }
-    public class UUaView : AuxPtrType<NxRHI.IUaView>
+    public class TtUaView : AuxPtrType<NxRHI.IUaView>
     {
     }
 }

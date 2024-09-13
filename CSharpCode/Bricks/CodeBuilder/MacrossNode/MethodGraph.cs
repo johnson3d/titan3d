@@ -18,10 +18,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public bool IsDraggingMember { get; set; }
         public MethodLocalVar DraggingLocalVar { get; set; }
         public bool IsDraggingLocalVar { get; set; }
-        public UClassDeclaration DefClass { get; }
+        public TtClassDeclaration DefClass { get; }
         public UCSharpCodeGenerator CSCodeGen { get; }
         public UHLSLCodeGenerator HlslCodeGen { get; }
-        public UCodeGeneratorBase CodeGen { get; }
+        public TtCodeGeneratorBase CodeGen { get; }
         public List<UMacrossMethodGraph> Methods { get; }
         public EGui.Controls.PropertyGrid.PropertyGrid PGMember { get; set; }
         public void RemoveMethod(UMacrossMethodGraph method);
@@ -56,7 +56,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             set
             {
                 mMethodDecKeyword = value;
-                UMethodDeclaration method = null;
+                TtMethodDeclaration method = null;
                 for (int i = 0; i < MethodGraph.MethodDatas.Count; i++)
                 {
                     if (MethodGraph.MethodDatas[i].MethodDec.GetKeyword() == value)
@@ -76,7 +76,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        public static UMethodStartNode NewStartNode(UMacrossMethodGraph graph, UMethodDeclaration methodDec)
+        public static UMethodStartNode NewStartNode(UMacrossMethodGraph graph, TtMethodDeclaration methodDec)
         {
             var result = new UMethodStartNode();
             result.MethodGraph = graph;
@@ -94,7 +94,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             AfterExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
             Position = new Vector2(100, 100);
         }
-        private void Initialize(UMacrossMethodGraph graph, UMethodDeclaration methodDec)
+        private void Initialize(UMacrossMethodGraph graph, TtMethodDeclaration methodDec)
         {
             MethodGraph = graph;
             mMethodDecKeyword = methodDec.GetKeyword();
@@ -115,7 +115,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public UMacrossMethodGraph MethodGraph;
         public List<PinOut> Arguments = new List<PinOut>();
         List<PinOut> mTemplateArguments = new List<PinOut>();
-        public void UpdateMethodDefine(UMethodDeclaration methodDec)
+        public void UpdateMethodDefine(TtMethodDeclaration methodDec)
         {
             mMethodDecKeyword = methodDec.GetKeyword();
 
@@ -137,7 +137,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 PinOut argPin = null;
                 foreach(var j in Arguments)
                 {
-                    var defType = j.Tag as UTypeReference;
+                    var defType = j.Tag as TtTypeReference;
                     if (j.Name == i.VariableName && defType == i.VariableType)
                     {
                         argPin = j;
@@ -203,9 +203,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 if(data.MethodDec.Arguments[i].OperationType == EMethodArgumentAttribute.Out)
                 {
-                    var assignOp = new UAssignOperatorStatement();
-                    assignOp.To = new UVariableReferenceExpression() { VariableName = data.MethodDec.Arguments[i].VariableName };
-                    assignOp.From = new UDefaultValueExpression() { Type = data.MethodDec.Arguments[i].VariableType };
+                    var assignOp = new TtAssignOperatorStatement();
+                    assignOp.To = new TtVariableReferenceExpression() { VariableName = data.MethodDec.Arguments[i].VariableName };
+                    assignOp.From = new TtDefaultValueExpression() { Type = data.MethodDec.Arguments[i].VariableType };
                     data.CurrentStatements.Add(assignOp);
                 }
             }
@@ -221,13 +221,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        public override CodeBuilder.UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override CodeBuilder.TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             for(int i=0; i<Arguments.Count; i++)
             {
                 if(pin == Arguments[i])
                 {
-                    return new UVariableReferenceExpression(Arguments[i].Name);
+                    return new TtVariableReferenceExpression(Arguments[i].Name);
                 }
             }
             return null;
@@ -238,7 +238,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 if (pin == Arguments[i])
                 {
-                    var argType = (UTypeReference)(Arguments[i].Tag);
+                    var argType = (TtTypeReference)(Arguments[i].Tag);
                     var typeDesc = argType.TypeDesc;
                     if (typeDesc != null)
                         return typeDesc;
@@ -253,7 +253,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 if(stayPin == Arguments[i])
                 {
                     string typeFullName = "";
-                    var argType = (UTypeReference)(Arguments[i].Tag);
+                    var argType = (TtTypeReference)(Arguments[i].Tag);
                     var typeDesc = argType.TypeDesc;
                     if (typeDesc != null)
                         typeFullName = typeDesc.FullName;
@@ -273,7 +273,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     {
         public UMethodStartNode StartNode;
         [Rtti.Meta]
-        public UMethodDeclaration MethodDec { get; set; }
+        public TtMethodDeclaration MethodDec { get; set; }
         public Rtti.TtClassMeta.TtMethodMeta Method;
         [Rtti.Meta]
         public bool IsDelegate { get; set; } = false;
@@ -321,7 +321,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //    methodData.StartNode = UMethodStartNode.NewStartNode(graph, methodData.MethodDec);
         //    return methodData;
         //}
-        public static MethodData CreateFromMethod(UMacrossMethodGraph graph, UMethodDeclaration method)
+        public static MethodData CreateFromMethod(UMacrossMethodGraph graph, TtMethodDeclaration method)
         {
             MethodData methodData = new MethodData();
             methodData.MethodDec = method;
@@ -352,8 +352,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class UMacrossMethodGraph : UNodeGraph, IPropertyCustomization
     {
         [Rtti.Meta, Category("Option")]
-        public List<UVariableDeclaration> LocalVars { get; set; } = new List<UVariableDeclaration>();
-        public UVariableDeclaration FindLocalVar(string name)
+        public List<TtVariableDeclaration> LocalVars { get; set; } = new List<TtVariableDeclaration>();
+        public TtVariableDeclaration FindLocalVar(string name)
         {
             foreach(var i in LocalVars)
             {
@@ -367,9 +367,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         [Rtti.Meta, Category("Option")]
         public bool IsUseCustumCode { get; set; } = false;
         bool mInputsDirty = true;
-        List<UMethodArgumentDeclaration> mInputs = new List<UMethodArgumentDeclaration>();
+        List<TtMethodArgumentDeclaration> mInputs = new List<TtMethodArgumentDeclaration>();
         [InputsOperationCallback, Category("Params")]
-        public List<UMethodArgumentDeclaration> Inputs
+        public List<TtMethodArgumentDeclaration> Inputs
         {
             get
             {
@@ -421,7 +421,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     }
                 }
                 while (sameName);
-                var arg = value as UMethodArgumentDeclaration;
+                var arg = value as TtMethodArgumentDeclaration;
                 arg.VariableName = name;
                 arg.OperationVisible = false;
                 arg.OperationType = EMethodArgumentAttribute.Default;
@@ -445,7 +445,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             void AfterInsertOperation(int index, object value, UMacrossMethodGraph graph)
             {
-                var arg = value as UMethodArgumentDeclaration;
+                var arg = value as TtMethodArgumentDeclaration;
                 var methodDec = graph.MethodDatas[0].MethodDec;
                 if (index >= methodDec.Arguments.Count)
                     methodDec.Arguments.Add(arg);
@@ -498,8 +498,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
 
-            UMethodArgumentDeclaration mOldDec = new UMethodArgumentDeclaration();
-            void PreValueChanged(int index, UMacrossMethodGraph graph, UMethodArgumentDeclaration value)
+            TtMethodArgumentDeclaration mOldDec = new TtMethodArgumentDeclaration();
+            void PreValueChanged(int index, UMacrossMethodGraph graph, TtMethodArgumentDeclaration value)
             {
                 mOldDec.VariableName = value.VariableName;
             }
@@ -514,16 +514,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             continue;
 
                         var graph = ins as UMacrossMethodGraph;
-                        PreValueChanged(index, graph, value as UMethodArgumentDeclaration);
+                        PreValueChanged(index, graph, value as TtMethodArgumentDeclaration);
                     }
                 }
                 else
                 {
                     var graph = objInstance as UMacrossMethodGraph;
-                    PreValueChanged(index, graph, value as UMethodArgumentDeclaration);
+                    PreValueChanged(index, graph, value as TtMethodArgumentDeclaration);
                 }
             }
-            void AfterValueChanged(int index, UMacrossMethodGraph graph, UMethodArgumentDeclaration value)
+            void AfterValueChanged(int index, UMacrossMethodGraph graph, TtMethodArgumentDeclaration value)
             {
                 if(value.VariableName != mOldDec.VariableName)
                 {
@@ -549,21 +549,21 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             continue;
 
                         var graph = ins as UMacrossMethodGraph;
-                        AfterValueChanged(index, graph, value as UMethodArgumentDeclaration);
+                        AfterValueChanged(index, graph, value as TtMethodArgumentDeclaration);
                     }
                 }
                 else
                 {
                     var graph = objInstance as UMacrossMethodGraph;
-                    AfterValueChanged(index, graph, value as UMethodArgumentDeclaration);
+                    AfterValueChanged(index, graph, value as TtMethodArgumentDeclaration);
                 }
             }
         }
 
         bool mOutputsDirty = true;
-        List<UMethodArgumentDeclaration> mOutputs = new List<UMethodArgumentDeclaration>();
+        List<TtMethodArgumentDeclaration> mOutputs = new List<TtMethodArgumentDeclaration>();
         [OutputsOperationCallback, Category("Params")]
-        public List<UMethodArgumentDeclaration> Outputs
+        public List<TtMethodArgumentDeclaration> Outputs
         {
             get
             {
@@ -631,7 +631,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     }
                 }
                 while (sameName);
-                var arg = value as UMethodArgumentDeclaration;
+                var arg = value as TtMethodArgumentDeclaration;
                 arg.VariableName = name;
                 arg.OperationVisible = false;
                 arg.OperationType = EMethodArgumentAttribute.Out;
@@ -655,7 +655,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             void AfterInsertOperation(int index, object value, UMacrossMethodGraph graph)
             {
-                var arg = value as UMethodArgumentDeclaration;
+                var arg = value as TtMethodArgumentDeclaration;
                 var methodDec = graph.MethodDatas[0].MethodDec;
                 var realIdx = graph.Inputs.Count + index;
                 if (realIdx >= methodDec.Arguments.Count)
@@ -708,8 +708,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     AfterRemoveOperation(index, graph);
                 }
             }
-            UMethodArgumentDeclaration mOldDec = new UMethodArgumentDeclaration();
-            void PreValueChanged(int index, UMacrossMethodGraph graph, UMethodArgumentDeclaration value)
+            TtMethodArgumentDeclaration mOldDec = new TtMethodArgumentDeclaration();
+            void PreValueChanged(int index, UMacrossMethodGraph graph, TtMethodArgumentDeclaration value)
             {
                 mOldDec.VariableName = value.VariableName;
             }
@@ -724,16 +724,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             continue;
 
                         var graph = ins as UMacrossMethodGraph;
-                        PreValueChanged(index, graph, value as UMethodArgumentDeclaration);
+                        PreValueChanged(index, graph, value as TtMethodArgumentDeclaration);
                     }
                 }
                 else
                 {
                     var graph = objInstance as UMacrossMethodGraph;
-                    PreValueChanged(index, graph, value as UMethodArgumentDeclaration);
+                    PreValueChanged(index, graph, value as TtMethodArgumentDeclaration);
                 }
             }
-            void AfterValueChanged(int index, UMacrossMethodGraph graph, UMethodArgumentDeclaration value)
+            void AfterValueChanged(int index, UMacrossMethodGraph graph, TtMethodArgumentDeclaration value)
             {
                 if (value.VariableName != mOldDec.VariableName)
                 {
@@ -766,18 +766,18 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             continue;
 
                         var graph = ins as UMacrossMethodGraph;
-                        AfterValueChanged(index, graph, value as UMethodArgumentDeclaration);
+                        AfterValueChanged(index, graph, value as TtMethodArgumentDeclaration);
                     }
                 }
                 else
                 {
                     var graph = objInstance as UMacrossMethodGraph;
-                    AfterValueChanged(index, graph, value as UMethodArgumentDeclaration);
+                    AfterValueChanged(index, graph, value as TtMethodArgumentDeclaration);
                 }
             }
         }
 
-        string GetVariableErrorString(in PGCustomValueEditorAttribute.EditorInfo info, UMethodArgumentDeclaration dec, object newValue)
+        string GetVariableErrorString(in PGCustomValueEditorAttribute.EditorInfo info, TtMethodArgumentDeclaration dec, object newValue)
         {
             var newName = (string)newValue;
             for(int i=0; i<Inputs.Count; i++)
@@ -792,7 +792,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return null;
         }
-        public static UMacrossMethodGraph NewGraph(IMacrossMethodHolder kls, UMethodDeclaration method = null)
+        public static UMacrossMethodGraph NewGraph(IMacrossMethodHolder kls, TtMethodDeclaration method = null)
         {
             var result = new UMacrossMethodGraph();
             result.MacrossEditor = kls;
@@ -836,7 +836,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //    }
         //    StartNode.BuildExpr(this, cGen);
         //}
-        public void BuildExpression(UClassDeclaration classDesc)
+        public void BuildExpression(TtClassDeclaration classDesc)
         {
             for(int i=0; i<Nodes.Count; i++)
             {

@@ -175,8 +175,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     {
         [Rtti.Meta]
         public List<Terrain.CDLOD.UTerrainMaterialId> MaterialIdArray { get; set; } = new List<Terrain.CDLOD.UTerrainMaterialId>();
-        public NxRHI.UTexture DiffuseTextureArray;
-        public NxRHI.UTexture NormalTextureArray;
+        public NxRHI.TtTexture DiffuseTextureArray;
+        public NxRHI.TtTexture NormalTextureArray;
         public NxRHI.TtSrView DiffuseTextureArraySRV;
         public NxRHI.TtSrView NormalTextureArraySRV;
         public void Cleanup()
@@ -235,7 +235,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                         {
                             continue;
                         }
-                        System.Diagnostics.Debug.Assert(txDesc.Format == desc.Format);
+                        //System.Diagnostics.Debug.Assert(txDesc.Format == desc.Format);
                         for (int j = 0; j < desc.m_MipLevels; j++)
                         {
                             var subRes = DiffuseTextureArray.mCoreObject.GetSubResource((uint)j, (uint)i, 0);
@@ -291,7 +291,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                         {
                             continue;
                         }
-                        System.Diagnostics.Debug.Assert(txDesc.Format == desc.Format);
+                        //System.Diagnostics.Debug.Assert(txDesc.Format == desc.Format);
                         for (int j = 0; j < desc.m_MipLevels; j++)
                         {
                             var subRes = NormalTextureArray.mCoreObject.GetSubResource((uint)j, (uint)i, 0);

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Animation.BlendTree.Node
 {
-    public class TtZeroPoseCommand<T> : TtAnimationCommand<T> where T : IRuntimePose
+    public class TtZeroPoseCommand<S, T> : TtAnimationCommand<S, T> where T : IRuntimePose
     {
        public TtZeroPoseCommandDesc Desc { get; set; }
 
@@ -20,14 +20,15 @@ namespace EngineNS.Animation.BlendTree.Node
     {
 
     }
-    public class TtBlendTree_ZeroPose<T> : TtBlendTree<T> where T : IRuntimePose
+    public class TtBlendTree_ZeroPose<S, T> : TtBlendTree<S, T> where T : IRuntimePose
     {
-        TtZeroPoseCommand<T> mAnimationCommand = null;
-        public override void Initialize(ref FAnimBlendTreeContext context)
+        TtZeroPoseCommand<S, T> mAnimationCommand = null;
+        public override async Thread.Async.TtTask<bool> Initialize(FAnimBlendTreeContext context)
         {
-            mAnimationCommand = new TtZeroPoseCommand<T>();
+            mAnimationCommand = new TtZeroPoseCommand<S, T>();
+            return false;
         }
-        public override TtAnimationCommand<T> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
+        public override TtAnimationCommand<S, T> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
             var depth = context.TreeDepth;
             mAnimationCommand.Desc = new TtZeroPoseCommandDesc();

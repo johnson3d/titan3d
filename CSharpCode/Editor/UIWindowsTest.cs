@@ -621,7 +621,7 @@ namespace EngineNS.Editor
                 winPos.Y += ImGuiAPI.GetWindowSize().Y - contentSize.Y;
                 var pivot = Vector2.Zero;
                 ImGuiAPI.SetNextWindowPos(in winPos, ImGuiCond_.ImGuiCond_Always, in pivot);
-                if(ImGuiAPI.BeginChild("MeshEDDockChild", in contentSize, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                if(ImGuiAPI.BeginChild("MeshEDDockChild", in contentSize, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, in EGui.UIProxy.StyleConfig.Instance.WindowPadding);
                     ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, in EGui.UIProxy.StyleConfig.Instance.MainTabFramePadding);
@@ -775,7 +775,7 @@ namespace EngineNS.Editor
                 winPos.Y += ImGuiAPI.GetWindowSize().Y - contentSize.Y;
                 var pivot = Vector2.Zero;
                 ImGuiAPI.SetNextWindowPos(in winPos, ImGuiCond_.ImGuiCond_Always, in pivot);
-                if (ImGuiAPI.BeginChild("Content Browser Child", in contentSize, false, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                if (ImGuiAPI.BeginChild("Content Browser Child", in contentSize, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                 {
                     var childDrawList = ImGuiAPI.GetWindowDrawList();
                     var posMin = ImGuiAPI.GetWindowPos();

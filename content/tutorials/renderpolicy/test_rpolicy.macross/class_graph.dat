@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossEditor@EngineCore">
-  <DefClass Type="EngineNS.Bricks.CodeBuilder.UClassDeclaration@EngineCore">
+  <DefClass Type="EngineNS.Bricks.CodeBuilder.TtClassDeclaration@EngineCore">
     <ClassName Type="System.String@Unknown" Value="test_rpolicy" />
     <IsStruct Type="System.Boolean@Unknown" Value="False" />
     <IsUnsafe Type="System.Boolean@Unknown" Value="False" />
-    <Methods Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UMethodDeclaration@EngineCore,&gt;@Unknown" Count="1">
-      <e_0 Type="EngineNS.Bricks.CodeBuilder.UMethodDeclaration@EngineCore">
-        <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UMethodArgumentDeclaration@EngineCore,&gt;@Unknown" Count="1">
-          <e_0 Type="EngineNS.Bricks.CodeBuilder.UMethodArgumentDeclaration@EngineCore">
+    <Methods Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtMethodDeclaration@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration@EngineCore">
+        <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore,&gt;@Unknown" Count="1">
+          <e_0 Type="EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore">
             <HasDefaultValue Type="System.Boolean@Unknown" Value="False" />
-            <InitValue Type="EngineNS.Bricks.CodeBuilder.UPrimitiveExpression@EngineCore">
+            <InitValue Type="EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore">
               <Type Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.Int32@Unknown" />
               <TypeIsTypeof Type="System.Boolean@Unknown" Value="True" />
               <ValueStr Type="System.String@Unknown" Value="0" />
@@ -19,18 +19,18 @@
             <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="Default" />
             <OperationVisible Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="host" />
-            <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
               <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.GamePlay.UGameInstance@EngineCore" />
               <TypeFullName Type="System.String@Unknown" Value="EngineNS.GamePlay.UGameInstance" />
             </VariableType>
           </e_0>
         </Arguments>
-        <AsyncType Type="EngineNS.Bricks.CodeBuilder.UMethodDeclaration.EAsyncType@EngineCore" Value="SystemTask" />
+        <AsyncType Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration.EAsyncType@EngineCore" Value="SystemTask" />
         <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="1">
           <e_0 Type="EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore">
-            <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore,&gt;@Unknown" Count="0" />
-            <AttributeType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+            <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtExpressionBase@EngineCore,&gt;@Unknown" Count="0" />
+            <AttributeType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
               <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Rtti.MetaAttribute@EngineCore" />
               <TypeFullName Type="System.String@Unknown" Value="EngineNS.Rtti.MetaAttribute" />
@@ -38,11 +38,11 @@
           </e_0>
         </Attributes>
         <IsOverride Type="System.Boolean@Unknown" Value="True" />
-        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="1">
-          <e_0 Type="EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore">
+        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="1">
+          <e_0 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
             <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
-            <InitValue Type="EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore">
-              <Type Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+            <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
+              <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                 <IsEnum Type="System.Boolean@Unknown" Value="False" />
                 <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
                 <TypeFullName Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene" />
@@ -51,7 +51,7 @@
             <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
             <IsBindable Type="System.Boolean@Unknown" Value="False" />
             <VariableName Type="System.String@Unknown" Value="tmp_r_InitViewportSlateWithScene_3545170604" />
-            <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
               <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
               <TypeFullName Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene" />
@@ -60,10 +60,10 @@
           </e_0>
         </LocalVariables>
         <MethodName Type="System.String@Unknown" Value="BeginPlay" />
-        <ReturnValue Type="EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore">
+        <ReturnValue Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
           <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
-          <InitValue Type="EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore">
-            <Type Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+          <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
+            <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
               <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
               <TypeFullName Type="System.String@Unknown" Value="System.Boolean" />
@@ -72,7 +72,7 @@
           <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
           <IsBindable Type="System.Boolean@Unknown" Value="False" />
           <VariableName Type="System.String@Unknown" Value="ret_3675910725" />
-          <VariableType Type="EngineNS.Bricks.CodeBuilder.UTypeReference@EngineCore">
+          <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
             <IsEnum Type="System.Boolean@Unknown" Value="False" />
             <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
             <TypeFullName Type="System.String@Unknown" Value="System.Boolean" />
@@ -82,7 +82,7 @@
         <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
       </e_0>
     </Methods>
-    <Properties Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
+    <Properties Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
     <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
       <e_0 Value="EngineNS.GamePlay.UMacrossGame" />
     </SupperClassNames>

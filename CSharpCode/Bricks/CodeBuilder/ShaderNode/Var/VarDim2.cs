@@ -157,10 +157,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InXY);
                 pinNode.BuildStatements(opPin, ref data);
 
-                var assignStatement = new UAssignOperatorStatement()
+                var assignStatement = new TtAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression(Name),
+                    To = new TtVariableReferenceExpression(Name),
                 };
                 if(!data.CurrentStatements.Contains(assignStatement))
                     data.CurrentStatements.Add(assignStatement);
@@ -171,10 +171,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InX);
                 pinNode.BuildStatements(opPin, ref data);
 
-                var assignStatement = new UAssignOperatorStatement()
+                var assignStatement = new TtAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression("x", new UVariableReferenceExpression(Name)),
+                    To = new TtVariableReferenceExpression("x", new TtVariableReferenceExpression(Name)),
                 };
                 if(!data.CurrentStatements.Contains(assignStatement))
                     data.CurrentStatements.Add(assignStatement);
@@ -185,10 +185,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InY);
                 pinNode.BuildStatements(opPin, ref data);
 
-                var assignStatement = new UAssignOperatorStatement()
+                var assignStatement = new TtAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression("y", new UVariableReferenceExpression(Name)),
+                    To = new TtVariableReferenceExpression("y", new TtVariableReferenceExpression(Name)),
                 };
                 if(!data.CurrentStatements.Contains(assignStatement))
                     data.CurrentStatements.Add(assignStatement);
@@ -196,11 +196,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             if (!data.MethodDec.HasLocalVariable(Name))
             {
-                var val = new UVariableDeclaration()
+                var val = new TtVariableDeclaration()
                 {
-                    VariableType = new UTypeReference(Type2HLSLType(VarType, IsHalfPrecision)),
+                    VariableType = new TtTypeReference(Type2HLSLType(VarType, IsHalfPrecision)),
                     VariableName = Name,
-                    InitValue = new UPrimitiveExpression(Value),
+                    InitValue = new TtPrimitiveExpression(Value),
                 };
                 if (IsUniform)
                 {
@@ -211,14 +211,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                     data.MethodDec.AddLocalVar(val);
             }
         }
-        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             if (pin == OutXY)
-                return new UVariableReferenceExpression(Name);
+                return new TtVariableReferenceExpression(Name);
             else if (pin == OutX)
-                return new UVariableReferenceExpression("x", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("x", new TtVariableReferenceExpression(Name));
             else if (pin == OutY)
-                return new UVariableReferenceExpression("y", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("y", new TtVariableReferenceExpression(Name));
             return null;
         }
 
@@ -318,10 +318,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InXY);
                 pinNode.BuildStatements(opPin, ref data);
 
-                var assignStatement = new UAssignOperatorStatement()
+                var assignStatement = new TtAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression(Name),
+                    To = new TtVariableReferenceExpression(Name),
                 };
                 if (!data.CurrentStatements.Contains(assignStatement))
                     data.CurrentStatements.Add(assignStatement);
@@ -332,10 +332,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InX);
                 pinNode.BuildStatements(opPin, ref data);
 
-                var assignStatement = new UAssignOperatorStatement()
+                var assignStatement = new TtAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression("x", new UVariableReferenceExpression(Name)),
+                    To = new TtVariableReferenceExpression("x", new TtVariableReferenceExpression(Name)),
                 };
                 if (!data.CurrentStatements.Contains(assignStatement))
                     data.CurrentStatements.Add(assignStatement);
@@ -346,10 +346,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var opPin = data.NodeGraph.GetOppositePin(InY);
                 pinNode.BuildStatements(opPin, ref data);
 
-                var assignStatement = new UAssignOperatorStatement()
+                var assignStatement = new TtAssignOperatorStatement()
                 {
                     From = pinNode.GetExpression(opPin, ref data),
-                    To = new UVariableReferenceExpression("y", new UVariableReferenceExpression(Name)),
+                    To = new TtVariableReferenceExpression("y", new TtVariableReferenceExpression(Name)),
                 };
                 if (!data.CurrentStatements.Contains(assignStatement))
                     data.CurrentStatements.Add(assignStatement);
@@ -357,11 +357,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             if (!data.MethodDec.HasLocalVariable(Name))
             {
-                var val = new UVariableDeclaration()
+                var val = new TtVariableDeclaration()
                 {
-                    VariableType = new UTypeReference(Type2HLSLType(VarType, IsHalfPrecision)),
+                    VariableType = new TtTypeReference(Type2HLSLType(VarType, IsHalfPrecision)),
                     VariableName = Name,
-                    InitValue = new UPrimitiveExpression(Value),
+                    InitValue = new TtPrimitiveExpression(Value),
                 };
                 if (IsUniform)
                 {
@@ -372,14 +372,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                     data.MethodDec.AddLocalVar(val);
             }
         }
-        public override UExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
+        public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
             if (pin == OutXY)
-                return new UVariableReferenceExpression(Name);
+                return new TtVariableReferenceExpression(Name);
             else if (pin == OutX)
-                return new UVariableReferenceExpression("x", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("x", new TtVariableReferenceExpression(Name));
             else if (pin == OutY)
-                return new UVariableReferenceExpression("y", new UVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("y", new TtVariableReferenceExpression(Name));
             return null;
         }
 

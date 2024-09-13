@@ -1,15 +1,23 @@
-﻿using System;
+﻿using NPOI.OpenXmlFormats.Dml;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EngineNS.NxRHI
 {
-    public class URenderPass : AuxPtrType<NxRHI.IRenderPass>
+    public partial struct FRenderPassClears
+    {
+        public void SetDefault()
+        {
+            this.SetDefault(TtEngine.Instance.Config.IsReverseZ);
+        }
+    }
+    public class TtRenderPass : AuxPtrType<NxRHI.IRenderPass>
     {
     }
-    public class UFrameBuffers : AuxPtrType<NxRHI.IFrameBuffers>
+    public class TtFrameBuffers : AuxPtrType<NxRHI.IFrameBuffers>
     {
-        public void BindRenderTargetView(uint index, URenderTargetView rt)
+        public void BindRenderTargetView(uint index, TtRenderTargetView rt)
         {
             if (rt == null)
             {
@@ -18,7 +26,7 @@ namespace EngineNS.NxRHI
             }
             mCoreObject.BindRenderTargetView(index, rt.mCoreObject);
         }
-        public void BindDepthStencilView(UDepthStencilView ds)
+        public void BindDepthStencilView(TtDepthStencilView ds)
         {
             if(ds == null)
             {
@@ -40,7 +48,7 @@ namespace EngineNS.NxRHI
             return mCoreObject.GetDsv();
         }
     }
-    public class USwapChain : AuxPtrType<NxRHI.ISwapChain>
+    public class TtSwapChain : AuxPtrType<NxRHI.ISwapChain>
     {
         public FViewPort Viewport;
         public unsafe void InitRenderPass()
@@ -121,14 +129,14 @@ namespace EngineNS.NxRHI
             mCoreObject.Present(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, SyncInterval, Flags);
         }
 
-        UFrameBuffers[] mBackFrameBuffers;
-        public URenderPass RenderPass { get; set; }
-        public UFrameBuffers GetBackFrameBuffers(uint index)
+        TtFrameBuffers[] mBackFrameBuffers;
+        public TtRenderPass RenderPass { get; set; }
+        public TtFrameBuffers GetBackFrameBuffers(uint index)
         {
             if (mBackFrameBuffers == null)
             {
                 var Num = mCoreObject.GetBackBufferCount();
-                mBackFrameBuffers = new UFrameBuffers[Num];
+                mBackFrameBuffers = new TtFrameBuffers[Num];
                 for (uint i = 0; i < Num; i++)
                 {
                     mBackFrameBuffers[i] = TtEngine.Instance.GfxDevice.RenderContext.CreateFrameBuffers(RenderPass);
@@ -139,7 +147,15 @@ namespace EngineNS.NxRHI
             }
             return mBackFrameBuffers[index];
         }
-        public UFrameBuffers BeginFrameBuffers(ICommandList cmd)
+        public TtFrameBuffers BeginFrameBuffers(UCommandList cmd)
+        {
+            return BeginFrameBuffers(cmd.mCoreObject);
+        }
+        public void EndFrameBuffers(UCommandList cmd)
+        {
+            EndFrameBuffers(cmd.mCoreObject);
+        }
+        public TtFrameBuffers BeginFrameBuffers(ICommandList cmd)
         {
             var index = CurrentBackBuffer;
             var result = GetBackFrameBuffers(index);

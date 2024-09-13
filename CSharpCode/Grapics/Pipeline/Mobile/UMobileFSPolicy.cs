@@ -43,7 +43,16 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         #endregion
         public UMobileOpaqueNode BasePassNode = new UMobileOpaqueNode();
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
         public Shadow.UShadowMapNode mShadowMapNode = new Shadow.UShadowMapNode();        
+        public override NxRHI.TtSrView GetFinalShowRSV()
+在此之后:
+        public Shadow.TtShadowMapNode mShadowMapNode = new Shadow.UShadowMapNode();        
+        public override NxRHI.TtSrView GetFinalShowRSV()
+*/
+        public Shadow.TtShadowMapNode mShadowMapNode = new Shadow.TtShadowMapNode();        
         public override NxRHI.TtSrView GetFinalShowRSV()
         {
             return this.AttachmentCache.FindAttachement(BasePassNode.GBuffers.RenderTargets[0].Attachement.AttachmentName).Srv;
@@ -59,7 +68,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             CoreSDK.DisposeObject(ref BasePassNode);
             base.Dispose();
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, atom);
             BasePassNode.mOpaqueShading.OnDrawCall(cmd, drawcall, this, atom);

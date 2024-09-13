@@ -21,7 +21,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtGaussNode;
             if (aaNode == null)
@@ -54,7 +54,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Gauss", "Post\\Gauss", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class TtGaussNode : USceenSpaceNode
+    public class TtGaussNode : TtSceenSpaceNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
         public TtGaussNode()
@@ -120,7 +120,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             get => mGaussStruct.BlurSigma;
             set => mGaussStruct.BlurSigma = value;
         }
-        public NxRHI.UCbView CBShadingEnv;
+        public NxRHI.TtCbView CBShadingEnv;
         public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             base.TickLogic(world, policy, bClear);
@@ -167,7 +167,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,
                 NxRHI.EVertexStreamType.VST_UV,};
         }
-        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.UGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             var aaNode = drawcall.TagObject as TtGaussAdditiveNode;
             if (aaNode == null)
@@ -210,7 +210,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
     }
     [Bricks.CodeBuilder.ContextMenu("GaussAdditive", "Post\\GaussAdditive", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class TtGaussAdditiveNode : USceenSpaceNode
+    public class TtGaussAdditiveNode : TtSceenSpaceNode
     {
         public TtRenderGraphPin Color1PinIn = TtRenderGraphPin.CreateInput("Color1");
         public TtRenderGraphPin Color2PinIn = TtRenderGraphPin.CreateInput("Color2");
@@ -279,7 +279,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             get => mGaussStruct.BlurSigma;
             set => mGaussStruct.BlurSigma = value;
         }
-        public NxRHI.UCbView CBShadingEnv;
+        public NxRHI.TtCbView CBShadingEnv;
         public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             base.TickLogic(world, policy, bClear);

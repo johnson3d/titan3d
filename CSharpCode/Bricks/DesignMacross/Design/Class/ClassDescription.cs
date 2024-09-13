@@ -2,6 +2,7 @@
 using EngineNS.DesignMacross.Base.Outline;
 using System.Reflection;
 using EngineNS.DesignMacross.Base.Description;
+using EngineNS.Animation.Macross.Postprocessing;
 
 namespace EngineNS.DesignMacross.Design
 {
@@ -16,9 +17,9 @@ namespace EngineNS.DesignMacross.Design
         public Vector2 Location { get; set; }
         public string ClassName { get => Name; }
         [Rtti.Meta]
-        public UCommentStatement Comment { get; set; }
+        public TtCommentStatement Comment { get; set; }
         [Rtti.Meta]
-        public UNamespaceDeclaration Namespace { get; set; }
+        public TtNamespaceDeclaration Namespace { get; set; }
         [Rtti.Meta]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
         [Rtti.Meta]
@@ -36,16 +37,29 @@ namespace EngineNS.DesignMacross.Design
         public List<IDesignableVariableDescription> DesignableVariables { get; set; } = new List<IDesignableVariableDescription>();
         public IDescription Parent { get; set; }
 
-        public List<UClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
+        public List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
-            List<UClassDeclaration> classDeclarationsBuilded = new();
-            UClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
+            List<TtClassDeclaration> classDeclarationsBuilded = new();
+            TtClassDeclaration thisClassDeclaration = TtASTBuildUtil.BuildClassDeclaration(this, ref classBuildContext);
             classBuildContext.ClassDeclaration = thisClassDeclaration;
             foreach (var designVarDesc in DesignableVariables)
             {
+                if (designVarDesc is TtAnimFinalBlendTreeClassDescription)
+                {
+                    continue;
+                }
                 classDeclarationsBuilded.AddRange(designVarDesc.BuildClassDeclarations(ref classBuildContext));
                 thisClassDeclaration.Properties.Add(designVarDesc.BuildVariableDeclaration(ref classBuildContext));
-                designVarDesc.GenerateCodeInClass(thisClassDeclaration);
+                designVarDesc.GenerateCodeInClass(thisClassDeclaration, ref classBuildContext);
+            }
+            foreach (var designVarDesc in DesignableVariables)
+            {
+                if(designVarDesc is TtAnimFinalBlendTreeClassDescription finalBlendTreeClassDescription)
+                {
+                    classDeclarationsBuilded.AddRange(designVarDesc.BuildClassDeclarations(ref classBuildContext));
+                    thisClassDeclaration.Properties.Add(designVarDesc.BuildVariableDeclaration(ref classBuildContext));
+                    designVarDesc.GenerateCodeInClass(thisClassDeclaration, ref classBuildContext);
+                }
             }
             classDeclarationsBuilded.Add(thisClassDeclaration);
             return classDeclarationsBuilded;

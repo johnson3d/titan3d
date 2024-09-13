@@ -105,7 +105,7 @@ namespace EngineNS.Bricks.NodeGraph
                     }
                 }
             }
-            if (ImGuiAPI.BeginChild("Graph", in Vector2.Zero, false, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
+            if (ImGuiAPI.BeginChild("Graph", in Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse))
             {
                 var vpMin = ImGuiAPI.GetWindowContentRegionMin();
                 var vpMax = ImGuiAPI.GetWindowContentRegionMax();
@@ -793,7 +793,7 @@ namespace EngineNS.Bricks.NodeGraph
                                 EGui.UIProxy.SearchBarProxy.OnDraw(ref mCanvasMenuFilterFocused, in drawList, "search item", ref CanvasMenuFilterStr, width);
                                 Vector2 wsize = new Vector2(200, 400);
                                 var id = ImGuiAPI.GetID("GraphContextMenu");
-                                if(ImGuiAPI.BeginChild(id, wsize, false, 
+                                if(ImGuiAPI.BeginChild(id, wsize, ImGuiChildFlags_.ImGuiChildFlags_None, 
                                     ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | 
                                     ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings |
                                     ImGuiWindowFlags_.ImGuiWindowFlags_HorizontalScrollbar))

@@ -152,9 +152,9 @@ namespace EngineNS.UI.Editor
             uint controlsId = 0;
             uint hierachyId = 0;
             uint detailsId = 0;
-            ImGuiAPI.DockBuilderSplitNode(designerId, ImGuiDir_.ImGuiDir_Left, 0.2f, ref controlsId, ref designerId);
-            ImGuiAPI.DockBuilderSplitNode(controlsId, ImGuiDir_.ImGuiDir_Down, 0.5f, ref hierachyId, ref controlsId);
-            ImGuiAPI.DockBuilderSplitNode(designerId, ImGuiDir_.ImGuiDir_Right, 0.2f, ref detailsId, ref designerId);
+            ImGuiAPI.DockBuilderSplitNode(designerId, ImGuiDir.ImGuiDir_Left, 0.2f, ref controlsId, ref designerId);
+            ImGuiAPI.DockBuilderSplitNode(controlsId, ImGuiDir.ImGuiDir_Down, 0.5f, ref hierachyId, ref controlsId);
+            ImGuiAPI.DockBuilderSplitNode(designerId, ImGuiDir.ImGuiDir_Right, 0.2f, ref detailsId, ref designerId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Controls", mDockKeyClass), controlsId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Designer", mDockKeyClass), designerId);
@@ -215,7 +215,7 @@ namespace EngineNS.UI.Editor
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            var result = EGui.UIProxy.DockProxy.BeginMainForm(UIAsset.AssetName.Name, this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+            var result = EGui.UIProxy.DockProxy.BeginMainForm(GetWindowsName(), this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
             if (result)
             {
@@ -628,12 +628,12 @@ namespace EngineNS.UI.Editor
                                         element.Name = GetValidName(element);
                                     }
                                     var varName = GetUIElementMacrossVariableName(element);
-                                    var elementVariable = new UVariableDeclaration()
+                                    var elementVariable = new TtVariableDeclaration()
                                     {
-                                        VariableType = new UTypeReference(element.GetType()),
+                                        VariableType = new TtTypeReference(element.GetType()),
                                         VariableName = varName,
                                         GetDisplayNameFunc = element.GetVariableDisplayName,
-                                        InitValue = new UNullValueExpression(),
+                                        InitValue = new TtNullValueExpression(),
                                         VisitMode = EVisisMode.Public,
                                     };
                                     if (UIAsset.MacrossEditor.DefClass.FindMember(varName) == null)
@@ -666,12 +666,12 @@ namespace EngineNS.UI.Editor
                             {
                                 // add variable to class
                                 var varName = GetUIElementMacrossVariableName(element);
-                                var elementVariable = new UVariableDeclaration()
+                                var elementVariable = new TtVariableDeclaration()
                                 {
-                                    VariableType = new UTypeReference(element.GetType()),
+                                    VariableType = new TtTypeReference(element.GetType()),
                                     VariableName = varName,
                                     GetDisplayNameFunc = element.GetVariableDisplayName,
-                                    InitValue = new UNullValueExpression(),
+                                    InitValue = new TtNullValueExpression(),
                                     VisitMode = EVisisMode.Public,
                                 };
                                 if(UIAsset.MacrossEditor.DefClass.FindMember(varName) == null)
@@ -1574,6 +1574,11 @@ namespace EngineNS.UI.Editor
                     return name + "_" + i;
             }
             return "";
+        }
+
+        public string GetWindowsName()
+        {
+            return UIAsset.AssetName.Name;
         }
     }
 }

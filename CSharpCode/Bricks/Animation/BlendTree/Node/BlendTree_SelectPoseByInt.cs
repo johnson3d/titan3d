@@ -6,9 +6,9 @@ using System.Text;
 
 namespace EngineNS.Animation.BlendTree.Node
 {
-    public class TtSelectPoseByIntCommand<T> : TtAnimationCommand<T> where T : IRuntimePose
+    public class TtSelectPoseByIntCommand<S, T> : TtAnimationCommand<S, T> where T : IRuntimePose
     {
-        public Dictionary<int, IBlendTree<T>> mPosesDic = new Dictionary<int, IBlendTree<T>>();
+        public Dictionary<int, IBlendTree<S, T>> mPosesDic = new Dictionary<int, IBlendTree<S, T>>();
         public Dictionary<int, float> mPosesBlendTime = new Dictionary<int, float>();
         public Dictionary<int, float> mPosesBlendWeights = new Dictionary<int, float>();
         public TtSelectPoseByIntCommandDesc Desc { get; set; }
@@ -55,10 +55,10 @@ namespace EngineNS.Animation.BlendTree.Node
         public Func<float> EvaluateBlendTimeFunc { get; set; } = null;
     }
 
-    public class TtBlendTree_SelectPoseByInt<T> : TtBlendTree<T> where T : IRuntimePose
+    public class TtBlendTree_SelectPoseByInt<S, T> : TtBlendTree<S, T> where T : IRuntimePose
     {
         TtSelectPoseByIntCommandDesc Desc = new TtSelectPoseByIntCommandDesc();
-        public Dictionary<int, IBlendTree<T>> mPosesDic = new Dictionary<int, IBlendTree<T>>();
+        public Dictionary<int, IBlendTree<S, T>> mPosesDic = new Dictionary<int, IBlendTree<S, T>>();
         public Dictionary<int, float> mPosesBlendTime = new Dictionary<int, float>();
         public Dictionary<int, float> mPosesBlendWeights = new Dictionary<int, float>();
         public int CurrentSelect
@@ -72,7 +72,7 @@ namespace EngineNS.Animation.BlendTree.Node
                 Desc.CurrentSelect = value;
             }
         }
-        public void Add(int index, IBlendTree<T> pose)
+        public void Add(int index, IBlendTree<S, T> pose)
         {
             if (mPosesDic.ContainsKey(index))
             {
@@ -83,12 +83,13 @@ namespace EngineNS.Animation.BlendTree.Node
                 mPosesDic.Add(index, pose);
             }
         }
-        TtSelectPoseByIntCommand<T> mAnimationCommand = null;
-        public override void Initialize(ref FAnimBlendTreeContext context)
+        TtSelectPoseByIntCommand<S, T> mAnimationCommand = null;
+        public override async Thread.Async.TtTask<bool> Initialize(FAnimBlendTreeContext context)
         {
-            mAnimationCommand = new TtSelectPoseByIntCommand<T>();
+            mAnimationCommand = new TtSelectPoseByIntCommand<S, T>();
+            return true;
         }
-        public override TtAnimationCommand<T> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
+        public override TtAnimationCommand<S, T> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
             //TODO : just add no zero weight to command tree
             mAnimationCommand.mPosesDic = mPosesDic;

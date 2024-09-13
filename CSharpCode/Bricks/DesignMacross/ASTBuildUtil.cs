@@ -1,4 +1,6 @@
-﻿using EngineNS.Bricks.CodeBuilder;
+﻿using EngineNS.Animation.StateMachine;
+using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Bricks.StateMachine.TimedSM;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Design;
 using EngineNS.Rtti;
@@ -66,9 +68,9 @@ namespace EngineNS.DesignMacross
             }
             return description.Name;
         }
-        public static UClassDeclaration BuildClassDeclaration(IClassDescription description, ref FClassBuildContext classBuildContext)
+        public static TtClassDeclaration BuildClassDeclaration(IClassDescription description, ref FClassBuildContext classBuildContext)
         {
-            UClassDeclaration declaration = new UClassDeclaration();
+            TtClassDeclaration declaration = new();
             declaration.IsStruct = description.IsStruct;
             declaration.ClassName = description.ClassName;
             declaration.Comment = description.Comment;
@@ -90,9 +92,9 @@ namespace EngineNS.DesignMacross
 
 
 
-        public static UVariableDeclaration CreateVariableDeclaration(IVariableDescription description, ref FClassBuildContext classBuildContext)
+        public static TtVariableDeclaration CreateVariableDeclaration(IVariableDescription description, ref FClassBuildContext classBuildContext)
         {
-            UVariableDeclaration declaration = new UVariableDeclaration();
+            TtVariableDeclaration declaration = new();
             declaration.VariableName = description.VariableName;
             declaration.VariableType = description.VariableType;
             declaration.InitValue = description.InitValue;
@@ -100,10 +102,10 @@ namespace EngineNS.DesignMacross
             declaration.VisitMode = description.VisitMode;
             return declaration;
         }
-        public static UMethodDeclaration CreateMethodDeclaration(IMethodDescription description, ref FClassBuildContext classBuildContext)
+        public static TtMethodDeclaration CreateMethodDeclaration(IMethodDescription description, ref FClassBuildContext classBuildContext)
         {
             var returnVar = TtASTBuildUtil.CreateMethodReturnVariableDeclaration(new(description.ReturnValueType), TtASTBuildUtil.CreateDefaultValueExpression(new(description.ReturnValueType)));
-            List<UMethodArgumentDeclaration> args = new();
+            List<TtMethodArgumentDeclaration> args = new();
             foreach(var argDesc in description.Arguments)
             {
                 args.Add(CreateMethodArgumentDeclaration(argDesc));
@@ -112,7 +114,7 @@ namespace EngineNS.DesignMacross
 
             return methodDeclaration;
         }
-        public static UMethodArgumentDeclaration CreateMethodArgumentDeclaration(TtMethodArgumentDescription methodArgumentDescription)
+        public static TtMethodArgumentDeclaration CreateMethodArgumentDeclaration(TtMethodArgumentDescription methodArgumentDescription)
         {
             return CreateMethodArgumentDeclaration(methodArgumentDescription.Name, new(methodArgumentDescription.VariableType), methodArgumentDescription.OperationType, false);
         }
@@ -120,9 +122,9 @@ namespace EngineNS.DesignMacross
 
 
 
-        public static UMethodDeclaration CreateMethodDeclaration(string methodName, UVariableDeclaration returnVar, List<UMethodArgumentDeclaration> arguments, bool isOverrid = false, UMethodDeclaration.EAsyncType asyncType = UMethodDeclaration.EAsyncType.None)
+        public static TtMethodDeclaration CreateMethodDeclaration(string methodName, TtVariableDeclaration returnVar, List<TtMethodArgumentDeclaration> arguments, bool isOverrid = false, TtMethodDeclaration.EAsyncType asyncType = TtMethodDeclaration.EAsyncType.None)
         {
-            UMethodDeclaration methodDeclaration = new();
+            TtMethodDeclaration methodDeclaration = new();
             methodDeclaration.IsOverride = true;
             methodDeclaration.AsyncType = asyncType;
             methodDeclaration.MethodName = methodName;
@@ -138,9 +140,9 @@ namespace EngineNS.DesignMacross
             return methodDeclaration;
         }
 
-        public static UMethodArgumentDeclaration CreateMethodArgumentDeclaration(string argName, UTypeReference argType, EMethodArgumentAttribute argOperationType, bool ssParamArray = false)
+        public static TtMethodArgumentDeclaration CreateMethodArgumentDeclaration(string argName, TtTypeReference argType, EMethodArgumentAttribute argOperationType, bool ssParamArray = false)
         {
-           return new UMethodArgumentDeclaration()
+           return new TtMethodArgumentDeclaration()
             {
                 VariableType = argType,
                 VariableName = argName,
@@ -149,9 +151,9 @@ namespace EngineNS.DesignMacross
                 IsParamArray = ssParamArray,
             };
         }
-        public static UVariableDeclaration CreateVariableDeclaration(string varName, UTypeReference varType, UExpressionBase varInitValue, EVisisMode varVisisMode = EVisisMode.Public)
+        public static TtVariableDeclaration CreateVariableDeclaration(string varName, TtTypeReference varType, TtExpressionBase varInitValue, EVisisMode varVisisMode = EVisisMode.Public)
         {
-            return new UVariableDeclaration()
+            return new TtVariableDeclaration()
             {
                 VariableType = varType,
                 InitValue = varInitValue,
@@ -159,9 +161,9 @@ namespace EngineNS.DesignMacross
                 VisitMode = varVisisMode
             };
         }
-        public static UVariableDeclaration CreateMethodReturnVariableDeclaration(UTypeReference varType, UExpressionBase varInitValue, EVisisMode varVisisMode = EVisisMode.Public)
+        public static TtVariableDeclaration CreateMethodReturnVariableDeclaration(TtTypeReference varType, TtExpressionBase varInitValue, EVisisMode varVisisMode = EVisisMode.Public)
         {
-            return new UVariableDeclaration()
+            return new TtVariableDeclaration()
             {
                 VariableType = varType,
                 InitValue = varInitValue,
@@ -169,25 +171,34 @@ namespace EngineNS.DesignMacross
                 VisitMode = varVisisMode
             };
         }
-        public static UDefaultValueExpression CreateDefaultValueExpression(UTypeReference type)   
+        public static TtDefaultValueExpression CreateDefaultValueExpression(TtTypeReference type)   
         {
-            return new UDefaultValueExpression(type);
+            return new TtDefaultValueExpression(type);
         }
-        public static UAssignOperatorStatement CreateAssignOperatorStatement(UExpressionBase leftHandSide, UExpressionBase rightHandSide)
+        public static TtAssignOperatorStatement CreateAssignOperatorStatement(TtExpressionBase leftHandSide, TtExpressionBase rightHandSide)
         {
-            UAssignOperatorStatement assignOperatorStatement = new()
+            TtAssignOperatorStatement assignOperatorStatement = new()
             {
                 To = leftHandSide,
                 From = rightHandSide
             };
             return assignOperatorStatement;
         }
-        public static UMethodDeclaration CreateInitMethodDeclaration(bool isOverride = true)
+        public static TtMethodDeclaration CreateInitMethodDeclaration(bool isOverride = true)
         {
-            UMethodDeclaration methodDeclaration = new UMethodDeclaration();
-            methodDeclaration.IsOverride = isOverride;
-            methodDeclaration.MethodName = "Initialize";
-            methodDeclaration.ReturnValue = CreateMethodReturnVariableDeclaration(new UTypeReference(typeof(bool)), new UDefaultValueExpression(typeof(bool)));
+            var returnVar = TtASTBuildUtil.CreateMethodReturnVariableDeclaration(new(typeof(bool)), TtASTBuildUtil.CreateDefaultValueExpression(new(typeof(bool))));
+            var methodDeclaration = TtASTBuildUtil.CreateMethodDeclaration("Initialize", returnVar, null, isOverride, TtMethodDeclaration.EAsyncType.CustomTask);
+
+            return methodDeclaration;
+        }
+        public static TtMethodDeclaration CreateTickMethodDeclaration(bool isOverride = true)
+        {
+            var args = new List<TtMethodArgumentDeclaration>
+            {
+                TtASTBuildUtil.CreateMethodArgumentDeclaration("elapseSecond", new(UTypeDesc.TypeOf<float>()), EMethodArgumentAttribute.Default)
+            };
+            var methodDeclaration = TtASTBuildUtil.CreateMethodDeclaration("Tick", null, args, isOverride);
+
             return methodDeclaration;
         }
     }

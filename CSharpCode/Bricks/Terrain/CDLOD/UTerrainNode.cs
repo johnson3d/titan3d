@@ -128,7 +128,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
         public ULevelStreaming LevelStreaming = new ULevelStreaming();
 
-        public NxRHI.UCbView TerrainCBuffer;
+        public NxRHI.TtCbView TerrainCBuffer;
 
         public VirtualTexture.TtVirtualTextureArray RVTextureArray;
         public UTerrainMaterialIdManager TerrainMaterialIdManager { get; set; }
