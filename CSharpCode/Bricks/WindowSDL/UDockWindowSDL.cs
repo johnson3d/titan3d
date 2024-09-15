@@ -27,7 +27,7 @@ namespace EngineNS.EGui
                 monitor.WorkPos = new Vector2((float)r.x, (float)r.y);
                 monitor.WorkSize = new Vector2((float)r.w, (float)r.h);
                 var dpi = SDL.SDL3.SDL_GetDisplayContentScale(dspl[n]);
-                monitor.DpiScale = dpi / 96.0f;
+                monitor.DpiScale = dpi;
                 ImGuiAPI.PlatformIO_Monitor_PushBack(platform_io, monitor);
             }
         }
@@ -123,6 +123,19 @@ namespace EngineNS.EGui
                         //io.KeySuper = ((SDL_GetModState() & KMOD_GUI) != 0);
                         return true;
                     }
+                //case (int)SDL.SDL_EventType.SDL_EVENT_WINDOW_MOVED:
+                //case (int)SDL.SDL_EventType.SDL_EVENT_WINDOW_RESIZED:
+                //    {
+                //        var window = SDL.SDL3.SDL_GetWindowFromID(ev.window.windowID);
+                //        var display = SDL.SDL3.SDL_GetDisplayForWindow(window);
+                //        ImGuiViewport* viewport = ImGuiAPI.FindViewportByPlatformHandle(window);
+                //        if(viewport != null)
+                //        {
+                //            var dpi = SDL.SDL3.SDL_GetDisplayContentScale(display);
+                //            viewport->DpiScale = dpi;
+                //        }
+                //        return true;
+                //    }
                 // Multi-viewport support
                 default:
                     {

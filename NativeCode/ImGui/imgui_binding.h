@@ -2077,6 +2077,18 @@ public:
 
 		return (window->LastFrameActive + 1 != g.FrameCount);
 	}
+	static ImFont* GetDrawListFont(ImDrawList* drawList)
+	{
+		if (drawList == nullptr)
+			return nullptr;
+		return drawList->_Data->Font;
+	}
+	static float GetDrawListFontSize(ImDrawList* drawList)
+	{
+		if (drawList == nullptr)
+			return 0.0f;
+		return drawList->_Data->FontSize;
+	}
 };
 
 NS_END

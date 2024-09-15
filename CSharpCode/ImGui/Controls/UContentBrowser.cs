@@ -63,9 +63,24 @@ namespace EngineNS.EGui.Controls
         }
         public string FilterText = "";
         public static IO.IAssetMeta GlobalSelectedAsset = null;
-        public static RName GlobalFocusAsset = null;
+        static RName mGlobalFocusAsset = null;
+        public static RName GlobalFocusAsset
+        {
+            get => mGlobalFocusAsset;
+            set
+            {
+                if(value != null)
+                {
+                    if(RName.IsExist(value))
+                        mGlobalFocusAsset = value;
+                }
+                else
+                    mGlobalFocusAsset = null;
+            }
+        }
         public List<IO.IAssetMeta> SelectedAssets = new List<IO.IAssetMeta>();
         public Action<IO.IAssetMeta> ItemSelectedAction = null;
+        public float ItemScale = 1.0f;
 
         public static string FilterImgName = "uestyle/content/filter.srv";
 
@@ -173,8 +188,13 @@ namespace EngineNS.EGui.Controls
         public unsafe void DrawFiles(RName dir, in Vector2 size)
         {
             var cmdlist = ImGuiAPI.GetWindowDrawList();
-            var itemSize = new Vector2(100, 140);
-                CreateNewAssets = true;
+            var itemSize = new Vector2(100, 150);
+
+            var imViewPort = ImGuiAPI.GetWindowViewport();
+            var dpiScale = imViewPort->DpiScale;
+            itemSize *= dpiScale;
+
+            CreateNewAssets = true;
             
             if(FirstClickIndex != LastClickIndex)
             {
@@ -261,7 +281,7 @@ namespace EngineNS.EGui.Controls
                 if ((mActiveFiltersCount > 0) && !((UIProxy.MenuItemProxy)mFilterMenus[assetTypeName]).Selected)
                     continue;
 
-                DrawItem(in cmdlist, ameta.Icon, ameta, in itemSize, drawIndex++);
+                DrawItem(in cmdlist, ameta.Icon, ameta, in itemSize, drawIndex++, ItemScale);
                 curPos += itemSize.X + style->ItemSpacing.X;
                 if (curPos + itemSize.X < width)
                 {
@@ -291,7 +311,7 @@ namespace EngineNS.EGui.Controls
                     else
                         continue;
 
-                    DrawItem(in cmdlist, ameta.Icon, ameta, in itemSize, drawIndex++);
+                    DrawItem(in cmdlist, ameta.Icon, ameta, in itemSize, drawIndex++, ItemScale);
                     curPos += itemSize.X + style->ItemSpacing.X;
                     if (curPos + itemSize.X < width)
                     {
@@ -356,7 +376,7 @@ namespace EngineNS.EGui.Controls
         int LastClickIndex = -1;
         RName LastDir;
 
-        private unsafe void DrawItem(in ImDrawList cmdlist, TtUVAnim icon, IO.IAssetMeta ameta, in Vector2 sz, int index)
+        private unsafe void DrawItem(in ImDrawList cmdlist, TtUVAnim icon, IO.IAssetMeta ameta, in Vector2 sz, int index, float scale)
         {
             ImGuiAPI.PushID($"##{ameta.GetAssetName().Name}");
             bool isSelected = false;
@@ -473,7 +493,7 @@ namespace EngineNS.EGui.Controls
                 }
                 ameta.ShowIconTime = TtEngine.Instance.CurrentTickCountUS;
 
-                ameta.OnDraw(in cmdlist, in sz, this);
+                ameta.OnDraw(in cmdlist, in sz, this, scale);
 
                 if (ImGuiAPI.BeginDragDropSource(ImGuiDragDropFlags_.ImGuiDragDropFlags_SourceNoDisableHover))
                 {
@@ -530,7 +550,7 @@ namespace EngineNS.EGui.Controls
                                     continue;
                                 }
                                 offsetDelta += decreaseDelta;
-                                SelectedAssets[i].OnDraw(in dragDropCmdlist, offset, in sz, this);
+                                SelectedAssets[i].OnDraw(in dragDropCmdlist, offset, in sz, this, scale);
                             }
                             var posY = ImGuiAPI.GetCursorPosY();
                             ImGuiAPI.SetCursorPosY(posY + winSize.Y - 20);

@@ -335,7 +335,7 @@ namespace EngineNS.Bricks.NodeGraph
         }
 
         public string BreakerName = "";
-        public void DrawNode(ImDrawList cmdlist, UNodeBase node)
+        public unsafe void DrawNode(ImDrawList cmdlist, UNodeBase node)
         {
             if(node.LayoutDirty)
             {
@@ -349,6 +349,7 @@ namespace EngineNS.Bricks.NodeGraph
             if (node.ParentGraph != null)
                 ImGuiAPI.SetWindowFontScale(1.0f / node.ParentGraph.ScaleVP);
 
+            var font = ImGuiAPI.GetDrawListFont(cmdlist);
 
             var shadowExt = new Vector2(12, 12);
             //cmdlist.AddRectFilled(in nodeStart, in nodeEnd, node.BackColor, 0, 0);
@@ -395,14 +396,14 @@ namespace EngineNS.Bricks.NodeGraph
                 var drawStart = CanvasToDraw(node.Position + styles.TitlePadding);
                 if (node.Name != node.Label && !string.IsNullOrEmpty(node.Label))
                 {
-                    cmdlist.AddText(in drawStart, styles.TitleTextDarkColor, node.Label, null);
+                    cmdlist.AddText(font, font.FontSize, &drawStart, styles.TitleTextDarkColor, node.Label, null, 0.0f, null);
                     var textSize = ImGuiAPI.CalcTextSize(node.Label, false, 0.0f);
                     drawStart.Y += textSize.Y + styles.TitleTextOffset;
                 }
                 if (node.HasError)
-                    cmdlist.AddText(in drawStart, styles.TitleTextErrorColor, node.Name != null ? node.Name : "none", null);
+                    cmdlist.AddText(font, font.FontSize, &drawStart, styles.TitleTextErrorColor, node.Name != null ? node.Name : "none", null, 0.0f, null);
                 else
-                    cmdlist.AddText(in drawStart, styles.TitleTextColor, node.Name != null ? node.Name : "none", null);
+                    cmdlist.AddText(font, font.FontSize, &drawStart, styles.TitleTextColor, node.Name != null ? node.Name : "none", null, 0.0f, null);
             }
 
             {//Draw Preview
@@ -477,15 +478,15 @@ namespace EngineNS.Bricks.NodeGraph
                 {
                     start = CanvasToDraw(inPin.NamePosition);
                     if(node.CodeExcept != null && node.CodeExcept.ErrorPin == inPin)
-                        cmdlist.AddText(start, styles.TitleTextErrorColor, inPin.Name, null);
+                        cmdlist.AddText(font, font.FontSize, &start, styles.TitleTextErrorColor, inPin.Name, null, 0.0f, null);
                     else
-                        cmdlist.AddText(start, styles.TitleTextColor, inPin.Name, null);
+                        cmdlist.AddText(font, font.FontSize, &start, styles.TitleTextColor, inPin.Name, null, 0.0f, null);
                 }
 				if (inPin.EditValue != null)
                 {
                     var pos = CanvasToDraw(inPin.EditValuePosition) - ImGuiAPI.GetWindowPos();
                     ImGuiAPI.SetCursorPos(pos);
-                    inPin.EditValue.OnDraw(node, inPin, styles, 1/mGraph.ScaleVP);
+                    inPin.EditValue.OnDraw(node, inPin, styles, 1/mGraph.ScaleVP, false);
                 }
             }
             ImGuiAPI.PopID();
@@ -515,9 +516,9 @@ namespace EngineNS.Bricks.NodeGraph
                 {
                     start = CanvasToDraw(i.NamePosition);
                     if(node.CodeExcept != null && node.CodeExcept.ErrorPin == i)
-                        cmdlist.AddText(start, styles.TitleTextErrorColor, i.Name, null);
+                        cmdlist.AddText(font, font.FontSize, &start, styles.TitleTextErrorColor, i.Name, null, 0.0f, null);
                     else
-                        cmdlist.AddText(start, styles.TitleTextColor, i.Name, null);
+                        cmdlist.AddText(font, font.FontSize, &start, styles.TitleTextColor, i.Name, null, 0.0f, null);
                 }
             }
 

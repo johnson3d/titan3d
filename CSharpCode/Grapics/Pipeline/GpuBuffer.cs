@@ -227,6 +227,7 @@ namespace EngineNS.Graphics.Pipeline
                     uavDesc.Buffer.NumElements = (uint)Count;
                     uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
                     Uav = TtEngine.Instance.GfxDevice.RenderContext.CreateUAV(GpuBuffer, in uavDesc);
+                    System.Diagnostics.Debug.Assert(Uav != null);
                 }
 
                 if ((bufferType & NxRHI.EBufferType.BFT_SRV) != 0)
@@ -236,6 +237,7 @@ namespace EngineNS.Graphics.Pipeline
                     srvDesc.Buffer.NumElements = (uint)Count;
                     srvDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
                     Srv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(GpuBuffer, in srvDesc);
+                    System.Diagnostics.Debug.Assert(Srv != null);
                 }
             }
         }

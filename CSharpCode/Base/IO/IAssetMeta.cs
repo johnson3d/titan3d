@@ -375,12 +375,16 @@ namespace EngineNS.IO
         }
         static Vector2 tempDelta0 = new Vector2(8, 8);
         static Vector2 tempDelta = new Vector2(12, 15);
-        public virtual unsafe void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
+        public virtual unsafe void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser, float scale)
         {
-            OnDraw(in cmdlist, in Vector2.Zero, in sz, ContentBrowser);
+            OnDraw(in cmdlist, in Vector2.Zero, in sz, ContentBrowser, scale);
         }
-        public virtual unsafe void OnDraw(in ImDrawList cmdlist, in Vector2 offset, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser)
+        public virtual unsafe void OnDraw(in ImDrawList cmdlist, in Vector2 offset, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser, float scale)
         {
+            var imViewPort = ImGuiAPI.GetWindowViewport();
+            var dpiScale = imViewPort->DpiScale;
+            scale *= dpiScale;
+
             var snapSize = sz.X * 0.9f;
             var start = ImGuiAPI.GetItemRectMin() + offset;
             var end = start + sz;
@@ -414,7 +418,7 @@ namespace EngineNS.IO
 
             //ImGuiAPI.PushClipRect(in start, in end, true);
 
-            var snapStart = new Vector2(start.X + delta, tpos.Y + 18);
+            var snapStart = new Vector2(start.X + delta, tpos.Y + 18 * scale);
             var snapEnd = snapStart + new Vector2(snapSize, snapSize);
             OnDrawSnapshot(in cmdlist, ref snapStart, ref snapEnd);
 
@@ -428,7 +432,7 @@ namespace EngineNS.IO
             var name = IO.TtFileManager.GetPureName(GetAssetName().Name, 11);
             var tsz = ImGuiAPI.CalcTextSize(name, false, -1);
             tpos.X = start.X + (sz.X - tsz.X) * 0.5f;
-            tpos.Y = snapEnd.Y + 8;
+            tpos.Y = snapEnd.Y + 8 * scale;
             TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)EGui.Slate.UBaseRenderer.enFont.Font_15px);
             cmdlist.AddText(in tpos, nameColor, name, null);
             TtEngine.Instance.GfxDevice.SlateRenderer.PopFont();

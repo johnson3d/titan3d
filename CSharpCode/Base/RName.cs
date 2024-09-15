@@ -162,6 +162,12 @@ namespace EngineNS
         {
             return string.IsNullOrEmpty(rName.mName);
         }
+        public static bool IsExist(RName rName)
+        {
+            if (rName == null)
+                return false;
+            return IO.TtFileManager.FileExists(rName.Address) || IO.TtFileManager.DirectoryExists(rName.Address);
+        }
 
         internal RName(string name, ERNameType type)
         {

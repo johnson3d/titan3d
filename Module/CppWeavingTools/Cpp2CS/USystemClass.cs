@@ -120,7 +120,7 @@ namespace CppWeaving.Cpp2CS
             RegClass("EngineNS.NxPhysics.NxQuat", new USystemTypeStruct() { CppName = "EngineNS::NxPhysics::PxQuat", CSName = "EngineNS.NxPhysics.PxQuat", RetPodName = "EngineNS::NxPhysics::PxQaut_t" });
             RegClass("EngineNS.NxPhysics.NxPQ", new USystemTypeStruct() { CppName = "EngineNS::NxPhysics::PxPQ", CSName = "EngineNS.NxPhysics.PxPQ", RetPodName = "EngineNS::NxPhysics::PxPQ_t" });
 
-            mTypeDefs["ImGuiDir"] = "ImGuiDir_";
+            mTypeDefs["ImGuiDir"] = "ImGuiDir";
             mTypeDefs["ImGuiInputTextFlags"] = "ImGuiInputTextFlags_";
             mTypeDefs["ImGuiKey"] = "ImGuiKey_";
             mTypeDefs["ImDrawCornerFlags"] = "ImDrawCornerFlags_";

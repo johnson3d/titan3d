@@ -158,6 +158,8 @@ namespace EngineNS
                 var io = ImGuiAPI.GetIO();
 
                 ImGuiConfigFlags_ configFlags = ImGuiConfigFlags_.ImGuiConfigFlags_None;
+                //configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_DpiEnableScaleViewports;
+                configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_DpiEnableScaleFonts;
                 configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
                 //configFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
                 configFlags |= ImGuiConfigFlags_.ImGuiConfigFlags_DockingEnable;           // Enable Docking

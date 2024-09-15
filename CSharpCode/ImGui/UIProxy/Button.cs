@@ -188,12 +188,16 @@ namespace EngineNS.EGui.UIProxy
             if (!IsReadToDraw())
                 return false;
 
+            var imViewPort = ImGuiAPI.GetWindowViewport();
+            var dpiScale = imViewPort->DpiScale;
+
             bool retValue = false;
             var rectStart = ImGuiAPI.GetCursorScreenPos();
 
             var id = ImGuiAPI.GetID(Name);
             var style = ImGuiAPI.GetStyle();
-            var size = ImGuiAPI.CalcItemSize(ref Size, Size.X + style->FramePadding.X * 2.0f, Size.Y + style->FramePadding.Y * 2.0f);
+            var sizeScaled = Size * dpiScale;
+            var size = ImGuiAPI.CalcItemSize(ref sizeScaled, sizeScaled.X + style->FramePadding.X * 2.0f, sizeScaled.Y + style->FramePadding.Y * 2.0f);
             var rectEnd = rectStart + size;
 
             ImGuiAPI.ItemSize(in size, 0);
@@ -210,8 +214,8 @@ namespace EngineNS.EGui.UIProxy
                 retValue = true;
             }
 
-            var imgPos = rectStart + (size - Size) * 0.5f;
-            var imgEnd = imgPos + Size;
+            var imgPos = rectStart + (size - sizeScaled) * 0.5f;
+            var imgEnd = imgPos + sizeScaled;
             if(IsChecked)
             {
                 if(mCheckedUVAnimTask != null)

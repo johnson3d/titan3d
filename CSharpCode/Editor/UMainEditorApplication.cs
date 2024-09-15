@@ -354,6 +354,7 @@ namespace EngineNS.Editor
         public float LeftWidth = 0;
         public float CenterWidth = 0;
         static string mNeedFocusWindowName;
+        public static string NeedFocusPanelName;
         static int mFrameDelay = 0;
         public static string NeedFocusWindowName
         {

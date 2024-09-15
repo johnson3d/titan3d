@@ -267,7 +267,7 @@ namespace EngineNS.Bricks.NodeGraph
         public float ControlWidth { get; set; } = 80;
         public float ControlHeight { get; set; } = 30;
         private static int GID_EditableValue = 0;
-        public virtual unsafe void OnDraw(UNodeBase node, PinIn pin, UNodeGraphStyles styles, float fScale)
+        public virtual unsafe void OnDraw(UNodeBase node, PinIn pin, UNodeGraphStyles styles, float fScale, bool useDPI)
         {
             //LabelName目前每次构造时确保id唯一，也许以后可以找到类似
             //GetObjectHandleAddress这样的方法替换
@@ -448,7 +448,7 @@ namespace EngineNS.Bricks.NodeGraph
                 base.Value = value;
             }
         }
-        public override void OnDraw(UNodeBase node, PinIn pin, UNodeGraphStyles styles, float fScale)
+        public override void OnDraw(UNodeBase node, PinIn pin, UNodeGraphStyles styles, float fScale, bool useDPI)
         {
             var width = ControlWidth;
             if (width < 60)
@@ -504,7 +504,7 @@ namespace EngineNS.Bricks.NodeGraph
         public Rtti.UTypeDesc MacrossType { get; set; }
         public EGui.Controls.UContentBrowser ContentBrowser;
         bool BrowserVisible = false;
-        public override void OnDraw(UNodeBase node, PinIn pin, UNodeGraphStyles styles, float fScale)
+        public override unsafe void OnDraw(UNodeBase node, PinIn pin, UNodeGraphStyles styles, float fScale, bool useDPI)
         {
             //Support.UAnyPointer anyPt = new Support.UAnyPointer()
             //{
@@ -528,7 +528,9 @@ namespace EngineNS.Bricks.NodeGraph
                 var cmdList = ImGuiAPI.GetWindowDrawList();
                 var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
                 ameta?.OnDrawSnapshot(cmdList, ref pos, ref end);
-                cmdList.AddText(new Vector2(pos.X, end.Y), 0xFFFFFFFF, AssetName.Name, null);
+                var cmdListFont = ImGuiAPI.GetDrawListFont(cmdList);
+                var textPos = new Vector2(pos.X, end.Y);
+                cmdList.AddText(cmdListFont, cmdListFont.FontSize, &textPos, 0xFFFFFFFF, AssetName.Name, null, 0.0f, null);
                 ImGuiAPI.SetCursorScreenPos(new Vector2(pos.X + iconSize.X, pos.Y));
             }
             else

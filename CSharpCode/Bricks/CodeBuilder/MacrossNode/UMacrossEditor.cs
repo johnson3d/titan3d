@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using EngineNS.Editor;
+using Microsoft.CodeAnalysis;
 using NPOI.SS.Formula.Functions;
 using NPOI.Util;
 using System;
@@ -1164,6 +1165,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 mSettingCurrentFuncIndex = OpenFunctions.Count;
                 OpenFunctions.Add(method);
             }
+            UMainEditorApplication.NeedFocusPanelName = EGui.UIProxy.DockProxy.GetDockWindowName("GraphWindow", mDockKeyClass);
         }
         bool mNodePropertyShow = true;
         protected void DrawPropertyGrid()

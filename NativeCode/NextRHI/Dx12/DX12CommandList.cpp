@@ -827,7 +827,7 @@ namespace NxRHI
 		D3D12_TEXTURE_COPY_LOCATION src{};
 		src.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
 		src.pResource = (ID3D12Resource*)source->GetHWBuffer();
-		src.PlacedFootprint.Footprint.Format = FormatToDX12Format(footprint->Format);
+		src.PlacedFootprint.Footprint.Format = FormatToDX12Format(target->Desc.Format);
 		src.PlacedFootprint.Footprint.Width = footprint->Width;
 		src.PlacedFootprint.Footprint.Height = footprint->Height;
 		src.PlacedFootprint.Footprint.Depth = footprint->Depth;
@@ -858,7 +858,7 @@ namespace NxRHI
 		D3D12_TEXTURE_COPY_LOCATION dst{};
 		dst.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
 		dst.pResource = (ID3D12Resource*)target->GetHWBuffer();
-		dst.PlacedFootprint.Footprint.Format = FormatToDX12Format(footprint->Format);
+		dst.PlacedFootprint.Footprint.Format = FormatToDX12Format(source->Desc.Format);
 		dst.PlacedFootprint.Footprint.Width = footprint->Width;
 		dst.PlacedFootprint.Footprint.Height = footprint->Height;
 		dst.PlacedFootprint.Footprint.Depth = footprint->Depth;

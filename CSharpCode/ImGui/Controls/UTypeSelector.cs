@@ -139,7 +139,7 @@ namespace EngineNS.EGui.Controls
         public string CtrlId = "##ComboTypeSelector";
         public delegate bool FOnTypeFilter(Rtti.UTypeDesc type);
         public bool PopupVisible = false;
-        public unsafe bool OnDraw(float itemWidth, int showMaxItems, FOnTypeFilter onTypeFilter = null)
+        public unsafe bool OnDraw(float itemWidth, int showMaxItems, FOnTypeFilter onTypeFilter = null, bool useDPI = true)
         {
             ImGuiAPI.PushID(CtrlId);
             var pos = ImGuiAPI.GetCursorScreenPos();
@@ -151,7 +151,16 @@ namespace EngineNS.EGui.Controls
             }
             var frameHeight = ImGuiAPI.GetFrameHeight();
             var textSize = ImGuiAPI.CalcTextSize(text, false, -1);
-            drawList.AddText(pos + new Vector2(0, (frameHeight - textSize.Y) * 0.5f), UIProxy.StyleConfig.Instance.TextColor, text, null);
+            var textPos = pos + new Vector2(0, (frameHeight - textSize.Y) * 0.5f);
+            if(useDPI)
+            {
+                drawList.AddText(textPos, UIProxy.StyleConfig.Instance.TextColor, text, null);
+            }
+            else
+            {
+                var font = ImGuiAPI.GetDrawListFont(drawList);
+                drawList.AddText(font, font.FontSize, &textPos, UIProxy.StyleConfig.Instance.TextColor, text, null, 0.0f, null);
+            }
             var sizeDelta = ImGuiAPI.GetFontSize() * 0.4f;
             ImGuiAPI.Arrow(drawList, pos + new Vector2(UIProxy.StyleConfig.Instance.ItemSpacing.X + textSize.X, (frameHeight - sizeDelta) * 0.5f - 2.0f), UIProxy.StyleConfig.Instance.TextColor, ImGuiDir.ImGuiDir_Down, 1.0f);
             if(ImGuiAPI.InvisibleButton(CtrlId + "InvBtn",

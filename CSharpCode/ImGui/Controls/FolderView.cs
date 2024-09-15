@@ -1,5 +1,6 @@
 ﻿using EngineNS.Thread;
 using MathNet.Numerics.Random;
+using NPOI.OpenXmlFormats.Dml;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -272,13 +273,19 @@ namespace EngineNS.EGui.Controls
 
             var cmdList = ImGuiAPI.GetWindowDrawList();
             var start = ImGuiAPI.GetItemRectMin();
-            //var end = ImGuiAPI.GetItemRectMax();
+            var end = ImGuiAPI.GetItemRectMax();
             //cmdList.AddRect(start, end, 0xFF0000FF, 0, ImDrawFlags_.ImDrawFlags_None, 1);
             //ImGuiAPI.SameLine(0, -1);
             var curPos = ImGuiAPI.GetCursorScreenPos();
             Vector2 rectSize = Vector2.Zero;
-            start.X = curPos.X;
-            var imgSize = 16;
+            var imViewPort = ImGuiAPI.GetWindowViewport();
+            var dpiScale = imViewPort->DpiScale;
+            float imgSize = 16.0f * dpiScale;
+            float iconIndent = 5 * dpiScale;
+
+            start.X = curPos.X + iconIndent;
+            start.Y = ImGuiAPI.GetItemRectMin().Y + ((end.Y - start.Y) - imgSize) * 0.5f;
+
             if (treeNodeResult)
             {
                 var shadowImg = TtEngine.Instance.UIProxyManager[FolderOpenImgName] as EGui.UIProxy.ImageProxy;
@@ -287,7 +294,7 @@ namespace EngineNS.EGui.Controls
             }
             else
             {
-                start.X += style->IndentSpacing;
+                start.X += style->IndentSpacing * dpiScale;
                 var shadowImg = TtEngine.Instance.UIProxyManager[FolderClosedImgName] as EGui.UIProxy.ImageProxy;
                 if (shadowImg != null)
                     shadowImg.OnDraw(cmdList, start, start + new Vector2(imgSize, imgSize), 0xff558fb6);
@@ -296,6 +303,7 @@ namespace EngineNS.EGui.Controls
             rectSize.Y = imgSize;
             start.X += rectSize.X;
             var textSize = ImGuiAPI.CalcTextSize(dirName, false, 0.0f);
+            start.Y = ImGuiAPI.GetItemRectMin().Y + ((end.Y - start.Y) - textSize.Y) * 0.5f;
             cmdList.AddText(start, textColor, dirName, null);
             rectSize.X += textSize.X;
             rectSize.Y = MathF.Max(rectSize.Y, textSize.Y);

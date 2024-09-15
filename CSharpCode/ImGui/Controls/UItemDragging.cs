@@ -52,7 +52,7 @@ namespace EngineNS.EGui.Controls
                 var cmdlst = ImGuiAPI.GetWindowDrawList();
                 var start = ImGuiAPI.GetWindowPos();
                 //CurItem.Icon.OnDraw(ref cmdlst, start, start + CurItem.Icon.Size, 0);
-                CurItem.AMeta.OnDraw(in cmdlst, in CurItem.Size, CurItem.Browser);
+                CurItem.AMeta.OnDraw(in cmdlst, in CurItem.Size, CurItem.Browser, 1.0f);
             }
             EGui.UIProxy.DockProxy.EndMainForm(result);
         }

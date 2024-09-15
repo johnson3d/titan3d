@@ -835,7 +835,10 @@ namespace NxRHI
 	void SrvDesc2DX(D3D11_SHADER_RESOURCE_VIEW_DESC* tar, const FSrvDesc* src)
 	{
 		memset(tar, 0, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
-		tar->Format = FormatToDXFormat(TypelessToViewDefaultFormat(src->Format));
+		if (src->Type == ST_BufferSRV)
+			tar->Format = FormatToDXFormat(src->Format);
+		else
+			tar->Format = FormatToDXFormat(TypelessToViewDefaultFormat(src->Format));
 		switch (src->Type)
 		{
 		case ST_BufferSRV:
@@ -1031,7 +1034,10 @@ namespace NxRHI
 	static void UavDesc2DX(IGpuResource* pBuffer, D3D11_UNORDERED_ACCESS_VIEW_DESC* tar, const FUavDesc* src)
 	{
 		//memset(tar, 0, sizeof(D3D12_SHADER_RESOURCE_VIEW_DESC));
-		tar->Format = FormatToDXFormat(TypelessToViewDefaultFormat(src->Format));
+		if (src->ViewDimension == EDimensionUAV::UAV_DIMENSION_BUFFER)
+			tar->Format = FormatToDXFormat(src->Format);
+		else
+			tar->Format = FormatToDXFormat(TypelessToViewDefaultFormat(src->Format));
 		switch (src->ViewDimension)
 		{
 			case EDimensionUAV::UAV_DIMENSION_BUFFER:
@@ -1090,14 +1096,14 @@ namespace NxRHI
 
 		D3D11_UNORDERED_ACCESS_VIEW_DESC tmp{};
 		UavDesc2DX(pBuffer, &tmp, &desc);
-		if (desc.ViewDimension == EDimensionUAV::UAV_DIMENSION_BUFFER)
+		/*if (desc.ViewDimension == EDimensionUAV::UAV_DIMENSION_BUFFER)
 		{
 			tmp.Format = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
 			if (tmp.Buffer.Flags & D3D11_BUFFER_UAV_FLAG_RAW)
 			{
 				tmp.Format = DXGI_FORMAT::DXGI_FORMAT_R32_TYPELESS;
 			}
-		}
+		}*/
 		
 		//tmp.Format = FormatToDXFormat(desc.Format);
 		//if (desc.ViewDimension == UAV_DIMENSION_BUFFER)
