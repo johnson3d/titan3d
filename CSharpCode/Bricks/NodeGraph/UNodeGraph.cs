@@ -98,7 +98,7 @@ namespace EngineNS.Bricks.NodeGraph
                 else
                 {
                     var pros = TypeDescriptor.GetProperties(Node);
-                    collection.InitValue(Node, Rtti.UTypeDesc.TypeOf(Node.GetType()), pros, parentIsValueType);
+                    collection.InitValue(Node, Rtti.TtTypeDesc.TypeOf(Node.GetType()), pros, parentIsValueType);
                 }
             }
 
@@ -485,14 +485,14 @@ namespace EngineNS.Bricks.NodeGraph
                 return null;
             return linker.InPin;
         }
-        public Rtti.UTypeDesc GetOppositePinType(PinIn pin)
+        public Rtti.TtTypeDesc GetOppositePinType(PinIn pin)
         {
             var linker = GetFirstLinker(pin);
             if (linker == null)
                 return null;
             return linker.OutPin.HostNode.GetOutPinType(linker.OutPin);
         }
-        public Rtti.UTypeDesc GetOppositePinType(PinOut pin)
+        public Rtti.TtTypeDesc GetOppositePinType(PinOut pin)
         {
             var linker = GetFirstLinker(pin);
             if (linker == null)
@@ -688,7 +688,7 @@ namespace EngineNS.Bricks.NodeGraph
                 if (max.Y < nodeMax.Y)
                     max.Y = nodeMax.Y;
 
-                var copyedNode = Rtti.UTypeDescManager.CreateInstance(node.GetType()) as UNodeBase;
+                var copyedNode = Rtti.TtTypeDescManager.CreateInstance(node.GetType()) as UNodeBase;
                 node.CopyTo(copyedNode);
                 copyedNode.UserData = this;
                 SetDefaultActionForNode(copyedNode);
@@ -850,7 +850,7 @@ namespace EngineNS.Bricks.NodeGraph
                 (TtMenuItem item, object sender) =>
                 {
                     if (PopMenuPressObject != null &&
-                        Rtti.UTypeDesc.CanCast(PopMenuPressObject.GetType(), typeof(NodePin)))
+                        Rtti.TtTypeDesc.CanCast(PopMenuPressObject.GetType(), typeof(NodePin)))
                     {
                         this.RemoveLink(this.PopMenuPressObject as NodePin);
                         PopMenuPressObject = null;
@@ -968,7 +968,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
 
             var pKls = hit.GetType();
-            if (Rtti.UTypeDesc.CanCast(pKls, typeof(UNodeBase)))
+            if (Rtti.TtTypeDesc.CanCast(pKls, typeof(UNodeBase)))
             {
                 var node = hit as UNodeBase;
                 if (node.Selected)
@@ -991,7 +991,7 @@ namespace EngineNS.Bricks.NodeGraph
                     }
                 }
             }
-            else if (Rtti.UTypeDesc.CanCast(pKls, typeof(NodePin)))
+            else if (Rtti.TtTypeDesc.CanCast(pKls, typeof(NodePin)))
             {
                 var pin = hit as NodePin;
                 var pinIn = hit as PinIn;
@@ -1026,8 +1026,8 @@ namespace EngineNS.Bricks.NodeGraph
                         if (hit != null)
                         {
                             var pKls = hit.GetType();
-                            if (Rtti.UTypeDesc.CanCast(pKls,typeof(PinIn)) &&
-                                Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(),typeof(PinOut)))
+                            if (Rtti.TtTypeDesc.CanCast(pKls,typeof(PinIn)) &&
+                                Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(),typeof(PinOut)))
                             {
                                 var outPin = LinkingOp.StartPin as PinOut;
                                 var inPin = hit as PinIn;
@@ -1035,8 +1035,8 @@ namespace EngineNS.Bricks.NodeGraph
                                 pressNode = inPin.HostNode;
                             }
                             else if (
-                                Rtti.UTypeDesc.CanCast(pKls,typeof(PinOut)) &&
-                                Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(),typeof(PinIn)))
+                                Rtti.TtTypeDesc.CanCast(pKls,typeof(PinOut)) &&
+                                Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(),typeof(PinIn)))
                             {
                                 var outPin = hit as PinOut;
                                 var inPin = LinkingOp.StartPin as PinIn;
@@ -1181,7 +1181,7 @@ namespace EngineNS.Bricks.NodeGraph
                     CurMenuType = EGraphMenu.Pin;
                     PinMenuDirty = true;
                 }
-                else if (Rtti.UTypeDesc.CanCast(pKls, typeof(UNodeBase)))
+                else if (Rtti.TtTypeDesc.CanCast(pKls, typeof(UNodeBase)))
                 {
                     CurMenuType = EGraphMenu.Node;
                     NodeMenuDirty = true;
@@ -1296,7 +1296,7 @@ namespace EngineNS.Bricks.NodeGraph
                 hit = HitObject(DragPosition.X, DragPosition.Y);
             if (hit != null)
             {
-                if(Rtti.UTypeDesc.CanCast(hit.GetType(), typeof(NodePin)))
+                if(Rtti.TtTypeDesc.CanCast(hit.GetType(), typeof(NodePin)))
                 {
                     LinkingOp.HoverPin = hit as NodePin;
                     if (LinkingOp.HoverPin != null)
@@ -1304,7 +1304,7 @@ namespace EngineNS.Bricks.NodeGraph
                         LinkingOp.HoverPin.HostNode.OnMouseStayPin(LinkingOp.HoverPin, this);
                     }
                 }
-                else if(Rtti.UTypeDesc.CanCast(hit.GetType(), typeof(UNodeBase)))
+                else if(Rtti.TtTypeDesc.CanCast(hit.GetType(), typeof(UNodeBase)))
                 {
                     var node = hit as UNodeBase;
                     if(node.HasError && node.CodeExcept != null)
@@ -1327,8 +1327,8 @@ namespace EngineNS.Bricks.NodeGraph
                             List<FSelNodeState> copyedNodes = new List<FSelNodeState>(SelectedNodes.Count);
                             foreach (var i in SelectedNodes)
                             {
-                                var type = Rtti.UTypeDesc.TypeOf(i.Node.GetType());
-                                var node = Rtti.UTypeDescManager.CreateInstance(type) as UNodeBase;
+                                var type = Rtti.TtTypeDesc.TypeOf(i.Node.GetType());
+                                var node = Rtti.TtTypeDescManager.CreateInstance(type) as UNodeBase;
                                 i.Node.CopyTo(node);
                                 node.Name = i.Node.Name + "_copy";
                                 node.UserData = i.Node.UserData;
@@ -1550,12 +1550,12 @@ namespace EngineNS.Bricks.NodeGraph
             }
 
             var pKls = hit.GetType();
-            if (Rtti.UTypeDesc.CanCast(pKls, typeof(UNodeBase)))
+            if (Rtti.TtTypeDesc.CanCast(pKls, typeof(UNodeBase)))
             {
                 var node = hit as UNodeBase;
                 node.OnDoubleClick();
             }
-            else if(Rtti.UTypeDesc.CanCast(pKls, typeof(NodePin)))
+            else if(Rtti.TtTypeDesc.CanCast(pKls, typeof(NodePin)))
             {
                 var pin = hit as NodePin;
                 if(pin != null)

@@ -229,23 +229,23 @@ namespace EngineNS
             FGlobalConfig.GetInstance().SetConfigValueF32(Handle, value);
             OnValueChanged();
         }
-        public static TtGlobalConfigVar CreateConfigVar(UTypeDesc type, string name, int value)
+        public static TtGlobalConfigVar CreateConfigVar(TtTypeDesc type, string name, int value)
         {
-            var result = Rtti.UTypeDescManager.CreateInstance(type, null) as TtGlobalConfigVar;
+            var result = Rtti.TtTypeDescManager.CreateInstance(type, null) as TtGlobalConfigVar;
             result.Handle = FGlobalConfig.GetInstance().SetConfigValueI32(name, value);
             result.OnValueChanged();
             return result;
         }
-        public static TtGlobalConfigVar CreateConfigVar(UTypeDesc type, string name, uint value)
+        public static TtGlobalConfigVar CreateConfigVar(TtTypeDesc type, string name, uint value)
         {
-            var result = Rtti.UTypeDescManager.CreateInstance(type, null) as TtGlobalConfigVar;
+            var result = Rtti.TtTypeDescManager.CreateInstance(type, null) as TtGlobalConfigVar;
             result.Handle = FGlobalConfig.GetInstance().SetConfigValueUI32(name, value);
             result.OnValueChanged();
             return result;
         }
-        public static TtGlobalConfigVar CreateConfigVar(UTypeDesc type, string name, float value)
+        public static TtGlobalConfigVar CreateConfigVar(TtTypeDesc type, string name, float value)
         {
-            var result = Rtti.UTypeDescManager.CreateInstance(type, null) as TtGlobalConfigVar;
+            var result = Rtti.TtTypeDescManager.CreateInstance(type, null) as TtGlobalConfigVar;
             result.Handle = FGlobalConfig.GetInstance().SetConfigValueF32(name, value);
             result.OnValueChanged();
             return result;
@@ -276,7 +276,7 @@ namespace EngineNS
     {
         public TtGlobalConfig()
         {
-            ConfigType = Rtti.UTypeDesc.TypeOf(typeof(TtGlobalConfigVar));
+            ConfigType = Rtti.TtTypeDesc.TypeOf(typeof(TtGlobalConfigVar));
         }
         [Rtti.Meta]
         public string Name { get; set; }
@@ -285,7 +285,7 @@ namespace EngineNS
         [Rtti.Meta]
         public NxRHI.EShaderVarType ValueType { get; set; } = NxRHI.EShaderVarType.SVT_Int;
         [Rtti.Meta]
-        public Rtti.UTypeDesc ConfigType { get; set; }
+        public Rtti.TtTypeDesc ConfigType { get; set; }
         public TtGlobalConfigVar SetToGlobalConfig()
         {
             switch (ValueType)

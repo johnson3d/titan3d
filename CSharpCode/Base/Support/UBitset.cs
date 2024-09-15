@@ -439,8 +439,8 @@ namespace EngineNS.Support
             {
                 unsafe
                 {
-                    var type = Rtti.UTypeDesc.TypeOf(mTypeName.c_str());
-                    var result = Rtti.UTypeDescManager.CreateInstance(type);
+                    var type = Rtti.TtTypeDesc.TypeOf(mTypeName.c_str());
+                    var result = Rtti.TtTypeDescManager.CreateInstance(type);
                     System.Runtime.InteropServices.Marshal.PtrToStructure(mStructPointer, result);
                     return result;
                 }
@@ -452,7 +452,7 @@ namespace EngineNS.Support
                 {
                     mStructSize = sizeof(T);
                     mStructPointer = (IntPtr)CoreSDK.Alloc((uint)mStructSize, sourceFilePath, sourceLineNumber);
-                    var typeStr = Rtti.UTypeDesc.TypeStr(typeof(T));
+                    var typeStr = Rtti.TtTypeDesc.TypeStr(typeof(T));
                     mTypeName.SetString(typeStr);
                 }
             }
@@ -463,7 +463,7 @@ namespace EngineNS.Support
                 {
                     mStructSize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(T)); 
                     mStructPointer = (IntPtr)CoreSDK.Alloc((uint)mStructSize, sourceFilePath, sourceLineNumber);
-                    var typeStr = Rtti.UTypeDesc.TypeStr(typeof(T));
+                    var typeStr = Rtti.TtTypeDesc.TypeStr(typeof(T));
                     mTypeName.SetString(typeStr);
                 }
             }
@@ -475,7 +475,7 @@ namespace EngineNS.Support
                 {
                     mStructSize = System.Runtime.InteropServices.Marshal.SizeOf(type);
                     mStructPointer = (IntPtr)CoreSDK.Alloc((uint)mStructSize, sourceFilePath, sourceLineNumber);
-                    var typeStr = Rtti.UTypeDesc.TypeStr(type);
+                    var typeStr = Rtti.TtTypeDesc.TypeStr(type);
                     mTypeName.SetString(typeStr);
                 }
             }

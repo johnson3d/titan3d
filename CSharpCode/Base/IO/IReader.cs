@@ -325,7 +325,7 @@ namespace EngineNS.IO
                 Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"MetaVersion lost:{versionHash}");
                 throw new Exception($"MetaVersion lost:{versionHash}");
             }
-            v = Rtti.UTypeDescManager.CreateInstance(meta.ClassType) as ISerializer;
+            v = Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as ISerializer;
             v.OnPreRead(this.Tag, hostObject, false);
             
             SerializerHelper.Read(this, v, metaVersion);

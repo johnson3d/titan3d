@@ -68,13 +68,13 @@ namespace EngineNS
         void Initialize()
         {
             Commands.Clear();
-            foreach (var i in Rtti.UTypeDescManager.Instance.Services)
+            foreach (var i in Rtti.TtTypeDescManager.Instance.Services)
             {
                 foreach (var j in i.Value.Types)
                 {
-                    if (j.Value.IsSubclassOf(Rtti.UTypeDescGetter<TtCommand>.TypeDesc))
+                    if (j.Value.IsSubclassOf(Rtti.TtTypeDescGetter<TtCommand>.TypeDesc))
                     {
-                        var cmd = Rtti.UTypeDescManager.CreateInstance(j.Value) as TtCommand;
+                        var cmd = Rtti.TtTypeDescManager.CreateInstance(j.Value) as TtCommand;
                         Commands.Add(cmd.CmdName, cmd);
                     }
                 }

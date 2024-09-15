@@ -14,7 +14,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
         //    {
         //        foreach(var state in compoundState.States)
         //        {
-        //            var instance = TtOutlineElementsPoolManager.Instance.Get(UTypeDesc.TypeOf(state.GetType())) as IOutlineElement_Leaf;
+        //            var instance = TtOutlineElementsPoolManager.Instance.Get(TtTypeDesc.TypeOf(state.GetType())) as IOutlineElement_Leaf;
         //            instance.Description = state;
         //            instance.Parent = this;
         //            childrenElements.Add(instance);

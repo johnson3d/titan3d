@@ -274,7 +274,7 @@ namespace EngineNS.Bricks.AssemblyLoader
             var context = new TtLoadContext(AssemblyPath);// Manager.CoreBinDirectory);
             //var assembly = context.LoadFromAssemblyPath(AssemblyPath);
             var assembly = context.LoadOnMemory(AssemblyPath);
-            Rtti.UAssemblyDesc.UpdateRtti(this.Name, assembly, UnsafeGetAssembly());
+            Rtti.TtAssemblyDesc.UpdateRtti(this.Name, assembly, UnsafeGetAssembly());
             ModuleAssembly = new WeakReference<Assembly>(assembly);
             if (GetPluginObjectImpl() == false)
                 return false;
@@ -290,23 +290,23 @@ namespace EngineNS.Bricks.AssemblyLoader
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): ModuleAssembly is not alive");
                 return false;
             }
-            var type = assembly.GetType($"EngineNS.Plugins.{this.Name}.UPluginLoader");
+            var type = assembly.GetType($"EngineNS.Plugins.{this.Name}.TtPluginLoader");
             if (type == null)
             {
-                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): EngineNS.Plugin.UPluginLoader is not found");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): EngineNS.Plugin.TtPluginLoader is not found");
                 return false;
             }
             var method = type.GetMethod("GetPluginObject", BindingFlags.Static | BindingFlags.Public);
             if (method == null)
             {
-                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): EngineNS.Plugin.UPluginLoader.GetPluginObject is not found");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): EngineNS.Plugin.TtPluginLoader.GetPluginObject is not found");
                 return false;
             }
             var obj = method.Invoke(null, null);
             PluginObject = obj as IPlugin;
             if (PluginObject == null)
             {
-                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): EngineNS.Plugin.UPluginLoader.GetPluginObject return null");
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): EngineNS.Plugin.TtPluginLoader.GetPluginObject return null");
                 return false;
             }
             PluginObject.OnLoadedPlugin();
@@ -316,7 +316,7 @@ namespace EngineNS.Bricks.AssemblyLoader
         {
             if (bUnregAssembly)
             {
-                Rtti.UTypeDescManager.Instance.UnregAssembly(this.UnsafeGetAssembly());
+                Rtti.TtTypeDescManager.Instance.UnregAssembly(this.UnsafeGetAssembly());
             }
 
             try

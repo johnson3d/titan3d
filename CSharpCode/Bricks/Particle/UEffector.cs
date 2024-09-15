@@ -303,7 +303,7 @@ namespace EngineNS.Bricks.Particle
         protected T mEffectorParameter;
         public override TtEffector CloneEffector()
         {
-            var result = Rtti.UTypeDescManager.CreateInstance(GetType()) as TtAuxEffector<T>;
+            var result = Rtti.TtTypeDescManager.CreateInstance(GetType()) as TtAuxEffector<T>;
             result.mEffectorParameter = mEffectorParameter;
             return result;
         }

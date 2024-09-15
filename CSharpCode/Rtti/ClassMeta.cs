@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace EngineNS.Rtti
 {
-    public class UDummyAttribute : Attribute
+    public class TtDummyAttribute : Attribute
     {
     }
     public class MetaParameterAttribute : Attribute
@@ -33,7 +33,7 @@ namespace EngineNS.Rtti
     //{
     //    public bool IsOverrideBitset = true;
     //}
-    public class UStructAttrubte : Attribute
+    public class TtStructAttrubte : Attribute
     {
         public int ReadSize;
     }
@@ -125,7 +125,7 @@ namespace EngineNS.Rtti
         public struct UMetaFieldValue
         {
             public string Name;
-            public Rtti.UTypeDesc FieldType;
+            public Rtti.TtTypeDesc FieldType;
             public object Value;
         }
         public void CopyObjectMetaField(List<UMetaFieldValue> tar, object src)
@@ -139,13 +139,13 @@ namespace EngineNS.Rtti
 
                 var fld = new UMetaFieldValue();
                 fld.Name = i.PropertyName;
-                fld.FieldType = Rtti.UTypeDesc.TypeOf(srcProp.PropertyType);
+                fld.FieldType = Rtti.TtTypeDesc.TypeOf(srcProp.PropertyType);
                 fld.Value = srcProp.GetValue(src);
                 var lst = fld.Value as System.Collections.IList;
                 var dict = fld.Value as System.Collections.IDictionary;
                 if (lst != null)
                 {
-                    var tarlst = Rtti.UTypeDescManager.CreateInstance(fld.FieldType) as System.Collections.IList;
+                    var tarlst = Rtti.TtTypeDescManager.CreateInstance(fld.FieldType) as System.Collections.IList;
                     for (int j = 0; j < lst.Count; j++)
                     {
                         tarlst.Add(lst[j]);
@@ -154,7 +154,7 @@ namespace EngineNS.Rtti
                 }
                 if (dict != null)
                 {
-                    var tardict = Rtti.UTypeDescManager.CreateInstance(fld.FieldType) as System.Collections.IDictionary;
+                    var tardict = Rtti.TtTypeDescManager.CreateInstance(fld.FieldType) as System.Collections.IDictionary;
                     var j = dict.GetEnumerator();
                     while (j.MoveNext())
                     {
@@ -191,7 +191,7 @@ namespace EngineNS.Rtti
                     return mSubClasses;
 
                 mSubClasses = new List<TtClassMeta>();
-                foreach (var i in Rtti.UTypeDescManager.Instance.Services)
+                foreach (var i in Rtti.TtTypeDescManager.Instance.Services)
                 {
                     foreach (var j in i.Value.Types)
                     {
@@ -224,11 +224,11 @@ namespace EngineNS.Rtti
                 return true;
             return srcKls.ClassType.IsSubclassOf(ClassType);
         }
-        public TtClassMeta(UTypeDesc t)
+        public TtClassMeta(TtTypeDesc t)
         {
             ClassType = t;
         }
-        public UTypeDesc ClassType
+        public TtTypeDesc ClassType
         {
             get;
             set;
@@ -237,7 +237,7 @@ namespace EngineNS.Rtti
         {
             get
             {
-                return UTypeDesc.TypeStr(ClassType);
+                return TtTypeDesc.TypeStr(ClassType);
             }
         }
         public string MetaDirectoryName
@@ -351,7 +351,7 @@ namespace EngineNS.Rtti
                     continue;
                 var meta = attrs[0] as MetaAttribute;
                 var fd = new TtPropertyMeta();
-                fd.Build(result, UTypeDesc.TypeOf(i.PropertyType), i.Name, true);
+                fd.Build(result, TtTypeDesc.TypeOf(i.PropertyType), i.Name, true);
                 Properties.Add(fd);
                 if (!meta.IsUnserializable)
                     result.Propertys.Add(fd);
@@ -391,7 +391,7 @@ namespace EngineNS.Rtti
                 {
                     return GetParamInfo().GetCustomAttributes(attributeType, inherit);
                 }
-                public Rtti.UTypeDesc ParameterType;
+                public Rtti.TtTypeDesc ParameterType;
                 public bool IsParamArray = false;
                 public bool IsDelegate = false;
                 public string Name;
@@ -414,20 +414,20 @@ namespace EngineNS.Rtti
                     if (info.IsOut)
                     {
                         ArgumentAttribute = Bricks.CodeBuilder.EMethodArgumentAttribute.Out;
-                        ParameterType = Rtti.UTypeDesc.TypeOf(info.ParameterType.GetElementType());
+                        ParameterType = Rtti.TtTypeDesc.TypeOf(info.ParameterType.GetElementType());
                     }
                     else if (info.IsIn)
                     {
                         ArgumentAttribute = Bricks.CodeBuilder.EMethodArgumentAttribute.In;
-                        ParameterType = Rtti.UTypeDesc.TypeOf(info.ParameterType.GetElementType());
+                        ParameterType = Rtti.TtTypeDesc.TypeOf(info.ParameterType.GetElementType());
                     }
                     else if (info.ParameterType.IsByRef)
                     {
                         ArgumentAttribute = Bricks.CodeBuilder.EMethodArgumentAttribute.Ref;
-                        ParameterType = Rtti.UTypeDesc.TypeOf(info.ParameterType.GetElementType());
+                        ParameterType = Rtti.TtTypeDesc.TypeOf(info.ParameterType.GetElementType());
                     }
                     else
-                        ParameterType = Rtti.UTypeDesc.TypeOf(info.ParameterType);
+                        ParameterType = Rtti.TtTypeDesc.TypeOf(info.ParameterType);
                     if (info.DefaultValue is System.DBNull == false)
                         DefaultValue = info.DefaultValue;
                 }
@@ -447,8 +447,8 @@ namespace EngineNS.Rtti
             public MetaAttribute Meta;
             public TtParamMeta[] Parameters;
             public string MethodName;
-            public Rtti.UTypeDesc ReturnType;
-            public Rtti.UTypeDesc DeclaringType;
+            public Rtti.TtTypeDesc ReturnType;
+            public Rtti.TtTypeDesc DeclaringType;
             public bool IsStatic = false;
             public bool IsVirtual = false;
 
@@ -520,8 +520,8 @@ namespace EngineNS.Rtti
                 MethodName = method.Name;
                 IsStatic = method.IsStatic;
                 IsVirtual = method.IsVirtual;
-                ReturnType = Rtti.UTypeDesc.TypeOf(method.ReturnType);
-                DeclaringType = Rtti.UTypeDesc.TypeOf(method.DeclaringType);
+                ReturnType = Rtti.TtTypeDesc.TypeOf(method.ReturnType);
+                DeclaringType = Rtti.TtTypeDesc.TypeOf(method.DeclaringType);
 
                 var parameters = method.GetParameters();
                 Parameters = new TtParamMeta[parameters.Length];
@@ -669,9 +669,9 @@ namespace EngineNS.Rtti
         public class TtFieldMeta
         {
             public MetaAttribute Meta;
-            public UTypeDesc FieldType;
+            public TtTypeDesc FieldType;
             public string FieldName;
-            public UTypeDesc DeclaringType;
+            public TtTypeDesc DeclaringType;
             private string Name;
             System.Reflection.FieldInfo mFieldInfoRef;
             public bool IsStatic
@@ -708,9 +708,9 @@ namespace EngineNS.Rtti
             }
             public void Init(System.Reflection.FieldInfo info)
             {
-                FieldType = UTypeDesc.TypeOf(info.FieldType);
+                FieldType = TtTypeDesc.TypeOf(info.FieldType);
                 FieldName = info.Name;
-                DeclaringType = UTypeDesc.TypeOf(info.DeclaringType);
+                DeclaringType = TtTypeDesc.TypeOf(info.DeclaringType);
                 Name = $"{info.FieldType.FullName} {info.Name}";
             }
             public override string ToString()
@@ -776,13 +776,13 @@ namespace EngineNS.Rtti
                 {
                     if (mPropInfoRef == null)
                     {
-                        mPropInfoRef = Rtti.UTypeDesc.GetProperty(HostType.SystemType, PropertyName);
+                        mPropInfoRef = Rtti.TtTypeDesc.GetProperty(HostType.SystemType, PropertyName);
                     }
                     return mPropInfoRef;
                 }
             }
-            UTypeDesc mHostType;
-            public UTypeDesc HostType { get => mHostType; }
+            TtTypeDesc mHostType;
+            public TtTypeDesc HostType { get => mHostType; }
             string mPropertyName;
             public string PropertyName { get => mPropertyName; }
             public bool IsGetStatic
@@ -834,7 +834,7 @@ namespace EngineNS.Rtti
                 }
             }
             
-            public void Build(TtMetaVersion metaVersion, UTypeDesc propType, string name, bool bUpdateOrder)
+            public void Build(TtMetaVersion metaVersion, TtTypeDesc propType, string name, bool bUpdateOrder)
             {
                 mHostType = metaVersion.HostClass.ClassType;
                 mPropertyName = name;
@@ -851,7 +851,7 @@ namespace EngineNS.Rtti
                 }
                 mPropInfoRef = info;
                 mHostType = metaVersion.HostClass.ClassType;
-                mFieldType = UTypeDesc.TypeOf(info.PropertyType);// propType;
+                mFieldType = TtTypeDesc.TypeOf(info.PropertyType);// propType;
 
                 System.Diagnostics.Debug.Assert(info.DeclaringType == metaVersion.HostClass.ClassType.SystemType || metaVersion.HostClass.ClassType.SystemType.IsSubclassOf(info.DeclaringType));
                 //System.Diagnostics.Debug.Assert(info.PropertyType == propType.SystemType);
@@ -873,8 +873,8 @@ namespace EngineNS.Rtti
                 }
             }
             public IO.UCustomSerializerAttribute CustumSerializer;
-            Rtti.UTypeDesc mFieldType;
-            public Rtti.UTypeDesc FieldType
+            Rtti.TtTypeDesc mFieldType;
+            public Rtti.TtTypeDesc FieldType
             {
                 get => mFieldType;
             }
@@ -924,7 +924,7 @@ namespace EngineNS.Rtti
         }
     }
 
-    public class UMetaVersionMeta : IO.IAssetMeta
+    public class TtMetaVersionMeta : IO.IAssetMeta
     {
         public override string GetAssetExtType()
         {
@@ -959,7 +959,7 @@ namespace EngineNS.Rtti
         //    ImGuiAPI.PopClipRect();
         //}
     }
-    [Editor.UAssetEditor(EditorType = typeof(Editor.UMetaVersionViewer))]
+    [Editor.UAssetEditor(EditorType = typeof(Editor.TtMetaVersionViewer))]
     public class TtMetaVersion
     {
         public TtMetaVersion(TtClassMeta kls)
@@ -1015,7 +1015,7 @@ namespace EngineNS.Rtti
         public System.Reflection.PropertyInfo FindPropertyByName(Type type, string name)
         {
             //var result = HostClass.ClassType.SystemType.GetProperty(name);
-            var result = Rtti.UTypeDesc.GetProperty(HostClass.ClassType.SystemType, name);
+            var result = Rtti.TtTypeDesc.GetProperty(HostClass.ClassType.SystemType, name);
             if (result == null && type != null)
             {//if renamed property,check NameAlias
                 var props = HostClass.ClassType.SystemType.GetProperties();
@@ -1061,7 +1061,7 @@ namespace EngineNS.Rtti
                         fd.Order = System.Convert.ToInt32(j.Value);
                     }
                 }
-                var fieldType = Rtti.UTypeDesc.TypeOf(fieldTypeStr);
+                var fieldType = Rtti.TtTypeDesc.TypeOf(fieldTypeStr);
                 fd.Build(this, fieldType, i.Name, false);
                 if (fd.FieldType == null)
                 {
@@ -1132,7 +1132,16 @@ namespace EngineNS.Rtti
             get => mMetas;
         }
         Dictionary<Hash64, TtClassMeta> mHashMetas = new Dictionary<Hash64, TtClassMeta>();
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
         public UTypeTreeManager TreeManager = new UTypeTreeManager();
+        public string MetaRoot;
+在此之后:
+        public TtTypeTreeManager TreeManager = new UTypeTreeManager();
+        public string MetaRoot;
+*/
+        public TtTypeTreeManager TreeManager = new TtTypeTreeManager();
         public string MetaRoot;
         public void LoadMetas(string moduleName = null)
         {
@@ -1157,7 +1166,7 @@ namespace EngineNS.Rtti
                             var strName = EngineNS.IO.TtFileManager.ReadAllText(tmpPath);
                             if (strName == null)
                                 continue;
-                            var type = UTypeDesc.TypeOf(strName);// EngineNS.Rtti.UTypeDescManager.Instance.GetTypeDescFromString(strName);
+                            var type = TtTypeDesc.TypeOf(strName);// EngineNS.Rtti.UTypeDescManager.Instance.GetTypeDescFromString(strName);
                             if (type != null)
                             {
                                 if (moduleName == null || (moduleName != null && type.Assembly.Name == moduleName))
@@ -1212,26 +1221,26 @@ namespace EngineNS.Rtti
             
             //ForceSaveAll();
 
-            GetMeta(UTypeDesc.TypeOf(typeof(void)));
-            GetMeta(UTypeDesc.TypeOf(typeof(char)));
-            GetMeta(UTypeDesc.TypeOf(typeof(byte)));
-            GetMeta(UTypeDesc.TypeOf(typeof(Int16)));
-            GetMeta(UTypeDesc.TypeOf(typeof(UInt16)));
-            GetMeta(UTypeDesc.TypeOf(typeof(Int32)));
-            GetMeta(UTypeDesc.TypeOf(typeof(UInt32)));
-            GetMeta(UTypeDesc.TypeOf(typeof(Int64)));
-            GetMeta(UTypeDesc.TypeOf(typeof(UInt64)));
-            GetMeta(UTypeDesc.TypeOf(typeof(float)));
-            GetMeta(UTypeDesc.TypeOf(typeof(double)));
-            GetMeta(UTypeDesc.TypeOf(typeof(string)));
-            GetMeta(UTypeDesc.TypeOf(typeof(Vector2)));
-            GetMeta(UTypeDesc.TypeOf(typeof(Vector3)));
-            GetMeta(UTypeDesc.TypeOf(typeof(Vector4)));
-            GetMeta(UTypeDesc.TypeOf(typeof(Quaternion)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(void)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(char)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(byte)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(Int16)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(UInt16)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(Int32)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(UInt32)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(Int64)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(UInt64)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(float)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(double)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(string)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(Vector2)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(Vector3)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(Vector4)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(Quaternion)));
         }
         public void BuildMeta(string moduleName = null)
         {
-            foreach (var i in UTypeDescManager.Instance.Services)
+            foreach (var i in TtTypeDescManager.Instance.Services)
             {
                 var klsColloector = new List<TtClassMeta>();
 
@@ -1355,7 +1364,7 @@ namespace EngineNS.Rtti
                 return null;
             lock (this)
             {
-                var type = Rtti.UTypeDesc.TypeOf(name);
+                var type = Rtti.TtTypeDesc.TypeOf(name);
                 if (type == null)
                     return null;
                 TtClassMeta result;
@@ -1375,15 +1384,15 @@ namespace EngineNS.Rtti
                 }
             }
         }
-        public Dictionary<UTypeDesc, TtClassMeta> TypeMetas { get; } = new Dictionary<UTypeDesc, TtClassMeta>();
+        public Dictionary<TtTypeDesc, TtClassMeta> TypeMetas { get; } = new Dictionary<TtTypeDesc, TtClassMeta>();
         public TtClassMeta GetMetaFromFullName(string fname)
         {
-            var desc = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(fname);
+            var desc = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(fname);
             if (desc == null)
                 return null;
             return GetMeta(desc);
         }
-        public TtClassMeta GetMeta(UTypeDesc type)
+        public TtClassMeta GetMeta(TtTypeDesc type)
         {
             if (type == null)
                 return null;
@@ -1394,7 +1403,7 @@ namespace EngineNS.Rtti
                 {
                     return result;
                 }
-                var typeStr = type.TypeString; //Rtti.UTypeDesc.TypeStr(type.SystemType);
+                var typeStr = type.TypeString; //Rtti.TtTypeDesc.TypeStr(type.SystemType);
                 return GetMeta(typeStr);
             }
         }
@@ -1406,6 +1415,4 @@ namespace EngineNS.Rtti
             return null;
         }
     }
-
-    
 }

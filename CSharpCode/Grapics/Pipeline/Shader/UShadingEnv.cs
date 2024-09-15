@@ -82,7 +82,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public class UPermutationItem
         {
             public string Name;
-            public Rtti.UTypeDesc TypeDesc;
+            public Rtti.TtTypeDesc TypeDesc;
             public int Start;
             public int Width;
             public FPermutationId Mask;
@@ -204,7 +204,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             var result = FPermutationId.GetMask(PermutationBitWidth, bitwidth);
             result.Name = name;
-            result.TypeDesc = Rtti.UTypeDesc.TypeOf<T>();
+            result.TypeDesc = Rtti.TtTypeDesc.TypeOf<T>();
             result.Value.SetValue(value, result);
 
             PermutationValues.Add(result);
@@ -378,7 +378,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 };
         }
     }
-    public class TtShadingEnvManager : UModule<TtEngine>
+    public class TtShadingEnvManager : TtModule<TtEngine>
     {
         public Dictionary<Type, TtShadingEnv> Shadings { get; } = new Dictionary<Type, TtShadingEnv>();
         public TtShadingEnv GetShadingEnv(Type name)
@@ -387,7 +387,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (Shadings.TryGetValue(name, out shading))
                 return shading;
 
-            shading = Rtti.UTypeDescManager.CreateInstance(name) as TtShadingEnv;
+            shading = Rtti.TtTypeDescManager.CreateInstance(name) as TtShadingEnv;
             if (shading == null)
                 return null;
             Shadings.Add(name, shading);
@@ -452,7 +452,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
                 return true;
             }
-            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)
             {
                 ExtName = ext;
                 mName = null;

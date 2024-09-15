@@ -9,7 +9,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     public class TtImmediateValueDescription : TtExpressionDescription
     {
         [Rtti.Meta]
-        public UTypeDesc TypeDesc { get; set; } = UTypeDesc.TypeOf<bool>();
+        public TtTypeDesc TypeDesc { get; set; } = TtTypeDesc.TypeOf<bool>();
         [Rtti.Meta]
         public string StrValue { get; set; }
         public TtImmediateValueDescription()
@@ -29,7 +29,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         public TtBoolValueDescription()
         {
-            TypeDesc = UTypeDesc.TypeOf<bool>();
+            TypeDesc = TtTypeDesc.TypeOf<bool>();
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
@@ -46,7 +46,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         public TtSByteValueDescription()
         {
-            TypeDesc = UTypeDesc.TypeOf<SByte>();
+            TypeDesc = TtTypeDesc.TypeOf<SByte>();
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
@@ -63,7 +63,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         public TtInt16ValueDescription()
         {
-            TypeDesc = UTypeDesc.TypeOf<Int16>();
+            TypeDesc = TtTypeDesc.TypeOf<Int16>();
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
@@ -80,7 +80,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         public TtInt32ValueDescription()
         {
-            TypeDesc = UTypeDesc.TypeOf<Int32>();
+            TypeDesc = TtTypeDesc.TypeOf<Int32>();
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
@@ -97,7 +97,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         public TtInt64ValueDescription()
         {
-            TypeDesc = UTypeDesc.TypeOf<Int64>();
+            TypeDesc = TtTypeDesc.TypeOf<Int64>();
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
@@ -114,7 +114,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         public TtByteValueDescription()
         {
-            TypeDesc = UTypeDesc.TypeOf<Byte>();
+            TypeDesc = TtTypeDesc.TypeOf<Byte>();
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
@@ -131,7 +131,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         public TtUInt16ValueDescription()
         {
-            TypeDesc = UTypeDesc.TypeOf<UInt16>();
+            TypeDesc = TtTypeDesc.TypeOf<UInt16>();
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
@@ -148,7 +148,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         public TtUInt32ValueDescription()
         {
-            TypeDesc = UTypeDesc.TypeOf<UInt32>();
+            TypeDesc = TtTypeDesc.TypeOf<UInt32>();
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
@@ -165,7 +165,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         public TtUInt64ValueDescription()
         {
-            TypeDesc = UTypeDesc.TypeOf<UInt64>();
+            TypeDesc = TtTypeDesc.TypeOf<UInt64>();
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
@@ -182,7 +182,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         public TtFloatValueDescription()
         {
-            TypeDesc = UTypeDesc.TypeOf<float>();
+            TypeDesc = TtTypeDesc.TypeOf<float>();
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
@@ -199,7 +199,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         public TtDoubleValueDescription()
         {
-            TypeDesc = UTypeDesc.TypeOf<double>();
+            TypeDesc = TtTypeDesc.TypeOf<double>();
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
@@ -216,7 +216,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         public TtStringValueDescription()
         {
-            TypeDesc = UTypeDesc.TypeOf<string>();
+            TypeDesc = TtTypeDesc.TypeOf<string>();
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
@@ -231,7 +231,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         public TtVector2ValueDescription()
         {
-            TypeDesc = UTypeDesc.TypeOf<Vector2>();
+            TypeDesc = TtTypeDesc.TypeOf<Vector2>();
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
@@ -246,7 +246,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         public TtVector3ValueDescription()
         {
-            TypeDesc = UTypeDesc.TypeOf<Vector3>();
+            TypeDesc = TtTypeDesc.TypeOf<Vector3>();
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
@@ -261,7 +261,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         public TtVector4ValueDescription()
         {
-            TypeDesc = UTypeDesc.TypeOf<Vector4>();
+            TypeDesc = TtTypeDesc.TypeOf<Vector4>();
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
@@ -276,7 +276,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         public TtColor3fValueDescription()
         {
-            TypeDesc = UTypeDesc.TypeOf<Color3f>();
+            TypeDesc = TtTypeDesc.TypeOf<Color3f>();
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
@@ -291,7 +291,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         public TtColor4fValueDescription()
         {
-            TypeDesc = UTypeDesc.TypeOf<Color4f>();
+            TypeDesc = TtTypeDesc.TypeOf<Color4f>();
             Name = TypeDesc.Name;
             AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }

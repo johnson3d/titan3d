@@ -201,7 +201,7 @@ namespace EngineNS.DesignMacross.Design
             var methodDescription = methodGraph.MethodDescription;
             var cmdHistory = context.CommandHistory;
             var graphElementStyleManager = context.GraphElementStyleManager;
-            foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
+            foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
             {
                 foreach (var typeDesc in service.Types.Values)
                 {
@@ -214,14 +214,14 @@ namespace EngineNS.DesignMacross.Design
                                                      (TtMenuItem item, object sender) =>
                                                      {
                                                          var popMenu = sender as TtPopupMenu;
-                                                         if (Rtti.UTypeDescManager.CreateInstance(typeDesc) is TtExpressionDescription expression)
+                                                         if (Rtti.TtTypeDescManager.CreateInstance(typeDesc) is TtExpressionDescription expression)
                                                          {
                                                              var style = graphElementStyleManager.GetOrAdd(expression.Id, popMenu.PopedPosition);
                                                              cmdHistory.CreateAndExtuteCommand("AddExpression",
                                                                  (data) => { methodDescription.AddExpression(expression); },
                                                                  (data) => { methodDescription.RemoveExpression(expression); });
                                                          }
-                                                         if (Rtti.UTypeDescManager.CreateInstance(typeDesc) is TtStatementDescription statement)
+                                                         if (Rtti.TtTypeDescManager.CreateInstance(typeDesc) is TtStatementDescription statement)
                                                          {
                                                              var style = graphElementStyleManager.GetOrAdd(statement.Id, popMenu.PopedPosition);
                                                              cmdHistory.CreateAndExtuteCommand("AddStatement",
@@ -242,12 +242,12 @@ namespace EngineNS.DesignMacross.Design
             foreach (var variable in context.DesignedClassDescription.Variables)
             {
                 string[] getMenuPath = { "Self", "Variables", "Get" + variable.Name };
-                var getTypeDesc = UTypeDesc.TypeOf<TtVarGetDescription>();
+                var getTypeDesc = TtTypeDesc.TypeOf<TtVarGetDescription>();
                 TtMenuUtil.ConstructMenuItem(popupMenu.Menu, getTypeDesc, getMenuPath, "",
                                                  (TtMenuItem item, object sender) =>
                                                  {
                                                      var popMenu = sender as TtPopupMenu;
-                                                     if (Rtti.UTypeDescManager.CreateInstance(getTypeDesc) is TtVarGetDescription expression)
+                                                     if (Rtti.TtTypeDescManager.CreateInstance(getTypeDesc) is TtVarGetDescription expression)
                                                      {
                                                          expression.VariableDescription = variable;
                                                          var style = graphElementStyleManager.GetOrAdd(expression.Id, popMenu.PopedPosition);
@@ -258,12 +258,12 @@ namespace EngineNS.DesignMacross.Design
                                                  });
 
                 string[] setMenuPath = { "Self", "Variables", "Set" + variable.Name };
-                var setTypeDesc = UTypeDesc.TypeOf<TtVarSetDescription>();
+                var setTypeDesc = TtTypeDesc.TypeOf<TtVarSetDescription>();
                 TtMenuUtil.ConstructMenuItem(popupMenu.Menu, setTypeDesc, setMenuPath, "",
                                                  (TtMenuItem item, object sender) =>
                                                  {
                                                      var popMenu = sender as TtPopupMenu;
-                                                     if (Rtti.UTypeDescManager.CreateInstance(setTypeDesc) is TtVarSetDescription expression)
+                                                     if (Rtti.TtTypeDescManager.CreateInstance(setTypeDesc) is TtVarSetDescription expression)
                                                      {
                                                          expression.VariableDescription = variable;
                                                          var style = graphElementStyleManager.GetOrAdd(expression.Id, popMenu.PopedPosition);
@@ -275,8 +275,8 @@ namespace EngineNS.DesignMacross.Design
 
             }
             string[] selfRefMenuPath = { "Self", "SelfReference"};
-            var selfRefTypeDesc = UTypeDesc.TypeOf<TtSelfReferenceDescription>();
-            var superClassType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(context.DesignedClassDescription.SupperClassNames[0]);
+            var selfRefTypeDesc = TtTypeDesc.TypeOf<TtSelfReferenceDescription>();
+            var superClassType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(context.DesignedClassDescription.SupperClassNames[0]);
             TtMenuUtil.ConstructMenuItem(popupMenu.Menu, selfRefTypeDesc, selfRefMenuPath, "",
                                              (TtMenuItem item, object sender) =>
                                              {
@@ -312,12 +312,12 @@ namespace EngineNS.DesignMacross.Design
                     {
                         menuPath = TtMenuUtil.GetContextPath(methodMeta.DeclaringType, methodMeta.MethodName);
                     }
-                    var typeDesc = UTypeDesc.TypeOf<TtMethodInvokeReflectedDescription>();
+                    var typeDesc = TtTypeDesc.TypeOf<TtMethodInvokeReflectedDescription>();
                     TtMenuUtil.ConstructMenuItem(popupMenu.Menu, typeDesc, menuPath, "",
                                                      (TtMenuItem item, object sender) =>
                                                      {
                                                          var popMenu = sender as TtPopupMenu;
-                                                         if (Rtti.UTypeDescManager.CreateInstance(typeDesc) is TtMethodInvokeReflectedDescription desc)
+                                                         if (Rtti.TtTypeDescManager.CreateInstance(typeDesc) is TtMethodInvokeReflectedDescription desc)
                                                          {
                                                              desc.SetMethodMeta(methodMeta);
                                                              var style = graphElementStyleManager.GetOrAdd(desc.Id, popMenu.PopedPosition);
@@ -354,7 +354,7 @@ namespace EngineNS.DesignMacross.Design
                     //Get
                     {
                         string[] menuPath = { classType.Name, "Get" + property.Name };
-                        var typeDesc = UTypeDesc.TypeOf(property.PropertyType);
+                        var typeDesc = TtTypeDesc.TypeOf(property.PropertyType);
                         TtPropertyGetDescription getExpression = new(classType, typeDesc);
                         getExpression.Name = property.Name;
                         getExpression.HostReferenceId = previewDataLine.StartPin.Parent.Id;
@@ -375,7 +375,7 @@ namespace EngineNS.DesignMacross.Design
                     //Set
                     {
                         string[] menuPath = { classType.Name, "Set" + property.Name };
-                        var typeDesc = UTypeDesc.TypeOf(property.PropertyType);
+                        var typeDesc = TtTypeDesc.TypeOf(property.PropertyType);
                         TtPropertySetDescription setExpression = new(classType, typeDesc);
                         setExpression.Name = property.Name;
                         setExpression.HostReferenceId = previewDataLine.StartPin.Parent.Id;
@@ -415,13 +415,13 @@ namespace EngineNS.DesignMacross.Design
                 {
                     foreach (var superClassName in context.DesignedClassDescription.SupperClassNames)
                     {
-                        var superClassType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(superClassName);
+                        var superClassType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(superClassName);
                         foreach (var property in superClassType.GetProperties())
                         {
                             //Get
                             {
                                 string[] menuPath = { "Self", "Get" + property.Name };
-                                var typeDesc = UTypeDesc.TypeOf(property.PropertyType);
+                                var typeDesc = TtTypeDesc.TypeOf(property.PropertyType);
                                 TtPropertyGetDescription getExpression = new(superClassType, typeDesc);
                                 getExpression.Name = property.Name;
                                 getExpression.HostReferenceId = previewDataLine.StartPin.Parent.Id;
@@ -442,7 +442,7 @@ namespace EngineNS.DesignMacross.Design
                             //Set
                             {
                                 string[] menuPath = { "Self", "Set" + property.Name };
-                                var typeDesc = UTypeDesc.TypeOf(property.PropertyType);
+                                var typeDesc = TtTypeDesc.TypeOf(property.PropertyType);
                                 TtPropertySetDescription setExpression = new(superClassType, typeDesc);
                                 setExpression.Name = property.Name;
                                 setExpression.HostReferenceId = previewDataLine.StartPin.Parent.Id;
@@ -472,7 +472,7 @@ namespace EngineNS.DesignMacross.Design
             var methodDescription = methodGraph.MethodDescription;
             var previewDataLine = methodGraph.PreviewDataLine;
             var previewExecutionLine = methodGraph.PreviewExecutionLine;
-            foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
+            foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
             {
                 foreach (var typeDesc in service.Types.Values)
                 {
@@ -481,7 +481,7 @@ namespace EngineNS.DesignMacross.Design
                     {
                         if (att.HasKeyString(UDesignMacross.MacrossScriptEditorKeyword))
                         {
-                            if (Rtti.UTypeDescManager.CreateInstance(typeDesc) is TtExpressionDescription expression)
+                            if (Rtti.TtTypeDescManager.CreateInstance(typeDesc) is TtExpressionDescription expression)
                             {
                                 if (previewDataLine != null)
                                 {            
@@ -517,7 +517,7 @@ namespace EngineNS.DesignMacross.Design
                                 }
                             }
 
-                            if (Rtti.UTypeDescManager.CreateInstance(typeDesc) is TtStatementDescription statement)
+                            if (Rtti.TtTypeDescManager.CreateInstance(typeDesc) is TtStatementDescription statement)
                             {
                                 if (previewDataLine != null)
                                 {
@@ -578,8 +578,8 @@ namespace EngineNS.DesignMacross.Design
                         continue;
                     if (methodMeta.Meta.IsNoMacrossUseable)
                         continue;
-                    var typeDesc = UTypeDesc.TypeOf<TtMethodInvokeReflectedDescription>();
-                    if (Rtti.UTypeDescManager.CreateInstance(typeDesc) is TtMethodInvokeReflectedDescription statement)
+                    var typeDesc = TtTypeDesc.TypeOf<TtMethodInvokeReflectedDescription>();
+                    if (Rtti.TtTypeDescManager.CreateInstance(typeDesc) is TtMethodInvokeReflectedDescription statement)
                     {
                         statement.SetMethodMeta(methodMeta);
                         string[] menuPath = methodMeta.Meta.MacrossDisplayPath;

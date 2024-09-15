@@ -42,7 +42,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonHovered, EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGHoverColor);
                 if (mImageButton.OnDraw(in drawList, in Support.TtAnyPointer.Default))
                 {
-                    newValue = Rtti.UTypeDescManager.CreateInstance(info.Type.SystemType);
+                    newValue = Rtti.TtTypeDescManager.CreateInstance(info.Type.SystemType);
                     valueChanged = true;
                     //prop.SetValue(ref target, v);
                 }
@@ -906,7 +906,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         EGui.UIProxy.ComboBox mComboBox;
         class DrawData
         {
-            public Rtti.UTypeDesc Type;
+            public Rtti.TtTypeDesc Type;
             public object Value;
             public object NewValue;
             public bool Readonly;
@@ -1110,7 +1110,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 }
                 else
                 {
-                    var vtype = Rtti.UTypeDesc.TypeOf(obj.GetType());
+                    var vtype = Rtti.TtTypeDesc.TypeOf(obj.GetType());
                     var elementEditorInfo = new PGCustomValueEditorAttribute.EditorInfo()
                     {
                         Name = info.Name + i,
@@ -1181,11 +1181,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                             if(mTypeSelector == null)
                                 mTypeSelector = new EGui.Controls.UTypeSelector();
                             mTypeSelector.CtrlId = "##ComboTypeSelector_" + info.Name;
-                            mTypeSelector.BaseType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(baseType.FullName);
+                            mTypeSelector.BaseType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(baseType.FullName);
                             mTypeSelector.OnDraw(150, 6);
                             if (mTypeSelector.SelectedType != null)
                             {
-                                var newItem = Rtti.UTypeDescManager.CreateInstance(mTypeSelector.SelectedType);
+                                var newItem = Rtti.TtTypeDescManager.CreateInstance(mTypeSelector.SelectedType);
                                 var idx = dict.Count;
                                 listOpAtt?.OnPreInsert(idx, newItem, info.ObjectInstance);
                                 dict.Insert(idx, newItem);
@@ -1268,7 +1268,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     if (ImGuiAPI.Button("+", in sz))
                     {
                         //addList.Add(new KeyValuePair<int, object>(i, obj));
-                        var newItem = Rtti.UTypeDescManager.CreateInstance(obj.GetType());
+                        var newItem = Rtti.TtTypeDescManager.CreateInstance(obj.GetType());
                         listOpAtt?.OnPreInsert(i, newItem, info.ObjectInstance);
                         lst.Insert(i, newItem);
                         itemChanged = true;
@@ -1299,7 +1299,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     var elementEditorInfo = new EditorInfo()
                     {
                         Name = info.Name + i,
-                        Type = Rtti.UTypeDesc.TypeOf(obj.GetType()),
+                        Type = Rtti.TtTypeDesc.TypeOf(obj.GetType()),
                         Value = obj,
                         Readonly = info.Readonly,
                         HostPropertyGrid = info.HostPropertyGrid,
@@ -1358,12 +1358,12 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 }
 
                 {
-                    Rtti.UTypeDesc keyType = null, valueType = null;
+                    Rtti.TtTypeDesc keyType = null, valueType = null;
                     var dict = info.Value as System.Collections.IDictionary;
                     if (dict.GetType().GenericTypeArguments.Length == 2)
                     {
-                        keyType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(dict.GetType().GenericTypeArguments[0].FullName);
-                        valueType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(dict.GetType().GenericTypeArguments[1].FullName);
+                        keyType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(dict.GetType().GenericTypeArguments[0].FullName);
+                        valueType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(dict.GetType().GenericTypeArguments[1].FullName);
                     }
                     if (mKVCreator == null)
                     {
@@ -1454,7 +1454,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 var keyEditorInfo = new EditorInfo()
                 {
                     Name = iter.Key.ToString() + idx,
-                    Type = Rtti.UTypeDesc.TypeOf(iter.Key.GetType()),
+                    Type = Rtti.TtTypeDesc.TypeOf(iter.Key.GetType()),
                     Value = iter.Key,
                     Readonly = info.Readonly,
                     HostPropertyGrid = info.HostPropertyGrid,
@@ -1476,9 +1476,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 //ImGuiAPI.NextColumn();
                 ImGuiAPI.TableSetColumnIndex(1);
                 ImGuiAPI.SetNextItemWidth(-1);
-                Rtti.UTypeDesc valueType = null;
+                Rtti.TtTypeDesc valueType = null;
                 if (iter.Value != null)
-                    valueType = Rtti.UTypeDesc.TypeOf(iter.Value.GetType());
+                    valueType = Rtti.TtTypeDesc.TypeOf(iter.Value.GetType());
                 var valueEditorInfo = new EditorInfo()
                 {
                     Name = iter.Value.ToString() + idx,

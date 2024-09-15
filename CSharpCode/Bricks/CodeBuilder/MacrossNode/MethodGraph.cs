@@ -232,7 +232,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return null;
         }
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             for (int i = 0; i < Arguments.Count; i++)
             {
@@ -988,9 +988,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return false;
         }
 
-        string[] GetContextPath(Rtti.UTypeDesc type, string name)
+        string[] GetContextPath(Rtti.TtTypeDesc type, string name)
         {
-            var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(type, false);
+            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(type, false);
             typeStr = typeStr.Replace("EngineNS.", "").Replace("Bricks.", "");
             var idx = typeStr.LastIndexOf('@');
             if(idx >= 0)
@@ -1004,7 +1004,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             CanvasMenus.SubMenuItems.Clear();
             CanvasMenus.Text = "Canvas";
-            foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
+            foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
             {
                 foreach (var typeDesc in service.Types.Values)
                 {
@@ -1027,7 +1027,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     parentMenu.AddMenuItem(menuName, att.FilterStrings, null,
                                         (TtMenuItem item, object sender) =>
                                         {
-                                            var node = Rtti.UTypeDescManager.CreateInstance(typeDesc) as UNodeBase;
+                                            var node = Rtti.TtTypeDescManager.CreateInstance(typeDesc) as UNodeBase;
                                             var nodeName = GetSerialFinalString(menuStr, GenSerialId());
                                             if (nodeName != null)
                                                 node.Name = nodeName;
@@ -1183,7 +1183,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 Datas.AddMenuItem("TypeConverter", null,
                     (TtMenuItem item, object sender) =>
                     {
-                        var type = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeStr(typeof(object)));
+                        var type = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDesc.TypeStr(typeof(object)));
                         var node = TypeConverterVar.NewTypeConverterVar(type, type);
                         node.Name = $"lAnyVar_{GenSerialId()}";
                         node.UserData = MacrossEditor;
@@ -1346,7 +1346,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     SetDefaultActionForNode(node);
                                     this.AddNode(node);
 
-                                    if (LinkingOp.StartPin != null && Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                    if (LinkingOp.StartPin != null && Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
                                     {
                                         var outPin = LinkingOp.StartPin as PinOut;
                                         AddLink(outPin, node.Self, true);
@@ -1367,7 +1367,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     SetDefaultActionForNode(node);
                                     this.AddNode(node);
 
-                                    if (LinkingOp.StartPin != null && Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                    if (LinkingOp.StartPin != null && Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
                                     {
                                         var outPin = LinkingOp.StartPin as PinOut;
                                         AddLink(outPin, node.Self, true);
@@ -1419,7 +1419,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 SetDefaultActionForNode(node);
                                 this.AddNode(node);
 
-                                if (LinkingOp.StartPin != null && Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                if (LinkingOp.StartPin != null && Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
                                 {
                                     var outPin = LinkingOp.StartPin as PinOut;
                                     AddLink(outPin, node.Self, true);
@@ -1437,7 +1437,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 SetDefaultActionForNode(node);
                                 this.AddNode(node);
 
-                                if (LinkingOp.StartPin != null && Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                if (LinkingOp.StartPin != null && Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
                                 {
                                     var outPin = LinkingOp.StartPin as PinOut;
                                     AddLink(outPin, node.Self, true);
@@ -1488,7 +1488,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 SetDefaultActionForNode(node);
                                 this.AddNode(node);
 
-                                if(LinkingOp.StartPin != null && Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                if(LinkingOp.StartPin != null && Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
                                 {
                                     var outPin = LinkingOp.StartPin as PinOut;
                                     AddLink(outPin, node.Self, true);
@@ -1507,7 +1507,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             ObjectMenus.SubMenuItems.Clear();
             ObjectMenus.Text = "Object";
 
-            var type = PopMenuPressObject as Rtti.UTypeDesc;
+            var type = PopMenuPressObject as Rtti.TtTypeDesc;
             if (type == null)
                 return;
             var typeFullName = type.FullName;
@@ -1538,7 +1538,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     SetDefaultActionForNode(node);
                                     this.AddNode(node);
 
-                                    if (LinkingOp.StartPin != null && Rtti.UTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                    if (LinkingOp.StartPin != null && Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
                                     {
                                         var outPin = LinkingOp.StartPin as PinOut;
                                         AddLink(outPin, node.Left, true);
@@ -1690,7 +1690,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             var type = oNode.GetOutPinType(oPin);
                             if (type != null)
                             {
-                                var srcType = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeStr(type));
+                                var srcType = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDesc.TypeStr(type));
                                 if (srcType != null)
                                 {
                                     var node = TypeConverterVar.NewTypeConverterVar(srcType, KlassSelector.mSltSubClass);
@@ -1860,7 +1860,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {
             var pros = TypeDescriptor.GetProperties(this);
-            var thisType = Rtti.UTypeDesc.TypeOf(this.GetType());
+            var thisType = Rtti.TtTypeDesc.TypeOf(this.GetType());
             foreach (PropertyDescriptor prop in pros)
             {
                 var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();

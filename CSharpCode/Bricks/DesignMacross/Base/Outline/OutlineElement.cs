@@ -140,20 +140,20 @@ namespace EngineNS.DesignMacross.Base.Outline
     public class TtOutlineElementsPoolManager
     {
         public static TtOutlineElementsPoolManager Instance { get; } = new TtOutlineElementsPoolManager();
-        protected Dictionary<UTypeDesc, TtOutlineElementsPool> ElementsPools = new Dictionary<UTypeDesc, TtOutlineElementsPool>();
-        public IOutlineElement Get(UTypeDesc type)
+        protected Dictionary<TtTypeDesc, TtOutlineElementsPool> ElementsPools = new Dictionary<TtTypeDesc, TtOutlineElementsPool>();
+        public IOutlineElement Get(TtTypeDesc type)
         {
             if (!ElementsPools.ContainsKey(type))
             {
                 ElementsPools.Add(type, new TtOutlineElementsPool(type));
             }
             var result = ElementsPools[type].Get();
-            Debug.Assert(UTypeDesc.TypeOf(result.GetType()) == type);
+            Debug.Assert(TtTypeDesc.TypeOf(result.GetType()) == type);
             return result;
         }
         public void Return(IOutlineElement graphElement)
         {
-            var elementType = UTypeDesc.TypeOf(graphElement.GetType());
+            var elementType = TtTypeDesc.TypeOf(graphElement.GetType());
             if (ElementsPools.ContainsKey(elementType))
             {
                 ElementsPools[elementType].Return(graphElement);
@@ -164,8 +164,8 @@ namespace EngineNS.DesignMacross.Base.Outline
     public class TtOutlineElementsPool
     {
         protected Stack<IOutlineElement> mPool = new Stack<IOutlineElement>();
-        protected UTypeDesc ElementType;
-        public TtOutlineElementsPool(UTypeDesc type)
+        protected TtTypeDesc ElementType;
+        public TtOutlineElementsPool(TtTypeDesc type)
         {
             ElementType = type;
         }
@@ -188,7 +188,7 @@ namespace EngineNS.DesignMacross.Base.Outline
         } = 0;
         protected IOutlineElement Create()
         {
-            return UTypeDescManager.CreateInstance(ElementType) as IOutlineElement;
+            return TtTypeDescManager.CreateInstance(ElementType) as IOutlineElement;
         }
         public IOutlineElement Get()
         {

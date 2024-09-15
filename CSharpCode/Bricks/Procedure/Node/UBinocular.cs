@@ -10,9 +10,9 @@ namespace EngineNS.Bricks.Procedure.Node
         public USuperBuffer<sbyte, FSByteOperator> Mask;
         public UBufferComponent Left;
         public UBufferComponent Right;
-        public Rtti.UTypeDesc ResultType;
-        public Rtti.UTypeDesc LeftType;
-        public Rtti.UTypeDesc RightType;
+        public Rtti.TtTypeDesc ResultType;
+        public Rtti.TtTypeDesc LeftType;
+        public Rtti.TtTypeDesc RightType;
     }
     public class UBinocular : UPgcNodeBase
     {

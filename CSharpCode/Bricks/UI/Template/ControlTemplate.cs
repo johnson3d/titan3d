@@ -10,8 +10,8 @@ namespace EngineNS.UI.Template
 {
     public class TtControlTemplate : TtUITemplate
     {
-        protected UTypeDesc mTargetType;
-        public UTypeDesc TargetType
+        protected TtTypeDesc mTargetType;
+        public TtTypeDesc TargetType
         {
             get => mTargetType;
             set

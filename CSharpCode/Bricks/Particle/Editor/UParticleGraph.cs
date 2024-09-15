@@ -27,7 +27,7 @@ namespace EngineNS.Bricks.Particle.Editor
             CanvasMenus.SubMenuItems.Clear();
             CanvasMenus.Text = "Canvas";
 
-            foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
+            foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
             {
                 foreach (var typeDesc in service.Types.Values)
                 {
@@ -50,7 +50,7 @@ namespace EngineNS.Bricks.Particle.Editor
                                 parentMenu.AddMenuItem(menuStr, att.FilterStrings, null,
                                     (TtMenuItem item, object sender) =>
                                     {
-                                        var node = Rtti.UTypeDescManager.CreateInstance(typeDesc) as TtParticleNode;
+                                        var node = Rtti.TtTypeDescManager.CreateInstance(typeDesc) as TtParticleNode;
                                         if (nodeName != null)
                                             node.Name = nodeName;
                                         node.UserData = this;

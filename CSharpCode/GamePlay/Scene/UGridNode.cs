@@ -66,7 +66,7 @@ namespace EngineNS.GamePlay.Scene
             var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
             tMaterials[0] = materialInstance;
             var ok = gridMesh.Initialize(mesh, tMaterials,
-                Rtti.UTypeDescGetter<Graphics.Mesh.UMdfGridUVMesh>.TypeDesc);
+                Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfGridUVMesh>.TypeDesc);
             if (ok == false)
                 return null;
 

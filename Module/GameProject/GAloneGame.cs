@@ -57,8 +57,8 @@ namespace GameProject
 
         //    var meshData1 = new EngineNS.GamePlay.Scene.TtMeshNode.UMeshNodeData();
         //    meshData1.MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
-        //    meshData1.MdfQueueType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh));
-        //    meshData1.AtomType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.TtMesh.UAtom));
+        //    meshData1.MdfQueueType = EngineNS.Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh));
+        //    meshData1.AtomType = EngineNS.Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.TtMesh.UAtom));
         //    var meshNode1 = new EngineNS.GamePlay.Scene.TtMeshNode();
         //    await meshNode1.InitializeNode(world, meshData1, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
         //    meshNode1.NodeData.Name = "Robot1";
@@ -81,7 +81,7 @@ namespace GameProject
         //    sapnd.Points.Add(new EngineNS.Animation.SceneNode.FBlendSpacePoint(RName.GetRName("utest/puppet/animation/w2_stand_aim_idle_ip.animclip"), Vector3.Zero));
         //    sapnd.Points.Add(new EngineNS.Animation.SceneNode.FBlendSpacePoint(RName.GetRName("utest/puppet/animation/w2_walk_aim_f_loop_ip.animclip"), new Vector3(3, 0, 0)));
         //    await EngineNS.Animation.SceneNode.UBlendSpaceAnimPlayNode.AddBlendSpace2DAnimPlayNode(world, meshNode1, sapnd, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UIdentityPlacement));
-            
+
         //    var characterController = new EngineNS.GamePlay.Controller.UCharacterController();
         //    await characterController.InitializeNode(WorldViewportSlate.World, new EngineNS.GamePlay.Scene.UNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
         //    characterController.Parent = world.Root;
@@ -97,7 +97,7 @@ namespace GameProject
         //    var springArmData = new EngineNS.GamePlay.Camera.UCameraSpringArm.UCameraSpringArmData();
         //    //springArmData.TargetOffset = DVector3.Up * 1.5f;
         //    await springArm.InitializeNode(WorldViewportSlate.World, springArmData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
-            
+
         //    springArm.Parent = ChiefPlayer;
 
         //    characterController.CameraControlNode = springArm;

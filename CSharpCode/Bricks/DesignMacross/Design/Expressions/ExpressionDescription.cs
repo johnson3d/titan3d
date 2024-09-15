@@ -128,7 +128,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             pin = null;
             return false;
         }
-        public List<TtDataInPinDescription> GetDataInPins(UTypeDesc typeDesc)
+        public List<TtDataInPinDescription> GetDataInPins(TtTypeDesc typeDesc)
         {
             var pins = new List<TtDataInPinDescription>();
             foreach(var pin in DataInPins)
@@ -140,7 +140,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             }
             return pins;
         }
-        public List<TtDataOutPinDescription> GetDataOutPins(UTypeDesc typeDesc)
+        public List<TtDataOutPinDescription> GetDataOutPins(TtTypeDesc typeDesc)
         {
             var pins = new List<TtDataOutPinDescription>();
             foreach (var pin in DataOutPins)

@@ -167,7 +167,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             //    //srv.Value = RName.GetRName("");
             //}
 
-            var mdfType = Rtti.UTypeDesc.TypeOf(typeof(UTerrainMdfQueue));
+            var mdfType = Rtti.TtTypeDesc.TypeOf(typeof(UTerrainMdfQueue));
             var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
             tMaterials[0] = terrain.Material;
 
@@ -262,7 +262,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     return;
 
                 //var saved = mMesh.MdfQueue.MdfDatas;
-                //Rtti.UTypeDesc mdfQueueType;
+                //Rtti.TtTypeDesc mdfQueueType;
                 //if (value)
                 //{
                 //    mdfQueueType = mMesh.MdfQueue.MdfPermutations.ReplacePermutation<Graphics.Pipeline.Shader.UMdf_NoShadow, Graphics.Pipeline.Shader.UMdf_Shadow>();

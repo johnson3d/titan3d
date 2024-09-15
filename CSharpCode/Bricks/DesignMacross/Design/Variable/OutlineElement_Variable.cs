@@ -106,7 +106,7 @@ public class TtOutlineElementsListRender_Variables : IOutlineElementsListRender
             }
 
             var name = $"{variableName}_{num}";
-            if (UTypeDescManager.CreateInstance(UTypeDesc.TypeOf<TtVariableDescription>()) is IVariableDescription
+            if (TtTypeDescManager.CreateInstance(TtTypeDesc.TypeOf<TtVariableDescription>()) is IVariableDescription
                 description)
             {
                 description.Name = name;

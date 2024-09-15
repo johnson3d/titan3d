@@ -148,7 +148,7 @@ namespace EngineNS.EGui
                 ameta.SaveAMeta(this);
             }
 
-            var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
+            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
             var xnd = new IO.TtXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("UVAnim", 0, 0))
             {
@@ -377,7 +377,7 @@ namespace EngineNS.EGui
 
 namespace EngineNS.Graphics.Pipeline
 {
-    partial class UGfxDevice
+    partial class TtGfxDevice
     {
         public EGui.TtUvAnimManager UvAnimManager { get; } = new EGui.TtUvAnimManager();
     }

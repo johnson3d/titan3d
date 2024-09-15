@@ -333,7 +333,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                     GrassType.GrassCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerGrassType.Binder.mCoreObject);
             }
         }
-        public class UMdfShaderBinder : Graphics.Pipeline.UCoreShaderBinder.UShaderResourceIndexer
+        public class UMdfShaderBinder : Graphics.Pipeline.TtCoreShaderBinder.UShaderResourceIndexer
         {
             public void Init(NxRHI.TtShaderEffect effect)
             {
@@ -433,7 +433,7 @@ namespace EngineNS.Bricks.Terrain.Grass
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public partial class UCoreShaderBinder
+    public partial class TtCoreShaderBinder
     {
         public class UCBufferPerGrassTypeIndexer : NxRHI.TtShader.UShaderVarIndexer
         {

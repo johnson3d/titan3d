@@ -210,7 +210,7 @@ namespace EngineNS.Bricks.Procedure.Node
             var MulValue = Value;
             var resultType = result.BufferCreator.ElementType;
             var leftType = left.BufferCreator.ElementType;
-            var rightType = Rtti.UTypeDescGetter<float>.TypeDesc;
+            var rightType = Rtti.TtTypeDescGetter<float>.TypeDesc;
             for (int i = 0; i < result.Depth; i++)
             {
                 for (int j = 0; j < result.Height; j++)

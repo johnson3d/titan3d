@@ -7,7 +7,7 @@ namespace EngineNS.Rtti
 {
     public class AssemblyEntry
     {
-        public class EnginCoreAssemblyDesc : UAssemblyDesc
+        public class EnginCoreAssemblyDesc : TtAssemblyDesc
         {
             public override string Name { get => "EngineCore"; }
             public override string Service { get { return "Global"; } }
@@ -15,7 +15,7 @@ namespace EngineNS.Rtti
             public override string Platform { get { return "Windows"; } }
         }
         static EnginCoreAssemblyDesc AssmblyDesc = new EnginCoreAssemblyDesc();
-        public static UAssemblyDesc GetAssemblyDesc()
+        public static TtAssemblyDesc GetAssemblyDesc()
         {
             return AssmblyDesc;
         }
@@ -104,7 +104,7 @@ namespace EngineNS
         [Rtti.Meta]
         public RName SimpleRPolicyName { get; set; }
         [Rtti.Meta]
-        public string RpcRootType { get; set; } = Rtti.UTypeDesc.TypeStr(typeof(EngineNS.UTest.UTest_Rpc));
+        public string RpcRootType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.UTest.UTest_Rpc));
         [Rtti.Meta]
         public bool CookDXBC { get; set; } = true;
         [Rtti.Meta]
@@ -149,7 +149,7 @@ namespace EngineNS
         }
     }
     [Rtti.Meta]
-    public partial class TtEngine : UModuleHost<TtEngine>
+    public partial class TtEngine : TtModuleHost<TtEngine>
     {
         public static string FindArgument(string[] args, string startWith)
         {
@@ -250,7 +250,7 @@ namespace EngineNS
             NativeMemory.BeginProfiler();
 
             var t1 = Support.TtTime.HighPrecision_GetTickCount();
-            EngineNS.Rtti.UTypeDescManager.Instance.InitTypes();
+            EngineNS.Rtti.TtTypeDescManager.Instance.InitTypes();
             var t2 = Support.TtTime.HighPrecision_GetTickCount();
 
             EngineNS.Rtti.TtClassMetaManager.Instance.LoadMetas();
@@ -285,7 +285,7 @@ namespace EngineNS
                 Config.DefaultTexture = RName.GetRName("texture/checkboard.txpic", RName.ERNameType.Engine);
                 Config.DefaultMaterial = RName.GetRName("material/SysDft.material", RName.ERNameType.Engine);
                 Config.DefaultMaterialInstance = RName.GetRName("material/box_wite.uminst", RName.ERNameType.Game);
-                Config.MainWindowType = Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Editor.UMainEditorApplication));
+                Config.MainWindowType = Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Editor.UMainEditorApplication));
                 Config.MainRPolicyName = RName.GetRName("utest/deferred.rpolicy", RName.ERNameType.Game);
                 Config.SimpleRPolicyName = RName.GetRName("graphics/deferred_simple.rpolicy", RName.ERNameType.Engine);                
                 Config.GlobalConfigs.Add(new TtGlobalConfig()

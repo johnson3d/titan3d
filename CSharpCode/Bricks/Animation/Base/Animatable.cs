@@ -132,8 +132,8 @@ namespace EngineNS.Animation.Animatable
     }
     public class TtAnimatablePropertyDesc
     {
-        public Rtti.UTypeDesc ClassType { get; set; } = new Rtti.UTypeDesc();
-        public Rtti.UTypeDesc PropertyType { get; set; } = new Rtti.UTypeDesc();
+        public Rtti.TtTypeDesc ClassType { get; set; } = new Rtti.TtTypeDesc();
+        public Rtti.TtTypeDesc PropertyType { get; set; } = new Rtti.TtTypeDesc();
         public string PropertyName { get; set; }
         public override bool Equals(object obj)
         {
@@ -182,20 +182,20 @@ namespace EngineNS.Animation.Animatable
     //    }
     //}
 
-    public partial class TtPropertySetterModule : EngineNS.UModule<EngineNS.TtEngine>
+    public partial class TtPropertySetterModule : EngineNS.TtModule<EngineNS.TtEngine>
     {
         //maybe can use hashcode to replace the AnimatablePropertyDesc as the key
-        Dictionary<TtAnimatablePropertyDesc, Rtti.UTypeDesc> ObjectPropertySetFuncDic { get; set; } = new Dictionary<TtAnimatablePropertyDesc, Rtti.UTypeDesc>();
+        Dictionary<TtAnimatablePropertyDesc, Rtti.TtTypeDesc> ObjectPropertySetFuncDic { get; set; } = new Dictionary<TtAnimatablePropertyDesc, Rtti.TtTypeDesc>();
         bool bInitialized = false;
         public override Task<bool> Initialize(TtEngine host)
         {
-            foreach (var i in Rtti.UTypeDescManager.Instance.Services)
+            foreach (var i in Rtti.TtTypeDescManager.Instance.Services)
             {
                 foreach (var j in i.Value.Types)
                 {
                     if (j.Value.SystemType.IsAssignableTo(typeof(IPropertySetter)) && !j.Value.SystemType.IsInterface)
                     {
-                        TtAnimatablePropertyDesc desc = Rtti.UTypeDescManager.CreateInstance(typeof(TtAnimatablePropertyDesc)) as TtAnimatablePropertyDesc;
+                        TtAnimatablePropertyDesc desc = Rtti.TtTypeDescManager.CreateInstance(typeof(TtAnimatablePropertyDesc)) as TtAnimatablePropertyDesc;
                         
                         var obj = j.Value.SystemType.GetProperty("AnimatableObject");
                         {
@@ -211,10 +211,10 @@ namespace EngineNS.Animation.Animatable
                             if (assignAttrs.Length > 0)
                             {
                                 var assign = assignAttrs[0] as PropertyTypeAssignAttribute;
-                                desc.PropertyType = Rtti.UTypeDesc.TypeOf(assign.PropertyType);
+                                desc.PropertyType = Rtti.TtTypeDesc.TypeOf(assign.PropertyType);
                             }
                         }
-                        desc.ClassType = Rtti.UTypeDesc.TypeOfFullName(obj.PropertyType.FullName);
+                        desc.ClassType = Rtti.TtTypeDesc.TypeOfFullName(obj.PropertyType.FullName);
                         ObjectPropertySetFuncDic.Add(desc, j.Value);
                     }
                 }
@@ -247,10 +247,10 @@ namespace EngineNS.Animation.Animatable
         }
         public IPropertySetter CreateInstance(TtAnimatablePropertyDesc objProperty)
         {
-            Rtti.UTypeDesc type;
+            Rtti.TtTypeDesc type;
             if (ObjectPropertySetFuncDic.TryGetValue(objProperty, out type))
             {
-                return Rtti.UTypeDescManager.CreateInstance(type) as IPropertySetter;
+                return Rtti.TtTypeDescManager.CreateInstance(type) as IPropertySetter;
             }
             System.Diagnostics.Debug.Assert(false);
             return null;

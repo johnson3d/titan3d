@@ -792,7 +792,7 @@ namespace EngineNS.Editor
 
                 {
                     var mesh1 = new Graphics.Mesh.TtMesh();
-                    await mesh1.Initialize(RName.GetRName("utest/puppet/mesh/puppet.ums"), Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfSkinMesh)));
+                    await mesh1.Initialize(RName.GetRName("utest/puppet/mesh/puppet.ums"), Rtti.TtTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfSkinMesh)));
                     var meshData1 = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
                     var meshNode1 = new GamePlay.Scene.TtMeshNode();
                     await meshNode1.InitializeNode(world, meshData1, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
@@ -805,8 +805,8 @@ namespace EngineNS.Editor
                     meshNode1.IsCastShadow = true;
 
                     (meshNode1.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
-                    (meshNode1.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfSkinMesh));
-                    (meshNode1.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).AtomType = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMesh.TtAtom));
+                    (meshNode1.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).MdfQueueType = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfSkinMesh));
+                    (meshNode1.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).AtomType = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMesh.TtAtom));
 
                     var gameplayMacrossNodeData = new EngineNS.GamePlay.GamePlayMacross.UGamePlayMacrossNode.UGamePlayMacrossNodeData();
                     gameplayMacrossNodeData.MacrossName = RName.GetRName("utest/puppet/testgameplay.macross");
@@ -868,7 +868,7 @@ namespace EngineNS.Editor
             //    {
             //        colorVar.SetValue(new Vector4(1, 0, 1, 1));
             //    }
-            //    var ok1 = mesh2.Initialize(cookedMesh, materials1, Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh)));
+            //    var ok1 = mesh2.Initialize(cookedMesh, materials1, Rtti.TtTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh)));
             //    if (ok1)
             //    {
             //        var boxNode = await GamePlay.Scene.UMeshNode.AddMeshNode(world, root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh2,

@@ -30,7 +30,7 @@ namespace EngineNS.GamePlay
         }
     }
     [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoMacrossCreate)]
-    public partial class UGameInstance : UModuleHost<UGameInstance>, ITickable
+    public partial class UGameInstance : TtModuleHost<UGameInstance>, ITickable
     {
         public int GetTickOrder()
         {
@@ -190,8 +190,8 @@ namespace EngineNS.GamePlay
 
             var meshData1 = new EngineNS.GamePlay.Scene.TtMeshNode.TtMeshNodeData();
             meshData1.MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
-            meshData1.MdfQueueType = EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh)).TypeString;
-            meshData1.AtomType = EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Graphics.Mesh.TtMesh.TtAtom)).TypeString;
+            meshData1.MdfQueueType = EngineNS.Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh)).TypeString;
+            meshData1.AtomType = EngineNS.Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.Graphics.Mesh.TtMesh.TtAtom)).TypeString;
             var meshNode1 = new EngineNS.GamePlay.Scene.TtMeshNode();
             await meshNode1.InitializeNode(scene.World, meshData1, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             meshNode1.NodeData.Name = "Robot1";

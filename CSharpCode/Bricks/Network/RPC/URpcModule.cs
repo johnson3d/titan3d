@@ -189,7 +189,7 @@ namespace EngineNS.Bricks.Network.RPC
         }
     }
 
-	public class URpcModule : UModule<TtEngine>
+	public class URpcModule : TtModule<TtEngine>
 	{
 		public INetConnect DefaultNetConnect = new UFakeNetConnect();
         public UInt16 DefaultExeIndex = UInt16.MaxValue;
@@ -225,8 +225,8 @@ namespace EngineNS.Bricks.Network.RPC
 		public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine host)
 		{
 			await Thread.TtAsyncDummyClass.DummyFunc();
-			var type = Rtti.UTypeDesc.TypeOf(host.Config.RpcRootType);
-			RpcManager = Rtti.UTypeDescManager.CreateInstance(type) as URpcManager;
+			var type = Rtti.TtTypeDesc.TypeOf(host.Config.RpcRootType);
+			RpcManager = Rtti.TtTypeDescManager.CreateInstance(type) as URpcManager;
 			if (RpcManager == null)
 			{
 				RpcManager = new URpcManager();

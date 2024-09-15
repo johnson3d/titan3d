@@ -8,7 +8,7 @@ using static EngineNS.EGui.UIProxy.SingleInputDialog;
 
 namespace EngineNS.Rtti
 {
-    public class UAssemblyDesc
+    public class TtAssemblyDesc
     {
         public virtual string Name { get; }
         public virtual string Service { get; }
@@ -22,12 +22,12 @@ namespace EngineNS.Rtti
                 return result;
             return null;
         }
-        public UTypeDescManager.ServiceManager Manager { get; set; }
+        public TtTypeDescManager.ServiceManager Manager { get; set; }
         public override string ToString()
         {
             return $"{Service}:{Name}";
         }
-        public virtual void SetAssembly(System.Reflection.Assembly assembly, UTypeDescManager.ServiceManager manager)
+        public virtual void SetAssembly(System.Reflection.Assembly assembly, TtTypeDescManager.ServiceManager manager)
         {
             ModuleAssembly = new WeakReference<Assembly>(assembly);
             Manager = manager;
@@ -40,9 +40,9 @@ namespace EngineNS.Rtti
         #region Rtti Reload
         public static void UpdateRtti(string moduleName, Assembly newAssembly, Assembly oldAssembly)
         {
-            Rtti.UTypeDescManager.ServiceManager manager;
-            Rtti.UAssemblyDesc desc;
-            if (Rtti.UTypeDescManager.Instance.RegAssembly(newAssembly, out manager, out desc))
+            Rtti.TtTypeDescManager.ServiceManager manager;
+            Rtti.TtAssemblyDesc desc;
+            if (Rtti.TtTypeDescManager.Instance.RegAssembly(newAssembly, out manager, out desc))
             {
                 List<Type> removed = new List<Type>();
                 List<Type> changed = new List<Type>();
@@ -67,7 +67,7 @@ namespace EngineNS.Rtti
                 manager.AddAssemblyDesc(desc);
             }
 
-            Rtti.UTypeDescManager.Instance.OnTypeChangedInvoke();
+            Rtti.TtTypeDescManager.Instance.OnTypeChangedInvoke();
 
             EngineNS.Rtti.TtClassMetaManager.Instance.LoadMetas(moduleName);
         }
@@ -117,7 +117,7 @@ namespace EngineNS.Rtti
                 }
             }
         }
-        public static void UpdateTypeManager(Rtti.UTypeDescManager.ServiceManager manager, Rtti.UAssemblyDesc desc, List<Type> removed, List<Type> changed, List<Type> added)
+        public static void UpdateTypeManager(Rtti.TtTypeDescManager.ServiceManager manager, Rtti.TtAssemblyDesc desc, List<Type> removed, List<Type> changed, List<Type> added)
         {
             List<string> removedNames = new List<string>();
             foreach (var j in manager.Types)
@@ -151,32 +151,32 @@ namespace EngineNS.Rtti
             }
             foreach (var j in added)
             {
-                var tmp = new Rtti.UTypeDesc();
+                var tmp = new Rtti.TtTypeDesc();
                 tmp.SystemType = j;
                 tmp.Assembly = desc;
-                manager.Types[Rtti.UTypeDesc.TypeStr(j)] = tmp;
+                manager.Types[Rtti.TtTypeDesc.TypeStr(j)] = tmp;
             }
         }
         #endregion
     }
-    public class UGlobalAssemblyDesc : UAssemblyDesc
+    public class TtGlobalAssemblyDesc : TtAssemblyDesc
     {
         private string mName;
         public override string Name { get => mName; }
         public override string Service { get { return "Global"; } }
         public override bool IsGameModule { get { return false; } }
         public override string Platform { get { return "Global"; } }
-        public override void SetAssembly(System.Reflection.Assembly assm, UTypeDescManager.ServiceManager manager)
+        public override void SetAssembly(System.Reflection.Assembly assm, TtTypeDescManager.ServiceManager manager)
         {
             base.SetAssembly(assm, manager);
             mName = "Unknown";
         }
     }
-    public class UTypeDesc
+    public class TtTypeDesc
     {
         public bool IsRemoved = false;
         public Type SystemType;
-        public UAssemblyDesc Assembly;
+        public TtAssemblyDesc Assembly;
         public bool IsRefType
         {
             get
@@ -272,7 +272,7 @@ namespace EngineNS.Rtti
         public bool IsSealed => (SystemType != null) ? SystemType.IsSealed : false;
         public bool IsDelegate => typeof(Delegate).IsAssignableFrom(SystemType);
         public bool IsPointer => (SystemType != null) ? SystemType.IsPointer : false;
-        public UTypeDesc BaseType
+        public TtTypeDesc BaseType
         {
             get
             {
@@ -318,49 +318,49 @@ namespace EngineNS.Rtti
             get
             {
                 if (mTypeString == null)
-                    mTypeString = UTypeDescManager.Instance.GetTypeStringFromType(SystemType);
+                    mTypeString = TtTypeDescManager.Instance.GetTypeStringFromType(SystemType);
                 return mTypeString;
             }
         }
-        public static UTypeDesc TypeOf<T>()
+        public static TtTypeDesc TypeOf<T>()
         {
             return TypeOf(typeof(T));
         }
-        public static UTypeDesc TypeOf(string typeStr)
+        public static TtTypeDesc TypeOf(string typeStr)
         {
-            var result = UTypeDescManager.Instance.GetTypeDescFromString(typeStr);
+            var result = TtTypeDescManager.Instance.GetTypeDescFromString(typeStr);
             if (result == null)
             {
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Typeof failed:{typeStr}");
             }
             return result;
         }
-        public static UTypeDesc TypeOf(System.Type type)
+        public static TtTypeDesc TypeOf(System.Type type)
         {
             if (type == null)
                 return null;
 
-            var typeStr = UTypeDescManager.Instance.GetTypeStringFromType(type);
+            var typeStr = TtTypeDescManager.Instance.GetTypeStringFromType(type);
             if (typeStr == null)
                 return null;
             return TypeOf(typeStr);
         }
-        public static UTypeDesc TypeOfFullName(string fullName)
+        public static TtTypeDesc TypeOfFullName(string fullName)
         {
-            var result = UTypeDescManager.Instance.GetTypeDescFromFullName(fullName);
+            var result = TtTypeDescManager.Instance.GetTypeDescFromFullName(fullName);
             if (result == null)
             {
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"TypeOfFullName failed:{fullName}");
             }
             return result;
         }
-        public static string TypeStr(UTypeDesc type)
+        public static string TypeStr(TtTypeDesc type)
         {
-            return UTypeDescManager.Instance.GetTypeStringFromType(type.SystemType);
+            return TtTypeDescManager.Instance.GetTypeStringFromType(type.SystemType);
         }
         public static string TypeStr(System.Type type)
         {
-            return UTypeDescManager.Instance.GetTypeStringFromType(type);
+            return TtTypeDescManager.Instance.GetTypeStringFromType(type);
         }
 
         public override string ToString()
@@ -371,7 +371,7 @@ namespace EngineNS.Rtti
         {
             return SystemType == type;
         }
-        public bool IsSubclassOf(UTypeDesc type)
+        public bool IsSubclassOf(TtTypeDesc type)
         {
             return SystemType.IsSubclassOf(type.SystemType);
         }
@@ -445,23 +445,23 @@ namespace EngineNS.Rtti
                 RuntimeHelpers.RunClassConstructor(SystemType.TypeHandle);
         }
     }
-    public struct UTypeDescGetter<T>
+    public struct TtTypeDescGetter<T>
     {
         public static T DefaultObject;
-        static UTypeDesc mTypeDesc;
-        public static UTypeDesc TypeDesc
+        static TtTypeDesc mTypeDesc;
+        public static TtTypeDesc TypeDesc
         { 
             get
             {
                 if (mTypeDesc == null)
-                    mTypeDesc = UTypeDesc.TypeOf<T>();
+                    mTypeDesc = TtTypeDesc.TypeOf<T>();
                 return mTypeDesc;
             }
         }
     }
-    public class UTypeDescManager
+    public class TtTypeDescManager
     {
-        static UTypeDescManager()
+        static TtTypeDescManager()
         {
             CoreSDK.SetCreateManagedObjectFunction(CreateObject);
             CoreSDK.SetFreeManagedObjectGCHandle(FreeManagedObjectGCHandle);
@@ -478,7 +478,7 @@ namespace EngineNS.Rtti
         {
             var className = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)arg0);
 
-            var typeDesc = UTypeDesc.TypeOf(className);
+            var typeDesc = TtTypeDesc.TypeOf(className);
             if (typeDesc == null)
                 return (void*)0;
 
@@ -488,7 +488,7 @@ namespace EngineNS.Rtti
                 createArg = new object[NumOfArg];
                 for (int i = 0; i < NumOfArg; i++)
                 {
-                    createArg[i] = Rtti.UNativeCoreProvider.BoxValue(ref arg1[i]);
+                    createArg[i] = Rtti.TtNativeCoreProvider.BoxValue(ref arg1[i]);
                 }
             }
 
@@ -528,7 +528,7 @@ namespace EngineNS.Rtti
         [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.IUnknown)]
         extern unsafe static object SDK_Core_GetObjectFromPointer(void* ptr);
         #endregion
-        public static object CreateInstance(Rtti.UTypeDesc t, params object[] args)
+        public static object CreateInstance(Rtti.TtTypeDesc t, params object[] args)
         {
             if (t == null)
                 return null;
@@ -556,17 +556,17 @@ namespace EngineNS.Rtti
             }
             return RuntimeHelpers.GetUninitializedObject(t);
         }
-        public static UTypeDescManager Instance { get; } = new UTypeDescManager();
+        public static TtTypeDescManager Instance { get; } = new TtTypeDescManager();
         public Dictionary<string, ServiceManager> Services { get; } = new Dictionary<string, ServiceManager>();
-        public Dictionary<string, UTypeDesc> NameAliasTypes { get; } = new Dictionary<string, UTypeDesc>();
-        public UTypeDesc FindNameAlias(string name)
+        public Dictionary<string, TtTypeDesc> NameAliasTypes { get; } = new Dictionary<string, TtTypeDesc>();
+        public TtTypeDesc FindNameAlias(string name)
         {
-            UTypeDesc result;
+            TtTypeDesc result;
             if (NameAliasTypes.TryGetValue(name, out result))
                 return result;
             return null;
         }
-        public bool GetInheritTypes(UTypeDesc baseType, List<UTypeDesc> types)
+        public bool GetInheritTypes(TtTypeDesc baseType, List<TtTypeDesc> types)
         {
             bool finded = false;
             foreach(var service in Services.Values)
@@ -603,7 +603,7 @@ namespace EngineNS.Rtti
                 }
                 if (find == false)
                     continue;
-                UAssemblyDesc desc;
+                TtAssemblyDesc desc;
                 ServiceManager manager;
                 RegAssembly(i, out manager, out desc);
             }
@@ -630,7 +630,7 @@ namespace EngineNS.Rtti
                 }
             }
         }
-        public void InterateTypes(Action<UTypeDesc> cb)
+        public void InterateTypes(Action<TtTypeDesc> cb)
         {
             foreach (var i in Services)
             {
@@ -642,9 +642,9 @@ namespace EngineNS.Rtti
         }
         public class ServiceManager
         {
-            public Dictionary<string, UTypeDesc> Types = new Dictionary<string, UTypeDesc>();
-            public Dictionary<string, UAssemblyDesc> Assemblies { get; } = new Dictionary<string, UAssemblyDesc>();
-            public void AddAssemblyDesc(UAssemblyDesc desc)
+            public Dictionary<string, TtTypeDesc> Types = new Dictionary<string, TtTypeDesc>();
+            public Dictionary<string, TtAssemblyDesc> Assemblies { get; } = new Dictionary<string, TtAssemblyDesc>();
+            public void AddAssemblyDesc(TtAssemblyDesc desc)
             {
                 var tps = desc.UnsafeGetAssembly().GetTypes();
                 foreach (var i in tps)
@@ -680,7 +680,7 @@ namespace EngineNS.Rtti
                     }
                 }
             }
-            public UAssemblyDesc FindAssemblyDesc(System.Reflection.Assembly assembly)
+            public TtAssemblyDesc FindAssemblyDesc(System.Reflection.Assembly assembly)
             {
                 foreach(var i in Assemblies)
                 {
@@ -689,15 +689,15 @@ namespace EngineNS.Rtti
                 }
                 return null;
             }
-            private void RegType(Type t, UAssemblyDesc desc)
+            private void RegType(Type t, TtAssemblyDesc desc)
             {
-                var str = UTypeDescManager.Instance.GetTypeStringFromType(t, false);
+                var str = TtTypeDescManager.Instance.GetTypeStringFromType(t, false);
                 if (str == null)
                     return;
-                UTypeDesc tdesc;
+                TtTypeDesc tdesc;
                 if (Types.TryGetValue(str, out tdesc) == false)
                 {
-                    tdesc = new UTypeDesc()
+                    tdesc = new TtTypeDesc()
                     {
                         //SystemType = t,
                         Assembly = desc
@@ -707,7 +707,7 @@ namespace EngineNS.Rtti
                 }
             }
         }
-        internal UAssemblyDesc FindAssemblyDesc(System.Reflection.Assembly assm)
+        internal TtAssemblyDesc FindAssemblyDesc(System.Reflection.Assembly assm)
         {
             foreach(var i in Services)
             {
@@ -722,7 +722,7 @@ namespace EngineNS.Rtti
             return null;
         }
         public Dictionary<string, string> StringMap = new Dictionary<string, string>();
-        public string GetTypeStringFromType(UTypeDesc type, bool tryAdd2Manager = true)
+        public string GetTypeStringFromType(TtTypeDesc type, bool tryAdd2Manager = true)
         {
             return GetTypeStringFromType(type.SystemType, tryAdd2Manager);
         }
@@ -745,7 +745,7 @@ namespace EngineNS.Rtti
             if (StringMap.TryGetValue(originName, out result))
                 return result;
             
-            UAssemblyDesc assm = FindAssemblyDesc(type.Assembly);
+            TtAssemblyDesc assm = FindAssemblyDesc(type.Assembly);
             if (assm == null)
             {
                 return null;
@@ -774,7 +774,7 @@ namespace EngineNS.Rtti
             {
                 if (GetTypeDescFromString(result) == null)
                 {
-                    var typeDesc = new UTypeDesc();
+                    var typeDesc = new TtTypeDesc();
                     typeDesc.Assembly = assm;
                     typeDesc.SystemType = type;
                     assm.Manager.Types[result] = typeDesc;
@@ -782,19 +782,19 @@ namespace EngineNS.Rtti
             }
             return result;
         }
-        public UTypeDesc GetTypeDescFromString(string typeStr)
+        public TtTypeDesc GetTypeDescFromString(string typeStr)
         {
             foreach (var i in Services)
             {
-                UTypeDesc t;
+                TtTypeDesc t;
                 if (i.Value.Types.TryGetValue(typeStr, out t))
                 {
                     return t;
                 }
             }
-            return Rtti.UTypeDescManager.Instance.FindNameAlias(typeStr);
+            return Rtti.TtTypeDescManager.Instance.FindNameAlias(typeStr);
         }
-        public UTypeDesc GetTypeDescFromFullName(string fullName)
+        public TtTypeDesc GetTypeDescFromFullName(string fullName)
         {
             foreach (var i in Services)
             {
@@ -806,14 +806,14 @@ namespace EngineNS.Rtti
                     }
                 }
             }
-            return Rtti.UTypeDescManager.Instance.FindNameAlias(fullName);
+            return Rtti.TtTypeDescManager.Instance.FindNameAlias(fullName);
         }
         public System.Type GetTypeFromString(string typeStr)
         {
             var typeDesc = GetTypeDescFromString(typeStr);
             return (typeDesc != null) ? typeDesc.SystemType : null;
         }
-        public bool RegAssembly(System.Reflection.Assembly asm, out ServiceManager manager, out UAssemblyDesc outDesc)
+        public bool RegAssembly(System.Reflection.Assembly asm, out ServiceManager manager, out TtAssemblyDesc outDesc)
         {
             ServiceManager mgr = null;
             var type = asm.GetType("EngineNS.Rtti.AssemblyEntry");
@@ -823,7 +823,7 @@ namespace EngineNS.Rtti
                 if (mtd != null)
                 {
                     var retDesc = mtd.Invoke(null, null);
-                    var desc = retDesc as UAssemblyDesc;
+                    var desc = retDesc as TtAssemblyDesc;
                     if (desc != null)
                     {
                         if (Services.TryGetValue(desc.Service, out mgr) == false)
@@ -847,7 +847,7 @@ namespace EngineNS.Rtti
                     }
                 }
             }
-            var assmDesc = new UGlobalAssemblyDesc();
+            var assmDesc = new TtGlobalAssemblyDesc();
             if (Services.TryGetValue(assmDesc.Service, out mgr) == false)
             {
                 mgr = new ServiceManager();
@@ -900,7 +900,7 @@ namespace EngineNS.Rtti
             ServiceManager mgr;
             if (Services.TryGetValue(service, out mgr))
             {
-                UAssemblyDesc result;
+                TtAssemblyDesc result;
                 if (mgr.Assemblies.TryGetValue(name, out result))
                 {
                     List<string> removedNames = new List<string>();
@@ -929,12 +929,12 @@ namespace EngineNS.Rtti
             }
             return false;
         }
-        public UAssemblyDesc GetAssembly(string service, string name)
+        public TtAssemblyDesc GetAssembly(string service, string name)
         {
             ServiceManager mgr;
             if (Services.TryGetValue(service, out mgr))
             {
-                UAssemblyDesc result;
+                TtAssemblyDesc result;
                 if (mgr.Assemblies.TryGetValue(name, out result))
                 {
                     return result;

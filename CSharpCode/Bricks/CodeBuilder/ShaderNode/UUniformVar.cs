@@ -7,7 +7,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
     public partial class UUniformVar : UNodeBase
     {
-        public Rtti.UTypeDesc VarType;
+        public Rtti.TtTypeDesc VarType;
         [Browsable(false)]
         public PinOut Out { get; set; } = new PinOut();
         [Browsable(false)]
@@ -24,7 +24,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public PinOut OutW { get; set; } = new PinOut();
         public UUniformVar()
         {
-            VarType = Rtti.UTypeDescGetter<float>.TypeDesc;
+            VarType = Rtti.TtTypeDescGetter<float>.TypeDesc;
 
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF80FF40;
@@ -64,22 +64,22 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             OutW.MultiLinks = true;
             this.AddPinOut(OutW);
         }
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             if(pin == OutXY)
             {
-                return Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Vector2));
+                return Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.Vector2));
             }
             else if (pin == OutXYZ)
             {
-                return Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Vector3));
+                return Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.Vector3));
             }
             else if((pin == OutX) ||
                     (pin == OutY) ||
                     (pin == OutZ) ||
                     (pin == OutW))
             {
-                return Rtti.UTypeDesc.TypeOf(typeof(float));
+                return Rtti.TtTypeDesc.TypeOf(typeof(float));
             }
             
             return VarType;

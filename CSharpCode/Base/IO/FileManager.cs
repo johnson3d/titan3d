@@ -375,7 +375,7 @@ namespace EngineNS.IO
             var xml = IO.TtFileManager.LoadXml(file);
             if (xml == null)
                 return null;
-            object pThis = Rtti.UTypeDescManager.CreateInstance(type);
+            object pThis = Rtti.TtTypeDescManager.CreateInstance(type);
             IO.SerializerHelper.ReadObjectMetaFields(null, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
             return pThis;
         }
@@ -384,18 +384,18 @@ namespace EngineNS.IO
             var xml = IO.TtFileManager.LoadXml(file);
             if (xml == null)
                 return null;
-            Rtti.UTypeDesc type = null;
+            Rtti.TtTypeDesc type = null;
             foreach(System.Xml.XmlAttribute i in xml.LastChild.Attributes)
             {
                 if (i.Name == "Type")
                 {
-                    type = Rtti.UTypeDesc.TypeOf(i.Value);
+                    type = Rtti.TtTypeDesc.TypeOf(i.Value);
                     break;
                 }
             }
             if (type == null)
                 return null;
-            object pThis = Rtti.UTypeDescManager.CreateInstance(type);
+            object pThis = Rtti.TtTypeDescManager.CreateInstance(type);
             IO.SerializerHelper.ReadObjectMetaFields(null, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
             return pThis;
         }

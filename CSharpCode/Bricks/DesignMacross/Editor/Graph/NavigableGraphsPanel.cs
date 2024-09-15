@@ -25,7 +25,7 @@ namespace EngineNS.DesignMacross.Editor.GraphPanel
             else
             {
                 var graphAttribute = GraphAttribute.GetAttributeWithSpecificClassType<IGraph>(description.GetType());
-                var graph = UTypeDescManager.CreateInstance(graphAttribute.ClassType, new object[] { description }) as IGraph;
+                var graph = TtTypeDescManager.CreateInstance(graphAttribute.ClassType, new object[] { description }) as IGraph;
                 SubGraphs.Add(description, graph);
                 Navigation.Push(graph);
             }

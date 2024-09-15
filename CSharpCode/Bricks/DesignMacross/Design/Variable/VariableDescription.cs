@@ -21,7 +21,7 @@ namespace EngineNS.DesignMacross.Design
         public string Name { get; set; } = "Variable";
         public string VariableName { get => TtASTBuildUtil.VariableNamePrefix + Name; }
         [Rtti.Meta]
-        public TtTypeReference VariableType { get; set; } = new TtTypeReference(UTypeDesc.TypeOf<bool>());
+        public TtTypeReference VariableType { get; set; } = new TtTypeReference(TtTypeDesc.TypeOf<bool>());
         [Rtti.Meta]
         public TtExpressionBase InitValue { get; set; }
         [Rtti.Meta]
@@ -39,7 +39,7 @@ namespace EngineNS.DesignMacross.Design
         public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {
             var pros = TypeDescriptor.GetProperties(this);
-            var thisType = Rtti.UTypeDesc.TypeOf(this.GetType());
+            var thisType = Rtti.TtTypeDesc.TypeOf(this.GetType());
             foreach (PropertyDescriptor prop in pros)
             {
                 var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
@@ -48,9 +48,9 @@ namespace EngineNS.DesignMacross.Design
                 {
                     case "VariableType":
                         {
-                            List<Rtti.UTypeDesc> types = new List<Rtti.UTypeDesc>(200);
-                            proDesc.PropertyType = Rtti.UTypeDesc.TypeOf(typeof(System.Type));
-                            foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
+                            List<Rtti.TtTypeDesc> types = new List<Rtti.TtTypeDesc>(200);
+                            proDesc.PropertyType = Rtti.TtTypeDesc.TypeOf(typeof(System.Type));
+                            foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
                             {
                                 foreach (var type in service.Types.Values)
                                 {
@@ -79,7 +79,7 @@ namespace EngineNS.DesignMacross.Design
                         break;
                     case "Comment":
                         {
-                            proDesc.PropertyType = Rtti.UTypeDesc.TypeOf(typeof(System.String));
+                            proDesc.PropertyType = Rtti.TtTypeDesc.TypeOf(typeof(System.String));
                         }
                         break;
                 }
@@ -128,10 +128,10 @@ namespace EngineNS.DesignMacross.Design
             {
                 case "VariableType":
                     {
-                        var tagType = value as Rtti.UTypeDesc;
+                        var tagType = value as Rtti.TtTypeDesc;
                         if (tagType != VariableType.TypeDesc)
                         {
-                            InitValue = new TtPrimitiveExpression(tagType, tagType.IsValueType ? Rtti.UTypeDescManager.CreateInstance(tagType) : null);
+                            InitValue = new TtPrimitiveExpression(tagType, tagType.IsValueType ? Rtti.TtTypeDescManager.CreateInstance(tagType) : null);
                             VariableType.TypeDesc = tagType;
                         }
                     }

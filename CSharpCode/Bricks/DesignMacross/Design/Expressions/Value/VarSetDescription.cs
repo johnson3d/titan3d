@@ -12,14 +12,14 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public override string Name { get => VariableDescription.Name; set => VariableDescription.Name = value; }
         public IVariableDescription VariableDescription { get; set; }
         public Guid VariableId { get; set; } = Guid.Empty;
-        public UTypeDesc VarTypeDesc { get => VariableDescription.VariableType.TypeDesc; }
+        public TtTypeDesc VarTypeDesc { get => VariableDescription.VariableType.TypeDesc; }
 
         public TtVarSetDescription()
         {
             AddExecutionInPin(new() { Name = "" });
             AddExecutionOutPin(new() { Name = "" });
-            AddDtaInPin(new() { Name = "Set", TypeDesc = UTypeDesc.TypeOf<bool>() });
-            AddDtaOutPin(new() { Name = "Get", TypeDesc = UTypeDesc.TypeOf<bool>() });
+            AddDtaInPin(new() { Name = "Set", TypeDesc = TtTypeDesc.TypeOf<bool>() });
+            AddDtaOutPin(new() { Name = "Get", TypeDesc = TtTypeDesc.TypeOf<bool>() });
         }
 
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Animation
 {
-    public partial class TtAnimationModule : UModule<TtEngine>
+    public partial class TtAnimationModule : TtModule<TtEngine>
     {
 
     }

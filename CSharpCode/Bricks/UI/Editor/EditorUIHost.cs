@@ -295,7 +295,7 @@ namespace EngineNS.UI.Editor
             mDrawBrush.IsDirty = true;
         }
 
-        public override bool CanAddChild(Rtti.UTypeDesc childType)
+        public override bool CanAddChild(Rtti.TtTypeDesc childType)
         {
             if (Children.Count > 0)
                 return false;

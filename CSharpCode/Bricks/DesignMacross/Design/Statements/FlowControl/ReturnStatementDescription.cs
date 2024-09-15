@@ -12,7 +12,7 @@ namespace EngineNS.DesignMacross.Design.Statement
     public class TtReturnStatementDescription : TtStatementDescription
     {
         [Rtti.Meta]
-        public UTypeDesc ReturnType { get; private set; } = null;
+        public TtTypeDesc ReturnType { get; private set; } = null;
         public bool ShowExecPin = true;
         public TtReturnStatementDescription() 
         {
@@ -20,7 +20,7 @@ namespace EngineNS.DesignMacross.Design.Statement
             AddExecutionInPin(new());
         }
         
-        public void SetReturnType(UTypeDesc typeDesc)
+        public void SetReturnType(TtTypeDesc typeDesc)
         {
             ReturnType = typeDesc;
             AddDataInPin(new() { TypeDesc = typeDesc });

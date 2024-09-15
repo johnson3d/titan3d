@@ -398,15 +398,15 @@ namespace EngineNS.UI.Event
         public string Name => mName;
         ERoutedType mRoutedType;
         public ERoutedType RoutedType => mRoutedType;
-        UTypeDesc mHandlerType;
-        public UTypeDesc HandlerType => mHandlerType;
-        UTypeDesc mOwnerType;
-        public UTypeDesc OwnerType => mOwnerType;
+        TtTypeDesc mHandlerType;
+        public TtTypeDesc HandlerType => mHandlerType;
+        TtTypeDesc mOwnerType;
+        public TtTypeDesc OwnerType => mOwnerType;
         int mGlobalIndex;
         public int GlobalIndex => mGlobalIndex;
         static int mGlobalIndexCounter = -1;
 
-        internal TtRoutedEvent(string name, ERoutedType routedType, UTypeDesc handlerType, UTypeDesc ownerType)
+        internal TtRoutedEvent(string name, ERoutedType routedType, TtTypeDesc handlerType, TtTypeDesc ownerType)
         {
             mName = name;
             mRoutedType = routedType;
@@ -483,13 +483,13 @@ namespace EngineNS.UI.Event
 
     public static class TtEventManager
     {
-        static Dictionary<UTypeDesc, Dictionary<string, TtRoutedEvent>> mEvents = new Dictionary<UTypeDesc, Dictionary<string, TtRoutedEvent>>();
+        static Dictionary<TtTypeDesc, Dictionary<string, TtRoutedEvent>> mEvents = new Dictionary<TtTypeDesc, Dictionary<string, TtRoutedEvent>>();
 
         public static TtRoutedEvent RegisterRoutedEvent(string name, ERoutedType type, Type handlerType, Type ownerType)
         {
-            return RegisterRoutedEvent(name, type, UTypeDesc.TypeOf(handlerType), UTypeDesc.TypeOf(ownerType));
+            return RegisterRoutedEvent(name, type, TtTypeDesc.TypeOf(handlerType), TtTypeDesc.TypeOf(ownerType));
         }
-        public static TtRoutedEvent RegisterRoutedEvent(string name, ERoutedType type, UTypeDesc handlerType, UTypeDesc ownerType)
+        public static TtRoutedEvent RegisterRoutedEvent(string name, ERoutedType type, TtTypeDesc handlerType, TtTypeDesc ownerType)
         {
             if(string.IsNullOrEmpty(name))
                 throw new ArgumentNullException("name");
@@ -514,10 +514,10 @@ namespace EngineNS.UI.Event
             }
         }
 
-        internal static TtRoutedEvent GetRoutedEventFromName(string name, UTypeDesc ownerType, bool includeSupers)
+        internal static TtRoutedEvent GetRoutedEventFromName(string name, TtTypeDesc ownerType, bool includeSupers)
         {
             Dictionary<string, TtRoutedEvent> events;
-            UTypeDesc type = ownerType;
+            TtTypeDesc type = ownerType;
             while(type != null)
             {
                 if(mEvents.TryGetValue(type, out events))
@@ -533,7 +533,7 @@ namespace EngineNS.UI.Event
             return null;
         }
 
-        public static void QueryEvents(UTypeDesc type, Action<UTypeDesc, string, TtRoutedEvent> queryAction, bool includeBaseType = true)
+        public static void QueryEvents(TtTypeDesc type, Action<TtTypeDesc, string, TtRoutedEvent> queryAction, bool includeBaseType = true)
         {
             if (queryAction == null)
                 return;

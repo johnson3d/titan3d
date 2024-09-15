@@ -106,7 +106,7 @@ namespace EngineNS.Editor.Forms
             {
                 NormalMesh = new Graphics.Mesh.TtMesh();
                 var normalProvider = Graphics.Mesh.UMeshDataProvider.MakeLines(in NormalList, 0xFF00FF00);
-                NormalMesh.Initialize(normalProvider.ToMesh(), materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                NormalMesh.Initialize(normalProvider.ToMesh(), materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 NormalMesh.MdfQueue.MdfDatas = this;
 
                 NormalNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, world.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), NormalMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
@@ -122,7 +122,7 @@ namespace EngineNS.Editor.Forms
             {
                 TangentMesh = new Graphics.Mesh.TtMesh();
                 var tangentProvider = Graphics.Mesh.UMeshDataProvider.MakeLines(in TangentList, 0xFF0000FF);
-                TangentMesh.Initialize(tangentProvider.ToMesh(), materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                TangentMesh.Initialize(tangentProvider.ToMesh(), materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 TangentMesh.MdfQueue.MdfDatas = this;
 
                 TangentNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, world.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), TangentMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
@@ -244,13 +244,13 @@ namespace EngineNS.Editor.Forms
             var meshNodeData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
             if (Mesh.PartialSkeleton != null)
             {
-                mesh.Initialize(Mesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfSkinMesh>.TypeDesc);
-                meshNodeData.MdfQueueType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh));
+                mesh.Initialize(Mesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfSkinMesh>.TypeDesc);
+                meshNodeData.MdfQueueType = EngineNS.Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh));
             }
             else
             {
-                mesh.Initialize(Mesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-                meshNodeData.MdfQueueType = EngineNS.Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfStaticMesh));
+                mesh.Initialize(Mesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                meshNodeData.MdfQueueType = EngineNS.Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfStaticMesh));
             }
             meshNodeData.MeshName = Mesh.AssetName;
             var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, meshNodeData, typeof(GamePlay.TtPlacement), mesh,
@@ -276,7 +276,7 @@ namespace EngineNS.Editor.Forms
             {
                 var arrowMaterialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(RName.GetRName("mesh/base/arrow.ums", RName.ERNameType.Engine));
                 var arrowMesh = new Graphics.Mesh.TtMesh();
-                var ok = arrowMesh.Initialize(arrowMaterialMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                var ok = arrowMesh.Initialize(arrowMaterialMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 if (ok)
                 {
                     mArrowMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), arrowMesh, DVector3.UnitX * 3, Vector3.One, Quaternion.Identity);
@@ -302,7 +302,7 @@ namespace EngineNS.Editor.Forms
                 var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
                 tMaterials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(TtEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName);
                 PlaneMesh.Initialize(box, tMaterials,
-                    Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                    Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 PlaneMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), PlaneMesh, new DVector3(0, boxStart.Y, 0), Vector3.One, Quaternion.Identity);
                 PlaneMeshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
                 PlaneMeshNode.NodeData.Name = "Plane";
@@ -359,7 +359,7 @@ namespace EngineNS.Editor.Forms
                 var rectMesh = rect.ToMesh();
                 var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
                 materials[0] = material;
-                SdfDebugMesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfInstanceStaticMesh>.TypeDesc);
+                SdfDebugMesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfInstanceStaticMesh>.TypeDesc);
                 SdfDebugMesh.MdfQueue.MdfDatas = this;
 
                 var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, world.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), SdfDebugMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
@@ -617,7 +617,7 @@ namespace EngineNS.Editor.Forms
                         var ameta = new DistanceField.TtSdfAssetAMeta();
                         ameta.SetAssetName(rn);
                         ameta.AssetId = Guid.NewGuid();
-                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(DistanceField.TtSdfAsset));
+                        ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(DistanceField.TtSdfAsset));
                         ameta.Description = $"This is a {typeof(DistanceField.TtSdfAssetAMeta).FullName}\n";
                         ameta.SaveAMeta((IO.IAsset)null);
                         TtEngine.Instance.AssetMetaManager.RegAsset(ameta);

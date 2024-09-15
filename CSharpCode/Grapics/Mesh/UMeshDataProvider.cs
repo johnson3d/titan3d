@@ -80,7 +80,7 @@ namespace EngineNS.Graphics.Mesh
             var mesh = new Graphics.Mesh.TtMesh();
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = material;
-            mesh.Initialize(ToMesh(), materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            mesh.Initialize(ToMesh(), materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             return mesh;
         }
         public void ToMesh(TtMeshPrimitives mesh)

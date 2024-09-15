@@ -8,7 +8,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public partial class UCoreShaderBinder
+    public partial class TtCoreShaderBinder
     {
         public class TtCBufferPerUIMeshIndexer : NxRHI.TtShader.UShaderVarIndexer
         {

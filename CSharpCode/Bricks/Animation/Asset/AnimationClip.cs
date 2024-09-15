@@ -91,7 +91,7 @@ namespace EngineNS.Animation.Asset
                 UpdateAMetaReferences(ameta);
                 ameta.SaveAMeta(this);
             }
-            var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
+            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
             var xnd = new IO.TtXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("AnimationClip", 0, 0))
             {
@@ -169,7 +169,7 @@ namespace EngineNS.Animation.Asset
             string mSourceFile;
             ImGui.ImGuiFileDialog mFileDialog = TtEngine.Instance.EditorInstance.FileDialog.mFileDialog;
             //EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
-            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)
             {
                 mDir = dir;
                 await PGAsset.Initialize();

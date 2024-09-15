@@ -10,9 +10,9 @@ namespace EngineNS.Bricks.Procedure.Node
         [Browsable(false)]
         public PinIn ValuePin { get; set; } = new PinIn();
 
-        Rtti.UTypeDesc mType;
+        Rtti.TtTypeDesc mType;
         [Rtti.Meta]
-        public Rtti.UTypeDesc Type
+        public Rtti.TtTypeDesc Type
         {
             get => mType;
             set
@@ -24,7 +24,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
 
-        protected void UpdateWithType(Rtti.UTypeDesc type)
+        protected void UpdateWithType(Rtti.TtTypeDesc type)
         {
             Type generic = typeof(USuperBuffer<,>);
             var pros = type.SystemType.GetFields();
@@ -34,13 +34,13 @@ namespace EngineNS.Bricks.Procedure.Node
                 typeArgs[0] = pros[i].FieldType;
                 typeArgs[1] = UBufferCreator.GetBufferOperatorType(pros[i].FieldType);
                 var tagType = generic.MakeGenericType(typeArgs);
-                AddOutput(new PinOut(), pros[i].Name, UBufferCreator.CreateInstance(Rtti.UTypeDesc.TypeOf(tagType)));
+                AddOutput(new PinOut(), pros[i].Name, UBufferCreator.CreateInstance(Rtti.TtTypeDesc.TypeOf(tagType)));
             }
 
             typeArgs[0] = type.SystemType;
             typeArgs[1] = UBufferCreator.GetBufferOperatorType(type.SystemType);
             var inputType = generic.MakeGenericType(typeArgs);
-            var inputBuffer = UBufferCreator.CreateInstance(Rtti.UTypeDesc.TypeOf(inputType));
+            var inputBuffer = UBufferCreator.CreateInstance(Rtti.TtTypeDesc.TypeOf(inputType));
             AddInput(ValuePin, "Value", inputBuffer);
         }
 
@@ -101,9 +101,9 @@ namespace EngineNS.Bricks.Procedure.Node
         UBufferCreator mResultBuffer;
         public UBufferCreator ResultBuffer => mResultBuffer;
 
-        Rtti.UTypeDesc mType;
+        Rtti.TtTypeDesc mType;
         [Rtti.Meta]
-        public Rtti.UTypeDesc Type 
+        public Rtti.TtTypeDesc Type 
         {
             get => mType;
             set
@@ -115,7 +115,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
         }
 
-        protected void UpdateWithType(Rtti.UTypeDesc type)
+        protected void UpdateWithType(Rtti.TtTypeDesc type)
         {
             Type generic = typeof(USuperBuffer<,>);
             var pros = type.SystemType.GetFields();
@@ -125,13 +125,13 @@ namespace EngineNS.Bricks.Procedure.Node
                 typeArgs[0] = pros[i].FieldType;
                 typeArgs[1] = UBufferCreator.GetBufferOperatorType(pros[i].FieldType);
                 var tagType = generic.MakeGenericType(typeArgs);
-                AddInput(new PinIn(), pros[i].Name, UBufferCreator.CreateInstance(Rtti.UTypeDesc.TypeOf(tagType)));
+                AddInput(new PinIn(), pros[i].Name, UBufferCreator.CreateInstance(Rtti.TtTypeDesc.TypeOf(tagType)));
             }
 
             typeArgs[0] = type.SystemType;
             typeArgs[1] = UBufferCreator.GetBufferOperatorType(type.SystemType);
             var resultType = generic.MakeGenericType(typeArgs);
-            mResultBuffer = UBufferCreator.CreateInstance(Rtti.UTypeDesc.TypeOf(resultType));
+            mResultBuffer = UBufferCreator.CreateInstance(Rtti.TtTypeDesc.TypeOf(resultType));
             AddOutput(ResultPin, "Result", mResultBuffer);
         }
 

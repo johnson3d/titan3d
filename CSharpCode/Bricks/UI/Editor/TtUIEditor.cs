@@ -336,7 +336,7 @@ namespace EngineNS.UI.Editor
             public string Name;
             public string Description;
             public string Icon;
-            public UTypeDesc UIControlType;
+            public TtTypeDesc UIControlType;
 
             public ControlItemData Parent;
             public List<ControlItemData> Children = new List<ControlItemData>();
@@ -346,7 +346,7 @@ namespace EngineNS.UI.Editor
         protected unsafe virtual void CollectionUIControls()
         {
             mUIControls.Clear();
-            foreach(var service in EngineNS.Rtti.UTypeDescManager.Instance.Services.Values)
+            foreach(var service in EngineNS.Rtti.TtTypeDescManager.Instance.Services.Values)
             {
                 foreach(var type in service.Types.Values)
                 {
@@ -359,7 +359,7 @@ namespace EngineNS.UI.Editor
                 }
             }
         }
-        void InitControlItemData(ControlItemData parent, List<ControlItemData> childList, string[] path, int pathStartIdx, Editor_UIControlAttribute att, Rtti.UTypeDesc type)
+        void InitControlItemData(ControlItemData parent, List<ControlItemData> childList, string[] path, int pathStartIdx, Editor_UIControlAttribute att, Rtti.TtTypeDesc type)
         {
             if ((path.Length - pathStartIdx) <= 0)
                 return;
@@ -443,7 +443,7 @@ namespace EngineNS.UI.Editor
                 {
                     var data = new ControlCreateDragData()
                     {
-                        TypeName = UTypeDescManager.Instance.GetTypeStringFromType(itemData.UIControlType),
+                        TypeName = TtTypeDescManager.Instance.GetTypeStringFromType(itemData.UIControlType),
                     };
                     var handle = GCHandle.Alloc(data);
                     ImGuiAPI.SetDragDropPayload("UIControlCreateDragDrop", GCHandle.ToIntPtr(handle).ToPointer(), (uint)Marshal.SizeOf<ControlCreateDragData>(), ImGuiCond_.ImGuiCond_None);
@@ -538,7 +538,7 @@ namespace EngineNS.UI.Editor
                         {
                             mIsDragDroping = mIsDragDroping || true;
                             var data = (ControlCreateDragData)handle.Target;
-                            var ctrlType = UTypeDesc.TypeOf(data.TypeName);
+                            var ctrlType = TtTypeDesc.TypeOf(data.TypeName);
                             var name = GetElementShowName(container);
                             if (container.CanAddChild(ctrlType))
                             {
@@ -767,10 +767,10 @@ namespace EngineNS.UI.Editor
                 var handle = GCHandle.FromIntPtr((IntPtr)(payload->Data));
                 var data = (ControlCreateDragData)handle.Target;
 
-                var ctrlType = UTypeDesc.TypeOf(data.TypeName);
+                var ctrlType = TtTypeDesc.TypeOf(data.TypeName);
                 if (parent.CanAddChild(ctrlType))
                 {
-                    var uiControl = UTypeDescManager.CreateInstance(ctrlType) as TtUIElement;
+                    var uiControl = TtTypeDescManager.CreateInstance(ctrlType) as TtUIElement;
                     uiControl.Name = GetValidName(uiControl);
                     switch(type)
                     {
@@ -853,7 +853,7 @@ namespace EngineNS.UI.Editor
                             result = false;
                             break;
                         }
-                        result = result && container.CanAddChild(Rtti.UTypeDesc.TypeOf(data.Elements[i].GetType()));
+                        result = result && container.CanAddChild(Rtti.TtTypeDesc.TypeOf(data.Elements[i].GetType()));
                     }
                 }
                 else
@@ -933,7 +933,7 @@ namespace EngineNS.UI.Editor
                 }
                 var handle = GCHandle.FromIntPtr((IntPtr)(dragDropPayload->Data));
                 var data = (ControlCreateDragData)handle.Target;
-                var ctrlType = UTypeDesc.TypeOf(data.TypeName);
+                var ctrlType = TtTypeDesc.TypeOf(data.TypeName);
                 if (type != 0)
                     container = element.Parent;
                 if (container != null && container.CanAddChild(ctrlType))

@@ -38,7 +38,7 @@ namespace EngineNS.Bricks.PhysicsCore
         public const string AssetExt = ".pxmtl";
         public class UPhyMaterialImportAttribute : IO.CommonCreateAttribute
         {
-            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)
             {
                 ExtName = ext;
                 mName = null;
@@ -82,7 +82,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public void SaveAssetTo(RName name)
         {
-            var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
+            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
             var xnd = new IO.TtXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("Material", 0, 0))
             {

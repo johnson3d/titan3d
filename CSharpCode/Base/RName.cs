@@ -111,7 +111,7 @@ namespace EngineNS
                 var contentBrowserSize = new Vector2(500, 600);
                 ImGuiAPI.SetNextWindowSize(in contentBrowserSize, ImGuiCond_.ImGuiCond_Appearing);
                 ContentBrowser.ExtNames = FilterExts;
-                ContentBrowser.MacrossBase = Rtti.UTypeDesc.TypeOf(MacrossType);
+                ContentBrowser.MacrossBase = Rtti.TtTypeDesc.TypeOf(MacrossType);
                 ContentBrowser.ShaderType = ShaderType;
                 ContentBrowser.SelectedAssets.Clear();
                 mComboBox.OnDraw(in drawList, in anyPt);

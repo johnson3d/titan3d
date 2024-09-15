@@ -71,9 +71,9 @@ namespace EngineNS.Bricks.Particle.Simple
         {
             Name = "SimpleEmitter";
         }
-        public override UTypeDesc CreateEmitterType()
+        public override TtTypeDesc CreateEmitterType()
         {
-            return UTypeDescGetter<TtSimpleEmitter>.TypeDesc;
+            return TtTypeDescGetter<TtSimpleEmitter>.TypeDesc;
         }
     }
 }

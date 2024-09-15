@@ -34,13 +34,13 @@ namespace EngineNS.UTest
         }
         public void UnitTestEntrance()
         {
-            var str = Rtti.UTypeDesc.TypeStr(typeof(List<Matrix>));
-            var type = Rtti.UTypeDesc.TypeOf(str);
+            var str = Rtti.TtTypeDesc.TypeStr(typeof(List<Matrix>));
+            var type = Rtti.TtTypeDesc.TypeOf(str);
 
-            str = Rtti.UTypeDesc.TypeStr(typeof(Matrix[]));
-            type = Rtti.UTypeDesc.TypeOf(str);
+            str = Rtti.TtTypeDesc.TypeStr(typeof(Matrix[]));
+            type = Rtti.TtTypeDesc.TypeOf(str);
             var args = new object[] { 8, };
-            var obj = Rtti.UTypeDescManager.CreateInstance(type, args) as Array;
+            var obj = Rtti.TtTypeDescManager.CreateInstance(type, args) as Array;
             unsafe
             {
                 var pMatrix = (Matrix*)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(obj, 0).ToPointer();

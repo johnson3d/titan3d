@@ -204,7 +204,7 @@ namespace EngineNS.Bricks.VXGI
                 var rectMesh = rect.ToMesh();
                 var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
                 materials[0] = material;
-                VxDebugMesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<UMdfVoxelDebugMesh>.TypeDesc);
+                VxDebugMesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<UMdfVoxelDebugMesh>.TypeDesc);
                 VxDebugMesh.MdfQueue.MdfDatas = this;
             }
 
@@ -246,7 +246,7 @@ namespace EngineNS.Bricks.VXGI
             var rectMesh = rect.ToMesh();
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = material;
-            VxDebugMesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<UMdfVoxelDebugMesh>.TypeDesc);
+            VxDebugMesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<UMdfVoxelDebugMesh>.TypeDesc);
             VxDebugMesh.MdfQueue.MdfDatas = this;
 
             ResetComputeDrawcall();

@@ -86,7 +86,7 @@ namespace EngineNS.Animation.Macross.BlendTree.Node
             pin = null;
             return false;
         }
-        public List<TtPoseInPinDescription> GetDataInPins(UTypeDesc typeDesc)
+        public List<TtPoseInPinDescription> GetDataInPins(TtTypeDesc typeDesc)
         {
             var pins = new List<TtPoseInPinDescription>();
             foreach (var pin in PoseInPins)
@@ -98,7 +98,7 @@ namespace EngineNS.Animation.Macross.BlendTree.Node
             }
             return pins;
         }
-        public List<TtPoseOutPinDescription> GetDataOutPins(UTypeDesc typeDesc)
+        public List<TtPoseOutPinDescription> GetDataOutPins(TtTypeDesc typeDesc)
         {
             var pins = new List<TtPoseOutPinDescription>();
             foreach (var pin in PoseOutPins)

@@ -50,7 +50,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateAttachment
 
             var getClipRName = new TtMethodInvokeStatement("ParseFrom", 
                 TtASTBuildUtil.CreateVariableDeclaration("AnimationClipName", new TtTypeReference(typeof(RName)),null), 
-                new TtClassReferenceExpression(UTypeDesc.TypeOf<RName>()),
+                new TtClassReferenceExpression(TtTypeDesc.TypeOf<RName>()),
                 new TtMethodInvokeArgumentExpression { Expression = new TtPrimitiveExpression(AnimationClip.ToString())});
             methodDeclaration.MethodBody.Sequence.Add(getClipRName);
 

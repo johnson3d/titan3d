@@ -9,8 +9,8 @@ namespace EngineNS.DesignMacross.Design.Expressions
     public class TtPropertyGetDescription : TtExpressionDescription
     {
         public Guid HostReferenceId { get; set; } = Guid.Empty;
-        public UTypeDesc VarTypeDesc { get; set; } = null;
-        public UTypeDesc HostReferenceTypeDesc { get; set; } = null;
+        public TtTypeDesc VarTypeDesc { get; set; } = null;
+        public TtTypeDesc HostReferenceTypeDesc { get; set; } = null;
 
         public TtPropertyGetDescription()
         {
@@ -18,7 +18,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             AddDtaOutPin(new() { Name = "Get", TypeDesc = VarTypeDesc });
         }
 
-        public TtPropertyGetDescription(UTypeDesc hostReferenceTypeDesc, UTypeDesc varTypeDesc)
+        public TtPropertyGetDescription(TtTypeDesc hostReferenceTypeDesc, TtTypeDesc varTypeDesc)
         {
             AddDtaInPin(new() { Name = "Host", TypeDesc = hostReferenceTypeDesc });
             AddDtaOutPin(new() { Name = "Get", TypeDesc = varTypeDesc });

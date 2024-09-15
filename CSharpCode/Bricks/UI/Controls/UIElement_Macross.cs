@@ -22,7 +22,7 @@ namespace EngineNS.UI.Controls
             [Rtti.Meta]
             public string PropertyName { get; set; }
             [Rtti.Meta]
-            public Rtti.UTypeDesc PropertyType { get; set; }
+            public Rtti.TtTypeDesc PropertyType { get; set; }
             [Rtti.Meta]
             public UInt64 Id { get; set; }
 
@@ -58,7 +58,7 @@ namespace EngineNS.UI.Controls
             {
                 return new TtVariableReferenceExpression("object_" + Id);
             }
-            public Rtti.UTypeDesc GetVariableType()
+            public Rtti.TtTypeDesc GetVariableType()
             {
                 return PropertyType;
             }
@@ -120,7 +120,7 @@ namespace EngineNS.UI.Controls
                 var bindCall = new TtMethodInvokeStatement()
                 {
                     MethodName = "SetBinding",
-                    Host = new TtClassReferenceExpression(Rtti.UTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
+                    Host = new TtClassReferenceExpression(Rtti.TtTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
                 };
                 bindCall.GenericTypes.Add(Target.GetVariableType());
                 bindCall.GenericTypes.Add(Source.GetVariableType());
@@ -182,7 +182,7 @@ namespace EngineNS.UI.Controls
                 var bindCall = new TtMethodInvokeStatement()
                 {
                     MethodName = "SetMethodBinding",
-                    Host = new TtClassReferenceExpression(Rtti.UTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
+                    Host = new TtClassReferenceExpression(Rtti.TtTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
                 };
                 bindCall.GenericTypes.Add(Target.GetVariableType());
                 bindCall.Arguments.Add(new TtMethodInvokeArgumentExpression(Target.GetVariableExpression()));
@@ -258,7 +258,7 @@ namespace EngineNS.UI.Controls
                 var bindCall = new TtMethodInvokeStatement()
                 {
                     MethodName = "SetBinding",
-                    Host = new TtClassReferenceExpression(Rtti.UTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
+                    Host = new TtClassReferenceExpression(Rtti.TtTypeDesc.TypeOf(typeof(Bind.TtBindingOperations))),
                 };
                 bindCall.GenericTypes.Add(Target.GetVariableType());
                 bindCall.GenericTypes.Add(prop.VariableType.TypeDesc);

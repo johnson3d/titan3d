@@ -595,9 +595,9 @@ namespace EngineNS.UI.Controls
                     if(expr.Key.IsAttachedProperty)
                     {
                         count++;
-                        ar.Write(Rtti.UTypeDescManager.Instance.GetTypeStringFromType(expr.Key.HostType.SystemType));
+                        ar.Write(Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(expr.Key.HostType.SystemType));
                         ar.Write(expr.Key.Name);
-                        ar.Write(Rtti.UTypeDescManager.Instance.GetTypeStringFromType(expr.Key.PropertyType.SystemType));
+                        ar.Write(Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(expr.Key.PropertyType.SystemType));
                         var offset = SerializerHelper.WriteSkippable(ar);
                         var value = expr.Value.GetValue<object>(expr.Key);
                         SerializerHelper.WriteObject(ar, expr.Key.PropertyType.SystemType, value);
@@ -625,12 +625,12 @@ namespace EngineNS.UI.Controls
                     var skipPoint = SerializerHelper.GetSkipOffset(ar);
                     try
                     {
-                        var hostType = EngineNS.Rtti.UTypeDesc.TypeOf(hostTypeName);
+                        var hostType = EngineNS.Rtti.TtTypeDesc.TypeOf(hostTypeName);
                         if(hostType == null)
                         {
                             throw new EngineNS.IO.IOException($"Read attacked property: host type {hostTypeName} is missing");
                         }
-                        var type = EngineNS.Rtti.UTypeDesc.TypeOf(proType).SystemType;
+                        var type = EngineNS.Rtti.TtTypeDesc.TypeOf(proType).SystemType;
                         if(type == null)
                         {
                             throw new EngineNS.IO.IOException($"Read attacked property: property type {proType} is missing");

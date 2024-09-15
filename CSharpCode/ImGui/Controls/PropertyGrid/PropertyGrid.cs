@@ -65,7 +65,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public struct EditorInfo
         {
             public string Name;
-            public Rtti.UTypeDesc Type;
+            public Rtti.TtTypeDesc Type;
             public object Value;
             public object ObjectInstance;
             public float RowHeight;
@@ -124,16 +124,16 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public string AssemblyFilter = null;
         public UTypeSelector.EFilterMode FilterMode = UTypeSelector.EFilterMode.IncludeObjectType | UTypeSelector.EFilterMode.IncludeValueType;
 
-        public Rtti.UTypeDesc BaseType;
+        public Rtti.TtTypeDesc BaseType;
         public PGTypeEditorAttribute()
         {
             BaseType = null;
         }
         public PGTypeEditorAttribute(System.Type baseType)
         {
-            BaseType = Rtti.UTypeDesc.TypeOf(baseType);
+            BaseType = Rtti.TtTypeDesc.TypeOf(baseType);
         }
-        public PGTypeEditorAttribute(Rtti.UTypeDesc[] types)
+        public PGTypeEditorAttribute(Rtti.TtTypeDesc[] types)
         {
             TypeSlt.TypeList = types;
         }
@@ -158,8 +158,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             else
             {
                 //var typeStr = info.Value.ToString();// as string;
-                //TypeSlt.SelectedType = Rtti.UTypeDesc.TypeOf(typeStr); //Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeStr);
-                TypeSlt.SelectedType = info.Value as Rtti.UTypeDesc;
+                //TypeSlt.SelectedType = Rtti.TtTypeDesc.TypeOf(typeStr); //Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(typeStr);
+                TypeSlt.SelectedType = info.Value as Rtti.TtTypeDesc;
                 if (TypeSlt.OnDraw(-1, 12))
                 {
                     newValue = TypeSlt.SelectedType;
@@ -197,7 +197,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public static void GetProperties(in T obj, ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {
             var pros = TypeDescriptor.GetProperties(obj);
-            var objType = Rtti.UTypeDesc.TypeOf(obj.GetType());
+            var objType = Rtti.TtTypeDesc.TypeOf(obj.GetType());
             foreach (PropertyDescriptor prop in pros)
             {
                 var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
@@ -232,7 +232,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
             return false;
         }
-        public virtual Rtti.UTypeDesc GetPropertyType(object arg)
+        public virtual Rtti.TtTypeDesc GetPropertyType(object arg)
         {
             return null;
         }
@@ -240,7 +240,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public virtual object GetValue(object arg) { return null; }
     }
 
-    public class PGTypeEditorManager : UModule<TtEngine>
+    public class PGTypeEditorManager : TtModule<TtEngine>
     {
         public PGTypeEditorManager()
         {
@@ -266,27 +266,27 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
         public override async Task<bool> Initialize(TtEngine host)
         {
-            RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(bool)), new BoolEditor());
-            RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(int)), new Int32Editor());
-            RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(sbyte)), new SByteEditor());
-            RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(short)), new Int16Editor());
-            RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(long)), new Int64Editor());
-            RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(uint)), new UInt32Editor());
-            RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(byte)), new ByteEditor());
-            RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(ushort)), new UInt16Editor());
-            RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(ulong)), new UInt64Editor());
-            RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(float)), new FloatEditor());
-            RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(double)), new DoubleEditor());
-            RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(string)), new StringEditor());
+            RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(bool)), new BoolEditor());
+            RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(int)), new Int32Editor());
+            RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(sbyte)), new SByteEditor());
+            RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(short)), new Int16Editor());
+            RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(long)), new Int64Editor());
+            RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(uint)), new UInt32Editor());
+            RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(byte)), new ByteEditor());
+            RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(ushort)), new UInt16Editor());
+            RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(ulong)), new UInt64Editor());
+            RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(float)), new FloatEditor());
+            RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(double)), new DoubleEditor());
+            RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(string)), new StringEditor());
             var rNameEditor = new RName.PGRNameAttribute();
             await rNameEditor.Initialize();
-            RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(RName)), rNameEditor);
+            RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(RName)), rNameEditor);
             var color4fEditor = new Color4PickerEditorAttribute();
             await color4fEditor.Initialize();
-            RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(Color4f)), color4fEditor);
+            RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(Color4f)), color4fEditor);
             var color3fEditor = new Color3PickerEditorAttribute();
             await color3fEditor.Initialize();
-            RegTypeEditor(Rtti.UTypeDesc.TypeOf(typeof(Color3f)), color3fEditor);
+            RegTypeEditor(Rtti.TtTypeDesc.TypeOf(typeof(Color3f)), color3fEditor);
 
             ObjectWithCreateEditor = new ObjectWithCreateEditor();
             await ObjectWithCreateEditor.Initialize();
@@ -307,15 +307,15 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         public ListEditor ListEditor;
         public DictionaryEditor DictionaryEditor;
 
-        Dictionary<Rtti.UTypeDesc, PGCustomValueEditorAttribute> mTypeEditors = new Dictionary<Rtti.UTypeDesc, PGCustomValueEditorAttribute>();
-        public PGCustomValueEditorAttribute GetEditorType(Rtti.UTypeDesc type)
+        Dictionary<Rtti.TtTypeDesc, PGCustomValueEditorAttribute> mTypeEditors = new Dictionary<Rtti.TtTypeDesc, PGCustomValueEditorAttribute>();
+        public PGCustomValueEditorAttribute GetEditorType(Rtti.TtTypeDesc type)
         {
             PGCustomValueEditorAttribute result;
             if (mTypeEditors.TryGetValue(type, out result))
                 return result;
             return null;
         }
-        public void RegTypeEditor(Rtti.UTypeDesc type, PGCustomValueEditorAttribute editorType)
+        public void RegTypeEditor(Rtti.TtTypeDesc type, PGCustomValueEditorAttribute editorType)
         {
             mTypeEditors[type] = editorType;
         }

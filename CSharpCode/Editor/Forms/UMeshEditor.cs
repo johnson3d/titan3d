@@ -167,7 +167,7 @@ namespace EngineNS.Editor.Forms
 
             var mesh = new Graphics.Mesh.TtMesh();
 
-            var ok = mesh.Initialize(Mesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            var ok = mesh.Initialize(Mesh, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
                 var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
@@ -180,7 +180,7 @@ namespace EngineNS.Editor.Forms
 
             var arrowMaterialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(RName.GetRName("mesh/base/arrow.ums", RName.ERNameType.Engine));
             var arrowMesh = new Graphics.Mesh.TtMesh();
-            ok = arrowMesh.Initialize(arrowMaterialMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            ok = arrowMesh.Initialize(arrowMaterialMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
                 mArrowMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), arrowMesh, DVector3.UnitX*3, Vector3.One, Quaternion.Identity);
@@ -211,7 +211,7 @@ namespace EngineNS.Editor.Forms
                 var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
                 tMaterials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
                 PlaneMesh.Initialize(box, tMaterials,
-                    Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                    Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 PlaneMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), PlaneMesh, new DVector3(0, boxStart.Y, 0), Vector3.One, Quaternion.Identity);
                 PlaneMeshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
                 PlaneMeshNode.NodeData.Name = "Plane";
@@ -250,7 +250,7 @@ namespace EngineNS.Editor.Forms
             sdfViewport.OnInitialize = Initialize_SdfViewport;
             await sdfViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, sdfRPolicyName, 0, 1);
             var mesh = new Graphics.Mesh.TtMesh();
-            var ok = mesh.Initialize(Mesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            var ok = mesh.Initialize(Mesh, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
                 var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(sdfViewport.World, sdfViewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);

@@ -26,7 +26,7 @@ namespace EngineNS.Graphics.Pipeline
             MaterialMesh.Initialize(new List<Mesh.TtMeshPrimitives>() { Mesh }, new List<List<Pipeline.Shader.TtMaterial>> { Materials });
 
             RenderMesh = new Graphics.Mesh.TtMesh();
-            RenderMesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<T>.TypeDesc );
+            RenderMesh.Initialize(MaterialMesh, Rtti.TtTypeDescGetter<T>.TypeDesc );
             return RenderMesh.MdfQueue as T;
         }
     }
@@ -39,7 +39,7 @@ namespace EngineNS.Graphics.Pipeline
         public void Initialize(Graphics.Pipeline.TtGpuCullingNode node, Mesh.TtMaterialMesh mesh, Mesh.UMdfInstanceStaticMesh mdfQueue)
         {
             RenderMesh = new Graphics.Mesh.TtMesh();
-            RenderMesh.Initialize(mesh, Rtti.UTypeDescGetter<Mesh.UMdfInstanceStaticMesh>.TypeDesc);
+            RenderMesh.Initialize(mesh, Rtti.TtTypeDescGetter<Mesh.UMdfInstanceStaticMesh>.TypeDesc);
 
             MdfQueue = RenderMesh.MdfQueue as Mesh.UMdfInstanceStaticMesh;
             GpuDrivenData.SetupGpuData(node, mdfQueue.InstanceModifier);

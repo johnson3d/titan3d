@@ -123,7 +123,7 @@ namespace EngineNS.Animation.Macross.BlendTree
             var cmdHistory = context.CommandHistory;
             var graphElementStyleManager = context.GraphElementStyleManager;
             //for now just put here, util we have the init method
-            foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
+            foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
             {
                 foreach (var typeDesc in service.Types.Values)
                 {
@@ -134,7 +134,7 @@ namespace EngineNS.Animation.Macross.BlendTree
                              (TtMenuItem item, object sender) =>
                              {
                                  var popMenu = sender as TtPopupMenu;
-                                 if (Rtti.UTypeDescManager.CreateInstance(typeDesc) is TtBlendTreeNodeClassDescription node)
+                                 if (Rtti.TtTypeDescManager.CreateInstance(typeDesc) is TtBlendTreeNodeClassDescription node)
                                  {
                                      node.Name = GetValidNodeName(node.Name);
                                      var style = graphElementStyleManager.GetOrAdd(node.Id, popMenu.PopedPosition);

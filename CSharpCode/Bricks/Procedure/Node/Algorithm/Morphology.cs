@@ -14,7 +14,7 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             var Input = graph.BufferCache.FindBuffer(SrcPin);
             var Output = graph.BufferCache.FindBuffer(ResultPin);
-            if (Input.BufferCreator.ElementType != Rtti.UTypeDescGetter<float>.TypeDesc)
+            if (Input.BufferCreator.ElementType != Rtti.TtTypeDescGetter<float>.TypeDesc)
                 return false;
 
             int width = Input.Width;

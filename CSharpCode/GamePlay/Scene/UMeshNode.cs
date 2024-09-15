@@ -27,33 +27,33 @@ namespace EngineNS.GamePlay.Scene
             public RName CollideName { get; set; }
             [Rtti.Meta]
             [ReadOnly(true)]
-            public string MdfQueueType { get; set; } = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfStaticMesh));
+            public string MdfQueueType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfStaticMesh));
             [Rtti.Meta]
             [ReadOnly(true)]
-            public string AtomType { get; set; } = Rtti.UTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMesh.TtAtom));
+            public string AtomType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMesh.TtAtom));
 
             [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Pipeline.Shader.TtMdfQueueBase))]
-            public Rtti.UTypeDesc MdfQueue
+            public Rtti.TtTypeDesc MdfQueue
             {
                 get
                 {
-                    return Rtti.UTypeDesc.TypeOf(MdfQueueType);
+                    return Rtti.TtTypeDesc.TypeOf(MdfQueueType);
                 }
                 set
                 {
-                    MdfQueueType = Rtti.UTypeDesc.TypeStr(value);
+                    MdfQueueType = Rtti.TtTypeDesc.TypeStr(value);
                 }
             }
             [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Mesh.TtMesh.TtAtom))]
-            public Rtti.UTypeDesc Atom
+            public Rtti.TtTypeDesc Atom
             {
                 get
                 {
-                    return Rtti.UTypeDesc.TypeOf(AtomType);
+                    return Rtti.TtTypeDesc.TypeOf(AtomType);
                 }
                 set
                 {
-                    AtomType = Rtti.UTypeDesc.TypeStr(value);
+                    AtomType = Rtti.TtTypeDesc.TypeStr(value);
                 }
             }
         }
@@ -127,7 +127,7 @@ namespace EngineNS.GamePlay.Scene
                     return;
 
                 //var saved = mMesh.MdfQueue.MdfDatas;
-                //Rtti.UTypeDesc mdfQueueType;
+                //Rtti.TtTypeDesc mdfQueueType;
                 //if (value)
                 //{
                 //    mdfQueueType = mMesh.MdfQueue.MdfPermutations.ReplacePermutation<Graphics.Pipeline.Shader.UMdf_NoShadow, Graphics.Pipeline.Shader.UMdf_Shadow>();
@@ -226,11 +226,11 @@ namespace EngineNS.GamePlay.Scene
                     meshData.MdfQueueType = mMesh.MdfQueueType;
                     if (mMesh.SubMeshes[0].Atoms.Count == 0)
                     {
-                        meshData.AtomType = Rtti.UTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfStaticMesh));
+                        meshData.AtomType = Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfStaticMesh));
                     }
                     else
                     {
-                        meshData.AtomType = Rtti.UTypeDesc.TypeStr(mMesh.SubMeshes[0].Atoms[0].GetType());
+                        meshData.AtomType = Rtti.TtTypeDesc.TypeStr(mMesh.SubMeshes[0].Atoms[0].GetType());
                     }
                 }
                 this.UpdateAbsTransform();
@@ -285,7 +285,7 @@ namespace EngineNS.GamePlay.Scene
 
         [Category("Option")]
         [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(Graphics.Pipeline.Shader.TtMdfQueueBase))]
-        public Rtti.UTypeDesc MdfQueue
+        public Rtti.TtTypeDesc MdfQueue
         {
             get
             {
@@ -294,7 +294,7 @@ namespace EngineNS.GamePlay.Scene
                     return meshNodeData.MdfQueue;
 
                 }
-                return Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh));
+                return Rtti.TtTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh));
             }
             set
             {
@@ -345,7 +345,7 @@ namespace EngineNS.GamePlay.Scene
                 //    colorVar.SetValue(new Vector4(1, 0, 1, 1));
                 //}
                 var mesh = new Graphics.Mesh.TtMesh();
-                mesh.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                mesh.Initialize(cookedMesh, materials1, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 mesh.IsAcceptShadow = this.IsAcceptShadow;
                 Mesh = mesh;
                 return;
@@ -358,7 +358,7 @@ namespace EngineNS.GamePlay.Scene
                     if (materialMesh != null)
                     {
                         var mesh = new Graphics.Mesh.TtMesh();
-                        mesh.Initialize(materialMesh, Rtti.UTypeDesc.TypeOf(meshData.MdfQueueType), Rtti.UTypeDesc.TypeOf(meshData.AtomType));
+                        mesh.Initialize(materialMesh, Rtti.TtTypeDesc.TypeOf(meshData.MdfQueueType), Rtti.TtTypeDesc.TypeOf(meshData.AtomType));
 
                         Mesh = mesh;
                         this.IsAcceptShadow = this.IsAcceptShadow;

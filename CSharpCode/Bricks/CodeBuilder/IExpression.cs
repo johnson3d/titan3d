@@ -112,18 +112,18 @@ namespace EngineNS.Bricks.CodeBuilder
         public List<DefineFunction> Functions { get; } = new List<DefineFunction>();
         public System.Type TryGetType()
         {
-            var desc = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(GetFullName());
+            var desc = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(GetFullName());
             if (desc == null)
                 return null;
             return desc.SystemType;
         }
-        public Rtti.UTypeDesc TryGetTypeDesc()
+        public Rtti.TtTypeDesc TryGetTypeDesc()
         {
-            return Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(GetFullName());
+            return Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(GetFullName());
         }
         public Rtti.TtClassMeta TryGetTypeMeta()
         {
-            var desc = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(GetFullName());
+            var desc = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(GetFullName());
             if (desc == null)
                 return null;
 
@@ -197,7 +197,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 TypeSlt.FilterMode |= EGui.Controls.UTypeSelector.EFilterMode.ExcludeNoMeta;// .SearchFromMetas = true;
                 TypeSlt.BaseType = BaseType;
                 var typeStr = info.Value as string;
-                TypeSlt.SelectedType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeStr);
+                TypeSlt.SelectedType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(typeStr);
                 int maxItem = TypeSlt.ShowTypes.Count;
                 if (maxItem > 12)
                     maxItem = 12;
@@ -407,7 +407,7 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             Num = n;
         }
-        public Rtti.UTypeDesc VarType;
+        public Rtti.TtTypeDesc VarType;
         public string Num;
     }
     [Obsolete]

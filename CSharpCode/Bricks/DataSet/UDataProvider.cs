@@ -18,7 +18,7 @@ namespace EngineNS.Bricks.DataSet
         public string SheetName;
         //public string ColumnName;
         public int ColumeIndex = -1;
-        public Rtti.UTypeDesc DataConverter;
+        public Rtti.TtTypeDesc DataConverter;
     }
     public class UDataConverter
     {
@@ -58,7 +58,7 @@ namespace EngineNS.Bricks.DataSet
                 tmp.ColumnIndex = columns.ColumeIndex;
                 if (columns.DataConverter != null)
                 {
-                    tmp.Conveter = Rtti.UTypeDescManager.CreateInstance(columns.DataConverter) as UDataConverter;
+                    tmp.Conveter = Rtti.TtTypeDescManager.CreateInstance(columns.DataConverter) as UDataConverter;
                 }
                 if (i.PropertyType.GetInterface("IDataProvider") != null)
                 {

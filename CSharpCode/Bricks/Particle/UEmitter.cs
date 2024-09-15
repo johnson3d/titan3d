@@ -262,10 +262,10 @@ namespace EngineNS.Bricks.Particle
 
         public virtual TtEmitter CloneEmitter()
         {
-            var emt = Rtti.UTypeDescManager.CreateInstance(this.GetType()) as TtEmitter;
+            var emt = Rtti.TtTypeDescManager.CreateInstance(this.GetType()) as TtEmitter;
             emt.IsGpuDriven = IsGpuDriven;
             var mesh = new Graphics.Mesh.TtMesh();
-            mesh.Initialize(Mesh.MaterialMesh, Rtti.UTypeDescGetter<TtParticleMdfQueue>.TypeDesc); //mesh.MdfQueue
+            mesh.Initialize(Mesh.MaterialMesh, Rtti.TtTypeDescGetter<TtParticleMdfQueue>.TypeDesc); //mesh.MdfQueue
             emt.InitEmitter(TtEngine.Instance.GfxDevice.RenderContext, mesh, 1024);
 
             foreach (var i in EmitterShapes)
@@ -379,7 +379,7 @@ namespace EngineNS.Bricks.Particle
             if (umesh == null)
                 return false;
             var mesh = new Graphics.Mesh.TtMesh();
-            mesh.Initialize(umesh, Rtti.UTypeDescGetter<TtParticleMdfQueue>.TypeDesc);
+            mesh.Initialize(umesh, Rtti.TtTypeDescGetter<TtParticleMdfQueue>.TypeDesc);
             InitEmitter(rc, mesh, maxParticle);
             return true;
         }

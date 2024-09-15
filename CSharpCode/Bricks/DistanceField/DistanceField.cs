@@ -118,7 +118,7 @@ namespace EngineNS.DistanceField
         public void SaveAssetTo(RName name)
         {
             AssetName = name;
-            var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
+            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
             var xnd = new IO.TtXndHolder(typeStr, 0, 0);
             using (var attr = xnd.NewAttribute("VolumeData", 0, 0))
             {

@@ -65,7 +65,7 @@ namespace EngineNS.DesignMacross.Base.Description
     {
         public EVisisMode VisitMode { get; set; }
         public TtCommentStatement Comment { get; set; }
-        public UTypeDesc ReturnValueType { get; set; }
+        public TtTypeDesc ReturnValueType { get; set; }
         public string MethodName { get; }
         public List<TtMethodArgumentDescription> Arguments { get; set; } 
         public List<TtVariableDescription> LocalVariables { get; set; } 

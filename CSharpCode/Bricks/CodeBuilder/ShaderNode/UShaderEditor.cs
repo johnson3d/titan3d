@@ -113,7 +113,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             //var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
             //var rectMesh = rect.ToMesh();
             var rectMesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.CreateMeshPrimitive(RName.GetRName("mesh/base/sphere.vms", RName.ERNameType.Engine));
-            var ok = mesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            var ok = mesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
                 //mesh.DirectSetWorldMatrix(ref Matrix.mIdentity);
@@ -385,7 +385,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                             continue;
                         tagList.Add(node.GetPropertyEditObject());
                     }
-                    NodePropGrid.HideInheritDeclareType = Rtti.UTypeDescGetter<UNodeBase>.TypeDesc;
+                    NodePropGrid.HideInheritDeclareType = Rtti.TtTypeDescGetter<UNodeBase>.TypeDesc;
                     NodePropGrid.Target = tagList;
                 }
                 NodePropGrid.OnDraw(true, false, false);
@@ -457,7 +457,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             var MaterialClass = new TtClassDeclaration();
 
-            var gen = mHLSLCodeGen.GetCodeObjectGen(Rtti.UTypeDescGetter<TtMethodDeclaration>.TypeDesc);
+            var gen = mHLSLCodeGen.GetCodeObjectGen(Rtti.TtTypeDescGetter<TtMethodDeclaration>.TypeDesc);
             BuildCodeStatementsData data = new BuildCodeStatementsData()
             {
                 ClassDec = MaterialClass,
@@ -467,7 +467,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             };
             MaterialOutput.BuildStatements(null, ref data);
             string code = "";
-            var incGen = mHLSLCodeGen.GetCodeObjectGen(Rtti.UTypeDescGetter<TtIncludeDeclaration>.TypeDesc);
+            var incGen = mHLSLCodeGen.GetCodeObjectGen(Rtti.TtTypeDescGetter<TtIncludeDeclaration>.TypeDesc);
             TtCodeGeneratorData genData = new TtCodeGeneratorData()
             {
                 Method = null,

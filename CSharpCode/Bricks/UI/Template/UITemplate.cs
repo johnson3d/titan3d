@@ -13,8 +13,8 @@ namespace EngineNS.UI.Template
 {
     public class TtUIElementFactory
     {
-        UTypeDesc mType;
-        public UTypeDesc Type
+        TtTypeDesc mType;
+        public TtTypeDesc Type
         {
             get => mType;
             set
@@ -50,7 +50,7 @@ namespace EngineNS.UI.Template
             : this(null, null)
         {
         }
-        public TtUIElementFactory(UTypeDesc type)
+        public TtUIElementFactory(TtTypeDesc type)
             : this(type, null)
         {
         }
@@ -58,7 +58,7 @@ namespace EngineNS.UI.Template
             : this(null, text)
         {
         }
-        public TtUIElementFactory(UTypeDesc type, string text)
+        public TtUIElementFactory(TtTypeDesc type, string text)
         {
             Type = type;
             Text = text;
@@ -104,7 +104,7 @@ namespace EngineNS.UI.Template
             else
             {
                 var logicParent = container as TtContainer;
-                treeNode = UTypeDescManager.CreateInstance(mType, logicParent);
+                treeNode = TtTypeDescManager.CreateInstance(mType, logicParent);
                 treeNode.mTemplateParent = container;
                 treeNode.TemplateChildIndex = mChildIndex;
                 var parentContainer = parent as TtContainer;

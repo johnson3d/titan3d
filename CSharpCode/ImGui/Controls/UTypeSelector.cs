@@ -17,12 +17,12 @@ namespace EngineNS.EGui.Controls
         }
         public UTypeSelector()
         {
-            mBaseType = Rtti.UTypeDescGetter<object>.TypeDesc;// Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(object).FullName);
+            mBaseType = Rtti.TtTypeDescGetter<object>.TypeDesc;// Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(object).FullName);
         }
         public string AssemblyFilter = null;
         public EFilterMode FilterMode = EFilterMode.IncludeObjectType | EFilterMode.IncludeValueType;
-        Rtti.UTypeDesc mBaseType;
-        public Rtti.UTypeDesc BaseType
+        Rtti.TtTypeDesc mBaseType;
+        public Rtti.TtTypeDesc BaseType
         {
             get => mBaseType;
             set
@@ -33,7 +33,7 @@ namespace EngineNS.EGui.Controls
                 mShowTypes.Clear();
                 if (mBaseType != null)
                     mShowTypes.Add(mBaseType);
-                foreach (var i in Rtti.UTypeDescManager.Instance.Services)
+                foreach (var i in Rtti.TtTypeDescManager.Instance.Services)
                 {
                     foreach (var j in i.Value.Types)
                     {
@@ -83,8 +83,8 @@ namespace EngineNS.EGui.Controls
                 }
             }
         }
-        Rtti.UTypeDesc[] mTypeList = null;
-        public Rtti.UTypeDesc[] TypeList 
+        Rtti.TtTypeDesc[] mTypeList = null;
+        public Rtti.TtTypeDesc[] TypeList 
         {
             get => mTypeList;
             set
@@ -99,21 +99,21 @@ namespace EngineNS.EGui.Controls
                 }
             }
         }
-        Rtti.UTypeDesc mSelectedType;
-        public Rtti.UTypeDesc SelectedType
+        Rtti.TtTypeDesc mSelectedType;
+        public Rtti.TtTypeDesc SelectedType
         {
             get => mSelectedType;
             set => mSelectedType = value;
         }
-        private List<Rtti.UTypeDesc> mShowTypes = new List<Rtti.UTypeDesc>();
-        public List<Rtti.UTypeDesc> ShowTypes
+        private List<Rtti.TtTypeDesc> mShowTypes = new List<Rtti.TtTypeDesc>();
+        public List<Rtti.TtTypeDesc> ShowTypes
         {
             get
             {
                 return mShowTypes;
             }
         }
-        public void AddShowType(Rtti.UTypeDesc type)
+        public void AddShowType(Rtti.TtTypeDesc type)
         {
             mShowTypes.Add(type);
         }
@@ -137,7 +137,7 @@ namespace EngineNS.EGui.Controls
         }
         bool mSearchBarFocused = false;
         public string CtrlId = "##ComboTypeSelector";
-        public delegate bool FOnTypeFilter(Rtti.UTypeDesc type);
+        public delegate bool FOnTypeFilter(Rtti.TtTypeDesc type);
         public bool PopupVisible = false;
         public unsafe bool OnDraw(float itemWidth, int showMaxItems, FOnTypeFilter onTypeFilter = null, bool useDPI = true)
         {

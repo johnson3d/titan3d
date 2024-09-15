@@ -23,7 +23,7 @@ namespace EngineNS.DesignMacross.Editor
             {
                 var graphAttribute = GraphAttribute.GetAttributeWithSpecificClassType<IGraph>(description.GetType());
                 System.Diagnostics.Debug.Assert(graphAttribute != null);
-                var graph = UTypeDescManager.CreateInstance(graphAttribute.ClassType, new object[] { description }) as IGraph;
+                var graph = TtTypeDescManager.CreateInstance(graphAttribute.ClassType, new object[] { description }) as IGraph;
                 var navigableGraphsPanel = new TtNavigableGraphsPanel(graph);
                 OpenedNavigableGraphsPanels.Add(description, navigableGraphsPanel);
                 ActiveGraphNavigatedPanel = navigableGraphsPanel;

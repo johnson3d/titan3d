@@ -6,7 +6,7 @@ namespace EngineNS.Rtti
 {
     public class AssemblyEntry
     {
-        public class USourceGitAssemblyDesc : UAssemblyDesc
+        public class USourceGitAssemblyDesc : TtAssemblyDesc
         {
             public USourceGitAssemblyDesc()
             {
@@ -22,7 +22,7 @@ namespace EngineNS.Rtti
             public override string Platform { get { return "Global"; } }
         }
         static USourceGitAssemblyDesc AssmblyDesc = new USourceGitAssemblyDesc();
-        public static UAssemblyDesc GetAssemblyDesc()
+        public static TtAssemblyDesc GetAssemblyDesc()
         {
             return AssmblyDesc;
         }
@@ -32,15 +32,15 @@ namespace EngineNS.Rtti
 
 namespace EngineNS.Plugins.SourceGit
 {
-    public class UPluginLoader
+    public class TtPluginLoader
     {
-        public static URpcCallerPlugin mPluginObject = new URpcCallerPlugin();
+        public static TtSourceGitPlugin mPluginObject = new TtSourceGitPlugin();
         public static Bricks.AssemblyLoader.IPlugin GetPluginObject()
         {
             return mPluginObject;
         }
     }
-    public class URpcCallerPlugin : Bricks.SourceControl.USource
+    public class TtSourceGitPlugin : Bricks.SourceControl.TtSource
     {
         public override void OnLoadedPlugin()
         {
@@ -51,10 +51,10 @@ namespace EngineNS.Plugins.SourceGit
         {
             
         }
-        public override Bricks.SourceControl.USourceOpResult AddFile(string file)
+        public override Bricks.SourceControl.TtSourceOpResult AddFile(string file)
         {
             if (IO.TtFileManager.FileExists(file) == false)
-                return new Bricks.SourceControl.USourceOpResult(-1);
+                return new Bricks.SourceControl.TtSourceOpResult(-1);
 
             ProcessStartInfo processStartInfo = new ProcessStartInfo();
             processStartInfo.FileName = @"git.exe";
@@ -66,7 +66,7 @@ namespace EngineNS.Plugins.SourceGit
             {
                 result = System.Diagnostics.Process.Start(processStartInfo);
                 
-                var hr = new Bricks.SourceControl.USourceOpResult(0);
+                var hr = new Bricks.SourceControl.TtSourceOpResult(0);
                 if (result != null)
                 {
                     while (result.HasExited == false)
@@ -75,21 +75,21 @@ namespace EngineNS.Plugins.SourceGit
                     }
                     return hr;
                 }
-                return new Bricks.SourceControl.USourceOpResult(-1);
+                return new Bricks.SourceControl.TtSourceOpResult(-1);
             }
             catch (Exception)
             {
-                return new Bricks.SourceControl.USourceOpResult(-2);
+                return new Bricks.SourceControl.TtSourceOpResult(-2);
             }
         }
-        public override Bricks.SourceControl.USourceOpResult AddDirectory(string dir)
+        public override Bricks.SourceControl.TtSourceOpResult AddDirectory(string dir)
         {
-            return new Bricks.SourceControl.USourceOpResult(0);
+            return new Bricks.SourceControl.TtSourceOpResult(0);
         }
-        public override Bricks.SourceControl.USourceOpResult RemoveFile(string file, bool delLocal = true)
+        public override Bricks.SourceControl.TtSourceOpResult RemoveFile(string file, bool delLocal = true)
         {
             if (IO.TtFileManager.FileExists(file) == false)
-                return new Bricks.SourceControl.USourceOpResult(-1);
+                return new Bricks.SourceControl.TtSourceOpResult(-1);
 
             ProcessStartInfo processStartInfo = new ProcessStartInfo();
             processStartInfo.FileName = @"git.exe";
@@ -99,7 +99,7 @@ namespace EngineNS.Plugins.SourceGit
             try
             {
                 result = System.Diagnostics.Process.Start(processStartInfo);
-                var hr = new Bricks.SourceControl.USourceOpResult(0);
+                var hr = new Bricks.SourceControl.TtSourceOpResult(0);
                 if (result != null)
                 {
                     //if (result.StandardOutput != null)
@@ -112,7 +112,7 @@ namespace EngineNS.Plugins.SourceGit
             }
             catch (Exception)
             {
-                return new Bricks.SourceControl.USourceOpResult(-2);
+                return new Bricks.SourceControl.TtSourceOpResult(-2);
             }
         }
     }

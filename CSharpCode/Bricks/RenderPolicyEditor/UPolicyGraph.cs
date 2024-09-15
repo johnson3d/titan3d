@@ -28,14 +28,14 @@ namespace EngineNS.Bricks.RenderPolicyEditor
             {
                 if (GraphNode == null)
                     return "";
-                return Rtti.UTypeDesc.TypeOf(GraphNode.GetType()).TypeString;
+                return Rtti.TtTypeDesc.TypeOf(GraphNode.GetType()).TypeString;
             }
             set
             {
-                var typeDesc = Rtti.UTypeDesc.TypeOf(value);
+                var typeDesc = Rtti.TtTypeDesc.TypeOf(value);
                 if (typeDesc != null)
                 {
-                    var rgNode = Rtti.UTypeDescManager.CreateInstance(typeDesc) as Graphics.Pipeline.TtRenderGraphNode;
+                    var rgNode = Rtti.TtTypeDescManager.CreateInstance(typeDesc) as Graphics.Pipeline.TtRenderGraphNode;
                     rgNode.InitNodePins();
                     InitNode(rgNode);
                 }
@@ -121,7 +121,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         //public bool IsPropertyVisibleDirty { get; set; } = false;
         //public void GetProperties(ref EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         //{
-        //    var thisType = Rtti.UTypeDesc.TypeOf(this.GetType());
+        //    var thisType = Rtti.TtTypeDesc.TypeOf(this.GetType());
         //    var pros = System.ComponentModel.TypeDescriptor.GetProperties(this);
 
         //    //collection.InitValue(this,  pros, parentIsValueType);
@@ -172,7 +172,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         public const string RGDEditorKeyword = "RDG";
         public UPolicyGraph()
         {
-            PolicyType = Rtti.UTypeDesc.TypeOf(typeof(Graphics.Pipeline.TtDeferredPolicyBase));
+            PolicyType = Rtti.TtTypeDesc.TypeOf(typeof(Graphics.Pipeline.TtDeferredPolicyBase));
             UpdateCanvasMenus();
             UpdateNodeMenus();
             UpdatePinMenus();
@@ -187,29 +187,29 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                 mRenderPolicy = value;
             }
         }
-        Rtti.UTypeDesc mPolicyType;
+        Rtti.TtTypeDesc mPolicyType;
         [Rtti.Meta]
         [PGTypeEditor(typeof(Graphics.Pipeline.TtRenderPolicy))]
-        public Rtti.UTypeDesc PolicyType
+        public Rtti.TtTypeDesc PolicyType
         {
             get => mPolicyType;
             set
             {
                 mPolicyType = value;
-                mRenderPolicy = Rtti.UTypeDescManager.CreateInstance(mPolicyType, null) as Graphics.Pipeline.TtRenderPolicy;
+                mRenderPolicy = Rtti.TtTypeDescManager.CreateInstance(mPolicyType, null) as Graphics.Pipeline.TtRenderPolicy;
             }
         }
         
         public TtPolicyEditor PolicyEditor;
-        List<Rtti.UTypeDesc> mGraphNodeTypes = null;
-        public List<Rtti.UTypeDesc> GraphNodeTypes
+        List<Rtti.TtTypeDesc> mGraphNodeTypes = null;
+        public List<Rtti.TtTypeDesc> GraphNodeTypes
         {
             get
             {
                 if (mGraphNodeTypes == null)
                 {
-                    mGraphNodeTypes = new List<Rtti.UTypeDesc>();
-                    foreach (var i in Rtti.UTypeDescManager.Instance.Services.Values)
+                    mGraphNodeTypes = new List<Rtti.TtTypeDesc>();
+                    foreach (var i in Rtti.TtTypeDescManager.Instance.Services.Values)
                     {
                         foreach (var j in i.Types)
                         {
@@ -262,7 +262,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
                                 (TtMenuItem item, object sender) =>
                                 {
                                     var node = new UPolicyNode();
-                                    var rgNode = Rtti.UTypeDescManager.CreateInstance(i) as Graphics.Pipeline.TtRenderGraphNode;
+                                    var rgNode = Rtti.TtTypeDescManager.CreateInstance(i) as Graphics.Pipeline.TtRenderGraphNode;
                                     //rgNode.RenderGraph = this;
                                     rgNode.InitNodePins();
                                     node.InitNode(rgNode);

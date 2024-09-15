@@ -288,7 +288,7 @@ namespace EngineNS.Support
                 return obj;
             }
         }
-        public static object ToObject(Rtti.UTypeDesc type, string text)
+        public static object ToObject(Rtti.TtTypeDesc type, string text)
         {
             return ToObject(type.SystemType, text);
         }
@@ -356,21 +356,21 @@ namespace EngineNS.Support
                 }
                 else if (type.FullName == "System.Type")
                 {
-                    var desc = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(text);
+                    var desc = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(text);
                     if (desc != null)
                         return desc.SystemType;
                     return null;
                 }
-                else if (type == typeof(Rtti.UTypeDesc))
+                else if (type == typeof(Rtti.TtTypeDesc))
                 {
-                    var desc = Rtti.UTypeDesc.TypeOf(text);
+                    var desc = Rtti.TtTypeDesc.TypeOf(text);
                     if (desc != null)
                         return desc;
                     return null;
                 }
                 else
                 {
-                    var result = Rtti.UTypeDescManager.CreateInstance(type);
+                    var result = Rtti.TtTypeDescManager.CreateInstance(type);
                     var attrs = type.GetCustomAttributes(typeof(TypeConverterAttributeBase), true);
                     if (attrs.Length != 0)
                     {
@@ -382,7 +382,7 @@ namespace EngineNS.Support
             }
             catch
             {
-                return Rtti.UTypeDescManager.CreateInstance(type);
+                return Rtti.TtTypeDescManager.CreateInstance(type);
             }
         }
     }

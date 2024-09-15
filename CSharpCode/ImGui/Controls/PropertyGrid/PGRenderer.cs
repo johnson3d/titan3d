@@ -310,7 +310,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
         }
 
-        static bool CanNewObject(Rtti.UTypeDesc type)
+        static bool CanNewObject(Rtti.TtTypeDesc type)
         {
             if (type.SystemType == typeof(string))
                 return false;
@@ -351,7 +351,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         //Vector2 mHightlightRowMax = Vector2.Zero;
         public bool UseProvider = true;
         static readonly ImGuiTableFlags_ mTabFlags = ImGuiTableFlags_.ImGuiTableFlags_BordersInner | ImGuiTableFlags_.ImGuiTableFlags_Resizable;// | ImGuiTableFlags_.ImGuiTableFlags_SizingFixedFit;
-        public Rtti.UTypeDesc HideInheritDeclareType = null;
+        public Rtti.TtTypeDesc HideInheritDeclareType = null;
         struct TargetKey
         {
             object mTarget;
@@ -575,7 +575,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                                 continue;
 
                             var showType = propDesc.GetPropertyType(target);
-                            var showTypeDesc = Rtti.UTypeDesc.TypeOf(showType);
+                            var showTypeDesc = Rtti.TtTypeDesc.TypeOf(showType);
                             var isReadonly = propDesc.GetIsReadonly(target);
                             var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow;
                             if (IsLeafTreeNode(propDesc, propertyValue, showTypeDesc))
@@ -817,17 +817,17 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
             ImGuiAPI.PopStyleVar(1);
         }
-        public static bool IsLeafTreeNode(CustomPropertyDescriptor propDesc, object value, Rtti.UTypeDesc propertyTypeDesc)
+        public static bool IsLeafTreeNode(CustomPropertyDescriptor propDesc, object value, Rtti.TtTypeDesc propertyTypeDesc)
         {
             if (propDesc.CustomValueEditor != null)
                 return !propDesc.CustomValueEditor.Expandable;
 
             return IsLeafTreeNode(value, propertyTypeDesc);
         }
-        public static bool IsLeafTreeNode(object value, Rtti.UTypeDesc typeDesc)
+        public static bool IsLeafTreeNode(object value, Rtti.TtTypeDesc typeDesc)
         {
             if(typeDesc == null)
-                typeDesc = Rtti.UTypeDesc.TypeOf(value.GetType());
+                typeDesc = Rtti.TtTypeDesc.TypeOf(value.GetType());
             var editor = EngineNS.TtEngine.Instance.PGTypeEditorManagerInstance.GetEditorType(typeDesc);
             if (editor != null)
                 return !editor.Expandable;
@@ -1350,12 +1350,12 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         //            }
 
         //            {
-        //                Rtti.UTypeDesc keyType = null, valueType = null;
+        //                Rtti.TtTypeDesc keyType = null, valueType = null;
         //                var dict = obj as System.Collections.IDictionary;
         //                if (dict.GetType().GenericTypeArguments.Length == 2)
         //                {
-        //                    keyType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(dict.GetType().GenericTypeArguments[0].FullName);
-        //                    valueType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(dict.GetType().GenericTypeArguments[1].FullName);
+        //                    keyType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(dict.GetType().GenericTypeArguments[0].FullName);
+        //                    valueType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(dict.GetType().GenericTypeArguments[1].FullName);
         //                }
         //                if (mKVCreator == null)
         //                {
@@ -1367,7 +1367,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         //                    mKVCreator.KeyTypeSlt.BaseType = keyType;
         //                    mKVCreator.ValueTypeSlt.BaseType = valueType;
         //                }
-                        
+
         //                var size = new Vector2(300, 500);
         //                ImGuiAPI.SetNextWindowSize(ref size, ImGuiCond_.ImGuiCond_None);
         //                mKVCreator.CreateFinished = false;
@@ -1491,7 +1491,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         //    callstack.RemoveAt(callstack.Count - 1);
         //}
         //KeyValueCreator mKVCreator = null;
-        
+
         //private unsafe void OnList(object target, List<KeyValuePair<object, System.Reflection.PropertyInfo>> callstack, System.Reflection.PropertyInfo prop, System.Collections.IList lst)
         //{
         //    ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet;

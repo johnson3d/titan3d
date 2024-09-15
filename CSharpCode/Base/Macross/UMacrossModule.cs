@@ -64,17 +64,17 @@ namespace EngineNS.Macross
             var newObj = module.NewInnerObject<T>(Name);
             if (mInnerObject != null)
             {
-                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDescGetter<T>.TypeDesc);
+                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDescGetter<T>.TypeDesc);
                 meta?.CopyObjectMetaField(newObj, mInnerObject);
             }
             InnerObject = newObj;
         }
     }
-    public partial class UMacrossModule : UModule<TtEngine>
+    public partial class UMacrossModule : TtModule<TtEngine>
     {
         private IAssemblyLoader mAssemblyLoader;
         public WeakReference mAssembly;
-        private Rtti.UAssemblyDesc mAssemblyDesc;
+        private Rtti.TtAssemblyDesc mAssemblyDesc;
         public uint Version = 1;
         public T NewInnerObject<T>(RName name) where T : class
         {//不要保存返回值!!
@@ -135,9 +135,9 @@ namespace EngineNS.Macross
             pdbPath += ".tpdb";
             var newAssembly = loader.LoadAssembly(assemblyPath, pdbPath);
 
-            Rtti.UTypeDescManager.ServiceManager manager;
-            Rtti.UAssemblyDesc desc;
-            if (Rtti.UTypeDescManager.Instance.RegAssembly(newAssembly, out manager, out desc))
+            Rtti.TtTypeDescManager.ServiceManager manager;
+            Rtti.TtAssemblyDesc desc;
+            if (Rtti.TtTypeDescManager.Instance.RegAssembly(newAssembly, out manager, out desc))
             {
                 List<Type> removed = new List<Type>();
                 List<Type> changed = new List<Type>();
@@ -146,10 +146,10 @@ namespace EngineNS.Macross
 
                 if (oldAssembly != null)
                 {
-                    Rtti.UAssemblyDesc.GetChangedLists(removed, changed, added, newAssembly, oldAssembly);
+                    Rtti.TtAssemblyDesc.GetChangedLists(removed, changed, added, newAssembly, oldAssembly);
                 }
 
-                Rtti.UAssemblyDesc.UpdateTypeManager(manager, desc, removed, changed, added);
+                Rtti.TtAssemblyDesc.UpdateTypeManager(manager, desc, removed, changed, added);
                 desc.ModuleAssembly = new WeakReference<System.Reflection.Assembly>(newAssembly);
 
                 for (int i = 0; i < 10; i++)
@@ -166,7 +166,7 @@ namespace EngineNS.Macross
                 manager.AddAssemblyDesc(desc);
             }
 
-            Rtti.UTypeDescManager.Instance.OnTypeChangedInvoke();
+            Rtti.TtTypeDescManager.Instance.OnTypeChangedInvoke();
 
             mAssembly = new WeakReference(newAssembly);
             mAssemblyLoader?.TryUnload();

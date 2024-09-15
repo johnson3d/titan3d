@@ -172,9 +172,9 @@ namespace EngineNS.Bricks.Particle.Editor
                 }
             }
         }
-        public virtual UTypeDesc CreateEmitterType()
+        public virtual TtTypeDesc CreateEmitterType()
         {
-            return UTypeDescGetter<TtEmitter>.TypeDesc;
+            return TtTypeDescGetter<TtEmitter>.TypeDesc;
         }
         public virtual void InitEmitter(TtEmitter emt)
         {

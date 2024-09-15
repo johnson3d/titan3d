@@ -80,7 +80,7 @@ namespace EngineNS.DesignMacross.Design
                             num++;
                         }
                         var name = $"{typeShowName}_{num}";
-                        if (UTypeDescManager.CreateInstance(designableType.TypeForDesign) is IDesignableVariableDescription description)
+                        if (TtTypeDescManager.CreateInstance(designableType.TypeForDesign) is IDesignableVariableDescription description)
                         {
                             description.Name = name;
                             elementsList.Descriptions.Add(description);

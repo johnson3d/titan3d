@@ -423,9 +423,9 @@ namespace EngineNS.Bricks.Procedure.Node
     {
         public UFloat3Dot()
         {
-            InputLeftDesc.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
-            InputRightDesc.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
-            OutputDesc.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
+            InputLeftDesc.BufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
+            InputRightDesc.BufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
+            OutputDesc.BufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
         }
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
@@ -482,8 +482,8 @@ namespace EngineNS.Bricks.Procedure.Node
         };
         public UFloat3Gaussion()
         {
-            SourceDesc.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
-            ResultDesc.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
+            SourceDesc.BufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
+            ResultDesc.BufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
         }
         [Rtti.Meta]
         public bool ClampBorder { get; set; } = true;

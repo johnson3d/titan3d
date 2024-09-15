@@ -19,11 +19,11 @@ namespace ProjectCooker.Command
         {
             AssetTypes.Clear();
             System.Console.WriteLine("Begin AssetType");
-            EngineNS.Rtti.UTypeDescManager.Instance.InterateTypes((cb) =>
+            EngineNS.Rtti.TtTypeDescManager.Instance.InterateTypes((cb) =>
             {
                 if (cb.SystemType.IsSubclassOf(typeof(EngineNS.IO.IAssetMeta)))
                 {
-                    var ameta = EngineNS.Rtti.UTypeDescManager.CreateInstance(cb) as EngineNS.IO.IAssetMeta;
+                    var ameta = EngineNS.Rtti.TtTypeDescManager.CreateInstance(cb) as EngineNS.IO.IAssetMeta;
                     AssetTypes[ameta.GetAssetTypeName()] = cb.SystemType;
                     System.Console.WriteLine(ameta.GetAssetTypeName());
                 }
@@ -120,7 +120,7 @@ namespace ProjectCooker.Command
         }
         async System.Threading.Tasks.Task ProcAssets(System.Type type, bool bOnlyAMeta = false)
         {
-            var ameta = EngineNS.Rtti.UTypeDescManager.CreateInstance(type) as EngineNS.IO.IAssetMeta;
+            var ameta = EngineNS.Rtti.TtTypeDescManager.CreateInstance(type) as EngineNS.IO.IAssetMeta;
             var extType = ameta.GetAssetExtType();
             for (var t = EngineNS.IO.TtFileManager.ERootDir.Game; t <= EngineNS.IO.TtFileManager.ERootDir.Editor; t++)
             {

@@ -70,7 +70,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.DescVS = DescVS;
             result.DescPS = DescPS;
             result.ShadingEnv = ShadingEnv;
-            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDescGetter<TtEffectDesc>.TypeDesc);
+            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDescGetter<TtEffectDesc>.TypeDesc);
             meta.CopyObjectMetaField(result.Desc, Desc);
             return result;
         }
@@ -213,7 +213,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 result.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
             }
 
-            var dbg_name = $"{shading},{material.AssetName},{Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}";
+            var dbg_name = $"{shading},{material.AssetName},{Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}";
             VertexShader.SetDebugName($"VS:{dbg_name}");
             PixelShader.SetDebugName($"PS:{dbg_name}");
             result.ShaderEffect.DebugName = dbg_name;
@@ -238,8 +238,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.Desc.MaterialHash = material.GetHash();
             result.Desc.MdfQueueHash = mdf.GetHash();
             result.Desc.MaterialName = material.AssetName;
-            result.Desc.MdfQueueType = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType());
-            result.Desc.ShadingType = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(shading.GetType());
+            result.Desc.MdfQueueType = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType());
+            result.Desc.ShadingType = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(shading.GetType());
             result.ShadingEnv = shading;
 
             var defines = new NxRHI.TtShaderDefinitions();
@@ -310,9 +310,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (await LinkShaders(result) == false)
                 return null;
 
-            VertexShader.SetDebugName($"VS:{shading},{material.AssetName},{Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}");
-            PixelShader.SetDebugName($"PS:{shading},{material.AssetName},{Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}");
-            result.ShaderEffect.DebugName = $"{shading},{material.AssetName},{Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}";
+            VertexShader.SetDebugName($"VS:{shading},{material.AssetName},{Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}");
+            PixelShader.SetDebugName($"PS:{shading},{material.AssetName},{Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}");
+            result.ShaderEffect.DebugName = $"{shading},{material.AssetName},{Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}";
             return result;
         }
         public async Thread.Async.TtTask<bool> RefreshEffect(TtMaterial material)
@@ -327,7 +327,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
             var defines = new NxRHI.TtShaderDefinitions();
-            var type = Rtti.UTypeDescManager.Instance.GetTypeFromString(Desc.ShadingType);
+            var type = Rtti.TtTypeDescManager.Instance.GetTypeFromString(Desc.ShadingType);
             if (type == null)
                 return false;
             var shading = TtEngine.Instance.ShadingEnvManager.GetShadingEnv(type);
@@ -335,10 +335,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return false;
             shading.GetShaderDefines(Desc.PermutationId, defines);
 
-            var mdfType = Rtti.UTypeDesc.TypeOf(Desc.MdfQueueType);
+            var mdfType = Rtti.TtTypeDesc.TypeOf(Desc.MdfQueueType);
             if (mdfType == null)
                 return false;
-            var mdf = Rtti.UTypeDescManager.CreateInstance(mdfType) as Pipeline.Shader.TtMdfQueueBase;
+            var mdf = Rtti.TtTypeDescManager.CreateInstance(mdfType) as Pipeline.Shader.TtMdfQueueBase;
             if (mdf == null)
                 return false;
 
@@ -395,7 +395,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (await LinkShaders(this) == false)
                 return false;
 
-            var dbg_name = $"{shading},{material.AssetName},{Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}";
+            var dbg_name = $"{shading},{material.AssetName},{Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}";
             VertexShader.SetDebugName($"VS:{dbg_name}");
             PixelShader.SetDebugName($"PS:{dbg_name}");
             ShaderEffect.DebugName = dbg_name;
@@ -407,14 +407,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return true;
         }
 
-        public UCoreShaderBinder.UShaderResourceIndexer mBindIndexer;
-        public UCoreShaderBinder.UShaderResourceIndexer BindIndexer
+        public TtCoreShaderBinder.UShaderResourceIndexer mBindIndexer;
+        public TtCoreShaderBinder.UShaderResourceIndexer BindIndexer
         {
             get
             {
                 if (mBindIndexer == null)
                 {
-                    mBindIndexer = new UCoreShaderBinder.UShaderResourceIndexer();
+                    mBindIndexer = new TtCoreShaderBinder.UShaderResourceIndexer();
                     mBindIndexer.UpdateBindResouce(this.ShaderEffect);
                 }
                 return mBindIndexer;
@@ -424,7 +424,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     public class TtEffectManager : IDisposable
     {
         public TtEffect DummyEffect;
-        public async System.Threading.Tasks.Task<bool> Initialize(UGfxDevice device)
+        public async System.Threading.Tasks.Task<bool> Initialize(TtGfxDevice device)
         {
             DummyEffect = await this.GetEffect(await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDummyShading>(), device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
 

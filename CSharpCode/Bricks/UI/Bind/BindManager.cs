@@ -11,11 +11,11 @@ using static EngineNS.UI.Bind.TtBindableProperty;
 
 namespace EngineNS.UI.Bind
 {
-    public class TtBindManager : UModule<TtEngine>
+    public class TtBindManager : TtModule<TtEngine>
     {
         public override async Task<bool> Initialize(TtEngine host)
         {
-            foreach(var service in UTypeDescManager.Instance.Services.Values)
+            foreach(var service in TtTypeDescManager.Instance.Services.Values)
             {
                 foreach(var typeDesc in service.Types.Values)
                 {
@@ -41,7 +41,7 @@ namespace EngineNS.UI.Bind
             return Interlocked.Increment(ref mBindablePropertyGlobalIndexCount);
         }
         private static Dictionary<TtBindableProperty.NameKey, TtBindableProperty> mBindableProperties = new Dictionary<TtBindableProperty.NameKey, TtBindableProperty>();
-        public TtBindableProperty FindBindableProperty(string name, Rtti.UTypeDesc hostType)
+        public TtBindableProperty FindBindableProperty(string name, Rtti.TtTypeDesc hostType)
         {
             TtBindableProperty bp = null;
             while ((bp == null) && (hostType != null))
@@ -74,7 +74,7 @@ namespace EngineNS.UI.Bind
             where TClass : class, IBindableObject
         {
             var classType = typeof(TClass);
-            var key = new NameKey(name, Rtti.UTypeDesc.TypeOf(classType));
+            var key = new NameKey(name, Rtti.TtTypeDesc.TypeOf(classType));
             lock(mBindableProperties)
             {
                 TtBindableProperty outPro;
@@ -95,8 +95,8 @@ namespace EngineNS.UI.Bind
             {
                 Name = name,
                 Category = category,
-                PropertyType = UTypeDesc.TypeOf(typeof(TProperty)),
-                HostType = UTypeDesc.TypeOf(classType),
+                PropertyType = TtTypeDesc.TypeOf(typeof(TProperty)),
+                HostType = TtTypeDesc.TypeOf(classType),
                 DefaultValue = defaultValue,
                 OnValueChanged = valueChangedCallback,
                 CustomValueEditor = valueEditor,
@@ -144,7 +144,7 @@ namespace EngineNS.UI.Bind
             where TClass : class, IBindableObject
         {
             //var classType = typeof(TClass);
-            //var key = new NameKey(name, Rtti.UTypeDesc.TypeOf(classType));
+            //var key = new NameKey(name, Rtti.TtTypeDesc.TypeOf(classType));
             var pro = Register<TProperty, TClass>(name, category, defaultValue, valueChangedCallback, valueEditor, displayNameAtt);
             pro.IsAttachedProperty = true;
             return pro;

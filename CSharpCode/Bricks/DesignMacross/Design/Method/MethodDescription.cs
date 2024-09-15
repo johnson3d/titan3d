@@ -19,7 +19,7 @@ namespace EngineNS.DesignMacross.Design
         [Rtti.Meta]
         public string Name { get; set; }
         [Rtti.Meta]
-        public UTypeDesc VariableType { get; set; } = Rtti.UTypeDesc.TypeOf<int>();
+        public TtTypeDesc VariableType { get; set; } = Rtti.TtTypeDesc.TypeOf<int>();
         [Rtti.Meta]
         public EMethodArgumentAttribute OperationType { get; set; } = EMethodArgumentAttribute.Default;
         public Guid Id { get; set; } = Guid.NewGuid();
@@ -107,7 +107,7 @@ namespace EngineNS.DesignMacross.Design
         [Rtti.Meta]
         public List<TtVariableDescription> LocalVariables { get; set; } = new List<TtVariableDescription>();
         [Rtti.Meta]
-        public UTypeDesc ReturnValueType { get; set; } = null;
+        public TtTypeDesc ReturnValueType { get; set; } = null;
         [Rtti.Meta, DrawInGraph]
         public TtMethodStartDescription Start { get; set; } = null;
         [Rtti.Meta, DrawInGraph]
@@ -133,7 +133,7 @@ namespace EngineNS.DesignMacross.Design
             return true;
         }
 
-        public void SetReturnValue(UTypeDesc returnValueType)
+        public void SetReturnValue(TtTypeDesc returnValueType)
         {
             if (returnValueType == null)
                 return;

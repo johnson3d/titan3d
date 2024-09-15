@@ -4,19 +4,19 @@ using System.Text;
 
 namespace EngineNS.Rtti
 {
-    public class UNameSpace
+    public class TtNameSpace
     {
         public string Name;
-        public List<UNameSpace> ChildrenNS = new List<UNameSpace>();
+        public List<TtNameSpace> ChildrenNS = new List<TtNameSpace>();
         public List<TtClassMeta> Types = new List<TtClassMeta>();
-        public UNameSpace GetNS(string n)
+        public TtNameSpace GetNS(string n)
         {
             foreach(var i in ChildrenNS)
             {
                 if (i.Name == n)
                     return i;
             }
-            var ns = new UNameSpace();
+            var ns = new TtNameSpace();
             ns.Name = n;
             ChildrenNS.Add(ns);
             return ns;
@@ -53,13 +53,13 @@ namespace EngineNS.Rtti
             return false;
         }
     }
-    public class UTypeTreeManager
+    public class TtTypeTreeManager
     {
-        public UTypeTreeManager()
+        public TtTypeTreeManager()
         {
             RootNS.Name = "global";
         }
-        public UNameSpace RootNS = new UNameSpace();
+        public TtNameSpace RootNS = new TtNameSpace();
         public void RegType(TtClassMeta kls)
         {
             var fname = kls.ClassType.FullName.Replace('+', '.');
@@ -68,7 +68,7 @@ namespace EngineNS.Rtti
             var nsp = SureNS(RootNS, segs, 0);
             nsp.Types.Add(kls);
         }
-        private static UNameSpace SureNS(UNameSpace cur, string[] ns, int index)
+        private static TtNameSpace SureNS(TtNameSpace cur, string[] ns, int index)
         {
             if (index == ns.Length - 1)
             {

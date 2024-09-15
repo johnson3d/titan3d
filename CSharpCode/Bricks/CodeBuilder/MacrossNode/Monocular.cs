@@ -127,7 +127,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         //public void OnValueChanged(UEditableValue ev)
         //{
-        //    TarType = Rtti.UClassMetaManager.Instance.GetMeta(ev.Value as Rtti.UTypeDesc);
+        //    TarType = Rtti.UClassMetaManager.Instance.GetMeta(ev.Value as Rtti.TtTypeDesc);
         //}
         public override void OnLoadLinker(UPinLinker linker)
         {
@@ -146,7 +146,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     EGui.Controls.CtrlUtility.DrawHelper($"VarType:{TarType.ClassType.FullName}");
             }
         }
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             if (TarType == null)
                 return null;
@@ -171,7 +171,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         //        var typeSlt = ToType.EditValue as UTypeSelectorEValue;
 
-        //        var newType = Rtti.UClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeStr(nodeExpr.GetOutPinType(oPin)));
+        //        var newType = Rtti.UClassMetaManager.Instance.GetMeta(Rtti.TtTypeDesc.TypeStr(nodeExpr.GetOutPinType(oPin)));
         //        if (newType != null && !newType.CanConvertFrom(TarType))
         //        {//类型改变，且不能转换到目标
         //            this.ParentGraph.RemoveLinkedOut(this.Result);

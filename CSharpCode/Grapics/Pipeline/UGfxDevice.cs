@@ -5,7 +5,7 @@ using EngineNS.NxRHI;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public partial class UGfxDevice : UModule<TtEngine>
+    public partial class TtGfxDevice : TtModule<TtEngine>
     {
         public override int GetOrder()
         {
@@ -29,12 +29,12 @@ namespace EngineNS.Graphics.Pipeline
             TtNativeWindow.PropertiesID_WindowData = SDL.SDL3.SDL_CreateProperties();
 #endif
 
-            var wtType = Rtti.UTypeDesc.TypeOf(engine.Config.MainWindowType).SystemType;
+            var wtType = Rtti.TtTypeDesc.TypeOf(engine.Config.MainWindowType).SystemType;
             if (wtType == null)
             {
                 wtType = typeof(EngineNS.Editor.UMainEditorApplication);
             }
-            SlateApplication = Rtti.UTypeDescManager.CreateInstance(wtType) as TtSlateApplication;
+            SlateApplication = Rtti.TtTypeDescManager.CreateInstance(wtType) as TtSlateApplication;
             var winRect = engine.Config.MainWindow;
 
             if(engine.Config.SupportMultWindows)
@@ -303,15 +303,15 @@ namespace EngineNS
 {
     public partial class TtEngine
     {
-        public static System.Type UGfxDeviceType = typeof(Graphics.Pipeline.UGfxDevice);
-        private Graphics.Pipeline.UGfxDevice mGfxDevice;
-        public Graphics.Pipeline.UGfxDevice GfxDevice 
+        public static System.Type UGfxDeviceType = typeof(Graphics.Pipeline.TtGfxDevice);
+        private Graphics.Pipeline.TtGfxDevice mGfxDevice;
+        public Graphics.Pipeline.TtGfxDevice GfxDevice 
         { 
             get
             {
                 if (mGfxDevice == null)
                 {
-                    mGfxDevice = Rtti.UTypeDescManager.CreateInstance(UGfxDeviceType) as Graphics.Pipeline.UGfxDevice;
+                    mGfxDevice = Rtti.TtTypeDescManager.CreateInstance(UGfxDeviceType) as Graphics.Pipeline.TtGfxDevice;
                 }
                 return mGfxDevice;
             }

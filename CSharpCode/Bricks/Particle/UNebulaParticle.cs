@@ -190,7 +190,7 @@ namespace EngineNS.Bricks.Particle
         [Rtti.Meta]
         public TtEmitter AddEmitter(System.Type type, string name)
         {
-            var emitter = Rtti.UTypeDescManager.CreateInstance(type) as TtEmitter;
+            var emitter = Rtti.TtTypeDescManager.CreateInstance(type) as TtEmitter;
             Emitter[name] = emitter;
             return emitter;
         }

@@ -195,7 +195,7 @@ namespace EngineNS.DesignMacross
         {
             var args = new List<TtMethodArgumentDeclaration>
             {
-                TtASTBuildUtil.CreateMethodArgumentDeclaration("elapseSecond", new(UTypeDesc.TypeOf<float>()), EMethodArgumentAttribute.Default)
+                TtASTBuildUtil.CreateMethodArgumentDeclaration("elapseSecond", new(TtTypeDesc.TypeOf<float>()), EMethodArgumentAttribute.Default)
             };
             var methodDeclaration = TtASTBuildUtil.CreateMethodDeclaration("Tick", null, args, isOverride);
 

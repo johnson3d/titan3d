@@ -71,7 +71,7 @@ namespace EngineNS.UI.Editor
         bool OnMacrossEditorAddMember(Bricks.CodeBuilder.TtVariableDeclaration variable)
         {
             // 默认UI的class所有member增加bind attribute
-            var bpaType = UTypeDesc.TypeOf(typeof(UI.Bind.BindPropertyAttribute));
+            var bpaType = TtTypeDesc.TypeOf(typeof(UI.Bind.BindPropertyAttribute));
             //if (!variable.HasAttribute(bpaType))
             //{
             //    variable.Attributes.Add(new TtAttribute()
@@ -256,7 +256,7 @@ namespace EngineNS.UI.Editor
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             UIAsset.MacrossEditor.OnDraw();
         }
-        public void AddEventMethod(Controls.TtUIElement element, string name, UTypeDesc eventType)
+        public void AddEventMethod(Controls.TtUIElement element, string name, TtTypeDesc eventType)
         {
             var elementName = GetValidName(element);
             if (elementName != element.Name)

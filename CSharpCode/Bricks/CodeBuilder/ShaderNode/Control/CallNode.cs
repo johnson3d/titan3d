@@ -192,7 +192,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             return null;
         }
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             if (pin == null)
                 return null;
@@ -201,7 +201,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             {
                 if (Result.Tag != null)
                 {
-                    var cvtType = Result.Tag as Rtti.UTypeDesc;
+                    var cvtType = Result.Tag as Rtti.TtTypeDesc;
                     if (cvtType != null)
                         return cvtType;
                 }
@@ -286,7 +286,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         //        retVar.InitValue = cGen.GetDefaultValue(Method.ReturnType);
         //        funGraph.ShaderEditor.MaterialOutput.Function.AddLocalVar(retVar);
 
-        //        if (Result != null && Result.Tag != null && ((Result.Tag as Rtti.UTypeDesc) != Method.ReturnType))
+        //        if (Result != null && Result.Tag != null && ((Result.Tag as Rtti.TtTypeDesc) != Method.ReturnType))
         //        {
         //            var cvtTargetType = (Result.Tag as System.Type);
         //            retVar.DefType = cvtTargetType.FullName;
@@ -294,7 +294,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         //            cvtExpr.TargetType = retVar.DefType;
         //        }
         //    }
-            
+
         //    var callExpr = GetExpr_Impl(funGraph, cGen) as CallOp;
 
         //    if (retVar != null)
@@ -331,7 +331,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         //{
         //    CallOp CallExpr = new CallOp();
         //    var links = new List<UPinLinker>();
-            
+
         //    {
         //        //这里要处理Static名字获取
         //        //CallExpr.Host = selfExpr;
@@ -408,7 +408,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             if (!data.MethodDec.HasLocalVariable(paramName))
             {
                 var arg = Method.FindParameter(pin.Name);
-                var type = pin.Tag as Rtti.UTypeDesc;
+                var type = pin.Tag as Rtti.TtTypeDesc;
                 var varDec = new TtVariableDeclaration()
                 {
                     VariableType = new TtTypeReference(type),
@@ -436,7 +436,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
                         if(!data.MethodDec.HasLocalVariable(paramName))
                         {
-                            var type = outPin.Tag as Rtti.UTypeDesc;
+                            var type = outPin.Tag as Rtti.TtTypeDesc;
                             var varDec = new TtVariableDeclaration()
                             {
                                 VariableType = new TtTypeReference(type),

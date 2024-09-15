@@ -85,7 +85,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         }
         [Rtti.Meta]
         public bool IsHalfPrecision { get; set; } = false;
-        public Rtti.UTypeDesc VarType;
+        public Rtti.TtTypeDesc VarType;
         public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
         {
             if (VarType == null)
@@ -112,7 +112,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             return true;
         }
-        public static string Type2HLSLType(Rtti.UTypeDesc type, bool IsHalfPrecision)
+        public static string Type2HLSLType(Rtti.TtTypeDesc type, bool IsHalfPrecision)
         {
             if (type.IsEqual(typeof(float)))
                 return IsHalfPrecision ? "half" : "float";
@@ -159,7 +159,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
     [ContextMenu("f1,float1", "Data\\float@_serial@", UMaterialGraph.MaterialEditorKeyword)]
     public class VarDimF1 : VarNode
     {
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             return VarType;
         }
@@ -190,7 +190,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public PinOut OutX { get; set; } = new PinOut();
         public VarDimF1()
         {
-            VarType = Rtti.UTypeDescGetter<float>.TypeDesc;
+            VarType = Rtti.TtTypeDescGetter<float>.TypeDesc;
 
             //Name = $"{Value}";
 
@@ -299,7 +299,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
     [ContextMenu("i1,int1", "Data\\int@_serial@", UMaterialGraph.MaterialEditorKeyword)]
     public class VarDimI1 : VarNode
     {
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             return VarType;
         }
@@ -330,7 +330,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public PinOut OutX { get; set; } = new PinOut();
         public VarDimI1()
         {
-            VarType = Rtti.UTypeDescGetter<int>.TypeDesc;
+            VarType = Rtti.TtTypeDescGetter<int>.TypeDesc;
 
             //Name = $"{Value}";
 

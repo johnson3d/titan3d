@@ -116,7 +116,7 @@ namespace EngineNS.Bricks.NodeGraph
             where T_E : IEndPointNode, new()
         {
             var unionNode = new T_N();
-            var contentGraph = Rtti.UTypeDescManager.CreateInstance(graph.GetType()) as UNodeGraph;
+            var contentGraph = Rtti.TtTypeDescManager.CreateInstance(graph.GetType()) as UNodeGraph;
             contentGraph.Initialize();
             unionNode.ContentGraph = contentGraph;
             if (addtoGraph)
@@ -147,7 +147,7 @@ namespace EngineNS.Bricks.NodeGraph
             for (int i = 0; i < nodes.Count; i++)
             {
                 var node = nodes[i];
-                var copyedNode = Rtti.UTypeDescManager.CreateInstance(node.GetType()) as UNodeBase;
+                var copyedNode = Rtti.TtTypeDescManager.CreateInstance(node.GetType()) as UNodeBase;
                 nodes[i].CopyTo(copyedNode);
                 copyedNode.UserData = contentGraph;
                 contentGraph.SetDefaultActionForNode(copyedNode);
@@ -182,7 +182,7 @@ namespace EngineNS.Bricks.NodeGraph
                 }
                 else if (hasOutNode)
                 {
-                    var pinOut = Rtti.UTypeDescManager.CreateInstance(linker.OutPin.GetType()) as PinOut;
+                    var pinOut = Rtti.TtTypeDescManager.CreateInstance(linker.OutPin.GetType()) as PinOut;
                     linker.OutPin.CopyTo(pinOut);
                     unionNode.AddPinOut(pinOut);
                     var pinDef = UNodePinDefineBase.CreatePinDefineFromPin<T_P, PinOut>(linker.OutPin);
@@ -205,7 +205,7 @@ namespace EngineNS.Bricks.NodeGraph
                 }
                 else if (hasInNode)
                 {
-                    var pinIn = Rtti.UTypeDescManager.CreateInstance(linker.InPin.GetType()) as PinIn;
+                    var pinIn = Rtti.TtTypeDescManager.CreateInstance(linker.InPin.GetType()) as PinIn;
                     linker.InPin.CopyTo(pinIn);
                     unionNode.AddPinIn(pinIn);
                     var pinDef = UNodePinDefineBase.CreatePinDefineFromPin<T_P, PinIn>(linker.InPin);

@@ -812,7 +812,7 @@ namespace EngineNS.Bricks.CodeBuilder
         UExpressionStatementCodeGen mExpressionStatementCodeGen = new UExpressionStatementCodeGen();
         UDebuggerTryBreakCodeGen mDebuggerTryBreakCodeGen = new UDebuggerTryBreakCodeGen();
         UDebuggerSetWatchVariableCodeGen mDebuggerSetWatchVariableCodeGen = new UDebuggerSetWatchVariableCodeGen();
-        public override ICodeObjectGen GetCodeObjectGen(Rtti.UTypeDesc type)
+        public override ICodeObjectGen GetCodeObjectGen(Rtti.TtTypeDesc type)
         {
             if (type.IsEqual(typeof(TtVariableDeclaration)))
                 return mVariableDeclarationCodeGen;
@@ -875,7 +875,7 @@ namespace EngineNS.Bricks.CodeBuilder
             System.Diagnostics.Debug.Assert(false);
             return null;
         }
-        public override string GetTypeString(Rtti.UTypeDesc t)
+        public override string GetTypeString(Rtti.TtTypeDesc t)
         {
             if (t.IsEqual(typeof(float)))
                 return "float";

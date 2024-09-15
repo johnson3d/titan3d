@@ -394,7 +394,7 @@ namespace EngineNS.GamePlay
                 //System.Diagnostics.Debug.Assert(false);
                 return false;
             }
-            mesh2.Initialize(cookedMesh, materials1, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            mesh2.Initialize(cookedMesh, materials1, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             mesh2.SetWorldTransform(in node.Placement.AbsTransform, this, true);
             mesh2.IsAcceptShadow = false;
             mesh2.IsUnlit = true;

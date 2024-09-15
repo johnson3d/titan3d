@@ -15,16 +15,16 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
         public object ObjectInstance;   // 包含此属性的对象的值
 
-        //public HashSet<Rtti.UTypeDesc> Propertys
+        //public HashSet<Rtti.TtTypeDesc> Propertys
         //{
         //    get;
         //    private set;
-        //} = new HashSet<Rtti.UTypeDesc>();
-        //public HashSet<Rtti.UTypeDesc> Fields
+        //} = new HashSet<Rtti.TtTypeDesc>();
+        //public HashSet<Rtti.TtTypeDesc> Fields
         //{
         //    get;
         //    private set;
-        //} = new HashSet<Rtti.UTypeDesc>();
+        //} = new HashSet<Rtti.TtTypeDesc>();
 
         public string Name
         {
@@ -50,8 +50,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             return mDisplayName;
         }
 
-        Rtti.UTypeDesc mPropertyType;
-        public Rtti.UTypeDesc PropertyType
+        Rtti.TtTypeDesc mPropertyType;
+        public Rtti.TtTypeDesc PropertyType
         {
             get => mPropertyType;
             set { mPropertyType = value; }
@@ -133,7 +133,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             set;
         }
 
-        public Rtti.UTypeDesc DeclaringType
+        public Rtti.TtTypeDesc DeclaringType
         {
             get;
             set;
@@ -158,13 +158,13 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         {
 
         }
-        public void InitValue(object objIns, Rtti.UTypeDesc insType, PropertyDescriptor property, bool parentIsValueType)
+        public void InitValue(object objIns, Rtti.TtTypeDesc insType, PropertyDescriptor property, bool parentIsValueType)
         {
             //Propertys.Add(insType);
             Name = property.Name;
             CanCreateNew = true;
             mDisplayName = property.DisplayName;
-            mPropertyType = Rtti.UTypeDesc.TypeOf(property.PropertyType);
+            mPropertyType = Rtti.TtTypeDesc.TypeOf(property.PropertyType);
             var atts = new Attribute[property.Attributes.Count];
             property.Attributes.CopyTo(atts, 0);
             Attributes = new AttributeCollection(atts); 
@@ -192,10 +192,10 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ParentIsValueType = parentIsValueType;
             else
                 ParentIsValueType = insType.IsValueType;
-            DeclaringType = Rtti.UTypeDesc.TypeOf(property.ComponentType);
+            DeclaringType = Rtti.TtTypeDesc.TypeOf(property.ComponentType);
         }
 
-        public void InitValue(object objIns, Rtti.UTypeDesc insType, System.Reflection.FieldInfo field, bool parentIsValueType)
+        public void InitValue(object objIns, Rtti.TtTypeDesc insType, System.Reflection.FieldInfo field, bool parentIsValueType)
         {
             //Fields.Add(insType);
             Name = field.Name;
@@ -203,7 +203,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var disNameAtt = field.GetCustomAttributes(typeof(DisplayNameAttribute), true);
             if (disNameAtt != null && disNameAtt.Length > 0)
                 mDisplayName = ((DisplayNameAttribute)disNameAtt[0]).DisplayName;
-            mPropertyType = Rtti.UTypeDesc.TypeOf(field.FieldType);
+            mPropertyType = Rtti.TtTypeDesc.TypeOf(field.FieldType);
             var browsableAtt = field.GetCustomAttributes(typeof(BrowsableAttribute), true);
             if (browsableAtt != null && browsableAtt.Length > 0)
                 IsBrowsable = ((BrowsableAttribute)browsableAtt[0]).Browsable;
@@ -251,7 +251,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 ParentIsValueType = parentIsValueType;
             else
                 ParentIsValueType = insType.IsValueType;
-            DeclaringType = Rtti.UTypeDesc.TypeOf(field.DeclaringType);
+            DeclaringType = Rtti.TtTypeDesc.TypeOf(field.DeclaringType);
         }
 
         public override bool Equals(object obj)
@@ -1053,7 +1053,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
         }
 
-        public void InitValue(object objIns, Rtti.UTypeDesc ins, PropertyDescriptorCollection collection, bool parentIsValueType)
+        public void InitValue(object objIns, Rtti.TtTypeDesc ins, PropertyDescriptorCollection collection, bool parentIsValueType)
         {
             Cleanup();
 
@@ -1089,7 +1089,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
             Count = count;
         }
-        public void InitValue(object objIns, Rtti.UTypeDesc ins, System.Reflection.FieldInfo[] fields, bool parentIsValueType)
+        public void InitValue(object objIns, Rtti.TtTypeDesc ins, System.Reflection.FieldInfo[] fields, bool parentIsValueType)
         {
             Cleanup();
 
@@ -1275,7 +1275,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                         var att = objType.GetCustomAttribute(typeof(PGNoCategoryAttribute));
                         if (att != null)
                             withCategoryGroup = false;
-                        var objTypeDesc = Rtti.UTypeDesc.TypeOf(objType);
+                        var objTypeDesc = Rtti.TtTypeDesc.TypeOf(objType);
                         PropertyDescriptorCollection pros;
                         var tc = TypeDescriptor.GetConverter(objIns);
                         var tempProperties = PropertyDescCollectionPool.QueryObjectSync();
@@ -1355,7 +1355,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     var att = insType.GetCustomAttribute(typeof(PGNoCategoryAttribute));
                     if (att != null)
                         withCategoryGroup = false;
-                    var insTypeDesc = Rtti.UTypeDesc.TypeOf(insType);
+                    var insTypeDesc = Rtti.TtTypeDesc.TypeOf(insType);
                     PropertyDescriptorCollection pros;
                     var tc = TypeDescriptor.GetConverter(instance);
                     properties = PropertyDescCollectionPool.QueryObjectSync();

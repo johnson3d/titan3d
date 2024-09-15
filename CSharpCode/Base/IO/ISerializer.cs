@@ -121,7 +121,7 @@ namespace EngineNS.IO
             {
                 throw new Exception($"MetaVersion lost:{versionHash}");
             }
-            obj = Rtti.UTypeDescManager.CreateInstance(meta.ClassType) as ISerializer;
+            obj = Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as ISerializer;
             obj.OnPreRead(ar.Tag, hostObject, false);
             return Read(ar, obj, metaVersion);
         }
@@ -132,7 +132,7 @@ namespace EngineNS.IO
                 Write(ar, null, null);
                 return;
             }
-            var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(obj.GetType());
+            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(obj.GetType());
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
             Write(ar, obj, meta.CurrentVersion);
         }
@@ -155,7 +155,7 @@ namespace EngineNS.IO
 #if UseSerializerCodeGen
             var srName = metaVersion.HostClass.ClassType.SystemType.FullName.Replace("+", "_CIC_") + "_Serializer";
             //Type.GetType(utilityReader)
-            var utilityReader = Rtti.UTypeDesc.TypeOfFullName(srName);
+            var utilityReader = Rtti.TtTypeDesc.TypeOfFullName(srName);
             if(utilityReader!=null)
             {
                 var call = utilityReader.SystemType.GetField($"mfn_Read_{metaVersion.MetaHash}", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
@@ -184,7 +184,7 @@ namespace EngineNS.IO
                 
                 if (value != null && i.PropInfo != null)
                 {
-                    if (Rtti.UTypeDesc.CanCast(value.GetType(), i.PropInfo.PropertyType) == false)
+                    if (Rtti.TtTypeDesc.CanCast(value.GetType(), i.PropInfo.PropertyType) == false)
                     {
                         Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"ProperySet {i.PropertyName}: {value.GetType().FullName}!={i.PropInfo.PropertyType.FullName}");
                         continue;
@@ -223,7 +223,7 @@ namespace EngineNS.IO
                 return true;
             }
             ar.Write(isNull);
-            var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(obj.GetType());
+            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(obj.GetType());
             if (metaVersion == null)
             {
                 var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
@@ -336,10 +336,10 @@ namespace EngineNS.IO
                     ar.Write(v.Name);
                 }
             }
-            else if(t == typeof(Rtti.UTypeDesc))
+            else if(t == typeof(Rtti.TtTypeDesc))
             {
                 ar.Write(isNull);
-                var v = (Rtti.UTypeDesc)obj;
+                var v = (Rtti.TtTypeDesc)obj;
                 if(v == null)
                 {
                     ar.Write(true);
@@ -347,7 +347,7 @@ namespace EngineNS.IO
                 else
                 {
                     ar.Write(false);
-                    var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(v);
+                    var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(v);
                     ar.Write(typeStr);
                 }
             }
@@ -365,7 +365,7 @@ namespace EngineNS.IO
                 ar.Write(lst.Count);
                 if (elemType.IsValueType)
                 {
-                    var elemTypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(elemType);
+                    var elemTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(elemType);
                     ar.Write(elemTypeStr);
                     var offset = WriteSkippable(ar);
                     for (int j = 0; j < lst.Count; j++)
@@ -380,7 +380,7 @@ namespace EngineNS.IO
                     for (int j = 0; j < lst.Count; j++)
                     {
                         var e = lst[j];
-                        var elemTypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(e.GetType());
+                        var elemTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(e.GetType());
                         ar.Write(elemTypeStr);
                         var offset = WriteSkippable(ar);
                         WriteObject(ar, e.GetType(), e);
@@ -401,9 +401,9 @@ namespace EngineNS.IO
                 ar.Write(lst.Count);
                 if (isKeyValueType && isValueValueType)
                 {
-                    var elemKeyTypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(elemKeyType);
+                    var elemKeyTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(elemKeyType);
                     ar.Write(elemKeyTypeStr);
-                    var elemValueTypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(elemValueType);
+                    var elemValueTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(elemValueType);
                     ar.Write(elemValueTypeStr);
                     var offset = WriteSkippable(ar);
                     System.Collections.IDictionaryEnumerator j = lst.GetEnumerator();
@@ -417,12 +417,12 @@ namespace EngineNS.IO
                 else if (isKeyValueType && !isValueValueType)
                 {
                     System.Collections.IDictionaryEnumerator j = lst.GetEnumerator();
-                    var elemKeyTypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(elemKeyType);
+                    var elemKeyTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(elemKeyType);
                     ar.Write(elemKeyTypeStr);
                     var offset = WriteSkippable(ar);
                     while (j.MoveNext())
                     {
-                        var elemValueTypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(elemValueType);
+                        var elemValueTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(elemValueType);
                         ar.Write(elemValueTypeStr);
                         var offset1 = WriteSkippable(ar);
                         WriteObject(ar, elemKeyType, j.Key);
@@ -434,12 +434,12 @@ namespace EngineNS.IO
                 else if (!isKeyValueType && isValueValueType)
                 {
                     System.Collections.IDictionaryEnumerator j = lst.GetEnumerator();
-                    var elemValueTypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(elemValueType);
+                    var elemValueTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(elemValueType);
                     ar.Write(elemValueTypeStr);
                     var offset = WriteSkippable(ar);
                     while (j.MoveNext())
                     {
-                        var elemKeyTypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(elemKeyType);
+                        var elemKeyTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(elemKeyType);
                         ar.Write(elemKeyTypeStr);
                         var offset1 = WriteSkippable(ar);
                         WriteObject(ar, elemKeyType, j.Key);
@@ -453,9 +453,9 @@ namespace EngineNS.IO
                     System.Collections.IDictionaryEnumerator j = lst.GetEnumerator();
                     while (j.MoveNext())
                     {
-                        var elemValueTypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(elemValueType);
+                        var elemValueTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(elemValueType);
                         ar.Write(elemValueTypeStr);
-                        var elemKeyTypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(elemKeyType);
+                        var elemKeyTypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(elemKeyType);
                         ar.Write(elemKeyTypeStr);
                         var offset = WriteSkippable(ar);
                         WriteObject(ar, elemKeyType, j.Key);
@@ -469,7 +469,7 @@ namespace EngineNS.IO
                 // 无法存盘默认null
                 ar.Write(true);
 
-                var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(t);
+                var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(t);
                 var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
             }
         }
@@ -494,10 +494,10 @@ namespace EngineNS.IO
                 unsafe
                 {
                     var size = System.Runtime.InteropServices.Marshal.SizeOf(t);
-                    var attrs = t.GetCustomAttributes(typeof(Rtti.UStructAttrubte), false);
+                    var attrs = t.GetCustomAttributes(typeof(Rtti.TtStructAttrubte), false);
                     if(attrs.Length>0)
                     {
-                        size = (attrs[0] as Rtti.UStructAttrubte).ReadSize;
+                        size = (attrs[0] as Rtti.TtStructAttrubte).ReadSize;
                     }                    
                     var pBuffer = stackalloc byte[size];
                     ar.ReadPtr(pBuffer, size);
@@ -532,7 +532,7 @@ namespace EngineNS.IO
                     return null;
                 }
             }
-            else if(t == typeof(Rtti.UTypeDesc))
+            else if(t == typeof(Rtti.TtTypeDesc))
             {
                 bool isNull;
                 ar.Read(out isNull);
@@ -540,7 +540,7 @@ namespace EngineNS.IO
                 {
                     string typeStr;
                     ar.Read(out typeStr);
-                    return Rtti.UTypeDesc.TypeOf(typeStr);
+                    return Rtti.TtTypeDesc.TypeOf(typeStr);
                 }
                 return null;
             }
@@ -578,7 +578,7 @@ namespace EngineNS.IO
                 Rtti.TtMetaVersion metaVersion;
                 if (meta != null && (metaVersion = meta.GetMetaVersion(versionHash)) != null)
                 {
-                    var obj = Rtti.UTypeDescManager.CreateInstance(meta.ClassType) as ISerializer;
+                    var obj = Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as ISerializer;
                     obj.OnPreRead(ar.Tag, hostObject, false);
                     Read(ar, obj, metaVersion);
                     return obj;
@@ -591,7 +591,7 @@ namespace EngineNS.IO
             }            
             else if (t.GetInterface(nameof(System.Collections.IList)) != null)
             {
-                var lst = Rtti.UTypeDescManager.CreateInstance(t) as System.Collections.IList;
+                var lst = Rtti.TtTypeDescManager.CreateInstance(t) as System.Collections.IList;
                 bool isValueType;
                 ar.Read(out isValueType);
                 int count = 0;
@@ -603,7 +603,7 @@ namespace EngineNS.IO
                     var skipPoint = GetSkipOffset(ar);
                     try
                     {
-                        var elemType = Rtti.UTypeDesc.TypeOf(elemTypeStr).SystemType;
+                        var elemType = Rtti.TtTypeDesc.TypeOf(elemTypeStr).SystemType;
                         if (elemType == null)
                         {
                             throw new IOException($"Read List: {elemTypeStr} is missing");
@@ -629,7 +629,7 @@ namespace EngineNS.IO
                         var skipPoint = GetSkipOffset(ar);
                         try
                         {
-                            var elemType = Rtti.UTypeDesc.TypeOf(elemTypeStr).SystemType;
+                            var elemType = Rtti.TtTypeDesc.TypeOf(elemTypeStr).SystemType;
                             if (elemType == null)
                             {
                                 throw new IOException($"Read List: {elemTypeStr} is missing");
@@ -648,7 +648,7 @@ namespace EngineNS.IO
             }
             else if (t.GetInterface(nameof(System.Collections.IDictionary)) != null)
             {
-                var lst = Rtti.UTypeDescManager.CreateInstance(t) as System.Collections.IDictionary;
+                var lst = Rtti.TtTypeDescManager.CreateInstance(t) as System.Collections.IDictionary;
                 bool isKeyValueType;
                 bool isValueValueType;
                 ar.Read(out isKeyValueType);
@@ -665,10 +665,10 @@ namespace EngineNS.IO
                     var skipPoint = GetSkipOffset(ar);
                     try
                     {
-                        var elemKeyType = Rtti.UTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
+                        var elemKeyType = Rtti.TtTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
                         if (elemKeyType == null)
                             throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
-                        var elemValueType = Rtti.UTypeDesc.TypeOf(elemValueTypeStr).SystemType;
+                        var elemValueType = Rtti.TtTypeDesc.TypeOf(elemValueTypeStr).SystemType;
                         if (elemValueType == null)
                             throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
                         for (int i = 0; i < count; i++)
@@ -691,7 +691,7 @@ namespace EngineNS.IO
                     var skipPoint = GetSkipOffset(ar);
                     try
                     {
-                        var elemKeyType = Rtti.UTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
+                        var elemKeyType = Rtti.TtTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
                         if (elemKeyType == null)
                             throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
                         for (int i = 0; i < count; i++)
@@ -699,7 +699,7 @@ namespace EngineNS.IO
                             string elemValueTypeStr;
                             ar.Read(out elemValueTypeStr);
                             var skipPoint1 = GetSkipOffset(ar);
-                            var elemValueType = Rtti.UTypeDesc.TypeOf(elemValueTypeStr).SystemType;
+                            var elemValueType = Rtti.TtTypeDesc.TypeOf(elemValueTypeStr).SystemType;
                             if (elemValueType == null)
                                 throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
                             try
@@ -728,7 +728,7 @@ namespace EngineNS.IO
                     var skipPoint = GetSkipOffset(ar);
                     try
                     {
-                        var elemValueType = Rtti.UTypeDesc.TypeOf(elemValueTypeStr).SystemType;
+                        var elemValueType = Rtti.TtTypeDesc.TypeOf(elemValueTypeStr).SystemType;
                         if (elemValueType == null)
                             throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
 
@@ -739,7 +739,7 @@ namespace EngineNS.IO
                             var skipPoint1 = GetSkipOffset(ar);
                             try
                             {
-                                var elemKeyType = Rtti.UTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
+                                var elemKeyType = Rtti.TtTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
                                 if (elemKeyType == null)
                                     throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
                                 var key = ReadObject(ar, elemKeyType, hostObject);
@@ -768,12 +768,12 @@ namespace EngineNS.IO
                         var skipPoint = GetSkipOffset(ar);
                         try
                         {
-                            var elemKeyType = Rtti.UTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
+                            var elemKeyType = Rtti.TtTypeDesc.TypeOf(elemKeyTypeStr).SystemType;
                             if (elemKeyType == null)
                                 throw new IOException($"Read Dictionary: KeyType {elemKeyType} is missing");
                             string elemValueTypeStr;
                             ar.Read(out elemValueTypeStr);
-                            var elemValueType = Rtti.UTypeDesc.TypeOf(elemValueTypeStr).SystemType;
+                            var elemValueType = Rtti.TtTypeDesc.TypeOf(elemValueTypeStr).SystemType;
                             if (elemValueType == null)
                                 throw new IOException($"Read Dictionary: ValueType {elemValueType} is missing");
                             var key = ReadObject(ar, elemKeyType, hostObject);
@@ -791,7 +791,7 @@ namespace EngineNS.IO
             }
             else
             {
-                var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(t);
+                var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(t);
                 var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
             }
             return null;
@@ -801,7 +801,7 @@ namespace EngineNS.IO
         {
             if (obj == null)
                 return false;
-            var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(obj.GetType());
+            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(obj.GetType());
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
 
             if (meta.MetaAttribute == null && obj.GetType().GetInterface(nameof(IO.ISerializer)) == null)
@@ -813,9 +813,9 @@ namespace EngineNS.IO
                     attr.Value = $"{rn.RNameType},{rn.Name},{rn.AssetId}";
                     node.Attributes.Append(attr);
                 }
-                else if (obj.GetType() == typeof(Rtti.UTypeDesc))
+                else if (obj.GetType() == typeof(Rtti.TtTypeDesc))
                 {
-                    var rn = obj as Rtti.UTypeDesc;
+                    var rn = obj as Rtti.TtTypeDesc;
                     var attr = xml.CreateAttribute($"Value");
                     attr.Value = rn.TypeString;
                     node.Attributes.Append(attr);
@@ -845,7 +845,7 @@ namespace EngineNS.IO
                 var prop = xml.CreateElement($"{i.PropertyName}", xml.NamespaceURI);
                 var attr = xml.CreateAttribute($"Type");
                 //attr.Value = i.FieldTypeStr;
-                attr.Value = Rtti.UTypeDesc.TypeOf(fv.GetType()).TypeString;
+                attr.Value = Rtti.TtTypeDesc.TypeOf(fv.GetType()).TypeString;
                 prop.Attributes.Append(attr);
 
                 if (i.PropInfo.PropertyType.IsValueType || i.PropInfo.PropertyType == typeof(string))
@@ -921,7 +921,7 @@ namespace EngineNS.IO
                 obj = Support.TConvert.ToObject(obj.GetType(), node.GetAttribute("Value"));
                 return;
             }
-            var typeDesc = Rtti.UTypeDesc.TypeOf(thisTypeStr);
+            var typeDesc = Rtti.TtTypeDesc.TypeOf(thisTypeStr);
             if (typeDesc == null)
             {
                 if (hostObject != null)
@@ -936,7 +936,7 @@ namespace EngineNS.IO
             if (obj == null && thisType == null)
                 return;
             if (obj == null)
-                obj = Rtti.UTypeDescManager.CreateInstance(thisType);            
+                obj = Rtti.TtTypeDescManager.CreateInstance(thisType);            
             (obj as ISerializer)?.OnPreRead(paramObject, hostObject, true);
             foreach (System.Xml.XmlElement i in node.ChildNodes)
             {
@@ -951,14 +951,14 @@ namespace EngineNS.IO
                 object readOnlyObject = null;
                 if (prop.PropertyType == typeof(object))
                 {
-                    if (typeAttr == Rtti.UTypeDescGetter<Rtti.UTypeDesc>.TypeDesc.TypeString)
+                    if (typeAttr == Rtti.TtTypeDescGetter<Rtti.TtTypeDesc>.TypeDesc.TypeString)
                     {
                         var valueAttr = i.GetAttribute("Value");
                         if (string.IsNullOrEmpty(valueAttr))
                         {
                             continue;
                         }
-                        var v = Rtti.UTypeDesc.TypeOf(valueAttr);
+                        var v = Rtti.TtTypeDesc.TypeOf(valueAttr);
                         if (prop.CanWrite)
                             prop.SetValue(obj, v);
                         continue;
@@ -982,14 +982,14 @@ namespace EngineNS.IO
                         prop.SetValue(obj, v);
                     continue;
                 }
-                else if (prop.PropertyType == typeof(Rtti.UTypeDesc))
+                else if (prop.PropertyType == typeof(Rtti.TtTypeDesc))
                 {
                     var valueAttr = i.GetAttribute("Value");
                     if (string.IsNullOrEmpty(valueAttr))
                     {
                         continue;
                     }
-                    var v = Rtti.UTypeDesc.TypeOf(valueAttr);
+                    var v = Rtti.TtTypeDesc.TypeOf(valueAttr);
                     if (prop.CanWrite)
                         prop.SetValue(obj, v);
                     continue;
@@ -1025,14 +1025,14 @@ namespace EngineNS.IO
                         continue;
                     var lst = readOnlyObject as System.Collections.IList;
                     if (lst == null)
-                        lst = Rtti.UTypeDescManager.CreateInstance(type) as System.Collections.IList;
+                        lst = Rtti.TtTypeDescManager.CreateInstance(type) as System.Collections.IList;
                     foreach (System.Xml.XmlElement j in i.ChildNodes)
                     {
                         var keyType = type.GetGenericArguments()[0];
                         typeAttr = j.GetAttribute("Type");
                         if (!string.IsNullOrEmpty(typeAttr))
                         {
-                            var elemType = Rtti.UTypeDesc.TypeOf(typeAttr)?.SystemType;
+                            var elemType = Rtti.TtTypeDesc.TypeOf(typeAttr)?.SystemType;
                             if (elemType != null)
                                 keyType = elemType;
                         }
@@ -1059,7 +1059,7 @@ namespace EngineNS.IO
                             }
                             else
                             {
-                                e = Rtti.UTypeDescManager.CreateInstance(keyType);
+                                e = Rtti.TtTypeDescManager.CreateInstance(keyType);
                                 ReadObjectMetaFields(paramObject, j, ref e, obj);
                             }
                         }
@@ -1076,7 +1076,7 @@ namespace EngineNS.IO
 
                     var dict = readOnlyObject as System.Collections.IDictionary;
                     if (dict == null)
-                        dict = Rtti.UTypeDescManager.CreateInstance(type) as System.Collections.IDictionary;
+                        dict = Rtti.TtTypeDescManager.CreateInstance(type) as System.Collections.IDictionary;
                     foreach (System.Xml.XmlElement j in i.ChildNodes)
                     {
                         if (j.ChildNodes.Count != 2)
@@ -1088,7 +1088,7 @@ namespace EngineNS.IO
                         typeAttr = key.GetAttribute("Type");
                         if (!string.IsNullOrEmpty(typeAttr))
                         {
-                            var kt = Rtti.UTypeDesc.TypeOf(typeAttr).SystemType;
+                            var kt = Rtti.TtTypeDesc.TypeOf(typeAttr).SystemType;
                             if (kt != null)
                                 keyType = kt;
                         }
@@ -1112,7 +1112,7 @@ namespace EngineNS.IO
                         }
                         else
                         {
-                            keyValue = Rtti.UTypeDescManager.CreateInstance(keyType);
+                            keyValue = Rtti.TtTypeDescManager.CreateInstance(keyType);
                             ReadObjectMetaFields(paramObject, key, ref keyValue, obj);
                         }
 
@@ -1120,7 +1120,7 @@ namespace EngineNS.IO
                         typeAttr = value.GetAttribute("Type");
                         if (!string.IsNullOrEmpty(typeAttr))
                         {
-                            var kt = Rtti.UTypeDesc.TypeOf(typeAttr).SystemType;
+                            var kt = Rtti.TtTypeDesc.TypeOf(typeAttr).SystemType;
                             if (kt != null)
                                 valueType = kt;
                         }
@@ -1144,7 +1144,7 @@ namespace EngineNS.IO
                         }
                         else
                         {
-                            valueValue = Rtti.UTypeDescManager.CreateInstance(valueType);
+                            valueValue = Rtti.TtTypeDescManager.CreateInstance(valueType);
                             ReadObjectMetaFields(paramObject, value, ref valueValue, obj);
                         }
 
@@ -1156,12 +1156,12 @@ namespace EngineNS.IO
                 }
                 else
                 {
-                    var tempType = Rtti.UTypeDescManager.Instance.GetTypeFromString(typeAttr);
+                    var tempType = Rtti.TtTypeDescManager.Instance.GetTypeFromString(typeAttr);
                     if (tempType != null)
                         type = tempType;
                     var subObject = readOnlyObject;
                     if (subObject == null)
-                        subObject = Rtti.UTypeDescManager.CreateInstance(type);
+                        subObject = Rtti.TtTypeDescManager.CreateInstance(type);
                     ReadObjectMetaFields(paramObject, i, ref subObject, obj);
                     if (prop.CanWrite)
                         prop.SetValue(obj, subObject);

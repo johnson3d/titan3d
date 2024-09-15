@@ -58,7 +58,7 @@ namespace EngineNS.GamePlay.Scene
             if (skyData == null)
             {
                 skyData = new TtSkyNodeData();
-                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDescGetter<TtSkyNodeData>.TypeDesc);
+                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDescGetter<TtSkyNodeData>.TypeDesc);
                 meta.CopyObjectMetaField(skyData, data);
                 skyData.SunMaterialName = RName.GetRName("material/default_sun.uminst", RName.ERNameType.Engine);
                 data = skyData;
@@ -73,7 +73,7 @@ namespace EngineNS.GamePlay.Scene
             var rectMesh = rect.ToMesh();
             var materials = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
             materials[0] = SunMaterial;
-            SunMesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            SunMesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             SunMesh.UserShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Shader.CommanShading.UDrawViewportShading>();
             return true;
         }

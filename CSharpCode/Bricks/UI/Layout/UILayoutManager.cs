@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.UI.Layout
 {
-    internal class TtUILayoutManager : UModule<TtEngine>
+    internal class TtUILayoutManager : TtModule<TtEngine>
     {
         // 在极端情况下（内存溢出等），树的强制刷新包含该元素
         private UI.Controls.TtUIElement mForceLayoutElement;

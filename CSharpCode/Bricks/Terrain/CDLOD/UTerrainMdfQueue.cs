@@ -61,7 +61,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
 
         }
-        public class UMdfShaderBinder : Graphics.Pipeline.UCoreShaderBinder.UShaderResourceIndexer
+        public class UMdfShaderBinder : Graphics.Pipeline.TtCoreShaderBinder.UShaderResourceIndexer
         {
             public void Init(NxRHI.TtShaderEffect effect)
             {

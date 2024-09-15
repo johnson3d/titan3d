@@ -16,7 +16,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
     {
         public TtAnimStateTransitionClassDescription() 
         {
-            CheckConditionMethodDescription = new TtTransitionCheckConditionMethodDescription(UTypeDesc.TypeOf<TtAnimStateMachineContext>())
+            CheckConditionMethodDescription = new TtTransitionCheckConditionMethodDescription(TtTypeDesc.TypeOf<TtAnimStateMachineContext>())
             {
                 Parent = this,
             };

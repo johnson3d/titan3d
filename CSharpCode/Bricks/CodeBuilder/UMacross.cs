@@ -101,8 +101,8 @@ namespace EngineNS.Bricks.CodeBuilder
 
         public class MacrossCreateAttribute : IO.CommonCreateAttribute
         {
-            UTypeDesc mSelectedType = null;
-            public override async Thread.Async.TtTask DoCreate(RName dir, UTypeDesc type, string ext)
+            TtTypeDesc mSelectedType = null;
+            public override async Thread.Async.TtTask DoCreate(RName dir, TtTypeDesc type, string ext)
             {
                 await base.DoCreate(dir, type, ext);
                 mSelectedType = null;
@@ -156,7 +156,7 @@ namespace EngineNS.Bricks.CodeBuilder
                             ImGuiAPI.SetKeyboardFocusHere(0);
                         searchBar.OnDraw(in comboDrawList, in Support.TtAnyPointer.Default);
                         bool bSelected = true;
-                        foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
+                        foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
                         {
                             foreach (var type in service.Types.Values)
                             {
@@ -298,7 +298,7 @@ namespace EngineNS.Bricks.CodeBuilder
             //}
         }
 
-        public UTypeDesc SelectedType = null;
+        public TtTypeDesc SelectedType = null;
         public MacrossNode.UMacrossEditor MacrossEditor = null;
         public void SaveAssetTo(RName name)
         {

@@ -15,10 +15,10 @@ namespace EngineNS.UI
 {
     public partial class TtUIManager
     {
-        Dictionary<Rtti.UTypeDesc, TtObjectPool<Timeline>> mTimelinePoolDic = new Dictionary<Rtti.UTypeDesc, TtObjectPool<Timeline>>();
+        Dictionary<Rtti.TtTypeDesc, TtObjectPool<Timeline>> mTimelinePoolDic = new Dictionary<Rtti.TtTypeDesc, TtObjectPool<Timeline>>();
         List<Timeline> mActivedTimelines = new List<Timeline>();
 
-        public Timeline QueryTimelineSync(Rtti.UTypeDesc type)
+        public Timeline QueryTimelineSync(Rtti.TtTypeDesc type)
         {
             TtObjectPool<Timeline> pool;
             if(!mTimelinePoolDic.TryGetValue(type, out pool))
@@ -31,7 +31,7 @@ namespace EngineNS.UI
         public void ReleaseEventSync(Timeline timeline)
         {
             TtObjectPool<Timeline> pool;
-            if(mTimelinePoolDic.TryGetValue(Rtti.UTypeDesc.TypeOf(timeline.GetType()), out pool))
+            if(mTimelinePoolDic.TryGetValue(Rtti.TtTypeDesc.TypeOf(timeline.GetType()), out pool))
             {
                 pool.ReleaseObject(timeline);
                 timeline.Reset();

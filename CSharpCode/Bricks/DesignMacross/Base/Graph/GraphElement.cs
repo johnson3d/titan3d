@@ -198,30 +198,30 @@ namespace EngineNS.DesignMacross.Base.Graph
     public class TtDescriptionGraphElementsPoolManager
     {
         public static TtDescriptionGraphElementsPoolManager Instance { get; } = new TtDescriptionGraphElementsPoolManager();
-        protected Dictionary<UTypeDesc, TtDescriptionGraphElementsPool> ElementsPools = new Dictionary<UTypeDesc, TtDescriptionGraphElementsPool>();
-        //public IGraphElement GetDescriptionGraphElement(UTypeDesc type, IDescription description, IGraphElementStyle elementStyle)
+        protected Dictionary<TtTypeDesc, TtDescriptionGraphElementsPool> ElementsPools = new Dictionary<TtTypeDesc, TtDescriptionGraphElementsPool>();
+        //public IGraphElement GetDescriptionGraphElement(TtTypeDesc type, IDescription description, IGraphElementStyle elementStyle)
         //{
         //    if (!ElementsPools.ContainsKey(type))
         //    {
         //        ElementsPools.Add(type, new TtDescriptionGraphElementsPool(type));
         //    }
         //    var result = ElementsPools[type].Get(description, elementStyle);
-        //    Debug.Assert(UTypeDesc.TypeOf(result.GetType()) == type);
+        //    Debug.Assert(TtTypeDesc.TypeOf(result.GetType()) == type);
         //    return result;
         //}
-        public IDescriptionGraphElement GetDescriptionGraphElement(UTypeDesc type, IDescription description, IGraphElementStyle elementStyle)
+        public IDescriptionGraphElement GetDescriptionGraphElement(TtTypeDesc type, IDescription description, IGraphElementStyle elementStyle)
         {
             if (!ElementsPools.ContainsKey(type))
             {
                 ElementsPools.Add(type, new TtDescriptionGraphElementsPool(type));
             }
             var result = ElementsPools[type].Get(description, elementStyle) as IDescriptionGraphElement;
-            Debug.Assert(UTypeDesc.TypeOf(result.GetType()) == type);
+            Debug.Assert(TtTypeDesc.TypeOf(result.GetType()) == type);
             return result;
         }
         public void Return(IGraphElement graphElement)
         {
-            var elementType = UTypeDesc.TypeOf(graphElement.GetType());
+            var elementType = TtTypeDesc.TypeOf(graphElement.GetType());
             if (ElementsPools.ContainsKey(elementType))
             {
                 ElementsPools[elementType].Return(graphElement);
@@ -232,8 +232,8 @@ namespace EngineNS.DesignMacross.Base.Graph
     public class TtDescriptionGraphElementsPool
     {
         Stack<IGraphElement> mPool = new Stack<IGraphElement>();
-        UTypeDesc ElementType;
-        public TtDescriptionGraphElementsPool(UTypeDesc type)
+        TtTypeDesc ElementType;
+        public TtDescriptionGraphElementsPool(TtTypeDesc type)
         {
             ElementType = type;
         }
@@ -256,11 +256,11 @@ namespace EngineNS.DesignMacross.Base.Graph
         } = 0;
         protected IGraphElement Create(IDescription description, IGraphElementStyle elementStyle)
         {
-            return UTypeDescManager.CreateInstance(ElementType, new object[] { description, elementStyle }) as IGraphElement;
+            return TtTypeDescManager.CreateInstance(ElementType, new object[] { description, elementStyle }) as IGraphElement;
         }
         protected IGraphElement Create(IGraphElementStyle elementStyle)
         {
-            return UTypeDescManager.CreateInstance(ElementType, new object[] { elementStyle }) as IGraphElement;
+            return TtTypeDescManager.CreateInstance(ElementType, new object[] { elementStyle }) as IGraphElement;
         }
         public IGraphElement Get(IDescription description, IGraphElementStyle elementStyle)
         {

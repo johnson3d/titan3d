@@ -20,7 +20,7 @@ namespace EngineNS.Bricks.Particle
         {
             public TtNebulaNodeData()
             {
-                this.MdfQueueType = Rtti.UTypeDesc.TypeStr(typeof(TtParticleMdfQueue));
+                this.MdfQueueType = Rtti.TtTypeDesc.TypeStr(typeof(TtParticleMdfQueue));
             }
             public TtNebulaParticle NebulaParticle = null;
             [Rtti.Meta]

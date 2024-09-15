@@ -310,7 +310,7 @@ namespace EngineNS.Graphics.Mesh
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public partial class UGfxDevice
+    public partial class TtGfxDevice
     {
         public Bricks.GpuDriven.TtClusteredMeshManager ClusteredMeshManager { get; } = new Bricks.GpuDriven.TtClusteredMeshManager();
     }

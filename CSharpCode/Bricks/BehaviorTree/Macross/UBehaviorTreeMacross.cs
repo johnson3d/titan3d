@@ -71,8 +71,8 @@ namespace EngineNS.BehaviorTree.Macross
         public const string MacrossEditorKeyword = "BehaviorTreeMacross";
         public class BehaviorTreeMacrossCreateAttribute : IO.CommonCreateAttribute
         {
-            UTypeDesc mSelectedType = null;
-            public override async Thread.Async.TtTask DoCreate(RName dir, UTypeDesc type, string ext)
+            TtTypeDesc mSelectedType = null;
+            public override async Thread.Async.TtTask DoCreate(RName dir, TtTypeDesc type, string ext)
             {
                 await base.DoCreate(dir, type, ext);
                 mSelectedType = null;
@@ -126,7 +126,7 @@ namespace EngineNS.BehaviorTree.Macross
                             ImGuiAPI.SetKeyboardFocusHere(0);
                         searchBar.OnDraw(in comboDrawList, in Support.TtAnyPointer.Default);
                         bool bSelected = true;
-                        foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
+                        foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
                         {
                             foreach (var type in service.Types.Values)
                             {
@@ -210,7 +210,7 @@ namespace EngineNS.BehaviorTree.Macross
             return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
 
-        UTypeDesc mSelectedType = null;
+        TtTypeDesc mSelectedType = null;
         public UBehaviorTreeMacrossEditor BehaviorTreeMacrossEditor = null;
         public void SaveAssetTo(RName name)
         {

@@ -170,7 +170,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.SubState{
                          (TtMenuItem item, object sender) =>
                          {
                              var popMenu = sender as TtPopupMenu;
-                             if (Rtti.UTypeDescManager.CreateInstance(type.TypeDesc) is TtTimedStateAttachmentClassDescription attachment)
+                             if (Rtti.TtTypeDescManager.CreateInstance(type.TypeDesc) is TtTimedStateAttachmentClassDescription attachment)
                              {
                                  attachment.Name = GetValidAttachmenName(attachment.Name);
                                  TimedSubStateClassDescription.AddAttachment(attachment);

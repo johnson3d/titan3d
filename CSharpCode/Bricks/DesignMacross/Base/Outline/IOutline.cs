@@ -7,28 +7,28 @@ namespace EngineNS.DesignMacross.Base.Outline
 {
     public class OutlineElement_LeafAttribute : Attribute
     {
-        public UTypeDesc ClassType { get; set; }
+        public TtTypeDesc ClassType { get; set; }
         public OutlineElement_LeafAttribute(Type type)
         {
-            ClassType = UTypeDesc.TypeOf(type);
+            ClassType = TtTypeDesc.TypeOf(type);
         }
     }
     public class OutlineElement_ListAttribute : Attribute
     {
-        public UTypeDesc ClassType { get; set; }
+        public TtTypeDesc ClassType { get; set; }
         public bool IsHideTitle { get; set; }
         public OutlineElement_ListAttribute(Type type, bool isHideTitle = false)
         {
-            ClassType = UTypeDesc.TypeOf(type);
+            ClassType = TtTypeDesc.TypeOf(type);
             IsHideTitle = isHideTitle;
         }
     }
     public class OutlineElement_BranchAttribute : Attribute
     {
-        public UTypeDesc ClassType { get; set; }
+        public TtTypeDesc ClassType { get; set; }
         public OutlineElement_BranchAttribute(Type type)
         {
-            ClassType = UTypeDesc.TypeOf(type);
+            ClassType = TtTypeDesc.TypeOf(type);
         }
     }
     public interface IOutlilneElementDraggable

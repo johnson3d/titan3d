@@ -50,7 +50,7 @@ namespace EngineNS.UTest
                         var ut = attrs[0] as UTestAttribute;
                         if (ut.Enable == false)
                             continue;
-                        var obj = Rtti.UTypeDescManager.CreateInstance(j);
+                        var obj = Rtti.TtTypeDescManager.CreateInstance(j);
                         var mtd = j.GetMethod("UnitTestEntrance");
                         if (mtd != null)
                         {

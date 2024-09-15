@@ -143,7 +143,7 @@ namespace EngineNS.Bricks.Collision.DDA
             var rectMesh = rect.ToMesh();
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = material;
-            VxDebugMesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfInstanceStaticMesh>.TypeDesc);
+            VxDebugMesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfInstanceStaticMesh>.TypeDesc);
             VxDebugMesh.MdfQueue.MdfDatas = this;
 
             var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, world.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), VxDebugMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
@@ -212,7 +212,7 @@ namespace EngineNS.Bricks.Collision.DDA
                 var sphereDebugMesh = new Graphics.Mesh.TtMesh();
                 var sphere = Graphics.Mesh.UMeshDataProvider.MakeSphere(0.3f, 8, 8, 0xFFFFFF00);
                 var sphereMesh = sphere.ToMesh();
-                sphereDebugMesh.Initialize(sphereMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                sphereDebugMesh.Initialize(sphereMesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 sphereDebugMesh.MdfQueue.MdfDatas = this;
 
                 var meshNode1 = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, this, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), sphereDebugMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
@@ -229,7 +229,7 @@ namespace EngineNS.Bricks.Collision.DDA
             var lineMesh = new Graphics.Mesh.TtMesh();
             var rect = Graphics.Mesh.UMeshDataProvider.MakeLine(in lineFrom, in lineTo, 0xFF50ff80);
             var rectMesh = rect.ToMesh();
-            lineMesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            lineMesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             lineMesh.MdfQueue.MdfDatas = this;
 
             var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(world, this, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), lineMesh, DVector3.Zero, Vector3.One, Quaternion.Identity);

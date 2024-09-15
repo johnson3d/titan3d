@@ -46,7 +46,7 @@ namespace EngineNS.Graphics.Mesh
             
             Graphics.Mesh.TtMaterialMesh Mesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.CreateMaterialMesh(GetAssetName());
             var mesh = new Graphics.Mesh.TtMesh();
-            var ok = mesh.Initialize(Mesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            var ok = mesh.Initialize(Mesh, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
                 var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(renderer.World, renderer.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
@@ -185,7 +185,7 @@ namespace EngineNS.Graphics.Mesh
 
         public class ImportAttribute : IO.CommonCreateAttribute
         {
-            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)
             {
                 await base.DoCreate(dir, type, ext);
                 var mesh = mAsset as TtMaterialMesh;
@@ -228,7 +228,7 @@ namespace EngineNS.Graphics.Mesh
                 UpdateAMetaReferences(ameta);
                 ameta.SaveAMeta(this);
             }
-            var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
+            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
             using (var xnd = new IO.TtXndHolder(typeStr, 0, 0))
             {
                 using (var attr = xnd.NewAttribute("MaterialMesh", 0, 0))
@@ -757,7 +757,7 @@ namespace EngineNS.Graphics.Mesh
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public partial class UGfxDevice
+    public partial class TtGfxDevice
     {
         public Mesh.UMaterialMeshManager MaterialMeshManager { get; } = new Mesh.UMaterialMeshManager();
     }

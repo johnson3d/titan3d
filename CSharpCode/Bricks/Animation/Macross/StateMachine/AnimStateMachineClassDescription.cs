@@ -82,7 +82,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine
 
             var getAnimatablePoseFromNode = new TtMethodInvokeStatement("CreateAnimatableSkeletonPoseFromeNode",
                 animatableSkeletonPoseCreate,
-                new TtClassReferenceExpression(UTypeDesc.TypeOf<TtAnimUtil>()),
+                new TtClassReferenceExpression(TtTypeDesc.TypeOf<TtAnimUtil>()),
                 new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression("MacrossNode") }
                 );
             initMethod.MethodBody.Sequence.Add(getAnimatablePoseFromNode);
@@ -114,7 +114,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine
 
             var bindRuntimeSkeletonPoseToNode = new TtMethodInvokeStatement("BindRuntimeSkeletonPoseToNode",
                 null,
-                new TtClassReferenceExpression(UTypeDesc.TypeOf<TtAnimUtil>()),
+                new TtClassReferenceExpression(TtTypeDesc.TypeOf<TtAnimUtil>()),
                 new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression("MacrossNode") }
                 );
             initMethod.MethodBody.Sequence.Add(bindRuntimeSkeletonPoseToNode);

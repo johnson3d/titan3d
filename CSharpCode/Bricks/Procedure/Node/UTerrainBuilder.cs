@@ -315,7 +315,7 @@ namespace EngineNS.Bricks.Procedure.Node
             var viewport = graph.GraphEditor.PreviewViewport;
             //if (TerrainMesh == null)
             {
-                //var mdfType = Rtti.UTypeDesc.TypeOf(typeof(Terrain.CDLOD.UTerrainMdfQueuePermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>));
+                //var mdfType = Rtti.TtTypeDesc.TypeOf(typeof(Terrain.CDLOD.UTerrainMdfQueuePermutation<Graphics.Pipeline.Shader.UMdf_NoShadow>));
 
                 //var Material = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/SysDft.material", RName.ERNameType.Engine));
                 //TerrainMesh = Graphics.Mesh.UMeshDataProvider.MakeGridForTerrain(256, 256).ToMesh();

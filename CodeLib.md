@@ -19,12 +19,12 @@ using (new Profiler.TimeScopeHelper(ScopeChildren))
 ```
 ## 2.插件开发
 1.确保插件dll包含如下实现
-UPluginLoader是用来描述插件的
-AssemblyEntry是用来描述DLL模块在UTypeDesc的信息的，通常处理类型和Meta信息
+TtPluginLoader是用来描述插件的
+AssemblyEntry是用来描述DLL模块在TtTypeDesc的信息的，通常处理类型和Meta信息
 ```C#
 namespace EngineNS.Plugins.你的插件名
 {
-    public class UPluginLoader
+    public class TtPluginLoader
     {
         public static UGameItemPlugin? mPluginObject = new UGameItemPlugin();
         public static Bricks.AssemblyLoader.UPlugin GetPluginObject()
@@ -38,7 +38,7 @@ namespace EngineNS.Rtti
 {
     public class AssemblyEntry
     {
-        public class UGameServerAssemblyDesc : UAssemblyDesc
+        public class UGameServerAssemblyDesc : TtAssemblyDesc
         {
             public UGameServerAssemblyDesc()
             {

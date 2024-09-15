@@ -89,7 +89,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
             var cmdHistory = context.CommandHistory;
             var graphElementStyleManager = context.GraphElementStyleManager;
             //for now just put here, util we have the init method
-            foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
+            foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
             {
                 foreach (var typeDesc in service.Types.Values)
                 {
@@ -100,7 +100,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
                              (TtMenuItem item, object sender) =>
                              {
                                  var popMenu = sender as TtPopupMenu;
-                                 if (Rtti.UTypeDescManager.CreateInstance(typeDesc) is TtAnimSubStateClassDescription state)
+                                 if (Rtti.TtTypeDescManager.CreateInstance(typeDesc) is TtAnimSubStateClassDescription state)
                                  {
                                      state.Name = GetValidNodeName(state.Name);
                                      var style = graphElementStyleManager.GetOrAdd(state.Id, popMenu.PopedPosition);
@@ -121,7 +121,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
                 {
                     continue;
                 }
-                var typeDesc = UTypeDesc.TypeOf(compoundState.GetType());
+                var typeDesc = TtTypeDesc.TypeOf(compoundState.GetType());
                 string[] menuPaths = new[] { "StateMachine", "Hub", compoundState.Name };
                 string filterStrings = compoundState.Name;
                 TtMenuUtil.ConstructMenuItem(popupMenu.Menu, typeDesc, menuPaths, filterStrings,

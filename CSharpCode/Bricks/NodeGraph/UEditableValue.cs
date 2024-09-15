@@ -37,7 +37,7 @@ namespace EngineNS.Bricks.NodeGraph
             mNotify = notify;
             LabelName = "EVL_" + System.Threading.Interlocked.Add(ref GID_EditableValue, 1).ToString();
         }
-        static UEditableValue CreateEditableValue_Internal(IValueEditNotify notify, Rtti.UTypeDesc type, object tag)
+        static UEditableValue CreateEditableValue_Internal(IValueEditNotify notify, Rtti.TtTypeDesc type, object tag)
         {
             var result = new UEditableValue(notify);
             result.ValueType = type;
@@ -46,9 +46,9 @@ namespace EngineNS.Bricks.NodeGraph
         }
         public static UEditableValue CreateEditableValue(IValueEditNotify notify, Type type, object tag, object defaultValue = null)
         {
-            return CreateEditableValue(notify, Rtti.UTypeDesc.TypeOf(type), tag, defaultValue);
+            return CreateEditableValue(notify, Rtti.TtTypeDesc.TypeOf(type), tag, defaultValue);
         }
-        public static UEditableValue CreateEditableValue(IValueEditNotify notify, Rtti.UTypeDesc type, object tag, object defaultValue = null)
+        public static UEditableValue CreateEditableValue(IValueEditNotify notify, Rtti.TtTypeDesc type, object tag, object defaultValue = null)
         {
             if (type.IsEqual(typeof(bool)))
             {
@@ -234,7 +234,7 @@ namespace EngineNS.Bricks.NodeGraph
         }
         private string LabelName;
         [Rtti.Meta]
-        public Rtti.UTypeDesc ValueType { get; set; }
+        public Rtti.TtTypeDesc ValueType { get; set; }
         [Rtti.Meta]
         public virtual object Value { get; set; } = null;   // todo: change value to TtAnyValue
         public string GetValueString()
@@ -407,7 +407,7 @@ namespace EngineNS.Bricks.NodeGraph
             var pros = TypeDescriptor.GetProperties(this);
             var pro = pros.Find("Value", false);
             var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
-            proDesc.InitValue(this, Rtti.UTypeDesc.TypeOf(this.GetType()), pro, false);
+            proDesc.InitValue(this, Rtti.TtTypeDesc.TypeOf(this.GetType()), pro, false);
             proDesc.PropertyType = ValueType;
             proDesc.CustomValueEditor = this;
             collection.Add(proDesc);
@@ -457,7 +457,7 @@ namespace EngineNS.Bricks.NodeGraph
             {
                 this.Value = Selector.SelectedType;
             }
-            Selector.SelectedType = this.Value as Rtti.UTypeDesc;
+            Selector.SelectedType = this.Value as Rtti.TtTypeDesc;
             var saved = Selector.SelectedType;
             Selector.OnDraw(width * fScale, 8);
             if (saved != Selector.SelectedType)
@@ -501,7 +501,7 @@ namespace EngineNS.Bricks.NodeGraph
                 return Value as RName;
             }
         }
-        public Rtti.UTypeDesc MacrossType { get; set; }
+        public Rtti.TtTypeDesc MacrossType { get; set; }
         public EGui.Controls.UContentBrowser ContentBrowser;
         bool BrowserVisible = false;
         public override unsafe void OnDraw(UNodeBase node, PinIn pin, UNodeGraphStyles styles, float fScale, bool useDPI)

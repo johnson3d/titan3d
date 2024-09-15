@@ -64,7 +64,7 @@ namespace ProjectCooker.Command
                                         {
                                             codeWriter.PushBrackets();
                                             {
-                                                codeWriter.AddLine($"var typeDef = EngineNS.Rtti.UTypeDesc.TypeOf(typeof({k.PropInfo.PropertyType.FullName.Replace('+','.')}));");                                           
+                                                codeWriter.AddLine($"var typeDef = EngineNS.Rtti.TtTypeDesc.TypeOf(typeof({k.PropInfo.PropertyType.FullName.Replace('+','.')}));");                                           
                                                 codeWriter.AddLine($"var meta = EngineNS.Rtti.UClassMetaManager.Instance.GetMeta(typeDef);");
                                                 codeWriter.AddLine($"meta?.CopyObjectMetaField(hostObject.{k.PropertyName}, tmp_{k.PropertyName});");
                                             }
@@ -126,7 +126,7 @@ namespace ProjectCooker.Command
                                                     codeWriter.AddLine($"try");
                                                     codeWriter.PushBrackets();
                                                     {
-                                                        codeWriter.AddLine($"var elemType = Rtti.UTypeDesc.TypeOf(elemTypeStr).SystemType;");
+                                                        codeWriter.AddLine($"var elemType = Rtti.TtTypeDesc.TypeOf(elemTypeStr).SystemType;");
                                                         codeWriter.AddLine($"var e = ({innerType.FullName.Replace('+','.')})EngineNS.IO.SerializerHelper.ReadObject(ar, elemType, hostObject);");
                                                         codeWriter.AddLine($"tmp_{k.PropertyName}.Add(e);");
                                                     }
@@ -209,7 +209,7 @@ namespace ProjectCooker.Command
                                                     codeWriter.AddLine($"string elemValueTypeStr;");
                                                     codeWriter.AddLine($"ar.Read(out elemValueTypeStr);");
                                                     codeWriter.AddLine($"var skipPoint1 = EngineNS.IO.SerializerHelper.GetSkipOffset(ar);");
-                                                    codeWriter.AddLine($"var elemValueType = Rtti.UTypeDesc.TypeOf(elemValueTypeStr).SystemType;"); 
+                                                    codeWriter.AddLine($"var elemValueType = Rtti.TtTypeDesc.TypeOf(elemValueTypeStr).SystemType;"); 
 
                                                     codeWriter.AddLine($"ar.Read(out elem_key_{k.PropertyName});");
                                                     codeWriter.AddLine($"var value = ({valueType.FullName.Replace('+', '.')})EngineNS.IO.SerializerHelper.ReadObject(ar, elemValueType, hostObject);");
@@ -233,7 +233,7 @@ namespace ProjectCooker.Command
                                                     codeWriter.AddLine($"string elemKeyTypeStr;");
                                                     codeWriter.AddLine($"ar.Read(out elemKeyTypeStr);");
                                                     codeWriter.AddLine($"var skipPoint1 = EngineNS.IO.SerializerHelper.GetSkipOffset(ar);");
-                                                    codeWriter.AddLine($"var elemKeyType = Rtti.UTypeDesc.TypeOf(elemKeyTypeStr).SystemType;");
+                                                    codeWriter.AddLine($"var elemKeyType = Rtti.TtTypeDesc.TypeOf(elemKeyTypeStr).SystemType;");
 
                                                     codeWriter.AddLine($"var key = ({keyType.FullName.Replace('+', '.')})EngineNS.IO.SerializerHelper.ReadObject(ar, elemKeyType, hostObject);");
                                                     codeWriter.AddLine($"ar.Read(out elem_value_{k.PropertyName});");                                                    
@@ -251,11 +251,11 @@ namespace ProjectCooker.Command
                                                 {
                                                     codeWriter.AddLine($"string elemKeyTypeStr;");
                                                     codeWriter.AddLine($"ar.Read(out elemKeyTypeStr);");
-                                                    codeWriter.AddLine($"var elemKeyType = Rtti.UTypeDesc.TypeOf(elemKeyTypeStr).SystemType;");
+                                                    codeWriter.AddLine($"var elemKeyType = Rtti.TtTypeDesc.TypeOf(elemKeyTypeStr).SystemType;");
 
                                                     codeWriter.AddLine($"string elemValueTypeStr;");
                                                     codeWriter.AddLine($"ar.Read(out elemValueTypeStr);");                                                    
-                                                    codeWriter.AddLine($"var elemValueType = Rtti.UTypeDesc.TypeOf(elemValueTypeStr).SystemType;");
+                                                    codeWriter.AddLine($"var elemValueType = Rtti.TtTypeDesc.TypeOf(elemValueTypeStr).SystemType;");
                                                     codeWriter.AddLine($"var skipPoint1 = EngineNS.IO.SerializerHelper.GetSkipOffset(ar);");
 
                                                     codeWriter.AddLine($"var key = ({keyType.FullName.Replace('+', '.')})EngineNS.IO.SerializerHelper.ReadObject(ar, elemKeyType, hostObject);");

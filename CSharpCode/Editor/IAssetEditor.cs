@@ -80,7 +80,7 @@ namespace EngineNS.Editor
             }
             if (editor == null)
             {
-                editor = Rtti.UTypeDescManager.CreateInstance(editorType) as IAssetEditor;
+                editor = Rtti.TtTypeDescManager.CreateInstance(editorType) as IAssetEditor;
             }
             editor.AssetName = name;
             mAssetEditorOpenProgress.CurrentEditor = editor;

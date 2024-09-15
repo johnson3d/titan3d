@@ -70,7 +70,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 new List<Graphics.Pipeline.Shader.TtMaterial[]>() { matrials, matrials1 });
             
             var mesh = new Graphics.Mesh.TtMesh();
-            var ok = mesh.Initialize(ShowMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            var ok = mesh.Initialize(ShowMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
                 var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);

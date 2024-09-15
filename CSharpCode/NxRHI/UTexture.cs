@@ -720,7 +720,7 @@ namespace EngineNS.NxRHI
             public TtPicDesc mDesc = new TtPicDesc();
             ImGui.ImGuiFileDialog mFileDialog = TtEngine.Instance.EditorInstance.FileDialog.mFileDialog;
             EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
-            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)
             {
                 mDir = dir;
                 mDesc.Desc.SetDefault();
@@ -893,7 +893,7 @@ namespace EngineNS.NxRHI
                     var ameta = new TtSrViewAMeta();
                     ameta.SetAssetName(rn);
                     ameta.AssetId = Guid.NewGuid();
-                    ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtSrView));
+                    ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtSrView));
                     ameta.Description = $"This is a {typeof(TtSrView).FullName}\n";
                     ameta.SaveAMeta((IAsset)null);
 
@@ -934,7 +934,7 @@ namespace EngineNS.NxRHI
                 var ameta = new TtSrViewAMeta();
                 ameta.SetAssetName(rn);
                 ameta.AssetId = Guid.NewGuid();
-                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtSrView));
+                ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtSrView));
                 ameta.Description = $"This is a {typeof(TtSrView).FullName}\n";
                 ameta.SaveAMeta((IO.IAsset)null);
 
@@ -956,7 +956,7 @@ namespace EngineNS.NxRHI
                 var ameta = new TtSrViewAMeta();
                 ameta.SetAssetName(rn);
                 ameta.AssetId = Guid.NewGuid();
-                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtSrView));
+                ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtSrView));
                 ameta.Description = $"This is a {typeof(TtSrView).FullName}\n";
                 ameta.SaveAMeta((IO.IAsset)null);
 
@@ -977,7 +977,7 @@ namespace EngineNS.NxRHI
                 var ameta = new TtSrViewAMeta();
                 ameta.SetAssetName(rn);
                 ameta.AssetId = Guid.NewGuid();
-                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtSrView));
+                ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtSrView));
                 ameta.Description = $"This is a {typeof(TtSrView).FullName}\n";
                 ameta.SaveAMeta((IO.IAsset)null);
 

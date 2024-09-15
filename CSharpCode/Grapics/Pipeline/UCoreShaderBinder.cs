@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public partial class UCoreShaderBinder
+    public partial class TtCoreShaderBinder
     {
         public unsafe void UpdateIndex(NxRHI.TtShaderEffect effect)
         {
@@ -322,8 +322,8 @@ namespace EngineNS.Graphics.Pipeline
         }
         public readonly UShaderResourceIndexer CBufferCreator = new UShaderResourceIndexer();
     }
-    partial class UGfxDevice
+    partial class TtGfxDevice
     {
-        public readonly UCoreShaderBinder CoreShaderBinder = new UCoreShaderBinder();
+        public readonly TtCoreShaderBinder CoreShaderBinder = new TtCoreShaderBinder();
     }
 }

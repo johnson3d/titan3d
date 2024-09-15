@@ -13,9 +13,9 @@ namespace EngineNS.Animation.Base
     /// </summary>
     public class TtAnimatedObjectDescription : IO.BaseSerializer
     {
-        public Rtti.UTypeDesc ClassType
+        public Rtti.TtTypeDesc ClassType
         {
-            get { return Rtti.UTypeDesc.TypeOf(TypeName); }
+            get { return Rtti.TtTypeDesc.TypeOf(TypeName); }
             set { TypeName =value.TypeString; }
         }
 
@@ -47,9 +47,9 @@ namespace EngineNS.Animation.Base
     /// </summary>
     public class TtAnimatedPropertyDescription : IO.BaseSerializer
     {
-        public Rtti.UTypeDesc ClassType
+        public Rtti.TtTypeDesc ClassType
         {
-            get { return Rtti.UTypeDesc.TypeOf(TypeName); }
+            get { return Rtti.TtTypeDesc.TypeOf(TypeName); }
             set { TypeName = value.TypeString; }
         }
         [Rtti.Meta]

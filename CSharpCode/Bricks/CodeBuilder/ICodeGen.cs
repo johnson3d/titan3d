@@ -83,7 +83,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
             klsGen.GenLines(kls, this);
         }
-        public virtual string GetDefaultValue(Rtti.UTypeDesc t)
+        public virtual string GetDefaultValue(Rtti.TtTypeDesc t)
         {
             return GetDefaultValue(t.SystemType);
         }
@@ -115,12 +115,12 @@ namespace EngineNS.Bricks.CodeBuilder
                 return $"null";
             }
         }
-        public virtual string GetTypeString(Rtti.UTypeDesc t)
+        public virtual string GetTypeString(Rtti.TtTypeDesc t)
         {
             return t.FullName;
         }
 
-        public static bool CanConvert(Rtti.UTypeDesc left, Rtti.UTypeDesc right)
+        public static bool CanConvert(Rtti.TtTypeDesc left, Rtti.TtTypeDesc right)
         {
             if (left == null || right == null)
                 return false;
@@ -138,7 +138,7 @@ namespace EngineNS.Bricks.CodeBuilder
             }
             return false;
         }
-        public static bool IsNumeric(Rtti.UTypeDesc t)
+        public static bool IsNumeric(Rtti.TtTypeDesc t)
         {
             if (t.IsEqual(typeof(sbyte)) ||
                 t.IsEqual(typeof(Int16)) ||

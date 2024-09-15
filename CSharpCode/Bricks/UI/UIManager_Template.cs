@@ -12,8 +12,8 @@ namespace EngineNS.UI
 {
     public partial class TtUIManager
     {
-        public static Dictionary<UTypeDesc, TtUITemplate> SystemDefaultTemplates = new Dictionary<UTypeDesc, TtUITemplate>();
-        Dictionary<UTypeDesc, TtUITemplate> mDefaultTemplates = new Dictionary<UTypeDesc, TtUITemplate>();
+        public static Dictionary<TtTypeDesc, TtUITemplate> SystemDefaultTemplates = new Dictionary<TtTypeDesc, TtUITemplate>();
+        Dictionary<TtTypeDesc, TtUITemplate> mDefaultTemplates = new Dictionary<TtTypeDesc, TtUITemplate>();
         Dictionary<string, TtUITemplate> mTemplates = new Dictionary<string, TtUITemplate>();
         public void ClearTemplates()
         {
@@ -21,7 +21,7 @@ namespace EngineNS.UI
             mDefaultTemplates.Clear();
             mTemplates.Clear();
         }
-        public TtUITemplate GetDefaultTemplate(UTypeDesc type)
+        public TtUITemplate GetDefaultTemplate(TtTypeDesc type)
         {
             if (mDefaultTemplates.TryGetValue(type, out var defaultTemplate))
                 return defaultTemplate;

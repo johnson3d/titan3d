@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace EngineNS.Editor
 {
-    public class UMetaVersionViewer : Editor.IAssetEditor, IRootForm
+    public class TtMetaVersionViewer : Editor.IAssetEditor, IRootForm
     {
         public RName AssetName { get; set; }
         protected bool mVisible = true;
@@ -46,7 +46,7 @@ namespace EngineNS.Editor
                 if (typeStr == null)
                     return false;
             }
-            var typeDesc = Rtti.UTypeDesc.TypeOf(typeStr);
+            var typeDesc = Rtti.TtTypeDesc.TypeOf(typeStr);
             if (typeDesc == null)
                 return false;
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);

@@ -17,7 +17,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             AddDtaOutPin(new TtSelfReferenceDataPin() { Name = "Get" });
         }
-        public TtSelfReferenceDescription(UTypeDesc typeDesc)
+        public TtSelfReferenceDescription(TtTypeDesc typeDesc)
         {
             AddDtaOutPin(new TtSelfReferenceDataPin() { Name = "Get", TypeDesc = typeDesc });
         }

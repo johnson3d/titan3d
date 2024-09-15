@@ -17,7 +17,7 @@ namespace EngineNS.DesignMacross.Design.Statement
             AddExecutionInPin(new());
             AddExecutionOutPin(new() { Name = "True" });
             AddExecutionOutPin(new() { Name = "False" });
-            AddDataInPin(new() { TypeDesc = UTypeDesc.TypeOf<bool>()});
+            AddDataInPin(new() { TypeDesc = TtTypeDesc.TypeOf<bool>()});
         }
         public override TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {

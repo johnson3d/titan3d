@@ -1228,7 +1228,7 @@ namespace {namespaceName}
                 source += $@"
         public{(baseHasBindObjectInterface ? " override" : " virtual")} void GetProperties(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {{
-            var type = EngineNS.Rtti.UTypeDesc.TypeOf(this.GetType());
+            var type = EngineNS.Rtti.TtTypeDesc.TypeOf(this.GetType());
             var pros = System.ComponentModel.TypeDescriptor.GetProperties(this);
             collection.InitValue(this, type, pros, parentIsValueType);
 
@@ -1256,7 +1256,7 @@ namespace {namespaceName}
                     var proDesc = EngineNS.EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
                     proDesc.Name = name;
                     proDesc.CanCreateNew = false;
-                    proDesc.PropertyType = EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.UI.Event.TtRoutedEventHandler));
+                    proDesc.PropertyType = EngineNS.Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.UI.Event.TtRoutedEventHandler));
                     proDesc.Category = ""Events"";
                     proDesc.CustomValueEditor = new EngineNS.UI.Event.PGRoutedEventHandlerEditorAttribute();
                     tempCollection.Add(proDesc);

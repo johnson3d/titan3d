@@ -341,7 +341,7 @@ namespace AssetImportAndExport.FBX
             }
         }
     }
-    public partial class UFBXFactoryModule : EngineNS.UModule<EngineNS.TtEngine>
+    public partial class UFBXFactoryModule : EngineNS.TtModule<EngineNS.TtEngine>
     {
         public AssetImportAndExport.FBX.FBXFactory Instance = AssetImportAndExport.FBX.FBXFactory.CreateInstance();
 

@@ -155,7 +155,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 if(DefClass.SupperClassNames.Count > 0)
                 {
-                    var baseType = Rtti.UTypeDesc.TypeOfFullName(DefClass.SupperClassNames[0]);
+                    var baseType = Rtti.TtTypeDesc.TypeOfFullName(DefClass.SupperClassNames[0]);
                     if(baseType != null && ameta.BaseTypeStr != baseType.TypeString)
                     {
                         var tmp = new UMacross();
@@ -300,7 +300,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             foreach (var i in DefClass.SupperClassNames)
             {
-                var type = Rtti.UTypeDesc.TypeOfFullName(i);
+                var type = Rtti.TtTypeDesc.TypeOfFullName(i);
                 var macrossAttr = type.GetCustomAttribute<Macross.UMacrossAttribute>(false);
                 if (macrossAttr != null)
                 {
@@ -906,7 +906,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         mb.VariableType = new TtTypeReference(selectedType);
                         mb.VariableName = $"Member_{num}";
                         mb.VisitMode = EVisisMode.Local;
-                        mb.InitValue = new TtPrimitiveExpression(Rtti.UTypeDesc.TypeOf(selectedType), selectedType.IsValueType ? Rtti.UTypeDescManager.CreateInstance(selectedType) : null);
+                        mb.InitValue = new TtPrimitiveExpression(Rtti.TtTypeDesc.TypeOf(selectedType), selectedType.IsValueType ? Rtti.TtTypeDescManager.CreateInstance(selectedType) : null);
                         mb.Comment = new TtCommentStatement("");
                         bool result = true;
                         if (OnAddMember != null)
@@ -1107,7 +1107,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     mb.VariableType = new TtTypeReference(selectedType);
                     mb.VariableName = $"Local_{num}";
                     mb.VisitMode = EVisisMode.Local;
-                    mb.InitValue = new TtPrimitiveExpression(Rtti.UTypeDesc.TypeOf(selectedType), selectedType.IsValueType ? Rtti.UTypeDescManager.CreateInstance(selectedType) : null);
+                    mb.InitValue = new TtPrimitiveExpression(Rtti.TtTypeDesc.TypeOf(selectedType), selectedType.IsValueType ? Rtti.TtTypeDescManager.CreateInstance(selectedType) : null);
                     mb.Comment = new TtCommentStatement("");
                     bool result = true;
                     if (OnAddMethodLocalVar != null)

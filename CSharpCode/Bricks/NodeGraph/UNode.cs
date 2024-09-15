@@ -39,14 +39,14 @@ namespace EngineNS.Bricks.NodeGraph
             {
                 var pinNameProDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
                 pinNameProDesc.Name = "ErrorPinName";
-                pinNameProDesc.PropertyType = Rtti.UTypeDesc.TypeOf(typeof(string));
+                pinNameProDesc.PropertyType = Rtti.TtTypeDesc.TypeOf(typeof(string));
                 pinNameProDesc.IsReadonly = true;
                 collection.Add(pinNameProDesc);
             }
 
             var infoProDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
             infoProDesc.Name = "ErrorInfo";
-            infoProDesc.PropertyType = Rtti.UTypeDesc.TypeOf(typeof(string));
+            infoProDesc.PropertyType = Rtti.TtTypeDesc.TypeOf(typeof(string));
             infoProDesc.IsReadonly = true;
             collection.Add(infoProDesc);
         }
@@ -754,21 +754,21 @@ namespace EngineNS.Bricks.NodeGraph
         {
             OnMouseStayPinAction?.Invoke(this, stayPin);
         }
-        public Func<PinOut, Rtti.UTypeDesc> GetOutPinTypeAction;
-        public virtual Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public Func<PinOut, Rtti.TtTypeDesc> GetOutPinTypeAction;
+        public virtual Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             if (GetOutPinTypeAction != null)
                 return GetOutPinTypeAction(pin);
             return null;
         }
-        public Func<PinIn, Rtti.UTypeDesc> GetInPinTypeAction;
-        public virtual Rtti.UTypeDesc GetInPinType(PinIn pin)
+        public Func<PinIn, Rtti.TtTypeDesc> GetInPinTypeAction;
+        public virtual Rtti.TtTypeDesc GetInPinType(PinIn pin)
         {
             if (GetInPinTypeAction != null)
                 return GetInPinTypeAction(pin);
             return null;
         }
-        public Rtti.UTypeDesc GetPinType<T>(T pin)
+        public Rtti.TtTypeDesc GetPinType<T>(T pin)
         {
             var pinIn = pin as PinIn;
             if(pinIn != null)
@@ -830,7 +830,7 @@ namespace EngineNS.Bricks.NodeGraph
 
         public static void AddDebugBreakerStatement(string breakName, ref BuildCodeStatementsData data)
         {
-            var breakType = Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Macross.UMacrossBreak));
+            var breakType = Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.Macross.UMacrossBreak));
             var breakDef = new CodeBuilder.TtVariableDeclaration()
             {
                 VariableType = new CodeBuilder.TtTypeReference(breakType),
@@ -859,7 +859,7 @@ namespace EngineNS.Bricks.NodeGraph
                 return false;
 
             var id = target.NodeId;
-            var type = Rtti.UTypeDesc.TypeOf(this.GetType());
+            var type = Rtti.TtTypeDesc.TypeOf(this.GetType());
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(type);
             meta.CopyObjectMetaField(target, this);
             if(!withId)

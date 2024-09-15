@@ -51,7 +51,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             var mesh = new Graphics.Mesh.TtMesh();
             var rect = Graphics.Mesh.UMeshDataProvider.MakeRect2D(-1, -1, 2, 2, 0.5F, false);
             var rectMesh = rect.ToMesh();
-            var ok = mesh.Initialize(rectMesh, materials, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            var ok = mesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
                 ScreenMesh = mesh;

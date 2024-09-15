@@ -97,7 +97,7 @@ namespace EngineNS.Editor
         public void GetProperties(ref EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {
             var pros = TypeDescriptor.GetProperties(this);
-            var thisType = Rtti.UTypeDesc.TypeOf(this.GetType());
+            var thisType = Rtti.TtTypeDesc.TypeOf(this.GetType());
             //collection.InitValue(this,  pros, parentIsValueType);
             foreach(PropertyDescriptor prop in pros)
             {

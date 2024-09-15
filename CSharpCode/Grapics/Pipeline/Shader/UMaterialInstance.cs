@@ -89,7 +89,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 ameta.SaveAMeta(this);
             }
 
-            var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
+            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
             using (var xnd = new IO.TtXndHolder(typeStr, 0, 0))
             {
                 using (var attr = xnd.NewAttribute("MaterialInstance", 0, 0))

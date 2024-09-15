@@ -150,7 +150,7 @@ namespace CSharpCodeTools.Cs2Cpp
                 }
                 if (i.Kind != UProperty.ETypeKind.Predefine)
                 {
-                    result += $"EngineNS.Rtti.UNativeCoreProvider.ObjectFromGCHandle<{i.Type}>({i.Name})";
+                    result += $"EngineNS.Rtti.TtNativeCoreProvider.ObjectFromGCHandle<{i.Type}>({i.Name})";
                 }
                 else
                 {

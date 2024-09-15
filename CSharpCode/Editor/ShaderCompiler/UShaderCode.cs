@@ -254,9 +254,9 @@ namespace EngineNS.Editor.ShaderCompiler
             var codeBuilder = new Bricks.CodeBuilder.UHLSLCodeGenerator();
             string sourceCode = "";
 
-            var ShaderEnums = new List<KeyValuePair<TtShaderDefineAttribute, Rtti.UTypeDesc>>();
-            var ShaderStructs = new List<KeyValuePair<TtShaderDefineAttribute, Rtti.UTypeDesc>>();
-            Rtti.UTypeDescManager.Instance.InterateTypes((Rtti.UTypeDesc type) =>
+            var ShaderEnums = new List<KeyValuePair<TtShaderDefineAttribute, Rtti.TtTypeDesc>>();
+            var ShaderStructs = new List<KeyValuePair<TtShaderDefineAttribute, Rtti.TtTypeDesc>>();
+            Rtti.TtTypeDescManager.Instance.InterateTypes((Rtti.TtTypeDesc type) =>
             {
                 var attrs = type.SystemType.GetCustomAttributes(typeof(TtShaderDefineAttribute), false);
                 if (attrs.Length != 1)

@@ -33,7 +33,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         private NxRHI.TtSrView TextureSRV;
         public Texture2D()
         {
-            VarType = Rtti.UTypeDescGetter<Texture2D>.TypeDesc;
+            VarType = Rtti.TtTypeDescGetter<Texture2D>.TypeDesc;
             PrevSize = new Vector2(100, 100);
 
             Icon.Size = new Vector2(25, 25);
@@ -58,7 +58,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         //    tmp.Value = texNode.AssetName;
         //    Material.UsedRSView.Add(tmp);
         //}
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             return VarType;
         }
@@ -78,7 +78,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         {
             base.OnLButtonClicked(clickedPin);
             var graph = UserData as UMaterialGraph;
-            graph.ShaderEditor.NodePropGrid.HideInheritDeclareType = Rtti.UTypeDescGetter<VarNode>.TypeDesc;
+            graph.ShaderEditor.NodePropGrid.HideInheritDeclareType = Rtti.TtTypeDescGetter<VarNode>.TypeDesc;
         }
         //public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
         //{
@@ -110,7 +110,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public PinOut OutTex { get; set; } = new PinOut();
         public Texture2DArray()
         {
-            VarType = Rtti.UTypeDescGetter<Texture2DArray>.TypeDesc;
+            VarType = Rtti.TtTypeDescGetter<Texture2DArray>.TypeDesc;
             PrevSize = new Vector2(100, 100);
 
             Icon.Size = new Vector2(25, 25);
@@ -123,7 +123,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             OutTex.MultiLinks = true;
             this.AddPinOut(OutTex);
         }
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             return VarType;
         }

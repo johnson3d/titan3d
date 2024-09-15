@@ -28,7 +28,7 @@ namespace EngineNS.NxPhysics
         }
     }
 
-    public class TtPxSystem : UModule<TtEngine>
+    public class TtPxSystem : TtModule<TtEngine>
     {
         public TtDevice Device { get; } = new TtDevice();
         public Graphics.Pipeline.Shader.TtMaterialInstance DebugShapeMaterial;

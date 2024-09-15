@@ -91,7 +91,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 if (NodeData.Placement == null && placementType != null)
                 {
-                    NodeData.Placement = Rtti.UTypeDescManager.CreateInstance(placementType) as TtPlacementBase;
+                    NodeData.Placement = Rtti.TtTypeDescManager.CreateInstance(placementType) as TtPlacementBase;
                     NodeData.Placement.HostNode = this;
                     switch (bvType)
                     {
@@ -632,7 +632,7 @@ namespace EngineNS.GamePlay.Scene
                 if (i.HasStyle(ENodeStyles.Transient))
                     continue;
 
-                var typeStr = Rtti.UTypeDesc.TypeStr(i.GetType());
+                var typeStr = Rtti.TtTypeDesc.TypeStr(i.GetType());
                 using (var nd = xnd.NewNode(typeStr, 1, 0))
                 {
                     node.AddNode(nd);
@@ -644,7 +644,7 @@ namespace EngineNS.GamePlay.Scene
                         {
                             nodeFlags |= (uint)ENodeFlags.IgnoreNodeDesc;
                         }
-                        using (var dataAttr = xnd.NewAttribute(Rtti.UTypeDesc.TypeStr(i.NodeData.GetType()), 1, nodeFlags))
+                        using (var dataAttr = xnd.NewAttribute(Rtti.TtTypeDesc.TypeStr(i.NodeData.GetType()), 1, nodeFlags))
                         {
                             var attrProxy = new EngineNS.IO.TtXndAttributeWriter(dataAttr);
 
@@ -678,9 +678,9 @@ namespace EngineNS.GamePlay.Scene
                 {
                     this.mIsPrefab = true;
                 }
-                var nodeTypeDesc = Rtti.UTypeDesc.TypeOf(attr.Name);
-                TtNodeData nodeData = Rtti.UTypeDescManager.CreateInstance(nodeTypeDesc) as TtNodeData;
-                var nd = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(cldTypeStr)) as TtNode;
+                var nodeTypeDesc = Rtti.TtTypeDesc.TypeOf(attr.Name);
+                TtNodeData nodeData = Rtti.TtTypeDescManager.CreateInstance(nodeTypeDesc) as TtNodeData;
+                var nd = Rtti.TtTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(cldTypeStr)) as TtNode;
                 if (nd == null || nodeData == null)
                 {
                     Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"SceneNode Load failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
@@ -706,7 +706,7 @@ namespace EngineNS.GamePlay.Scene
                                 var old = FindFirstChild(nodeData.Name, nd.GetType());
                                 if (old != null)
                                 {
-                                    var typeDesc = Rtti.UTypeDesc.TypeOf(nodeData.GetType());
+                                    var typeDesc = Rtti.TtTypeDesc.TypeOf(nodeData.GetType());
                                     var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
                                     meta.CopyObjectMetaField(old.NodeData, nodeData);
                                     nodeData = old.NodeData;
@@ -958,10 +958,10 @@ namespace EngineNS.GamePlay.Scene
 
         public async System.Threading.Tasks.Task<TtNode> CloneNode(TtWorld world)
         {
-            var data = Rtti.UTypeDescManager.CreateInstance(this.NodeData.GetType()) as TtNodeData;
-            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeOf(this.NodeData.GetType()));
+            var data = Rtti.TtTypeDescManager.CreateInstance(this.NodeData.GetType()) as TtNodeData;
+            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDesc.TypeOf(this.NodeData.GetType()));
             meta.CopyObjectMetaField(data, NodeData);
-            var node = Rtti.UTypeDescManager.CreateInstance(this.GetType()) as TtNode;
+            var node = Rtti.TtTypeDescManager.CreateInstance(this.GetType()) as TtNode;
             EBoundVolumeType bvType = EBoundVolumeType.None;
             if (NodeData.BoundVolume != null)
             {

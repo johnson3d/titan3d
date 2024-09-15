@@ -7,7 +7,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
     public partial class Binocular : UNodeBase
     {
-        public Rtti.UTypeDesc LeftType;
+        public Rtti.TtTypeDesc LeftType;
         public TtBinaryOperatorExpression.EBinaryOperation Op { get; set; }
 
         [Rtti.Meta]
@@ -16,12 +16,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             get
             {
                 if (LeftType != null)
-                    return Rtti.UTypeDesc.TypeStr(LeftType);
+                    return Rtti.TtTypeDesc.TypeStr(LeftType);
                 return "";
             }
             set
             {
-                LeftType = Rtti.UTypeDesc.TypeOf(value);
+                LeftType = Rtti.TtTypeDesc.TypeOf(value);
             }
         }
         
@@ -58,7 +58,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Right.LinkDesc.CanLinks.Add("Value");
             Result.LinkDesc.CanLinks.Add("Value");
         }
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             return LeftType;
         }
@@ -278,9 +278,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             : base(op, name)
         {
         }
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
-            return Rtti.UTypeDesc.TypeOf(typeof(bool));
+            return Rtti.TtTypeDesc.TypeOf(typeof(bool));
         }
         public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
         {
@@ -398,11 +398,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public BoolNode(TtBinaryOperatorExpression.EBinaryOperation op, string name)
             : base(op, name)
         {
-            LeftType = Rtti.UTypeDescGetter<bool>.TypeDesc;
+            LeftType = Rtti.TtTypeDescGetter<bool>.TypeDesc;
         }
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
-            return Rtti.UTypeDesc.TypeOf(typeof(bool));
+            return Rtti.TtTypeDesc.TypeOf(typeof(bool));
         }
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {

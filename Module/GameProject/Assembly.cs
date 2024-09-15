@@ -6,7 +6,7 @@ namespace EngineNS.Rtti
 {
     public partial class AssemblyEntry
     {
-        public partial class GameAssemblyDesc : UAssemblyDesc
+        public partial class GameAssemblyDesc : TtAssemblyDesc
         {
             public GameAssemblyDesc()
             {
@@ -22,7 +22,7 @@ namespace EngineNS.Rtti
             public override string Platform { get { return "Windows"; } }
         }
         static GameAssemblyDesc AssmblyDesc = new GameAssemblyDesc();
-        public static UAssemblyDesc GetAssemblyDesc()
+        public static TtAssemblyDesc GetAssemblyDesc()
         {
             return AssmblyDesc;
         }

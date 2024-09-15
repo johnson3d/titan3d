@@ -14,10 +14,10 @@ namespace EngineNS.UI.Editor
     [AttributeUsage(AttributeTargets.Class)]
     public class EditorDecoratorAttribute : Attribute
     {
-        public Rtti.UTypeDesc TypeDesc;
+        public Rtti.TtTypeDesc TypeDesc;
         public EditorDecoratorAttribute(Type decoratorType)
         {
-            TypeDesc = Rtti.UTypeDesc.TypeOf(decoratorType);
+            TypeDesc = Rtti.TtTypeDesc.TypeOf(decoratorType);
         }
     }
 
@@ -38,7 +38,7 @@ namespace EngineNS.UI.Editor
         internal TtUINode SelectedRect;
         internal TtUINode PointAtRect;
         internal TtHitproxyNode HitProxyNode;
-        Dictionary<Rtti.UTypeDesc, IUIEditorDecorator> mDecorators = new Dictionary<UTypeDesc, IUIEditorDecorator>();
+        Dictionary<Rtti.TtTypeDesc, IUIEditorDecorator> mDecorators = new Dictionary<TtTypeDesc, IUIEditorDecorator>();
         internal IUIEditorDecorator CurrentDecorator;
 
         async Thread.Async.TtTask InitializeDecorators()
@@ -136,7 +136,7 @@ namespace EngineNS.UI.Editor
                 SelectedRect.GetUIHost(0).MeshDirty = true;
                 SelectedRect.Parent = mUINode;
 
-                UTypeDesc decalType;
+                TtTypeDesc decalType;
                 var parent = VisualTreeHelper.GetParent(mSelectedElements[0]);
                 if(parent != null)
                 {
@@ -146,14 +146,14 @@ namespace EngineNS.UI.Editor
                         decalType = ((EditorDecoratorAttribute)atts[0]).TypeDesc;
                         if(!mDecorators.TryGetValue(decalType, out CurrentDecorator))
                         {
-                            CurrentDecorator = UTypeDescManager.CreateInstance(decalType) as IUIEditorDecorator;
+                            CurrentDecorator = TtTypeDescManager.CreateInstance(decalType) as IUIEditorDecorator;
                             await CurrentDecorator.Initialize(this);
                             mDecorators[decalType] = CurrentDecorator;
                         }
                         // when update type, type is not equal
                         if(CurrentDecorator != null && !decalType.IsEqual(CurrentDecorator.GetType()))
                         {
-                            CurrentDecorator = UTypeDescManager.CreateInstance(decalType) as IUIEditorDecorator;
+                            CurrentDecorator = TtTypeDescManager.CreateInstance(decalType) as IUIEditorDecorator;
                             await CurrentDecorator.Initialize(this);
                             mDecorators[decalType] = CurrentDecorator;
                         }

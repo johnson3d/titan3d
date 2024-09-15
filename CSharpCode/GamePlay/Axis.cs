@@ -245,7 +245,7 @@ namespace EngineNS.GamePlay
                 var mesh = new Graphics.Mesh.TtMesh();
                 var ok = await mesh.Initialize(new List<RName>() { meshName }, 
                     new List<List<Graphics.Pipeline.Shader.TtMaterial>>() { materials },
-                    Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                    Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 mesh.IsAcceptShadow = false;
                 return ok ? mesh : null;
             }
@@ -986,7 +986,7 @@ namespace EngineNS.GamePlay
             var rotArrowAssetMesh = new Graphics.Mesh.TtMesh();
             var ok = await rotArrowAssetMesh.Initialize(mAxisMeshMoveX, 
                 new List<Graphics.Pipeline.Shader.TtMaterial>() { rotArrowAssetMat },
-                Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if(ok)
             {
                 rotArrowAssetMesh.IsAcceptShadow = false;
@@ -1020,7 +1020,7 @@ namespace EngineNS.GamePlay
             var ok = mesh.Initialize(
                 planeMesh,
                 new Graphics.Pipeline.Shader.TtMaterial[] { planeMaterial },
-                Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if(ok)
             {
                 mesh.IsAcceptShadow = false;
@@ -1044,7 +1044,7 @@ namespace EngineNS.GamePlay
             var pointMesh = point.ToMesh();
             var pointMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Center);
             ok = mesh.Initialize(pointMesh, new Graphics.Pipeline.Shader.TtMaterial[] { pointMaterial },
-                Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if(ok)
             {
                 mesh.IsAcceptShadow = false;

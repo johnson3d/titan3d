@@ -106,7 +106,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public class MaterialImportAttribute : IO.CommonCreateAttribute
         {
-            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)
             {
                 await base.DoCreate(dir, type, ext);
 
@@ -144,7 +144,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 ameta.SaveAMeta(this);
             }
 
-            var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
+            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
             using (var xnd = new IO.TtXndHolder(typeStr, 0, 0))
             {
                 using (var attr = xnd.NewAttribute("Material", 0, 0))
@@ -1091,7 +1091,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             Materials.Clear();
         }
-        public async Thread.Async.TtTask Initialize(UGfxDevice device)
+        public async Thread.Async.TtTask Initialize(TtGfxDevice device)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
             ScreenMaterial = new TtMaterial();

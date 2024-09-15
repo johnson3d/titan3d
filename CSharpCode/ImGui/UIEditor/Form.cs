@@ -268,11 +268,11 @@ namespace EngineNS.EGui.UIEditor
             FormCode += result;
             return result;
         }
-        public Rtti.UTypeDesc BindType
+        public Rtti.TtTypeDesc BindType
         {
             get;
             set;
-        } = Rtti.UTypeDesc.TypeOf(typeof(Form));
+        } = Rtti.TtTypeDesc.TypeOf(typeof(Form));
         internal static string BindTargetName = "_mBindTarget";
         public void GenCode()
         {

@@ -11,7 +11,7 @@ namespace EngineNS.EGui.UIProxy
         System.Threading.Tasks.Task<bool> Initialize();
         bool OnDraw(in ImDrawList drawList, in Support.TtAnyPointer drawData);
     }
-    public class UIManager : UModule<TtEngine>
+    public class UIManager : TtModule<TtEngine>
     {
         Dictionary<string, IUIProxyBase> mDic = new Dictionary<string, IUIProxyBase>();
 

@@ -59,7 +59,7 @@ namespace EngineNS.Bricks.PythonRuntime
         }
     }
 
-    public class TtPython : UModule<TtEngine>
+    public class TtPython : TtModule<TtEngine>
     {
         public TtPyModule RootModule { get; private set; }
         public bool StartPython { get; set; } = false;
@@ -70,7 +70,7 @@ namespace EngineNS.Bricks.PythonRuntime
             PythonWrapper.FPyUtility.InitializePython();
             RootModule = new TtPyModule(null, "PyTitan");
             var args = new object[] { this, };
-            foreach (var i in Rtti.UTypeDescManager.Instance.Services)
+            foreach (var i in Rtti.TtTypeDescManager.Instance.Services)
             {
                 foreach (var j in i.Value.Types)
                 {

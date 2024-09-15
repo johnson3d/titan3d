@@ -46,13 +46,13 @@ namespace EngineNS.EGui
         {
             Visible = visible;
             Name = name;
-            ElementType = Rtti.UTypeDesc.TypeOf(type);
+            ElementType = Rtti.TtTypeDesc.TypeOf(type);
             LayoutIndex = 0;
             LayoutOffset = 0;
         }
         public bool Visible;
         public string Name;
-        public Rtti.UTypeDesc ElementType;
+        public Rtti.TtTypeDesc ElementType;
         public int LayoutIndex;
         public int LayoutOffset;
     }

@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS
 {
-    public class UModuleHost<THost> where THost : class
+    public class TtModuleHost<THost> where THost : class
     {
-        protected List<UModule<THost>> mModules = new List<UModule<THost>>();
+        protected List<TtModule<THost>> mModules = new List<TtModule<THost>>();
         protected virtual THost GetHost()
         {
             return null;
@@ -17,9 +17,9 @@ namespace EngineNS
             var props = this.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Static);
             foreach (var i in props)
             {
-                if (i.PropertyType.IsSubclassOf(typeof(UModule<THost>)))
+                if (i.PropertyType.IsSubclassOf(typeof(TtModule<THost>)))
                 {
-                    var module = i.GetValue(this) as UModule<THost>;
+                    var module = i.GetValue(this) as TtModule<THost>;
                     if (module == null)
                         continue;
                     mModules.Add(module);
@@ -111,7 +111,7 @@ namespace EngineNS
             }
         }
     }
-    public class UModule<THost> where THost : class
+    public class TtModule<THost> where THost : class
     {
         [Flags]
         public enum EModuleFlags : uint

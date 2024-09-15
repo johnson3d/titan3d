@@ -165,7 +165,7 @@ namespace EngineNS.Editor.ShaderCompiler
             }
             else if (file.EndsWith("/MdfQueue"))
             {
-                var mdf = Rtti.UTypeDescManager.CreateInstance(MdfQueueType) as Graphics.Pipeline.Shader.TtMdfQueueBase;
+                var mdf = Rtti.TtTypeDescManager.CreateInstance(MdfQueueType) as Graphics.Pipeline.Shader.TtMdfQueueBase;
                 if (mdf != null)
                 {
                     if (IsWriteDebugFile)
@@ -216,7 +216,7 @@ namespace EngineNS.Editor.ShaderCompiler
         }
         private TtHLSLInclude UserInclude;
         private Graphics.Pipeline.Shader.TtMaterial Material;
-        private Rtti.UTypeDesc MdfQueueType;
+        private Rtti.TtTypeDesc MdfQueueType;
         private string GetVertexStreamDefine(NxRHI.EVertexStreamType type)
         {
             switch (type)
@@ -369,7 +369,7 @@ namespace EngineNS.Editor.ShaderCompiler
                 desc.PermutationId = shadingEnvshadingEnv.CurrentPermutationId;
             UserInclude = incProvider;
             Material = mtl;
-            MdfQueueType = Rtti.UTypeDesc.TypeOf(mdfType);
+            MdfQueueType = Rtti.TtTypeDesc.TypeOf(mdfType);
             //IShaderDefinitions defPtr = new IShaderDefinitions((void*)0);
             using (var defPtr = new NxRHI.TtShaderDefinitions())
             {
@@ -421,7 +421,7 @@ namespace EngineNS.Editor.ShaderCompiler
                         }
                     }
                     {
-                        var mdfObj = Rtti.UTypeDescManager.CreateInstance(MdfQueueType) as Graphics.Pipeline.Shader.TtMdfQueueBase;
+                        var mdfObj = Rtti.TtTypeDescManager.CreateInstance(MdfQueueType) as Graphics.Pipeline.Shader.TtMdfQueueBase;
                         if (mdfObj != null)
                         {
                             var mdfNeeds = mdfObj.GetNeedStreams();

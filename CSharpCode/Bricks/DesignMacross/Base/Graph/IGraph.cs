@@ -6,10 +6,10 @@ namespace EngineNS.DesignMacross.Base.Graph
 {
     public class GraphAttribute : Attribute
     {
-        public UTypeDesc ClassType { get; set; }
+        public TtTypeDesc ClassType { get; set; }
         public GraphAttribute(Type type)
         {
-            ClassType = UTypeDesc.TypeOf(type);
+            ClassType = TtTypeDesc.TypeOf(type);
         }
         public static GraphAttribute GetAttributeWithSpecificClassType<T>(Type type)
         {
@@ -27,16 +27,16 @@ namespace EngineNS.DesignMacross.Base.Graph
     }
     public class GraphElementAttribute : Attribute
     {
-        public UTypeDesc ClassType { get; set; }
+        public TtTypeDesc ClassType { get; set; }
         public Vector2 DefaultLocation { get; set; }
         public GraphElementAttribute(Type type)
         {
-            ClassType = UTypeDesc.TypeOf(type);
+            ClassType = TtTypeDesc.TypeOf(type);
             DefaultLocation = Vector2.Zero;
         }
         public GraphElementAttribute(Type type, float defaultLocationX, float defaultLocationY)
         {
-            ClassType = UTypeDesc.TypeOf(type);
+            ClassType = TtTypeDesc.TypeOf(type);
             DefaultLocation = new Vector2(defaultLocationX, defaultLocationY);
         }
         public static GraphElementAttribute GetAttributeWithSpecificClassType<T>(Type type)

@@ -55,7 +55,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public class SceneCreateAttribute : IO.CommonCreateAttribute
         {
-            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)
             {
                 ExtName = ext;
                 mName = null;
@@ -65,7 +65,7 @@ namespace EngineNS.GamePlay.Scene
 
                 PGAssetInitTask = PGAsset.Initialize();
                 //mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType, new USceneData()) as IO.IAsset;
-                mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IO.IAsset;
+                mAsset = Rtti.TtTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IO.IAsset;
                 var world = new TtWorld(null);
                 await world.InitWorld();
                 var task = (mAsset as TtScene).InitializeNode(world, new TtSceneData(), EBoundVolumeType.Box, typeof(TtPlacement));
@@ -189,7 +189,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public async Thread.Async.TtTask<TtSceneActorNode> NewNode(GamePlay.TtWorld world, string nodeType, TtNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
         {
-            var ntype = Rtti.UTypeDesc.TypeOf(nodeType);
+            var ntype = Rtti.TtTypeDesc.TypeOf(nodeType);
             return await NewNode(world, ntype.SystemType, data, bvType, placementType, false);
         }
         public async Thread.Async.TtTask<TtSceneActorNode> NewNodeSimple(GamePlay.TtWorld world, Type nodeType, TtNodeData data, bool isSceneManaged = false)
@@ -198,7 +198,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public async Thread.Async.TtTask<TtSceneActorNode> NewNode(GamePlay.TtWorld world, Type nodeType, TtNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
         {
-            var node = Rtti.UTypeDescManager.CreateInstance(nodeType) as TtSceneActorNode;
+            var node = Rtti.TtTypeDescManager.CreateInstance(nodeType) as TtSceneActorNode;
             if (node != null)
             {
                 if (await node.InitializeNode(world, data, bvType, placementType) == false)
@@ -221,13 +221,13 @@ namespace EngineNS.GamePlay.Scene
                 ameta.SaveAMeta(this);
             }
 
-            var typeStr = Rtti.UTypeDesc.TypeStr(GetType());
+            var typeStr = Rtti.TtTypeDesc.TypeStr(GetType());
             var xndHolder = new EngineNS.IO.TtXndHolder(typeStr, 1, 0);
             var xnd = xndHolder;
             var node = xndHolder.RootNode;
             if (SceneData != null)
             {
-                using (var dataAttr = xnd.NewAttribute(Rtti.UTypeDesc.TypeStr(SceneData.GetType()), 1, SceneDescAttributeFlags))
+                using (var dataAttr = xnd.NewAttribute(Rtti.TtTypeDesc.TypeStr(SceneData.GetType()), 1, SceneDescAttributeFlags))
                 {
                     node.AddAttribute(dataAttr);
                     using (var ar = dataAttr.GetWriter((ulong)SceneData.GetStructSize() * 2))
@@ -252,11 +252,11 @@ namespace EngineNS.GamePlay.Scene
                     return null;
                 }
 
-                TtSceneData nodeData = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(descAttr.Name)) as TtSceneData;
+                TtSceneData nodeData = Rtti.TtTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(descAttr.Name)) as TtSceneData;
 
                 //UScene don't have construct with params
-                //UScene scene = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(xnd.RootNode.Name), nodeData) as UScene;
-                TtScene scene = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(xnd.RootNode.Name)) as TtScene;
+                //UScene scene = Rtti.UTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(xnd.RootNode.Name), nodeData) as UScene;
+                TtScene scene = Rtti.TtTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(xnd.RootNode.Name)) as TtScene;
                 if (scene == null)
                     return null;
 
@@ -455,7 +455,7 @@ namespace EngineNS.GamePlay.Scene
         }
     }
 
-    public class USceneManager : UModule<TtEngine>
+    public class USceneManager : TtModule<TtEngine>
     {
         public override void Cleanup(TtEngine host)
         {

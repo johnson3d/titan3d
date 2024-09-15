@@ -53,7 +53,7 @@ namespace EngineNS.Bricks.DataSet
                     var elemType = i.PropInfo.PropertyType.GetGenericArguments()[0];
                     
                     var segs = linkInfo.Split(',');
-                    var lst = Rtti.UTypeDescManager.CreateInstance(i.PropInfo.PropertyType) as System.Collections.IList;
+                    var lst = Rtti.TtTypeDescManager.CreateInstance(i.PropInfo.PropertyType) as System.Collections.IList;
                     foreach (var j in segs)
                     {
                         var k = System.Convert.ToInt32(j);

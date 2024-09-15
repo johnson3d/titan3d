@@ -62,7 +62,7 @@ namespace EngineNS.UI
                 case EBrushType.Rectangle:
                     break;
             }
-            collection.InitValue(this, EngineNS.Rtti.UTypeDesc.TypeOf(this.GetType()), pros, parentIsValueType);
+            collection.InitValue(this, EngineNS.Rtti.TtTypeDesc.TypeOf(this.GetType()), pros, parentIsValueType);
 
             TtBindingOperations.DefaultGetBindProperties(this, mBindExprDic, ref collection);
         }

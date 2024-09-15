@@ -48,7 +48,7 @@ namespace EngineNS.Bricks.Procedure
             CanvasMenus.SubMenuItems.Clear();
             CanvasMenus.Text = "Canvas";
 
-            foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
+            foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
             {
                 foreach (var typeDesc in service.Types.Values)
                 {
@@ -71,7 +71,7 @@ namespace EngineNS.Bricks.Procedure
                                 parentMenu.AddMenuItem(menuStr, att.FilterStrings, null,
                                     (TtMenuItem item, object sender) =>
                                     {
-                                        var node = Rtti.UTypeDescManager.CreateInstance(typeDesc) as UNodeBase;
+                                        var node = Rtti.TtTypeDescManager.CreateInstance(typeDesc) as UNodeBase;
                                         if (nodeName != null)
                                             node.Name = nodeName;
                                         node.UserData = this;

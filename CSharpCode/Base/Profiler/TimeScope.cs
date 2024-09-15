@@ -378,7 +378,7 @@ namespace EngineNS.Profiler
         #endregion
     }
 
-    public class TtProfilerModule : UModule<TtEngine>
+    public class TtProfilerModule : TtModule<TtEngine>
     {
         public NxRHI.TtGpuTimeScopeManager GpuTimeScopeManager { get; } = new NxRHI.TtGpuTimeScopeManager();
         public override unsafe void TickModule(TtEngine host)

@@ -13,7 +13,7 @@ namespace EngineNS.IO
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class IAssetCreateAttribute : Attribute
     {
-        public virtual async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+        public virtual async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)
         {
 
         }
@@ -54,7 +54,7 @@ namespace EngineNS.IO
                 return null;
             return RName.GetRName(mDir.Name + mName + ExtName, mDir.RNameType);
         }
-        public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+        public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)
         {
             ExtName = ext;
             mName = null;
@@ -63,7 +63,7 @@ namespace EngineNS.IO
             TypeSlt.SelectedType = type;
 
             PGAssetInitTask = PGAsset.Initialize();
-            mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IAsset;
+            mAsset = Rtti.TtTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IAsset;
             PGAsset.Target = mAsset;
         }
         public override unsafe bool OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
@@ -103,7 +103,7 @@ namespace EngineNS.IO
                 TypeSlt.OnDraw(-1, 6);
                 if (TypeSlt.SelectedType != saved)
                 {
-                    mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IAsset;
+                    mAsset = Rtti.TtTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IAsset;
                     PGAsset.Target = mAsset;
                 }
 
@@ -171,7 +171,7 @@ namespace EngineNS.IO
             var ameta = mAsset.CreateAMeta();
             ameta.SetAssetName(mAsset.AssetName);
             ameta.AssetId = Guid.NewGuid();
-            ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(mAsset.GetType());
+            ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(mAsset.GetType());
             ameta.Description = $"This is a {mAsset.GetType().FullName}\n";
             ameta.SaveAMeta((IAsset)null);
 
@@ -308,7 +308,7 @@ namespace EngineNS.IO
                 return;
             var tarName = RName.GetRName(name, type);
             var ameta = TtEngine.Instance.AssetMetaManager.NewAMeta(tarName, asset.GetAMeta().GetType());
-            ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(asset.GetType());
+            ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(asset.GetType());
             foreach (var i in this.RefAssetRNames)
             {
                 ameta.RefAssetRNames.Add(i);
@@ -346,7 +346,7 @@ namespace EngineNS.IO
             {
                 if (asset != null)
                 {
-                    TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(asset.GetType());
+                    TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(asset.GetType());
                 }
                 var fileName = mAssetName.Address + MetaExt;
                 SaveAMeta(fileName);
@@ -707,7 +707,7 @@ namespace EngineNS.IO
             ameta = asset.CreateAMeta();
             ameta.SetAssetName(name);
             ameta.AssetId = Guid.NewGuid();
-            ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(T));
+            ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(T));
             ameta.SaveAMeta(asset);
             Assets.Add(ameta.AssetId, ameta);
             RNameAssets.Add(ameta.GetAssetName(), ameta);
@@ -721,14 +721,14 @@ namespace EngineNS.IO
             {
                 return null;
             }
-            var asset = Rtti.UTypeDescManager.CreateInstance(type) as IAsset;
+            var asset = Rtti.TtTypeDescManager.CreateInstance(type) as IAsset;
             if (asset == null)
                 return null;
             asset.AssetName = name;
             ameta = asset.CreateAMeta();
             ameta.SetAssetName(name);
             ameta.AssetId = Guid.NewGuid();
-            ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(type);
+            ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(type);
             ameta.SaveAMeta(asset);
             Assets.Add(ameta.AssetId, ameta);
             RNameAssets.Add(ameta.GetAssetName(), ameta);
@@ -742,7 +742,7 @@ namespace EngineNS.IO
             {
                 return null;
             }
-            ameta = Rtti.UTypeDescManager.CreateInstance(metaType) as IAssetMeta;
+            ameta = Rtti.TtTypeDescManager.CreateInstance(metaType) as IAssetMeta;
             ameta.SetAssetName(name);
             ameta.AssetId = Guid.NewGuid();
             //ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(type);
@@ -751,7 +751,7 @@ namespace EngineNS.IO
             RNameAssets.Add(ameta.GetAssetName(), ameta);
             return ameta;
         }
-        public IAssetCreateAttribute ImportAsset(RName dir, Rtti.UTypeDesc type, string ext)
+        public IAssetCreateAttribute ImportAsset(RName dir, Rtti.TtTypeDesc type, string ext)
         {
             var attrs = type.GetCustomAttributes(typeof(IAssetCreateAttribute), true);
             if (attrs.Length > 0)
@@ -762,7 +762,7 @@ namespace EngineNS.IO
             }
             return null;
         }
-        public async Thread.Async.TtTask<IAssetCreateAttribute> AwaitImportAsset(RName dir, Rtti.UTypeDesc type, string ext)
+        public async Thread.Async.TtTask<IAssetCreateAttribute> AwaitImportAsset(RName dir, Rtti.TtTypeDesc type, string ext)
         {
             var attrs = type.GetCustomAttributes(typeof(IAssetCreateAttribute), true);
             if (attrs.Length > 0)

@@ -70,7 +70,7 @@ namespace EngineNS.Bricks.Particle
     {
         public Dictionary<Hash160, TtNebulaShader> Shaders { get; } = new Dictionary<Hash160, TtNebulaShader>();
     }
-    public class UNebulaTemplateManager : UModule<TtEngine>
+    public class UNebulaTemplateManager : TtModule<TtEngine>
     {
         public uint ShaderRandomPoolSize = 65535;
         public NxRHI.TtBuffer RandomPoolBuffer;

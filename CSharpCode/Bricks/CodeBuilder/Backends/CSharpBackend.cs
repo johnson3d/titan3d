@@ -1124,7 +1124,7 @@ namespace EngineNS.Bricks.CodeBuilder
         UCommentStatementCodeGen mCommentStatementCodeGen = new UCommentStatementCodeGen();
         UExpressionStatementCodeGen mExpressionStatementCodeGen = new UExpressionStatementCodeGen();
 
-        public override ICodeObjectGen GetCodeObjectGen(Rtti.UTypeDesc type)
+        public override ICodeObjectGen GetCodeObjectGen(Rtti.TtTypeDesc type)
         {
             if (type.IsEqual(typeof(TtDebuggerSetWatchVariable)))
                 return mDebuggerSetWatchVariableCodeGen;
@@ -1200,14 +1200,14 @@ namespace EngineNS.Bricks.CodeBuilder
             else
                 return t.TypeFullName;
         }
-        public override string GetTypeString(UTypeDesc t)
+        public override string GetTypeString(TtTypeDesc t)
         {
             if (t == null)
                 return "";
             return base.GetTypeString(t);
             //if (t.SystemType != null)
             //{
-            //    return Rtti.UTypeDesc.GetCSharpTypeNameString(t.SystemType);
+            //    return Rtti.TtTypeDesc.GetCSharpTypeNameString(t.SystemType);
             //}
             //else
             //    return t.FullName;

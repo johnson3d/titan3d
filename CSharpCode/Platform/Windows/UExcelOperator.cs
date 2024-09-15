@@ -83,7 +83,7 @@ namespace EngineNS.Bricks.DataSet
                 {
                     break;
                 }
-                var obj = Rtti.UTypeDescManager.CreateInstance(objType) as IDataProvider;
+                var obj = Rtti.TtTypeDescManager.CreateInstance(objType) as IDataProvider;
                 if (obj == null)
                     return false;
 
@@ -144,7 +144,7 @@ namespace EngineNS.Bricks.DataSet
             if (type.IsGenericType && type.GetInterface("IList") != null)
             {
                 var elemType = type.GetGenericArguments()[0];
-                var lst = Rtti.UTypeDescManager.CreateInstance(type) as System.Collections.IList;
+                var lst = Rtti.TtTypeDescManager.CreateInstance(type) as System.Collections.IList;
                 if (elemType == typeof(string))
                 {
 

@@ -31,8 +31,8 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     }
     public struct FGrassTransformDataOperator : Procedure.ISuperPixelOperator<FGrassTransformData>
     {
-        public Rtti.UTypeDesc ElementType => Rtti.UTypeDescGetter<FGrassTransformData>.TypeDesc;
-        public Rtti.UTypeDesc BufferType => Rtti.UTypeDescGetter<USuperBuffer<FGrassTransformData, FGrassTransformDataOperator>>.TypeDesc;
+        public Rtti.TtTypeDesc ElementType => Rtti.TtTypeDescGetter<FGrassTransformData>.TypeDesc;
+        public Rtti.TtTypeDesc BufferType => Rtti.TtTypeDescGetter<USuperBuffer<FGrassTransformData, FGrassTransformDataOperator>>.TypeDesc;
         public FGrassTransformData MaxValue => FGrassTransformData.Identity;
         public FGrassTransformData MinValue => FGrassTransformData.Identity;
 
@@ -46,7 +46,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             throw new NotImplementedException();
         }
 
-        public unsafe void Add(UTypeDesc resultType, void* result, UTypeDesc leftType, void* left, UTypeDesc rightType, void* right)
+        public unsafe void Add(TtTypeDesc resultType, void* result, TtTypeDesc leftType, void* left, TtTypeDesc rightType, void* right)
         {
             throw new NotImplementedException();
         }
@@ -62,14 +62,14 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             return 0;
         }
 
-        public unsafe void Copy(UTypeDesc tarTyp, void* tar, UTypeDesc srcType, void* src)
+        public unsafe void Copy(TtTypeDesc tarTyp, void* tar, TtTypeDesc srcType, void* src)
         {
             (*(FGrassTransformData*)tar) = (*(FGrassTransformData*)src);
         }
 
-        public unsafe void Div(UTypeDesc resultType, void* result, UTypeDesc leftType, void* left, UTypeDesc rightType, void* right)
+        public unsafe void Div(TtTypeDesc resultType, void* result, TtTypeDesc leftType, void* left, TtTypeDesc rightType, void* right)
         {
-            if (resultType != Rtti.UTypeDescGetter<FGrassTransformData>.TypeDesc && resultType != leftType && resultType != rightType)
+            if (resultType != Rtti.TtTypeDescGetter<FGrassTransformData>.TypeDesc && resultType != leftType && resultType != rightType)
                 return;
 
             FGrassTransformData rValue = FGrassTransformData.Identity;
@@ -78,9 +78,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             FTransform.Multiply(out (*(FGrassTransformData*)result).Transform, in (*(FGrassTransformData*)left).Transform, in (*(FGrassTransformData*)right).Transform);
         }
 
-        public unsafe void Lerp(UTypeDesc resultType, void* result, UTypeDesc leftType, void* left, UTypeDesc rightType, void* right, float factor)
+        public unsafe void Lerp(TtTypeDesc resultType, void* result, TtTypeDesc leftType, void* left, TtTypeDesc rightType, void* right, float factor)
         {
-            if (resultType != Rtti.UTypeDescGetter<FGrassTransformData>.TypeDesc && resultType != leftType && resultType != rightType)
+            if (resultType != Rtti.TtTypeDescGetter<FGrassTransformData>.TypeDesc && resultType != leftType && resultType != rightType)
                 return;
             var rValue = FGrassTransformData.Identity;
             if (right != (void*)0)
@@ -98,9 +98,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
         }
 
-        public unsafe void Mul(UTypeDesc resultType, void* result, UTypeDesc leftType, void* left, UTypeDesc rightType, void* right)
+        public unsafe void Mul(TtTypeDesc resultType, void* result, TtTypeDesc leftType, void* left, TtTypeDesc rightType, void* right)
         {
-            if (resultType != Rtti.UTypeDescGetter<FGrassTransformData>.TypeDesc && resultType != leftType && resultType != rightType)
+            if (resultType != Rtti.TtTypeDescGetter<FGrassTransformData>.TypeDesc && resultType != leftType && resultType != rightType)
                 return;
 
             var rValue = FGrassTransformData.Identity;
@@ -119,17 +119,17 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             *(FGrassTransformData*)tar = FGrassTransformData.Identity;
         }
 
-        public unsafe void SetIfGreateThan(UTypeDesc tarTyp, void* tar, UTypeDesc srcType, void* src)
+        public unsafe void SetIfGreateThan(TtTypeDesc tarTyp, void* tar, TtTypeDesc srcType, void* src)
         {
         }
 
-        public unsafe void SetIfLessThan(UTypeDesc tarTyp, void* tar, UTypeDesc srcType, void* src)
+        public unsafe void SetIfLessThan(TtTypeDesc tarTyp, void* tar, TtTypeDesc srcType, void* src)
         {
         }
 
-        public unsafe void Sub(UTypeDesc resultType, void* result, UTypeDesc leftType, void* left, UTypeDesc rightType, void* right)
+        public unsafe void Sub(TtTypeDesc resultType, void* result, TtTypeDesc leftType, void* left, TtTypeDesc rightType, void* right)
         {
-            if (resultType != Rtti.UTypeDescGetter<FGrassTransformData>.TypeDesc && resultType != leftType && resultType != rightType)
+            if (resultType != Rtti.TtTypeDescGetter<FGrassTransformData>.TypeDesc && resultType != leftType && resultType != rightType)
                 return;
             var rValue = FGrassTransformData.Identity;
             if (right != (void*)0)
@@ -247,9 +247,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 }
                 Mesh = new Graphics.Mesh.TtMesh();
                 if (desc.FollowHeight)
-                    Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Grass.UMdf_Grass_VertexFollowHeight>>.TypeDesc);
+                    Mesh.Initialize(MaterialMesh, Rtti.TtTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Grass.UMdf_Grass_VertexFollowHeight>>.TypeDesc);
                 else
-                    Mesh.Initialize(MaterialMesh, Rtti.UTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Grass.UMdf_Grass_VertexNotFollowHeight>>.TypeDesc);
+                    Mesh.Initialize(MaterialMesh, Rtti.TtTypeDescGetter<Grass.UMdfGrassStaticMeshPermutation<Grass.UMdf_Grass_VertexNotFollowHeight>>.TypeDesc);
                 
                 Mesh.IsAcceptShadow = !desc.NoShadow;
                 Mesh.IsCastShadow = true;

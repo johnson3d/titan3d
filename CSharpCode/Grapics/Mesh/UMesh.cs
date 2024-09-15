@@ -61,8 +61,8 @@ namespace EngineNS.Graphics.Mesh
             MaterialMesh.SerialId = MaterialMeshSerialId;
 
             Initialize(MaterialMesh,
-                Rtti.UTypeDesc.TypeOf(MdfQueue.GetType()),
-                Rtti.UTypeDesc.TypeOf(mSubMeshes[0].Atoms[0].GetType()));
+                Rtti.TtTypeDesc.TypeOf(MdfQueue.GetType()),
+                Rtti.TtTypeDesc.TypeOf(mSubMeshes[0].Atoms[0].GetType()));
         }
 
         public Pipeline.Shader.TtMdfQueueBase MdfQueue { get; private set; }
@@ -501,16 +501,16 @@ namespace EngineNS.Graphics.Mesh
         {
             get
             {
-                return Rtti.UTypeDesc.TypeStr(this.MdfQueue.GetType());
+                return Rtti.TtTypeDesc.TypeStr(this.MdfQueue.GetType());
             }
             set
             {
-                SetMdfQueueType(Rtti.UTypeDesc.TypeOf(value));
+                SetMdfQueueType(Rtti.TtTypeDesc.TypeOf(value));
             }
         }
-        internal bool SetMdfQueueType(Rtti.UTypeDesc mdfQueueType)
+        internal bool SetMdfQueueType(Rtti.TtTypeDesc mdfQueueType)
         {
-            var mdf = Rtti.UTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.TtMdfQueueBase;
+            var mdf = Rtti.TtTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.TtMdfQueueBase;
             if (mdf == null)
                 return false;
             MdfQueue.Initialize(MaterialMesh);
@@ -527,14 +527,14 @@ namespace EngineNS.Graphics.Mesh
             }
             return true;
         }
-        public bool Initialize(TtMaterialMesh materialMesh, Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
+        public bool Initialize(TtMaterialMesh materialMesh, Rtti.TtTypeDesc mdfQueueType, Rtti.TtTypeDesc atomType = null)
         {
             if (atomType == null)
-                atomType = Rtti.UTypeDesc.TypeOf(typeof(TtAtom));
-            if (atomType != Rtti.UTypeDesc.TypeOf(typeof(TtAtom)) && atomType.IsSubclassOf(typeof(TtAtom)) == false)
+                atomType = Rtti.TtTypeDesc.TypeOf(typeof(TtAtom));
+            if (atomType != Rtti.TtTypeDesc.TypeOf(typeof(TtAtom)) && atomType.IsSubclassOf(typeof(TtAtom)) == false)
                 return false;
             
-            MdfQueue = Rtti.UTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.TtMdfQueueBase;
+            MdfQueue = Rtti.TtTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.TtMdfQueueBase;
             if (MdfQueue == null)
                 return false;
             MdfQueue.Initialize(materialMesh);
@@ -549,7 +549,7 @@ namespace EngineNS.Graphics.Mesh
                 sbMesh.Atoms.Resize(MaterialMesh.SubMeshes[j].Materials.Count);
                 for (int i = 0; i < sbMesh.Atoms.Count; i++)
                 {
-                    sbMesh.Atoms[i] = Rtti.UTypeDescManager.CreateInstance(atomType) as TtAtom;
+                    sbMesh.Atoms[i] = Rtti.TtTypeDescManager.CreateInstance(atomType) as TtAtom;
                     sbMesh.Atoms[i].SubMesh = sbMesh;
                     sbMesh.Atoms[i].AtomIndex = i;
                     sbMesh.Atoms[i].Material = MaterialMesh.SubMeshes[j].Materials[i];
@@ -559,7 +559,7 @@ namespace EngineNS.Graphics.Mesh
 
             return true;
         }
-        public async Thread.Async.TtTask<bool> Initialize(RName materialMesh, Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
+        public async Thread.Async.TtTask<bool> Initialize(RName materialMesh, Rtti.TtTypeDesc mdfQueueType, Rtti.TtTypeDesc atomType = null)
         {
             MaterialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(materialMesh);
             if (MaterialMesh == null)
@@ -568,11 +568,11 @@ namespace EngineNS.Graphics.Mesh
             return Initialize(MaterialMesh, mdfQueueType, atomType);
         }
         public async Thread.Async.TtTask<bool> Initialize(List<RName> meshSource, List<List<Pipeline.Shader.TtMaterial>> materials,
-            Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
+            Rtti.TtTypeDesc mdfQueueType, Rtti.TtTypeDesc atomType = null)
         {
             if (atomType == null)
-                atomType = Rtti.UTypeDesc.TypeOf(typeof(TtAtom));
-            if (atomType != Rtti.UTypeDesc.TypeOf(typeof(TtAtom)) && atomType.IsSubclassOf(typeof(TtAtom)) == false)
+                atomType = Rtti.TtTypeDesc.TypeOf(typeof(TtAtom));
+            if (atomType != Rtti.TtTypeDesc.TypeOf(typeof(TtAtom)) && atomType.IsSubclassOf(typeof(TtAtom)) == false)
                 return false;
 
             var mesh = new List<TtMeshPrimitives>();
@@ -584,7 +584,7 @@ namespace EngineNS.Graphics.Mesh
             if (false == UpdateMesh(mesh, materials, atomType))
                 return false;
 
-            MdfQueue = Rtti.UTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.TtMdfQueueBase;
+            MdfQueue = Rtti.TtTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.TtMdfQueueBase;
             if (MdfQueue == null)
                 return false;
             MdfQueue.Initialize(MaterialMesh);
@@ -592,19 +592,19 @@ namespace EngineNS.Graphics.Mesh
         }
 
         public bool Initialize(List<TtMeshPrimitives> mesh, List<List<Pipeline.Shader.TtMaterial>> materials,
-            Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
+            Rtti.TtTypeDesc mdfQueueType, Rtti.TtTypeDesc atomType = null)
         {
             if (false == UpdateMesh(mesh, materials, atomType))
                 return false;
 
-            MdfQueue = Rtti.UTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.TtMdfQueueBase;
+            MdfQueue = Rtti.TtTypeDescManager.CreateInstance(mdfQueueType) as Pipeline.Shader.TtMdfQueueBase;
             if (MdfQueue == null)
                 return false;
             MdfQueue.Initialize(MaterialMesh);
             return true; 
         }
         public bool Initialize(TtMeshPrimitives mesh, Pipeline.Shader.TtMaterial[] mats,
-            Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
+            Rtti.TtTypeDesc mdfQueueType, Rtti.TtTypeDesc atomType = null)
         {
             var materials = ListExtra.CreateList(mats);
             return Initialize(new List<TtMeshPrimitives>(){ mesh }, 
@@ -612,21 +612,21 @@ namespace EngineNS.Graphics.Mesh
                 mdfQueueType, atomType);
         }
         public bool Initialize(TtMeshPrimitives mesh, List<Pipeline.Shader.TtMaterial> materials,
-            Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
+            Rtti.TtTypeDesc mdfQueueType, Rtti.TtTypeDesc atomType = null)
         {
             return Initialize(new List<TtMeshPrimitives>() { mesh },
                 new List<List<Pipeline.Shader.TtMaterial>>() { materials },
                 mdfQueueType, atomType);
         }
         public async Thread.Async.TtTask<bool> Initialize(RName meshName, List<Pipeline.Shader.TtMaterial> materials,
-            Rtti.UTypeDesc mdfQueueType, Rtti.UTypeDesc atomType = null)
+            Rtti.TtTypeDesc mdfQueueType, Rtti.TtTypeDesc atomType = null)
         {
             var mesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(meshName);
             return Initialize(new List<TtMeshPrimitives>() { mesh },
                 new List<List<Pipeline.Shader.TtMaterial>>() { materials },
                 mdfQueueType, atomType);
         }
-        public bool UpdateMaterial(Pipeline.Shader.TtMaterial material, int subMesh = -1, Rtti.UTypeDesc atomType = null)
+        public bool UpdateMaterial(Pipeline.Shader.TtMaterial material, int subMesh = -1, Rtti.TtTypeDesc atomType = null)
         {
             if(subMesh >= 0 && subMesh < MaterialMesh.SubMeshes.Count)
             {
@@ -643,7 +643,7 @@ namespace EngineNS.Graphics.Mesh
             }
             return true;
         }
-        public bool UpdateMaterial(List<Pipeline.Shader.TtMaterial> materials, int subMesh = -1, Rtti.UTypeDesc atomType = null)
+        public bool UpdateMaterial(List<Pipeline.Shader.TtMaterial> materials, int subMesh = -1, Rtti.TtTypeDesc atomType = null)
         {
             if(subMesh >= 0 && subMesh < MaterialMesh.SubMeshes.Count)
             {
@@ -660,10 +660,10 @@ namespace EngineNS.Graphics.Mesh
             }
             return true;
         }
-        public bool UpdateMesh(int subMesh, TtMeshPrimitives mesh, Pipeline.Shader.TtMaterial material, Rtti.UTypeDesc atomType = null)
+        public bool UpdateMesh(int subMesh, TtMeshPrimitives mesh, Pipeline.Shader.TtMaterial material, Rtti.TtTypeDesc atomType = null)
         {
             if (atomType == null)
-                atomType = Rtti.UTypeDescGetter<TtAtom>.TypeDesc;
+                atomType = Rtti.TtTypeDescGetter<TtAtom>.TypeDesc;
 
             var sbMesh = MaterialMesh.SubMeshes[subMesh];
             sbMesh.Mesh = mesh;
@@ -675,10 +675,10 @@ namespace EngineNS.Graphics.Mesh
             MeshAtomUpdate(subMesh, atomType);
             return true;
         }
-        public bool UpdateMesh(int subMesh, TtMeshPrimitives mesh, List<Pipeline.Shader.TtMaterial> materials, Rtti.UTypeDesc atomType = null)
+        public bool UpdateMesh(int subMesh, TtMeshPrimitives mesh, List<Pipeline.Shader.TtMaterial> materials, Rtti.TtTypeDesc atomType = null)
         {
             if (atomType == null)
-                atomType = Rtti.UTypeDescGetter<TtAtom>.TypeDesc;
+                atomType = Rtti.TtTypeDescGetter<TtAtom>.TypeDesc;
 
             var sbMesh = MaterialMesh.SubMeshes[subMesh];
             sbMesh.Mesh = mesh;
@@ -692,7 +692,7 @@ namespace EngineNS.Graphics.Mesh
             MeshAtomUpdate(subMesh, atomType);
             return true;
         }
-        void MeshAtomUpdate(int subMesh, Rtti.UTypeDesc atomType)
+        void MeshAtomUpdate(int subMesh, Rtti.TtTypeDesc atomType)
         {
             var sbMesh = MaterialMesh.SubMeshes[subMesh];
             var tarMesh = this.SubMeshes[subMesh];
@@ -705,7 +705,7 @@ namespace EngineNS.Graphics.Mesh
             {
                 if (tarMesh.Atoms[i] == null || tarMesh.Atoms[i].GetType() != atomType.SystemType)
                 {
-                    tarMesh.Atoms[i] = Rtti.UTypeDescManager.CreateInstance(atomType) as TtAtom;
+                    tarMesh.Atoms[i] = Rtti.TtTypeDescManager.CreateInstance(atomType) as TtAtom;
                     tarMesh.Atoms[i].SubMesh = tarMesh;
                     tarMesh.Atoms[i].AtomIndex = i;
                     if (tarMesh.Atoms[i].Material != sbMesh.Materials[i])
@@ -726,7 +726,7 @@ namespace EngineNS.Graphics.Mesh
                 }
             }
         }
-        public bool UpdateMesh(List<TtMeshPrimitives> mesh, List<List<Pipeline.Shader.TtMaterial>> materials, Rtti.UTypeDesc atomType = null)
+        public bool UpdateMesh(List<TtMeshPrimitives> mesh, List<List<Pipeline.Shader.TtMaterial>> materials, Rtti.TtTypeDesc atomType = null)
         {
             if (mesh.Count != materials.Count)
                 return false;

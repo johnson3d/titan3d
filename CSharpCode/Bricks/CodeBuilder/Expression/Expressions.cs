@@ -74,7 +74,7 @@ namespace EngineNS.Bricks.CodeBuilder
             {
                 if(mTypeDesc != null)
                 {
-                    var name = Rtti.UTypeDesc.GetCSharpTypeNameString(mTypeDesc.SystemType);
+                    var name = Rtti.TtTypeDesc.GetCSharpTypeNameString(mTypeDesc.SystemType);
                     if (mTypeDesc.IsRefType)
                     {
                         return "ref " + name.Substring(0, name.Length - 1);
@@ -86,15 +86,15 @@ namespace EngineNS.Bricks.CodeBuilder
             set
             {
                 if (mTypeDesc == null)
-                    mTypeDesc = Rtti.UTypeDesc.TypeOfFullName(value);
+                    mTypeDesc = Rtti.TtTypeDesc.TypeOfFullName(value);
                 else if (mTypeDesc.FullName != value)
-                    mTypeDesc = Rtti.UTypeDesc.TypeOfFullName(value);
+                    mTypeDesc = Rtti.TtTypeDesc.TypeOfFullName(value);
                 mTypeFullName = value;
             }
         }
-        Rtti.UTypeDesc mTypeDesc;
+        Rtti.TtTypeDesc mTypeDesc;
         [Rtti.Meta(Order = 0)]
-        public Rtti.UTypeDesc TypeDesc
+        public Rtti.TtTypeDesc TypeDesc
         {
             get => mTypeDesc;
             set => mTypeDesc = value;
@@ -142,13 +142,13 @@ namespace EngineNS.Bricks.CodeBuilder
             mTypeFullName = typeFullName;
             mIsEnum = isEnum;
         }
-        public TtTypeReference(Rtti.UTypeDesc typeDesc)
+        public TtTypeReference(Rtti.TtTypeDesc typeDesc)
         {
             mTypeDesc = typeDesc;
         }
         public TtTypeReference(Type type)
         {
-            mTypeDesc = Rtti.UTypeDesc.TypeOf(type);
+            mTypeDesc = Rtti.TtTypeDesc.TypeOf(type);
         }
         public static bool operator == (TtTypeReference lhs, TtTypeReference rhs)
         {
@@ -183,7 +183,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 return mTypeDesc.IsEqual(type);
             return TypeFullName == type.FullName;
         }
-        public bool IsEqual(UTypeDesc type)
+        public bool IsEqual(TtTypeDesc type)
         {
             if (mTypeDesc != null)
                 return mTypeDesc == type;
@@ -336,7 +336,7 @@ namespace EngineNS.Bricks.CodeBuilder
             return (VariableName == varDec.VariableName) && (VariableType.Equals(varDec.VariableType));
         }
 
-        public bool HasAttribute(UTypeDesc desc)
+        public bool HasAttribute(TtTypeDesc desc)
         {
             for(int i=0; i<Attributes.Count; i++)
             {
@@ -357,7 +357,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public void GetProperties(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {
             var pros = TypeDescriptor.GetProperties(this);
-            var thisType = Rtti.UTypeDesc.TypeOf(this.GetType());
+            var thisType = Rtti.TtTypeDesc.TypeOf(this.GetType());
             foreach(PropertyDescriptor prop in pros)
             {
                 var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
@@ -366,9 +366,9 @@ namespace EngineNS.Bricks.CodeBuilder
                 {
                     case "VariableType":
                         {
-                            List<Rtti.UTypeDesc> types = new List<Rtti.UTypeDesc>(200);
-                            proDesc.PropertyType = Rtti.UTypeDesc.TypeOf(typeof(System.Type));
-                            foreach(var service in Rtti.UTypeDescManager.Instance.Services.Values)
+                            List<Rtti.TtTypeDesc> types = new List<Rtti.TtTypeDesc>(200);
+                            proDesc.PropertyType = Rtti.TtTypeDesc.TypeOf(typeof(System.Type));
+                            foreach(var service in Rtti.TtTypeDescManager.Instance.Services.Values)
                             {
                                 foreach(var type in service.Types.Values)
                                 {
@@ -397,7 +397,7 @@ namespace EngineNS.Bricks.CodeBuilder
                         break;
                     case "Comment":
                         {
-                            proDesc.PropertyType = Rtti.UTypeDesc.TypeOf(typeof(System.String));
+                            proDesc.PropertyType = Rtti.TtTypeDesc.TypeOf(typeof(System.String));
                         }
                         break;
                 }
@@ -437,10 +437,10 @@ namespace EngineNS.Bricks.CodeBuilder
             {
                 case "VariableType":
                     {
-                        var tagType = value as Rtti.UTypeDesc;
+                        var tagType = value as Rtti.TtTypeDesc;
                         if(tagType != VariableType.TypeDesc)
                         {
-                            InitValue = new TtPrimitiveExpression(tagType, tagType.IsValueType ? Rtti.UTypeDescManager.CreateInstance(tagType) : null);
+                            InitValue = new TtPrimitiveExpression(tagType, tagType.IsValueType ? Rtti.TtTypeDescManager.CreateInstance(tagType) : null);
                             VariableType.TypeDesc = tagType;
                         }
                     }
@@ -533,15 +533,15 @@ namespace EngineNS.Bricks.CodeBuilder
 
         [Rtti.Meta]
 
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-        public UTypeReference VariableType { get; set; } = new UTypeReference(Rtti.UTypeDesc.TypeOf<int>());
-        public Action<string, string> OnVariableNameChanged = null;
-在此之后:
-        public TtTypeReference VariableType { get; set; } = new UTypeReference(Rtti.UTypeDesc.TypeOf<int>());
-        public Action<string, string> OnVariableNameChanged = null;
-*/
-        public TtTypeReference VariableType { get; set; } = new TtTypeReference(Rtti.UTypeDesc.TypeOf<int>());
+        /* 项目“Engine.Android”的未合并的更改
+        在此之前:
+                public UTypeReference VariableType { get; set; } = new UTypeReference(Rtti.TtTypeDesc.TypeOf<int>());
+                public Action<string, string> OnVariableNameChanged = null;
+        在此之后:
+                public TtTypeReference VariableType { get; set; } = new UTypeReference(Rtti.TtTypeDesc.TypeOf<int>());
+                public Action<string, string> OnVariableNameChanged = null;
+        */
+        public TtTypeReference VariableType { get; set; } = new TtTypeReference(Rtti.TtTypeDesc.TypeOf<int>());
         public Action<string, string> OnVariableNameChanged = null;
         string mVariableName = "NewValue";
         [Rtti.Meta]
@@ -571,7 +571,7 @@ namespace EngineNS.Bricks.CodeBuilder
             }
         }
         [Rtti.Meta]
-        public TtExpressionBase InitValue { get; set; } = new TtPrimitiveExpression(Rtti.UTypeDesc.TypeOf<int>(), 0);
+        public TtExpressionBase InitValue { get; set; } = new TtPrimitiveExpression(Rtti.TtTypeDesc.TypeOf<int>(), 0);
         [Rtti.Meta]
         public EMethodArgumentAttribute OperationType { get; set; } = EMethodArgumentAttribute.Default;
         [Rtti.Meta]
@@ -619,7 +619,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 HasDefaultValue = info.HasDefaultValue,
             };
             if (info.HasDefaultValue)
-                retVal.InitValue = new TtPrimitiveExpression(Rtti.UTypeDesc.TypeOf(info.DefaultValue.GetType()), info.DefaultValue);
+                retVal.InitValue = new TtPrimitiveExpression(Rtti.TtTypeDesc.TypeOf(info.DefaultValue.GetType()), info.DefaultValue);
             retVal.OperationType = GetOperationType(info);
             retVal.IsParamArray = GetIsParamArray(info);
             var attrs = info.GetCustomAttributes(typeof(Rtti.MetaParameterAttribute), false);
@@ -636,7 +636,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 HasDefaultValue = info.HasDefaultValue,
             };
             if (info.HasDefaultValue)
-                retVal.InitValue = new TtPrimitiveExpression(Rtti.UTypeDesc.TypeOf(info.DefaultValue.GetType()), info.DefaultValue);
+                retVal.InitValue = new TtPrimitiveExpression(Rtti.TtTypeDesc.TypeOf(info.DefaultValue.GetType()), info.DefaultValue);
             retVal.OperationType = GetOperationType(info);
             retVal.IsParamArray = GetIsParamArray(info);
             retVal.Meta = info.Meta;
@@ -665,7 +665,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {
             var pros = TypeDescriptor.GetProperties(this);
-            var thisType = Rtti.UTypeDesc.TypeOf(this.GetType());
+            var thisType = Rtti.TtTypeDesc.TypeOf(this.GetType());
             foreach(PropertyDescriptor prop in pros)
             {
                 var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
@@ -676,9 +676,9 @@ namespace EngineNS.Bricks.CodeBuilder
                 {
                     case "VariableType":
                         {
-                            var types = new List<Rtti.UTypeDesc>(200);
-                            proDesc.PropertyType = Rtti.UTypeDesc.TypeOf(typeof(System.Type));
-                            foreach(var service in Rtti.UTypeDescManager.Instance.Services.Values)
+                            var types = new List<Rtti.TtTypeDesc>(200);
+                            proDesc.PropertyType = Rtti.TtTypeDesc.TypeOf(typeof(System.Type));
+                            foreach(var service in Rtti.TtTypeDescManager.Instance.Services.Values)
                             {
                                 foreach(var type in service.Types.Values)
                                 {
@@ -752,10 +752,10 @@ namespace EngineNS.Bricks.CodeBuilder
             {
                 case "VariableType":
                     {
-                        var tagType = value as Rtti.UTypeDesc;
+                        var tagType = value as Rtti.TtTypeDesc;
                         if(tagType != VariableType.TypeDesc)
                         {
-                            InitValue = new TtPrimitiveExpression(tagType, tagType.IsValueType ? Rtti.UTypeDescManager.CreateInstance(tagType) : null);
+                            InitValue = new TtPrimitiveExpression(tagType, tagType.IsValueType ? Rtti.TtTypeDescManager.CreateInstance(tagType) : null);
                             VariableType.TypeDesc = tagType;
                         }
                     }
@@ -959,12 +959,12 @@ namespace EngineNS.Bricks.CodeBuilder
                 var retType = method.ReturnType;
                 if(retType.IsSubclassOf(typeof(System.Threading.Tasks.Task)))
                 {
-                    retType = Rtti.UTypeDesc.TypeOf(method.ReturnType.GetGenericArguments()[0]);
+                    retType = Rtti.TtTypeDesc.TypeOf(method.ReturnType.GetGenericArguments()[0]);
                     retVal.AsyncType = EAsyncType.SystemTask;
                 }
                 else if (retType.IsSubclassOf(typeof(TtTask)))
                 {
-                    retType = Rtti.UTypeDesc.TypeOf(method.ReturnType.GetGenericArguments()[0]);
+                    retType = Rtti.TtTypeDesc.TypeOf(method.ReturnType.GetGenericArguments()[0]);
                     retVal.AsyncType = EAsyncType.CustomTask;
                 }
                 retVal.ReturnValue = new TtVariableDeclaration()
@@ -1118,9 +1118,9 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return ((Namespace != null) ? (Namespace.Namespace + ".") : "") + ClassName;
         }
-        public Rtti.UTypeDesc TryGetTypeDesc()
+        public Rtti.TtTypeDesc TryGetTypeDesc()
         {
-            return Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(GetFullName());
+            return Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(GetFullName());
         }
         public void Reset()
         {
@@ -1209,7 +1209,7 @@ namespace EngineNS.Bricks.CodeBuilder
             return ((Namespace != null) ? Namespace.ToString() : "") + "." + ClassName;
         }
 
-        public static TtClassDeclaration GetClassDeclaration(UTypeDesc type)
+        public static TtClassDeclaration GetClassDeclaration(TtTypeDesc type)
         {
             var dec = new TtClassDeclaration()
             {
@@ -1227,10 +1227,10 @@ namespace EngineNS.Bricks.CodeBuilder
     public class TtClassReferenceExpression : TtExpressionBase, IO.ISerializer
     {
         [Rtti.Meta]
-        public Rtti.UTypeDesc Class { get; set; }
+        public Rtti.TtTypeDesc Class { get; set; }
 
         public TtClassReferenceExpression() { }
-        public TtClassReferenceExpression(Rtti.UTypeDesc classType)
+        public TtClassReferenceExpression(Rtti.TtTypeDesc classType)
         {
             Class = classType;
         }
@@ -1262,7 +1262,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public string VariableName { get; set; } = "Unknow";
         public bool IsProperty { get; set; }
         [Rtti.Meta]
-        public UTypeDesc PropertyDeclClass { get; set; } = null;
+        public TtTypeDesc PropertyDeclClass { get; set; } = null;
         
         public TtVariableReferenceExpression()
         {
@@ -1393,7 +1393,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public bool IsAsync { get; set; } = false;
         [Rtti.Meta]
         public bool IsUnsafe { get; set; } = false;
-        public List<UTypeDesc> GenericTypes { get; set; } = new List<UTypeDesc>();
+        public List<TtTypeDesc> GenericTypes { get; set; } = new List<TtTypeDesc>();
         
         public TtMethodInvokeStatement() { }
         public TtMethodInvokeStatement(string methodName, TtVariableDeclaration retValue, TtExpressionBase host)
@@ -1625,7 +1625,7 @@ namespace EngineNS.Bricks.CodeBuilder
     public class TtPrimitiveExpression : TtExpressionBase, IO.ISerializer
     {
         [Rtti.Meta(Order = 0)]
-        public Rtti.UTypeDesc Type { get; set; }
+        public Rtti.TtTypeDesc Type { get; set; }
 
         [Rtti.Meta]
         public string ObjectStr { get; set; }
@@ -1657,73 +1657,73 @@ namespace EngineNS.Bricks.CodeBuilder
 
         public TtPrimitiveExpression(Byte val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(Byte));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(Byte));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(UInt16 val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(UInt16));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(UInt16));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(UInt32 val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(UInt32));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(UInt32));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(UInt64 val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(UInt64));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(UInt64));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(SByte val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(SByte));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(SByte));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(Int16 val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(Int16));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(Int16));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(Int32 val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(Int32));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(Int32));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(Int64 val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(Int64));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(Int64));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(float val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(float));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(float));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(double val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(double));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(double));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(string val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(string));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(string));
             mValueStr = val;
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(bool val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(bool));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(bool));
             mValueStr = val.ToString();
             if (val)
                 mValueStr = "true";
@@ -1733,75 +1733,75 @@ namespace EngineNS.Bricks.CodeBuilder
         }
         public TtPrimitiveExpression(Vector2 val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(Vector2));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(Vector2));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(Vector3 val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(Vector3));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(Vector3));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(Color3f val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(Color3f));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(Color3f));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(Vector4 val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(Vector4));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(Vector4));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(Color4f val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(Color4f));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(Color4f));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(Vector2i val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(Vector2i));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(Vector2i));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(Vector3i val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(Vector3i));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(Vector3i));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(Vector4i val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(Vector4i));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(Vector4i));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
         public TtPrimitiveExpression(Matrix val)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(Matrix));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(Matrix));
             mValueStr = val.ToString();
             ObjectStr = mValueStr;
         }
-        public TtPrimitiveExpression(Rtti.UTypeDesc type, object value)
+        public TtPrimitiveExpression(Rtti.TtTypeDesc type, object value)
         {
             Type = type;
             CalculateValueString(type, value);
         }
-        public TtPrimitiveExpression(Rtti.UTypeDesc type, bool typeIsTypeOf)
+        public TtPrimitiveExpression(Rtti.TtTypeDesc type, bool typeIsTypeOf)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(System.Type));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(System.Type));
             TypeIsTypeof = typeIsTypeOf;
             CalculateValueString(Type, type, typeIsTypeOf);
         }
         public TtPrimitiveExpression(Enum enumVal)
         {
-            Type = Rtti.UTypeDesc.TypeOf(enumVal.GetType());
+            Type = Rtti.TtTypeDesc.TypeOf(enumVal.GetType());
             ValueStr = enumVal.ToString();
         }
-        public void CalculateValueString(Rtti.UTypeDesc type, object value, bool typeIsTypeof = true)
+        public void CalculateValueString(Rtti.TtTypeDesc type, object value, bool typeIsTypeof = true)
         {
             ObjectStr = value.ToString();
             string retValue;
@@ -1809,29 +1809,29 @@ namespace EngineNS.Bricks.CodeBuilder
             {
                 retValue = "null";
             }
-            else if (type == Rtti.UTypeDescGetter<bool>.TypeDesc)
+            else if (type == Rtti.TtTypeDescGetter<bool>.TypeDesc)
             {
                 var v = (bool)value;
                 retValue = v ? "true" : "false";
             }
-            else if (type == Rtti.UTypeDescGetter<RName>.TypeDesc)
+            else if (type == Rtti.TtTypeDescGetter<RName>.TypeDesc)
             {
                 var v = (RName)value;
                 retValue = $"EngineNS.RName.GetRName(\"{v.Name}\", EngineNS.RName.ERNameType.{v.RNameType})";
             }
-            else if(type == Rtti.UTypeDescGetter<System.Type>.TypeDesc)
+            else if(type == Rtti.TtTypeDescGetter<System.Type>.TypeDesc)
             {
-                var typeDesc = (Rtti.UTypeDesc)value;
+                var typeDesc = (Rtti.TtTypeDesc)value;
                 if (typeIsTypeof)
                     retValue = $"typeof({typeDesc.FullName})";
                 else
                     retValue = typeDesc.FullName;
             }
-            else if(type == Rtti.UTypeDescGetter<Color4f>.TypeDesc)
+            else if(type == Rtti.TtTypeDescGetter<Color4f>.TypeDesc)
             {
                 retValue = $"new EngineNS.Color4f({value.ToString()})";
             }
-            else if (type == Rtti.UTypeDescGetter<Color3f>.TypeDesc)
+            else if (type == Rtti.TtTypeDescGetter<Color3f>.TypeDesc)
             {
                 retValue = $"new EngineNS.Color3f({value.ToString()})";
             }
@@ -1898,7 +1898,7 @@ namespace EngineNS.Bricks.CodeBuilder
             {
                 var idxStart = ValueStr.IndexOf('(');
                 var idxEnd = ValueStr.IndexOf(')');
-                return Rtti.UTypeDesc.TypeOfFullName(ValueStr.Substring(idxStart, idxEnd - idxStart));
+                return Rtti.TtTypeDesc.TypeOfFullName(ValueStr.Substring(idxStart, idxEnd - idxStart));
             }
             else if(Type.IsEnum)
             {
@@ -1910,12 +1910,12 @@ namespace EngineNS.Bricks.CodeBuilder
         }
         public void SetValue<T>(T value) where T : unmanaged
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(T));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(T));
             ValueStr = value.ToString();
         }
         public void SetValue(string value)
         {
-            Type = Rtti.UTypeDesc.TypeOf(typeof(string));
+            Type = Rtti.TtTypeDesc.TypeOf(typeof(string));
             ValueStr = value;
         }
     }
@@ -2000,7 +2000,7 @@ namespace EngineNS.Bricks.CodeBuilder
         [Rtti.Meta]
         public TtTypeReference Type { get; set; }
         public TtDefaultValueExpression() { }
-        public TtDefaultValueExpression(Rtti.UTypeDesc type)
+        public TtDefaultValueExpression(Rtti.TtTypeDesc type)
         {
             Type = new TtTypeReference(type);
         }
@@ -2063,7 +2063,7 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             Variable = val;
         }
-        public TtTypeOfExpression(Rtti.UTypeDesc type)
+        public TtTypeOfExpression(Rtti.TtTypeDesc type)
         {
             Variable = new TtTypeReference(type);
         }

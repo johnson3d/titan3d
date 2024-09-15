@@ -15,7 +15,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         [Rtti.Meta]
         public string Name { get; set; } = "";
         [Rtti.Meta]
-        public UTypeDesc TypeDesc { get; set; } = UTypeDesc.TypeOf<bool>();
+        public TtTypeDesc TypeDesc { get; set; } = TtTypeDesc.TypeOf<bool>();
         #region ISerializer
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {

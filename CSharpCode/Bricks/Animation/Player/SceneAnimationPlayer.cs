@@ -41,7 +41,7 @@ namespace EngineNS.Animation.Player
         //{
         //    var animatedHierarchy = SceneAnimClip.AnimatedHierarchy;
         //    System.Diagnostics.Debug.Assert(animatedHierarchy != null);
-        //    var objType = Rtti.UTypeDesc.TypeOfFullName(animatable.GetType().FullName);
+        //    var objType = Rtti.TtTypeDesc.TypeOfFullName(animatable.GetType().FullName);
         //    if (objType == animatedHierarchy.Value.ClassType)
         //    {
         //        var properties = objType.SystemType.GetProperties();
@@ -133,7 +133,7 @@ namespace EngineNS.Animation.Player
         //void BindeRecursion(Animatable.IAnimatable animatable, Base.UAnimHierarchy instanceHierarchy)
         //{
         //    var animatedHierarchy = SceneAnimClip.AnimatedHierarchy;
-        //    var objType = Rtti.UTypeDesc.TypeOfFullName(animatable.GetType().FullName);
+        //    var objType = Rtti.TtTypeDesc.TypeOfFullName(animatable.GetType().FullName);
         //    if (objType == animatedHierarchy.Value.ClassType)
         //    {
         //        var properties = objType.SystemType.GetProperties();

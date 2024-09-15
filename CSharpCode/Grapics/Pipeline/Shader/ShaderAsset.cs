@@ -52,7 +52,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
                 return true;
             }
-            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)
             {
                 ExtName = ext;
                 mName = null;

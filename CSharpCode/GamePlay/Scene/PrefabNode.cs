@@ -139,7 +139,7 @@ namespace EngineNS.GamePlay.Scene
         #region IAsset
         public class PrefabCreateAttribute : IO.CommonCreateAttribute
         {
-            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)
             {
                 ExtName = ext;
                 mName = null;
@@ -152,7 +152,7 @@ namespace EngineNS.GamePlay.Scene
                 await world.InitWorld();
                 PGAsset.Target = mAsset;
 
-                mAsset = Rtti.UTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IO.IAsset;
+                mAsset = Rtti.TtTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IO.IAsset;
                 
                 var prefab = mAsset as TtPrefab;
                 prefab.Root = new TtPrefabNode();
@@ -171,14 +171,14 @@ namespace EngineNS.GamePlay.Scene
                 ameta.SaveAMeta(this);
             }
 
-            var typeStr = Rtti.UTypeDesc.TypeStr(GetType());
+            var typeStr = Rtti.TtTypeDesc.TypeStr(GetType());
             var xndHolder = new EngineNS.IO.TtXndHolder(typeStr, 1, 0);
             var xnd = xndHolder;
             var node = xndHolder.RootNode;
             if (Root != null)
             {
                 Root.PrefabNodeData.PrefabName = name;
-                using (var dataAttr = xnd.NewAttribute(Rtti.UTypeDesc.TypeStr(Root.NodeData.GetType()), 1, PrefabDescAttributeFlags))
+                using (var dataAttr = xnd.NewAttribute(Rtti.TtTypeDesc.TypeStr(Root.NodeData.GetType()), 1, PrefabDescAttributeFlags))
                 {
                     node.AddAttribute(dataAttr);
                     using (var ar = dataAttr.GetWriter((ulong)Root.NodeData.GetStructSize() * 2))
@@ -205,9 +205,9 @@ namespace EngineNS.GamePlay.Scene
                     return null;
                 }
 
-                var nodeData = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(descAttr.Name)) as TtNodeData;
+                var nodeData = Rtti.TtTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(descAttr.Name)) as TtNodeData;
 
-                var prefab = Rtti.UTypeDescManager.CreateInstance(Rtti.UTypeDesc.TypeOf(xnd.RootNode.Name)) as TtPrefab;
+                var prefab = Rtti.TtTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(xnd.RootNode.Name)) as TtPrefab;
                 if (prefab == null)
                     return null;
                 var node = new TtPrefabNode();
@@ -327,14 +327,14 @@ namespace EngineNS.GamePlay.Scene
             TtNode result = tarNode;
             if (result == null)
             {
-                result = Rtti.UTypeDescManager.CreateInstance(node.GetType()) as TtNode;
+                result = Rtti.TtTypeDescManager.CreateInstance(node.GetType()) as TtNode;
             }
             else
             {
                 System.Diagnostics.Debug.Assert(tarNode.GetType() == node.GetType());
             }
-            var nd = Rtti.UTypeDescManager.CreateInstance(node.NodeData.GetType()) as TtNodeData;
-            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.UTypeDesc.TypeOf(node.NodeData.GetType()));
+            var nd = Rtti.TtTypeDescManager.CreateInstance(node.NodeData.GetType()) as TtNodeData;
+            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDesc.TypeOf(node.NodeData.GetType()));
             meta.CopyObjectMetaField(nd, node.NodeData);
             await result.InitializeNode(world, nd, node.BoundVolumeType, node.Placement.GetType());
             result.SetPrefabTemplate(node.NodeData);
@@ -369,7 +369,7 @@ namespace EngineNS.GamePlay.Scene
             RemovePrefabChildren(tarNode, Root);
         }
     }
-    public class TtPrefabManager : UModule<TtEngine>
+    public class TtPrefabManager : TtModule<TtEngine>
     {
         public override void Cleanup(TtEngine host)
         {

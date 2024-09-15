@@ -114,7 +114,7 @@ namespace EngineNS.DesignMacross.Design
                     }
 
                     var name = $"{methodName}_{num}";
-                    if (UTypeDescManager.CreateInstance(UTypeDesc.TypeOf<TtMethodDescription>()) is IMethodDescription
+                    if (TtTypeDescManager.CreateInstance(TtTypeDesc.TypeOf<TtMethodDescription>()) is IMethodDescription
                         description)
                     {
                         description.Name = name;
@@ -127,7 +127,7 @@ namespace EngineNS.DesignMacross.Design
                     List<EGui.UIProxy.MenuItemProxy> menuItemProxies = new List<EGui.UIProxy.MenuItemProxy>();
                     foreach(var superClassName in context.EditorInteroperation.OutlineEditPanel.ClassDesc.SupperClassNames)
                     {
-                        var superClassType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(superClassName);
+                        var superClassType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(superClassName);
                         foreach(var method in superClassType.GetMethods())
                         {
                             if(method.IsVirtual && method.DeclaringType == superClassType.SystemType)
@@ -137,7 +137,7 @@ namespace EngineNS.DesignMacross.Design
 
                                 menuItem.Action = (proxy, data) =>
                                 {
-                                    if (UTypeDescManager.CreateInstance(UTypeDesc.TypeOf<TtMethodDescription>()) is IMethodDescription
+                                    if (TtTypeDescManager.CreateInstance(TtTypeDesc.TypeOf<TtMethodDescription>()) is IMethodDescription
                                         description)
                                     {
                                         description.Name = method.Name;

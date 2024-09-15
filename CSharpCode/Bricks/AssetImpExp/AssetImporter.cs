@@ -1028,7 +1028,7 @@ namespace EngineNS.Bricks.AssetImpExp
             foreach (var element in aiAnim.NodeAnimationChannels)
             {
                 TtAnimatedObjectDescription objectBinding = new TtAnimatedObjectDescription();
-                objectBinding.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Animation.SkeletonAnimation.AnimatablePose.TtAnimatableBonePose));
+                objectBinding.ClassType = EngineNS.Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.Animation.SkeletonAnimation.AnimatablePose.TtAnimatableBonePose));
                 objectBinding.Name = element.NodeName;
 
                 // position
@@ -1039,7 +1039,7 @@ namespace EngineNS.Bricks.AssetImpExp
                     animChunk.AnimCurvesList.Add(curve.Id, curve);
 
                     TtAnimatedPropertyDescription propertyBinding = new TtAnimatedPropertyDescription();
-                    propertyBinding.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<FNullableVector3>();
+                    propertyBinding.ClassType = EngineNS.Rtti.TtTypeDesc.TypeOf<FNullableVector3>();
                     propertyBinding.Name = "Position";
                     propertyBinding.CurveId = curve.Id;
                     objectBinding.TranslationProperty = propertyBinding;
@@ -1051,7 +1051,7 @@ namespace EngineNS.Bricks.AssetImpExp
                     animChunk.AnimCurvesList.Add(curve.Id, curve);
 
                     TtAnimatedPropertyDescription propertyBinding = new TtAnimatedPropertyDescription();
-                    propertyBinding.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<FNullableVector3>();
+                    propertyBinding.ClassType = EngineNS.Rtti.TtTypeDesc.TypeOf<FNullableVector3>();
                     propertyBinding.Name = "Rotation";
                     propertyBinding.CurveId = curve.Id;
                     objectBinding.RotationProperty = propertyBinding;
@@ -1064,7 +1064,7 @@ namespace EngineNS.Bricks.AssetImpExp
                     animChunk.AnimCurvesList.Add(curve.Id, curve);
 
                     TtAnimatedPropertyDescription propertyBinding = new TtAnimatedPropertyDescription();
-                    propertyBinding.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<FNullableVector3>();
+                    propertyBinding.ClassType = EngineNS.Rtti.TtTypeDesc.TypeOf<FNullableVector3>();
                     propertyBinding.Name = "Scale";
                     propertyBinding.CurveId = curve.Id;
                     objectBinding.ScaleProperty = propertyBinding;

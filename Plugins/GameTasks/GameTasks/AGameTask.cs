@@ -6,7 +6,7 @@ namespace EngineNS.Rtti
 {
     public class AssemblyEntry
     {
-        public class AGameTaskAssemblyDesc : UAssemblyDesc
+        public class AGameTaskAssemblyDesc : TtAssemblyDesc
         {
             public AGameTaskAssemblyDesc()
             {
@@ -22,7 +22,7 @@ namespace EngineNS.Rtti
             public override string Platform { get { return "Global"; } }
         }
         static AGameTaskAssemblyDesc AssmblyDesc = new AGameTaskAssemblyDesc();
-        public static UAssemblyDesc GetAssemblyDesc()
+        public static TtAssemblyDesc GetAssemblyDesc()
         {
             return AssmblyDesc;
         }
@@ -31,7 +31,7 @@ namespace EngineNS.Rtti
 
 namespace EngineNS.Plugins.GameTasks
 {
-    public class UPluginLoader
+    public class TtPluginLoader
     {
         public static Plugins.GameTasks.UGameTaskPlugin mPluginObject = new Plugins.GameTasks.UGameTaskPlugin();
         public static Bricks.AssemblyLoader.IPlugin GetPluginObject()
@@ -77,7 +77,7 @@ namespace EngineNS.Plugins.GameTasks
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
-            return ((UGameTaskPlugin)UPluginLoader.mPluginObject).TaskDescriptorManager.FindDescriptor(GetAssetName());
+            return ((UGameTaskPlugin)TtPluginLoader.mPluginObject).TaskDescriptorManager.FindDescriptor(GetAssetName());
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -133,7 +133,7 @@ namespace EngineNS.Plugins.GameTasks
         {
             public override object GetTagObject(RName rn)
             {
-                return ((UGameTaskPlugin)UPluginLoader.mPluginObject).TaskDescriptorManager.FindDescriptor(rn);
+                return ((UGameTaskPlugin)TtPluginLoader.mPluginObject).TaskDescriptorManager.FindDescriptor(rn);
             }
         }
         [Rtti.Meta]

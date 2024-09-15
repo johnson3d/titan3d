@@ -18,8 +18,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
     public class TtMdfPermutationsBase
     {
-        public List<Rtti.UTypeDesc> Permutations { get; } = new List<Rtti.UTypeDesc>();
-        internal static string GetPermutationsName(List<Rtti.UTypeDesc> lst)
+        public List<Rtti.TtTypeDesc> Permutations { get; } = new List<Rtti.TtTypeDesc>();
+        internal static string GetPermutationsName(List<Rtti.TtTypeDesc> lst)
         {
             string result = "";
             foreach (var i in lst)
@@ -28,7 +28,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             return result;
         }
-        internal static void SortPermutations(List<Rtti.UTypeDesc> lst)
+        internal static void SortPermutations(List<Rtti.TtTypeDesc> lst)
         {
             lst.Sort((x, y) =>
             {
@@ -39,33 +39,33 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             foreach (var i in Permutations)
             {
-                var po = Rtti.UTypeDescManager.CreateInstance(i) as TtMdfPermutation;
+                var po = Rtti.TtTypeDescManager.CreateInstance(i) as TtMdfPermutation;
                 po.BuildPermutationCode(ref codeString, builder);
             }
         }
-        public Rtti.UTypeDesc AddPermutation<T>() where T : TtMdfPermutation
+        public Rtti.TtTypeDesc AddPermutation<T>() where T : TtMdfPermutation
         {
-            var nps = new List<Rtti.UTypeDesc>(Permutations);
-            nps.Remove(Rtti.UTypeDescGetter<T>.TypeDesc);
-            nps.Add(Rtti.UTypeDescGetter<T>.TypeDesc);
+            var nps = new List<Rtti.TtTypeDesc>(Permutations);
+            nps.Remove(Rtti.TtTypeDescGetter<T>.TypeDesc);
+            nps.Add(Rtti.TtTypeDescGetter<T>.TypeDesc);
             SortPermutations(nps);
 
             return TtMdfPermutationsTypeManager.Instance.FindType(GetPermutationsName(nps));
         }
-        public Rtti.UTypeDesc RemovePermutation<Tar>() where Tar : TtMdfPermutation
+        public Rtti.TtTypeDesc RemovePermutation<Tar>() where Tar : TtMdfPermutation
         {
-            var nps = new List<Rtti.UTypeDesc>(Permutations);
-            nps.Remove(Rtti.UTypeDescGetter<Tar>.TypeDesc);
+            var nps = new List<Rtti.TtTypeDesc>(Permutations);
+            nps.Remove(Rtti.TtTypeDescGetter<Tar>.TypeDesc);
             SortPermutations(nps);
 
             return TtMdfPermutationsTypeManager.Instance.FindType(GetPermutationsName(nps));
         }
-        public Rtti.UTypeDesc ReplacePermutation<Tar, Src>() where Tar : TtMdfPermutation
+        public Rtti.TtTypeDesc ReplacePermutation<Tar, Src>() where Tar : TtMdfPermutation
             where Src : TtMdfPermutation
         {
-            var nps = new List<Rtti.UTypeDesc>(Permutations);
-            nps.Remove(Rtti.UTypeDescGetter<Tar>.TypeDesc);
-            nps.Add(Rtti.UTypeDescGetter<Src>.TypeDesc);
+            var nps = new List<Rtti.TtTypeDesc>(Permutations);
+            nps.Remove(Rtti.TtTypeDescGetter<Tar>.TypeDesc);
+            nps.Add(Rtti.TtTypeDescGetter<Src>.TypeDesc);
             SortPermutations(nps);
 
             return TtMdfPermutationsTypeManager.Instance.FindType(GetPermutationsName(nps));
@@ -76,7 +76,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     {
         public TtMdfPermutations1()
         {
-            Permutations.Add(Rtti.UTypeDescGetter<T0>.TypeDesc);
+            Permutations.Add(Rtti.TtTypeDescGetter<T0>.TypeDesc);
             SortPermutations(Permutations);
         }
     }
@@ -86,8 +86,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
     {
         public TtMdfPermutations2()
         {
-            Permutations.Add(Rtti.UTypeDescGetter<T0>.TypeDesc);
-            Permutations.Add(Rtti.UTypeDescGetter<T1>.TypeDesc);
+            Permutations.Add(Rtti.TtTypeDescGetter<T0>.TypeDesc);
+            Permutations.Add(Rtti.TtTypeDescGetter<T1>.TypeDesc);
             SortPermutations(Permutations);
         }
     }
@@ -106,11 +106,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return mInstance;
             }
         }
-        protected Dictionary<string, Rtti.UTypeDesc> MdfPermutationTypes = new Dictionary<string, Rtti.UTypeDesc>();
+        protected Dictionary<string, Rtti.TtTypeDesc> MdfPermutationTypes = new Dictionary<string, Rtti.TtTypeDesc>();
         public TtMdfPermutationsTypeManager()
         {
-            List<Rtti.UTypeDesc> types = new List<Rtti.UTypeDesc>();
-            Rtti.UTypeDescManager.Instance.GetInheritTypes(Rtti.UTypeDescGetter<TtMdfPermutationsBase>.TypeDesc, types);
+            List<Rtti.TtTypeDesc> types = new List<Rtti.TtTypeDesc>();
+            Rtti.TtTypeDescManager.Instance.GetInheritTypes(Rtti.TtTypeDescGetter<TtMdfPermutationsBase>.TypeDesc, types);
             foreach(var i in types)
             {
                 if(i.SystemType.IsGenericType)
@@ -129,7 +129,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 }
             }
         }
-        public Rtti.UTypeDesc FindType(string name)
+        public Rtti.TtTypeDesc FindType(string name)
         {
             if (MdfPermutationTypes.TryGetValue(name, out var result))
                 return result;
@@ -271,7 +271,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
         public override string ToString()
         {
-            return Rtti.UTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
+            return Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
             //string result = $"Var: {DefineCode?.AsText}\n";
             //result += $"Code: {SourceCode.AsText}\n";
             //return result;

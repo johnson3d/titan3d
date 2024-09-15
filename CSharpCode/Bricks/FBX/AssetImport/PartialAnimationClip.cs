@@ -136,7 +136,7 @@ namespace EngineNS.Animation.Asset
                             var ameta = new TtAnimationClipAMeta();
                             ameta.SetAssetName(rn);
                             ameta.AssetId = Guid.NewGuid();
-                            ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtAnimationClip));
+                            ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtAnimationClip));
                             ameta.Description = $"This is a {typeof(TtAnimationClip).FullName}\n";
                             ameta.SaveAMeta(animClip);
                             TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
@@ -167,7 +167,7 @@ namespace AssetImportAndExport.FBX
             {
                 var animElement = animElements[i];
                 TtAnimatedObjectDescription objectClassDesc = new TtAnimatedObjectDescription();
-                objectClassDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf(typeof(EngineNS.Animation.SkeletonAnimation.AnimatablePose.TtAnimatableBonePose));
+                objectClassDesc.ClassType = EngineNS.Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.Animation.SkeletonAnimation.AnimatablePose.TtAnimatableBonePose));
                 var t = objectClassDesc.ClassType;
                 objectClassDesc.Name = animElement.Desc.Name.Text;
                 uint hash = UniHash32.APHash(objectClassDesc.Name.ToString());
@@ -187,7 +187,7 @@ namespace AssetImportAndExport.FBX
                         animChunk.AnimCurvesList.Add(curve.Id, curve);
 
                         TtAnimatedPropertyDescription posDesc = new TtAnimatedPropertyDescription();
-                        posDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<FNullableVector3>();
+                        posDesc.ClassType = EngineNS.Rtti.TtTypeDesc.TypeOf<FNullableVector3>();
                         posDesc.Name = "Position";
                         posDesc.CurveId = curve.Id;
                         objectClassDesc.Properties.Add(posDesc);
@@ -212,7 +212,7 @@ namespace AssetImportAndExport.FBX
                         animChunk.AnimCurvesList.Add(curve.Id, curve);
 
                         TtAnimatedPropertyDescription rotDesc = new TtAnimatedPropertyDescription();
-                        rotDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<FNullableVector3>();
+                        rotDesc.ClassType = EngineNS.Rtti.TtTypeDesc.TypeOf<FNullableVector3>();
                         rotDesc.Name = "Rotation";
                         rotDesc.CurveId = curve.Id;
                         objectClassDesc.Properties.Add(rotDesc);
@@ -236,7 +236,7 @@ namespace AssetImportAndExport.FBX
                         animChunk.AnimCurvesList.Add(curve.Id, curve);
 
                         TtAnimatedPropertyDescription scaleDesc = new TtAnimatedPropertyDescription();
-                        scaleDesc.ClassType = EngineNS.Rtti.UTypeDesc.TypeOf<FNullableVector3>();
+                        scaleDesc.ClassType = EngineNS.Rtti.TtTypeDesc.TypeOf<FNullableVector3>();
                         scaleDesc.Name = "Scale";
                         scaleDesc.CurveId = curve.Id;
                         objectClassDesc.Properties.Add(scaleDesc);

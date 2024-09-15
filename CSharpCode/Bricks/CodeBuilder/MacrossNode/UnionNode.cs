@@ -15,7 +15,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     {
         [Rtti.Meta]
         [EGui.Controls.PropertyGrid.PGTypeEditor()]
-        public UTypeDesc Type { get; set; } = UTypeDesc.TypeOf(typeof(int));
+        public TtTypeDesc Type { get; set; } = TtTypeDesc.TypeOf(typeof(int));
         [Rtti.Meta]
         [Browsable(false)]
         public LinkDesc LinkDesc { get; set; }
@@ -135,7 +135,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             LayoutDirty = true;
         }
 
-        public override UTypeDesc GetOutPinType(PinOut pin)
+        public override TtTypeDesc GetOutPinType(PinOut pin)
         {
             for(int i=0; i<Outputs.Count; i++)
             {
@@ -156,7 +156,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     if (Outputs[i].Tag == null || Outputs[i] != stayPin)
                         continue;
                     var valueString = GetRuntimeValueString(Outputs[i].Name + "_" + (uint)NodeId.GetHashCode());
-                    var typeString = (Outputs[i].Tag as UTypeDesc).FullName;
+                    var typeString = (Outputs[i].Tag as TtTypeDesc).FullName;
                     EGui.Controls.CtrlUtility.DrawHelper($"{valueString}({typeString})");
                 }
             }
@@ -167,7 +167,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     if (Inputs[i].Tag == null || Inputs[i] != stayPin)
                         continue;
                     var valueString = GetRuntimeValueString(Inputs[i].Name + "_" + (uint)NodeId.GetHashCode());
-                    var typeString = (Inputs[i].Tag as UTypeDesc).FullName;
+                    var typeString = (Inputs[i].Tag as TtTypeDesc).FullName;
                     EGui.Controls.CtrlUtility.DrawHelper($"{valueString}({typeString})");
                 }
             }
@@ -483,7 +483,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             LayoutDirty = true;
         }
 
-        public override UTypeDesc GetOutPinType(PinOut pin)
+        public override TtTypeDesc GetOutPinType(PinOut pin)
         {
             for (int i = 0; i < Outputs.Count; i++)
             {
@@ -494,7 +494,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return null;
         }
-        public override UTypeDesc GetInPinType(PinIn pin)
+        public override TtTypeDesc GetInPinType(PinIn pin)
         {
             for (int i = 0; i < Inputs.Count; i++)
             {
@@ -516,7 +516,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return;
 
             var valueString = GetRuntimeValueString(stayPin.Name + "_" + (uint)NodeId.GetHashCode());
-            var typeString = (stayPin.Tag as UTypeDesc).FullName;
+            var typeString = (stayPin.Tag as TtTypeDesc).FullName;
             EGui.Controls.CtrlUtility.DrawHelper($"{valueString}({typeString})");
         }
 
@@ -576,7 +576,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             mProValueDataDic.Clear();
             var pros = TypeDescriptor.GetProperties(this);
-            var objType = Rtti.UTypeDesc.TypeOf(this.GetType());
+            var objType = Rtti.TtTypeDesc.TypeOf(this.GetType());
             collection.InitValue(this, objType, pros, parentIsValueType);
 
             for(int i=0; i< PropertyDatas.Count; i++)
@@ -611,7 +611,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     var nodePro = nodePros[name];
                     if (nodePro == null)
                         continue;
-                    proDesc.InitValue(node, Rtti.UTypeDesc.TypeOf(nodeType), nodePro, parentIsValueType);
+                    proDesc.InitValue(node, Rtti.TtTypeDesc.TypeOf(nodeType), nodePro, parentIsValueType);
                 }
                 proDesc.DisplayName = displayName;
                 proDesc.IsReadonly = PropertyDatas[i].ReadOnly;

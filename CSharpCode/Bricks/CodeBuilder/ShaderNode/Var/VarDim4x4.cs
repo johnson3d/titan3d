@@ -87,7 +87,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
         public VarDimF4x4()
         {
-            VarType = Rtti.UTypeDescGetter<Matrix>.TypeDesc;
+            VarType = Rtti.TtTypeDescGetter<Matrix>.TypeDesc;
 
             InValue.Name = "matrix ";
             InValue.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
@@ -211,10 +211,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             AddPinOut(Out44);
         }
 
-        public override UTypeDesc GetOutPinType(PinOut pin)
+        public override TtTypeDesc GetOutPinType(PinOut pin)
         {
             if (pin == OutValue)
-                return Rtti.UTypeDesc.TypeOf(typeof(Matrix));
+                return Rtti.TtTypeDesc.TypeOf(typeof(Matrix));
             else if (
                 (pin == Out11) ||
                 (pin == Out12) ||
@@ -232,7 +232,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 (pin == Out42) ||
                 (pin == Out43) ||
                 (pin == Out44) )
-                return Rtti.UTypeDesc.TypeOf(typeof(float));
+                return Rtti.TtTypeDesc.TypeOf(typeof(float));
             return null;
         }
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)

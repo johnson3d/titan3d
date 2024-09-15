@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Editor
 {
-    public partial class UPIEModule : UModule<TtEngine>
+    public partial class UPIEModule : TtModule<TtEngine>
     {
         public override void TickModule(TtEngine engine)
         {

@@ -290,7 +290,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
 
         public static T CopyPose<T>(T pose) where T : IRuntimePose
         {
-            T temp = (T)UTypeDescManager.CreateInstance(UTypeDesc.TypeOf<T>());
+            T temp = (T)TtTypeDescManager.CreateInstance(TtTypeDesc.TypeOf<T>());
             temp.Transforms.AddRange(pose.Transforms);
             temp.Descs.AddRange(pose.Descs);
             return temp;
@@ -299,7 +299,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
         {
             if (descPose == null)
             {
-                descPose = (T)UTypeDescManager.CreateInstance(UTypeDesc.TypeOf<T>());
+                descPose = (T)TtTypeDescManager.CreateInstance(TtTypeDesc.TypeOf<T>());
             }
             descPose.Transforms.Clear();
             descPose.Descs.Clear();

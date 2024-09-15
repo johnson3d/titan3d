@@ -9,7 +9,7 @@ namespace EngineNS.Rtti
 {
     public class AssemblyEntry
     {
-        public class AGameItemAssemblyDesc : UAssemblyDesc
+        public class AGameItemAssemblyDesc : TtAssemblyDesc
         {
             public AGameItemAssemblyDesc()
             {
@@ -25,7 +25,7 @@ namespace EngineNS.Rtti
             public override string Platform { get { return "Global"; } }
         }
         static AGameItemAssemblyDesc AssmblyDesc = new AGameItemAssemblyDesc();
-        public static UAssemblyDesc GetAssemblyDesc()
+        public static TtAssemblyDesc GetAssemblyDesc()
         {
             return AssmblyDesc;
         }
@@ -34,7 +34,7 @@ namespace EngineNS.Rtti
 
 namespace EngineNS.Plugins.GameItems
 {
-    public class UPluginLoader
+    public class TtPluginLoader
     {
         public static UGameItemPlugin? mPluginObject = new UGameItemPlugin();
         public static Bricks.AssemblyLoader.IPlugin GetPluginObject()
@@ -80,7 +80,7 @@ namespace EngineNS.Plugins.GameItems
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
-            return ((UGameItemPlugin)UPluginLoader.mPluginObject).ItemDescriptorManager.FindDescriptor(GetAssetName());
+            return ((UGameItemPlugin)TtPluginLoader.mPluginObject).ItemDescriptorManager.FindDescriptor(GetAssetName());
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -139,7 +139,7 @@ namespace EngineNS.Plugins.GameItems
         {
             public override object GetTagObject(RName rn)
             {
-                return ((UGameItemPlugin)UPluginLoader.mPluginObject).ItemDescriptorManager.FindDescriptor(rn);
+                return ((UGameItemPlugin)TtPluginLoader.mPluginObject).ItemDescriptorManager.FindDescriptor(rn);
             }
         }
         [Rtti.Meta]

@@ -8,7 +8,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
 {
     public class Binocular : UNodeBase
     {
-        public Rtti.UTypeDesc LeftType;
+        public Rtti.TtTypeDesc LeftType;
         [Browsable(false)]
         public TtBinaryOperatorExpression.EBinaryOperation Op { get; set; }
         [Rtti.Meta]
@@ -18,12 +18,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
             get
             {
                 if (LeftType != null)
-                    return Rtti.UTypeDesc.TypeStr(LeftType);
+                    return Rtti.TtTypeDesc.TypeStr(LeftType);
                 return "";
             }
             set
             {
-                LeftType = Rtti.UTypeDesc.TypeOf(value);
+                LeftType = Rtti.TtTypeDesc.TypeOf(value);
             }
         }
         [Browsable(false)]
@@ -55,7 +55,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
             AddPinIn(Right);
             AddPinOut(Result);
         }
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             return LeftType;
         }

@@ -27,7 +27,7 @@ namespace EngineNS
         {
             unsafe
             {
-                return Rtti.UNativeCoreProvider.MarshalPtrAnsi(mNativeString.GetText());
+                return Rtti.TtNativeCoreProvider.MarshalPtrAnsi(mNativeString.GetText());
             }
         }
         public unsafe sbyte* GetTextPointer()

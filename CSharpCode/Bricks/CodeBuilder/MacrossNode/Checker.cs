@@ -14,7 +14,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public PinOut OutPin { get; set; }
 
         [Rtti.Meta(Order = 0)]
-        public Rtti.UTypeDesc TargetType
+        public Rtti.TtTypeDesc TargetType
         {
             get;
             set;
@@ -40,8 +40,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             TypePin.Name = "Type";
             TypePin.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
             TypePin.LinkDesc.CanLinks.Add("Value");
-            var ev = UEditableValue.CreateEditableValue(this, Rtti.UTypeDesc.TypeOf(typeof(System.Type)), TypePin) as UTypeSelectorEValue;
-            foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
+            var ev = UEditableValue.CreateEditableValue(this, Rtti.TtTypeDesc.TypeOf(typeof(System.Type)), TypePin) as UTypeSelectorEValue;
+            foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
             {
                 foreach (var typeDesc in service.Types.Values)
                 {
@@ -92,7 +92,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var pin = ev.Tag as PinIn;
                 if (pin == null)
                     return;
-                TargetType = (Rtti.UTypeDesc)ev.Value;
+                TargetType = (Rtti.TtTypeDesc)ev.Value;
                 if(OutPin != null)
                     OutPin.Tag = TargetType;
             }
@@ -106,7 +106,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     return new TtPrimitiveExpression(false);
                 }
                 var leftExp = data.NodeGraph.GetOppositePinExpression(InPin, ref data);
-                UTypeDesc finalType = TargetType;
+                TtTypeDesc finalType = TargetType;
                 if (TypePin.HasLinker())
                     finalType = data.NodeGraph.GetOppositePinType(TypePin);
                 var rightExp = new TtPrimitiveExpression(finalType, false);
@@ -120,10 +120,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return null;
         }
-        public override UTypeDesc GetOutPinType(PinOut pin)
+        public override TtTypeDesc GetOutPinType(PinOut pin)
         {
             if(pin == OutPin)
-                return UTypeDesc.TypeOf(typeof(bool));
+                return TtTypeDesc.TypeOf(typeof(bool));
             return null;
         }
     }
@@ -154,8 +154,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             TypePin.Name = "Type";
             TypePin.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
             TypePin.LinkDesc.CanLinks.Add("Value");
-            var ev = UEditableValue.CreateEditableValue(this, Rtti.UTypeDesc.TypeOf(typeof(System.Type)), TypePin) as UTypeSelectorEValue;
-            foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
+            var ev = UEditableValue.CreateEditableValue(this, Rtti.TtTypeDesc.TypeOf(typeof(System.Type)), TypePin) as UTypeSelectorEValue;
+            foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
             {
                 foreach (var typeDesc in service.Types.Values)
                 {
@@ -291,10 +291,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return null;
         }
-        public override UTypeDesc GetOutPinType(PinOut pin)
+        public override TtTypeDesc GetOutPinType(PinOut pin)
         {
             if (pin == OutPin)
-                return UTypeDesc.TypeOf(typeof(bool));
+                return TtTypeDesc.TypeOf(typeof(bool));
             return null;
         }
     }

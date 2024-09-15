@@ -74,7 +74,7 @@ namespace EngineNS.Bricks.Font
             public TtFontDesc mDesc = new TtFontDesc();
             ImGui.ImGuiFileDialog mFileDialog = TtEngine.Instance.EditorInstance.FileDialog.mFileDialog;
             EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
-            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)
             {
                 mDir = dir;
                 var noused = PGAsset.Initialize();
@@ -177,7 +177,7 @@ namespace EngineNS.Bricks.Font
                 var ameta = new TtFontSDFAMeta();
                 ameta.SetAssetName(rn);
                 ameta.AssetId = Guid.NewGuid();
-                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtFontSDFAMeta));
+                ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtFontSDFAMeta));
                 ameta.Description = $"This is a {typeof(TtFontSDFAMeta).FullName}\n";
                 ameta.SaveAMeta((IO.IAsset)null);
 
@@ -427,7 +427,7 @@ namespace EngineNS.Bricks.Font
         }
     }
 
-    public class UFontModule : UModule<TtEngine>
+    public class UFontModule : TtModule<TtEngine>
     {
         TtFontManager mFontManager = new TtFontManager();
         public TtFontManager FontManager { get => mFontManager; }

@@ -314,7 +314,7 @@ namespace EngineNS.Bricks.Procedure.Node
             var viewport = graph.GraphEditor.PreviewViewport;
 
             var mesh = new Graphics.Mesh.TtMesh();
-            var ok = mesh.Initialize(PreviewMesh, Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            var ok = mesh.Initialize(PreviewMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)
             {
                 var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, graph.GraphEditor.PreviewRoot, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);

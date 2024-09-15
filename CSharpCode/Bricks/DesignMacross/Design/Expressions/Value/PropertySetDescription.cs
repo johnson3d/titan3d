@@ -11,8 +11,8 @@ namespace EngineNS.DesignMacross.Design.Expressions
     public class TtPropertySetDescription : TtExpressionDescription
     {
         public Guid HostReferenceId { get; set; } = Guid.Empty;
-        public UTypeDesc VarTypeDesc { get; set; } = null;
-        public UTypeDesc HostReferenceTypeDesc { get; set; } = null;
+        public TtTypeDesc VarTypeDesc { get; set; } = null;
+        public TtTypeDesc HostReferenceTypeDesc { get; set; } = null;
 
         public TtPropertySetDescription()
         {
@@ -22,7 +22,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             AddDtaInPin(new() { Name = "Set", TypeDesc = VarTypeDesc });
             AddDtaOutPin(new() { Name = "Get", TypeDesc = VarTypeDesc });
         }
-        public TtPropertySetDescription(UTypeDesc hostReferenceTypeDesc, UTypeDesc varTypeDesc)
+        public TtPropertySetDescription(TtTypeDesc hostReferenceTypeDesc, TtTypeDesc varTypeDesc)
         {
             AddExecutionInPin(new() { Name = "" });
             AddExecutionOutPin(new() { Name = "" });

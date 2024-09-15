@@ -13,7 +13,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public PinOut OutSampler { get; set; } = new PinOut();
         public SamplerState()
         {
-            VarType = Rtti.UTypeDescGetter<SamplerState>.TypeDesc;
+            VarType = Rtti.TtTypeDescGetter<SamplerState>.TypeDesc;
             
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF40FF40;
@@ -35,7 +35,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         //    tmp.Value = sampNode.Desc;
         //    Material.UsedSamplerStates.Add(tmp);
         //}
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             return VarType;
         }

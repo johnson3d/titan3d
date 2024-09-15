@@ -26,8 +26,8 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateAttachment
                 Parent = this,
                 IsOverride = true
             };
-            var elapseSecondMethodArgument = new TtMethodArgumentDescription { Name = "elapseSecond", VariableType = UTypeDesc.TypeOf<float>() };
-            var contextMethodArgument = new TtMethodArgumentDescription { OperationType = EMethodArgumentAttribute.In, VariableType = UTypeDesc.TypeOf<TtStateMachineContext>(), Name = "context" };
+            var elapseSecondMethodArgument = new TtMethodArgumentDescription { Name = "elapseSecond", VariableType = TtTypeDesc.TypeOf<float>() };
+            var contextMethodArgument = new TtMethodArgumentDescription { OperationType = EMethodArgumentAttribute.In, VariableType = TtTypeDesc.TypeOf<TtStateMachineContext>(), Name = "context" };
             TickMethodDescription.AddArgument(elapseSecondMethodArgument);
             TickMethodDescription.AddArgument(contextMethodArgument);
         }

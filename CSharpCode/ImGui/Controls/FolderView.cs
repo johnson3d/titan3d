@@ -18,7 +18,7 @@ namespace EngineNS.EGui.Controls
         public bool IsNextFolderDisable = true;
         public string[] ExtNameArray;
         public Dictionary<string, bool> DirectoryShowFlags = new Dictionary<string, bool>();
-        public Rtti.UTypeDesc MacrossBase = null;
+        public Rtti.TtTypeDesc MacrossBase = null;
         public string ShaderType = null;
 
         public static string FolderOpenImgName = "uestyle/content/folderopen.srv";

@@ -13,7 +13,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public List<CodeCompiler.ProjectConfig> GenProjects = new List<CodeCompiler.ProjectConfig>();
     }
 
-    public class UMacrossManager : UModule<TtEngine>
+    public class UMacrossManager : TtModule<TtEngine>
     {
         public override int GetOrder()
         {

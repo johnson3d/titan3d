@@ -21,8 +21,8 @@ namespace EngineNS.GamePlay
 
     public class UCenterData
     {
-        public Dictionary<Rtti.UTypeDesc, USharedData> SharedDatas { get; } = new Dictionary<Rtti.UTypeDesc, USharedData>();
-        public bool HasSharedData(Rtti.UTypeDesc type)
+        public Dictionary<Rtti.TtTypeDesc, USharedData> SharedDatas { get; } = new Dictionary<Rtti.TtTypeDesc, USharedData>();
+        public bool HasSharedData(Rtti.TtTypeDesc type)
         {
             lock (SharedDatas)
             {
@@ -33,17 +33,17 @@ namespace EngineNS.GamePlay
         {
             lock (SharedDatas)
             {
-                return SharedDatas.ContainsKey(UTypeDescGetter<T>.TypeDesc);
+                return SharedDatas.ContainsKey(TtTypeDescGetter<T>.TypeDesc);
             }
         }
-        public USharedData GetOrNewSharedData(Rtti.UTypeDesc type)
+        public USharedData GetOrNewSharedData(Rtti.TtTypeDesc type)
         {
             lock(SharedDatas)
             {
                 USharedData data;
                 if (SharedDatas.TryGetValue(type, out data))
                     return data;
-                data = Rtti.UTypeDescManager.CreateInstance(type) as USharedData;
+                data = Rtti.TtTypeDescManager.CreateInstance(type) as USharedData;
                 if (data == null)
                     return null;
                 SharedDatas.Add(type, data);
@@ -52,7 +52,7 @@ namespace EngineNS.GamePlay
         }
         public T GetOrNewSharedData<T>() where T : USharedData
         {
-            return GetOrNewSharedData(UTypeDescGetter<T>.TypeDesc) as T;
+            return GetOrNewSharedData(TtTypeDescGetter<T>.TypeDesc) as T;
         }
     }
 }

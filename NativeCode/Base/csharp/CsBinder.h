@@ -8,7 +8,7 @@
 
 namespace EngineNS::Rtti
 {
-	struct UNativeCoreProvider;
+	struct TtNativeCoreProvider;
 }
 
 #pragma pack(push)
@@ -51,7 +51,7 @@ UCs2CppBase
 
 	static void InitializeNativeCoreProvider();
 	static void FinalCleanupNativeCoreProvider();
-	static EngineNS::Rtti::UNativeCoreProvider* GetNativeCoreProvider();
+	static EngineNS::Rtti::TtNativeCoreProvider* GetNativeCoreProvider();
 };
 
 template<class _Type>

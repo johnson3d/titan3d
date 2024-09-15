@@ -7,7 +7,7 @@ namespace EngineNS.Rtti
 {
     public class AssemblyEntry
     {
-        public class URootServerAssemblyDesc : UAssemblyDesc
+        public class URootServerAssemblyDesc : TtAssemblyDesc
         {
             public URootServerAssemblyDesc()
             {
@@ -23,7 +23,7 @@ namespace EngineNS.Rtti
             public override string Platform { get { return "Global"; } }
         }
         static URootServerAssemblyDesc AssmblyDesc = new URootServerAssemblyDesc();
-        public static UAssemblyDesc GetAssemblyDesc()
+        public static TtAssemblyDesc GetAssemblyDesc()
         {
             return AssmblyDesc;
         }
@@ -33,7 +33,7 @@ namespace EngineNS.Rtti
 
 namespace EngineNS.Plugins.RootServer
 {
-    public class UPluginLoader
+    public class TtPluginLoader
     {
         public static URootServerPlugin mPluginObject = new URootServerPlugin();
         public static Bricks.AssemblyLoader.IPlugin GetPluginObject()

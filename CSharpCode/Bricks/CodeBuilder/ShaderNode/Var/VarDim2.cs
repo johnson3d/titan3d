@@ -8,13 +8,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
     [ContextMenu("f2,float2", "Data\\float2@_serial@", UMaterialGraph.MaterialEditorKeyword)]
     public class VarDimF2 : VarNode
     {
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             if (pin == OutXY)
-                return Rtti.UTypeDesc.TypeOf(typeof(Vector2));
+                return Rtti.TtTypeDesc.TypeOf(typeof(Vector2));
             else if (pin == OutX ||
                 pin == OutY)
-                return Rtti.UTypeDesc.TypeOf(typeof(float));
+                return Rtti.TtTypeDesc.TypeOf(typeof(float));
             return null;
         }
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
@@ -238,7 +238,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public PinOut OutY { get; set; } = new PinOut();
         public VarDimF2()
         {
-            VarType = Rtti.UTypeDescGetter<Vector2>.TypeDesc;
+            VarType = Rtti.TtTypeDescGetter<Vector2>.TypeDesc;
 
             //Name = $"{Value}";
 
@@ -270,13 +270,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
     [ContextMenu("i2,int2", "Data\\int2@_serial@", UMaterialGraph.MaterialEditorKeyword)]
     public class VarDimI2 : VarNode
     {
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             if (pin == OutXY)
-                return Rtti.UTypeDesc.TypeOf(typeof(Vector2i));
+                return Rtti.TtTypeDesc.TypeOf(typeof(Vector2i));
             else if (pin == OutX ||
                 pin == OutY)
-                return Rtti.UTypeDesc.TypeOf(typeof(int));
+                return Rtti.TtTypeDesc.TypeOf(typeof(int));
             return null;
         }
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
@@ -399,7 +399,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public PinOut OutY { get; set; } = new PinOut();
         public VarDimI2()
         {
-            VarType = Rtti.UTypeDescGetter<Vector2i>.TypeDesc;
+            VarType = Rtti.TtTypeDescGetter<Vector2i>.TypeDesc;
 
             //Name = $"{Value}";
 

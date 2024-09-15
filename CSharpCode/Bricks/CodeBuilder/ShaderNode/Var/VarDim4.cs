@@ -8,17 +8,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
     [ContextMenu("f4,float4", "Data\\float4@_serial@", UMaterialGraph.MaterialEditorKeyword)]
     public class VarDimF4 : VarNode
     {
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             if (pin == OutXYZW)
-                return Rtti.UTypeDesc.TypeOf(typeof(Vector4));
+                return Rtti.TtTypeDesc.TypeOf(typeof(Vector4));
             else if (pin == OutXYZ)
-                return Rtti.UTypeDesc.TypeOf(typeof(Vector3));
+                return Rtti.TtTypeDesc.TypeOf(typeof(Vector3));
             else if (pin == OutX ||
                 pin == OutY ||
                 pin == OutZ ||
                 pin == OutW)
-                return Rtti.UTypeDesc.TypeOf(typeof(float));
+                return Rtti.TtTypeDesc.TypeOf(typeof(float));
             return null;
         }
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
@@ -332,7 +332,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public PinOut OutW { get; set; } = new PinOut();
         public VarDimF4()
         {
-            VarType = Rtti.UTypeDescGetter<Vector4>.TypeDesc;
+            VarType = Rtti.TtTypeDescGetter<Vector4>.TypeDesc;
 
             //Name = $"{Value}";
 
@@ -391,17 +391,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         }
         [EGui.Controls.PropertyGrid.Color4PickerEditor()]
         public Vector4 Color { get => mValue; set => mValue = value; }
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             if (pin == OutXYZW)
-                return Rtti.UTypeDesc.TypeOf(typeof(Vector4));
+                return Rtti.TtTypeDesc.TypeOf(typeof(Vector4));
             else if (pin == OutXYZ)
-                return Rtti.UTypeDesc.TypeOf(typeof(Vector3));
+                return Rtti.TtTypeDesc.TypeOf(typeof(Vector3));
             else if (pin == OutX ||
                 pin == OutY ||
                 pin == OutZ ||
                 pin == OutW)
-                return Rtti.UTypeDesc.TypeOf(typeof(float));
+                return Rtti.TtTypeDesc.TypeOf(typeof(float));
             return null;
         }
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
@@ -431,17 +431,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
     [ContextMenu("i4,int4", "Data\\int4@_serial@", UMaterialGraph.MaterialEditorKeyword)]
     public class VarDimI4 : VarNode
     {
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             if (pin == OutXYZW)
-                return Rtti.UTypeDesc.TypeOf(typeof(Vector4i));
+                return Rtti.TtTypeDesc.TypeOf(typeof(Vector4i));
             else if (pin == OutXYZ)
-                return Rtti.UTypeDesc.TypeOf(typeof(Vector3i));
+                return Rtti.TtTypeDesc.TypeOf(typeof(Vector3i));
             else if (pin == OutX ||
                 pin == OutY ||
                 pin == OutZ ||
                 pin == OutW)
-                return Rtti.UTypeDesc.TypeOf(typeof(int));
+                return Rtti.TtTypeDesc.TypeOf(typeof(int));
             return null;
         }
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
@@ -606,7 +606,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public PinOut OutW { get; set; } = new PinOut();
         public VarDimI4()
         {
-            VarType = Rtti.UTypeDescGetter<Vector4i>.TypeDesc;
+            VarType = Rtti.TtTypeDescGetter<Vector4i>.TypeDesc;
 
             //Name = $"{Value}";
 

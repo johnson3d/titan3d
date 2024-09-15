@@ -143,7 +143,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         public Graphics.Pipeline.TtRenderPolicy CreateRenderPolicy(TtViewportSlate viewport, string endingName = "Copy2SwapChainNode")
         {
             var typeDesc = PolicyGraph.PolicyType;
-            var policy = Rtti.UTypeDescManager.CreateInstance(typeDesc) as Graphics.Pipeline.TtRenderPolicy; // new Graphics.Pipeline.URenderPolicy();
+            var policy = Rtti.TtTypeDescManager.CreateInstance(typeDesc) as Graphics.Pipeline.TtRenderPolicy; // new Graphics.Pipeline.URenderPolicy();
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
             meta.CopyObjectMetaField(policy, this.PolicyGraph.RenderPolicy);
             policy.ViewportSlate = viewport;

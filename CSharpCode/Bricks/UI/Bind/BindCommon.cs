@@ -649,7 +649,7 @@ namespace EngineNS.UI.Bind
             public IBindableObject SourceObject;
             public List<IBindableObject> TargetObjects;
             public string TargetName;
-            public Rtti.UTypeDesc TargetType;
+            public Rtti.TtTypeDesc TargetType;
             public EditorUIHost Host;
             public bool HasProperty;
         }
@@ -798,8 +798,8 @@ namespace EngineNS.UI.Bind
     {
         public string Name;
         public string Category;
-        public UTypeDesc PropertyType;
-        public UTypeDesc HostType;
+        public TtTypeDesc PropertyType;
+        public TtTypeDesc HostType;
         public PGCustomValueEditorAttribute CustomValueEditor;
         public BindPropertyDisplayNameAttribute DisplayNameAtt;
 
@@ -949,10 +949,10 @@ namespace EngineNS.UI.Bind
         internal struct NameKey
         {
             private string mName;
-            private UTypeDesc mHostType;
+            private TtTypeDesc mHostType;
             private int mHashCode;
 
-            public NameKey(string name, UTypeDesc hostType)
+            public NameKey(string name, TtTypeDesc hostType)
             {
                 mName = name;
                 mHostType = hostType;
@@ -1046,7 +1046,7 @@ namespace EngineNS.UI.Bind
                         return key;
                 }
             }
-            return TtEngine.Instance.UIBindManager.FindBindableProperty(propertyName, UTypeDesc.TypeOf(GetType())); 
+            return TtEngine.Instance.UIBindManager.FindBindableProperty(propertyName, TtTypeDesc.TypeOf(GetType())); 
         }
         //public TtBindingExpressionBase SetBinding(TtBindableProperty bp, TtBindingBase binding)
         //{
@@ -1070,7 +1070,7 @@ namespace EngineNS.UI.Bind
         public virtual void SetValue<T>(in T value, [CallerMemberName] string? propertyName = null)
 #nullable disable
         {
-            var bp = TtEngine.Instance.UIBindManager.FindBindableProperty(propertyName, UTypeDesc.TypeOf(GetType()));
+            var bp = TtEngine.Instance.UIBindManager.FindBindableProperty(propertyName, TtTypeDesc.TypeOf(GetType()));
             SetValue<T>(value, bp);
         }
         public virtual void SetValue<T>(in T value, TtBindableProperty bp)
@@ -1100,7 +1100,7 @@ namespace EngineNS.UI.Bind
         public virtual T GetValue<T>([CallerMemberName] string? propertyName = null)
 #nullable disable
         {
-            var bp = TtEngine.Instance.UIBindManager.FindBindableProperty(propertyName, UTypeDesc.TypeOf(GetType()));
+            var bp = TtEngine.Instance.UIBindManager.FindBindableProperty(propertyName, TtTypeDesc.TypeOf(GetType()));
             return GetValue<T>(bp);
         }
         public virtual T GetValue<T>(TtBindableProperty bp)
@@ -1147,7 +1147,7 @@ namespace EngineNS.UI.Bind
         {
             var retVal = new TtBindingExpression<TProperty>(binding, parent);
             retVal.TargetObject = this;
-            retVal.TargetProperty = (TtBindableProperty<TProperty>)TtEngine.Instance.UIBindManager.FindBindableProperty(propertyName, UTypeDesc.TypeOf(GetType()));
+            retVal.TargetProperty = (TtBindableProperty<TProperty>)TtEngine.Instance.UIBindManager.FindBindableProperty(propertyName, TtTypeDesc.TypeOf(GetType()));
             return retVal;
         }
         public virtual void ClearBindExpression(TtBindableProperty bp)
@@ -1197,7 +1197,7 @@ namespace EngineNS.UI.Bind
         public virtual void GetProperties(ref CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {
             var pros = TypeDescriptor.GetProperties(this);
-            collection.InitValue(this, Rtti.UTypeDesc.TypeOf(this.GetType()), pros, parentIsValueType);
+            collection.InitValue(this, Rtti.TtTypeDesc.TypeOf(this.GetType()), pros, parentIsValueType);
 
             // attached properties
             foreach(var bindData in mBindExprDic)

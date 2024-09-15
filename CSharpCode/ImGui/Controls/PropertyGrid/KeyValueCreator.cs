@@ -25,7 +25,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     KeyTypeSlt.OnDraw(-1, 6);
                     if (KeyTypeSlt.SelectedType != saved)
                     {
-                        KeyData = Rtti.UTypeDescManager.CreateInstance(KeyTypeSlt.SelectedType.SystemType);
+                        KeyData = Rtti.TtTypeDescManager.CreateInstance(KeyTypeSlt.SelectedType.SystemType);
                     }
 
                     ImGuiAPI.Separator();
@@ -45,7 +45,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     ValueTypeSlt.OnDraw(-1, 6);
                     if (ValueTypeSlt.SelectedType != saved)
                     {
-                        ValueData = Rtti.UTypeDescManager.CreateInstance(ValueTypeSlt.SelectedType.SystemType);
+                        ValueData = Rtti.TtTypeDescManager.CreateInstance(ValueTypeSlt.SelectedType.SystemType);
                     }
 
                     ImGuiAPI.Separator();

@@ -83,7 +83,7 @@ namespace EngineNS.GamePlay.Scene
                     materials1[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria.CloneMaterialInstance();
                     var mesh2 = new Graphics.Mesh.TtMesh();
                     var ok1 = mesh2.Initialize(cookedMesh, materials1,
-                        Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                        Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                     if (ok1)
                     {
                         mesh2.IsAcceptShadow = false;

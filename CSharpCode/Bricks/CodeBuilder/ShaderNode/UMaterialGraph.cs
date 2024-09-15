@@ -23,7 +23,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         {
             CanvasMenus.SubMenuItems.Clear();
             CanvasMenus.Text = "Canvas";
-            foreach(var service in Rtti.UTypeDescManager.Instance.Services.Values)
+            foreach(var service in Rtti.TtTypeDescManager.Instance.Services.Values)
             {
                 foreach(var typeDesc in service.Types.Values)
                 {
@@ -45,7 +45,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                                 parentMenu.AddMenuItem(menuName, att.FilterStrings, null,
                                     (TtMenuItem item, object sender) =>
                                     {
-                                        var node = Rtti.UTypeDescManager.CreateInstance(typeDesc) as UNodeBase;
+                                        var node = Rtti.TtTypeDescManager.CreateInstance(typeDesc) as UNodeBase;
                                         var nodeName = GetSerialFinalString(menuStr, GenSerialId());
                                         if (nodeName != null)
                                             node.Name = nodeName;
@@ -72,7 +72,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                                     if (attrs.Length > 0)
                                     {
                                         var data = (attrs[0] as Bricks.CodeBuilder.ShaderNode.Control.UserCallNodeAttribute);
-                                        node = Rtti.UTypeDescManager.CreateInstance(data.CallNodeType, null) as Control.CallNode;
+                                        node = Rtti.TtTypeDescManager.CreateInstance(data.CallNodeType, null) as Control.CallNode;
                                         node.Initialize(i);
                                     }
                                     else
@@ -120,7 +120,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     (TtMenuItem item, object sender) =>
                     {
                         var node = new UUniformVar();
-                        node.VarType = Rtti.UTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.UShaderVarAttribute).VarType);
+                        node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.UShaderVarAttribute).VarType);
                         node.Name = i.Name;
                         node.UserData = this;
                         node.Position = PopMenuPosition;
@@ -139,7 +139,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     (TtMenuItem item, object sender) =>
                     {
                         var node = new UUniformVar();
-                        node.VarType = Rtti.UTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.UShaderVarAttribute).VarType);
+                        node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.UShaderVarAttribute).VarType);
                         node.Name = i.Name;
                         node.UserData = this;
                         node.Position = PopMenuPosition;
@@ -153,7 +153,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 (TtMenuItem item, object sender) =>
                 {
                     var node = new UUniformVar();
-                    node.VarType = Rtti.UTypeDesc.TypeOf(typeof(Graphics.Pipeline.Shader.PS_INPUT));
+                    node.VarType = Rtti.TtTypeDesc.TypeOf(typeof(Graphics.Pipeline.Shader.PS_INPUT));
                     node.Name = "input";
                     node.UserData = this;
                     node.Position = PopMenuPosition;
@@ -167,7 +167,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     (TtMenuItem item, object sender) =>
                     {
                         var node = new UUniformVar();
-                        node.VarType = Rtti.UTypeDesc.TypeOf(i.FieldType);
+                        node.VarType = Rtti.TtTypeDesc.TypeOf(i.FieldType);
                         if(i.Name == "bIsFrontFace")
                         {
                             node.Name = "input.GetIsFrontFace()";
@@ -240,7 +240,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         //                if (ImGuiAPI.MenuItem(i.Name, null, false, true))
         //                {
         //                    var node = new UUniformVar();
-        //                    node.VarType = Rtti.UTypeDesc.TypeOf((attrs[0] as NxRHI.UBuffer.UShaderTypeAttribute).ShaderType);
+        //                    node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.UBuffer.UShaderTypeAttribute).ShaderType);
         //                    node.Name = i.Name;
         //                    node.UserData = this;
         //                    node.Position = PopMenuPosition;
@@ -261,7 +261,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         //                if (ImGuiAPI.MenuItem("Input", null, false, true))
         //                {
         //                    var node = new UUniformVar();
-        //                    node.VarType = Rtti.UTypeDesc.TypeOf(typeof(Graphics.Pipeline.Shader.UMaterial.PSInput));
+        //                    node.VarType = Rtti.TtTypeDesc.TypeOf(typeof(Graphics.Pipeline.Shader.UMaterial.PSInput));
         //                    node.Name = "input";
         //                    node.UserData = this;
         //                    node.Position = PopMenuPosition;
@@ -276,7 +276,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         //                if (ImGuiAPI.MenuItem(i.Name, null, false, true))
         //                {
         //                    var node = new UUniformVar();
-        //                    node.VarType = Rtti.UTypeDesc.TypeOf(i.FieldType);
+        //                    node.VarType = Rtti.TtTypeDesc.TypeOf(i.FieldType);
         //                    node.Name = "input." + i.Name;
         //                    node.UserData = this;
         //                    node.Position = PopMenuPosition;

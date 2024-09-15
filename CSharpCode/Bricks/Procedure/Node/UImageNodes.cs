@@ -109,7 +109,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 }
             }
 
-            Float1Desc.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
+            Float1Desc.BufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
             if (image != null)
             {
                 UBufferComponent red = null;
@@ -670,7 +670,7 @@ namespace EngineNS.Bricks.Procedure.Node
 
             var resultType = result.BufferCreator.ElementType;
             var leftType = left.BufferCreator.ElementType;
-            var rightType = Rtti.UTypeDescGetter<float>.TypeDesc;
+            var rightType = Rtti.TtTypeDescGetter<float>.TypeDesc;
 
             result.DispatchPixels((result, x, y, z) =>
             {

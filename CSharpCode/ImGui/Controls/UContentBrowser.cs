@@ -41,8 +41,8 @@ namespace EngineNS.EGui.Controls
         }
         string[] mExtNameArray;
 
-        Rtti.UTypeDesc mMacrossBase = null;
-        public Rtti.UTypeDesc MacrossBase
+        Rtti.TtTypeDesc mMacrossBase = null;
+        public Rtti.TtTypeDesc MacrossBase
         {
             get => mMacrossBase;
             set
@@ -156,14 +156,14 @@ namespace EngineNS.EGui.Controls
             mContextMenu.SubMenuItems.Clear();
 
             // New Asset menu
-            foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
+            foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
             {
                 foreach(var typeDesc in service.Types.Values)
                 {
                     var atts = typeDesc.SystemType.GetCustomAttributes(typeof(IO.AssetCreateMenuAttribute), false);
                     if (atts.Length == 0)
                         continue;
-                    var assetExtField = Rtti.UTypeDesc.GetField(typeDesc.SystemType, "AssetExt");
+                    var assetExtField = Rtti.TtTypeDesc.GetField(typeDesc.SystemType, "AssetExt");
                     var parentMenu = mContextMenu;
                     var att = atts[0] as IO.AssetCreateMenuAttribute;
                     var splits = att.MenuName.Split('/');
@@ -296,8 +296,8 @@ namespace EngineNS.EGui.Controls
             var metafiles = IO.TtFileManager.GetFiles(dir.Address, "*.metadata", false);
             if (metafiles.Length > 0)
             {
-                var ameta = new Rtti.UMetaVersionMeta();
-                ameta.TypeStr = Rtti.UTypeDescGetter<Rtti.TtMetaVersion>.TypeDesc.TypeString;
+                var ameta = new Rtti.TtMetaVersionMeta();
+                ameta.TypeStr = Rtti.TtTypeDescGetter<Rtti.TtMetaVersion>.TypeDesc.TypeString;
                 foreach (var i in metafiles)
                 {
                     var name = IO.TtFileManager.GetPureName(i);
@@ -424,7 +424,7 @@ namespace EngineNS.EGui.Controls
                             var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
                             if (mainEditor != null)
                             {
-                                var type = Rtti.UTypeDesc.TypeOf(ameta.TypeStr).SystemType;
+                                var type = Rtti.TtTypeDesc.TypeOf(ameta.TypeStr).SystemType;
                                 if (type != null)
                                 {
                                     var attrs = type.GetCustomAttributes(typeof(Editor.UAssetEditorAttribute), false);
@@ -610,13 +610,13 @@ namespace EngineNS.EGui.Controls
             {
                 Name = "Asset Types",
             };
-            foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
+            foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
             {
                 foreach(var typeDesc in service.Types.Values)
                 {
                     if(typeDesc.IsSubclassOf(typeof(IO.IAssetMeta)))
                     {
-                        var inst = Rtti.UTypeDescManager.CreateInstance(typeDesc) as IO.IAssetMeta;
+                        var inst = Rtti.TtTypeDescManager.CreateInstance(typeDesc) as IO.IAssetMeta;
                         var name = inst.GetAssetTypeName();
                         var menu = new UIProxy.MenuItemProxy()
                         {
@@ -858,8 +858,8 @@ namespace EngineNS.EGui.Controls
                             if(mousePos.X >= pos.X && mousePos.X <= (pos.X + size.X) &&
                                mousePos.Y >= pos.Y && mousePos.Y <= (pos.Y + size.Y))
                             {
-                                List<Rtti.UTypeDesc> importers = new List<Rtti.UTypeDesc>();
-                                foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
+                                List<Rtti.TtTypeDesc> importers = new List<Rtti.TtTypeDesc>();
+                                foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
                                 {
                                     foreach (var typeDesc in service.Types.Values)
                                     {
@@ -884,7 +884,7 @@ namespace EngineNS.EGui.Controls
                                             var attrs = importers[j].GetCustomAttributes(typeof(IO.IAssetCreateAttribute), true);
                                             if (((IO.IAssetCreateAttribute)(attrs[0])).IsAssetSource(fileExt))
                                             {
-                                                var assetExtField = Rtti.UTypeDesc.GetField(importers[j].SystemType, "AssetExt");
+                                                var assetExtField = Rtti.TtTypeDesc.GetField(importers[j].SystemType, "AssetExt");
                                                 EnqueueAssetImporter(TtEngine.Instance.AssetMetaManager.ImportAsset(mFolderView.CurrentDir, importers[j], (string)assetExtField.GetValue(null)), file);
                                                 break;
                                             }

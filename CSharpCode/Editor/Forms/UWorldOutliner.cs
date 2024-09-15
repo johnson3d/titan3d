@@ -149,14 +149,14 @@ namespace EngineNS.Editor.Forms
         {
             if (mAddToNode == null)
                 return null;
-            var ntype = Rtti.UTypeDesc.TypeOf(i.ClassType.TypeString);
-            var newNode = Rtti.UTypeDescManager.CreateInstance(ntype) as GamePlay.Scene.TtSceneActorNode;
+            var ntype = Rtti.TtTypeDesc.TypeOf(i.ClassType.TypeString);
+            var newNode = Rtti.TtTypeDescManager.CreateInstance(ntype) as GamePlay.Scene.TtSceneActorNode;
             var attrs = newNode.GetType().GetCustomAttributes(typeof(GamePlay.Scene.TtNodeAttribute), false);
             GamePlay.Scene.TtNodeData nodeData = null;
             string prefix = "Node";
             if (attrs.Length > 0)
             {
-                nodeData = Rtti.UTypeDescManager.CreateInstance((attrs[0] as GamePlay.Scene.TtNodeAttribute).NodeDataType) as GamePlay.Scene.TtNodeData;
+                nodeData = Rtti.TtTypeDescManager.CreateInstance((attrs[0] as GamePlay.Scene.TtNodeAttribute).NodeDataType) as GamePlay.Scene.TtNodeData;
                 prefix = (attrs[0] as GamePlay.Scene.TtNodeAttribute).DefaultNamePrefix;
             }
             await newNode.InitializeNode(World, nodeData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
@@ -167,7 +167,7 @@ namespace EngineNS.Editor.Forms
         public void UpdateAddNodeMenu()
         {
             mAddNodeMenus = new TtMenuItem();
-            var typeDesc = Rtti.UTypeDescGetter<GamePlay.Scene.TtNode>.TypeDesc;
+            var typeDesc = Rtti.TtTypeDescGetter<GamePlay.Scene.TtNode>.TypeDesc;
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeDesc);
             var subClasses = meta.SubClasses;
             foreach (var i in subClasses)

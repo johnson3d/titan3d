@@ -28,7 +28,7 @@ namespace CppWeaving.Cpp2CS
             AddLine($"#if DEBUG");
             PushTab();
             {
-                AddLine($"using SuppressGC = EngineNS.Rtti.UDummyAttribute;");
+                AddLine($"using SuppressGC = EngineNS.Rtti.TtDummyAttribute;");
             }
             PopTab();
             AddLine($"#else");
@@ -150,7 +150,7 @@ namespace CppWeaving.Cpp2CS
                             if (i.ReturnType.NumOfElement <= 0 && retTypeStr == "sbyte*")
                             {
                                 retTypeStr = "string";
-                                marshalReturn = $"EngineNS.Rtti.UNativeCoreProvider.MarshalPtrAnsi";
+                                marshalReturn = $"EngineNS.Rtti.TtNativeCoreProvider.MarshalPtrAnsi";
                             }
                         }
                     }
@@ -330,7 +330,7 @@ namespace CppWeaving.Cpp2CS
                             if (i.NumOfElement <= 0 && retType == "sbyte*")
                             {
                                 retType = "string";
-                                marshalReturn = $"EngineNS.Rtti.UNativeCoreProvider.MarshalPtrAnsi";
+                                marshalReturn = $"EngineNS.Rtti.TtNativeCoreProvider.MarshalPtrAnsi";
                             }
                         }
                         if (i.IsTypeDef)
@@ -473,7 +473,7 @@ namespace CppWeaving.Cpp2CS
                         if (i.ReturnType.NumOfElement <= 0 && retTypeStr == "sbyte*")
                         {
                             retTypeStr = "string";
-                            marshalReturn = $"EngineNS.Rtti.UNativeCoreProvider.MarshalPtrAnsi";
+                            marshalReturn = $"EngineNS.Rtti.TtNativeCoreProvider.MarshalPtrAnsi";
                         }
                     }
                 }

@@ -4,13 +4,13 @@ using System.Text;
 
 namespace EngineNS.Bricks.SourceControl
 {
-    public struct UVersion
+    public struct TtVersion
     {
         public ulong VersionId;
     }
-    public struct USourceOpResult
+    public struct TtSourceOpResult
     {
-        public USourceOpResult(int hr)
+        public TtSourceOpResult(int hr)
         {
             HResult = hr;
             Info = "NotImplemented";
@@ -18,7 +18,7 @@ namespace EngineNS.Bricks.SourceControl
         public int HResult;
         public string Info;
     }
-    public abstract class USource : AssemblyLoader.IPlugin
+    public abstract class TtSource : AssemblyLoader.IPlugin
     {
         public virtual void OnLoadedPlugin()
         {
@@ -28,9 +28,9 @@ namespace EngineNS.Bricks.SourceControl
         {
 
         }
-        public abstract USourceOpResult AddFile(string file);
-        public abstract USourceOpResult AddDirectory(string dir);
-        public abstract USourceOpResult RemoveFile(string file, bool delLocal = true);
+        public abstract TtSourceOpResult AddFile(string file);
+        public abstract TtSourceOpResult AddDirectory(string dir);
+        public abstract TtSourceOpResult RemoveFile(string file, bool delLocal = true);
         //public virtual async System.Threading.Tasks.Task<USourceOpResult> Pull(URepository reps)
         //{
         //    await Thread.TtAsyncDummyClass.DummyFunc();
@@ -70,9 +70,9 @@ namespace EngineNS.Bricks.SourceControl
         //}
     }
 
-    public class USourceControlModule : UModule<TtEngine>
+    public class TtSourceControlModule : TtModule<TtEngine>
     {
-        public USource Source { get; private set; } = null;
+        public TtSource Source { get; private set; } = null;
         public List<string> PreAddFiles = new List<string>();
         public override int GetOrder()
         {
@@ -84,7 +84,7 @@ namespace EngineNS.Bricks.SourceControl
 
             var serverPlugin = TtEngine.Instance.PluginModuleManager.GetPluginModule("SourceGit");
             if (serverPlugin != null)
-                Source = serverPlugin.GetPluginObject<USource>();
+                Source = serverPlugin.GetPluginObject<TtSource>();
 
             if (Source != null)
             {
@@ -137,7 +137,7 @@ namespace EngineNS
 {
     partial class TtEngine
     {
-        public Bricks.SourceControl.USourceControlModule SourceControlModule { get; } = new Bricks.SourceControl.USourceControlModule();
+        public Bricks.SourceControl.TtSourceControlModule SourceControlModule { get; } = new Bricks.SourceControl.TtSourceControlModule();
     }
 }
 

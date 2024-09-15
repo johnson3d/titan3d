@@ -21,13 +21,13 @@ namespace EngineNS.Bricks.Procedure
             where TBuffer : UBufferComponent
         {
             var result = new UBufferCreator();
-            result.BufferType = Rtti.UTypeDesc.TypeOf<TBuffer>();
+            result.BufferType = Rtti.TtTypeDesc.TypeOf<TBuffer>();
             result.XSize = x;
             result.YSize = y;
             result.ZSize = z;
             return result;
         }
-        public static UBufferCreator CreateInstance(Rtti.UTypeDesc bufferType, int x = -1, int y = -1, int z = -1)
+        public static UBufferCreator CreateInstance(Rtti.TtTypeDesc bufferType, int x = -1, int y = -1, int z = -1)
         {
             var result = new UBufferCreator();
             result.BufferType = bufferType;
@@ -61,9 +61,9 @@ namespace EngineNS.Bricks.Procedure
         {
             return System.Runtime.InteropServices.Marshal.SizeOf(ElementType);
         }
-        Rtti.UTypeDesc mElementType;
+        Rtti.TtTypeDesc mElementType;
         [EGui.Controls.PropertyGrid.PGTypeEditor(FilterMode = 0)]
-        public Rtti.UTypeDesc ElementType
+        public Rtti.TtTypeDesc ElementType
         {
             get
             {
@@ -71,7 +71,7 @@ namespace EngineNS.Bricks.Procedure
                 {
                     if (mBufferType == null)
                         return null;
-                    var tmp = Rtti.UTypeDescManager.CreateInstance(mBufferType) as UBufferComponent;
+                    var tmp = Rtti.TtTypeDescManager.CreateInstance(mBufferType) as UBufferComponent;
                     if (tmp != null)
                         mElementType = tmp.PixelOperator.ElementType;
                 }
@@ -82,24 +82,24 @@ namespace EngineNS.Bricks.Procedure
                 mElementType = value;
             }
         }
-        Rtti.UTypeDesc mBufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
+        Rtti.TtTypeDesc mBufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
         [Rtti.Meta]
         //[IO.UTypeDescSerializer()]
         [EGui.Controls.PropertyGrid.PGTypeEditor(typeof(UBufferComponent), FilterMode = EGui.Controls.UTypeSelector.EFilterMode.IncludeObjectType)]
-        public Rtti.UTypeDesc BufferType
+        public Rtti.TtTypeDesc BufferType
         {
             get => mBufferType;
             set
             {
                 mBufferType = value;
-                var tmp = Rtti.UTypeDescManager.CreateInstance(value) as UBufferComponent;
+                var tmp = Rtti.TtTypeDescManager.CreateInstance(value) as UBufferComponent;
                 if (tmp != null)
                 {
                     ElementType = tmp.PixelOperator.ElementType;
                 }
                 else
                 {
-                    mBufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
+                    mBufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
                 }
             }
         }
@@ -497,7 +497,7 @@ namespace EngineNS.Bricks.Procedure
                         {//高度信息有2的11次方级别精度高度
                             var Count = Width * Height;
                             var tarPixels = new Half[Count];
-                            if (BufferCreator.ElementType == Rtti.UTypeDescGetter<float>.TypeDesc)
+                            if (BufferCreator.ElementType == Rtti.TtTypeDescGetter<float>.TypeDesc)
                             {
                                 var pSlice = (float*)this.GetSliceAddress(0);
                                 for (int i = 0; i < Count; i++)
@@ -514,7 +514,7 @@ namespace EngineNS.Bricks.Procedure
                                 }
                                 
                             }
-                            else if (BufferCreator.ElementType == Rtti.UTypeDescGetter<sbyte>.TypeDesc)
+                            else if (BufferCreator.ElementType == Rtti.TtTypeDescGetter<sbyte>.TypeDesc)
                             {
                                 var pSlice = (sbyte*)this.GetSliceAddress(0);
                                 for (int i = 0; i < Count; i++)
@@ -597,12 +597,12 @@ namespace EngineNS.Bricks.Procedure
         #region CppMemBuffer
         public unsafe static UBufferComponent CreateInstance(in UBufferCreator creator)
         {
-            var result = Rtti.UTypeDescManager.CreateInstance(creator.BufferType) as UBufferComponent;
+            var result = Rtti.TtTypeDescManager.CreateInstance(creator.BufferType) as UBufferComponent;
             result.BufferCreator = creator.Clone();
             result.CreateBuffer(creator.ElementType, creator.XSize, creator.YSize, creator.ZSize, IntPtr.Zero.ToPointer());
             return result;
         }
-        public unsafe void CreateBuffer(Rtti.UTypeDesc type, int xSize, int ySize, int zSize, void* initValue)
+        public unsafe void CreateBuffer(Rtti.TtTypeDesc type, int xSize, int ySize, int zSize, void* initValue)
         {
             int elementSize = System.Runtime.InteropServices.Marshal.SizeOf(type.SystemType);
             if (BufferCreator == null)
@@ -869,7 +869,7 @@ namespace EngineNS.Bricks.Procedure
             var tOp = new TOperator();
             minValue = tOp.MaxValue;
             maxValue = tOp.MinValue;
-            var srcType = Rtti.UTypeDescGetter<T>.TypeDesc;
+            var srcType = Rtti.TtTypeDescGetter<T>.TypeDesc;
             fixed(T* pMaxValue = &maxValue)
             fixed (T* pMinValue = &minValue)
             {
@@ -1323,7 +1323,7 @@ namespace EngineNS.Bricks.Procedure
         {
             fixed (T* pAddr = &initValue)
             {
-                CreateBuffer(Rtti.UTypeDescGetter<T>.TypeDesc, xSize, ySize, zSize, pAddr);
+                CreateBuffer(Rtti.TtTypeDescGetter<T>.TypeDesc, xSize, ySize, zSize, pAddr);
             }
         }
         public unsafe ref T GetSuperPixel(int x, int y, int z)

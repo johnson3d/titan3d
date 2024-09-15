@@ -8,14 +8,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
     [ContextMenu("f3,float3", "Data\\float3@_serial@", UMaterialGraph.MaterialEditorKeyword)]
     public class VarDimF3 : VarNode
     {
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             if (pin == OutXYZ)
-                return Rtti.UTypeDesc.TypeOf(typeof(Vector3));
+                return Rtti.TtTypeDesc.TypeOf(typeof(Vector3));
             else if (pin == OutX ||
                 pin == OutY ||
                 pin == OutZ)
-                return Rtti.UTypeDesc.TypeOf(typeof(float));
+                return Rtti.TtTypeDesc.TypeOf(typeof(float));
             return null;
         }
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
@@ -282,7 +282,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public PinOut OutZ { get; set; } = new PinOut();
         public VarDimF3()
         {
-            VarType = Rtti.UTypeDescGetter<Vector3>.TypeDesc;
+            VarType = Rtti.TtTypeDescGetter<Vector3>.TypeDesc;
 
             //Name = $"{Value}";
 
@@ -331,14 +331,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
     [ContextMenu("i3,int3", "Data\\int3@_serial@", UMaterialGraph.MaterialEditorKeyword)]
     public class VarDimI3 : VarNode
     {
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             if (pin == OutXYZ)
-                return Rtti.UTypeDesc.TypeOf(typeof(Vector3i));
+                return Rtti.TtTypeDesc.TypeOf(typeof(Vector3i));
             else if (pin == OutX ||
                 pin == OutY ||
                 pin == OutZ)
-                return Rtti.UTypeDesc.TypeOf(typeof(int));
+                return Rtti.TtTypeDesc.TypeOf(typeof(int));
             return null;
         }
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
@@ -481,7 +481,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public PinOut OutZ { get; set; } = new PinOut();
         public VarDimI3()
         {
-            VarType = Rtti.UTypeDescGetter<Vector3i>.TypeDesc;
+            VarType = Rtti.TtTypeDescGetter<Vector3i>.TypeDesc;
 
             //Name = $"{Value}";
 

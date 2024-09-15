@@ -54,7 +54,7 @@ namespace EngineNS.UI.Controls.Containers
             }
         }
 
-        public override bool CanAddChild(Rtti.UTypeDesc childType)
+        public override bool CanAddChild(Rtti.TtTypeDesc childType)
         {
             return false;
         }

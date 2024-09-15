@@ -190,7 +190,7 @@ namespace EngineNS.DesignMacross.Base.Graph
     public class TtMenuUtil
     {
 
-        public static void ConstructMenuItem(TtMenuItem menuToAdded, UTypeDesc typeDesc, string[] menuPaths, string filterStrings, FMenuAction action, Func<TtMenuItem, object, bool> beforeAction = null)
+        public static void ConstructMenuItem(TtMenuItem menuToAdded, TtTypeDesc typeDesc, string[] menuPaths, string filterStrings, FMenuAction action, Func<TtMenuItem, object, bool> beforeAction = null)
         {
             var parentMenu = menuToAdded;
             for (var menuIdx = 0; menuIdx < menuPaths.Length; menuIdx++)
@@ -217,9 +217,9 @@ namespace EngineNS.DesignMacross.Base.Graph
             return menuString;
         }
 
-        public static string[] GetContextPath(Rtti.UTypeDesc type, string name)
+        public static string[] GetContextPath(Rtti.TtTypeDesc type, string name)
         {
-            var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(type, false);
+            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(type, false);
             typeStr = typeStr.Replace("EngineNS.", "").Replace("Bricks.", "");
             var idx = typeStr.LastIndexOf('@');
             if (idx >= 0)

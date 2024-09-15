@@ -28,7 +28,7 @@ namespace EngineNS.NxPhysics
                         TtEngine.Instance.PxSystem.DebugShapeMaterial,
                     };
                     mDebugMesh.Initialize(geoMesh, materials, 
-                        Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                        Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 }
                 return mDebugMesh;
             }
@@ -64,7 +64,7 @@ namespace EngineNS.NxPhysics
                         TtEngine.Instance.PxSystem.DebugShapeMaterial,
                     };
                     mDebugMesh.Initialize(geoMesh, materials,
-                        Rtti.UTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                        Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 }
                 return mDebugMesh;
             }

@@ -872,7 +872,7 @@ namespace EngineNS.UI.Controls.Containers
             return idx;
         }
 
-        public virtual bool CanAddChild(Rtti.UTypeDesc childType)
+        public virtual bool CanAddChild(Rtti.TtTypeDesc childType)
         {
             return true;
         }

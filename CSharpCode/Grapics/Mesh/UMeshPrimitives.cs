@@ -61,7 +61,7 @@ namespace EngineNS.Graphics.Mesh
             string mSourceFile;
             ImGui.ImGuiFileDialog mFileDialog = TtEngine.Instance.EditorInstance.FileDialog.mFileDialog;
             //EGui.Controls.PropertyGrid.PropertyGrid PGAsset = new EGui.Controls.PropertyGrid.PropertyGrid();
-            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.UTypeDesc type, string ext)
+            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)
             {
                 mDir = dir;
                 await PGAsset.Initialize();
@@ -392,7 +392,7 @@ namespace EngineNS.Graphics.Mesh
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public partial class UGfxDevice
+    public partial class TtGfxDevice
     {
         public Mesh.UMeshPrimitiveManager MeshPrimitiveManager { get; } = new Mesh.UMeshPrimitiveManager();
     }

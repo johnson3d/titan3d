@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.UI
 {
-    public partial class TtUIManager : UModule<TtEngine>
+    public partial class TtUIManager : TtModule<TtEngine>
     {
         TtUIConfig mConfig = new TtUIConfig();
         public TtUIConfig Config => mConfig;
@@ -189,7 +189,7 @@ namespace EngineNS.UI
         {
             if (element == null)
                 return;
-            var typeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(element.GetType());
+            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(element.GetType());
             using (var xnd = new IO.TtXndHolder(typeStr, 0, 0))
             {
                 using (var attr = xnd.NewAttribute("UI", 0, 0))

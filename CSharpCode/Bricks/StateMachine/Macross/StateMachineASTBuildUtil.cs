@@ -24,7 +24,7 @@ namespace EngineNS.Bricks.StateMachine.Macross
             var returnVar = TtASTBuildUtil.CreateMethodReturnVariableDeclaration(new(typeof(bool)), TtASTBuildUtil.CreateDefaultValueExpression(new(typeof(bool))));
             var args = new List<TtMethodArgumentDeclaration>
             {
-                TtASTBuildUtil.CreateMethodArgumentDeclaration("context", new(UTypeDesc.TypeOf<TtStateMachineContext>()), EMethodArgumentAttribute.Default)
+                TtASTBuildUtil.CreateMethodArgumentDeclaration("context", new(TtTypeDesc.TypeOf<TtStateMachineContext>()), EMethodArgumentAttribute.Default)
             };
             var methodDeclaration = TtASTBuildUtil.CreateMethodDeclaration("Initialize", returnVar, args, true, TtMethodDeclaration.EAsyncType.CustomTask);
 

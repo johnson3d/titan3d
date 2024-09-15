@@ -21,10 +21,10 @@ namespace EngineNS.DesignMacross.Design.Expressions
         }
         public IVariableDescription VariableDescription { get; set; }
         public Guid VariableId { get; set; } = Guid.Empty;
-        public UTypeDesc VarTypeDesc { get=>VariableDescription.VariableType.TypeDesc; }
+        public TtTypeDesc VarTypeDesc { get=>VariableDescription.VariableType.TypeDesc; }
         public TtVarGetDescription()
         {
-            AddDtaOutPin(new() { Name = "Get", TypeDesc = UTypeDesc.TypeOf<bool>() });
+            AddDtaOutPin(new() { Name = "Get", TypeDesc = TtTypeDesc.TypeOf<bool>() });
         }
 
         public IVariableDescription GetVariableDescription()

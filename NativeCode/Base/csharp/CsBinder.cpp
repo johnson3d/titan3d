@@ -1,15 +1,15 @@
 #include "CsBinder.h"
 #include "../../../codegen/Cs2Cpp/cpp/EngineNS.UTest.UTestCs2CppBuilder.cs2cpp.h"
-#include "../../../codegen/Cs2Cpp/cpp/EngineNS.Rtti.UNativeCoreProvider.cs2cpp.h"
+#include "../../../codegen/Cs2Cpp/cpp/EngineNS.Rtti.TtNativeCoreProvider.cs2cpp.h"
 
 #define new VNEW
 
 NS_BEGIN
 
-EngineNS::Rtti::UNativeCoreProvider GNativeCoreProvider;
+EngineNS::Rtti::TtNativeCoreProvider GNativeCoreProvider;
 void UCs2CppBase::InitializeNativeCoreProvider()
 {
-	GNativeCoreProvider.mCSFullName = "EngineNS.Rtti.UNativeCoreProvider@EngineCore";
+	GNativeCoreProvider.mCSFullName = "EngineNS.Rtti.TtNativeCoreProvider@EngineCore";
 	GNativeCoreProvider.CreateManagedObject();
 }
 
@@ -18,7 +18,7 @@ void UCs2CppBase::FinalCleanupNativeCoreProvider()
 	GNativeCoreProvider.FreeManagedObjectGCHandle();
 }
 
-EngineNS::Rtti::UNativeCoreProvider* UCs2CppBase::GetNativeCoreProvider()
+EngineNS::Rtti::TtNativeCoreProvider* UCs2CppBase::GetNativeCoreProvider()
 {
 	if (GNativeCoreProvider.mCSharpHandle == nullptr)
 		return nullptr;
@@ -176,7 +176,7 @@ void UCs2CppBase::UnitTest()
 {
 	///test code
 	EngineNS::UTest::UTestCs2CppBuilder mCs2CppBuilder;
-	//EngineNS::Rtti::UNativeCoreProvider mNativeCoreProvider;
+	//EngineNS::Rtti::TtNativeCoreProvider mNativeCoreProvider;
 
 	mCs2CppBuilder.mCSFullName = "EngineNS.UTest.UTestCs2CppBuilder@EngineCore";
 	mCs2CppBuilder.CreateManagedObject();
@@ -188,7 +188,7 @@ void UCs2CppBase::UnitTest()
 		[[maybe_unused]] auto r2 = mCs2CppBuilder.Func1(5);
 	}
 
-	/*mNativeCoreProvider.mCSFullName = "EngineNS.Rtti.UNativeCoreProvider@EngineCore";
+	/*mNativeCoreProvider.mCSFullName = "EngineNS.Rtti.TtNativeCoreProvider@EngineCore";
 	mNativeCoreProvider.CreateManagedObject();
 	if (mNativeCoreProvider.mCSharpHandle != nullptr)*/
 	{

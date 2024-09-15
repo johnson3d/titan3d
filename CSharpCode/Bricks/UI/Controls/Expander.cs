@@ -39,11 +39,11 @@ namespace EngineNS.UI.Controls
             // Expander system default template
             var expanderTemplate = new Template.TtControlTemplate()
             {
-                TargetType = UTypeDesc.TypeOf(typeof(TtExpander)),
+                TargetType = TtTypeDesc.TypeOf(typeof(TtExpander)),
             };
-            TtUIManager.SystemDefaultTemplates[UTypeDesc.TypeOf(typeof(TtExpander))] = expanderTemplate;
+            TtUIManager.SystemDefaultTemplates[TtTypeDesc.TypeOf(typeof(TtExpander))] = expanderTemplate;
 
-            var root = new Template.TtUIElementFactory(UTypeDesc.TypeOf(typeof(TtStackPanel)));
+            var root = new Template.TtUIElementFactory(TtTypeDesc.TypeOf(typeof(TtStackPanel)));
             root.SetValue(TtStackPanel.NameProperty, "panel");
             root.SetValue(TtStackPanel.OrientationProperty, ELayout_Orientation.Vertical);
             root.SetTemplateBindingValue<TtBrush, TtBrush>(TtStackPanel.BackgroundProperty, "Background", "Background");
@@ -51,11 +51,11 @@ namespace EngineNS.UI.Controls
             root.SetTemplateBindingValue<Thickness, Thickness>(TtStackPanel.BorderThicknessProperty, "BorderThickness", "BorderThickness");
             expanderTemplate.TemplateRoot = root;
 
-            var headerBorder = new Template.TtUIElementFactory(UTypeDesc.TypeOf(typeof(TtBorder)));
+            var headerBorder = new Template.TtUIElementFactory(TtTypeDesc.TypeOf(typeof(TtBorder)));
             headerBorder.SetValue(TtBorder.NameProperty, "headerBorder");
             headerBorder.SetValue(TtBorder.BackgroundProperty, new TtBrush(Color4b.Transparent, TtBrush.EBrushType.Rectangle));
             root.AppendChild(headerBorder);
-            var headerToggle = new Template.TtUIElementFactory(UTypeDesc.TypeOf(typeof(TtToggleButton)));
+            var headerToggle = new Template.TtUIElementFactory(TtTypeDesc.TypeOf(typeof(TtToggleButton)));
             headerToggle.SetValue(TtToggleButton.NameProperty, "headerToggle");
             headerToggle.SetValue(TtToggleButton.BackgroundProperty, new TtBrush(Color4b.Transparent, TtBrush.EBrushType.Rectangle));
             headerToggle.SetValue(TtToggleButton.SizeToContentProperty, ESizeToContent.WidthAndHeight);
@@ -63,12 +63,12 @@ namespace EngineNS.UI.Controls
             headerToggle.SetValue(TtBorder.VerticalAlignmentProperty, VerticalAlignment.Stretch);
             headerToggle.SetTemplateBindingValue<bool, bool>(TtToggleButton.IsCheckedProperty, "IsExpanded", "IsExpanded");
             headerBorder.AppendChild(headerToggle);
-            var headerContent = new Template.TtUIElementFactory(UTypeDesc.TypeOf(typeof(TtContentsPresenter)));
+            var headerContent = new Template.TtUIElementFactory(TtTypeDesc.TypeOf(typeof(TtContentsPresenter)));
             headerContent.SetValue(TtContentsPresenter.NameProperty, "headerContentPresenter");
             headerContent.SetValue(TtContentsPresenter.ContentSourceProperty, "Header");
             headerBorder.AppendChild(headerContent);
 
-            var content = new Template.TtUIElementFactory(UTypeDesc.TypeOf(typeof(TtContentsPresenter)));
+            var content = new Template.TtUIElementFactory(TtTypeDesc.TypeOf(typeof(TtContentsPresenter)));
             content.SetValue(TtContentsPresenter.NameProperty, "contentPresenter");
             content.SetValue(TtContentsPresenter.ContentSourceProperty, "Content");
             content.SetValue(TtContentsPresenter.VisibilityProperty, Visibility.Collapsed);
@@ -151,7 +151,7 @@ namespace EngineNS.UI.Controls
 
         public TtExpander()
         {
-            Template = TtEngine.Instance.UIManager.GetDefaultTemplate(UTypeDesc.TypeOf(typeof(TtExpander)));
+            Template = TtEngine.Instance.UIManager.GetDefaultTemplate(TtTypeDesc.TypeOf(typeof(TtExpander)));
             Template.Seal();
         }
     }

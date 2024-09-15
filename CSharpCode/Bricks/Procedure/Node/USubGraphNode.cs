@@ -200,7 +200,7 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             mProValueDataDic.Clear();
             var pros = TypeDescriptor.GetProperties(this);
-            var objType = Rtti.UTypeDesc.TypeOf(this.GetType());
+            var objType = Rtti.TtTypeDesc.TypeOf(this.GetType());
             collection.InitValue(this, objType, pros, parentIsValueType);
 
             for (int i = 0; i < PropertyDatas.Count; i++)
@@ -235,7 +235,7 @@ namespace EngineNS.Bricks.Procedure.Node
                     var nodePro = nodePros[name];
                     if (nodePro == null)
                         continue;
-                    proDesc.InitValue(node, Rtti.UTypeDesc.TypeOf(nodeType), nodePro, parentIsValueType);
+                    proDesc.InitValue(node, Rtti.TtTypeDesc.TypeOf(nodeType), nodePro, parentIsValueType);
                 }
                 proDesc.DisplayName = displayName;
                 proDesc.IsReadonly = PropertyDatas[i].ReadOnly;

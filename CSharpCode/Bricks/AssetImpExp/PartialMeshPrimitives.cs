@@ -205,7 +205,7 @@ namespace EngineNS.Graphics.Mesh
                                         var ameta = new TtMeshPrimitivesAMeta();
                                         ameta.SetAssetName(name);
                                         ameta.AssetId = Guid.NewGuid();
-                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
+                                        ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
                                         ameta.Description = $"This is a {typeof(TtMeshPrimitives).FullName}\n";
                                         ameta.SaveAMeta((IO.IAsset)null);
                                         TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
@@ -224,7 +224,7 @@ namespace EngineNS.Graphics.Mesh
                                         var ameta = new TtMeshPrimitivesAMeta();
                                         ameta.SetAssetName(name);
                                         ameta.AssetId = Guid.NewGuid();
-                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
+                                        ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
                                         ameta.Description = $"This is a {typeof(TtMeshPrimitives).FullName}\n";
                                         ameta.SaveAMeta((IO.IAsset)null);
                                         TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
@@ -243,7 +243,7 @@ namespace EngineNS.Graphics.Mesh
                                         var ameta = new TtMeshPrimitivesAMeta();
                                         ameta.SetAssetName(name);
                                         ameta.AssetId = Guid.NewGuid();
-                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
+                                        ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
                                         ameta.Description = $"This is a {typeof(TtMeshPrimitives).FullName}\n";
                                         ameta.SaveAMeta((IO.IAsset)null);
                                         TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
@@ -262,7 +262,7 @@ namespace EngineNS.Graphics.Mesh
                                         var ameta = new TtMeshPrimitivesAMeta();
                                         ameta.SetAssetName(name);
                                         ameta.AssetId = Guid.NewGuid();
-                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
+                                        ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
                                         ameta.Description = $"This is a {typeof(TtMeshPrimitives).FullName}\n";
                                         ameta.SaveAMeta((IO.IAsset)null);
                                         TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
@@ -281,7 +281,7 @@ namespace EngineNS.Graphics.Mesh
                                         var ameta = new TtMeshPrimitivesAMeta();
                                         ameta.SetAssetName(name);
                                         ameta.AssetId = Guid.NewGuid();
-                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
+                                        ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
                                         ameta.Description = $"This is a {typeof(TtMeshPrimitives).FullName}\n";
                                         ameta.SaveAMeta((IO.IAsset)null);
                                         TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
@@ -300,7 +300,7 @@ namespace EngineNS.Graphics.Mesh
                                         var ameta = new TtMeshPrimitivesAMeta();
                                         ameta.SetAssetName(name);
                                         ameta.AssetId = Guid.NewGuid();
-                                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
+                                        ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
                                         ameta.Description = $"This is a {typeof(TtMeshPrimitives).FullName}\n";
                                         ameta.SaveAMeta((IO.IAsset)null);
                                         TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
@@ -394,7 +394,7 @@ namespace EngineNS.Graphics.Mesh
                         var ameta = new TtMaterialMeshAMeta();
                         ameta.SetAssetName(umsRN);
                         ameta.AssetId = Guid.NewGuid();
-                        ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMaterialMesh));
+                        ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMaterialMesh));
                         ameta.Description = $"This is a {typeof(TtMaterialMesh).FullName}\n";
                         ameta.SaveAMeta(ums);
                         TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
@@ -415,7 +415,7 @@ namespace EngineNS.Graphics.Mesh
                     var sktameta = new Animation.Asset.TtSkeletonAssetAMeta();
                     sktameta.SetAssetName(skeletonAsset);
                     sktameta.AssetId = Guid.NewGuid();
-                    sktameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(Animation.Asset.TtSkeletonAsset));
+                    sktameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(Animation.Asset.TtSkeletonAsset));
                     sktameta.Description = $"This is a {typeof(Animation.Asset.TtSkeletonAsset).FullName}\n";
                     sktameta.SaveAMeta(newAsset);
                     TtEngine.Instance.AssetMetaManager.RegAsset(sktameta);
@@ -440,7 +440,7 @@ namespace EngineNS.Graphics.Mesh
                 var ameta = new TtMeshPrimitivesAMeta();
                 ameta.SetAssetName(name);
                 ameta.AssetId = Guid.NewGuid();
-                ameta.TypeStr = Rtti.UTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
+                ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtMeshPrimitives));
                 ameta.Description = $"This is a {typeof(TtMeshPrimitives).FullName}\n";
                 ameta.SaveAMeta(meshPrimitives);
                 TtEngine.Instance.AssetMetaManager.RegAsset(ameta);

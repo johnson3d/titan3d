@@ -59,7 +59,7 @@ namespace EngineNS.Bricks.Procedure
             {
                 srv.SrvObject = this.PreviewSRV;
             }
-            mesh.Initialize(vms, materials1, Rtti.UTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh)));
+            mesh.Initialize(vms, materials1, Rtti.TtTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh)));
             var nodeData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
             nodeData.Name = "TexturePreivew";
             var prevMesh = await GamePlay.Scene.TtMeshNode.AddMeshNode(graph.GraphEditor.PreviewViewport.World, graph.GraphEditor.PreviewRoot, 
@@ -315,28 +315,28 @@ namespace EngineNS.Bricks.Procedure
                     var previewBuffer = GetResultBuffer(mPreviewResultIndex);
                     if (previewBuffer != null)
                     {
-                        if (previewBuffer.BufferCreator.ElementType == Rtti.UTypeDescGetter<float>.TypeDesc)
+                        if (previewBuffer.BufferCreator.ElementType == Rtti.TtTypeDescGetter<float>.TypeDesc)
                         {
                             float minV = float.MaxValue;
                             float maxV = float.MinValue;
                             previewBuffer.GetRangeUnsafe<float, FFloatOperator>(out minV, out maxV);
                             PreviewSRV = previewBuffer.CreateAsHeightMapTexture2D(out PreviewTexture, minV, maxV, EPixelFormat.PXF_R16_FLOAT, ScaleForPreview, true);
                         }
-                        else if (previewBuffer.BufferCreator.ElementType == Rtti.UTypeDescGetter<sbyte>.TypeDesc)
+                        else if (previewBuffer.BufferCreator.ElementType == Rtti.TtTypeDescGetter<sbyte>.TypeDesc)
                         {
                             sbyte minV = sbyte.MaxValue;
                             sbyte maxV = sbyte.MinValue;
                             previewBuffer.GetRangeUnsafe<sbyte, FSByteOperator>(out minV, out maxV);
                             PreviewSRV = previewBuffer.CreateAsHeightMapTexture2D(out PreviewTexture, (float)minV, (float)maxV, EPixelFormat.PXF_R16_FLOAT, ScaleForPreview, true);
                         }
-                        else if (previewBuffer.BufferCreator.ElementType == Rtti.UTypeDescGetter<Vector2>.TypeDesc)
+                        else if (previewBuffer.BufferCreator.ElementType == Rtti.TtTypeDescGetter<Vector2>.TypeDesc)
                         {
                             Vector2 minV = Vector2.MaxValue;
                             Vector2 maxV = Vector2.MinValue;
                             previewBuffer.GetRangeUnsafe<Vector2, FFloat2Operator>(out minV, out maxV);
                             PreviewSRV = previewBuffer.CreateVector2Texture2D(minV, maxV);
                         }
-                        else if (previewBuffer.BufferCreator.ElementType == Rtti.UTypeDescGetter<Vector3>.TypeDesc)
+                        else if (previewBuffer.BufferCreator.ElementType == Rtti.TtTypeDescGetter<Vector3>.TypeDesc)
                         {
                             Vector3 minV = Vector3.MaxValue;
                             Vector3 maxV = Vector3.MinValue;
@@ -505,7 +505,7 @@ namespace EngineNS.Bricks.Procedure
         public bool IsPropertyVisibleDirty { get; set; } = false;
         public virtual void GetProperties(ref EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {
-            var thisType = Rtti.UTypeDesc.TypeOf(this.GetType());
+            var thisType = Rtti.TtTypeDesc.TypeOf(this.GetType());
             var pros = System.ComponentModel.TypeDescriptor.GetProperties(this);
 
             //collection.InitValue(this,  pros, parentIsValueType);

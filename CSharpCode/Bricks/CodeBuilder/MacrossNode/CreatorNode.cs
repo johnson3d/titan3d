@@ -33,9 +33,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
 
         public string VariableName => "new_" + (uint)NodeId.GetHashCode();
-        Rtti.UTypeDesc mTargetType;
+        Rtti.TtTypeDesc mTargetType;
         [Rtti.Meta(Order = 0)]
-        public Rtti.UTypeDesc TargetType
+        public Rtti.TtTypeDesc TargetType
         {
             get => mTargetType;
             set
@@ -61,7 +61,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             TypePin = AddPinIn(new PinIn() { Name = "Type" });
             TypePin.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
             TypePin.LinkDesc.CanLinks.Add("Value");
-            var ev = UEditableValue.CreateEditableValue(this, Rtti.UTypeDesc.TypeOf(typeof(System.Type)), TypePin) as UTypeSelectorEValue;
+            var ev = UEditableValue.CreateEditableValue(this, Rtti.TtTypeDesc.TypeOf(typeof(System.Type)), TypePin) as UTypeSelectorEValue;
             foreach(var meta in Rtti.TtClassMetaManager.Instance.Metas.Values)
             {
                 if (meta.MetaAttribute == null)
@@ -89,7 +89,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             if (pin != null && pin != OutPin)
                 return;
-            UTypeDesc resultType = TargetType;
+            TtTypeDesc resultType = TargetType;
             if(TypePin.HasLinker())
             {
                 resultType = data.NodeGraph.GetOppositePinType(TypePin);
@@ -161,7 +161,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var pin = ev.Tag as PinIn;
                 if (pin == null)
                     return;
-                mTargetType = (Rtti.UTypeDesc)ev.Value;
+                mTargetType = (Rtti.TtTypeDesc)ev.Value;
                 OutPin.Tag = mTargetType;
             }
         }
@@ -188,13 +188,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 EGui.Controls.CtrlUtility.DrawHelper($"{valueStr}({typeString})");
             }
         }
-        public override UTypeDesc GetInPinType(PinIn pin)
+        public override TtTypeDesc GetInPinType(PinIn pin)
         {
             if(pin == TypePin)
                 return mTargetType;
             return null;
         }
-        public override UTypeDesc GetOutPinType(PinOut pin)
+        public override TtTypeDesc GetOutPinType(PinOut pin)
         {
             if(pin == OutPin)
                 return mTargetType;

@@ -12,10 +12,10 @@ namespace EngineNS.DesignMacross
 {
     public class TypeHelper
     {
-        public static List<(T AttributeInstance, UTypeDesc TypeDesc)> CollectTypesByAttribute<T>() where T : Attribute
+        public static List<(T AttributeInstance, TtTypeDesc TypeDesc)> CollectTypesByAttribute<T>() where T : Attribute
         {
-            List<(T, UTypeDesc)> temp = new List<(T, UTypeDesc)>();
-            foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
+            List<(T, TtTypeDesc)> temp = new List<(T, TtTypeDesc)>();
+            foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
             {
                 foreach (var type in service.Types.Values)
                 {
@@ -114,8 +114,8 @@ namespace EngineNS.DesignMacross
         public const string MacrossAnimEditorKeyword = "DesignMacross_Anim";
         public class DesignMacrossCreateAttribute : IO.CommonCreateAttribute
         {
-            UTypeDesc mSelectedType = null;
-            public override async Thread.Async.TtTask DoCreate(RName dir, UTypeDesc type, string ext)
+            TtTypeDesc mSelectedType = null;
+            public override async Thread.Async.TtTask DoCreate(RName dir, TtTypeDesc type, string ext)
             {
                 await base.DoCreate(dir, type, ext);
                 mSelectedType = null;
@@ -169,7 +169,7 @@ namespace EngineNS.DesignMacross
                             ImGuiAPI.SetKeyboardFocusHere(0);
                         searchBar.OnDraw(in comboDrawList, in Support.TtAnyPointer.Default);
                         bool bSelected = true;
-                        foreach (var service in Rtti.UTypeDescManager.Instance.Services.Values)
+                        foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
                         {
                             foreach (var type in service.Types.Values)
                             {
@@ -256,7 +256,7 @@ namespace EngineNS.DesignMacross
             return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
         [Rtti.Meta]
-        public UTypeDesc DesignMacrossBaseClass { get; set; } = null;
+        public TtTypeDesc DesignMacrossBaseClass { get; set; } = null;
         public void SaveAssetTo(RName name)
         {
             var ameta = GetAMeta();

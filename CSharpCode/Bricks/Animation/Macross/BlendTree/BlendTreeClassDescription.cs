@@ -143,7 +143,7 @@ namespace EngineNS.Animation.Macross.BlendTree
 
             var getAnimatablePoseFromNode = new TtMethodInvokeStatement("CreateAnimatableSkeletonPoseFromeNode",
                 animatableSkeletonPoseCreate,
-                new TtClassReferenceExpression(UTypeDesc.TypeOf<TtAnimUtil>()),
+                new TtClassReferenceExpression(TtTypeDesc.TypeOf<TtAnimUtil>()),
                 new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression("MacrossNode") }
                 );
             initMethod.MethodBody.Sequence.Add(getAnimatablePoseFromNode);
@@ -174,7 +174,7 @@ namespace EngineNS.Animation.Macross.BlendTree
 
             var bindRuntimeSkeletonPoseToNode = new TtMethodInvokeStatement("BindRuntimeSkeletonPoseToNode",
                 runtimePoseCreate,
-                new TtClassReferenceExpression(UTypeDesc.TypeOf<TtAnimUtil>()),
+                new TtClassReferenceExpression(TtTypeDesc.TypeOf<TtAnimUtil>()),
                 new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression("MacrossNode") }
                 );
             initMethod.MethodBody.Sequence.Add(bindRuntimeSkeletonPoseToNode);

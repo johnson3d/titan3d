@@ -40,7 +40,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     if (pin == null)
                         return;
 
-                    var type = (Rtti.UTypeDesc)ev.Value;
+                    var type = (Rtti.TtTypeDesc)ev.Value;
                     pin.Tag = type;
 
                     if (DelegateGraph != null)
@@ -139,7 +139,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 [Rtti.Meta]
                 public string PinName { get; set; }
                 [Rtti.Meta]
-                public Rtti.UTypeDesc Type { get; set; }
+                public Rtti.TtTypeDesc Type { get; set; }
 
                 public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
                 public void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml) { }
@@ -174,7 +174,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         continue;
                     var pin = i.PinIn;
 
-                    var pinType = pin.Tag as Rtti.UTypeDesc;
+                    var pinType = pin.Tag as Rtti.TtTypeDesc;
                     if(pinType.IsDelegate)
                     {
                         var saveData = new DelegateArgumentSaveData();
@@ -188,7 +188,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 saveData.ExtPinDatas.Add(new DelegateArgumentSaveData.ExtPinData()
                                 {
                                     PinName = subPin.PinIn.Name,
-                                    Type = subPin.PinIn.Tag as Rtti.UTypeDesc,
+                                    Type = subPin.PinIn.Tag as Rtti.TtTypeDesc,
                                 });
                             }
                         }
@@ -215,7 +215,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 var pType = Method.GetParameter(j).ParameterType;
                                 if (pin.EditValue.Value != null)
                                 {
-                                    pType = Rtti.UTypeDesc.TypeOf(pin.EditValue.Value.GetType());
+                                    pType = Rtti.TtTypeDesc.TypeOf(pin.EditValue.Value.GetType());
                                 }
                                 pin.EditValue.Value = Support.TConvert.ToObject(pType, i.Value);
                                 OnValueChanged(pin.EditValue);
@@ -285,7 +285,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     if ((arg.Meta.ConvertOutArguments & Rtti.MetaParameterAttribute.EArgumentFilter.R) != 0)
                     {
-                        Result.Tag = (Rtti.UTypeDesc)ev.Value;// Rtti.UTypeDesc.TypeOf((Type)ev.Value);
+                        Result.Tag = (Rtti.TtTypeDesc)ev.Value;// Rtti.TtTypeDesc.TypeOf((Type)ev.Value);
                     }
                 }
             }
@@ -348,7 +348,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 pin.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
                 pin.ShowIcon = false;
                 pin.Name = info.Name;
-                pin.Tag = Rtti.UTypeDesc.TypeOf(info.ParameterType);
+                pin.Tag = Rtti.TtTypeDesc.TypeOf(info.ParameterType);
                 pin.GroupName = "Delegate_" + hostPinName + "_" + info.Name;
                 AddPinIn(pin);
                 pinData.PinIn = pin;
@@ -361,7 +361,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     pin.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
                     pin.LinkDesc.CanLinks.Add("Value");
                     pin.Name = info.Name;
-                    pin.Tag = Rtti.UTypeDesc.TypeOf(info.ParameterType);
+                    pin.Tag = Rtti.TtTypeDesc.TypeOf(info.ParameterType);
                     AddPinIn(pin);
                     pinData.PinIn = pin;
                 }
@@ -372,7 +372,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     pinOut.MultiLinks = true;
                     pinOut.LinkDesc.CanLinks.Add("Value");
                     pinOut.Name = info.Name;
-                    pinOut.Tag = Rtti.UTypeDesc.TypeOf(info.ParameterType);
+                    pinOut.Tag = Rtti.TtTypeDesc.TypeOf(info.ParameterType);
                     AddPinOut(pinOut);
                     pinData.PinOut = pinOut;
                 }
@@ -387,7 +387,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 if (Arguments[i].PinIn == null)
                     continue;
-                var argType = Arguments[i].PinIn.Tag as Rtti.UTypeDesc;
+                var argType = Arguments[i].PinIn.Tag as Rtti.TtTypeDesc;
                 if(argType.IsDelegate)
                 {
                     var methodName = GetDelegateParamMethodName(Arguments[i].PinIn.Name);
@@ -413,7 +413,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 if (Arguments[i].PinIn == null)
                     continue;
-                var argType = Arguments[i].PinIn.Tag as Rtti.UTypeDesc;
+                var argType = Arguments[i].PinIn.Tag as Rtti.TtTypeDesc;
                 if (argType.IsDelegate)
                 {
                     editor.RemoveMethod(Arguments[i].DelegateGraph);
@@ -431,7 +431,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //Method = m;
             if (string.IsNullOrEmpty(mMethodMeta))
             {
-                mMethodMeta = Rtti.UTypeDesc.TypeStr(m.DeclaringType) + "#" + m.GetMethodDeclareString(false);
+                mMethodMeta = Rtti.TtTypeDesc.TypeStr(m.DeclaringType) + "#" + m.GetMethodDeclareString(false);
             }
             var method = Method;
             Name = method.MethodName;
@@ -519,10 +519,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 {
                                     if (i.Meta.TypeList != null)
                                     {
-                                        var typeList = new Rtti.UTypeDesc[i.Meta.TypeList.Length];
+                                        var typeList = new Rtti.TtTypeDesc[i.Meta.TypeList.Length];
                                         for (int j = 0; j < i.Meta.TypeList.Length; j++)
                                         {
-                                            typeList[j] = Rtti.UTypeDesc.TypeOf(i.Meta.TypeList[j]);
+                                            typeList[j] = Rtti.TtTypeDesc.TypeOf(i.Meta.TypeList[j]);
                                         }
                                         typeEV.Selector.TypeList = typeList;
                                         if (typeEV.Selector.SelectedType == null)
@@ -530,13 +530,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     }
                                     else if (i.Meta.FilterType != null)
                                     {
-                                        typeEV.Selector.BaseType = Rtti.UTypeDesc.TypeOf(i.Meta.FilterType);
+                                        typeEV.Selector.BaseType = Rtti.TtTypeDesc.TypeOf(i.Meta.FilterType);
                                         if (typeEV.Selector.SelectedType == null)
                                             typeEV.Selector.SelectedType = typeEV.Selector.BaseType;
                                     }
                                     if (ev.Value == null)
                                     {
-                                        ev.Value = typeEV.Selector.BaseType;// Rtti.UTypeDesc.TypeOf(i.Meta.FilterType);
+                                        ev.Value = typeEV.Selector.BaseType;// Rtti.TtTypeDesc.TypeOf(i.Meta.FilterType);
                                         OnValueChanged(typeEV);
                                     }
                                 }
@@ -581,7 +581,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             Profiler.Log.WriteLine<Profiler.TtMacrossCategory>(Profiler.ELogTag.Warning, $"{method.MethodName} ParamMeta Error");
                         }
 
-                        Result.Tag = Rtti.UTypeDesc.TypeOf(i.Meta.FilterType);
+                        Result.Tag = Rtti.TtTypeDesc.TypeOf(i.Meta.FilterType);
                     }
                 }
             }
@@ -602,7 +602,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     {
                         if (argFilter != Rtti.MetaParameterAttribute.EArgumentFilter.R)
                         {
-                            var type = Rtti.UTypeDesc.TypeOf(method.Parameters[i].Meta.FilterType);
+                            var type = Rtti.TtTypeDesc.TypeOf(method.Parameters[i].Meta.FilterType);
                             if(Arguments[argIdx].PinOut != null)
                                 Arguments[argIdx].PinOut.Tag = type;
                             if(Arguments[argIdx].PinIn != null)
@@ -667,9 +667,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             var typeEV = ev as UTypeSelectorEValue;
                             if (typeEV != null)
                             {
-                                typeEV.Selector.BaseType = Rtti.UTypeDesc.TypeOf(i.Meta.FilterType);
+                                typeEV.Selector.BaseType = Rtti.TtTypeDesc.TypeOf(i.Meta.FilterType);
                                 if (typeEV.Selector.SelectedType == null)
-                                    typeEV.Selector.SelectedType = Rtti.UTypeDesc.TypeOf(i.Meta.FilterType);
+                                    typeEV.Selector.SelectedType = Rtti.TtTypeDesc.TypeOf(i.Meta.FilterType);
                                 if (ev.Value == null)
                                 {
                                     ev.Value = i.Meta.FilterType;
@@ -720,13 +720,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     string valueString = GetRuntimeValueString(GetReturnValueName());
                     string typeString = "";
-                    var cvtType = Result.Tag as Rtti.UTypeDesc;
+                    var cvtType = Result.Tag as Rtti.TtTypeDesc;
                     if (cvtType != null)
                     {
                         if(Method.IsAsync())
                         {
                             if (cvtType.GetGenericArguments().Length == 1)
-                                cvtType = Rtti.UTypeDesc.TypeOf(cvtType.GetGenericArguments()[0]);
+                                cvtType = Rtti.TtTypeDesc.TypeOf(cvtType.GetGenericArguments()[0]);
                             typeString = cvtType.FullName;
                         }
                         else
@@ -758,7 +758,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //        return;
             //    }
             //}
-            var type = pin.Tag as Rtti.UTypeDesc;
+            var type = pin.Tag as Rtti.TtTypeDesc;
             if(type != null)
             {
                 if(type.IsDelegate)
@@ -782,12 +782,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             for(int i=0; i<Arguments.Count; i++)
             {
                 var pinIn = Arguments[i].PinIn;
-                if(pinIn != null && !((Rtti.UTypeDesc)pinIn.Tag).IsDelegate)
+                if(pinIn != null && !((Rtti.TtTypeDesc)pinIn.Tag).IsDelegate)
                 {
                     var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
                     proDesc.Name = pinIn.Name;
                     proDesc.DisplayName = pinIn.Name;
-                    proDesc.PropertyType = (Rtti.UTypeDesc)pinIn.Tag;
+                    proDesc.PropertyType = (Rtti.TtTypeDesc)pinIn.Tag;
                     proDesc.CustomValueEditor = pinIn.EditValue;
                     collection.Add(proDesc);
                 }
@@ -824,7 +824,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public override void OnDoubleClickedPin(NodePin hitPin)
         {
-            var hitType = hitPin.Tag as Rtti.UTypeDesc;
+            var hitType = hitPin.Tag as Rtti.TtTypeDesc;
             if(hitType.IsDelegate)
             {
                 var method = Method;
@@ -863,7 +863,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     continue;
 
                                 var name = Arguments[i].SubPins[subPinIdx].PinIn.Name;
-                                var type = Arguments[i].SubPins[subPinIdx].PinIn.Tag as Rtti.UTypeDesc;
+                                var type = Arguments[i].SubPins[subPinIdx].PinIn.Tag as Rtti.TtTypeDesc;
 
                                 f.Arguments.Add(new TtMethodArgumentDeclaration()
                                 {
@@ -889,33 +889,33 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
         }
-        void AddDelegateExtPin(PinData pinData, string pinName, Rtti.UTypeDesc pinType, int idx)
+        void AddDelegateExtPin(PinData pinData, string pinName, Rtti.TtTypeDesc pinType, int idx)
         {
             var subPin = new PinIn();
             subPin.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
             subPin.LinkDesc.CanLinks.Add("Value");
             subPin.Name = pinName;
             subPin.Tag = pinType;
-            var ev = UEditableValue.CreateEditableValue(pinData, Rtti.UTypeDesc.TypeOf(typeof(Type)), subPin) as UTypeSelectorEValue;
+            var ev = UEditableValue.CreateEditableValue(pinData, Rtti.TtTypeDesc.TypeOf(typeof(Type)), subPin) as UTypeSelectorEValue;
             if (ev != null)
             {
                 ev.ControlWidth = InputControlWidth;
                 subPin.EditValue = ev;
-                var typeList = new List<Rtti.UTypeDesc>()
+                var typeList = new List<Rtti.TtTypeDesc>()
                 {
-                    Rtti.UTypeDesc.TypeOf(typeof(SByte)),
-                    Rtti.UTypeDesc.TypeOf(typeof(Byte)),
-                    Rtti.UTypeDesc.TypeOf(typeof(Int16)),
-                    Rtti.UTypeDesc.TypeOf(typeof(UInt16)),
-                    Rtti.UTypeDesc.TypeOf(typeof(Int32)),
-                    Rtti.UTypeDesc.TypeOf(typeof(UInt32)),
-                    Rtti.UTypeDesc.TypeOf(typeof(Int64)),
-                    Rtti.UTypeDesc.TypeOf(typeof(UInt64)),
-                    Rtti.UTypeDesc.TypeOf(typeof(float)),
-                    Rtti.UTypeDesc.TypeOf(typeof(double)),
-                    Rtti.UTypeDesc.TypeOf(typeof(string)),
+                    Rtti.TtTypeDesc.TypeOf(typeof(SByte)),
+                    Rtti.TtTypeDesc.TypeOf(typeof(Byte)),
+                    Rtti.TtTypeDesc.TypeOf(typeof(Int16)),
+                    Rtti.TtTypeDesc.TypeOf(typeof(UInt16)),
+                    Rtti.TtTypeDesc.TypeOf(typeof(Int32)),
+                    Rtti.TtTypeDesc.TypeOf(typeof(UInt32)),
+                    Rtti.TtTypeDesc.TypeOf(typeof(Int64)),
+                    Rtti.TtTypeDesc.TypeOf(typeof(UInt64)),
+                    Rtti.TtTypeDesc.TypeOf(typeof(float)),
+                    Rtti.TtTypeDesc.TypeOf(typeof(double)),
+                    Rtti.TtTypeDesc.TypeOf(typeof(string)),
                 };
-                foreach(var ser in Rtti.UTypeDescManager.Instance.Services.Values)
+                foreach(var ser in Rtti.TtTypeDescManager.Instance.Services.Values)
                 {
                     typeList.AddRange(ser.Types.Values);
                 }
@@ -990,7 +990,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 nameIdx++;
                             }
                             var pinName = valueKeyName + nameIdx;
-                            var pinType = Rtti.UTypeDesc.TypeOf(typeof(int));
+                            var pinType = Rtti.TtTypeDesc.TypeOf(typeof(int));
                             AddDelegateExtPin(pinData, pinName, pinType, idx);
 
                             if (pinData.DelegateGraph != null)
@@ -1066,7 +1066,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             List<TtStatementBase> afterStatements = null)
         {
             var pinData = Arguments[argIdx];
-            var pinType = ((pinData.PinIn != null) ? pinData.PinIn.Tag : pinData.PinOut.Tag) as Rtti.UTypeDesc;
+            var pinType = ((pinData.PinIn != null) ? pinData.PinIn.Tag : pinData.PinOut.Tag) as Rtti.TtTypeDesc;
             if (pinType.IsPointer && invokeStatement != null)
                 invokeStatement.IsUnsafe = true;
             
@@ -1131,7 +1131,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             if (data.NodeGraph.PinHasLinker(pinData.SubPins[i].PinIn))
                                 argExp.Expression = data.NodeGraph.GetOppositePinExpression(pinData.SubPins[i].PinIn, ref data);
                             else
-                                argExp.Expression = new TtDefaultValueExpression(pinData.SubPins[i].PinIn.Tag as Rtti.UTypeDesc);
+                                argExp.Expression = new TtDefaultValueExpression(pinData.SubPins[i].PinIn.Tag as Rtti.TtTypeDesc);
                         }
                         methodInvokeExp.Arguments.Add(argExp);
                     }
@@ -1475,10 +1475,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if(method.HasReturnValue())
             {
                 var retValName = GetReturnValueName();
-                var type = Result.Tag as Rtti.UTypeDesc;
+                var type = Result.Tag as Rtti.TtTypeDesc;
                 if(method.IsAsync())
                 {
-                    type = Rtti.UTypeDesc.TypeOf(type.GetGenericArguments()[0]);
+                    type = Rtti.TtTypeDesc.TypeOf(type.GetGenericArguments()[0]);
                     methodInvokeExp.IsAsync = true;
                 }
                 if (type.IsPointer)
@@ -1519,7 +1519,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var retName = GetReturnValueName();
                 data.CurrentStatements.Add(new TtDebuggerSetWatchVariable()
                 {
-                    VariableType = new TtTypeReference(Result.Tag as Rtti.UTypeDesc),
+                    VariableType = new TtTypeReference(Result.Tag as Rtti.TtTypeDesc),
                     VariableName = retName,
                     VariableValue = new TtVariableReferenceExpression(retName),
                 });
@@ -1562,11 +1562,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return null;
         }
-        public override Rtti.UTypeDesc GetInPinType(PinIn pin)
+        public override Rtti.TtTypeDesc GetInPinType(PinIn pin)
         {
-            return pin.Tag as Rtti.UTypeDesc;
+            return pin.Tag as Rtti.TtTypeDesc;
         }
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             if (pin == null)
                 return null;
@@ -1575,11 +1575,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 if (Result.Tag != null)
                 {
-                    var cvtType = Result.Tag as Rtti.UTypeDesc;
+                    var cvtType = Result.Tag as Rtti.TtTypeDesc;
                     if (cvtType != null)
                     {
                         if (method.IsAsync() && cvtType.GetGenericArguments().Length == 1)
-                            return Rtti.UTypeDesc.TypeOf(cvtType.GetGenericArguments()[0]);
+                            return Rtti.TtTypeDesc.TypeOf(cvtType.GetGenericArguments()[0]);
                         else
                             return cvtType;
                     }
@@ -1590,7 +1590,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //{
             //    if (pin == i.PinOut)
             //    {
-            //        return i.PinOut.Tag as Rtti.UTypeDesc;
+            //        return i.PinOut.Tag as Rtti.TtTypeDesc;
             //        //foreach(var j in method.Parameters)
             //        //{
             //        //    if (j.Name == i.PinOut.Name && j.IsOut)
@@ -1598,7 +1598,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //        //}
             //    }
             //}
-            return pin.Tag as Rtti.UTypeDesc;
+            return pin.Tag as Rtti.TtTypeDesc;
             //return null;
         }
         public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
@@ -1697,7 +1697,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             DrawNSTree(filterText, Rtti.TtClassMetaManager.Instance.TreeManager.RootNS);
         }
-        public unsafe void DrawNSTree(string filterText, Rtti.UNameSpace ns)
+        public unsafe void DrawNSTree(string filterText, Rtti.TtNameSpace ns)
         {
             bool bTestFilter = string.IsNullOrEmpty(filterText) == false;
             if (bTestFilter && ns.IsContain(filterText) == false)

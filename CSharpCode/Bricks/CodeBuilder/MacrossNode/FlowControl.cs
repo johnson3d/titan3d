@@ -333,12 +333,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        public override Rtti.UTypeDesc GetInPinType(PinIn pin)
+        public override Rtti.TtTypeDesc GetInPinType(PinIn pin)
         {
             for(int i=0; i< ConditionResultPairs.Count; i++)
             {
                 if (pin == ConditionResultPairs[i].Key)
-                    return Rtti.UTypeDesc.TypeOf(typeof(bool));
+                    return Rtti.TtTypeDesc.TypeOf(typeof(bool));
             }
             return null;
         }

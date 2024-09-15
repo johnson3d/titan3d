@@ -17,8 +17,8 @@ namespace EngineNS.Bricks.Procedure
 
     public struct FPgcSpawnSceneNodeDescOperator : ISuperPixelOperator<PgcSpawnSceneNodeDesc>
     {
-        public Rtti.UTypeDesc ElementType => Rtti.UTypeDescGetter<PgcSpawnSceneNodeDesc>.TypeDesc;
-        public Rtti.UTypeDesc BufferType => Rtti.UTypeDescGetter<USuperBuffer<PgcSpawnSceneNodeDesc, FPgcSpawnSceneNodeDescOperator>>.TypeDesc;
+        public Rtti.TtTypeDesc ElementType => Rtti.TtTypeDescGetter<PgcSpawnSceneNodeDesc>.TypeDesc;
+        public Rtti.TtTypeDesc BufferType => Rtti.TtTypeDescGetter<USuperBuffer<PgcSpawnSceneNodeDesc, FPgcSpawnSceneNodeDescOperator>>.TypeDesc;
         public PgcSpawnSceneNodeDesc MaxValue
         {
             get
@@ -53,7 +53,7 @@ namespace EngineNS.Bricks.Procedure
             return left;
         }
 
-        public unsafe void Add(UTypeDesc resultType, void* result, UTypeDesc leftType, void* left, UTypeDesc rightType, void* right)
+        public unsafe void Add(TtTypeDesc resultType, void* result, TtTypeDesc leftType, void* left, TtTypeDesc rightType, void* right)
         {
         }
 
@@ -67,16 +67,16 @@ namespace EngineNS.Bricks.Procedure
             return 0;
         }
 
-        public unsafe void Copy(UTypeDesc tarTyp, void* tar, UTypeDesc srcType, void* src)
+        public unsafe void Copy(TtTypeDesc tarTyp, void* tar, TtTypeDesc srcType, void* src)
         {
             (*(PgcSpawnSceneNodeDesc*)tar) = (*(PgcSpawnSceneNodeDesc*)src);
         }
 
-        public unsafe void Div(UTypeDesc resultType, void* result, UTypeDesc leftType, void* left, UTypeDesc rightType, void* right)
+        public unsafe void Div(TtTypeDesc resultType, void* result, TtTypeDesc leftType, void* left, TtTypeDesc rightType, void* right)
         {
         }
 
-        public unsafe void Lerp(UTypeDesc resultType, void* result, UTypeDesc leftType, void* left, UTypeDesc rightType, void* right, float factor)
+        public unsafe void Lerp(TtTypeDesc resultType, void* result, TtTypeDesc leftType, void* left, TtTypeDesc rightType, void* right, float factor)
         {
         }
 
@@ -88,7 +88,7 @@ namespace EngineNS.Bricks.Procedure
         {
         }
 
-        public unsafe void Mul(UTypeDesc resultType, void* result, UTypeDesc leftType, void* left, UTypeDesc rightType, void* right)
+        public unsafe void Mul(TtTypeDesc resultType, void* result, TtTypeDesc leftType, void* left, TtTypeDesc rightType, void* right)
         {
         }
 
@@ -100,15 +100,15 @@ namespace EngineNS.Bricks.Procedure
         {
         }
 
-        public unsafe void SetIfGreateThan(UTypeDesc tarTyp, void* tar, UTypeDesc srcType, void* src)
+        public unsafe void SetIfGreateThan(TtTypeDesc tarTyp, void* tar, TtTypeDesc srcType, void* src)
         {
         }
 
-        public unsafe void SetIfLessThan(UTypeDesc tarTyp, void* tar, UTypeDesc srcType, void* src)
+        public unsafe void SetIfLessThan(TtTypeDesc tarTyp, void* tar, TtTypeDesc srcType, void* src)
         {
         }
 
-        public unsafe void Sub(UTypeDesc resultType, void* result, UTypeDesc leftType, void* left, UTypeDesc rightType, void* right)
+        public unsafe void Sub(TtTypeDesc resultType, void* result, TtTypeDesc leftType, void* left, TtTypeDesc rightType, void* right)
         {
         }
     }
@@ -127,7 +127,7 @@ namespace EngineNS.Bricks.Procedure
         }
         public bool UpdatePgcSceneNodes(UBufferComponent buffer, GamePlay.Scene.TtNode node)
         {
-            if (buffer.BufferCreator.ElementType != Rtti.UTypeDesc.TypeOf(typeof(PgcSpawnSceneNodeDesc)))
+            if (buffer.BufferCreator.ElementType != Rtti.TtTypeDesc.TypeOf(typeof(PgcSpawnSceneNodeDesc)))
                 return false;
 
             RemoveAll(node);

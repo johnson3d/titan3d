@@ -91,14 +91,14 @@ namespace EngineNS.Bricks.CodeBuilder
     public abstract class TtCodeGeneratorBase : TtCodeCreator
     {
         public bool IsEditorDebug = true;
-        public abstract ICodeObjectGen GetCodeObjectGen(Rtti.UTypeDesc type);
+        public abstract ICodeObjectGen GetCodeObjectGen(Rtti.TtTypeDesc type);
         public ICodeObjectGen GetCodeObjectGen(Type type)
         {
-            return GetCodeObjectGen(Rtti.UTypeDesc.TypeOf(type));
+            return GetCodeObjectGen(Rtti.TtTypeDesc.TypeOf(type));
         }
         public void GenerateClassCode(TtNamespaceDeclaration ns, TtClassDeclaration cls, in RName assetName, ref string code)
         {
-            var gen = GetCodeObjectGen(Rtti.UTypeDescGetter<TtClassDeclaration>.TypeDesc);
+            var gen = GetCodeObjectGen(Rtti.TtTypeDescGetter<TtClassDeclaration>.TypeDesc);
             var data = new TtCodeGeneratorData(ns, cls, this, assetName);
             gen.GenCodes(cls, ref code, ref data);
         }
@@ -107,7 +107,7 @@ namespace EngineNS.Bricks.CodeBuilder
             GenerateClassCode(cls.Namespace, cls, assetName, ref code);
         }
 
-        public static bool CanConvert(Rtti.UTypeDesc left, Rtti.UTypeDesc right)
+        public static bool CanConvert(Rtti.TtTypeDesc left, Rtti.TtTypeDesc right)
         {
             if (left == null || right == null)
                 return false;
@@ -125,7 +125,7 @@ namespace EngineNS.Bricks.CodeBuilder
             }
             return false;
         }
-        public static bool IsNumeric(Rtti.UTypeDesc t)
+        public static bool IsNumeric(Rtti.TtTypeDesc t)
         {
             if (t.IsEqual(typeof(sbyte)) ||
                 t.IsEqual(typeof(Int16)) ||
@@ -146,9 +146,9 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return t.TypeFullName;
         }
-        public virtual string GetTypeString(Rtti.UTypeDesc t)
+        public virtual string GetTypeString(Rtti.TtTypeDesc t)
         {
-            var name = Rtti.UTypeDesc.GetCSharpTypeNameString(t.SystemType);
+            var name = Rtti.TtTypeDesc.GetCSharpTypeNameString(t.SystemType);
             if (t.IsRefType==false)
                 return name;
             

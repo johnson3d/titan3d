@@ -282,7 +282,7 @@ namespace EngineNS.UI.Controls
     {
         public TtButton()
         {
-            Template = TtEngine.Instance.UIManager.GetDefaultTemplate(UTypeDesc.TypeOf(typeof(TtButton)));
+            Template = TtEngine.Instance.UIManager.GetDefaultTemplate(TtTypeDesc.TypeOf(typeof(TtButton)));
             Template.Seal();
 
             //TtEngine.Instance.UIManager.RegisterTickElement(this);
@@ -297,26 +297,26 @@ namespace EngineNS.UI.Controls
         {
             var buttonTemplate = new Template.TtControlTemplate()
             {
-                TargetType = UTypeDesc.TypeOf(typeof(TtButton)),
+                TargetType = TtTypeDesc.TypeOf(typeof(TtButton)),
             };
             // 设置属性的默认值
             buttonTemplate.DefaultValues.Add(new Template.TtTemplateSimpleValue(new TtBrush(Color4b.White, TtBrush.EBrushType.Rectangle), TtButton.BackgroundProperty));
             buttonTemplate.DefaultValues.Add(new Template.TtTemplateSimpleValue(new TtBrush(Color4b.Tomato, TtBrush.EBrushType.Border), TtButton.BorderBrushProperty));
 
             // 添加模板控件
-            var buttonRoot = new Template.TtUIElementFactory(UTypeDesc.TypeOf(typeof(Controls.Containers.TtBorder)));
+            var buttonRoot = new Template.TtUIElementFactory(TtTypeDesc.TypeOf(typeof(Controls.Containers.TtBorder)));
             buttonRoot.SetValue(Controls.Containers.TtBorder.NameProperty, "border");
             buttonRoot.SetTemplateBindingValue<TtBrush, TtBrush>(Controls.Containers.TtBorder.BackgroundProperty, "Background", "Background");
             buttonRoot.SetTemplateBindingValue<TtBrush, TtBrush>(Controls.Containers.TtBorder.BorderBrushProperty, "BorderBrush", "BorderBrush");
             buttonRoot.SetTemplateBindingValue<Thickness, Thickness>(Controls.Containers.TtBorder.BorderThicknessProperty, "BorderThickness", "BorderThickness");
             buttonTemplate.TemplateRoot = buttonRoot;
-            var content = new Template.TtUIElementFactory(UTypeDesc.TypeOf(typeof(Controls.TtContentsPresenter)));
+            var content = new Template.TtUIElementFactory(TtTypeDesc.TypeOf(typeof(Controls.TtContentsPresenter)));
             content.SetValue(Controls.TtContentsPresenter.NameProperty, "contentPresenter");
             content.SetTemplateBindingValue<Thickness, Thickness>(Controls.TtContentsPresenter.MarginProperty, "Margin", "Padding");
             content.SetValue(Controls.Containers.TtBorder.HorizontalAlignmentProperty, Controls.HorizontalAlignment.Center);
             content.SetValue(Controls.Containers.TtBorder.VerticalAlignmentProperty, Controls.VerticalAlignment.Center);
             buttonRoot.AppendChild(content);
-            TtUIManager.SystemDefaultTemplates[UTypeDesc.TypeOf(typeof(TtButton))] = buttonTemplate;
+            TtUIManager.SystemDefaultTemplates[TtTypeDesc.TypeOf(typeof(TtButton))] = buttonTemplate;
 
             // 设置Trigger
             var proTrigger = new Trigger.TtUIPropertyTrigger();

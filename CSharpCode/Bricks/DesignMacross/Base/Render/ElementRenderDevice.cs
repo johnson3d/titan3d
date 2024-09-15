@@ -101,7 +101,7 @@ namespace EngineNS.DesignMacross.Base.Render
             {
                 if (attr.RenderType.IsAssignableTo(typeof(IElementRender<U>)))
                 {
-                    return (IElementRender<U>)UTypeDescManager.CreateInstance(attr.RenderType);
+                    return (IElementRender<U>)TtTypeDescManager.CreateInstance(attr.RenderType);
                 }
             }
             return null;

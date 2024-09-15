@@ -11,13 +11,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     public partial class VarNode : UNodeBase
     {
         public TtVariableDeclaration Var;
-        public Rtti.UTypeDesc VarType;
+        public Rtti.TtTypeDesc VarType;
         public PinIn SetPin { get; set; } = new PinIn();
         public PinOut GetPin { get; set; } = new PinOut()
         {
             MultiLinks = true,
         };
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             return VarType;
         }
@@ -108,12 +108,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return new TtSelfReferenceExpression();
         }
 
-        public override UTypeDesc GetOutPinType(PinOut pin)
+        public override TtTypeDesc GetOutPinType(PinOut pin)
         {
             var editor = this.ParentGraph.Editor as UMacrossEditor;
             var type = editor.DefClass.TryGetTypeDesc();
             if (type == null && editor.DefClass.SupperClassNames.Count > 0)
-                type = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(editor.DefClass.SupperClassNames[0]);
+                type = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(editor.DefClass.SupperClassNames[0]);
             return type;
         }
     }
@@ -133,9 +133,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return new TtNullValueExpression();
         }
 
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
-            return Rtti.UTypeDescGetter<object>.TypeDesc;
+            return Rtti.TtTypeDescGetter<object>.TypeDesc;
         }
     }
 
@@ -304,13 +304,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 PropertyDeclClass = mDefClass.TryGetTypeDesc(),
             };
         }
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             if(Var != null)
                 return Var.VariableType.TypeDesc;
             return null;
         }
-        public override Rtti.UTypeDesc GetInPinType(PinIn pin)
+        public override Rtti.TtTypeDesc GetInPinType(PinIn pin)
         {
             if (Var != null)
                 return Var.VariableType.TypeDesc;
@@ -547,13 +547,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 IsProperty = false,
             };
         }
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             if (Var != null)
                 return Var.VariableType.TypeDesc;
             return null;
         }
-        public override Rtti.UTypeDesc GetInPinType(PinIn pin)
+        public override Rtti.TtTypeDesc GetInPinType(PinIn pin)
         {
             if (Var != null)
                 return Var.VariableType.TypeDesc;
@@ -729,12 +729,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             if(string.IsNullOrEmpty(mClassPropertyMeta))
             {
-                mClassPropertyMeta = Rtti.UTypeDesc.TypeStr(pro.PropInfo.DeclaringType) + "#" + pro.PropInfo.Name;
+                mClassPropertyMeta = Rtti.TtTypeDesc.TypeStr(pro.PropInfo.DeclaringType) + "#" + pro.PropInfo.Name;
             }
             mIsGet = isGet;
             Name = (isGet ? "Get " : "Set ") + pro.PropertyName;
             VarType = pro.FieldType;
-            System.Diagnostics.Debug.Assert(Rtti.UTypeDesc.TypeOf(pro.PropInfo.PropertyType) == pro.FieldType);
+            System.Diagnostics.Debug.Assert(Rtti.TtTypeDesc.TypeOf(pro.PropInfo.PropertyType) == pro.FieldType);
 
             if (isGet && pro.PropInfo.CanRead)
             {
@@ -866,11 +866,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         }
 
-        public override Rtti.UTypeDesc GetInPinType(PinIn pin)
+        public override Rtti.TtTypeDesc GetInPinType(PinIn pin)
         {
             return ClassProperty.FieldType;
         }
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             return ClassProperty.FieldType;
         }
@@ -1093,7 +1093,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 if (nodeExpr == null)
                     return true;
                 var testType = nodeExpr.GetOutPinType(oPin);
-                var klsDesc = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(HostClass.ClassType.FullName);
+                var klsDesc = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(HostClass.ClassType.FullName);
                 if (klsDesc == null)
                     return false;
                 return TtCodeGeneratorBase.CanConvert(testType, klsDesc);
@@ -1219,11 +1219,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         }
 
-        public override Rtti.UTypeDesc GetInPinType(PinIn pin)
+        public override Rtti.TtTypeDesc GetInPinType(PinIn pin)
         {
             return ClassField.FieldType;
         }
-        public override Rtti.UTypeDesc GetOutPinType(PinOut pin)
+        public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
             return ClassField.FieldType;
         }
@@ -1346,13 +1346,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public AnyVar()
         {
             var edtValue = UEditableValue.CreateEditableValue(this, typeof(System.Type), SetPin) as UTypeSelectorEValue;
-            edtValue.Selector.BaseType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(object).FullName);
+            edtValue.Selector.BaseType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(typeof(object).FullName);
             SetPin.EditValue = edtValue;
             Var.InitValue = new TtNullValueExpression();
         }
         public void OnValueChanged(UEditableValue ev)
         {
-            VarType = ev.Value as Rtti.UTypeDesc;
+            VarType = ev.Value as Rtti.TtTypeDesc;
         }
         [Rtti.Meta]
         public string VarTypeString
@@ -1360,12 +1360,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             get
             {
                 if (VarType != null)
-                    return Rtti.UTypeDesc.TypeStr(VarType);
+                    return Rtti.TtTypeDesc.TypeStr(VarType);
                 return "Unknown";
             }
             set
             {
-                VarType = Rtti.UTypeDesc.TypeOf(value);
+                VarType = Rtti.TtTypeDesc.TypeOf(value);
                 var edtValue = EditValue as UTypeSelectorEValue;
                 if (edtValue != null)
                 {
@@ -1394,7 +1394,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public BoolLVar()
         {
-            VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(bool).FullName);
+            VarType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(typeof(bool).FullName);
             var edtValue = UEditableValue.CreateEditableValue(this, typeof(bool), SetPin);
             edtValue.Value = false;
             SetPin.EditValue = edtValue;
@@ -1439,7 +1439,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public SByteLVar()
         {
-            VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(sbyte).FullName);
+            VarType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(typeof(sbyte).FullName);
             var edtValue = UEditableValue.CreateEditableValue(this, typeof(sbyte), SetPin);
             edtValue.Value = (sbyte)0;
             SetPin.EditValue = edtValue;
@@ -1484,7 +1484,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public Int16LVar()
         {
-            VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Int16).FullName);
+            VarType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Int16).FullName);
             var edtValue = UEditableValue.CreateEditableValue(this, typeof(Int16), SetPin);
             edtValue.Value = (Int16)0;
             SetPin.EditValue = edtValue;
@@ -1529,7 +1529,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public Int32LVar()
         {
-            VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Int32).FullName);
+            VarType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Int32).FullName);
             var edtValue = UEditableValue.CreateEditableValue(this, typeof(Int32), SetPin);
             edtValue.Value = (Int32)0;
             SetPin.EditValue = edtValue;
@@ -1574,7 +1574,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public Int64LVar()
         {
-            VarType = Rtti.UTypeDescGetter<Int64>.TypeDesc;
+            VarType = Rtti.TtTypeDescGetter<Int64>.TypeDesc;
             var edtValue = UEditableValue.CreateEditableValue(this, typeof(Int64), SetPin);
             edtValue.Value = (Int64)0;
             SetPin.EditValue = edtValue;
@@ -1619,7 +1619,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public ByteLVar()
         {
-            VarType = Rtti.UTypeDescGetter<byte>.TypeDesc;
+            VarType = Rtti.TtTypeDescGetter<byte>.TypeDesc;
             var edtValue = UEditableValue.CreateEditableValue(this, typeof(byte), SetPin);
             edtValue.Value = (byte)0;
             SetPin.EditValue = edtValue;
@@ -1664,7 +1664,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public UInt16LVar()
         {
-            VarType = Rtti.UTypeDescGetter<UInt16>.TypeDesc;
+            VarType = Rtti.TtTypeDescGetter<UInt16>.TypeDesc;
             var edtValue = UEditableValue.CreateEditableValue(this, typeof(UInt16), SetPin);
             edtValue.Value = (UInt16)0;
             SetPin.EditValue = edtValue;
@@ -1709,7 +1709,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public UInt32LVar()
         {
-            VarType = Rtti.UTypeDescGetter<UInt32>.TypeDesc;
+            VarType = Rtti.TtTypeDescGetter<UInt32>.TypeDesc;
             var edtValue = UEditableValue.CreateEditableValue(this, typeof(UInt32), SetPin);
             edtValue.Value = (UInt32)0;
             SetPin.EditValue = edtValue;
@@ -1754,7 +1754,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public UInt64LVar()
         {
-            VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(UInt64).FullName);
+            VarType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(typeof(UInt64).FullName);
             var edtValue = UEditableValue.CreateEditableValue(this, typeof(UInt64), SetPin);
             edtValue.Value = (UInt64)0;
             SetPin.EditValue = edtValue;
@@ -1799,7 +1799,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public FloatLVar()
         {
-            VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(float).FullName);
+            VarType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(typeof(float).FullName);
             var edtValue = UEditableValue.CreateEditableValue(this, typeof(float), SetPin);
             edtValue.Value = (float)0;
             SetPin.EditValue = edtValue;
@@ -1844,7 +1844,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public DoubleLVar()
         {
-            VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(double).FullName);
+            VarType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(typeof(double).FullName);
             var edtValue = UEditableValue.CreateEditableValue(this, typeof(double), SetPin);
             edtValue.Value = (double)0;
             SetPin.EditValue = edtValue;
@@ -1889,7 +1889,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public StringLVar()
         {
-            VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(string).FullName);
+            VarType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(typeof(string).FullName);
             var edtValue = UEditableValue.CreateEditableValue(this, typeof(string), SetPin);
             edtValue.Value = "";
             SetPin.EditValue = edtValue;
@@ -1937,7 +1937,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public Vector2LVar()
         {
-            VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Vector2).FullName);
+            VarType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Vector2).FullName);
             var edtValue = UEditableValue.CreateEditableValue(this, typeof(Vector2), SetPin);
             edtValue.Value = new Vector2(0, 0);
             SetPin.EditValue = edtValue;
@@ -1982,7 +1982,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public Vector3LVar()
         {
-            VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Vector3).FullName);
+            VarType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Vector3).FullName);
             var edtValue = UEditableValue.CreateEditableValue(this, typeof(Vector3), SetPin);
             edtValue.Value = new Vector3(0, 0, 0);
             SetPin.EditValue = edtValue;
@@ -2027,8 +2027,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public Vector4LVar()
         {
-            VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Vector4).FullName);
-            var edtValue = UEditableValue.CreateEditableValue(this, Rtti.UTypeDesc.TypeOf(typeof(Vector4)), SetPin);
+            VarType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Vector4).FullName);
+            var edtValue = UEditableValue.CreateEditableValue(this, Rtti.TtTypeDesc.TypeOf(typeof(Vector4)), SetPin);
             edtValue.Value = new Vector4(0, 0, 0, 0);
             SetPin.EditValue = edtValue;
         }
@@ -2073,7 +2073,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public Color3fLVar()
         {
-            VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Color3f).FullName);
+            VarType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Color3f).FullName);
             var edtValue = UEditableValue.CreateEditableValue(this, typeof(Color3f), SetPin);
             edtValue.Value = new Color3f(1, 1, 1);
             SetPin.EditValue = edtValue;
@@ -2111,7 +2111,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public Color4fLVar()
         {
-            VarType = Rtti.UTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Color4f).FullName);
+            VarType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(typeof(Color4f).FullName);
             var edtValue = UEditableValue.CreateEditableValue(this, typeof(Color4f), SetPin);
             edtValue.Value = new Color4f(1, 1, 1);
             SetPin.EditValue = edtValue;
@@ -2137,7 +2137,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     //{
     //    public PinIn Left { get; set; } = new PinIn();
     //    public PinIn Right { get; set; } = new PinIn();
-    //    public Rtti.UTypeDesc LeftType;
+    //    public Rtti.TtTypeDesc LeftType;
     //    public VarSetNode()
     //    {
     //        Name = " = ";
@@ -2172,7 +2172,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     //                var nodeExpr = linker.OutNode as UNodeExpr;
     //                if (nodeExpr == null)
     //                    return;
-    //                LeftType = Rtti.UTypeDesc.TypeOf(nodeExpr.GetOutPinType(linker.OutPin));
+    //                LeftType = Rtti.TtTypeDesc.TypeOf(nodeExpr.GetOutPinType(linker.OutPin));
     //            }
     //        }
     //        if (LeftType != null)
@@ -2185,7 +2185,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     //            var nodeExpr = linker.OutNode as UNodeExpr;
     //            if (nodeExpr == null)
     //                return;
-    //            LeftType = Rtti.UTypeDesc.TypeOf(nodeExpr.GetOutPinType(linker.OutPin));
+    //            LeftType = Rtti.TtTypeDesc.TypeOf(nodeExpr.GetOutPinType(linker.OutPin));
     //        }
     //    }
     //    public override void OnRemoveLinker(UPinLinker linker)
@@ -2230,7 +2230,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     //                {//类型改变，所有输入输出都需要断开
     //                    this.ParentGraph.RemoveLinkedIn(this.Right);
     //                }
-    //                LeftType = Rtti.UTypeDesc.TypeOf(newType);
+    //                LeftType = Rtti.TtTypeDesc.TypeOf(newType);
     //                return;
     //            }
     //        }

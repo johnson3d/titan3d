@@ -152,7 +152,7 @@ namespace EngineNS.Bricks.PhysicsCore
         public TtPhyMaterialManager PhyMaterialManager { get; } = new TtPhyMaterialManager();
         public UPhyMeshManager PhyMeshManager { get; } = new UPhyMeshManager();
     }
-    public class UPhyModule : UModule<TtEngine>
+    public class UPhyModule : TtModule<TtEngine>
     {
         TtPhyContext mPhyContext;
         public TtPhyContext PhyContext { get => mPhyContext; }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.TcpServer
 {
-    public class UDedicatedServer : UModule<TtEngine>
+    public class UDedicatedServer : TtModule<TtEngine>
     {
         public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine engine)
         {
@@ -51,7 +51,7 @@ namespace EngineNS
             {
                 if (mDedicatedServer == null)
                 {
-                    mDedicatedServer = Rtti.UTypeDescManager.CreateInstance(UDedicatedServerType) as Bricks.TcpServer.UDedicatedServer;
+                    mDedicatedServer = Rtti.TtTypeDescManager.CreateInstance(UDedicatedServerType) as Bricks.TcpServer.UDedicatedServer;
                 }
                 return mDedicatedServer;
             }

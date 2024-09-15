@@ -15,7 +15,7 @@ namespace EngineNS.Bricks.Plugins
         string PluginDirectory { get; set; }
         string PluginName { get; set; }
     }
-    public class UPluginLoader
+    public class TtPluginLoader
     {
         public List<Assembly> DefaultAssemblies { get; set; }
         public string PluginDirectory { get; set; }
@@ -26,7 +26,7 @@ namespace EngineNS.Bricks.Plugins
         private volatile bool mChanged;
         private FileSystemWatcher mWatcher;
         private object _reloadLock;
-        public UPluginLoader(string pluginName, string pluginDirectory)
+        public TtPluginLoader(string pluginName, string pluginDirectory)
         {
             DefaultAssemblies = AssemblyLoadContext.Default.Assemblies
                 .Where(assembly => !assembly.IsDynamic)

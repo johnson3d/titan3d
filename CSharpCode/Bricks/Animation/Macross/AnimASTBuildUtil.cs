@@ -43,7 +43,7 @@ namespace EngineNS.Animation.Macross
             var returnVar = TtASTBuildUtil.CreateMethodReturnVariableDeclaration(new(typeof(bool)), TtASTBuildUtil.CreateDefaultValueExpression(new(typeof(bool))));
             var args = new List<TtMethodArgumentDeclaration>
             {
-                TtASTBuildUtil.CreateMethodArgumentDeclaration("context", new(UTypeDesc.TypeOf<FAnimBlendTreeContext>()), EMethodArgumentAttribute.Default)
+                TtASTBuildUtil.CreateMethodArgumentDeclaration("context", new(TtTypeDesc.TypeOf<FAnimBlendTreeContext>()), EMethodArgumentAttribute.Default)
             };
             var methodDeclaration = TtASTBuildUtil.CreateMethodDeclaration("Initialize", returnVar, args, true, TtMethodDeclaration.EAsyncType.CustomTask);
 
@@ -54,7 +54,7 @@ namespace EngineNS.Animation.Macross
             var returnVar = TtASTBuildUtil.CreateMethodReturnVariableDeclaration(new(typeof(bool)), TtASTBuildUtil.CreateDefaultValueExpression(new(typeof(bool))));
             var args = new List<TtMethodArgumentDeclaration>
             {
-                TtASTBuildUtil.CreateMethodArgumentDeclaration("context", new(UTypeDesc.TypeOf<TtAnimStateMachineContext>()), EMethodArgumentAttribute.Default)
+                TtASTBuildUtil.CreateMethodArgumentDeclaration("context", new(TtTypeDesc.TypeOf<TtAnimStateMachineContext>()), EMethodArgumentAttribute.Default)
             };
             var methodDeclaration = TtASTBuildUtil.CreateMethodDeclaration("Initialize", returnVar, args, true, TtMethodDeclaration.EAsyncType.CustomTask);
 

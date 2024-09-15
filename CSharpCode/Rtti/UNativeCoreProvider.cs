@@ -6,9 +6,9 @@ using System.Text;
 namespace EngineNS.Rtti
 {
     [Editor.UCs2Cpp]
-    public partial class UNativeCoreProvider
+    public partial class TtNativeCoreProvider
     {
-        static UNativeCoreProvider()
+        static TtNativeCoreProvider()
         {
             InitCallbacks();
         }
@@ -32,7 +32,7 @@ namespace EngineNS.Rtti
                     return null;
                 case Support.TtAnyValue.EValueType.Struct:
                     {
-                        var type = Rtti.UTypeDesc.TypeOf(v.Struct.mTypeName.c_str());
+                        var type = Rtti.TtTypeDesc.TypeOf(v.Struct.mTypeName.c_str());
                         if (type == null)
                             return null;
                         return System.Runtime.InteropServices.Marshal.PtrToStructure(v.Struct.mStructPointer, type.SystemType);

@@ -9,7 +9,7 @@ namespace EngineNS.Bricks.Procedure.Node
     {
         public UMaskBase()
         {
-            OutputDesc.BufferType = Rtti.UTypeDesc.TypeOf<USuperBuffer<sbyte, FSByteOperator>>();
+            OutputDesc.BufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<sbyte, FSByteOperator>>();
         }
         public override UBufferCreator GetOutBufferCreator(PinOut pin)
         {
@@ -402,7 +402,7 @@ namespace EngineNS.Bricks.Procedure.Node
         public UBufferCreator ClosestDesc { get; } = UBufferCreator.CreateInstance<USuperBuffer<Vector3i, FInt3Operator>>(-1, -1, -1);
         public USdfCalculator()
         {
-            SourceDesc.BufferType = Rtti.UTypeDescGetter<USuperBuffer<sbyte, FSByteOperator>>.TypeDesc;
+            SourceDesc.BufferType = Rtti.TtTypeDescGetter<USuperBuffer<sbyte, FSByteOperator>>.TypeDesc;
 
             AddOutput(ClosestPin, "Closest", ClosestDesc);
         }
