@@ -21,7 +21,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
         public class UGamePlayMacrossNodeData : TtNodeData
         {
             [Rtti.Meta]
-            [RName.PGRName(FilterExts = Bricks.CodeBuilder.UMacross.AssetExt, MacrossType = typeof(UGameplayMacross))]
+            [RName.PGRName(FilterExts = Bricks.CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(UGameplayMacross))]
             public RName MacrossName
             {
                 get
@@ -120,7 +120,7 @@ namespace EngineNS.GamePlay.GamePlayMacross
         //    return node;
         //}
     }
-    [UMacross]
+    [TtMacross]
     public class UGameplayMacross
     {
         protected TtGamePlayStateMachine<UGameplayMacross> mGamePlayStateMachine = new TtGamePlayStateMachine<UGameplayMacross>();

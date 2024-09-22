@@ -2,6 +2,7 @@
 using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.Rtti;
 using EngineNS.Thread.Async;
+using MathNet.Numerics.LinearAlgebra.Factorization;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -799,6 +800,13 @@ namespace EngineNS.Bricks.CodeBuilder
         [Rtti.Meta]
         public string MethodName { get; set; } = "Unknow";
         public Func<TtMethodDeclaration, string> GetDisplayNameFunc;
+        public string UniqueMethodName
+        {
+            get
+            {
+                return $"{MethodName}_{UniHash32.APHash(this.ToString())}";
+            }
+        }
         public string DisplayName
         {
             get

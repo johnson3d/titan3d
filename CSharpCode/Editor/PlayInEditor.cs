@@ -62,7 +62,7 @@ namespace EngineNS.Editor
                 return false;
 
             mCurrentName = TtEngine.Instance.Config.PlayGameName;
-            mRNameEditor.FilterExts = Bricks.CodeBuilder.UMacross.AssetExt;
+            mRNameEditor.FilterExts = Bricks.CodeBuilder.TtMacross.AssetExt;
             mRNameEditor.MacrossType = typeof(GamePlay.UMacrossGame);
 
             return true;

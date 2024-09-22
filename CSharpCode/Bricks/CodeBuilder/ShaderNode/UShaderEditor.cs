@@ -97,7 +97,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
         bool IsStarting = false;
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task<bool> Initialize_PreviewMaterial(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -108,7 +108,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = Material;
             if (materials[0] == null)
-                return;
+                return false;
             var mesh = new Graphics.Mesh.TtMesh();
             //var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
             //var rectMesh = rect.ToMesh();
@@ -139,6 +139,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
+            return true;
         }
         public async Thread.Async.TtTask<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
         {

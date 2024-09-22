@@ -313,7 +313,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             set
             {
                 mBreakerState = value;
-                Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
+                Macross.TtMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
             }
         }
         public void AddMenuItems(TtMenuItem parentItem)

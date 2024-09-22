@@ -176,10 +176,10 @@ namespace EngineNS.Bricks.NodeGraph
                     }
                 }
 
-                if (tempGraph.LinkingOp.StartPin != null)
-                {
-                    var mPos = ImGuiAPI.GetMousePos();
-                }
+                //if (tempGraph.LinkingOp.StartPin != null)
+                //{
+                //    var mPos = ImGuiAPI.GetMousePos();
+                //}
 
                 // draw mouse drag rect
                 if (tempGraph.MultiSelectionMode)
@@ -396,14 +396,14 @@ namespace EngineNS.Bricks.NodeGraph
                 var drawStart = CanvasToDraw(node.Position + styles.TitlePadding);
                 if (node.Name != node.Label && !string.IsNullOrEmpty(node.Label))
                 {
-                    cmdlist.AddText(font, font.FontSize, &drawStart, styles.TitleTextDarkColor, node.Label, null, 0.0f, null);
+                    cmdlist.AddText(font, font.FontSize / mGraph.ScaleVP, &drawStart, styles.TitleTextDarkColor, node.Label, null, 0.0f, null);
                     var textSize = ImGuiAPI.CalcTextSize(node.Label, false, 0.0f);
                     drawStart.Y += textSize.Y + styles.TitleTextOffset;
                 }
                 if (node.HasError)
-                    cmdlist.AddText(font, font.FontSize, &drawStart, styles.TitleTextErrorColor, node.Name != null ? node.Name : "none", null, 0.0f, null);
+                    cmdlist.AddText(font, font.FontSize / mGraph.ScaleVP, &drawStart, styles.TitleTextErrorColor, node.Name != null ? node.Name : "none", null, 0.0f, null);
                 else
-                    cmdlist.AddText(font, font.FontSize, &drawStart, styles.TitleTextColor, node.Name != null ? node.Name : "none", null, 0.0f, null);
+                    cmdlist.AddText(font, font.FontSize / mGraph.ScaleVP, &drawStart, styles.TitleTextColor, node.Name != null ? node.Name : "none", null, 0.0f, null);
             }
 
             {//Draw Preview
@@ -478,9 +478,9 @@ namespace EngineNS.Bricks.NodeGraph
                 {
                     start = CanvasToDraw(inPin.NamePosition);
                     if(node.CodeExcept != null && node.CodeExcept.ErrorPin == inPin)
-                        cmdlist.AddText(font, font.FontSize, &start, styles.TitleTextErrorColor, inPin.Name, null, 0.0f, null);
+                        cmdlist.AddText(font, font.FontSize / mGraph.ScaleVP, &start, styles.TitleTextErrorColor, inPin.Name, null, 0.0f, null);
                     else
-                        cmdlist.AddText(font, font.FontSize, &start, styles.TitleTextColor, inPin.Name, null, 0.0f, null);
+                        cmdlist.AddText(font, font.FontSize / mGraph.ScaleVP, &start, styles.TitleTextColor, inPin.Name, null, 0.0f, null);
                 }
 				if (inPin.EditValue != null)
                 {
@@ -516,13 +516,13 @@ namespace EngineNS.Bricks.NodeGraph
                 {
                     start = CanvasToDraw(i.NamePosition);
                     if(node.CodeExcept != null && node.CodeExcept.ErrorPin == i)
-                        cmdlist.AddText(font, font.FontSize, &start, styles.TitleTextErrorColor, i.Name, null, 0.0f, null);
+                        cmdlist.AddText(font, font.FontSize / mGraph.ScaleVP, &start, styles.TitleTextErrorColor, i.Name, null, 0.0f, null);
                     else
-                        cmdlist.AddText(font, font.FontSize, &start, styles.TitleTextColor, i.Name, null, 0.0f, null);
+                        cmdlist.AddText(font, font.FontSize / mGraph.ScaleVP, &start, styles.TitleTextColor, i.Name, null, 0.0f, null);
                 }
             }
 
-            if (mGraph.LinkingOp.StartPin != null)
+            if (mGraph.LinkingOp.IsDraging)
             {
                 DrawLinkingOp(cmdlist);
             }

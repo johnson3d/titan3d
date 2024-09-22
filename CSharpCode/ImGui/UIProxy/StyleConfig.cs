@@ -29,6 +29,11 @@ namespace EngineNS.EGui.UIProxy
 
         [Category("Common")]
         [Controls.PropertyGrid.PGShowInPropertyGrid]
+        [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
+        public UInt32 SecondPanelBackground = 0xff141414;
+
+        [Category("Common")]
+        [Controls.PropertyGrid.PGShowInPropertyGrid]
         public Vector2 PanelFramePadding = new Vector2(4, 4);
 
         [Category("Common")]

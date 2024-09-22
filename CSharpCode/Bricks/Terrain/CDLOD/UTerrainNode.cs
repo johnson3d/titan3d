@@ -11,6 +11,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.Terrain.CDLOD.UTerrainNode@EngineCore" })]
     public class TtTerrainNode : GamePlay.Scene.TtSceneActorNode
     {
+        public TtTerrainNode() 
+        { 
+            this.IsCastShadow = true;
+            this.IsAcceptShadow = true;
+        }
         public override void Dispose()
         {
             LevelStreaming.Dispose();
@@ -97,11 +102,14 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             set
             {
                 base.IsAcceptShadow = value;
-                foreach (var i in ActiveLevels)
+                if (ActiveLevels != null)
                 {
-                    if (i == null)
-                        continue;
-                    i.LevelData?.SetAcceptShadow(value);
+                    foreach (var i in ActiveLevels)
+                    {
+                        if (i == null)
+                            continue;
+                        i.LevelData?.SetAcceptShadow(value);
+                    }
                 }
             }
         }

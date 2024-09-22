@@ -530,7 +530,7 @@ namespace EngineNS.Bricks.NodeGraph
                 ameta?.OnDrawSnapshot(cmdList, ref pos, ref end);
                 var cmdListFont = ImGuiAPI.GetDrawListFont(cmdList);
                 var textPos = new Vector2(pos.X, end.Y);
-                cmdList.AddText(cmdListFont, cmdListFont.FontSize, &textPos, 0xFFFFFFFF, AssetName.Name, null, 0.0f, null);
+                cmdList.AddText(cmdListFont, cmdListFont.FontSize * fScale, &textPos, 0xFFFFFFFF, AssetName.Name, null, 0.0f, null);
                 ImGuiAPI.SetCursorScreenPos(new Vector2(pos.X + iconSize.X, pos.Y));
             }
             else

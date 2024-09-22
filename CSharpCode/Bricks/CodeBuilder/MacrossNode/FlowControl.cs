@@ -6,7 +6,7 @@ using EngineNS.EGui.Controls;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    [ContextMenu("Sequence", "FlowControl\\Sequence", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("Sequence", "FlowControl\\Sequence", TtMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class SequenceNode : UNodeBase, IBeforeExecNode, IBreakableNode
     {
         [Rtti.Meta]
@@ -69,7 +69,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             set
             {
                 mBreakerState = value;
-                Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
+                Macross.TtMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
             }
         }
 
@@ -171,7 +171,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 });
         }
     }
-    [ContextMenu("if", "FlowControl\\If", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("if", "FlowControl\\If", TtMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class IfNode : UNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode
     {
         [Browsable(false)]
@@ -188,7 +188,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             set
             {
                 mBreakerState = value;
-                Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
+                Macross.TtMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
             }
         }
         public void AddMenuItems(TtMenuItem parentItem)
@@ -501,7 +501,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
     }
-    [ContextMenu("return", "FlowControl\\Return", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("return", "FlowControl\\Return", TtMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class ReturnNode : UNodeBase, IBeforeExecNode, IBreakableNode
     {
         [Browsable(false)]
@@ -516,7 +516,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             set
             {
                 mBreakerState = value;
-                Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
+                Macross.TtMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
             }
         }
         public void AddMenuItems(TtMenuItem parentItem)
@@ -818,7 +818,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return ParentGraph;
         }
     }
-    [ContextMenu("forloop", "FlowControl\\For", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("forloop", "FlowControl\\For", TtMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class ForLoopNode : UNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode
     {
         [Browsable(false)]
@@ -855,7 +855,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             set
             {
                 mBreakerState = value;
-                Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
+                Macross.TtMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
             }
         }
         public void AddMenuItems(TtMenuItem parentItem)
@@ -1014,7 +1014,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
     }
-    [ContextMenu("whileloop", "FlowControl\\While", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("whileloop", "FlowControl\\While", TtMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class WhileNode : UNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode
     {
         public PinIn ConditionPin;
@@ -1034,7 +1034,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             set
             {
                 mBreakerState = value;
-                Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
+                Macross.TtMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
             }
         }
         public void AddMenuItems(TtMenuItem parentItem)
@@ -1137,7 +1137,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
     }
-    [ContextMenu("continue", "FlowControl\\Continue", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("continue", "FlowControl\\Continue", TtMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class ContinueNode : UNodeBase, IBeforeExecNode, IBreakableNode
     {
         [Browsable(false)]
@@ -1152,7 +1152,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             set
             {
                 mBreakerState = value;
-                Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
+                Macross.TtMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
             }
         }
         public void AddMenuItems(TtMenuItem parentItem)
@@ -1211,7 +1211,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return null;
         }
     }
-    [ContextMenu("break", "FlowControl\\Break", UMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("break", "FlowControl\\Break", TtMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
     public partial class BreakNode : UNodeBase, IBeforeExecNode, IBreakableNode
     {
         [Browsable(false)]
@@ -1226,7 +1226,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             set
             {
                 mBreakerState = value;
-                Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
+                Macross.TtMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
             }
         }
         public void AddMenuItems(TtMenuItem parentItem)

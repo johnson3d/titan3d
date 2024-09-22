@@ -567,6 +567,10 @@ namespace EngineNS.Graphics.Mesh
             [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMaterialMesh.TtSubMaterialedMesh.TSaveData@EngineCore" })]
             public class TSaveData : IO.BaseSerializer
             {
+                public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
+                {
+                    base.OnPreRead(tagObject, hostObject, fromXml);
+                }
                 [Rtti.Meta]
                 public RName MeshName { get; set; }
                 [Rtti.Meta]
@@ -600,6 +604,8 @@ namespace EngineNS.Graphics.Mesh
                     Mesh = null;
                     System.Action exec = async () =>
                     {
+                        if (value.MeshName == null)
+                            value.MeshName = TtEngine.Instance.Config.DefaultVMS;
                         Mesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value.MeshName);
                         if (Mesh == null)
                         {

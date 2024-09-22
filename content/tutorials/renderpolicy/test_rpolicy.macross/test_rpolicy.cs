@@ -1,15 +1,15 @@
 ﻿namespace NS_tutorials.renderpolicy
 {
-    [EngineNS.Macross.UMacross]
+    [EngineNS.Macross.TtMacross]
     public partial class test_rpolicy : EngineNS.GamePlay.UMacrossGame
     {
-        public EngineNS.Macross.UMacrossBreak breaker_InitViewportSlateWithScene_3545170604 = new EngineNS.Macross.UMacrossBreak("breaker_InitViewportSlateWithScene_3545170604");
-        public EngineNS.Macross.UMacrossBreak breaker_return_1522025194 = new EngineNS.Macross.UMacrossBreak("breaker_return_1522025194");
-        EngineNS.Macross.UMacrossStackFrame mFrame_BeginPlay = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("tutorials/renderpolicy/test_rpolicy.macross", EngineNS.RName.ERNameType.Game));
+        public EngineNS.Macross.TtMacrossBreak breaker_InitViewportSlateWithScene_3545170604 = new EngineNS.Macross.TtMacrossBreak("breaker_InitViewportSlateWithScene_3545170604");
+        public EngineNS.Macross.TtMacrossBreak breaker_return_1522025194 = new EngineNS.Macross.TtMacrossBreak("breaker_return_1522025194");
+        EngineNS.Macross.TtMacrossStackFrame mFrame_BeginPlay = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("tutorials/renderpolicy/test_rpolicy.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.MetaAttribute]
         public override async System.Threading.Tasks.Task<System.Boolean> BeginPlay(EngineNS.GamePlay.UGameInstance host)
         {
-            using(var guard_BeginPlay = new EngineNS.Macross.UMacrossStackGuard(mFrame_BeginPlay))
+            using(var guard_BeginPlay = new EngineNS.Macross.TtMacrossStackGuard(mFrame_BeginPlay))
             {
                 System.Boolean ret_3675910725 = default(System.Boolean);
                 mFrame_BeginPlay.SetWatchVariable("host", host);

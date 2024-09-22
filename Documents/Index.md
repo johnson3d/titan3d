@@ -35,8 +35,21 @@
 - - **MaterialEditor**
 - - **MaterialInstanceEditor**
 - - **MaterialedMeshEditor**
+- - **NebulaParticleEditor**
 - - **RendPolicyEditor**
 - - **SceneEditor**
 - - **MacrossEditor**
-- - **PGCEdtiro**
+- - **PGCEditor**
 - - **UIEditor**
+
+- 基础教程
+- 在ContentBrowser的tutorials下面有对应的子目录
+- - helloworld
+- - material
+- - mcshader
+- - particles
+- - pbr
+- - prefab
+- - renderpolicy
+- - terrain
+- - viewinstance

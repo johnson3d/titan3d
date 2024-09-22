@@ -49,6 +49,39 @@ namespace EngineNS.DesignMacross.Design.Expressions
                 DataOutPins.Add(pinDescription);
             }
         }
+        public virtual void OnPinConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, TtMethodDescription methodDescription)
+        {
+
+        }
+        public virtual void OnPinDisConnected(TtDataPinDescription selfPin, TtDataPinDescription disConnectedPin, TtMethodDescription methodDescription)
+        {
+
+        }
+        public virtual bool PinsChecking(TtPinsCheckContext pinsCheckContext)
+        {
+            bool isPinsCorrect = true;
+            var methodDesc = pinsCheckContext.MethodDescription;
+            foreach (var inPin in DataInPins)
+            {
+                var linkedPin = methodDesc.GetLinkedDataPin(inPin);
+                if (linkedPin != null)
+                {
+                    if (linkedPin.TypeDesc == inPin.TypeDesc)
+                    {
+                        if (linkedPin.Parent is TtExpressionDescription linkedExpressionDesc)
+                        {
+                            isPinsCorrect = linkedExpressionDesc.PinsChecking(pinsCheckContext);
+                        }
+                    }
+                    else
+                    {
+                        pinsCheckContext.ErrorDescriptions.Add(this);
+                        isPinsCorrect = false;
+                    }
+                }
+            }
+            return isPinsCorrect;
+        }
         public void AddExecutionInPin(TtExecutionInPinDescription pinDescription)
         {
             if(!ExecutionInPins.Contains(pinDescription))

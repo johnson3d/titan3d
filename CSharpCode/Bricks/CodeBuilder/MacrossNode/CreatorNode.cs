@@ -8,7 +8,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    [ContextMenu("create,creator,new", "Create instance", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("create,creator,new", "Create instance", TtMacross.MacrossEditorKeyword)]
     public partial class CreatorNode : UNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode, UEditableValue.IValueEditNotify
     {
         public PinIn TypePin;
@@ -28,7 +28,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             set
             {
                 mBreakerState = value;
-                Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
+                Macross.TtMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
             }
         }
 

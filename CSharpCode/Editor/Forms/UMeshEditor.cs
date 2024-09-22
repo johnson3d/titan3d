@@ -82,13 +82,13 @@ namespace EngineNS.Editor.Forms
         #region Color Sdf Preview
         DistanceField.TtSdfAsset MeshSdfAsset = new DistanceField.TtSdfAsset();
         public EngineNS.Editor.USdfPreviewViewport sdfViewport = new EngineNS.Editor.USdfPreviewViewport();
-        protected async System.Threading.Tasks.Task Initialize_SdfViewport(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task<bool> Initialize_SdfViewport(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
             var subMesh = Mesh.GetMeshPrimitives(0);
             if (subMesh == null)
-                return;
+                return false;
             var noExtName = subMesh.AssetName.Name.Substring(0, subMesh.AssetName.Name.Length - subMesh.AssetName.ExtName.Length);
             var rn = RName.GetRName(noExtName + DistanceField.TtSdfAsset.AssetExt, Mesh.AssetName.RNameType);
             MeshSdfAsset = await TtEngine.Instance.SdfAssetManager.GetSdfAsset(rn);
@@ -96,7 +96,7 @@ namespace EngineNS.Editor.Forms
             if (MeshSdfAsset == null)
             {
                 await policy.Initialize(null);
-                return;
+                return false;
             }
             var SdfMip = MeshSdfAsset.Mips[0];
             var sdfVoxelDimensions = SdfMip.GetVoxelDimensions();
@@ -114,6 +114,8 @@ namespace EngineNS.Editor.Forms
 
             await policy.Initialize(sdfCamera);
             policy.OnResize(sdfVoxelDimensions.X, sdfVoxelDimensions.Y);
+
+            return true;
         }
         #endregion
 
@@ -146,7 +148,7 @@ namespace EngineNS.Editor.Forms
         EngineNS.GamePlay.Scene.TtMeshNode mArrowMeshNode;
         EngineNS.GamePlay.Scene.UGridNode GridNode;
         float mCurrentMeshRadius = 1.0f;
-        protected async System.Threading.Tasks.Task Initialize_PreviewMesh(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task<bool> Initialize_PreviewMesh(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -222,6 +224,8 @@ namespace EngineNS.Editor.Forms
             GridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             GridNode.ViewportSlate = this.PreviewViewport;
             this.RenderPolicy.LookNodeName = "DirLightingNode";
+
+            return true;
         }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";

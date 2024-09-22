@@ -5,17 +5,17 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Macross
 {
-    public class UMacrossAttribute : Attribute
+    public class TtMacrossAttribute : Attribute
     {
         public bool IsGenShader = false;
     }
-    [UMacross]
+    [TtMacross]
     public partial class BaseClass
     {
         [Rtti.Meta]
         public void BaseFunc() { }
     }
-    [UMacross]
+    [TtMacross]
     public partial class SubClass1 : BaseClass
     {
         [Rtti.Meta]
@@ -24,7 +24,7 @@ namespace EngineNS.Macross
         [Rtti.Meta]
         public BaseClass UseBaseClassFunc(BaseClass item) { return null; }
     }
-    [UMacross]
+    [TtMacross]
     public partial class SubClass2 : BaseClass
     {
         [Rtti.Meta]
@@ -34,7 +34,7 @@ namespace EngineNS.Macross
         public BaseClass UseBaseClassFunc(BaseClass item) { return null; }
     }
 
-    [UMacross]
+    [TtMacross]
     public partial class UMacrossTestClass
     {
         [Rtti.Meta]

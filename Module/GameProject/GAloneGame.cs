@@ -10,12 +10,12 @@ namespace GameProject
 {
     public class GAloneGame : EngineNS.GamePlay.UMacrossGame
     {   
-        EngineNS.Macross.UMacrossStackFrame mFrame_BeginPlay = new EngineNS.Macross.UMacrossStackFrame();
+        EngineNS.Macross.TtMacrossStackFrame mFrame_BeginPlay = new EngineNS.Macross.TtMacrossStackFrame();
         public async override System.Threading.Tasks.Task<bool> BeginPlay(EngineNS.GamePlay.UGameInstance host)
         {
             //WorldViewportSlate = new EngineNS.GamePlay.UGameViewportSlate(true);
 
-            //using (var guard = new EngineNS.Macross.UMacrossStackGuard(mFrame_BeginPlay))
+            //using (var guard = new EngineNS.Macross.TtMacrossStackGuard(mFrame_BeginPlay))
             //{
             //    await base.BeginPlay(host);
 

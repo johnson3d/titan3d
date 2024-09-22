@@ -1,16 +1,16 @@
 ﻿namespace NS_tutorials.helloword
 {
-    [EngineNS.Macross.UMacross]
+    [EngineNS.Macross.TtMacross]
     public partial class helloword : EngineNS.GamePlay.UMacrossGame
     {
-        public EngineNS.Macross.UMacrossBreak breaker_InitViewportSlateWithScene_3402544262 = new EngineNS.Macross.UMacrossBreak("breaker_InitViewportSlateWithScene_3402544262");
-        public EngineNS.Macross.UMacrossBreak breaker_Load_2325772087 = new EngineNS.Macross.UMacrossBreak("breaker_Load_2325772087");
-        public EngineNS.Macross.UMacrossBreak breaker_Add_1937078671 = new EngineNS.Macross.UMacrossBreak("breaker_Add_1937078671");
-        public EngineNS.Macross.UMacrossBreak breaker_return_1529912777 = new EngineNS.Macross.UMacrossBreak("breaker_return_1529912777");
-        EngineNS.Macross.UMacrossStackFrame mFrame_BeginPlay = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("tutorials/helloword/helloword.macross", EngineNS.RName.ERNameType.Game));
+        public EngineNS.Macross.TtMacrossBreak breaker_InitViewportSlateWithScene_3402544262 = new EngineNS.Macross.TtMacrossBreak("breaker_InitViewportSlateWithScene_3402544262");
+        public EngineNS.Macross.TtMacrossBreak breaker_Load_2325772087 = new EngineNS.Macross.TtMacrossBreak("breaker_Load_2325772087");
+        public EngineNS.Macross.TtMacrossBreak breaker_Add_1937078671 = new EngineNS.Macross.TtMacrossBreak("breaker_Add_1937078671");
+        public EngineNS.Macross.TtMacrossBreak breaker_return_1529912777 = new EngineNS.Macross.TtMacrossBreak("breaker_return_1529912777");
+        EngineNS.Macross.TtMacrossStackFrame mFrame_BeginPlay = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("tutorials/helloword/helloword.macross", EngineNS.RName.ERNameType.Game));
         public override async System.Threading.Tasks.Task<System.Boolean> BeginPlay(EngineNS.GamePlay.UGameInstance host)
         {
-            using(var guard_BeginPlay = new EngineNS.Macross.UMacrossStackGuard(mFrame_BeginPlay))
+            using(var guard_BeginPlay = new EngineNS.Macross.TtMacrossStackGuard(mFrame_BeginPlay))
             {
                 System.Boolean ret_4129711059 = default(System.Boolean);
                 mFrame_BeginPlay.SetWatchVariable("host", host);

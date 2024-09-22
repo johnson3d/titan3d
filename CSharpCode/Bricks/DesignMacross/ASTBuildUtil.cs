@@ -90,8 +90,6 @@ namespace EngineNS.DesignMacross
             return declaration;
         }
 
-
-
         public static TtVariableDeclaration CreateVariableDeclaration(IVariableDescription description, ref FClassBuildContext classBuildContext)
         {
             TtVariableDeclaration declaration = new();
@@ -118,9 +116,6 @@ namespace EngineNS.DesignMacross
         {
             return CreateMethodArgumentDeclaration(methodArgumentDescription.Name, new(methodArgumentDescription.VariableType), methodArgumentDescription.OperationType, false);
         }
-
-
-
 
         public static TtMethodDeclaration CreateMethodDeclaration(string methodName, TtVariableDeclaration returnVar, List<TtMethodArgumentDeclaration> arguments, bool isOverrid = false, TtMethodDeclaration.EAsyncType asyncType = TtMethodDeclaration.EAsyncType.None)
         {

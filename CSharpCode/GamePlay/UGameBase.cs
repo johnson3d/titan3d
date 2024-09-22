@@ -2,13 +2,14 @@
 using EngineNS.GamePlay.Camera;
 using EngineNS.GamePlay.Player;
 using EngineNS.GamePlay.Scene;
+using EngineNS.IO;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    [Macross.UMacross]
+    [Macross.TtMacross]
     public partial class UMacrossGame
     {
         [Rtti.Meta]
@@ -27,6 +28,14 @@ namespace EngineNS.GamePlay
         public virtual void BeginDestroy(UGameInstance host)
         {
             host.FinalViewportSlate();
+        }
+
+        [Rtti.Meta]
+        public delegate void Delegate_DelegateTest(IAssetMeta meta);
+        [Rtti.Meta]
+        public virtual void DelegateTest(int param1, Delegate_DelegateTest delegateParam)
+        {
+
         }
     }
     [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoMacrossCreate)]

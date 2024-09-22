@@ -89,7 +89,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //}
     }
 
-    [ContextMenu("self,this,my,myself", "Self\\Self", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("self,this,my,myself", "Self\\Self", TtMacross.MacrossEditorKeyword)]
     public partial class SelfNode : UNodeBase
     {
         public PinOut OutPin { get; set; } = new PinOut();
@@ -117,7 +117,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return type;
         }
     }
-    [ContextMenu("null", "Data\\null", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("null", "Data\\null", TtMacross.MacrossEditorKeyword)]
     public partial class NullNode : UNodeBase
     {
         public PinOut OutPin { get; set; } = new PinOut();
@@ -1376,7 +1376,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
     }
-    [ContextMenu("Bool", "Data\\POD\\Bool@_serial@", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("Bool", "Data\\POD\\Bool@_serial@", TtMacross.MacrossEditorKeyword)]
     public partial class BoolLVar : LocalVar, UEditableValue.IValueEditNotify
     {
         bool mValue;
@@ -1421,7 +1421,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
-    [ContextMenu("SByte", "Data\\POD\\SByte@_serial@", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("SByte", "Data\\POD\\SByte@_serial@", TtMacross.MacrossEditorKeyword)]
     public partial class SByteLVar : LocalVar, UEditableValue.IValueEditNotify
     {
         SByte mValue;
@@ -1466,7 +1466,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
-    [ContextMenu("Int16", "Data\\POD\\Int16@_serial@", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("Int16", "Data\\POD\\Int16@_serial@", TtMacross.MacrossEditorKeyword)]
     public partial class Int16LVar : LocalVar, UEditableValue.IValueEditNotify
     {
         Int16 mValue;
@@ -1511,7 +1511,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
-    [ContextMenu("Int32", "Data\\POD\\Int32@_serial@", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("Int32", "Data\\POD\\Int32@_serial@", TtMacross.MacrossEditorKeyword)]
     public partial class Int32LVar : LocalVar, UEditableValue.IValueEditNotify
     {
         Int32 mValue;
@@ -1556,7 +1556,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
-    [ContextMenu("Int64", "Data\\POD\\Int64@_serial@", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("Int64", "Data\\POD\\Int64@_serial@", TtMacross.MacrossEditorKeyword)]
     public partial class Int64LVar : LocalVar, UEditableValue.IValueEditNotify
     {
         Int64 mValue;
@@ -1601,7 +1601,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
-    [ContextMenu("Byte", "Data\\POD\\Byte@_serial@", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("Byte", "Data\\POD\\Byte@_serial@", TtMacross.MacrossEditorKeyword)]
     public partial class ByteLVar : LocalVar, UEditableValue.IValueEditNotify
     {
         Byte mValue;
@@ -1646,7 +1646,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
-    [ContextMenu("UInt16", "Data\\POD\\UInt16@_serial@", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("UInt16", "Data\\POD\\UInt16@_serial@", TtMacross.MacrossEditorKeyword)]
     public partial class UInt16LVar : LocalVar, UEditableValue.IValueEditNotify
     {
         UInt16 mValue;
@@ -1691,7 +1691,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
-    [ContextMenu("UInt32", "Data\\POD\\UInt32@_serial@", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("UInt32", "Data\\POD\\UInt32@_serial@", TtMacross.MacrossEditorKeyword)]
     public partial class UInt32LVar : LocalVar, UEditableValue.IValueEditNotify
     {
         UInt32 mValue;
@@ -1736,7 +1736,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
-    [ContextMenu("UInt64", "Data\\POD\\UInt64@_serial@", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("UInt64", "Data\\POD\\UInt64@_serial@", TtMacross.MacrossEditorKeyword)]
     public partial class UInt64LVar : LocalVar, UEditableValue.IValueEditNotify
     {
         UInt64 mValue;
@@ -1781,7 +1781,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
-    [ContextMenu("float", "Data\\POD\\Float@_serial@", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("float", "Data\\POD\\Float@_serial@", TtMacross.MacrossEditorKeyword)]
     public partial class FloatLVar : LocalVar, UEditableValue.IValueEditNotify
     {
         float mValue;
@@ -1826,7 +1826,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
-    [ContextMenu("double", "Data\\POD\\Double@_serial@", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("double", "Data\\POD\\Double@_serial@", TtMacross.MacrossEditorKeyword)]
     public partial class DoubleLVar : LocalVar, UEditableValue.IValueEditNotify
     {
         double mValue;
@@ -1871,7 +1871,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
-    [ContextMenu("string", "Data\\POD\\String@_serial@", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("string", "Data\\POD\\String@_serial@", TtMacross.MacrossEditorKeyword)]
     public partial class StringLVar : LocalVar, UEditableValue.IValueEditNotify
     {
         string mValue;
@@ -1919,7 +1919,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
-    [ContextMenu("Vector2", "Data\\POD\\BaseData\\Vector2@_serial@", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("Vector2", "Data\\POD\\BaseData\\Vector2@_serial@", TtMacross.MacrossEditorKeyword)]
     public partial class Vector2LVar : LocalVar, UEditableValue.IValueEditNotify
     {
         Vector2 mValue;
@@ -1964,7 +1964,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
-    [ContextMenu("Vector3", "Data\\POD\\BaseData\\Vector3@_serial@", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("Vector3", "Data\\POD\\BaseData\\Vector3@_serial@", TtMacross.MacrossEditorKeyword)]
     public partial class Vector3LVar : LocalVar, UEditableValue.IValueEditNotify
     {
         Vector3 mValue;
@@ -2009,7 +2009,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
     }
-    [ContextMenu("Vector4", "Data\\POD\\BaseData\\Vector4@_serial@", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("Vector4", "Data\\POD\\BaseData\\Vector4@_serial@", TtMacross.MacrossEditorKeyword)]
     public partial class Vector4LVar : LocalVar, UEditableValue.IValueEditNotify
     {
         Vector4 mValue;
@@ -2055,7 +2055,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
 
-    [ContextMenu("Color3f", "Data\\POD\\BaseData\\Color3f@_serial@", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("Color3f", "Data\\POD\\BaseData\\Color3f@_serial@", TtMacross.MacrossEditorKeyword)]
     public partial class Color3fLVar : LocalVar, UEditableValue.IValueEditNotify
     {
         Color3f mValue;
@@ -2093,7 +2093,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
 
-    [ContextMenu("Color4f", "Data\\POD\\BaseData\\Color4f@_serial@", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("Color4f", "Data\\POD\\BaseData\\Color4f@_serial@", TtMacross.MacrossEditorKeyword)]
     public partial class Color4fLVar : LocalVar, UEditableValue.IValueEditNotify
     {
         Color4f mValue;

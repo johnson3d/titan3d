@@ -1,6 +1,6 @@
 ﻿namespace NS_utest.puppet
 {
-    [EngineNS.Macross.UMacross]
+    [EngineNS.Macross.TtMacross]
     public partial class testgameplay : EngineNS.GamePlay.GamePlayMacross.UGameplayMacross
     {
     }

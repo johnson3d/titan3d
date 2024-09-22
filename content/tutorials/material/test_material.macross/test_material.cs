@@ -1,23 +1,23 @@
 ﻿namespace NS_tutorials.material
 {
-    [EngineNS.Macross.UMacross]
+    [EngineNS.Macross.TtMacross]
     public partial class test_material : EngineNS.GamePlay.UMacrossGame
     {
         [EngineNS.Rtti.Meta]
         internal EngineNS.GamePlay.Scene.TtMeshNode Member_0 { get; set; } = null;
-        public EngineNS.Macross.UMacrossBreak breaker_InitViewportSlateWithScene_1114193444 = new EngineNS.Macross.UMacrossBreak("breaker_InitViewportSlateWithScene_1114193444");
-        public EngineNS.Macross.UMacrossBreak breaker_FindFirstChild_1270059286 = new EngineNS.Macross.UMacrossBreak("breaker_FindFirstChild_1270059286");
-        public EngineNS.Macross.UMacrossBreak breaker_return_3324266569 = new EngineNS.Macross.UMacrossBreak("breaker_return_3324266569");
-        public EngineNS.Macross.UMacrossBreak breaker_GetMaterial_2979780793 = new EngineNS.Macross.UMacrossBreak("breaker_GetMaterial_2979780793");
-        public EngineNS.Macross.UMacrossBreak breaker_Sin_2456722531 = new EngineNS.Macross.UMacrossBreak("breaker_Sin_2456722531");
-        public EngineNS.Macross.UMacrossBreak breaker_CreateColor3f_494365951 = new EngineNS.Macross.UMacrossBreak("breaker_CreateColor3f_494365951");
-        public EngineNS.Macross.UMacrossBreak breaker_SetColor3_927806693 = new EngineNS.Macross.UMacrossBreak("breaker_SetColor3_927806693");
-        public EngineNS.Macross.UMacrossBreak breaker_if_1289412133 = new EngineNS.Macross.UMacrossBreak("breaker_if_1289412133");
-        EngineNS.Macross.UMacrossStackFrame mFrame_BeginPlay = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("tutorials/material/test_material.macross", EngineNS.RName.ERNameType.Game));
+        public EngineNS.Macross.TtMacrossBreak breaker_InitViewportSlateWithScene_1114193444 = new EngineNS.Macross.TtMacrossBreak("breaker_InitViewportSlateWithScene_1114193444");
+        public EngineNS.Macross.TtMacrossBreak breaker_FindFirstChild_1270059286 = new EngineNS.Macross.TtMacrossBreak("breaker_FindFirstChild_1270059286");
+        public EngineNS.Macross.TtMacrossBreak breaker_return_3324266569 = new EngineNS.Macross.TtMacrossBreak("breaker_return_3324266569");
+        public EngineNS.Macross.TtMacrossBreak breaker_GetMaterial_2979780793 = new EngineNS.Macross.TtMacrossBreak("breaker_GetMaterial_2979780793");
+        public EngineNS.Macross.TtMacrossBreak breaker_Sin_2456722531 = new EngineNS.Macross.TtMacrossBreak("breaker_Sin_2456722531");
+        public EngineNS.Macross.TtMacrossBreak breaker_CreateColor3f_494365951 = new EngineNS.Macross.TtMacrossBreak("breaker_CreateColor3f_494365951");
+        public EngineNS.Macross.TtMacrossBreak breaker_SetColor3_927806693 = new EngineNS.Macross.TtMacrossBreak("breaker_SetColor3_927806693");
+        public EngineNS.Macross.TtMacrossBreak breaker_if_1289412133 = new EngineNS.Macross.TtMacrossBreak("breaker_if_1289412133");
+        EngineNS.Macross.TtMacrossStackFrame mFrame_BeginPlay = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("tutorials/material/test_material.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.MetaAttribute]
         public override async System.Threading.Tasks.Task<System.Boolean> BeginPlay(EngineNS.GamePlay.UGameInstance host)
         {
-            using(var guard_BeginPlay = new EngineNS.Macross.UMacrossStackGuard(mFrame_BeginPlay))
+            using(var guard_BeginPlay = new EngineNS.Macross.TtMacrossStackGuard(mFrame_BeginPlay))
             {
                 System.Boolean ret_358951701 = default(System.Boolean);
                 mFrame_BeginPlay.SetWatchVariable("host", host);
@@ -44,11 +44,11 @@
                 return ret_358951701;
             }
         }
-        EngineNS.Macross.UMacrossStackFrame mFrame_Tick = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("tutorials/material/test_material.macross", EngineNS.RName.ERNameType.Game));
+        EngineNS.Macross.TtMacrossStackFrame mFrame_Tick = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("tutorials/material/test_material.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.MetaAttribute]
         public override void Tick(EngineNS.GamePlay.UGameInstance host,System.Single elapsedMillisecond)
         {
-            using(var guard_Tick = new EngineNS.Macross.UMacrossStackGuard(mFrame_Tick))
+            using(var guard_Tick = new EngineNS.Macross.TtMacrossStackGuard(mFrame_Tick))
             {
                 mFrame_Tick.SetWatchVariable("host", host);
                 mFrame_Tick.SetWatchVariable("elapsedMillisecond", elapsedMillisecond);

@@ -1,14 +1,14 @@
 ﻿namespace NS_utest.pgc
 {
-    [EngineNS.Macross.UMacross]
+    [EngineNS.Macross.TtMacross]
     public partial class terraingen : EngineNS.Bricks.Procedure.UPgcGraphProgram
     {
-        public EngineNS.Macross.UMacrossBreak breaker_FindPgcNodeByName_1051611981 = new EngineNS.Macross.UMacrossBreak("breaker_FindPgcNodeByName_1051611981");
-        public EngineNS.Macross.UMacrossBreak breaker_if_2408442523 = new EngineNS.Macross.UMacrossBreak("breaker_if_2408442523");
-        EngineNS.Macross.UMacrossStackFrame mFrame_OnNodeInitialized = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("utest/pgc/terraingen.macross", EngineNS.RName.ERNameType.Game));
+        public EngineNS.Macross.TtMacrossBreak breaker_FindPgcNodeByName_1051611981 = new EngineNS.Macross.TtMacrossBreak("breaker_FindPgcNodeByName_1051611981");
+        public EngineNS.Macross.TtMacrossBreak breaker_if_2408442523 = new EngineNS.Macross.TtMacrossBreak("breaker_if_2408442523");
+        EngineNS.Macross.TtMacrossStackFrame mFrame_OnNodeInitialized = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("utest/pgc/terraingen.macross", EngineNS.RName.ERNameType.Game));
         public override System.Boolean OnNodeInitialized(EngineNS.Bricks.Procedure.UPgcGraph graph,EngineNS.Bricks.Procedure.UPgcNodeBase node)
         {
-            using(var guard_OnNodeInitialized = new EngineNS.Macross.UMacrossStackGuard(mFrame_OnNodeInitialized))
+            using(var guard_OnNodeInitialized = new EngineNS.Macross.TtMacrossStackGuard(mFrame_OnNodeInitialized))
             {
                 System.Boolean ret_2298037646 = default(System.Boolean);
                 mFrame_OnNodeInitialized.SetWatchVariable("graph", graph);

@@ -5,7 +5,7 @@ using EngineNS.EGui.Controls;
 
 namespace EngineNS.Bricks.Procedure
 {
-    [Macross.UMacross]
+    [Macross.TtMacross]
     public partial class UPgcGraphProgram
     {
         [Rtti.Meta]
@@ -225,7 +225,7 @@ namespace EngineNS.Bricks.Procedure
         }
         #region Macross
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = CodeBuilder.UMacross.AssetExt, MacrossType = typeof(UPgcGraphProgram))]
+        [RName.PGRName(FilterExts = CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(UPgcGraphProgram))]
         public RName ProgramName
         {
             get

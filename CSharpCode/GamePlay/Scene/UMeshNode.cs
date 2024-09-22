@@ -391,8 +391,33 @@ namespace EngineNS.GamePlay.Scene
             var world = this.GetWorld();
             mMesh.SetWorldTransform(in Placement.AbsTransform, world, false);
         }
+
+/* 项目“Engine.Window”的未合并的更改
+在此之前:
         static Macross.UMacrossStackFrame mLogicTickFrame = new Macross.UMacrossStackFrame();
         static Macross.UMacrossBreak mTestBreak = new Macross.UMacrossBreak("UMeshNode.OnTickLogic", false);
+在此之后:
+        static Macross.TtMacrossStackFrame mLogicTickFrame = new Macross.TtMacrossStackFrame();
+        static Macross.UMacrossBreak mTestBreak = new Macross.UMacrossBreak("UMeshNode.OnTickLogic", false);
+*/
+
+/* 项目“Engine.Window”的未合并的更改
+在此之前:
+        static Macross.UMacrossStackFrame mLogicTickFrame = new Macross.UMacrossStackFrame();
+在此之后:
+        static Macross.TtMacrossStackFrame mLogicTickFrame = new Macross.TtMacrossStackFrame();
+*/
+        static Macross.TtMacrossStackFrame mLogicTickFrame = new Macross.TtMacrossStackFrame();
+
+/* 项目“Engine.Window”的未合并的更改
+在此之前:
+        static Macross.UMacrossBreak mTestBreak = new Macross.UMacrossBreak("UMeshNode.OnTickLogic", false);
+        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+在此之后:
+        static Macross.TtMacrossBreak mTestBreak = new Macross.TtMacrossBreak("UMeshNode.OnTickLogic", false);
+        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+*/
+        static Macross.TtMacrossBreak mTestBreak = new Macross.TtMacrossBreak("UMeshNode.OnTickLogic", false);
         public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             //using (var guard = new Macross.UMacrossStackGuard(mLogicTickFrame))

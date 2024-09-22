@@ -206,7 +206,7 @@ namespace EngineNS.EGui.Controls
                         var files = IO.TtFileManager.GetFiles(path, "*" + ExtNameArray[i] + ".ameta");
                         if (files.Length == 0)
                             continue;
-                        if (MacrossBase != null && ExtNameArray[i] == Bricks.CodeBuilder.UMacross.AssetExt)
+                        if (MacrossBase != null && ExtNameArray[i] == Bricks.CodeBuilder.TtMacross.AssetExt)
                         {
                             foreach (var f in files)
                             {

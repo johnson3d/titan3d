@@ -34,7 +34,7 @@ namespace EngineNS.Bricks.Particle
         //}
     }
     [TtNebulaParticle.TtNebulaParticleImport]
-    [IO.AssetCreateMenu(MenuName = "FX/NubulaParticle")]
+    [IO.AssetCreateMenu(MenuName = "FX/NebulaParticle")]
     [EngineNS.Editor.UAssetEditor(EditorType = typeof(Editor.TtParticleEditor))]
     public partial class TtNebulaParticle : IO.BaseSerializer, IO.IAsset, IDisposable
     {
@@ -213,7 +213,7 @@ namespace EngineNS.Bricks.Particle
             //policy.CommitCommandList(cmdlist);
         }
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = CodeBuilder.UMacross.AssetExt, MacrossType = typeof(TtNebulaMacross))]
+        [RName.PGRName(FilterExts = CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtNebulaMacross))]
         public RName McName
         {
             get
@@ -252,7 +252,7 @@ namespace EngineNS.Bricks.Particle
         }
     }
 
-    [Macross.UMacross]
+    [Macross.TtMacross]
     public partial class TtNebulaMacross
     {
         [Rtti.Meta]

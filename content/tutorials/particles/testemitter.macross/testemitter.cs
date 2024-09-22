@@ -1,28 +1,28 @@
 ﻿namespace NS_tutorials.particles
 {
-    [EngineNS.Macross.UMacross]
+    [EngineNS.Macross.TtMacross]
     public partial class testemitter : EngineNS.Bricks.Particle.TtEmitterMacross
     {
-        public EngineNS.Macross.UMacrossBreak breaker_InterlockedAddUInt32_1872985343 = new EngineNS.Macross.UMacrossBreak("breaker_InterlockedAddUInt32_1872985343");
-        public EngineNS.Macross.UMacrossBreak breaker_SetParticleFlags_4124938284 = new EngineNS.Macross.UMacrossBreak("breaker_SetParticleFlags_4124938284");
-        public EngineNS.Macross.UMacrossBreak breaker_Spawn_318270620 = new EngineNS.Macross.UMacrossBreak("breaker_Spawn_318270620");
-        public EngineNS.Macross.UMacrossBreak breaker_if_801148221 = new EngineNS.Macross.UMacrossBreak("breaker_if_801148221");
-        public EngineNS.Macross.UMacrossBreak breaker_GetParticleData_2624031083 = new EngineNS.Macross.UMacrossBreak("breaker_GetParticleData_2624031083");
-        public EngineNS.Macross.UMacrossBreak breaker_SetParticleFlags_43658510 = new EngineNS.Macross.UMacrossBreak("breaker_SetParticleFlags_43658510");
-        public EngineNS.Macross.UMacrossBreak breaker_Spawn_2821917696 = new EngineNS.Macross.UMacrossBreak("breaker_Spawn_2821917696");
-        public EngineNS.Macross.UMacrossBreak breaker_if_1932775334 = new EngineNS.Macross.UMacrossBreak("breaker_if_1932775334");
-        public EngineNS.Macross.UMacrossBreak breaker_SetParticleFlags_2645294717 = new EngineNS.Macross.UMacrossBreak("breaker_SetParticleFlags_2645294717");
-        public EngineNS.Macross.UMacrossBreak breaker_Spawn_4269439374 = new EngineNS.Macross.UMacrossBreak("breaker_Spawn_4269439374");
-        public EngineNS.Macross.UMacrossBreak breaker_RandomUnit_3537506712 = new EngineNS.Macross.UMacrossBreak("breaker_RandomUnit_3537506712");
-        public EngineNS.Macross.UMacrossBreak breaker_RandomUnit_2843124104 = new EngineNS.Macross.UMacrossBreak("breaker_RandomUnit_2843124104");
-        public EngineNS.Macross.UMacrossBreak breaker_Uint2Color4f_3287025661 = new EngineNS.Macross.UMacrossBreak("breaker_Uint2Color4f_3287025661");
-        public EngineNS.Macross.UMacrossBreak breaker_CreateColor4f_1754197827 = new EngineNS.Macross.UMacrossBreak("breaker_CreateColor4f_1754197827");
-        public EngineNS.Macross.UMacrossBreak breaker_Color2Uint_1566520051 = new EngineNS.Macross.UMacrossBreak("breaker_Color2Uint_1566520051");
-        EngineNS.Macross.UMacrossStackFrame mFrame_DoUpdateSystem = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("tutorials/particles/testemitter.macross", EngineNS.RName.ERNameType.Game));
+        public EngineNS.Macross.TtMacrossBreak breaker_InterlockedAddUInt32_1872985343 = new EngineNS.Macross.TtMacrossBreak("breaker_InterlockedAddUInt32_1872985343");
+        public EngineNS.Macross.TtMacrossBreak breaker_SetParticleFlags_4124938284 = new EngineNS.Macross.TtMacrossBreak("breaker_SetParticleFlags_4124938284");
+        public EngineNS.Macross.TtMacrossBreak breaker_Spawn_318270620 = new EngineNS.Macross.TtMacrossBreak("breaker_Spawn_318270620");
+        public EngineNS.Macross.TtMacrossBreak breaker_if_801148221 = new EngineNS.Macross.TtMacrossBreak("breaker_if_801148221");
+        public EngineNS.Macross.TtMacrossBreak breaker_GetParticleData_2624031083 = new EngineNS.Macross.TtMacrossBreak("breaker_GetParticleData_2624031083");
+        public EngineNS.Macross.TtMacrossBreak breaker_SetParticleFlags_43658510 = new EngineNS.Macross.TtMacrossBreak("breaker_SetParticleFlags_43658510");
+        public EngineNS.Macross.TtMacrossBreak breaker_Spawn_2821917696 = new EngineNS.Macross.TtMacrossBreak("breaker_Spawn_2821917696");
+        public EngineNS.Macross.TtMacrossBreak breaker_if_1932775334 = new EngineNS.Macross.TtMacrossBreak("breaker_if_1932775334");
+        public EngineNS.Macross.TtMacrossBreak breaker_SetParticleFlags_2645294717 = new EngineNS.Macross.TtMacrossBreak("breaker_SetParticleFlags_2645294717");
+        public EngineNS.Macross.TtMacrossBreak breaker_Spawn_4269439374 = new EngineNS.Macross.TtMacrossBreak("breaker_Spawn_4269439374");
+        public EngineNS.Macross.TtMacrossBreak breaker_RandomUnit_3537506712 = new EngineNS.Macross.TtMacrossBreak("breaker_RandomUnit_3537506712");
+        public EngineNS.Macross.TtMacrossBreak breaker_RandomUnit_2843124104 = new EngineNS.Macross.TtMacrossBreak("breaker_RandomUnit_2843124104");
+        public EngineNS.Macross.TtMacrossBreak breaker_Uint2Color4f_3287025661 = new EngineNS.Macross.TtMacrossBreak("breaker_Uint2Color4f_3287025661");
+        public EngineNS.Macross.TtMacrossBreak breaker_CreateColor4f_1754197827 = new EngineNS.Macross.TtMacrossBreak("breaker_CreateColor4f_1754197827");
+        public EngineNS.Macross.TtMacrossBreak breaker_Color2Uint_1566520051 = new EngineNS.Macross.TtMacrossBreak("breaker_Color2Uint_1566520051");
+        EngineNS.Macross.TtMacrossStackFrame mFrame_DoUpdateSystem = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("tutorials/particles/testemitter.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.MetaAttribute]
         public override void DoUpdateSystem(EngineNS.Bricks.Particle.TtEmitter emt)
         {
-            using(var guard_DoUpdateSystem = new EngineNS.Macross.UMacrossStackGuard(mFrame_DoUpdateSystem))
+            using(var guard_DoUpdateSystem = new EngineNS.Macross.TtMacrossStackGuard(mFrame_DoUpdateSystem))
             {
                 mFrame_DoUpdateSystem.SetWatchVariable("emt", emt);
                 System.UInt32 tmp_r_SetParticleFlags_4124938284 = default(System.UInt32);
@@ -54,11 +54,11 @@
                 }
             }
         }
-        EngineNS.Macross.UMacrossStackFrame mFrame_OnDeadParticle = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("tutorials/particles/testemitter.macross", EngineNS.RName.ERNameType.Game));
+        EngineNS.Macross.TtMacrossStackFrame mFrame_OnDeadParticle = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("tutorials/particles/testemitter.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.MetaAttribute]
         public override void OnDeadParticle(EngineNS.Bricks.Particle.TtEmitter emt,System.UInt32 index,ref EngineNS.Bricks.Particle.FParticle particle)
         {
-            using(var guard_OnDeadParticle = new EngineNS.Macross.UMacrossStackGuard(mFrame_OnDeadParticle))
+            using(var guard_OnDeadParticle = new EngineNS.Macross.TtMacrossStackGuard(mFrame_OnDeadParticle))
             {
                 mFrame_OnDeadParticle.SetWatchVariable("emt", emt);
                 mFrame_OnDeadParticle.SetWatchVariable("index", index);
@@ -104,11 +104,11 @@
                 }
             }
         }
-        EngineNS.Macross.UMacrossStackFrame mFrame_OnInitParticle = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("tutorials/particles/testemitter.macross", EngineNS.RName.ERNameType.Game));
+        EngineNS.Macross.TtMacrossStackFrame mFrame_OnInitParticle = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("tutorials/particles/testemitter.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.MetaAttribute]
         public override void OnInitParticle(EngineNS.Bricks.Particle.TtEmitter emt,ref EngineNS.Bricks.Particle.FParticle particle)
         {
-            using(var guard_OnInitParticle = new EngineNS.Macross.UMacrossStackGuard(mFrame_OnInitParticle))
+            using(var guard_OnInitParticle = new EngineNS.Macross.TtMacrossStackGuard(mFrame_OnInitParticle))
             {
                 mFrame_OnInitParticle.SetWatchVariable("emt", emt);
                 mFrame_OnInitParticle.SetWatchVariable("particle", particle);
@@ -128,11 +128,11 @@
                 particle.Scale = 1f;
             }
         }
-        EngineNS.Macross.UMacrossStackFrame mFrame_OnParticleTick = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("tutorials/particles/testemitter.macross", EngineNS.RName.ERNameType.Game));
+        EngineNS.Macross.TtMacrossStackFrame mFrame_OnParticleTick = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("tutorials/particles/testemitter.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.MetaAttribute]
         public override void OnParticleTick(EngineNS.Bricks.Particle.TtEmitter emt,System.Single elapsed,ref EngineNS.Bricks.Particle.FParticle particle)
         {
-            using(var guard_OnParticleTick = new EngineNS.Macross.UMacrossStackGuard(mFrame_OnParticleTick))
+            using(var guard_OnParticleTick = new EngineNS.Macross.TtMacrossStackGuard(mFrame_OnParticleTick))
             {
                 mFrame_OnParticleTick.SetWatchVariable("emt", emt);
                 mFrame_OnParticleTick.SetWatchVariable("elapsed", elapsed);
@@ -159,11 +159,11 @@
                 particle.Rotator = tmp_r_Color2Uint_1566520051;
             }
         }
-        EngineNS.Macross.UMacrossStackFrame mFrame_OnTimer = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("tutorials/particles/testemitter.macross", EngineNS.RName.ERNameType.Game));
+        EngineNS.Macross.TtMacrossStackFrame mFrame_OnTimer = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("tutorials/particles/testemitter.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.MetaAttribute]
         public override void OnTimer(EngineNS.Bricks.Particle.TtEmitter emt,System.Single second)
         {
-            using(var guard_OnTimer = new EngineNS.Macross.UMacrossStackGuard(mFrame_OnTimer))
+            using(var guard_OnTimer = new EngineNS.Macross.TtMacrossStackGuard(mFrame_OnTimer))
             {
                 mFrame_OnTimer.SetWatchVariable("emt", emt);
                 mFrame_OnTimer.SetWatchVariable("second", second);

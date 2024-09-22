@@ -1014,7 +1014,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         {
                             var parentMenu = CanvasMenus;
                             var att = atts[0] as ContextMenuAttribute;
-                            if (!att.HasKeyString(UMacross.MacrossEditorKeyword))
+                            if (!att.HasKeyString(TtMacross.MacrossEditorKeyword))
                                 continue;
                             for (var menuIdx = 0; menuIdx < att.MenuPaths.Length; menuIdx++)
                             {
@@ -1346,7 +1346,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     SetDefaultActionForNode(node);
                                     this.AddNode(node);
 
-                                    if (LinkingOp.StartPin != null && Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                    if (LinkingOp.IsDraging && Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
                                     {
                                         var outPin = LinkingOp.StartPin as PinOut;
                                         AddLink(outPin, node.Self, true);
@@ -1367,7 +1367,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     SetDefaultActionForNode(node);
                                     this.AddNode(node);
 
-                                    if (LinkingOp.StartPin != null && Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                    if (LinkingOp.IsDraging && Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
                                     {
                                         var outPin = LinkingOp.StartPin as PinOut;
                                         AddLink(outPin, node.Self, true);
@@ -1419,7 +1419,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 SetDefaultActionForNode(node);
                                 this.AddNode(node);
 
-                                if (LinkingOp.StartPin != null && Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                if (LinkingOp.IsDraging && Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
                                 {
                                     var outPin = LinkingOp.StartPin as PinOut;
                                     AddLink(outPin, node.Self, true);
@@ -1437,7 +1437,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 SetDefaultActionForNode(node);
                                 this.AddNode(node);
 
-                                if (LinkingOp.StartPin != null && Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                if (LinkingOp.IsDraging && Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
                                 {
                                     var outPin = LinkingOp.StartPin as PinOut;
                                     AddLink(outPin, node.Self, true);
@@ -1488,7 +1488,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 SetDefaultActionForNode(node);
                                 this.AddNode(node);
 
-                                if(LinkingOp.StartPin != null && Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                if(LinkingOp.IsDraging && Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
                                 {
                                     var outPin = LinkingOp.StartPin as PinOut;
                                     AddLink(outPin, node.Self, true);
@@ -1538,7 +1538,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                     SetDefaultActionForNode(node);
                                     this.AddNode(node);
 
-                                    if (LinkingOp.StartPin != null && Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
+                                    if (LinkingOp.IsDraging && Rtti.TtTypeDesc.CanCast(LinkingOp.StartPin.GetType(), typeof(PinOut)))
                                     {
                                         var outPin = LinkingOp.StartPin as PinOut;
                                         AddLink(outPin, node.Left, true);
@@ -1650,7 +1650,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (nodeExpr == null)
                 return true;
 
-            if (linking.StartPin != null && pressNode == null)
+            if (linking.IsDraging && pressNode == null)
             {
                 var oPin = linking.StartPin as PinOut;
                 if (oPin != null)

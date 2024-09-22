@@ -21,7 +21,7 @@ namespace EngineNS.Editor
             RenderPolicy = null;
             base.Dispose();
         }
-        new protected async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        new protected async System.Threading.Tasks.Task<bool> Initialize_Default(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             RenderPolicy = policy;
 
@@ -32,7 +32,7 @@ namespace EngineNS.Editor
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("utest/ttt.material"));
             if (materials[0] == null)
-                return;
+                return false;
             var mesh = new Graphics.Mesh.TtMesh();
             var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
             var rectMesh = rect.ToMesh();
@@ -50,8 +50,10 @@ namespace EngineNS.Editor
             //this.RenderPolicy.GBuffers.SkyLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             //this.RenderPolicy.GBuffers.GroundLightColor = new Vector3(0.1f, 0.1f, 0.1f);
             //this.RenderPolicy.GBuffers.UpdateViewportCBuffer();
+
+            return true;
         }
-        public override async System.Threading.Tasks.Task Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
+        public override async System.Threading.Tasks.Task<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
         {
             Graphics.Pipeline.TtRenderPolicy policy = await TtEngine.Instance.EventPoster.Post((state) =>
             {
@@ -90,6 +92,7 @@ namespace EngineNS.Editor
             IsInlitialized = true;
             StartTime = System.DateTime.Now;
             HasAssetSnap = IO.TtFileManager.FileExists(PreviewAsset.Address + ".snap");
+            return true;
         }
         public bool HasAssetSnap = false;
         public System.DateTime StartTime;

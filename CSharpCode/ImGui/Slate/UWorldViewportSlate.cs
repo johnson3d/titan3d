@@ -41,13 +41,14 @@ namespace EngineNS.EGui.Slate
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
             return true;
         }
-        public async System.Threading.Tasks.Task Initialize_Default(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        public async System.Threading.Tasks.Task<bool> Initialize_Default(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             RenderPolicy = policy;
 
             CameraController.ControlCamera(RenderPolicy.DefaultCamera);
+            return true;
         }
-        public override async System.Threading.Tasks.Task Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
+        public override async System.Threading.Tasks.Task<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
         {
             TtRenderPolicy policy = null;
             var rpAsset = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(policyName);
@@ -55,11 +56,13 @@ namespace EngineNS.EGui.Slate
             {
                 policy = rpAsset.CreateRenderPolicy(this);
             }
-            await InitializeImpl(application, policy, zMin, zMax);
+            if (false == await InitializeImpl(application, policy, zMin, zMax))
+                return false;
 
             IsInlitialized = true;
+            return true;
         }
-        private async Thread.Async.TtTask InitializeImpl(TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        private async Thread.Async.TtTask<bool> InitializeImpl(TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             await Initialize();
             
@@ -72,7 +75,8 @@ namespace EngineNS.EGui.Slate
             {
                 OnInitialize = this.Initialize_Default;
             }
-            await OnInitialize(this, application, policy, zMin, zMax);
+            if (false == await OnInitialize(this, application, policy, zMin, zMax))
+                return false;
 
             SetCameraOffset(in DVector3.Zero);
 
@@ -82,6 +86,7 @@ namespace EngineNS.EGui.Slate
 
             mAxis = new GamePlay.UAxis();
             await mAxis.Initialize(this.World, CameraController);
+            return true;
         }
         protected override void OnClientChanged(bool bSizeChanged)
         {

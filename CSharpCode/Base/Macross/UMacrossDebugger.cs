@@ -5,17 +5,17 @@ using System.Runtime.CompilerServices;
 
 namespace EngineNS.Macross
 {
-    public class UMacrossBreak
+    public class TtMacrossBreak
     {
         public string BreakName;
         internal bool Enable;
-        public UMacrossStackTracer StackTracer;
-        public UMacrossStackFrame BreakStackFrame;
-        public UMacrossBreak(string name, bool enable = false)
+        public TtMacrossStackTracer StackTracer;
+        public TtMacrossStackFrame BreakStackFrame;
+        public TtMacrossBreak(string name, bool enable = false)
         {
             Enable = enable;
             BreakName = name;
-            UMacrossDebugger.Instance.AddBreak(this);
+            TtMacrossDebugger.Instance.AddBreak(this);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void TryBreak()
@@ -31,26 +31,27 @@ namespace EngineNS.Macross
         }
         private void TryBreakInner()
         {
-            lock (UMacrossDebugger.Instance)
+            lock (TtMacrossDebugger.Instance)
             {
-                if (UMacrossDebugger.Instance.CurrrentBreak != null)
+                if (TtMacrossDebugger.Instance.CurrrentBreak != null)
                     return;
-                StackTracer = UMacrossStackTracer.ThreadInstance;
+                StackTracer = TtMacrossStackTracer.ThreadInstance;
 
-                BreakStackFrame = UMacrossStackTracer.CurrentFrame;
-                UMacrossDebugger.Instance.CurrrentBreak = this;
-                UMacrossDebugger.Instance.BreakEvent.Reset();
+                BreakStackFrame = TtMacrossStackTracer.CurrentFrame;
+                TtMacrossDebugger.Instance.CurrrentBreak = this;
+                TtMacrossDebugger.Instance.BreakEvent.Reset();
                 TtEngine.Instance.ThreadLogic.MacrossDebug.Set();
             }
-            UMacrossDebugger.Instance.BreakEvent.WaitOne();
+            TtMacrossDebugger.Instance.BreakEvent.WaitOne();
         }
     }
-    public class UMacrossDebugger
+
+    public class TtMacrossDebugger
     {
-        public static UMacrossDebugger Instance = new UMacrossDebugger();
+        public static TtMacrossDebugger Instance = new TtMacrossDebugger();
         internal System.Threading.AutoResetEvent BreakEvent { get; } = new System.Threading.AutoResetEvent(false);
-        internal UMacrossBreak CurrrentBreak;
-        public Dictionary<string, WeakReference<UMacrossBreak>> Breaks = new();
+        internal TtMacrossBreak CurrrentBreak;
+        public Dictionary<string, WeakReference<TtMacrossBreak>> Breaks = new();
         internal Dictionary<string, bool> mBreakEnableStore = new Dictionary<string, bool>();
         private bool mIsEnableDebugger = true;
         public bool IsEnableDebugger
@@ -88,7 +89,7 @@ namespace EngineNS.Macross
                 }
             }
         }
-        public UMacrossBreak Run()
+        public TtMacrossBreak Run()
         {
             lock (Instance)
             {
@@ -116,11 +117,11 @@ namespace EngineNS.Macross
                 mBreakEnableStore[breakName] = enable;
             }
         }
-        public void AddBreak(UMacrossBreak brk)
+        public void AddBreak(TtMacrossBreak brk)
         {
             lock (Instance)
             {
-                Breaks[brk.BreakName] = new WeakReference<UMacrossBreak>(brk);
+                Breaks[brk.BreakName] = new WeakReference<TtMacrossBreak>(brk);
 
                 if (mBreakEnableStore.TryGetValue(brk.BreakName, out var eb))
                 {
@@ -128,7 +129,7 @@ namespace EngineNS.Macross
                 }
             }   
         }
-        public void RemoveBreak(UMacrossBreak brk)
+        public void RemoveBreak(TtMacrossBreak brk)
         {
             lock (Instance)
             {
@@ -153,7 +154,7 @@ namespace EngineNS.Macross
             {
                 foreach (var i in Breaks.Values)
                 {
-                    UMacrossBreak tmp;
+                    TtMacrossBreak tmp;
                     if (i.TryGetTarget(out tmp))
                     {
                         tmp.Enable = enable;
@@ -161,11 +162,11 @@ namespace EngineNS.Macross
                 }
             }
         }
-        public UMacrossBreak FindBreak(string name)
+        public TtMacrossBreak FindBreak(string name)
         {
             if (Breaks.TryGetValue(name, out var v))
             {
-                UMacrossBreak tmp;
+                TtMacrossBreak tmp;
                 if (v.TryGetTarget(out tmp))
                 {
                     return tmp;

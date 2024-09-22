@@ -47,5 +47,68 @@ namespace EngineNS.DesignMacross.Design.Expressions
             }
             return expression;
         }
+        public void PinTypeSpreading(TtDataPinDescription dataPin, TtMethodDescription methodDescription)
+        {
+            foreach(var otherPin in DataInPins)
+            {
+                if (otherPin == dataPin)
+                    continue;
+
+                if(dataPin.TypeDesc != null)
+                {
+                    if(otherPin.TypeDesc == null)
+                    {
+                        otherPin.TypeDesc = dataPin.TypeDesc;
+                    }
+                }
+                else
+                {
+                    if(otherPin.TypeDesc != null)
+                    {
+                        dataPin.TypeDesc = otherPin.TypeDesc;
+                    }
+                }
+            }
+            foreach (var otherPin in DataOutPins)
+            {
+                if (otherPin == dataPin)
+                    continue;
+
+                if (dataPin.TypeDesc != null)
+                {
+                    if (otherPin.TypeDesc == null)
+                    {
+                        otherPin.TypeDesc = dataPin.TypeDesc;
+                        var linkedPin = methodDescription.GetLinkedDataPin(dataPin);
+                        if(linkedPin != null && linkedPin.TypeDesc == null)
+                        {
+                            if(linkedPin.Parent is TtValueOperatorDescription valueOperatorDescription)
+                            {
+                                linkedPin.TypeDesc = dataPin.TypeDesc;
+                                valueOperatorDescription.PinTypeSpreading(linkedPin, methodDescription);
+                            }
+                            if (linkedPin.Parent is TtLogicOperatorDescription logicOperatorDescription)
+                            {
+                                linkedPin.TypeDesc = dataPin.TypeDesc;
+                                logicOperatorDescription.PinTypeSpreading(linkedPin, methodDescription);
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+        public override void OnPinConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, TtMethodDescription methodDescription)
+        {
+            if(selfPin.TypeDesc == null)
+            {
+                selfPin.TypeDesc = connectedPin.TypeDesc;
+                PinTypeSpreading(selfPin, methodDescription);
+            }
+        }
+        public override void OnPinDisConnected(TtDataPinDescription selfPin, TtDataPinDescription disConnectedPin, TtMethodDescription methodDescription)
+        {
+            selfPin.TypeDesc = null;
+        }
     }
 }
