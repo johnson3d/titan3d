@@ -771,7 +771,7 @@ namespace EngineNS.Editor
                 meshNode.Parent = root;
                 meshNode.Placement.Scale = new Vector3(800.0f);
                 meshNode.Placement.Position = DVector3.Zero;
-                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+                meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
                 meshNode.NodeData.Name = "SkySphere";
                 meshNode.IsAcceptShadow = false;
                 meshNode.IsCastShadow = false;
@@ -785,7 +785,7 @@ namespace EngineNS.Editor
                 await meshNode.InitializeNode(world, meshData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
                 meshNode.Parent = root;
                 meshNode.Placement.SetTransform(new DVector3(0, 0, 0), new Vector3(0.01f), Quaternion.Identity);
-                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "Robot0";
                 meshNode.IsAcceptShadow = false;
                 meshNode.IsCastShadow = true;
@@ -800,7 +800,7 @@ namespace EngineNS.Editor
                     meshNode1.NodeData.Name = "Robot1";
                     meshNode1.Parent = meshNode;
                     meshNode1.Placement.SetTransform(new DVector3(3, 3, 3), new Vector3(0.01f), Quaternion.RotationAxis(Vector3.UnitY, (float)Math.PI / 4));
-                    meshNode1.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent;
+                    meshNode1.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.FollowParent;
                     meshNode1.IsAcceptShadow = false;
                     meshNode1.IsCastShadow = true;
 
@@ -830,7 +830,7 @@ namespace EngineNS.Editor
                 await meshNode.InitializeNode(world, meshData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
                 meshNode.Parent = root;
                 meshNode.Placement.SetTransform(new DVector3(0, 10, 0), new Vector3(1.0f), Quaternion.Identity);
-                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "Robot_Chair";
                 meshNode.IsAcceptShadow = false;
                 meshNode.IsCastShadow = true;
@@ -844,7 +844,7 @@ namespace EngineNS.Editor
                 await meshNode.InitializeNode(world, meshData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
                 meshNode.Parent = root;
                 meshNode.Placement.SetTransform(new DVector3(0, 10, 0), new Vector3(1.0f), Quaternion.Identity);
-                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "Robot_Chair_Far";
                 meshNode.IsAcceptShadow = false;
                 meshNode.IsCastShadow = true;
@@ -907,7 +907,7 @@ namespace EngineNS.Editor
                 await meshNode.InitializeNode(world, nebulaData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
                 meshNode.Parent = root;
                 meshNode.Placement.Position = DVector3.Zero;
-                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+                meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
                 meshNode.NodeData.Name = "NebulaParticle";
                 meshNode.IsAcceptShadow = false;
                 meshNode.IsCastShadow = false;

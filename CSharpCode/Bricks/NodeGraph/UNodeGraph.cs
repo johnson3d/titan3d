@@ -18,6 +18,7 @@ namespace EngineNS.Bricks.NodeGraph
         public UNodeBase GraphHostNode;
         public List<CodeBuilder.TtStatementBase> CurrentStatements;
         public object UserData;
+        public List<CodeBuilder.TtExpressionBase> DelegatePinExps;
         
         public void CopyTo(ref BuildCodeStatementsData data)
         {
@@ -597,7 +598,7 @@ namespace EngineNS.Bricks.NodeGraph
         public Vector2 DragPosition;
 
         protected Vector2 PositionVP;
-        protected Vector2 SizeVP;
+        protected Vector2 SizeVP = new Vector2(1, 1);
         //Vector2 MoveVPOffset;
 
         public Vector2 PhysicalSizeVP;
@@ -1020,7 +1021,7 @@ namespace EngineNS.Bricks.NodeGraph
             {
                 if (!mIsMovingSelNodes)
                 {
-                    if (LinkingOp.StartPin != null)
+                    if (LinkingOp.IsDraging)
                     {
                         var hit = LinkingOp.HoverPin; //HitObject(DragPosition.X, DragPosition.Y);
                         if (hit != null)
@@ -1251,9 +1252,10 @@ namespace EngineNS.Bricks.NodeGraph
         {
             mLastDragPosition = DragPosition;
             DragPosition = ViewportRateToCanvas(in screenPos);
+            LinkingOp.DragPosition = DragPosition;
             LinkingOp.HoverPin = null;
             object hit = null;
-            if(LinkingOp.StartPin != null)
+            if(LinkingOp.IsDraging)
             {
                 float minLen = 50;
                 for (int i = 0; i < Nodes.Count; i++)
@@ -1433,7 +1435,7 @@ namespace EngineNS.Bricks.NodeGraph
                 }
                 else
                 {
-                    if (LinkingOp.StartPin != null && LinkingOp.IsBlocking == false)
+                    if (LinkingOp.IsDraging && LinkingOp.IsBlocking == false)
                     {
                         LinkingOp.BlockingEnd = DragPosition;
                     }

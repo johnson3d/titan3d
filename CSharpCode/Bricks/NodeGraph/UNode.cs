@@ -830,7 +830,7 @@ namespace EngineNS.Bricks.NodeGraph
 
         public static void AddDebugBreakerStatement(string breakName, ref BuildCodeStatementsData data)
         {
-            var breakType = Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.Macross.UMacrossBreak));
+            var breakType = Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.Macross.TtMacrossBreak));
             var breakDef = new CodeBuilder.TtVariableDeclaration()
             {
                 VariableType = new CodeBuilder.TtTypeReference(breakType),
@@ -843,11 +843,11 @@ namespace EngineNS.Bricks.NodeGraph
         }
         public static string GetRuntimeValueString(string name)
         {
-            if (Macross.UMacrossDebugger.Instance.CurrrentBreak != null && Macross.UMacrossDebugger.Instance.CurrrentBreak.BreakStackFrame != null)
+            if (Macross.TtMacrossDebugger.Instance.CurrrentBreak != null && Macross.TtMacrossDebugger.Instance.CurrrentBreak.BreakStackFrame != null)
             {
-                if (Macross.UMacrossDebugger.Instance.CurrrentBreak.BreakStackFrame.HasWatchVariable(name))
+                if (Macross.TtMacrossDebugger.Instance.CurrrentBreak.BreakStackFrame.HasWatchVariable(name))
                 {
-                    var obj = Macross.UMacrossDebugger.Instance.CurrrentBreak.BreakStackFrame.GetWatchVariable(name);
+                    var obj = Macross.TtMacrossDebugger.Instance.CurrrentBreak.BreakStackFrame.GetWatchVariable(name);
                     return (obj == null) ? "null" : obj.ToString() + " ";
                 }
             }

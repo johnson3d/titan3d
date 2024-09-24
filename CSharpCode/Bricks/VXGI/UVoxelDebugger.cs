@@ -217,7 +217,7 @@ namespace EngineNS.Bricks.VXGI
             meshNode.NodeData.Name = "Debug_VoxelDebugMeshNode";
             meshNode.IsAcceptShadow = false;
             meshNode.IsCastShadow = false;
-            meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+            meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
 
             VxDebugMeshNode = meshNode;
         }

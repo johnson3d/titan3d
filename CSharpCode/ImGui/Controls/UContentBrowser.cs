@@ -242,7 +242,7 @@ namespace EngineNS.EGui.Controls
                     if (!find)
                         continue;
 
-                    if (MacrossBase != null && ext == Bricks.CodeBuilder.UMacross.AssetExt)
+                    if (MacrossBase != null && ext == Bricks.CodeBuilder.TtMacross.AssetExt)
                     {
                         var ameta1 = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType)) as Bricks.CodeBuilder.UMacrossAMeta;
                         if (ameta1 == null)

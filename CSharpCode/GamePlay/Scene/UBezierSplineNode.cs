@@ -81,12 +81,12 @@ namespace EngineNS.GamePlay.Scene
             {
                 TtEngine.Instance?.GfxDevice.HitproxyManager.UnmapProxy(this);
             }
-            public Graphics.Pipeline.UHitProxy HitProxy { get; set; }
-            public Graphics.Pipeline.UHitProxy.EHitproxyType HitproxyType
+            public Graphics.Pipeline.TtHitProxy HitProxy { get; set; }
+            public Graphics.Pipeline.TtHitProxy.EHitproxyType HitproxyType
             {
                 get
                 {
-                    return Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                    return Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                 }
                 set
                 {
@@ -149,7 +149,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
 
-            this.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+            this.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
 
             {
                 var radius = 0.1f;
@@ -223,9 +223,9 @@ namespace EngineNS.GamePlay.Scene
             UpdateAABB();
             Parent?.UpdateAABB();
         }
-        public override void OnNodeLoaded(TtNode parent)
+        public override async Thread.Async.TtTask OnNodeLoaded(TtNode parent)
         {
-            base.OnNodeLoaded(parent);
+            await base.OnNodeLoaded(parent);
             UpdateAbsTransform();
         }
         public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
@@ -237,7 +237,7 @@ namespace EngineNS.GamePlay.Scene
                 meshes.Add(mDebugPointMesh);
             foreach (var i in Children)
             {
-                if (i.HitproxyType == Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent)
+                if (i.HitproxyType == Graphics.Pipeline.TtHitProxy.EHitproxyType.FollowParent)
                     i.GetHitProxyDrawMesh(meshes);
             }
         }
@@ -282,7 +282,7 @@ namespace EngineNS.GamePlay.Scene
                 return;
             }
 
-            if (HitproxyType != Graphics.Pipeline.UHitProxy.EHitproxyType.None)
+            if (HitproxyType != Graphics.Pipeline.TtHitProxy.EHitproxyType.None)
             {
                 mDebugSplineMesh.IsDrawHitproxy = true;
                 var value = HitProxy.ConvertHitProxyIdToVector4();

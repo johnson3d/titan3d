@@ -49,7 +49,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
         public TtCpuCullingNode CpuCullNode = null;
         public TtGpuCullingNode GpuCullNode = null;
-        public UDrawBuffers BackgroundPass = new UDrawBuffers();
+        public TtDrawBuffers BackgroundPass = new TtDrawBuffers();
         [Category("Option")]
         [Rtti.Meta]
         public bool ClearMRT

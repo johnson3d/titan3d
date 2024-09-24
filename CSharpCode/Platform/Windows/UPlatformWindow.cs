@@ -267,7 +267,7 @@ namespace EngineNS
                 if (pHandle != IntPtr.Zero)
                 {
                     var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr(pHandle);
-                    var presentWindow = handle.Target as Graphics.Pipeline.UPresentWindow;
+                    var presentWindow = handle.Target as Graphics.Pipeline.TtPresentWindow;
                     if (presentWindow != null)
                     {
                         presentWindow.OnEvent(in evt);
@@ -284,7 +284,7 @@ namespace EngineNS
     {
         public bool CreateNativeWindow(TtEngine engine, string title, int x, int y, int w, int h)
         {
-            NativeWindow = new UPresentWindow();
+            NativeWindow = new TtPresentWindow();
             SDL.SDL_WindowFlags sdl_flags = 0;
             sdl_flags |= SDL.SDL_WindowFlags.SDL_WINDOW_HIGH_PIXEL_DENSITY;
             if (engine.Config.SupportMultWindows)

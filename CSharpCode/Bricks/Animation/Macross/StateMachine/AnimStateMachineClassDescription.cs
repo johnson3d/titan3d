@@ -112,13 +112,6 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine
             finalPoseInitializeInvoke.IsAsync = true;
             initMethod.MethodBody.Sequence.Add(finalPoseInitializeInvoke);
 
-            var bindRuntimeSkeletonPoseToNode = new TtMethodInvokeStatement("BindRuntimeSkeletonPoseToNode",
-                null,
-                new TtClassReferenceExpression(TtTypeDesc.TypeOf<TtAnimUtil>()),
-                new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression("MacrossNode") }
-                );
-            initMethod.MethodBody.Sequence.Add(bindRuntimeSkeletonPoseToNode);
-
         }
         public override void GenerateCodeInClass(TtClassDeclaration classDeclaration, ref FClassBuildContext classBuildContext)
         {

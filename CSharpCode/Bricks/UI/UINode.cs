@@ -107,9 +107,9 @@ namespace EngineNS.UI
                 // todo: load ui
             }
         }
-        public override void OnNodeLoaded(TtNode parent)
+        public override async Thread.Async.TtTask OnNodeLoaded(TtNode parent)
         {
-            base.OnNodeLoaded(parent);
+            await base.OnNodeLoaded(parent);
 
             UpdateAbsTransform();
             var uiData = NodeData as TtUINodeData;

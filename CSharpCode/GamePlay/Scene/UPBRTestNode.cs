@@ -149,7 +149,7 @@ namespace EngineNS.GamePlay.Scene
             meshes.Add(mMesh);
             foreach(var i in Children)
             {
-                if(i.HitproxyType == Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent)
+                if(i.HitproxyType == Graphics.Pipeline.TtHitProxy.EHitproxyType.FollowParent)
                     i.GetHitProxyDrawMesh(meshes);
             }
         }
@@ -163,7 +163,7 @@ namespace EngineNS.GamePlay.Scene
                 return;
             }
 
-            if (HitproxyType != Graphics.Pipeline.UHitProxy.EHitproxyType.None)
+            if (HitproxyType != Graphics.Pipeline.TtHitProxy.EHitproxyType.None)
             {
                 mMesh.IsDrawHitproxy = true;
                 var value = HitProxy.ConvertHitProxyIdToVector4();
@@ -373,9 +373,9 @@ namespace EngineNS.GamePlay.Scene
                 action();
             }
         }
-        public override void OnNodeLoaded(TtNode parent)
+        public override async Thread.Async.TtTask OnNodeLoaded(TtNode parent)
         {
-            base.OnNodeLoaded(parent);
+            await base.OnNodeLoaded(parent);
 
             UpdateAbsTransform();
             var meshData = NodeData as UMeshNodeData;
@@ -447,8 +447,33 @@ namespace EngineNS.GamePlay.Scene
             var world = this.GetWorld();
             mMesh.SetWorldTransform(in Placement.AbsTransform, world, false);
         }
+
+/* 项目“Engine.Window”的未合并的更改
+在此之前:
         static Macross.UMacrossStackFrame mLogicTickFrame = new Macross.UMacrossStackFrame();
         static Macross.UMacrossBreak mTestBreak = new Macross.UMacrossBreak("UMeshNode.OnTickLogic", false);
+在此之后:
+        static Macross.TtMacrossStackFrame mLogicTickFrame = new Macross.TtMacrossStackFrame();
+        static Macross.UMacrossBreak mTestBreak = new Macross.UMacrossBreak("UMeshNode.OnTickLogic", false);
+*/
+
+/* 项目“Engine.Window”的未合并的更改
+在此之前:
+        static Macross.UMacrossStackFrame mLogicTickFrame = new Macross.UMacrossStackFrame();
+在此之后:
+        static Macross.TtMacrossStackFrame mLogicTickFrame = new Macross.TtMacrossStackFrame();
+*/
+        static Macross.TtMacrossStackFrame mLogicTickFrame = new Macross.TtMacrossStackFrame();
+
+/* 项目“Engine.Window”的未合并的更改
+在此之前:
+        static Macross.UMacrossBreak mTestBreak = new Macross.UMacrossBreak("UMeshNode.OnTickLogic", false);
+        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+在此之后:
+        static Macross.TtMacrossBreak mTestBreak = new Macross.TtMacrossBreak("UMeshNode.OnTickLogic", false);
+        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+*/
+        static Macross.TtMacrossBreak mTestBreak = new Macross.TtMacrossBreak("UMeshNode.OnTickLogic", false);
         public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             //using (var guard = new Macross.UMacrossStackGuard(mLogicTickFrame))

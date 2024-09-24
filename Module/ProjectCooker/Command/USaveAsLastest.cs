@@ -534,7 +534,7 @@ namespace ProjectCooker.Command
         async System.Threading.Tasks.Task ProcMacross()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
-            var files = new List<string>(EngineNS.IO.TtFileManager.GetDirectories(root, "*" + UMacross.AssetExt, true));
+            var files = new List<string>(EngineNS.IO.TtFileManager.GetDirectories(root, "*" + TtMacross.AssetExt, true));
             foreach (var i in files)
             {
                 try
@@ -560,7 +560,7 @@ namespace ProjectCooker.Command
                 }
             }
             root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
-            files = new List<string>(EngineNS.IO.TtFileManager.GetDirectories(root, "*" + UMacross.AssetExt, true));
+            files = new List<string>(EngineNS.IO.TtFileManager.GetDirectories(root, "*" + TtMacross.AssetExt, true));
             foreach (var i in files)
             {
                 try

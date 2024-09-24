@@ -4,12 +4,12 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public class UPresentWindow : TtNativeWindow
+    public class TtPresentWindow : TtNativeWindow
     {
-        public UPresentWindow()
+        public TtPresentWindow()
         {
         }
-        ~UPresentWindow()
+        ~TtPresentWindow()
         {
             Cleanup();
         }

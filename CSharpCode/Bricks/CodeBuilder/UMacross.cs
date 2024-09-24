@@ -51,7 +51,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public string BaseTypeStr { get; set; }
         public override string GetAssetExtType()
         {
-            return UMacross.AssetExt;
+            return TtMacross.AssetExt;
         }
         public override string GetAssetTypeName()
         {
@@ -90,11 +90,11 @@ namespace EngineNS.Bricks.CodeBuilder
         //}
     }
 
-    [Rtti.Meta]
-    [UMacross.MacrossCreate]
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMacross@EngineCore", "EngineNS.Bricks.CodeBuilder.UMacross" })]
+    [TtMacross.MacrossCreate]
     [IO.AssetCreateMenu(MenuName = "Script/Macross")]
     [Editor.UAssetEditor(EditorType = typeof(Bricks.CodeBuilder.MacrossNode.UMacrossEditor))]
-    public partial class UMacross : IO.IAsset
+    public partial class TtMacross : IO.IAsset
     {
         public const string AssetExt = ".macross";
         public const string MacrossEditorKeyword = "Macross";
@@ -165,7 +165,7 @@ namespace EngineNS.Bricks.CodeBuilder
                                 if (type.IsSealed)
                                     continue;
 
-                                var atts = type.GetCustomAttributes(typeof(Macross.UMacrossAttribute), false);
+                                var atts = type.GetCustomAttributes(typeof(Macross.TtMacrossAttribute), false);
                                 if (atts == null || atts.Length == 0)
                                     continue;
 
@@ -205,7 +205,7 @@ namespace EngineNS.Bricks.CodeBuilder
                         var rn = RName.GetRName(mDir.Name + mName + ExtName, mDir.RNameType);
                         if(IO.TtFileManager.FileExists(rn.Address) == false && string.IsNullOrWhiteSpace(mName) == false)
                         {
-                            ((UMacross)mAsset).SelectedType = mSelectedType;
+                            ((TtMacross)mAsset).SelectedType = mSelectedType;
                             if (DoImportAsset())
                             {
                                 ImGuiAPI.CloseCurrentPopup();

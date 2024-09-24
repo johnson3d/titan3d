@@ -1,23 +1,23 @@
 ﻿namespace NS_utest.pgc
 {
-    [EngineNS.Macross.UMacross]
+    [EngineNS.Macross.TtMacross]
     public partial class terrain_bz_height : EngineNS.Bricks.Procedure.Node.UProgram
     {
-        EngineNS.Macross.UMacrossBreak breaker_GetUVW_504025461 = new EngineNS.Macross.UMacrossBreak("breaker_GetUVW_504025461");
-        EngineNS.Macross.UMacrossBreak breaker_GetY_4154552476 = new EngineNS.Macross.UMacrossBreak("breaker_GetY_4154552476");
-        EngineNS.Macross.UMacrossBreak breaker_SetFloat1_3734322301 = new EngineNS.Macross.UMacrossBreak("breaker_SetFloat1_3734322301");
-        EngineNS.Macross.UMacrossBreak breaker_GetInputNodeByName_2129939616 = new EngineNS.Macross.UMacrossBreak("breaker_GetInputNodeByName_2129939616");
-        EngineNS.Macross.UMacrossBreak breaker_GetUVW_3747548161 = new EngineNS.Macross.UMacrossBreak("breaker_GetUVW_3747548161");
-        EngineNS.Macross.UMacrossBreak breaker_GetY_1647280972 = new EngineNS.Macross.UMacrossBreak("breaker_GetY_1647280972");
-        EngineNS.Macross.UMacrossBreak breaker_SetFloat1_1829751520 = new EngineNS.Macross.UMacrossBreak("breaker_SetFloat1_1829751520");
-        EngineNS.Macross.UMacrossBreak breaker_GetInputNodeByName_2473213923 = new EngineNS.Macross.UMacrossBreak("breaker_GetInputNodeByName_2473213923");
-        EngineNS.Macross.UMacrossBreak breaker_FindBuffer_2587353212 = new EngineNS.Macross.UMacrossBreak("breaker_FindBuffer_2587353212");
-        EngineNS.Macross.UMacrossBreak breaker_DispatchPixels_545367290 = new EngineNS.Macross.UMacrossBreak("breaker_DispatchPixels_545367290");
-        EngineNS.Macross.UMacrossStackFrame mFrame_dm_onPerPiexel_DispatchPixels_545367290 = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("utest/pgc/terrain_bz_height.macross", EngineNS.RName.ERNameType.Game));
+        EngineNS.Macross.TtMacrossBreak breaker_GetUVW_504025461 = new EngineNS.Macross.TtMacrossBreak("breaker_GetUVW_504025461");
+        EngineNS.Macross.TtMacrossBreak breaker_GetY_4154552476 = new EngineNS.Macross.TtMacrossBreak("breaker_GetY_4154552476");
+        EngineNS.Macross.TtMacrossBreak breaker_SetFloat1_3734322301 = new EngineNS.Macross.TtMacrossBreak("breaker_SetFloat1_3734322301");
+        EngineNS.Macross.TtMacrossBreak breaker_GetInputNodeByName_2129939616 = new EngineNS.Macross.TtMacrossBreak("breaker_GetInputNodeByName_2129939616");
+        EngineNS.Macross.TtMacrossBreak breaker_GetUVW_3747548161 = new EngineNS.Macross.TtMacrossBreak("breaker_GetUVW_3747548161");
+        EngineNS.Macross.TtMacrossBreak breaker_GetY_1647280972 = new EngineNS.Macross.TtMacrossBreak("breaker_GetY_1647280972");
+        EngineNS.Macross.TtMacrossBreak breaker_SetFloat1_1829751520 = new EngineNS.Macross.TtMacrossBreak("breaker_SetFloat1_1829751520");
+        EngineNS.Macross.TtMacrossBreak breaker_GetInputNodeByName_2473213923 = new EngineNS.Macross.TtMacrossBreak("breaker_GetInputNodeByName_2473213923");
+        EngineNS.Macross.TtMacrossBreak breaker_FindBuffer_2587353212 = new EngineNS.Macross.TtMacrossBreak("breaker_FindBuffer_2587353212");
+        EngineNS.Macross.TtMacrossBreak breaker_DispatchPixels_545367290 = new EngineNS.Macross.TtMacrossBreak("breaker_DispatchPixels_545367290");
+        EngineNS.Macross.TtMacrossStackFrame mFrame_dm_onPerPiexel_DispatchPixels_545367290 = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("utest/pgc/terrain_bz_height.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.Meta]
         public void dm_onPerPiexel_DispatchPixels_545367290(EngineNS.Bricks.Procedure.UBufferComponent result,System.Int32 x,System.Int32 y,System.Int32 z,EngineNS.Bricks.Procedure.Node.UBezier Value1)
         {
-            using(var guard_dm_onPerPiexel_DispatchPixels_545367290 = new EngineNS.Macross.UMacrossStackGuard(mFrame_dm_onPerPiexel_DispatchPixels_545367290))
+            using(var guard_dm_onPerPiexel_DispatchPixels_545367290 = new EngineNS.Macross.TtMacrossStackGuard(mFrame_dm_onPerPiexel_DispatchPixels_545367290))
             {
                 mFrame_dm_onPerPiexel_DispatchPixels_545367290.SetWatchVariable("result", result);
                 mFrame_dm_onPerPiexel_DispatchPixels_545367290.SetWatchVariable("x", x);
@@ -44,11 +44,11 @@
                 result.SetFloat1(x,y,z,tmp_r_GetY_4154552476);
             }
         }
-        EngineNS.Macross.UMacrossStackFrame mFrame_OnPerPixel = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("utest/pgc/terrain_bz_height.macross", EngineNS.RName.ERNameType.Game));
+        EngineNS.Macross.TtMacrossStackFrame mFrame_OnPerPixel = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("utest/pgc/terrain_bz_height.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.Meta]
         public override void OnPerPixel(EngineNS.Bricks.Procedure.UPgcGraph graph,EngineNS.Bricks.Procedure.Node.UProgramNode node,EngineNS.Bricks.Procedure.UBufferComponent resuilt,System.Int32 x,System.Int32 y,System.Int32 z,System.Object tag)
         {
-            using(var guard_OnPerPixel = new EngineNS.Macross.UMacrossStackGuard(mFrame_OnPerPixel))
+            using(var guard_OnPerPixel = new EngineNS.Macross.TtMacrossStackGuard(mFrame_OnPerPixel))
             {
                 mFrame_OnPerPixel.SetWatchVariable("graph", graph);
                 mFrame_OnPerPixel.SetWatchVariable("node", node);
@@ -84,11 +84,11 @@
                 resuilt.SetFloat1(x,y,z,tmp_r_GetY_1647280972);
             }
         }
-        EngineNS.Macross.UMacrossStackFrame mFrame_OnProcedure = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName("utest/pgc/terrain_bz_height.macross", EngineNS.RName.ERNameType.Game));
+        EngineNS.Macross.TtMacrossStackFrame mFrame_OnProcedure = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("utest/pgc/terrain_bz_height.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.Meta]
         public override System.Boolean OnProcedure(EngineNS.Bricks.Procedure.UPgcGraph graph,EngineNS.Bricks.Procedure.Node.UProgramNode node)
         {
-            using(var guard_OnProcedure = new EngineNS.Macross.UMacrossStackGuard(mFrame_OnProcedure))
+            using(var guard_OnProcedure = new EngineNS.Macross.TtMacrossStackGuard(mFrame_OnProcedure))
             {
                 System.Boolean ret_989296408 = default(System.Boolean);
                 mFrame_OnProcedure.SetWatchVariable("graph", graph);

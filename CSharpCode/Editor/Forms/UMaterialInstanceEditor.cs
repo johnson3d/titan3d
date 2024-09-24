@@ -54,7 +54,7 @@ namespace EngineNS.Editor.Forms
         {
             return this;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task<bool> Initialize_PreviewMaterialInstance(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -65,7 +65,7 @@ namespace EngineNS.Editor.Forms
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = Material;
             if (materials[0] == null)
-                return;
+                return false;
             var mesh = new Graphics.Mesh.TtMesh();
             var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
             var rectMesh = rect.ToMesh();
@@ -74,7 +74,7 @@ namespace EngineNS.Editor.Forms
             {
                 var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh,
                     DVector3.Zero, Vector3.One, Quaternion.Identity);
-                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "PreviewObject";
                 meshNode.IsAcceptShadow = false;
                 meshNode.IsCastShadow = true;
@@ -98,6 +98,7 @@ namespace EngineNS.Editor.Forms
 
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
+            return true;
         }
         async System.Threading.Tasks.Task CreateAnother(Graphics.Pipeline.TtViewportSlate viewport, Graphics.Mesh.TtMeshPrimitives rectMesh, Graphics.Pipeline.Shader.TtMaterial[] materials)
         {
@@ -109,7 +110,7 @@ namespace EngineNS.Editor.Forms
             {
                 var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh,
                     DVector3.Zero, Vector3.One, Quaternion.Identity);
-                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                 meshNode.NodeData.Name = "PreviewObject1";
                 meshNode.IsAcceptShadow = false;
                 meshNode.IsCastShadow = true;

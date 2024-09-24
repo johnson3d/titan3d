@@ -5,7 +5,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public class UDrawBuffers : IDisposable
+    public class TtDrawBuffers : IDisposable
     {
         public void Dispose() 
         {
@@ -89,17 +89,17 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         public NxRHI.TtGpuPipeline mPipeline;
-        public UDrawBuffers[] PassBuffers = new UDrawBuffers[(int)ERenderLayer.RL_Num];
-        public UDrawBuffers PostCmds = new UDrawBuffers();
+        public TtDrawBuffers[] PassBuffers = new TtDrawBuffers[(int)ERenderLayer.RL_Num];
+        public TtDrawBuffers PostCmds = new TtDrawBuffers();
         public void Initialize(NxRHI.TtGpuDevice rc, string debugName)
         {
             for (ERenderLayer i = ERenderLayer.RL_Begin; i < ERenderLayer.RL_Num; i++)
             {
-                PassBuffers[(int)i] = new UDrawBuffers();
+                PassBuffers[(int)i] = new TtDrawBuffers();
                 PassBuffers[(int)i].Initialize(rc, $"{debugName}:{i.ToString()}");
                 PassBuffers[(int)i].SetPipeline(mPipeline);
             }
-            PostCmds = new UDrawBuffers();
+            PostCmds = new TtDrawBuffers();
             PostCmds.Initialize(rc, $"{debugName}:Post");
         }
         public void BeginCommands()

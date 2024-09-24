@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.DesignMacross;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -109,6 +110,33 @@ namespace EngineNS.EGui.Controls
                 {
                     
                 }
+                if (ImGuiAPI.IsItemActive())
+                {
+                    if(ImGuiAPI.IsKeyDown(ImGuiKey.ImGuiKey_UpArrow))
+                    {
+                        if (CommandHistory.Count > 0)
+                        {
+                            CurSelectHistory++;
+                            if (CurSelectHistory >= CommandHistory.Count)
+                            {
+                                CurSelectHistory = 0;
+                            }
+                            CommandText = CommandHistory[CurSelectHistory];
+                        }
+                    }
+                    if (ImGuiAPI.IsKeyDown(ImGuiKey.ImGuiKey_DownArrow))
+                    {
+                        if (CommandHistory.Count > 0)
+                        {
+                            CurSelectHistory--;
+                            if (CurSelectHistory < 0)
+                            {
+                                CurSelectHistory = CommandHistory.Count - 1;
+                            }
+                            CommandText = CommandHistory[CurSelectHistory];
+                        }
+                    }
+                }
                 ImGuiAPI.SameLine(0, -1);
                 if (ImGuiAPI.Button("OK"))
                 {
@@ -134,6 +162,12 @@ namespace EngineNS.EGui.Controls
                     else
                     {
                         Profiler.Log.WriteLine<Profiler.TtDebugLogCategory>(Profiler.ELogTag.Info, "Commands", $"Command {cmdName} is not found");
+                    }
+                    CommandHistory.Remove(CommandText);
+                    CommandHistory.Add(CommandText);
+                    if (CommandHistory.Count > 20)
+                    {
+                        CommandHistory.RemoveRange(0, CommandHistory.Count - 20);
                     }
                     CommandText = "";
                 }
@@ -216,6 +250,8 @@ namespace EngineNS.EGui.Controls
         private string[] CategoryFilters;
         public string CategoryFilterText;
         public string CommandText;
+        public List<string> CommandHistory = new List<string>();
+        public int CurSelectHistory = 0;
         private bool IsCategory(string cate)
         {
             if (CategoryFilters == null)

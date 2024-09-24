@@ -7,13 +7,13 @@ namespace EngineNS
 {
     public unsafe partial struct ImGuiAPI
     {
-        public static unsafe Graphics.Pipeline.UPresentWindow GetWindowViewportData()
+        public static unsafe Graphics.Pipeline.TtPresentWindow GetWindowViewportData()
         {
             var viewport = ImGuiAPI.GetWindowViewport();
             if ((IntPtr)viewport->PlatformUserData == IntPtr.Zero)
                 return null;
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)viewport->PlatformUserData);
-            var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
+            var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
 
             return myWindow;
         }

@@ -52,7 +52,7 @@ namespace EngineNS.Animation
                 var skinMDfQueue = meshNode.Mesh.MdfQueue as Graphics.Mesh.UMdfSkinMesh;
                 var animatedPose = SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animatablePose);
                 skinMDfQueue.SkinModifier.RuntimePose = animatedPose;
-                return animatedPose;
+                return skinMDfQueue.SkinModifier.RuntimePose;
             }
             return null;
         }

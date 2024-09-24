@@ -8,8 +8,8 @@ namespace EngineNS.Bricks.DataSet
     public partial class TtDataSet
     {
         public UDataProviderBinderManager BinderManager = new UDataProviderBinderManager();
-        public Dictionary<string, UTable> Tables { get; } = new Dictionary<string, UTable>();
-        public UTable MainTable;
+        public Dictionary<string, TtTable> Tables { get; } = new Dictionary<string, TtTable>();
+        public TtTable MainTable;
         public bool LoadDataSet(RName name, Type objType)
         {
             bool isOk = false;
@@ -26,9 +26,9 @@ namespace EngineNS.Bricks.DataSet
             return false;
         }
         partial void LoadDataSet_Exel(ref bool isOk, RName name, Type objType);
-        public UTable GetTable(string name)
+        public TtTable GetTable(string name)
         {
-            UTable result;
+            TtTable result;
             if (Tables.TryGetValue(name, out result))
                 return result;
             return null;

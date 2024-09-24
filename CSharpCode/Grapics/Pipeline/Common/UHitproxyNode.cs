@@ -112,7 +112,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     var TempHitProxyIdCache = &HitProxyIdArray[PointY * pBitmapDesc->Width];
                     for (Int32 PointX = RegionMinX; PointX < RegionMaxX; PointX++)
                     {
-                        mHitProxyIdArray[HitProxyArrayIdx] = UHitProxy.ConvertCpuTexColorToHitProxyId(TempHitProxyIdCache[PointX]);
+                        mHitProxyIdArray[HitProxyArrayIdx] = TtHitProxy.ConvertCpuTexColorToHitProxyId(TempHitProxyIdCache[PointX]);
                         HitProxyArrayIdx++;
                     }
                 }

@@ -202,7 +202,7 @@ namespace CSharpCodeTools.Macross
                             genericDef += ">";
                         }
                         
-                        AddLine($"private static EngineNS.Macross.UMacrossBreak macross_break_{i.MethodSyntax.Identifier.Text}_{i.GetParameterHashCode()} = new EngineNS.Macross.UMacrossBreak(\"{funName}\");");
+                        AddLine($"private static EngineNS.Macross.TtMacrossBreak macross_break_{i.MethodSyntax.Identifier.Text}_{i.GetParameterHashCode()} = new EngineNS.Macross.TtMacrossBreak(\"{funName}\");");
                         if (i.ParamenterCount > 0)
                             AddLine($"public {isStatic}{asyncStr}{i.MethodSyntax.ReturnType.ToString()} macross_{i.MethodSyntax.Identifier.Text} {genericDef}(string nodeName, {i.GetParameterDefine()}) {constraint}");
                         else
@@ -210,7 +210,7 @@ namespace CSharpCodeTools.Macross
                         PushBrackets();
                         {
                             bool hasOut = false;
-                            AddLine($"using(var stackframe = EngineNS.Macross.UMacrossStackTracer.CurrentFrame)");
+                            AddLine($"using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)");
                             PushBrackets();
                             {
                                 AddLine($"if(stackframe != null)");
@@ -255,7 +255,7 @@ namespace CSharpCodeTools.Macross
 
                             if (hasOut)
                             {
-                                AddLine($"using(var stackframe = EngineNS.Macross.UMacrossStackTracer.CurrentFrame)");
+                                AddLine($"using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)");
                                 PushBrackets();
                                 {
                                     AddLine($"if(stackframe != null)");

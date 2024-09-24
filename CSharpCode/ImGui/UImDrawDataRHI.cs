@@ -163,7 +163,7 @@ namespace EngineNS.EGui
                 return mScopeRenderImDrawData;
             }
         }
-        public unsafe static void RenderImDrawData(ref ImDrawData draw_data, Graphics.Pipeline.UPresentWindow presentWindow, UImDrawDataRHI rhiData)
+        public unsafe static void RenderImDrawData(ref ImDrawData draw_data, Graphics.Pipeline.TtPresentWindow presentWindow, UImDrawDataRHI rhiData)
         {
             using (new Profiler.TimeScopeHelper(ScopeRenderImDrawData))
             {
@@ -192,7 +192,7 @@ namespace EngineNS.EGui
                 return mScopeDrawPass;
             }
         }
-        private unsafe static void RenderImDrawDataImpl(ref ImDrawData draw_data, Graphics.Pipeline.UPresentWindow presentWindow, UImDrawDataRHI rhiData)
+        private unsafe static void RenderImDrawDataImpl(ref ImDrawData draw_data, Graphics.Pipeline.TtPresentWindow presentWindow, UImDrawDataRHI rhiData)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var drawCmd = rhiData.CmdList;

@@ -16,11 +16,11 @@ namespace EngineNS.GamePlay.Scene
             return;
         }
         [Category("Option")]
-        public Graphics.Pipeline.UHitProxy.EHitproxyType HitproxyType
+        public Graphics.Pipeline.TtHitProxy.EHitproxyType HitproxyType
         {
             get
             {
-                return (Graphics.Pipeline.UHitProxy.EHitproxyType)(((uint)(NodeStyles & ENodeStyles.HitproxyMasks)) >> 2);
+                return (Graphics.Pipeline.TtHitProxy.EHitproxyType)(((uint)(NodeStyles & ENodeStyles.HitproxyMasks)) >> 2);
             }
             set
             {
@@ -31,26 +31,26 @@ namespace EngineNS.GamePlay.Scene
                 OnHitProxyChanged();
             }
         }
-        public Graphics.Pipeline.UHitProxy HitProxy { get; set; }
+        public Graphics.Pipeline.TtHitProxy HitProxy { get; set; }
         public virtual void OnHitProxyChanged()
         {
         }
 
-        private void OnHipproxyTypeChanged(Graphics.Pipeline.UHitProxy.EHitproxyType oldValue, Graphics.Pipeline.UHitProxy.EHitproxyType newValue)
+        private void OnHipproxyTypeChanged(Graphics.Pipeline.TtHitProxy.EHitproxyType oldValue, Graphics.Pipeline.TtHitProxy.EHitproxyType newValue)
         {
             switch(newValue)
             {
-                case Graphics.Pipeline.UHitProxy.EHitproxyType.None:
+                case Graphics.Pipeline.TtHitProxy.EHitproxyType.None:
                     TtEngine.Instance.GfxDevice.HitproxyManager.UnmapProxy(this);
                     SetHitProxySubTree(null);
                     break;
-                case Graphics.Pipeline.UHitProxy.EHitproxyType.Root:
+                case Graphics.Pipeline.TtHitProxy.EHitproxyType.Root:
                     TtEngine.Instance.GfxDevice.HitproxyManager.UnmapProxy(this);
                     TtEngine.Instance.GfxDevice.HitproxyManager.MapProxy(this);
                     SetHitProxySubTree(HitProxy);
                     break;
-                case Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent:
-                    if (oldValue != Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent)
+                case Graphics.Pipeline.TtHitProxy.EHitproxyType.FollowParent:
+                    if (oldValue != Graphics.Pipeline.TtHitProxy.EHitproxyType.FollowParent)
                         TtEngine.Instance.GfxDevice.HitproxyManager.UnmapProxy(this);
                     if (Parent != null)
                     {
@@ -60,11 +60,11 @@ namespace EngineNS.GamePlay.Scene
                     break;
             }
         }
-        private void SetHitProxySubTree(Graphics.Pipeline.UHitProxy proxy)
+        private void SetHitProxySubTree(Graphics.Pipeline.TtHitProxy proxy)
         {
             foreach (var i in Children)
             {
-                if (i.HitproxyType == Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent)
+                if (i.HitproxyType == Graphics.Pipeline.TtHitProxy.EHitproxyType.FollowParent)
                 {
                     TtEngine.Instance.GfxDevice.HitproxyManager.UnmapProxy(i);
                     i.HitProxy = proxy;

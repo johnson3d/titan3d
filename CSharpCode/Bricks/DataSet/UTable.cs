@@ -5,7 +5,7 @@ using System.Text;
 namespace EngineNS.Bricks.DataSet
 {
     
-    public partial class UTable
+    public partial class TtTable
     {
         public UDataProviderBinder Binder;
         private List<IDataProvider> DataProviders { get; } = new List<IDataProvider>();

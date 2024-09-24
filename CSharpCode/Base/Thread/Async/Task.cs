@@ -8,6 +8,10 @@ using System.Threading;
 
 namespace EngineNS.Thread.Async
 {
+    public interface ITask : IDisposable
+    {
+        bool IsCompleted { get; }
+    }
     #region task<T>
     public struct AsyncFiberMethodBuilder<T>
     {
@@ -250,7 +254,7 @@ namespace EngineNS.Thread.Async
     
     [AsyncMethodBuilder(typeof(AsyncFiberMethodBuilder<>))]
     //public sealed class TtTask<T>
-    public struct TtTask<T> : IDisposable
+    public struct TtTask<T> : ITask, IDisposable
     {
         //make the members as a class type pointer;
         TtTaskData<T> mTaskData;
@@ -517,7 +521,7 @@ namespace EngineNS.Thread.Async
         #endregion
     }
     [AsyncMethodBuilder(typeof(AsyncFiberMethodBuilder))]
-    public struct TtTask : IDisposable
+    public struct TtTask : ITask, IDisposable
     {
         //make the members as a class type pointer;
         TtTaskData mTaskData;

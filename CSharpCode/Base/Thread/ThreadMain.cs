@@ -84,7 +84,7 @@ namespace EngineNS.Thread
                     var evtIndex = System.Threading.WaitHandle.WaitAny(TtEngine.Instance.ThreadLogic.LogicEndEvents);
                     if (evtIndex == (int)TtThreadLogic.EEndEvent.MacrossDebug)
                     {
-                        System.Diagnostics.Debug.Assert(Macross.UMacrossDebugger.Instance.CurrrentBreak != null);
+                        System.Diagnostics.Debug.Assert(Macross.TtMacrossDebugger.Instance.CurrrentBreak != null);
                     }
                     //TtEngine.Instance.ThreadLogic.mLogicEnd.WaitOne();
                     TtEngine.Instance.ThreadLogic.LogicEnd.Reset();

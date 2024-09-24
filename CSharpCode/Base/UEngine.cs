@@ -122,10 +122,12 @@ namespace EngineNS
         [Rtti.Meta]
         public bool CompressAstc { get; set; } = false;
         [Rtti.Meta]
+        public RName DefaultVMS { get; set; } = RName.GetRName("mesh/base/box.vms", RName.ERNameType.Engine);
+        [Rtti.Meta]
         public RName DefaultMaterial { get; set; }// = RName.GetRName("UTest/ttt.material");
         [Rtti.Meta]
         public RName DefaultMaterialInstance { get; set; }// = RName.GetRName("UTest/box_wite.uminst");
-        [RName.PGRName(FilterExts = Bricks.CodeBuilder.UMacross.AssetExt, MacrossType = typeof(GamePlay.UMacrossGame))]
+        [RName.PGRName(FilterExts = Bricks.CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(GamePlay.UMacrossGame))]
         [Rtti.Meta]
         public RName PlayGameName { get; set; }
         [Rtti.Meta]

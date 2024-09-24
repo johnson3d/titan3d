@@ -1,5 +1,7 @@
-﻿using System;
+﻿using NPOI.SS.Formula.Functions;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Net;
 using System.Text;
 
@@ -77,6 +79,110 @@ namespace EngineNS
                         var cmd = Rtti.TtTypeDescManager.CreateInstance(j.Value) as TtCommand;
                         Commands.Add(cmd.CmdName, cmd);
                     }
+                }
+            }
+        }
+    }
+    
+    [Macross.TtMacross()]
+    public partial class TtCommandMacross
+    {
+        [Rtti.Meta()]
+        public delegate bool OnProcAsset(IO.IAssetMeta ameta);
+        [Rtti.Meta()]
+        public void IterateDirectory(string dir, string ext, OnProcAsset fun, bool bAllDir = false)
+        {
+            if (dir == null)
+                return;
+            dir = RName.GetRName(dir).Address;
+            var files = IO.TtFileManager.GetFiles(dir, "*" + ext, bAllDir);
+            var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
+            foreach (var i in files)
+            {
+                var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
+                var ameta = EngineNS.TtEngine.Instance.AssetMetaManager.GetAssetMeta(rn);
+                if (ameta == null)
+                {
+                    continue;
+                }
+                fun(ameta);
+            }
+        }
+        [Rtti.Meta()]
+        public virtual async Thread.Async.TtTask DoCommand(TtMcCommand host)
+        {
+
+        }
+    }
+    public partial class TtMcCommand : TtCommand
+    {
+        public TtMcCommand()
+        {
+            CmdName = "McCmd";
+            CmdHelp = "McCmd Macross=(string) OnGameThread=(bool)";
+        }
+        [Category("Option")]
+        [Rtti.Meta]
+        [RName.PGRName(FilterExts = EngineNS.Bricks.CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtCommandMacross))]
+        public RName McName
+        {
+            get
+            {
+                if (mMcObject == null)
+                    return null;
+                return mMcObject.Name;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    mMcObject = null;
+                    return;
+                }
+                if (mMcObject == null)
+                {
+                    mMcObject = Macross.UMacrossGetter<TtCommandMacross>.NewInstance();
+                }
+                mMcObject.Name = value;
+            }
+        }
+        Macross.UMacrossGetter<TtCommandMacross> mMcObject;
+        public Macross.UMacrossGetter<TtCommandMacross> McObject
+        {
+            get => mMcObject;
+        }
+        KeyValuePair<string, string>[] Args;
+        [Rtti.Meta]
+        public string FindArgument(string argName)
+        {
+            return FindArgument(Args, argName);
+        }
+        public override void Execute(string argsText)
+        {
+            Args = GetArguments(argsText);
+            var flt = FindArgument(Args, "Macross");
+            bool bRunInLogicThread = false;
+            var OnGameThread = FindArgument(Args, "OnGameThread");
+            if (OnGameThread != null)
+            {
+                bRunInLogicThread = System.Convert.ToBoolean(OnGameThread);
+            }
+
+            McName = RName.GetRName(flt + Bricks.CodeBuilder.TtMacross.AssetExt);
+            if (McObject != null)
+            {
+                if (bRunInLogicThread)
+                {
+                    TtEngine.Instance.EventPoster.RunOn((state) =>
+                    {
+                        McObject.Get()?.DoCommand(this);
+                        return true;
+                    }, Thread.Async.EAsyncTarget.Logic);
+                }
+                else
+                {
+                    McObject.Get()?.DoCommand(this);
                 }
             }
         }

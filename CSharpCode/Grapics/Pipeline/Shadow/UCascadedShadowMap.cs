@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Shadow
 {
-    public class UCascadedShadowMap
+    public class TtCascadedShadowMap
     {
     }
 }

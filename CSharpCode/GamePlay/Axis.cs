@@ -185,10 +185,10 @@ namespace EngineNS.GamePlay
                 SetStyle(ENodeStyles.Transient);
                 return result;
             }
-            public override void OnNodeLoaded(TtNode parent)
+            public override async Thread.Async.TtTask OnNodeLoaded(TtNode parent)
             {
                 SetStyle(ENodeStyles.Transient);
-                base.OnNodeLoaded(parent);
+                await base.OnNodeLoaded(parent);
             }
             public override bool DrawNode(EngineNS.Editor.TtTreeNodeDrawer tree, int index, int NumOfChild)
             {
@@ -679,7 +679,7 @@ namespace EngineNS.GamePlay
                 if(axisMesh != null)
                 {
                     MeshNode.Mesh = axisMesh;
-                    MeshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                    MeshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                     MeshNode.IsCastShadow = false;
                 }
                 var placement = MeshNode.Placement as GamePlay.TtPlacement;
@@ -977,7 +977,7 @@ namespace EngineNS.GamePlay
                     Name = "AxisRootNode"
                 },
                 Scene.EBoundVolumeType.Sphere, typeof(GamePlay.TtPlacement));
-            mRootNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+            mRootNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
             mRootNode.IsCastShadow = false;
             mRootNode.Parent = world.Root;
             ((GamePlay.TtPlacement)mRootNode.Placement).InheritScale = true;
@@ -996,7 +996,7 @@ namespace EngineNS.GamePlay
                 mRotArrowAssetNode = (Scene.TtMeshNode)await world.Root.NewNode(world, typeof(Scene.TtMeshNode), meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
                 mRotArrowAssetNode.SetStyle(Scene.TtNode.ENodeStyles.HideBoundShape | Scene.TtNode.ENodeStyles.NoPickedDraw);
                 mRotArrowAssetNode.Mesh = rotArrowAssetMesh;
-                mRotArrowAssetNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                mRotArrowAssetNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                 mRotArrowAssetNode.IsCastShadow = false;
             }
             //await InitializeDebugAssit();
@@ -1033,7 +1033,7 @@ namespace EngineNS.GamePlay
                     DVector3.Zero,
                     Vector3.One,
                     Quaternion.Identity);
-                mPlaneNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+                mPlaneNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
                 mPlaneNode.NodeData.Name = "AxisDebugPlane";
                 mPlaneNode.IsCastShadow = false;
                 mPlaneNode.Parent = mHostWorld.Root;
@@ -1057,7 +1057,7 @@ namespace EngineNS.GamePlay
                     DVector3.Zero,
                     Vector3.One,
                     Quaternion.Identity);
-                mPointNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+                mPointNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
                 mPointNode.NodeData.Name = "AxisDebugPoint";
                 mPointNode.IsCastShadow = false;
                 mPointNode.Parent = mHostWorld.Root;

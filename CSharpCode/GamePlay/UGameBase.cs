@@ -2,13 +2,14 @@
 using EngineNS.GamePlay.Camera;
 using EngineNS.GamePlay.Player;
 using EngineNS.GamePlay.Scene;
+using EngineNS.IO;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EngineNS.GamePlay
 {
-    [Macross.UMacross]
+    [Macross.TtMacross]
     public partial class UMacrossGame
     {
         [Rtti.Meta]
@@ -27,6 +28,19 @@ namespace EngineNS.GamePlay
         public virtual void BeginDestroy(UGameInstance host)
         {
             host.FinalViewportSlate();
+        }
+
+        [Rtti.Meta]
+        public delegate void Delegate_DelegateTest(IAssetMeta meta);
+        [Rtti.Meta]
+        public virtual void DelegateTest(int param1, Delegate_DelegateTest delegateParam)
+        {
+
+        }
+        [Rtti.Meta]
+        public virtual void TestFunction(int paramInt)
+        {
+
         }
     }
     [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoMacrossCreate)]
@@ -176,7 +190,7 @@ namespace EngineNS.GamePlay
             await ChiefPlayer.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             ChiefPlayer.Parent = root;
             ChiefPlayer.NodeData.Name = "UActor";
-            ChiefPlayer.HitproxyType = EngineNS.Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+            ChiefPlayer.HitproxyType = EngineNS.Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
             ChiefPlayer.IsCastShadow = true;
             ChiefPlayer.SetStyle(EngineNS.GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
             if(playerStart == null)
@@ -197,7 +211,7 @@ namespace EngineNS.GamePlay
             meshNode1.NodeData.Name = "Robot1";
             meshNode1.Parent = ChiefPlayer;
             meshNode1.Placement.SetTransform(new DVector3(0.0f), new Vector3(1.0f), Quaternion.Identity);
-            meshNode1.HitproxyType = EngineNS.Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent;
+            meshNode1.HitproxyType = EngineNS.Graphics.Pipeline.TtHitProxy.EHitproxyType.FollowParent;
             meshNode1.IsAcceptShadow = false;
             meshNode1.IsCastShadow = true;
 
@@ -258,7 +272,7 @@ namespace EngineNS.GamePlay
             await actor.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             actor.Parent = root;
             actor.NodeData.Name = "UActor";
-            actor.HitproxyType = EngineNS.Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+            actor.HitproxyType = EngineNS.Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
             actor.IsCastShadow = true;
             actor.SetStyle(EngineNS.GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
             actor.Placement.SetTransform(new DVector3(100, 10, 50), Vector3.One, Quaternion.Identity);
@@ -277,7 +291,7 @@ namespace EngineNS.GamePlay
             await actor.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             actor.Parent = root;
             actor.NodeData.Name = "UActor";
-            actor.HitproxyType = EngineNS.Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+            actor.HitproxyType = EngineNS.Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
             actor.IsCastShadow = true;
             actor.SetStyle(EngineNS.GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
             actor.Placement.SetTransform(new DVector3(100, 2, 50), Vector3.One, Quaternion.Identity);

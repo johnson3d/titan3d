@@ -50,7 +50,7 @@ namespace EngineNS.GamePlay
                 if ((IntPtr)imViewport->PlatformUserData != IntPtr.Zero)
                 {
                     var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)imViewport->PlatformUserData);
-                    var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
+                    var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
                     if (myWindow != mPresentWindow)
                     {
                         mPresentWindow?.UnregEventProcessor(this);

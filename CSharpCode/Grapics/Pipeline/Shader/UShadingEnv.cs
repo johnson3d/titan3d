@@ -552,7 +552,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         [Category("Option")]
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = Bricks.CodeBuilder.UMacross.AssetExt, MacrossType = typeof(TtShadingMacross))]
+        [RName.PGRName(FilterExts = Bricks.CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtShadingMacross))]
         public RName McName
         {
             get
@@ -583,7 +583,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
         public Shader.TtShaderAsset ShaderAsset { get; protected set; }
     }
-    [Macross.UMacross(IsGenShader = true)]
+    [Macross.TtMacross(IsGenShader = true)]
     public partial class TtShadingMacross
     {
         [Rtti.Meta]
@@ -831,7 +831,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         [Category("Option")]
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = Bricks.CodeBuilder.UMacross.AssetExt, MacrossType = typeof(TtShadingMacross))]
+        [RName.PGRName(FilterExts = Bricks.CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtShadingMacross))]
         public RName McName
         {
             get

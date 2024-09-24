@@ -29,7 +29,7 @@ namespace EngineNS.Bricks.DataSet
             mWorkbook = workbook;
             foreach (var i in sheetTypes)
             {
-                var tmp = new UTable();
+                var tmp = new TtTable();
                 var binder = BinderManager.GetBinder(i);
                 tmp.LoadTableFromExcel(this, binder.SheetName, i);
                 Tables.Add(binder.SheetName, tmp);
@@ -66,7 +66,7 @@ namespace EngineNS.Bricks.DataSet
             return (NPOI.HSSF.UserModel.HSSFSheet)workbook.CreateSheet(name);
         }
     }
-    public partial class UTable
+    public partial class TtTable
     {
         HSSFSheet mSheet;
         internal bool LoadTableFromExcel(TtDataSet dataSet, string sheetName, Type objType)

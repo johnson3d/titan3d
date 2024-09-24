@@ -76,8 +76,8 @@ namespace EngineNS.Graphics.Pipeline
         public bool IsDrawing { get; protected set; }
         public bool IsMouseIn = false;
 
-        protected Graphics.Pipeline.UPresentWindow mPresentWindow;
-        public Graphics.Pipeline.UPresentWindow PresentWindow { get => mPresentWindow; }
+        protected Graphics.Pipeline.TtPresentWindow mPresentWindow;
+        public Graphics.Pipeline.TtPresentWindow PresentWindow { get => mPresentWindow; }
         public enum EViewportType
         {
             Window,
@@ -152,7 +152,7 @@ namespace EngineNS.Graphics.Pipeline
                 if ((IntPtr)imViewport->PlatformUserData != IntPtr.Zero)
                 {
                     var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)imViewport->PlatformUserData);
-                    var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
+                    var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
                     if (myWindow != mPresentWindow)
                     {
                         mPresentWindow?.UnregEventProcessor(this);
@@ -389,10 +389,10 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
         }
-        public delegate System.Threading.Tasks.Task FOnInitialize(TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax);
+        public delegate System.Threading.Tasks.Task<bool> FOnInitialize(TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax);
         public FOnInitialize OnInitialize = null;
         [Rtti.Meta]
-        public virtual async System.Threading.Tasks.Task Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
+        public virtual async System.Threading.Tasks.Task<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)
         {
             var policy = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(policyName).CreateRenderPolicy(this);
             if (OnInitialize != null)
@@ -406,6 +406,7 @@ namespace EngineNS.Graphics.Pipeline
             mHUDStack.Push(mDefaultHUD);
 
             IsInlitialized = true;
+            return true;
         }
 
         #region HUD

@@ -2,6 +2,7 @@
 using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.Rtti;
 using EngineNS.Thread.Async;
+using MathNet.Numerics.LinearAlgebra.Factorization;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -72,7 +73,7 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             get
             {
-                if(mTypeDesc != null)
+                if (mTypeDesc != null)
                 {
                     var name = Rtti.TtTypeDesc.GetCSharpTypeNameString(mTypeDesc.SystemType);
                     if (mTypeDesc.IsRefType)
@@ -135,7 +136,13 @@ namespace EngineNS.Bricks.CodeBuilder
             }
         }
 
-        public bool IsTask => (mTypeDesc.IsEqual(typeof(System.Threading.Tasks.Task)) || mTypeDesc.IsSubclassOf(typeof(System.Threading.Tasks.Task)));
+        public bool IsTask
+        {
+            get
+            {
+                return (mTypeDesc.IsEqual(typeof(System.Threading.Tasks.Task)) || mTypeDesc.IsSubclassOf(typeof(System.Threading.Tasks.Task))) || (mTypeDesc.GetInterface(nameof(ITask)) != null);
+            }
+        }
 
         public TtTypeReference(string typeFullName, bool isEnum = false)
         {
@@ -799,6 +806,13 @@ namespace EngineNS.Bricks.CodeBuilder
         [Rtti.Meta]
         public string MethodName { get; set; } = "Unknow";
         public Func<TtMethodDeclaration, string> GetDisplayNameFunc;
+        public string UniqueMethodName
+        {
+            get
+            {
+                return $"{MethodName}_{UniHash32.APHash(this.ToString())}";
+            }
+        }
         public string DisplayName
         {
             get
@@ -914,15 +928,18 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             var retVal = new TtMethodDeclaration();
             retVal.IsOverride = true;
-            if ((method.ReturnType != typeof(void)) && (method.ReturnType != typeof(System.Threading.Tasks.Task)))
+            if ((method.ReturnType != typeof(void)) && 
+                (method.ReturnType != typeof(System.Threading.Tasks.Task)
+                && method.ReturnType != typeof(EngineNS.Thread.Async.TtTask)))
             {
                 var retType = method.ReturnType;
-                if (method.ReturnType.BaseType == typeof(System.Threading.Tasks.Task))
+                if (method.ReturnType.BaseType == typeof(System.Threading.Tasks.Task) ||
+                    method.ReturnType.BaseType.IsSubclassOf(typeof(System.Threading.Tasks.Task)))
                 {
                     retType = method.ReturnType.GetGenericArguments()[0];
                     retVal.AsyncType = EAsyncType.SystemTask;
                 }
-                else if(method.ReturnType.BaseType == typeof(TtTask))
+                else if (method.ReturnType.BaseType.GetInterface(nameof(ITask)) != null)
                 {
                     retType = method.ReturnType.GetGenericArguments()[0];
                     retVal.AsyncType = EAsyncType.CustomTask;
@@ -935,9 +952,9 @@ namespace EngineNS.Bricks.CodeBuilder
                     VariableName = "ret_" + (UInt32)Guid.NewGuid().ToString().GetHashCode(),
                 };
             }
-            else if (method.ReturnType.BaseType == typeof(System.Threading.Tasks.Task))
+            else if (method.ReturnType.BaseType == typeof(System.Threading.Tasks.Task) || method.ReturnType.IsSubclassOf(typeof(System.Threading.Tasks.Task)))
                 retVal.AsyncType = EAsyncType.SystemTask;
-            else if (method.ReturnType.BaseType == typeof(TtTask))
+            else if (method.ReturnType.GetInterface(nameof(ITask)) != null)
                 retVal.AsyncType = EAsyncType.CustomTask;
 
             retVal.MethodName = method.Name;
@@ -954,15 +971,17 @@ namespace EngineNS.Bricks.CodeBuilder
             var retVal = new TtMethodDeclaration();
             retVal.IsOverride = true;
             retVal.OverrideMethod = method;
-            if(!method.ReturnType.IsEqual(typeof(void)) && !method.ReturnType.IsEqual(typeof(System.Threading.Tasks.Task)))
+            if (!method.ReturnType.IsEqual(typeof(void)) && 
+                !method.ReturnType.IsEqual(typeof(System.Threading.Tasks.Task)) &&
+                !method.ReturnType.IsEqual(typeof(EngineNS.Thread.Async.TtTask)))
             {
                 var retType = method.ReturnType;
-                if(retType.IsSubclassOf(typeof(System.Threading.Tasks.Task)))
+                if (retType.IsSubclassOf(typeof(System.Threading.Tasks.Task)))
                 {
                     retType = Rtti.TtTypeDesc.TypeOf(method.ReturnType.GetGenericArguments()[0]);
                     retVal.AsyncType = EAsyncType.SystemTask;
                 }
-                else if (retType.IsSubclassOf(typeof(TtTask)))
+                else if (retType.GetInterface(nameof(ITask)) != null)
                 {
                     retType = Rtti.TtTypeDesc.TypeOf(method.ReturnType.GetGenericArguments()[0]);
                     retVal.AsyncType = EAsyncType.CustomTask;
@@ -1461,6 +1480,8 @@ namespace EngineNS.Bricks.CodeBuilder
         public TtTypeReference ReturnType { get; set; }
         [Rtti.Meta]
         public List<TtMethodInvokeArgumentExpression> LambdaArguments { get; set; } = new List<TtMethodInvokeArgumentExpression>();
+        [Rtti.Meta]
+        public List<TtStatementBase> Sequence { get; set; } = new List<TtStatementBase>();
         [Rtti.Meta]
         public TtMethodInvokeStatement MethodInvoke { get; set; }
         [Rtti.Meta]

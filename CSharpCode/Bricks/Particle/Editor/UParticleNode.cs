@@ -70,7 +70,7 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         [Category("Option")]
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = CodeBuilder.UMacross.AssetExt, MacrossType = typeof(TtEmitterMacross))]
+        [RName.PGRName(FilterExts = CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtEmitterMacross))]
         public RName McName
         {
             get;

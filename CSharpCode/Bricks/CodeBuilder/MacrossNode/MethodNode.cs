@@ -134,6 +134,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             [Rtti.Meta]
             public string ArgumentName { get; set; }
 
+            [Rtti.Meta]
+            public UMacrossMethodGraph DelegateGraph { get; set; } = null;
+
             public class ExtPinData : IO.ISerializer
             {
                 [Rtti.Meta]
@@ -179,6 +182,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     {
                         var saveData = new DelegateArgumentSaveData();
                         saveData.ArgumentName = i.PinIn.Name;
+                        saveData.DelegateGraph = i.DelegateGraph;
                         tmp.DelegateArgumentSaveDatas.Add(saveData);
                         for(int subPinIdx = 0; subPinIdx < i.SubPins.Count; subPinIdx++)
                         {
@@ -233,6 +237,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                         if(Arguments[i].PinIn.Name == saveData.ArgumentName)
                         {
+                            Arguments[i].DelegateGraph = saveData.DelegateGraph;
                             for(int extIdx = 0; extIdx < saveData.ExtPinDatas.Count; extIdx++)
                             {
                                 var extPinData = saveData.ExtPinDatas[extIdx];
@@ -313,7 +318,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             set
             {
                 mBreakerState = value;
-                Macross.UMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
+                Macross.TtMacrossDebugger.Instance.SetBreakEnable(BreakerName, (value == EBreakerState.Enable));
             }
         }
         public void AddMenuItems(TtMenuItem parentItem)
@@ -350,7 +355,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 pin.Name = info.Name;
                 pin.Tag = Rtti.TtTypeDesc.TypeOf(info.ParameterType);
                 pin.GroupName = "Delegate_" + hostPinName + "_" + info.Name;
-                AddPinIn(pin);
+                //AddPinIn(pin);
                 pinData.PinIn = pin;
             }
             else
@@ -362,7 +367,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     pin.LinkDesc.CanLinks.Add("Value");
                     pin.Name = info.Name;
                     pin.Tag = Rtti.TtTypeDesc.TypeOf(info.ParameterType);
-                    AddPinIn(pin);
+                    //AddPinIn(pin);
                     pinData.PinIn = pin;
                 }
                 if (info.IsOut || info.ParameterType.IsByRef)
@@ -381,44 +386,44 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             subPins.Add(pinData);
         }
 
-        public void SetDelegateGraph(UMacrossEditor editor)
-        {
-            for(int i=0; i<Arguments.Count; i++)
-            {
-                if (Arguments[i].PinIn == null)
-                    continue;
-                var argType = Arguments[i].PinIn.Tag as Rtti.TtTypeDesc;
-                if(argType.IsDelegate)
-                {
-                    var methodName = GetDelegateParamMethodName(Arguments[i].PinIn.Name);
-                    for(int methodIdx = 0; methodIdx < editor.Methods.Count; methodIdx++)
-                    {
-                        var methodGraph = editor.Methods[methodIdx];
-                        if (methodGraph.MethodDatas.Count == 0)
-                            continue;
-                        if(methodGraph.MethodDatas[0].MethodDec.MethodName == methodName)
-                        {
-                            Arguments[i].DelegateGraph = methodGraph;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+        //public void SetDelegateGraph(UMacrossEditor editor)
+        //{
+        //    for(int i=0; i<Arguments.Count; i++)
+        //    {
+        //        if (Arguments[i].PinIn == null)
+        //            continue;
+        //        var argType = Arguments[i].PinIn.Tag as Rtti.TtTypeDesc;
+        //        if(argType.IsDelegate)
+        //        {
+        //            var methodName = GetDelegateParamMethodName(Arguments[i].PinIn.Name);
+        //            for(int methodIdx = 0; methodIdx < editor.Methods.Count; methodIdx++)
+        //            {
+        //                var methodGraph = editor.Methods[methodIdx];
+        //                if (methodGraph.MethodDatas.Count == 0)
+        //                    continue;
+        //                if(methodGraph.MethodDatas[0].MethodDec.MethodName == methodName)
+        //                {
+        //                    Arguments[i].DelegateGraph = methodGraph;
+        //                    break;
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
         public override void OnRemoveNode()
         {
-            var graph = ParentGraph as UMacrossMethodGraph;
-            var editor = graph.MacrossEditor;
-            for (int i = 0; i < Arguments.Count; i++)
-            {
-                if (Arguments[i].PinIn == null)
-                    continue;
-                var argType = Arguments[i].PinIn.Tag as Rtti.TtTypeDesc;
-                if (argType.IsDelegate)
-                {
-                    editor.RemoveMethod(Arguments[i].DelegateGraph);
-                }
-            }
+            //var graph = ParentGraph as UMacrossMethodGraph;
+            //var editor = graph.MacrossEditor;
+            //for (int i = 0; i < Arguments.Count; i++)
+            //{
+            //    if (Arguments[i].PinIn == null)
+            //        continue;
+            //    var argType = Arguments[i].PinIn.Tag as Rtti.TtTypeDesc;
+            //    if (argType.IsDelegate)
+            //    {
+            //        editor.RemoveMethod(Arguments[i].DelegateGraph);
+            //    }
+            //}
         }
 
         public void SetSelfMethod()
@@ -873,8 +878,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             }
                             showGraph = UMacrossMethodGraph.NewGraph(macrossGraph.MacrossEditor, f);
                             showGraph.MethodDatas[0].IsDelegate = true;
-                            macrossGraph.MacrossEditor.Methods.Add(showGraph);
-                            macrossGraph.MacrossEditor.DefClass.Methods.Add(f);
+                            //macrossGraph.MacrossEditor.Methods.Add(showGraph);
+                            //macrossGraph.MacrossEditor.DefClass.Methods.Add(f);
 
                             Arguments[i].DelegateGraph = showGraph;
                         }
@@ -1077,10 +1082,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var delegateMethod = pinType.SystemType.GetMethod("Invoke");
                 var lambdaExp = new TtLambdaExpression();
                 exp = lambdaExp;
-                if (delegateMethod.ReturnType != typeof(void) && delegateMethod.ReturnType != typeof(System.Threading.Tasks.Task))
+                if (delegateMethod.ReturnType != typeof(void) &&
+                    delegateMethod.ReturnType != typeof(System.Threading.Tasks.Task) &&
+                    delegateMethod.ReturnType != typeof(EngineNS.Thread.Async.TtTask))
                 {
                     if (delegateMethod.ReturnType.IsSubclassOf(typeof(System.Threading.Tasks.Task)) ||
-                        delegateMethod.ReturnType.IsSubclassOf(typeof(Thread.Async.TtTask)))
+                        delegateMethod.ReturnType.GetInterface(nameof(EngineNS.Thread.Async.ITask)) != null)
                     {
                         lambdaExp.ReturnType = new TtTypeReference(delegateMethod.ReturnType.GetGenericArguments()[0]);
                         lambdaExp.IsAsync = true;
@@ -1096,7 +1103,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 foreach(var param in delegateMethodParams)
                 {
                     var lambdaArg = new TtMethodInvokeArgumentExpression();
-                    lambdaArg.Expression = new TtVariableReferenceExpression("___" + param.Name);
+                    lambdaArg.Expression = new TtVariableReferenceExpression(param.Name);
                     if (param.IsIn)
                         lambdaArg.OperationType = EMethodArgumentAttribute.In;
                     else if (param.IsOut)
@@ -1110,31 +1117,49 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                 if(pinData.DelegateGraph != null)
                 {
-                    var methodInvokeExp = new TtMethodInvokeStatement();
-                    lambdaExp.MethodInvoke = methodInvokeExp;
-                    methodInvokeExp.MethodName = GetDelegateParamMethodName(inPin.Name);
-                    methodInvokeExp.IsAsync = lambdaExp.IsAsync;
-                    for(int i=0; i< pinData.SubPins.Count; i++)
+                    BuildCodeStatementsData delegateData = new BuildCodeStatementsData()
                     {
-                        var argExp = new TtMethodInvokeArgumentExpression()
+                        ClassDec = data.ClassDec,
+                        CodeGen = data.CodeGen,
+
+                        DelegatePinExps = new List<TtExpressionBase>(),
+                    };
+                    for(int i=0; i<pinData.SubPins.Count; i++)
+                    {
+                        if (pinData.SubPins[i].IsCustomPin)
                         {
-                            OperationType = pinData.SubPins[i].OpType,
-                        };
-                        var pinName = pinData.SubPins[i].PinIn.Name;
-                        if (i < delegateMethodParams.Length)
-                        {
-                            pinName = "___" + pinName;
-                            argExp.Expression = new TtVariableReferenceExpression(pinName);
+                            delegateData.DelegatePinExps.Add(data.NodeGraph.GetOppositePinExpression(pinData.SubPins[i].PinIn, ref data));
                         }
                         else
-                        {
-                            if (data.NodeGraph.PinHasLinker(pinData.SubPins[i].PinIn))
-                                argExp.Expression = data.NodeGraph.GetOppositePinExpression(pinData.SubPins[i].PinIn, ref data);
-                            else
-                                argExp.Expression = new TtDefaultValueExpression(pinData.SubPins[i].PinIn.Tag as Rtti.TtTypeDesc);
-                        }
-                        methodInvokeExp.Arguments.Add(argExp);
+                            delegateData.DelegatePinExps.Add(null);
                     }
+                    pinData.DelegateGraph.BuildExpression(ref delegateData);
+                    lambdaExp.Sequence = delegateData.CurrentStatements;
+                    //var methodInvokeExp = new TtMethodInvokeStatement();
+                    //lambdaExp.MethodInvoke = methodInvokeExp;
+                    //methodInvokeExp.MethodName = GetDelegateParamMethodName(inPin.Name);
+                    //methodInvokeExp.IsAsync = lambdaExp.IsAsync;
+                    //for(int i=0; i< pinData.SubPins.Count; i++)
+                    //{
+                    //    var argExp = new TtMethodInvokeArgumentExpression()
+                    //    {
+                    //        OperationType = pinData.SubPins[i].OpType,
+                    //    };
+                    //    var pinName = pinData.SubPins[i].PinIn.Name;
+                    //    if (i < delegateMethodParams.Length)
+                    //    {
+                    //        pinName = "___" + pinName;
+                    //        argExp.Expression = new TtVariableReferenceExpression(pinName);
+                    //    }
+                    //    else
+                    //    {
+                    //        if (data.NodeGraph.PinHasLinker(pinData.SubPins[i].PinIn))
+                    //            argExp.Expression = data.NodeGraph.GetOppositePinExpression(pinData.SubPins[i].PinIn, ref data);
+                    //        else
+                    //            argExp.Expression = new TtDefaultValueExpression(pinData.SubPins[i].PinIn.Tag as Rtti.TtTypeDesc);
+                    //    }
+                    //    methodInvokeExp.Arguments.Add(argExp);
+                    //}
                 }
             }
             else

@@ -136,7 +136,7 @@ namespace EngineNS.UI.Editor
                     new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement),
                     mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
                 mOperatorNodes[i].Parent = null;
-                mOperatorNodes[i].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                mOperatorNodes[i].HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
             }
 
             for(var i=EDecoratorType.Anchor_Start; i<EDecoratorType.Anchor_End; i++)
@@ -152,7 +152,7 @@ namespace EngineNS.UI.Editor
                             mAnchorNodes[idx] = await TtMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
                             mAnchorNodes[idx].Parent = null;
-                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                         }
                         break;
                     case EDecoratorType.Anchor_Top:
@@ -163,7 +163,7 @@ namespace EngineNS.UI.Editor
                             mAnchorNodes[idx] = await TtMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
                             mAnchorNodes[idx].Parent = null;
-                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                         }
                         break;
                     case EDecoratorType.Anchor_TopRight:
@@ -174,7 +174,7 @@ namespace EngineNS.UI.Editor
                             mAnchorNodes[idx] = await TtMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
                             mAnchorNodes[idx].Parent = null;
-                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                         }
                         break;
                     case EDecoratorType.Anchor_Right:
@@ -185,7 +185,7 @@ namespace EngineNS.UI.Editor
                             mAnchorNodes[idx] = await TtMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, -MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
-                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                         }
                         break;
                     case EDecoratorType.Anchor_BottomRight:
@@ -196,7 +196,7 @@ namespace EngineNS.UI.Editor
                             mAnchorNodes[idx] = await TtMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, -MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
-                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                         }
                         break;
                     case EDecoratorType.Anchor_Bottom:
@@ -207,7 +207,7 @@ namespace EngineNS.UI.Editor
                             mAnchorNodes[idx] = await TtMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI));
                             mAnchorNodes[idx].Parent = null;
-                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                         }
                         break;
                     case EDecoratorType.Anchor_BottomLeft:
@@ -218,7 +218,7 @@ namespace EngineNS.UI.Editor
                             mAnchorNodes[idx] = await TtMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI));
                             mAnchorNodes[idx].Parent = null;
-                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                         }
                         break;
                     case EDecoratorType.Anchor_Left:
@@ -229,7 +229,7 @@ namespace EngineNS.UI.Editor
                             mAnchorNodes[idx] = await TtMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
-                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                         }
                         break;
                     case EDecoratorType.Anchor_TopLeft:
@@ -240,7 +240,7 @@ namespace EngineNS.UI.Editor
                             mAnchorNodes[idx] = await TtMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
-                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                         }
                         break;
                     case EDecoratorType.Anchor_MTop:
@@ -251,7 +251,7 @@ namespace EngineNS.UI.Editor
                             mAnchorNodes[idx] = await TtMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
                             mAnchorNodes[idx].Parent = null;
-                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                         }
                         break;
                     case EDecoratorType.Anchor_MRight:
@@ -262,7 +262,7 @@ namespace EngineNS.UI.Editor
                             mAnchorNodes[idx] = await TtMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, -MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
-                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                         }
                         break;
                     case EDecoratorType.Anchor_MBottom:
@@ -273,7 +273,7 @@ namespace EngineNS.UI.Editor
                             mAnchorNodes[idx] = await TtMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI));
                             mAnchorNodes[idx].Parent = null;
-                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                         }
                         break;
                     case EDecoratorType.Anchor_MLeft:
@@ -284,7 +284,7 @@ namespace EngineNS.UI.Editor
                             mAnchorNodes[idx] = await TtMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
-                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                         }
                         break;
                     case EDecoratorType.Anchor_STopRight:
@@ -295,7 +295,7 @@ namespace EngineNS.UI.Editor
                             mAnchorNodes[idx] = await TtMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
                             mAnchorNodes[idx].Parent = null;
-                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                         }
                         break;
                     case EDecoratorType.Anchor_SBottomRight:
@@ -306,7 +306,7 @@ namespace EngineNS.UI.Editor
                             mAnchorNodes[idx] = await TtMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, -MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
-                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                         }
                         break;
                     case EDecoratorType.Anchor_SBottomLeft:
@@ -317,7 +317,7 @@ namespace EngineNS.UI.Editor
                             mAnchorNodes[idx] = await TtMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI));
                             mAnchorNodes[idx].Parent = null;
-                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                         }
                         break;
                     case EDecoratorType.Anchor_STopLeft:
@@ -328,7 +328,7 @@ namespace EngineNS.UI.Editor
                             mAnchorNodes[idx] = await TtMeshNode.AddMeshNode(editor.PreviewViewport.World, editor.mUINode,
                                 new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.RotationAxis(Vector3.UnitZ, MathF.PI * 0.5f));
                             mAnchorNodes[idx].Parent = null;
-                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                            mAnchorNodes[idx].HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                         }
                         break;
                 }

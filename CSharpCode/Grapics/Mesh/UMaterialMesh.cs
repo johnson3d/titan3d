@@ -50,7 +50,7 @@ namespace EngineNS.Graphics.Mesh
             if (ok)
             {
                 var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(renderer.World, renderer.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);
-                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+                meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
                 meshNode.NodeData.Name = "PreviewObject";
                 meshNode.IsAcceptShadow = false;
                 meshNode.IsCastShadow = false;
@@ -138,7 +138,7 @@ namespace EngineNS.Graphics.Mesh
                 var node = await worldViewport.World.Root.ParentScene.NewNode(worldViewport.World, typeof(TtMeshNode), meshNodeData, EBoundVolumeType.Box, typeof(TtPlacement));
                 node.Parent = worldViewport.World.Root;
                 node.Placement.Position = hitPos;
-                node.HitproxyType = Pipeline.UHitProxy.EHitproxyType.Root;
+                node.HitproxyType = Pipeline.TtHitProxy.EHitproxyType.Root;
 
                 if(mPreviewNode != null)
                 {
@@ -567,6 +567,10 @@ namespace EngineNS.Graphics.Mesh
             [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMaterialMesh.TtSubMaterialedMesh.TSaveData@EngineCore" })]
             public class TSaveData : IO.BaseSerializer
             {
+                public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
+                {
+                    base.OnPreRead(tagObject, hostObject, fromXml);
+                }
                 [Rtti.Meta]
                 public RName MeshName { get; set; }
                 [Rtti.Meta]
@@ -600,6 +604,8 @@ namespace EngineNS.Graphics.Mesh
                     Mesh = null;
                     System.Action exec = async () =>
                     {
+                        if (value.MeshName == null)
+                            value.MeshName = TtEngine.Instance.Config.DefaultVMS;
                         Mesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value.MeshName);
                         if (Mesh == null)
                         {

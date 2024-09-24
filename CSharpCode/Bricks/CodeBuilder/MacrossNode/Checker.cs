@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    [ContextMenu("istype,checktype", "Utilitites\\IsType", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("istype,checktype", "Utilitites\\IsType", TtMacross.MacrossEditorKeyword)]
     public partial class IsTypeNode : UNodeBase, UEditableValue.IValueEditNotify
     {
         public PinIn InPin { get; set; } = new PinIn();
@@ -127,7 +127,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return null;
         }
     }
-    [ContextMenu("istype,checktype", "Utilitites\\IsTypeEx", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("istype,checktype", "Utilitites\\IsTypeEx", TtMacross.MacrossEditorKeyword)]
     public partial class IsTypeNodeEx : IsTypeNode, IBeforeExecNode
     {
         public PinIn BeforeExec { get; set; } = new PinIn();
@@ -222,7 +222,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
 
-    [ContextMenu("isnull,isvalid,valid", "Utilitites\\IsValid", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("isnull,isvalid,valid", "Utilitites\\IsValid", TtMacross.MacrossEditorKeyword)]
     public partial class IsValidNode : UNodeBase
     {
         public PinIn InPin { get; set; } = new PinIn();
@@ -299,7 +299,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
 
-    [ContextMenu("isnull,isvalid,valid", "Utilitites\\IsValidEx", UMacross.MacrossEditorKeyword)]
+    [ContextMenu("isnull,isvalid,valid", "Utilitites\\IsValidEx", TtMacross.MacrossEditorKeyword)]
     public partial class IsValidNodeEx : IsValidNode, IBeforeExecNode
     {
         public PinIn BeforeExec { get; set; } = new PinIn();

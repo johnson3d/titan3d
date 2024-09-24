@@ -520,7 +520,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         #endregion
     }
-    public class TtMaterialInstanceManager
+    public partial class TtMaterialInstanceManager
     {
         TtMaterialInstance mWireColorMateria;
         public TtMaterialInstance WireColorMateria
@@ -680,6 +680,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
 
             return null;
+        }
+
+        [Rtti.Meta]
+        public static TtMaterialInstance CreateMaterialInstance(TtMaterial mtl)
+        {
+            return TtMaterialInstance.CreateMaterialInstance(mtl);
         }
     }
 }

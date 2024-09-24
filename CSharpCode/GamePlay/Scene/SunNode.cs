@@ -91,7 +91,7 @@ namespace EngineNS.GamePlay.Scene
                 return;
             }
 
-            if (HitproxyType != Graphics.Pipeline.UHitProxy.EHitproxyType.None)
+            if (HitproxyType != Graphics.Pipeline.TtHitProxy.EHitproxyType.None)
             {
                 mDebugMesh.IsDrawHitproxy = true;
                 var value = HitProxy.ConvertHitProxyIdToVector4();
@@ -126,7 +126,7 @@ namespace EngineNS.GamePlay.Scene
 
                         BoundVolume.LocalAABB = mDebugMesh.MaterialMesh.AABB;
 
-                        this.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                        this.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
 
                         UpdateAbsTransform();
                         UpdateAABB();

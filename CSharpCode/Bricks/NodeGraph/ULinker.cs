@@ -105,6 +105,18 @@ namespace EngineNS.Bricks.NodeGraph
 
         public bool IsBlocking;
         public Vector2 BlockingEnd;
+        public Vector2 DragPosition;
+        public bool IsDraging
+        {
+            get
+            {
+                if (StartPin == null)
+                    return false;
+                if (StartPin.IsHit(DragPosition.X, DragPosition.Y))
+                    return false;
+                return true;
+            }
+        }
 
         public void Reset()
         {

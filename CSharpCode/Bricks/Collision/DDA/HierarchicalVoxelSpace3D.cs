@@ -151,7 +151,7 @@ namespace EngineNS.Bricks.Collision.DDA
             meshNode.NodeData.Name = "Debug_HVXMeshNode";
             meshNode.IsAcceptShadow = false;
             meshNode.IsCastShadow = false;
-            meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+            meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
 
             HVXDebugNode = meshNode;
 
@@ -220,7 +220,7 @@ namespace EngineNS.Bricks.Collision.DDA
                 meshNode1.NodeData.Name = "Debug_HVXHitNode";
                 meshNode1.IsAcceptShadow = false;
                 meshNode1.IsCastShadow = false;
-                meshNode1.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+                meshNode1.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
 
                 meshNode1.Placement.Position = lineTo.AsDVector();
 
@@ -237,7 +237,7 @@ namespace EngineNS.Bricks.Collision.DDA
             meshNode.NodeData.Name = "Debug_HVXLineNode";
             meshNode.IsAcceptShadow = false;
             meshNode.IsCastShadow = false;
-            meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+            meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
 
             HVXDebugLineNode = meshNode;
         }

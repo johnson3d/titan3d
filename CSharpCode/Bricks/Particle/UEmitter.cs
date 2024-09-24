@@ -666,7 +666,7 @@ namespace EngineNS.Bricks.Particle
         }
         [Category("Option")]
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = CodeBuilder.UMacross.AssetExt, MacrossType = typeof(TtEmitterMacross))]
+        [RName.PGRName(FilterExts = CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(TtEmitterMacross))]
         public RName McName
         {
             get
@@ -713,7 +713,7 @@ namespace EngineNS.Bricks.Particle
         #endregion
     }
 
-    [Macross.UMacross(IsGenShader = true)]
+    [Macross.TtMacross(IsGenShader = true)]
     public partial class TtEmitterMacross
     {
         [Rtti.Meta]

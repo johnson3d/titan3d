@@ -77,7 +77,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         public TtCamera ViewerCamera;
         public TtCamera CullCamera;
         public TtGraphicsBuffers[] GBuffersArray;
-        public UDrawBuffers[] CSMPass = new UDrawBuffers[4];
+        public TtDrawBuffers[] CSMPass = new TtDrawBuffers[4];
 
         TtCpuCullingNode[] CSMCullingNode = new TtCpuCullingNode[4];
 
@@ -207,7 +207,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
             for (UInt32 CamIdx = 0; CamIdx < mCsmNum; CamIdx++)
             {
-                CSMPass[CamIdx] = new UDrawBuffers();
+                CSMPass[CamIdx] = new TtDrawBuffers();
                 CSMPass[CamIdx].Initialize(rc, debugName);
             }
 

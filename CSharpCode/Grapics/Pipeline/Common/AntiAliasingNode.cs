@@ -153,7 +153,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
         public NxRHI.TtCopyDraw mCopyColorDrawcall;
         public NxRHI.TtCopyDraw mCopyDepthDrawcall;
-        public UDrawBuffers CopyPass = new UDrawBuffers();
+        public TtDrawBuffers CopyPass = new TtDrawBuffers();
 
         public TtAttachBuffer[] ResultBuffer = new TtAttachBuffer[2];
         public TtAttachBuffer PreColor { get => ResultBuffer[0]; }

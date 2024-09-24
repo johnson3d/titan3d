@@ -115,7 +115,7 @@ namespace EngineNS.Editor.Forms
                 NormalNode.NodeData.Name = "Debug_NormalNode";
                 NormalNode.IsAcceptShadow = false;
                 NormalNode.IsCastShadow = false;
-                NormalNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+                NormalNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
             }
 
             if(TangentList.Count>0)
@@ -131,7 +131,7 @@ namespace EngineNS.Editor.Forms
                 TangentNode.NodeData.Name = "Debug_TangentMeshNode";
                 TangentNode.IsAcceptShadow = false;
                 TangentNode.IsCastShadow = false;
-                TangentNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+                TangentNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
             }
 
         }
@@ -226,7 +226,7 @@ namespace EngineNS.Editor.Forms
         {
             return this;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task<bool> Initialize_PreviewMaterialInstance(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -255,7 +255,7 @@ namespace EngineNS.Editor.Forms
             meshNodeData.MeshName = Mesh.AssetName;
             var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, meshNodeData, typeof(GamePlay.TtPlacement), mesh,
                         DVector3.Zero, Vector3.One, Quaternion.Identity);
-            meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+            meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
             meshNode.NodeData.Name = "PreviewObject";
             meshNode.IsAcceptShadow = true;
             meshNode.IsCastShadow = true;
@@ -280,7 +280,7 @@ namespace EngineNS.Editor.Forms
                 if (ok)
                 {
                     mArrowMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), arrowMesh, DVector3.UnitX * 3, Vector3.One, Quaternion.Identity);
-                    mArrowMeshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                    mArrowMeshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                     mArrowMeshNode.NodeData.Name = "PreviewArrow";
                     mArrowMeshNode.IsAcceptShadow = false;
                     mArrowMeshNode.IsCastShadow = false;
@@ -304,7 +304,7 @@ namespace EngineNS.Editor.Forms
                 PlaneMesh.Initialize(box, tMaterials,
                     Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 PlaneMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), PlaneMesh, new DVector3(0, boxStart.Y, 0), Vector3.One, Quaternion.Identity);
-                PlaneMeshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+                PlaneMeshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
                 PlaneMeshNode.NodeData.Name = "Plane";
                 PlaneMeshNode.IsAcceptShadow = true;
                 PlaneMeshNode.IsCastShadow = false;
@@ -312,6 +312,8 @@ namespace EngineNS.Editor.Forms
 
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
+
+            return true;
         }
 
         public Graphics.Mesh.TtMesh SdfDebugMesh;
@@ -367,7 +369,7 @@ namespace EngineNS.Editor.Forms
                 meshNode.NodeData.Name = "Debug_SdfMeshNode";
                 meshNode.IsAcceptShadow = false;
                 meshNode.IsCastShadow = false;
-                meshNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+                meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
 
                 SdfMeshNode = meshNode;
             }

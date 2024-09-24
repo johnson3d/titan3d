@@ -55,11 +55,11 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             mIndentCount--;
         }
-        public void AddLine(string addCode, ref string sourceCode)
+        public void AddLine(string addCode, ref string sourceCode, bool toNextLine = true)
         {
             for(byte i = 0; i < mIndentCount; i++)
                 sourceCode += mIndentStr;
-            sourceCode += addCode + "\n";
+            sourceCode += addCode + (toNextLine ? "\n" : "");
         }
         public void PushSegment(ref string sourceCode)
         {

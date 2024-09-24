@@ -191,7 +191,6 @@ namespace EngineNS.DesignMacross.Design
             }
         }
     }
-
     public class TtMethodGraphContextMenuUtil
     {
         public static void ConstructMenuItemsAboutAssembly(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu, TtGraph_Method methodGraph)

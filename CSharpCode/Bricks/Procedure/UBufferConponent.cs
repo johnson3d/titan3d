@@ -1028,7 +1028,7 @@ namespace EngineNS.Bricks.Procedure
         }
         public static unsafe bool macross_CopyData(string nodeName, UBufferComponent src, UBufferComponent dst)
         {
-            using (var stackframe = EngineNS.Macross.UMacrossStackTracer.CurrentFrame)
+            using (var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
             {
                 if (stackframe != null)
                 {

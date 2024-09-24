@@ -303,19 +303,19 @@ namespace EngineNS.Bricks.Input
         public unsafe static void StartTextInput()
         {
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)ImGuiAPI.GetMainViewport()->PlatformUserData);
-            var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
+            var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
             SDL.SDL3.SDL_StartTextInput(myWindow.WindowSDL);
         }
         public unsafe static void StopTextInput()
         {
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)ImGuiAPI.GetMainViewport()->PlatformUserData);
-            var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
+            var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
             SDL.SDL3.SDL_StopTextInput(myWindow.WindowSDL);
         }
         public unsafe static void SetTextInputRect(in EngineNS.Rectangle rect)
         {
             var gcHandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)ImGuiAPI.GetMainViewport()->PlatformUserData);
-            var myWindow = gcHandle.Target as Graphics.Pipeline.UPresentWindow;
+            var myWindow = gcHandle.Target as Graphics.Pipeline.TtPresentWindow;
             SDL.SDL_Rect sdlRect = new SDL.SDL_Rect()
             {
                 x = rect.X,

@@ -93,7 +93,7 @@ namespace EngineNS.GamePlay.Scene
 
                         BoundVolume.LocalAABB = mDebugMesh.MaterialMesh.AABB;
 
-                        this.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                        this.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
 
                         UpdateAbsTransform();
                         UpdateAABB();
@@ -105,9 +105,9 @@ namespace EngineNS.GamePlay.Scene
                 return mDebugMesh;
             }
         }
-        public override void OnNodeLoaded(TtNode parent)
+        public override async Thread.Async.TtTask OnNodeLoaded(TtNode parent)
         {
-            base.OnNodeLoaded(parent);
+            await base.OnNodeLoaded(parent);
             UpdateAbsTransform();
         }
         public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
@@ -115,7 +115,7 @@ namespace EngineNS.GamePlay.Scene
             meshes.Add(mDebugMesh);
             foreach (var i in Children)
             {
-                if (i.HitproxyType == Graphics.Pipeline.UHitProxy.EHitproxyType.FollowParent)
+                if (i.HitproxyType == Graphics.Pipeline.TtHitProxy.EHitproxyType.FollowParent)
                     i.GetHitProxyDrawMesh(meshes);
             }
         }
@@ -155,7 +155,7 @@ namespace EngineNS.GamePlay.Scene
                 return;
             }
 
-            if (HitproxyType != Graphics.Pipeline.UHitProxy.EHitproxyType.None)
+            if (HitproxyType != Graphics.Pipeline.TtHitProxy.EHitproxyType.None)
             {
                 mDebugMesh.IsDrawHitproxy = true;
                 var value = HitProxy.ConvertHitProxyIdToVector4();

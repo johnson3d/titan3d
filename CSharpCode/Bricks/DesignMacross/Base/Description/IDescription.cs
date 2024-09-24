@@ -1,5 +1,6 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
 using EngineNS.DesignMacross.Design;
+using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.Rtti;
 
 namespace EngineNS.DesignMacross.Base.Description
@@ -72,6 +73,8 @@ namespace EngineNS.DesignMacross.Base.Description
         public bool IsOverride { get; set; } 
         public TtMethodDeclaration.EAsyncType AsyncType { get; set; }
         public TtMethodDeclaration BuildMethodDeclaration(ref FClassBuildContext classBuildContext);
+        public TtExecutionPinDescription GetLinkedExecutionPin(TtExecutionPinDescription execPin);
+        public TtDataPinDescription GetLinkedDataPin(TtDataPinDescription dataPin);
     }
 
     public interface IDesignableVariableDescription : IVariableDescription, IClassDescription
@@ -86,5 +89,10 @@ namespace EngineNS.DesignMacross.Base.Description
     public interface IStatementDescription : IDescription
     {
         public TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext);
+    }
+    public class TtPinsCheckContext
+    {
+        public IMethodDescription MethodDescription { get; set; }
+        public List<IDescription> ErrorDescriptions { get; set; } = new();
     }
 }

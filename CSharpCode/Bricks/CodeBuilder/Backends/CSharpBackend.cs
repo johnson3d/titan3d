@@ -31,7 +31,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 if (data.CodeGen.IsEditorDebug)
                 {
                     var exp = obj as TtDebuggerSetWatchVariable;
-                    var codeStr = $"mFrame_{data.Method.MethodName}.SetWatchVariable(\"{exp.VariableName}\", ";
+                    var codeStr = $"mFrame_{data.Method.UniqueMethodName}.SetWatchVariable(\"{exp.VariableName}\", ";
                     var varGen = data.CodeGen.GetCodeObjectGen(exp.VariableValue.GetType());
                     varGen.GenCodes(exp.VariableValue, ref codeStr, ref data);
                     codeStr += ");";
@@ -181,8 +181,8 @@ namespace EngineNS.Bricks.CodeBuilder
                 var methodDec = obj as TtMethodDeclaration;
 
                 // debugger code
-                var frameName = $"mFrame_{methodDec.MethodName}";
-                data.CodeGen.AddLine($"EngineNS.Macross.UMacrossStackFrame {frameName} = new EngineNS.Macross.UMacrossStackFrame(EngineNS.RName.GetRName(\"{data.AssetName.Name}\", {data.AssetName.RNameType.GetType().FullName.Replace("+", ".")}.{data.AssetName.RNameType.ToString()}));", ref sourceCode);
+                var frameName = $"mFrame_{methodDec.UniqueMethodName}";
+                data.CodeGen.AddLine($"EngineNS.Macross.TtMacrossStackFrame {frameName} = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName(\"{data.AssetName.Name}\", {data.AssetName.RNameType.GetType().FullName.Replace("+", ".")}.{data.AssetName.RNameType.ToString()}));", ref sourceCode);
 
                 GenCommentCodes(methodDec.Comment, ref data, ref sourceCode);
                 data.Method = methodDec;
@@ -255,7 +255,7 @@ namespace EngineNS.Bricks.CodeBuilder
                     string awaitDummyPosCode = "@@@await@@@";
                     data.CodeGen.AddLine(awaitDummyPosCode, ref sourceCode);
 
-                    data.CodeGen.AddLine($"using(var guard_{methodDec.MethodName} = new EngineNS.Macross.UMacrossStackGuard({frameName}))", ref sourceCode);
+                    data.CodeGen.AddLine($"using(var guard_{methodDec.MethodName} = new EngineNS.Macross.TtMacrossStackGuard({frameName}))", ref sourceCode);
                     data.CodeGen.PushSegment(ref sourceCode, in data);
                     {
                         if(methodDec.ReturnValue != null)
@@ -327,7 +327,7 @@ namespace EngineNS.Bricks.CodeBuilder
                     data.CodeGen.PushSegment(ref sourceCode);
                 }
                 GenCommentCodes(classDec.Comment, ref data, ref sourceCode);
-                data.CodeGen.AddLine("[EngineNS.Macross.UMacross]", ref sourceCode);
+                data.CodeGen.AddLine("[EngineNS.Macross.TtMacross]", ref sourceCode);
                 string tempCode = "";
                 switch(classDec.VisitMode)
                 {
@@ -374,7 +374,7 @@ namespace EngineNS.Bricks.CodeBuilder
                     {
                         if (data.CodeGen.IsEditorDebug == false &&
                             classDec.PreDefineVariables[i].VariableType.TypeDesc != null &&
-                            classDec.PreDefineVariables[i].VariableType.TypeDesc.SystemType == typeof(Macross.UMacrossBreak))
+                            classDec.PreDefineVariables[i].VariableType.TypeDesc.SystemType == typeof(Macross.TtMacrossBreak))
                         {
                             continue;
                         }
@@ -557,19 +557,33 @@ namespace EngineNS.Bricks.CodeBuilder
                         sourceCode = sourceCode.TrimEnd(',');
                     }
                     sourceCode += ")=> { ";
-                    if(exp.MethodInvoke != null)
+
+                    data.CodeGen.AddLine("", ref sourceCode);
+                    data.CodeGen.PushIndent();
                     {
-                        if(exp.ReturnType != null)
-                            sourceCode += "return ";
-                        var bodyCodeGen = data.CodeGen.GetCodeObjectGen(exp.MethodInvoke.GetType()) as UMethodInvokeStatementCodeGen;
-                        bodyCodeGen.GenInvokeExpression(exp.MethodInvoke, ref sourceCode, ref data);
-                        sourceCode += ";";
+                        for (int i = 0; i < exp.Sequence.Count; i++)
+                        {
+                            var seqGen = data.CodeGen.GetCodeObjectGen(exp.Sequence[i].GetType());
+                            seqGen.GenCodes(exp.Sequence[i], ref sourceCode, ref data);
+                        }
+
+                        if (exp.MethodInvoke != null)
+                        {
+                            string bodyCode = "";
+                            if (exp.ReturnType != null)
+                                bodyCode += "return ";
+                            var bodyCodeGen = data.CodeGen.GetCodeObjectGen(exp.MethodInvoke.GetType()) as UMethodInvokeStatementCodeGen;
+                            bodyCodeGen.GenInvokeExpression(exp.MethodInvoke, ref bodyCode, ref data);
+                            bodyCode += ";";
+                            data.CodeGen.AddLine(bodyCode, ref sourceCode);
+                        }
+                        else if (exp.ReturnType != null)
+                        {
+                            data.CodeGen.AddLine("return default(" + data.CodeGen.GetTypeString(exp.ReturnType) + ");", ref sourceCode);
+                        }
                     }
-                    else if(exp.ReturnType != null)
-                    {
-                        sourceCode += "return default(" + data.CodeGen.GetTypeString(exp.ReturnType) + ");";
-                    }
-                    sourceCode += " })";
+                    data.CodeGen.PopIndent();
+                    data.CodeGen.AddLine("})", ref sourceCode, false);
                 }
             }
         }

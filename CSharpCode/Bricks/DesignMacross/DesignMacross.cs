@@ -55,7 +55,12 @@ namespace EngineNS.DesignMacross
     public class TtDesignMacrossBase
     {
         public TtNode MacrossNode{ get; set; } = null;
-        public virtual async TtTask<bool> Initialize() { return false; }
+        public bool IsInitialized { get; set; } = false;
+        public virtual async TtTask<bool> Initialize() 
+        {
+            IsInitialized = true;
+            return true; 
+        }
         public virtual void Tick(float elapseSecond) { }
     }
     public partial class TtDesignMacrossAMeta : IO.IAssetMeta

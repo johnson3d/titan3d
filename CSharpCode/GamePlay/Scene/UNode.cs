@@ -735,7 +735,7 @@ namespace EngineNS.GamePlay.Scene
                     nd.Parent = this;
                     await nd.LoadChildNode(world, scene, cld, bTryFindNode);
                 }
-                nd.OnNodeLoaded(this);
+                await nd.OnNodeLoaded(this);
             }
             if (isNoAABB == false)
             {
@@ -744,7 +744,7 @@ namespace EngineNS.GamePlay.Scene
             }
             return true;
         }
-        public virtual void OnNodeLoaded(TtNode parent)
+        public virtual async Thread.Async.TtTask OnNodeLoaded(TtNode parent)
         {
             
         }

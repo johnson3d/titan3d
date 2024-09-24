@@ -87,7 +87,7 @@ namespace EngineNS.Bricks.Procedure
             
             return true;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterial(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task<bool> Initialize_PreviewMaterial(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -102,6 +102,7 @@ namespace EngineNS.Bricks.Procedure
                 new GamePlay.Scene.TtNodeData() { Name = "PreviewRoot" }, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
             PreviewRoot.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
             PreviewRoot.Parent = viewport.World.Root;
+            return true;
         }
         public GamePlay.Scene.TtSceneActorNode PreviewRoot { get; private set; }
         #region ISerializer

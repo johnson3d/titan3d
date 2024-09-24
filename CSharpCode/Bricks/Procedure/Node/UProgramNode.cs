@@ -16,7 +16,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 TypeValue = pin.LinkDesc.CanLinks[0];
         }
     }
-    [Macross.UMacross]
+    [Macross.TtMacross]
     public partial class UProgram
     {
         [Rtti.Meta]
@@ -140,7 +140,7 @@ namespace EngineNS.Bricks.Procedure.Node
             ameta.AddReferenceAsset(ProgramName);
         }
         [Rtti.Meta]
-        [RName.PGRName(FilterExts = CodeBuilder.UMacross.AssetExt, MacrossType = typeof(UProgram))]
+        [RName.PGRName(FilterExts = CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(UProgram))]
         public RName ProgramName
         {
             get

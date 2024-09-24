@@ -2,6 +2,8 @@
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
+using EngineNS.DesignMacross.Design.Expressions;
+using EngineNS.DesignMacross.Design.Statement;
 using EngineNS.DesignMacross.Editor;
 using EngineNS.EGui.Controls;
 
@@ -240,45 +242,45 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
                 var startPin = methodGraph.PreviewDataLine.StartPin;
                 if (startPin != DataPinDescription && startPin.Parent != DataPinDescription.Parent)
                 {
-                    var fromId = Guid.Empty;
-                    var fromDescName = "";
-                    var toId = Guid.Empty;
-                    var toDescName = "";
-                    bool validLine = false;
-                    if (methodGraph.PreviewDataLine.StartPin is TtDataInPinDescription)
+                    TtDataPinDescription fromPin = null;
+                    TtDataPinDescription toPin = null;
+                    if(startPin is TtDataOutPinDescription)
                     {
-                        if(DataPinDescription is TtDataOutPinDescription)
+                        fromPin = startPin;
+                    }
+                    if(DataPinDescription is TtDataOutPinDescription)
+                    {
+                        fromPin = DataPinDescription;
+                    }
+                    if (startPin is TtDataInPinDescription)
+                    {
+                        toPin = startPin;
+                    }
+                    if (DataPinDescription is TtDataInPinDescription)
+                    {
+                        toPin = DataPinDescription;
+                    }
+                    if(fromPin == null || toPin == null)
+                    {
+                        return;
+                    }
+                    if (fromPin.TypeDesc != null && toPin.TypeDesc != null)
+                    {
+                        if (fromPin.TypeDesc != toPin.TypeDesc)
                         {
-                            validLine = true;
-                            fromId = DataPinDescription.Id;
-                            fromDescName = DataPinDescription.Parent.Name;
-                            toId = methodGraph.PreviewDataLine.StartPin.Id;
-                            toDescName = methodGraph.PreviewDataLine.StartPin.Parent.Name;
+                            return;
                         }
                     }
-                    else
-                    {
-                        if(DataPinDescription is TtDataInPinDescription)
-                        {
-                            validLine = true;
-                            System.Diagnostics.Debug.Assert(methodGraph.PreviewDataLine.StartPin is TtDataOutPinDescription);
-                            fromId = methodGraph.PreviewDataLine.StartPin.Id;
-                            fromDescName = methodGraph.PreviewDataLine.StartPin.Parent.Name;
-                            toId = DataPinDescription.Id;
-                            toDescName = DataPinDescription.Parent.Name;
-                        }
-                    }
-                    if(validLine)
-                    {
-                        var line = new TtDataLineDescription() { Name = "Data_" + fromDescName + "_To_" + toDescName, FromId = fromId, ToId = toId };
-                        context.CommandHistory.CreateAndExtuteCommand("AddDataLine",
-                            (data) => { methodGraph.MethodDescription.AddDataLine(line); },
-                            (data) => { methodGraph.MethodDescription.RemoveDataLine(line); });
-                    }
+                    
+                    var line = new TtDataLineDescription() { Name = "Data_" + fromPin.Parent.Name + "_To_" + toPin.Parent.Name, FromId = fromPin.Id, ToId = toPin.Id };
+                    context.CommandHistory.CreateAndExtuteCommand("AddDataLine",
+                        (data) => { methodGraph.MethodDescription.AddDataLine(line); },
+                        (data) => { methodGraph.MethodDescription.RemoveDataLine(line); });
                 }
             }
             methodGraph.PreviewDataLine = null;
         }
+        
         public override void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
         {
             popupMenu.bHasSearchBox = false;

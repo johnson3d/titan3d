@@ -87,7 +87,7 @@ namespace EngineNS.UI.Editor
 
             return true;
         }
-        protected async System.Threading.Tasks.Task Initialize_PreviewMaterialInstance(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
+        protected async System.Threading.Tasks.Task<bool> Initialize_PreviewMaterialInstance(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
 
@@ -101,7 +101,7 @@ namespace EngineNS.UI.Editor
             mUINode.NodeData.Name = "UI";
             mUINode.Parent = PreviewViewport.World.Root;
             mUINode.Placement.SetTransform(DVector3.Zero, Vector3.One, Quaternion.Identity);
-            mUINode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+            mUINode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
             mUINode.IsAcceptShadow = false;
             mUINode.IsCastShadow = false;
             mUIHost.AddToNode(mUINode);
@@ -132,6 +132,7 @@ namespace EngineNS.UI.Editor
 
             //var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             //gridNode.ViewportSlate = this.PreviewViewport;
+            return true;
         }
         bool mDockInitialized = false;
         protected void ResetDockspace(bool force = false)
@@ -1365,7 +1366,8 @@ namespace EngineNS.UI.Editor
             PreviewViewport.PreviewAsset = AssetName;
             PreviewViewport.Title = $"UI:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewMaterialInstance;
-            await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
+            if (false == await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1))
+                return false;
             PreviewViewport.OnEventAction = OnPreviewViewportEvent;
 
             await InitializeDecorators();

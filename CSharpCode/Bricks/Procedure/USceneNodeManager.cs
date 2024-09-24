@@ -138,7 +138,7 @@ namespace EngineNS.Bricks.Procedure
                 var tagNode = new GamePlay.Scene.TtMeshNode();
                 tagNode.Parent = node;
                 tagNode.Placement.SetTransform(desc.Location, desc.Scale, desc.Rotation);
-                tagNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
+                tagNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
                 tagNode.NodeData.Name = "pgc_" + i;
                 tagNode.IsAcceptShadow = false;
                 tagNode.IsCastShadow = true;

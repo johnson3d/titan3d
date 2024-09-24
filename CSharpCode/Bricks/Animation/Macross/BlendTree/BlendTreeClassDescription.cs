@@ -186,6 +186,9 @@ namespace EngineNS.Animation.Macross.BlendTree
                 );
             initMethod.MethodBody.Sequence.Add(setPose);
 
+            var baseInitializeInvoke = new TtMethodInvokeStatement("Initialize", null, new TtBaseReferenceExpression());
+            baseInitializeInvoke.IsAsync = true;
+            initMethod.MethodBody.Sequence.Add(baseInitializeInvoke);
         }
 
         void GenerateCodeInMainClassTickMethod(TtClassDeclaration classDeclaration, ref FClassBuildContext classBuildContext)

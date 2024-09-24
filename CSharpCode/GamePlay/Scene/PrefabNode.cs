@@ -62,10 +62,10 @@ namespace EngineNS.GamePlay.Scene
             if (prefab != null)
                 await prefab.ConcreatePrefab(this.GetWorld(), this);
         }
-        public override void OnNodeLoaded(TtNode parent)
+        public override async Thread.Async.TtTask OnNodeLoaded(TtNode parent)
         {
-            base.OnNodeLoaded(parent);
-            _ = UpdatePrefab(null, PrefabName);
+            await base.OnNodeLoaded(parent);
+            await UpdatePrefab(null, PrefabName);
         }
     }
     [Rtti.Meta]

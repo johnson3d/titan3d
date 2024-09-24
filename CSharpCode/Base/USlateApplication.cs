@@ -127,7 +127,7 @@ namespace EngineNS
 
     public partial class TtSlateApplication
     {
-        public UPresentWindow NativeWindow;
+        public TtPresentWindow NativeWindow;
         //public virtual EGui.Slate.UWorldViewportSlate GetWorldViewportSlate() { return null; }
 
         public IntPtr mImGuiContext;

@@ -46,7 +46,7 @@ namespace EngineNS.NxRHI
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public class UStateManager<T> where T : class
+    public class TtStateManager<T> where T : class
     {
         public Dictionary<Hash64, T> States
         {
@@ -83,7 +83,7 @@ namespace EngineNS.Graphics.Pipeline
 
         }
     }
-    public class UGpuPipelineManager : UStateManager<NxRHI.TtGpuPipeline>
+    public class TtGpuPipelineManager : TtStateManager<NxRHI.TtGpuPipeline>
     {
         NxRHI.TtGpuPipeline mDefaultState;
         public NxRHI.TtGpuPipeline DefaultState
@@ -109,7 +109,7 @@ namespace EngineNS.Graphics.Pipeline
             state?.Dispose();
         }
     }
-    public class USamplerStateManager : UStateManager<NxRHI.TtSampler>
+    public class TtSamplerStateManager : TtStateManager<NxRHI.TtSampler>
     {
         NxRHI.TtSampler mDefaultState;
         public NxRHI.TtSampler DefaultState
@@ -192,7 +192,7 @@ namespace EngineNS.Graphics.Pipeline
             state.Dispose();
         }
     }
-    public class URenderPassManager : UStateManager<NxRHI.TtRenderPass>
+    public class TtRenderPassManager : TtStateManager<NxRHI.TtRenderPass>
     {
         //public NxRHI.URenderPass DefaultRenderPass { get; private set; }
         public void Initialize(TtEngine engine)
@@ -225,7 +225,7 @@ namespace EngineNS.Graphics.Pipeline
         }
     }
 
-    public class UInputLayoutManager
+    public class TtInputLayoutManager
     {
         public Dictionary<UInt64, NxRHI.TtInputLayoutDesc> States
         {

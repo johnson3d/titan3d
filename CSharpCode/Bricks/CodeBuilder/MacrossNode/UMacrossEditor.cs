@@ -158,7 +158,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     var baseType = Rtti.TtTypeDesc.TypeOfFullName(DefClass.SupperClassNames[0]);
                     if(baseType != null && ameta.BaseTypeStr != baseType.TypeString)
                     {
-                        var tmp = new UMacross();
+                        var tmp = new TtMacross();
                         tmp.AssetName = rn;
                         tmp.SelectedType = baseType;
                         tmp.UpdateAMetaReferences(ameta);
@@ -166,7 +166,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     }
                     else if(baseType == null && !string.IsNullOrEmpty(ameta.BaseTypeStr))
                     {
-                        var tmp = new UMacross();
+                        var tmp = new TtMacross();
                         tmp.AssetName = rn;
                         tmp.SelectedType = null;
                         tmp.UpdateAMetaReferences(ameta);
@@ -291,7 +291,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                                 methodNode.MethodDesc = DefClass.Methods[methodIdx];
                             }
                         }
-                        methodNode.SetDelegateGraph(this);
+                        //methodNode.SetDelegateGraph(this);
                     }
                 }
             }
@@ -301,7 +301,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             foreach (var i in DefClass.SupperClassNames)
             {
                 var type = Rtti.TtTypeDesc.TypeOfFullName(i);
-                var macrossAttr = type.GetCustomAttribute<Macross.UMacrossAttribute>(false);
+                var macrossAttr = type.GetCustomAttribute<Macross.TtMacrossAttribute>(false);
                 if (macrossAttr != null)
                 {
                     this.IsGenShader = macrossAttr.IsGenShader;
@@ -670,7 +670,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as UMacrossAMeta;
                 if (ameta != null)
                 {
-                    UMacross.UpdateAMetaReferences(this, ameta);
+                    TtMacross.UpdateAMetaReferences(this, ameta);
                     ameta.Description = $"MacrossType:{ameta.BaseTypeStr}\n";
                     ameta.SaveAMeta((IO.IAsset)null);
                 }
@@ -725,12 +725,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             ////////////////////////
             toolBarItemIdx++;
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
-            if(Macross.UMacrossDebugger.Instance.CurrrentBreak != null)
+            if(Macross.TtMacrossDebugger.Instance.CurrrentBreak != null)
             {
                 if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
                     ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Run", false, -1, 0, spacing))
                 {
-                    Macross.UMacrossDebugger.Instance.Run();
+                    Macross.TtMacrossDebugger.Instance.Run();
                 }
             }
                 
@@ -1213,27 +1213,31 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }
-        Macross.UMacrossBreak mBreakerStore = null;
+        Macross.TtMacrossBreak mBreakerStore = null;
         bool mGraphWindowShow = true;
         int mSettingCurrentFuncIndex = -1;
         UMacrossMethodGraph CurrentOpenMethod = null;
         protected unsafe void DrawGraph()
         {
-            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "GraphWindow", ref mGraphWindowShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "GraphWindow", ref mGraphWindowShow, ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollWithMouse);
             if (show)
             {
                 var vMin = ImGuiAPI.GetWindowContentRegionMin();
                 var vMax = ImGuiAPI.GetWindowContentRegionMax();
                 CurrentOpenMethod = null;
-                if (ImGuiAPI.BeginTabBar("OpenFuncTab", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_WindowBg, EGui.UIProxy.StyleConfig.Instance.SecondPanelBackground);
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ChildBg, EGui.UIProxy.StyleConfig.Instance.SecondPanelBackground);
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_TableHeaderBg, EGui.UIProxy.StyleConfig.Instance.SecondPanelBackground);
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_TabActive, EGui.UIProxy.StyleConfig.Instance.SecondPanelBackground);
+                if (ImGuiAPI.BeginTabBar("OpenFuncTab", ImGuiTabBarFlags_.ImGuiTabBarFlags_DrawSelectedOverline | ImGuiTabBarFlags_.ImGuiTabBarFlags_Reorderable))
                 {
                     var itMax = ImGuiAPI.GetItemRectSize();
                     vMin.Y += itMax.Y;
                     var sz = vMax - vMin;
                     bool breakerChanged = false;
-                    if (mBreakerStore != Macross.UMacrossDebugger.Instance.CurrrentBreak)
+                    if (mBreakerStore != Macross.TtMacrossDebugger.Instance.CurrrentBreak)
                     {
-                        mBreakerStore = Macross.UMacrossDebugger.Instance.CurrrentBreak;
+                        mBreakerStore = Macross.TtMacrossDebugger.Instance.CurrrentBreak;
                         breakerChanged = true;
                     }
                     
@@ -1276,13 +1280,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     }
                     ImGuiAPI.EndTabBar();
                 }
+                ImGuiAPI.PopStyleColor(4);
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }
 
         public void DrawFunctionGraph(UMacrossMethodGraph func, Vector2 size)
         {
-            if (ImGuiAPI.BeginChild("Function", in size, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
+            if (ImGuiAPI.BeginChild("Function", in size, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar))
             {
                 ((UMacrossMethodGraph)(func.GraphRenderer.Graph)).UpdateSelectPG();
                 func.GraphRenderer.OnDraw();                

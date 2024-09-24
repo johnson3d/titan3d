@@ -238,33 +238,35 @@ namespace EngineNS.Graphics.Pipeline
         public Shader.TtMaterialManager MaterialManager { get; private set; } = new Shader.TtMaterialManager();
 */
         public NxRHI.TtTextureManager TextureManager { get; } = new NxRHI.TtTextureManager();
+        [Rtti.Meta]
         public Shader.TtMaterialManager MaterialManager { get; private set; } = new Shader.TtMaterialManager();
+        [Rtti.Meta]
         public Shader.TtMaterialInstanceManager MaterialInstanceManager { get; private set; } = new Shader.TtMaterialInstanceManager();
         public EGui.Slate.UBaseRenderer SlateRenderer { get; private set; }
         public Graphics.Pipeline.Shader.TtEffectManager EffectManager
         {
             get;
         } = new Graphics.Pipeline.Shader.TtEffectManager();
-        public Graphics.Pipeline.UGpuPipelineManager PipelineManager
+        public Graphics.Pipeline.TtGpuPipelineManager PipelineManager
         {
             get;
-        } = new Graphics.Pipeline.UGpuPipelineManager();
-        public Graphics.Pipeline.USamplerStateManager SamplerStateManager
+        } = new Graphics.Pipeline.TtGpuPipelineManager();
+        public Graphics.Pipeline.TtSamplerStateManager SamplerStateManager
         {
             get;
-        } = new Graphics.Pipeline.USamplerStateManager();
-        public Graphics.Pipeline.URenderPassManager RenderPassManager
+        } = new Graphics.Pipeline.TtSamplerStateManager();
+        public Graphics.Pipeline.TtRenderPassManager RenderPassManager
         {
             get;
-        } = new Graphics.Pipeline.URenderPassManager();
-        public Graphics.Pipeline.UInputLayoutManager InputLayoutManager
+        } = new Graphics.Pipeline.TtRenderPassManager();
+        public Graphics.Pipeline.TtInputLayoutManager InputLayoutManager
         {
             get;
-        } = new Graphics.Pipeline.UInputLayoutManager();
-        public Graphics.Pipeline.UHitproxyManager HitproxyManager
+        } = new Graphics.Pipeline.TtInputLayoutManager();
+        public Graphics.Pipeline.TtHitproxyManager HitproxyManager
         {
             get;
-        } = new Graphics.Pipeline.UHitproxyManager();
+        } = new Graphics.Pipeline.TtHitproxyManager();
         public Graphics.Pipeline.TtAttachBufferManager AttachBufferManager
         {
             get;

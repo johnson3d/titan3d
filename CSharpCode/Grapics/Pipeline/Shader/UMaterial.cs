@@ -1078,7 +1078,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         #endregion
     }
-    public class TtMaterialManager
+    public partial class TtMaterialManager
     {
         public void Cleanup()
         {
@@ -1187,6 +1187,18 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 Materials.Add(name, obj);
             }
         }
+        [Rtti.Meta]
+        public TtMaterial FindMaterial(RName rn)
+        {
+            if (rn == null)
+                return null;
+
+            TtMaterial result;
+            if (Materials.TryGetValue(rn, out result))
+                return result;
+            return null;
+        }
+        [Rtti.Meta]
         public async Thread.Async.TtTask<TtMaterial> GetMaterial(RName rn)
         {
             if (rn == null)

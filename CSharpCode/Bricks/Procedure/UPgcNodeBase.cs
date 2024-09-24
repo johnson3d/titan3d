@@ -65,7 +65,7 @@ namespace EngineNS.Bricks.Procedure
             var prevMesh = await GamePlay.Scene.TtMeshNode.AddMeshNode(graph.GraphEditor.PreviewViewport.World, graph.GraphEditor.PreviewRoot, 
                     new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh,
                     DVector3.Zero, Vector3.One, Quaternion.Identity);
-            prevMesh.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.None;
+            prevMesh.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
             prevMesh.IsCastShadow = true;
             prevMesh.IsAcceptShadow = true;
 

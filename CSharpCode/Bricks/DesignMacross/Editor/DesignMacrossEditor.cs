@@ -261,12 +261,12 @@ namespace EngineNS.DesignMacross.Editor
             ////////////////////////
             toolBarItemIdx++;
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
-            if (Macross.UMacrossDebugger.Instance.CurrrentBreak != null)
+            if (Macross.TtMacrossDebugger.Instance.CurrrentBreak != null)
             {
                 if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
                     ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Run", false, -1, 0, spacing))
                 {
-                    Macross.UMacrossDebugger.Instance.Run();
+                    Macross.TtMacrossDebugger.Instance.Run();
                 }
             }
 

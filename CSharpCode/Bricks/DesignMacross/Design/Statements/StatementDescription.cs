@@ -1,6 +1,7 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Design.ConnectingLine;
+using EngineNS.DesignMacross.Design.Expressions;
 using EngineNS.Rtti;
 using System.Diagnostics;
 using System.Reflection;
@@ -90,6 +91,50 @@ namespace EngineNS.DesignMacross.Design.Statement
                 }
             }
             return false;
+        }
+        public virtual void OnPinConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, TtMethodDescription methodDescription)
+        {
+
+        }
+        public virtual void OnPinDisConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, TtMethodDescription methodDescription)
+        {
+
+        }
+        public virtual bool PinsChecking(TtPinsCheckContext pinsCheckContext)
+        {
+            bool isPinsCorrect = true;
+            var methodDesc = pinsCheckContext.MethodDescription;
+            foreach (var inDataPin in DataInPins)
+            {
+                var linkedPin = methodDesc.GetLinkedDataPin(inDataPin);
+                if (linkedPin != null)
+                {
+                    if (linkedPin.TypeDesc == inDataPin.TypeDesc)
+                    {
+                        if (linkedPin.Parent is TtExpressionDescription linkedExpressionDesc)
+                        {
+                            isPinsCorrect = linkedExpressionDesc.PinsChecking(pinsCheckContext);
+                        }
+                    }
+                    else
+                    {
+                        pinsCheckContext.ErrorDescriptions.Add(this);
+                        isPinsCorrect = false;
+                    }
+                }
+            }
+            foreach(var outExecPin in ExecutionOutPins)
+            {
+                var linkedPin = methodDesc.GetLinkedExecutionPin(outExecPin);
+                if(linkedPin != null)
+                {
+                    if(linkedPin.Parent is TtStatementDescription linkedDesc)
+                    {
+                        isPinsCorrect = linkedDesc.PinsChecking(pinsCheckContext);
+                    }
+                }
+            }
+            return isPinsCorrect;
         }
         public void AddExecutionInPin(TtExecutionInPinDescription pinDescription)
         {

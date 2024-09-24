@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public class UHitProxy
+    public class TtHitProxy
     {
         public enum EHitproxyType
         {
@@ -35,24 +35,24 @@ namespace EngineNS.Graphics.Pipeline
     }
     public interface IProxiable
     {
-        UHitProxy HitProxy { get; set; }
-        UHitProxy.EHitproxyType HitproxyType { get; set; }
+        TtHitProxy HitProxy { get; set; }
+        TtHitProxy.EHitproxyType HitproxyType { get; set; }
         bool Selected { get; set; }
         void OnHitProxyChanged();
         void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes);
     }
-    public class UHitproxyManager
+    public class TtHitproxyManager
     {
-        private Dictionary<UInt32, UHitProxy> Proxies
+        private Dictionary<UInt32, TtHitProxy> Proxies
         {
             get;
-        } = new Dictionary<UInt32, UHitProxy>();
+        } = new Dictionary<UInt32, TtHitProxy>();
         private UInt32 HitProxyAllocatorId = 0;
         public void Cleanup()
         {
 
         }
-        public UHitProxy MapProxy(IProxiable proxiable)
+        public TtHitProxy MapProxy(IProxiable proxiable)
         {
             lock (Proxies)
             {
@@ -75,7 +75,7 @@ namespace EngineNS.Graphics.Pipeline
                     }
                 }
 
-                var result = new UHitProxy();
+                var result = new TtHitProxy();
                 result.ProxyId = ++HitProxyAllocatorId;
                 result.ProxyObject = new WeakReference<IProxiable>(proxiable);
                 proxiable.HitProxy = result;
@@ -91,7 +91,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             lock (Proxies)
             {
-                UHitProxy proxy;
+                TtHitProxy proxy;
                 if (Proxies.TryGetValue(id, out proxy))
                 {
                     IProxiable result;
@@ -108,7 +108,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             lock (Proxies)
             {
-                UHitProxy proxy;
+                TtHitProxy proxy;
                 if (Proxies.TryGetValue(id, out proxy))
                 {
                     IProxiable result;
