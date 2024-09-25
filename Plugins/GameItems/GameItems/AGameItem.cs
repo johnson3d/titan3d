@@ -73,10 +73,6 @@ namespace EngineNS.Plugins.GameItems
         {
             get => AGameItemDescriptor.AssetExt;
         }
-        public override string GetAssetExtType()
-        {
-            return AGameItemDescriptor.AssetExt;
-        }
         public override string GetAssetTypeName()
         {
             return "GameItem";

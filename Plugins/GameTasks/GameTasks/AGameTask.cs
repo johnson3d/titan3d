@@ -70,10 +70,6 @@ namespace EngineNS.Plugins.GameTasks
         {
             get => AGameTaskDescriptor.AssetExt;
         }
-        public override string GetAssetExtType()
-        {
-            return AGameTaskDescriptor.AssetExt;
-        }
         public override string GetAssetTypeName()
         {
             return "GameTask";
