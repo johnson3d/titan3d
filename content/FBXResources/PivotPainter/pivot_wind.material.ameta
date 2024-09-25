@@ -10,9 +10,8 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Value="Game,fbxresources/pivotpainter/pp2_rgb_xvect_a_xextent.srv,d0e27459-a5d5-499b-a754-90fa4f857e27" />
-    <e_1 Value="Game,fbxresources/pivotpainter/simpexpivpos.srv,af96e403-6960-4985-8c86-3c58c737360a" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

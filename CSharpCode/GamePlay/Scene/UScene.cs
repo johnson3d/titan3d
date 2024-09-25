@@ -8,9 +8,9 @@ namespace EngineNS.GamePlay.Scene
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.USceneAMeta@EngineCore" })]
     public class TtSceneAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return TtScene.AssetExt;
+            get => TtScene.AssetExt;
         }
         public override string GetAssetTypeName()
         {
@@ -49,6 +49,7 @@ namespace EngineNS.GamePlay.Scene
     public partial class TtScene : TtNode, IO.IAsset
     {
         public const string AssetExt = ".scene";
+        public string TypeExt { get => AssetExt; }
         public override string ToString()
         {
             return this.AssetName.ToString();

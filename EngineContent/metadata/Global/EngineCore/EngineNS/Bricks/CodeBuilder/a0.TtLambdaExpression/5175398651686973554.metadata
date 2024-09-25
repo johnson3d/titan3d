@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_5175398651686973554 Type="EngineNS.Bricks.CodeBuilder.TtLambdaExpression@EngineCore">
+  <IsAsync Type="System.Boolean@Unknown" Order="0" />
+  <LambdaArguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtMethodInvokeArgumentExpression@EngineCore,&gt;@Unknown" Order="0" />
+  <MethodInvoke Type="EngineNS.Bricks.CodeBuilder.TtMethodInvokeStatement@EngineCore" Order="0" />
+  <ReturnType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore" Order="0" />
+  <Sequence Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtStatementBase@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_5175398651686973554>

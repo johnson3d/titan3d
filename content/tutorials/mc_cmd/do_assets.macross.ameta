@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.CodeBuilder.UMacrossAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="60e09289-a0ad-47ca-a513-b8e6415a8f64" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/mc_cmd/do_assets.macross,60e09289-a0ad-47ca-a513-b8e6415a8f64" />
   <BaseTypeStr Type="System.String@Unknown" Value="EngineNS.TtCommandMacross@EngineCore" />
   <Description Type="System.String@Unknown" Value="MacrossType:EngineNS.TtCommandMacross@EngineCore&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">

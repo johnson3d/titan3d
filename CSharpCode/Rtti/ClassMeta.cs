@@ -855,7 +855,7 @@ namespace EngineNS.Rtti
 
                 System.Diagnostics.Debug.Assert(info.DeclaringType == metaVersion.HostClass.ClassType.SystemType || metaVersion.HostClass.ClassType.SystemType.IsSubclassOf(info.DeclaringType));
                 //System.Diagnostics.Debug.Assert(info.PropertyType == propType.SystemType);
-                System.Diagnostics.Debug.Assert(info.Name == name);
+                //System.Diagnostics.Debug.Assert(info.Name == name || );
                 
                 var attrs = info.GetCustomAttributes(typeof(MetaAttribute), true);
                 if (attrs.Length != 0)
@@ -926,10 +926,6 @@ namespace EngineNS.Rtti
 
     public class TtMetaVersionMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
-        {
-            return ".metadata";
-        }
         public override string GetAssetTypeName()
         {
             return "Metadata";

@@ -14,9 +14,9 @@ namespace EngineNS.Animation.Asset
     [Rtti.Meta]
     public class TtAnimationClipAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return TtAnimationClip.AssetExt;
+            get => TtAnimationClip.AssetExt;
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -40,6 +40,7 @@ namespace EngineNS.Animation.Asset
     {
         #region IAnimationAsset
         public const string AssetExt = ".animclip";
+        public string TypeExt { get => AssetExt; }
         [Rtti.Meta]
         public RName AssetName
         {

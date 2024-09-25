@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_11411672386278100548 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode.DelegateArgumentSaveData@EngineCore">
+  <ArgumentName Type="System.String@Unknown" Order="0" />
+  <DelegateGraph Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossMethodGraph@EngineCore" Order="0" />
+  <ExtPinDatas Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode.DelegateArgumentSaveData.ExtPinData@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_11411672386278100548>

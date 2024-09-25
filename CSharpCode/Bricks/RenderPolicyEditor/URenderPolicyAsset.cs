@@ -9,9 +9,9 @@ namespace EngineNS.Bricks.RenderPolicyEditor
     //[Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.RenderPolicyEditor.URenderPolicyAssetAMeta@EngineCore" })]
     public class TtRenderPolicyAssetAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return TtRenderPolicyAsset.AssetExt;
+            get => TtRenderPolicyAsset.AssetExt;
         }
         public override string GetAssetTypeName()
         {
@@ -69,7 +69,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
     public class TtRenderPolicyAsset : IO.IAsset
     {
         public const string AssetExt = ".rpolicy";
-
+        public string TypeExt { get => AssetExt; }
         public class ImportAttribute : IO.CommonCreateAttribute
         {
             

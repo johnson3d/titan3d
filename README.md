@@ -4,11 +4,12 @@
 - 3.建议安装C#移动开发环境
 # 编译构建
 ## Windows编译引擎
-1. 编译Core.Window工程（C++）
-2. 编译Engine.Window工程（C#）
-3. 编译MainEditor工程（C#）
-4. **因为github的LFS限制，可能需要运行一下Setup.bat做一些运行环境配置**
-5. **第一次编译引擎如果失败，报告缺失一些生成代码，请单独调试运行CppWeavingTools和CSharpCodeTools两个工程一次** 
+1. **第一次编译引擎，很多时候需要单独调试运行CppWeavingTools和CSharpCodeTools两个工程一次，确保codegen下面NativeBinder和Cs2Cpp目录产生了必要的临时cpp,cs文件** 
+2. 如果第一次产生NativeBinder失败，有可能需要安装llvm
+3. 编译Core.Window工程（C++）
+4. 编译Engine.Window工程（C#）
+5. 编译MainEditor工程（C#）
+6. **因为github的LFS限制，可能需要运行一下Setup.bat做一些运行环境配置**
 ## Windows编译Android APK
 1. 编译Core.Android工程（C++）
 2. 编译Engine.Android程（C#）

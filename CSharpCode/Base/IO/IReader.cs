@@ -141,7 +141,8 @@ namespace EngineNS.IO
                     v = "";
                     return;
                 }
-                var str = new System.Char[len];
+                var str = new System.Char[len + 1];
+                str[len] = '\0';
                 fixed (System.Char* pChar = &str[0])
                 {
                     ReadPtr(pChar, sizeof(System.Char) * len);

@@ -13,9 +13,9 @@ namespace EngineNS.Graphics.Mesh
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMaterialMeshAMeta@EngineCore" })]
     public class TtMaterialMeshAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return TtMaterialMesh.AssetExt;
+            get => TtMaterialMesh.AssetExt;
         }
         public override string GetAssetTypeName()
         {
@@ -182,7 +182,7 @@ namespace EngineNS.Graphics.Mesh
     public partial class TtMaterialMesh : IO.ISerializer, IO.IAsset
     {
         public const string AssetExt = ".ums";
-
+        public string TypeExt { get => AssetExt; }
         public class ImportAttribute : IO.CommonCreateAttribute
         {
             public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)

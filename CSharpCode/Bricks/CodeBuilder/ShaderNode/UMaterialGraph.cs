@@ -17,7 +17,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             UpdateNodeMenus();
             UpdatePinMenus();
         }
-        public UShaderEditor ShaderEditor;
+        public TtMaterialEditor ShaderEditor;
 
         public override void UpdateCanvasMenus()
         {

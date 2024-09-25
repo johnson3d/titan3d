@@ -71,9 +71,9 @@ namespace EngineNS.GamePlay.Scene
     [Rtti.Meta]
     public class TtPrefabAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return TtScene.AssetExt;
+            get => TtPrefab.AssetExt;
         }
         public override string GetAssetTypeName()
         {
@@ -116,6 +116,7 @@ namespace EngineNS.GamePlay.Scene
             return false;
         }
         public const string AssetExt = ".prefab";
+        public string TypeExt { get => AssetExt; }
         [Category("Option")]
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]

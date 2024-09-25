@@ -21,7 +21,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             BackColor = 0x80808080;
 
             OutSampler.Name = "sampler";
-            OutSampler.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutSampler.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutSampler.MultiLinks = true;
             this.AddPinOut(OutSampler);
 

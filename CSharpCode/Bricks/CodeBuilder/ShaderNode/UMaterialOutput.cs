@@ -36,7 +36,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 var pin = new PinIn();
                 System.Diagnostics.Debug.Assert(attr.ShaderName.StartsWith("m"));
                 pin.Name = attr.ShaderName.Substring(1) + " ";
-                pin.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+                pin.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
                 this.AddPinIn(pin);
 
                 FieldPins.Add(pin);

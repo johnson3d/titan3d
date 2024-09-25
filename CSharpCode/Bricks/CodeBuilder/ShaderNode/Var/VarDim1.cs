@@ -195,11 +195,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             //Name = $"{Value}";
 
             InX.Name = "x";
-            InX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InX.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InX);
 
             OutX.Name = "x";
-            OutX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutX.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutX.MultiLinks = true;
             this.AddPinOut(OutX);
         }
@@ -335,11 +335,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             //Name = $"{Value}";
 
             InX.Name = "x";
-            InX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InX.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InX);
 
             OutX.Name = "x";
-            OutX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutX.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutX.MultiLinks = true;
             this.AddPinOut(OutX);
         }

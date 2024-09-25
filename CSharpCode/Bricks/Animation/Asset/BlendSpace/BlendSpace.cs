@@ -118,6 +118,10 @@ namespace EngineNS.Animation.Asset.BlendSpace
     [Rtti.Meta]
     public abstract class TtBlendSpace : IO.BaseSerializer, IAnimationCompositeAsset
     {
+        public virtual string TypeExt
+        {
+            get { return null; }
+        }
         [Rtti.Meta]
         public List<TtBlendSpace_Axis> BlendAxises = new List<TtBlendSpace_Axis>() { null, null, null };
         [Rtti.Meta]

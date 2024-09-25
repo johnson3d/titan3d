@@ -9,9 +9,9 @@ namespace EngineNS.Animation.Asset.BlendSpace
     [Rtti.Meta]
     public class TtBlendSpace2DAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return TtAnimationClip.AssetExt;
+            get => TtBlendSpace2D.AssetExt;
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -134,6 +134,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
         }
         #region IAnimationAsset
         public const string AssetExt = ".blendspace2d";
+        public override string TypeExt { get => AssetExt; }
         [Rtti.Meta]
         public override RName AssetName { get; set; }
         public override IAssetMeta CreateAMeta()

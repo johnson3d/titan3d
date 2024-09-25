@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_7755520635858182528 Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Blend Type="EngineNS.NxRHI.FBlendDesc@EngineCore" Order="0" />
+  <DepthStencil Type="EngineNS.NxRHI.FDepthStencilDesc@EngineCore" Order="0" />
+  <Flags Type="EngineNS.Graphics.Pipeline.Shader.TtMaterial.InnerFlags@EngineCore" Order="0" />
+  <GraphXMLString Type="System.String@Unknown" Order="0" />
+  <HLSLCode Type="System.String@Unknown" Order="0" />
+  <IncludeFiles Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Order="0" />
+  <PSNeedInputs Type="System.Collections.Generic.List&lt;EngineNS.Graphics.Pipeline.Shader.EPixelShaderInput@EngineCore,&gt;@Unknown" Order="0" />
+  <Rasterizer Type="EngineNS.NxRHI.FRasterizerDesc@EngineCore" Order="0" />
+  <UsedSamplerStates Type="System.Collections.Generic.List&lt;EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair@EngineCore,&gt;@Unknown" Order="0" />
+  <UsedSrView Type="System.Collections.Generic.List&lt;EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair@EngineCore,&gt;@Unknown" Order="0" />
+  <UsedUniformVars Type="System.Collections.Generic.List&lt;EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair@EngineCore,&gt;@Unknown" Order="0" />
+  <UserDefines Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Order="0" />
+  <VSNeedStreams Type="System.Collections.Generic.List&lt;EngineNS.NxRHI.EVertexStreamType@EngineCore,&gt;@Unknown" Order="0" />
+  <SaveData Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance.TSaveData@EngineCore" Order="1" />
+</Hash_7755520635858182528>

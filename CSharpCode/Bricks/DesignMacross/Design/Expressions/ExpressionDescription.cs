@@ -212,43 +212,9 @@ namespace EngineNS.DesignMacross.Design.Expressions
             
         }
     }
-    public class TtClassReferenceExpressionDescription : IClassDescription
+    public class TtClassReferenceExpressionDescription : TtExpressionDescription
     {
-        public IDescription Parent { get; set; }
-        [Rtti.Meta]
-        public TtDataOutPinDescription DataPin;
 
-        public string ClassName => throw new NotImplementedException();
-        public EVisisMode VisitMode { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public TtCommentStatement Comment { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public TtNamespaceDeclaration Namespace { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public bool IsStruct { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public List<string> SupperClassNames { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public List<IVariableDescription> Variables { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public List<IMethodDescription> Methods { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public Guid Id { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public string Name { get; set; }
-        [Rtti.Meta]
-        public Vector2 Location { get; set; }
-        List<IVariableDescription> IClassDescription.Variables { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        List<IMethodDescription> IClassDescription.Methods { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        public List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
-        {
-            throw new NotImplementedException();
-        }
-
-        #region ISerializer
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-
-        }
-
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
-        {
-
-        }
-        #endregion ISerializer
     }
     public class TtVariableReferenceExpressionDescription : TtExpressionDescription
     {

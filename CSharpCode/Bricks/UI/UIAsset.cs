@@ -10,9 +10,9 @@ namespace EngineNS.UI
     [Rtti.Meta]
     public class TtUIAssetAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return TtUIAsset.AssetExt;
+            get => TtUIAsset.AssetExt;
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
@@ -39,6 +39,7 @@ namespace EngineNS.UI
     public class TtUIAsset : IO.IAsset, IDisposable
     {
         public const string AssetExt = ".ui";
+        public string TypeExt { get => AssetExt; }
         public class ImportAttribute : IO.CommonCreateAttribute
         {
 

@@ -407,11 +407,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
     public class TtMacrossShadingEnvAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return TtMacrossShadingEnv.AssetExt;
+            get => TtMacrossShadingEnv.AssetExt;
         }
-
         public override string GetAssetTypeName()
         {
             return "McShading";
@@ -442,6 +441,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     public class TtMacrossShadingEnv : TtComputeShadingEnv, IO.IAsset
     {
         public const string AssetExt = ".mcshading";
+        public string TypeExt { get => AssetExt; }
         public class TtMacrossShadingEnvImportAttribute : IO.CommonCreateAttribute
         {
             protected override bool CheckAsset()

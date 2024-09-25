@@ -307,6 +307,7 @@ namespace EngineNS
     {
         public static System.Type UGfxDeviceType = typeof(Graphics.Pipeline.TtGfxDevice);
         private Graphics.Pipeline.TtGfxDevice mGfxDevice;
+        [Rtti.Meta]
         public Graphics.Pipeline.TtGfxDevice GfxDevice 
         { 
             get

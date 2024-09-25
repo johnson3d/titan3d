@@ -397,19 +397,7 @@ namespace EngineNS.GamePlay.Scene
             }
             else
             {
-                System.Action action = async () =>
-                {
-                    var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
-                    if (materialMesh != null)
-                    {
-                        var mesh = new Graphics.Mesh.TtMesh();
-                        mesh.Initialize(materialMesh, Rtti.TtTypeDesc.TypeOf(meshData.MdfQueueType), Rtti.TtTypeDesc.TypeOf(meshData.AtomType));
-
-                        Mesh = mesh;
-                        this.IsAcceptShadow = this.IsAcceptShadow;
-                    }
-                };
-                action();
+                this.IsAcceptShadow = this.IsAcceptShadow;
             }
         }
         public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)

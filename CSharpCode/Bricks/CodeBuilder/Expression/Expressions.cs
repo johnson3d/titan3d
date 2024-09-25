@@ -1483,6 +1483,8 @@ namespace EngineNS.Bricks.CodeBuilder
         [Rtti.Meta]
         public List<TtStatementBase> Sequence { get; set; } = new List<TtStatementBase>();
         [Rtti.Meta]
+        public TtMethodDeclaration MethodDesc;
+        [Rtti.Meta]
         public TtMethodInvokeStatement MethodInvoke { get; set; }
         [Rtti.Meta]
         public bool IsAsync { get; set; } = false;
@@ -1824,7 +1826,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
         public void CalculateValueString(Rtti.TtTypeDesc type, object value, bool typeIsTypeof = true)
         {
-            ObjectStr = value.ToString();
+            ObjectStr = value?.ToString();
             string retValue;
             if (value == null)
             {

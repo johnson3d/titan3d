@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_16691352103044427498 Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+  <IsEnum Type="System.Boolean@Unknown" Order="0" />
+  <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Order="0" />
+  <TypeFullName Type="System.String@Unknown" Order="1" />
+</Hash_16691352103044427498>

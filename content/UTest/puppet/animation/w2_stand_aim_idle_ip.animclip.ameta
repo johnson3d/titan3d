@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Animation.Asset.TtAnimationClipAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="41aad0b3-9f63-4ad6-a8cf-51e495cecc0d" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/puppet/animation/w2_stand_aim_idle_ip.animclip,41aad0b3-9f63-4ad6-a8cf-51e495cecc0d" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Animation.Asset.TtAnimationClip&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

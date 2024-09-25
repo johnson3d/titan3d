@@ -62,9 +62,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
         public CallNode()
         {
-            Icon = UShaderEditorStyles.Instance.FunctionIcon;
-            TitleColor = UShaderEditorStyles.Instance.FunctionTitleColor;
-            BackColor = UShaderEditorStyles.Instance.FunctionBGColor;
+            Icon = TtMaterialEditorStyles.Instance.FunctionIcon;
+            TitleColor = TtMaterialEditorStyles.Instance.FunctionTitleColor;
+            BackColor = TtMaterialEditorStyles.Instance.FunctionBGColor;
         }
         internal void Initialize(Rtti.TtClassMeta.TtMethodMeta m)
         {
@@ -74,7 +74,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             if (!m.ReturnType.IsEqual(typeof(void)))
             {
                 Result = new PinOut();
-                Result.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+                Result.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
                 Result.Name = "Result";
                 Result.MultiLinks = true;
                 AddPinOut(Result);
@@ -95,7 +95,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 if(!i.IsOut)
                 {
                     var pin = new PinIn();
-                    pin.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+                    pin.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
                     pin.LinkDesc.CanLinks.Add("Value");
                     pin.Name = i.Name;
                     pin.Tag = i.ParameterType;
@@ -105,7 +105,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 if(i.IsOut || i.IsRef)
                 {
                     var pinOut = new PinOut();
-                    pinOut.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+                    pinOut.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
                     pinOut.LinkDesc.CanLinks.Add("Value");
                     pinOut.Name = i.Name;
                     pinOut.Tag = i.ParameterType;

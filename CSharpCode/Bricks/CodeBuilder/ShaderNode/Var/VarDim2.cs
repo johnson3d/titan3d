@@ -243,25 +243,25 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             //Name = $"{Value}";
 
             InXY.Name = "in ";
-            InXY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InXY.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InXY);
             InX.Name = "x ";
-            InX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InX.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InX);
             InY.Name = "y ";
-            InY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InY.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InY);
 
             OutXY.Name = " xy";
-            OutXY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutXY.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutXY.MultiLinks = true;
             this.AddPinOut(OutXY);
             OutX.Name = " x";
-            OutX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutX.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutX.MultiLinks = true;
             this.AddPinOut(OutX);
             OutY.Name = " y";
-            OutY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutY.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutY.MultiLinks = true;
             this.AddPinOut(OutY);
         }
@@ -404,25 +404,25 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             //Name = $"{Value}";
 
             InXY.Name = "in ";
-            InXY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InXY.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InXY);
             InX.Name = "x ";
-            InX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InX.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InX);
             InY.Name = "y ";
-            InY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InY.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InY);
 
             OutXY.Name = " xy";
-            OutXY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutXY.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutXY.MultiLinks = true;
             this.AddPinOut(OutXY);
             OutX.Name = " x";
-            OutX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutX.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutX.MultiLinks = true;
             this.AddPinOut(OutX);
             OutY.Name = " y";
-            OutY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutY.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutY.MultiLinks = true;
             this.AddPinOut(OutY);
         }

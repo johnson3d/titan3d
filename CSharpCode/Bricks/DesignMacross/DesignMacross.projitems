@@ -24,18 +24,18 @@
     <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\FlowControl\IfStatementDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\Reflected\GraphElement_MethodInvokeReflected.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\Reflected\MethodInvokeReflectedDescription.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ValueOperator\GraphElement_ValueOperator.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ValueOperator\ValueOperatorDescription.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ValueOperator\BitRightshiftOperatorDescription.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ValueOperator\BitOrOperatorDescription.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ValueOperator\BitXorOperatorDescription.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ValueOperator\BitLeftshiftOperatorDescription.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ValueOperator\MultiplyOperatorDescription.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ValueOperator\DivideOperatorDescription.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ValueOperator\ModOperatorDescription.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ValueOperator\BitAndOperatorDescription.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ValueOperator\SubtractOperatorDescription.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ValueOperator\AddOperatorDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ArithmeticOperator\GraphElement_ValueOperator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ArithmeticOperator\ArithmeticOperatorDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ArithmeticOperator\BitRightshiftOperatorDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ArithmeticOperator\BitOrOperatorDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ArithmeticOperator\BitXorOperatorDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ArithmeticOperator\BitLeftshiftOperatorDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ArithmeticOperator\MultiplyOperatorDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ArithmeticOperator\DivideOperatorDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ArithmeticOperator\ModOperatorDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ArithmeticOperator\BitAndOperatorDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ArithmeticOperator\SubtractOperatorDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ArithmeticOperator\AddOperatorDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\GraphElement_ExpressionDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CommandHistory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ASTBuildUtil.cs" />
@@ -94,7 +94,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Design\Class\" />
-    <Folder Include="$(MSBuildThisFileDirectory)Design\Expressions\Monocular\" />
     <Folder Include="$(MSBuildThisFileDirectory)Design\Statements\Reflected\" />
   </ItemGroup>
 </Project>

@@ -169,7 +169,20 @@ namespace EngineNS
                 bRunInLogicThread = System.Convert.ToBoolean(OnGameThread);
             }
 
-            McName = RName.GetRName(flt + Bricks.CodeBuilder.TtMacross.AssetExt);
+            if (flt.StartsWith("@Game/"))
+            {
+                flt = flt.Substring("@Game/".Length);
+                McName = RName.GetRName(flt + Bricks.CodeBuilder.TtMacross.AssetExt, RName.ERNameType.Game);
+            }
+            else if (flt.StartsWith("@Engine/"))
+            {
+                flt = flt.Substring("@Engine/".Length);
+                McName = RName.GetRName(flt + Bricks.CodeBuilder.TtMacross.AssetExt, RName.ERNameType.Engine);
+            }
+            else
+            {
+                McName = RName.GetRName(flt + Bricks.CodeBuilder.TtMacross.AssetExt, RName.ERNameType.Game);
+            }
             if (McObject != null)
             {
                 if (bRunInLogicThread)

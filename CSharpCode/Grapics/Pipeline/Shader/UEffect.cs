@@ -9,7 +9,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     public class TtEffect : IDisposable
     {
         public const string AssetExt = ".effect";
-
+        public string TypeExt { get => AssetExt; }
         public override string ToString()
         {
             return base.ToString();

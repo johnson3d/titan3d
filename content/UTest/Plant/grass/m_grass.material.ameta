@@ -10,9 +10,6 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
-    <e_0 Value="Game,utest/plant/grass/grass_d.srv,efde052b-f977-4b43-8808-7034a2fc26e1" />
-    <e_1 Value="Game,utest/plant/grass/t_water_n.srv,d5ac4973-eb44-4aee-9133-5a50b66231f2" />
-  </RefAssetRNames>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

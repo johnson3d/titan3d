@@ -8,11 +8,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
 {
     public class TtShaderAssetAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return TtShaderAsset.AssetExt;
+            get => TtShaderAsset.AssetExt;
         }
-
         public override string GetAssetTypeName()
         {
             return "Nebula";
@@ -42,6 +41,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     public class TtShaderAsset : IO.IAsset
     {
         public const string AssetExt = ".shader";
+        public string TypeExt { get => AssetExt; }
         public class TtShaderAssetImportAttribute : IO.CommonCreateAttribute
         {
             protected override bool CheckAsset()

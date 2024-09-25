@@ -66,6 +66,10 @@ namespace EngineNS.Plugins.GameTasks
     [IO.AssetCreateMenu(MenuName = "Game/Task")]
     public class AGameTaskDescriptorAMeta : IO.IAssetMeta
     {
+        public override string TypeExt
+        {
+            get => AGameTaskDescriptor.AssetExt;
+        }
         public override string GetAssetExtType()
         {
             return AGameTaskDescriptor.AssetExt;
@@ -99,6 +103,7 @@ namespace EngineNS.Plugins.GameTasks
     {
         #region IAsset
         public const string AssetExt = ".task";
+        public string TypeExt { get => AssetExt; }
         public IO.IAssetMeta CreateAMeta()
         {
             var result = new AGameTaskDescriptorAMeta();

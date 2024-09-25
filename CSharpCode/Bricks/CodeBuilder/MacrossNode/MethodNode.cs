@@ -428,6 +428,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public void SetSelfMethod()
         {
+            if (Self == null)
+                return;
             Self.LinkDesc.SetColor(MacrossStyles.Instance.SelfLinkColor);
         }
 
@@ -1135,6 +1137,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     }
                     pinData.DelegateGraph.BuildExpression(ref delegateData);
                     lambdaExp.Sequence = delegateData.CurrentStatements;
+                    lambdaExp.MethodDesc = delegateData.MethodDec;
                     //var methodInvokeExp = new TtMethodInvokeStatement();
                     //lambdaExp.MethodInvoke = methodInvokeExp;
                     //methodInvokeExp.MethodName = GetDelegateParamMethodName(inPin.Name);

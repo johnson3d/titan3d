@@ -561,6 +561,11 @@ namespace EngineNS.Bricks.CodeBuilder
                     data.CodeGen.AddLine("", ref sourceCode);
                     data.CodeGen.PushIndent();
                     {
+                        for(int i=0; i<exp.MethodDesc.LocalVariables.Count; i++)
+                        {
+                            var localVarCodeGen = data.CodeGen.GetCodeObjectGen(exp.MethodDesc.LocalVariables[i].GetType());
+                            localVarCodeGen.GenCodes(exp.MethodDesc.LocalVariables[i], ref sourceCode, ref data);
+                        }
                         for (int i = 0; i < exp.Sequence.Count; i++)
                         {
                             var seqGen = data.CodeGen.GetCodeObjectGen(exp.Sequence[i].GetType());

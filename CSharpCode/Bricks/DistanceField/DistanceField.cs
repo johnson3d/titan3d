@@ -1,4 +1,5 @@
-﻿using EngineNS.IO;
+﻿using EngineNS.DesignMacross;
+using EngineNS.IO;
 using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
@@ -69,9 +70,9 @@ namespace EngineNS.DistanceField
     [Rtti.Meta]
     public class TtSdfAssetAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return TtSdfAsset.AssetExt;
+            get => TtSdfAsset.AssetExt;
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
@@ -100,6 +101,7 @@ namespace EngineNS.DistanceField
 
         #region IO.IAsset
         public const string AssetExt = ".sdf";
+        public string TypeExt { get => AssetExt; }
         [Rtti.Meta]
         public RName AssetName { get; set; }
 

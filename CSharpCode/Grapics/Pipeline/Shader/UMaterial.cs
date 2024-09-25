@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterialAMeta@EngineCore" })]
     public partial class TtMaterialAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return TtMaterial.AssetExt;
+            get => TtMaterial.AssetExt;
         }
         public override string GetAssetTypeName()
         {
@@ -55,6 +57,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
     public partial class TtMaterial : IO.ISerializer, IO.IAsset, IShaderCodeProvider
     {
         public const string AssetExt = ".material";
+        public string TypeExt { get => AssetExt; }
         public TtMaterial()
         {
             mPipelineDesc.SetDefault();
@@ -128,13 +131,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public virtual void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
             ameta.RefAssetRNames.Clear();
-            foreach (var i in UsedRSView)
+            foreach (var i in UsedSrView)
             {
                 if (i.Value == null)
                     continue;
                 ameta.AddReferenceAsset(i.Value);
             }
         }
+        [Rtti.Meta]
         public virtual void SaveAssetTo(RName name)
         {
             var ameta = this.GetAMeta();
@@ -228,6 +232,81 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return material;
             }
             return null;
+        }
+        public static string GenMateralGraphCode(TtMaterial Material, UHLSLCodeGenerator mHLSLCodeGen, 
+            Bricks.CodeBuilder.ShaderNode.UMaterialGraph MaterialGraph, 
+            Bricks.CodeBuilder.ShaderNode.UMaterialOutput MaterialOutput)
+        {
+            Material.UsedSrView.Clear();
+            Material.UsedUniformVars.Clear();
+            Material.UsedSamplerStates.Clear();
+
+            var MaterialClass = new TtClassDeclaration();
+
+            var gen = mHLSLCodeGen.GetCodeObjectGen(Rtti.TtTypeDescGetter<TtMethodDeclaration>.TypeDesc);
+            BuildCodeStatementsData data = new BuildCodeStatementsData()
+            {
+                ClassDec = MaterialClass,
+                NodeGraph = MaterialGraph,
+                UserData = Material,
+                CodeGen = mHLSLCodeGen,
+            };
+            MaterialOutput.BuildStatements(null, ref data);
+            string code = "";
+            var incGen = mHLSLCodeGen.GetCodeObjectGen(Rtti.TtTypeDescGetter<TtIncludeDeclaration>.TypeDesc);
+            TtCodeGeneratorData genData = new TtCodeGeneratorData()
+            {
+                Method = null,
+                CodeGen = mHLSLCodeGen,
+                UserData = Material,
+            };
+            Material.IncludeFiles.Clear();
+            foreach (var i in MaterialClass.PreIncludeHeads)
+            {
+                incGen.GenCodes(i, ref code, ref genData);
+                Material.IncludeFiles.Add(i.FilePath);
+            }
+            genData = new TtCodeGeneratorData()
+            {
+                Method = MaterialOutput.VSFunction,
+                CodeGen = mHLSLCodeGen,
+                UserData = Material,
+            };
+            gen.GenCodes(MaterialOutput.VSFunction, ref code, ref genData);
+            genData = new TtCodeGeneratorData()
+            {
+                Method = MaterialOutput.PSFunction,
+                CodeGen = mHLSLCodeGen,
+                UserData = Material,
+            };
+            gen.GenCodes(MaterialOutput.PSFunction, ref code, ref genData);
+
+            Material.HLSLCode = code;
+            Material.VSNeedStreams = MaterialOutput.GetVSNeedStreams();
+            Material.PSNeedInputs = MaterialOutput.GetPSNeedInputs();
+
+            if (Material.NormalMode == Graphics.Pipeline.Shader.TtMaterial.ENormalMode.NormalMap)
+            {
+                if (Material.VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Normal) == false)
+                    Material.VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Normal);
+                if (Material.VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Tangent) == false)
+                    Material.VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Tangent);
+
+                if (Material.PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal) == false)
+                    Material.PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal);
+                if (Material.PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent) == false)
+                    Material.PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent);
+            }
+            else if (Material.NormalMode == Graphics.Pipeline.Shader.TtMaterial.ENormalMode.Normal)
+            {
+                if (Material.VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Normal) == false)
+                    Material.VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Normal);
+                if (Material.PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal) == false)
+                    Material.PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal);
+            }
+            Material.UpdateShaderCode(false);
+
+            return code;
         }
         [Flags]
         public enum InnerFlags : UInt32
@@ -349,7 +428,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             codeBuilder.AddLine($"#ifndef _Material_H_", ref sourceCode);
             codeBuilder.AddLine($"#define _Material_H_", ref sourceCode);
 
-            foreach (var i in this.UsedRSView)
+            foreach (var i in this.UsedSrView)
             {
                 codeBuilder.AddLine($"{i.ShaderType} {i.Name} DX_AUTOBIND;", ref sourceCode);
             }
@@ -500,30 +579,25 @@ namespace EngineNS.Graphics.Pipeline.Shader
             mMaterialHash = GetHash();
         }
         [Browsable(false)]
-
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-        public NxRHI.UShaderCode DefineCode { get; } = new NxRHI.UShaderCode();
-        [Browsable(false)]
-        public NxRHI.UShaderCode SourceCode { get; } = new NxRHI.UShaderCode();
-        [Browsable(false)]
-在此之后:
-        public NxRHI.TtShaderCode DefineCode { get; } = new NxRHI.UShaderCode();
-        [Browsable(false)]
-        public NxRHI.TtShaderCode SourceCode { get; } = new NxRHI.UShaderCode();
-        [Browsable(false)]
-*/
         public NxRHI.TtShaderCode DefineCode { get; } = new NxRHI.TtShaderCode();
         [Browsable(false)]
         public NxRHI.TtShaderCode SourceCode { get; } = new NxRHI.TtShaderCode();
-        [Browsable(false)]
-
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-        public NxRHI.UShaderDefinitions Defines { get; } = new NxRHI.UShaderDefinitions();
-在此之后:
-        public NxRHI.TtShaderDefinitions Defines { get; } = new NxRHI.UShaderDefinitions();
-*/
+        [Category("Option")]
+        public string DefineCodeText
+        {
+            get
+            {
+                return DefineCode.TextCode;
+            }
+        }
+        [Category("Option")]
+        public string SourceCodeText
+        {
+            get
+            {
+                return SourceCode.TextCode;
+            }
+        }
         public NxRHI.TtShaderDefinitions Defines { get; } = new NxRHI.TtShaderDefinitions();
 
         public EngineNS.NxRHI.EVertexStreamType[] GetVSNeedStreams()
@@ -670,13 +744,13 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             public object SrvObject { get; set; } = null;
         }
-        protected List<NameRNamePair> mUsedRSView = new List<NameRNamePair>();
-        [Rtti.Meta]
+        protected List<NameRNamePair> mUsedSrView = new List<NameRNamePair>();
+        [Rtti.Meta(NameAlias = new string[] { "UsedRSView" })]
         [Category("Variable")]
-        public List<NameRNamePair> UsedRSView { get => mUsedRSView; }
+        public List<NameRNamePair> UsedSrView { get => mUsedSrView; }
         public NameRNamePair FindSRV(string name)
         {
-            foreach (var i in mUsedRSView)
+            foreach (var i in mUsedSrView)
             {
                 if (i.Name == name)
                     return i;
@@ -687,30 +761,30 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             get
             {
-                return UsedRSView.Count;
+                return UsedSrView.Count;
             }
         }
         public string GetNameOfSRV(int index)
         {
-            if (index < 0 || index >= UsedRSView.Count)
+            if (index < 0 || index >= UsedSrView.Count)
                 return null;
-            return UsedRSView[index]?.Name;
+            return UsedSrView[index]?.Name;
         }
         public virtual async System.Threading.Tasks.Task<NxRHI.TtSrView> GetSRV(int index)
         {
-            var srv = UsedRSView[index].SrvObject as NxRHI.TtSrView;
+            var srv = UsedSrView[index].SrvObject as NxRHI.TtSrView;
             if (srv != null)
                 return srv;
-            UsedRSView[index].SrvObject = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(UsedRSView[index].Value);
-            return UsedRSView[index].SrvObject as NxRHI.TtSrView;
+            UsedSrView[index].SrvObject = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(UsedSrView[index].Value);
+            return UsedSrView[index].SrvObject as NxRHI.TtSrView;
         }
         public NxRHI.TtSrView TryGetSRV(int index)
         {
-            var srv = UsedRSView[index].SrvObject as NxRHI.TtSrView;
+            var srv = UsedSrView[index].SrvObject as NxRHI.TtSrView;
             if (srv != null)
                 return srv;
-            UsedRSView[index].SrvObject = TtEngine.Instance.GfxDevice.TextureManager.TryGetTexture(UsedRSView[index].Value);
-            return UsedRSView[index].SrvObject as NxRHI.TtSrView;
+            UsedSrView[index].SrvObject = TtEngine.Instance.GfxDevice.TextureManager.TryGetTexture(UsedSrView[index].Value);
+            return UsedSrView[index].SrvObject as NxRHI.TtSrView;
         }
         #endregion
         #region Sampler
@@ -1009,31 +1083,49 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
         [Rtti.Meta]
-        public void SetColor4(string name, in Color4f color)
+        public bool SetSrv(string name,
+            [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
+            RName srv)
         {
-            var v = FindVar(name);
-            if (v == null)
-                return;
-            v.SetValue(in color);
-            PerMaterialCBuffer?.SetValue(name, in color);
+            foreach (var i in mUsedSrView)
+            {
+                if (i.Name == name)
+                {
+                    i.Value = srv;
+                    return true;
+                }
+            }
+            return false;
         }
         [Rtti.Meta]
-        public void SetColor3(string name, in Color3f color)
+        public bool SetColor4(string name, in Color4f color)
         {
             var v = FindVar(name);
             if (v == null)
-                return;
+                return false;
             v.SetValue(in color);
             PerMaterialCBuffer?.SetValue(name, in color);
+            return true;
         }
         [Rtti.Meta]
-        public void SetFloat4(string name, in Vector4 value)
+        public bool SetColor3(string name, in Color3f color)
         {
             var v = FindVar(name);
             if (v == null)
-                return;
+                return false;
+            v.SetValue(in color);
+            PerMaterialCBuffer?.SetValue(name, in color);
+            return true;
+        }
+        [Rtti.Meta]
+        public bool SetFloat4(string name, in Vector4 value)
+        {
+            var v = FindVar(name);
+            if (v == null)
+                return false;
             v.SetValue(in value);
             PerMaterialCBuffer?.SetValue(name, in value);
+            return true;
         }
         public bool CreateCBuffer(TtEffect effect)
         {
@@ -1084,7 +1176,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             foreach(var i in Materials)
             {
-                foreach(var j in i.Value.UsedRSView)
+                foreach(var j in i.Value.UsedSrView)
                 {
                     j.SrvObject = null;
                 }

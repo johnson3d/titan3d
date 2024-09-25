@@ -19,12 +19,12 @@ namespace EngineNS.BehaviorTree.Macross
     }
     public partial class UBehaviorTreeMacrossAMeta : IO.IAssetMeta
     {
+        public override string TypeExt
+        {
+            get => UBehaviorTreeMacross.AssetExt;
+        }
         [Rtti.Meta]
         public string BaseTypeStr { get; set; }
-        public override string GetAssetExtType()
-        {
-            return UBehaviorTreeMacross.AssetExt;
-        }
         public override string GetAssetTypeName()
         {
             return "BehaviorTreeMacross";
@@ -68,6 +68,7 @@ namespace EngineNS.BehaviorTree.Macross
     public partial class UBehaviorTreeMacross : IO.IAsset
     {
         public const string AssetExt = ".BehaviorTreeMacross";
+        public string TypeExt { get => AssetExt; }
         public const string MacrossEditorKeyword = "BehaviorTreeMacross";
         public class BehaviorTreeMacrossCreateAttribute : IO.CommonCreateAttribute
         {

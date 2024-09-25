@@ -7,15 +7,30 @@ using Org.BouncyCastle.Asn1.X509.Qualified;
 
 namespace EngineNS.DesignMacross.Design.Expressions
 {
-    public class TtLogicOperatorDescription : TtExpressionDescription
+    #region UnaryLogicOperator
+    public class TtUnaryLogicOperatorDescription : TtExpressionDescription
+    {
+        [Rtti.Meta]
+        public TtUnaryOperatorExpression.EUnaryOperation Op { get; set; }
+        public TtUnaryLogicOperatorDescription()
+        {
+            AddDtaInPin(new() { Name = "" });
+            AddDtaOutPin(new() { Name = "" });
+        }
+    }
+
+    #endregion UnaryLogicOperator
+
+    #region BinaryLogicOperator
+    public class TtBinaryLogicOperatorDescription : TtExpressionDescription
     {
         [Rtti.Meta]
         public TtBinaryOperatorExpression.EBinaryOperation Op { get; set; }
-        public TtLogicOperatorDescription()
+        public TtBinaryLogicOperatorDescription()
         {
-            AddDtaInPin(new() { Name = "L" });
-            AddDtaInPin(new() { Name = "R" });
-            AddDtaOutPin(new() { Name = "=" });
+            AddDtaInPin(new() { Name = "" });
+            AddDtaInPin(new() { Name = "" });
+            AddDtaOutPin(new() { Name = "Result" });
         }
 
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
@@ -77,12 +92,12 @@ namespace EngineNS.DesignMacross.Design.Expressions
                         var linkedPin = methodDescription.GetLinkedDataPin(dataPin);
                         if (linkedPin != null && linkedPin.TypeDesc == null)
                         {
-                            if (linkedPin.Parent is TtValueOperatorDescription valueOperatorDescription)
+                            if (linkedPin.Parent is TtBinaryArithmeticOperatorDescription valueOperatorDescription)
                             {
                                 linkedPin.TypeDesc = dataPin.TypeDesc;
                                 valueOperatorDescription.PinTypeSpreading(linkedPin, methodDescription);
                             }
-                            if (linkedPin.Parent is TtLogicOperatorDescription logicOperatorDescription)
+                            if (linkedPin.Parent is TtBinaryLogicOperatorDescription logicOperatorDescription)
                             {
                                 linkedPin.TypeDesc = dataPin.TypeDesc;
                                 logicOperatorDescription.PinTypeSpreading(linkedPin, methodDescription);
@@ -108,8 +123,8 @@ namespace EngineNS.DesignMacross.Design.Expressions
     }
 
     [ContextMenu("equal,==", "LogicOperation\\==", UDesignMacross.MacrossScriptEditorKeyword)]
-    [GraphElement(typeof(TtGraphElement_LogicOperator))]
-    public class TtEqualOperatorDescription : TtLogicOperatorDescription
+    [GraphElement(typeof(TtGraphElement_BinaryLogicOperator))]
+    public class TtEqualOperatorDescription : TtBinaryLogicOperatorDescription
     {
         public TtEqualOperatorDescription()
         {
@@ -119,8 +134,8 @@ namespace EngineNS.DesignMacross.Design.Expressions
     }
 
     [ContextMenu("notequal,!=", "LogicOperation\\!=", UDesignMacross.MacrossScriptEditorKeyword)]
-    [GraphElement(typeof(TtGraphElement_LogicOperator))]
-    public class TtNotEqualOperatorDescription : TtLogicOperatorDescription
+    [GraphElement(typeof(TtGraphElement_BinaryLogicOperator))]
+    public class TtNotEqualOperatorDescription : TtBinaryLogicOperatorDescription
     {
         public TtNotEqualOperatorDescription()
         {
@@ -130,8 +145,8 @@ namespace EngineNS.DesignMacross.Design.Expressions
     }
 
     [ContextMenu("greate,>", "LogicOperation\\>", UDesignMacross.MacrossScriptEditorKeyword)]
-    [GraphElement(typeof(TtGraphElement_LogicOperator))]
-    public class TtGreateOperatorDescription : TtLogicOperatorDescription
+    [GraphElement(typeof(TtGraphElement_BinaryLogicOperator))]
+    public class TtGreateOperatorDescription : TtBinaryLogicOperatorDescription
     {
         public TtGreateOperatorDescription()
         {
@@ -141,8 +156,8 @@ namespace EngineNS.DesignMacross.Design.Expressions
     }
 
     [ContextMenu("greateequal,>=", "LogicOperation\\>=", UDesignMacross.MacrossScriptEditorKeyword)]
-    [GraphElement(typeof(TtGraphElement_LogicOperator))]
-    public class TtGreateEqualOperatorDescription : TtLogicOperatorDescription
+    [GraphElement(typeof(TtGraphElement_BinaryLogicOperator))]
+    public class TtGreateEqualOperatorDescription : TtBinaryLogicOperatorDescription
     {
         public TtGreateEqualOperatorDescription()
         {
@@ -152,8 +167,8 @@ namespace EngineNS.DesignMacross.Design.Expressions
     }
 
     [ContextMenu("less,<", "LogicOperation\\<", UDesignMacross.MacrossScriptEditorKeyword)]
-    [GraphElement(typeof(TtGraphElement_LogicOperator))]
-    public class TtLessOperatorDescription : TtLogicOperatorDescription
+    [GraphElement(typeof(TtGraphElement_BinaryLogicOperator))]
+    public class TtLessOperatorDescription : TtBinaryLogicOperatorDescription
     {
         public TtLessOperatorDescription()
         {
@@ -163,8 +178,8 @@ namespace EngineNS.DesignMacross.Design.Expressions
     }
 
     [ContextMenu("lessequal,<=", "LogicOperation\\<=", UDesignMacross.MacrossScriptEditorKeyword)]
-    [GraphElement(typeof(TtGraphElement_LogicOperator))]
-    public class TtLessEqualOperatorDescription : TtLogicOperatorDescription
+    [GraphElement(typeof(TtGraphElement_BinaryLogicOperator))]
+    public class TtLessEqualOperatorDescription : TtBinaryLogicOperatorDescription
     {
         public TtLessEqualOperatorDescription()
         {
@@ -174,8 +189,8 @@ namespace EngineNS.DesignMacross.Design.Expressions
     }
 
     [ContextMenu("and,&&", "LogicOperation\\&&", UDesignMacross.MacrossScriptEditorKeyword)]
-    [GraphElement(typeof(TtGraphElement_LogicOperator))]
-    public class TtAndOperatorDescription : TtLogicOperatorDescription
+    [GraphElement(typeof(TtGraphElement_BinaryLogicOperator))]
+    public class TtAndOperatorDescription : TtBinaryLogicOperatorDescription
     {
         public TtAndOperatorDescription()
         {
@@ -185,8 +200,8 @@ namespace EngineNS.DesignMacross.Design.Expressions
     }
 
     [ContextMenu("or,||", "LogicOperation\\||", UDesignMacross.MacrossScriptEditorKeyword)]
-    [GraphElement(typeof(TtGraphElement_LogicOperator))]
-    public class TtOrOperatorDescription : TtLogicOperatorDescription
+    [GraphElement(typeof(TtGraphElement_BinaryLogicOperator))]
+    public class TtOrOperatorDescription : TtBinaryLogicOperatorDescription
     {
         public TtOrOperatorDescription()
         {
@@ -194,4 +209,5 @@ namespace EngineNS.DesignMacross.Design.Expressions
             Op = TtBinaryOperatorExpression.EBinaryOperation.BooleanOr;
         }
     }
+    #endregion BinaryLogicOperator
 }

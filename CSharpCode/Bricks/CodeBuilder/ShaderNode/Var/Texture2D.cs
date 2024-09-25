@@ -42,7 +42,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             BackColor = 0x80808080;
 
             OutTex.Name = "texture";
-            OutTex.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutTex.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutTex.MultiLinks = true;
             this.AddPinOut(OutTex);
         }
@@ -95,7 +95,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 tmp.Name = this.Name;
                 var texNode = this;
                 tmp.Value = texNode.AssetName;
-                material.UsedRSView.Add(tmp);
+                material.UsedSrView.Add(tmp);
             }
         }
         public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
@@ -119,7 +119,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             BackColor = 0x80808080;
 
             OutTex.Name = "texture";
-            OutTex.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutTex.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutTex.MultiLinks = true;
             this.AddPinOut(OutTex);
         }

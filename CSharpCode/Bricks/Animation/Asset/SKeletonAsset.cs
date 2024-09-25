@@ -9,9 +9,9 @@ namespace EngineNS.Animation.Asset
     [Rtti.Meta]
     public partial class TtSkeletonAssetAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return TtSkeletonAsset.AssetExt;
+            get => TtSkeletonAsset.AssetExt;
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
@@ -34,6 +34,7 @@ namespace EngineNS.Animation.Asset
         public TtSkinSkeleton Skeleton { get; set; } = new TtSkinSkeleton();
         #region IO.IAsset
         public const string AssetExt = ".skt";
+        public string TypeExt { get => AssetExt; }
         [Rtti.Meta]
         public RName AssetName { get; set; }
 

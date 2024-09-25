@@ -1,0 +1,109 @@
+﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.DesignMacross.Base.Description;
+using EngineNS.DesignMacross.Base.Graph;
+using EngineNS.DesignMacross.Design.ConnectingLine;
+using EngineNS.Rtti;
+
+namespace EngineNS.DesignMacross.Design.Expressions
+{
+    public class TtBinaryArithmeticOperatorDescription : TtExpressionDescription
+    {
+        [Rtti.Meta]
+        public TtBinaryOperatorExpression.EBinaryOperation Op { get; set; }
+        public TtBinaryArithmeticOperatorDescription()
+        {
+            AddDtaInPin(new() { Name = "" });
+            AddDtaInPin(new() { Name = "" });
+            AddDtaOutPin(new() { Name = "=" });
+            
+        }
+
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        {
+            var methodDesc = expressionBuildContext.MethodDescription as TtMethodDescription;
+
+            TtBinaryOperatorExpression expression = new();
+            expression.Operation = Op;
+            var dataInPin_Left = DataInPins[0];
+            var dataInPin_Right = DataInPins[1];
+            var leftLinkedDataPin = methodDesc.GetLinkedDataPin(dataInPin_Left);
+            if (leftLinkedDataPin != null)
+            {
+                System.Diagnostics.Debug.Assert(leftLinkedDataPin is TtDataOutPinDescription);
+                FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription };
+                expression.Left = (leftLinkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
+            }
+            var rightLinkedDataPin = methodDesc.GetLinkedDataPin(dataInPin_Right);
+            if (rightLinkedDataPin != null)
+            {
+                System.Diagnostics.Debug.Assert(rightLinkedDataPin is TtDataOutPinDescription);
+                FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription };
+                expression.Right = (rightLinkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
+            }
+            return expression;
+        }
+        public void PinTypeSpreading(TtDataPinDescription dataPin, TtMethodDescription methodDescription)
+        {
+            foreach(var otherPin in DataInPins)
+            {
+                if (otherPin == dataPin)
+                    continue;
+
+                if(dataPin.TypeDesc != null)
+                {
+                    if(otherPin.TypeDesc == null)
+                    {
+                        otherPin.TypeDesc = dataPin.TypeDesc;
+                    }
+                }
+                else
+                {
+                    if(otherPin.TypeDesc != null)
+                    {
+                        dataPin.TypeDesc = otherPin.TypeDesc;
+                    }
+                }
+            }
+            foreach (var otherPin in DataOutPins)
+            {
+                if (otherPin == dataPin)
+                    continue;
+
+                if (dataPin.TypeDesc != null)
+                {
+                    if (otherPin.TypeDesc == null)
+                    {
+                        otherPin.TypeDesc = dataPin.TypeDesc;
+                        var linkedPin = methodDescription.GetLinkedDataPin(dataPin);
+                        if(linkedPin != null && linkedPin.TypeDesc == null)
+                        {
+                            if(linkedPin.Parent is TtBinaryArithmeticOperatorDescription valueOperatorDescription)
+                            {
+                                linkedPin.TypeDesc = dataPin.TypeDesc;
+                                valueOperatorDescription.PinTypeSpreading(linkedPin, methodDescription);
+                            }
+                            if (linkedPin.Parent is TtBinaryLogicOperatorDescription logicOperatorDescription)
+                            {
+                                linkedPin.TypeDesc = dataPin.TypeDesc;
+                                logicOperatorDescription.PinTypeSpreading(linkedPin, methodDescription);
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+        public override void OnPinConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, TtMethodDescription methodDescription)
+        {
+            if(selfPin.TypeDesc == null)
+            {
+                selfPin.TypeDesc = connectedPin.TypeDesc;
+                PinTypeSpreading(selfPin, methodDescription);
+            }
+        }
+        public override void OnPinDisConnected(TtDataPinDescription selfPin, TtDataPinDescription disConnectedPin, TtMethodDescription methodDescription)
+        {
+            selfPin.TypeDesc = null;
+        }
+    }
+}

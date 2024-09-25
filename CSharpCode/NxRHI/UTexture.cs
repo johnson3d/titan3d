@@ -30,13 +30,13 @@ namespace EngineNS.NxRHI
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.NxRHI.USrViewAMeta@EngineCore", "EngineNS.NxRHI.USrViewAMeta" })]
     public class TtSrViewAMeta : IO.IAssetMeta
     {
+        public override string TypeExt
+        {
+            get => TtSrView.AssetExt;
+        }
         protected override Color4b GetBorderColor()
         {
             return TtEngine.Instance.EditorInstance.Config.TextureBoderColor;
-        }
-        public override string GetAssetExtType()
-        {
-            return TtSrView.AssetExt;
         }
         public override string GetAssetTypeName()
         {
@@ -1020,6 +1020,7 @@ namespace EngineNS.NxRHI
 
         #region IAsset
         public const string AssetExt = ".srv";
+        public string TypeExt { get => AssetExt; }
         public IO.IAssetMeta CreateAMeta()
         {
             var result = new TtSrViewAMeta();

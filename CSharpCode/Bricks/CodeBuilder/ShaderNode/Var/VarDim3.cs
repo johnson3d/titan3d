@@ -287,32 +287,32 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             //Name = $"{Value}";
 
             InXYZ.Name = "in ";
-            InXYZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InXYZ.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InXYZ);
             InX.Name = "x ";
-            InX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InX.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InX);
             InY.Name = "y ";
-            InY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InY.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InY);
             InZ.Name = "z ";
-            InZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InZ.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InZ);
 
             OutXYZ.Name = " xyz";
-            OutXYZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutXYZ.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutXYZ.MultiLinks = true;
             this.AddPinOut(OutXYZ);
             OutX.Name = " x";
-            OutX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutX.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutX.MultiLinks = true;
             this.AddPinOut(OutX);
             OutY.Name = " y";
-            OutY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutY.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutY.MultiLinks = true;
             this.AddPinOut(OutY);
             OutZ.Name = " z";
-            OutZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutZ.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutZ.MultiLinks = true;
             this.AddPinOut(OutZ);
         }
@@ -486,32 +486,32 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             //Name = $"{Value}";
 
             InXYZ.Name = "in ";
-            InXYZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InXYZ.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InXYZ);
             InX.Name = "x ";
-            InX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InX.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InX);
             InY.Name = "y ";
-            InY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InY.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InY);
             InZ.Name = "z ";
-            InZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            InZ.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             this.AddPinIn(InZ);
 
             OutXYZ.Name = " xyz";
-            OutXYZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutXYZ.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutXYZ.MultiLinks = true;
             this.AddPinOut(OutXYZ);
             OutX.Name = " x";
-            OutX.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutX.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutX.MultiLinks = true;
             this.AddPinOut(OutX);
             OutY.Name = " y";
-            OutY.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutY.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutY.MultiLinks = true;
             this.AddPinOut(OutY);
             OutZ.Name = " z";
-            OutZ.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            OutZ.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
             OutZ.MultiLinks = true;
             this.AddPinOut(OutZ);
         }

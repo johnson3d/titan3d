@@ -12,7 +12,7 @@
           <e_0 Type="EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore">
             <HasDefaultValue Type="System.Boolean@Unknown" Value="True" />
             <InitValue Type="EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore">
-              <Type Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="System.DBNull@Unknown" />
+              <Type Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.DBNull@Unknown" />
               <TypeIsTypeof Type="System.Boolean@Unknown" Value="False" />
             </InitValue>
             <InitValueVisible Type="System.Boolean@Unknown" Value="True" />
@@ -22,7 +22,7 @@
             <VariableName Type="System.String@Unknown" Value="host" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
-              <TypeDesc Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.GamePlay.UGameInstance@EngineCore" />
+              <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.GamePlay.UGameInstance@EngineCore" />
               <TypeFullName Type="System.String@Unknown" Value="EngineNS.GamePlay.UGameInstance" />
             </VariableType>
           </e_0>

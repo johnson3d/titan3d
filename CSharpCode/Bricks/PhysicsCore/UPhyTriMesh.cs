@@ -7,9 +7,9 @@ namespace EngineNS.Bricks.PhysicsCore
     [Rtti.Meta]
     public class TtPhyTriMeshAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return TtPhyTriMesh.AssetExt;
+            get => TtPhyTriMesh.AssetExt;
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -45,7 +45,7 @@ namespace EngineNS.Bricks.PhysicsCore
             mCoreObject = PhyTriMesh.CreateInstance();
         }
         public const string AssetExt = ".pxmesh";
-        
+        public string TypeExt { get => AssetExt; }
         public class UPhyMeshImportAttribute : IO.CommonCreateAttribute
         {
             public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)

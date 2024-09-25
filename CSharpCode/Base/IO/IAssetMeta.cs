@@ -188,6 +188,7 @@ namespace EngineNS.IO
     }
     public interface IAsset
     {
+        string TypeExt { get; }
         RName AssetName { get; set; }
         IAssetMeta CreateAMeta();
         IAssetMeta GetAMeta();
@@ -227,10 +228,14 @@ namespace EngineNS.IO
         {
             throw new NotImplementedException("Need override this method!");
         }
-        public virtual string GetAssetExtType()
+        [Rtti.Meta]
+        public virtual string TypeExt
         {
-            System.Diagnostics.Debug.Assert(false);
-            return null;
+            get 
+            {
+                System.Diagnostics.Debug.Assert(false);
+                return null; 
+            }
         }
         public virtual void Cleanup()
         {
@@ -339,6 +344,11 @@ namespace EngineNS.IO
         public RName GetAssetName()
         {
             return mAssetName;
+        }
+        [Rtti.Meta]
+        public RName AssetName
+        {
+            get { return mAssetName; }
         }
         public void SaveAMeta(IAsset asset)
         {

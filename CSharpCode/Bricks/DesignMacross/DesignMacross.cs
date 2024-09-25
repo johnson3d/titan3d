@@ -65,12 +65,12 @@ namespace EngineNS.DesignMacross
     }
     public partial class TtDesignMacrossAMeta : IO.IAssetMeta
     {
+        public override string TypeExt
+        {
+            get => UDesignMacross.AssetExt;
+        }
         [Rtti.Meta]
         public string BaseTypeStr { get; set; }
-        public override string GetAssetExtType()
-        {
-            return UDesignMacross.AssetExt;
-        }
         public override string GetAssetTypeName()
         {
             return "DesignMacross";
@@ -114,6 +114,7 @@ namespace EngineNS.DesignMacross
     public partial class UDesignMacross : IO.BaseSerializer, IO.IAsset
     {
         public const string AssetExt = ".designmacross";
+        public string TypeExt { get => AssetExt; }
         public const string MacrossEditorKeyword = "DesignMacross";
         public const string MacrossScriptEditorKeyword = "DesignMacross_Script";
         public const string MacrossAnimEditorKeyword = "DesignMacross_Anim";

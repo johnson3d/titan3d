@@ -7,9 +7,9 @@ namespace EngineNS.Bricks.Procedure
     [Rtti.Meta]
     public class UPgcAssetAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return UPgcAsset.AssetExt;
+            get => UPgcAsset.AssetExt;
         }
         protected override Color4b GetBorderColor()
         {
@@ -66,6 +66,7 @@ namespace EngineNS.Bricks.Procedure
     public class UPgcAsset : IO.IAsset
     {
         public const string AssetExt = ".pgc";
+        public string TypeExt { get => AssetExt; }
         public class ImportAttribute : IO.CommonCreateAttribute
         {
 

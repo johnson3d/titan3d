@@ -47,12 +47,12 @@ namespace EngineNS.Bricks.CodeBuilder
 
     public partial class UMacrossAMeta : IO.IAssetMeta
     {
+        public override string TypeExt
+        {
+            get => TtMacross.AssetExt;
+        }
         [Rtti.Meta]
         public string BaseTypeStr { get; set; }
-        public override string GetAssetExtType()
-        {
-            return TtMacross.AssetExt;
-        }
         public override string GetAssetTypeName()
         {
             return "Macross";
@@ -97,6 +97,7 @@ namespace EngineNS.Bricks.CodeBuilder
     public partial class TtMacross : IO.IAsset
     {
         public const string AssetExt = ".macross";
+        public string TypeExt { get => AssetExt; }
         public const string MacrossEditorKeyword = "Macross";
 
         public class MacrossCreateAttribute : IO.CommonCreateAttribute

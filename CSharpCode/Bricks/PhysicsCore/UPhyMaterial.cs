@@ -7,9 +7,9 @@ namespace EngineNS.Bricks.PhysicsCore
     [Rtti.Meta]
     public class TtPhyMaterialAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return TtPhyMaterial.AssetExt;
+            get => TtPhyMaterial.AssetExt;
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
@@ -36,6 +36,7 @@ namespace EngineNS.Bricks.PhysicsCore
     public class TtPhyMaterial : AuxPtrType<PhyMaterial>, IO.IAsset, IO.ISerializer
     {
         public const string AssetExt = ".pxmtl";
+        public string TypeExt { get => AssetExt; }
         public class UPhyMaterialImportAttribute : IO.CommonCreateAttribute
         {
             public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)

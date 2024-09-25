@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_10940832530247188494 Type="EngineNS.Bricks.Procedure.UBufferCreator@EngineCore">
+  <BufferType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Order="0" />
+  <XSize Type="System.Int32@Unknown" Order="0" />
+  <YSize Type="System.Int32@Unknown" Order="0" />
+  <ZSize Type="System.Int32@Unknown" Order="0" />
+</Hash_10940832530247188494>

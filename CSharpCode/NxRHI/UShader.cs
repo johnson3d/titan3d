@@ -107,6 +107,7 @@ namespace EngineNS.NxRHI
 
         public Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId PermutationId { get; set; }
         public const string AssetExt = ".shader";
+        public string TypeExt { get => AssetExt; }
         public unsafe void SaveTo(RName shader, in Hash160 hash)
         {
             var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Shader);

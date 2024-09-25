@@ -358,7 +358,15 @@ namespace EngineNS.IO
             if (string.IsNullOrEmpty(xmlStr))
                 return null;
             var xml = new System.Xml.XmlDocument();
-            xml.LoadXml(xmlStr);
+            try
+            {
+                xml.LoadXml(xmlStr);
+            }
+            catch(System.Exception exp)
+            { 
+                Profiler.Log.WriteException(exp);
+                return null;
+            }
             return xml;
         }
         public static void SaveObjectToXml(string file, object obj)

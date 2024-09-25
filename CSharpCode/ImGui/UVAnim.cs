@@ -9,16 +9,16 @@ namespace EngineNS.EGui
     [Rtti.Meta]
     public partial class TtUVAnimAMeta : IO.IAssetMeta
     {
+        public override string TypeExt
+        {
+            get => TtUVAnim.AssetExt;
+        }
         [Rtti.Meta]
         public RName TextureName { get; set; }
         [Rtti.Meta]
         public Vector2 SnapUVStart { get; set; }
         [Rtti.Meta]
         public Vector2 SnapUVEnd { get; set; } = new Vector2(1, 1);
-        public override string GetAssetExtType()
-        {
-            return TtUVAnim.AssetExt;
-        }
         public override string GetAssetTypeName()
         {
             return "UVAnim";
@@ -30,7 +30,7 @@ namespace EngineNS.EGui
         }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
-            if (ameta.GetAssetExtType() == NxRHI.TtSrView.AssetExt)
+            if (ameta.TypeExt == NxRHI.TtSrView.AssetExt)
                 return true;
             //必须是TextureAsset
             return false;
@@ -87,6 +87,7 @@ namespace EngineNS.EGui
     public partial class TtUVAnim : IO.IAsset, IO.ISerializer
     {
         public const string AssetExt = ".uvanim";
+        public string TypeExt { get => AssetExt; }
         #region ISerializer
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {

@@ -734,7 +734,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 if (material.FindSRV(tmp.Name) == null)
                 {
                     tmp.Value = AssetName;
-                    material.UsedRSView.Add(tmp);
+                    material.UsedSrView.Add(tmp);
                 }
             }
             var samplerPinIn = FindPinIn("sampler");
@@ -951,7 +951,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 if (material.FindSRV(tmp.Name) == null)
                 {
                     tmp.Value = AssetName;
-                    material.UsedRSView.Add(tmp);
+                    material.UsedSrView.Add(tmp);
                 }
             }
             var samplerPinIn = FindPinIn("sampler");
@@ -1120,7 +1120,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 if (material.FindSRV(tmp.Name) == null)
                 {
                     tmp.Value = AssetName;
-                    material.UsedRSView.Add(tmp);
+                    material.UsedSrView.Add(tmp);
                 }
             }
             var samplerPinIn = FindPinIn("sampler");
@@ -1289,7 +1289,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 if (material.FindSRV(tmp.Name) == null)
                 {
                     tmp.Value = AssetName;
-                    material.UsedRSView.Add(tmp);
+                    material.UsedSrView.Add(tmp);
                 }
             }
             var samplerPinIn = FindPinIn("sampler");

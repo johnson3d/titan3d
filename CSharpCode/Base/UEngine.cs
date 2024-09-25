@@ -171,6 +171,11 @@ namespace EngineNS
         private static TtEngine mInstance;
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.Unserializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public static TtEngine Instance { get => mInstance; }
+        [Rtti.Meta]
+        public static RName GetRName(string name, RName.ERNameType type = RName.ERNameType.Game)
+        {
+            return RName.GetRName(name, type);
+        }
         public EPlayMode PlayMode { get; set; } = EPlayMode.Editor;
         [Rtti.Meta]
         public TtEngineConfig Config { get; set; }

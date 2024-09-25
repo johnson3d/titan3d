@@ -1,4 +1,5 @@
-﻿using EngineNS.Support;
+﻿using EngineNS.DistanceField;
+using EngineNS.Support;
 using NPOI.SS.Formula.Functions;
 using NPOI.SS.Formula.PTG;
 using NPOI.Util;
@@ -15,9 +16,9 @@ namespace EngineNS.Bricks.Font
     [Rtti.Meta]
     public class TtFontSDFAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return TtFontSDF.AssetExt;
+            get => TtFontSDF.AssetExt;
         }
         public override string GetAssetTypeName()
         {
@@ -48,6 +49,7 @@ namespace EngineNS.Bricks.Font
     public class TtFontSDF : AuxPtrType<Canvas.FTFont>, IO.IAsset
     {
         public const string AssetExt = ".fontsdf";
+        public string TypeExt { get => AssetExt; }
         public class TtFontDesc : IO.BaseSerializer
         {
             public TtFontDesc()

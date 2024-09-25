@@ -7,9 +7,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterialInstanceAMeta@EngineCore" })]
     public partial class TtMaterialInstanceAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return TtMaterialInstance.AssetExt;
+            get
+            {
+                return TtMaterialInstance.AssetExt;
+            }
         }
         public override string GetAssetTypeName()
         {
@@ -30,7 +33,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //必须是TextureAsset
-            if (ameta.GetAssetExtType() == NxRHI.TtSrView.AssetExt)
+            if (ameta.TypeExt == NxRHI.TtSrView.AssetExt)
                 return true;
             return false;
         }
@@ -156,7 +159,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             ameta.RefAssetRNames.Clear();
             ameta.AddReferenceAsset(MaterialName);
-            foreach (var i in UsedRSView)
+            foreach (var i in UsedSrView)
             {
                 if (i.Value == null)
                     continue;
@@ -170,9 +173,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.ParentMaterial = mtl;
             result.AssetState = IO.EAssetState.LoadFinished;
             
-            foreach (var i in mtl.UsedRSView)
+            foreach (var i in mtl.UsedSrView)
             {
-                result.UsedRSView.Add(i.Clone(result));
+                result.UsedSrView.Add(i.Clone(result));
             }
 
             foreach (var i in mtl.UsedSamplerStates)
@@ -200,9 +203,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             result.MaterialHash = MaterialHash;
             result.RenderLayer = RenderLayer;
 
-            foreach (var i in this.UsedRSView)
+            foreach (var i in this.UsedSrView)
             {
-                result.UsedRSView.Add(i.Clone(result));
+                result.UsedSrView.Add(i.Clone(result));
             }
 
             foreach (var i in this.UsedSamplerStates)
@@ -291,15 +294,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
                     #region SRV match parent
                     isMatch = true;
-                    if (mUsedRSView.Count != ParentMaterial.UsedRSView.Count)
+                    if (mUsedSrView.Count != ParentMaterial.UsedSrView.Count)
                     {
                         isMatch = false;
                     }
                     else
                     {
-                        for (int i = 0; i < mUsedRSView.Count; i++)
+                        for (int i = 0; i < mUsedSrView.Count; i++)
                         {
-                            if (mUsedRSView[i].Name != ParentMaterial.UsedRSView[i].Name)
+                            if (mUsedSrView[i].Name != ParentMaterial.UsedSrView[i].Name)
                             {
                                 isMatch = false;
                                 break;
@@ -309,19 +312,19 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     if (isMatch == false)
                     {
                         var srvs = new List<NameRNamePair>();
-                        for (int i = 0; i < ParentMaterial.UsedRSView.Count; i++)
+                        for (int i = 0; i < ParentMaterial.UsedSrView.Count; i++)
                         {
-                            var uuv = this.FindSRV(ParentMaterial.UsedRSView[i].Name);
+                            var uuv = this.FindSRV(ParentMaterial.UsedSrView[i].Name);
                             if (uuv != null)
                             {
                                 srvs.Add(uuv);
                             }
                             else
                             {
-                                srvs.Add(ParentMaterial.UsedRSView[i]);
+                                srvs.Add(ParentMaterial.UsedSrView[i]);
                             }
                         }
-                        mUsedRSView = srvs;
+                        mUsedSrView = srvs;
                     }
                     #endregion
 
@@ -683,7 +686,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
 
         [Rtti.Meta]
-        public static TtMaterialInstance CreateMaterialInstance(TtMaterial mtl)
+        public TtMaterialInstance CreateMaterialInstance(TtMaterial mtl)
         {
             return TtMaterialInstance.CreateMaterialInstance(mtl);
         }

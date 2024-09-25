@@ -186,6 +186,7 @@ namespace EngineNS
         string mName;
         string mAddress;
         int RNameHashValue;
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public Guid AssetId
         {
             get
@@ -210,23 +211,15 @@ namespace EngineNS
                 }
             }
         }
+        [Rtti.Meta]
         public ERNameType RNameType
         {
             get { return mRNameType; }
-            //private set
-            //{
-            //    mRNameType = value;
-            //    ChangeAddressWithRNameType();
-            //}
         }
+        [Rtti.Meta]
         public string Name
         {
             get => mName;
-            //private set
-            //{
-            //    mName = value.ToLower();
-            //    ChangeAddressWithRNameType();
-            //}
         }
 
         public void UnsafeUpdate(string name, ERNameType type)
@@ -236,10 +229,12 @@ namespace EngineNS
             mName = name.ToLower();
             ChangeAddressWithRNameType();
         }
+        [Rtti.Meta]
         public string Address
         {
             get => mAddress;
         }
+        [Rtti.Meta]
         public string ExtName
         {
             get
@@ -247,6 +242,7 @@ namespace EngineNS
                 return IO.TtFileManager.GetExtName(mName);
             }
         }
+        [Rtti.Meta]
         public string PureName => IO.TtFileManager.GetPureName(mName);
         public static RName GetRNameFromAbsPath(string path)
         {

@@ -7,9 +7,9 @@ namespace EngineNS.Bricks.Particle
     [Rtti.Meta]
     public class TtNebulaParticleAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return TtNebulaParticle.AssetExt;
+            get => TtNebulaParticle.AssetExt;
         }
         protected override Color4b GetBorderColor()
         {
@@ -39,6 +39,7 @@ namespace EngineNS.Bricks.Particle
     public partial class TtNebulaParticle : IO.BaseSerializer, IO.IAsset, IDisposable
     {
         public const string AssetExt = ".nebula";
+        public string TypeExt { get => AssetExt; }
         public class TtNebulaParticleImportAttribute : IO.CommonCreateAttribute
         {
             protected override bool CheckAsset()

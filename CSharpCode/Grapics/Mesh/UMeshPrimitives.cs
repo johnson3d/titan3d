@@ -7,9 +7,9 @@ namespace EngineNS.Graphics.Mesh
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMeshPrimitivesAMeta@EngineCore" })]
     public class TtMeshPrimitivesAMeta : IO.IAssetMeta
     {
-        public override string GetAssetExtType()
+        public override string TypeExt
         {
-            return TtMeshPrimitives.AssetExt;
+            get => TtMeshPrimitives.AssetExt;
         }
         public override string GetAssetTypeName()
         {
@@ -51,7 +51,7 @@ namespace EngineNS.Graphics.Mesh
     public partial class TtMeshPrimitives : AuxPtrType<NxRHI.FMeshPrimitives>, IO.IAsset
     {
         public const string AssetExt = ".vms";
-
+        public string TypeExt { get => AssetExt; }
         public partial class ImportAttribute : IO.CommonCreateAttribute
         {
             ~ImportAttribute()

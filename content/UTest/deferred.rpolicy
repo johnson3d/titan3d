@@ -31,7 +31,9 @@
       <Name Type="System.String@Unknown" Value="ShadwoMapNode" />
       <NodeId Type="System.Guid@Unknown" Value="390b3f71-ed8a-4b35-a8ec-5b7d816606e9" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="-94.41669,-163.87428" />
-      <GraphNode Type="EngineNS.Graphics.Pipeline.Shadow.TtShadowMapNode@EngineCore" />
+      <GraphNode Type="EngineNS.Graphics.Pipeline.Shadow.TtShadowMapNode@EngineCore">
+        <IsDepth32 Type="System.Boolean@Unknown" Value="False" />
+      </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_2>
     <e_3 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
@@ -490,7 +492,7 @@
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_44>
   </Nodes>
-  <PolicyType Type="EngineNS.Rtti.UTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore" />
+  <PolicyType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore" />
   <RenderPolicy Type="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore">
     <DisableAO Type="System.Boolean@Unknown" Value="False" />
     <DisableHDR Type="System.Boolean@Unknown" Value="False" />

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_8762148157878386048 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UnionPinDefine@EngineCore">
+  <LinkDesc Type="EngineNS.Bricks.NodeGraph.LinkDesc@EngineCore" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <Type Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Order="0" />
+  <TypeValue Type="System.String@Unknown" Order="0" />
+</Hash_8762148157878386048>

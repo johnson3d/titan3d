@@ -69,6 +69,10 @@ namespace EngineNS.Plugins.GameItems
     [Rtti.Meta]
     public class AGameItemDescriptorAMeta : IO.IAssetMeta
     {
+        public override string TypeExt
+        {
+            get => AGameItemDescriptor.AssetExt;
+        }
         public override string GetAssetExtType()
         {
             return AGameItemDescriptor.AssetExt;
@@ -105,6 +109,7 @@ namespace EngineNS.Plugins.GameItems
     {
         #region IAsset
         public const string AssetExt = ".item";
+        public string TypeExt { get => AssetExt; }
         public IO.IAssetMeta CreateAMeta()
         {
             var result = new AGameItemDescriptorAMeta();

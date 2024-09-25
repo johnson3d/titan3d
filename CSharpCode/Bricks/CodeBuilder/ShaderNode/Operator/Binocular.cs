@@ -42,9 +42,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
             Result.Name = "= ";
             Result.MultiLinks = true;
 
-            Left.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
-            Right.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
-            Result.LinkDesc = UShaderEditorStyles.Instance.NewInOutPinDesc();
+            Left.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
+            Right.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
+            Result.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
 
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF00FF00;
