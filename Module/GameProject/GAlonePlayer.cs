@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 
 namespace GameProject
 {
-    public class GAloneNPC : EngineNS.GamePlay.Scene.Actor.UActor
+    public class GAloneNPC : EngineNS.GamePlay.Scene.Actor.TtActor
     {
     }
-    public class GAlonePlayer : EngineNS.GamePlay.Character.UCharacter
+    public class GAlonePlayer : EngineNS.GamePlay.Character.TtCharacter
     {
         public GAlonePlayer()
         {

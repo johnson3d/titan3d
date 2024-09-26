@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Character
 {
-    partial class UCharacter
+    partial class TtCharacter
     {
-        public partial class UCharacterData
+        public partial class TtCharacterData
         {
             
         }

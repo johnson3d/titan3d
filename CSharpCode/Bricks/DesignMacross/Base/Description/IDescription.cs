@@ -75,6 +75,8 @@ namespace EngineNS.DesignMacross.Base.Description
         public TtMethodDeclaration BuildMethodDeclaration(ref FClassBuildContext classBuildContext);
         public TtExecutionPinDescription GetLinkedExecutionPin(TtExecutionPinDescription execPin);
         public TtDataPinDescription GetLinkedDataPin(TtDataPinDescription dataPin);
+        public TtDataLineDescription GetDataLineWithPin(TtDataPinDescription dataPin);
+        public TtExecutionLineDescription GetExecutionLineWithPin(TtExecutionPinDescription execPin);
     }
 
     public interface IDesignableVariableDescription : IVariableDescription, IClassDescription

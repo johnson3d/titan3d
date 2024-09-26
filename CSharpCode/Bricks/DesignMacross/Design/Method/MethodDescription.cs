@@ -11,16 +11,18 @@ using Org.BouncyCastle.Asn1.X509.Qualified;
 using System.Linq.Expressions;
 using EngineNS.Bricks.NodeGraph;
 using EngineNS.Rtti;
+using System.ComponentModel;
 
 namespace EngineNS.DesignMacross.Design
 {
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtMethodArgumentDescription : IDescription
     {
-        [Rtti.Meta]
+        [Rtti.Meta, Category("Option")]
         public string Name { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta, Category("Option")]
         public TtTypeDesc VariableType { get; set; } = Rtti.TtTypeDesc.TypeOf<int>();
-        [Rtti.Meta]
+        [Rtti.Meta, Category("Option")]
         public EMethodArgumentAttribute OperationType { get; set; } = EMethodArgumentAttribute.Default;
         public Guid Id { get; set; } = Guid.NewGuid();
         public IDescription Parent { get; set; } = null;
@@ -112,17 +114,17 @@ namespace EngineNS.DesignMacross.Design
         public virtual string MethodName { get=> TtASTBuildUtil.GenerateMethodName(this);}
         [Rtti.Meta]
         public Guid Id { get; set; } = Guid.NewGuid();
-        [Rtti.Meta]
+        [Rtti.Meta, Category("Option")]
         public string Name { get; set; } = "Method";
-        [Rtti.Meta]
+        [Rtti.Meta, Category("Option")]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
-        [Rtti.Meta]
+        [Rtti.Meta, Category("Option")]
         public TtCommentStatement Comment { get; set; }
         [Rtti.Meta]
         public bool IsOverride { get; set; } = false;
         [Rtti.Meta]
         public TtMethodDeclaration.EAsyncType AsyncType { get; set; } = TtMethodDeclaration.EAsyncType.None;
-        [Rtti.Meta]
+        [Rtti.Meta, Category("Option")]
         public List<TtMethodArgumentDescription> Arguments { get; set; } = new List<TtMethodArgumentDescription>();
         [Rtti.Meta]
         public List<TtVariableDescription> LocalVariables { get; set; } = new List<TtVariableDescription>();
@@ -299,6 +301,21 @@ namespace EngineNS.DesignMacross.Design
             }
             return null;
         }
+        public TtDataLineDescription GetDataLineWithPin(TtDataPinDescription dataPin)
+        {
+            foreach (var dataLine in DataLines)
+            {
+                if (dataLine.FromId == dataPin.Id)
+                {
+                    return dataLine;
+                }
+                if (dataLine.ToId == dataPin.Id)
+                {
+                    return dataLine;
+                }
+            }
+            return null;
+        }
         public TtDataPinDescription GetDataPinById(Guid dataPinId)
         {
             foreach (var expression in Expressions)
@@ -348,6 +365,21 @@ namespace EngineNS.DesignMacross.Design
                 }
             }
             
+            return null;
+        }
+        public TtExecutionLineDescription GetExecutionLineWithPin(TtExecutionPinDescription execPin)
+        {
+            foreach (var executeLine in ExecutionLines)
+            {
+                if (executeLine.FromId == execPin.Id)
+                {
+                    return executeLine;
+                }
+                if (executeLine.ToId == execPin.Id)
+                {
+                    return executeLine;
+                }
+            }
             return null;
         }
 

@@ -3,6 +3,8 @@ using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.DesignMacross.Editor;
+using EngineNS.EGui.Controls;
+using System.Collections.Generic;
 
 namespace EngineNS.DesignMacross.Design.Statement
 {
@@ -161,6 +163,85 @@ namespace EngineNS.DesignMacross.Design.Statement
                     }
                 }
             }
+        }
+
+        public override void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
+        {
+            popupMenu.bHasSearchBox = false;
+            var parentMenu = popupMenu.Menu;
+            var cmdHistory = context.CommandHistory;
+            parentMenu.AddMenuSeparator("GENERAL");
+            parentMenu.AddMenuItem(
+               "Delete", null,
+               (TtMenuItem item, object sender) =>
+               {
+                   List<TtExecutionLineDescription> executionLinesToBeRemoved = new();
+                   List<TtDataLineDescription> dataLinesToBeRemoved = new();
+                   List<TtDataPinDescription> dataPins = new();
+                   dataPins.AddRange(StatementDescription.DataInPins);
+                   dataPins.AddRange(StatementDescription.DataOutPins);
+                   foreach (var pin in dataPins)
+                   {
+                       if(StatementDescription.Parent is IMethodDescription methodDescription)
+                       {
+                           var line = methodDescription.GetDataLineWithPin(pin);
+                           if(line != null)
+                           {
+                               dataLinesToBeRemoved.Add(line);
+                           }
+                       }
+                       
+                   }
+                   List<TtExecutionPinDescription> execPins = new();
+                   execPins.AddRange(StatementDescription.ExecutionInPins);
+                   execPins.AddRange(StatementDescription.ExecutionOutPins);
+                   foreach (var pin in execPins)
+                   {
+                       if (StatementDescription.Parent is IMethodDescription methodDescription)
+                       {
+                           var line = methodDescription.GetExecutionLineWithPin(pin);
+                           if (line != null)
+                           {
+                               executionLinesToBeRemoved.Add(line);
+                           }
+                       }
+
+                   }
+
+                   cmdHistory.CreateAndExtuteCommand("DeleteStatement",
+                       (data) =>
+                       {
+                           if (StatementDescription.Parent is TtMethodDescription methodDescription)
+                           {
+                               methodDescription.Statements.Remove(StatementDescription);
+                               foreach (var line in executionLinesToBeRemoved)
+                               {
+                                   methodDescription.ExecutionLines.Remove(line);
+                               }
+                               foreach (var line in dataLinesToBeRemoved)
+                               {
+                                   methodDescription.DataLines.Remove(line);
+                               }
+                           }
+                           
+                       },
+                       (data) =>
+                       {
+                           if (StatementDescription.Parent is TtMethodDescription methodDescription)
+                           {
+                               methodDescription.Statements.Add(StatementDescription);
+                               foreach (var line in executionLinesToBeRemoved)
+                               {
+                                   methodDescription.ExecutionLines.Add(line);
+                               }
+                               foreach (var line in dataLinesToBeRemoved)
+                               {
+                                   methodDescription.DataLines.Add(line);
+                               }
+                           }
+                       });
+               });
+
         }
     }
     public class TtGraphElementRender_StatementDescription : IGraphElementRender

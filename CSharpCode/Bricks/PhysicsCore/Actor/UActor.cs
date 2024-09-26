@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene.Actor
 {
-    partial class UActor
+    partial class TtActor
     {
-        partial class UActorData
+        partial class TtActorData
         {
             [Rtti.Meta]
             public RName PxMaterial { get; set; }

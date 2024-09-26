@@ -4,20 +4,20 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene.Actor
 {
-    public partial class UActor : TtSceneActorNode
+    public partial class TtActor : TtSceneActorNode
     {
-        public partial class UActorData : TtNodeData
+        public partial class TtActorData : TtNodeData
         {
             [Rtti.Meta]
             public float Radius { get; set; } = 1.0f;
             [Rtti.Meta]
             public float Height { get; set; } = 1.85f;
         }
-        public UActorData ActorData
+        public TtActorData ActorData
         {
             get
             {
-                return NodeData as UActorData;
+                return NodeData as TtActorData;
             }
         }
         public UCenterData CenterData { get; } = new UCenterData();

@@ -950,10 +950,10 @@ namespace EngineNS.Editor
             await player.InitializeNode(world, playerData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
             player.Parent = root;
 
-            var character = new GamePlay.Character.UCharacter();
-            await character.InitializeNode(world, new GamePlay.Character.UCharacter.UCharacterData(), GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
+            var character = new GamePlay.Character.TtCharacter();
+            await character.InitializeNode(world, new GamePlay.Character.TtCharacter.TtCharacterData(), GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
             characterController.ControlledCharacter = character;
-            var movement = new GamePlay.Movemnet.UMovement();
+            var movement = new GamePlay.Movemnet.TtMovement();
             movement.Parent = character;
 
         }

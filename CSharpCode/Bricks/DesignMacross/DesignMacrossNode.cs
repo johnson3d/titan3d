@@ -30,7 +30,10 @@ namespace EngineNS.DesignMacross
             await base.OnNodeLoaded(parent);
             if (DesignMacross != null && !RName.IsEmpty(DesignMacross))
             {
-                mMacrossGetter = Macross.UMacrossGetter<TtDesignMacrossBase>.NewInstance();
+                if(mMacrossGetter == null)
+                {
+                    mMacrossGetter = Macross.UMacrossGetter<TtDesignMacrossBase>.NewInstance();
+                }
                 mMacrossGetter.Name = DesignMacross;
                 mMacrossGetter.Get().MacrossNode = this;
                 await mMacrossGetter.Get().Initialize();
@@ -50,12 +53,16 @@ namespace EngineNS.DesignMacross
             }
             set
             {
+                if (mMacrossGetter == null)
+                {
+                    mMacrossGetter = Macross.UMacrossGetter<TtDesignMacrossBase>.NewInstance();
+                }
                 if (NodeData is TtDesignMacrossNodeData data)
                 {
                     data.DesignMacrossName = value;
                     if (value == null)
                     {
-                        mMacrossGetter = null;
+                        mMacrossGetter.Name = null;
                         return;
                     }
                 }

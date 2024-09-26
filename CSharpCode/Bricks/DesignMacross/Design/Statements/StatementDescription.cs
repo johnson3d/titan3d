@@ -3,6 +3,7 @@ using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.DesignMacross.Design.Expressions;
 using EngineNS.Rtti;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
 
@@ -13,7 +14,7 @@ namespace EngineNS.DesignMacross.Design.Statement
     {
         [Rtti.Meta]
         public Guid Id { get; set; } = Guid.NewGuid();
-        [Rtti.Meta]
+        [Rtti.Meta, Category("Option")]
         public virtual string Name { get; set; } = "StatementDescription";
         public IDescription Parent { get; set; }
         [Rtti.Meta]
@@ -162,12 +163,28 @@ namespace EngineNS.DesignMacross.Design.Statement
                     return true;
                 }
             }
+            foreach (var dataPin in DataOutPins)
+            {
+                if (dataPin.Id == pinId)
+                {
+                    pin = dataPin;
+                    return true;
+                }
+            }
             pin = null;
             return false;
         }
         public bool TryGetExecutePin(Guid pinId, out TtExecutionPinDescription pin)
         {
             foreach (var executionPin in ExecutionInPins)
+            {
+                if (executionPin.Id == pinId)
+                {
+                    pin = executionPin;
+                    return true;
+                }
+            }
+            foreach (var executionPin in ExecutionOutPins)
             {
                 if (executionPin.Id == pinId)
                 {

@@ -111,7 +111,7 @@ namespace EngineNS.DesignMacross.Design
             bool existLink = false;
             if (startPin is TtExecutionInPinDescription)
             {
-                var pins = expression.GetExecutionInPins();
+                var pins = expression.GetExecutionOutPins();
                 if (pins.Count > 0)
                 {
                     var firstPin = pins[0];
@@ -124,7 +124,7 @@ namespace EngineNS.DesignMacross.Design
             }
             else
             {
-                var pins = expression.GetExecutionOutPins();
+                var pins = expression.GetExecutionInPins();
                 if (pins.Count > 0)
                 {
                     var firstPin = pins[0];
@@ -155,7 +155,7 @@ namespace EngineNS.DesignMacross.Design
             bool existLink = false;
             if (startPin is TtExecutionInPinDescription)
             {
-                var pins = statement.GetExecutionInPins();
+                var pins = statement.GetExecutionOutPins();
                 if (pins.Count > 0)
                 {
                     var firstPin = pins[0];
@@ -168,7 +168,7 @@ namespace EngineNS.DesignMacross.Design
             }
             else
             {
-                var pins = statement.GetExecutionOutPins();
+                var pins = statement.GetExecutionInPins();
                 if (pins.Count > 0)
                 {
                     var firstPin = pins[0];
@@ -348,6 +348,9 @@ namespace EngineNS.DesignMacross.Design
                 }
 
                 var classType = previewDataLine.StartPin.TypeDesc;
+                if (classType == null)
+                    return;
+
                 foreach (var property in classType.GetProperties())
                 {
                     //Get

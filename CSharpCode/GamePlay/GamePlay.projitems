@@ -16,7 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Camera\ICameraControlNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Camera\UCamera.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Camera\UCameraSpringArm.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Character\UCharacter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Character\Character.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\PlayerStart.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\PrefabNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\SunNode.cs" />
@@ -26,8 +26,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controller\UNPCController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controller\UCharacterController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\UGameplayMacross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Movemnet\UCharacterMovement.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Movemnet\UMovement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Movemnet\CharacterMovement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Movemnet\Movement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\Actor\UActor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\Player.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UBezierSplineNode.cs" />

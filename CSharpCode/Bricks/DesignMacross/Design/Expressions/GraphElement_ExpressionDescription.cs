@@ -3,6 +3,7 @@ using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.DesignMacross.Editor;
+using EngineNS.EGui.Controls;
 
 namespace EngineNS.DesignMacross.Design.Expressions
 {
@@ -156,6 +157,79 @@ namespace EngineNS.DesignMacross.Design.Expressions
                     }
                 }
             }
+        }
+
+        public override void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
+        {
+            popupMenu.bHasSearchBox = false;
+            var parentMenu = popupMenu.Menu;
+            var cmdHistory = context.CommandHistory;
+            parentMenu.AddMenuSeparator("GENERAL");
+            parentMenu.AddMenuItem(
+               "Delete", null,
+               (TtMenuItem item, object sender) =>
+               {
+                   List<TtExecutionLineDescription> executionLinesToBeRemoved = new();
+                   List<TtDataLineDescription> dataLinesToBeRemoved = new();
+                   foreach (var pin in ExpressionDescription.DataOutPins)
+                   {
+                       if (ExpressionDescription.Parent is IMethodDescription methodDescription)
+                       {
+                           var line = methodDescription.GetDataLineWithPin(pin);
+                           if (line != null)
+                           {
+                               dataLinesToBeRemoved.Add(line);
+                           }
+                       }
+
+                   }
+                   foreach (var pin in ExpressionDescription.ExecutionOutPins)
+                   {
+                       if (ExpressionDescription.Parent is IMethodDescription methodDescription)
+                       {
+                           var line = methodDescription.GetExecutionLineWithPin(pin);
+                           if (line != null)
+                           {
+                               executionLinesToBeRemoved.Add(line);
+                           }
+                       }
+
+                   }
+
+                   cmdHistory.CreateAndExtuteCommand("DeleteExpression",
+                       (data) =>
+                       {
+                           if (ExpressionDescription.Parent is TtMethodDescription methodDescription)
+                           {
+                               methodDescription.Expressions.Remove(ExpressionDescription);
+                               foreach (var line in executionLinesToBeRemoved)
+                               {
+                                   methodDescription.ExecutionLines.Remove(line);
+                               }
+                               foreach (var line in dataLinesToBeRemoved)
+                               {
+                                   methodDescription.DataLines.Remove(line);
+                               }
+                           }
+
+                       },
+                       (data) =>
+                       {
+                           if (ExpressionDescription.Parent is TtMethodDescription methodDescription)
+                           {
+                               methodDescription.Expressions.Add(ExpressionDescription);
+                               foreach (var line in executionLinesToBeRemoved)
+                               {
+                                   methodDescription.ExecutionLines.Add(line);
+                               }
+                               foreach (var line in dataLinesToBeRemoved)
+                               {
+                                   methodDescription.DataLines.Add(line);
+                               }
+                           }
+                       });
+               });
+
         }
     }
     public class TtGraphElementRender_ExpressionDescription : IGraphElementRender

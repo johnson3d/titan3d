@@ -19,9 +19,9 @@ namespace EngineNS.GamePlay.Controller
 {
     public class UCharacterController : TtNode, IController
     {
-        public Scene.Actor.UActor ControlledCharacter { get; set; }
+        public Scene.Actor.TtActor ControlledCharacter { get; set; }
         public Camera.ICameraControlNode CameraControlNode { get; set; }
-        public UMovement MovementNode { get; set; }
+        public TtMovement MovementNode { get; set; }
 
         public bool OrientCameraRoation = true;
 

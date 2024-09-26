@@ -89,7 +89,7 @@ namespace EngineNS.Animation.SceneNode
             Player.RuntimePose = skinMDfQueue.SkinModifier.RuntimePose;
 
         }
-        GamePlay.Movemnet.UMovement Movement = null;
+        GamePlay.Movemnet.TtMovement Movement = null;
         [ThreadStatic]
         private static Profiler.TimeScope mScopeTick;
         private static Profiler.TimeScope ScopeTick
@@ -107,7 +107,7 @@ namespace EngineNS.Animation.SceneNode
             {
                 if (Movement == null)
                 {
-                    Movement = Parent.Parent.FindFirstChild<UMovement>() as GamePlay.Movemnet.UMovement;
+                    Movement = Parent.Parent.FindFirstChild<TtMovement>() as GamePlay.Movemnet.TtMovement;
                 }
                 Player.Input = new Vector3(Movement.LinearVelocity.Length(), 0, 0);
                 Player.Update(args.World.DeltaTimeSecond);

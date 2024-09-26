@@ -2,6 +2,7 @@
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.Rtti;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
 
@@ -12,7 +13,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         [Rtti.Meta]
         public Guid Id { get; set; } = Guid.NewGuid();
-        [Rtti.Meta]
+        [Rtti.Meta, Category("Option")]
         public virtual string Name { get; set; } = "ExpressionDescription";
         public IDescription Parent { get; set; }
 
@@ -166,7 +167,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             var pins = new List<TtDataInPinDescription>();
             foreach(var pin in DataInPins)
             {
-                if(pin.TypeDesc == typeDesc)
+                if(pin.TypeDesc == typeDesc || typeDesc == null)
                 {
                     pins.Add(pin);
                 }
@@ -178,7 +179,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             var pins = new List<TtDataOutPinDescription>();
             foreach (var pin in DataOutPins)
             {
-                if (pin.TypeDesc == typeDesc)
+                if (pin.TypeDesc == typeDesc || typeDesc == null)
                 {
                     pins.Add(pin);
                 }
@@ -211,78 +212,5 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             
         }
-    }
-    public class TtClassReferenceExpressionDescription : TtExpressionDescription
-    {
-
-    }
-    public class TtVariableReferenceExpressionDescription : TtExpressionDescription
-    {
-        //public override string Name { get => ""; set { } }
-        public TtVariableReferenceExpressionDescription()
-        {
-            AddDtaInPin(new () { Name = "" });
-            AddDtaOutPin(new () { Name = "" });
-        }
-    }
-    public class TtSelfReferenceExpressionDescription
-    {
-
-    }
-    public class TtLambdaExpressionDescription
-    {
-
-    }
-    public class TtAssignOperatorExpressionDescription
-    {
-
-    }
-    public class TtUnaryOperatorExpressionDescription
-    {
-
-    }
-    public class TtIndexerOperatorExpressionDescription
-    {
-
-    }
-    public class TtPrimitiveExpressionDescription
-    {
-
-    }
-    public class TtCastExpressionDescription
-    {
-
-    }
-    public class TtCreateObjectExpressionDescription
-    {
-
-    }
-    public class TtDefaultValueExpressionDescription
-    {
-
-    }
-    public class TtNullValueExpressionDescription
-    {
-
-    }
-    public class TtExecuteSequenceStatementDescription
-    {
-
-    }
-    public class TtForLoopStatementDescription
-    {
-
-    }
-    public class TtWhileLoopStatementDescription
-    {
-
-    }
-    public class TtContinueStatementDescription
-    {
-
-    }
-    public class TtBreakStatementDescription
-    {
-
     }
 }

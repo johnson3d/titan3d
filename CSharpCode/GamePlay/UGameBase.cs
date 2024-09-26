@@ -179,14 +179,14 @@ namespace EngineNS.GamePlay
             scene.Parent = world.Root;
         }
         [Rtti.Meta]
-        public GamePlay.Scene.Actor.UActor ChiefPlayer { get; set; }
+        public GamePlay.Scene.Actor.TtActor ChiefPlayer { get; set; }
         [Rtti.Meta]
         public async System.Threading.Tasks.Task CreateCharacter(Scene.TtScene scene)
         {
             var playerStart = scene.FindFirstChild<TtPlayerStart>();
             EngineNS.GamePlay.Scene.TtNode root = scene;
-            var playerData = new EngineNS.GamePlay.Scene.Actor.UActor.UActorData();
-            ChiefPlayer = new EngineNS.GamePlay.Scene.Actor.UActor();
+            var playerData = new EngineNS.GamePlay.Scene.Actor.TtActor.TtActorData();
+            ChiefPlayer = new EngineNS.GamePlay.Scene.Actor.TtActor();
             await ChiefPlayer.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             ChiefPlayer.Parent = root;
             ChiefPlayer.NodeData.Name = "UActor";
@@ -267,8 +267,8 @@ namespace EngineNS.GamePlay
         public async System.Threading.Tasks.Task CreateSpereActor(Scene.TtScene scene)
         {
             EngineNS.GamePlay.Scene.TtNode root = scene;
-            var playerData = new EngineNS.GamePlay.Scene.Actor.UActor.UActorData();
-            var actor = new EngineNS.GamePlay.Scene.Actor.UActor();
+            var playerData = new EngineNS.GamePlay.Scene.Actor.TtActor.TtActorData();
+            var actor = new EngineNS.GamePlay.Scene.Actor.TtActor();
             await actor.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             actor.Parent = root;
             actor.NodeData.Name = "UActor";
@@ -286,8 +286,8 @@ namespace EngineNS.GamePlay
         public async System.Threading.Tasks.Task CreateBoxActor(Scene.TtScene scene)
         {
             EngineNS.GamePlay.Scene.TtNode root = scene;
-            var playerData = new EngineNS.GamePlay.Scene.Actor.UActor.UActorData();
-            var actor = new EngineNS.GamePlay.Scene.Actor.UActor();
+            var playerData = new EngineNS.GamePlay.Scene.Actor.TtActor.TtActorData();
+            var actor = new EngineNS.GamePlay.Scene.Actor.TtActor();
             await actor.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             actor.Parent = root;
             actor.NodeData.Name = "UActor";

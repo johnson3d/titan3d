@@ -217,6 +217,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         public override void OnMouseOver(ref FGraphElementRenderingContext context)
         {
             BackgroundColor = new Color4f(0.5, 1, 1, 1);
+            EGui.Controls.CtrlUtility.DrawHelper($"{DataPinDescription.TypeDesc.ToString()}");
         }
         public override void OnMouseLeave(ref FGraphElementRenderingContext context)
         {
