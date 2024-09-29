@@ -3227,10 +3227,15 @@ const TextEditor::LanguageDefinition& TextEditor::LanguageDefinition::Lua()
 #include "../../Base/BlobObject.h"
 
 NS_BEGIN
-void FCodeEditor::GetText(IBlobObject* blob) const
+void FCodeEditor::GetText(IBlobObject* blob)
 {
-	std::string text = TextEditor.GetText();
+	Text = TextEditor.GetText();
 	blob->ReSize(0);
-	blob->PushData(&text[0], (UINT)text.length());
+	blob->PushData(&Text[0], (UINT)Text.length());
+}
+const char* FCodeEditor::GetTextPointer()
+{
+	Text = TextEditor.GetText();
+	return Text.c_str();
 }
 NS_END

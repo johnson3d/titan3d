@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="d5966cb7-b596-4819-9f2d-2f7e766cb153" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,fbxresources/pivotpainter/mi_branch2.uminst,d5966cb7-b596-4819-9f2d-2f7e766cb153" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterialInstance&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
@@ -10,13 +11,9 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="6">
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Value="Game,fbxresources/pivotpainter/pivot_hierarchy.material,3f1ec76a-5e2d-4c69-9291-1d3bb4121a19" />
-    <e_1 Value="Game,fbxresources/pivotpainter/t_craghead_oak_tile_01_d_tex.srv,67d49acd-8a8d-463b-b4cb-ebfb8c3b0828" />
-    <e_2 Value="Game,fbxresources/pivotpainter/t_craghead_oak_tile_01_n_tex.srv,a389e1ff-5114-4008-bfe5-5b079f821981" />
-    <e_3 Value="Game,fbxresources/pivotpainter/hilltree_p2_rgb_pivotpos_a_parentindexint_uv_2.srv,5b150c42-7736-439f-83bb-39f10418ceb1" />
-    <e_4 Value="Game,fbxresources/pivotpainter/ht_p2_xvec_xexdiv2048r2048_uv_2.srv,66ecf7d0-b1ea-46bd-8619-46518307c225" />
-    <e_5 Value="Game,fbxresources/pivotpainter/windturblencevectorandgustmagnitude.srv,c941dc73-76ac-493d-9e51-f493f7dc57ba" />
+    <e_1 Value="Game,fbxresources/pivotpainter/t_craghead_oak_limbtile_02_d_tex.srv,8a5d04a0-f49b-4f17-9c3c-cc8f0996d463" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
 </Root>

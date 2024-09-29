@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="15ec2216-bf13-481e-a2ef-d3a8a9b739a8" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/mesh01.ums,15ec2216-bf13-481e-a2ef-d3a8a9b739a8" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMaterialMesh&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

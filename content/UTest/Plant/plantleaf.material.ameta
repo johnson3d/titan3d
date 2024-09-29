@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="c9d4455e-03e3-4c5b-b8f5-4189099f74ee" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/plant/plantleaf.material,c9d4455e-03e3-4c5b-b8f5-4189099f74ee" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterial&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
@@ -14,6 +15,9 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Game,utest/plant/fir_01_plant/t_fir_leaves_bc_t.srv,6d27a5f4-f8d4-411e-a7a2-37830ca0cffc" />
+    <e_1 Value="Game,utest/plant/fir_01_plant/t_fir_leaves_n.srv,228d32da-ae6f-4fc9-a4d3-5081f89ef56a" />
+  </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

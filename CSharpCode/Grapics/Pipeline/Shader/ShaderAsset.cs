@@ -80,6 +80,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     shader.ShaderCode = IO.TtFileManager.ReadAllText(TemplateName.Address);
                 }
                 mAsset.SaveAssetTo(mAsset.AssetName);
+                TtEngine.Instance.SourceControlModule.AddFile(mAsset.AssetName.Address, true);
+                TtEngine.Instance.SourceControlModule.AddFile(mAsset.AssetName.Address + ".ameta", true);
 
                 return true;
             }
@@ -165,7 +167,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public string ShaderCode { get; set; } = null;
         public string GetShaderCode()
         {
-            return IO.TtFileManager.ReadAllText(AssetName.Address);
+            return IO.TtFileManager.ReadAllText(AssetName.Address, System.Text.Encoding.UTF8);
         }
     }
     public partial class TtShaderAssetEditor : EngineNS.Editor.IAssetEditor, IRootForm
@@ -295,8 +297,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
                 var blob = new Support.TtBlobObject();
-                mShaderEditor.mCoreObject.GetText(blob.mCoreObject);
-                ShaderAsset.ShaderCode = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)blob.mCoreObject.GetData(), (int)blob.mCoreObject.GetSize());
+                //mShaderEditor.mCoreObject.GetText(blob.mCoreObject);
+                //ShaderAsset.ShaderCode = System.Runtime.InteropServices.Marshal.PtrToStringUTF8((IntPtr)blob.mCoreObject.GetData(), (int)blob.mCoreObject.GetSize());
+                ShaderAsset.ShaderCode = mShaderEditor.mCoreObject.GetTextPointer();
                 ShaderAsset.SaveAssetTo(AssetName);
             }
             ImGuiAPI.SameLine(0, -1);

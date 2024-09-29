@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="59d7fc63-224d-414a-b315-71a87f921839" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/renderpolicy/test01.scene,59d7fc63-224d-414a-b315-71a87f921839" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.UScene&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

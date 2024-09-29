@@ -14,7 +14,6 @@ namespace EngineNS.GamePlay.Scene
     {
         public override void Dispose()
         {
-            CoreSDK.DisposeObject(ref mMesh);
             foreach(var mesh1 in mMeshMatrix)
             {
                 mesh1.Dispose();
@@ -68,16 +67,38 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
+        bool bNeedUpdateMeshMatrix = false;
+        int meshCount = 10;
+        [Category("Option")]
+        public int MeshCount
+        {
+            get => meshCount;
+            set
+            {
+                meshCount = value;
+                bNeedUpdateMeshMatrix = true;
+            }
+        }
+        float meshSpacing = 1.5f;
+        [Category("Option")]
+        public float MeshSpacing
+        {
+            get => meshSpacing;
+            set
+            {
+                bNeedUpdateMeshMatrix = true;
+                meshSpacing = value;
+            }
+        }
         async Thread.Async.TtTask<bool> InitMeshMatrix(UMeshNodeData meshData)
         {
             mMeshMatrix.Clear();
             var world = this.GetWorld();
-            int meshCount = 10;
             for (int x = 0; x < meshCount; ++x)
             {
                 for (int z = 0; z < meshCount; ++z)
                 {
-                    var meshPrimitive = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.CreateMeshPrimitive(RName.GetRName("tutorials/pbr/cube.vms", RName.ERNameType.Game));
+                    var meshPrimitive = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.CreateMeshPrimitive(RName.GetRName("mesh/base/sphere.vms", RName.ERNameType.Engine));
                     var mtlInst = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/brdf_base.uminst", RName.ERNameType.Engine));
                     var mtlInstList = new List<Graphics.Pipeline.Shader.TtMaterial>();
                     mtlInstList.Add(mtlInst);
@@ -96,7 +117,7 @@ namespace EngineNS.GamePlay.Scene
                             metallic.SetValue((float)z / (float)(meshCount - 1));
                         }
                         var trans = Placement.AbsTransform;
-                        trans.Position = trans.Position + new DVector3(x * 2.5, 0, z * 2.5);
+                        trans.Position = trans.Position + new DVector3(x * meshSpacing, 0, z * meshSpacing);
                         if (world != null)
                         {
                             meshSphere.SetWorldTransform(in trans, world, false);
@@ -111,10 +132,13 @@ namespace EngineNS.GamePlay.Scene
                     }
                 }
             }
-            // todo: this function invalid
-            BoundVolume.LocalAABB.Merge(new Vector3(25, 0, 25));
+            var maxDistance = meshCount * meshSpacing;
+            //BoundVolume.LocalAABB.Merge(new Vector3(maxDistance, 1, maxDistance));
+            BoundVolume.LocalAABB = new BoundingBox(BoundVolume.LocalAABB.Minimum, new Vector3(maxDistance, 1, maxDistance));
 
-            BoundVolume.LocalAABB = new BoundingBox(BoundVolume.LocalAABB.Minimum, new Vector3(25, 1, 25));
+            this.UpdateAbsTransform();
+            UpdateAABB();
+            Parent?.UpdateAABB();
 
             return true;
         }
@@ -131,22 +155,11 @@ namespace EngineNS.GamePlay.Scene
 
             await InitMeshMatrix(meshData);
 
-            var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
-            if (materialMesh != null)
-            {
-                var mesh = new Graphics.Mesh.TtMesh();
-                mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
-                this.Mesh = mesh;
-                //await materialMesh.Mesh.TryLoadClusteredMesh();
-            }
-
             return true;
         }
         public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
         {
-            if (mMesh == null)
-                return;
-            meshes.Add(mMesh);
+            meshes.AddRange(mMeshMatrix);
             foreach(var i in Children)
             {
                 if(i.HitproxyType == Graphics.Pipeline.TtHitProxy.EHitproxyType.FollowParent)
@@ -155,23 +168,31 @@ namespace EngineNS.GamePlay.Scene
         }
         public override void OnHitProxyChanged()
         {
-            if (mMesh == null)
-                return;
             if (this.HitProxy == null)
             {
-                mMesh.IsDrawHitproxy = false;
+                foreach(var m in mMeshMatrix)
+                {
+                    m.IsDrawHitproxy = false;
+                }
                 return;
             }
 
             if (HitproxyType != Graphics.Pipeline.TtHitProxy.EHitproxyType.None)
             {
-                mMesh.IsDrawHitproxy = true;
                 var value = HitProxy.ConvertHitProxyIdToVector4();
-                mMesh.SetHitproxy(in value);
+                foreach (var m in mMeshMatrix)
+                {
+                    m.IsDrawHitproxy = true;
+                    m.SetHitproxy(in value);
+                }
+
             }
             else
             {
-                mMesh.IsDrawHitproxy = false;
+                foreach (var m in mMeshMatrix)
+                {
+                    m.IsDrawHitproxy = false;
+                }
             }
         }
         protected override void OnSetPrefabTemplate()
@@ -187,10 +208,14 @@ namespace EngineNS.GamePlay.Scene
             set
             {
                 base.IsAcceptShadow = value;
-                if (mMesh == null)
+                if (mMeshMatrix.Count == 0)
                     return;
 
-                mMesh.IsAcceptShadow = value;
+                foreach (var m in mMeshMatrix)
+                {
+                    m.IsAcceptShadow = value;
+                }
+
             }
         }
         public static async System.Threading.Tasks.Task<TtMeshNode> AddMeshNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, Graphics.Mesh.TtMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
@@ -241,138 +266,7 @@ namespace EngineNS.GamePlay.Scene
         }
         List<Graphics.Mesh.TtMesh> mCurrMeshMatrix = new List<Graphics.Mesh.TtMesh>();
         List<Graphics.Mesh.TtMesh> mMeshMatrix = new List<Graphics.Mesh.TtMesh>();
-        Graphics.Mesh.TtMesh mMesh;
-        [Rtti.Meta]
-        public Graphics.Mesh.TtMesh Mesh 
-        {
-            get 
-            {
-                return mMesh;
-            }
-            set
-            {
-                if (mMesh != null)
-                {
-                    mMesh.HostNode = null;
-                }
-                
-                mMesh = value;
 
-                var meshData = NodeData as UMeshNodeData;
-                if (meshData != null)
-                {
-                    meshData.MeshName = mMesh.MaterialMesh.AssetName;
-                    meshData.MdfQueueType = mMesh.MdfQueueType;
-                    meshData.AtomType = Rtti.TtTypeDesc.TypeStr(mMesh.SubMeshes[0].Atoms[0].GetType());
-                }
-
-                if (mMesh != null)
-                {
-                    BoundVolume.LocalAABB = mMesh.MaterialMesh.AABB;
-                    mMesh.HostNode = this;
-                }
-                else
-                    BoundVolume.LocalAABB.InitEmptyBox();
-
-                this.UpdateAbsTransform();
-                UpdateAABB();
-                Parent?.UpdateAABB();
-
-                mMesh.HostNode = this;
-            }
-        }
-        [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
-        [Category("Option")]
-        public RName MeshName 
-        {
-            get
-            {
-                var meshData = NodeData as UMeshNodeData;
-                if (meshData == null)
-                    return null;
-                return meshData.MeshName;
-            }
-            set
-            {
-                var meshData = NodeData as UMeshNodeData;
-                if (meshData == null)
-                    return;
-                meshData.MeshName = value;
-                if (meshData.MeshName == null)
-                    return;
-                _ = InitMeshMatrix(meshData);
-
-                System.Action action = async () =>
-                {
-                    var mesh = new Graphics.Mesh.TtMesh();
-
-                    var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(value);
-                    var ok = mesh.Initialize(materialMesh, meshData.MdfQueue, meshData.Atom);
-                    if (ok == false)
-                        return;
-                    Mesh = mesh;
-                    var world = this.GetWorld();
-                    if (world != null)
-                    {
-                        Mesh.SetWorldTransform(in Placement.AbsTransform, world, false);
-                    }
-                    else
-                    {
-                        Mesh.SetWorldTransform(in Placement.AbsTransform, null, false);
-                    }
-                    OnHitProxyChanged();
-
-                    //// add mesh matrix
-                    //int meshCount = 10;
-                    //mMeshMatrix.Clear();
-                    //for(int x = 0; x < meshCount; ++x)
-                    //{
-                    //    for (int z = 0; z < meshCount; ++z)
-                    //    {
-                    //        var mtlInst = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/brdf_base.uminst", RName.ERNameType.Engine));
-                    //        var meshPrimitive = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.CreateMeshPrimitive(RName.GetRName("mesh/base/sphere.vms", RName.ERNameType.Engine));
-                    //        var mtlInstList = new List<Graphics.Pipeline.Shader.TtMaterial>();
-                    //        mtlInstList.Add(mtlInst);
-                    //        //var materialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(meshData.MeshName);
-                    //        //if (materialMesh != null)
-                    //        {
-                    //            var meshSphere = new Graphics.Mesh.TtMesh();
-                    //            meshSphere.Initialize(meshPrimitive, mtlInstList, Rtti.TtTypeDesc.TypeOf(meshData.MdfQueueType), Rtti.TtTypeDesc.TypeOf(meshData.AtomType));
-                    //            var mtl = meshSphere.GetMaterial(0, 0);
-                    //            var roughness = mtl.FindVar("Roughness");
-                    //            if (roughness != null)
-                    //            {
-                    //                roughness.SetValue((float)x / (float)(meshCount-1));
-                    //            }
-                    //            var metallic = mtl.FindVar("Metallic");
-                    //            if (metallic != null)
-                    //            {
-                    //                metallic.SetValue((float)z / (float)(meshCount-1));
-                    //            }
-                    //            var trans = Placement.AbsTransform;
-                    //            trans.Position = trans.Position + new DVector3(x * 2.5, 0, z * 2.5);
-                    //            //var world = this.GetWorld();
-                    //            if (world != null)
-                    //            {
-                    //                meshSphere.SetWorldTransform(in trans, world, false);
-                    //            }
-                    //            else
-                    //            {
-                    //                meshSphere.SetWorldTransform(in trans, null, false);
-                    //            }
-
-                    //            mMeshMatrix.Add(meshSphere);
-                    //            meshSphere.HostNode = this;
-
-                    //        }
-                    //    }
-                    //}
-                    //BoundVolume.LocalAABB.Merge(new Vector3(25, 0, 25));
-                    //BoundVolume.LocalAABB = new BoundingBox(BoundVolume.LocalAABB.Minimum, new Vector3(25, 1, 25));
-                };
-                action();
-            }
-        }
         public override async Thread.Async.TtTask OnNodeLoaded(TtNode parent)
         {
             await base.OnNodeLoaded(parent);
@@ -384,15 +278,6 @@ namespace EngineNS.GamePlay.Scene
                 var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeBoxWireframe(0, 0, 0, 5, 5, 5).ToMesh();
                 var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
                 materials1[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria;// TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria.CloneMaterialInstance();
-                //var colorVar = materials1[0].FindVar("clr4_0");
-                //if (colorVar != null)
-                //{
-                //    colorVar.SetValue(new Vector4(1, 0, 1, 1));
-                //}
-                var mesh = new Graphics.Mesh.TtMesh();
-                mesh.Initialize(cookedMesh, materials1, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
-                mesh.IsAcceptShadow = this.IsAcceptShadow;
-                Mesh = mesh;
                 return;
             }
             else
@@ -404,12 +289,7 @@ namespace EngineNS.GamePlay.Scene
         {
             UpdateCameralOffset(rp.World);
 
-            if (mMesh == null)
-                return;
-
             NodeData.CheckDirty(this);
-
-            rp.AddVisibleMesh(mMesh);
 
             foreach (var mesh in mCurrMeshMatrix)
             {
@@ -425,15 +305,19 @@ namespace EngineNS.GamePlay.Scene
         }
         protected override void OnCameralOffsetChanged(TtWorld world)
         {
-            mMesh?.UpdateCameraOffset(world);
+
+            foreach (var m in mMeshMatrix)
+            {
+                m?.UpdateCameraOffset(world);
+            }
         }
         protected override void OnAbsTransformChanged()
         {
-            if (mMesh == null)
-                return;
+            //if (mMesh == null)
+            //    return;
 
-            var world = this.GetWorld();
-            mMesh.SetWorldTransform(in Placement.AbsTransform, world, false);
+            //var world = this.GetWorld();
+            //mMesh.SetWorldTransform(in Placement.AbsTransform, world, false);
         }
 
 /* 项目“Engine.Window”的未合并的更改
@@ -464,11 +348,13 @@ namespace EngineNS.GamePlay.Scene
         static Macross.TtMacrossBreak mTestBreak = new Macross.TtMacrossBreak("UMeshNode.OnTickLogic", false);
         public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
-            //using (var guard = new Macross.UMacrossStackGuard(mLogicTickFrame))
-            //{
-            //    mTestBreak.TryBreak();
-            //}
-                
+            if (bNeedUpdateMeshMatrix == true)
+            {
+                var meshData = NodeData as UMeshNodeData;
+                if (meshData != null)
+                    _ = InitMeshMatrix(meshData);
+                bNeedUpdateMeshMatrix = false;
+            }
             return true;
         }
 
@@ -508,8 +394,6 @@ namespace EngineNS.GamePlay.Scene
 
         public override void AddAssetReferences(IO.IAssetMeta ameta)
         {
-            if (MeshName != null)
-                ameta.AddReferenceAsset(MeshName);
         }
     }
 }

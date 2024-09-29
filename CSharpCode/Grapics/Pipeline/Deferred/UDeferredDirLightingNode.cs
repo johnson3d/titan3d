@@ -364,11 +364,12 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             get
             {
-                return mBasePassShading.DebugShowMode;
+                return mBasePassShading!=null ? mBasePassShading.DebugShowMode : TtDeferredDirLightingShading.EDebugShowMode.None;
             }
             set
             {
-                mBasePassShading.DebugShowMode = value;
+                if(mBasePassShading!=null)
+                    mBasePassShading.DebugShowMode = value;
             }
         }
     }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="473899c0-4c10-4ae5-93a8-d54cc6b61253" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/plant/grass/mm_grass.ums,473899c0-4c10-4ae5-93a8-d54cc6b61253" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMaterialMesh&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

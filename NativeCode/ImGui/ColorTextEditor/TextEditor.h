@@ -400,6 +400,7 @@ protected:
 	TextEditor TextEditor;
 	TextEditor::LanguageDefinition LangDefine;
 	TextEditor::ErrorMarkers ErrorMarkers;
+	std::string Text;
 public:
 	FCodeEditor()
 	{
@@ -457,7 +458,8 @@ public:
 	{
 		TextEditor.SetText(aText);
 	}
-	void GetText(IBlobObject* blob) const;
+	void GetText(IBlobObject* blob);
+	const char* GetTextPointer();
 	void Undo()
 	{
 		TextEditor.Undo();

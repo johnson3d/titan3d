@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assimp;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -322,11 +323,13 @@ namespace EngineNS.IO
             }
             return path;
         }
-        public static string ReadAllText(string file)
+        public static string ReadAllText(string file, System.Text.Encoding encoding = null)
         {
             if (System.IO.File.Exists(file) == false)
                 return null;
-            return System.IO.File.ReadAllText(file);
+            if (encoding == null)
+                return System.IO.File.ReadAllText(file);
+            return System.IO.File.ReadAllText(file, encoding);
         }
         public static void WriteAllText(string file, string text)
         {

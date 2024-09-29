@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="fb7a2d73-754d-4879-854f-92e2870af64a" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/mesh/puppet.ums,fb7a2d73-754d-4879-854f-92e2870af64a" />
   <Description Type="System.String@Unknown" Value="This is a Asset" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

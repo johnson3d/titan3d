@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="ec52a1c3-0428-4ba0-b6f9-e1e5f6755d8c" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,fbxresources/pivotpainter/house.ums,ec52a1c3-0428-4ba0-b6f9-e1e5f6755d8c" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMaterialMesh&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

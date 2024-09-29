@@ -791,9 +791,9 @@ namespace EngineNS.Graphics.Mesh
             else
             {
                 if (isNoScale == false)
-                    this.DirectSetWorldMatrix(transform.ToMatrixWithScale(in transform.mPosition));
+                    this.DirectSetWorldMatrix(transform.ToMatrixWithScale(in DVector3.Zero));
                 else
-                    this.DirectSetWorldMatrix(transform.ToMatrixNoScale(in transform.mPosition));
+                    this.DirectSetWorldMatrix(transform.ToMatrixNoScale(in DVector3.Zero));
             }
         }
         public void DirectSetWorldMatrix(in Matrix tm)

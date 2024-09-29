@@ -123,7 +123,7 @@ namespace ProjectCooker.Command
         async System.Threading.Tasks.Task ProcAssets(System.Type type, bool bOnlyAMeta = false)
         {
             var ameta = EngineNS.Rtti.TtTypeDescManager.CreateInstance(type) as EngineNS.IO.IAssetMeta;
-            var extType = ameta.GetAssetExtType();
+            var extType = ameta.TypeExt;
             for (var t = EngineNS.IO.TtFileManager.ERootDir.Game; t <= EngineNS.IO.TtFileManager.ERootDir.Editor; t++)
             {
                 var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(t);
