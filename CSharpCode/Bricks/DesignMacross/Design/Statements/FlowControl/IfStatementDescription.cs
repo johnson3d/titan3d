@@ -22,8 +22,7 @@ namespace EngineNS.DesignMacross.Design.Statement
         public override TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
             var ifStatement = new TtIfStatement();
-            var methodDesc = statementBuildContext.MethodDescription as TtMethodDescription;
-            
+            var methodDesc = statementBuildContext.MethodDescription as TtMethodDescription;          
             
             var linkedDataPin = methodDesc.GetLinkedDataPin(DataInPins[0]);
             if(linkedDataPin == null)

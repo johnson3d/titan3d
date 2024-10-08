@@ -15,11 +15,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public override string Name { get => "Self"; set { } }
         public TtSelfReferenceDescription()
         {
-            AddDtaOutPin(new TtSelfReferenceDataPin() { Name = "Get" });
+            AddDataOutPin(new TtSelfReferenceDataPin() { Name = "Get" });
         }
         public TtSelfReferenceDescription(TtTypeDesc typeDesc)
         {
-            AddDtaOutPin(new TtSelfReferenceDataPin() { Name = "Get", TypeDesc = typeDesc });
+            AddDataOutPin(new TtSelfReferenceDataPin() { Name = "Get", TypeDesc = typeDesc });
         }
     }
 }

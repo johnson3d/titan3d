@@ -9,6 +9,7 @@ using EngineNS.DesignMacross.Design.Expressions;
 using EngineNS.DesignMacross.Design.Statement;
 using EngineNS.EGui.Controls;
 using EngineNS.Rtti;
+using Org.BouncyCastle.Asn1.X509.Qualified;
 
 namespace EngineNS.DesignMacross.Design
 {
@@ -193,7 +194,7 @@ namespace EngineNS.DesignMacross.Design
     }
     public class TtMethodGraphContextMenuUtil
     {
-        public static void ConstructMenuItemsAboutAssembly(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu, TtGraph_Method methodGraph)
+        public static void ConstructMenuItemsAboutContextMenuAttribute(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu, TtGraph_Method methodGraph)
         {
             //Collect DMC Descriptions with  ContextMenuAttribute
 
@@ -273,7 +274,7 @@ namespace EngineNS.DesignMacross.Design
                                                  });
 
             }
-            string[] selfRefMenuPath = { "Self", "SelfReference"};
+            string[] selfRefMenuPath = { "Self", "SelfReference" };
             var selfRefTypeDesc = TtTypeDesc.TypeOf<TtSelfReferenceDescription>();
             var superClassType = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(context.DesignedClassDescription.SupperClassNames[0]);
             TtMenuUtil.ConstructMenuItem(popupMenu.Menu, selfRefTypeDesc, selfRefMenuPath, "",
@@ -287,7 +288,7 @@ namespace EngineNS.DesignMacross.Design
                                                      (data) => { methodDescription.RemoveExpression(expression); });
                                              });
         }
-        public static void ConstructMenuItemsAboutReflection(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu, TtGraph_Method methodGraph)
+        public static void ConstructMenuItemsAboutMetas(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu, TtGraph_Method methodGraph)
         {
             var methodDescription = methodGraph.MethodDescription;
             var cmdHistory = context.CommandHistory;
@@ -311,19 +312,17 @@ namespace EngineNS.DesignMacross.Design
                     {
                         menuPath = TtMenuUtil.GetContextPath(methodMeta.DeclaringType, methodMeta.MethodName);
                     }
-                    var typeDesc = TtTypeDesc.TypeOf<TtMethodInvokeReflectedDescription>();
+                    var typeDesc = TtTypeDesc.TypeOf<TtMethodInvokeDescription>();
                     TtMenuUtil.ConstructMenuItem(popupMenu.Menu, typeDesc, menuPath, "",
                                                      (TtMenuItem item, object sender) =>
                                                      {
                                                          var popMenu = sender as TtPopupMenu;
-                                                         if (Rtti.TtTypeDescManager.CreateInstance(typeDesc) is TtMethodInvokeReflectedDescription desc)
-                                                         {
-                                                             desc.SetMethodMeta(methodMeta);
-                                                             var style = graphElementStyleManager.GetOrAdd(desc.Id, popMenu.PopedPosition);
-                                                             cmdHistory.CreateAndExtuteCommand("AddStatement",
-                                                                 (data) => { methodDescription.AddStatement(desc); },
-                                                                 (data) => { methodDescription.RemoveStatement(desc); });
-                                                         }
+                                                         var methodInvoke = TtMethodInvokeDescription.Create(methodMeta);
+                                                         var style = graphElementStyleManager.GetOrAdd(methodInvoke.Id, popMenu.PopedPosition);
+                                                         cmdHistory.CreateAndExtuteCommand("AddStatement",
+                                                             (data) => { methodDescription.AddStatement(methodInvoke); },
+                                                             (data) => { methodDescription.RemoveStatement(methodInvoke); });
+
                                                      });
 
                 }
@@ -333,7 +332,7 @@ namespace EngineNS.DesignMacross.Design
 
     public class TtMethodGraphLinkedPinContextMenuUtil
     {
-        public static void ConstructMenuItemsAboutClassPropertiesAndMethods(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu, TtGraph_Method methodGraph)
+        public static void ConstructMenuItemsAboutClassPropertiesAndMethods_OutPin(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu, TtGraph_Method methodGraph)
         {
             var cmdHistory = context.CommandHistory;
             var graphElementStyleManager = context.GraphElementStyleManager;
@@ -351,56 +350,71 @@ namespace EngineNS.DesignMacross.Design
                 if (classType == null)
                     return;
 
+                if (previewDataLine.StartPin is TtDataInPinDescription)
+                    return;
+
                 foreach (var property in classType.GetProperties())
                 {
                     //Get
                     {
                         string[] menuPath = { classType.Name, "Get" + property.Name };
                         var typeDesc = TtTypeDesc.TypeOf(property.PropertyType);
-                        TtPropertyGetDescription getExpression = new(classType, typeDesc);
-                        getExpression.Name = property.Name;
-                        getExpression.HostReferenceId = previewDataLine.StartPin.Parent.Id;
-                        var canLink = TtMethodUtil.TryGetLinkedDataLineWithPin(previewDataLine.StartPin, getExpression, out var line);
-                        if (canLink)
-                        {
-                            TtMenuUtil.ConstructMenuItem(popupMenu.Menu, typeDesc, menuPath, "",
-                                                        (TtMenuItem item, object sender) =>
-                                                        {
-                                                            var popMenu = sender as TtPopupMenu;
-                                                            var style = graphElementStyleManager.GetOrAdd(getExpression.Id, popMenu.PopedPosition);
-                                                            cmdHistory.CreateAndExtuteCommand("AddExpressionAndDataLink",
-                                                                    (data) => { methodDescription.AddExpression(getExpression); methodDescription.AddDataLine(line); },
-                                                                    (data) => { methodDescription.RemoveExpression(getExpression); methodDescription.RemoveDataLine(line); });
-                                                        });
-                        }
+                        TtMenuUtil.ConstructMenuItem(popupMenu.Menu, typeDesc, menuPath, "",
+                                                    (TtMenuItem item, object sender) =>
+                                                    {
+                                                        TtPropertyGetDescription getExpression = new(classType, typeDesc);
+                                                        getExpression.Name = property.Name;
+                                                        getExpression.HostReferenceId = previewDataLine.StartPin.Parent.Id;
+                                                        var line = new TtDataLineDescription { FromId = previewDataLine.StartPin.Id, ToId = getExpression.GetHostPin().Id };
+                                                        var popMenu = sender as TtPopupMenu;
+                                                        var style = graphElementStyleManager.GetOrAdd(getExpression.Id, popMenu.PopedPosition);
+                                                        cmdHistory.CreateAndExtuteCommand("AddExpressionAndDataLink",
+                                                                (data) => { methodDescription.AddExpression(getExpression); methodDescription.AddDataLine(line); },
+                                                                (data) => { methodDescription.RemoveExpression(getExpression); methodDescription.RemoveDataLine(line); });
+                                                    });
                     }
                     //Set
                     {
                         string[] menuPath = { classType.Name, "Set" + property.Name };
                         var typeDesc = TtTypeDesc.TypeOf(property.PropertyType);
-                        TtPropertySetDescription setExpression = new(classType, typeDesc);
-                        setExpression.Name = property.Name;
-                        setExpression.HostReferenceId = previewDataLine.StartPin.Parent.Id;
-                        var canLink = TtMethodUtil.TryGetLinkedDataLineWithPin(previewDataLine.StartPin, setExpression, out var line);
-                        if (canLink)
-                        {
-                            TtMenuUtil.ConstructMenuItem(popupMenu.Menu, typeDesc, menuPath, "",
-                                                        (TtMenuItem item, object sender) =>
-                                                        {
-                                                            var popMenu = sender as TtPopupMenu;
-                                                            var style = graphElementStyleManager.GetOrAdd(setExpression.Id, popMenu.PopedPosition);
-                                                            cmdHistory.CreateAndExtuteCommand("AddExpressionAndDataLink",
-                                                                    (data) => { methodDescription.AddExpression(setExpression); methodDescription.AddDataLine(line); },
-                                                                    (data) => { methodDescription.RemoveExpression(setExpression); methodDescription.RemoveDataLine(line); });
-                                                        });
-                        }
+                        TtMenuUtil.ConstructMenuItem(popupMenu.Menu, typeDesc, menuPath, "",
+                                                    (TtMenuItem item, object sender) =>
+                                                    {
+                                                        TtPropertySetDescription setExpression = new(classType, typeDesc);
+                                                        setExpression.Name = property.Name;
+                                                        setExpression.HostReferenceId = previewDataLine.StartPin.Parent.Id;
+                                                        var line = new TtDataLineDescription { FromId = previewDataLine.StartPin.Id, ToId = setExpression.GetHostPin().Id };
+                                                        var popMenu = sender as TtPopupMenu;
+                                                        var style = graphElementStyleManager.GetOrAdd(setExpression.Id, popMenu.PopedPosition);
+                                                        cmdHistory.CreateAndExtuteCommand("AddExpressionAndDataLink",
+                                                                (data) => { methodDescription.AddExpression(setExpression); methodDescription.AddDataLine(line); },
+                                                                (data) => { methodDescription.RemoveExpression(setExpression); methodDescription.RemoveDataLine(line); });
+                                                    });
+
                     }
 
                 }
                 foreach (var method in classType.GetMethods())
                 {
-                    string[] menuPath = { classType.Name, method.Name };
+                    if (!method.IsPublic || method.IsStatic)
+                        continue;
 
+                    string[] menuPath = { classType.Name, method.Name };
+                    var typeDesc = TtTypeDesc.TypeOf<TtMethodInvokeDescription>();
+                    var statement = TtMethodInvokeDescription.Create(method);
+                    if (statement.GetHostPin() != null)
+                    {
+                        var line = new TtDataLineDescription { FromId = previewDataLine.StartPin.Id, ToId = statement.GetHostPin().Id };
+                        TtMenuUtil.ConstructMenuItem(popupMenu.Menu, typeDesc, menuPath, "",
+                                                                             (TtMenuItem item, object sender) =>
+                                                                             {
+                                                                                 var popMenu = sender as TtPopupMenu;
+                                                                                 var style = graphElementStyleManager.GetOrAdd(statement.Id, popMenu.PopedPosition);
+                                                                                 cmdHistory.CreateAndExtuteCommand("AddStatementAndDataLink",
+                                                                                            (data) => { methodDescription.AddStatement(statement); methodDescription.AddDataLine(line); },
+                                                                                            (data) => { methodDescription.RemoveStatement(statement); methodDescription.RemoveDataLine(line); });
+                                                                             });
+                    }
                 }
             }
         }
@@ -467,7 +481,7 @@ namespace EngineNS.DesignMacross.Design
                 }
             }
         }
-        public static void ConstructMenuItemsAboutAssembly(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu, TtGraph_Method methodGraph)
+        public static void ConstructMenuItemsAboutContextMenuAttribute(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu, TtGraph_Method methodGraph)
         {
             var cmdHistory = context.CommandHistory;
             var graphElementStyleManager = context.GraphElementStyleManager;
@@ -486,7 +500,7 @@ namespace EngineNS.DesignMacross.Design
                             if (Rtti.TtTypeDescManager.CreateInstance(typeDesc) is TtExpressionDescription expression)
                             {
                                 if (previewDataLine != null)
-                                {            
+                                {
                                     var canLink = TtMethodUtil.TryGetLinkedDataLineWithPin(previewDataLine.StartPin, expression, out var line);
                                     if (canLink)
                                     {
@@ -559,7 +573,7 @@ namespace EngineNS.DesignMacross.Design
                 }
             }
         }
-        public static void ConstructMenuItemsAboutReflection(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu, TtGraph_Method methodGraph)
+        public static void ConstructMenuItemsAboutMetas(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu, TtGraph_Method methodGraph)
         {
             var cmdHistory = context.CommandHistory;
             var graphElementStyleManager = context.GraphElementStyleManager;
@@ -580,46 +594,43 @@ namespace EngineNS.DesignMacross.Design
                         continue;
                     if (methodMeta.Meta.IsNoMacrossUseable)
                         continue;
-                    var typeDesc = TtTypeDesc.TypeOf<TtMethodInvokeReflectedDescription>();
-                    if (Rtti.TtTypeDescManager.CreateInstance(typeDesc) is TtMethodInvokeReflectedDescription statement)
+                    var typeDesc = TtTypeDesc.TypeOf<TtMethodInvokeDescription>();
+                    var statement = TtMethodInvokeDescription.Create(methodMeta);
+                    string[] menuPath = methodMeta.Meta.MacrossDisplayPath;
+                    if (menuPath == null)
                     {
-                        statement.SetMethodMeta(methodMeta);
-                        string[] menuPath = methodMeta.Meta.MacrossDisplayPath;
-                        if (menuPath == null)
+                        menuPath = TtMenuUtil.GetContextPath(methodMeta.DeclaringType, methodMeta.MethodName);
+                    }
+                    if (previewDataLine != null)
+                    {
+                        var canLink = TtMethodUtil.TryGetLinkedDataLineWithPin(previewDataLine.StartPin, statement, out var line);
+                        if (canLink)
                         {
-                            menuPath = TtMenuUtil.GetContextPath(methodMeta.DeclaringType, methodMeta.MethodName);
+                            TtMenuUtil.ConstructMenuItem(popupMenu.Menu, typeDesc, menuPath, "",
+                                                                                 (TtMenuItem item, object sender) =>
+                                                                                 {
+                                                                                     var popMenu = sender as TtPopupMenu;
+                                                                                     var style = graphElementStyleManager.GetOrAdd(statement.Id, popMenu.PopedPosition);
+                                                                                     cmdHistory.CreateAndExtuteCommand("AddStatementAndDataLink",
+                                                                                                (data) => { methodDescription.AddStatement(statement); methodDescription.AddDataLine(line); },
+                                                                                                (data) => { methodDescription.RemoveStatement(statement); methodDescription.RemoveDataLine(line); });
+                                                                                 });
                         }
-                        if (previewDataLine != null)
+                    }
+                    if (previewExecutionLine != null)
+                    {
+                        var canLink = TtMethodUtil.TryGetLinkedExecutionLineWithPin(previewExecutionLine.StartPin, statement, out var line);
+                        if (canLink)
                         {
-                            var canLink = TtMethodUtil.TryGetLinkedDataLineWithPin(previewDataLine.StartPin, statement, out var line);
-                            if (canLink)
-                            {
-                                TtMenuUtil.ConstructMenuItem(popupMenu.Menu, typeDesc, menuPath, "",
-                                                                                     (TtMenuItem item, object sender) =>
-                                                                                     {
-                                                                                         var popMenu = sender as TtPopupMenu;
-                                                                                         var style = graphElementStyleManager.GetOrAdd(statement.Id, popMenu.PopedPosition);
-                                                                                         cmdHistory.CreateAndExtuteCommand("AddStatementAndDataLink",
-                                                                                                    (data) => { methodDescription.AddStatement(statement); methodDescription.AddDataLine(line); },
-                                                                                                    (data) => { methodDescription.RemoveStatement(statement); methodDescription.RemoveDataLine(line); });
-                                                                                     });
-                            }
-                        }
-                        if (previewExecutionLine != null)
-                        {
-                            var canLink = TtMethodUtil.TryGetLinkedExecutionLineWithPin(previewExecutionLine.StartPin, statement, out var line);
-                            if (canLink)
-                            {
-                                TtMenuUtil.ConstructMenuItem(popupMenu.Menu, typeDesc, menuPath, "",
-                                                                                     (TtMenuItem item, object sender) =>
-                                                                                     {
-                                                                                         var popMenu = sender as TtPopupMenu;
-                                                                                         var style = graphElementStyleManager.GetOrAdd(statement.Id, popMenu.PopedPosition);
-                                                                                         cmdHistory.CreateAndExtuteCommand("AddStatementAndExecLink",
-                                                                                                    (data) => { methodDescription.AddStatement(statement); methodDescription.AddExecutionLine(line); },
-                                                                                                    (data) => { methodDescription.RemoveStatement(statement); methodDescription.RemoveExecutionLine(line); });
-                                                                                     });
-                            }
+                            TtMenuUtil.ConstructMenuItem(popupMenu.Menu, typeDesc, menuPath, "",
+                                                                                 (TtMenuItem item, object sender) =>
+                                                                                 {
+                                                                                     var popMenu = sender as TtPopupMenu;
+                                                                                     var style = graphElementStyleManager.GetOrAdd(statement.Id, popMenu.PopedPosition);
+                                                                                     cmdHistory.CreateAndExtuteCommand("AddStatementAndExecLink",
+                                                                                                (data) => { methodDescription.AddStatement(statement); methodDescription.AddExecutionLine(line); },
+                                                                                                (data) => { methodDescription.RemoveStatement(statement); methodDescription.RemoveExecutionLine(line); });
+                                                                                 });
                         }
                     }
                 }

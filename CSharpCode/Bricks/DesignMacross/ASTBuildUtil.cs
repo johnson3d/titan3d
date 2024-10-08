@@ -102,7 +102,13 @@ namespace EngineNS.DesignMacross
         }
         public static TtMethodDeclaration CreateMethodDeclaration(IMethodDescription description, ref FClassBuildContext classBuildContext)
         {
-            var returnVar = TtASTBuildUtil.CreateMethodReturnVariableDeclaration(new(description.ReturnValueType), TtASTBuildUtil.CreateDefaultValueExpression(new(description.ReturnValueType)));
+            TtVariableDeclaration returnVar = null;
+            if(description.ReturnValueType != null)
+            {
+                returnVar = TtASTBuildUtil.CreateMethodReturnVariableDeclaration(
+                    new(description.ReturnValueType), 
+                    TtASTBuildUtil.CreateDefaultValueExpression(new(description.ReturnValueType)));
+            }
             List<TtMethodArgumentDeclaration> args = new();
             foreach(var argDesc in description.Arguments)
             {
@@ -120,7 +126,7 @@ namespace EngineNS.DesignMacross
         public static TtMethodDeclaration CreateMethodDeclaration(string methodName, TtVariableDeclaration returnVar, List<TtMethodArgumentDeclaration> arguments, bool isOverrid = false, TtMethodDeclaration.EAsyncType asyncType = TtMethodDeclaration.EAsyncType.None)
         {
             TtMethodDeclaration methodDeclaration = new();
-            methodDeclaration.IsOverride = true;
+            methodDeclaration.IsOverride = isOverrid;
             methodDeclaration.AsyncType = asyncType;
             methodDeclaration.MethodName = methodName;
             if(returnVar != null)

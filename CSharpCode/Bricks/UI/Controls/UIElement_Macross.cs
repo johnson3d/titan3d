@@ -204,13 +204,13 @@ namespace EngineNS.UI.Controls
                 {
                     var methodDesc = editor.UIAsset.MacrossEditor.DefClass.FindMethod(SetMethodName);
                     if(methodDesc != null)
-                        editor.UIAsset.MacrossEditor.RemoveMethod(methodDesc);
+                        editor.UIAsset.MacrossEditor.RemoveMethod(methodDesc, false);
                 }
                 if(!string.IsNullOrEmpty(GetMethodName))
                 {
                     var methodDesc = editor.UIAsset.MacrossEditor.DefClass.FindMethod(GetMethodName);
                     if (methodDesc != null)
-                        editor.UIAsset.MacrossEditor.RemoveMethod(methodDesc);
+                        editor.UIAsset.MacrossEditor.RemoveMethod(methodDesc, false);
                 }
             }
             public override bool IsSame(BindingDataBase target)

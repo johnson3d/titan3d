@@ -14,8 +14,8 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public TtUnaryOperatorExpression.EUnaryOperation Op { get; set; }
         public TtUnaryLogicOperatorDescription()
         {
-            AddDtaInPin(new() { Name = "" });
-            AddDtaOutPin(new() { Name = "" });
+            AddDataInPin(new() { Name = "" });
+            AddDataOutPin(new() { Name = "" });
         }
     }
 
@@ -28,9 +28,9 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public TtBinaryOperatorExpression.EBinaryOperation Op { get; set; }
         public TtBinaryLogicOperatorDescription()
         {
-            AddDtaInPin(new() { Name = "" });
-            AddDtaInPin(new() { Name = "" });
-            AddDtaOutPin(new() { Name = "Result" });
+            AddDataInPin(new() { Name = "" });
+            AddDataInPin(new() { Name = "" });
+            AddDataOutPin(new() { Name = "Result", TypeDesc = TtTypeDesc.TypeOf<bool>() });
         }
 
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
@@ -84,28 +84,28 @@ namespace EngineNS.DesignMacross.Design.Expressions
                 if (otherPin == dataPin)
                     continue;
 
-                if (dataPin.TypeDesc != null)
-                {
-                    if (otherPin.TypeDesc == null)
-                    {
-                        otherPin.TypeDesc = dataPin.TypeDesc;
-                        var linkedPin = methodDescription.GetLinkedDataPin(dataPin);
-                        if (linkedPin != null && linkedPin.TypeDesc == null)
-                        {
-                            if (linkedPin.Parent is TtBinaryArithmeticOperatorDescription valueOperatorDescription)
-                            {
-                                linkedPin.TypeDesc = dataPin.TypeDesc;
-                                valueOperatorDescription.PinTypeSpreading(linkedPin, methodDescription);
-                            }
-                            if (linkedPin.Parent is TtBinaryLogicOperatorDescription logicOperatorDescription)
-                            {
-                                linkedPin.TypeDesc = dataPin.TypeDesc;
-                                logicOperatorDescription.PinTypeSpreading(linkedPin, methodDescription);
-                            }
+                //if (dataPin.TypeDesc != null)
+                //{
+                //    if (otherPin.TypeDesc == null)
+                //    {
+                //        otherPin.TypeDesc = dataPin.TypeDesc;
+                //        var linkedPin = methodDescription.GetLinkedDataPin(dataPin);
+                //        if (linkedPin != null && linkedPin.TypeDesc == null)
+                //        {
+                //            if (linkedPin.Parent is TtBinaryArithmeticOperatorDescription valueOperatorDescription)
+                //            {
+                //                linkedPin.TypeDesc = dataPin.TypeDesc;
+                //                valueOperatorDescription.PinTypeSpreading(linkedPin, methodDescription);
+                //            }
+                //            if (linkedPin.Parent is TtBinaryLogicOperatorDescription logicOperatorDescription)
+                //            {
+                //                linkedPin.TypeDesc = dataPin.TypeDesc;
+                //                logicOperatorDescription.PinTypeSpreading(linkedPin, methodDescription);
+                //            }
 
-                        }
-                    }
-                }
+                //        }
+                //    }
+                //}
             }
         }
         public override void OnPinConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, TtMethodDescription methodDescription)

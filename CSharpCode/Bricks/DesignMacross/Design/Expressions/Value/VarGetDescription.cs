@@ -24,7 +24,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public TtTypeDesc VarTypeDesc { get=>VariableDescription.VariableType.TypeDesc; }
         public TtVarGetDescription()
         {
-            AddDtaOutPin(new() { Name = "Get", TypeDesc = TtTypeDesc.TypeOf<bool>() });
+            AddDataOutPin(new() { Name = "Get", TypeDesc = TtTypeDesc.TypeOf<bool>() });
         }
 
         public IVariableDescription GetVariableDescription()

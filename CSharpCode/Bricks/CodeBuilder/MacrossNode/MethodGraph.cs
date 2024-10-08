@@ -24,7 +24,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public TtCodeGeneratorBase CodeGen { get; }
         public List<UMacrossMethodGraph> Methods { get; }
         public EGui.Controls.PropertyGrid.PropertyGrid PGMember { get; set; }
-        public void RemoveMethod(UMacrossMethodGraph method);
+        public void RemoveMethod(UMacrossMethodGraph method, bool realDelete);
         public void SetConfigUnionNode(NodeGraph.IUnionNode node);
     }
     public partial class UMethodStartNode : UNodeBase, IAfterExecNode

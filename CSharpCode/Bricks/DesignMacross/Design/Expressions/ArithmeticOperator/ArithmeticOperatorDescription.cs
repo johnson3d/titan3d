@@ -12,9 +12,9 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public TtBinaryOperatorExpression.EBinaryOperation Op { get; set; }
         public TtBinaryArithmeticOperatorDescription()
         {
-            AddDtaInPin(new() { Name = "" });
-            AddDtaInPin(new() { Name = "" });
-            AddDtaOutPin(new() { Name = "=" });
+            AddDataInPin(new() { Name = "" });
+            AddDataInPin(new() { Name = "" });
+            AddDataOutPin(new() { Name = "=" });
             
         }
 

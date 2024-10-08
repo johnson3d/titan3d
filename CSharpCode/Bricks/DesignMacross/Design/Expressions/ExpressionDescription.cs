@@ -34,7 +34,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             return null;
         }
-        public void AddDtaInPin(TtDataInPinDescription pinDescription)
+        public void AddDataInPin(TtDataInPinDescription pinDescription)
         {
             if(!DataInPins.Contains(pinDescription))
             {
@@ -42,7 +42,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
                 DataInPins.Add(pinDescription);
             }
         }
-        public void AddDtaOutPin(TtDataOutPinDescription pinDescription)
+        public void AddDataOutPin(TtDataOutPinDescription pinDescription)
         {
             if(!DataOutPins.Contains(pinDescription))
             {

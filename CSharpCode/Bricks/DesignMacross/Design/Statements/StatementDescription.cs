@@ -25,10 +25,11 @@ namespace EngineNS.DesignMacross.Design.Statement
         public List<TtDataInPinDescription> DataInPins { get; set; } = new();
         [Rtti.Meta]
         public List<TtDataOutPinDescription> DataOutPins { get; set; } = new();
-        public virtual  TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
+        public virtual TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
             return null;
         }
+        public virtual TtExpressionBase BuildExpressionForOutPin(TtDataPinDescription pin) { return null; }
         public void AddDataInPin(TtDataInPinDescription pinDescription)
         {
             if (!DataInPins.Contains(pinDescription))
@@ -152,6 +153,27 @@ namespace EngineNS.DesignMacross.Design.Statement
                 pinDescription.Parent = this;
                 ExecutionOutPins.Add(pinDescription);
             }
+        }
+        public void InsertExecuteOutPin(int index, TtExecutionOutPinDescription pinDescription)
+        {
+            if (index < 0)
+                return;
+            if (!ExecutionOutPins.Contains(pinDescription))
+            {
+                pinDescription.Parent = this;
+                if (index > ExecutionOutPins.Count)
+                    ExecutionOutPins.Add(pinDescription);
+                else
+                    ExecutionOutPins.Insert(index, pinDescription);
+            }
+        }
+        public int GetExecuteOutPinIndex(TtExecutionOutPinDescription pinDescription)
+        {
+            return ExecutionOutPins.IndexOf(pinDescription);
+        }
+        public bool RemoveExecuteOutPin(TtExecutionOutPinDescription pinDescription)
+        {
+            return ExecutionOutPins.Remove(pinDescription);
         }
         public bool TryGetDataPin(Guid pinId, out TtDataPinDescription pin)
         {

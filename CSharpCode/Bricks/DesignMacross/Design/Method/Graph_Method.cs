@@ -160,19 +160,19 @@ namespace EngineNS.DesignMacross.Design
         public override void ConstructLinkedPinContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
         {
             popupMenu.bHasSearchBox = true;
-            TtMethodGraphLinkedPinContextMenuUtil.ConstructMenuItemsAboutAssembly(ref context, popupMenu, this);
-            TtMethodGraphLinkedPinContextMenuUtil.ConstructMenuItemsAboutReflection(ref context, popupMenu, this);
+            TtMethodGraphLinkedPinContextMenuUtil.ConstructMenuItemsAboutContextMenuAttribute(ref context, popupMenu, this);
+            TtMethodGraphLinkedPinContextMenuUtil.ConstructMenuItemsAboutMetas(ref context, popupMenu, this);
             TtMethodGraphLinkedPinContextMenuUtil.ConstructMenuItemsAboutDesignedClass(ref context, popupMenu, this);
-            TtMethodGraphLinkedPinContextMenuUtil.ConstructMenuItemsAboutClassPropertiesAndMethods(ref context, popupMenu, this);
+            TtMethodGraphLinkedPinContextMenuUtil.ConstructMenuItemsAboutClassPropertiesAndMethods_OutPin(ref context, popupMenu, this);
         }
 
         #region IContextMeunable
         public override void ConstructContextMenu(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu)
         {
             popupMenu.bHasSearchBox = true;
-            TtMethodGraphContextMenuUtil.ConstructMenuItemsAboutAssembly(ref context, popupMenu, this);
+            TtMethodGraphContextMenuUtil.ConstructMenuItemsAboutContextMenuAttribute(ref context, popupMenu, this);
             TtMethodGraphContextMenuUtil.ConstructMenuItemsAboutDesignedClass(ref context, popupMenu, this);
-            TtMethodGraphContextMenuUtil.ConstructMenuItemsAboutReflection(ref context, popupMenu, this);
+            TtMethodGraphContextMenuUtil.ConstructMenuItemsAboutMetas(ref context, popupMenu, this);
         }
         #endregion IContextMeunable
 

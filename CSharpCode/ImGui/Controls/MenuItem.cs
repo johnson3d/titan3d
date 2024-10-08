@@ -182,7 +182,7 @@ namespace EngineNS.EGui.Controls
 
             var finalFilter = filter.Replace(" ", "");
 
-            bool checkResult;
+            bool checkResult = false;
             if (SubMenuItems.Count > 0)
             {
                 bool result = false;
@@ -192,7 +192,7 @@ namespace EngineNS.EGui.Controls
                 }
                 checkResult = result;
             }
-            else
+            else if(!string.IsNullOrEmpty(TextForFilter))
                 checkResult = TextForFilter.Contains(finalFilter);
 
             mFilterStore = finalFilter;

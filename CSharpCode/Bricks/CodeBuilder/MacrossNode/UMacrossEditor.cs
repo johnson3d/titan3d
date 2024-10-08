@@ -1,4 +1,5 @@
-﻿using EngineNS.Editor;
+﻿using EngineNS.DesignMacross.Design;
+using EngineNS.Editor;
 using Microsoft.CodeAnalysis;
 using NPOI.SS.Formula.Functions;
 using NPOI.Util;
@@ -113,6 +114,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //public DefineClass DefClass { get; } = new DefineClass();
         //[Rtti.Meta(Order = 1)]
         public List<UMacrossMethodGraph> Methods { get; } = new List<UMacrossMethodGraph>();
+        public List<UMacrossMethodGraph> MethodDeletedList { get; } = new List<UMacrossMethodGraph>();
         public RName AssetName { get; set; }
         protected bool mVisible = true;
         public bool Visible 
@@ -147,7 +149,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     return CSCodeGen;
             }
         }
-
+        string GetMethodFileName(RName rn, UMacrossMethodGraph method)
+        {
+            string declName = "";
+            foreach (var k in method.MethodDatas)
+            {
+                declName += k.MethodDec.GetKeyword();
+            }
+            return $"{rn.Address}/{method.Name}_{Hash160.CreateHash160(declName)}.fn";
+        }
         public void SaveClassGraph(RName rn)
         {
             var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as UMacrossAMeta;
@@ -194,12 +204,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 funcXml.AppendChild(funcXmlRoot);
                 IO.SerializerHelper.WriteObjectMetaFields(funcXml, funcXmlRoot, Methods[i]);
                 var funcXmlText = IO.TtFileManager.GetXmlText(funcXml);
-                string declName = "";
-                foreach (var k in Methods[i].MethodDatas)
-                {
-                    declName += k.MethodDec.GetKeyword();
-                }
-                var methodFileName = $"{rn.Address}/{Methods[i].Name}_{Hash160.CreateHash160(declName)}.fn";
+                var methodFileName = GetMethodFileName(rn, Methods[i]);
                 IO.TtFileManager.WriteAllText(methodFileName, funcXmlText);
                 TtEngine.Instance.SourceControlModule.AddFile(methodFileName);
             }
@@ -292,6 +297,24 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             }
                         }
                         //methodNode.SetDelegateGraph(this);
+                    }
+                }
+
+                var delFuncFiles = IO.TtFileManager.GetFiles(rn.Address, "*.delfn", false);
+                for(int i=0; i<delFuncFiles.Length; i++)
+                {
+                    try
+                    {
+                        var funcXml = IO.TtFileManager.LoadXml(delFuncFiles[i]);
+                        var funcGraph = UMacrossMethodGraph.NewGraph(this);
+                        object pFuncGraph = funcGraph;
+                        IO.SerializerHelper.ReadObjectMetaFields(null, funcXml.LastChild as System.Xml.XmlElement, ref pFuncGraph, null);
+                        funcGraph.AssetName = this.AssetName;
+                        MethodDeletedList.Add(funcGraph);
+                    }
+                    catch (System.Exception e)
+                    {
+                        Profiler.Log.WriteException(e);
                     }
                 }
             }
@@ -390,15 +413,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return "";
             }
         }
-        public string GenerateMethodCode(TtCodeGeneratorBase gen, int methodIndex)
+        public string GenerateMethodCode(TtCodeGeneratorBase gen, TtMethodDeclaration methodDesc)
         {
-            if (methodIndex < 0 || methodIndex >= DefClass.Methods.Count)
-                return "";
-
             string funcCode = "";
             try
             {
-                var mtd = DefClass.Methods[methodIndex];
+                var mtd = methodDesc;
                 if (gen == mHlslCodeGen && mtd.OverrideMethod != null)
                 {
                     var meta = mtd.OverrideMethod.GetFirstCustomAttribute<Rtti.MetaAttribute>(false);
@@ -785,7 +805,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        public void RemoveMethod(TtMethodDeclaration methodDesc)
+        public void RemoveMethod(TtMethodDeclaration methodDesc, bool realDelete)
         {
             for(var methodIdx = Methods.Count - 1; methodIdx >= 0; methodIdx--)
             {
@@ -799,36 +819,55 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
                 if(method.MethodDatas.Count == 0)
                 {
-                    RemoveMethod(method);
+                    RemoveMethod(method, realDelete);
                 }
             }
         }
 
         public Func<UMacrossMethodGraph, bool> OnRemoveMethod;
-        public void RemoveMethod(UMacrossMethodGraph method)
+        public void RemoveMethod(UMacrossMethodGraph method, bool realDelete)
         {
             if (OnRemoveMethod != null)
             {
                 if (!OnRemoveMethod.Invoke(method))
                     return;
             }
-
-            if (AssetName != null)
+            if(realDelete)
             {
-                var funcFileName = $"{AssetName.Address}/{method.Name}.func";
-                IO.TtFileManager.DeleteFile(funcFileName);
-                TtEngine.Instance.SourceControlModule.RemoveFile(funcFileName);
-            }
-            Methods.Remove(method);
-            for (int methodIdx = 0; methodIdx < method.MethodDatas.Count; methodIdx++)
-                DefClass.RemoveMethod(method.MethodDatas[methodIdx].MethodDec);
-            for (int itemIdx = 0; itemIdx < mOverrideMethodMenuItems.Count; itemIdx++)
-            {
-                for (int dataIdx = 0; dataIdx < method.MethodDatas.Count; dataIdx++)
+                if (AssetName != null)
                 {
-                    if (mOverrideMethodMenuItems[itemIdx].MenuName == method.MethodDatas[dataIdx].MethodDec.GetKeyword())
+                    var funcFileName = GetMethodFileName(AssetName, method);
+                    if(!IO.TtFileManager.FileExists(funcFileName))
                     {
-                        mOverrideMethodMenuItems[itemIdx].Visible = true;
+                        funcFileName = IO.TtFileManager.RemoveExtName(funcFileName) + ".delfn";
+                    }
+                    IO.TtFileManager.DeleteFile(funcFileName);
+                    TtEngine.Instance.SourceControlModule.RemoveFile(funcFileName);
+                }
+                MethodDeletedList.Remove(method);
+            }
+            else
+            {
+                if (AssetName != null)
+                {
+                    var funcFileName = GetMethodFileName(AssetName, method);
+                    var delFuncName = IO.TtFileManager.RemoveExtName(funcFileName) + ".delfn";
+                    IO.TtFileManager.MoveFile(funcFileName, delFuncName);
+                    TtEngine.Instance.SourceControlModule.RemoveFile(funcFileName);
+                    TtEngine.Instance.SourceControlModule.AddFile(delFuncName);
+                }
+                Methods.Remove(method);
+                MethodDeletedList.Add(method);
+                for (int methodIdx = 0; methodIdx < method.MethodDatas.Count; methodIdx++)
+                    DefClass.RemoveMethod(method.MethodDatas[methodIdx].MethodDec);
+                for (int itemIdx = 0; itemIdx < mOverrideMethodMenuItems.Count; itemIdx++)
+                {
+                    for (int dataIdx = 0; dataIdx < method.MethodDatas.Count; dataIdx++)
+                    {
+                        if (mOverrideMethodMenuItems[itemIdx].MenuName == method.MethodDatas[dataIdx].MethodDec.GetKeyword())
+                        {
+                            mOverrideMethodMenuItems[itemIdx].Visible = true;
+                        }
                     }
                 }
             }
@@ -865,6 +904,96 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         bool mClassViewShow = true;
         EGui.UIProxy.MenuItemProxy.MenuState mNewMethodMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         EGui.UIProxy.MenuItemProxy.MenuState mOverrideMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
+
+        enum EDrawMethodButtonFlag : byte
+        {
+            None = 0,
+            GenPreviewCode  = 1 << 0,
+            CustomCode      = 1 << 1,
+            Delete          = 1 << 2,
+            All = 0xFF,
+        }
+
+        bool DrawMethod(
+            UMacrossMethodGraph method, 
+            in Vector2 regionSize, 
+            in Vector2 buttonSize, 
+            float buttonOffset, 
+            bool realDelete,
+            ImGuiTreeNodeFlags_ treeNodeFlags,
+            EDrawMethodButtonFlag buttonFlags)
+        {
+            var displayName = method.DisplayName;
+
+            if (method.IsUseCustumCode)
+            {
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xFF0000FF);
+            }
+            var methodTreeNodeResult = ImGuiAPI.TreeNodeEx(displayName, treeNodeFlags);
+            ImGuiAPI.SameLine(0, EGui.UIProxy.StyleConfig.Instance.ItemSpacing.X);
+            if (method.IsUseCustumCode)
+            {
+                ImGuiAPI.PopStyleColor(1);
+            }
+            var methodTreeNodeDoubleClicked = ImGuiAPI.IsItemDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
+            var methodTreeNodeIsItemClicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
+            if((buttonFlags & EDrawMethodButtonFlag.GenPreviewCode) != 0)
+            {
+                ImGuiAPI.SameLine(regionSize.X - buttonSize.X * 3 - buttonOffset, -1.0f);
+                if (EGui.UIProxy.CustomButton.ToolButton("g", in buttonSize, 0xFF00FF00, "func_G_" + method.DisplayName))
+                {
+                    var methodCode = GenerateMethodCode(this.CodeGen, method.MethodDatas[0].MethodDec);
+                    mCodeEditor.mCoreObject.SetText(methodCode);
+                    TextEditorTitle = "Gen:" + method.DisplayName;
+                    CurrentTextoutMethod = method;
+                    return false;
+                }
+            }
+            if((buttonFlags & EDrawMethodButtonFlag.CustomCode) != 0)
+            {
+                ImGuiAPI.SameLine(regionSize.X - buttonSize.X * 2 - buttonOffset, -1.0f);
+                if (EGui.UIProxy.CustomButton.ToolButton("c", in buttonSize, 0xFF00FF00, "func_C_" + method.DisplayName))
+                {
+                    if (method.CustumCode != null)
+                        mCodeEditor.mCoreObject.SetText(method.CustumCode);
+                    else
+                        mCodeEditor.mCoreObject.SetText("//No CustumCode");
+                    TextEditorTitle = "Custum:" + method.DisplayName;
+                    CurrentTextoutMethod = method;
+                    return false;
+                }
+            }
+            if((buttonFlags & EDrawMethodButtonFlag.Delete) != 0)
+            {
+                ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
+                var keyName = $"Delete func {displayName}?";
+                if (EGui.UIProxy.CustomButton.ToolButton("x", in buttonSize, 0xFF0000FF, "func_X_" + method.DisplayName))
+                {
+                    EGui.UIProxy.MessageBox.Open(keyName);
+                    return false;
+                }
+                EGui.UIProxy.MessageBox.Draw(keyName, $"Are you sure to delete {displayName}?", EGui.UIProxy.MessageBox.EButtonType.YesNo,
+                () =>
+                {
+                    RemoveMethod(method, realDelete);
+                }, null);
+            }
+
+            if (methodTreeNodeResult)
+            {
+                if (methodTreeNodeDoubleClicked)
+                {
+                    OpenMethodGraph(method);
+                }
+                else if (methodTreeNodeIsItemClicked)
+                {
+                    PGMember.Target = method;
+                }
+            }
+
+            return true;
+        }
+
         protected unsafe void DrawClassView()
         {
             ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap;
@@ -1006,68 +1135,28 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         var method = Methods[i];
                         if (method.IsDelegateGraph())
                             continue;
-                        var displayName = method.DisplayName;
-
-                        if (method.IsUseCustumCode)
-                        {
-                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xFF0000FF);
-                        }
-                        var methodTreeNodeResult = ImGuiAPI.TreeNodeEx(displayName, flags);
-                        ImGuiAPI.SameLine(0, EGui.UIProxy.StyleConfig.Instance.ItemSpacing.X);
-                        if (method.IsUseCustumCode)
-                        {
-                            ImGuiAPI.PopStyleColor(1);
-                        }
-                        var methodTreeNodeDoubleClicked = ImGuiAPI.IsItemDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
-                        var methodTreeNodeIsItemClicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
-                        ImGuiAPI.SameLine(regionSize.X - buttonSize.X * 3 - buttonOffset, -1.0f);
-                        if (EGui.UIProxy.CustomButton.ToolButton("g", in buttonSize, 0xFF00FF00, "func_G_" + i))
-                        {
-                            mCodeEditor.mCoreObject.SetText(GenerateMethodCode(this.CodeGen, i));
-                            TextEditorTitle = "Gen:" + method.DisplayName;
-                            CurrentTextoutMethod = method;
+                        
+                        if (!DrawMethod(method, in regionSize, in buttonSize, buttonOffset, false, flags, EDrawMethodButtonFlag.All))
                             break;
-                        }
-                        ImGuiAPI.SameLine(regionSize.X - buttonSize.X * 2 - buttonOffset, -1.0f);
-                        if (EGui.UIProxy.CustomButton.ToolButton("c", in buttonSize, 0xFF00FF00, "func_C_" + i))
-                        {
-                            if (Methods[i].CustumCode != null)
-                                mCodeEditor.mCoreObject.SetText(Methods[i].CustumCode);
-                            else
-                                mCodeEditor.mCoreObject.SetText("//No CustumCode");
-                            TextEditorTitle = "Custum:" + method.DisplayName;
-                            CurrentTextoutMethod = method;
-                            break;
-                        }
-                        ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
-                        var keyName = $"Delete func {displayName}?";
-                        if (EGui.UIProxy.CustomButton.ToolButton("x", in buttonSize, 0xFF0000FF, "func_X_" + i))
-                        {
-                            EGui.UIProxy.MessageBox.Open(keyName);
-                            break;
-                        }
-                        EGui.UIProxy.MessageBox.Draw(keyName, $"Are you sure to delete {displayName}?", EGui.UIProxy.MessageBox.EButtonType.YesNo,
-                        () =>
-                        {
-                            RemoveMethod(method);
-                        }, null);
-
-                        if (methodTreeNodeResult)
-                        {
-                            if (methodTreeNodeDoubleClicked)
-                            {
-                                OpenMethodGraph(method);
-                            }
-                            else if (methodTreeNodeIsItemClicked)
-                            {
-                                PGMember.Target = method;
-                            }
-                        }
                     }
-
 
                     ImGuiAPI.TreePop();
                 }
+
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextDisableColor);
+                var deletedMethodsTreeNodeResult = ImGuiAPI.TreeNodeEx("Deleted Methods", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap);
+                if(deletedMethodsTreeNodeResult)
+                {
+                    for(int i=MethodDeletedList.Count - 1; i >= 0; i--)
+                    {
+                        var method = MethodDeletedList[i];
+                        if (!DrawMethod(method, in regionSize, in buttonSize, buttonOffset, true, flags, EDrawMethodButtonFlag.Delete))
+                            break;
+                    }
+
+                    ImGuiAPI.TreePop();
+                }
+                ImGuiAPI.PopStyleColor(1);
 
                 if (CurrentOpenMethod != null)
                 {

@@ -31,7 +31,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             TypeDesc = TtTypeDesc.TypeOf<bool>();
             Name = TypeDesc.Name;
-            AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
+            AddDataOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
@@ -48,7 +48,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             TypeDesc = TtTypeDesc.TypeOf<SByte>();
             Name = TypeDesc.Name;
-            AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
+            AddDataOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
@@ -65,7 +65,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             TypeDesc = TtTypeDesc.TypeOf<Int16>();
             Name = TypeDesc.Name;
-            AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
+            AddDataOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
@@ -82,7 +82,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             TypeDesc = TtTypeDesc.TypeOf<Int32>();
             Name = TypeDesc.Name;
-            AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
+            AddDataOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
@@ -99,7 +99,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             TypeDesc = TtTypeDesc.TypeOf<Int64>();
             Name = TypeDesc.Name;
-            AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
+            AddDataOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
@@ -116,7 +116,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             TypeDesc = TtTypeDesc.TypeOf<Byte>();
             Name = TypeDesc.Name;
-            AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
+            AddDataOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
@@ -133,7 +133,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             TypeDesc = TtTypeDesc.TypeOf<UInt16>();
             Name = TypeDesc.Name;
-            AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
+            AddDataOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
@@ -150,7 +150,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             TypeDesc = TtTypeDesc.TypeOf<UInt32>();
             Name = TypeDesc.Name;
-            AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
+            AddDataOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
@@ -167,7 +167,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             TypeDesc = TtTypeDesc.TypeOf<UInt64>();
             Name = TypeDesc.Name;
-            AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
+            AddDataOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
@@ -184,7 +184,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             TypeDesc = TtTypeDesc.TypeOf<float>();
             Name = TypeDesc.Name;
-            AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
+            AddDataOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
@@ -201,7 +201,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             TypeDesc = TtTypeDesc.TypeOf<double>();
             Name = TypeDesc.Name;
-            AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
+            AddDataOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
@@ -218,7 +218,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             TypeDesc = TtTypeDesc.TypeOf<string>();
             Name = TypeDesc.Name;
-            AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
+            AddDataOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
@@ -233,7 +233,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             TypeDesc = TtTypeDesc.TypeOf<Vector2>();
             Name = TypeDesc.Name;
-            AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
+            AddDataOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
@@ -248,7 +248,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             TypeDesc = TtTypeDesc.TypeOf<Vector3>();
             Name = TypeDesc.Name;
-            AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
+            AddDataOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
@@ -263,7 +263,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             TypeDesc = TtTypeDesc.TypeOf<Vector4>();
             Name = TypeDesc.Name;
-            AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
+            AddDataOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
@@ -278,7 +278,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             TypeDesc = TtTypeDesc.TypeOf<Color3f>();
             Name = TypeDesc.Name;
-            AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
+            AddDataOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
@@ -293,7 +293,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             TypeDesc = TtTypeDesc.TypeOf<Color4f>();
             Name = TypeDesc.Name;
-            AddDtaOutPin(new() { Name = "", TypeDesc = TypeDesc });
+            AddDataOutPin(new() { Name = "", TypeDesc = TypeDesc });
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {

@@ -14,6 +14,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\GraphCamera.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DesignMacrossNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\ConnectingLine\GraphElement_DataLine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\CastExpressionStatement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\GraphElement_CastExpressionStatement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\LogicOperator\GraphElement_LogicOperator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\LogicOperator\LogicOperatorDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\Value\GraphElement_SelfReference.cs" />
@@ -21,9 +23,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\Value\PropertyGetDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\Value\PropertySetDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Method\MethodUtil.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\FlowControl\BreakStatementDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\FlowControl\ContinueStatementDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\FlowControl\ExecuteSequenceStatementDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\FlowControl\ForLoopStatementDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\FlowControl\GraphElement_ExecuteSequenceStatement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\FlowControl\IfStatementDescription.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\Reflected\GraphElement_MethodInvokeReflected.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\Reflected\MethodInvokeReflectedDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\FlowControl\WhileLoopStatementDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\MethodInvokeDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ArithmeticOperator\GraphElement_ValueOperator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ArithmeticOperator\ArithmeticOperatorDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\ArithmeticOperator\BitRightshiftOperatorDescription.cs" />
@@ -58,6 +65,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Design\Variable\OutlineElement_Variable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\Elements\GraphElement_DockPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\Elements\GraphElement_Icon.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\Elements\GraphElement_ComboBox.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\NavigableGraphsPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\ConnectingLine\DataLineDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\DelegateEvent\DelegateEventDescription.cs" />
@@ -94,6 +102,5 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Design\Class\" />
-    <Folder Include="$(MSBuildThisFileDirectory)Design\Statements\Reflected\" />
   </ItemGroup>
 </Project>

@@ -18,17 +18,21 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             AddExecutionInPin(new() { Name = "" });
             AddExecutionOutPin(new() { Name = "" });
-            AddDtaInPin(new() { Name = "Host", TypeDesc = HostReferenceTypeDesc });
-            AddDtaInPin(new() { Name = "Set", TypeDesc = VarTypeDesc });
-            AddDtaOutPin(new() { Name = "Get", TypeDesc = VarTypeDesc });
+            AddDataInPin(new() { Name = "Host", TypeDesc = HostReferenceTypeDesc });
+            AddDataInPin(new() { Name = "Set", TypeDesc = VarTypeDesc });
+            AddDataOutPin(new() { Name = "Get", TypeDesc = VarTypeDesc });
         }
         public TtPropertySetDescription(TtTypeDesc hostReferenceTypeDesc, TtTypeDesc varTypeDesc)
         {
             AddExecutionInPin(new() { Name = "" });
             AddExecutionOutPin(new() { Name = "" });
-            AddDtaInPin(new() { Name = "Host", TypeDesc = hostReferenceTypeDesc });
-            AddDtaInPin(new() { Name = "Set", TypeDesc = varTypeDesc });
-            AddDtaOutPin(new() { Name = "Get", TypeDesc = varTypeDesc });
+            AddDataInPin(new() { Name = "Host", TypeDesc = hostReferenceTypeDesc });
+            AddDataInPin(new() { Name = "Set", TypeDesc = varTypeDesc });
+            AddDataOutPin(new() { Name = "Get", TypeDesc = varTypeDesc });
+        }
+        public TtDataInPinDescription GetHostPin()
+        {
+            return DataInPins[0];
         }
 
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)

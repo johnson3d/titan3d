@@ -14,14 +14,18 @@ namespace EngineNS.DesignMacross.Design.Expressions
 
         public TtPropertyGetDescription()
         {
-            AddDtaInPin(new() { Name = "Host", TypeDesc = HostReferenceTypeDesc });
-            AddDtaOutPin(new() { Name = "Get", TypeDesc = VarTypeDesc });
+            AddDataInPin(new() { Name = "Host", TypeDesc = HostReferenceTypeDesc });
+            AddDataOutPin(new() { Name = "Get", TypeDesc = VarTypeDesc });
         }
 
         public TtPropertyGetDescription(TtTypeDesc hostReferenceTypeDesc, TtTypeDesc varTypeDesc)
         {
-            AddDtaInPin(new() { Name = "Host", TypeDesc = hostReferenceTypeDesc });
-            AddDtaOutPin(new() { Name = "Get", TypeDesc = varTypeDesc });
+            AddDataInPin(new() { Name = "Host", TypeDesc = hostReferenceTypeDesc });
+            AddDataOutPin(new() { Name = "Get", TypeDesc = varTypeDesc });
+        }
+        public TtDataInPinDescription GetHostPin()
+        {
+            return DataInPins[0];
         }
     }
 }

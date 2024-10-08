@@ -18,8 +18,8 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             AddExecutionInPin(new() { Name = "" });
             AddExecutionOutPin(new() { Name = "" });
-            AddDtaInPin(new() { Name = "Set", TypeDesc = TtTypeDesc.TypeOf<bool>() });
-            AddDtaOutPin(new() { Name = "Get", TypeDesc = TtTypeDesc.TypeOf<bool>() });
+            AddDataInPin(new() { Name = "Set", TypeDesc = TtTypeDesc.TypeOf<bool>() });
+            AddDataOutPin(new() { Name = "Get", TypeDesc = TtTypeDesc.TypeOf<bool>() });
         }
 
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
