@@ -102,7 +102,7 @@ namespace EngineNS.Plugins.LoginServer
 			reader.Read(out user);
 			string psw;
 			reader.Read(out psw);
-			UReturnContext retContext;
+			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = await ((EngineNS.Plugins.LoginServer.ULoginServer)host).LoginAccount(user, psw, context);
 			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())

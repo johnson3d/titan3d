@@ -104,7 +104,7 @@ namespace CSharpCodeTools
                             }
                             if (i.ReturnType != null)
                             {
-                                AddLine($"UReturnContext retContext;");
+                                AddLine($"FReturnContext retContext;");
                                 AddLine($"reader.Read(out retContext);");
 
                                 if (i.IsAsync)
@@ -198,7 +198,7 @@ namespace CSharpCodeTools
 
                             if (i.RetType != URpcMethod.EDataType.Void)
                             {
-                                AddLine($"var retContext = UReturnAwaiter<{i.GetNakedReturnType()}>.CreateInstance(Timeout);");
+                                AddLine($"var retContext = TtReturnAwaiter<{i.GetNakedReturnType()}>.CreateInstance(Timeout, NetConnect.ReturnContext);");
                                 AddLine($"if (NetConnect != null)");
                                 PushBrackets();
                                 {
@@ -243,13 +243,13 @@ namespace CSharpCodeTools
                                 switch (i.RetType)
                                 {
                                     case URpcMethod.EDataType.Unmanaged:
-                                        AddLine($"return await URpcAwaiter.AwaitReturn<{i.GetNakedReturnType()}>(retContext);");
+                                        AddLine($"return await TtRpcAwaiter.AwaitReturn<{i.GetNakedReturnType()}>(retContext);");
                                         break;
                                     case URpcMethod.EDataType.ISerializer:
-                                        AddLine($"return await URpcAwaiter.AwaitReturn_ISerializer<{i.GetNakedReturnType()}>(retContext);");
+                                        AddLine($"return await TtRpcAwaiter.AwaitReturn_ISerializer<{i.GetNakedReturnType()}>(retContext);");
                                         break;
                                     case URpcMethod.EDataType.String:
-                                        AddLine($"return await URpcAwaiter.AwaitReturn_String(retContext);");
+                                        AddLine($"return await TtRpcAwaiter.AwaitReturn_String(retContext);");
                                         break;
                                 }
                             }

@@ -415,7 +415,7 @@ namespace EngineNS.Profiler
 			{
 				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
-			var retContext = UReturnAwaiter<EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads>.CreateInstance(Timeout);
+			var retContext = TtReturnAwaiter<EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads>.CreateInstance(Timeout, NetConnect.ReturnContext);
 			if (NetConnect != null)
 			{
 				retContext.Context.Index = ExeIndex;
@@ -438,7 +438,7 @@ namespace EngineNS.Profiler
 				pkg.CoreWriter.SurePkgHeader();
 				NetConnect?.Send(in pkg);
 			}
-			return await URpcAwaiter.AwaitReturn<EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads>(retContext);
+			return await TtRpcAwaiter.AwaitReturn<EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads>(retContext);
 		}
 		public static async System.Threading.Tasks.Task<EngineNS.Profiler.TtRpcProfiler.RpcProfilerData> GetProfilerData(string name, uint Timeout = uint.MaxValue, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
 		{
@@ -450,7 +450,7 @@ namespace EngineNS.Profiler
 			{
 				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
-			var retContext = UReturnAwaiter<EngineNS.Profiler.TtRpcProfiler.RpcProfilerData>.CreateInstance(Timeout);
+			var retContext = TtReturnAwaiter<EngineNS.Profiler.TtRpcProfiler.RpcProfilerData>.CreateInstance(Timeout, NetConnect.ReturnContext);
 			if (NetConnect != null)
 			{
 				retContext.Context.Index = ExeIndex;
@@ -473,7 +473,7 @@ namespace EngineNS.Profiler
 				pkg.CoreWriter.SurePkgHeader();
 				NetConnect?.Send(in pkg);
 			}
-			return await URpcAwaiter.AwaitReturn<EngineNS.Profiler.TtRpcProfiler.RpcProfilerData>(retContext);
+			return await TtRpcAwaiter.AwaitReturn<EngineNS.Profiler.TtRpcProfiler.RpcProfilerData>(retContext);
 		}
 		public static void ResetMaxTime(EngineNS.Profiler.TtRpcProfiler.ResetMaxTimeArg arg, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
 		{
@@ -515,7 +515,7 @@ namespace EngineNS.Profiler
 		{
 			sbyte arg;
 			reader.Read(out arg);
-			UReturnContext retContext;
+			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Profiler.TtRpcProfiler)host).GetProfilerThreads(arg, context);
 			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
@@ -534,7 +534,7 @@ namespace EngineNS.Profiler
 		{
 			string name;
 			reader.Read(out name);
-			UReturnContext retContext;
+			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Profiler.TtRpcProfiler)host).GetProfilerData(name, context);
 			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())

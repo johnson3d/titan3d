@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Plugins.ServerCommon
 {
-    public class UServerBase : Bricks.Network.RPC.URpcManager, ITickable
+    public class UServerBase : Bricks.Network.RPC.TtRpcManager, ITickable
     {
         public int GetTickOrder()
         {
@@ -41,7 +41,7 @@ namespace EngineNS.Plugins.ServerCommon
         {
             return GetRunTargetConnect(target.RunTarget, target.Index, connect);
         }
-        public override Bricks.Network.INetConnect GetRunTargetConnect(in Bricks.Network.RPC.UReturnContext target, Bricks.Network.INetConnect connect)
+        public override Bricks.Network.INetConnect GetRunTargetConnect(in Bricks.Network.RPC.FReturnContext target, Bricks.Network.INetConnect connect)
         {
             return GetRunTargetConnect(target.RunTarget, target.Index, connect);
         }

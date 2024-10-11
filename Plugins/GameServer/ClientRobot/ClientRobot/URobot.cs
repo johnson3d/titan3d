@@ -8,7 +8,7 @@ using EngineNS.Plugins.ClientCommon;
 namespace RobotClient
 {
     [URpcClass(RunTarget = ERunTarget.Client, Executer = EExecuter.Root)]
-    partial class URobot : EngineNS.Bricks.Network.RPC.URpcManager, EngineNS.ITickable
+    partial class URobot : EngineNS.Bricks.Network.RPC.TtRpcManager, EngineNS.ITickable
     {
         public int GetTickOrder()
         {
@@ -53,11 +53,12 @@ namespace RobotClient
             EngineNS.TtEngine.Instance.RpcModule.RpcManager = this;
             Guid sessionId = Guid.NewGuid();
             EngineNS.TtEngine.Instance.RpcModule.DefaultNetConnect = RootConnect;
+            RootConnect.ReturnContext = new TtReturnContext();
             var ret = await RootConnect.Connect("127.0.0.1", 2334, RootConnectPackages);
             if (ret)
             {
                 var lnk = await EngineNS.Plugins.LoginServer.ULoginServer_RpcCaller.LoginAccount("User0", "god");
-                if (EngineNS.Bricks.Network.RPC.URpcAwaiter.IsTimeout)
+                if (RootConnect.ReturnContext.IsTimeout)
                 {
 
                 }
@@ -88,7 +89,7 @@ namespace RobotClient
 
                 }
                 IndexInLevel = await EngineNS.Plugins.LevelServer.ULevelServer_RpcCaller.RegClient(sessionId, "User0", UInt16.MaxValue, 5000);
-                if (EngineNS.Bricks.Network.RPC.URpcAwaiter.IsTimeout)
+                if (RootConnect.ReturnContext.IsTimeout)
                     return false;
                 TtEngine.Instance.RpcModule.DefaultExeIndex = IndexInLevel;
 
@@ -106,7 +107,7 @@ namespace RobotClient
             }
 
             var hp = await EngineNS.Plugins.LevelServer.ULevelClient_RpcCaller.GetHP(5000);
-            if (EngineNS.Bricks.Network.RPC.URpcAwaiter.IsTimeout)
+            if (RootConnect.ReturnContext.IsTimeout)
                 return false;
             if (hp != 5)
                 return false;

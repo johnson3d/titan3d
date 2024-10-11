@@ -18,6 +18,7 @@ namespace EngineNS.Bricks.Network
         public RPC.EAuthority Authority { get; set; } = RPC.EAuthority.Client;
         public bool Connected { get; set; }
         public object Tag { get; set; } = null;
+        public EngineNS.Bricks.Network.RPC.TtReturnContext ReturnContext { get; set; }
         public UInt16 ConnectId { get; private set; }
         public UInt16 GetConnectId()
         {

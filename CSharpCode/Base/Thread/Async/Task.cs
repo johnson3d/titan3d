@@ -258,11 +258,12 @@ namespace EngineNS.Thread.Async
     {
         //make the members as a class type pointer;
         TtTaskData<T> mTaskData;
-
+        public bool IsTimeout;
         public void Dispose()
         {
             mTaskData.Dispose();
             mTaskData = null;
+            IsTimeout = false;
         }
 
         public TtTask(T result)

@@ -73,6 +73,7 @@ namespace EngineNS.Plugins.LevelServer
             }
         }
         public object Tag { get; set; } = null;
+        public TtReturnContext ReturnContext { get; set; }
         public UInt16 GetConnectId()
         {
             return 0;
@@ -125,7 +126,7 @@ namespace EngineNS.Plugins.LevelServer
 	{
 		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_GetHP = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
 		{
-			UReturnContext retContext;
+			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Plugins.LevelServer.ULevelClient)host).GetHP(context);
 			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())

@@ -162,7 +162,7 @@ namespace EngineNS.Plugins.LevelServer
 			reader.Read(out user);
 			UInt16 indexInGate;
 			reader.Read(out indexInGate);
-			UReturnContext retContext;
+			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).RegClient(sessionId, user, indexInGate, context);
 			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
@@ -183,7 +183,7 @@ namespace EngineNS.Plugins.LevelServer
 			reader.Read(out id);
 			RName name;
 			reader.Read(out name);
-			UReturnContext retContext;
+			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).RegLevel(id, name, context);
 			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
@@ -204,7 +204,7 @@ namespace EngineNS.Plugins.LevelServer
 			reader.Read(out clientIndex);
 			Guid levelId;
 			reader.Read(out levelId);
-			UReturnContext retContext;
+			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).TryClientEnterLevel(clientIndex, levelId, context);
 			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
@@ -225,7 +225,7 @@ namespace EngineNS.Plugins.LevelServer
 			reader.Read(out clientIndex);
 			Guid levelId;
 			reader.Read(out levelId);
-			UReturnContext retContext;
+			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).TryClientLeaveLevel(clientIndex, levelId, context);
 			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())

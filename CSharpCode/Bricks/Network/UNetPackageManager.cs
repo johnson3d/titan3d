@@ -17,7 +17,7 @@ namespace EngineNS.Bricks.Network
                 pkg.Read(out pkgHeader);
                 if (pkgHeader.IsHasReturn())
                 {
-                    UReturnContext retContext;
+                    FReturnContext retContext;
                     pkg.Read(out retContext);
                     if (retContext.RunTarget != TtEngine.Instance.RpcModule.RpcManager.CurrentTarget)
                     {
@@ -88,7 +88,7 @@ namespace EngineNS.Bricks.Network
                     pkg.Read(out pkgHeader);
                     if (pkgHeader.IsHasReturn())
                     {
-                        UReturnContext retContext;
+                        FReturnContext retContext;
                         pkg.Read(out retContext);
                         TtEngine.Instance.RpcModule.RemoteReturn(retContext.Handle, ref pkg);
                     }

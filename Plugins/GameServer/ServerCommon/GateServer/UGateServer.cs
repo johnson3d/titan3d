@@ -184,7 +184,7 @@ namespace EngineNS.Plugins.GateServer
 			reader.Read(out sessionId);
 			string user;
 			reader.Read(out user);
-			UReturnContext retContext;
+			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Plugins.GateServer.UGateServer)host).WaitSession(sessionId, user, context);
 			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
@@ -205,7 +205,7 @@ namespace EngineNS.Plugins.GateServer
 			reader.Read(out sessionId);
 			string user;
 			reader.Read(out user);
-			UReturnContext retContext;
+			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Plugins.GateServer.UGateServer)host).RegClient(sessionId, user, context);
 			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
@@ -228,7 +228,7 @@ namespace EngineNS.Plugins.GateServer
 			reader.Read(out user);
 			UInt16 indexInLevel;
 			reader.Read(out indexInLevel);
-			UReturnContext retContext;
+			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Plugins.GateServer.UGateServer)host).ClientEnterLevel(sessionId, user, indexInLevel, context);
 			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
