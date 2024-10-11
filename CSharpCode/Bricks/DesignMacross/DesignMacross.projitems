@@ -14,6 +14,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\GraphCamera.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DesignMacrossNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\ConnectingLine\GraphElement_DataLine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\Value\CenterDataReferenceDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\Value\NullDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\CastExpressionStatement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Statements\GraphElement_CastExpressionStatement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\LogicOperator\GraphElement_LogicOperator.cs" />

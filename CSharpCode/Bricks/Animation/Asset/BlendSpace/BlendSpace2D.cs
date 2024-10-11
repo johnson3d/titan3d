@@ -1,4 +1,5 @@
 ﻿using EngineNS.IO;
+using EngineNS.Thread.Async;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -24,8 +25,10 @@ namespace EngineNS.Animation.Asset.BlendSpace
         }
     }
 
-
-    public class TtBlendSpace2D : TtBlendSpace
+    [TtBlendSpace2D.BlendSpaceCreate]
+    [IO.AssetCreateMenu(MenuName = "Anim/BlendSpace")]
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    public partial class TtBlendSpace2D : TtBlendSpace
     {
         public TtBlendSpace2D() 
         {
@@ -133,6 +136,23 @@ namespace EngineNS.Animation.Asset.BlendSpace
             }
         }
         #region IAnimationAsset
+        public class BlendSpaceCreateAttribute : IO.CommonCreateAttribute
+        {
+            public override async Thread.Async.TtTask DoCreate(RName dir, Rtti.TtTypeDesc type, string ext)
+            {
+                ExtName = ext;
+                mName = null;
+                mDir = dir;
+                TypeSlt.BaseType = type;
+                TypeSlt.SelectedType = type;
+
+                PGAssetInitTask = PGAsset.Initialize();
+                PGAsset.Target = mAsset;
+
+                mAsset = Rtti.TtTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IO.IAsset;
+
+            }
+        }
         public const string AssetExt = ".blendspace2d";
         public override string TypeExt { get => AssetExt; }
         [Rtti.Meta]
@@ -155,8 +175,111 @@ namespace EngineNS.Animation.Asset.BlendSpace
 
         public override void SaveAssetTo(RName name)
         {
-            throw new NotImplementedException();
+            var ameta = this.GetAMeta();
+            if (ameta != null)
+            {
+                UpdateAMetaReferences(ameta);
+                ameta.SaveAMeta(this);
+            }
+            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
+            var xnd = new IO.TtXndHolder(typeStr, 0, 0);
+            using (var attr = xnd.NewAttribute("BlendSpace", 0, 0))
+            {
+                using (var ar = attr.GetWriter(512))
+                {
+                    ar.Write(this);
+                }
+                xnd.RootNode.AddAttribute(attr);
+            }
+            xnd.SaveXnd(name.Address);
         }
+        public static TtBlendSpace2D LoadXnd(TtBlendSpace2DManager manager, IO.TtXndHolder holder)
+        {
+            unsafe
+            {
+                IO.ISerializer result = null;
+                var attr = holder.RootNode.TryGetAttribute("BlendSpace");
+                if ((IntPtr)attr.CppPointer != IntPtr.Zero)
+                {
+                    using (var ar = attr.GetReader(manager))
+                    {
+                        ar.Read(out result, manager);
+                    }
+                }
+                var blendSpace = result as TtBlendSpace2D;
+                if (blendSpace != null)
+                {
+                    return blendSpace;
+                }
+                return null;
+            }
+        }
+
         #endregion
+    }
+
+    public class TtBlendSpace2DManager
+    {
+        Dictionary<RName, TtBlendSpace2D> BlendSpaces = new();
+
+        //for new don't see animationChunk as the asset
+        public async TtTask<TtBlendSpace2D> GetAnimation(RName name)
+        {
+            TtBlendSpace2D result;
+            if (BlendSpaces.TryGetValue(name, out result))
+                return result;
+
+            //this is a demo for suspend&cancel operation
+            Thread.Async.TtAsyncTaskToken token = null;// new Thread.Async.TtAsyncTaskToken();
+            result = await TtEngine.Instance.EventPoster.Post((state) =>
+            {
+                if (state.TaskToken != null)
+                {
+                    if (state.TaskToken.TaskState == Thread.Async.EAsyncTaskState.Suspended)
+                    {
+                        state.TaskState = Thread.Async.EAsyncTaskState.Suspended;
+                        return null;
+                    }
+                    else if (state.TaskToken.TaskState == Thread.Async.EAsyncTaskState.Canceled)
+                    {
+                        state.TaskState = Thread.Async.EAsyncTaskState.Canceled;
+                        return null;
+                    }
+                }
+                using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
+                {
+                    if (xnd != null)
+                    {
+                        var clip = TtBlendSpace2D.LoadXnd(this, xnd);
+                        clip.SaveAssetTo(name);
+                        if (clip == null)
+                            return null;
+
+                        clip.AssetName = name;
+                        return clip;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }, Thread.Async.EAsyncTarget.AsyncIO).WithToken(token);
+
+            foreach (var point in result.AnimPoints)
+            {
+                point.Animation = await TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(point.AnimationName);
+            }
+
+            if (result != null)
+            {
+                BlendSpaces[name] = result;
+                return result;
+            }
+            return null;
+        }
+        public void Remove(RName name)
+        {
+            BlendSpaces.Remove(name);
+        }
     }
 }

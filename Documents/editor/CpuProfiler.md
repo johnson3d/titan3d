@@ -1,0 +1,8 @@
+- CpuProfiler
+	- 树状模式
+	- ![TreeMode](CpuProfiler/TreeMode.png)
+	- - 红色框内选择要查看的线程
+		- 线程包括：主线程，逻辑线程，物理线程，异步IO线程等
+	- - 蓝色框内选择显示模式，上图显示的是树状显示
+	- 列表模式
+	- ![ListMode](CpuProfiler/ListMode.png)

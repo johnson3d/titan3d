@@ -15,7 +15,7 @@ namespace EngineNS.DesignMacross.Design
 {
     public class TtMethodUtil
     {
-        public static bool TryGetLinkedDataLineWithPin(TtDataPinDescription startPin, TtExpressionDescription expression, out TtDataLineDescription line)
+        public static bool TryGetAvailableDataLineWithPin(TtDataPinDescription startPin, TtExpressionDescription expression, out TtDataLineDescription line)
         {
             var fromId = Guid.Empty;
             var fromDescName = "";
@@ -24,28 +24,32 @@ namespace EngineNS.DesignMacross.Design
             bool existLink = false;
             if (startPin is TtDataInPinDescription)
             {
-                var pins = expression.GetDataOutPins(startPin.TypeDesc);
-                if (pins.Count > 0)
+                if(expression.TryGetLinkableDataOutPins(startPin, out var linkablePins))
                 {
-                    var firstPin = pins[0];
-                    fromId = firstPin.Id;
-                    fromDescName = firstPin.Parent.Name;
-                    toId = startPin.Id;
-                    toDescName = startPin.Parent.Name;
-                    existLink = true;
+                    if (linkablePins.Count > 0)
+                    {
+                        var firstPin = linkablePins[0];
+                        fromId = firstPin.Id;
+                        fromDescName = firstPin.Parent.Name;
+                        toId = startPin.Id;
+                        toDescName = startPin.Parent.Name;
+                        existLink = true;
+                    }
                 }
             }
             else
             {
-                var pins = expression.GetDataInPins(startPin.TypeDesc);
-                if (pins.Count > 0)
+                if(expression.TryGetLinkableDataInPins(startPin, out var linkablePins))
                 {
-                    var firstPin = pins[0];
-                    fromId = startPin.Id;
-                    fromDescName = startPin.Parent.Name;
-                    toId = firstPin.Id;
-                    toDescName = firstPin.Parent.Name;
-                    existLink = true;
+                    if (linkablePins.Count > 0)
+                    {
+                        var firstPin = linkablePins[0];
+                        fromId = startPin.Id;
+                        fromDescName = startPin.Parent.Name;
+                        toId = firstPin.Id;
+                        toDescName = firstPin.Parent.Name;
+                        existLink = true;
+                    }
                 }
             }
             if (existLink)
@@ -59,7 +63,7 @@ namespace EngineNS.DesignMacross.Design
                 return false;
             }
         }
-        public static bool TryGetLinkedDataLineWithPin(TtDataPinDescription startPin, TtStatementDescription statement, out TtDataLineDescription line)
+        public static bool TryGetAvailableDataLineWithPin(TtDataPinDescription startPin, TtStatementDescription statement, out TtDataLineDescription line)
         {
             var fromId = Guid.Empty;
             var fromDescName = "";
@@ -68,28 +72,32 @@ namespace EngineNS.DesignMacross.Design
             bool existLink = false;
             if (startPin is TtDataInPinDescription)
             {
-                var pins = statement.GetDataOutPins(startPin.TypeDesc);
-                if (pins.Count > 0)
+                if(statement.TryGetLinkableDataOutPins(startPin, out var linkablePins))
                 {
-                    var firstPin = pins[0];
-                    fromId = firstPin.Id;
-                    fromDescName = firstPin.Parent.Name;
-                    toId = startPin.Id;
-                    toDescName = startPin.Parent.Name;
-                    existLink = true;
+                    if (linkablePins.Count > 0)
+                    {
+                        var firstPin = linkablePins[0];
+                        fromId = firstPin.Id;
+                        fromDescName = firstPin.Parent.Name;
+                        toId = startPin.Id;
+                        toDescName = startPin.Parent.Name;
+                        existLink = true;
+                    }
                 }
             }
             else
             {
-                var pins = statement.GetDataInPins(startPin.TypeDesc);
-                if (pins.Count > 0)
+                if(statement.TryGetLinkableDataInPins(startPin, out var linkablePins))
                 {
-                    var firstPin = pins[0];
-                    fromId = startPin.Id;
-                    fromDescName = startPin.Parent.Name;
-                    toId = firstPin.Id;
-                    toDescName = firstPin.Parent.Name;
-                    existLink = true;
+                    if (linkablePins.Count > 0)
+                    {
+                        var firstPin = linkablePins[0];
+                        fromId = startPin.Id;
+                        fromDescName = startPin.Parent.Name;
+                        toId = firstPin.Id;
+                        toDescName = firstPin.Parent.Name;
+                        existLink = true;
+                    }
                 }
             }
             if (existLink)
@@ -441,7 +449,7 @@ namespace EngineNS.DesignMacross.Design
                                 TtPropertyGetDescription getExpression = new(superClassType, typeDesc);
                                 getExpression.Name = property.Name;
                                 getExpression.HostReferenceId = previewDataLine.StartPin.Parent.Id;
-                                var canLink = TtMethodUtil.TryGetLinkedDataLineWithPin(previewDataLine.StartPin, getExpression, out var line);
+                                var canLink = TtMethodUtil.TryGetAvailableDataLineWithPin(previewDataLine.StartPin, getExpression, out var line);
                                 if (canLink)
                                 {
                                     TtMenuUtil.ConstructMenuItem(popupMenu.Menu, typeDesc, menuPath, "",
@@ -462,7 +470,7 @@ namespace EngineNS.DesignMacross.Design
                                 TtPropertySetDescription setExpression = new(superClassType, typeDesc);
                                 setExpression.Name = property.Name;
                                 setExpression.HostReferenceId = previewDataLine.StartPin.Parent.Id;
-                                var canLink = TtMethodUtil.TryGetLinkedDataLineWithPin(previewDataLine.StartPin, setExpression, out var line);
+                                var canLink = TtMethodUtil.TryGetAvailableDataLineWithPin(previewDataLine.StartPin, setExpression, out var line);
                                 if (canLink)
                                 {
                                     TtMenuUtil.ConstructMenuItem(popupMenu.Menu, typeDesc, menuPath, "",
@@ -501,7 +509,7 @@ namespace EngineNS.DesignMacross.Design
                             {
                                 if (previewDataLine != null)
                                 {
-                                    var canLink = TtMethodUtil.TryGetLinkedDataLineWithPin(previewDataLine.StartPin, expression, out var line);
+                                    var canLink = TtMethodUtil.TryGetAvailableDataLineWithPin(previewDataLine.StartPin, expression, out var line);
                                     if (canLink)
                                     {
                                         TtMenuUtil.ConstructMenuItem(popupMenu.Menu, typeDesc, att.MenuPaths, att.FilterStrings,
@@ -537,7 +545,7 @@ namespace EngineNS.DesignMacross.Design
                             {
                                 if (previewDataLine != null)
                                 {
-                                    var canLink = TtMethodUtil.TryGetLinkedDataLineWithPin(previewDataLine.StartPin, statement, out var line);
+                                    var canLink = TtMethodUtil.TryGetAvailableDataLineWithPin(previewDataLine.StartPin, statement, out var line);
                                     if (canLink)
                                     {
                                         TtMenuUtil.ConstructMenuItem(popupMenu.Menu, typeDesc, att.MenuPaths, att.FilterStrings,
@@ -603,7 +611,7 @@ namespace EngineNS.DesignMacross.Design
                     }
                     if (previewDataLine != null)
                     {
-                        var canLink = TtMethodUtil.TryGetLinkedDataLineWithPin(previewDataLine.StartPin, statement, out var line);
+                        var canLink = TtMethodUtil.TryGetAvailableDataLineWithPin(previewDataLine.StartPin, statement, out var line);
                         if (canLink)
                         {
                             TtMenuUtil.ConstructMenuItem(popupMenu.Menu, typeDesc, menuPath, "",

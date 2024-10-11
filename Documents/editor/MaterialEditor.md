@@ -1,0 +1,7 @@
+- 主界面
+- - ![MainUI](MaterialEditor/MaterialEditor.png)
+	- 渲染状态
+	- ![RenderState](MaterialEditor/RenderState.png)
+	- 这里可以设置材质的渲染状态
+	- ![MaterialSettings](MaterialEditor/MaterialSettings.png)
+	- 这里设置光照模式，法线模式，渲染层等

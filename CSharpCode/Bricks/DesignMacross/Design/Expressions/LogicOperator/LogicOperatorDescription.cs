@@ -108,6 +108,10 @@ namespace EngineNS.DesignMacross.Design.Expressions
                 //}
             }
         }
+        public override bool IsPinsLinkable(TtDataPinDescription selfPin, TtDataPinDescription targetPin)
+        {
+            return selfPin.TypeDesc == targetPin.TypeDesc || selfPin.TypeDesc == null || targetPin.TypeDesc == null;
+        }
         public override void OnPinConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, TtMethodDescription methodDescription)
         {
             if (selfPin.TypeDesc == null)

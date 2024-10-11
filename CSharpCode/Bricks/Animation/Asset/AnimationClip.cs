@@ -265,6 +265,7 @@ namespace EngineNS.Animation
     public partial class TtAnimationModule
     {
         public Animation.Asset.TtAnimationClipManager AnimationClipManager { get; } = new Animation.Asset.TtAnimationClipManager();
+        public Animation.Asset.BlendSpace.TtBlendSpace2DManager BlendSpaceClipManager { get; } = new();
     }
 
 }

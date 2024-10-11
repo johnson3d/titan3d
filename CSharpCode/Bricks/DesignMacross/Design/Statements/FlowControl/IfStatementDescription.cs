@@ -54,7 +54,7 @@ namespace EngineNS.DesignMacross.Design.Statement
                 (linkedTrueExecPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);
                 ifStatement.TrueStatement = buildContext.ExecuteSequenceStatement;
             }
-            var executionOutPin_False = ExecutionOutPins[0];
+            var executionOutPin_False = ExecutionOutPins[1];
             var linkedFalseExecPin = methodDesc.GetLinkedExecutionPin(executionOutPin_False);
             if(linkedFalseExecPin == null)
             {

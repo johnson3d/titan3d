@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NPOI.POIFS.Properties;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -286,10 +287,17 @@ namespace EngineNS.NxRHI
         {
             return mCoreObject.GetDeltaTime();
         }
+        public TtGpuScope Parent;
+        [ThreadStatic]
+        public static TtGpuScope CurrentScope = null;
         public void Begin(UCommandList cmdlist)
         {
             if (ScopeFrameValue == 0)
+            {
                 mCoreObject.Begin(cmdlist.mCoreObject);
+                Parent = CurrentScope;
+                CurrentScope = this;
+            }
         }
         public void End(UCommandList cmdlist)
         {

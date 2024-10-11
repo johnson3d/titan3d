@@ -217,6 +217,10 @@ namespace EngineNS.DesignMacross.Design.Statement
             pin = null;
             return false;
         }
+        public virtual bool IsPinsLinkable(TtDataPinDescription selfPin, TtDataPinDescription targetPin)
+        {
+            return selfPin.TypeDesc == targetPin.TypeDesc;
+        }
         public List<TtDataInPinDescription> GetDataInPins(TtTypeDesc typeDesc)
         {
             var pins = new List<TtDataInPinDescription>();
@@ -229,6 +233,23 @@ namespace EngineNS.DesignMacross.Design.Statement
             }
             return pins;
         }
+        public virtual bool TryGetLinkableDataInPins(TtDataPinDescription targetPin, out List<TtDataInPinDescription> outLinkablePins)
+        {
+            var pins = new List<TtDataInPinDescription>();
+            foreach (var pin in DataInPins)
+            {
+                if (IsPinsLinkable(pin, targetPin))
+                {
+                    pins.Add(pin);
+                }
+            }
+            outLinkablePins = pins;
+            if (pins.Count > 0)
+            {
+                return true;
+            }
+            return false;
+        }
         public List<TtDataOutPinDescription> GetDataOutPins(TtTypeDesc typeDesc)
         {
             var pins = new List<TtDataOutPinDescription>();
@@ -240,6 +261,23 @@ namespace EngineNS.DesignMacross.Design.Statement
                 }
             }
             return pins;
+        }
+        public virtual bool TryGetLinkableDataOutPins(TtDataPinDescription targetPin, out List<TtDataOutPinDescription> outLinkablePins)
+        {
+            var pins = new List<TtDataOutPinDescription>();
+            foreach (var pin in DataOutPins)
+            {
+                if (IsPinsLinkable(pin, targetPin))
+                {
+                    pins.Add(pin);
+                }
+            }
+            outLinkablePins = pins;
+            if (pins.Count > 0)
+            {
+                return true;
+            }
+            return false;
         }
         public List<TtExecutionInPinDescription> GetExecutionInPins()
         {

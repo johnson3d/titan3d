@@ -104,10 +104,10 @@ namespace NxRHI
 	public:
 		TWeakRefHandle<DX11GpuDevice>	mDeviceRef;
 		std::string					mName;
-		AutoRef<ID3D11Query>		mQueryJoint;
 		AutoRef<ID3D11Query>		mQueryStart;
 		AutoRef<ID3D11Query>		mQueryEnd;
 		//AutoRef<IFence>				mFence;
+		UINT64						mDeltaTime = 0;
 	};
 }
 

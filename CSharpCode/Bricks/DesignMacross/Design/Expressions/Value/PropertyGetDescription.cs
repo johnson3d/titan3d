@@ -1,6 +1,8 @@
-﻿using EngineNS.DesignMacross.Base.Description;
+﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Design.ConnectingLine;
+using EngineNS.DesignMacross.Design.Statement;
 using EngineNS.Rtti;
 
 namespace EngineNS.DesignMacross.Design.Expressions
@@ -26,6 +28,29 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public TtDataInPinDescription GetHostPin()
         {
             return DataInPins[0];
+        }
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        {
+            var linkedDataPin = expressionBuildContext.MethodDescription.GetLinkedDataPin(DataInPins[0]);
+            if(linkedDataPin == null)
+            {
+
+            }
+            else
+            {
+                if(linkedDataPin.Parent is TtExpressionDescription expressionDescription)
+                {
+                    FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription };
+                    var hostExpression = expressionDescription.BuildExpression(ref buildContext);
+                    return new TtVariableReferenceExpression(Name, hostExpression);
+                }
+                if (linkedDataPin.Parent is TtStatementDescription statementDescription)
+                {
+                    var hostExpression = statementDescription.BuildExpressionForOutPin(linkedDataPin);
+                    return new TtVariableReferenceExpression(Name, hostExpression);
+                }
+            }
+            return null;
         }
     }
 }

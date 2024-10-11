@@ -35,7 +35,7 @@ namespace EngineNS.DesignMacross.Design.Statements
         {
             var forStatement = new TtForLoopStatement()
             {
-                LoopIndexName = "__loopIndex_" + this.Id.ToString().GetHashCode(),
+                LoopIndexName = "__loopIndex_" + (uint)this.Id.ToString().GetHashCode(),
                 IncludeEnd = IncludeEnd,
             };
             var methodDesc = statementBuildContext.MethodDescription as TtMethodDescription;
@@ -143,7 +143,7 @@ namespace EngineNS.DesignMacross.Design.Statements
         {
             if(pin == DataOutPins[0])
             {
-                return new TtVariableReferenceExpression("__loopIndex_" + this.Id.ToString().GetHashCode());
+                return new TtVariableReferenceExpression("__loopIndex_" + (uint)this.Id.ToString().GetHashCode());
             }
             return null;
         }

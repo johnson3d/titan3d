@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controller\EditorCameraController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\GpuProfiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\MemoryProfiler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Forms\AnimationBlendSpaceEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\USkeletonEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UAnimationClipEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Forms\UAssetReferViewer.cs" />

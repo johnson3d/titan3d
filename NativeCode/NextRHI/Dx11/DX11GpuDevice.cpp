@@ -509,7 +509,21 @@ namespace NxRHI
 	}
 	void DX11CmdQueue::Init(DX11GpuDevice* device)
 	{
-		mDefaultQueueFrequence = 1;
+		AutoRef<ID3D11Query>		mQueryJoint;
+		D3D11_QUERY_DESC queryDesc{};
+		queryDesc.Query = D3D11_QUERY::D3D11_QUERY_TIMESTAMP_DISJOINT;
+		device->mDevice->CreateQuery(&queryDesc, mQueryJoint.GetAddressOf());
+
+		auto context = ((DX11CmdQueue*)device->GetCmdQueue())->mHardwareContext->mContext;
+		context->Begin(mQueryJoint);
+		context->End(mQueryJoint);
+
+		HRESULT hr = S_OK;
+		D3D11_QUERY_DATA_TIMESTAMP_DISJOINT disjoint = { 1, TRUE };
+		while ((hr = context->GetData(mQueryJoint, &disjoint, sizeof(disjoint), 0)) == S_FALSE)
+		{
+		}
+		mDefaultQueueFrequence = disjoint.Frequency;
 	}
 	void DX11CmdQueue::ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type)
 	{

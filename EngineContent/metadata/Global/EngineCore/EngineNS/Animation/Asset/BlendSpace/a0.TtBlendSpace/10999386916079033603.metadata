@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_10999386916079033603 Type="EngineNS.Animation.Asset.BlendSpace.TtBlendSpace@EngineCore">
+  <AnimPoints Type="System.Collections.Generic.List&lt;EngineNS.Animation.Asset.BlendSpace.TtBlendSpace_Point@EngineCore,&gt;@Unknown" Order="0" />
+  <BlendAxises Type="System.Collections.Generic.List&lt;EngineNS.Animation.Asset.BlendSpace.TtBlendSpace_Axis@EngineCore,&gt;@Unknown" Order="0" />
+  <GridTriangles Type="System.Collections.Generic.List&lt;EngineNS.Animation.Asset.BlendSpace.TtBlentSpace_Triangle@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_10999386916079033603>

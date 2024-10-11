@@ -53,21 +53,104 @@ namespace EngineNS.DesignMacross.Design.Expressions
         }
         public override TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
-            new TtBinaryOperatorExpression()
+            var ifStatement = new TtIfStatement();
+            var binaryOP = new TtBinaryOperatorExpression()
             {
                 Operation = TtBinaryOperatorExpression.EBinaryOperation.Is,
             };
-            TtCastExpression castExpression = new();
-            var ifStatement = new TtIfStatement();
+            var linkedDataPin = statementBuildContext.MethodDescription.GetLinkedDataPin(DataInPins[0]);
+            if (linkedDataPin == null) 
+            {
+
+            }
+            else
+            {
+                if(linkedDataPin.Parent is TtExpressionDescription expressionDescription)
+                {
+                    FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription };
+                    var left = expressionDescription.BuildExpression(ref buildContext);
+                    binaryOP.Left = left;
+                }
+                if (linkedDataPin.Parent is TtStatementDescription statementDescription)
+                {
+                    FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription };
+                    var left = statementDescription.BuildExpressionForOutPin(linkedDataPin);
+                    binaryOP.Left = left;
+                }
+            }
+            binaryOP.Right = new TtPrimitiveExpression(TargetType, false);
+            ifStatement.Condition = binaryOP;
+
+            var castedVarName = "result_" + Name + "_" + (uint)Id.ToString().GetHashCode();
+            TtVariableDeclaration casted = new TtVariableDeclaration
+            {
+                VariableType = new TtTypeReference(TargetType),
+                VariableName = castedVarName
+            };
+            statementBuildContext.AddStatement(casted);
+            var executionOutPin_True = ExecutionOutPins[0];
+            var linkedTrueExecPin = statementBuildContext.MethodDescription.GetLinkedExecutionPin(executionOutPin_True);
+            if (linkedTrueExecPin == null)
+            {
+                //空语句
+                //ifStatement.TrueStatement = new UEmptyStatement()
+
+                ifStatement.TrueStatement = new TtExecuteSequenceStatement();
+            }
+            else
+            {
+                var trueExecuteSequenceStatement = new TtExecuteSequenceStatement();
+                TtCastExpression castExpression = new();
+                castExpression.SourceType = new TtTypeReference(linkedDataPin.TypeDesc);
+                castExpression.TargetType = new TtTypeReference(TargetType);
+                if (linkedDataPin.Parent is TtExpressionDescription expressionDescription)
+                {
+                    FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription };
+                    castExpression.Expression = expressionDescription.BuildExpression(ref buildContext);
+                }
+                if (linkedDataPin.Parent is TtStatementDescription statementDescription)
+                {
+                    FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription };
+                    castExpression.Expression = statementDescription.BuildExpressionForOutPin(linkedDataPin);
+                }
+                var assign = TtASTBuildUtil.CreateAssignOperatorStatement(new TtVariableReferenceExpression(castedVarName), castExpression);
+                trueExecuteSequenceStatement.Sequence.Add(assign);
+                FStatementBuildContext trueStatementBuildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = statementBuildContext.MethodDescription };
+                (linkedTrueExecPin.Parent as TtStatementDescription).BuildStatement(ref trueStatementBuildContext);
+                trueExecuteSequenceStatement.Sequence.Add(trueStatementBuildContext.ExecuteSequenceStatement);
+                ifStatement.TrueStatement = trueExecuteSequenceStatement;
+            }
+            var executionOutPin_False = ExecutionOutPins[1];
+            var linkedFalseExecPin = statementBuildContext.MethodDescription.GetLinkedExecutionPin(executionOutPin_False);
+            if (linkedFalseExecPin == null)
+            {
+                //空
+            }
+            else
+            {
+                System.Diagnostics.Debug.Assert(linkedFalseExecPin is TtExecutionInPinDescription);
+                FStatementBuildContext buildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = statementBuildContext.MethodDescription };
+                (linkedFalseExecPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);
+                ifStatement.FalseStatement = buildContext.ExecuteSequenceStatement;
+            }
+            statementBuildContext.AddStatement(ifStatement);
             return base.BuildStatement(ref statementBuildContext);
         }
         public override TtExpressionBase BuildExpressionForOutPin(TtDataPinDescription pin)
         {
-            return base.BuildExpressionForOutPin(pin);
+            return new TtVariableReferenceExpression("result_" + Name + "_" + (uint)Id.ToString().GetHashCode());
+        }
+        public override bool IsPinsLinkable(TtDataPinDescription selfPin, TtDataPinDescription targetPin)
+        {
+            if(SourcePin == selfPin)
+            {
+                return selfPin.TypeDesc == targetPin.TypeDesc;
+            }
+            return false;
         }
         public override void OnPinConnected(TtDataPinDescription selfPin, TtDataPinDescription connectedPin, TtMethodDescription methodDescription)
         {
-            if(SourcePin == selfPin)
+            if (SourcePin == selfPin)
             {
                 SourceType = connectedPin.TypeDesc;
             }

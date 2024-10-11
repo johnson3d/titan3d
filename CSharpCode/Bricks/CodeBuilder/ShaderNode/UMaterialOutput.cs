@@ -220,7 +220,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             data.MethodDec = PSFunction;
 
             foreach (var i in FieldPins)
-            {
+            {               
+                if (i.Name.Contains("VertexOffset"))
+                    continue;
+
                 if (i.HasLinker())
                 {
                     var linker = graph.FindInLinkerSingle(i);
@@ -258,6 +261,25 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             VSFunction.MethodBody.Sequence.Clear();
             data.CurrentStatements = VSFunction.MethodBody.Sequence;
             data.MethodDec = VSFunction;
+
+            foreach (var i in FieldPins)
+            {
+                if (i.HasLinker() && i.Name.Contains("VertexOffset"))
+                {
+                    var linker = graph.FindInLinkerSingle(i);
+                    var opPin = graph.GetOppositePin(i);
+                    var pinNode = graph.GetOppositePinNode(i);
+                    pinNode.BuildStatements(opPin, ref data);
+                    var exp = graph.GetOppositePinExpression(i, ref data);
+                    var assign = new TtAssignOperatorStatement()
+                    {
+                        From = exp,
+                        To = new TtVariableReferenceExpression("m" + i.Name, new TtVariableReferenceExpression("mtl")),
+                    };
+                    VSFunction.MethodBody.Sequence.Add(assign);
+                }
+            }
+
         }
     }
 }

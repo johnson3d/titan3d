@@ -1,0 +1,3 @@
+- 主界面
+- - ![MainUI](NebulaEditor/MainUI.png)
+	- 左边Graph里面右键弹出菜单可以看到发射器，效果器，外形节点，链接出来EffectQueue

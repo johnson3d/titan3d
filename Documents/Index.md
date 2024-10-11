@@ -4,11 +4,13 @@
 ![启动配置](picture/run_config.png)
 -  编辑器总览
 ![总览图](picture/main_edtor.png)
-- - **LogWatcher**
-- - **GpuProfiler**
-- - **MemProfiler**
-- - **ClrProfiler**
-- - **PIEController**
+- - **[ContentBrowser](editor/ContentBrowser.md)**
+- - **[LogWatcher&Command](editor/LogWatcher.md)**
+- - **[CpuProfiler](editor/CpuProfiler.md)**
+- - **[GpuProfiler](editor/GpuProfiler.md)**
+- - **[MemProfiler](editor/MemProfiler.md)**
+- - **[ClrProfiler](editor/ClrProfiler.md)**
+- - **[PIEController](editor/PIEController.md)**
 - MainMenu
 这里可以打开和关闭一些编辑器的窗口
 
@@ -30,26 +32,27 @@
 - - **绕观察点旋转**:按住Alt键和鼠标左键拖动
 - - **摄像机自身旋转**:鼠标右键拖动
 - 内置编辑器
-- - **TextureEditor**
-- - **MeshEditor**
-- - **MaterialEditor**
-- - **MaterialInstanceEditor**
-- - **MaterialedMeshEditor**
-- - **NebulaParticleEditor**
-- - **RendPolicyEditor**
-- - **SceneEditor**
-- - **MacrossEditor**
-- - **PGCEditor**
-- - **UIEditor**
+- - **[TextureEditor](editor/TextureEditor.md)**
+- - **[MeshPrimitiveEditor](editor/MeshPrimitiveEditor.md)**
+- - **[MaterialEditor](editor/MaterialEditor.md)**
+- - **[MaterialInstanceEditor](editor/MaterialInstanceEditor.md)**
+- - **[MaterialedMeshEditor](editor.MaterialedMeshEditor.md)**
+- - **[NebulaParticleEditor](editor/NebulaParticleEditor.md)**
+- - **[RendPolicyEditor](editor/RendPolicyEditor.md)**
+- - **[SceneEditor](editor/SceneEditor.md)**
+- - **[MacrossEditor](editor/MacrossEditor.md)**
+- - **[PGCEditor](editor/PGCEditor.md)**
+- - **[UIEditor](editor/UIEditor.md)**
 
 - 基础教程
 - 在ContentBrowser的tutorials下面有对应的子目录
-- - helloworld
-- - material
-- - mcshader
-- - particles
-- - pbr
-- - prefab
-- - renderpolicy
-- - terrain
-- - viewinstance
+- - [helloworld](tutorials/helloworld.md)
+- - [material](tutorials/material.md)
+- - [mcshader](tutorials/mcshader.md)
+- - [particles](tutorials/particles.md)
+- - [pbr](tutorials/pbr.md)
+- - [prefab](tutorials/prefab.md)
+- - [renderpolicy](tutorials/renderpolicy.md)
+- - [terrain](tutorials/terrain.md)
+- - [viewinstance](tutorials/viewinstance.md)
+- - [mc_cmd](tutorials/mc_cmd.md)

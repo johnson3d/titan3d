@@ -5,6 +5,7 @@ using EngineNS.DesignMacross.Base.Render;
 using EngineNS.DesignMacross.Design.Expressions;
 using EngineNS.DesignMacross.Design.Statement;
 using EngineNS.DesignMacross.Editor;
+using EngineNS.EGui;
 using EngineNS.EGui.Controls;
 
 namespace EngineNS.DesignMacross.Design.ConnectingLine
@@ -217,9 +218,50 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         public override void OnMouseOver(ref FGraphElementRenderingContext context)
         {
             BackgroundColor = new Color4f(0.5, 1, 1, 1);
-            if(DataPinDescription.TypeDesc != null)
+            var methodGraph = context.DesignedGraph as TtGraph_Method;
+            if (methodGraph.PreviewExecutionLine != null)
             {
-                EGui.Controls.CtrlUtility.DrawHelper($"{DataPinDescription.TypeDesc.ToString()}");
+                BackgroundColor = new Color4f(0.5, 1, 0, 0);
+            }
+            if (methodGraph.PreviewDataLine != null)
+            {
+                var startPin = methodGraph.PreviewDataLine.StartPin;
+                if (startPin != DataPinDescription)
+                {
+                    bool isLinkable = true;
+                    if(startPin.Parent == DataPinDescription.Parent)
+                    {
+                        isLinkable = false;
+                    }
+                    if(startPin is TtDataOutPinDescription && DataPinDescription is TtDataOutPinDescription)
+                    {
+                        isLinkable = false;
+                    }
+                    if (startPin is TtDataInPinDescription && DataPinDescription is TtDataInPinDescription)
+                    {
+                        isLinkable = false;
+                    }
+                    if (!CheckPinsLinkable(startPin, DataPinDescription))
+                    {
+                        isLinkable = false;
+                    }
+
+                    if (!isLinkable)
+                    {
+                        BackgroundColor = new Color4f(0.5, 1, 0, 0);
+                    }
+                    else
+                    {
+                        BackgroundColor = new Color4f(0.5, 0, 1, 0);
+                    }
+                }
+            }
+            else
+            {
+                if (DataPinDescription.TypeDesc != null)
+                {
+                    EGui.Controls.CtrlUtility.DrawHelper($"{DataPinDescription.TypeDesc.ToString()}");
+                }
             }
         }
         public override void OnMouseLeave(ref FGraphElementRenderingContext context)
@@ -233,7 +275,24 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             methodGraph.PreviewDataLine.AbsLocation = Icon.AbsCenter;
             methodGraph.PreviewDataLine.StartPin = DataPinDescription;
         }
-
+        public bool CheckPinsLinkable(TtDataPinDescription startPin, TtDataPinDescription endPin)
+        {
+            if (endPin.Parent is TtStatementDescription toStatementDesc)
+            {
+                if (toStatementDesc.IsPinsLinkable(endPin, startPin))
+                {
+                    return true;
+                }
+            }
+            if (endPin.Parent is TtExpressionDescription toExpressionDesc)
+            {
+                if (toExpressionDesc.IsPinsLinkable(endPin, startPin))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         public override void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context)
         {
             var methodGraph = context.DesignedGraph as TtGraph_Method;
@@ -246,34 +305,32 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
                 var startPin = methodGraph.PreviewDataLine.StartPin;
                 if (startPin != DataPinDescription && startPin.Parent != DataPinDescription.Parent)
                 {
-                    TtDataPinDescription fromPin = null;
-                    TtDataPinDescription toPin = null;
+                    TtDataOutPinDescription fromPin = null;
+                    TtDataInPinDescription toPin = null;
                     if(startPin is TtDataOutPinDescription)
                     {
-                        fromPin = startPin;
+                        fromPin = (TtDataOutPinDescription)startPin;
+                        
                     }
                     if(DataPinDescription is TtDataOutPinDescription)
                     {
-                        fromPin = DataPinDescription;
+                        fromPin = (TtDataOutPinDescription)DataPinDescription;
                     }
                     if (startPin is TtDataInPinDescription)
                     {
-                        toPin = startPin;
+                        toPin = (TtDataInPinDescription)startPin;
                     }
                     if (DataPinDescription is TtDataInPinDescription)
                     {
-                        toPin = DataPinDescription;
+                        toPin = (TtDataInPinDescription)DataPinDescription;
                     }
                     if(fromPin == null || toPin == null)
                     {
                         return;
                     }
-                    if (fromPin.TypeDesc != null && toPin.TypeDesc != null)
+                    if (!CheckPinsLinkable(startPin, DataPinDescription))
                     {
-                        if (fromPin.TypeDesc != toPin.TypeDesc)
-                        {
-                            return;
-                        }
+                        return;
                     }
                     
                     var line = new TtDataLineDescription() { Name = "Data_" + fromPin.Parent.Name + "_To_" + toPin.Parent.Name, FromId = fromPin.Id, ToId = toPin.Id };

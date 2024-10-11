@@ -1,6 +1,9 @@
-﻿using EngineNS.IO;
+﻿using EngineNS.Graphics.Mesh;
+using EngineNS.IO;
+using EngineNS.Thread.Async;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,11 +13,12 @@ namespace EngineNS.Animation.Asset.BlendSpace
 {
     public delegate void AxisNameChange(string newName);
     [Rtti.Meta]
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtBlendSpace_Axis : IO.BaseSerializer
     {
         public event AxisNameChange OnAxisNameChange;
         string mAxisName = "None";
-        [Rtti.Meta]
+        [Rtti.Meta, Category("Option")]
         public string AxisName
         {
             get => mAxisName;
@@ -24,11 +28,11 @@ namespace EngineNS.Animation.Asset.BlendSpace
                 OnAxisNameChange?.Invoke(value);
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta, Category("Option")]
         public float Min { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta, Category("Option")]
         public float Max { get; set; }
-        [Rtti.Meta]
+        [Rtti.Meta, Category("Option")]
         public int GridNum { get; set; }
         public TtBlendSpace_Axis()
         {
@@ -64,20 +68,25 @@ namespace EngineNS.Animation.Asset.BlendSpace
     }
     //BlendSpace中 动作和所在的位置
     [Rtti.Meta]
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtBlendSpace_Point : IO.BaseSerializer
     {
         public event EventHandler OnAnimationChanged;
-        [Rtti.Meta]
-        public Vector3 Value { get; set; }
-        [Rtti.Meta]
-        public IAnimationAsset Animation
-        {
-            get;
-            set;
-        }
+        [Rtti.Meta, Category("Option")]
+        public Vector3 Value { get; set; } = Vector3.Zero;
+        [Rtti.Meta, Category("Option")]
+        [RName.PGRName(FilterExts = TtAnimationClip.AssetExt)]
+        public RName AnimationName { get; set; }
+        public IAnimationAsset Animation { get; set; } = null;
         public TtBlendSpace_Point(IAnimationAsset animation, Vector3 value)
         {
+            AnimationName = animation.AssetName;
             Animation = animation;
+            Value = value;
+        }
+        public TtBlendSpace_Point(RName animationName, Vector3 value)
+        {
+            AnimationName = animationName;
             Value = value;
         }
         public TtBlendSpace_Point()
@@ -116,19 +125,20 @@ namespace EngineNS.Animation.Asset.BlendSpace
 
     //need to seperate editor and runtime
     [Rtti.Meta]
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public abstract class TtBlendSpace : IO.BaseSerializer, IAnimationCompositeAsset
     {
         public virtual string TypeExt
         {
             get { return null; }
         }
-        [Rtti.Meta]
-        public List<TtBlendSpace_Axis> BlendAxises = new List<TtBlendSpace_Axis>() { null, null, null };
+        [Rtti.Meta, Category("Option")]
+        public List<TtBlendSpace_Axis> BlendAxises { get; set; } = new List<TtBlendSpace_Axis>() { null, null, null };
         [Rtti.Meta]
         public List<TtBlentSpace_Triangle> GridTriangles { get; protected set; } = new List<TtBlentSpace_Triangle>();
  
-        [Rtti.Meta]    
-        public List<TtBlendSpace_Point> AnimPoints { get; protected set; } = new List<TtBlendSpace_Point>();
+        [Rtti.Meta, Category("Option")]    
+        public List<TtBlendSpace_Point> AnimPoints { get; set; } = new List<TtBlendSpace_Point>();
 
         public TtBlendSpace_Point GetAnimPoint(RName name)
         {
@@ -152,6 +162,16 @@ namespace EngineNS.Animation.Asset.BlendSpace
         {
             //valid sample
             var animPoint = new TtBlendSpace_Point(animationAsset, value);
+            AnimPoints.Add(animPoint);
+            animPoint.OnAnimationChanged += AnimPoint_OnAnimationChanged;
+            ReConstructTrangles();
+            return animPoint;
+        }
+        public virtual async TtTask<TtBlendSpace_Point> AddPoint(RName animationAsset, Vector3 value)
+        {
+            //valid sample
+            var animPoint = new TtBlendSpace_Point(animationAsset, value);
+            animPoint.Animation = await TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(animationAsset);
             AnimPoints.Add(animPoint);
             animPoint.OnAnimationChanged += AnimPoint_OnAnimationChanged;
             ReConstructTrangles();

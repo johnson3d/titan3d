@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Text;
 
@@ -98,6 +99,24 @@ namespace EngineNS.Graphics.Pipeline.Shader
             CoreSDK.PtrType_Release(psNode);
 
             xnd.SaveXnd(file);
+        }
+        public static TtEffectDesc LoadEffectDesc(string file)
+        {
+            //var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect);
+            //var file = path + hash.ToString() + TtEffect.AssetExt;
+            using (var xnd = IO.TtXndHolder.LoadXnd(file))
+            {
+                var descAttr = xnd.RootNode.mCoreObject.TryGetAttribute("Desc");
+                IO.ISerializer desc;
+                using (var ar = descAttr.GetReader(null))
+                {
+                    IO.SerializerHelper.Read(ar, out desc, null);
+                }
+                var effectDesc = desc as TtEffectDesc;
+                if (effectDesc == null)
+                    return null;
+                return effectDesc;
+            }
         }
         public static async Thread.Async.TtTask<TtEffect> LoadEffect(Hash160 hash, TtShadingEnv shading, TtMaterial material, TtMdfQueueBase mdf)
         {

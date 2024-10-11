@@ -1,4 +1,6 @@
-﻿using NPOI.SS.Formula.Functions;
+﻿using EngineNS.Graphics.Pipeline.Shader;
+using MathNet.Numerics;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,7 +9,7 @@ using System.Text;
 
 namespace EngineNS
 {
-    public class TtCommand
+    public partial class TtCommand
     {
         public string CmdName { get; protected set; }
         public string CmdHelp { get; protected set; }
@@ -37,6 +39,25 @@ namespace EngineNS
                     return i.Value;
             }
             return null;
+        }
+        public RName GetRNameByArg(string arg, string append = null)
+        {
+            RName result = null;
+            if (arg.StartsWith("@Game/"))
+            {
+                arg = arg.Substring("@Game/".Length);
+                result = RName.GetRName(arg + append, RName.ERNameType.Game);
+            }
+            else if (arg.StartsWith("@Engine/"))
+            {
+                arg = arg.Substring("@Engine/".Length);
+                result = RName.GetRName(arg + append, RName.ERNameType.Engine);
+            }
+            else
+            {
+                result = RName.GetRName(arg + append, RName.ERNameType.Game);
+            }
+            return result;
         }
         public virtual void Execute(string args)
         {
@@ -114,6 +135,7 @@ namespace EngineNS
         {
 
         }
+       
     }
     public partial class TtMcCommand : TtCommand
     {
@@ -169,20 +191,7 @@ namespace EngineNS
                 bRunInLogicThread = System.Convert.ToBoolean(OnGameThread);
             }
 
-            if (flt.StartsWith("@Game/"))
-            {
-                flt = flt.Substring("@Game/".Length);
-                McName = RName.GetRName(flt + Bricks.CodeBuilder.TtMacross.AssetExt, RName.ERNameType.Game);
-            }
-            else if (flt.StartsWith("@Engine/"))
-            {
-                flt = flt.Substring("@Engine/".Length);
-                McName = RName.GetRName(flt + Bricks.CodeBuilder.TtMacross.AssetExt, RName.ERNameType.Engine);
-            }
-            else
-            {
-                McName = RName.GetRName(flt + Bricks.CodeBuilder.TtMacross.AssetExt, RName.ERNameType.Game);
-            }
+            McName = GetRNameByArg(flt, Bricks.CodeBuilder.TtMacross.AssetExt);
             if (McObject != null)
             {
                 if (bRunInLogicThread)
@@ -289,6 +298,37 @@ namespace EngineNS
         public override void Execute(string argsText)
         {
             TtEngine.Instance.GfxDevice.AttachBufferManager.PrintCachedBuffer = true;
+        }
+    }
+
+    public class TtCommand_DelMaterialShaderCache : TtCommand
+    {
+        public TtCommand_DelMaterialShaderCache()
+        {
+            CmdName = "DelMaterialCache";
+            CmdHelp = "DelMaterialCache Material={string}";
+        }
+        public override void Execute(string argsText)
+        {
+            _ = ExecuteImpl(argsText);
+        }
+        private async Thread.Async.TtTask ExecuteImpl(string argsText)
+        {
+            var args = GetArguments(argsText);
+            var arg = FindArgument(args, "Material");
+            var mtlName = GetRNameByArg(arg, null);
+            var mtl = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(mtlName);
+            if (mtl == null)
+                return;
+            var files = IO.TtFileManager.GetFiles(TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect), "*.effect", true);
+            foreach (var i in files)
+            {
+                var desc = Graphics.Pipeline.Shader.TtEffect.LoadEffectDesc(i);
+                if (desc.MaterialHash == mtl.MaterialHash)
+                {
+                    IO.TtFileManager.DeleteFile(i);
+                }
+            }
         }
     }
 }

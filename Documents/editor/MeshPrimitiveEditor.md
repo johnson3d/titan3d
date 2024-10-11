@@ -1,0 +1,3 @@
+- 主界面
+- - ![MainUI](MeshPrimitiveEditor/MainUI.png)
+	- 按钮N,T两个可以显示Normal,Tangent

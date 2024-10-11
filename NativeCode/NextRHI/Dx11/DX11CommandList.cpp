@@ -657,9 +657,7 @@ namespace NxRHI
 		
 		device->mDevice->CreateQuery(&queryDesc, mQueryStart.GetAddressOf());
 		device->mDevice->CreateQuery(&queryDesc, mQueryEnd.GetAddressOf());
-
-		queryDesc.Query = D3D11_QUERY::D3D11_QUERY_TIMESTAMP_DISJOINT;
-		device->mDevice->CreateQuery(&queryDesc, mQueryJoint.GetAddressOf());
+		
 		return true;
 	}
 
@@ -669,35 +667,32 @@ namespace NxRHI
 	}
 	UINT64 DX11GpuScope::GetDeltaTime()
 	{
-		/*auto device = mDeviceRef.GetPtr();
+		auto device = mDeviceRef.GetPtr();
 		UINT64 start = 0,end = 0;
-		D3D11_QUERY_DATA_TIMESTAMP_DISJOINT disjoint = { 1, TRUE };
+		
 		auto context = ((DX11CmdQueue*)device->GetCmdQueue())->mHardwareContext->mContext;
 		HRESULT hr = S_OK;
-		while ((hr = context->GetData(mQueryJoint, &disjoint, sizeof(disjoint), 0)) == S_FALSE)
+		
+		if ((hr = context->GetData(mQueryStart, &start, sizeof(UINT64), 0)) == S_FALSE)
 		{
+			return mDeltaTime;
 		}
-		device->GetCmdQueue()->mDefaultQueueFrequence = disjoint.Frequency;
-		while ((hr = context->GetData(mQueryStart, &start, sizeof(UINT64), 0)) == S_FALSE)
+		if ((hr = context->GetData(mQueryEnd, &end, sizeof(UINT64), 0)) == S_FALSE)
 		{
+			return mDeltaTime;
 		}
-		while ((hr = context->GetData(mQueryEnd, &end, sizeof(UINT64), 0)) == S_FALSE)
-		{
-		}
-		return end - start;*/
-		return 0;
+		mDeltaTime = end - start;
+		return mDeltaTime;
 	}
 	void DX11GpuScope::Begin(ICommandList* cmdlist)
 	{
 		auto cmd = (DX11CommandList*)cmdlist;
-		cmd->mContext->Begin(mQueryJoint);
 		cmd->mContext->End(mQueryStart);
 	}
 	void DX11GpuScope::End(ICommandList* cmdlist)
 	{
 		auto cmd = (DX11CommandList*)cmdlist;
 		cmd->mContext->End(mQueryEnd);
-		cmd->mContext->End(mQueryJoint);
 	}
 	void DX11GpuScope::SetName(const char* name)
 	{

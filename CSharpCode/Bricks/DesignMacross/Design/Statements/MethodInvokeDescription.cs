@@ -107,7 +107,7 @@ namespace EngineNS.DesignMacross.Design.Statement
                 {
                     VariableType = new TtTypeReference(ReturnType),
                     InitValue = new TtDefaultValueExpression(ReturnType),
-                    VariableName = "result_" + Name + "_" + Id.ToString().GetHashCode(),
+                    VariableName = "result_" + Name + "_" + (uint)Id.ToString().GetHashCode(),
                 };
                 statementBuildContext.AddStatement(resultVarDeclaration);
                 methodInvoke.ReturnValue = resultVarDeclaration;
@@ -155,7 +155,7 @@ namespace EngineNS.DesignMacross.Design.Statement
         {
             if (pin == DataOutPins[0])
             {
-                return new TtVariableReferenceExpression("result_" + Name + "_" + Id.ToString().GetHashCode());
+                return new TtVariableReferenceExpression("result_" + Name + "_" + (uint)Id.ToString().GetHashCode());
             }
             return null;
         }
