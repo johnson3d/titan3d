@@ -3,8 +3,8 @@
   - Category可以进一步筛选
 - Command
 	- 在如图红箭头处输入命令行
-	![图片](LogWatcher/LogWatcher.png)
-	命令格式 CommandName ArgName1=XXXX ArgName2=YYYY
+    - ![图片](LogWatcher/LogWatcher.png)
+	- 命令格式 CommandName ArgName1=XXXX ArgName2=YYYY
 	- 新增命令
 	- - C#代码扩展
     ```C#

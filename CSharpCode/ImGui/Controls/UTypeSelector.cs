@@ -138,7 +138,18 @@ namespace EngineNS.EGui.Controls
         bool mSearchBarFocused = false;
         public string CtrlId = "##ComboTypeSelector";
         public delegate bool FOnTypeFilter(Rtti.TtTypeDesc type);
-        public bool PopupVisible = false;
+        Dictionary<string, bool> mPopupVisibleDic = new Dictionary<string, bool>();
+        public bool PopupVisible
+        {
+            get
+            {
+                if(mPopupVisibleDic.ContainsKey(CtrlId))
+                {
+                    return mPopupVisibleDic[CtrlId];
+                }
+                return false;
+            }
+        }
         public unsafe bool OnDraw(float itemWidth, int showMaxItems, FOnTypeFilter onTypeFilter = null, bool useDPI = true)
         {
             ImGuiAPI.PushID(CtrlId);
@@ -167,8 +178,8 @@ namespace EngineNS.EGui.Controls
                 new Vector2(Math.Max(itemWidth, UIProxy.StyleConfig.Instance.ItemSpacing.X + textSize.X + sizeDelta), frameHeight),
                 ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft))
             {
-                ImGuiAPI.OpenPopup("combobox", ImGuiPopupFlags_.ImGuiPopupFlags_None);
-                PopupVisible = true;
+                ImGuiAPI.OpenPopup("combobox" + CtrlId, ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                mPopupVisibleDic[CtrlId] = true;
             }
 
             bool bChanged = false;
@@ -177,12 +188,14 @@ namespace EngineNS.EGui.Controls
             var size = new Vector2(300, 500);
             ImGuiAPI.SetNextWindowPos(popWinPos, ImGuiCond_.ImGuiCond_None, in pivot);
             ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_None);
-            if (ImGuiAPI.BeginPopupModal("combobox", ref PopupVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_Popup))
+            bool popupVisible = PopupVisible;
+            if (ImGuiAPI.BeginPopupModal("combobox" + CtrlId, ref popupVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_Popup))
             {
+                mPopupVisibleDic[CtrlId] = popupVisible;
                 var sz = new Vector2(0, 0);
                 var popDrawList = ImGuiAPI.GetWindowDrawList();
                 UIProxy.SearchBarProxy.OnDraw(ref mSearchBarFocused, popDrawList, "search types", ref mFilterText, ImGuiAPI.GetWindowContentRegionWidth());
-                ImGuiAPI.BeginChild("typesWin", in sz, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+                ImGuiAPI.BeginChild("typesWin" + CtrlId, in sz, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_None);
                 {
                     mFilterText = mFilterText.ToLower();
                     ImGuiAPI.Separator();
