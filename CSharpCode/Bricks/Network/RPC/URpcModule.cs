@@ -104,7 +104,43 @@ namespace EngineNS.Bricks.Network.RPC
 	public class TtReturnContext
 	{
 		public bool IsTimeout = false;
+		public void Reset()
+		{
+            IsTimeout = false;
+        }
 	}
+	public struct FRpcCallArg
+	{
+        public FRpcCallArg()
+		{
+			SetDefault();
+        }
+        public FRpcCallArg(INetConnect Connect)
+		{
+            Timeout = uint.MaxValue;
+            ExeIndex = UInt16.MaxValue;
+            NetConnect = Connect;
+            ReturnContext = null;
+        }
+        public FRpcCallArg(TtReturnContext retContext)
+        {
+            Timeout = uint.MaxValue;
+            ExeIndex = UInt16.MaxValue;
+            NetConnect = null;
+            ReturnContext = retContext;
+        }
+        public void SetDefault()
+		{
+            Timeout = uint.MaxValue;
+			ExeIndex = UInt16.MaxValue;
+			NetConnect = null;
+            ReturnContext = null;
+        }
+		public uint Timeout;
+		public UInt16 ExeIndex;
+		public INetConnect NetConnect;
+		public TtReturnContext ReturnContext;
+    }
 	public class TtReturnAwaiter<T> : TtReturnAwaiterBase
     {
         #region life manage
@@ -129,7 +165,10 @@ namespace EngineNS.Bricks.Network.RPC
 			result.BeginWaitTime = Support.TtTime.GetTickCount();
 			result.Timeout = timeOut;
 			result.ReturnContext = retContext;
-			retContext.IsTimeout = false;
+			if (retContext != null)
+			{
+				retContext.Reset();
+			}
             TtEngine.Instance.RpcModule.PushReturnAwaiter(result);
 			return result;
 		}
@@ -351,7 +390,7 @@ namespace EngineNS.UTest
         [URpcMethod(Index = 100 + 4)]
         public async Task<Vector3> TestRpc5(Vector3 arg, UCallContext context)
         {
-            var ret3 = await UTest_Rpc_RpcCaller.TestRpc4("10.1");
+            var ret3 = await UTest_Rpc_RpcCaller.TestRpc4("10.1", new FRpcCallArg());
             var result = arg * 2;
             result.X += System.Convert.ToSingle(ret3);
             return result;
@@ -401,9 +440,10 @@ namespace EngineNS.UTest
                 //{
                 //    tcpClient = null;
                 //}
-                pConnect.ReturnContext = new TtReturnContext();
-                var ret = await UTest_Rpc_RpcCaller.TestRpc1(2.0f, uint.MaxValue, ushort.MaxValue, pConnect);
-                if (pConnect.ReturnContext.IsTimeout)
+                var retContext = new TtReturnContext();
+                var rpcArg = new FRpcCallArg(retContext);
+                var ret = await UTest_Rpc_RpcCaller.TestRpc1(2.0f, rpcArg);
+                if (retContext.IsTimeout)
                 {
 
 				}
@@ -411,18 +451,18 @@ namespace EngineNS.UTest
                 {
                     return;
                 }
-                UTest_Rpc_RpcCaller.TestRpc2("", ushort.MaxValue, pConnect);
-                var ret3 = await UTest_Rpc_RpcCaller.TestRpc3(1, uint.MaxValue, ushort.MaxValue, pConnect);
-                var ret4 = await UTest_Rpc_RpcCaller.TestRpc4("2", uint.MaxValue, ushort.MaxValue, pConnect);
+                UTest_Rpc_RpcCaller.TestRpc2("", in rpcArg);
+                var ret3 = await UTest_Rpc_RpcCaller.TestRpc3(1, rpcArg);
+                var ret4 = await UTest_Rpc_RpcCaller.TestRpc4("2", rpcArg);
                 if (ret4 != "2")
                 {
                     return;
                 }
-                var ret5 = await UTest_Rpc_RpcCaller.TestRpc5(Vector3.One, uint.MaxValue, ushort.MaxValue, pConnect);
-                var ret6 = await UTest_Rpc_RpcCaller.TestRpc6(new TestRPCArgument() { AA = 8 }, uint.MaxValue, ushort.MaxValue, pConnect);
-                var ret7 = await UTest_Rpc_RpcCaller.TestRpc7(new TestUnmanagedStruct() { A = 8 }, uint.MaxValue, ushort.MaxValue, pConnect);
+                var ret5 = await UTest_Rpc_RpcCaller.TestRpc5(Vector3.One, rpcArg);
+                var ret6 = await UTest_Rpc_RpcCaller.TestRpc6(new TestRPCArgument() { AA = 8 }, rpcArg);
+                var ret7 = await UTest_Rpc_RpcCaller.TestRpc7(new TestUnmanagedStruct() { A = 8 }, rpcArg);
 
-                var base_ret7 = await TtRpcManager_RpcCaller.TestBaseRpc1(5.0f, uint.MaxValue, ushort.MaxValue, pConnect);
+                var base_ret7 = await TtRpcManager_RpcCaller.TestBaseRpc1(5.0f, rpcArg);
 
 				//tcpClient?.Disconnect();
             };
@@ -441,8 +481,10 @@ namespace EngineNS.Bricks.Network.RPC
 {
 	public partial class TtRpcManager_RpcCaller
 	{
-		public static async System.Threading.Tasks.Task<int> TestBaseRpc1(float arg, uint Timeout = uint.MaxValue, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
+		public static async System.Threading.Tasks.Task<int> TestBaseRpc1(float arg, EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
 		{
+			var ExeIndex = rpcArg.ExeIndex;
+			var NetConnect = rpcArg.NetConnect;
 			if (ExeIndex == UInt16.MaxValue)
 			{
 				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
@@ -451,7 +493,7 @@ namespace EngineNS.Bricks.Network.RPC
 			{
 				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
-			var retContext = TtReturnAwaiter<int>.CreateInstance(Timeout, NetConnect.ReturnContext);
+			var retContext = TtReturnAwaiter<int>.CreateInstance(rpcArg.Timeout, rpcArg.ReturnContext);
 			if (NetConnect != null)
 			{
 				retContext.Context.Index = ExeIndex;
@@ -512,8 +554,10 @@ namespace EngineNS.UTest
 {
 	public partial class UTest_Rpc_RpcCaller
 	{
-		public static async System.Threading.Tasks.Task<int> TestRpc1(float arg, uint Timeout = uint.MaxValue, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
+		public static async System.Threading.Tasks.Task<int> TestRpc1(float arg, EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
 		{
+			var ExeIndex = rpcArg.ExeIndex;
+			var NetConnect = rpcArg.NetConnect;
 			if (ExeIndex == UInt16.MaxValue)
 			{
 				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
@@ -522,7 +566,7 @@ namespace EngineNS.UTest
 			{
 				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
-			var retContext = TtReturnAwaiter<int>.CreateInstance(Timeout, NetConnect.ReturnContext);
+			var retContext = TtReturnAwaiter<int>.CreateInstance(rpcArg.Timeout, rpcArg.ReturnContext);
 			if (NetConnect != null)
 			{
 				retContext.Context.Index = ExeIndex;
@@ -548,8 +592,10 @@ namespace EngineNS.UTest
 			}
 			return await TtRpcAwaiter.AwaitReturn<int>(retContext);
 		}
-		public static void TestRpc2(string arg, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
+		public static void TestRpc2(string arg, in EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
 		{
+			var ExeIndex = rpcArg.ExeIndex;
+			var NetConnect = rpcArg.NetConnect;
 			if (ExeIndex == UInt16.MaxValue)
 			{
 				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
@@ -576,8 +622,10 @@ namespace EngineNS.UTest
 				NetConnect?.Send(in pkg);
 			}
 		}
-		public static async System.Threading.Tasks.Task<IO.ISerializer> TestRpc3(int arg, uint Timeout = uint.MaxValue, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
+		public static async System.Threading.Tasks.Task<IO.ISerializer> TestRpc3(int arg, EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
 		{
+			var ExeIndex = rpcArg.ExeIndex;
+			var NetConnect = rpcArg.NetConnect;
 			if (ExeIndex == UInt16.MaxValue)
 			{
 				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
@@ -586,7 +634,7 @@ namespace EngineNS.UTest
 			{
 				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
-			var retContext = TtReturnAwaiter<IO.ISerializer>.CreateInstance(Timeout, NetConnect.ReturnContext);
+			var retContext = TtReturnAwaiter<IO.ISerializer>.CreateInstance(rpcArg.Timeout, rpcArg.ReturnContext);
 			if (NetConnect != null)
 			{
 				retContext.Context.Index = ExeIndex;
@@ -611,8 +659,10 @@ namespace EngineNS.UTest
 			}
 			return await TtRpcAwaiter.AwaitReturn<IO.ISerializer>(retContext);
 		}
-		public static async System.Threading.Tasks.Task<string> TestRpc4(string arg, uint Timeout = uint.MaxValue, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
+		public static async System.Threading.Tasks.Task<string> TestRpc4(string arg, EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
 		{
+			var ExeIndex = rpcArg.ExeIndex;
+			var NetConnect = rpcArg.NetConnect;
 			if (ExeIndex == UInt16.MaxValue)
 			{
 				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
@@ -621,7 +671,7 @@ namespace EngineNS.UTest
 			{
 				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
-			var retContext = TtReturnAwaiter<string>.CreateInstance(Timeout, NetConnect.ReturnContext);
+			var retContext = TtReturnAwaiter<string>.CreateInstance(rpcArg.Timeout, rpcArg.ReturnContext);
 			if (NetConnect != null)
 			{
 				retContext.Context.Index = ExeIndex;
@@ -646,8 +696,10 @@ namespace EngineNS.UTest
 			}
 			return await TtRpcAwaiter.AwaitReturn_String(retContext);
 		}
-		public static async System.Threading.Tasks.Task<Vector3> TestRpc5(Vector3 arg, uint Timeout = uint.MaxValue, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
+		public static async System.Threading.Tasks.Task<Vector3> TestRpc5(Vector3 arg, EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
 		{
+			var ExeIndex = rpcArg.ExeIndex;
+			var NetConnect = rpcArg.NetConnect;
 			if (ExeIndex == UInt16.MaxValue)
 			{
 				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
@@ -656,7 +708,7 @@ namespace EngineNS.UTest
 			{
 				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
-			var retContext = TtReturnAwaiter<Vector3>.CreateInstance(Timeout, NetConnect.ReturnContext);
+			var retContext = TtReturnAwaiter<Vector3>.CreateInstance(rpcArg.Timeout, rpcArg.ReturnContext);
 			if (NetConnect != null)
 			{
 				retContext.Context.Index = ExeIndex;
@@ -681,8 +733,10 @@ namespace EngineNS.UTest
 			}
 			return await TtRpcAwaiter.AwaitReturn<Vector3>(retContext);
 		}
-		public static async System.Threading.Tasks.Task<EngineNS.UTest.UTest_Rpc.TestRPCArgument> TestRpc6(EngineNS.UTest.UTest_Rpc.TestRPCArgument arg, uint Timeout = uint.MaxValue, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
+		public static async System.Threading.Tasks.Task<EngineNS.UTest.UTest_Rpc.TestRPCArgument> TestRpc6(EngineNS.UTest.UTest_Rpc.TestRPCArgument arg, EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
 		{
+			var ExeIndex = rpcArg.ExeIndex;
+			var NetConnect = rpcArg.NetConnect;
 			if (ExeIndex == UInt16.MaxValue)
 			{
 				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
@@ -691,7 +745,7 @@ namespace EngineNS.UTest
 			{
 				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
-			var retContext = TtReturnAwaiter<EngineNS.UTest.UTest_Rpc.TestRPCArgument>.CreateInstance(Timeout, NetConnect.ReturnContext);
+			var retContext = TtReturnAwaiter<EngineNS.UTest.UTest_Rpc.TestRPCArgument>.CreateInstance(rpcArg.Timeout, rpcArg.ReturnContext);
 			if (NetConnect != null)
 			{
 				retContext.Context.Index = ExeIndex;
@@ -716,8 +770,10 @@ namespace EngineNS.UTest
 			}
 			return await TtRpcAwaiter.AwaitReturn<EngineNS.UTest.UTest_Rpc.TestRPCArgument>(retContext);
 		}
-		public static async System.Threading.Tasks.Task<int> TestRpc7(EngineNS.UTest.UTest_Rpc.TestUnmanagedStruct arg, uint Timeout = uint.MaxValue, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
+		public static async System.Threading.Tasks.Task<int> TestRpc7(EngineNS.UTest.UTest_Rpc.TestUnmanagedStruct arg, EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
 		{
+			var ExeIndex = rpcArg.ExeIndex;
+			var NetConnect = rpcArg.NetConnect;
 			if (ExeIndex == UInt16.MaxValue)
 			{
 				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
@@ -726,7 +782,7 @@ namespace EngineNS.UTest
 			{
 				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
-			var retContext = TtReturnAwaiter<int>.CreateInstance(Timeout, NetConnect.ReturnContext);
+			var retContext = TtReturnAwaiter<int>.CreateInstance(rpcArg.Timeout, rpcArg.ReturnContext);
 			if (NetConnect != null)
 			{
 				retContext.Context.Index = ExeIndex;

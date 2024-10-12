@@ -73,7 +73,6 @@ namespace EngineNS.Plugins.LevelServer
             }
         }
         public object Tag { get; set; } = null;
-        public TtReturnContext ReturnContext { get; set; }
         public UInt16 GetConnectId()
         {
             return 0;

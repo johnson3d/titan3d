@@ -53,12 +53,14 @@ namespace RobotClient
             EngineNS.TtEngine.Instance.RpcModule.RpcManager = this;
             Guid sessionId = Guid.NewGuid();
             EngineNS.TtEngine.Instance.RpcModule.DefaultNetConnect = RootConnect;
-            RootConnect.ReturnContext = new TtReturnContext();
+            var retContext = new TtReturnContext();
+            var rpcArg = new FRpcCallArg(retContext);
+            //rpcArg.NetConnect = RootConnect;
             var ret = await RootConnect.Connect("127.0.0.1", 2334, RootConnectPackages);
             if (ret)
             {
-                var lnk = await EngineNS.Plugins.LoginServer.ULoginServer_RpcCaller.LoginAccount("User0", "god");
-                if (RootConnect.ReturnContext.IsTimeout)
+                var lnk = await EngineNS.Plugins.LoginServer.ULoginServer_RpcCaller.LoginAccount("User0", "god", rpcArg);
+                if (retContext.IsTimeout)
                 {
 
                 }
@@ -71,10 +73,10 @@ namespace RobotClient
                 ret = await RootConnect.Connect(np.Ip, np.Port, RootConnectPackages);
                 sessionId = lnk.Sessiond;
 
-                IndexInGate = await EngineNS.Plugins.GateServer.UGateServer_RpcCaller.RegClient(sessionId, "User0");
+                IndexInGate = await EngineNS.Plugins.GateServer.UGateServer_RpcCaller.RegClient(sessionId, "User0", rpcArg);
                 TtEngine.Instance.RpcModule.DefaultExeIndex = IndexInGate;
 
-                var ok = await EngineNS.Plugins.RootServer.URootServer_RpcCaller.UpdatePayload(EngineNS.Bricks.Network.RPC.ERunTarget.Gate, 0, 1);
+                var ok = await EngineNS.Plugins.RootServer.URootServer_RpcCaller.UpdatePayload(EngineNS.Bricks.Network.RPC.ERunTarget.Gate, 0, 1, rpcArg);
                 if (ok)
                 {
 
@@ -88,26 +90,29 @@ namespace RobotClient
                 {
 
                 }
-                IndexInLevel = await EngineNS.Plugins.LevelServer.ULevelServer_RpcCaller.RegClient(sessionId, "User0", UInt16.MaxValue, 5000);
-                if (RootConnect.ReturnContext.IsTimeout)
+                rpcArg.Timeout = 5000;
+                IndexInLevel = await EngineNS.Plugins.LevelServer.ULevelServer_RpcCaller.RegClient(sessionId, "User0", UInt16.MaxValue, rpcArg);
+                if (retContext.IsTimeout)
                     return false;
+                rpcArg.Timeout = UInt32.MaxValue;
                 TtEngine.Instance.RpcModule.DefaultExeIndex = IndexInLevel;
 
                 var sceneId = Guid.NewGuid();
-                ret = await EngineNS.Plugins.LevelServer.ULevelServer_RpcCaller.RegLevel(sceneId, RName.GetRName("test0.scene"));
+                ret = await EngineNS.Plugins.LevelServer.ULevelServer_RpcCaller.RegLevel(sceneId, RName.GetRName("test0.scene"), rpcArg);
                 if (ret == false)
                 {
 
                 }
-                SyncIdInLevel = await EngineNS.Plugins.LevelServer.ULevelServer_RpcCaller.TryClientEnterLevel(IndexInLevel, sceneId);
+                SyncIdInLevel = await EngineNS.Plugins.LevelServer.ULevelServer_RpcCaller.TryClientEnterLevel(IndexInLevel, sceneId, rpcArg);
                 if (SyncIdInLevel == uint.MaxValue)
                 {
 
                 }
             }
 
-            var hp = await EngineNS.Plugins.LevelServer.ULevelClient_RpcCaller.GetHP(5000);
-            if (RootConnect.ReturnContext.IsTimeout)
+            rpcArg.Timeout = 5000;
+            var hp = await EngineNS.Plugins.LevelServer.ULevelClient_RpcCaller.GetHP(rpcArg);
+            if (retContext.IsTimeout)
                 return false;
             if (hp != 5)
                 return false;
@@ -133,7 +138,8 @@ namespace RobotClient
                 var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
                 EngineNS.Bricks.Network.AutoSync.FSyncHelper.BuildModify(AutoSyncData, ar);
 
-                EngineNS.Plugins.LevelServer.ULevelClient_RpcCaller.UpdateAutoSyncData(writer);
+                var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg();
+                EngineNS.Plugins.LevelServer.ULevelClient_RpcCaller.UpdateAutoSyncData(writer, in rpcArg);
             }
         }
 

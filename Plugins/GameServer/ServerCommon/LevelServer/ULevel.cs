@@ -67,7 +67,9 @@ namespace EngineNS.Plugins.LevelServer
                         ar.Write(mGhostPlacementChangedActors[i].SyncId);
                         ar.Write(in mGhostPlacementChangedActors[i].Placement.TransformRef);
                     }
-                    RobotClient.URobot_RpcCaller.GhostsUpdatePlacement(writer, ushort.MaxValue, ULevelServer.Instance.ClientAllConnects);
+                    var rpcArg = new Bricks.Network.RPC.FRpcCallArg();
+                    rpcArg.NetConnect = ULevelServer.Instance.ClientAllConnects;
+                    RobotClient.URobot_RpcCaller.GhostsUpdatePlacement(writer, in rpcArg);
                 }
             }
             if (mGhostAutoSyncDataChangedActors.Count > 0)
@@ -82,7 +84,9 @@ namespace EngineNS.Plugins.LevelServer
                         var clt = mGhostAutoSyncDataChangedActors[i] as ULevelClient;
                         EngineNS.Bricks.Network.AutoSync.FSyncHelper.BuildModify(clt.AutoSyncData, ar);
                     }
-                    RobotClient.URobot_RpcCaller.GhostsAutoSync(writer, ushort.MaxValue, ULevelServer.Instance.ClientAllConnects);
+                    var rpcArg = new Bricks.Network.RPC.FRpcCallArg();
+                    rpcArg.NetConnect = ULevelServer.Instance.ClientAllConnects;
+                    RobotClient.URobot_RpcCaller.GhostsAutoSync(writer, in rpcArg);
                 }   
             }
         }

@@ -99,7 +99,9 @@ namespace EngineNS.Plugins.GateServer
             if (ret == false)
                 return false;
 
-            var index = await RootServer.URootServer_RpcCaller.RegGate("TitanServer", ServerId, ip, port, uint.MaxValue, ushort.MaxValue, RootConnect);
+            var rpcArg = new Bricks.Network.RPC.FRpcCallArg();
+            rpcArg.NetConnect = RootConnect;
+            var index = await RootServer.URootServer_RpcCaller.RegGate("TitanServer", ServerId, ip, port, rpcArg);
             if (index == UInt16.MaxValue)
                 return false;
 			IndexInRoot = index;

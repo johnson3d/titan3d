@@ -159,7 +159,7 @@ namespace EngineNS.Editor.Forms
                 {
                     if (mRpcProfilerThreads != null)
                         ProfilerThreadNames = mRpcProfilerThreads.Result.ThreadNames;
-                    mRpcProfilerThreads = Profiler.TtRpcProfiler_RpcCaller.GetProfilerThreads(0);
+                    mRpcProfilerThreads = Profiler.TtRpcProfiler_RpcCaller.GetProfilerThreads(0, new Bricks.Network.RPC.FRpcCallArg());
                 }
             }
                 
@@ -201,7 +201,7 @@ namespace EngineNS.Editor.Forms
                                     SetTimeList(mRpcProfilerData.Result.Scopes);
                                     TimeScopeTree.SetTreeNodes(mRpcProfilerData.Result.Scopes);
                                 }
-                                mRpcProfilerData = Profiler.TtRpcProfiler_RpcCaller.GetProfilerData(i);
+                                mRpcProfilerData = Profiler.TtRpcProfiler_RpcCaller.GetProfilerData(i, new());
                             }
                             if (ImGuiAPI.BeginChild("TimeScope", in Vector2.MinusOne, ImGuiChildFlags_.ImGuiChildFlags_Borders, ImGuiWindowFlags_.ImGuiWindowFlags_None))
                             {
@@ -549,7 +549,7 @@ namespace EngineNS.Editor.Forms
                                     var arg = new Profiler.TtRpcProfiler.ResetMaxTimeArg();
                                     arg.ThreadName = watchingThread;
                                     arg.ScopeName = scope.ShowName;
-                                    Profiler.TtRpcProfiler_RpcCaller.ResetMaxTime(arg);
+                                    Profiler.TtRpcProfiler_RpcCaller.ResetMaxTime(arg,new());
                                     OnDrawMenu = null;
                                 }
                                 ImGuiAPI.EndPopup();

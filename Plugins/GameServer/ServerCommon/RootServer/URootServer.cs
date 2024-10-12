@@ -155,7 +155,9 @@ namespace EngineNS.Plugins.RootServer
 			{
 				return null;
 			}
-			var ok = await GateServer.UGateServer_RpcCaller.WaitSession(sessionId, user, uint.MaxValue, ushort.MaxValue, slt.Connect);
+            var rpcArg = new Bricks.Network.RPC.FRpcCallArg();
+            rpcArg.NetConnect = slt.Connect;
+            var ok = await GateServer.UGateServer_RpcCaller.WaitSession(sessionId, user, rpcArg);
 			if (ok == false)
                 return null;
             return slt.ListenPoint;

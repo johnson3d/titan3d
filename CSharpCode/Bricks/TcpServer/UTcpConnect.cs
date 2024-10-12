@@ -6,7 +6,6 @@ namespace EngineNS.Bricks.TcpServer
 {
     public class UTcpConnect : AuxPtrType<EngineNS.TcpConnect>, Bricks.Network.INetConnect
     {
-        public EngineNS.Bricks.Network.RPC.TtReturnContext ReturnContext { get; set; }
         internal static unsafe EngineNS.TcpConnect.FDelegate_FOnTcpConnectRcvData OnTcpConnectRcvData = OnTcpConnectRcvDataImpl;
         private static unsafe void OnTcpConnectRcvDataImpl(EngineNS.TcpConnect arg0, byte* arg1, int arg2)
         {

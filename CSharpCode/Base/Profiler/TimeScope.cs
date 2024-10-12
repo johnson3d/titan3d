@@ -405,8 +405,10 @@ namespace EngineNS.Profiler
 {
 	public partial class TtRpcProfiler_RpcCaller
 	{
-		public static async System.Threading.Tasks.Task<EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads> GetProfilerThreads(sbyte arg, uint Timeout = uint.MaxValue, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
+		public static async System.Threading.Tasks.Task<EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads> GetProfilerThreads(sbyte arg, EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
 		{
+			var ExeIndex = rpcArg.ExeIndex;
+			var NetConnect = rpcArg.NetConnect;
 			if (ExeIndex == UInt16.MaxValue)
 			{
 				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
@@ -415,7 +417,7 @@ namespace EngineNS.Profiler
 			{
 				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
-			var retContext = TtReturnAwaiter<EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads>.CreateInstance(Timeout, NetConnect.ReturnContext);
+			var retContext = TtReturnAwaiter<EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads>.CreateInstance(rpcArg.Timeout, rpcArg.ReturnContext);
 			if (NetConnect != null)
 			{
 				retContext.Context.Index = ExeIndex;
@@ -440,8 +442,10 @@ namespace EngineNS.Profiler
 			}
 			return await TtRpcAwaiter.AwaitReturn<EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads>(retContext);
 		}
-		public static async System.Threading.Tasks.Task<EngineNS.Profiler.TtRpcProfiler.RpcProfilerData> GetProfilerData(string name, uint Timeout = uint.MaxValue, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
+		public static async System.Threading.Tasks.Task<EngineNS.Profiler.TtRpcProfiler.RpcProfilerData> GetProfilerData(string name, EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
 		{
+			var ExeIndex = rpcArg.ExeIndex;
+			var NetConnect = rpcArg.NetConnect;
 			if (ExeIndex == UInt16.MaxValue)
 			{
 				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;
@@ -450,7 +454,7 @@ namespace EngineNS.Profiler
 			{
 				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
-			var retContext = TtReturnAwaiter<EngineNS.Profiler.TtRpcProfiler.RpcProfilerData>.CreateInstance(Timeout, NetConnect.ReturnContext);
+			var retContext = TtReturnAwaiter<EngineNS.Profiler.TtRpcProfiler.RpcProfilerData>.CreateInstance(rpcArg.Timeout, rpcArg.ReturnContext);
 			if (NetConnect != null)
 			{
 				retContext.Context.Index = ExeIndex;
@@ -475,8 +479,10 @@ namespace EngineNS.Profiler
 			}
 			return await TtRpcAwaiter.AwaitReturn<EngineNS.Profiler.TtRpcProfiler.RpcProfilerData>(retContext);
 		}
-		public static void ResetMaxTime(EngineNS.Profiler.TtRpcProfiler.ResetMaxTimeArg arg, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)
+		public static void ResetMaxTime(EngineNS.Profiler.TtRpcProfiler.ResetMaxTimeArg arg, in EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
 		{
+			var ExeIndex = rpcArg.ExeIndex;
+			var NetConnect = rpcArg.NetConnect;
 			if (ExeIndex == UInt16.MaxValue)
 			{
 				ExeIndex = TtEngine.Instance.RpcModule.DefaultExeIndex;

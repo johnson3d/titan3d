@@ -52,7 +52,9 @@ namespace EngineNS.Plugins.LoginServer
             if (ret == false)
                 return false;
 
-            ret = await RootServer.URootServer_RpcCaller.RegLogin("TitanServer", ServerId, ip, port, uint.MaxValue, ushort.MaxValue, RootConnect);
+            var rpcArg = new Bricks.Network.RPC.FRpcCallArg();
+            rpcArg.NetConnect = RootConnect;
+            ret = await RootServer.URootServer_RpcCaller.RegLogin("TitanServer", ServerId, ip, port, rpcArg);
             if (ret == false)
                 return false;
             return true;
@@ -76,8 +78,10 @@ namespace EngineNS.Plugins.LoginServer
             if (info == null)
                 return null;
 
+            var rpcArg = new Bricks.Network.RPC.FRpcCallArg();
+            rpcArg.NetConnect = RootConnect;
             var result = new Bricks.Network.FLoginResultArgument();
-            result.GatewayURL = await RootServer.URootServer_RpcCaller.SelectGateway(user, info.SessionId, uint.MaxValue, ushort.MaxValue, RootConnect);
+            result.GatewayURL = await RootServer.URootServer_RpcCaller.SelectGateway(user, info.SessionId, rpcArg);
             if (result.GatewayURL == null)
             {
                 return null;

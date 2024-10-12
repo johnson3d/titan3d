@@ -76,7 +76,9 @@ namespace EngineNS.Plugins.LevelServer
             }
             else
             {
-                IndexInRoot = await RootServer.URootServer_RpcCaller.RegLevel("TitanServer", ServerId, ip, port, uint.MaxValue, ushort.MaxValue, RootConnect);
+                var rpcArg = new Bricks.Network.RPC.FRpcCallArg();
+                rpcArg.NetConnect = RootConnect;
+                IndexInRoot = await RootServer.URootServer_RpcCaller.RegLevel("TitanServer", ServerId, ip, port, rpcArg);
                 if (IndexInRoot == UInt16.MaxValue)
                     return false;
                 return true;

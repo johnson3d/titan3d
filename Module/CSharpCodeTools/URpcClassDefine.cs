@@ -178,11 +178,13 @@ namespace CSharpCodeTools
                         if (argDeclStr != "")
                             argDeclStr += ", ";
                         if (i.RetType != URpcMethod.EDataType.Void)
-                            AddLine($"public static async System.Threading.Tasks.Task<{i.GetNakedReturnType()}> {i.Name}({argDeclStr}uint Timeout = uint.MaxValue, UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)");
+                            AddLine($"public static async System.Threading.Tasks.Task<{i.GetNakedReturnType()}> {i.Name}({argDeclStr}EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)");
                         else
-                            AddLine($"public static void {i.Name}({argDeclStr}UInt16 ExeIndex = UInt16.MaxValue, EngineNS.Bricks.Network.INetConnect NetConnect = null)");
+                            AddLine($"public static void {i.Name}({argDeclStr}in EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)");
                         PushBrackets();
                         {
+                            AddLine($"var ExeIndex = rpcArg.ExeIndex;");
+                            AddLine($"var NetConnect = rpcArg.NetConnect;");
                             AddLine($"if (ExeIndex == UInt16.MaxValue)");
                             PushBrackets();
                             {
@@ -198,7 +200,7 @@ namespace CSharpCodeTools
 
                             if (i.RetType != URpcMethod.EDataType.Void)
                             {
-                                AddLine($"var retContext = TtReturnAwaiter<{i.GetNakedReturnType()}>.CreateInstance(Timeout, NetConnect.ReturnContext);");
+                                AddLine($"var retContext = TtReturnAwaiter<{i.GetNakedReturnType()}>.CreateInstance(rpcArg.Timeout, rpcArg.ReturnContext);");
                                 AddLine($"if (NetConnect != null)");
                                 PushBrackets();
                                 {

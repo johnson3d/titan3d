@@ -45,7 +45,6 @@ namespace EngineNS.Bricks.Network
         RPC.EAuthority Authority { get; set; }
         bool Connected { get; set; }
         object Tag { get; set; }
-        TtReturnContext ReturnContext { get; set; }
         UInt16 GetConnectId();
         void Send(void* ptr, uint size);
         void Send(in IO.AuxWriter<IO.UMemWriter> pkg);
@@ -62,7 +61,6 @@ namespace EngineNS.Bricks.Network
             }
         }
         public object Tag { get; set; } = null;
-        public TtReturnContext ReturnContext { get; set; } = null;
         public UInt16 GetConnectId()
         {
             return 0;
