@@ -2,6 +2,7 @@
 - - 调试运行MainEditor工程
 - - 修改启动配置，其中cfg文件可以修改引擎的各种启动参数
 ![启动配置](picture/run_config.png)
+	- [引擎配置文件](engine/EngineConfig.md)
 -  编辑器总览
 ![总览图](picture/main_edtor.png)
 - - **[ContentBrowser](editor/ContentBrowser.md)**

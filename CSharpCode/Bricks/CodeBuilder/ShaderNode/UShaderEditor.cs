@@ -161,7 +161,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             //EngineNS.EGui.Controls.NodeGraph.PinLinker
             //var graphStr = Material.GraphXMLString?.Replace("EngineNS.EGui.Controls.NodeGraph.PinLinker", "EngineNS.Bricks.NodeGraph.UPinLinker");
-            if(string.IsNullOrEmpty(Material.GraphXMLString)==false)
+            if (string.IsNullOrEmpty(Material.GraphXMLString) == false)
             {
                 var xml = IO.TtFileManager.LoadXmlFromString(Material.GraphXMLString);
                 if (xml != null)

@@ -709,7 +709,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
         } = null;
         #endregion
         #region Texture
-        [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial.NameRNamePair@EngineCore" })] 
+        [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial.NameRNamePair@EngineCore" })]
+        [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
         public class NameRNamePair : IO.BaseSerializer
         {
             public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
@@ -718,9 +719,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             TtMaterial HostMaterial;
             [Rtti.Meta()]
+            [Category("Option")]
+            [ReadOnly(true)]
             public string Name { get; set; }
             RName mValue;
             [Rtti.Meta]
+            [Category("Option")]
             [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
             public RName Value
             {
@@ -789,6 +793,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         #endregion
         #region Sampler
         [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair@EngineCore" })]
+        [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
         public class NameSamplerStateDescPair : IO.BaseSerializer
         {
             public NameSamplerStateDescPair()
@@ -801,9 +806,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             TtMaterial HostMaterial;
             [Rtti.Meta()]
+            [Category("Option")]
+            [ReadOnly(true)]
             public string Name { get; set; }
             internal NxRHI.FSamplerDesc mValue;
             [Rtti.Meta]
+            [Category("Option")]
             public NxRHI.FSamplerDesc Value
             {
                 get => mValue;
@@ -870,6 +878,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         #endregion
         #region UniformVar
         [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shader.UMaterial.NameValuePair@EngineCore" })]
+        [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
         public class NameValuePair : IO.BaseSerializer
         {
             public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
@@ -878,11 +887,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             TtMaterial HostMaterial;
             [Rtti.Meta]
+            [Category("Option")]
+            [ReadOnly(true)]
             public string VarType { get; set; }
-            [Rtti.Meta]
+            [Category("Option")]
+            [ReadOnly(true)]
             public string Name { get; set; }
             string mValue;
             [Rtti.Meta]
+            [Category("Option")]
             public string Value
             {
                 get => mValue;
