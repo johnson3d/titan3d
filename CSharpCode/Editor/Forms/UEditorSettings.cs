@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UEditorSettings : IRootForm
+    public class TtEditorSettings : IRootForm
     {
-        public UEditorSettings()
+        public TtEditorSettings()
         {
             TtEngine.RootFormManager.RegRootForm(this);
         }
@@ -14,7 +14,7 @@ namespace EngineNS.Editor.Forms
         {
             await SettingsPropGrid.Initialize();
 
-            SettingsPropGrid.Target = this;
+            SettingsPropGrid.Target = Config;
             return true;
         }
         

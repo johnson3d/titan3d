@@ -161,19 +161,22 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             //EngineNS.EGui.Controls.NodeGraph.PinLinker
             //var graphStr = Material.GraphXMLString?.Replace("EngineNS.EGui.Controls.NodeGraph.PinLinker", "EngineNS.Bricks.NodeGraph.UPinLinker");
-            var xml = IO.TtFileManager.LoadXmlFromString(Material.GraphXMLString);
-            if (xml != null)
+            if(string.IsNullOrEmpty(Material.GraphXMLString)==false)
             {
-                object pThis = this;
-                IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
-            }
-            else
-            {
-                System.Diagnostics.Debug.Assert(false);
-                Material.GraphXMLString = Material.GraphXMLString.Substring(0, Material.GraphXMLString.Length - 1);
-                xml = IO.TtFileManager.LoadXmlFromString(Material.GraphXMLString);
-                object pThis = this;
-                IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
+                var xml = IO.TtFileManager.LoadXmlFromString(Material.GraphXMLString);
+                if (xml != null)
+                {
+                    object pThis = this;
+                    IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.Assert(false);
+                    Material.GraphXMLString = Material.GraphXMLString.Substring(0, Material.GraphXMLString.Length - 1);
+                    xml = IO.TtFileManager.LoadXmlFromString(Material.GraphXMLString);
+                    object pThis = this;
+                    IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
+                }
             }
             
             if (MaterialOutput == null)

@@ -33,7 +33,7 @@ namespace EngineNS.Editor
             //mWorldOutliner = new Editor.Forms.UWorldOutliner(WorldViewportSlate);
 
             mBrickManager = new Bricks.ProjectGen.UBrickManager();
-            mEditorSettings = new Forms.UEditorSettings();
+            mEditorSettings = new Forms.TtEditorSettings();
             mPIEController = new UPIEController();
         }
         private bool IsVisible = true;
@@ -44,7 +44,7 @@ namespace EngineNS.Editor
         public Editor.Forms.TtMemoryProfiler mMemProfiler;
         public Editor.Forms.UInspector mMainInspector;
         public Bricks.ProjectGen.UBrickManager mBrickManager = null;
-        public Editor.Forms.UEditorSettings mEditorSettings;
+        public Editor.Forms.TtEditorSettings mEditorSettings;
         public UPIEController mPIEController;
 
         //public UEditorWorldViewportSlate WorldViewportSlate = null;
