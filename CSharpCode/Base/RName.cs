@@ -43,7 +43,7 @@ namespace EngineNS
             [System.ThreadStatic]
             static DrawData mDrawData = new DrawData();
 
-            public EGui.Controls.UContentBrowser ContentBrowser;
+            public EGui.Controls.TtContentBrowser ContentBrowser;
 
             public float MaxWidth = -1;
             public float MinWidth = -1;
@@ -133,12 +133,12 @@ namespace EngineNS
                     var sz = new Vector2(0, 0);
                     if(ImGuiAPI.Button("F", in sz))
                     {
-                        EGui.Controls.UContentBrowser.GlobalFocusAsset = mDrawData.NewValue;
+                        EGui.Controls.TtContentBrowser.GlobalFocusAsset = mDrawData.NewValue;
                     }
                     ImGuiAPI.SameLine(0, 8);
                     if (ImGuiAPI.Button("<", in sz))
                     {
-                        mDrawData.NewValue = EGui.Controls.UContentBrowser.GlobalSelectedAsset.GetAssetName();
+                        mDrawData.NewValue = EGui.Controls.TtContentBrowser.GlobalSelectedAsset.GetAssetName();
                     }
                     ImGuiAPI.SameLine(0, 8);
                     if (ImGuiAPI.Button("-", in sz))

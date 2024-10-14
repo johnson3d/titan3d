@@ -29,18 +29,6 @@ namespace EngineNS.DesignMacross.Design
             context.EditorInteroperation.PGMember.Target = Description.Parent;
         }
     }
-    [ImGuiElementRender(typeof(TtGraphElementRender_StatementDescription))]
-    public class TtGraphElement_MethodEndDescription : TtGraphElement_StatementDescription
-    {
-        public TtMethodEndDescription MethodEndDescription { get => Description as TtMethodEndDescription; }
-        public TtGraphElement_MethodEndDescription(IDescription description, IGraphElementStyle style) : base(description, style)
-        {
-        }
-        public override void OnSelected(ref FGraphElementRenderingContext context)
-        {
-            context.EditorInteroperation.PGMember.Target = Description.Parent;
-        }
-    }
     public struct ElementLocation
     {
         public Guid Id;
@@ -83,6 +71,9 @@ namespace EngineNS.DesignMacross.Design
                         foreach (var propertyValue in propertyValueList)
                         {
                             var graphElementAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<IGraphElement>(propertyValue.GetType());
+                            if (graphElementAttribute == null)
+                                continue;
+
                             Debug.Assert(graphElementAttribute != null);
                             Debug.Assert(propertyValue is IDescription);
                             var desc = propertyValue as IDescription;

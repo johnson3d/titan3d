@@ -360,8 +360,8 @@ namespace ProjectCooker.Command
                         EngineNS.IO.SerializerHelper.ReadObjectMetaFields(editor, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
                         UHLSLCodeGenerator mHLSLCodeGen = new UHLSLCodeGenerator();
                         var MaterialGraph = editor.MaterialGraph;
-                        var MaterialOutput = new EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialOutput();
-                        MaterialOutput = MaterialGraph.FindNode(editor.OutputNodeId) as EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialOutput;
+                        var MaterialOutput = new EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialOutput();
+                        MaterialOutput = MaterialGraph.FindNode(editor.OutputNodeId) as EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialOutput;
                         EngineNS.Graphics.Pipeline.Shader.TtMaterial.GenMateralGraphCode(asset, mHLSLCodeGen, MaterialGraph, MaterialOutput);
                     }
                     else
@@ -394,8 +394,8 @@ namespace ProjectCooker.Command
                         EngineNS.IO.SerializerHelper.ReadObjectMetaFields(editor, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
                         UHLSLCodeGenerator mHLSLCodeGen = new UHLSLCodeGenerator();
                         var MaterialGraph = editor.MaterialGraph;
-                        var MaterialOutput = new EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialOutput();
-                        MaterialOutput = MaterialGraph.FindNode(editor.OutputNodeId) as EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialOutput;
+                        var MaterialOutput = new EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialOutput();
+                        MaterialOutput = MaterialGraph.FindNode(editor.OutputNodeId) as EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialOutput;
                         EngineNS.Graphics.Pipeline.Shader.TtMaterial.GenMateralGraphCode(asset, mHLSLCodeGen, MaterialGraph, MaterialOutput);
                     }
                     else

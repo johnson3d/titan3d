@@ -337,6 +337,10 @@ namespace EngineNS.Bricks.NodeGraph
         public string BreakerName = "";
         public unsafe void DrawNode(ImDrawList cmdlist, UNodeBase node)
         {
+            var style = ImGuiAPI.GetStyle();
+            var framePaddingStore = style->FramePadding;
+            style->FramePadding = framePaddingStore / mGraph.ScaleVP;
+
             if(node.LayoutDirty)
             {
                 node.UpdateLayout();
@@ -422,7 +426,7 @@ namespace EngineNS.Bricks.NodeGraph
                 max = min + mGraph.LinkingOp.HoverPin.Size;
                 min = mGraph.CanvasToViewport(min) + DrawOffset;
                 max = mGraph.CanvasToViewport(max) + DrawOffset;
-                cmdlist.AddRect(in min, in max, styles.HighLightColor, 0, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 2);
+                cmdlist.AddRect(in min, in max, styles.HighLightColor, 0, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 2 / mGraph.ScaleVP);
             }
 
             string lastGroup = null;
@@ -485,6 +489,7 @@ namespace EngineNS.Bricks.NodeGraph
 				if (inPin.EditValue != null)
                 {
                     var pos = CanvasToDraw(inPin.EditValuePosition) - ImGuiAPI.GetWindowPos();
+                    pos.Y -= style->FramePadding.Y;
                     ImGuiAPI.SetCursorPos(pos);
                     inPin.EditValue.OnDraw(node, inPin, styles, 1/mGraph.ScaleVP, false);
                 }
@@ -588,6 +593,7 @@ namespace EngineNS.Bricks.NodeGraph
 
             node.OnAfterDraw(styles, cmdlist);
             ImGuiAPI.SetWindowFontScale(1.0f);
+            style->FramePadding = framePaddingStore;
         }
         public void DrawLinker(ImDrawList cmdlist, UPinLinker linker)
         {

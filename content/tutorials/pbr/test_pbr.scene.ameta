@@ -11,9 +11,6 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
-    <e_0 Value="Game,tutorials/pbr/pbr_base.ums,e5fd1f75-b3bd-4f63-bde5-50867224b202" />
-    <e_1 Value="Engine,material/gridline.material,fe431749-ed31-45b1-93d8-34462bd00922" />
-  </RefAssetRNames>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
 </Root>

@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
-    [ContextMenu("f2,float2", "Data\\float2@_serial@", UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("f2,float2", "Data\\float2@_serial@", TtMaterialGraph.MaterialEditorKeyword)]
     public class VarDimF2 : VarNode
     {
         public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
@@ -204,7 +204,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 };
                 if (IsUniform)
                 {
-                    var graph = data.NodeGraph as UMaterialGraph;
+                    var graph = data.NodeGraph as TtMaterialGraph;
                     graph.ShaderEditor.MaterialOutput.UniformVars.Add(val);
                 }
                 else
@@ -267,7 +267,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         }
     }
 
-    [ContextMenu("i2,int2", "Data\\int2@_serial@", UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("i2,int2", "Data\\int2@_serial@", TtMaterialGraph.MaterialEditorKeyword)]
     public class VarDimI2 : VarNode
     {
         public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
@@ -365,7 +365,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 };
                 if (IsUniform)
                 {
-                    var graph = data.NodeGraph as UMaterialGraph;
+                    var graph = data.NodeGraph as TtMaterialGraph;
                     graph.ShaderEditor.MaterialOutput.UniformVars.Add(val);
                 }
                 else

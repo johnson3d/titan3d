@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.EGui.TtUVAnimAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="e82cae65-31d4-4049-9641-043f7c0096c7" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,icons/rot_normal.uvanim,e82cae65-31d4-4049-9641-043f7c0096c7" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.EGui.UUvAnim&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

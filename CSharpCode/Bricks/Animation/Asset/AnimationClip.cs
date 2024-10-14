@@ -177,14 +177,14 @@ namespace EngineNS.Animation.Asset
                 //mDesc.Desc.SetDefault();
                 //PGAsset.SingleTarget = mDesc;
             }
-            public override unsafe bool OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
+            public override unsafe bool OnDraw(EGui.Controls.TtContentBrowser ContentBrowser)
             {
                 //return FBXCreateCreateDraw(ContentBrowser);
                 return AssimpCreateCreateDraw(ContentBrowser);
             }
 
             //for just create a clip as a property animation not from fbx 
-            public unsafe void SimpleCreateDraw(EGui.Controls.UContentBrowser ContentBrowser)
+            public unsafe void SimpleCreateDraw(EGui.Controls.TtContentBrowser ContentBrowser)
             {
 
             }
@@ -193,8 +193,8 @@ namespace EngineNS.Animation.Asset
                 return false;
             }
 
-            public unsafe partial bool FBXCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser);
-            public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser);
+            public unsafe partial bool FBXCreateCreateDraw(EGui.Controls.TtContentBrowser ContentBrowser);
+            public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.TtContentBrowser ContentBrowser);
         }
         #endregion
 

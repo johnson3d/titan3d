@@ -295,6 +295,20 @@ namespace EngineNS.DesignMacross.Design
                                                      (data) => { methodDescription.AddExpression(expression); },
                                                      (data) => { methodDescription.RemoveExpression(expression); });
                                              });
+            string[] centerDataMenuPath = { "Self", "CenterData" };
+            var centerDataTypeDescription = TtTypeDesc.TypeOf<TtCenterDataReferenceDescription>();
+            var centerDataTypeFullName = context.DesignedClassDescription.ClassFullName;
+            var centerDataType = TtTypeDesc.TypeOfFullName(centerDataTypeFullName);
+            TtMenuUtil.ConstructMenuItem(popupMenu.Menu, centerDataTypeDescription, centerDataMenuPath, "",
+                                             (TtMenuItem item, object sender) =>
+                                             {
+                                                 var popMenu = sender as TtPopupMenu;
+                                                 var expression = new TtCenterDataReferenceDescription(TtTypeDesc.TypeOfFullName(centerDataTypeFullName));
+                                                 var style = graphElementStyleManager.GetOrAdd(expression.Id, popMenu.PopedPosition);
+                                                 cmdHistory.CreateAndExtuteCommand("AddCenterData",
+                                                     (data) => { methodDescription.AddExpression(expression); },
+                                                     (data) => { methodDescription.RemoveExpression(expression); });
+                                             });
         }
         public static void ConstructMenuItemsAboutMetas(ref FGraphElementRenderingContext context, TtPopupMenu popupMenu, TtGraph_Method methodGraph)
         {

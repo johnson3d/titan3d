@@ -157,27 +157,9 @@
       <NodeId Type="System.Guid@Unknown" Value="5edf88f1-025f-4ef6-9453-3c19dfed583e" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="1529,228.00003" />
       <SelfMethod Type="System.Boolean@Unknown" Value="False" />
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="2">
-        <e_0 Type="EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore">
-          <PinName Type="System.String@Unknown" Value="name" />
-          <Value Type="System.String@Unknown" Value="Color3_2" />
-        </e_0>
-        <e_1 Type="EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore">
-          <PinName Type="System.String@Unknown" Value="color" />
-          <Value Type="EngineNS.Color3f@EngineCore" Value="0.9775281,0,0" />
-        </e_1>
-      </InputEditableValues>
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
       <SaveData Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode.TSaveData@EngineCore">
-        <DefaultArguments Type="System.Collections.Generic.Dictionary&lt;System.String@Unknown,System.String@Unknown,&gt;@Unknown" Count="2">
-          <e_0>
-            <Key Value="name" />
-            <Value Value="Color3_2" />
-          </e_0>
-          <e_1>
-            <Key Value="color" />
-            <Value Value="0.9775281,0,0" />
-          </e_1>
-        </DefaultArguments>
+        <DefaultArguments Type="System.Collections.Generic.Dictionary&lt;System.String@Unknown,System.String@Unknown,&gt;@Unknown" Count="0" />
         <DelegateArgumentSaveDatas Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode.DelegateArgumentSaveData@EngineCore,&gt;@Unknown" Count="0" />
       </SaveData>
     </e_3>
@@ -387,8 +369,7 @@
     </e_7>
     <e_8 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
-        <InNodeId Type="System.Guid@Unknown" Value="5edf88f1-025f-4ef6-9453-3c19dfed583e" />
-        <InPinName Type="System.String@Unknown" Value="color" />
+        <InNodeId Type="System.Guid@Unknown" Value="00000000-0000-0000-0000-000000000000" />
         <OutNodeId Type="System.Guid@Unknown" Value="0fc9075a-10ee-415d-a5a0-fd17eedb1e44" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>
@@ -432,8 +413,7 @@
     </e_13>
     <e_14 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
       <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
-        <InNodeId Type="System.Guid@Unknown" Value="5edf88f1-025f-4ef6-9453-3c19dfed583e" />
-        <InPinName Type="System.String@Unknown" Value="Self" />
+        <InNodeId Type="System.Guid@Unknown" Value="00000000-0000-0000-0000-000000000000" />
         <OutNodeId Type="System.Guid@Unknown" Value="bc5e6cec-4206-4d70-b092-e3e0e36456a0" />
         <OutPinName Type="System.String@Unknown" Value="Result" />
       </SaveData>

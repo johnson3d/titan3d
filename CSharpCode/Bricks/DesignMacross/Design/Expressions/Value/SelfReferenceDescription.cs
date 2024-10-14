@@ -24,7 +24,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         }
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
-            return new TtVariableReferenceExpression("Self");
+            return new TtVariableReferenceExpression("this");
         }
     }
 }

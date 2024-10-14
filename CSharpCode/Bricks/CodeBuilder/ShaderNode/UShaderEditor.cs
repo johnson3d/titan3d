@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using Assimp;
 using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
@@ -181,7 +183,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             
             if (MaterialOutput == null)
             {
-                MaterialOutput = UMaterialOutput.NewNode(MaterialGraph);
+                MaterialOutput = TtMaterialOutput.NewNode(MaterialGraph);
                 MaterialGraph.AddNode(MaterialOutput);
             }
 
@@ -230,7 +232,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
         [Rtti.Meta]
-        public UMaterialGraph MaterialGraph { get; } = new UMaterialGraph();
+        public TtMaterialGraph MaterialGraph { get; } = new TtMaterialGraph();
         public Bricks.NodeGraph.TtGraphRenderer GraphRenderer = new NodeGraph.TtGraphRenderer();
         [Rtti.Meta(Order = 1)]
         public Guid OutputNodeId
@@ -241,15 +243,15 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             }
             set
             {
-                MaterialOutput = MaterialGraph.FindNode(value) as UMaterialOutput;
+                MaterialOutput = MaterialGraph.FindNode(value) as TtMaterialOutput;
                 if (MaterialOutput == null)
                 {
-                    MaterialOutput = UMaterialOutput.NewNode(MaterialGraph);
+                    MaterialOutput = TtMaterialOutput.NewNode(MaterialGraph);
                     MaterialGraph.AddNode(MaterialOutput);
                 }
             }
         }
-        public UMaterialOutput MaterialOutput = null;
+        public TtMaterialOutput MaterialOutput = null;
         public EGui.Controls.PropertyGrid.PropertyGrid NodePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid MaterialPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid PreviewPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
@@ -285,8 +287,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             ResetDockspace();
             EGui.UIProxy.DockProxy.EndMainForm(IsDrawing);
 
-            DrawTextEditor();
             DrawShaderGraph();
+            DrawTextEditor();
             DrawNodeDetails();
             DrawMaterialDetails();
             DrawEditorDetails();

@@ -244,7 +244,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
         }
     }
-    [ContextMenu("bitxor,^", "Operation\\^", TtMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("bitxor,^", "Operation\\^", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
     public partial class BitXorNode : ValueOpNode
     {
         public BitXorNode()
@@ -252,7 +252,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
         }
     }
-    [ContextMenu("bitleftshift,|", "Operation\\<<", TtMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("bitleftshift,|", "Operation\\<<", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
     public partial class BitLeftshiftNode : ValueOpNode
     {
         public BitLeftshiftNode()
@@ -260,7 +260,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
         }
     }
-    [ContextMenu("bitrightshift,|", "Operation\\>>", TtMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("bitrightshift,|", "Operation\\>>", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
     public partial class BitRightshiftNode : ValueOpNode
     {
         public BitRightshiftNode()
@@ -336,7 +336,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return true;
         }
     }
-    [ContextMenu("equal,==", "Bool Operation\\==", TtMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("equal,==", "Bool Operation\\==", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
     public partial class EqualNode : CmpNode
     {
         public EqualNode()
@@ -345,7 +345,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             
         }
     }
-    [ContextMenu("notequal,!=", "Bool Operation\\!=", TtMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("notequal,!=", "Bool Operation\\!=", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
     public partial class NotEqualNode : CmpNode
     {
         public NotEqualNode()
@@ -354,7 +354,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             
         }
     }
-    [ContextMenu("greate,>", "Bool Operation\\>", TtMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("greate,>", "Bool Operation\\>", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
     public partial class GreateNode : CmpNode
     {
         public GreateNode()
@@ -363,7 +363,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             
         }
     }
-    [ContextMenu("greateequal,>=", "Bool Operation\\>=", TtMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("greateequal,>=", "Bool Operation\\>=", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
     public partial class GreateEqualNode : CmpNode
     {
         public GreateEqualNode()
@@ -372,7 +372,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             
         }
     }
-    [ContextMenu("less,<", "Bool Operation\\<", TtMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("less,<", "Bool Operation\\<", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
     public partial class LessNode : CmpNode
     {
         public LessNode()
@@ -381,7 +381,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             
         }
     }
-    [ContextMenu("lessequal,<=", "Bool Operation\\<=", TtMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("lessequal,<=", "Bool Operation\\<=", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
     public partial class LessEqualNode : CmpNode
     {
         public LessEqualNode()
@@ -419,7 +419,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return true;
         }
     }
-    [ContextMenu("and,&&", "Bool Operation\\&&", TtMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("and,&&", "Bool Operation\\&&", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
     public partial class AndNode : BoolNode
     {
         public AndNode()
@@ -427,7 +427,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
         }
     }
-    [ContextMenu("or,||", "Bool Operation\\||", TtMacross.MacrossEditorKeyword, ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("or,||", "Bool Operation\\||", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
     public partial class OrNode : BoolNode
     {
         public OrNode()

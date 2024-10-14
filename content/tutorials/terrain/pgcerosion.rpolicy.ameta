@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.RenderPolicyEditor.TtRenderPolicyAssetAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="f14a4349-6779-4c09-9dbb-cf23ed5f8cdf" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/terrain/pgcerosion.rpolicy,f14a4349-6779-4c09-9dbb-cf23ed5f8cdf" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.RenderPolicyEditor.URenderPolicyAsset&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

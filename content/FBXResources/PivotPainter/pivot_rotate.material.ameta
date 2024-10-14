@@ -11,8 +11,9 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Value="Engine,texture/checkboard.srv,560770de-c559-4718-93cb-bb4e1995176f" />
+    <e_1 Value="Game,fbxresources/pivotpainter/pp2_rgb_xvect_a_xextent.srv,d0e27459-a5d5-499b-a754-90fa4f857e27" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

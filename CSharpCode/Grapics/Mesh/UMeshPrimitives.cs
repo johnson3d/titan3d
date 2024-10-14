@@ -68,15 +68,15 @@ namespace EngineNS.Graphics.Mesh
                 //mDesc.Desc.SetDefault();
                 //PGAsset.SingleTarget = mDesc;
             }
-            public override unsafe bool OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
+            public override unsafe bool OnDraw(EGui.Controls.TtContentBrowser ContentBrowser)
             {
                 //we also can import from other types
                 //return FBXCreateCreateDraw(ContentBrowser);
                 return AssimpCreateCreateDraw(ContentBrowser);
             }
 
-            public unsafe partial bool FBXCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser);
-            public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser);
+            public unsafe partial bool FBXCreateCreateDraw(EGui.Controls.TtContentBrowser ContentBrowser);
+            public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.TtContentBrowser ContentBrowser);
         }
         public TtMeshPrimitives()
         {

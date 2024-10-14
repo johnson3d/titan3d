@@ -4,6 +4,7 @@ using EngineNS.Thread;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,7 +19,7 @@ namespace EngineNS.IO
 
         }
         //导入的窗口渲染接口
-        public virtual bool OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
+        public virtual bool OnDraw(EGui.Controls.TtContentBrowser ContentBrowser)
         {
             return true;
         }
@@ -66,7 +67,7 @@ namespace EngineNS.IO
             mAsset = Rtti.TtTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IAsset;
             PGAsset.Target = mAsset;
         }
-        public override unsafe bool OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
+        public override unsafe bool OnDraw(EGui.Controls.TtContentBrowser ContentBrowser)
         {
             if (bPopOpen == false)
                 ImGuiAPI.OpenPopup($"New {TypeSlt.BaseType.Name}", ImGuiPopupFlags_.ImGuiPopupFlags_None);
@@ -269,7 +270,11 @@ namespace EngineNS.IO
         }
         public virtual async System.Threading.Tasks.Task MoveTo(string name, RName.ERNameType type)
         {
-            if (mAssetName.Name == name && mAssetName.RNameType == type)
+            var rootType = TtEngine.Instance.FileManager.GetRootDirType(name);
+            var rPath = IO.TtFileManager.GetRelativePath(TtEngine.Instance.FileManager.GetRoot(rootType), name);
+
+            if (mAssetName.Address == name && mAssetName.RNameType == type)
+            //if (mAssetName.Name == name && mAssetName.RNameType == type)
                 return;
             IAsset asset = await LoadAsset();
             List<EngineNS.IO.IAssetMeta> holders = new List<EngineNS.IO.IAssetMeta>();
@@ -288,10 +293,10 @@ namespace EngineNS.IO
             var savedType = mAssetName.RNameType;
             OnBeforeRenamedAsset(asset, mAssetName);
             
-            var tarAddress = RName.GetAddress(type, name);
-            IO.TtFileManager.CopyFile(mAssetName.Address + ".snap", tarAddress + ".snap");
+            //var tarAddress = RName.GetAddress(type, name);
+            IO.TtFileManager.CopyFile(mAssetName.Address + ".snap", name + ".snap");
 
-            mAssetName.UnsafeUpdate(name, type);
+            mAssetName.UnsafeUpdate(rPath, type);
             this.SaveAMeta(asset);
             asset.SaveAssetTo(mAssetName);
             
@@ -385,11 +390,11 @@ namespace EngineNS.IO
         }
         static Vector2 tempDelta0 = new Vector2(8, 8);
         static Vector2 tempDelta = new Vector2(12, 15);
-        public virtual unsafe void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser, float scale)
+        public virtual unsafe void OnDraw(in ImDrawList cmdlist, in Vector2 sz, EGui.Controls.TtContentBrowser ContentBrowser, float scale)
         {
             OnDraw(in cmdlist, in Vector2.Zero, in sz, ContentBrowser, scale);
         }
-        public virtual unsafe void OnDraw(in ImDrawList cmdlist, in Vector2 offset, in Vector2 sz, EGui.Controls.UContentBrowser ContentBrowser, float scale)
+        public virtual unsafe void OnDraw(in ImDrawList cmdlist, in Vector2 offset, in Vector2 sz, EGui.Controls.TtContentBrowser ContentBrowser, float scale)
         {
             var imViewPort = ImGuiAPI.GetWindowViewport();
             var dpiScale = imViewPort->DpiScale;
@@ -451,7 +456,7 @@ namespace EngineNS.IO
 
             DrawPopMenu(ContentBrowser);
         }
-        protected void DrawPopMenu(EGui.Controls.UContentBrowser ContentBrowser)
+        protected void DrawPopMenu(EGui.Controls.TtContentBrowser ContentBrowser)
         {
             if (ImGuiAPI.BeginPopupContextItem(mAssetName.Address, ImGuiPopupFlags_.ImGuiPopupFlags_MouseButtonRight))
             {
@@ -464,7 +469,7 @@ namespace EngineNS.IO
                 ContentBrowser.CreateNewAssets = createNewAssetValueStore;
             }
         }
-        protected virtual void OnDrawPopMenu(EGui.Controls.UContentBrowser ContentBrowser)
+        protected virtual void OnDrawPopMenu(EGui.Controls.TtContentBrowser ContentBrowser)
         {
             var createNewAssetValueStore = ContentBrowser.CreateNewAssets;
             ContentBrowser.CreateNewAssets = false;
@@ -502,15 +507,15 @@ namespace EngineNS.IO
             }
             if (EGui.UIProxy.MenuItemProxy.MenuItem("Rename", null, false, null, in drawList, in menuData, ref mMoveToMenuState))
             {
-                ContentBrowser.OperationAsset(this, EGui.Controls.UContentBrowser.EAssetOperationType.Rename);
+                ContentBrowser.OperationAsset(this, EGui.Controls.TtContentBrowser.EAssetOperationType.Rename);
             }
             if (EGui.UIProxy.MenuItemProxy.MenuItem("MoveTo", null, false, null, in drawList, in menuData, ref mMoveToMenuState))
             {
-                ContentBrowser.OperationAsset(this, EGui.Controls.UContentBrowser.EAssetOperationType.MoveTo);
+                ContentBrowser.OperationAsset(this, EGui.Controls.TtContentBrowser.EAssetOperationType.MoveTo);
             }
             if (EGui.UIProxy.MenuItemProxy.MenuItem("CopyTo", null, false, null, in drawList, in menuData, ref mCopyToMenuState))
             {
-                ContentBrowser.OperationAsset(this, EGui.Controls.UContentBrowser.EAssetOperationType.CopyTo);
+                ContentBrowser.OperationAsset(this, EGui.Controls.TtContentBrowser.EAssetOperationType.CopyTo);
             }
 
             if (OnDrawContextMenu(ref drawList))

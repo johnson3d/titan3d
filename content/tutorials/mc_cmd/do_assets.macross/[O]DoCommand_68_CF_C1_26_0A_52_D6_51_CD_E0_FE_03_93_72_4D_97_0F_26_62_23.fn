@@ -178,7 +178,7 @@
                     <AsyncType Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration.EAsyncType@EngineCore" Value="None" />
                     <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
                     <IsOverride Type="System.Boolean@Unknown" Value="False" />
-                    <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="3">
+                    <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="4">
                       <e_0 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
                         <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
                         <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
@@ -236,6 +236,25 @@
                         </VariableType>
                         <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
                       </e_2>
+                      <e_3 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
+                        <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+                        <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
+                          <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+                            <IsEnum Type="System.Boolean@Unknown" Value="False" />
+                            <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.RName@EngineCore" />
+                            <TypeFullName Type="System.String@Unknown" Value="EngineNS.RName" />
+                          </Type>
+                        </InitValue>
+                        <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
+                        <IsBindable Type="System.Boolean@Unknown" Value="False" />
+                        <VariableName Type="System.String@Unknown" Value="tmp_r_GetRName_1223778736" />
+                        <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+                          <IsEnum Type="System.Boolean@Unknown" Value="False" />
+                          <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.RName@EngineCore" />
+                          <TypeFullName Type="System.String@Unknown" Value="EngineNS.RName" />
+                        </VariableType>
+                        <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+                      </e_3>
                     </LocalVariables>
                     <MethodName Type="System.String@Unknown" Value="dm_fun_IterateDirectory_366745237" />
                     <ReturnValue Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">

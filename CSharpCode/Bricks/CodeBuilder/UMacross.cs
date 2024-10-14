@@ -45,7 +45,8 @@ namespace EngineNS.Bricks.CodeBuilder
         public Vector2 PosMenu;
     }
 
-    public partial class UMacrossAMeta : IO.IAssetMeta
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMacrossAMeta@EngineCore", "EngineNS.Bricks.CodeBuilder.UMacrossAMeta" })]
+    public partial class TtMacrossAMeta : IO.IAssetMeta
     {
         public override string TypeExt
         {
@@ -109,7 +110,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 mSelectedType = null;
             }
 
-            public override unsafe bool OnDraw(UContentBrowser contentBrowser)
+            public override unsafe bool OnDraw(TtContentBrowser contentBrowser)
             {
                 //base.OnDraw(contentBrowser);
                 
@@ -236,7 +237,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
         public IO.IAssetMeta CreateAMeta()
         {
-            var result = new UMacrossAMeta();
+            var result = new TtMacrossAMeta();
             result.Icon = new EGui.TtUVAnim();
             return result;
         }
@@ -246,7 +247,7 @@ namespace EngineNS.Bricks.CodeBuilder
             return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
 
-        public static void UpdateAMetaReferences(MacrossNode.UMacrossEditor graph, UMacrossAMeta ameta)
+        public static void UpdateAMetaReferences(MacrossNode.UMacrossEditor graph, TtMacrossAMeta ameta)
         {
             foreach (var i in graph.Methods)
             {
@@ -271,13 +272,13 @@ namespace EngineNS.Bricks.CodeBuilder
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
             ameta.RefAssetRNames.Clear();
-            var macrossMeta = (ameta as UMacrossAMeta);
+            var macrossMeta = (ameta as TtMacrossAMeta);
             if (macrossMeta != null && SelectedType != null)
                 macrossMeta.BaseTypeStr = SelectedType.TypeString;
 
             var graph = new MacrossNode.UMacrossEditor();
             graph.LoadClassGraph(this.AssetName);
-            UpdateAMetaReferences(graph, ameta as UMacrossAMeta);
+            UpdateAMetaReferences(graph, ameta as TtMacrossAMeta);
             //foreach (var i in graph.Methods)
             //{
             //    foreach (var j in i.Nodes)
@@ -303,7 +304,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public MacrossNode.UMacrossEditor MacrossEditor = null;
         public void SaveAssetTo(RName name)
         {
-            var ameta = GetAMeta() as UMacrossAMeta;
+            var ameta = GetAMeta() as TtMacrossAMeta;
             if (ameta != null)
             {
                 ameta.Description = $"MacrossType:{ameta.BaseTypeStr}\n";

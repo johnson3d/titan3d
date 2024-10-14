@@ -23,7 +23,7 @@ namespace EngineNS.Graphics.Mesh
             UMeshDataProvider.UMakeTorusParameter TorusParameter = new UMeshDataProvider.UMakeTorusParameter();
             UMeshDataProvider.MakeCapsuleParameter CapsuleParameter = new UMeshDataProvider.MakeCapsuleParameter(); 
 
-            public unsafe partial bool FBXCreateCreateDraw(UContentBrowser ContentBrowser)
+            public unsafe partial bool FBXCreateCreateDraw(TtContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)
                     ImGuiAPI.OpenPopup($"Import MeshPrimitives", ImGuiPopupFlags_.ImGuiPopupFlags_None);

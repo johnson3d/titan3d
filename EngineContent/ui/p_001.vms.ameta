@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Mesh.TtMeshPrimitivesAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="8d4b0c86-7c29-4900-bf8d-afd3bf40a4b8" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,ui/p_001.vms,8d4b0c86-7c29-4900-bf8d-afd3bf40a4b8" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMeshPrimitives&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

@@ -181,7 +181,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
             }
         }
     }
-    [ContextMenu("add,+", "Operation\\+", ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("add,+", "Operation\\+", ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
     public class AddNode : ValueOpNode
     {
         public AddNode()
@@ -189,7 +189,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
         {
         }
     }
-    [ContextMenu("subtraction,-", "Operation\\-", ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("subtraction,-", "Operation\\-", ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
     public class SubNode : ValueOpNode
     {
         public SubNode()
@@ -197,7 +197,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
         {
         }
     }
-    [ContextMenu("multiplication,*", "Operation\\*", ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("multiplication,*", "Operation\\*", ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
     public class MulNode : ValueOpNode
     {
         public MulNode()
@@ -205,7 +205,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
         {
         }
     }
-    [ContextMenu("division,/", "Operation\\/", ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("division,/", "Operation\\/", ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
     public class DivNode : ValueOpNode
     {
         public DivNode()
@@ -213,7 +213,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
         {
         }
     }
-    [ContextMenu("mod,%", "Operation\\%", ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("mod,%", "Operation\\%", ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
     public class ModNode : ValueOpNode
     {
         public ModNode()
@@ -221,7 +221,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
         {
         }
     }
-    [ContextMenu("bitand,&", "Operation\\&", ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("bitand,&", "Operation\\&", ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
     public class BitAndNode : ValueOpNode
     {
         public BitAndNode()
@@ -230,7 +230,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
 
         }
     }
-    [ContextMenu("bitor,|", "Operation\\|", ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("bitor,|", "Operation\\|", ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
     public class BitOrNode : ValueOpNode
     {
         public BitOrNode()

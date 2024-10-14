@@ -6,6 +6,7 @@ using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Design;
 using EngineNS.DesignMacross.Design.ConnectingLine;
+using EngineNS.DesignMacross.Design.Statement;
 using EngineNS.Rtti;
 using System.Diagnostics;
 
@@ -20,7 +21,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
             IsOverride = true;
             ReturnValueType = TtTypeDesc.TypeOf<bool>();
             AddArgument(new TtMethodArgumentDescription { OperationType = EMethodArgumentAttribute.In, VariableType = contextTypeDesc, Name = "context" });
-            var endNode = new TtMethodEndDescription() { Parent = this };
+            var endNode = new TtReturnStatementDescription() { Parent = this };
             var dataPinIn = new TtDataInPinDescription() { TypeDesc = TtTypeDesc.TypeOf<bool>() , Parent = this };
             endNode.DataInPins.Add(dataPinIn);
             AddStatement(endNode);

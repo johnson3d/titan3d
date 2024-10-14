@@ -160,7 +160,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public void SaveClassGraph(RName rn)
         {
-            var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as UMacrossAMeta;
+            var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as TtMacrossAMeta;
             if (ameta != null)
             {
                 if(DefClass.SupperClassNames.Count > 0)
@@ -248,6 +248,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     funcFiles = IO.TtFileManager.GetFiles(rn.Address, "*.func", false);
                 }
+                Type clsType = null;
+                for(int clsNameIdx=0; clsNameIdx < DefClass.SupperClassNames.Count; clsNameIdx++)
+                {
+                    var clsName = DefClass.SupperClassNames[clsNameIdx];
+                    var cls = Type.GetType(clsName);
+                    if(cls != null && cls.IsClass)
+                    {
+                        clsType = cls;
+                        break;
+                    }
+                }
                 for (int i = 0; i < funcFiles.Length; i++)
                 {
                     try
@@ -256,10 +267,39 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         var funcGraph = UMacrossMethodGraph.NewGraph(this);
                         object pFuncGraph = funcGraph;
                         IO.SerializerHelper.ReadObjectMetaFields(null, funcXml.LastChild as System.Xml.XmlElement, ref pFuncGraph, null);
+
+                        // check method valid
+                        if(clsType != null)
+                        {
+                            var methodInfos = clsType.GetMethods();
+                            for (int methodIdx = 0; methodIdx < funcGraph.MethodDatas.Count; methodIdx++)
+                            {
+                                bool bFind = false;
+                                MethodData.EErrorType lastErrorType = MethodData.EErrorType.None;
+                                for (int mIIdx = 0; mIIdx < methodInfos.Length; mIIdx++)
+                                {
+                                    if (funcGraph.MethodDatas[methodIdx].GetMethodName() != methodInfos[mIIdx].Name)
+                                        continue;
+                                    lastErrorType = TtMethodDeclaration.IsMatching(funcGraph.MethodDatas[methodIdx].MethodDec, methodInfos[mIIdx]);
+                                    if (lastErrorType == MethodData.EErrorType.None)
+                                    {
+                                        bFind = true;
+                                        break;
+                                    }
+                                }
+                                if(!bFind)
+                                {
+                                    funcGraph.MethodDatas[methodIdx].ErrorType = (lastErrorType == MethodData.EErrorType.None) ? MethodData.EErrorType.InvalidMethodName : lastErrorType;
+                                }
+                            }
+                        }
+                        
                         for(int methodIdx = 0; methodIdx < funcGraph.MethodDatas.Count; methodIdx++)
                         {
                             //if (funcGraph.MethodDatas[methodIdx].IsDelegate)
                             //    continue;
+                            if (funcGraph.MethodDatas[methodIdx].ErrorType != MethodData.EErrorType.None)
+                                continue;
                             DefClass.AddMethod(funcGraph.MethodDatas[methodIdx].MethodDec);
                         }
                         funcGraph.AssetName = this.AssetName;
@@ -687,7 +727,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList, 
                 ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Save"))
             {
-                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as UMacrossAMeta;
+                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as TtMacrossAMeta;
                 if (ameta != null)
                 {
                     TtMacross.UpdateAMetaReferences(this, ameta);
@@ -924,12 +964,46 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             EDrawMethodButtonFlag buttonFlags)
         {
             var displayName = method.DisplayName;
+            var keyName = method.KeyName;
 
             if (method.IsUseCustumCode)
             {
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xFF0000FF);
             }
-            var methodTreeNodeResult = ImGuiAPI.TreeNodeEx(displayName, treeNodeFlags);
+            bool methodTreeNodeResult = false;
+            if (method.MethodHasError())
+            {
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xFF0000FF);
+                methodTreeNodeResult = ImGuiAPI.TreeNodeEx("(E) " + displayName + "##" + keyName, treeNodeFlags);
+                if(ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                {
+                    if(ImGuiAPI.BeginTooltip())
+                    {
+                        var errorStr = "";
+                        for(int i=0; i<method.MethodDatas.Count; i++)
+                        {
+                            var errorType = method.MethodDatas[i].ErrorType;
+                            if((errorType & MethodData.EErrorType.InvalidMethodName) != 0)
+                            {
+                                errorStr += $"No method name {method.MethodDatas[i].GetMethodName()} \r\n";
+                            }
+                            if((errorType & MethodData.EErrorType.InvalidParam) != 0)
+                            {
+                                errorStr += $"Params has changed \r\n";
+                            }
+                            if((errorType & MethodData.EErrorType.InvalidReturn) != 0)
+                            {
+                                errorStr += $"Return type has changed \r\n";
+                            }
+                        }
+                        ImGuiAPI.Text(errorStr);
+                    }
+                    ImGuiAPI.EndTooltip();
+                }
+                ImGuiAPI.PopStyleColor(1);
+            }
+            else
+                methodTreeNodeResult = ImGuiAPI.TreeNodeEx(displayName + "##" + keyName, treeNodeFlags);
             ImGuiAPI.SameLine(0, EGui.UIProxy.StyleConfig.Instance.ItemSpacing.X);
             if (method.IsUseCustumCode)
             {
@@ -940,11 +1014,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if((buttonFlags & EDrawMethodButtonFlag.GenPreviewCode) != 0)
             {
                 ImGuiAPI.SameLine(regionSize.X - buttonSize.X * 3 - buttonOffset, -1.0f);
-                if (EGui.UIProxy.CustomButton.ToolButton("g", in buttonSize, 0xFF00FF00, "func_G_" + method.DisplayName))
+                if (EGui.UIProxy.CustomButton.ToolButton("g", in buttonSize, 0xFF00FF00, "func_G_" + displayName + keyName))
                 {
                     var methodCode = GenerateMethodCode(this.CodeGen, method.MethodDatas[0].MethodDec);
                     mCodeEditor.mCoreObject.SetText(methodCode);
-                    TextEditorTitle = "Gen:" + method.DisplayName;
+                    TextEditorTitle = "Gen:" + displayName;
                     CurrentTextoutMethod = method;
                     return false;
                 }
@@ -952,13 +1026,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if((buttonFlags & EDrawMethodButtonFlag.CustomCode) != 0)
             {
                 ImGuiAPI.SameLine(regionSize.X - buttonSize.X * 2 - buttonOffset, -1.0f);
-                if (EGui.UIProxy.CustomButton.ToolButton("c", in buttonSize, 0xFF00FF00, "func_C_" + method.DisplayName))
+                if (EGui.UIProxy.CustomButton.ToolButton("c", in buttonSize, 0xFF00FF00, "func_C_" + displayName + keyName))
                 {
                     if (method.CustumCode != null)
                         mCodeEditor.mCoreObject.SetText(method.CustumCode);
                     else
                         mCodeEditor.mCoreObject.SetText("//No CustumCode");
-                    TextEditorTitle = "Custum:" + method.DisplayName;
+                    TextEditorTitle = "Custum:" + displayName;
                     CurrentTextoutMethod = method;
                     return false;
                 }
@@ -966,13 +1040,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if((buttonFlags & EDrawMethodButtonFlag.Delete) != 0)
             {
                 ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
-                var keyName = $"Delete func {displayName}?";
-                if (EGui.UIProxy.CustomButton.ToolButton("x", in buttonSize, 0xFF0000FF, "func_X_" + method.DisplayName))
+                var delFunckeyName = $"Delete func {displayName}?";
+                if (EGui.UIProxy.CustomButton.ToolButton("x", in buttonSize, 0xFF0000FF, "func_X_" + displayName + keyName))
                 {
-                    EGui.UIProxy.MessageBox.Open(keyName);
+                    EGui.UIProxy.MessageBox.Open(delFunckeyName);
                     return false;
                 }
-                EGui.UIProxy.MessageBox.Draw(keyName, $"Are you sure to delete {displayName}?", EGui.UIProxy.MessageBox.EButtonType.YesNo,
+                EGui.UIProxy.MessageBox.Draw(delFunckeyName, $"Are you sure to delete {displayName}?", EGui.UIProxy.MessageBox.EButtonType.YesNo,
                 () =>
                 {
                     RemoveMethod(method, realDelete);
@@ -1351,7 +1425,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             flag |= ImGuiTabItemFlags_.ImGuiTabItemFlags_SetSelected;
                             mSettingCurrentFuncIndex = -1;
                         }
-                        if (ImGuiAPI.BeginTabItem(func.DisplayName, ref func.VisibleInClassGraphTables, flag))
+                        bool tabItemResult = false;
+                        if(func.MethodHasError())
+                        {
+                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xFF0000FF);
+                            tabItemResult = ImGuiAPI.BeginTabItem("(E) " + func.DisplayName + "##" + func.KeyName, ref func.VisibleInClassGraphTables, flag);
+                            ImGuiAPI.PopStyleColor(1);
+                        }
+                        else
+                            tabItemResult = ImGuiAPI.BeginTabItem(func.DisplayName + "##" + func.KeyName, ref func.VisibleInClassGraphTables, flag);
+
+                        if (tabItemResult)
                         {
                             DrawFunctionGraph(func, sz);
                             CurrentOpenMethod = func;

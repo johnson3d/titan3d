@@ -55,6 +55,8 @@ namespace EngineNS.Editor
         [Rtti.Meta]
         public Color4b MaterialBoderColor { get; set; } = Color4b.Gold;
         [Rtti.Meta]
+        public Color4b MaterialFunctionBoderColor { get; set; } = Color4b.Goldenrod;
+        [Rtti.Meta]
         public Color4b MaterialInstanceBoderColor { get; set; } = Color4b.Cyan;
         [Rtti.Meta]
         public Color4b TextureBoderColor { get; set; } = Color4b.LightPink;

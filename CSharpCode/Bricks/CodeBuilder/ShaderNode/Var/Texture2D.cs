@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
-    [ContextMenu("texture2d", "Data\\Texture2D@_serial@", UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("texture2d", "Data\\Texture2D@_serial@", TtMaterialGraph.MaterialEditorKeyword)]
     public class Texture2D : VarNode
     {
         [Browsable(false)]
@@ -77,7 +77,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public override void OnLButtonClicked(NodePin clickedPin)
         {
             base.OnLButtonClicked(clickedPin);
-            var graph = UserData as UMaterialGraph;
+            var graph = UserData as TtMaterialGraph;
             graph.ShaderEditor.NodePropGrid.HideInheritDeclareType = Rtti.TtTypeDescGetter<VarNode>.TypeDesc;
         }
         //public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
@@ -103,7 +103,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             return new TtVariableReferenceExpression(Name);
         }
     }
-    [ContextMenu("texture2darray", "Data\\Texture2DArray@_serial@", UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("texture2darray", "Data\\Texture2DArray@_serial@", TtMaterialGraph.MaterialEditorKeyword)]
     public class Texture2DArray : VarNode
     {
         [Browsable(false)]

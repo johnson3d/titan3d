@@ -242,6 +242,8 @@ namespace EngineNS.Graphics.Pipeline
         public Shader.TtMaterialManager MaterialManager { get; private set; } = new Shader.TtMaterialManager();
         [Rtti.Meta]
         public Shader.TtMaterialInstanceManager MaterialInstanceManager { get; private set; } = new Shader.TtMaterialInstanceManager();
+        [Rtti.Meta]
+        public Shader.TtMaterialFunctionManager MaterialFunctionManager { get; private set; } = new Shader.TtMaterialFunctionManager();
         public EGui.Slate.UBaseRenderer SlateRenderer { get; private set; }
         public Graphics.Pipeline.Shader.TtEffectManager EffectManager
         {

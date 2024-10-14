@@ -290,6 +290,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         [Rtti.Meta]
         public bool IsDelegate { get; set; } = false;
 
+        [Flags]
+        public enum EErrorType
+        {
+            None = 0,
+            InvalidMethodName = 1 << 0,
+            InvalidParam = 1 << 1,
+            InvalidReturn = 1 << 2,
+        }
+        public EErrorType ErrorType = EErrorType.None;
+
         public string GetMethodName()
         {
             return MethodDec.MethodName;
@@ -941,6 +951,18 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return GraphName;
             }
         }
+        public string KeyName
+        {
+            get
+            {
+                var keyName = "";
+                foreach (var k in MethodDatas)
+                {
+                    keyName += k.MethodDec.GetKeyword();
+                }
+                return keyName;
+            }
+        }
 
         class GraphNameAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
         {
@@ -1006,6 +1028,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             get;
             set;
         } = new List<MethodData>();
+
+        public bool MethodHasError()
+        {
+            for(int i=0; i<MethodDatas.Count; i++)
+            {
+                if(MethodDatas[i].ErrorType != MethodData.EErrorType.None)
+                    return true;
+            }
+            return false;
+        }
 
         public bool IsDelegateGraph()
         {

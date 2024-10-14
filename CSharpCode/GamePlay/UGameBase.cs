@@ -38,7 +38,7 @@ namespace EngineNS.GamePlay
 
         }
         [Rtti.Meta]
-        public virtual void TestFunction(int paramInt)
+        public virtual void TestFunction(int paramInt, bool param2)
         {
 
         }

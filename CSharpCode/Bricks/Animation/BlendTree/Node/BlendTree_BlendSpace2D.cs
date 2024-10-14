@@ -91,6 +91,8 @@ namespace EngineNS.Animation.BlendTree.Node
         }
         public override void Tick(float elapseSecond, ref FAnimBlendTreeContext context)
         {
+            UpdateRuntimeSamples(elapseSecond);
+
             mAnimationCommand.Desc.Times.Clear();
             mAnimationCommand.Desc.Weights.Clear();
             for (int i = 0; i < mRuntimeBlendSamples.Count; ++i)
@@ -102,7 +104,7 @@ namespace EngineNS.Animation.BlendTree.Node
                 mAnimationCommand.Desc.Weights.Add(mRuntimeBlendSamples[i].TotalWeight);
             }
         }
-        protected Vector3 mInput = Vector3.Zero;
+        public Vector3 Input { get; set; } = Vector3.Zero;
         private List<FBlendSample> mRuntimeBlendSamples = new List<FBlendSample>();
         public float Duration { get; set; }
         public uint KeyFrames { get; protected set; }
@@ -116,7 +118,7 @@ namespace EngineNS.Animation.BlendTree.Node
         public void UpdateRuntimeSamples(float elapseTimeSecond)
         {
             mRuntimeBlendSamples.Clear();
-            mBlendSpace.EvaluateRuntimeSamplesByInput(mInput, ref mRuntimeBlendSamples);
+            mBlendSpace.EvaluateRuntimeSamplesByInput(Input, ref mRuntimeBlendSamples);
 
             float newDuration = 0;
             for (int i = 0; i < mRuntimeBlendSamples.Count; ++i)

@@ -156,7 +156,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             return "0";
         }
     }
-    [ContextMenu("f1,float1", "Data\\float@_serial@", UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("f1,float1", "Data\\float@_serial@", TtMaterialGraph.MaterialEditorKeyword)]
     public class VarDimF1 : VarNode
     {
         public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
@@ -281,7 +281,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 };
                 if (IsUniform)
                 {
-                    var graph = data.NodeGraph as UMaterialGraph;
+                    var graph = data.NodeGraph as TtMaterialGraph;
                     graph.ShaderEditor.MaterialOutput.UniformVars.Add(val);
                 }
                 else
@@ -296,7 +296,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         }
     }
 
-    [ContextMenu("i1,int1", "Data\\int@_serial@", UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("i1,int1", "Data\\int@_serial@", TtMaterialGraph.MaterialEditorKeyword)]
     public class VarDimI1 : VarNode
     {
         public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
@@ -371,7 +371,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 };
                 if (IsUniform)
                 {
-                    var graph = data.NodeGraph as UMaterialGraph;
+                    var graph = data.NodeGraph as TtMaterialGraph;
                     graph.ShaderEditor.MaterialOutput.UniformVars.Add(val);
                 }
                 else

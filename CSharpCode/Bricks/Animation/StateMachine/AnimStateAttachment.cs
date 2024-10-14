@@ -31,10 +31,31 @@ namespace EngineNS.Animation.StateMachine
         public override void Tick(float elapseSecond, in TtAnimStateMachineContext context)
         {
             base.Tick(elapseSecond, context);
-            //(BlendTree as TtBlendTree_AnimationClip).Time = 
+
             BlendTree.Tick(elapseSecond, ref context.BlendTreeContext);
         }
+    }
+    public class TtBlendSpacePlayStateAttachment<S> : TtAnimStateAttachment<S>
+    {
+        public RName AnimationName { get; set; }
+        public Vector3 Input = Vector3.Zero;
+        public override async TtTask<bool> Initialize(TtAnimStateMachineContext context)
+        {
+            var blendSpaceBlendTree = new TtBlendTree_BlendSpace2D<S>();
+            blendSpaceBlendTree.BlendSpace = await TtEngine.Instance.AnimationModule.BlendSpaceClipManager
+                .GetAnimation(AnimationName);
+            BlendTree = blendSpaceBlendTree;
+            await BlendTree.Initialize(context.BlendTreeContext);
+            return await base.Initialize(context);
+        }
 
+        public override void Tick(float elapseSecond, in TtAnimStateMachineContext context)
+        {
+            base.Tick(elapseSecond, context);
+            var blendSpace = BlendTree as TtBlendTree_BlendSpace2D<S>;
+            blendSpace.Input = Input;
+            BlendTree.Tick(elapseSecond, ref context.BlendTreeContext);
+        }
     }
     /// <summary>
     /// Using for construct the BlendTree from graph

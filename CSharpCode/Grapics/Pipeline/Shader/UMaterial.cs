@@ -234,8 +234,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return null;
         }
         public static string GenMateralGraphCode(TtMaterial Material, UHLSLCodeGenerator mHLSLCodeGen, 
-            Bricks.CodeBuilder.ShaderNode.UMaterialGraph MaterialGraph, 
-            Bricks.CodeBuilder.ShaderNode.UMaterialOutput MaterialOutput)
+            Bricks.CodeBuilder.ShaderNode.TtMaterialGraph MaterialGraph, 
+            Bricks.CodeBuilder.ShaderNode.TtMaterialOutput MaterialOutput)
         {
             Material.UsedSrView.Clear();
             Material.UsedUniformVars.Clear();
@@ -578,9 +578,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             mMaterialHash = GetHash();
         }
-        [Browsable(false)]
         public NxRHI.TtShaderCode DefineCode { get; } = new NxRHI.TtShaderCode();
-        [Browsable(false)]
         public NxRHI.TtShaderCode SourceCode { get; } = new NxRHI.TtShaderCode();
         [Category("Option")]
         public string DefineCodeText
@@ -892,6 +890,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             public string VarType { get; set; }
             [Category("Option")]
             [ReadOnly(true)]
+            [Rtti.Meta]
             public string Name { get; set; }
             string mValue;
             [Rtti.Meta]

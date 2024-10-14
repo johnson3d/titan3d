@@ -43,7 +43,7 @@ namespace EngineNS.DesignMacross.Design.Statement
                     TypeDesc = methodMeta.ReturnType
                 });
             }
-                
+
             return methodInvoke;
         }
         public static TtMethodInvokeDescription Create(MethodInfo methodInfo)
@@ -52,7 +52,7 @@ namespace EngineNS.DesignMacross.Design.Statement
             methodInvoke.Name = methodInfo.Name;
             methodInvoke.DeclaringType = TtTypeDesc.TypeOf(methodInfo.DeclaringType);
             methodInvoke.IsStatic = methodInfo.IsStatic;
-            if(!methodInvoke.IsStatic)
+            if (!methodInvoke.IsStatic)
             {
                 methodInvoke.AddDataInPin(new() { Name = "Host", TypeDesc = methodInvoke.DeclaringType });
             }
@@ -82,7 +82,7 @@ namespace EngineNS.DesignMacross.Design.Statement
         }
         public TtDataInPinDescription GetHostPin()
         {
-            if(!IsStatic)
+            if (!IsStatic)
             {
                 return DataInPins[0];
             }
@@ -101,6 +101,24 @@ namespace EngineNS.DesignMacross.Design.Statement
             {
                 methodInvoke.Host = new TtClassReferenceExpression() { Class = DeclaringType };
             }
+            else
+            {
+                var hostPin = DataInPins[0];
+                if (hostPin != null)
+                {
+                    var linkedHostPin = methodDesc.GetLinkedDataPin(hostPin);
+                    var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, Sequence = statementBuildContext.ExecuteSequenceStatement };
+                    var linkedDesc = linkedHostPin.Parent;
+                    if (linkedDesc is TtExpressionDescription linkedExpressionDesc)
+                    {
+                        methodInvoke.Host = linkedExpressionDesc.BuildExpression(ref buildContext);
+                    }
+                    if (linkedDesc is TtStatementDescription linkedStatementDesc)
+                    {
+                        methodInvoke.Host = linkedStatementDesc.BuildExpressionForOutPin(linkedHostPin);
+                    }
+                }
+            }
             if (ReturnType != TtTypeDesc.TypeOf(typeof(void)))
             {
                 var resultVarDeclaration = new TtVariableDeclaration()
@@ -112,7 +130,12 @@ namespace EngineNS.DesignMacross.Design.Statement
                 statementBuildContext.AddStatement(resultVarDeclaration);
                 methodInvoke.ReturnValue = resultVarDeclaration;
             }
-            foreach (var pin in DataInPins)
+            var otherInPins = new List<TtDataPinDescription>(DataInPins);
+            if (!IsStatic)
+            {
+                otherInPins.RemoveAt(0);
+            }
+            foreach (var pin in otherInPins)
             {
                 var linkedDataPin = methodDesc.GetLinkedDataPin(pin);
                 if (linkedDataPin == null)
@@ -136,6 +159,8 @@ namespace EngineNS.DesignMacross.Design.Statement
                     }
                 }
             }
+
+
             statementBuildContext.AddStatement(methodInvoke);
 
             var executionOutPin = ExecutionOutPins[0];

@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
-    [ContextMenu("sampler", "Data\\Sampler@_serial@", UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("sampler", "Data\\Sampler@_serial@", TtMaterialGraph.MaterialEditorKeyword)]
     public class SamplerState : VarNode
     {
         [Browsable(false)]

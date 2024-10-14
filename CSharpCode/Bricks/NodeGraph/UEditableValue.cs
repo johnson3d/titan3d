@@ -502,7 +502,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
         }
         public Rtti.TtTypeDesc MacrossType { get; set; }
-        public EGui.Controls.UContentBrowser ContentBrowser;
+        public EGui.Controls.TtContentBrowser ContentBrowser;
         bool BrowserVisible = false;
         public override unsafe void OnDraw(UNodeBase node, PinIn pin, UNodeGraphStyles styles, float fScale, bool useDPI)
         {

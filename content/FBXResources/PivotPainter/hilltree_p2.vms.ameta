@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Mesh.TtMeshPrimitivesAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="63a137dc-1788-4b96-87c8-2280cc60baf3" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,fbxresources/pivotpainter/hilltree_p2.vms,63a137dc-1788-4b96-87c8-2280cc60baf3" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMeshPrimitives&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

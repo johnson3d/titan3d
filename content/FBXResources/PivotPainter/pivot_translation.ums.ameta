@@ -13,7 +13,7 @@
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Value="Game,fbxresources/pivotpainter/simplepivotpainterexample.vms,7af963fb-77dc-4517-8107-75ece5c37536" />
-    <e_1 Value="Game,fbxresources/pivotpainter/pivot_translation.material,9d9a1988-9919-4c01-b123-97f477490db6" />
+    <e_1 Value="Game,tutorials/pivotpainter/pivot_translation.material,00000000-0000-0000-0000-000000000000" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
 </Root>

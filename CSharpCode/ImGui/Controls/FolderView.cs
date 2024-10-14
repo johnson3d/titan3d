@@ -168,6 +168,14 @@ namespace EngineNS.EGui.Controls
                         mCreateFolderDir = data.RefObject.ToString();
                     },
                 },
+                new UIProxy.MenuItemProxy()
+                {
+                    MenuName = "Copy Folder Address",
+                    Action = (item, data)=>
+                    {
+                        ImGuiAPI.SetClipboardText(data.RefObject.ToString());
+                    },
+                }
             };
         }
         struct stDirMenuData
@@ -211,7 +219,7 @@ namespace EngineNS.EGui.Controls
                             foreach (var f in files)
                             {
                                 var ff = f.Substring(0, f.Length - ".ameta".Length);
-                                var ameta1 = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRNameFromAbsPath(ff)) as Bricks.CodeBuilder.UMacrossAMeta;
+                                var ameta1 = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRNameFromAbsPath(ff)) as Bricks.CodeBuilder.TtMacrossAMeta;
                                 if (ameta1 == null)
                                     continue;
 

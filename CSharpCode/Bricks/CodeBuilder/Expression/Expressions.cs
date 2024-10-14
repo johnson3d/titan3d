@@ -1,4 +1,5 @@
-﻿using EngineNS.Bricks.NodeGraph;
+﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
+using EngineNS.Bricks.NodeGraph;
 using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.Rtti;
 using EngineNS.Thread.Async;
@@ -7,6 +8,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 
@@ -617,6 +619,16 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return info.IsParamArray;
         }
+
+        public static bool IsMatching(TtMethodArgumentDeclaration desc, ParameterInfo info)
+        {
+            Debug.Assert(desc != null);
+            Debug.Assert(info != null);
+
+            return desc.VariableType.IsEqual(info.ParameterType) &&
+                   (desc.OperationType == GetOperationType(info)) &&
+                   (desc.IsParamArray == GetIsParamArray(info));
+        }
         public static TtMethodArgumentDeclaration GetParam(System.Reflection.ParameterInfo info)
         {
             var retVal = new TtMethodArgumentDeclaration()
@@ -922,6 +934,32 @@ namespace EngineNS.Bricks.CodeBuilder
             }
             retStr = retStr.TrimEnd(',') + ")";
             return retStr;
+        }
+
+        public static MethodData.EErrorType IsMatching(TtMethodDeclaration methodDesc, MethodInfo methodInfo)
+        {
+            Debug.Assert(methodDesc != null);
+            Debug.Assert(methodInfo != null);
+
+            var methodInfoParams = methodInfo.GetParameters();
+            if (methodDesc.Arguments.Count != methodInfoParams.Length)
+                return MethodData.EErrorType.InvalidParam;
+
+            if ((methodInfo.ReturnType != typeof(void)) &&
+                (methodInfo.ReturnType != typeof(System.Threading.Tasks.Task)
+                && methodInfo.ReturnType != typeof(EngineNS.Thread.Async.TtTask)))
+            {
+                if (!methodDesc.ReturnValue.VariableType.IsEqual(methodInfo.ReturnType))
+                    return MethodData.EErrorType.InvalidReturn;
+            }
+
+            for(int i=0; i<methodInfoParams.Length; i++)
+            {
+                if(!TtMethodArgumentDeclaration.IsMatching(methodDesc.Arguments[i], methodInfoParams[i]))
+                    return MethodData.EErrorType.InvalidParam;
+            }
+
+            return MethodData.EErrorType.None;
         }
 
         public static TtMethodDeclaration GetMethodDeclaration(System.Reflection.MethodInfo method)

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.RenderPolicyEditor.TtRenderPolicyAssetAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="821a48b8-ab07-4859-aaa1-d188a7d033b9" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/renderpolicy/simple_ds.rpolicy,821a48b8-ab07-4859-aaa1-d188a7d033b9" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.RenderPolicyEditor.URenderPolicyAsset&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

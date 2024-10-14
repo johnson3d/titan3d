@@ -9,7 +9,7 @@ using System.ComponentModel;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
-    [ContextMenu("matrixf,f4x4,float4x4", "Data\\float4x4@_serial@", UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("matrixf,f4x4,float4x4", "Data\\float4x4@_serial@", TtMaterialGraph.MaterialEditorKeyword)]
     public class VarDimF4x4 : VarNode
     {
         Matrix mValue = Matrix.Identity;
@@ -356,7 +356,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 };
                 if(IsUniform)
                 {
-                    var graph = data.NodeGraph as UMaterialGraph;
+                    var graph = data.NodeGraph as TtMaterialGraph;
                     graph.ShaderEditor.MaterialOutput.UniformVars.Add(val);
                 }
                 else

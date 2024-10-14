@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
-    [ContextMenu("f4,float4", "Data\\float4@_serial@", UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("f4,float4", "Data\\float4@_serial@", TtMaterialGraph.MaterialEditorKeyword)]
     public class VarDimF4 : VarNode
     {
         public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
@@ -282,7 +282,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 };
                 if (IsUniform)
                 {
-                    var graph = data.NodeGraph as UMaterialGraph;
+                    var graph = data.NodeGraph as TtMaterialGraph;
                     graph.ShaderEditor.MaterialOutput.UniformVars.Add(val);
                 }
                 else
@@ -378,7 +378,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             this.AddPinOut(OutW);
         }
     }
-    [ContextMenu("color4", "Data\\color4@_serial@", UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("color4", "Data\\color4@_serial@", TtMaterialGraph.MaterialEditorKeyword)]
     public class VarColor4 : VarDimF4
     {
         public VarColor4()
@@ -428,7 +428,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         }
     }
 
-    [ContextMenu("i4,int4", "Data\\int4@_serial@", UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("i4,int4", "Data\\int4@_serial@", TtMaterialGraph.MaterialEditorKeyword)]
     public class VarDimI4 : VarNode
     {
         public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
@@ -556,7 +556,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 };
                 if (IsUniform)
                 {
-                    var graph = data.NodeGraph as UMaterialGraph;
+                    var graph = data.NodeGraph as TtMaterialGraph;
                     graph.ShaderEditor.MaterialOutput.UniformVars.Add(val);
                 }
                 else

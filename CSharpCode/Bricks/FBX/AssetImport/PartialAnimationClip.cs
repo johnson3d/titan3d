@@ -10,7 +10,7 @@ namespace EngineNS.Animation.Asset
         public partial class ImportAttribute
         {
             AssetImportAndExport.FBX.FBXImporter mFBXImporter; //for now we only have one file to import
-            public unsafe partial bool FBXCreateCreateDraw(UContentBrowser ContentBrowser)
+            public unsafe partial bool FBXCreateCreateDraw(TtContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)
                     ImGuiAPI.OpenPopup($"Import Animation", ImGuiPopupFlags_.ImGuiPopupFlags_None);

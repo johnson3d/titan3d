@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
-    [ContextMenu("f3,float3", "Data\\float3@_serial@", UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("f3,float3", "Data\\float3@_serial@", TtMaterialGraph.MaterialEditorKeyword)]
     public class VarDimF3 : VarNode
     {
         public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
@@ -241,7 +241,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 };
                 if (IsUniform)
                 {
-                    var graph = data.NodeGraph as UMaterialGraph;
+                    var graph = data.NodeGraph as TtMaterialGraph;
                     graph.ShaderEditor.MaterialOutput.UniformVars.Add(val);
                 }
                 else
@@ -317,7 +317,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             this.AddPinOut(OutZ);
         }
     }
-    [ContextMenu("color3", "Data\\Color3@_serial@", UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("color3", "Data\\Color3@_serial@", TtMaterialGraph.MaterialEditorKeyword)]
     public class VarColor3 : VarDimF3
     {
         public VarColor3()
@@ -328,7 +328,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public Vector3 Color { get => mValue; set => mValue = value; }
     }
 
-    [ContextMenu("i3,int3", "Data\\int3@_serial@", UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("i3,int3", "Data\\int3@_serial@", TtMaterialGraph.MaterialEditorKeyword)]
     public class VarDimI3 : VarNode
     {
         public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
@@ -440,7 +440,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 };
                 if (IsUniform)
                 {
-                    var graph = data.NodeGraph as UMaterialGraph;
+                    var graph = data.NodeGraph as TtMaterialGraph;
                     graph.ShaderEditor.MaterialOutput.UniformVars.Add(val);
                 }
                 else

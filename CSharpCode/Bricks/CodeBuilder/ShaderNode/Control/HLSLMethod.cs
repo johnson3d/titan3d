@@ -20,7 +20,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta]
         [TtHLSLProvider(Name = "SampleLevel2D")]
         [UserCallNode(CallNodeType = typeof(SampleLevel2DNode))]
-        [ContextMenu("samplelevel2d", "Sample\\Level2D", UMaterialGraph.MaterialEditorKeyword)]
+        [ContextMenu("samplelevel2d", "Sample\\Level2D", TtMaterialGraph.MaterialEditorKeyword)]
         public static Vector4 SampleLevel2D(Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, float level, out Vector3 rgb)
         {
             rgb = new Vector3();
@@ -396,14 +396,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
         [Rtti.Meta]
         [TtHLSLProvider(Name = "Pivot_DecodePosition")]
-        [ContextMenu("Pivot_DecodePosition", "Pivot\\DecodePosition", UMaterialGraph.MaterialEditorKeyword)]
+        [ContextMenu("Pivot_DecodePosition", "Pivot\\DecodePosition", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Pivot_DecodePosition(Vector3 rgb, out Vector3 localPos)
         {
             localPos = Vector3.Zero;
         }
         [Rtti.Meta]
         [TtHLSLProvider(Name = "Pivot_DecodeAxisVector")]
-        [ContextMenu("Pivot_DecodeAxisVector", "Pivot\\DecodeAxisVector", UMaterialGraph.MaterialEditorKeyword)]
+        [ContextMenu("Pivot_DecodeAxisVector", "Pivot\\DecodeAxisVector", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Pivot_DecodeAxisVector(Vector3 rgb, out Vector3 localAxis)
         {
             localAxis = Vector3.UnitY;
@@ -411,7 +411,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
         [Rtti.Meta]
         [TtHLSLProvider(Name = "Pivot_UnpackIntAsFloat")]
-        [ContextMenu("Pivot_UnpackIntAsFloat", "Pivot\\UnpackIntAsFloat", UMaterialGraph.MaterialEditorKeyword)]
+        [ContextMenu("Pivot_UnpackIntAsFloat", "Pivot\\UnpackIntAsFloat", TtMaterialGraph.MaterialEditorKeyword)]
         public static float Pivot_UnpackIntAsFloat(float N)
         {
             return 0;
@@ -419,7 +419,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
         [Rtti.Meta]
         [TtHLSLProvider(Name = "Pivot_GetPivotIndex")]
-        [ContextMenu("Pivot_GetPivotIndex", "Pivot\\GetPivotIndex", UMaterialGraph.MaterialEditorKeyword)]
+        [ContextMenu("Pivot_GetPivotIndex", "Pivot\\GetPivotIndex", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Pivot_GetPivotIndex(Vector2 uv, Vector2 texSize, out float index)
         {
             index = 0;
@@ -427,7 +427,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
         [Rtti.Meta]
         [TtHLSLProvider(Name = "Pivot_GetParentPivotData")]
-        [ContextMenu("Pivot_GetParentPivotData", "Pivot\\GetParentPivotData", UMaterialGraph.MaterialEditorKeyword)]
+        [ContextMenu("Pivot_GetParentPivotData", "Pivot\\GetParentPivotData", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Pivot_GetParentPivotData(float parentIdx, Vector2 texSize, float currentIdx, out Vector2 parentUV, out float isChild)
         {
             parentUV = Vector2.Zero;
@@ -436,7 +436,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
         [Rtti.Meta]
         [TtHLSLProvider(Name = "Pivot_GetHierarchyData")]
-        [ContextMenu("Pivot_GetHierarchyData", "Pivot\\GetHierarchyData", UMaterialGraph.MaterialEditorKeyword)]
+        [ContextMenu("Pivot_GetHierarchyData", "Pivot\\GetHierarchyData", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Pivot_GetHierarchyData(float pivotDepth, Vector2 pivot1UV, Vector2 pivot2UV, Vector2 pivot3UV, Vector2 pivot4UV, out Vector2 rootUV, out Vector2 mainBranchUV, out Vector2 smallBranchUV, out Vector2 leaveUV, out float mainBranchMask, out float smallBranchMask, out float leaveMask)
         {
             rootUV = mainBranchUV = smallBranchUV = leaveUV = Vector2.Zero;
@@ -445,7 +445,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
         [Rtti.Meta]
         [TtHLSLProvider(Name = "Pivot_WindAnimation")]
-        [ContextMenu("Pivot_WindAnimation", "Pivot\\WindAnimation", UMaterialGraph.MaterialEditorKeyword)]
+        [ContextMenu("Pivot_WindAnimation", "Pivot\\WindAnimation", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Pivot_WindAnimation(Vector3 prePos,
             Var.Texture2D posTex, Var.Texture2D xTex, Var.SamplerState samp, Vector2 uv,
             float mask, Var.Texture2D windTex, float scale, float speedX, Vector3 windAxisX, float speedY, Vector3 windAxisY,
@@ -459,7 +459,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
         [Rtti.Meta]
         [TtHLSLProvider(Name = "Pivot_WindAnimation_Sway2")]
-        [ContextMenu("Pivot_WindAnimation_Sway2", "Pivot\\WindAnimation_Sway2", UMaterialGraph.MaterialEditorKeyword)]
+        [ContextMenu("Pivot_WindAnimation_Sway2", "Pivot\\WindAnimation_Sway2", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Pivot_WindAnimation_Sway2(Vector3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, Vector3 localPos, float time, out Vector3 localVertexOffset)
         {
             localVertexOffset = Vector3.Zero;
@@ -467,7 +467,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
         [Rtti.Meta]
         [TtHLSLProvider(Name = "Pivot_WindAnimation_Sway3")]
-        [ContextMenu("Pivot_WindAnimation_Sway3", "Pivot\\WindAnimation_Sway3", UMaterialGraph.MaterialEditorKeyword)]
+        [ContextMenu("Pivot_WindAnimation_Sway3", "Pivot\\WindAnimation_Sway3", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Pivot_WindAnimation_Sway3(Vector3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, Vector3 localPos, float time, float windSwayEffectOffset, float windSwayEffectFalloff, out Vector3 localVertexOffset)
         {
             localVertexOffset = Vector3.Zero;
@@ -475,7 +475,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
         [Rtti.Meta]
         [TtHLSLProvider(Name = "Pivot_WindAnimation_Rustle")]
-        [ContextMenu("Pivot_WindAnimation_Rustle", "Pivot\\WindAnimation_Rustle", UMaterialGraph.MaterialEditorKeyword)]
+        [ContextMenu("Pivot_WindAnimation_Rustle", "Pivot\\WindAnimation_Rustle", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Pivot_WindAnimation_Rustle(float windSpeed, float windIntensity, Vector3 localPos, float time, out Vector3 localVertexOffset)
         {
             localVertexOffset = Vector3.Zero;
@@ -483,7 +483,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
         [Rtti.Meta]
         [TtHLSLProvider(Name = "Pivot_Gradient")]
-        [ContextMenu("Pivot_Gradient", "Pivot\\Pivot_Gradient", UMaterialGraph.MaterialEditorKeyword)]
+        [ContextMenu("Pivot_Gradient", "Pivot\\Pivot_Gradient", TtMaterialGraph.MaterialEditorKeyword)]
         public static float Pivot_Gradient(Vector3 worldPos, float gradientOffset, float gradientFallout)
         {
             return 0;
@@ -491,7 +491,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
         [Rtti.Meta]
         [TtHLSLProvider(Name = "Pivot_LeafNormal")]
-        [ContextMenu("Pivot_LeafNormal", "Pivot\\Pivot_LeafNormal", UMaterialGraph.MaterialEditorKeyword)]
+        [ContextMenu("Pivot_LeafNormal", "Pivot\\Pivot_LeafNormal", TtMaterialGraph.MaterialEditorKeyword)]
         public static Vector3 Pivot_LeafNormal(bool frontFace, Vector3 normal)
         {
             return Vector3.UnitY;
