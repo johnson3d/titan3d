@@ -31,7 +31,7 @@ namespace EngineNS.Animation.Asset
         public partial class ImportAttribute
         {
             List<TtAnimImprotSetting> AnimImprotSettings = new ();
-            public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser)
+            public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.TtContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)
                     ImGuiAPI.OpenPopup($"Import Animation", ImGuiPopupFlags_.ImGuiPopupFlags_None);

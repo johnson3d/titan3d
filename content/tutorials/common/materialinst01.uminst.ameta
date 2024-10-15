@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="8348db13-900a-40c8-962f-0a218f2fc8dd" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/materialinst01.uminst,8348db13-900a-40c8-962f-0a218f2fc8dd" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterialInstance&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
@@ -12,7 +13,7 @@
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Value="Game,tutorials/common/material01.material,3b3ed3a2-1472-4b10-8e62-33910be339e8" />
-    <e_1 Value="Game,tutorials/common/texture01.srv,d25c4a3e-e46e-4a75-82ef-c81f30f082c6" />
+    <e_1 Value="Engine,texture/checkboard.srv,560770de-c559-4718-93cb-bb4e1995176f" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
 </Root>

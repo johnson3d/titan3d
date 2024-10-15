@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Mesh.TtMeshPrimitivesAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="806cddec-b8ad-40be-906e-3c7306dd03b7" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/brdf_test/sm_chair.vms,806cddec-b8ad-40be-906e-3c7306dd03b7" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMeshPrimitives&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

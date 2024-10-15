@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_10761723968622468210 Type="EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCallMaterialFunctionNode@EngineCore">
+  <Label Type="System.String@Unknown" Order="0" />
+  <MethodDeclString Type="System.String@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeId Type="System.Guid@Unknown" Order="0" />
+  <Position Type="EngineNS.Vector2@EngineCore" Order="0" />
+  <FunctionName Type="EngineNS.RName@EngineCore" Order="1" />
+  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Order="1" />
+</Hash_10761723968622468210>

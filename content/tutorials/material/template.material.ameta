@@ -11,8 +11,9 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Value="Game,tutorials/material/mtl_texture0.srv,45db650e-c59c-4c29-a21c-1daf30b98529" />
+    <e_1 Value="Game,tutorials/material/mat_func0.mtlfunc,8df77479-6f69-4965-8ef1-a406a7bafed2" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

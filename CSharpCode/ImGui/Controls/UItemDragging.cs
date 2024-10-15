@@ -62,7 +62,7 @@ namespace EngineNS.EGui.Controls
             public Vector2 Size;
             public IO.IAssetMeta AMeta;
             public System.Action OnRelease;
-            public UContentBrowser Browser;
+            public TtContentBrowser Browser;
         }
 
         protected UItem CurItem;

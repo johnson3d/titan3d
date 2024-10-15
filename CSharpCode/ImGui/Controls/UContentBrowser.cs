@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.EGui.Controls
 {
-    public partial class UContentBrowser : IRootForm, EGui.IPanel
+    public partial class TtContentBrowser : IRootForm, EGui.IPanel
     {
         bool mVisible = true;
         public bool Visible { get => mVisible; set => mVisible = value; }
@@ -244,7 +244,7 @@ namespace EngineNS.EGui.Controls
 
                     if (MacrossBase != null && ext == Bricks.CodeBuilder.TtMacross.AssetExt)
                     {
-                        var ameta1 = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType)) as Bricks.CodeBuilder.UMacrossAMeta;
+                        var ameta1 = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType)) as Bricks.CodeBuilder.TtMacrossAMeta;
                         if (ameta1 == null)
                             continue;
 

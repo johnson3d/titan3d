@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_10263017739567139043 Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialFunction@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <GraphXMLString Type="System.String@Unknown" Order="0" />
+  <HLSLCode Type="System.String@Unknown" Order="0" />
+  <MethodMeta Type="EngineNS.Rtti.TtClassMeta.TtMethodMeta@EngineCore" Order="0" />
+</Hash_10263017739567139043>

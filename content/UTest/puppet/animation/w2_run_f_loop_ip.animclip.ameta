@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Animation.Asset.TtAnimationClipAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="5db561c7-7adf-4880-ad1e-f213caae7e90" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/puppet/animation/w2_run_f_loop_ip.animclip,5db561c7-7adf-4880-ad1e-f213caae7e90" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Animation.Asset.TtAnimationClip&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

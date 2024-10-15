@@ -8,15 +8,16 @@ using NPOI.POIFS.Crypt.Dsig;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
-    public partial class UMaterialOutput : UNodeBase
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialOutput@EngineCore", "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialOutput" })]
+    public partial class TtMaterialOutput : UNodeBase
     {
-        public static UMaterialOutput NewNode(UMaterialGraph graph)
+        public static TtMaterialOutput NewNode(TtMaterialGraph graph)
         {
-            var result = new UMaterialOutput();
+            var result = new TtMaterialOutput();
             result.UserData = graph;
             return result;
         }
-        public UMaterialOutput()
+        public TtMaterialOutput()
         {
             Icon.Size = new Vector2(25, 25);
             Icon.Color = 0xFF40FF40;
@@ -192,10 +193,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
         public TtMethodDeclaration PSFunction { get; } = new TtMethodDeclaration();
         public TtMethodDeclaration VSFunction { get; } = new TtMethodDeclaration();
-        public List<TtVariableDeclaration> UniformVars { get; } = new List<TtVariableDeclaration>();
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
-            var graph = data.NodeGraph as UMaterialGraph;
+            var graph = data.NodeGraph as TtMaterialGraph;
+            graph.UniformVars.Clear();
 
             PSFunction.MethodName = "DO_PS_MATERIAL_IMPL";
             PSFunction.Arguments.Clear();
@@ -214,7 +215,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     VariableName = "mtl",
                 });
             PSFunction.LocalVariables.Clear();
-            UniformVars.Clear();
+            
             PSFunction.MethodBody.Sequence.Clear();
             data.CurrentStatements = PSFunction.MethodBody.Sequence;
             data.MethodDec = PSFunction;

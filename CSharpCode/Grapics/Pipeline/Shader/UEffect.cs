@@ -34,7 +34,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
 
             }
-            public const uint CurrentEffectVersion = 5;
+            public const uint CurrentEffectVersion = 6;
             [Rtti.Meta()]
             public uint EffectVersion { get; set; } = CurrentEffectVersion;
             [Rtti.Meta()]

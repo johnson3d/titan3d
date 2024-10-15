@@ -36,6 +36,7 @@
 - - **[TextureEditor](editor/TextureEditor.md)**
 - - **[MeshPrimitiveEditor](editor/MeshPrimitiveEditor.md)**
 - - **[MaterialEditor](editor/MaterialEditor.md)**
+- - **[MaterialFunctionEditor](editor/MaterialFunctionEditor.md)**
 - - **[MaterialInstanceEditor](editor/MaterialInstanceEditor.md)**
 - - **[MaterialedMeshEditor](editor.MaterialedMeshEditor.md)**
 - - **[NebulaParticleEditor](editor/NebulaParticleEditor.md)**

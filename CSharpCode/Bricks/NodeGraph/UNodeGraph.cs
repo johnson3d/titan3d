@@ -183,6 +183,25 @@ namespace EngineNS.Bricks.NodeGraph
             }
             return null;
         }
+        public T FindFirstTypedNode<T>(string name, bool findInSubGraphs = true) where T : UNodeBase
+        {
+            for (int i = 0; i < Nodes.Count; i++)
+            {
+                if (Nodes[i].GetType() != typeof(T))
+                    continue;
+                if (Nodes[i].Name == name)
+                    return Nodes[i] as T;
+            }
+            if (findInSubGraphs == false || SubGraphs == null)
+                return null;
+            foreach (var subGraph in SubGraphs.Values)
+            {
+                var node = subGraph.FindFirstTypedNode<T>(name, findInSubGraphs);
+                if (node != null) 
+                    return node;
+            }
+            return null;
+        }
         public UNodeBase FindNode(in Guid id, bool findInSubGraphs = true)
         {
             for(int i=0; i<Nodes.Count; i++)

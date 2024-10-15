@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_18367914090108366048 Type="EngineNS.Rtti.TtClassMeta.TtMethodMeta.TtParamMeta@EngineCore">
+  <ArgumentAttribute Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Order="0" />
+  <IsDelegate Type="System.Boolean@Unknown" Order="0" />
+  <IsParamArray Type="System.Boolean@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <ParameterType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Order="0" />
+  <ParamIndex Type="System.Int32@Unknown" Order="0" />
+  <DefaultValueString Type="System.String@Unknown" Order="1" />
+</Hash_18367914090108366048>

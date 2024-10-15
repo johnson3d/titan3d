@@ -46,7 +46,7 @@ namespace EngineNS.Graphics.Mesh
         {
             //TtMeshImprotSetting MeshImprotSetting = new TtMeshImprotSetting();
             List<TtMeshImprotSetting> MeshImprotSettings = new List<TtMeshImprotSetting>();
-            public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.UContentBrowser ContentBrowser)
+            public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.TtContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)
                     ImGuiAPI.OpenPopup($"Import MeshPrimitives", ImGuiPopupFlags_.ImGuiPopupFlags_None);

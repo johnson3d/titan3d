@@ -35,8 +35,14 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         }
         public override void AfterConstructElements(ref FGraphElementRenderingContext context)
         {
-            From = context.DescriptionsElement[ExecutionLineDescription.FromId];
-            To = context.DescriptionsElement[ExecutionLineDescription.ToId];
+            if(context.DescriptionsElement.ContainsKey(ExecutionLineDescription.FromId))
+            {
+                From = context.DescriptionsElement[ExecutionLineDescription.FromId];
+            }
+            if(context.DescriptionsElement.ContainsKey(ExecutionLineDescription.ToId))
+            {
+                To = context.DescriptionsElement[ExecutionLineDescription.ToId];
+            }
             base.AfterConstructElements(ref context);
         }
     }
@@ -318,6 +324,9 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             var cmdlist = ImGuiAPI.GetWindowDrawList();
             var fromPin = line.From as TtGraphElement_ExecutionPin;
             var toPin = line.To as TtGraphElement_ExecutionPin;
+            if (fromPin == null || toPin == null)
+                return;
+
             var nodeStart = context.ViewPortTransform(fromPin.Icon.AbsCenter);
             var nodeEnd = context.ViewPortTransform(toPin.Icon.AbsCenter);
             cmdlist.AddLine(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1,1,1,1)), 5);

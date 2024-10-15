@@ -127,7 +127,7 @@ namespace EngineNS.DesignMacross
                 mSelectedType = null;
             }
 
-            public override unsafe bool OnDraw(UContentBrowser contentBrowser)
+            public override unsafe bool OnDraw(TtContentBrowser contentBrowser)
             {
                 //base.OnDraw(contentBrowser);
 

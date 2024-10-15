@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Mesh.TtMeshPrimitivesAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="140ae0dd-dbb9-4c13-aa81-8ebb57ecf336" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/elf/tutor_elf_majestic.vms,140ae0dd-dbb9-4c13-aa81-8ebb57ecf336" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMeshPrimitives&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

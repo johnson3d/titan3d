@@ -2,6 +2,7 @@
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Design.ConnectingLine;
+using EngineNS.DesignMacross.Design.Statement;
 using EngineNS.Rtti;
 using Org.BouncyCastle.Asn1.X509.Qualified;
 
@@ -46,14 +47,37 @@ namespace EngineNS.DesignMacross.Design.Expressions
             {
                 System.Diagnostics.Debug.Assert(leftLinkedDataPin is TtDataOutPinDescription);
                 FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription };
-                expression.Left = (leftLinkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
+                if(leftLinkedDataPin.Parent is TtExpressionDescription expressionDescription)
+                {
+                    expression.Left = (leftLinkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
+                }
+                if(leftLinkedDataPin.Parent is TtStatementDescription statementDescription)
+                {
+                    expression.Left = (leftLinkedDataPin.Parent as TtStatementDescription).BuildExpressionForOutPin(leftLinkedDataPin);
+                }
+            }
+            else
+            {
+                expression.Left = new TtDefaultValueExpression() { Type = new TtTypeReference(dataInPin_Left.TypeDesc) };
             }
             var rightLinkedDataPin = methodDesc.GetLinkedDataPin(dataInPin_Right);
             if (rightLinkedDataPin != null)
             {
                 System.Diagnostics.Debug.Assert(rightLinkedDataPin is TtDataOutPinDescription);
                 FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription };
-                expression.Right = (rightLinkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
+                if (rightLinkedDataPin.Parent is TtExpressionDescription expressionDescription)
+                {
+                    expression.Right = (rightLinkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
+                }
+                if (rightLinkedDataPin.Parent is TtStatementDescription statementDescription)
+                {
+                    expression.Right = (rightLinkedDataPin.Parent as TtStatementDescription).BuildExpressionForOutPin(rightLinkedDataPin);
+                }
+                
+            }
+            else
+            {
+                expression.Right = new TtDefaultValueExpression() { Type = new TtTypeReference(dataInPin_Right.TypeDesc) };
             }
             return expression;
         }

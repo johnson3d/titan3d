@@ -82,7 +82,7 @@ namespace EngineNS.Bricks.Font
                 var noused = PGAsset.Initialize();
                 PGAsset.Target = mDesc;
             }
-            public override unsafe bool OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
+            public override unsafe bool OnDraw(EGui.Controls.TtContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)
                     ImGuiAPI.OpenPopup($"Import font", ImGuiPopupFlags_.ImGuiPopupFlags_None);
@@ -422,7 +422,7 @@ namespace EngineNS.Bricks.Font
     {
         [Rtti.Meta]
         [Bricks.CodeBuilder.ShaderNode.Control.TtHLSLProvider(Name = "GetFontSDF")]
-        [Bricks.CodeBuilder.ContextMenu("font", "Bricks\\Font\\GetFontSDF", Bricks.CodeBuilder.ShaderNode.UMaterialGraph.MaterialEditorKeyword)]
+        [Bricks.CodeBuilder.ContextMenu("font", "Bricks\\Font\\GetFontSDF", Bricks.CodeBuilder.ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
         public static Vector4 GetFontSDF(int effect, Vector3 baseColor, Vector3 borderColor, float alpha, float lowThreshold = 0, float highThreshold = 0.8f, float smoothValue = 0.5f)
         {
             return Vector4.Zero;

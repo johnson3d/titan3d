@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using Assimp;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.NodeGraph;
 
@@ -137,10 +138,45 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     continue;
                 ameta.AddReferenceAsset(i.Value);
             }
+            ameta.RefAssetRNames.AddRange(this.RefMaterialFunctions);
         }
+        [Rtti.Meta]
+        public List<RName> RefMaterialFunctions { get; set; } = new List<RName>();
         [Rtti.Meta]
         public virtual void SaveAssetTo(RName name)
         {
+            var MaterialGraph = new Bricks.CodeBuilder.ShaderNode.TtMaterialGraph();
+            var xml = IO.TtFileManager.LoadXmlFromString(this.GraphXMLString);
+            if (xml != null)
+            {
+                var node = xml.LastChild as System.Xml.XmlElement;
+                var thisTypeStr = node.GetAttribute("Type");
+                var typeDesc = Rtti.TtTypeDesc.TypeOf(thisTypeStr);
+                if (typeDesc == Rtti.TtTypeDescGetter<Bricks.CodeBuilder.ShaderNode.TtMaterialEditor>.TypeDesc)
+                {
+                    object pThis = new Bricks.CodeBuilder.ShaderNode.TtMaterialEditor();
+                    IO.SerializerHelper.ReadObjectMetaFields(this, node, ref pThis, null);
+                    MaterialGraph = (pThis as Bricks.CodeBuilder.ShaderNode.TtMaterialEditor).MaterialGraph;
+                    {   
+                        var xml2 = new System.Xml.XmlDocument();
+                        var xmlRoot2 = xml2.CreateElement($"Root", xml2.NamespaceURI);
+                        xml2.AppendChild(xmlRoot2);
+                        IO.SerializerHelper.WriteObjectMetaFields(xml2, xmlRoot2, MaterialGraph);
+                        var xmlText = IO.TtFileManager.GetXmlText(xml2);
+                        this.GraphXMLString = xmlText;
+                    }
+                }
+                else
+                {
+                    object pThis = MaterialGraph;
+                    IO.SerializerHelper.ReadObjectMetaFields(this, node, ref pThis, null);
+                }
+            }
+            
+            string code = "";
+            var MaterialOutput = MaterialGraph.FindFirstTypedNode<Bricks.CodeBuilder.ShaderNode.TtMaterialOutput>("Output", false);
+            GenMateralGraphCode(ref code, this, new UHLSLCodeGenerator(), MaterialGraph, MaterialOutput);
+
             var ameta = this.GetAMeta();
             if (ameta != null)
             {
@@ -233,10 +269,22 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             return null;
         }
-        public static string GenMateralGraphCode(TtMaterial Material, UHLSLCodeGenerator mHLSLCodeGen, 
-            Bricks.CodeBuilder.ShaderNode.UMaterialGraph MaterialGraph, 
-            Bricks.CodeBuilder.ShaderNode.UMaterialOutput MaterialOutput)
+        public static void GenMateralGraphCode(ref string code, TtMaterial Material, UHLSLCodeGenerator mHLSLCodeGen, 
+            Bricks.CodeBuilder.ShaderNode.TtMaterialGraph MaterialGraph, 
+            Bricks.CodeBuilder.ShaderNode.TtMaterialOutput MaterialOutput)
         {
+            Material.RefMaterialFunctions.Clear();
+            foreach (var i in MaterialGraph.Nodes)
+            {
+                var f = i as Bricks.CodeBuilder.ShaderNode.Control.TtCallMaterialFunctionNode;
+                if (f != null)
+                {
+                    Material.RefMaterialFunctions.Add(f.FunctionName);
+
+                    f.MaterialFunction.WriteRefHLSLCode(ref code);
+                }
+            }
+
             Material.UsedSrView.Clear();
             Material.UsedUniformVars.Clear();
             Material.UsedSamplerStates.Clear();
@@ -252,7 +300,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 CodeGen = mHLSLCodeGen,
             };
             MaterialOutput.BuildStatements(null, ref data);
-            string code = "";
             var incGen = mHLSLCodeGen.GetCodeObjectGen(Rtti.TtTypeDescGetter<TtIncludeDeclaration>.TypeDesc);
             TtCodeGeneratorData genData = new TtCodeGeneratorData()
             {
@@ -305,8 +352,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     Material.PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal);
             }
             Material.UpdateShaderCode(false);
-
-            return code;
         }
         [Flags]
         public enum InnerFlags : UInt32
@@ -578,9 +623,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             mMaterialHash = GetHash();
         }
-        [Browsable(false)]
         public NxRHI.TtShaderCode DefineCode { get; } = new NxRHI.TtShaderCode();
-        [Browsable(false)]
         public NxRHI.TtShaderCode SourceCode { get; } = new NxRHI.TtShaderCode();
         [Category("Option")]
         public string DefineCodeText
@@ -892,6 +935,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             public string VarType { get; set; }
             [Category("Option")]
             [ReadOnly(true)]
+            [Rtti.Meta]
             public string Name { get; set; }
             string mValue;
             [Rtti.Meta]

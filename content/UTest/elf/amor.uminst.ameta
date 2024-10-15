@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="9fe5f14c-4e18-4f47-8bcf-e1a9d047755b" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/elf/amor.uminst,9fe5f14c-4e18-4f47-8bcf-e1a9d047755b" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterialInstance&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
@@ -11,11 +12,8 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="4">
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Value="Game,utest/puppet/pbr_role.material,13e877a1-aba6-4b7b-83a9-a852d111baff" />
-    <e_1 Value="Game,utest/elf/elf_majestic_armor_06_dn.srv,b7d2b6b2-a4eb-42e8-aa5f-f9913e1cc452" />
-    <e_2 Value="Game,utest/elf/elf_majestic_armor_04_no.srv,945ca0b7-5a39-4827-aabc-7ab45662ef77" />
-    <e_3 Value="Game,utest/puppet/texture/puppet_ao.srv,2c7867fa-102a-4c8f-bb61-ddc45b08b8e8" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
 </Root>

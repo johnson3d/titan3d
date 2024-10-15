@@ -179,7 +179,7 @@ namespace EngineNS.NxRHI
             }
             //cmdlist.AddText(in start, 0xFFFFFFFF, "texture", null);
         }
-        protected override void OnDrawPopMenu(EGui.Controls.UContentBrowser ContentBrowser)
+        protected override void OnDrawPopMenu(EGui.Controls.TtContentBrowser ContentBrowser)
         {
             base.OnDrawPopMenu(ContentBrowser);
 
@@ -741,7 +741,7 @@ namespace EngineNS.NxRHI
                     }
                 }
             }
-            public override unsafe bool OnDraw(EGui.Controls.UContentBrowser ContentBrowser)
+            public override unsafe bool OnDraw(EGui.Controls.TtContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)
                     ImGuiAPI.OpenPopup($"Import SRV", ImGuiPopupFlags_.ImGuiPopupFlags_None);

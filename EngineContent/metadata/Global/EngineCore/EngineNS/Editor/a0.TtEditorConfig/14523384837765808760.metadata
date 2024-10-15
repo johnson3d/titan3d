@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_14523384837765808760 Type="EngineNS.Editor.TtEditorConfig@EngineCore">
+  <FontIconName Type="EngineNS.RName@EngineCore" Order="0" />
+  <FontSDFBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <GameModuleName Type="System.String@Unknown" Order="0" />
+  <GameProject Type="System.String@Unknown" Order="0" />
+  <MacrossIconName Type="EngineNS.RName@EngineCore" Order="0" />
+  <MaterialBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <MaterialFunctionBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <MaterialInstanceBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <MaterialMeshBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <MeshPrimitivesBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <NebulaBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <PgcBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <PhyMaterialIconName Type="EngineNS.RName@EngineCore" Order="0" />
+  <PrefabBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <RenderPolicyBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <SceneBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+  <TextureBoderColor Type="EngineNS.Color4b@EngineCore" Order="0" />
+</Hash_14523384837765808760>

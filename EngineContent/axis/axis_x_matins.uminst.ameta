@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="7e8c0d08-c43e-47db-9402-c56a1fcc7fa6" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,axis/axis_x_matins.uminst,7e8c0d08-c43e-47db-9402-c56a1fcc7fa6" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterialInstance&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

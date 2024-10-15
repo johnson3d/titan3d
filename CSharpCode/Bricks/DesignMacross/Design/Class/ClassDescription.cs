@@ -16,6 +16,7 @@ namespace EngineNS.DesignMacross.Design
         [Rtti.Meta]
         public Vector2 Location { get; set; }
         public string ClassName { get => Name; }
+        public string ClassFullName { get => Namespace + "." + ClassName; }
         [Rtti.Meta]
         public TtCommentStatement Comment { get; set; }
         [Rtti.Meta]

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.RenderPolicyEditor.TtRenderPolicyAssetAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="961076e2-5dce-427f-a9f0-ff47c91d13e3" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/terrain/height2flowmap.rpolicy,961076e2-5dce-427f-a9f0-ff47c91d13e3" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.RenderPolicyEditor.URenderPolicyAsset&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

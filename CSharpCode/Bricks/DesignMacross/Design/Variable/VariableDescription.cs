@@ -17,15 +17,15 @@ namespace EngineNS.DesignMacross.Design
         public IDescription Parent { get; set; }
         [Rtti.Meta]
         public Guid Id { get; set; } = Guid.NewGuid();
-        [Rtti.Meta]
+        [Rtti.Meta, Category("Option")]
         public string Name { get; set; } = "Variable";
         public string VariableName { get => TtASTBuildUtil.VariableNamePrefix + Name; }
-        [Rtti.Meta]
+        [Rtti.Meta, Category("Option")]
         public TtTypeReference VariableType { get; set; } = new TtTypeReference(TtTypeDesc.TypeOf<bool>());
-        [Rtti.Meta]
-        public TtExpressionBase InitValue { get; set; }
-        [Rtti.Meta]
-        public TtCommentStatement Comment { get; set; }
+        [Rtti.Meta, Category("Option")]
+        public TtExpressionBase InitValue { get; set; } = new TtPrimitiveExpression(TtTypeDesc.TypeOf<bool>(), (object)false);
+        [Rtti.Meta, Category("Option")]
+        public TtCommentStatement Comment { get; set; } = new TtCommentStatement("This is a Variable");
         [Rtti.Meta]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
 

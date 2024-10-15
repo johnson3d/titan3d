@@ -15,7 +15,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
         public Guid Id { get; set; } = Guid.NewGuid();
         [Rtti.Meta, Category("Option")]
         public virtual string Name { get; set; } = "ExpressionDescription";
-        public IDescription Parent { get; set; }
+        public virtual IDescription Parent { get; set; }
 
         [Rtti.Meta]
         public List<TtExecutionInPinDescription> ExecutionInPins { get; set; } = new();

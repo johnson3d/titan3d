@@ -36,9 +36,9 @@ namespace EngineNS.Editor
         //        ImGuiAPI.CloseCurrentPopup();
         //    },
         //};
-        public static EGui.Controls.UContentBrowser NewPopupContentBrowser()
+        public static EGui.Controls.TtContentBrowser NewPopupContentBrowser()
         {
-            var result = new EGui.Controls.UContentBrowser()
+            var result = new EGui.Controls.TtContentBrowser()
             {
                 DrawInWindow = false,
                 CreateNewAssets = false,

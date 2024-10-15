@@ -60,6 +60,17 @@ namespace EngineNS.Animation.Macross
 
             return methodDeclaration;
         }
+        public static TtMethodDeclaration CreateStateMachineOverridedTickMethodStatement()
+        {
+            var args = new List<TtMethodArgumentDeclaration>
+            {
+                TtASTBuildUtil.CreateMethodArgumentDeclaration("elapseSecond", new(TtTypeDesc.TypeOf<float>()), EMethodArgumentAttribute.Default),
+                TtASTBuildUtil.CreateMethodArgumentDeclaration("context", new(TtTypeDesc.TypeOf<TtAnimStateMachineContext>()), EMethodArgumentAttribute.Default)
+            };
+            var methodDeclaration = TtASTBuildUtil.CreateMethodDeclaration("Tick", null, args, true);
+
+            return methodDeclaration;
+        }
 
         public static void CreateCenterDataAssignStatement(IDesignableVariableDescription description, TtMethodDeclaration method)
         {
@@ -75,6 +86,15 @@ namespace EngineNS.Animation.Macross
                 null, new TtBaseReferenceExpression(),
                 new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression("context") });
             baseInitializeInvoke.IsAsync = true;
+            method.MethodBody.Sequence.Add(baseInitializeInvoke);
+        }
+        public static void CreateBaseTickInvokeStatement(TtMethodDeclaration method)
+        {
+            var baseInitializeInvoke = new TtMethodInvokeStatement("Tick",
+                null, new TtBaseReferenceExpression(),
+                new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression("elapseSecond") },
+                new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression("context"), OperationType = EMethodArgumentAttribute.In });
+            baseInitializeInvoke.IsAsync = false;
             method.MethodBody.Sequence.Add(baseInitializeInvoke);
         }
     }

@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.IO
 {
-    public class UAssetOperator
+    public class TtAssetOperator
     {
-        public struct UAssetModifier
+        public struct FAssetModifier
         {
             public RName Source;
             public string SourcePath;
@@ -14,7 +14,7 @@ namespace EngineNS.IO
             public string TargetPath;
             public RName.ERNameType TargetType;
         }
-        public List<UAssetModifier> Modifiers { get; set; } = new List<UAssetModifier>();
+        public List<FAssetModifier> Modifiers { get; set; } = new List<FAssetModifier>();
         public Dictionary<RName, IAsset> mDirtyAssets = new Dictionary<RName, IAsset>();
         public bool AddModifier(RName source, string targetPath, RName.ERNameType targetType)
         {
@@ -33,7 +33,7 @@ namespace EngineNS.IO
                 return false;
             }
 
-            UAssetModifier mdf = new UAssetModifier();
+            FAssetModifier mdf = new FAssetModifier();
             mdf.Source = source;
             mdf.SourcePath = source.Name;
             mdf.SourceType = source.RNameType;
@@ -103,7 +103,7 @@ namespace EngineNS.UTest
         {
             Action action = async () =>
             {
-                var assetOp = new IO.UAssetOperator();
+                var assetOp = new IO.TtAssetOperator();
                 var rn = RName.GetRName(@"axis\axis_focus_matins.uminst", RName.ERNameType.Game);
                 var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(rn);
                 if (ameta != null)

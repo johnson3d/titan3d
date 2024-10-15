@@ -216,7 +216,7 @@ namespace EngineNS.Editor.Forms
         public GamePlay.Scene.TtScene Scene;
         public USceneEditorViewport PreviewViewport = new USceneEditorViewport();
         public UWorldOutliner mWorldOutliner;
-        EGui.Controls.UContentBrowser mContentBrowser = new EGui.Controls.UContentBrowser();
+        EGui.Controls.TtContentBrowser mContentBrowser = new EGui.Controls.TtContentBrowser();
 
         public EGui.Controls.PropertyGrid.PropertyGrid NodeInspector = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid ScenePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
@@ -902,7 +902,7 @@ namespace EngineNS.Editor.Forms
         }
         unsafe void ContentBrowserDragDropPreview()
         {
-            if (UContentBrowser.IsInDragDropMode)
+            if (TtContentBrowser.IsInDragDropMode)
             {
                 var payload = ImGuiAPI.GetDragDropPayload();
                 if (payload == null)
@@ -915,7 +915,7 @@ namespace EngineNS.Editor.Forms
                 var max = ImGuiAPI.GetWindowContentRegionMax() + pos;
                 var draggingInViewport = ImGuiAPI.IsMouseHoveringRect(in min, in max, true);
                 var handle = GCHandle.FromIntPtr((IntPtr)(payload->Data));
-                var dragData = (UContentBrowser.DragDropData)handle.Target;
+                var dragData = (TtContentBrowser.DragDropData)handle.Target;
                 for (int i = 0; i < dragData.Metas.Length; i++)
                 {
                     dragData.Metas[i].DraggingInViewport = draggingInViewport;
@@ -954,7 +954,7 @@ namespace EngineNS.Editor.Forms
                     if(payload != null)
                     {
                         var handle = GCHandle.FromIntPtr((IntPtr)(payload->Data));
-                        var dragData = (UContentBrowser.DragDropData)handle.Target;
+                        var dragData = (TtContentBrowser.DragDropData)handle.Target;
                         for(int i=0; i<dragData.Metas.Length; i++)
                         {
                             _ = dragData.Metas[i].OnDragTo(PreviewViewport);

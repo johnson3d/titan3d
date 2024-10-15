@@ -177,6 +177,16 @@ namespace EngineNS.Rtti
         public bool IsRemoved = false;
         public Type SystemType;
         public TtAssemblyDesc Assembly;
+
+        public bool IsClass
+        {
+            get
+            {
+                if (SystemType == null)
+                    return false;
+                return SystemType.IsClass;
+            }
+        }
         public bool IsRefType
         {
             get

@@ -4,37 +4,36 @@ using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
 using System.Linq;
 using EngineNS.EGui.Controls;
+using System.ComponentModel;
+using EngineNS.Graphics.Pipeline.Shader;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
-    public partial class UMaterialGraph : UNodeGraph
+    public partial class TtMaterialGraphBase : UNodeGraph
     {
         public const string MaterialEditorKeyword = "Material";
-
-        public UMaterialGraph()
+        public TtMaterialGraphBase()
         {
             UpdateCanvasMenus();
             UpdateNodeMenus();
             UpdatePinMenus();
         }
-        public TtMaterialEditor ShaderEditor;
-
         public override void UpdateCanvasMenus()
         {
             CanvasMenus.SubMenuItems.Clear();
             CanvasMenus.Text = "Canvas";
-            foreach(var service in Rtti.TtTypeDescManager.Instance.Services.Values)
+            foreach (var service in Rtti.TtTypeDescManager.Instance.Services.Values)
             {
-                foreach(var typeDesc in service.Types.Values)
+                foreach (var typeDesc in service.Types.Values)
                 {
                     var atts = typeDesc.SystemType.GetCustomAttributes(typeof(ContextMenuAttribute), true);
-                    if(atts.Length > 0)
+                    if (atts.Length > 0)
                     {
                         var parentMenu = CanvasMenus;
                         var att = atts[0] as ContextMenuAttribute;
                         if (!att.HasKeyString(MaterialEditorKeyword))
                             continue;
-                        for(var menuIdx = 0; menuIdx < att.MenuPaths.Length; menuIdx++)
+                        for (var menuIdx = 0; menuIdx < att.MenuPaths.Length; menuIdx++)
                         {
                             var menuStr = att.MenuPaths[menuIdx];
                             var menuName = GetMenuName(menuStr);
@@ -62,36 +61,36 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             //var kls = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(typeof(Control.HLSLMethod).FullName);
             var methods = TtEngine.Instance.HLSLMethodManager.Methods;
             var funcMenu = CanvasMenus.AddMenuItem("Function", null, null);
-            foreach(var i in methods.Values)
+            foreach (var i in methods.Values)
             {
                 var attrs = i.GetMethod().GetCustomAttributes(typeof(Bricks.CodeBuilder.ShaderNode.Control.UserCallNodeAttribute), false);
                 var menuAtts = i.GetMethod().GetCustomAttributes(typeof(ContextMenuAttribute), true);
                 TtMenuItem.FMenuAction action = (TtMenuItem item, object sender) =>
-                                {
-                                    Control.CallNode node;
-                                    if (attrs.Length > 0)
-                                    {
-                                        var data = (attrs[0] as Bricks.CodeBuilder.ShaderNode.Control.UserCallNodeAttribute);
-                                        node = Rtti.TtTypeDescManager.CreateInstance(data.CallNodeType, null) as Control.CallNode;
-                                        node.Initialize(i);
-                                    }
-                                    else
-                                    {
-                                        node = Control.CallNode.NewMethodNode(i);
-                                    }
-                                    node.Name = i.MethodName;
-                                    node.UserData = this;
-                                    node.Position = PopMenuPosition;
-                                    SetDefaultActionForNode(node);
-                                    this.AddNode(node);
-                                };
-                if(menuAtts.Length > 0)
+                {
+                    Control.CallNode node;
+                    if (attrs.Length > 0)
+                    {
+                        var data = (attrs[0] as Bricks.CodeBuilder.ShaderNode.Control.UserCallNodeAttribute);
+                        node = Rtti.TtTypeDescManager.CreateInstance(data.CallNodeType, null) as Control.CallNode;
+                        node.Initialize(i);
+                    }
+                    else
+                    {
+                        node = Control.CallNode.NewMethodNode(i);
+                    }
+                    node.Name = i.MethodName;
+                    node.UserData = this;
+                    node.Position = PopMenuPosition;
+                    SetDefaultActionForNode(node);
+                    this.AddNode(node);
+                };
+                if (menuAtts.Length > 0)
                 {
                     var parentMenu = funcMenu;
                     var att = menuAtts[0] as ContextMenuAttribute;
                     if (!att.HasKeyString(MaterialEditorKeyword))
                         continue;
-                    for(var menuIdx = 0; menuIdx < att.MenuPaths.Length; menuIdx++)
+                    for (var menuIdx = 0; menuIdx < att.MenuPaths.Length; menuIdx++)
                     {
                         var menuStr = att.MenuPaths[menuIdx];
                         var menuName = GetMenuName(menuStr);
@@ -108,10 +107,26 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     funcMenu.AddMenuItem(i.MethodName, null, action);
                 }
             }
+            var mtlFuncMenu = CanvasMenus.AddMenuItem("MaterialFunction", null, null);
+            foreach (var i in TtEngine.Instance.GfxDevice.MaterialFunctionManager.MaterialFunctionNames)
+            {
+                TtMenuItem.FMenuAction action = (TtMenuItem item, object sender) =>
+                {
+                    Control.TtCallMaterialFunctionNode node;
+                    node = new Control.TtCallMaterialFunctionNode();
+                    node.FunctionName = i;
+                    //node.Name = i.CallNodeName;
+                    node.UserData = this;
+                    node.Position = PopMenuPosition;
+                    SetDefaultActionForNode(node);
+                    this.AddNode(node);
+                };
+                mtlFuncMenu.AddMenuItem(i.Name, null, action);
+            }
             var uniformVarMenus = CanvasMenus.AddMenuItem("UniformVars", null, null);
             var perFrameMenus = uniformVarMenus.AddMenuItem("PerFrame", null, null);
             var members = TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerFrame.GetType().GetFields();
-            foreach(var i in members)
+            foreach (var i in members)
             {
                 var attrs = i.GetCustomAttributes(typeof(NxRHI.TtShader.UShaderVarAttribute), false);
                 if (attrs.Length == 0)
@@ -168,7 +183,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     {
                         var node = new UUniformVar();
                         node.VarType = Rtti.TtTypeDesc.TypeOf(i.FieldType);
-                        if(i.Name == "bIsFrontFace")
+                        if (i.Name == "bIsFrontFace")
                         {
                             node.Name = "input.GetIsFrontFace()";
                         }
@@ -181,115 +196,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     });
             }
         }
-        //public override void OnAfterDrawMenu(EngineNS.EGui.Controls.NodeGraph.NodeGraphStyles styles)
-        //{
-        //    //if (ImGuiAPI.BeginMenu("Function", true))
-        //    //{
-        //    //    var kls = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(typeof(Control.HLSLMethod).FullName);
-        //    //    foreach(var i in kls.Methods)
-        //    //    {
-        //    //        if (ImGuiAPI.MenuItem(i.MethodName, null, false, true))
-        //    //        {
-        //    //            var attrs = i.GetCustomAttributes(typeof(Control.UserCallNodeAttribute), false);
-        //    //            if (attrs.Length > 0)
-        //    //            {
-        //    //                var usr = attrs[0] as Control.UserCallNodeAttribute;
-        //    //                if (usr.CallNodeType != null)
-        //    //                {
-        //    //                    var node = Rtti.UTypeDescManager.CreateInstance(usr.CallNodeType) as Control.CallNode;
-        //    //                    if (node != null)
-        //    //                    {
-        //    //                        node.Initialize(i);
-        //    //                        node.Name = i.MethodName;
-        //    //                        node.UserData = this;
-        //    //                        node.Position = PopMenuPosition;
-        //    //                        this.AddNode(node);
-        //    //                    }
-        //    //                }
-        //    //                else
-        //    //                {
-        //    //                    var node = Control.CallNode.NewMethodNode(i);
-        //    //                    node.Name = i.MethodName;
-        //    //                    node.UserData = this;
-        //    //                    node.Position = PopMenuPosition;
-        //    //                    this.AddNode(node);
-        //    //                }
-        //    //            }
-        //    //            else
-        //    //            {
-        //    //                var node = Control.CallNode.NewMethodNode(i);
-        //    //                node.Name = i.MethodName;
-        //    //                node.UserData = this;
-        //    //                node.Position = PopMenuPosition;
-        //    //                this.AddNode(node);
-        //    //            }
-        //    //        }
-        //    //    }
-        //    //    ImGuiAPI.EndMenu();
-        //    //}
-        //    if (ImGuiAPI.BeginMenu("UniformVars", true))
-        //    {
-        //        if (ImGuiAPI.BeginMenu("PerFrame", true))
-        //        {
-        //            System.Reflection.FieldInfo[] members = NxRHI.UBuffer.PerFrameType.GetFields();
-        //            foreach (var i in members)
-        //            {
-        //                var attrs = i.GetCustomAttributes(typeof(NxRHI.UBuffer.UShaderTypeAttribute), false);
-        //                if (attrs.Length == 0)
-        //                    continue;
-        //                if (ImGuiAPI.MenuItem(i.Name, null, false, true))
-        //                {
-        //                    var node = new UUniformVar();
-        //                    node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.UBuffer.UShaderTypeAttribute).ShaderType);
-        //                    node.Name = i.Name;
-        //                    node.UserData = this;
-        //                    node.Position = PopMenuPosition;
-        //                    SetDefaultActionForNode(node);
-        //                    //node.OnPreReadAction = NodeOnPreRead;
-        //                    this.AddNode(node);
-        //                }
-        //            }
-        //            ImGuiAPI.EndMenu();
-        //        }
-        //        ImGuiAPI.EndMenu();
-        //    }
-        //    if (ImGuiAPI.BeginMenu("InputVars", true))
-        //    {
-        //        if (ImGuiAPI.BeginMenu("PSInput", true))
-        //        {
-        //            {
-        //                if (ImGuiAPI.MenuItem("Input", null, false, true))
-        //                {
-        //                    var node = new UUniformVar();
-        //                    node.VarType = Rtti.TtTypeDesc.TypeOf(typeof(Graphics.Pipeline.Shader.UMaterial.PSInput));
-        //                    node.Name = "input";
-        //                    node.UserData = this;
-        //                    node.Position = PopMenuPosition;
-        //                    SetDefaultActionForNode(node);
-        //                    //node.OnPreReadAction = NodeOnPreRead;
-        //                    this.AddNode(node);
-        //                }   
-        //            }
-        //            System.Reflection.FieldInfo[] members = typeof(Graphics.Pipeline.Shader.UMaterial.PSInput).GetFields();
-        //            foreach (var i in members)
-        //            {
-        //                if (ImGuiAPI.MenuItem(i.Name, null, false, true))
-        //                {
-        //                    var node = new UUniformVar();
-        //                    node.VarType = Rtti.TtTypeDesc.TypeOf(i.FieldType);
-        //                    node.Name = "input." + i.Name;
-        //                    node.UserData = this;
-        //                    node.Position = PopMenuPosition;
-        //                    SetDefaultActionForNode(node);
-        //                    //node.OnPreReadAction = NodeOnPreRead;
-        //                    this.AddNode(node);
-        //                }
-        //            }
-        //            ImGuiAPI.EndMenu();
-        //        }
-        //        ImGuiAPI.EndMenu();
-        //    }
-        //}
         public override void SetDefaultActionForNode(UNodeBase node)
         {
             node.OnLButtonClickedAction = NodeLButtonClickedAction;
@@ -325,32 +231,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
         private void NodeLButtonClickedAction(UNodeBase node, NodePin clickedPin)
         {
-            //if (HasError)
-            //{
-            //    if (Graph != null)
-            //    {
-            //        Graph.ShaderEditor.NodePropGrid.SingleTarget = CodeExcept;
-            //    }
-            //    return;
-            //}
-            //var graph = node.UserData as UMaterialGraph;
-            //graph.ShaderEditor.NodePropGrid.HideInheritDeclareType = null;
 
-            //if (node.GetPropertyEditObject() == null)
-            //{
-            //    if (graph != null)
-            //    {
-            //        graph.ShaderEditor.NodePropGrid.Target = null;
-            //    }
-            //    return;
-            //}
-
-            //graph.ShaderEditor.NodePropGrid.HideInheritDeclareType = Rtti.UTypeDescGetter<UNodeBase>.TypeDesc;
-            //graph.ShaderEditor.NodePropGrid.Target = node.GetPropertyEditObject();
         }
         private void NodeOnLinkedFrom(UNodeBase node, PinIn iPin, UNodeBase OutNode, PinOut oPin)
         {
-            var funcGraph = ParentGraph as UMaterialGraph;
+            var funcGraph = ParentGraph as TtMaterialGraph;
             if (funcGraph == null || oPin.LinkDesc == null || iPin.LinkDesc == null)
             {
                 return;
@@ -360,13 +245,77 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 funcGraph.RemoveLinkedInExcept(iPin, OutNode, oPin.Name);
             }
         }
-        //private void NodeOnPreRead(UNodeBase node, object tagObject, object hostObject, bool fromXml)
-        //{
-        //    var editor = tagObject as UShaderEditor;
-        //    if (editor != null)
-        //    {
-        //        node.UserData = editor.MaterialGraph;
-        //    }
-        //}
+    }
+
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialGraph@EngineCore", "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialGraph" })]
+    public partial class TtMaterialGraph : TtMaterialGraphBase
+    {
+        public TtMaterialEditor ShaderEditor;
+        public List<TtVariableDeclaration> UniformVars { get; } = new List<TtVariableDeclaration>();
+    }
+
+    public interface IMaterialFunctionInput
+    {
+        Rtti.TtTypeDesc InputType { get; }
+        string VarName { get; }
+    }
+    public interface IMaterialFunctionOutput
+    {
+        Rtti.TtTypeDesc OutputType { get; }
+        string VarName { get; }
+        PinIn OutPin { get; }
+    }
+    public partial class TtMaterialFunctionInputF1 : Var.VarDimF1, IMaterialFunctionInput
+    {
+        public Rtti.TtTypeDesc InputType { get => VarType; }
+        public TtMaterialFunctionInputF1() 
+        {
+            TitleColor = Color4b.AliceBlue.ToArgb();
+            this.RemovePinIn(InX);
+        }
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            //do nothing
+        }
+    }
+    public partial class TtMaterialFunctionOutputF1 : Var.VarDimF1, IMaterialFunctionOutput
+    {
+        public Rtti.TtTypeDesc OutputType { get => VarType; }
+        public PinIn OutPin { get => base.InX; }
+        public TtMaterialFunctionOutputF1()
+        {
+            TitleColor = Color4b.IndianRed.ToArgb();
+            this.RemovePinOut(OutX);
+        }
+    }
+    public partial class TtMaterialFunctionGraph : TtMaterialGraphBase
+    {
+        public TtMaterialFunctionEditor ShaderEditor;
+
+        public override void UpdateCanvasMenus()
+        {
+            base.UpdateCanvasMenus();
+            var mfuncMenus = CanvasMenus.AddMenuItem("MFunctionArgs", null, null);
+            mfuncMenus.AddMenuItem("InF1", null,
+                (TtMenuItem item, object sender) =>
+                {
+                    var node = new TtMaterialFunctionInputF1();
+                    node.Name = "FunctionInput";
+                    node.UserData = this;
+                    node.Position = PopMenuPosition;
+                    SetDefaultActionForNode(node);
+                    this.AddNode(node);
+                });
+            mfuncMenus.AddMenuItem("OutF1", null,
+                (TtMenuItem item, object sender) =>
+                {
+                    var node = new TtMaterialFunctionOutputF1();
+                    node.Name = "FunctionOutput";
+                    node.UserData = this;
+                    node.Position = PopMenuPosition;
+                    SetDefaultActionForNode(node);
+                    this.AddNode(node);
+                });
+        }
     }
 }

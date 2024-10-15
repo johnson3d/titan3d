@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.GamePlay.Scene.TtPrefabAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="f065ad84-fce9-4f1d-a9ab-bf49f9b97a87" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/prefab/prefab01.prefab,f065ad84-fce9-4f1d-a9ab-bf49f9b97a87" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtPrefab&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

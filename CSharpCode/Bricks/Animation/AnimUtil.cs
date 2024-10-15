@@ -57,6 +57,115 @@ namespace EngineNS.Animation
             return null;
         }
     }
+    public class PGBlendSpaceValueBindSelectAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
+    {
+        public string mSelectedValueBind = "None";
+        public Guid mSelectedValueBindId = Guid.Empty;
+        protected override async Task<bool> Initialize_Override()
+        {
+
+
+            return await base.Initialize_Override();
+        }
+        ~PGBlendSpaceValueBindSelectAttribute()
+        {
+            Cleanup();
+        }
+        protected override void Cleanup_Override()
+        {
+            base.Cleanup_Override();
+        }
+
+        public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
+        {
+            newValue = info.Value;
+            if (info.Value != null)
+            {
+                mSelectedValueBindId = (Guid)info.Value;
+                if (GetActiveEditorClassDescription() != null)
+                {
+                    foreach (var variables in GetActiveEditorClassDescription().Variables)
+                    {
+                        if (variables is TtVariableDescription variable)
+                        {
+                            if (variable.Id == mSelectedValueBindId)
+                            {
+                                mSelectedValueBind = variable.VariableName;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                mSelectedValueBindId = Guid.Empty;
+                mSelectedValueBind = "None";
+            }
+
+            if (EGui.UIProxy.ComboBox.BeginCombo("##SelectVariable", mSelectedValueBind))
+            {
+                var comboDrawList = ImGuiAPI.GetWindowDrawList();
+                var searchBar = TtEngine.Instance.UIProxyManager["VariableDescSearchBar"] as EGui.UIProxy.SearchBarProxy;
+                if (searchBar == null)
+                {
+                    searchBar = new EGui.UIProxy.SearchBarProxy()
+                    {
+                        InfoText = "Search macross base type",
+                        Width = -1,
+                    };
+                    TtEngine.Instance.UIProxyManager["VariableDescSearchBar"] = searchBar;
+                }
+                if (!ImGuiAPI.IsAnyItemActive() && !ImGuiAPI.IsMouseClicked(0, false))
+                    ImGuiAPI.SetKeyboardFocusHere(0);
+                searchBar.OnDraw(in comboDrawList, in Support.TtAnyPointer.Default);
+                bool bSelected = true;
+                List<(string Name, Guid Id)> VariableIdName = new List<(string, Guid)>();
+                VariableIdName.Add(("None", Guid.Empty));
+                if (GetActiveEditorClassDescription() != null)
+                {
+                    foreach (var variables in GetActiveEditorClassDescription().Variables)
+                    {
+                        if (variables is TtVariableDescription variable)
+                        {
+                            VariableIdName.Add((variable.VariableName, variable.Id));
+                        }
+                    }
+                }
+
+                foreach (var idName in VariableIdName)
+                {
+                    if (!string.IsNullOrEmpty(searchBar.SearchText) && !idName.Name.ToLower().Contains(searchBar.SearchText.ToLower()))
+                        continue;
+
+                    if (ImGuiAPI.Selectable(idName.Name, ref bSelected, ImGuiSelectableFlags_.ImGuiSelectableFlags_None, in Vector2.Zero))
+                    {
+                        mSelectedValueBindId = idName.Id;
+                        mSelectedValueBind = idName.Name;
+                        newValue = mSelectedValueBindId;
+                    }
+                    if (ImGuiAPI.IsItemHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_None))
+                    {
+                        CtrlUtility.DrawHelper(idName.Name);
+                    }
+                }
+                EGui.UIProxy.ComboBox.EndCombo();
+            }
+
+            return true;
+        }
+
+        public TtClassDescription GetActiveEditorClassDescription()
+        {
+            if (TtEngine.Instance.GfxDevice.SlateApplication is EngineNS.Editor.UMainEditorApplication mainEditor)
+            {
+                if (mainEditor.AssetEditorManager.CurrentActiveEditor is TtDesignMacrossEditor designMacrossEditor)
+                {
+                    return designMacrossEditor.DesignMacross.DesignedClassDescription;
+                }
+            }
+            return null;
+        }
+    }
 
     public class PGStateMachineSelectAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
     {

@@ -53,7 +53,7 @@ namespace EngineNS.Editor
         //    return WorldViewportSlate;
         //}        
         ///////////////////////////////////////////
-        public EGui.Controls.UContentBrowser ContentBrowser = new EGui.Controls.UContentBrowser();
+        public EGui.Controls.TtContentBrowser ContentBrowser = new EGui.Controls.TtContentBrowser();
         public override void Cleanup()
         {
             TtEngine.Instance?.TickableManager.RemoveTickable(this);

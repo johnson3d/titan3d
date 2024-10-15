@@ -68,6 +68,16 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 material.UsedUniformVars.Add(tmp);
             }
         }
+        protected virtual void OnAddLocalVar(TtVariableDeclaration val, ref BuildCodeStatementsData data)
+        {
+            if (IsUniform)
+            {
+                var graph = data.NodeGraph as TtMaterialGraph;
+                graph.UniformVars.Add(val);
+            }
+            else
+                data.MethodDec.AddLocalVar(val);
+        }
         protected virtual void OnAsUniform(bool isUniform)
         {
             if (isUniform)
@@ -156,7 +166,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             return "0";
         }
     }
-    [ContextMenu("f1,float1", "Data\\float@_serial@", UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("f1,float1", "Data\\float@_serial@", TtMaterialGraph.MaterialEditorKeyword)]
     public class VarDimF1 : VarNode
     {
         public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
@@ -203,56 +213,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             OutX.MultiLinks = true;
             this.AddPinOut(OutX);
         }
-        //public override void PreGenExpr()
-        //{
-        //    Executed = false;
-        //}
-        //bool Executed = false;
-        //public override IExpression GetVarExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
-        //{
-        //    DefineVar Var = new DefineVar();
-        //    Var.IsLocalVar = !IsUniform;
-        //    Var.VarName = this.Name;
-        //    Var.DefType = Type2HLSLType(VarType, IsHalfPrecision);
-
-        //    Var.InitValue = GetDefaultValue();
-
-        //    if (Var.IsLocalVar)
-        //    {
-        //        funGraph.ShaderEditor.MaterialOutput.Function.AddLocalVar(Var);
-        //    }
-        //    else
-        //    {
-        //        funGraph.ShaderEditor.MaterialOutput.UniformVars.Add(Var);
-        //    }
-        //    if (Executed)
-        //    {
-        //        return new OpUseDefinedVar(Var);
-        //    }
-        //    Executed = true;
-        //    var seq = new ExecuteSequence();
-        //    var linkX = funGraph.FindInLinkerSingle(InX);
-        //    if (linkX != null)
-        //    {
-        //        var exprNode = linkX.OutNode as IBaseNode;
-        //        var xyExpr = exprNode.GetExpr(funGraph, cGen, linkX.OutPin, true) as OpExpress;
-        //        var setExpr = new AssignOp();
-        //        setExpr.Left = new OpUseDefinedVar(Var);
-        //        setExpr.Right = xyExpr;
-
-        //        seq.Lines.Add(setExpr);
-        //    }
-        //    return new OpExecuteAndUseDefinedVar(seq, Var);
-        //}        
-        //public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
-        //{
-        //    var expr = GetVarExpr(funGraph, cGen, oPin, bTakeResult);
-        //    if (oPin == OutX)
-        //    {
-        //        return expr;
-        //    }
-        //    return null;
-        //}
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             base.BuildStatements(pin, ref data);
@@ -271,7 +231,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                     data.CurrentStatements.Add(assignStatement);
             }
 
-            if(!data.MethodDec.HasLocalVariable(Name))
+            if (!data.MethodDec.HasLocalVariable(Name))
             {
                 var val = new TtVariableDeclaration()
                 {
@@ -279,13 +239,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                     VariableName = Name,
                     InitValue = new TtPrimitiveExpression(Value),
                 };
-                if (IsUniform)
-                {
-                    var graph = data.NodeGraph as UMaterialGraph;
-                    graph.ShaderEditor.MaterialOutput.UniformVars.Add(val);
-                }
-                else
-                    data.MethodDec.AddLocalVar(val);
+                OnAddLocalVar(val, ref data);
             }
         }
         public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
@@ -296,7 +250,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         }
     }
 
-    [ContextMenu("i1,int1", "Data\\int@_serial@", UMaterialGraph.MaterialEditorKeyword)]
+    [ContextMenu("i1,int1", "Data\\int@_serial@", TtMaterialGraph.MaterialEditorKeyword)]
     public class VarDimI1 : VarNode
     {
         public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
@@ -369,13 +323,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                     VariableName = Name,
                     InitValue = new TtPrimitiveExpression(Value),
                 };
-                if (IsUniform)
-                {
-                    var graph = data.NodeGraph as UMaterialGraph;
-                    graph.ShaderEditor.MaterialOutput.UniformVars.Add(val);
-                }
-                else
-                    data.MethodDec.AddLocalVar(val);
+                OnAddLocalVar(val, ref data);
             }
         }
         public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)

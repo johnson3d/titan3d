@@ -32,6 +32,8 @@ namespace EngineNS.DesignMacross.Base.Description
     {
         public IMethodDescription MethodDescription { get; set; }
         public TtExecuteSequenceStatement Sequence { get; set; }
+        public TtDataPinDescription SelfPin { get; set; }
+        public TtDataPinDescription TargetPin { get; set; }
     }
     public interface IDescription  : IO.ISerializer
     {

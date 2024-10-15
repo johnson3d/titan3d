@@ -95,15 +95,6 @@ namespace EngineNS.DesignMacross.Design
             return true;
         }
     }
-    [GraphElement(typeof(TtGraphElement_MethodEndDescription), 500, 400)]
-    public partial class TtMethodEndDescription : TtStatementDescription
-    {
-        public TtMethodEndDescription()
-        {
-            Name = "Return";
-            AddExecutionInPin(new());
-        }
-    }
 
     [Graph(typeof(TtGraph_Method))]
     [OutlineElement_Leaf(typeof(TtOutlineElement_Method))]

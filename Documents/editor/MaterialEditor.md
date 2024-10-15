@@ -5,3 +5,5 @@
 	- 这里可以设置材质的渲染状态
 	- ![MaterialSettings](MaterialEditor/MaterialSettings.png)
 	- 这里设置光照模式，法线模式，渲染层等
+	- ![CallMaterialFuncion](MaterialEditor/CallMaterialFunction.png)
+	- 红框内新增材质函数列表，可以给材质和材质函数图调用
