@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
 using System.Linq;
 using EngineNS.EGui.Controls;
+using System.ComponentModel;
+using EngineNS.Graphics.Pipeline.Shader;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
     public partial class TtMaterialGraphBase : UNodeGraph
     {
-        public virtual string EditorKeyword { get; }
+        public const string MaterialEditorKeyword = "Material";
         public TtMaterialGraphBase()
         {
             UpdateCanvasMenus();
@@ -29,7 +31,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     {
                         var parentMenu = CanvasMenus;
                         var att = atts[0] as ContextMenuAttribute;
-                        if (!att.HasKeyString(EditorKeyword))
+                        if (!att.HasKeyString(MaterialEditorKeyword))
                             continue;
                         for (var menuIdx = 0; menuIdx < att.MenuPaths.Length; menuIdx++)
                         {
@@ -86,7 +88,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 {
                     var parentMenu = funcMenu;
                     var att = menuAtts[0] as ContextMenuAttribute;
-                    if (!att.HasKeyString(EditorKeyword))
+                    if (!att.HasKeyString(MaterialEditorKeyword))
                         continue;
                     for (var menuIdx = 0; menuIdx < att.MenuPaths.Length; menuIdx++)
                     {
@@ -104,6 +106,22 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 {
                     funcMenu.AddMenuItem(i.MethodName, null, action);
                 }
+            }
+            var mtlFuncMenu = CanvasMenus.AddMenuItem("MaterialFunction", null, null);
+            foreach (var i in TtEngine.Instance.GfxDevice.MaterialFunctionManager.MaterialFunctionNames)
+            {
+                TtMenuItem.FMenuAction action = (TtMenuItem item, object sender) =>
+                {
+                    Control.TtCallMaterialFunctionNode node;
+                    node = new Control.TtCallMaterialFunctionNode();
+                    node.FunctionName = i;
+                    //node.Name = i.CallNodeName;
+                    node.UserData = this;
+                    node.Position = PopMenuPosition;
+                    SetDefaultActionForNode(node);
+                    this.AddNode(node);
+                };
+                mtlFuncMenu.AddMenuItem(i.Name, null, action);
             }
             var uniformVarMenus = CanvasMenus.AddMenuItem("UniformVars", null, null);
             var perFrameMenus = uniformVarMenus.AddMenuItem("PerFrame", null, null);
@@ -232,15 +250,72 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialGraph@EngineCore", "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialGraph" })]
     public partial class TtMaterialGraph : TtMaterialGraphBase
     {
-        public const string MaterialEditorKeyword = "Material";
-        public override string EditorKeyword { get => MaterialEditorKeyword; }
         public TtMaterialEditor ShaderEditor;
+        public List<TtVariableDeclaration> UniformVars { get; } = new List<TtVariableDeclaration>();
     }
 
+    public interface IMaterialFunctionInput
+    {
+        Rtti.TtTypeDesc InputType { get; }
+        string VarName { get; }
+    }
+    public interface IMaterialFunctionOutput
+    {
+        Rtti.TtTypeDesc OutputType { get; }
+        string VarName { get; }
+        PinIn OutPin { get; }
+    }
+    public partial class TtMaterialFunctionInputF1 : Var.VarDimF1, IMaterialFunctionInput
+    {
+        public Rtti.TtTypeDesc InputType { get => VarType; }
+        public TtMaterialFunctionInputF1() 
+        {
+            TitleColor = Color4b.AliceBlue.ToArgb();
+            this.RemovePinIn(InX);
+        }
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            //do nothing
+        }
+    }
+    public partial class TtMaterialFunctionOutputF1 : Var.VarDimF1, IMaterialFunctionOutput
+    {
+        public Rtti.TtTypeDesc OutputType { get => VarType; }
+        public PinIn OutPin { get => base.InX; }
+        public TtMaterialFunctionOutputF1()
+        {
+            TitleColor = Color4b.IndianRed.ToArgb();
+            this.RemovePinOut(OutX);
+        }
+    }
     public partial class TtMaterialFunctionGraph : TtMaterialGraphBase
     {
-        public const string MaterialEditorKeyword = "MaterialFunction";
-        public override string EditorKeyword { get => MaterialEditorKeyword; }
         public TtMaterialFunctionEditor ShaderEditor;
+
+        public override void UpdateCanvasMenus()
+        {
+            base.UpdateCanvasMenus();
+            var mfuncMenus = CanvasMenus.AddMenuItem("MFunctionArgs", null, null);
+            mfuncMenus.AddMenuItem("InF1", null,
+                (TtMenuItem item, object sender) =>
+                {
+                    var node = new TtMaterialFunctionInputF1();
+                    node.Name = "FunctionInput";
+                    node.UserData = this;
+                    node.Position = PopMenuPosition;
+                    SetDefaultActionForNode(node);
+                    this.AddNode(node);
+                });
+            mfuncMenus.AddMenuItem("OutF1", null,
+                (TtMenuItem item, object sender) =>
+                {
+                    var node = new TtMaterialFunctionOutputF1();
+                    node.Name = "FunctionOutput";
+                    node.UserData = this;
+                    node.Position = PopMenuPosition;
+                    SetDefaultActionForNode(node);
+                    this.AddNode(node);
+                });
+        }
     }
 }

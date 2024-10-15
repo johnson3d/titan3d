@@ -33,7 +33,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)ImGuiSizeCallbackData_2863311530.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ImGuiStorage_2863311530.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ImGuiStyle_2863311530.cpp2cs.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)ImGuiTableSortSpecs_2863311530.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ImGuiViewport_2863311530.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ImGuiWindowClass_2863311530.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)v3dxFrustum_2863311530.cpp2cs.cpp" />
@@ -49,6 +48,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/EigenUtility_2581692454.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/EmbreeManager_2581692454.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/FBitset_2581692454.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/FCodeEditor_2581692454.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/FContextTickableManager_2581692454.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/FCsDictionaryIterator_2581692454.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/FEmbreeGeometry_2581692454.cpp2cs.cpp" />
@@ -213,7 +213,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FGpuDeviceCaps_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FGpuDeviceDesc_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FGpuPipelineDesc_910209287.cpp2cs.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FGpuPipelineManager_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FGpuResourceAlignment_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FGpuSystemDesc_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FIbvDesc_910209287.cpp2cs.cpp" />
@@ -272,6 +271,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FUavDesc_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FVbvDesc_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FVertexArray_910209287.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FViewInstanceDesc_910209287.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FViewInstanceLocation_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FViewPort_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IActionDraw_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IBuffer_910209287.cpp2cs.cpp" />

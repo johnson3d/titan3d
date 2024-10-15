@@ -46,10 +46,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             return this;
         }
         #endregion
-        private string GenHLSLCode()
-        {
-            return null;
-        }
         #region Tickable
         public void TickLogic(float ellapse)
         {
@@ -138,7 +134,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 var xml = IO.TtFileManager.LoadXmlFromString(MaterialFunction.GraphXMLString);
                 if (xml != null)
                 {
-                    object pThis = this;
+                    object pThis = this.MaterialGraph;
                     IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
                 }
                 else
@@ -146,7 +142,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     System.Diagnostics.Debug.Assert(false);
                     MaterialFunction.GraphXMLString = MaterialFunction.GraphXMLString.Substring(0, MaterialFunction.GraphXMLString.Length - 1);
                     xml = IO.TtFileManager.LoadXmlFromString(MaterialFunction.GraphXMLString);
-                    object pThis = this;
+                    object pThis = this.MaterialGraph;
                     IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
                 }
             }
@@ -284,7 +280,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Compile", in btSize))
             {
-                var code = GenHLSLCode();
+                var code = MaterialFunction.GenMateralFunctionGraphCode(new UHLSLCodeGenerator(), MaterialGraph);
                 System.Diagnostics.Trace.WriteLine(MaterialFunction.DefineCode.TextCode);
                 System.Diagnostics.Trace.WriteLine(code);
 
@@ -294,6 +290,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this);
                 var xmlText = IO.TtFileManager.GetXmlText(xml);
                 MaterialFunction.GraphXMLString = xmlText;
+                MaterialFunction.HLSLCode = code;
             }
         }
         bool ShowNodeGraph = true;
@@ -382,12 +379,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var xml = new System.Xml.XmlDocument();
             var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
             xml.AppendChild(xmlRoot);
-            IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this);
+            IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, MaterialGraph);
             var xmlText = IO.TtFileManager.GetXmlText(xml);
             MaterialFunction.GraphXMLString = xmlText;
-            GenHLSLCode();
-            //Material.UpdateShaderCode(false);
-            //Material.HLSLCode = GenHLSLCode();
             MaterialFunction.SaveAssetTo(MaterialFunction.AssetName);
             //Material.SerialId++;
 

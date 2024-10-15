@@ -239,13 +239,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                     VariableName = Name,
                     InitValue = new TtPrimitiveExpression(Value),
                 };
-                if (IsUniform)
-                {
-                    var graph = data.NodeGraph as TtMaterialGraph;
-                    graph.ShaderEditor.MaterialOutput.UniformVars.Add(val);
-                }
-                else
-                    data.MethodDec.AddLocalVar(val);
+                OnAddLocalVar(val, ref data);
             }
         }
         public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
@@ -438,13 +432,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                     VariableName = Name,
                     InitValue = new TtPrimitiveExpression(Value),
                 };
-                if (IsUniform)
-                {
-                    var graph = data.NodeGraph as TtMaterialGraph;
-                    graph.ShaderEditor.MaterialOutput.UniformVars.Add(val);
-                }
-                else
-                    data.MethodDec.AddLocalVar(val);
+                OnAddLocalVar(val, ref data);
             }
         }
         public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)

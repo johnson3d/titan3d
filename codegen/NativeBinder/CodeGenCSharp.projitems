@@ -28,21 +28,22 @@
     <Compile Include="$(MSBuildThisFileDirectory)ImFont_2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiBackendFlags__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiButtonFlags__2863311530.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ImGuiChildFlags__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiColorEditFlags__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiCol__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiComboFlags__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiCond__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiConfigFlags__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiDataType__2863311530.cpp2cs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ImGuiDir__2863311530.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ImGuiDir_2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiDockNodeFlags__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiDragDropFlags__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiFocusedFlags__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiHoveredFlags__2863311530.cpp2cs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ImGuiInputFlags__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiInputTextCallbackData_2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiInputTextFlags__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiIO_2863311530.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ImGuiItemFlags__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiKey_2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiMouseButton__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiMouseCursor__2863311530.cpp2cs.cs" />
@@ -62,7 +63,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiTableColumnFlags__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiTableFlags__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiTableRowFlags__2863311530.cpp2cs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ImGuiTableSortSpecs_2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiTreeNodeFlags__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiViewportFlags__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiViewport_2863311530.cpp2cs.cs" />
@@ -91,6 +91,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EPlatformType_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EResourceState_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/FBitset_2581692454.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/FCodeEditor_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/FContextTickableManager_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/FCsDictionaryIterator_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/FEmbreeGeometry_2581692454.cpp2cs.cs" />
@@ -308,7 +309,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FGpuDeviceCaps_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FGpuDeviceDesc_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FGpuPipelineDesc_910209287.cpp2cs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FGpuPipelineManager_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FGpuResourceAlignment_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FGpuSystemDesc_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FIbvDesc_910209287.cpp2cs.cs" />
@@ -367,6 +367,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FUavDesc_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FVbvDesc_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FVertexArray_910209287.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FViewInstanceDesc_910209287.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FViewInstanceLocation_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FViewPort_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IActionDraw_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IBuffer_910209287.cpp2cs.cs" />

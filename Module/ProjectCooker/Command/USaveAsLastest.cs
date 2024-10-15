@@ -351,23 +351,23 @@ namespace ProjectCooker.Command
                 var asset = await EngineNS.TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(rn);
                 if (asset != null)
                 {
-                    var editor = new EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialEditor();
-                    editor.MaterialGraph.ShaderEditor = editor;
-                    var xml = EngineNS.IO.TtFileManager.LoadXmlFromString(asset.GraphXMLString);
-                    if (xml != null)
-                    {
-                        object pThis = editor;
-                        EngineNS.IO.SerializerHelper.ReadObjectMetaFields(editor, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
-                        UHLSLCodeGenerator mHLSLCodeGen = new UHLSLCodeGenerator();
-                        var MaterialGraph = editor.MaterialGraph;
-                        var MaterialOutput = new EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialOutput();
-                        MaterialOutput = MaterialGraph.FindNode(editor.OutputNodeId) as EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialOutput;
-                        EngineNS.Graphics.Pipeline.Shader.TtMaterial.GenMateralGraphCode(asset, mHLSLCodeGen, MaterialGraph, MaterialOutput);
-                    }
-                    else
-                    {
-                        EngineNS.Profiler.Log.WriteLine<TtCookGategory>(ELogTag.Warning, $"Material({rn} GraphXML Parse Error!)");
-                    }
+                    //var editor = new EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialEditor();
+                    //editor.MaterialGraph.ShaderEditor = editor;
+                    //var xml = EngineNS.IO.TtFileManager.LoadXmlFromString(asset.GraphXMLString);
+                    //if (xml != null)
+                    //{
+                    //    object pThis = editor;
+                    //    EngineNS.IO.SerializerHelper.ReadObjectMetaFields(editor, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
+                    //    UHLSLCodeGenerator mHLSLCodeGen = new UHLSLCodeGenerator();
+                    //    var MaterialGraph = editor.MaterialGraph;
+                    //    var MaterialOutput = new EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialOutput();
+                    //    MaterialOutput = MaterialGraph.FindNode(editor.OutputNodeId) as EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialOutput;
+                    //    EngineNS.Graphics.Pipeline.Shader.TtMaterial.GenMateralGraphCode(asset, mHLSLCodeGen, MaterialGraph, MaterialOutput);
+                    //}
+                    //else
+                    //{
+                    //    EngineNS.Profiler.Log.WriteLine<TtCookGategory>(ELogTag.Warning, $"Material({rn} GraphXML Parse Error!)");
+                    //}
                     asset.SaveAssetTo(rn);
                 }
                 else
@@ -385,23 +385,23 @@ namespace ProjectCooker.Command
                 var asset = await EngineNS.TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(rn);
                 if (asset != null)
                 {
-                    var editor = new EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialEditor();
-                    editor.MaterialGraph.ShaderEditor = editor;
-                    var xml = EngineNS.IO.TtFileManager.LoadXmlFromString(asset.GraphXMLString);
-                    if (xml != null)
-                    {
-                        object pThis = editor;
-                        EngineNS.IO.SerializerHelper.ReadObjectMetaFields(editor, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
-                        UHLSLCodeGenerator mHLSLCodeGen = new UHLSLCodeGenerator();
-                        var MaterialGraph = editor.MaterialGraph;
-                        var MaterialOutput = new EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialOutput();
-                        MaterialOutput = MaterialGraph.FindNode(editor.OutputNodeId) as EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialOutput;
-                        EngineNS.Graphics.Pipeline.Shader.TtMaterial.GenMateralGraphCode(asset, mHLSLCodeGen, MaterialGraph, MaterialOutput);
-                    }
-                    else
-                    {
-                        EngineNS.Profiler.Log.WriteLine<TtCookGategory>(ELogTag.Warning, $"Material({rn} GraphXML Parse Error!)");
-                    }
+                    //var editor = new EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialEditor();
+                    //editor.MaterialGraph.ShaderEditor = editor;
+                    //var xml = EngineNS.IO.TtFileManager.LoadXmlFromString(asset.GraphXMLString);
+                    //if (xml != null)
+                    //{
+                    //    object pThis = editor;
+                    //    EngineNS.IO.SerializerHelper.ReadObjectMetaFields(editor, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
+                    //    UHLSLCodeGenerator mHLSLCodeGen = new UHLSLCodeGenerator();
+                    //    var MaterialGraph = editor.MaterialGraph;
+                    //    var MaterialOutput = new EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialOutput();
+                    //    MaterialOutput = MaterialGraph.FindNode(editor.OutputNodeId) as EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialOutput;
+                    //    EngineNS.Graphics.Pipeline.Shader.TtMaterial.GenMateralGraphCode(asset, mHLSLCodeGen, MaterialGraph, MaterialOutput);
+                    //}
+                    //else
+                    //{
+                    //    EngineNS.Profiler.Log.WriteLine<TtCookGategory>(ELogTag.Warning, $"Material({rn} GraphXML Parse Error!)");
+                    //}
                     asset.SaveAssetTo(rn);
                 }
                 else
