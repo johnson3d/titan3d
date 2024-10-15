@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
+using EngineNS.Graphics.Pipeline.Shader;
 using MathNet.Numerics.LinearAlgebra.Factorization;
+using Org.BouncyCastle.Asn1.Mozilla;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 {
@@ -43,7 +45,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     var name = Rtti.TtClassMeta.GetNameByDeclstring(value);
                     Method = TtEngine.Instance.HLSLMethodManager.GetMethod(name);
                 }
-                this.Initialize(Method);
+                if (Method != null)
+                    this.Initialize(Method);
             }
         }
         public static CallNode NewMethodNode(Rtti.TtClassMeta.TtMethodMeta m)
@@ -485,7 +488,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             var method = Method;
-            var incAttr = Method.DeclaringType.GetCustomAttribute<EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtHLSLProviderAttribute>(false);
+            var incAttr = Method.DeclaringType?.GetCustomAttribute<EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtHLSLProviderAttribute>(false);
             if (incAttr != null && incAttr.Include != null)
             {
                 data.ClassDec.PushPreInclude(incAttr.Include);
@@ -541,7 +544,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             else
             {
                 var parameters = method.GetParameters();
-                for (int i = 0; i < parameters.Length; i++)
+                for (int i = 0; i < parameters.Count; i++)
                 {
                     if (parameters[i].Name == pin.Name)
                     {
@@ -554,5 +557,31 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             System.Diagnostics.Debug.Assert(false);
             return null;
         }
+    }
+    
+    public class TtCallMaterialFunctionNode : CallNode
+    {
+        RName mFunctionName;
+        [Rtti.Meta(Order = 1)]
+        [RName.PGRName(FilterExts = TtMaterialFunction.AssetExt)]
+        public RName FunctionName 
+        {
+            get 
+            {
+                return mFunctionName;
+            }
+            set
+            {
+                if (mFunctionName == value)
+                    return;
+                mFunctionName = value;
+
+                MaterialFunction = TtEngine.Instance.GfxDevice.MaterialFunctionManager.GetMaterialFunctionSync(value);
+                this.Initialize(MaterialFunction.MethodMeta);
+                this.Name = MaterialFunction.CallNodeName;
+            }
+        }
+
+        public TtMaterialFunction MaterialFunction { get; private set; }
     }
 }

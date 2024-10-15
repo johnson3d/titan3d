@@ -1,4 +1,5 @@
-﻿using EngineNS.UI;
+﻿using EngineNS.Support;
+using EngineNS.UI;
 using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
@@ -376,13 +377,14 @@ namespace EngineNS.Rtti
             return result;
         }
         #region MacrossMethod
-        public class TtMethodMeta
+        public class TtMethodMeta : IO.BaseSerializer
         {
-            public class TtParamMeta
+            public class TtParamMeta : IO.BaseSerializer
             {
                 public MetaParameterAttribute Meta;
                 public TtMethodMeta HostMethod;
-                public int ParamIndex = -1;
+                [Rtti.Meta]
+                public int ParamIndex { get; set; } = -1;
                 public System.Reflection.ParameterInfo GetParamInfo()
                 {
                     return HostMethod.GetMethod().GetParameters()[ParamIndex];
@@ -391,12 +393,26 @@ namespace EngineNS.Rtti
                 {
                     return GetParamInfo().GetCustomAttributes(attributeType, inherit);
                 }
-                public Rtti.TtTypeDesc ParameterType;
-                public bool IsParamArray = false;
-                public bool IsDelegate = false;
-                public string Name;
-                public Bricks.CodeBuilder.EMethodArgumentAttribute ArgumentAttribute = Bricks.CodeBuilder.EMethodArgumentAttribute.Default;
+                [Rtti.Meta]
+                public Rtti.TtTypeDesc ParameterType { get; set; }
+                [Rtti.Meta]
+                public bool IsParamArray { get; set; } = false;
+                [Rtti.Meta]
+                public bool IsDelegate { get; set; } = false;
+                [Rtti.Meta]
+                public string Name { get; set; }
+                [Rtti.Meta]
+                public Bricks.CodeBuilder.EMethodArgumentAttribute ArgumentAttribute { get; set; } = Bricks.CodeBuilder.EMethodArgumentAttribute.Default;
                 public object DefaultValue = null;
+                [Rtti.Meta(Order = 1)]
+                public string DefaultValueString
+                {
+                    get => DefaultValue?.ToString();
+                    set
+                    {
+                        DefaultValue = TConvert.ToObject(ParameterType, value);
+                    }
+                }
 
                 public bool HasDefaultValue
                 {
@@ -445,12 +461,18 @@ namespace EngineNS.Rtti
                 }
             }
             public MetaAttribute Meta;
-            public TtParamMeta[] Parameters;
-            public string MethodName;
-            public Rtti.TtTypeDesc ReturnType;
-            public Rtti.TtTypeDesc DeclaringType;
-            public bool IsStatic = false;
-            public bool IsVirtual = false;
+            [Rtti.Meta]
+            public List<TtParamMeta> Parameters { get; set; }
+            [Rtti.Meta]
+            public string MethodName { get; set; }
+            [Rtti.Meta]
+            public Rtti.TtTypeDesc ReturnType { get; set; }
+            [Rtti.Meta]
+            public Rtti.TtTypeDesc DeclaringType { get; set; }
+            [Rtti.Meta]
+            public bool IsStatic { get; set; } = false;
+            [Rtti.Meta]
+            public bool IsVirtual { get; set; } = false;
 
             private string DeclarName;
 
@@ -461,12 +483,14 @@ namespace EngineNS.Rtti
             //}
             public System.Reflection.MethodInfo GetMethod()
             {
+                if (DeclaringType == null)
+                    return null;
                 //return mMethodRef;
                 Type[] argTypes = null;
-                if (Parameters.Length > 0)
+                if (Parameters.Count > 0)
                 {
-                    argTypes = new Type[Parameters.Length];
-                    for (int i = 0; i < Parameters.Length; i++)
+                    argTypes = new Type[Parameters.Count];
+                    for (int i = 0; i < Parameters.Count; i++)
                     {
                         argTypes[i] = Parameters[i].ParameterType.SystemType;
                     }
@@ -478,10 +502,10 @@ namespace EngineNS.Rtti
                     foreach (var i in methods)
                     {
                         var ps = i.GetParameters();
-                        if (i.Name == this.MethodName && ps.Length == Parameters.Length)
+                        if (i.Name == this.MethodName && ps.Length == Parameters.Count)
                         {
                             bool bFailed = false;
-                            for (int j = 0; j < Parameters.Length; j++)
+                            for (int j = 0; j < Parameters.Count; j++)
                             {
                                 bool isIn = ps[j].IsIn && Parameters[j].IsIn;
                                 bool isOut = ps[j].IsOut && Parameters[j].IsOut;
@@ -524,20 +548,22 @@ namespace EngineNS.Rtti
                 DeclaringType = Rtti.TtTypeDesc.TypeOf(method.DeclaringType);
 
                 var parameters = method.GetParameters();
-                Parameters = new TtParamMeta[parameters.Length];
+                Parameters = new List<TtParamMeta>(parameters.Length);
                 DeclarName = $"{method.ReturnType.FullName} {method.DeclaringType.FullName}.{method.Name}(";                
                 for (int i = 0; i < parameters.Length; i++)
                 {
-                    Parameters[i] = new TtParamMeta();
-                    Parameters[i].Init(parameters[i], this, i);
-                    Parameters[i].Meta = GetParameterMeta(parameters[i]);
+                    var tmp = new TtParamMeta();
+                    tmp.Init(parameters[i], this, i);
+                    tmp.Meta = GetParameterMeta(parameters[i]);
                     DeclarName += $"{parameters[i].ParameterType.FullName} {parameters[i].Name}";
                     if (i < parameters.Length - 1)
                         DeclarName += ",";
+
+                    Parameters.Add(tmp);
                 }
                 DeclarName += ')';
             }
-            public TtParamMeta[] GetParameters()
+            public List<TtParamMeta> GetParameters()
             {
                 return Parameters;
             }
@@ -569,14 +595,31 @@ namespace EngineNS.Rtti
             public string GetMethodDeclareString(bool removeDllVersion)
             {
                 var result = $"{ReturnType.FullName} {MethodName}(";
-                var parameters = GetMethod().GetParameters();
-                for (int i = 0; i < parameters.Length; i++)
+                var method = GetMethod();
+                if (method == null)
                 {
-                    result += $"{parameters[i].ParameterType.FullName}";
-                    if (i < parameters.Length - 1)
-                        result += ",";
+                    var parameters = this.Parameters;
+
+                    for (int i = 0; i < parameters.Count; i++)
+                    {
+                        result += $"{parameters[i].ParameterType.FullName}";
+                        if (i < parameters.Count - 1)
+                            result += ",";
+                    }
+                    result += ')';
                 }
-                result += ')';
+                else
+                {
+                    var parameters = GetMethod().GetParameters();
+
+                    for (int i = 0; i < parameters.Length; i++)
+                    {
+                        result += $"{parameters[i].ParameterType.FullName}";
+                        if (i < parameters.Length - 1)
+                            result += ",";
+                    }
+                    result += ')';
+                }
                 if (removeDllVersion)
                     return RemoveDeclstringDllVersion(result);
                 else
@@ -584,12 +627,12 @@ namespace EngineNS.Rtti
             }
             public object[] GetCustomAttributes(Type type, bool inherit)
             {
-                return this.GetMethod().GetCustomAttributes(type, inherit);
+                return this.GetMethod()?.GetCustomAttributes(type, inherit);
             }
             public T GetFirstCustomAttribute<T>(bool inherit) where T : Attribute
             {
-                var attrs = this.GetMethod().GetCustomAttributes(typeof(T), inherit);
-                if (attrs.Length == 0)
+                var attrs = this.GetMethod()?.GetCustomAttributes(typeof(T), inherit);
+                if (attrs == null || attrs.Length == 0)
                     return default(T);
                 return attrs[0] as T;
             }

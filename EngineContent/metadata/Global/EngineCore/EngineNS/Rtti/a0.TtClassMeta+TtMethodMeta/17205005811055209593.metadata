@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_17205005811055209593 Type="EngineNS.Rtti.TtClassMeta.TtMethodMeta@EngineCore">
+  <DeclaringType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Order="0" />
+  <IsStatic Type="System.Boolean@Unknown" Order="0" />
+  <IsVirtual Type="System.Boolean@Unknown" Order="0" />
+  <MethodName Type="System.String@Unknown" Order="0" />
+  <Parameters Type="System.Collections.Generic.List&lt;EngineNS.Rtti.TtClassMeta.TtMethodMeta.TtParamMeta@EngineCore,&gt;@Unknown" Order="0" />
+  <ReturnType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Order="0" />
+</Hash_17205005811055209593>

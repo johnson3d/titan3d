@@ -37,7 +37,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\MaterialFunctionEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Operator\Binocular.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\UMaterialOutput.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\UShaderEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\MaterialEditor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\UMaterialGraph.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\UUniformVar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShaderNode\Var\SamplerState.cs" />

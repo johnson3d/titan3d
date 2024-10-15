@@ -52,6 +52,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             MaterialPropGrid.Target = null;
         }
         EGui.TtCodeEditor mShaderEditor = new EGui.TtCodeEditor();
+        public EGui.TtCodeEditor ShaderEditor { get => mShaderEditor; }
         public async Thread.Async.TtTask<bool> Initialize()
         {
             await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
@@ -168,19 +169,31 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 var xml = IO.TtFileManager.LoadXmlFromString(Material.GraphXMLString);
                 if (xml != null)
                 {
-                    object pThis = this;
-                    IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
+                    var node = xml.LastChild as System.Xml.XmlElement;
+                    var thisTypeStr = node.GetAttribute("Type");
+                    var typeDesc = Rtti.TtTypeDesc.TypeOf(thisTypeStr);
+                    if(typeDesc == Rtti.TtTypeDescGetter<TtMaterialEditor>.TypeDesc)
+                    {
+                        object pThis = this;
+                        IO.SerializerHelper.ReadObjectMetaFields(this, node, ref pThis, null);
+                    }
+                    else
+                    {
+                        object pThis = this.MaterialGraph;
+                        IO.SerializerHelper.ReadObjectMetaFields(this, node, ref pThis, null);
+                    }
                 }
                 else
                 {
                     System.Diagnostics.Debug.Assert(false);
-                    Material.GraphXMLString = Material.GraphXMLString.Substring(0, Material.GraphXMLString.Length - 1);
-                    xml = IO.TtFileManager.LoadXmlFromString(Material.GraphXMLString);
-                    object pThis = this;
-                    IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
+                    //Material.GraphXMLString = Material.GraphXMLString.Substring(0, Material.GraphXMLString.Length - 1);
+                    //xml = IO.TtFileManager.LoadXmlFromString(Material.GraphXMLString);
+                    //object pThis = this.MaterialGraph;
+                    //IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
                 }
             }
-            
+
+            MaterialOutput = MaterialGraph.FindFirstTypedNode<TtMaterialOutput>("Output");
             if (MaterialOutput == null)
             {
                 MaterialOutput = TtMaterialOutput.NewNode(MaterialGraph);
@@ -340,16 +353,18 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Compile", in btSize))
             {
-                var code = GenHLSLCode();
-                System.Diagnostics.Trace.WriteLine(Material.DefineCode.TextCode);
-                System.Diagnostics.Trace.WriteLine(code);
-
                 var xml = new System.Xml.XmlDocument();
                 var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
                 xml.AppendChild(xmlRoot);
-                IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this);
+                IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this.MaterialGraph);
                 var xmlText = IO.TtFileManager.GetXmlText(xml);
                 Material.GraphXMLString = xmlText;
+
+                string code = "";
+                Graphics.Pipeline.Shader.TtMaterial.GenMateralGraphCode(ref code, Material, mHLSLCodeGen, MaterialGraph, MaterialOutput);
+                System.Diagnostics.Trace.WriteLine(Material.DefineCode.TextCode);
+                System.Diagnostics.Trace.WriteLine(code);
+
                 //if (code == Material.HLSLCode)
                 //    return;
                 //Material.UpdateShaderCode(false);
@@ -444,12 +459,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var xml = new System.Xml.XmlDocument();
             var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
             xml.AppendChild(xmlRoot);
-            IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this);
+            IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this.MaterialGraph);
             var xmlText = IO.TtFileManager.GetXmlText(xml);
             Material.GraphXMLString = xmlText;
-            GenHLSLCode();
-            //Material.UpdateShaderCode(false);
-            //Material.HLSLCode = GenHLSLCode();
+            
             Material.SaveAssetTo(Material.AssetName);
             //Material.SerialId++;
 
@@ -463,82 +476,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         #endregion
 
         UHLSLCodeGenerator mHLSLCodeGen = new UHLSLCodeGenerator();
-        private string GenHLSLCode()
-        {
-            var code = Graphics.Pipeline.Shader.TtMaterial.GenMateralGraphCode(Material, mHLSLCodeGen, MaterialGraph, MaterialOutput);
-            //Material.UsedSrView.Clear();
-            //Material.UsedUniformVars.Clear();
-            //Material.UsedSamplerStates.Clear();
-
-            //var MaterialClass = new TtClassDeclaration();
-
-            //var gen = mHLSLCodeGen.GetCodeObjectGen(Rtti.TtTypeDescGetter<TtMethodDeclaration>.TypeDesc);
-            //BuildCodeStatementsData data = new BuildCodeStatementsData()
-            //{
-            //    ClassDec = MaterialClass,
-            //    NodeGraph = MaterialGraph,
-            //    UserData = Material,
-            //    CodeGen = mHLSLCodeGen,
-            //};
-            //MaterialOutput.BuildStatements(null, ref data);
-            //string code = "";
-            //var incGen = mHLSLCodeGen.GetCodeObjectGen(Rtti.TtTypeDescGetter<TtIncludeDeclaration>.TypeDesc);
-            //TtCodeGeneratorData genData = new TtCodeGeneratorData()
-            //{
-            //    Method = null,
-            //    CodeGen = mHLSLCodeGen,
-            //    UserData = Material,
-            //};
-            //Material.IncludeFiles.Clear();
-            //foreach (var i in MaterialClass.PreIncludeHeads)
-            //{
-            //    incGen.GenCodes(i, ref code, ref genData);
-            //    Material.IncludeFiles.Add(i.FilePath);
-            //}
-            //genData = new TtCodeGeneratorData()
-            //{
-            //    Method = MaterialOutput.VSFunction,
-            //    CodeGen = mHLSLCodeGen,
-            //    UserData = Material,
-            //};
-            //gen.GenCodes(MaterialOutput.VSFunction, ref code, ref genData);
-            //genData = new TtCodeGeneratorData()
-            //{
-            //    Method = MaterialOutput.PSFunction,
-            //    CodeGen = mHLSLCodeGen,
-            //    UserData = Material,
-            //};
-            //gen.GenCodes(MaterialOutput.PSFunction, ref code, ref genData);
-
-            //Material.HLSLCode = code;
-            //Material.VSNeedStreams = MaterialOutput.GetVSNeedStreams();
-            //Material.PSNeedInputs = MaterialOutput.GetPSNeedInputs();
-
-            //if (Material.NormalMode == Graphics.Pipeline.Shader.TtMaterial.ENormalMode.NormalMap)
-            //{
-            //    if (Material.VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Normal) == false)
-            //        Material.VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Normal);
-            //    if (Material.VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Tangent) == false)
-            //        Material.VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Tangent);
-
-            //    if (Material.PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal) == false)
-            //        Material.PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal);
-            //    if (Material.PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent) == false)
-            //        Material.PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent);
-            //}
-            //else if (Material.NormalMode == Graphics.Pipeline.Shader.TtMaterial.ENormalMode.Normal)
-            //{
-            //    if (Material.VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Normal) == false)
-            //        Material.VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Normal);
-            //    if (Material.PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal) == false)
-            //        Material.PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal);
-            //}
-        
-            //Material.UpdateShaderCode(false);
-
-            mShaderEditor.mCoreObject.SetText(code);
-            return code;
-        }
 
         public string GetWindowsName()
         {

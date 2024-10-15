@@ -926,7 +926,7 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             var retStr = method.MethodName + "(";
             var parameters = method.Parameters;
-            for(int i=0; i<parameters.Length; i++)
+            for(int i=0; i<parameters.Count; i++)
             {
                 retStr += TtMethodArgumentDeclaration.GetOperationType(parameters[i]) + " ";
                 retStr += TtMethodArgumentDeclaration.GetIsParamArray(parameters[i]) ? "param " : "";
@@ -1038,8 +1038,8 @@ namespace EngineNS.Bricks.CodeBuilder
 
             retVal.MethodName = method.MethodName;
             var parameters = method.Parameters;
-            retVal.Arguments = new List<TtMethodArgumentDeclaration>(parameters.Length);
-            for (int paramIdx = 0; paramIdx < parameters.Length; paramIdx++)
+            retVal.Arguments = new List<TtMethodArgumentDeclaration>(parameters.Count);
+            for (int paramIdx = 0; paramIdx < parameters.Count; paramIdx++)
             {
                 retVal.Arguments.Add(TtMethodArgumentDeclaration.GetParam(parameters[paramIdx]));
             }

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_4879381412121305679 Type="EngineNS.Rtti.TtClassMeta.TtMethodMeta.TtParamMeta@EngineCore">
+  <IsDelegate Type="System.Boolean@Unknown" Order="0" />
+  <IsParamArray Type="System.Boolean@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <ParameterType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Order="0" />
+  <ParamIndex Type="System.Int32@Unknown" Order="0" />
+  <DefaultValueString Type="System.String@Unknown" Order="1" />
+</Hash_4879381412121305679>
