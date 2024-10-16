@@ -268,6 +268,20 @@ namespace EngineNS.IO
             IO.TtFileManager.DeleteFile(address + MetaExt);
             IO.TtFileManager.DeleteFile(address + ".snap");
         }
+        public virtual async Thread.Async.TtTask SaveRefAssets()
+        {
+            //Stop Editor Operate
+            TtEngine.Instance.StopOperation($"{this.AssetName}: SaveRefAssets");
+            List<IAssetMeta> holders = new List<IAssetMeta>();
+            TtEngine.Instance.AssetMetaManager.GetAssetHolder(this, holders);
+            foreach (var i in holders)
+            {
+                var holdAsset = await i.LoadAsset();
+                holdAsset.SaveAssetTo(i.GetAssetName());
+            }
+            //Resume Editor Operate
+            TtEngine.Instance.ResumeOperation();
+        }
         public virtual async System.Threading.Tasks.Task MoveTo(string name, RName.ERNameType type)
         {
             var rootType = TtEngine.Instance.FileManager.GetRootDirType(name);

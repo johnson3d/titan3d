@@ -7,7 +7,7 @@ using System.Text;
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
     [ContextMenu("istype,checktype", "Utilitites\\IsType", TtMacross.MacrossEditorKeyword)]
-    public partial class IsTypeNode : UNodeBase, UEditableValue.IValueEditNotify
+    public partial class IsTypeNode : TtNodeBase, UEditableValue.IValueEditNotify
     {
         public PinIn InPin { get; set; } = new PinIn();
         public PinIn TypePin { get; set; } = new PinIn();
@@ -57,7 +57,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             OutPin.LinkDesc.CanLinks.Add("Value");
             AddPinOut(OutPin);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             if(stayPin == InPin)
             {
@@ -223,7 +223,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     }
 
     [ContextMenu("isnull,isvalid,valid", "Utilitites\\IsValid", TtMacross.MacrossEditorKeyword)]
-    public partial class IsValidNode : UNodeBase
+    public partial class IsValidNode : TtNodeBase
     {
         public PinIn InPin { get; set; } = new PinIn();
         public PinOut OutPin { get; set; }
@@ -251,7 +251,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             OutPin.LinkDesc.CanLinks.Add("Value");
             AddPinOut(OutPin);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             if(stayPin == InPin)
             {

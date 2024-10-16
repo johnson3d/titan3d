@@ -3,3 +3,4 @@
 	- 相比材质编辑，多出来材质函数输入输出的节点，根据参数类型选择节点
 	- ![InOutArgs](MaterialFunctionEditor/MaterialFunctionArgs.png)
 	- In/Out两种节点，根据实际情况In可以没有，但是Out必须药有
+	- 在MateriaDetais里面可以为本材质函数设置一个适合的名字

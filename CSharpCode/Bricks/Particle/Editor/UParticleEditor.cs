@@ -308,7 +308,7 @@ namespace EngineNS.Bricks.Particle.Editor
             TtEngine.Instance.TickableManager.AddTickable(this);
 
             //ParticleGraph.ResetGraph();
-            ParticleGraph.OnChangeGraph = (UNodeGraph graph) =>
+            ParticleGraph.OnChangeGraph = (TtNodeGraph graph) =>
             {
                 GraphRenderer.SetGraph(graph);
             };

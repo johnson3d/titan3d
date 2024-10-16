@@ -8,7 +8,7 @@ using EngineNS.Rtti;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public partial class VarNode : UNodeBase
+    public partial class VarNode : TtNodeBase
     {
         public TtVariableDeclaration Var;
         public Rtti.TtTypeDesc VarType;
@@ -36,14 +36,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //AddPinIn(SetPin);
             //AddPinOut(GetPin);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             if (VarType == null)
                 return;
             if (stayPin == GetPin || stayPin == SetPin)
                 EGui.Controls.CtrlUtility.DrawHelper($"VarType:{VarType.ToString()}");
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -90,7 +90,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     }
 
     [ContextMenu("self,this,my,myself", "Self\\Self", TtMacross.MacrossEditorKeyword)]
-    public partial class SelfNode : UNodeBase
+    public partial class SelfNode : TtNodeBase
     {
         public PinOut OutPin { get; set; } = new PinOut();
         public SelfNode()
@@ -118,7 +118,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
     [ContextMenu("null", "Data\\null", TtMacross.MacrossEditorKeyword)]
-    public partial class NullNode : UNodeBase
+    public partial class NullNode : TtNodeBase
     {
         public PinOut OutPin { get; set; } = new PinOut();
         public NullNode()
@@ -316,7 +316,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return Var.VariableType.TypeDesc;
             return null;
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             if (Var == null)
                 return;
@@ -559,7 +559,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 return Var.VariableType.TypeDesc;
             return null;
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             if (Var == null)
                 return;
@@ -780,7 +780,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 AddPinOut(GetPin);
             }
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             if(stayPin == Self)
             {
@@ -1079,7 +1079,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //    set => mDefClass = value;
         //}
 
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -1134,7 +1134,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //    }
         //    return result;
         //}
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             if (stayPin == Self)
             {
@@ -1416,7 +1416,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (bool)SetPin.EditValue.Value;
             return new TtPrimitiveExpression(Value);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
@@ -1461,7 +1461,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (SByte)SetPin.EditValue.Value;
             return new TtPrimitiveExpression(Value);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
@@ -1506,7 +1506,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (Int16)SetPin.EditValue.Value;
             return new TtPrimitiveExpression(Value);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
@@ -1551,7 +1551,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (Int32)SetPin.EditValue.Value;
             return new TtPrimitiveExpression(Value);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
@@ -1596,7 +1596,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (Int64)SetPin.EditValue.Value;
             return new TtPrimitiveExpression(Value);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
@@ -1641,7 +1641,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (Byte)SetPin.EditValue.Value;
             return new TtPrimitiveExpression(Value);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
@@ -1686,7 +1686,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (UInt16)SetPin.EditValue.Value;
             return new TtPrimitiveExpression(Value);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
@@ -1731,7 +1731,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (UInt32)SetPin.EditValue.Value;
             return new TtPrimitiveExpression(Value);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
@@ -1776,7 +1776,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (UInt64)SetPin.EditValue.Value;
             return new TtPrimitiveExpression(Value);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
@@ -1821,7 +1821,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (float)SetPin.EditValue.Value;
             return new TtPrimitiveExpression(Value);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
@@ -1866,7 +1866,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (double)SetPin.EditValue.Value;
             return new TtPrimitiveExpression(Value);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
@@ -1911,7 +1911,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (string)SetPin.EditValue.Value;
             return new TtPrimitiveExpression(Value);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             if(Value == null)
                 EGui.Controls.CtrlUtility.DrawHelper("null");
@@ -1959,7 +1959,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (Vector2)SetPin.EditValue.Value;
             return new TtPrimitiveExpression(Value);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
@@ -2004,7 +2004,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (Vector3)SetPin.EditValue.Value;
             return new TtPrimitiveExpression(Value);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
@@ -2049,7 +2049,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (Vector4)SetPin.EditValue.Value;
             return new TtPrimitiveExpression(Value);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
@@ -2087,7 +2087,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (Color3f)SetPin.EditValue.Value;
             return new TtPrimitiveExpression(Value);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }
@@ -2125,7 +2125,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             mValue = (Color4f)SetPin.EditValue.Value;
             return new TtPrimitiveExpression(Value);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             EGui.Controls.CtrlUtility.DrawHelper(Value.ToString());
         }

@@ -14,8 +14,8 @@ namespace EngineNS.Bricks.NodeGraph
         public CodeBuilder.TtClassDeclaration ClassDec;
         public CodeBuilder.TtMethodDeclaration MethodDec;
         public CodeBuilder.TtCodeGeneratorBase CodeGen;
-        public UNodeGraph NodeGraph;
-        public UNodeBase GraphHostNode;
+        public TtNodeGraph NodeGraph;
+        public TtNodeBase GraphHostNode;
         public List<CodeBuilder.TtStatementBase> CurrentStatements;
         public object UserData;
         public List<CodeBuilder.TtExpressionBase> DelegatePinExps;
@@ -35,7 +35,8 @@ namespace EngineNS.Bricks.NodeGraph
     {
 
     }
-    public partial class UNodeGraph : IO.ISerializer
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.NodeGraph.UNodeGraph@EngineCore", "EngineNS.Bricks.NodeGraph.UNodeGraph" })]
+    public partial class TtNodeGraph : IO.ISerializer
     {
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
         public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
@@ -45,7 +46,7 @@ namespace EngineNS.Bricks.NodeGraph
             //UpdateNodeMenus();
             //UpdatePinMenus();
         }
-        public virtual void SetDefaultActionForNode(UNodeBase node) { }
+        public virtual void SetDefaultActionForNode(TtNodeBase node) { }
         public virtual TtGraphRenderer GetGraphRenderer() 
         {
             throw new MissingMethodException("Need override this method");
@@ -69,7 +70,7 @@ namespace EngineNS.Bricks.NodeGraph
         public string GraphName { get; set; } = "NodeGraph";
         [Rtti.Meta]
         [Browsable(false)]
-        public List<UNodeBase> Nodes { get; } = new List<UNodeBase>();
+        public List<TtNodeBase> Nodes { get; } = new List<TtNodeBase>();
         [Rtti.Meta(Order = 1)]
         [Browsable(false)]
         public List<UPinLinker> Linkers { get; } = new List<UPinLinker>();
@@ -78,7 +79,7 @@ namespace EngineNS.Bricks.NodeGraph
         public ULinkingLine LinkingOp { get; } = new ULinkingLine();
         public class FSelNodeState : EGui.Controls.PropertyGrid.IPropertyCustomization
         {
-            public UNodeBase Node;
+            public TtNodeBase Node;
             public Vector2 MoveOffset;
             public override int GetHashCode()
             {
@@ -143,13 +144,13 @@ namespace EngineNS.Bricks.NodeGraph
         [Browsable(false)]
         public List<FSelNodeState> SelectedNodes { get; } = new List<FSelNodeState>();
 
-        public Dictionary<UNodeBase, UNodeGraph> SubGraphs;
+        public Dictionary<TtNodeBase, TtNodeGraph> SubGraphs;
         [Browsable(false)]
-        public UNodeGraph ParentGraph { get; set; }
+        public TtNodeGraph ParentGraph { get; set; }
 
-        public delegate void FOnChangeGraph(UNodeGraph graph);
+        public delegate void FOnChangeGraph(TtNodeGraph graph);
         public FOnChangeGraph OnChangeGraph;
-        public void ChangeGraph(UNodeGraph graph)
+        public void ChangeGraph(TtNodeGraph graph)
         {
             if (OnChangeGraph != null)
             {
@@ -167,7 +168,7 @@ namespace EngineNS.Bricks.NodeGraph
             PreOrderPinOut = null;
         }
         [Rtti.Meta]
-        public UNodeBase FindFirstNode(string name, bool findInSubGraphs = true)
+        public TtNodeBase FindFirstNode(string name, bool findInSubGraphs = true)
         {
             for(int i=0; i<Nodes.Count; i++)
             {
@@ -183,7 +184,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
             return null;
         }
-        public T FindFirstTypedNode<T>(string name, bool findInSubGraphs = true) where T : UNodeBase
+        public T FindFirstTypedNode<T>(string name, bool findInSubGraphs = true) where T : TtNodeBase
         {
             for (int i = 0; i < Nodes.Count; i++)
             {
@@ -202,7 +203,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
             return null;
         }
-        public UNodeBase FindNode(in Guid id, bool findInSubGraphs = true)
+        public TtNodeBase FindNode(in Guid id, bool findInSubGraphs = true)
         {
             for(int i=0; i<Nodes.Count; i++)
             {
@@ -220,8 +221,8 @@ namespace EngineNS.Bricks.NodeGraph
 
             return null;
         }
-        public void AddLink(UNodeBase OutNode, string OutPin,
-            UNodeBase InNode, string InPin, bool bCallLinked = true)
+        public void AddLink(TtNodeBase OutNode, string OutPin,
+            TtNodeBase InNode, string InPin, bool bCallLinked = true)
         {
             PinOut oPin = null;
             if (OutNode != null)
@@ -323,7 +324,7 @@ namespace EngineNS.Bricks.NodeGraph
                 }
             }
         }
-        public void RemoveLinkedInExcept(PinIn pin, UNodeBase OutNode, string OutPin)
+        public void RemoveLinkedInExcept(PinIn pin, TtNodeBase OutNode, string OutPin)
         {
             for (int i = 0; i < Linkers.Count; i++)
             {
@@ -353,7 +354,7 @@ namespace EngineNS.Bricks.NodeGraph
                 }
             }
         }
-        public void RemoveLinkedOutExcept(PinOut pin, UNodeBase InNode, string InPin)
+        public void RemoveLinkedOutExcept(PinOut pin, TtNodeBase InNode, string InPin)
         {
             for (int i = 0; i < Linkers.Count; i++)
             {
@@ -459,7 +460,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
             return null;
         }
-        public UNodeBase GetOppositePinNode(PinIn pin)
+        public TtNodeBase GetOppositePinNode(PinIn pin)
         {
             var linker = GetFirstLinker(pin);
             if (linker == null)
@@ -468,7 +469,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
             return linker.OutPin.HostNode;
         }
-        public UNodeBase GetOppositePinNode(PinOut pin)
+        public TtNodeBase GetOppositePinNode(PinOut pin)
         {
             var linker = GetFirstLinker(pin);
             if (linker == null)
@@ -520,7 +521,7 @@ namespace EngineNS.Bricks.NodeGraph
             return linker.InPin.HostNode.GetInPinType(linker.InPin);
         }
 
-        public UNodeBase AddNode(UNodeBase node)
+        public TtNodeBase AddNode(TtNodeBase node)
         {
             node.ParentGraph = this;
             foreach (var i in Nodes)
@@ -533,7 +534,7 @@ namespace EngineNS.Bricks.NodeGraph
             Nodes.Add(node);
             return node;
         }
-        public void RemoveNode(UNodeBase node)
+        public void RemoveNode(TtNodeBase node)
         {
             node.OnRemoveNode();
             foreach (var i in node.Inputs)
@@ -555,7 +556,7 @@ namespace EngineNS.Bricks.NodeGraph
             node.ParentGraph = null;
         }
 
-        public bool IsInViewport(UNodeBase node)
+        public bool IsInViewport(TtNodeBase node)
         {
             if (node.Position.X > PositionVP.X + SizeVP.X ||
                 node.Position.Y > PositionVP.Y + SizeVP.Y ||
@@ -566,7 +567,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
             return true;
         }
-        public void AddSelected(UNodeBase node)
+        public void AddSelected(TtNodeBase node)
         {
             node.Selected = true;
             FSelNodeState state = new FSelNodeState();
@@ -574,7 +575,7 @@ namespace EngineNS.Bricks.NodeGraph
             SelectedNodes.Add(state);
             SelectedNodesDirty = true;
         }
-        public void RemoveSelected(UNodeBase node)
+        public void RemoveSelected(TtNodeBase node)
         {
             node.Selected = false;
             for (int i = 0; i < SelectedNodes.Count; i++)
@@ -665,7 +666,7 @@ namespace EngineNS.Bricks.NodeGraph
             CanvasMenus.Text = "Canvas";
         }
 
-        static List<UNodeBase> mCopyedNodes = new List<UNodeBase>();
+        static List<TtNodeBase> mCopyedNodes = new List<TtNodeBase>();
         static Dictionary<NodePin, NodePin> mCopyedPins = new Dictionary<NodePin, NodePin>();
         static Dictionary<NodePin, NodePin> mCopyedLinkers = new Dictionary<NodePin, NodePin>();
         public void Copy()
@@ -708,7 +709,7 @@ namespace EngineNS.Bricks.NodeGraph
                 if (max.Y < nodeMax.Y)
                     max.Y = nodeMax.Y;
 
-                var copyedNode = Rtti.TtTypeDescManager.CreateInstance(node.GetType()) as UNodeBase;
+                var copyedNode = Rtti.TtTypeDescManager.CreateInstance(node.GetType()) as TtNodeBase;
                 node.CopyTo(copyedNode);
                 copyedNode.UserData = this;
                 SetDefaultActionForNode(copyedNode);
@@ -764,7 +765,7 @@ namespace EngineNS.Bricks.NodeGraph
                 "Delete Node", null,
                 (TtMenuItem item, object sender) =>
                 {
-                    var pNode = sender as UNodeBase;
+                    var pNode = sender as TtNodeBase;
                     if (pNode == null)
                         return;
 
@@ -795,7 +796,7 @@ namespace EngineNS.Bricks.NodeGraph
                 "Collapse Nodes", null,
                 (TtMenuItem item, object sender) =>
                 {
-                    var nodeList = new List<UNodeBase>(SelectedNodes.Count);
+                    var nodeList = new List<TtNodeBase>(SelectedNodes.Count);
                     for (int i = 0; i < SelectedNodes.Count; i++)
                     {
                         nodeList.Add(SelectedNodes[i].Node);
@@ -814,7 +815,7 @@ namespace EngineNS.Bricks.NodeGraph
                 "Expand Nodes", null,
                 (TtMenuItem item, object sender) =>
                 {
-                    var nodeList = new List<UNodeBase>(SelectedNodes.Count);
+                    var nodeList = new List<TtNodeBase>(SelectedNodes.Count);
                     for (int i = 0; i < SelectedNodes.Count; i++)
                     {
                         nodeList.Add(SelectedNodes[i].Node);
@@ -845,11 +846,11 @@ namespace EngineNS.Bricks.NodeGraph
                 }
             }
         }
-        public virtual void CollapseNodes(List<UNodeBase> nodeList)
+        public virtual void CollapseNodes(List<TtNodeBase> nodeList)
         {
             throw new InvalidOperationException("Need override this method");
         }
-        public virtual void ExpandNodes(List<UNodeBase> nodeList)
+        public virtual void ExpandNodes(List<TtNodeBase> nodeList)
         {
             for(int i=0; i<nodeList.Count; i++)
             {
@@ -955,7 +956,7 @@ namespace EngineNS.Bricks.NodeGraph
             t.Y = PhysicalSizeVP.Y * rate.Y;
             return t;
         }
-        public void GetSelectNodes(in Vector2 start, in Vector2 end, List<UNodeBase> OutNodes)
+        public void GetSelectNodes(in Vector2 start, in Vector2 end, List<TtNodeBase> OutNodes)
         {
             foreach (var i in Nodes)
             {
@@ -988,9 +989,9 @@ namespace EngineNS.Bricks.NodeGraph
             }
 
             var pKls = hit.GetType();
-            if (Rtti.TtTypeDesc.CanCast(pKls, typeof(UNodeBase)))
+            if (Rtti.TtTypeDesc.CanCast(pKls, typeof(TtNodeBase)))
             {
-                var node = hit as UNodeBase;
+                var node = hit as TtNodeBase;
                 if (node.Selected)
                 {
                     if(this.IsKeydown(EKey.Ctl))
@@ -1035,7 +1036,7 @@ namespace EngineNS.Bricks.NodeGraph
         {
             DragPosition = ViewportRateToCanvas(in screenPos);
             //if (ButtonPress[EMouseButton::Left])
-            UNodeBase pressNode = null;
+            TtNodeBase pressNode = null;
             if (CurMenuType == EGraphMenu.None)
             {
                 if (!mIsMovingSelNodes)
@@ -1089,7 +1090,7 @@ namespace EngineNS.Bricks.NodeGraph
                         }
                         else
                         {
-                            var hitNode = hit as UNodeBase;
+                            var hitNode = hit as TtNodeBase;
                             if (hitNode != null)
                             {
                                 hitNode.OnLButtonClicked(null);
@@ -1117,7 +1118,7 @@ namespace EngineNS.Bricks.NodeGraph
                                 end.Y = start.Y;
                                 start.Y = save;
                             }
-                            List<UNodeBase> sels = new List<UNodeBase>();
+                            List<TtNodeBase> sels = new List<TtNodeBase>();
                             GetSelectNodes(start, end, sels);
                             if(this.IsKeydown(EKey.Ctl))
                             {
@@ -1156,7 +1157,7 @@ namespace EngineNS.Bricks.NodeGraph
                             hitPin.HostNode.OnLButtonClicked(hitPin);
                         else
                         {
-                            var hitNode = hit as UNodeBase;
+                            var hitNode = hit as TtNodeBase;
                             if (hitNode != null)
                                 hitNode.OnLButtonClicked(null);
                             else
@@ -1201,7 +1202,7 @@ namespace EngineNS.Bricks.NodeGraph
                     CurMenuType = EGraphMenu.Pin;
                     PinMenuDirty = true;
                 }
-                else if (Rtti.TtTypeDesc.CanCast(pKls, typeof(UNodeBase)))
+                else if (Rtti.TtTypeDesc.CanCast(pKls, typeof(TtNodeBase)))
                 {
                     CurMenuType = EGraphMenu.Node;
                     NodeMenuDirty = true;
@@ -1325,9 +1326,9 @@ namespace EngineNS.Bricks.NodeGraph
                         LinkingOp.HoverPin.HostNode.OnMouseStayPin(LinkingOp.HoverPin, this);
                     }
                 }
-                else if(Rtti.TtTypeDesc.CanCast(hit.GetType(), typeof(UNodeBase)))
+                else if(Rtti.TtTypeDesc.CanCast(hit.GetType(), typeof(TtNodeBase)))
                 {
-                    var node = hit as UNodeBase;
+                    var node = hit as TtNodeBase;
                     if(node.HasError && node.CodeExcept != null)
                     {
                         EGui.Controls.CtrlUtility.DrawHelper(node.CodeExcept.ErrorInfo);
@@ -1349,7 +1350,7 @@ namespace EngineNS.Bricks.NodeGraph
                             foreach (var i in SelectedNodes)
                             {
                                 var type = Rtti.TtTypeDesc.TypeOf(i.Node.GetType());
-                                var node = Rtti.TtTypeDescManager.CreateInstance(type) as UNodeBase;
+                                var node = Rtti.TtTypeDescManager.CreateInstance(type) as TtNodeBase;
                                 i.Node.CopyTo(node);
                                 node.Name = i.Node.Name + "_copy";
                                 node.UserData = i.Node.UserData;
@@ -1571,9 +1572,9 @@ namespace EngineNS.Bricks.NodeGraph
             }
 
             var pKls = hit.GetType();
-            if (Rtti.TtTypeDesc.CanCast(pKls, typeof(UNodeBase)))
+            if (Rtti.TtTypeDesc.CanCast(pKls, typeof(TtNodeBase)))
             {
-                var node = hit as UNodeBase;
+                var node = hit as TtNodeBase;
                 node.OnDoubleClick();
             }
             else if(Rtti.TtTypeDesc.CanCast(pKls, typeof(NodePin)))
@@ -1606,7 +1607,7 @@ namespace EngineNS.Bricks.NodeGraph
         {
 
         }
-        public virtual bool OnLinkingUp(ULinkingLine linking, UNodeBase pressNode)
+        public virtual bool OnLinkingUp(ULinkingLine linking, TtNodeBase pressNode)
         {
             return true;
         }

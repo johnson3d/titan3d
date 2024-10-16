@@ -5,7 +5,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Procedure
 {
-    public abstract partial class UPgcNodeBase : UNodeBase, EGui.Controls.PropertyGrid.IPropertyCustomization
+    public abstract partial class UPgcNodeBase : TtNodeBase, EGui.Controls.PropertyGrid.IPropertyCustomization
     {
         public int RootDistance;
         protected int mPreviewResultIndex = -1;
@@ -115,7 +115,7 @@ namespace EngineNS.Bricks.Procedure
 
         }
         #region GUI
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             var creator = stayPin.Tag as UBufferCreator;
             if (creator != null)
@@ -170,14 +170,14 @@ namespace EngineNS.Bricks.Procedure
         #endregion
 
         #region Link
-        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (iPin.LinkDesc.CanLinks.Contains("Value"))
             {
                 ParentGraph.RemoveLinkedInExcept(iPin, OutNode, oPin.Name);
             }
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;

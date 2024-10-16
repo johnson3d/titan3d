@@ -9,7 +9,7 @@ using NPOI.POIFS.Crypt.Dsig;
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialOutput@EngineCore", "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialOutput" })]
-    public partial class TtMaterialOutput : UNodeBase
+    public partial class TtMaterialOutput : TtNodeBase
     {
         public static TtMaterialOutput NewNode(TtMaterialGraph graph)
         {
@@ -101,12 +101,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         //public PinIn VertexOffset { get; set; } = new PinIn();
         //[Browsable(false)]
         //public PinIn AO { get; set; } = new PinIn();
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
 
-            var nodeExpr = OutNode as UNodeBase;
+            var nodeExpr = OutNode as TtNodeBase;
             var type = nodeExpr.GetOutPinType(oPin);
 
             if (iPin == FindPinIn("Albedo") ||

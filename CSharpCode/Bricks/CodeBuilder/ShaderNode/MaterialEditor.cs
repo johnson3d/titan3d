@@ -365,6 +365,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 System.Diagnostics.Trace.WriteLine(Material.DefineCode.TextCode);
                 System.Diagnostics.Trace.WriteLine(code);
 
+                mShaderEditor.mCoreObject.SetText(code);
+
                 //if (code == Material.HLSLCode)
                 //    return;
                 //Material.UpdateShaderCode(false);
@@ -414,7 +416,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                             continue;
                         tagList.Add(node.GetPropertyEditObject());
                     }
-                    NodePropGrid.HideInheritDeclareType = Rtti.TtTypeDescGetter<UNodeBase>.TypeDesc;
+                    NodePropGrid.HideInheritDeclareType = Rtti.TtTypeDescGetter<TtNodeBase>.TypeDesc;
                     NodePropGrid.Target = tagList;
                 }
                 NodePropGrid.OnDraw(true, false, false);

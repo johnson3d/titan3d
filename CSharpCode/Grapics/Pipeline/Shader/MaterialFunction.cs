@@ -23,6 +23,28 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return TtEngine.Instance.EditorInstance.Config.MaterialFunctionBoderColor;
         }
+        public override async Thread.Async.TtTask SaveRefAssets()
+        {
+            //Stop Editor Operate
+            TtEngine.Instance.StopOperation($"{this.AssetName}: SaveRefAssets");
+            var holders = new List<IO.IAssetMeta>();
+            TtEngine.Instance.AssetMetaManager.GetAssetHolder(this, holders);
+            foreach (var i in holders)
+            {
+                var mtl = i as TtMaterialAMeta;
+                if (mtl == null)
+                    continue;
+                var holdAsset = await mtl.LoadAsset();
+                holdAsset.SaveAssetTo(mtl.GetAssetName());
+            }
+            //await TtEngine.Instance.EventPoster.Post((state) =>
+            //{
+            //    System.Threading.Thread.Sleep(10000);
+            //    return true;
+            //}, Thread.Async.EAsyncTarget.AsyncIO);
+            //Resume Editor Operate
+            TtEngine.Instance.ResumeOperation();
+        }
     }
     [TtMaterialFunction.MaterialFunctionImport]
     [IO.AssetCreateMenu(MenuName = "Graphics/MaterialFunction")]
@@ -85,6 +107,33 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 object pThis = MaterialGraph;
                 IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
             }
+            
+            HLSLCode = GenMateralFunctionGraphCode(new UHLSLCodeGenerator(), MaterialGraph);
+
+            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
+            using (var xnd = new IO.TtXndHolder(typeStr, 0, 0))
+            {
+                using (var attr = xnd.NewAttribute("MaterialFunction", 0, 0))
+                {
+                    using (var ar = attr.GetWriter(512))
+                    {
+                        ar.Write(this);
+                    }
+                    xnd.RootNode.AddAttribute(attr);
+                }
+
+                xnd.SaveXnd(name.Address);
+            }
+
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address);
+
+            TtEngine.Instance.GfxDevice.MaterialFunctionManager.RegMaterialFunctionName(AssetName);
+
+            _ = ameta.SaveRefAssets();
+        }
+        public string GenMateralFunctionGraphCode(UHLSLCodeGenerator mHLSLCodeGen,
+            Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionGraph MaterialGraph)
+        {
             var lstInput = new List<IMaterialFunctionInput>();
             RefMaterialFunctions.Clear();
             foreach (var i in MaterialGraph.Nodes)
@@ -122,6 +171,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 t.Name = i.VarName;
                 t.ParameterType = i.InputType;
                 t.ArgumentAttribute = Bricks.CodeBuilder.EMethodArgumentAttribute.In;
+                t.DefaultValue = i.GetDefaultValueObject();
                 MethodMeta.Parameters.Add(t);
             }
             foreach (var i in lstOutput)
@@ -130,35 +180,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 t.Name = i.VarName;
                 t.ParameterType = i.OutputType;
                 t.ArgumentAttribute = Bricks.CodeBuilder.EMethodArgumentAttribute.Out;
+                t.DefaultValue = i.GetDefaultValueObject();
                 MethodMeta.Parameters.Add(t);
             }
             MethodMeta.ReturnType = Rtti.TtTypeDesc.TypeOf(typeof(void));
             MethodMeta.MethodName = AssetName.PureName + "_" + UniHash32.APHash(this.AssetName.ToString());
 
-            HLSLCode = GenMateralFunctionGraphCode(new UHLSLCodeGenerator(), MaterialGraph);
-
-            var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
-            using (var xnd = new IO.TtXndHolder(typeStr, 0, 0))
-            {
-                using (var attr = xnd.NewAttribute("MaterialFunction", 0, 0))
-                {
-                    using (var ar = attr.GetWriter(512))
-                    {
-                        ar.Write(this);
-                    }
-                    xnd.RootNode.AddAttribute(attr);
-                }
-
-                xnd.SaveXnd(name.Address);
-            }
-
-            TtEngine.Instance.SourceControlModule.AddFile(name.Address);
-
-            TtEngine.Instance.GfxDevice.MaterialFunctionManager.RegMaterialFunctionName(AssetName);
-        }
-        public string GenMateralFunctionGraphCode(UHLSLCodeGenerator mHLSLCodeGen,
-            Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionGraph MaterialGraph)
-        {
             var MaterialClass = new TtClassDeclaration();
 
             var gen = mHLSLCodeGen.GetCodeObjectGen(Rtti.TtTypeDescGetter<TtMethodDeclaration>.TypeDesc);
@@ -180,6 +207,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     OperationType = i.ArgumentAttribute,
                     VariableType = new TtTypeReference(i.ParameterType),
                     VariableName = i.Name,
+                    InitValue = new TtPrimitiveExpression(Rtti.TtTypeDesc.TypeOf(i.DefaultValue.GetType()), i.DefaultValue),
                 });
             }
             data.CurrentStatements = MtlFunction.MethodBody.Sequence;
@@ -190,19 +218,22 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 var v = i as IMaterialFunctionOutput;
                 if (v == null)
                     continue;
-                if (v.OutPin.HasLinker())
+                foreach (var j in v.OutPins)
                 {
-                    var linker = MaterialGraph.FindInLinkerSingle(v.OutPin);
-                    var opPin = MaterialGraph.GetOppositePin(v.OutPin);
-                    var pinNode = MaterialGraph.GetOppositePinNode(v.OutPin);
-                    pinNode.BuildStatements(opPin, ref data);
-                    var exp = MaterialGraph.GetOppositePinExpression(v.OutPin, ref data);
-                    var assign = new TtAssignOperatorStatement()
+                    if (j.HasLinker())
                     {
-                        From = exp,
-                        To = new TtVariableReferenceExpression(i.Name, null),
-                    };
-                    MtlFunction.MethodBody.Sequence.Add(assign);
+                        var linker = MaterialGraph.FindInLinkerSingle(j);
+                        var opPin = MaterialGraph.GetOppositePin(j);
+                        var pinNode = MaterialGraph.GetOppositePinNode(j);
+                        pinNode.BuildStatements(opPin, ref data);
+                        var exp = MaterialGraph.GetOppositePinExpression(j, ref data);
+                        var assign = new TtAssignOperatorStatement()
+                        {
+                            From = exp,
+                            To = new TtVariableReferenceExpression(v.GetSetter(i, j), null),
+                        };
+                        MtlFunction.MethodBody.Sequence.Add(assign);
+                    }
                 }
             }
 
@@ -215,11 +246,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 UserData = this,
             };
             //Material.IncludeFiles.Clear();
-            //foreach (var i in MaterialClass.PreIncludeHeads)
-            //{
-            //    incGen.GenCodes(i, ref code, ref genData);
-            //    Material.IncludeFiles.Add(i.FilePath);
-            //}
+            foreach (var i in MaterialClass.PreIncludeHeads)
+            {
+                incGen.GenCodes(i, ref code, ref genData);
+                //Material.IncludeFiles.Add(i.FilePath);
+            }
             genData = new TtCodeGeneratorData()
             {
                 Method = MtlFunction,
@@ -228,31 +259,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
             };
             gen.GenCodes(MtlFunction, ref code, ref genData);
             
-            //Material.HLSLCode = code;
-            //Material.VSNeedStreams = MaterialOutput.GetVSNeedStreams();
-            //Material.PSNeedInputs = MaterialOutput.GetPSNeedInputs();
-
-            //if (Material.NormalMode == Graphics.Pipeline.Shader.TtMaterial.ENormalMode.NormalMap)
-            //{
-            //    if (Material.VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Normal) == false)
-            //        Material.VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Normal);
-            //    if (Material.VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Tangent) == false)
-            //        Material.VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Tangent);
-
-            //    if (Material.PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal) == false)
-            //        Material.PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal);
-            //    if (Material.PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent) == false)
-            //        Material.PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Tangent);
-            //}
-            //else if (Material.NormalMode == Graphics.Pipeline.Shader.TtMaterial.ENormalMode.Normal)
-            //{
-            //    if (Material.VSNeedStreams.Contains(NxRHI.EVertexStreamType.VST_Normal) == false)
-            //        Material.VSNeedStreams.Add(NxRHI.EVertexStreamType.VST_Normal);
-            //    if (Material.PSNeedInputs.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal) == false)
-            //        Material.PSNeedInputs.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_Normal);
-            //}
-            //Material.UpdateShaderCode(false);
-
             return code;
         }
         public static TtMaterialFunction LoadXnd(TtMaterialFunctionManager manager, IO.TtXndNode node)

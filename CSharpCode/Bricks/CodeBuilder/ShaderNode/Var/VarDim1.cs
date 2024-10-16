@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 {
-    public class VarNode : UNodeBase
+    public class VarNode : TtNodeBase
     {
         public VarNode()
         {
@@ -96,13 +96,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         [Rtti.Meta]
         public bool IsHalfPrecision { get; set; } = false;
         public Rtti.TtTypeDesc VarType;
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             if (VarType == null)
                 return;
             EGui.Controls.CtrlUtility.DrawHelper($"VarType:{VarType.ToString()}");
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -115,7 +115,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
 
             return true;
         }
-        public override bool CanLinkTo(PinOut oPin, UNodeBase InNode, PinIn iPin)
+        public override bool CanLinkTo(PinOut oPin, TtNodeBase InNode, PinIn iPin)
         {
             if (base.CanLinkTo(oPin, InNode, iPin) == false)
                 return false;
@@ -173,12 +173,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         {
             return VarType;
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
 
-            var nodeExpr = OutNode as UNodeBase;
+            var nodeExpr = OutNode as TtNodeBase;
             var type = nodeExpr.GetOutPinType(oPin);
 
             if (iPin == InX)
@@ -257,12 +257,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         {
             return VarType;
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
 
-            var nodeExpr = OutNode as UNodeBase;
+            var nodeExpr = OutNode as TtNodeBase;
             var type = nodeExpr.GetOutPinType(oPin);
 
             if (iPin == InX)

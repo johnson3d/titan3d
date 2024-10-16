@@ -7,7 +7,7 @@ using Org.BouncyCastle.Asn1.X509.Qualified;
 
 namespace EngineNS.Bricks.Particle.Editor
 {
-    public class TtParticleGraph : NodeGraph.UNodeGraph
+    public class TtParticleGraph : NodeGraph.TtNodeGraph
     {
         public const string NebulaEditorKeyword = "Nebula";
         public TtParticleGraph()

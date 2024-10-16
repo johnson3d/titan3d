@@ -6,7 +6,7 @@ using EngineNS.EGui.Controls;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public partial class MethodNode : UNodeBase, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode, IBreakableNode, EGui.Controls.PropertyGrid.IPropertyCustomization
+    public partial class MethodNode : TtNodeBase, UEditableValue.IValueEditNotify, IBeforeExecNode, IAfterExecNode, IBreakableNode, EGui.Controls.PropertyGrid.IPropertyCustomization
     {
         public PinOut Result = null;
         public PinIn Self = null;
@@ -714,7 +714,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
         }
-        public override void OnMouseStayPin(NodePin pin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin pin, TtNodeGraph graph)
         {
             if (pin == Self)
             {
@@ -1629,12 +1629,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return pin.Tag as Rtti.TtTypeDesc;
             //return null;
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
 
-            var nodeExpr = OutNode as UNodeBase;
+            var nodeExpr = OutNode as TtNodeBase;
             if (nodeExpr == null)
                 return true;
 

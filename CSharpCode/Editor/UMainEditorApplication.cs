@@ -507,7 +507,6 @@ namespace EngineNS.Editor
                 ImGuiAPI.ShowDemoWindow(ref _showDemoWindow);
             }
 
-            AssetEditorManager.OnDrawTopMost();
             TickToOperationMenus();
 
             if(!string.IsNullOrEmpty(NeedFocusWindowName))

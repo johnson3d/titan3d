@@ -121,7 +121,7 @@ namespace EngineNS.Bricks.Procedure.Node
             if(input != null)
                 (linker.InPin.Tag as UBufferCreator).BufferType = input.BufferType;
         }
-        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             base.OnLinkedFrom(iPin, OutNode, oPin);
 

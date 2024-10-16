@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
 {
-    public class Binocular : UNodeBase
+    public class Binocular : TtNodeBase
     {
         public Rtti.TtTypeDesc LeftType;
         [Browsable(false)]
@@ -131,7 +131,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
             : base(op, name)
         {
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             if (LeftType != null)
                 EGui.Controls.CtrlUtility.DrawHelper(LeftType.FullName);
@@ -143,7 +143,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
                 LeftType = null;
             }
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -161,7 +161,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
             }
             return true;
         }
-        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             base.OnLinkedFrom(iPin, OutNode, oPin);
 

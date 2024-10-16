@@ -25,7 +25,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return base.GetOutBufferCreator(pin);
         }
-        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             ParentGraph.RemoveLinkedInExcept(iPin, OutNode, oPin.Name);
 

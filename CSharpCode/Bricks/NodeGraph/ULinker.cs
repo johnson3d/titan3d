@@ -8,7 +8,7 @@ namespace EngineNS.Bricks.NodeGraph
     {
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
-            var graph = hostObject as UNodeGraph;
+            var graph = hostObject as TtNodeGraph;
             if (graph == null)
                 return;
             mGraph = graph;
@@ -17,18 +17,18 @@ namespace EngineNS.Bricks.NodeGraph
         {
 
         }
-        UNodeGraph mGraph;
+        TtNodeGraph mGraph;
         public PinIn InPin { get; set; }
         public PinOut OutPin { get; set; }
         public bool InDebuggerLine = false;
-        public UNodeBase InNode
+        public TtNodeBase InNode
         {
             get
             {
                 return InPin?.HostNode;
             }
         }
-        public UNodeBase OutNode
+        public TtNodeBase OutNode
         {
             get
             {

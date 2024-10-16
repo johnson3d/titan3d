@@ -92,7 +92,7 @@ namespace EngineNS.Bricks.NodeGraph
     }
     public interface IUnionNode : EGui.Controls.PropertyGrid.IPropertyCustomization
     {
-        public UNodeGraph ContentGraph { get; set; }
+        public TtNodeGraph ContentGraph { get; set; }
         public Guid InputNodeId { get; set; }
         public Guid OutputNodeId { get; set; }
         public List<UNodePinDefineBase> UserInputs { get; set; }
@@ -110,27 +110,27 @@ namespace EngineNS.Bricks.NodeGraph
         public void UpdatePinWithDefine(NodePin pin, UNodePinDefineBase pinDef);
 
         static Dictionary<NodePin, NodePin> mCreateTempPins = new Dictionary<NodePin, NodePin>();
-        public static T_N CreateUnionNode<T_N, T_P, T_E>(UNodeGraph graph, List<UNodeBase> nodes, bool addtoGraph = true)
+        public static T_N CreateUnionNode<T_N, T_P, T_E>(TtNodeGraph graph, List<TtNodeBase> nodes, bool addtoGraph = true)
             where T_N : IUnionNode, new()
             where T_P : UNodePinDefineBase, new()
             where T_E : IEndPointNode, new()
         {
             var unionNode = new T_N();
-            var contentGraph = Rtti.TtTypeDescManager.CreateInstance(graph.GetType()) as UNodeGraph;
+            var contentGraph = Rtti.TtTypeDescManager.CreateInstance(graph.GetType()) as TtNodeGraph;
             contentGraph.Initialize();
             unionNode.ContentGraph = contentGraph;
             if (addtoGraph)
-                graph.AddNode(unionNode as UNodeBase);
+                graph.AddNode(unionNode as TtNodeBase);
 
             var startNode = new T_E();
             startNode.Name = "Inputs";
             startNode.IsStart = true;
-            contentGraph.AddNode(startNode as UNodeBase);
+            contentGraph.AddNode(startNode as TtNodeBase);
             unionNode.InputNodeId = startNode.NodeId;
             var endNode = new T_E();
             endNode.Name = "Outputs";
             endNode.IsStart = false;
-            contentGraph.AddNode(endNode as UNodeBase);
+            contentGraph.AddNode(endNode as TtNodeBase);
             unionNode.OutputNodeId = endNode.NodeId;
 
             mCreateTempPins.Clear();
@@ -147,7 +147,7 @@ namespace EngineNS.Bricks.NodeGraph
             for (int i = 0; i < nodes.Count; i++)
             {
                 var node = nodes[i];
-                var copyedNode = Rtti.TtTypeDescManager.CreateInstance(node.GetType()) as UNodeBase;
+                var copyedNode = Rtti.TtTypeDescManager.CreateInstance(node.GetType()) as TtNodeBase;
                 nodes[i].CopyTo(copyedNode);
                 copyedNode.UserData = contentGraph;
                 contentGraph.SetDefaultActionForNode(copyedNode);
@@ -236,7 +236,7 @@ namespace EngineNS.Bricks.NodeGraph
             return unionNode;
         }
         static List<UPinLinker> mTemplinkers = new List<UPinLinker>();
-        public static void ExpandUnionNode(UNodeGraph graph, IUnionNode unionNode)
+        public static void ExpandUnionNode(TtNodeGraph graph, IUnionNode unionNode)
         {
             mCreateTempPins.Clear();
             var contentGraph = unionNode.ContentGraph;
@@ -324,7 +324,7 @@ namespace EngineNS.Bricks.NodeGraph
                 }
             }
 
-            graph.RemoveNode(unionNode as UNodeBase);
+            graph.RemoveNode(unionNode as TtNodeBase);
         }
     }
     public class UnionNodeConfigRenderer
@@ -403,11 +403,11 @@ namespace EngineNS.Bricks.NodeGraph
                                         if(objIns == null)
                                             continue;
 
-                                        UNodeBase node = null;
-                                        if (objIns is UNodeBase)
-                                            node = objIns as UNodeBase;
-                                        else if (objIns is UNodeGraph.FSelNodeState)
-                                            node = ((UNodeGraph.FSelNodeState)objIns).Node;
+                                        TtNodeBase node = null;
+                                        if (objIns is TtNodeBase)
+                                            node = objIns as TtNodeBase;
+                                        else if (objIns is TtNodeGraph.FSelNodeState)
+                                            node = ((TtNodeGraph.FSelNodeState)objIns).Node;
                                         if (node == null)
                                             continue;
 
@@ -452,12 +452,12 @@ namespace EngineNS.Bricks.NodeGraph
                         mUnionNode.PropertyDatas.Add(data);
                     }
                     mUnionNode.IsPropertyVisibleDirty = true;
-                    ((UNodeBase)mUnionNode).ParentGraph.SetConfigUnionNode(null);
+                    ((TtNodeBase)mUnionNode).ParentGraph.SetConfigUnionNode(null);
                 }
                 ImGuiAPI.SameLine(0, -1);
                 if(EGui.UIProxy.CustomButton.ToolButton("Cancel", in Vector2.Zero))
                 {
-                    ((UNodeBase)mUnionNode).ParentGraph.SetConfigUnionNode(null);
+                    ((TtNodeBase)mUnionNode).ParentGraph.SetConfigUnionNode(null);
                 }
             }
             ImGuiAPI.EndChild();

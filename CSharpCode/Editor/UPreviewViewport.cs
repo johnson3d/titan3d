@@ -148,7 +148,6 @@ namespace EngineNS.Editor
         }
         #region CameraControl
         Vector2 mPreMousePt;
-        public float CameraRotSpeed = 1.0f;
         public bool FreezCameraControl = false;
         public delegate void Delegate_OnEvent(in Bricks.Input.Event e);
         public Delegate_OnEvent OnEventAction;
@@ -176,8 +175,8 @@ namespace EngineNS.Editor
                 {
                     if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                     {
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * CameraRotSpeed * TtEngine.Instance.ElapsedSecond);
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * CameraRotSpeed * TtEngine.Instance.ElapsedSecond);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * CameraMouseRotSpeed * TtEngine.Instance.ElapsedSecond);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * CameraMouseRotSpeed * TtEngine.Instance.ElapsedSecond);
                         /*if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LCTRL))
                         {
                             TtEngine.Instance.GfxDevice.RenderCmdQueue.CaptureRenderDocFrame = true;
@@ -197,8 +196,8 @@ namespace EngineNS.Editor
                     }
                     else
                     {
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * CameraRotSpeed * TtEngine.Instance.ElapsedSecond, true);
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * CameraRotSpeed * TtEngine.Instance.ElapsedSecond, true);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * CameraMouseRotSpeed * TtEngine.Instance.ElapsedSecond, true);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * CameraMouseRotSpeed * TtEngine.Instance.ElapsedSecond, true);
                     }
                 }
 

@@ -8,7 +8,7 @@ using EngineNS.EGui.Controls.PropertyGrid;
 
 namespace EngineNS.Bricks.RenderPolicyEditor
 {
-    public partial class UPolicyNode : UNodeBase//, EGui.Controls.PropertyGrid.IPropertyCustomization
+    public partial class UPolicyNode : TtNodeBase//, EGui.Controls.PropertyGrid.IPropertyCustomization
     {
         public UPolicyNode()
         {
@@ -111,7 +111,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         }
 
 
-        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             base.OnLinkedFrom(iPin, OutNode, oPin);
             ParentGraph.RemoveLinkedInExcept(iPin, OutNode, oPin.Name);
@@ -167,7 +167,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         //}
         //#endregion
     }
-    public class UPolicyGraph : UNodeGraph
+    public class UPolicyGraph : TtNodeGraph
     {
         public const string RGDEditorKeyword = "RDG";
         public UPolicyGraph()

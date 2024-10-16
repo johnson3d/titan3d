@@ -291,6 +291,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 var xmlText = IO.TtFileManager.GetXmlText(xml);
                 MaterialFunction.GraphXMLString = xmlText;
                 MaterialFunction.HLSLCode = code;
+
+                mShaderEditor.mCoreObject.SetText(code);
             }
         }
         bool ShowNodeGraph = true;

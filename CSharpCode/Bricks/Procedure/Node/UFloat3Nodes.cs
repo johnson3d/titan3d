@@ -427,7 +427,7 @@ namespace EngineNS.Bricks.Procedure.Node
             InputRightDesc.BufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<Vector3, FFloat3Operator>>();
             OutputDesc.BufferType = Rtti.TtTypeDesc.TypeOf<USuperBuffer<float, FFloatOperator>>();
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -440,7 +440,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return true;
         }
-        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (iPin.LinkDesc.CanLinks.Contains("Value"))
             {

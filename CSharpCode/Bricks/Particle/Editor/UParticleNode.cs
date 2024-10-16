@@ -9,10 +9,10 @@ using EngineNS.Rtti;
 namespace EngineNS.Bricks.Particle.Editor
 {
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public partial class TtParticleNode : NodeGraph.UNodeBase
+    public partial class TtParticleNode : NodeGraph.TtNodeBase
     {
         internal TtParticleEditor NebulaEditor;
-        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             var funcGraph = ParentGraph as TtParticleGraph;
             if (funcGraph == null || oPin.LinkDesc == null || iPin.LinkDesc == null)
@@ -214,7 +214,7 @@ namespace EngineNS.Bricks.Particle.Editor
             AddPinIn(Left);
             AddPinOut(Right);
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -289,7 +289,7 @@ namespace EngineNS.Bricks.Particle.Editor
             AddPinIn(Left);
             AddPinOut(Right);
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;

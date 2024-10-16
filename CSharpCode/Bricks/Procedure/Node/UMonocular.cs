@@ -30,7 +30,7 @@ namespace EngineNS.Bricks.Procedure.Node
             AddOutput(ResultPin, "Result", GetResultDesc());
         }
 
-        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             base.OnLinkedFrom(iPin, OutNode, oPin);
         }
@@ -81,7 +81,7 @@ namespace EngineNS.Bricks.Procedure.Node
             //base.IsMatchLinkedPin(input, output);
             return true;
         }
-        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             base.OnLinkedFrom(iPin, OutNode, oPin);
 

@@ -7,7 +7,7 @@ using EngineNS.EGui.Controls;
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
     [ContextMenu("Sequence", "FlowControl\\Sequence", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
-    public partial class SequenceNode : UNodeBase, IBeforeExecNode, IBreakableNode
+    public partial class SequenceNode : TtNodeBase, IBeforeExecNode, IBreakableNode
     {
         [Rtti.Meta]
         public int SequenceCount 
@@ -172,7 +172,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
     [ContextMenu("if", "FlowControl\\If", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
-    public partial class IfNode : UNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode
+    public partial class IfNode : TtNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode
     {
         [Browsable(false)]
         public PinIn BeforeExec { get; set; } = new PinIn();
@@ -275,7 +275,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         public List<KeyValuePair<PinIn, PinOut>> ConditionResultPairs = new List<KeyValuePair<PinIn, PinOut>>();
         [Browsable(false)]
         public PinOut FalsePin { get; set; } = new PinOut();
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -284,7 +284,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 if (iPin == ConditionResultPairs[i].Key)
                 {
-                    var nodeExpr = OutNode as UNodeBase;
+                    var nodeExpr = OutNode as TtNodeBase;
                     var type = nodeExpr.GetOutPinType(oPin);
                     if (type == null)
                         return false;
@@ -322,7 +322,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             for (int i = 0; i < ConditionResultPairs.Count; i++)
             {
@@ -502,7 +502,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
     [ContextMenu("return", "FlowControl\\Return", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
-    public partial class ReturnNode : UNodeBase, IBeforeExecNode, IBreakableNode
+    public partial class ReturnNode : TtNodeBase, IBeforeExecNode, IBreakableNode
     {
         [Browsable(false)]
         public PinIn BeforeExec { get; set; } = new PinIn();
@@ -674,7 +674,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //    set;
         //}
         //public PinIn ReturnValuePin { get; set; } = null;
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             //if (ReturnValuePin != stayPin)
             //    return;
@@ -690,7 +690,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 EGui.Controls.CtrlUtility.DrawHelper($"{valueString}({typeString})");
             }
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -702,7 +702,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (funGraph == null)
                 return false;
 
-            var nodeExpr = OutNode as UNodeBase;
+            var nodeExpr = OutNode as TtNodeBase;
             if (nodeExpr == null)
                 return false;
 
@@ -819,7 +819,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
     [ContextMenu("forloop", "FlowControl\\For", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
-    public partial class ForLoopNode : UNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode
+    public partial class ForLoopNode : TtNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode
     {
         [Browsable(false)]
         public PinIn BeginIdxPin;
@@ -902,7 +902,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return this;
         }
 
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             var nodeId = (uint)NodeId.GetHashCode();
             if(stayPin == BeginIdxPin)
@@ -1015,7 +1015,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
     [ContextMenu("whileloop", "FlowControl\\While", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
-    public partial class WhileNode : UNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode
+    public partial class WhileNode : TtNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode
     {
         public PinIn ConditionPin;
         public PinOut LoopBodyPin;
@@ -1105,7 +1105,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 nextNode.BuildStatements(nextNodePin, ref data);
         }
 
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             if(stayPin == ConditionPin)
             {
@@ -1138,7 +1138,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
     [ContextMenu("continue", "FlowControl\\Continue", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
-    public partial class ContinueNode : UNodeBase, IBeforeExecNode, IBreakableNode
+    public partial class ContinueNode : TtNodeBase, IBeforeExecNode, IBreakableNode
     {
         [Browsable(false)]
         public PinIn BeforeExec { get; set; } = new PinIn();
@@ -1212,7 +1212,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
     [ContextMenu("break", "FlowControl\\Break", TtMacross.MacrossEditorKeyword, ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
-    public partial class BreakNode : UNodeBase, IBeforeExecNode, IBreakableNode
+    public partial class BreakNode : TtNodeBase, IBeforeExecNode, IBreakableNode
     {
         [Browsable(false)]
         public PinIn BeforeExec { get; set; } = new PinIn();

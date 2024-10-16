@@ -86,6 +86,7 @@ namespace EngineNS.EGui.Slate
 
             mAxis = new GamePlay.UAxis();
             await mAxis.Initialize(this.World, CameraController);
+
             return true;
         }
         protected override void OnClientChanged(bool bSizeChanged)
@@ -119,8 +120,33 @@ namespace EngineNS.EGui.Slate
         #region CameraControl
         Vector2 mPreMousePt;
         Vector2 mStartMousePt;
-        public float CameraMoveSpeed { get; set; } = 1.0f;
-        public float CameraMouseWheelSpeed { get; set; } = 1.0f;
+        float mCameraMoveSpeed = 1.0f;
+        public float CameraMoveSpeed 
+        {
+            get => mCameraMoveSpeed;
+            set
+            {
+                mCameraMoveSpeed = value;
+            }
+        }
+        float mCameraMouseWheelSpeed = 1.0f;
+        public float CameraMouseWheelSpeed 
+        {
+            get => mCameraMouseWheelSpeed;
+            set
+            {
+                mCameraMouseWheelSpeed = value;
+            }
+        }
+        float mCameraMouseRotSpeed = 1.0f;
+        public float CameraMouseRotSpeed
+        {
+            get => mCameraMouseRotSpeed;
+            set
+            {
+                mCameraMouseRotSpeed = value;
+            }
+        }
         public bool CameralWheelMoveWithLookAt { get; set; } = false;
         public unsafe override bool OnEvent(in Bricks.Input.Event e)
         {
@@ -136,14 +162,14 @@ namespace EngineNS.EGui.Slate
                 {
                     if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                     {
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * 0.01f);
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * 0.01f);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * mCameraMouseRotSpeed * TtEngine.Instance.ElapsedSecond);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * mCameraMouseRotSpeed * TtEngine.Instance.ElapsedSecond);
                     }                    
                 }
                 else if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_MIDDLE)
                 {
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.X - mPreMousePt.X) * 0.01f, true);
-                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.Y - mPreMousePt.Y) * -0.01f, true);
+                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.X - mPreMousePt.X) * CameraMoveSpeed * TtEngine.Instance.ElapsedSecond, true);
+                    CameraController.Move(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.Y - mPreMousePt.Y) * -CameraMoveSpeed * TtEngine.Instance.ElapsedSecond, true);
                 }
                 else if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_X1)
                 {
@@ -153,8 +179,8 @@ namespace EngineNS.EGui.Slate
                     }
                     else
                     {
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * 0.01f, true);
-                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * 0.01f, true);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * mCameraMouseRotSpeed * TtEngine.Instance.ElapsedSecond, true);
+                        CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * mCameraMouseRotSpeed * TtEngine.Instance.ElapsedSecond, true);
                     }
                 }
 
@@ -181,7 +207,7 @@ namespace EngineNS.EGui.Slate
                 if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT && mAxis != null &&
                     mAxis.CurrentAxisType == GamePlay.UAxis.enAxisType.Null &&
                     ((new Vector2(e.MouseMotion.X, e.MouseMotion.Y) - mStartMousePt).Length() < 1.0f) &&
-                    !mAxisOperated &&
+                    !mUIOperated &&
                     IsMouseIn &&
                     !PointInOverlappedArea(in viewportPoint))
                 {
@@ -307,11 +333,32 @@ namespace EngineNS.EGui.Slate
             }
         }
 
-        bool mAxisOperated = false;
+        bool mUIOperated = false;
+        public bool DrawAxisUI = true;
+        public bool DrawCameraOPUI = true;
+
         public override void OnDrawViewportUI(in Vector2 startDrawPos)
         {
-            if (mAxis != null)
-                mAxisOperated = mAxis.OnDrawUI(this, startDrawPos);
+            if (mAxis != null && DrawAxisUI)
+                mUIOperated = mAxis.OnDrawUI(this, startDrawPos);
+
+            if(DrawCameraOPUI)
+            {
+                bool mCameraOPToggled = false;
+                if(ImGuiAPI.BeginPopup("ViewPortCameraOP", ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_NoResize))
+                {
+                    mCameraOPToggled = true;
+                    ImGuiAPI.InputFloat("MoveSpeed", ref mCameraMoveSpeed, 0, 0, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                    ImGuiAPI.InputFloat("WheelSpeed", ref mCameraMouseWheelSpeed, 0, 0, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+                    ImGuiAPI.InputFloat("RotSpeed", ref mCameraMouseRotSpeed, 0, 0, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_None);
+
+                    ImGuiAPI.EndPopup();
+                }
+                if(EGui.UIProxy.CustomButton.ToggleButton("Camera", in Vector2.Zero, ref mCameraOPToggled))
+                {
+                    ImGuiAPI.OpenPopup("ViewPortCameraOP", ImGuiPopupFlags_.ImGuiPopupFlags_None);
+                }
+            }
 
             if (ShowWorldAxis)
                 DrawWorldAxis(this.CameraController.Camera);

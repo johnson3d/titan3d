@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
-    public partial class UUniformVar : UNodeBase
+    public partial class UUniformVar : TtNodeBase
     {
         public Rtti.TtTypeDesc VarType;
         [Browsable(false)]
@@ -84,13 +84,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             
             return VarType;
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             if (VarType == null)
                 return;
             EGui.Controls.CtrlUtility.DrawHelper($"VarType:{VarType.ToString()}");
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -100,7 +100,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             return true;
         }
-        public override bool CanLinkTo(PinOut oPin, UNodeBase InNode, PinIn iPin)
+        public override bool CanLinkTo(PinOut oPin, TtNodeBase InNode, PinIn iPin)
         {
             if (base.CanLinkTo(oPin, InNode, iPin) == false)
                 return false;

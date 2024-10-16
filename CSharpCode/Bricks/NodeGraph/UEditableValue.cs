@@ -267,7 +267,7 @@ namespace EngineNS.Bricks.NodeGraph
         public float ControlWidth { get; set; } = 80;
         public float ControlHeight { get; set; } = 30;
         private static int GID_EditableValue = 0;
-        public virtual unsafe void OnDraw(UNodeBase node, PinIn pin, UNodeGraphStyles styles, float fScale, bool useDPI)
+        public virtual unsafe void OnDraw(TtNodeBase node, PinIn pin, UNodeGraphStyles styles, float fScale, bool useDPI)
         {
             //LabelName目前每次构造时确保id唯一，也许以后可以找到类似
             //GetObjectHandleAddress这样的方法替换
@@ -448,7 +448,7 @@ namespace EngineNS.Bricks.NodeGraph
                 base.Value = value;
             }
         }
-        public override void OnDraw(UNodeBase node, PinIn pin, UNodeGraphStyles styles, float fScale, bool useDPI)
+        public override void OnDraw(TtNodeBase node, PinIn pin, UNodeGraphStyles styles, float fScale, bool useDPI)
         {
             var width = ControlWidth;
             if (width < 60)
@@ -504,7 +504,7 @@ namespace EngineNS.Bricks.NodeGraph
         public Rtti.TtTypeDesc MacrossType { get; set; }
         public EGui.Controls.TtContentBrowser ContentBrowser;
         bool BrowserVisible = false;
-        public override unsafe void OnDraw(UNodeBase node, PinIn pin, UNodeGraphStyles styles, float fScale, bool useDPI)
+        public override unsafe void OnDraw(TtNodeBase node, PinIn pin, UNodeGraphStyles styles, float fScale, bool useDPI)
         {
             //Support.UAnyPointer anyPt = new Support.UAnyPointer()
             //{

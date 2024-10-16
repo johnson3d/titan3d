@@ -40,11 +40,11 @@ namespace EngineNS.Bricks.NodeGraph
                 TtEngine.Instance.UIProxyManager[styles.BreakpointNodeImg] = new EGui.UIProxy.ImageProxy(RName.GetRName(styles.BreakpointNodeImg, RName.ERNameType.Engine));
         }
 
-        UNodeGraph mGraph = null;
-        public UNodeGraph Graph => mGraph;
-        List<UNodeGraph> mGraphInherit { get; } = new List<UNodeGraph>();
+        TtNodeGraph mGraph = null;
+        public TtNodeGraph Graph => mGraph;
+        List<TtNodeGraph> mGraphInherit { get; } = new List<TtNodeGraph>();
         Vector2 DrawOffset;
-        public void SetGraph(UNodeGraph graph)
+        public void SetGraph(TtNodeGraph graph)
         {
             if(mGraph != null)
             {
@@ -199,7 +199,7 @@ namespace EngineNS.Bricks.NodeGraph
             ImGuiAPI.EndChild();
         }
 
-        void ProcessKeyboard(in Vector2 screenPt, UNodeGraph graph)
+        void ProcessKeyboard(in Vector2 screenPt, TtNodeGraph graph)
         {
             if (!ImGuiAPI.IsWindowHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_ChildWindows))
                 return;
@@ -217,9 +217,9 @@ namespace EngineNS.Bricks.NodeGraph
             if (TtEngine.Instance.InputSystem.IsKeyPressed(Input.Keycode.KEY_TAB))
             {
                 graph.PopMenuPosition = graph.ViewportRateToCanvas(screenPt);
-                graph.CurMenuType = UNodeGraph.EGraphMenu.Canvas;
+                graph.CurMenuType = TtNodeGraph.EGraphMenu.Canvas;
             }
-            if(graph.IsKeydown(UNodeGraph.EKey.Ctl))
+            if(graph.IsKeydown(TtNodeGraph.EKey.Ctl))
             {
                 if (TtEngine.Instance.InputSystem.IsKeyPressed(Input.Keycode.KEY_c))
                 {
@@ -235,11 +235,11 @@ namespace EngineNS.Bricks.NodeGraph
         internal bool mIsLeftMouseFocusOnGraph = false;
         internal bool mIsRightMouseFocusOnGraph = false;
         internal bool mIsMiddleMouseFocusOnGraph = false;
-        unsafe void ProcessMouse(in Vector2 screenPt, in Vector2 rectSize, UNodeGraph graph)
+        unsafe void ProcessMouse(in Vector2 screenPt, in Vector2 rectSize, TtNodeGraph graph)
         {
             //if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_ChildWindows | ImGuiFocusedFlags_.ImGuiFocusedFlags_RootWindow) == false)
             //    return;
-            if (graph.CurMenuType != UNodeGraph.EGraphMenu.None)
+            if (graph.CurMenuType != TtNodeGraph.EGraphMenu.None)
                 return;
             bool isHovered = false;
             if (ImGuiAPI.IsWindowHovered(ImGuiHoveredFlags_.ImGuiHoveredFlags_ChildWindows))
@@ -259,7 +259,7 @@ namespace EngineNS.Bricks.NodeGraph
             var delta = clickPos - DrawOffset;
             if (delta.X >= 0 && delta.X <= rectSize.X && delta.Y >= 0 && delta.Y <= rectSize.Y && isHovered)
             {
-                if (graph.ButtonPress[(int)UNodeGraph.EMouseButton.Middle] == false)
+                if (graph.ButtonPress[(int)TtNodeGraph.EMouseButton.Middle] == false)
                 {
                     if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Middle))
                     {
@@ -272,7 +272,7 @@ namespace EngineNS.Bricks.NodeGraph
                     graph.MiddleDoubleClicked(in screenPt);
                 }
 
-                if (graph.ButtonPress[(int)UNodeGraph.EMouseButton.Left] == false)
+                if (graph.ButtonPress[(int)TtNodeGraph.EMouseButton.Left] == false)
                 {
                     if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left))
                     {
@@ -286,7 +286,7 @@ namespace EngineNS.Bricks.NodeGraph
                     graph.LeftDoubleClicked(in screenPt);
                 }
 
-                if (graph.ButtonPress[(int)UNodeGraph.EMouseButton.Right] == false)
+                if (graph.ButtonPress[(int)TtNodeGraph.EMouseButton.Right] == false)
                 {
                     if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Right))
                     {
@@ -300,7 +300,7 @@ namespace EngineNS.Bricks.NodeGraph
                     graph.RightDoubleClicked(screenPt);
                 }
             }
-            if(graph.ButtonPress[(int)UNodeGraph.EMouseButton.Middle] == true)
+            if(graph.ButtonPress[(int)TtNodeGraph.EMouseButton.Middle] == true)
             {
                 if (!ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Middle))
                 {
@@ -308,7 +308,7 @@ namespace EngineNS.Bricks.NodeGraph
                     mIsMiddleMouseFocusOnGraph = false;
                 }
             }
-            if (graph.ButtonPress[(int)UNodeGraph.EMouseButton.Left] == true)
+            if (graph.ButtonPress[(int)TtNodeGraph.EMouseButton.Left] == true)
             {
                 if (!ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left))
                 {
@@ -316,7 +316,7 @@ namespace EngineNS.Bricks.NodeGraph
                     mIsLeftMouseFocusOnGraph = false;
                 }
             }
-            if (graph.ButtonPress[(int)UNodeGraph.EMouseButton.Right] == true)
+            if (graph.ButtonPress[(int)TtNodeGraph.EMouseButton.Right] == true)
             {
                 if (!ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Right))
                 {
@@ -335,7 +335,7 @@ namespace EngineNS.Bricks.NodeGraph
         }
 
         public string BreakerName = "";
-        public unsafe void DrawNode(ImDrawList cmdlist, UNodeBase node)
+        public unsafe void DrawNode(ImDrawList cmdlist, TtNodeBase node)
         {
             var style = ImGuiAPI.GetStyle();
             var framePaddingStore = style->FramePadding;
@@ -736,7 +736,7 @@ namespace EngineNS.Bricks.NodeGraph
 
         public void DrawPopMenu()
         {
-            if (mGraph.CurMenuType == UNodeGraph.EGraphMenu.None)
+            if (mGraph.CurMenuType == TtNodeGraph.EGraphMenu.None)
                 return;
 
             var styles = UNodeGraphStyles.DefaultStyles;
@@ -752,7 +752,7 @@ namespace EngineNS.Bricks.NodeGraph
                 if(!contain)
                 {
                     mGraph.LinkingOp.StartPin = null;
-                    mGraph.CurMenuType = UNodeGraph.EGraphMenu.None;
+                    mGraph.CurMenuType = TtNodeGraph.EGraphMenu.None;
                     return;
                 }
             }
@@ -775,7 +775,7 @@ namespace EngineNS.Bricks.NodeGraph
 
                 switch (mGraph.CurMenuType)
                 {
-                    case UNodeGraph.EGraphMenu.Canvas:
+                    case TtNodeGraph.EGraphMenu.Canvas:
                         {
                             if(mMouseInvalidAreas.Count != 2)
                             {
@@ -819,7 +819,7 @@ namespace EngineNS.Bricks.NodeGraph
                             }
                         }
                         break;
-                    case UNodeGraph.EGraphMenu.Node:
+                    case TtNodeGraph.EGraphMenu.Node:
                         if (mMouseInvalidAreas.Count != 1)
                         {
                             mMouseInvalidAreas.Clear();
@@ -845,7 +845,7 @@ namespace EngineNS.Bricks.NodeGraph
                                 TtMenuItem.Draw(mGraph.NodeMenus.SubMenuItems[childIdx], this, mGraph.PopMenuPressObject, "".ToLower(), in cmdList, ref mSelectQuickMenuIdx, ref mCurrentQuickMenuIdx, MenuPostAction, TtMenuItem.EMenuStyle.Menu);
                         }
                         break;
-                    case UNodeGraph.EGraphMenu.Pin:
+                    case TtNodeGraph.EGraphMenu.Pin:
                         {
                             if (mMouseInvalidAreas.Count != 1)
                             {
@@ -873,7 +873,7 @@ namespace EngineNS.Bricks.NodeGraph
                             }
                         }
                         break;
-                    case UNodeGraph.EGraphMenu.Object:
+                    case TtNodeGraph.EGraphMenu.Object:
                         {
                             if (mMouseInvalidAreas.Count != 2)
                             {
@@ -937,7 +937,7 @@ namespace EngineNS.Bricks.NodeGraph
         int mCurrentQuickMenuIdx = 0;
         void MenuPostAction(TtMenuItem menuItem)
         {
-            mGraph.CurMenuType = UNodeGraph.EGraphMenu.None;
+            mGraph.CurMenuType = TtNodeGraph.EGraphMenu.None;
             mGraph.LinkingOp.Reset();
         }
     }

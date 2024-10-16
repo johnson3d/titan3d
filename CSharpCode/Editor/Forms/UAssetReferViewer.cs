@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace EngineNS.Editor.Forms
 {
-    public partial class UAssetReferNode : UNodeBase
+    public partial class UAssetReferNode : TtNodeBase
     {
         [Browsable(false)]
         public PinIn InPin { get; set; } = new PinIn();
@@ -139,7 +139,7 @@ namespace EngineNS.Editor.Forms
         }
     }
 
-    public partial class UAssetReferGraph : UNodeGraph
+    public partial class UAssetReferGraph : TtNodeGraph
     {
     }
 

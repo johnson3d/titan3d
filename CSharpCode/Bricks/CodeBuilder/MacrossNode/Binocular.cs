@@ -5,7 +5,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public partial class Binocular : UNodeBase
+    public partial class Binocular : TtNodeBase
     {
         public Rtti.TtTypeDesc LeftType;
         public TtBinaryOperatorExpression.EBinaryOperation Op { get; set; }
@@ -140,7 +140,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             : base(op, name)
         {
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             if (LeftType != null)
                 EGui.Controls.CtrlUtility.DrawHelper(LeftType.FullName);
@@ -152,7 +152,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 LeftType = null;
             }
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -167,7 +167,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return true;
         }
-        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             base.OnLinkedFrom(iPin, OutNode, oPin);
 
@@ -282,7 +282,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             return Rtti.TtTypeDesc.TypeOf(typeof(bool));
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             if (Result == stayPin)
             {
@@ -301,7 +301,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 LeftType = null;
             }
         }
-        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             base.OnLinkedFrom(iPin, OutNode, oPin);
 
@@ -320,7 +320,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 LeftType = newType;
             }
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
@@ -404,7 +404,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             return Rtti.TtTypeDesc.TypeOf(typeof(bool));
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;

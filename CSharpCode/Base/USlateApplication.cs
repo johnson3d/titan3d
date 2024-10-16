@@ -289,6 +289,7 @@ namespace EngineNS
 
                 Update((TtEngine.Instance.ElapseTickCountMS) * 0.001f);
                 OnDrawUI();
+                TtEngine.Instance.OnDrawTopMost();
             }
 
             TtEngine.Instance.InputSystem.ClearFilesDrop();
@@ -393,6 +394,83 @@ namespace EngineNS
             {
                 return TtRootFormManager.Insance;
             }
+        }
+        public class TtStopOperateCover : IRootForm
+        {
+            public async Thread.Async.TtTask<bool> Initialize()
+            {
+                await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
+                return true;
+            }
+
+            public void Dispose() { }
+            bool mVisible = true;
+            public bool Visible
+            {
+                get => mVisible;
+                set => mVisible = value;
+            }
+            public uint DockId { get; set; }
+            public ImGuiWindowClass DockKeyClass { get; }
+            public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
+            public Editor.IAssetEditor CurrentEditor;
+            public string Info;
+            public Action DrawAction;
+            public void OnDraw()
+            {
+                var size = new Vector2(8000, 6000);
+                ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_Always);
+                ImGuiAPI.SetNextWindowPos(in Vector2.Zero, ImGuiCond_.ImGuiCond_Always, in Vector2.Zero);
+                if (ImGuiAPI.Begin("OpCover", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+                {
+                    ImGuiAPI.Text(Info);
+                    if (DrawAction != null)
+                        DrawAction();
+                }
+                ImGuiAPI.End();
+                //var result = EGui.UIProxy.DockProxy.BeginMainForm($"Not Allow User Operation", this, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove);
+                //if (result)
+                //{
+                //    ImGuiAPI.Text(Info);
+                //}
+                //EGui.UIProxy.DockProxy.EndMainForm(result);
+            }
+        }
+        TtStopOperateCover mStopOperateCover = new TtStopOperateCover();
+        private List<IRootForm> TopMostForms { get; } = new List<IRootForm>();
+        public void ShowTopMost(IRootForm form)
+        {
+            if (TopMostForms.Contains(form))
+                return;
+            form.Visible = true;
+            TopMostForms.Add(form);
+        }
+        public void OnDrawTopMost()
+        {
+            for (int i = 0; i < TopMostForms.Count; i++)
+            {
+                if (TopMostForms[i].Visible)
+                {
+                    TopMostForms[i].OnDraw();
+                }
+                else
+                {
+                    TopMostForms.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
+        public void StopOperation(string info, Action drawAction = null)
+        {
+            mStopOperateCover.Info = info;
+            mStopOperateCover.DrawAction = drawAction;
+            ShowTopMost(mStopOperateCover);
+        }
+        public void ResumeOperation()
+        {
+            mStopOperateCover.Visible = false;
+            mStopOperateCover.Info = null;
+            mStopOperateCover.DrawAction = null;
         }
     }
 }

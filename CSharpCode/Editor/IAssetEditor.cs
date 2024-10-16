@@ -25,44 +25,10 @@ namespace EngineNS.Editor
         Thread.Async.TtTask<bool> Initialize();
         string GetWindowsName();
     }
-    public class TtAssetEditorOpenProgress : IRootForm
-    {
-        public async Thread.Async.TtTask<bool> Initialize()
-        {
-            await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
-            return true;
-        }
-
-        public void Dispose() { }
-        bool mVisible = true;
-        public bool Visible
-        {
-            get => mVisible;
-            set => mVisible = value;
-        }
-        public uint DockId { get; set; }
-        public ImGuiWindowClass DockKeyClass { get; }
-        public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
-        public IAssetEditor CurrentEditor;
-        public void OnDraw()
-        {
-            var size = new Vector2(800, 600);
-            ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_FirstUseEver);
-            var result = EGui.UIProxy.DockProxy.BeginMainForm($"Progress: Open {CurrentEditor.AssetName}", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
-            if (result)
-            {
-                ImGuiAPI.Button($"Loading:{CurrentEditor.LoadingPercent}->{CurrentEditor.ProgressText}");
-            }
-            EGui.UIProxy.DockProxy.EndMainForm(result);
-        }
-    }
     public class UAssetEditorManager
     {
-        TtAssetEditorOpenProgress mAssetEditorOpenProgress = null;
         public async System.Threading.Tasks.Task<bool> Initialize()
         {
-            mAssetEditorOpenProgress = new TtAssetEditorOpenProgress();
-            await mAssetEditorOpenProgress.Initialize();
             return true;
         }
         public List<IAssetEditor> OpenedEditors { get; } = new List<IAssetEditor>();
@@ -83,8 +49,7 @@ namespace EngineNS.Editor
                 editor = Rtti.TtTypeDescManager.CreateInstance(editorType) as IAssetEditor;
             }
             editor.AssetName = name;
-            mAssetEditorOpenProgress.CurrentEditor = editor;
-            this.ShowTopMost(mAssetEditorOpenProgress);
+            TtEngine.Instance.StopOperation($"{name}: OpenEditor");
 
             bool ok = false;
             try
@@ -97,12 +62,10 @@ namespace EngineNS.Editor
             catch (Exception exp)
             {
                 Profiler.Log.WriteException(exp);
-                mAssetEditorOpenProgress.Visible = false;
-                mAssetEditorOpenProgress.CurrentEditor = null;
+                TtEngine.Instance.ResumeOperation();
                 return;
             }
-            mAssetEditorOpenProgress.Visible = false;
-            mAssetEditorOpenProgress.CurrentEditor = null;
+            TtEngine.Instance.ResumeOperation();
             if (ok == false)
             {
                 Profiler.Log.WriteLine<Profiler.TtEditorGategory>(Profiler.ELogTag.Warning, "Editor", $"AssetEditor {name} open failed");
@@ -179,29 +142,7 @@ namespace EngineNS.Editor
             return wr;
         }
 
-        private List<IRootForm> TopMostForms { get; } = new List<IRootForm>();
-        public void ShowTopMost(IRootForm form)
-        {
-            if (TopMostForms.Contains(form))
-                return;
-            form.Visible = true;
-            TopMostForms.Add(form);
-        }
-        public void OnDrawTopMost()
-        {
-            for (int i = 0; i < TopMostForms.Count; i++)
-            {
-                if (TopMostForms[i].Visible)
-                {
-                    TopMostForms[i].OnDraw();
-                }
-                else
-                {
-                    TopMostForms.RemoveAt(i);
-                    i--;
-                }
-            }
-        }
+        
     }
 }
 

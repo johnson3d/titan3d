@@ -39,7 +39,7 @@ namespace EngineNS.Bricks.Procedure.Node
             AddInput(RightPin, "Right", InputRightDesc);
             AddOutput(ResultPin, "Result", OutputDesc);
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (iPin == LeftPin)
             {
@@ -47,7 +47,7 @@ namespace EngineNS.Bricks.Procedure.Node
             }
             return base.CanLinkFrom(iPin, OutNode, oPin);
         }
-        public override void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             base.OnLinkedFrom(iPin, OutNode, oPin);
 

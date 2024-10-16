@@ -198,7 +198,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
                 xnd.SaveXnd(name.Address);
             }
-            
+            this.SerialId++;
             TtEngine.Instance.SourceControlModule.AddFile(name.Address);
         }
         public static bool ReloadXnd(TtMaterial material, TtMaterialManager manager, IO.TtXndNode node)

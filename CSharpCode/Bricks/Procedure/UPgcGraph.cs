@@ -19,7 +19,7 @@ namespace EngineNS.Bricks.Procedure
             return true;
         }
     }
-    public partial class UPgcGraph : UNodeGraph
+    public partial class UPgcGraph : TtNodeGraph
     {
         public const string PgcEditorKeyword = "PGC";
         public bool IsTryCacheBuffer { get; set; } = false;
@@ -71,7 +71,7 @@ namespace EngineNS.Bricks.Procedure
                                 parentMenu.AddMenuItem(menuStr, att.FilterStrings, null,
                                     (TtMenuItem item, object sender) =>
                                     {
-                                        var node = Rtti.TtTypeDescManager.CreateInstance(typeDesc) as UNodeBase;
+                                        var node = Rtti.TtTypeDescManager.CreateInstance(typeDesc) as TtNodeBase;
                                         if (nodeName != null)
                                             node.Name = nodeName;
                                         node.UserData = this;
@@ -266,7 +266,7 @@ namespace EngineNS.Bricks.Procedure
         }
         #endregion
 
-        public override void CollapseNodes(List<UNodeBase> nodeList)
+        public override void CollapseNodes(List<TtNodeBase> nodeList)
         {
             var node = IUnionNode.CreateUnionNode<Node.UUnionNode, Node.UNodePinDefine, Node.UEndPointNode>(this, nodeList);
             node.Name = "Collapse Node";

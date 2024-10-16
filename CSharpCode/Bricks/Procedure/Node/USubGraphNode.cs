@@ -37,7 +37,7 @@ namespace EngineNS.Bricks.Procedure.Node
         {
             Icon.Size = new Vector2(25, 25);
         }
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             var creator = stayPin.Tag as UBufferCreator;
             if (creator != null)
@@ -87,7 +87,7 @@ namespace EngineNS.Bricks.Procedure.Node
     {
         [Rtti.Meta]
         [Browsable(false)]
-        public UNodeGraph ContentGraph { get; set; }
+        public TtNodeGraph ContentGraph { get; set; }
         [Rtti.Meta]
         [Browsable(false)]
         public Guid InputNodeId { get; set; }
@@ -191,7 +191,7 @@ namespace EngineNS.Bricks.Procedure.Node
         struct PropertyValueData
         {
             public string Name;
-            public UNodeBase Node;
+            public TtNodeBase Node;
             public EGui.Controls.PropertyGrid.CustomPropertyDescriptor ProInfo;
             public bool IsPropertyCustomization;
         }
@@ -285,7 +285,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 {
                     var obj = (object)(valData.Node);
                     valData.ProInfo.SetValue(ref obj, value);
-                    valData.Node = (UNodeBase)obj;
+                    valData.Node = (TtNodeBase)obj;
                 }
             }
             else

@@ -18,12 +18,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 return Rtti.TtTypeDesc.TypeOf(typeof(float));
             return null;
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
 
-            var nodeExpr = OutNode as UNodeBase;
+            var nodeExpr = OutNode as TtNodeBase;
             var type = nodeExpr.GetOutPinType(oPin);
 
             if (iPin == InXYZ)
@@ -335,12 +335,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 return Rtti.TtTypeDesc.TypeOf(typeof(int));
             return null;
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
 
-            var nodeExpr = OutNode as UNodeBase;
+            var nodeExpr = OutNode as TtNodeBase;
             var type = nodeExpr.GetOutPinType(oPin);
 
             if (iPin == InXYZ)

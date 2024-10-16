@@ -27,7 +27,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
 
-    public class EndPointNode : UNodeBase, IEndPointNode
+    public class EndPointNode : TtNodeBase, IEndPointNode
     {
         public UnionNode HostUnion;
 
@@ -147,7 +147,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return null;
         }
 
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             if(IsStart)
             {
@@ -254,10 +254,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
     }
 
-    public class UnionNode : UNodeBase, IUnionNode, INodeWithContextMenu
+    public class UnionNode : TtNodeBase, IUnionNode, INodeWithContextMenu
     {
         [Rtti.Meta, Browsable(false)]
-        public UNodeGraph ContentGraph { get; set; }
+        public TtNodeGraph ContentGraph { get; set; }
         [Rtti.Meta, Browsable(false)]
         public Guid InputNodeId { get; set; }
         [Rtti.Meta, Browsable(false)]
@@ -510,7 +510,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             pin.Tag = ((UnionPinDefine)pinDef).Type;
         }
 
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             if (stayPin.Tag == null)
                 return;
@@ -567,7 +567,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         struct PropertyValueData
         {
             public string Name;
-            public UNodeBase Node;
+            public TtNodeBase Node;
             public CustomPropertyDescriptor ProInfo;
             public bool IsPropertyCustomization;
         }
@@ -661,7 +661,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     var obj = (object)(valData.Node);
                     valData.ProInfo.SetValue(ref obj, value);
-                    valData.Node = (UNodeBase)obj;
+                    valData.Node = (TtNodeBase)obj;
                 }
             }
             else

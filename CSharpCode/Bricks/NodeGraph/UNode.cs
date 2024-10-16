@@ -9,7 +9,7 @@ namespace EngineNS.Bricks.NodeGraph
 {
     public class GraphException : Exception, EGui.Controls.PropertyGrid.IPropertyCustomization
     {
-        public UNodeBase ErrorNode;
+        public TtNodeBase ErrorNode;
         public NodePin ErrorPin;
         public string ErrorPinName
         {
@@ -21,7 +21,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
         }
         public string ErrorInfo { get; set; }
-        public GraphException(UNodeBase node, NodePin pin, string info,
+        public GraphException(TtNodeBase node, NodePin pin, string info,
             [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
             [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
             [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
@@ -115,7 +115,7 @@ namespace EngineNS.Bricks.NodeGraph
                 return HostNode.NodeId;
             }
         }
-        public UNodeBase HostNode { get; set; }
+        public TtNodeBase HostNode { get; set; }
         public LinkDesc LinkDesc { get; set; }
         
         public Vector2 Position { get; set; }
@@ -214,7 +214,8 @@ namespace EngineNS.Bricks.NodeGraph
     {
         public TtMenuItem ContextMenu { get; set; }
     }
-    public class UNodeBase : IO.ISerializer
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore", "EngineNS.Bricks.NodeGraph.UNodeBase" })]
+    public class TtNodeBase : IO.ISerializer
     {
         public bool LayoutDirty = true;
 
@@ -226,10 +227,10 @@ namespace EngineNS.Bricks.NodeGraph
             CodeExcept = null;
         }
 
-        public Action<UNodeBase, object, object, bool> OnPreReadAction;
+        public Action<TtNodeBase, object, object, bool> OnPreReadAction;
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
-            var graph = hostObject as UNodeGraph;
+            var graph = hostObject as TtNodeGraph;
             if (graph != null)
                 ParentGraph = graph;
             OnPreReadAction?.Invoke(this, tagObject, hostObject, fromXml);
@@ -285,7 +286,7 @@ namespace EngineNS.Bricks.NodeGraph
         [System.ComponentModel.Browsable(false)]
         public float TitleHeight { get; set; }
         [System.ComponentModel.Browsable(false)]
-        public UNodeGraph ParentGraph { get; set; }
+        public TtNodeGraph ParentGraph { get; set; }
         [System.ComponentModel.Browsable(false)]
         public uint BackColor { get; set; }
         [System.ComponentModel.Browsable(false)]
@@ -342,7 +343,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
         }
 
-        public UNodeBase()
+        public TtNodeBase()
         {
             Icon.Size = new Vector2(25, 25);
             Selected = false;
@@ -588,7 +589,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
             return null;
         }
-        public virtual bool CanLinkTo(PinOut oPin, UNodeBase InNode, PinIn iPin)
+        public virtual bool CanLinkTo(PinOut oPin, TtNodeBase InNode, PinIn iPin)
         {
             if (InNode == this)
                 return false;
@@ -609,7 +610,7 @@ namespace EngineNS.Bricks.NodeGraph
                 return true;
             }
         }
-        public virtual bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public virtual bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (OutNode == this)
                 return false;
@@ -691,66 +692,66 @@ namespace EngineNS.Bricks.NodeGraph
             }
         }
         #region override
-        public delegate void Deleage_OnPreviewDraw(UNodeBase node, in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist);
+        public delegate void Deleage_OnPreviewDraw(TtNodeBase node, in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist);
         public Deleage_OnPreviewDraw OnPreviewDrawAction;
         public virtual void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
             OnPreviewDrawAction?.Invoke(this, in prevStart, in prevEnd, cmdlist);
         }
-        public Action<UNodeBase, UNodeGraphStyles, ImDrawList> OnAfterDrawAction;
+        public Action<TtNodeBase, UNodeGraphStyles, ImDrawList> OnAfterDrawAction;
         public virtual void OnAfterDraw(UNodeGraphStyles styles, ImDrawList cmdlist)
         {
             OnAfterDrawAction?.Invoke(this, styles, cmdlist);
         }
-        public Action<UNodeBase, NodePin> OnShowPinMenuAction;
+        public Action<TtNodeBase, NodePin> OnShowPinMenuAction;
         public virtual void OnShowPinMenu(NodePin pin)
         {
             OnShowPinMenuAction?.Invoke(this, pin);
         }
-        public Action<UNodeBase, UPinLinker> OnRemoveLinkerAction;
+        public Action<TtNodeBase, UPinLinker> OnRemoveLinkerAction;
         public virtual void OnRemoveLinker(UPinLinker linker)
         {
             OnRemoveLinkerAction?.Invoke(this, linker);
         }
-        public Action<UNodeBase, UPinLinker> OnLoadLinkerAction;
+        public Action<TtNodeBase, UPinLinker> OnLoadLinkerAction;
         public virtual void OnLoadLinker(UPinLinker linker)
         {
             OnLoadLinkerAction?.Invoke(this, linker);
         }
-        public Action<UNodeBase, PinOut, UNodeBase, PinIn> OnLinkedToAction;
-        public virtual void OnLinkedTo(PinOut oPin, UNodeBase InNode, PinIn iPin)
+        public Action<TtNodeBase, PinOut, TtNodeBase, PinIn> OnLinkedToAction;
+        public virtual void OnLinkedTo(PinOut oPin, TtNodeBase InNode, PinIn iPin)
         {
             OnLinkedToAction?.Invoke(this, oPin, InNode, iPin);
         }
-        public Action<UNodeBase, PinIn, UNodeBase, PinOut> OnLinkedFromAction;
-        public virtual void OnLinkedFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public Action<TtNodeBase, PinIn, TtNodeBase, PinOut> OnLinkedFromAction;
+        public virtual void OnLinkedFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             OnLinkedFromAction?.Invoke(this, iPin, OutNode, oPin);
         }
-        public Action<UNodeBase> OnDoubleClickAction;
+        public Action<TtNodeBase> OnDoubleClickAction;
         public virtual void OnDoubleClick() 
         {
             OnDoubleClickAction?.Invoke(this);
         }
-        public Action<UNodeBase, NodePin> OnOnDoubleClickedPinAction;
+        public Action<TtNodeBase, NodePin> OnOnDoubleClickedPinAction;
         public virtual void OnDoubleClickedPin(NodePin hitPin)
         {
             OnOnDoubleClickedPinAction?.Invoke(this, hitPin);
         }
-        public Action<UNodeBase, NodePin> OnLButtonClickedAction;
+        public Action<TtNodeBase, NodePin> OnLButtonClickedAction;
         public virtual void OnLButtonClicked(NodePin hitPin)
         {
             OnLButtonClickedAction?.Invoke(this, hitPin);
         }
-        public Func<UNodeBase, object> GetPropertyEditObjectAction;
+        public Func<TtNodeBase, object> GetPropertyEditObjectAction;
         public virtual object GetPropertyEditObject()
         {
             if (GetPropertyEditObjectAction != null)
                 return GetPropertyEditObjectAction(this);
             return this;
         }
-        public Action<UNodeBase, NodePin> OnMouseStayPinAction;
-        public virtual void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public Action<TtNodeBase, NodePin> OnMouseStayPinAction;
+        public virtual void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             OnMouseStayPinAction?.Invoke(this, stayPin);
         }
@@ -789,7 +790,7 @@ namespace EngineNS.Bricks.NodeGraph
         {
             throw new NotImplementedException("Invalid get expression");
         }
-        public Action<UNodeBase> OnRemoveNodeAction;
+        public Action<TtNodeBase> OnRemoveNodeAction;
         public virtual void OnRemoveNode()
         {
             OnRemoveNodeAction?.Invoke(this);
@@ -853,7 +854,7 @@ namespace EngineNS.Bricks.NodeGraph
             }
             return "";
         }
-        public virtual bool CopyTo(UNodeBase target, bool withId = false)
+        public virtual bool CopyTo(TtNodeBase target, bool withId = false)
         {
             if (target.GetType() != this.GetType())
                 return false;

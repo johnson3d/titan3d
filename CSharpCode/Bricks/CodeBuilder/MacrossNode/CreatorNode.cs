@@ -9,7 +9,7 @@ using System.Text;
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
     [ContextMenu("create,creator,new", "Create instance", TtMacross.MacrossEditorKeyword)]
-    public partial class CreatorNode : UNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode, UEditableValue.IValueEditNotify
+    public partial class CreatorNode : TtNodeBase, IBeforeExecNode, IAfterExecNode, IBreakableNode, UEditableValue.IValueEditNotify
     {
         public PinIn TypePin;
         public PinOut OutPin;
@@ -166,7 +166,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
-        public override void OnMouseStayPin(NodePin stayPin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
             if(mTargetType == null)
                 EGui.Controls.CtrlUtility.DrawHelper("null");

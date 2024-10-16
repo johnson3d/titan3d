@@ -12,7 +12,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
     {
         public Type CallNodeType;
     }
-    public class CallNode : UNodeBase
+    public class CallNode : TtNodeBase
     {
         public PinOut Result = null;
         public struct PinData
@@ -119,7 +119,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 Arguments.Add(pinData);
             }
         }
-        public override void OnMouseStayPin(NodePin pin, UNodeGraph graph)
+        public override void OnMouseStayPin(NodePin pin, TtNodeGraph graph)
         {
             if (pin == Result)
             {
@@ -225,12 +225,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             return null;
         }
-        public override bool CanLinkFrom(PinIn iPin, UNodeBase OutNode, PinOut oPin)
+        public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
             if (base.CanLinkFrom(iPin, OutNode, oPin) == false)
                 return false;
 
-            var nodeExpr = OutNode as UNodeBase;
+            var nodeExpr = OutNode as TtNodeBase;
             if (nodeExpr == null)
                 return true;
 
