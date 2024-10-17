@@ -268,12 +268,15 @@ namespace EngineNS.Bricks.Input
             //#region TypeFSharp
             //target.TypeFSharp = (EventType)source.typeFSharp;
             //#endregion TypeFSharp
-            //#region Drop
-            //target.Drop.Type = (EventType)source.drop.type;
-            //target.Drop.Timestamp = source.drop.timestamp;
-            //target.Drop.File = source.drop.file;
-            //target.Drop.WindowID = source.drop.windowID;
-            //#endregion Drop
+            #region Drop
+            if (source.drop.type == SDL.SDL_EventType.SDL_EVENT_DROP_FILE)
+            {
+                target.Drop.Type = (EventType)source.drop.type;
+                target.Drop.Timestamp = (uint)source.drop.timestamp;
+                target.Drop.File = (IntPtr)source.drop.data;
+                target.Drop.WindowID = (uint)source.drop.windowID;
+            }
+            #endregion Drop
         }
         public unsafe Scancode GetScancodeFromKey(Keycode keyCode)
         {

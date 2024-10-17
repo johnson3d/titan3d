@@ -157,6 +157,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 var typeDesc = Rtti.TtTypeDesc.TypeOf(thisTypeStr);
                 if (typeDesc == Rtti.TtTypeDescGetter<Bricks.CodeBuilder.ShaderNode.TtMaterialEditor>.TypeDesc)
                 {
+                    System.Diagnostics.Debug.Assert(false);
                     object pThis = new Bricks.CodeBuilder.ShaderNode.TtMaterialEditor();
                     IO.SerializerHelper.ReadObjectMetaFields(this, node, ref pThis, null);
                     MaterialGraph = (pThis as Bricks.CodeBuilder.ShaderNode.TtMaterialEditor).MaterialGraph;
