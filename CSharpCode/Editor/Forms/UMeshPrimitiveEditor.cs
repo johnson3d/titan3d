@@ -1,5 +1,4 @@
-﻿using Assimp;
-using EngineNS.DistanceField;
+﻿using EngineNS.DistanceField;
 using EngineNS.GamePlay.Camera;
 using EngineNS.Graphics.Mesh;
 using ICSharpCode.SharpZipLib.Tar;

@@ -88,7 +88,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var ameta = this.GetAMeta();
             if (ameta != null)
             {
-                UpdateAMetaReferences(ameta);
+                UpdateAMetaReferences(ameta, null);
                 ameta.SaveAMeta(this);
             }
 
@@ -155,7 +155,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             return null;
         }
-        public override void UpdateAMetaReferences(IO.IAssetMeta ameta)
+        public override void UpdateAMetaReferences(IO.IAssetMeta ameta, Bricks.CodeBuilder.ShaderNode.TtMaterialGraph MaterialGraph)
         {
             ameta.RefAssetRNames.Clear();
             ameta.AddReferenceAsset(MaterialName);

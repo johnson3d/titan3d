@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using Assimp;
 using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
@@ -32,7 +31,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.ShaderNode.UShaderEditor@EngineCore" })]
-    public partial class TtMaterialEditor : Editor.IAssetEditor, IO.ISerializer, ITickable, IRootForm
+    public partial class TtMaterialEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
         public int GetTickOrder()
         {
@@ -69,16 +68,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         {
             return this;
         }
-        #region ISerializer
-        public void OnPreRead(object tagObject, object hostObject, bool fromXml)
-        {
-
-        }
-        public void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml)
-        {
-
-        }
-        #endregion
         #region Tickable
         public void TickLogic(float ellapse)
         {
@@ -466,9 +455,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             Material.GraphXMLString = xmlText;
             
             Material.SaveAssetTo(Material.AssetName);
-            //Material.SerialId++;
-
-            //Editor.USnapshot.Save(Material.AssetName, Material.GetAMeta(), PreviewViewport.RenderPolicy.GetFinalShowRSV(), TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.GetImmCommandList());
 
             if (await TtEngine.Instance.GfxDevice.MaterialManager.ReloadMaterial(Material.AssetName))
             {

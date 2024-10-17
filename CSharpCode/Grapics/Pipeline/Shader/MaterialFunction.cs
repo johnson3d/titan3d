@@ -84,22 +84,22 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
-        public virtual void UpdateAMetaReferences(IO.IAssetMeta ameta)
+        public virtual void UpdateAMetaReferences(IO.IAssetMeta ameta, TtMaterialFunctionGraph MaterialGraph)
         {
             ameta.RefAssetRNames.Clear();
 
-            ameta.RefAssetRNames.AddRange(this.RefMaterialFunctions);
+            foreach (var i in MaterialGraph.Nodes)
+            {
+                var f = i as Bricks.CodeBuilder.ShaderNode.Control.TtCallMaterialFunctionNode;
+                if (f != null)
+                {
+                    ameta.RefAssetRNames.Add(f.FunctionName);
+                }
+            }
         }
         [Rtti.Meta]
         public virtual void SaveAssetTo(RName name)
         {
-            var ameta = this.GetAMeta();
-            if (ameta != null)
-            {
-                UpdateAMetaReferences(ameta);
-                ameta.SaveAMeta(this);
-            }
-
             var MaterialGraph = new Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionGraph();
             var xml = IO.TtFileManager.LoadXmlFromString(this.GraphXMLString);
             if (xml != null)
@@ -107,7 +107,13 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 object pThis = MaterialGraph;
                 IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
             }
-            
+            var ameta = this.GetAMeta();
+            if (ameta != null)
+            {
+                UpdateAMetaReferences(ameta, MaterialGraph);
+                ameta.SaveAMeta(this);
+            }
+
             HLSLCode = GenMateralFunctionGraphCode(new UHLSLCodeGenerator(), MaterialGraph);
 
             var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
@@ -135,14 +141,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
             Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionGraph MaterialGraph)
         {
             var lstInput = new List<IMaterialFunctionInput>();
-            RefMaterialFunctions.Clear();
             foreach (var i in MaterialGraph.Nodes)
             {
-                var f = i as Bricks.CodeBuilder.ShaderNode.Control.TtCallMaterialFunctionNode;
-                if (f != null)
-                {
-                    RefMaterialFunctions.Add(f.FunctionName);
-                }
                 var v = i as IMaterialFunctionInput;
                 if (v == null)
                     continue;
@@ -312,8 +312,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
         #region IShaderCodeProvider
         public NxRHI.TtShaderCode DefineCode { get; } = new NxRHI.TtShaderCode();
         public NxRHI.TtShaderCode SourceCode { get; } = new NxRHI.TtShaderCode();
-        [Rtti.Meta]
-        public List<RName> RefMaterialFunctions { get; set; } = new List<RName>();
         #endregion
 
         [Rtti.Meta]
@@ -341,11 +339,26 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
         }
 
+        private Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionGraph LoadGraph()
+        {
+            var MaterialGraph = new Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionGraph();
+            var xml = IO.TtFileManager.LoadXmlFromString(this.GraphXMLString);
+            if (xml != null)
+            {
+                object pThis = MaterialGraph;
+                IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
+            }
+            return MaterialGraph;
+        }
         public void WriteRefHLSLCode(ref string code)
         {
-            foreach (var i in RefMaterialFunctions)
+            var MaterialGraph = LoadGraph();
+            foreach (var i in MaterialGraph.Nodes)
             {
-                var refFunc = TtEngine.Instance.GfxDevice.MaterialFunctionManager.GetMaterialFunctionSync(i);
+                var f = i as Bricks.CodeBuilder.ShaderNode.Control.TtCallMaterialFunctionNode;
+                if (f == null)
+                    continue;
+                var refFunc = TtEngine.Instance.GfxDevice.MaterialFunctionManager.GetMaterialFunctionSync(f.FunctionName);
                 if (refFunc != null)
                 {
                     refFunc.WriteRefHLSLCode(ref code);

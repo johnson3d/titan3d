@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using Assimp;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.NodeGraph;
 
@@ -129,7 +128,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
-        public virtual void UpdateAMetaReferences(IO.IAssetMeta ameta)
+        public virtual void UpdateAMetaReferences(IO.IAssetMeta ameta, Bricks.CodeBuilder.ShaderNode.TtMaterialGraph MaterialGraph)
         {
             ameta.RefAssetRNames.Clear();
             foreach (var i in UsedSrView)
@@ -138,10 +137,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     continue;
                 ameta.AddReferenceAsset(i.Value);
             }
-            ameta.RefAssetRNames.AddRange(this.RefMaterialFunctions);
+            foreach (var i in MaterialGraph.Nodes)
+            {
+                var f = i as Bricks.CodeBuilder.ShaderNode.Control.TtCallMaterialFunctionNode;
+                if (f == null)
+                    continue;
+                ameta.RefAssetRNames.Add(f.FunctionName);
+            }
         }
-        [Rtti.Meta]
-        public List<RName> RefMaterialFunctions { get; set; } = new List<RName>();
         [Rtti.Meta]
         public virtual void SaveAssetTo(RName name)
         {
@@ -175,12 +178,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
             
             string code = "";
             var MaterialOutput = MaterialGraph.FindFirstTypedNode<Bricks.CodeBuilder.ShaderNode.TtMaterialOutput>("Output", false);
+            if (MaterialOutput == null)
+            {
+                MaterialOutput = Bricks.CodeBuilder.ShaderNode.TtMaterialOutput.NewNode(MaterialGraph);
+                MaterialGraph.AddNode(MaterialOutput);
+            }
             GenMateralGraphCode(ref code, this, new UHLSLCodeGenerator(), MaterialGraph, MaterialOutput);
 
             var ameta = this.GetAMeta();
             if (ameta != null)
             {
-                UpdateAMetaReferences(ameta);
+                UpdateAMetaReferences(ameta, MaterialGraph);
                 ameta.SaveAMeta(this);
             }
 
@@ -273,14 +281,11 @@ namespace EngineNS.Graphics.Pipeline.Shader
             Bricks.CodeBuilder.ShaderNode.TtMaterialGraph MaterialGraph, 
             Bricks.CodeBuilder.ShaderNode.TtMaterialOutput MaterialOutput)
         {
-            Material.RefMaterialFunctions.Clear();
             foreach (var i in MaterialGraph.Nodes)
             {
                 var f = i as Bricks.CodeBuilder.ShaderNode.Control.TtCallMaterialFunctionNode;
                 if (f != null)
                 {
-                    Material.RefMaterialFunctions.Add(f.FunctionName);
-
                     f.MaterialFunction.WriteRefHLSLCode(ref code);
                 }
             }

@@ -175,7 +175,7 @@ namespace EngineNS.Graphics.Mesh
             get;
             set;
         }
-        public unsafe static TtMeshPrimitives LoadXnd(UMeshPrimitiveManager manager, IO.TtXndHolder xnd)
+        public unsafe static TtMeshPrimitives LoadXnd(TtMeshPrimitiveManager manager, IO.TtXndHolder xnd)
         {
             var result = new TtMeshPrimitives();
             
@@ -263,9 +263,9 @@ namespace EngineNS.Graphics.Mesh
             }
         }
     }
-    public class UMeshPrimitiveManager
+    public class TtMeshPrimitiveManager
     {
-        ~UMeshPrimitiveManager()
+        ~TtMeshPrimitiveManager()
         {
             mUnitSphere?.Dispose();
             mUnitSphere = null;
@@ -405,6 +405,6 @@ namespace EngineNS.Graphics.Pipeline
 {
     public partial class TtGfxDevice
     {
-        public Mesh.UMeshPrimitiveManager MeshPrimitiveManager { get; } = new Mesh.UMeshPrimitiveManager();
+        public Mesh.TtMeshPrimitiveManager MeshPrimitiveManager { get; } = new Mesh.TtMeshPrimitiveManager();
     }
 }

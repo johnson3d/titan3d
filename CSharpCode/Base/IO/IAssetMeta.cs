@@ -193,7 +193,6 @@ namespace EngineNS.IO
         RName AssetName { get; set; }
         IAssetMeta CreateAMeta();
         IAssetMeta GetAMeta();
-        void UpdateAMetaReferences(IAssetMeta ameta);
         void SaveAssetTo(RName name);
     }
     public enum EAssetState
