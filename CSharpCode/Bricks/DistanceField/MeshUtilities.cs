@@ -281,7 +281,7 @@ namespace EngineNS.DistanceField
         }
 
         public static void GenerateSignedDistanceFieldVolumeData(string MeshName,
-            Graphics.Mesh.UMeshDataProvider meshProvider,
+            Graphics.Mesh.TtMeshDataProvider meshProvider,
             DistanceFieldConfig sdfConfig,
             float DistanceFieldResolutionScale,
             bool bGenerateAsIfTwoSided,

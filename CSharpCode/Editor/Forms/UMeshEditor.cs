@@ -207,7 +207,7 @@ namespace EngineNS.Editor.Forms
                 meshSize.Y = aabb.GetSize().Y * 0.05f;
                 var boxStart = meshCenter - meshSize * 0.5f;
                 boxStart.Y -= aabb.GetSize().Y * 0.5f + meshSize.Y * 0.5f + 0.001f;
-                var box = Graphics.Mesh.UMeshDataProvider.MakePlane(meshSize.X, meshSize.Z).ToMesh();
+                var box = Graphics.Mesh.TtMeshDataProvider.MakePlane(meshSize.X, meshSize.Z).ToMesh();
 
                 var PlaneMesh = new Graphics.Mesh.TtMesh();
                 var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];

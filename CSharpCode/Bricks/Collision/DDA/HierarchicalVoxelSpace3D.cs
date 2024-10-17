@@ -139,7 +139,7 @@ namespace EngineNS.Bricks.Collision.DDA
         {
             var material = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("utest/box_wite.uminst"));
             VxDebugMesh = new Graphics.Mesh.TtMesh();
-            var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1, 0xffff00ff);
+            var rect = Graphics.Mesh.TtMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1, 0xffff00ff);
             var rectMesh = rect.ToMesh();
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = material;
@@ -210,7 +210,7 @@ namespace EngineNS.Bricks.Collision.DDA
                 lineTo = from;
 
                 var sphereDebugMesh = new Graphics.Mesh.TtMesh();
-                var sphere = Graphics.Mesh.UMeshDataProvider.MakeSphere(0.3f, 8, 8, 0xFFFFFF00);
+                var sphere = Graphics.Mesh.TtMeshDataProvider.MakeSphere(0.3f, 8, 8, 0xFFFFFF00);
                 var sphereMesh = sphere.ToMesh();
                 sphereDebugMesh.Initialize(sphereMesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 sphereDebugMesh.MdfQueue.MdfDatas = this;
@@ -227,7 +227,7 @@ namespace EngineNS.Bricks.Collision.DDA
                 HVXDebugHitNode = meshNode1;
             }
             var lineMesh = new Graphics.Mesh.TtMesh();
-            var rect = Graphics.Mesh.UMeshDataProvider.MakeLine(in lineFrom, in lineTo, 0xFF50ff80);
+            var rect = Graphics.Mesh.TtMeshDataProvider.MakeLine(in lineFrom, in lineTo, 0xFF50ff80);
             var rectMesh = rect.ToMesh();
             lineMesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             lineMesh.MdfQueue.MdfDatas = this;

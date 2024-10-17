@@ -60,7 +60,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 gridColor.SetValue(new Vector4(0.6f, 0.6f, 0.6f, 1));
             }
-            var mesh = Graphics.Mesh.UMeshDataProvider.MakeGridPlane(rc, Vector2.Zero, Vector2.One, 10).ToMesh();
+            var mesh = Graphics.Mesh.TtMeshDataProvider.MakeGridPlane(rc, Vector2.Zero, Vector2.One, 10).ToMesh();
 
             var gridMesh = new Graphics.Mesh.TtMesh();
             var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];

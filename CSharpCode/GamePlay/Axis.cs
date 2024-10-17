@@ -1014,7 +1014,7 @@ namespace EngineNS.GamePlay
         async System.Threading.Tasks.Task InitializeDebugAssit()
         {
             var mesh = new Graphics.Mesh.TtMesh();
-            var plane = Graphics.Mesh.UMeshDataProvider.MakePlane(1, 1);
+            var plane = Graphics.Mesh.TtMeshDataProvider.MakePlane(1, 1);
             var planeMesh = plane.ToMesh();
             var planeMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Focus_d);
             var ok = mesh.Initialize(
@@ -1040,7 +1040,7 @@ namespace EngineNS.GamePlay
             }
 
             mesh = new Graphics.Mesh.TtMesh();
-            var point = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.05f, -0.05f, -0.05f, 0.1f, 0.1f, 0.1f);
+            var point = Graphics.Mesh.TtMeshDataProvider.MakeBox(-0.05f, -0.05f, -0.05f, 0.1f, 0.1f, 0.1f);
             var pointMesh = point.ToMesh();
             var pointMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(mAxisMaterial_Center);
             ok = mesh.Initialize(pointMesh, new Graphics.Pipeline.Shader.TtMaterial[] { pointMaterial },

@@ -16,12 +16,12 @@ namespace EngineNS.Graphics.Mesh
             }
             AssetImportAndExport.FBX.FBXImporter mFBXImporter; //for now we only have one file to import
             string MeshType = "FromFile";
-            UMeshDataProvider.UMakeBoxParameter BoxParameter = new UMeshDataProvider.UMakeBoxParameter();
-            UMeshDataProvider.UMakeRect2DParameter Rect2DParameter = new UMeshDataProvider.UMakeRect2DParameter();
-            UMeshDataProvider.UMakeSphereParameter SphereParameter = new UMeshDataProvider.UMakeSphereParameter();
-            UMeshDataProvider.UMakeCylinderParameter CylinderParameter = new UMeshDataProvider.UMakeCylinderParameter();
-            UMeshDataProvider.UMakeTorusParameter TorusParameter = new UMeshDataProvider.UMakeTorusParameter();
-            UMeshDataProvider.MakeCapsuleParameter CapsuleParameter = new UMeshDataProvider.MakeCapsuleParameter(); 
+            TtMeshDataProvider.UMakeBoxParameter BoxParameter = new TtMeshDataProvider.UMakeBoxParameter();
+            TtMeshDataProvider.UMakeRect2DParameter Rect2DParameter = new TtMeshDataProvider.UMakeRect2DParameter();
+            TtMeshDataProvider.UMakeSphereParameter SphereParameter = new TtMeshDataProvider.UMakeSphereParameter();
+            TtMeshDataProvider.UMakeCylinderParameter CylinderParameter = new TtMeshDataProvider.UMakeCylinderParameter();
+            TtMeshDataProvider.UMakeTorusParameter TorusParameter = new TtMeshDataProvider.UMakeTorusParameter();
+            TtMeshDataProvider.MakeCapsuleParameter CapsuleParameter = new TtMeshDataProvider.MakeCapsuleParameter(); 
 
             public unsafe partial bool FBXCreateCreateDraw(TtContentBrowser ContentBrowser)
             {
@@ -151,7 +151,7 @@ namespace EngineNS.Graphics.Mesh
                                     break;
                                 case "Box":
                                     {
-                                        var mesh = UMeshDataProvider.MakeBox(BoxParameter.Position.X, BoxParameter.Position.Y, BoxParameter.Position.Z,
+                                        var mesh = TtMeshDataProvider.MakeBox(BoxParameter.Position.X, BoxParameter.Position.Y, BoxParameter.Position.Z,
                                             BoxParameter.Extent.X, BoxParameter.Extent.Y, BoxParameter.Extent.Z, new Color4f(BoxParameter.Color).ToArgb(), BoxParameter.FaceFlags);
 
                                         var name = this.GetAssetRName();
@@ -170,7 +170,7 @@ namespace EngineNS.Graphics.Mesh
                                     break;
                                 case "Rect2D":
                                     {
-                                        var mesh = UMeshDataProvider.MakeRect2D(Rect2DParameter.Position.X, Rect2DParameter.Position.Y, 
+                                        var mesh = TtMeshDataProvider.MakeRect2D(Rect2DParameter.Position.X, Rect2DParameter.Position.Y, 
                                             Rect2DParameter.Width, Rect2DParameter.Height, Rect2DParameter.Position.Z);
 
                                         var name = this.GetAssetRName();
@@ -189,7 +189,7 @@ namespace EngineNS.Graphics.Mesh
                                     break;
                                 case "Sphere":
                                     {
-                                        var mesh = UMeshDataProvider.MakeSphere(SphereParameter.Radius, SphereParameter.Slices,
+                                        var mesh = TtMeshDataProvider.MakeSphere(SphereParameter.Radius, SphereParameter.Slices,
                                             SphereParameter.Stacks, new Color4f(SphereParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();
@@ -208,7 +208,7 @@ namespace EngineNS.Graphics.Mesh
                                     break;
                                 case "Cylinder":
                                     {
-                                        var mesh = UMeshDataProvider.MakeCylinder(CylinderParameter.Radius1, CylinderParameter.Radius2, CylinderParameter.Length,
+                                        var mesh = TtMeshDataProvider.MakeCylinder(CylinderParameter.Radius1, CylinderParameter.Radius2, CylinderParameter.Length,
                                             CylinderParameter.Slices, CylinderParameter.Stacks, new Color4f(CylinderParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();
@@ -227,7 +227,7 @@ namespace EngineNS.Graphics.Mesh
                                     break;
                                 case "Torus":
                                     {
-                                        var mesh = UMeshDataProvider.MakeTorus(TorusParameter.InnerRadius, TorusParameter.OutRadius2,
+                                        var mesh = TtMeshDataProvider.MakeTorus(TorusParameter.InnerRadius, TorusParameter.OutRadius2,
                                             TorusParameter.Slices, TorusParameter.Rings, new Color4f(TorusParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();
@@ -246,7 +246,7 @@ namespace EngineNS.Graphics.Mesh
                                     break;
                                 case "Capsule":
                                     {
-                                        var mesh = UMeshDataProvider.MakeCapsule(CapsuleParameter.Radius, CapsuleParameter.Depth,
+                                        var mesh = TtMeshDataProvider.MakeCapsule(CapsuleParameter.Radius, CapsuleParameter.Depth,
                                             (int)CapsuleParameter.Latitudes, (int)CapsuleParameter.Longitudes, (int)CapsuleParameter.Rings, CapsuleParameter.UvProfile, new Color4f(TorusParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();

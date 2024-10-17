@@ -203,9 +203,9 @@ namespace EngineNS.Bricks.PhysicsCore
             set {; }
         }
 
-        public Graphics.Mesh.UMeshDataProvider ToMeshProvider()
+        public Graphics.Mesh.TtMeshDataProvider ToMeshProvider()
         {
-            var meshProvider = new Graphics.Mesh.UMeshDataProvider(mCoreObject.CreateMeshProvider());
+            var meshProvider = new Graphics.Mesh.TtMeshDataProvider(mCoreObject.CreateMeshProvider());
             return meshProvider;
         }
     }

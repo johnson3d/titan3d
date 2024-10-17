@@ -200,7 +200,7 @@ namespace EngineNS.Bricks.VXGI
             {
                 var material = VxDebugMesh.MaterialMesh.SubMeshes[0].Materials[0];
                 VxDebugMesh = new Graphics.Mesh.TtMesh();
-                var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
+                var rect = Graphics.Mesh.TtMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
                 var rectMesh = rect.ToMesh();
                 var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
                 materials[0] = material;
@@ -242,7 +242,7 @@ namespace EngineNS.Bricks.VXGI
             CollectVxDebugger = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<CollectVxDebuggerShading>();
 
             VxDebugMesh = new Graphics.Mesh.TtMesh();
-            var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
+            var rect = Graphics.Mesh.TtMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
             var rectMesh = rect.ToMesh();
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = material;

@@ -221,7 +221,7 @@ namespace EngineNS.Bricks.Procedure.Node
         }
         protected unsafe void CreatePreviewMesh(RName rn, UPgcGraph graph)
         {
-            var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
+            var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             {
                 var indices = graph.BufferCache.FindBuffer(InIndices) as USuperBuffer<Vector3i, FInt3Operator>;
                 var pos = graph.BufferCache.FindBuffer(InPos) as USuperBuffer<Vector3, FFloat3Operator>;

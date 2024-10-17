@@ -176,7 +176,7 @@ namespace EngineNS.GamePlay
             public void AddAABB(in Aabb aabb, in Color4f color, in FTransform transform)
             {
                 BoundingBox box = new BoundingBox(-aabb.Extent, aabb.Extent);
-                var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeBox(in box, color.ToArgb());
+                var meshProvider = Graphics.Mesh.TtMeshDataProvider.MakeBox(in box, color.ToArgb());
                 meshProvider.TransientVB = TransientVB;
                 meshProvider.TransientIB = TransientIB;
                 var mesh = meshProvider.ToDrawMesh(TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
@@ -188,7 +188,7 @@ namespace EngineNS.GamePlay
             }
             public void AddBoundingBox(in BoundingBox box, in Color4f color)
             {
-                var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeBox(in box, color.ToArgb());
+                var meshProvider = Graphics.Mesh.TtMeshDataProvider.MakeBox(in box, color.ToArgb());
                 var mesh = meshProvider.ToDrawMesh(TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
                 mesh.SetWorldTransform(in FTransform.Identity, this.World, true);
                 AddVisibleMesh(mesh);
@@ -383,7 +383,7 @@ namespace EngineNS.GamePlay
 
             ref var aabb = ref node.AABB;
             var size = aabb.GetSize();
-            var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeBoxWireframe((float)aabb.Minimum.X, (float)aabb.Minimum.Y, (float)aabb.Minimum.Z,
+            var cookedMesh = Graphics.Mesh.TtMeshDataProvider.MakeBoxWireframe((float)aabb.Minimum.X, (float)aabb.Minimum.Y, (float)aabb.Minimum.Z,
                 (float)size.X, (float)size.Y, (float)size.Z).ToMesh();
             var mesh2 = new Graphics.Mesh.TtMesh();
 

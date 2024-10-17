@@ -159,20 +159,20 @@ namespace EngineNS.Bricks.PhysicsCore
                         case EPhysShapeType.PST_Box:
                             {
                                 var shape = this as TtPhyBoxShape;
-                                meshPrimitive = Graphics.Mesh.UMeshDataProvider.MakeBox(-shape.HalfExtent.X, -shape.HalfExtent.Y, -shape.HalfExtent.Z,
+                                meshPrimitive = Graphics.Mesh.TtMeshDataProvider.MakeBox(-shape.HalfExtent.X, -shape.HalfExtent.Y, -shape.HalfExtent.Z,
                                     shape.HalfExtent.X * 2.0f, shape.HalfExtent.Y * 2.0f, shape.HalfExtent.Z * 2.0f, 0xfffffff).ToMesh();
                             }
                             break;
                         case EPhysShapeType.PST_Sphere:
                             {
                                 var shape = this as TtPhySphereShape;
-                                meshPrimitive = Graphics.Mesh.UMeshDataProvider.MakeSphere(shape.Radius, 20, 20, 0xfffffff).ToMesh();
+                                meshPrimitive = Graphics.Mesh.TtMeshDataProvider.MakeSphere(shape.Radius, 20, 20, 0xfffffff).ToMesh();
                             }
                             break;
                         case EPhysShapeType.PST_Capsule:
                             {
                                 var shape = this as TtPhyCapsuleShape;
-                                meshPrimitive = Graphics.Mesh.UMeshDataProvider.MakeCapsule(shape.Radius, shape.HalfHeight* 2, 10, 10, 100, Graphics.Mesh.UMeshDataProvider.ECapsuleUvProfile.Aspect, 0xfffffff).ToMesh();
+                                meshPrimitive = Graphics.Mesh.TtMeshDataProvider.MakeCapsule(shape.Radius, shape.HalfHeight* 2, 10, 10, 100, Graphics.Mesh.TtMeshDataProvider.ECapsuleUvProfile.Aspect, 0xfffffff).ToMesh();
                             }
                             break;
                         case EPhysShapeType.PST_Convex:

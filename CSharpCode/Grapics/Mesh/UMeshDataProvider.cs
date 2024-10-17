@@ -7,13 +7,13 @@ using System.Text;
 
 namespace EngineNS.Graphics.Mesh
 {
-    public class UMeshDataProvider : AuxPtrType<NxRHI.FMeshDataProvider>
+    public class TtMeshDataProvider : AuxPtrType<NxRHI.FMeshDataProvider>
     {
-        public UMeshDataProvider()
+        public TtMeshDataProvider()
         {
             mCoreObject = NxRHI.FMeshDataProvider.CreateInstance();
         }
-        public UMeshDataProvider(NxRHI.FMeshDataProvider self)
+        public TtMeshDataProvider(NxRHI.FMeshDataProvider self)
         {
             mCoreObject = self;
         }
@@ -33,6 +33,13 @@ namespace EngineNS.Graphics.Mesh
             get
             {
                 return mCoreObject.GetAtomNumber();
+            }
+        }
+        public uint NumOfVertex
+        {
+            get
+            {
+                return mCoreObject.GetVertexNumber();
             }
         }
         public BoundingBox AABB
@@ -119,17 +126,17 @@ namespace EngineNS.Graphics.Mesh
             public Vector4 Color { get; set; }
             public EBoxFace FaceFlags { get; set; } = EBoxFace.All;
         }
-        public static unsafe UMeshDataProvider MakeBox(in BoundingBox aabb, uint color = 0xffffffff,
+        public static unsafe TtMeshDataProvider MakeBox(in BoundingBox aabb, uint color = 0xffffffff,
             EBoxFace faceFlags = EBoxFace.All)
         {
             var center = aabb.GetCenter();
             var size = aabb.GetSize();
             return MakeBox(center.X, center.Y, center.Z, size.X, size.Y, size.Z, color, faceFlags);
         }
-        public static unsafe UMeshDataProvider MakeBox(float x, float y, float z, float xSize, float ySize, float zSize, uint color = 0xffffffff,
+        public static unsafe TtMeshDataProvider MakeBox(float x, float y, float z, float xSize, float ySize, float zSize, uint color = 0xffffffff,
             EBoxFace faceFlags = EBoxFace.All)
         {
-            var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
+            var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             meshBuilder.AssetName = RName.GetRName("@MakeBox", RName.ERNameType.Transient);
             var builder = meshBuilder.mCoreObject;
             uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) | 
@@ -269,9 +276,9 @@ namespace EngineNS.Graphics.Mesh
             builder.PushAtomLOD(0, &dpDesc);
             return meshBuilder;
         }
-        public static unsafe UMeshDataProvider MakeBoxWireframe(float x, float y, float z, float xSize, float ySize, float zSize, UInt32 color = 0xFFFFFFFF)
+        public static unsafe TtMeshDataProvider MakeBoxWireframe(float x, float y, float z, float xSize, float ySize, float zSize, UInt32 color = 0xFFFFFFFF)
         {
-            var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
+            var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             meshBuilder.AssetName = RName.GetRName("@MakeBoxWireframe", RName.ERNameType.Transient);
             var builder = meshBuilder.mCoreObject;
             uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
@@ -353,9 +360,9 @@ namespace EngineNS.Graphics.Mesh
             public float Width { get; set; } = 1.0f;
             public float Height { get; set; } = 1.0f;
         }
-        public static unsafe UMeshDataProvider MakeRect2D(float x, float y, float w, float h, float z, bool lh = true, NxRHI.ECpuAccess cpuAccess = NxRHI.ECpuAccess.CAS_DEFAULT)
+        public static unsafe TtMeshDataProvider MakeRect2D(float x, float y, float w, float h, float z, bool lh = true, NxRHI.ECpuAccess cpuAccess = NxRHI.ECpuAccess.CAS_DEFAULT)
         {
-            var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
+            var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             meshBuilder.AssetName = RName.GetRName("@MakeRect2D", RName.ERNameType.Transient);
             var builder = meshBuilder.mCoreObject;
             uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
@@ -464,7 +471,7 @@ namespace EngineNS.Graphics.Mesh
             [EGui.Controls.PropertyGrid.Color4PickerEditor()]
             public Vector4 Color { get; set; } = Vector4.One;
         }
-        public static unsafe UMeshDataProvider MakeSphere(float radius, uint slices, uint stacks, uint color)
+        public static unsafe TtMeshDataProvider MakeSphere(float radius, uint slices, uint stacks, uint color)
         {
             uint number_of_vertices, number_of_faces;            
             float phi_step, phi_start;
@@ -596,7 +603,7 @@ namespace EngineNS.Graphics.Mesh
             faces[(int)face].Z = vertex;
 
             //=======================
-            var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
+            var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             meshBuilder.AssetName = RName.GetRName("@MakeSphere", RName.ERNameType.Transient);
             var builder = meshBuilder.mCoreObject;
             uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
@@ -643,7 +650,7 @@ namespace EngineNS.Graphics.Mesh
             [EGui.Controls.PropertyGrid.Color4PickerEditor()]
             public Vector4 Color { get; set; } = Vector4.One;
         }
-        public static unsafe UMeshDataProvider MakeCylinder(float radius1, float radius2, float length, uint slices, uint stacks, uint color)
+        public static unsafe TtMeshDataProvider MakeCylinder(float radius1, float radius2, float length, uint slices, uint stacks, uint color)
         {
             uint number_of_vertices, number_of_faces;
             
@@ -798,7 +805,7 @@ namespace EngineNS.Graphics.Mesh
             faces[(int)face].Z = SphereVertexIndex(slices, 0, stack);
 
             //=======================
-            var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
+            var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             meshBuilder.AssetName = RName.GetRName("@MakeCylinder", RName.ERNameType.Transient);
             var builder = meshBuilder.mCoreObject;
             uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
@@ -855,7 +862,7 @@ namespace EngineNS.Graphics.Mesh
             [EGui.Controls.PropertyGrid.Color4PickerEditor()]
             public Vector4 Color { get; set; } = Vector4.One;
         }
-        public static unsafe UMeshDataProvider MakeTorus(float innerradius, float outerradius, uint sides, uint rings, uint color = 0xffffffff)
+        public static unsafe TtMeshDataProvider MakeTorus(float innerradius, float outerradius, uint sides, uint rings, uint color = 0xffffffff)
         {
             float phi, phi_step, sin_phi, cos_phi;
             float theta, theta_step, sin_theta, cos_theta;
@@ -919,7 +926,7 @@ namespace EngineNS.Graphics.Mesh
             }
 
             //=======================
-            var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
+            var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             meshBuilder.AssetName = RName.GetRName("@MakeTorus", RName.ERNameType.Transient);
             var builder = meshBuilder.mCoreObject;
             uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
@@ -970,12 +977,12 @@ namespace EngineNS.Graphics.Mesh
             public uint Longitudes { get; set; } = 10;
             public uint Rings { get; set; } = 100;
             public uint Slices { get; set; } = 30;
-            public Graphics.Mesh.UMeshDataProvider.ECapsuleUvProfile UvProfile { get; set; } = ECapsuleUvProfile.Aspect;
+            public Graphics.Mesh.TtMeshDataProvider.ECapsuleUvProfile UvProfile { get; set; } = ECapsuleUvProfile.Aspect;
 
             [EGui.Controls.PropertyGrid.Color4PickerEditor()]
             public Vector4 Color { get; set; } = Vector4.One;
         }
-        public static unsafe UMeshDataProvider MakeCapsule(float radius, float depth, int latitudes, int longitudes, int rings, ECapsuleUvProfile profile, uint color = 0xffffffff)
+        public static unsafe TtMeshDataProvider MakeCapsule(float radius, float depth, int latitudes, int longitudes, int rings, ECapsuleUvProfile profile, uint color = 0xffffffff)
         {//https://gist.github.com/behreajj/d84525c0e1a0738c4de2c00a411e4b73#file-capsulemaker-cs
             bool calcMiddle = rings > 0;
             int halfLats = latitudes / 2;
@@ -1277,7 +1284,7 @@ namespace EngineNS.Graphics.Mesh
             }
 
             //=======================
-            var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
+            var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             meshBuilder.AssetName = RName.GetRName("@MakeCapsule", RName.ERNameType.Transient);
             var builder = meshBuilder.mCoreObject;
             uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
@@ -1315,9 +1322,9 @@ namespace EngineNS.Graphics.Mesh
         #endregion
 
         #region Plane
-        public static unsafe UMeshDataProvider MakeGridIndices(ushort NumX, ushort NumZ)
+        public static unsafe TtMeshDataProvider MakeGridIndices(ushort NumX, ushort NumZ)
         {
-            var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
+            var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             meshBuilder.AssetName = RName.GetRName("@MakeGridIndices", RName.ERNameType.Transient);
             var builder = meshBuilder.mCoreObject;
             uint streams = 0;
@@ -1357,9 +1364,9 @@ namespace EngineNS.Graphics.Mesh
             return meshBuilder;
         }
         
-        public static unsafe UMeshDataProvider MakeGridForTerrain(ushort NumX, ushort NumZ)
+        public static unsafe TtMeshDataProvider MakeGridForTerrain(ushort NumX, ushort NumZ)
         {
-            var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
+            var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             meshBuilder.AssetName = RName.GetRName("@MakeGridForTerrain", RName.ERNameType.Transient);
             var builder = meshBuilder.mCoreObject;
             uint streams = (uint)(1 << (int)NxRHI.EVertexStreamType.VST_Position);
@@ -1406,9 +1413,18 @@ namespace EngineNS.Graphics.Mesh
         {
             return start + factor * (end - start);
         }
-        public static UMeshDataProvider MakeGridPlane(NxRHI.TtGpuDevice rc, Vector2 uvMin, Vector2 uvMax, UInt32 tileCount = 10)
+        public static TtMeshDataProvider MakeGridPlane(NxRHI.TtGpuDevice rc, Vector2 uvMin, Vector2 uvMax, UInt32 tileCount = 10)
         {//reference:DrawGridline
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
             UMeshDataProvider meshBuilder = new Graphics.Mesh.UMeshDataProvider();
+            meshBuilder.AssetName = RName.GetRName("@MakeGridPlane", RName.ERNameType.Transient);
+在此之后:
+            TtMeshDataProvider meshBuilder = new Graphics.Mesh.UMeshDataProvider();
+            meshBuilder.AssetName = RName.GetRName("@MakeGridPlane", RName.ERNameType.Transient);
+*/
+            TtMeshDataProvider meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             meshBuilder.AssetName = RName.GetRName("@MakeGridPlane", RName.ERNameType.Transient);
             var builder = meshBuilder.mCoreObject;
             uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
@@ -1492,9 +1508,9 @@ namespace EngineNS.Graphics.Mesh
             return meshBuilder;
         }
 
-        public static unsafe UMeshDataProvider MakePlane(float width, float length)
+        public static unsafe TtMeshDataProvider MakePlane(float width, float length)
         {
-            var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
+            var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             meshBuilder.AssetName = RName.GetRName("@MakePlane", RName.ERNameType.Transient);
             var builder = meshBuilder.mCoreObject;
             uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
@@ -1556,9 +1572,9 @@ namespace EngineNS.Graphics.Mesh
         #endregion
 
         #region line
-        public static unsafe UMeshDataProvider MakeLine(in Vector3 from, in Vector3 to, uint color)
+        public static unsafe TtMeshDataProvider MakeLine(in Vector3 from, in Vector3 to, uint color)
         {
-            var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
+            var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             meshBuilder.AssetName = RName.GetRName("@MakeLine", RName.ERNameType.Transient);
             var builder = meshBuilder.mCoreObject;
             uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
@@ -1585,9 +1601,9 @@ namespace EngineNS.Graphics.Mesh
             builder.SetAABB(ref aabb);
             return meshBuilder;
         }
-        public static unsafe UMeshDataProvider MakeLines(in List<Vector3> lineList, uint color)
+        public static unsafe TtMeshDataProvider MakeLines(in List<Vector3> lineList, uint color)
         {
-            var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
+            var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             meshBuilder.AssetName = RName.GetRName("@MakeLine", RName.ERNameType.Transient);
             var builder = meshBuilder.mCoreObject;
             uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
@@ -1621,9 +1637,9 @@ namespace EngineNS.Graphics.Mesh
             return meshBuilder;
         }
 
-        public static unsafe UMeshDataProvider MakeBezier3DSpline(UBezier3DSpline spline, uint color)
+        public static unsafe TtMeshDataProvider MakeBezier3DSpline(UBezier3DSpline spline, uint color)
         {
-            var meshBuilder = new Graphics.Mesh.UMeshDataProvider();
+            var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             meshBuilder.AssetName = RName.GetRName("@MakeBezier3DSpline", RName.ERNameType.Transient);
             var builder = meshBuilder.mCoreObject;
             uint streams = (uint)((1 << (int)NxRHI.EVertexStreamType.VST_Position) |
@@ -1663,5 +1679,14 @@ namespace EngineNS.Graphics.Mesh
             return meshBuilder;
         }
         #endregion
+
+        public IBlobObject CreateStream(EngineNS.NxRHI.EVertexStreamType index)
+        {
+            return mCoreObject.CreateStream(index);
+        }
+        public IBlobObject GetStream(EngineNS.NxRHI.EVertexStreamType index)
+        {
+            return mCoreObject.GetStream(index);
+        }
     }
 }

@@ -22,7 +22,7 @@ namespace EngineNS.NxPhysics
                     var clr = ((uint)TtEngine.Instance.PxSystem.Random.Next()) | 0xff000000;
                     var radius = mCoreObject.mDesc.Radius.AsSingle();
                     var stack = (uint)(radius / TtEngine.Instance.PxSystem.DebugTriangleSize);
-                    var geoMesh = Graphics.Mesh.UMeshDataProvider.MakeSphere(radius, stack, stack, clr).ToMesh();
+                    var geoMesh = Graphics.Mesh.TtMeshDataProvider.MakeSphere(radius, stack, stack, clr).ToMesh();
                     Graphics.Pipeline.Shader.TtMaterial[] materials = new Graphics.Pipeline.Shader.TtMaterial[]
                     {
                         TtEngine.Instance.PxSystem.DebugShapeMaterial,
@@ -57,7 +57,7 @@ namespace EngineNS.NxPhysics
                     Vector3 start = -halfExt;
                     Vector3 size = halfExt * 2.0f;
                     mCoreObject.mDesc.HalfExtent.ToVector3f(&halfExt);
-                    var geoMesh = Graphics.Mesh.UMeshDataProvider.MakeBox(start.X, start.Y, start.Z,
+                    var geoMesh = Graphics.Mesh.TtMeshDataProvider.MakeBox(start.X, start.Y, start.Z,
                          size.X, size.Y, size.Z, clr).ToMesh();
                     Graphics.Pipeline.Shader.TtMaterial[] materials = new Graphics.Pipeline.Shader.TtMaterial[]
                     {

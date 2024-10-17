@@ -59,7 +59,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             {
                 var size = (ushort)Math.Pow(2, GridMipLevels.Length - i - 1);
 
-                GridMipLevels[i] = Graphics.Mesh.UMeshDataProvider.MakeGridForTerrain(size, size).ToMesh();
+                GridMipLevels[i] = Graphics.Mesh.TtMeshDataProvider.MakeGridForTerrain(size, size).ToMesh();
             }
             //Parameters.SureMiplevels(mipLevel);
             //Parameters.LODLevelCount = mipLevel;

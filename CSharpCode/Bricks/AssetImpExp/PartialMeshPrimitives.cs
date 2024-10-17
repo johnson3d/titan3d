@@ -198,7 +198,7 @@ namespace EngineNS.Graphics.Mesh
                                     break;
                                 case "Box":
                                     {
-                                        var mesh = UMeshDataProvider.MakeBox(BoxParameter.Position.X, BoxParameter.Position.Y, BoxParameter.Position.Z,
+                                        var mesh = TtMeshDataProvider.MakeBox(BoxParameter.Position.X, BoxParameter.Position.Y, BoxParameter.Position.Z,
                                             BoxParameter.Extent.X, BoxParameter.Extent.Y, BoxParameter.Extent.Z, new Color4f(BoxParameter.Color).ToArgb(), BoxParameter.FaceFlags);
 
                                         var name = this.GetAssetRName();
@@ -217,7 +217,7 @@ namespace EngineNS.Graphics.Mesh
                                     break;
                                 case "Rect2D":
                                     {
-                                        var mesh = UMeshDataProvider.MakeRect2D(Rect2DParameter.Position.X, Rect2DParameter.Position.Y,
+                                        var mesh = TtMeshDataProvider.MakeRect2D(Rect2DParameter.Position.X, Rect2DParameter.Position.Y,
                                             Rect2DParameter.Width, Rect2DParameter.Height, Rect2DParameter.Position.Z);
 
                                         var name = this.GetAssetRName();
@@ -236,7 +236,7 @@ namespace EngineNS.Graphics.Mesh
                                     break;
                                 case "Sphere":
                                     {
-                                        var mesh = UMeshDataProvider.MakeSphere(SphereParameter.Radius, SphereParameter.Slices,
+                                        var mesh = TtMeshDataProvider.MakeSphere(SphereParameter.Radius, SphereParameter.Slices,
                                             SphereParameter.Stacks, new Color4f(SphereParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();
@@ -255,7 +255,7 @@ namespace EngineNS.Graphics.Mesh
                                     break;
                                 case "Cylinder":
                                     {
-                                        var mesh = UMeshDataProvider.MakeCylinder(CylinderParameter.Radius1, CylinderParameter.Radius2, CylinderParameter.Length,
+                                        var mesh = TtMeshDataProvider.MakeCylinder(CylinderParameter.Radius1, CylinderParameter.Radius2, CylinderParameter.Length,
                                             CylinderParameter.Slices, CylinderParameter.Stacks, new Color4f(CylinderParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();
@@ -274,7 +274,7 @@ namespace EngineNS.Graphics.Mesh
                                     break;
                                 case "Torus":
                                     {
-                                        var mesh = UMeshDataProvider.MakeTorus(TorusParameter.InnerRadius, TorusParameter.OutRadius2,
+                                        var mesh = TtMeshDataProvider.MakeTorus(TorusParameter.InnerRadius, TorusParameter.OutRadius2,
                                             TorusParameter.Slices, TorusParameter.Rings, new Color4f(TorusParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();
@@ -293,7 +293,7 @@ namespace EngineNS.Graphics.Mesh
                                     break;
                                 case "Capsule":
                                     {
-                                        var mesh = UMeshDataProvider.MakeCapsule(CapsuleParameter.Radius, CapsuleParameter.Depth,
+                                        var mesh = TtMeshDataProvider.MakeCapsule(CapsuleParameter.Radius, CapsuleParameter.Depth,
                                             (int)CapsuleParameter.Latitudes, (int)CapsuleParameter.Longitudes, (int)CapsuleParameter.Rings, CapsuleParameter.UvProfile, new Color4f(TorusParameter.Color).ToArgb());
 
                                         var name = this.GetAssetRName();

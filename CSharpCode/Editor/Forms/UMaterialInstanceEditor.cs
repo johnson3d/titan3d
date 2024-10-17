@@ -67,7 +67,7 @@ namespace EngineNS.Editor.Forms
             if (materials[0] == null)
                 return false;
             var mesh = new Graphics.Mesh.TtMesh();
-            var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
+            var rect = Graphics.Mesh.TtMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1);
             var rectMesh = rect.ToMesh();
             var ok = mesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
             if (ok)

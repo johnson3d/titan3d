@@ -48,10 +48,10 @@ namespace EngineNS.Bricks.Recast
         {
             mCoreObject.Save2Xnd(node.mCoreObject);
         }
-        public Graphics.Mesh.UMeshDataProvider CreateRenderMesh()
+        public Graphics.Mesh.TtMeshDataProvider CreateRenderMesh()
         {
             var ptr = mCoreObject.CreateRenderMesh();
-            return new Graphics.Mesh.UMeshDataProvider(ptr);
+            return new Graphics.Mesh.TtMeshDataProvider(ptr);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace EngineNS.DistanceField
         {
             mCoreObject = EngineNS.EmbreeManager.CreateInstance();
         }
-        public void SetupEmbreeScene(string name, UMeshDataProvider meshProvider, float DistanceFieldResolutionScale, UEmbreeScene embreeScene)
+        public void SetupEmbreeScene(string name, TtMeshDataProvider meshProvider, float DistanceFieldResolutionScale, UEmbreeScene embreeScene)
         {
             mCoreObject.SetupEmbreeScene(VNameString.FromString(name), meshProvider.mCoreObject, DistanceFieldResolutionScale, embreeScene.mCoreObject);
         }

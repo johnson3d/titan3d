@@ -44,7 +44,7 @@ namespace EngineNS.Bricks.Procedure
             var graph = this.ParentGraph as UPgcGraph;
             graph.GraphEditor.PreviewRoot.ClearChildren();
 
-            var vms = Graphics.Mesh.UMeshDataProvider.MakeRect2D(0, 0, 100, 100, 0).ToMesh();
+            var vms = Graphics.Mesh.TtMeshDataProvider.MakeRect2D(0, 0, 100, 100, 0).ToMesh();
             var mesh = new Graphics.Mesh.TtMesh();
 
             var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];

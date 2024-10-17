@@ -213,7 +213,7 @@ namespace EngineNS.Graphics.Mesh
             }
         }
 
-        private UMeshDataProvider mMeshDataProvider;
+        private TtMeshDataProvider mMeshDataProvider;
         public async System.Threading.Tasks.Task LoadMeshDataProvider()
         {
             if (mMeshDataProvider != null || AssetName == null)
@@ -221,13 +221,20 @@ namespace EngineNS.Graphics.Mesh
 
             if (mMeshDataProvider == null)
             {
-                var result = await TtEngine.Instance.EventPoster.Post((state) =>
+                var result = await TtEngine.Instance.EventPoster.Post((Thread.Async.FPostEvent<bool>)((state) =>
                 {
                     using (var xnd = IO.TtXndHolder.LoadXnd(AssetName.Address))
                     {
                         if (xnd != null)
                         {
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
                             var tmp = new UMeshDataProvider();
+在此之后:
+                            var tmp = new Mesh.UMeshDataProvider();
+*/
+                            var tmp = new TtMeshDataProvider();
 
                             var ok = tmp.mCoreObject.LoadFromMeshPrimitive(xnd.RootNode.mCoreObject, NxRHI.EVertexStreamType.VST_FullMask);
                             if (ok == false)
@@ -241,10 +248,14 @@ namespace EngineNS.Graphics.Mesh
                             return false;
                         }
                     }
-                }, Thread.Async.EAsyncTarget.AsyncIO);
+                }), Thread.Async.EAsyncTarget.AsyncIO);
             }
         }
-        public UMeshDataProvider MeshDataProvider
+        public void FreeMeshDataProvider()
+        {
+            mMeshDataProvider = null;
+        }
+        public TtMeshDataProvider MeshDataProvider
         {
             get
             {
@@ -279,7 +290,7 @@ namespace EngineNS.Graphics.Mesh
             {
                 if (mUnitSphere == null)
                 {
-                    mUnitSphere = Graphics.Mesh.UMeshDataProvider.MakeSphere(1.0f, 15, 15, 0xfffffff).ToMesh();
+                    mUnitSphere = Graphics.Mesh.TtMeshDataProvider.MakeSphere(1.0f, 15, 15, 0xfffffff).ToMesh();
                 }
                 return mUnitSphere;
             }
@@ -291,7 +302,7 @@ namespace EngineNS.Graphics.Mesh
             {
                 if (mUnitBox == null)
                 {
-                    mUnitBox = Graphics.Mesh.UMeshDataProvider.MakeBox(0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 0xfffffff).ToMesh();
+                    mUnitBox = Graphics.Mesh.TtMeshDataProvider.MakeBox(0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 0xfffffff).ToMesh();
                 }
                 return mUnitBox;
             }

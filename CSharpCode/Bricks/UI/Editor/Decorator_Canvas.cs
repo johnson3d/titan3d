@@ -125,7 +125,7 @@ namespace EngineNS.UI.Editor
             mNormalAnchorMats.Add(mWhiteColorMat);
             mHighLightAnchorMats = new List<Graphics.Pipeline.Shader.TtMaterial>();
             mHighLightAnchorMats.Add(mGreenColorMat);
-            var meshProvider = UMeshDataProvider.MakeSphere(1.0f, 8, 8, 0xffffffff);
+            var meshProvider = TtMeshDataProvider.MakeSphere(1.0f, 8, 8, 0xffffffff);
             var meshPrim = meshProvider.ToMesh();
             for (int i = (int)EDecoratorType.Size_Left_Top; i <= (int)EDecoratorType.Size_Right_Bottom; i++)
             {

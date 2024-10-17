@@ -6,6 +6,8 @@ using ICSharpCode.SharpZipLib.Tar;
 using NPOI.OpenXmlFormats.Dml;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
 //using EngineNS.Graphics.Canvas;
@@ -68,7 +70,16 @@ namespace EngineNS.Editor.Forms
             {
                 foreach( var Mesh in MeshPrimitivesList)
                 {
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
                     UMeshDataProvider meshProvider = new UMeshDataProvider();
+                    if (meshProvider.InitFrom(Mesh))
+在此之后:
+                    TtMeshDataProvider meshProvider = new UMeshDataProvider();
+                    if (meshProvider.InitFrom(Mesh))
+*/
+                    TtMeshDataProvider meshProvider = new TtMeshDataProvider();
                     if (meshProvider.InitFrom(Mesh))
                     {
                         var builder = meshProvider.mCoreObject;
@@ -105,7 +116,7 @@ namespace EngineNS.Editor.Forms
             if(NormalList.Count>0)
             {
                 NormalMesh = new Graphics.Mesh.TtMesh();
-                var normalProvider = Graphics.Mesh.UMeshDataProvider.MakeLines(in NormalList, 0xFF00FF00);
+                var normalProvider = Graphics.Mesh.TtMeshDataProvider.MakeLines(in NormalList, 0xFF00FF00);
                 NormalMesh.Initialize(normalProvider.ToMesh(), materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 NormalMesh.MdfQueue.MdfDatas = this;
 
@@ -121,7 +132,7 @@ namespace EngineNS.Editor.Forms
             if(TangentList.Count>0)
             {
                 TangentMesh = new Graphics.Mesh.TtMesh();
-                var tangentProvider = Graphics.Mesh.UMeshDataProvider.MakeLines(in TangentList, 0xFF0000FF);
+                var tangentProvider = Graphics.Mesh.TtMeshDataProvider.MakeLines(in TangentList, 0xFF0000FF);
                 TangentMesh.Initialize(tangentProvider.ToMesh(), materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 TangentMesh.MdfQueue.MdfDatas = this;
 
@@ -296,7 +307,7 @@ namespace EngineNS.Editor.Forms
                 var boxStart = meshCenter - meshSize * 0.5f;
                 boxStart.Y -= aabb.GetSize().Y * 0.5f + meshSize.Y * 0.5f + 0.001f;
                 //var box = Graphics.Mesh.UMeshDataProvider.MakeBox(boxStart.X, boxStart.Y, boxStart.Z, meshSize.X, meshSize.Y, meshSize.Z).ToMesh();
-                var box = Graphics.Mesh.UMeshDataProvider.MakePlane(meshSize.X, meshSize.Z).ToMesh();
+                var box = Graphics.Mesh.TtMeshDataProvider.MakePlane(meshSize.X, meshSize.Z).ToMesh();
 
                 var PlaneMesh = new Graphics.Mesh.TtMesh();
                 var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
@@ -357,7 +368,7 @@ namespace EngineNS.Editor.Forms
             {
                 var material = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.CreateMaterialInstance(RName.GetRName("material/sdfcolor.uminst", RName.ERNameType.Engine));
                 SdfDebugMesh = new Graphics.Mesh.TtMesh();
-                var rect = Graphics.Mesh.UMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1, 0xffffffff);
+                var rect = Graphics.Mesh.TtMeshDataProvider.MakeBox(-0.5f, -0.5f, -0.5f, 1, 1, 1, 0xffffffff);
                 var rectMesh = rect.ToMesh();
                 var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
                 materials[0] = material;
@@ -448,6 +459,7 @@ namespace EngineNS.Editor.Forms
                 Mesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.CreateMeshPrimitive(name);
                 if (Mesh == null)
                     return false;
+                await Mesh.LoadMeshDataProvider();
             }
 
             PreviewViewport.PreviewAsset = AssetName;
@@ -585,12 +597,34 @@ namespace EngineNS.Editor.Forms
         }
 
         bool ShowEditorPropGrid = true;
+        [Category("Editing")]
+        public Color4b MeshColor { get; set; } = Color4b.FromArgb(255, 255, 255, 255);
         protected void DrawEditorDetails()
         {
             var sz = new Vector2(-1);
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "EditorDetails", ref ShowEditorPropGrid, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)
             {
+                if (ImGuiAPI.Button("SetMeshColor"))
+                {
+                    TtEngine.Instance.EventPoster.RunOn((state) =>
+                    {
+                        //TtEngine.Instance.StopOperation($"{Mesh.AssetName}:SetMeshColor");
+                        var vb = Mesh.MeshDataProvider.CreateStream(NxRHI.EVertexStreamType.VST_Color);
+                        unsafe
+                        {
+                            Color4b* pVertices = (Color4b*)vb.GetData();
+                            for (uint i = 0; i < this.Mesh.MeshDataProvider.NumOfVertex; i++)
+                            {
+                                pVertices[i] = MeshColor;
+                            }
+                        }
+                        Mesh.MeshDataProvider.ToMesh(Mesh);
+                        Mesh.SaveAssetTo(Mesh.AssetName);
+                        //TtEngine.Instance.ResumeOperation();
+                        return true;
+                    }, Thread.Async.EAsyncTarget.Main);
+                }
                 EditorPropGrid.OnDraw(true, false, false);
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
@@ -607,7 +641,16 @@ namespace EngineNS.Editor.Forms
                     ImGuiChildFlags_.ImGuiChildFlags_AlwaysAutoResize | ImGuiChildFlags_.ImGuiChildFlags_AutoResizeX | ImGuiChildFlags_.ImGuiChildFlags_AutoResizeY);
                 if (ImGuiAPI.Button("Build SDF"))
                 {
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
                     UMeshDataProvider meshProvider = new UMeshDataProvider();
+                    if (meshProvider.InitFrom(Mesh))
+在此之后:
+                    TtMeshDataProvider meshProvider = new UMeshDataProvider();
+                    if (meshProvider.InitFrom(Mesh))
+*/
+                    TtMeshDataProvider meshProvider = new TtMeshDataProvider();
                     if (meshProvider.InitFrom(Mesh))
                     {
                         var sdfConfig = new DistanceField.DistanceFieldConfig();

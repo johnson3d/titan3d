@@ -275,7 +275,7 @@ namespace EngineNS.GamePlay.Scene
             var meshData = NodeData as UMeshNodeData;
             if (meshData == null || meshData.MeshName == null)
             {
-                var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeBoxWireframe(0, 0, 0, 5, 5, 5).ToMesh();
+                var cookedMesh = Graphics.Mesh.TtMeshDataProvider.MakeBoxWireframe(0, 0, 0, 5, 5, 5).ToMesh();
                 var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
                 materials1[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria;// TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireColorMateria.CloneMaterialInstance();
                 return;
@@ -358,8 +358,8 @@ namespace EngineNS.GamePlay.Scene
             return true;
         }
 
-        Graphics.Mesh.UMeshDataProvider mMeshDataProvider;
-        public Graphics.Mesh.UMeshDataProvider MeshDataProvider
+        Graphics.Mesh.TtMeshDataProvider mMeshDataProvider;
+        public Graphics.Mesh.TtMeshDataProvider MeshDataProvider
         {
             get => mMeshDataProvider;
             set => mMeshDataProvider = value;

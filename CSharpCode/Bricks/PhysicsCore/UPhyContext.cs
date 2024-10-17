@@ -133,14 +133,14 @@ namespace EngineNS.Bricks.PhysicsCore
                 return new TtPhyHeightfield(self);
             }
         }
-        public TtPhyConvexMesh CookConvexMesh(Graphics.Mesh.UMeshDataProvider mesh)
+        public TtPhyConvexMesh CookConvexMesh(Graphics.Mesh.TtMeshDataProvider mesh)
         {
             var self = mCoreObject.CookConvexMesh(mesh.mCoreObject);
             if (self.IsValidPointer == false)
                 return null;
             return new TtPhyConvexMesh(self);
         }
-        public TtPhyTriMesh CookTriMesh(Graphics.Mesh.UMeshDataProvider mesh, Support.TtBlobObject uvblob, Support.TtBlobObject faceblob, Support.TtBlobObject posblob)
+        public TtPhyTriMesh CookTriMesh(Graphics.Mesh.TtMeshDataProvider mesh, Support.TtBlobObject uvblob, Support.TtBlobObject faceblob, Support.TtBlobObject posblob)
         {
             var self = mCoreObject.CookTriMesh(mesh.mCoreObject, (uvblob != null) ? uvblob.mCoreObject : new IBlobObject(),
                 (faceblob != null) ? faceblob.mCoreObject : new IBlobObject(),

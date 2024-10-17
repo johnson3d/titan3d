@@ -129,7 +129,7 @@ namespace EngineNS.GamePlay.Scene
         public void UpdateSplineMesh()
         {
             {
-                var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeBezier3DSpline(Spline, 0xFFFFFFFF).ToMesh();
+                var cookedMesh = Graphics.Mesh.TtMeshDataProvider.MakeBezier3DSpline(Spline, 0xFFFFFFFF).ToMesh();
                 if (cookedMesh == null)
                     return;
                 var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
@@ -161,7 +161,7 @@ namespace EngineNS.GamePlay.Scene
                     pointSmooth = splineData.PointSmooth;
                 }
                 
-                var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeSphere(radius, pointSmooth, pointSmooth, 0xffffffff).ToMesh();
+                var cookedMesh = Graphics.Mesh.TtMeshDataProvider.MakeSphere(radius, pointSmooth, pointSmooth, 0xffffffff).ToMesh();
                 if (cookedMesh == null)
                     return;
                 var materials1 = new Graphics.Pipeline.Shader.TtMaterialInstance[1];

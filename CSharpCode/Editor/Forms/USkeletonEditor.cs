@@ -80,7 +80,7 @@ namespace EngineNS.Editor.Forms
             for (int i = 0; i < SkeletonAsset.Skeleton.Limbs.Count; ++i)
             {
                 var index = SkeletonAsset.Skeleton.Limbs[i].Index.Value;
-                var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeSphere(0.005f, 5, 5, Color4b.Green.ToArgb());
+                var meshProvider = Graphics.Mesh.TtMeshDataProvider.MakeSphere(0.005f, 5, 5, Color4b.Green.ToArgb());
                 var mesh = meshProvider.ToDrawMesh(TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
                 BoneMeshes.Add(index, mesh);
             }
@@ -93,7 +93,7 @@ namespace EngineNS.Editor.Forms
             foreach (var child in limb.Children)
             {
                 var end = child.Index.Value;
-                var meshProvider = Graphics.Mesh.UMeshDataProvider.MakeBox(0, -0.0005f, -0.0005f, 1, 0.001f, 0.001f, Color4b.Green.ToArgb());
+                var meshProvider = Graphics.Mesh.TtMeshDataProvider.MakeBox(0, -0.0005f, -0.0005f, 1, 0.001f, 0.001f, Color4b.Green.ToArgb());
                 var mesh = meshProvider.ToDrawMesh(TtEngine.Instance.GfxDevice.MaterialInstanceManager.WireVtxColorMateria);
                 var boneLine = new FBoneLine() { Start = start, End = end };
                 BoneLineMeshes.Add(boneLine, mesh);
@@ -313,7 +313,7 @@ namespace EngineNS.Editor.Forms
                 var PlaneMesh = new Graphics.Mesh.TtMesh();
                 var tMaterials = new Graphics.Pipeline.Shader.TtMaterial[1];
                 tMaterials[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(TtEngine.Instance.Config.MeshPrimitiveEditorConfig.PlaneMaterialName);
-                PlaneMesh.Initialize(Graphics.Mesh.UMeshDataProvider.MakePlane(10, 10).ToMesh(), tMaterials,
+                PlaneMesh.Initialize(Graphics.Mesh.TtMeshDataProvider.MakePlane(10, 10).ToMesh(), tMaterials,
                     Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
                 PlaneMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), PlaneMesh, new DVector3(0, -0.0001f, 0), Vector3.One, Quaternion.Identity);
                 PlaneMeshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;

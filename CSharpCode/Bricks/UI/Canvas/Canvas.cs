@@ -39,7 +39,7 @@ namespace EngineNS.UI.Canvas
         {
             mCoreObject.Reset();
         }
-        public void BuildMesh(Graphics.Mesh.UMeshDataProvider mesh)
+        public void BuildMesh(Graphics.Mesh.TtMeshDataProvider mesh)
         {
             mCoreObject.BuildMesh(mesh.mCoreObject);
         }

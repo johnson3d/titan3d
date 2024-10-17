@@ -26,7 +26,7 @@ namespace EngineNS.UI
         }
 
         protected Canvas.TtCanvas mCanvas = new Canvas.TtCanvas();
-        protected Graphics.Mesh.UMeshDataProvider mMeshProvider;
+        protected Graphics.Mesh.TtMeshDataProvider mMeshProvider;
         protected Graphics.Mesh.TtMeshPrimitives mMesh = null;
         protected Canvas.TtCanvasDrawBatch mDrawBatch = null;
         public Graphics.Pipeline.TtCamera RenderCamera;
@@ -247,7 +247,7 @@ namespace EngineNS.UI
 
             if (mMeshProvider == null)
             {
-                mMeshProvider = new Graphics.Mesh.UMeshDataProvider();
+                mMeshProvider = new Graphics.Mesh.TtMeshDataProvider();
                 mMesh = new Graphics.Mesh.TtMeshPrimitives();
                 mMesh.Init("UICookedMesh", 0);
                 var builder = mMeshProvider.mCoreObject;

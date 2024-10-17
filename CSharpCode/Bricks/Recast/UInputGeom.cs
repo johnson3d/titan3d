@@ -10,7 +10,7 @@ namespace EngineNS.Bricks.Recast
         {
             mCoreObject = InputGeom.CreateInstance();
         }
-        public bool LoadMesh(Graphics.Mesh.UMeshDataProvider mesh, float scale)
+        public bool LoadMesh(Graphics.Mesh.TtMeshDataProvider mesh, float scale)
         {
             return mCoreObject.LoadMesh(mesh.mCoreObject, scale);
         }

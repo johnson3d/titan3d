@@ -69,7 +69,7 @@ namespace EngineNS.GamePlay.Scene
                 SunMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(skyData.SunMaterialName);
             }
             await base.InitializeNode(world, data, bvType, placementType);
-            var rect = Graphics.Mesh.UMeshDataProvider.MakeRect2D(-0.5f, -0.5f, 1, 1, 0);
+            var rect = Graphics.Mesh.TtMeshDataProvider.MakeRect2D(-0.5f, -0.5f, 1, 1, 0);
             var rectMesh = rect.ToMesh();
             var materials = new Graphics.Pipeline.Shader.TtMaterialInstance[1];
             materials[0] = SunMaterial;
