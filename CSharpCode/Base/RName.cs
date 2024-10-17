@@ -221,14 +221,6 @@ namespace EngineNS
         {
             get => mName;
         }
-
-        public void UnsafeUpdate(string name, ERNameType type)
-        {
-            RNameManager.Instance.UnsafeUpdateRName(this, name, type);
-            mRNameType = type;
-            mName = name.ToLower();
-            ChangeAddressWithRNameType();
-        }
         [Rtti.Meta]
         public string Address
         {
@@ -272,6 +264,10 @@ namespace EngineNS
         public static RName GetRName(string name, ERNameType rNameType = ERNameType.Game)
         {
             return RNameManager.Instance.GetRName(name, rNameType);
+        }
+        public static RName TryGetRName(string name, ERNameType type)
+        {
+            return RNameManager.Instance.TryGetRName(name, type);
         }
         public static RName ParseFrom(string nameStr)
         {
@@ -364,6 +360,21 @@ namespace EngineNS
                     return result;
                 }
             }
+            public RName TryGetRName(string name, ERNameType type)
+            {
+                name = name.Replace('\\', '/');
+                name = name.ToLower();
+                RName result;
+                var dict = mNameSets[(int)type];
+                if (dict.TryGetValue(name, out result))
+                {
+                    return result;
+                }
+                else
+                {
+                    return null;
+                }
+            }
             public void UnsafeUpdateRName(RName rn, string name, ERNameType type)
             {
                 lock (this)
@@ -379,7 +390,14 @@ namespace EngineNS
                     }
                     dict.Remove(rn.Name);
                     dict = mNameSets[(int)type];
-                    dict.Add(name, rn);
+                    if (dict.TryGetValue(name, out result) == false)
+                    {
+                        dict.Add(name, rn);
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.Assert(result == rn);
+                    }
                 }
             }
         }

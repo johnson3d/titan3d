@@ -1006,13 +1006,13 @@ namespace EngineNS.EGui.Controls
                                 {
                                     case EAssetOperationType.MoveTo:
                                         {
-                                            var name = mSelectFolderView.CurrentDir.Address + sourceName.PureName + sourceName.ExtName;
+                                            var name = mSelectFolderView.CurrentDir.Name + sourceName.PureName + sourceName.ExtName;
                                             AssetOpTask = mOperationAsset.MoveTo(name, sourceName.RNameType);
                                         }
                                         break;
                                     case EAssetOperationType.CopyTo:
                                         {
-                                            var name = mSelectFolderView.CurrentDir.Address + sourceName.PureName + sourceName.ExtName;
+                                            var name = mSelectFolderView.CurrentDir.Name + sourceName.PureName + sourceName.ExtName;
                                             AssetOpTask = mOperationAsset.CopyTo(name, sourceName.RNameType);
                                         }
                                         break;

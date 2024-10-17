@@ -1330,6 +1330,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 if (Materials.TryGetValue(name, out var result))
                 {
+                    Materials.Remove(name);
                     return result;
                 }
                 return null;

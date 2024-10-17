@@ -65,12 +65,8 @@ namespace EngineNS.IO
 
                 var src = i.Source.Address;
                 TtEngine.Instance.AssetMetaManager.RemoveAMeta(ameta);
-                var nameSets = RName.RNameManager.Instance.mNameSets[(int)i.Source.RNameType];
-                nameSets.Remove(i.Source.Name);
-                i.Source.UnsafeUpdate(i.TargetPath, i.TargetType);
-                var tarNameSets = RName.RNameManager.Instance.mNameSets[(int)i.Source.RNameType];
-                tarNameSets.Add(i.Source.Name, i.Source);
-                var tar = i.Source.Address;
+                ameta.SetAssetName(RName.GetRName(i.TargetPath, i.TargetType));
+                var tar = ameta.AssetName.Address;
 
                 TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
 

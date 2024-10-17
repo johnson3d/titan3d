@@ -283,11 +283,7 @@ namespace EngineNS.IO
         }
         public virtual async System.Threading.Tasks.Task MoveTo(string name, RName.ERNameType type)
         {
-            var rootType = TtEngine.Instance.FileManager.GetRootDirType(name);
-            var rPath = IO.TtFileManager.GetRelativePath(TtEngine.Instance.FileManager.GetRoot(rootType), name);
-
-            if (mAssetName.Address == name && mAssetName.RNameType == type)
-            //if (mAssetName.Name == name && mAssetName.RNameType == type)
+            if (mAssetName.Name == name && mAssetName.RNameType == type)
                 return;
             IAsset asset = await LoadAsset();
             List<EngineNS.IO.IAssetMeta> holders = new List<EngineNS.IO.IAssetMeta>();
@@ -304,15 +300,16 @@ namespace EngineNS.IO
 
             var savedName = mAssetName.Name;
             var savedType = mAssetName.RNameType;
-            OnBeforeRenamedAsset(asset, mAssetName);
-            
-            //var tarAddress = RName.GetAddress(type, name);
-            IO.TtFileManager.CopyFile(mAssetName.Address + ".snap", name + ".snap");
+            IO.TtFileManager.MoveFile(mAssetName.Address + ".snap", TtEngine.Instance.FileManager.GetRoot(type) + name + ".snap");
 
-            mAssetName.UnsafeUpdate(rPath, type);
+            TtEngine.Instance.AssetMetaManager.RemoveAMeta(this);
+            OnBeforeRenamedAsset(asset, mAssetName);
+
+            mAssetName = RName.GetRName(name, type);
             this.SaveAMeta(asset);
             asset.SaveAssetTo(mAssetName);
-            
+
+            TtEngine.Instance.AssetMetaManager.RegAsset(this);
             OnAfterRenamedAsset(asset, mAssetName);
 
             foreach (var i in holdAssets)
@@ -340,7 +337,7 @@ namespace EngineNS.IO
             ameta.SaveAMeta(asset);
             asset.SaveAssetTo(tarName);
 
-            IO.TtFileManager.MoveFile(mAssetName.Address + ".snap", tarName.Address + ".snap");
+            IO.TtFileManager.CopyFile(mAssetName.Address + ".snap", tarName.Address + ".snap");
         }
         public virtual async System.Threading.Tasks.Task RenameTo(string name, RName.ERNameType type)
         {

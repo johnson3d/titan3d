@@ -60,6 +60,17 @@ namespace EngineNS.IO
         {
             return Roots[(int)type];
         }
+        public string GetRoot(RName.ERNameType type)
+        {
+            switch (type)
+            {
+                case RName.ERNameType.Engine:
+                    return Roots[(int)ERootDir.Engine];
+                case RName.ERNameType.Game:
+                    return Roots[(int)ERootDir.Game];
+            }
+            return null;
+        }
         public string GetPath(ERootDir root, ESystemDir type)
         {
             return Roots[(int)root] + SysDirs[(int)type] + "/";
