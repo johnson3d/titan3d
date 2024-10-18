@@ -1,4 +1,5 @@
-﻿using EngineNS.DesignMacross.Base.Description;
+﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Outline;
 using EngineNS.DesignMacross.Base.Render;
 using EngineNS.Rtti;
@@ -17,7 +18,7 @@ namespace EngineNS.DesignMacross.Design
         {
             TtOutlineElement_Method outlineElement_Method = renderableElement as TtOutlineElement_Method;
             var varibleName = outlineElement_Method.Description.Name;
-            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;// | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap;
+            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet;// | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap;
             Vector2 buttonSize = new Vector2(16, 16);
             var regionSize = ImGuiAPI.GetContentRegionAvail();
 
@@ -25,7 +26,7 @@ namespace EngineNS.DesignMacross.Design
             ImGuiAPI.SameLine(0, EGui.UIProxy.StyleConfig.Instance.ItemSpacing.X);
             var treeNodeDoubleClicked = ImGuiAPI.IsItemDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
             var treeNodeIsItemClicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
-            ImGuiAPI.SameLine(regionSize.X - buttonSize.X, -1.0f);
+            ImGuiAPI.SameLine(regionSize.X, -1.0f);
             var keyName = $"Delete Method {varibleName}?";
             if (EGui.UIProxy.CustomButton.ToolButton("x", in buttonSize, 0xFF0000FF, "Method_X_" + varibleName))
             {
@@ -137,12 +138,29 @@ namespace EngineNS.DesignMacross.Design
 
                                 menuItem.Action = (proxy, data) =>
                                 {
-                                    if (TtTypeDescManager.CreateInstance(TtTypeDesc.TypeOf<TtMethodDescription>()) is IMethodDescription
+                                    if (TtTypeDescManager.CreateInstance(TtTypeDesc.TypeOf<TtMethodDescription>()) is TtMethodDescription
                                         description)
                                     {
                                         description.Name = method.Name;
                                         description.Parent = (elementsList.Parent as TtOutline).Description;
                                         description.IsOverride = true;
+                                        foreach(var arg in method.GetParameters())
+                                        {
+                                            EMethodArgumentAttribute operationType = EMethodArgumentAttribute.Default;
+                                            if (arg.IsIn)
+                                            {
+                                                operationType = EMethodArgumentAttribute.In;
+                                            }
+                                            if(arg.IsOut)
+                                            {
+                                                operationType = EMethodArgumentAttribute.Out;
+                                            }
+                                            if(arg.ParameterType.IsByRef)
+                                            {
+                                                operationType = EMethodArgumentAttribute.Ref;
+                                            }
+                                            description.AddArgument(new TtMethodArgumentDescription() { Name = arg.Name, VariableType = TtTypeDesc.TypeOf(arg.ParameterType), OperationType = operationType });
+                                        }
                                         elementsList.Descriptions.Add(description);
                                     }
                                 };

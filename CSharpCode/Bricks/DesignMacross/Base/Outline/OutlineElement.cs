@@ -1,4 +1,5 @@
 ﻿using EngineNS.DesignMacross.Base.Description;
+using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.Rtti;
 using System.Collections;
 using System.Diagnostics;
@@ -11,6 +12,7 @@ namespace EngineNS.DesignMacross.Base.Outline
     public class TtOutlineElement_Leaf : IOutlineElement_Leaf
     {
         public string Name { get; set; } = "Default_OutlineElement_Leaf";
+        public Guid Id { get; set; } = Guid.NewGuid();
         public IDescription Description { get; set; } = null;
         public IOutlineElement Parent { get; set; } = null;
 
@@ -33,11 +35,21 @@ namespace EngineNS.DesignMacross.Base.Outline
         {
             
         }
+        public void ConstructContextMenu(ref FOutlineElementRenderingContext context, TtPopupMenu popupMenu)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public void SetContextMenuableId(TtPopupMenu popupMenu)
+        {
+            popupMenu.StringId = Name + "_" + Id + "_" + "ContextMenu";
+        }
     }
     //the inner node of tree
     public class TtOutlineElement_Branch : IOutlineElement_Branch
     {
         public string Name { get; set; } = "Default_OutlineElement_Branch";
+        public Guid Id { get; set; } = Guid.NewGuid();
         public IDescription Description { get; set; }
         public IOutlineElement Parent { get; set; }
         public virtual List<IOutlineElement> ConstructChildrenElements()
@@ -97,11 +109,22 @@ namespace EngineNS.DesignMacross.Base.Outline
         {
 
         }
+
+        public void ConstructContextMenu(ref FOutlineElementRenderingContext context, TtPopupMenu popupMenu)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public void SetContextMenuableId(TtPopupMenu popupMenu)
+        {
+            popupMenu.StringId = Name + "_" + Id + "_" + "ContextMenu";
+        }
     }
     //the inner node of tree
     public class TtOutlineElement_List : IOutlineElement_List
     {
         public string Name { get; set; } = "Default_OutlineElement_List";
+        public Guid Id { get; set; } = Guid.NewGuid();
         public IList DescriptionsList { get; set; } = null;
         public IOutlineElement Parent { get; set; } = null;
         public bool IsHideTitle { get; set; } = false;
@@ -134,6 +157,15 @@ namespace EngineNS.DesignMacross.Base.Outline
                 }
             }
             return childrenElements;
+        }
+        public virtual void ConstructContextMenu(ref FOutlineElementRenderingContext context, TtPopupMenu popupMenu)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public void SetContextMenuableId(TtPopupMenu popupMenu)
+        {
+            popupMenu.StringId = Name + "_" + Id + "_" + "ContextMenu";
         }
     }
 

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_17743066050749805057 Type="EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialEditor@EngineCore">
+  <MaterialGraph Type="EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialGraph@EngineCore" Order="0" />
+  <OutputNodeId Type="System.Guid@Unknown" Order="1" />
+</Hash_17743066050749805057>

@@ -217,7 +217,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
                     }
                 }
                 TtMouseEventProcesser.Instance.Processing(timedStatesHubGraph, ref elementRenderingContext);
-                TtContextMenuHandler.Instance.HandleContextMenu(TtMouseEventProcesser.Instance.LastElement, ref elementRenderingContext);
+                TtGraphContextMenuHandler.Instance.HandleContextMenu(TtMouseEventProcesser.Instance.LastElement, ref elementRenderingContext);
             }
             ImGuiAPI.EndChild();
         }

@@ -171,7 +171,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
                {
                    List<TtExecutionLineDescription> executionLinesToBeRemoved = new();
                    List<TtDataLineDescription> dataLinesToBeRemoved = new();
-                   foreach (var pin in ExpressionDescription.DataOutPins)
+                   foreach (var pin in ExpressionDescription.DataPins)
                    {
                        if (ExpressionDescription.Parent is IMethodDescription methodDescription)
                        {
@@ -183,7 +183,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
                        }
 
                    }
-                   foreach (var pin in ExpressionDescription.ExecutionOutPins)
+                   foreach (var pin in ExpressionDescription.ExecutionPins)
                    {
                        if (ExpressionDescription.Parent is IMethodDescription methodDescription)
                        {

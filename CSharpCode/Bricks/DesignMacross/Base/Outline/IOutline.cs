@@ -44,15 +44,16 @@ namespace EngineNS.DesignMacross.Base.Outline
     public interface IOutlineElement : IRenderableElement
     {
         public string Name { get; set; }
+        public Guid Id { get; set; }
         public IOutlineElement Parent { get; set; }
     }
     //the leaf node of tree
-    public interface IOutlineElement_Leaf : IOutlineElement, IOutlilneElementSelectable
+    public interface IOutlineElement_Leaf : IOutlineElement, IOutlilneElementSelectable, IOutlineContextMeunable
     {
         public IDescription Description { get; set; }
     }
     //the inner node of tree
-    public interface IOutlineElement_Branch : IOutlineElement, IOutlilneElementSelectable
+    public interface IOutlineElement_Branch : IOutlineElement, IOutlilneElementSelectable, IOutlineContextMeunable
     {
         public IDescription Description { get; set; }
         public List<IOutlineElement> ConstructChildrenElements();

@@ -80,7 +80,9 @@ namespace EngineNS.DesignMacross
         {
             if(mMacrossGetter!= null && mMacrossGetter.Get() != null && mMacrossGetter.Get().IsInitialized)
             {
+                mMacrossGetter.Get().PreTick(args.World.DeltaTimeSecond);
                 mMacrossGetter.Get().Tick(args.World.DeltaTimeSecond);
+                mMacrossGetter.Get().AfterTick(args.World.DeltaTimeSecond);
             }
             base.TickLogic(args);
         }

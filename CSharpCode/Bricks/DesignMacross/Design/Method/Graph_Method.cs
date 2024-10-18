@@ -140,7 +140,7 @@ namespace EngineNS.DesignMacross.Design
         {
             if (PreviewDataLine != null || PreviewExecutionLine != null)
             {
-                TtContextMenuHandler.Instance.HandleLinkedPinContextMenu(this, ref context);
+                TtGraphContextMenuHandler.Instance.HandleLinkedPinContextMenu(this, ref context);
                 PreviewDataLine = null;
                 PreviewExecutionLine = null;
             }
@@ -243,7 +243,7 @@ namespace EngineNS.DesignMacross.Design
                 }
 
                 TtMouseEventProcesser.Instance.Processing(methodGraph, ref elementRenderingContext);
-                TtContextMenuHandler.Instance.HandleContextMenu(TtMouseEventProcesser.Instance.LastElement, ref elementRenderingContext);
+                TtGraphContextMenuHandler.Instance.HandleContextMenu(TtMouseEventProcesser.Instance.LastElement, ref elementRenderingContext);
             }
             ImGuiAPI.EndChild();
         }

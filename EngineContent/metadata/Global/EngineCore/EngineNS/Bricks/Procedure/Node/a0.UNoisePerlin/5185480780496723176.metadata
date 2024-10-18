@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_5185480780496723176 Type="EngineNS.Bricks.Procedure.Node.UNoisePerlin@EngineCore">
+  <Amptitude Type="System.Single@Unknown" Order="0" />
+  <Border Type="System.Single@Unknown" Order="0" />
+  <FbmMode Type="EngineNS.Support.TtPerlin2.EFbmMode@EngineCore" Order="0" />
+  <Freq Type="System.Single@Unknown" Order="0" />
+  <Gain Type="System.Single@Unknown" Order="0" />
+  <GridSize Type="System.Single@Unknown" Order="0" />
+  <Label Type="System.String@Unknown" Order="0" />
+  <Lacumarity Type="System.Single@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeId Type="System.Guid@Unknown" Order="0" />
+  <Octaves Type="System.Int32@Unknown" Order="0" />
+  <Position Type="EngineNS.Vector2@EngineCore" Order="0" />
+  <PreviewResultIndex Type="System.Int32@Unknown" Order="0" />
+  <Rotator Type="System.Single@Unknown" Order="0" />
+  <SamplerSize Type="System.Int32@Unknown" Order="0" />
+  <Seed Type="System.Int32@Unknown" Order="0" />
+  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Order="1" />
+</Hash_5185480780496723176>

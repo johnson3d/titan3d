@@ -199,7 +199,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
                     }
                 }
                 TtMouseEventProcesser.Instance.Processing(timedStatesHubGraph, ref elementRenderingContext);
-                TtContextMenuHandler.Instance.HandleContextMenu(TtMouseEventProcesser.Instance.LastElement, ref elementRenderingContext);
+                TtGraphContextMenuHandler.Instance.HandleContextMenu(TtMouseEventProcesser.Instance.LastElement, ref elementRenderingContext);
             }
             ImGuiAPI.EndChild();
         }

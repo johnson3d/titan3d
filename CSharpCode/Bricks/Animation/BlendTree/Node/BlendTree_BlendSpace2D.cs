@@ -4,6 +4,7 @@ using EngineNS.Animation.Command;
 using EngineNS.Animation.Player;
 using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
 using EngineNS.Animation.SkeletonAnimation.Runtime.Pose;
+using EngineNS.Bricks.StateMachine.TimedSM;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,17 +17,22 @@ namespace EngineNS.Animation.BlendTree.Node
         // Array??
         public List<TtExtractPoseFromClipCommand<S>> AnimCmds { get; set; } = new List<TtExtractPoseFromClipCommand<S>>();
         public List<TtAnimatableSkeletonPose> AnimPoses { get; set; } = new List<TtAnimatableSkeletonPose>();
+        public TtAnimatableSkeletonPose AnimatableSkeletonPose { get; set; } = null;
 
-        public TtBlendSpaceEvaluateCommandDesc Desc { get; set; }
+        public TtBlendSpaceEvaluateCommandDesc Desc { get; set; } = new();
         public void Reset()
         {
             AnimCmds.Clear();
-            AnimPoses.Clear();
+            //AnimPoses.Clear();
         }
         public override void Execute()
         {
             if (AnimCmds.Count == 0)
                 return;
+            foreach(var animCmd in AnimCmds)
+            {
+                animCmd.Execute();
+            }
 
             if (AnimCmds.Count == 1)
             {
@@ -71,38 +77,36 @@ namespace EngineNS.Animation.BlendTree.Node
         public override async Thread.Async.TtTask<bool> Initialize(FAnimBlendTreeContext context)
         {
             mAnimationCommand = new TtBlendSpaceEvaluateCommand<S>();
+            mAnimationCommand.AnimatableSkeletonPose = context.AnimatableSkeletonPose;
             await base.Initialize(context);
             return true;
         }
         public override TtAnimationCommand<S, TtLocalSpaceRuntimePose> ConstructAnimationCommandTree(IAnimationCommand parentNode, ref FConstructAnimationCommandTreeContext context)
         {
-            var desc = new TtBlendSpaceEvaluateCommandDesc();
-            mAnimationCommand.Desc = desc;
             context.AddCommand(context.TreeDepth, mAnimationCommand);
 
-            for (int i = 0; i < mRuntimeBlendSamples.Count; ++i)
-            {
-                var clip = mRuntimeBlendSamples[i].Animation as TtAnimationClip;
-                System.Diagnostics.Debug.Assert(clip != null);
-                TtExtractPoseFromClipCommand<S> animEvaluateCmd = new TtExtractPoseFromClipCommand<S>(clip);
-                mAnimationCommand.AnimCmds.Add(animEvaluateCmd);
-            }
             return mAnimationCommand;
         }
         public override void Tick(float elapseSecond, ref FAnimBlendTreeContext context)
         {
             UpdateRuntimeSamples(elapseSecond);
 
-            mAnimationCommand.Desc.Times.Clear();
-            mAnimationCommand.Desc.Weights.Clear();
+            mAnimationCommand.Reset();
+
             for (int i = 0; i < mRuntimeBlendSamples.Count; ++i)
             {
+                TtAnimatableSkeletonPose clipPose = mAnimationCommand.AnimatableSkeletonPose.Clone() as TtAnimatableSkeletonPose;
                 var clip = mRuntimeBlendSamples[i].Animation as TtAnimationClip;
                 System.Diagnostics.Debug.Assert(clip != null);
+                TtExtractPoseFromClipCommand<S> animEvaluateCmd = new TtExtractPoseFromClipCommand<S>(ref clipPose, clip);
+                animEvaluateCmd.Time = PlayPercent * clip.Duration;
 
-                mAnimationCommand.Desc.Times.Add(PlayPercent * clip.Duration);
+                mAnimationCommand.AnimCmds.Add(animEvaluateCmd);
+                //mAnimationCommand.AnimPoses.Add(clipPose);
                 mAnimationCommand.Desc.Weights.Add(mRuntimeBlendSamples[i].TotalWeight);
+                mAnimationCommand.Desc.Times.Add(PlayPercent * clip.Duration);
             }
+            mAnimationCommand.OutPose = TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(mAnimationCommand.AnimatableSkeletonPose);
         }
         public Vector3 Input { get; set; } = Vector3.Zero;
         private List<FBlendSample> mRuntimeBlendSamples = new List<FBlendSample>();

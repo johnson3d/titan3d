@@ -61,7 +61,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.SubState
 
             foreach (var attachment in Attachments)
             {
-                TtAnimASTBuildUtil.CreateNewAndInitInvokeStatement(attachment, methodDeclaration);
+                TtAnimASTBuildUtil.CreateNewThenCenterDataAssignThenInitInvokeStatement(attachment, methodDeclaration);
                 CreateAddAttachmentMethodStatement(attachment, methodDeclaration);
             }
 

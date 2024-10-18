@@ -3,6 +3,7 @@ using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.Rtti;
+using System.ComponentModel;
 
 namespace EngineNS.DesignMacross.Design.Expressions
 {
@@ -10,7 +11,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
     {
         [Rtti.Meta]
         public TtTypeDesc TypeDesc { get; set; } = TtTypeDesc.TypeOf<bool>();
-        [Rtti.Meta]
+        [Rtti.Meta, Category("Option"), DisplayName("Value")]
         public string StrValue { get; set; }
         public TtImmediateValueDescription()
         {

@@ -61,7 +61,9 @@ namespace EngineNS.DesignMacross
             IsInitialized = true;
             return true; 
         }
+        public virtual void PreTick(float elapseSecond) { }
         public virtual void Tick(float elapseSecond) { }
+        public virtual void AfterTick(float elapseSecond) { } //for necessary code generate in dmc
     }
     public partial class TtDesignMacrossAMeta : IO.IAssetMeta
     {
@@ -83,8 +85,9 @@ namespace EngineNS.DesignMacross
         public override void DeleteAsset(string name, RName.ERNameType type)
         {
             var address = RName.GetAddress(type, name);
-            IO.TtFileManager.DeleteDirectory(address);
-            IO.TtFileManager.DeleteFile(address + IAssetMeta.MetaExt);
+            DeleteFile(address + IAssetMeta.MetaExt);
+
+            DeleteDir(address);
 
             //if (UMacrossEditor.RemoveAssemblyDescCreateInstanceCode(name, type))
             {

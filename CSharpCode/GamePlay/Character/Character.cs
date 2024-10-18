@@ -7,15 +7,15 @@ using System.Text;
 namespace EngineNS.GamePlay.Character
 {
     [Bricks.CodeBuilder.ContextMenu("Character", "Character", TtNode.EditorKeyword)]
-    [TtNode(NodeDataType = typeof(TtCharacter.TtCharacterData), DefaultNamePrefix = "Character")]
+    [TtNode(NodeDataType = typeof(TtCharacterData), DefaultNamePrefix = "Character")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtCharacter : TtActor
     {
-        public partial class TtCharacterData : TtCharacter.TtActorData
+        public partial class TtCharacterData : TtActorData
         {
         }
 
-        public TtCharacterData PlayerData
+        public TtCharacterData CharacterData
         {
             get
             {
@@ -41,7 +41,7 @@ namespace EngineNS.GamePlay.Character
             if (cur != null)
             {
                 bool ok = true;
-                CreatePxCapsuleController(ref ok, cur, PlayerData.Radius, PlayerData.Height);
+                CreatePxCapsuleController(ref ok, cur, CharacterData.Radius, CharacterData.Height);
             }
         }
     }

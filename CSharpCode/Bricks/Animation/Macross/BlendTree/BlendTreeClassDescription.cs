@@ -191,26 +191,26 @@ namespace EngineNS.Animation.Macross.BlendTree
             initMethod.MethodBody.Sequence.Add(baseInitializeInvoke);
         }
 
-        void GenerateCodeInMainClassTickMethod(TtClassDeclaration classDeclaration, ref FClassBuildContext classBuildContext)
+        void GenerateCodeInMainClassAfterTickMethod(TtClassDeclaration classDeclaration, ref FClassBuildContext classBuildContext)
         {
-            var tickMethod = classDeclaration.FindMethod("Tick");
-            if (tickMethod == null)
+            var afterTickMethod = classDeclaration.FindMethod("AfterTick");
+            if (afterTickMethod == null)
             {
-                tickMethod = TtASTBuildUtil.CreateTickMethodDeclaration();
-                classDeclaration.AddMethod(tickMethod);
+                afterTickMethod = TtASTBuildUtil.CreateAfterTickMethodDeclaration();
+                classDeclaration.AddMethod(afterTickMethod);
             }
             var blendTreeContext_VarName = "blendTreeContext" + VariableName;
 
             var blendTreeContextCreate = TtASTBuildUtil.CreateVariableDeclaration(blendTreeContext_VarName,
                 new TtTypeReference(typeof(FAnimBlendTreeContext)),
                 new TtCreateObjectExpression(typeof(FAnimBlendTreeContext).FullName));
-            tickMethod.MethodBody.Sequence.Add(blendTreeContextCreate);
+            afterTickMethod.MethodBody.Sequence.Add(blendTreeContextCreate);
 
             var finalPoseInitializeInvoke = new TtMethodInvokeStatement("Tick",
                 null, new TtVariableReferenceExpression(VariableName),
                 new TtMethodInvokeArgumentExpression { OperationType = EMethodArgumentAttribute.Default, Expression = new TtVariableReferenceExpression("elapseSecond") },
                 new TtMethodInvokeArgumentExpression { OperationType = EMethodArgumentAttribute.Ref, Expression = new TtVariableReferenceExpression(blendTreeContext_VarName) });
-            tickMethod.MethodBody.Sequence.Add(finalPoseInitializeInvoke);
+            afterTickMethod.MethodBody.Sequence.Add(finalPoseInitializeInvoke);
 
         }
         public override void GenerateCodeInClass(TtClassDeclaration classDeclaration, ref FClassBuildContext classBuildContext)
@@ -219,7 +219,7 @@ namespace EngineNS.Animation.Macross.BlendTree
 
             GenerateCodeInMainClassInitMethod(classDeclaration, ref classBuildContext);
 
-            GenerateCodeInMainClassTickMethod(classDeclaration, ref classBuildContext);
+            GenerateCodeInMainClassAfterTickMethod(classDeclaration, ref classBuildContext);
         }
 
         #region Internal AST Build

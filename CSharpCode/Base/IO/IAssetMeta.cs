@@ -1,6 +1,7 @@
 ﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
 using EngineNS.EGui.Controls;
 using EngineNS.Thread;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -260,13 +261,6 @@ namespace EngineNS.IO
         {
             //Manager.RemapAsset
         }
-        public virtual void DeleteAsset(string name, RName.ERNameType type)
-        {
-            var address = RName.GetAddress(type, name);
-            IO.TtFileManager.DeleteFile(address);
-            IO.TtFileManager.DeleteFile(address + MetaExt);
-            IO.TtFileManager.DeleteFile(address + ".snap");
-        }
         public virtual async Thread.Async.TtTask SaveRefAssets()
         {
             //Stop Editor Operate
@@ -280,6 +274,34 @@ namespace EngineNS.IO
             }
             //Resume Editor Operate
             TtEngine.Instance.ResumeOperation();
+        }
+        public virtual void DeleteAsset(string name, RName.ERNameType type)
+        {
+            var address = RName.GetAddress(type, name);
+
+            DeleteFile(address);
+
+            DeleteFile(address + MetaExt);
+
+            DeleteFile(address + ".snap");
+        }
+        public void DeleteFile(string address, bool rmGit = true)
+        {
+            if (rmGit)
+                TtEngine.Instance.SourceControlModule.RemoveFile(address, false);
+            IO.TtFileManager.DeleteFile(address);
+        }
+        public void DeleteDir(string dir, bool rmGit = true)
+        {
+            if (rmGit)
+            {
+                var files = IO.TtFileManager.GetFiles(dir, "*.*", true);
+                foreach (var file in files)
+                {
+                    DeleteFile(file,true);
+                }
+            }
+            IO.TtFileManager.DeleteDirectory(dir);
         }
         public virtual async System.Threading.Tasks.Task MoveTo(string name, RName.ERNameType type)
         {
@@ -300,7 +322,8 @@ namespace EngineNS.IO
 
             var savedName = mAssetName.Name;
             var savedType = mAssetName.RNameType;
-            IO.TtFileManager.MoveFile(mAssetName.Address + ".snap", TtEngine.Instance.FileManager.GetRoot(type) + name + ".snap");
+            IO.TtFileManager.MoveFile(mAssetName.Address + ".snap", TtEngine.Instance.FileManager.GetRoot(type) + name + ".snap");            
+            TtEngine.Instance.SourceControlModule.AddFile(TtEngine.Instance.FileManager.GetRoot(type) + name + ".snap", true);
 
             TtEngine.Instance.AssetMetaManager.RemoveAMeta(this);
             OnBeforeRenamedAsset(asset, mAssetName);
@@ -338,6 +361,7 @@ namespace EngineNS.IO
             asset.SaveAssetTo(tarName);
 
             IO.TtFileManager.CopyFile(mAssetName.Address + ".snap", tarName.Address + ".snap");
+            TtEngine.Instance.SourceControlModule.AddFile(mAssetName.Address + ".snap", true);
         }
         public virtual async System.Threading.Tasks.Task RenameTo(string name, RName.ERNameType type)
         {

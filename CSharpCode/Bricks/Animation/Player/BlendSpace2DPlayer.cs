@@ -109,7 +109,7 @@ namespace EngineNS.Animation.Player
                 animEvaluateCmd.Time = PlayPercent * clip.Duration;
 
                 mEvaluateCmd.AnimCmds.Add(animEvaluateCmd);
-                mEvaluateCmd.AnimPoses.Add(clipPose);
+                //mEvaluateCmd.AnimPoses.Add(clipPose);
                 mEvaluateCmd.Desc.Weights.Add(mRuntimeBlendSamples[i].TotalWeight);
                 mEvaluateCmd.Desc.Times.Add(PlayPercent * clip.Duration);
             }

@@ -17,7 +17,7 @@ namespace EngineNS.Animation.Macross.Postprocessing
         {
             TtOutlineElement_AnimFinalPoseOutput outlineElement_AnimFinalPoseOutput = renderableElement as TtOutlineElement_AnimFinalPoseOutput;
             var varibleName = outlineElement_AnimFinalPoseOutput.Description.Name;
-            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;// | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap;
+            ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet;// | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;// | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap;
             Vector2 buttonSize = new Vector2(16, 16);
             var regionSize = ImGuiAPI.GetContentRegionAvail();
 

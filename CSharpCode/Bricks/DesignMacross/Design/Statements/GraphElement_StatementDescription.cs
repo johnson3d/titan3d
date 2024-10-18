@@ -177,10 +177,7 @@ namespace EngineNS.DesignMacross.Design.Statement
                {
                    List<TtExecutionLineDescription> executionLinesToBeRemoved = new();
                    List<TtDataLineDescription> dataLinesToBeRemoved = new();
-                   List<TtDataPinDescription> dataPins = new();
-                   dataPins.AddRange(StatementDescription.DataInPins);
-                   dataPins.AddRange(StatementDescription.DataOutPins);
-                   foreach (var pin in dataPins)
+                   foreach (var pin in StatementDescription.DataPins)
                    {
                        if(StatementDescription.Parent is IMethodDescription methodDescription)
                        {
@@ -192,10 +189,7 @@ namespace EngineNS.DesignMacross.Design.Statement
                        }
                        
                    }
-                   List<TtExecutionPinDescription> execPins = new();
-                   execPins.AddRange(StatementDescription.ExecutionInPins);
-                   execPins.AddRange(StatementDescription.ExecutionOutPins);
-                   foreach (var pin in execPins)
+                   foreach (var pin in StatementDescription.ExecutionPins)
                    {
                        if (StatementDescription.Parent is IMethodDescription methodDescription)
                        {

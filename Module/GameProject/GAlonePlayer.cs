@@ -13,8 +13,13 @@ namespace GameProject
     public class GAloneNPC : EngineNS.GamePlay.Scene.Actor.TtActor
     {
     }
+    [TtNode(NodeDataType = typeof(GAlonePlayerData), DefaultNamePrefix = "AlonePlayer ")]
     public class GAlonePlayer : EngineNS.GamePlay.Character.TtCharacter
     {
+        public class GAlonePlayerData : TtCharacterData
+        {
+
+        }
         public GAlonePlayer()
         {
 

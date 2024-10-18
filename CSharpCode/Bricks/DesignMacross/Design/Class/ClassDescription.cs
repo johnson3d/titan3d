@@ -30,6 +30,17 @@ namespace EngineNS.DesignMacross.Design
         [OutlineElement_List(typeof(TtOutlineElementsList_Variables))]
         [Rtti.Meta]
         public List<IVariableDescription> Variables { get; set; } = new List<IVariableDescription>();
+        public IVariableDescription GetVariable(Guid varId)
+        {
+            foreach(var variable in Variables)
+            {
+                if(variable.Id == varId)
+                {
+                    return variable;
+                }
+            }
+            return null;
+        }
         [Rtti.Meta]
         [OutlineElement_List(typeof(TtOutlineElementsList_Methods))]
         public List<IMethodDescription> Methods { get; set; } = new List<IMethodDescription>();

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_11760494978924583563 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.CmpNode@EngineCore">
+  <Label Type="System.String@Unknown" Order="0" />
+  <LeftTypeString Type="System.String@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeId Type="System.Guid@Unknown" Order="0" />
+  <Position Type="EngineNS.Vector2@EngineCore" Order="0" />
+  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Order="1" />
+</Hash_11760494978924583563>

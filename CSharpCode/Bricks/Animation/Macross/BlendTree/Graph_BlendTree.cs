@@ -105,7 +105,7 @@ namespace EngineNS.Animation.Macross.BlendTree
         {
             if (PreviewPoseLine != null)
             {
-                TtContextMenuHandler.Instance.HandleLinkedPinContextMenu(this, ref context);
+                TtGraphContextMenuHandler.Instance.HandleLinkedPinContextMenu(this, ref context);
                 PreviewPoseLine = null;
             }
         }
@@ -232,7 +232,7 @@ namespace EngineNS.Animation.Macross.BlendTree
                 }
 
                 TtMouseEventProcesser.Instance.Processing(graph, ref elementRenderingContext);
-                TtContextMenuHandler.Instance.HandleContextMenu(TtMouseEventProcesser.Instance.LastElement, ref elementRenderingContext);
+                TtGraphContextMenuHandler.Instance.HandleContextMenu(TtMouseEventProcesser.Instance.LastElement, ref elementRenderingContext);
             }
             ImGuiAPI.EndChild();
         }

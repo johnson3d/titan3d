@@ -26,6 +26,7 @@ namespace EngineNS.Bricks.Animation.Macross
             ImGuiAPI.SameLine(regionSize.X , -1.0f);
             var isTreeNodeDoubleClicked = ImGuiAPI.IsItemDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
             var isTreeNodeIsItemClicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
+            var isTreeNodeIsItemRightClicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right);
             var keyName = $"Delete DesignableVariable {varibleName}?";
             if (EGui.UIProxy.CustomButton.ToolButton("x", in buttonSize, 0xFF0000FF, "DesignVar_X_" + varibleName))
             {
@@ -90,6 +91,10 @@ namespace EngineNS.Bricks.Animation.Macross
                 else if (isTreeNodeIsItemClicked)
                 {
                     stateMachineElement.OnSelected(ref context);
+                }
+                if(isTreeNodeIsItemRightClicked)
+                {
+                    TtOutlineContextMenuHandler.Instance.OpenContextMenu(stateMachineElement, ref context);
                 }
                 var elements = stateMachineElement.ConstructChildrenElements();
                 foreach (var element in elements)

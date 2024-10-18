@@ -99,26 +99,33 @@ namespace EngineNS.DesignMacross.Design.Expressions
             }
             else
             {
-                var trueExecuteSequenceStatement = new TtExecuteSequenceStatement();
-                TtCastExpression castExpression = new();
-                castExpression.SourceType = new TtTypeReference(linkedDataPin.TypeDesc);
-                castExpression.TargetType = new TtTypeReference(TargetType);
-                if (linkedDataPin.Parent is TtExpressionDescription expressionDescription)
+                if(linkedDataPin == null)
                 {
-                    FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription };
-                    castExpression.Expression = expressionDescription.BuildExpression(ref buildContext);
+
                 }
-                if (linkedDataPin.Parent is TtStatementDescription statementDescription)
+                else
                 {
-                    FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription };
-                    castExpression.Expression = statementDescription.BuildExpressionForOutPin(linkedDataPin);
+                    var trueExecuteSequenceStatement = new TtExecuteSequenceStatement();
+                    TtCastExpression castExpression = new();
+                    castExpression.SourceType = new TtTypeReference(linkedDataPin.TypeDesc);
+                    castExpression.TargetType = new TtTypeReference(TargetType);
+                    if (linkedDataPin.Parent is TtExpressionDescription expressionDescription)
+                    {
+                        FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription };
+                        castExpression.Expression = expressionDescription.BuildExpression(ref buildContext);
+                    }
+                    if (linkedDataPin.Parent is TtStatementDescription statementDescription)
+                    {
+                        FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription };
+                        castExpression.Expression = statementDescription.BuildExpressionForOutPin(linkedDataPin);
+                    }
+                    var assign = TtASTBuildUtil.CreateAssignOperatorStatement(new TtVariableReferenceExpression(castedVarName), castExpression);
+                    trueExecuteSequenceStatement.Sequence.Add(assign);
+                    FStatementBuildContext trueStatementBuildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = statementBuildContext.MethodDescription };
+                    (linkedTrueExecPin.Parent as TtStatementDescription).BuildStatement(ref trueStatementBuildContext);
+                    trueExecuteSequenceStatement.Sequence.Add(trueStatementBuildContext.ExecuteSequenceStatement);
+                    ifStatement.TrueStatement = trueExecuteSequenceStatement;
                 }
-                var assign = TtASTBuildUtil.CreateAssignOperatorStatement(new TtVariableReferenceExpression(castedVarName), castExpression);
-                trueExecuteSequenceStatement.Sequence.Add(assign);
-                FStatementBuildContext trueStatementBuildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = statementBuildContext.MethodDescription };
-                (linkedTrueExecPin.Parent as TtStatementDescription).BuildStatement(ref trueStatementBuildContext);
-                trueExecuteSequenceStatement.Sequence.Add(trueStatementBuildContext.ExecuteSequenceStatement);
-                ifStatement.TrueStatement = trueExecuteSequenceStatement;
             }
             var executionOutPin_False = ExecutionOutPins[1];
             var linkedFalseExecPin = statementBuildContext.MethodDescription.GetLinkedExecutionPin(executionOutPin_False);
@@ -144,6 +151,10 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             if(SourcePin == selfPin)
             {
+                if(selfPin.TypeDesc == null)
+                {
+                    return true;
+                }
                 return selfPin.TypeDesc == targetPin.TypeDesc;
             }
             return false;

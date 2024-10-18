@@ -43,6 +43,24 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get;
             set;
         }
+        public UPermutationItem EnableRimLight
+        {
+            get;
+            set;
+        }
+        [Category("Option")]
+        public bool IsEnableRimLight
+        {
+            get
+            {
+                return EnableRimLight.Value.GetValue(EnableRimLight) == 1;
+            }
+            set
+            {
+                EnableRimLight.SetValue(value);
+                this.UpdatePermutation();
+            }
+        }
         [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "EDebugShowMode")]
         public enum EDebugShowMode : uint
         {
@@ -87,6 +105,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             DisableSunshaft = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_SUNSHAFT", (int)Shader.EPermutation_Bool.BitWidth);
             DisableBloom = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_BLOOM", (int)Shader.EPermutation_Bool.BitWidth);
             DisableHdr = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_HDR", (int)Shader.EPermutation_Bool.BitWidth);
+            EnableRimLight = this.PushPermutation<Shader.EPermutation_Bool>("ENV_ENABLE_RIMLIGHT", (int)Shader.EPermutation_Bool.BitWidth);
 
             DisableAO.SetValue((int)Shader.EPermutation_Bool.FalseValue);
             DisableShadow.SetValue((int)Shader.EPermutation_Bool.FalseValue);
@@ -94,6 +113,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             DisableSunshaft.SetValue((int)Shader.EPermutation_Bool.TrueValue);
             DisableBloom.SetValue((int)Shader.EPermutation_Bool.TrueValue);
             DisableHdr.SetValue((int)Shader.EPermutation_Bool.TrueValue);
+            EnableRimLight.SetValue((int)Shader.EPermutation_Bool.FalseValue);
 
             DebugShowModePermutation = this.PushPermutation<EDebugShowMode>("ENV_EDebugShowMode", GetBitWidth((int)EDebugShowMode.Num));
             DebugShowModePermutation.SetValue((int)EDebugShowMode.None);
@@ -251,6 +271,17 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             {
                 drawcall.BindCBuffer(index, policy.DefaultCamera.PerCameraCBuffer);
             }
+            index = drawcall.FindBinder("cbShadingEnv");
+            if (index.IsValidPointer)
+            {
+                if (dirLightingNode.CBShadingEnv == null)
+                {
+                    dirLightingNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                }
+                dirLightingNode.CBShadingEnv.SetValue("RimPower", dirLightingNode.RimPower);
+                dirLightingNode.CBShadingEnv.SetValue("RimIntensity", dirLightingNode.RimIntensity);
+                drawcall.BindCBuffer(index, dirLightingNode.CBShadingEnv);
+            }
         }
         public void SetDisableShadow(bool value)
         {
@@ -300,9 +331,19 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public TtRenderGraphPin GpuScenePinIn = TtRenderGraphPin.CreateInput("GpuScene");
         public TtRenderGraphPin PointLightsPinIn = TtRenderGraphPin.CreateInput("PointLights");
 
+        public NxRHI.TtCbView CBShadingEnv;
+        [Category("Shading")]
+        public float RimPower { get; set; } = 5.0f;
+        [Category("Shading")]
+        public float RimIntensity { get; set; } = 0.5f;
         public TtDeferredDirLightingNode()
         {
             Name = "UDeferredDirLightingNode";
+        }
+        public override void Dispose()
+        {
+            CoreSDK.DisposeObject(ref CBShadingEnv);
+            base.Dispose();
         }
         public override void InitNodePins()
         {
@@ -327,6 +368,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             base.FrameBuild(policy);
         }
         public TtDeferredDirLightingShading mBasePassShading;
+        [Category("Option")]
+        public TtDeferredDirLightingShading BasePassShading
+        {
+            get
+            {
+                return mBasePassShading;
+            }
+        }
         public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mBasePassShading;
@@ -358,19 +407,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public override void TickSync(TtRenderPolicy policy)
         {
             base.TickSync(policy);
-        }
-        [Category("Option")]
-        public TtDeferredDirLightingShading.EDebugShowMode DebugShowMode
-        {
-            get
-            {
-                return mBasePassShading!=null ? mBasePassShading.DebugShowMode : TtDeferredDirLightingShading.EDebugShowMode.None;
-            }
-            set
-            {
-                if(mBasePassShading!=null)
-                    mBasePassShading.DebugShowMode = value;
-            }
         }
     }
 }

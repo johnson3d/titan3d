@@ -951,7 +951,8 @@ namespace EngineNS.IO
                 object readOnlyObject = null;
                 if (prop.PropertyType == typeof(object))
                 {
-                    if (typeAttr == Rtti.TtTypeDescGetter<Rtti.TtTypeDesc>.TypeDesc.TypeString)
+                    if (typeAttr == Rtti.TtTypeDescGetter<Rtti.TtTypeDesc>.TypeDesc.TypeString ||
+                        typeAttr == "EngineNS.Rtti.UTypeDesc@EngineCore")
                     {
                         var valueAttr = i.GetAttribute("Value");
                         if (string.IsNullOrEmpty(valueAttr))

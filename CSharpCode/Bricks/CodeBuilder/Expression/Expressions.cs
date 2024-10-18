@@ -945,12 +945,24 @@ namespace EngineNS.Bricks.CodeBuilder
             if (methodDesc.Arguments.Count != methodInfoParams.Length)
                 return MethodData.EErrorType.InvalidParam;
 
-            if ((methodInfo.ReturnType != typeof(void)) &&
-                (methodInfo.ReturnType != typeof(System.Threading.Tasks.Task)
-                && methodInfo.ReturnType != typeof(EngineNS.Thread.Async.TtTask)))
+            if (methodInfo.ReturnType != typeof(void))
             {
-                if (!methodDesc.ReturnValue.VariableType.IsEqual(methodInfo.ReturnType))
-                    return MethodData.EErrorType.InvalidReturn;
+                if(methodInfo.ReturnType.BaseType == typeof(System.Threading.Tasks.Task) ||
+                   methodInfo.ReturnType.BaseType.IsSubclassOf(typeof(System.Threading.Tasks.Task)))
+                {
+                    if (!methodDesc.ReturnValue.VariableType.IsEqual(methodInfo.ReturnType.GetGenericArguments()[0]))
+                        return MethodData.EErrorType.InvalidReturn;
+                }
+                else if(methodInfo.ReturnType.BaseType.GetInterface(nameof(ITask)) != null)
+                {
+                    if (!methodDesc.ReturnValue.VariableType.IsEqual(methodInfo.ReturnType.GetGenericArguments()[0]))
+                        return MethodData.EErrorType.InvalidReturn;
+                }
+                else
+                {
+                    if(!methodDesc.ReturnValue.VariableType.IsEqual(methodInfo.ReturnType))
+                        return MethodData.EErrorType.InvalidReturn;
+                }
             }
 
             for(int i=0; i<methodInfoParams.Length; i++)

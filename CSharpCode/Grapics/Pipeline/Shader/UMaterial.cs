@@ -29,12 +29,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             TtEngine.Instance.GfxDevice.MaterialManager.UnsafeAdd(name, (TtMaterial)asset);
         }
-        public override void DeleteAsset(string name, RName.ERNameType type)
-        {
-            var address = RName.GetAddress(type, name);
-            IO.TtFileManager.DeleteFile(address);
-            IO.TtFileManager.DeleteFile(address + IO.IAssetMeta.MetaExt);
-        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //必须是TextureAsset

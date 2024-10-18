@@ -10,6 +10,7 @@ namespace EngineNS.DesignMacross.Base.Outline
     public class TtOutline : IOutline
     {
         public string Name { get; set; }
+        public Guid Id { get; set; }
         public List<IOutlineElement> Children { get; set; } = new List<IOutlineElement>();
         public IDescription Description { get; set; } = null;
         public IOutlineElement Parent { get; set; } = null;
@@ -67,6 +68,7 @@ namespace EngineNS.DesignMacross.Base.Outline
                 var elementRender = TtElementRenderDevice.CreateOutlineElementRender(element);
                 elementRender.Draw(element, ref elementContext);
             }
+            TtOutlineContextMenuHandler.Instance.HandleContextMenu(ref elementContext);
         }       
     }
 }

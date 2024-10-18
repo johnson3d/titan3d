@@ -66,8 +66,9 @@ namespace EngineNS.Bricks.CodeBuilder
         public override void DeleteAsset(string name, RName.ERNameType type)
         {
             var address = RName.GetAddress(type, name);
-            IO.TtFileManager.DeleteDirectory(address);
-            IO.TtFileManager.DeleteFile(address + IAssetMeta.MetaExt);
+            DeleteFile(address + IAssetMeta.MetaExt);
+
+            DeleteDir(address);
 
             //if(UMacrossEditor.RemoveAssemblyDescCreateInstanceCode(name, type))
             {

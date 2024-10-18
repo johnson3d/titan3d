@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_8275644989011744255 Type="EngineNS.Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionInputF1@EngineCore">
+  <DefaultValue Type="System.Single@Unknown" Order="0" />
+  <IsHalfPrecision Type="System.Boolean@Unknown" Order="0" />
+  <IsUniform Type="System.Boolean@Unknown" Order="0" />
+  <Label Type="System.String@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeId Type="System.Guid@Unknown" Order="0" />
+  <Position Type="EngineNS.Vector2@EngineCore" Order="0" />
+  <Value Type="System.Single@Unknown" Order="0" />
+  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Order="1" />
+</Hash_8275644989011744255>

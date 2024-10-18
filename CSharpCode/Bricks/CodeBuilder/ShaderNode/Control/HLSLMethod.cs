@@ -3,6 +3,7 @@ using EngineNS.Graphics.Pipeline.Shader;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
@@ -274,20 +275,13 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
         [Rtti.Meta]
         [TtHLSLProvider(Name = "RimLight")]
-        public static void RimLight(Vector3 localPos, Vector3 localNormal, float rimStart, float rimEnd, Vector4 rimColor, float rimMultiply, out Vector3 outColor)
+        public void RimLight(Vector3 N, Vector3 V, float rimPower, float rimIntensity, out float OutRimFactor)
         {
-            outColor = Vector3.Zero;
-            //var l = localNormal.Length();
-            //if (l == 0)
-            //{
-            //    outColor = Vector4.Zero;
-            //    return;
-            //}
-            //var N = Vector3.Normalize(localNormal);
-            //var V = Vector3.Normalize(CameraPositionInModel - localPos);
-            //var rim = (half)smoothstep(rimStart, rimEnd, 1 - dot(N, V));
-
-            //outColor = rim * rimMultiply * rimColor;
+            OutRimFactor = 0;
+            //float NdotV = 1 - dot(N, V);
+            //NdotV = pow(NdotV, rimPower);
+            //NdotV *= rimIntensity;
+            //OutRimFactor = NdotV;
         }
         [Rtti.Meta]
         [TtHLSLProvider(Name = "VecMultiplyQuat")]

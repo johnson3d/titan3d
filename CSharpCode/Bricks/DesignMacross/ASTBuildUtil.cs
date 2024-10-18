@@ -114,7 +114,7 @@ namespace EngineNS.DesignMacross
             {
                 args.Add(CreateMethodArgumentDeclaration(argDesc));
             }
-           var methodDeclaration = CreateMethodDeclaration(description.Name, returnVar, args);
+           var methodDeclaration = CreateMethodDeclaration(description.Name, returnVar, args, description.IsOverride, description.AsyncType);
 
             return methodDeclaration;
         }
@@ -199,6 +199,16 @@ namespace EngineNS.DesignMacross
                 TtASTBuildUtil.CreateMethodArgumentDeclaration("elapseSecond", new(TtTypeDesc.TypeOf<float>()), EMethodArgumentAttribute.Default)
             };
             var methodDeclaration = TtASTBuildUtil.CreateMethodDeclaration("Tick", null, args, isOverride);
+
+            return methodDeclaration;
+        }
+        public static TtMethodDeclaration CreateAfterTickMethodDeclaration(bool isOverride = true)
+        {
+            var args = new List<TtMethodArgumentDeclaration>
+            {
+                TtASTBuildUtil.CreateMethodArgumentDeclaration("elapseSecond", new(TtTypeDesc.TypeOf<float>()), EMethodArgumentAttribute.Default)
+            };
+            var methodDeclaration = TtASTBuildUtil.CreateMethodDeclaration("AfterTick", null, args, isOverride);
 
             return methodDeclaration;
         }

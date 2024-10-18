@@ -68,8 +68,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
             bool bIsSetInitialActiveState = false;
             foreach (var state in States)
             {
-                TtAnimASTBuildUtil.CreateNewAndInitInvokeStatement(state, methodDeclaration);
-                TtAnimASTBuildUtil.CreateCenterDataAssignStatement(state, methodDeclaration);
+                TtAnimASTBuildUtil.CreateNewThenCenterDataAssignThenInitInvokeStatement(state, methodDeclaration);
 
                 var stateMachineAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
                                             new TtVariableReferenceExpression("StateMachine", new TtVariableReferenceExpression(state.VariableName)),

@@ -65,7 +65,7 @@ namespace EngineNS.Animation.Macross
             var args = new List<TtMethodArgumentDeclaration>
             {
                 TtASTBuildUtil.CreateMethodArgumentDeclaration("elapseSecond", new(TtTypeDesc.TypeOf<float>()), EMethodArgumentAttribute.Default),
-                TtASTBuildUtil.CreateMethodArgumentDeclaration("context", new(TtTypeDesc.TypeOf<TtAnimStateMachineContext>()), EMethodArgumentAttribute.Default)
+                TtASTBuildUtil.CreateMethodArgumentDeclaration("context", new(TtTypeDesc.TypeOf<TtAnimStateMachineContext>()), EMethodArgumentAttribute.In)
             };
             var methodDeclaration = TtASTBuildUtil.CreateMethodDeclaration("Tick", null, args, true);
 

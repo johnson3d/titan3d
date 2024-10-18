@@ -502,19 +502,19 @@ void Rotator(float2 uv, float time, float2 center, float2 scale, float speed, ou
 	outUV = mul(inUV, rot).xy;
 }
 
-void RimLight( half3 localPos, half3 localNormal, half rimStart, half rimEnd, half4 rimColor, half rimMultiply, out half4 outColor )
+void RimLight(half NdotV, half rimPower, half rimIntensity, out half OutRimFactor)
 {
-	half l = (half)length(localNormal);
-	if(l==0)
-	{
-		outColor = half4(0,0,0,0);
-		return;
-	}
-    half3 N = (half3)normalize(localNormal);
-    half3 V = (half3)normalize(CameraPositionInModel - localPos);
-    half rim = (half)smoothstep(rimStart, rimEnd, 1- dot(N,V));
+    NdotV = 1.0h - NdotV;
+    NdotV = (half) pow(NdotV, rimPower);
+    NdotV *= rimIntensity;
+    OutRimFactor = NdotV;
+}
 
-    outColor = rim* rimMultiply * rimColor;
+void RimLight(half3 N, half3 V, half rimPower, half rimIntensity, out half OutRimFactor)
+{
+    half NdotV = dot(N, V);
+    RimLight(NdotV, rimPower, rimIntensity, OutRimFactor);
+    //OutColor = lerp(color, rimColor, NdotV);
 }
 
 void Luminance4( half4 color , out half ret  )

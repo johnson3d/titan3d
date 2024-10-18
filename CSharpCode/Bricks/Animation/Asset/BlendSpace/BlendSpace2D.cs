@@ -175,6 +175,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
 
         public override void SaveAssetTo(RName name)
         {
+            ReConstructTrangles();
             var ameta = this.GetAMeta();
             if (ameta != null)
             {

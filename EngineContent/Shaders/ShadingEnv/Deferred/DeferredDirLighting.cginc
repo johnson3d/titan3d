@@ -51,6 +51,12 @@ SamplerState Samp_GVignette DX_AUTOBIND;
 
 StructuredBuffer<FTileData> TilingBuffer DX_AUTOBIND;
 
+cbuffer cbShadingEnv DX_AUTOBIND
+{
+    float RimPower;
+    float RimIntensity;
+};
+
 float GetDepth(float2 uv)
 {
 	return DepthBuffer.SampleLevel(Samp_DepthBuffer, uv, 0).r;
@@ -317,7 +323,14 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	}
 #endif
 
- 	half3 Color = BaseShading.rgb;
+    half3 Color = BaseShading.rgb;
+#if ENV_ENABLE_RIMLIGHT == 1
+    half rimFactor;
+    RimLight(NoV, RimPower, RimIntensity, rimFactor);
+    half3 rimColor = gDirLightColor_Intensity.rgb; 
+    Color = lerp(Color, rimColor, rimFactor);
+#endif
+    
 #if ENV_EDebugShowMode == EDebugShowMode_None
 	output.RT0.rgb = Linear2sRGB(Color);
 #elif ENV_EDebugShowMode == EDebugShowMode_N

@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\GraphElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\GraphViewport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Base\Graph\GraphCamera.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Base\Outline\OutlineContextMenuHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DesignMacrossNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\ConnectingLine\GraphElement_DataLine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\Expressions\Value\CenterDataReferenceDescription.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\Elements\GraphElement_DockPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\Elements\GraphElement_Icon.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\Elements\GraphElement_ComboBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\Elements\GraphElement_TextBox.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editor\Graph\NavigableGraphsPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\ConnectingLine\DataLineDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Design\DelegateEvent\DelegateEventDescription.cs" />

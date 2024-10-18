@@ -23,15 +23,15 @@ namespace EngineNS.DesignMacross.Base.Graph
         public float Bottom { get; set; }
     }
 
-    public class TtContextMenuHandler
+    public class TtGraphContextMenuHandler
     {
-        static TtContextMenuHandler mInstance = null;
-        public static TtContextMenuHandler Instance
+        static TtGraphContextMenuHandler mInstance = null;
+        public static TtGraphContextMenuHandler Instance
         {
             get
             {
                 if (mInstance == null)
-                    mInstance = new TtContextMenuHandler();
+                    mInstance = new TtGraphContextMenuHandler();
                 return mInstance;
             }
         }

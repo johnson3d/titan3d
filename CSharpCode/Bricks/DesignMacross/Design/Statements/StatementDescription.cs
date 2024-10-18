@@ -21,10 +21,30 @@ namespace EngineNS.DesignMacross.Design.Statement
         public List<TtExecutionInPinDescription> ExecutionInPins { get; set; } = new();
         [Rtti.Meta]
         public List<TtExecutionOutPinDescription> ExecutionOutPins { get; set; } = new();
+        public List<TtExecutionPinDescription> ExecutionPins
+        {
+            get
+            {
+                List<TtExecutionPinDescription> pins = new();
+                pins.AddRange(ExecutionInPins);
+                pins.AddRange(ExecutionOutPins);
+                return pins; ;
+            }
+        }
         [Rtti.Meta]
         public List<TtDataInPinDescription> DataInPins { get; set; } = new();
         [Rtti.Meta]
         public List<TtDataOutPinDescription> DataOutPins { get; set; } = new();
+        public List<TtDataPinDescription> DataPins
+        {
+            get
+            {
+                List<TtDataPinDescription> pins = new();
+                pins.AddRange(DataInPins);
+                pins.AddRange(DataOutPins);
+                return pins; ;
+            }
+        }
         public virtual TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
             return null;

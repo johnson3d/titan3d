@@ -1,6 +1,7 @@
 ﻿using EngineNS.Rtti;
 using EngineNS.EGui.Controls;
 using static EngineNS.EGui.Controls.TtMenuItem;
+using EngineNS.DesignMacross.Base.Outline;
 
 namespace EngineNS.DesignMacross.Base.Graph
 {
@@ -20,6 +21,10 @@ namespace EngineNS.DesignMacross.Base.Graph
             PopupMenuRender.OpenPopup(this);
         }
         public void Draw(ref FGraphElementRenderingContext context)
+        {
+            PopupMenuRender.Draw(this, context);
+        }
+        public void Draw(ref FOutlineElementRenderingContext context)
         {
             PopupMenuRender.Draw(this, context);
         }
@@ -61,6 +66,47 @@ namespace EngineNS.DesignMacross.Base.Graph
                     var width = ImGuiAPI.GetWindowContentRegionWidth();//ImGuiAPI.GetWindowWidth();
                     var drawList = ImGuiAPI.GetWindowDrawList();
                     if(popupMenu.bHasSearchBox)
+                    {
+                        EGui.UIProxy.SearchBarProxy.OnDraw(ref mCanvasMenuFilterFocused, in drawList, "search item", ref CanvasMenuFilterStr, width);
+                        Vector2 wsize = new Vector2(200, 400);
+                        var id = ImGuiAPI.GetID(popupMenu.StringId);
+                        if (ImGuiAPI.BeginChild(id, wsize, ImGuiChildFlags_.ImGuiChildFlags_None,
+                            ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar |
+                            ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings))
+                        {
+                            var cmdList = ImGuiAPI.GetWindowDrawList();
+                            for (var childIdx = 0; childIdx < popupMenu.Menu.SubMenuItems.Count; childIdx++)
+                                DrawMenu(popupMenu, popupMenu.Menu.SubMenuItems[childIdx], CanvasMenuFilterStr.ToLower(), cmdList);
+                        }
+                        ImGuiAPI.EndChild();
+                    }
+                    else
+                    {
+                        var cmdList = ImGuiAPI.GetWindowDrawList();
+                        for (var childIdx = 0; childIdx < popupMenu.Menu.SubMenuItems.Count; childIdx++)
+                            DrawMenu(popupMenu, popupMenu.Menu.SubMenuItems[childIdx], CanvasMenuFilterStr.ToLower(), cmdList);
+                    }
+                }
+                ImGuiAPI.EndPopup();
+            }
+        }
+        public void Draw(TtPopupMenu popupMenu, FOutlineElementRenderingContext context)
+        {
+            if (ImGuiAPI.BeginPopup(popupMenu.StringId,
+                ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize |
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar |
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings |
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar |
+                ImGuiWindowFlags_.ImGuiWindowFlags_NoNav))
+            {
+                {
+                    popupMenu.PopedPosition = mPopMousePosition;
+                    var size = ImGuiAPI.GetWindowSize();
+
+
+                    var width = ImGuiAPI.GetWindowContentRegionWidth();//ImGuiAPI.GetWindowWidth();
+                    var drawList = ImGuiAPI.GetWindowDrawList();
+                    if (popupMenu.bHasSearchBox)
                     {
                         EGui.UIProxy.SearchBarProxy.OnDraw(ref mCanvasMenuFilterFocused, in drawList, "search item", ref CanvasMenuFilterStr, width);
                         Vector2 wsize = new Vector2(200, 400);

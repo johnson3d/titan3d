@@ -172,7 +172,7 @@ namespace EngineNS.Editor.Forms
             var subClasses = meta.SubClasses;
             foreach (var i in subClasses)
             {
-                var atts = i.ClassType.SystemType.GetCustomAttributes(typeof(Bricks.CodeBuilder.ContextMenuAttribute), true);
+                var atts = i.ClassType.SystemType.GetCustomAttributes(typeof(Bricks.CodeBuilder.ContextMenuAttribute), inherit: false);
                 if (atts.Length > 0)
                 {
                     var parentMenu = mAddNodeMenus;

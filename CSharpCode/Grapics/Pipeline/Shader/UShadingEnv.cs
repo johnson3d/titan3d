@@ -36,6 +36,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         TrueValue = 1,
         BitWidth = 1,
     }
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtShadingEnv
     {
         public static int GetBitWidth(int num)
