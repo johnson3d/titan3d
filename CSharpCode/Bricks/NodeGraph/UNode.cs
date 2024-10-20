@@ -215,6 +215,7 @@ namespace EngineNS.Bricks.NodeGraph
         public TtMenuItem ContextMenu { get; set; }
     }
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore", "EngineNS.Bricks.NodeGraph.UNodeBase" })]
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtNodeBase : IO.ISerializer
     {
         public bool LayoutDirty = true;
@@ -238,6 +239,7 @@ namespace EngineNS.Bricks.NodeGraph
         public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
         string mName = "NoName";
         [Rtti.Meta]
+        [Category("Option")]
         public virtual string Name 
         {
             get => mName;
@@ -250,11 +252,10 @@ namespace EngineNS.Bricks.NodeGraph
             }
         }
         [Rtti.Meta]
-        [System.ComponentModel.Browsable(false)]
         public virtual string Label { get; set; } = "NoName";
         [Rtti.Meta]
-        [System.ComponentModel.Browsable(false)]
         public Guid NodeId { get; set; }
+        [Category("Option")]
         public string NodeType
         {
             get
@@ -262,7 +263,6 @@ namespace EngineNS.Bricks.NodeGraph
                 return this.GetType().Name;
             }
         }
-        [System.ComponentModel.Browsable(false)]
         public bool Selected { get; set; }
         internal Vector2 mPosition;
         [Rtti.Meta]

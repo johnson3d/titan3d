@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="9d9a1988-9919-4c01-b123-97f477490db6" />
-  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/pivotpainter/pivot_translation.material,00000000-0000-0000-0000-000000000000" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/pivotpainter/pivot_translation.material,9d9a1988-9919-4c01-b123-97f477490db6" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterial&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
@@ -12,7 +12,7 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
-    <e_0 Value="Game,fbxresources/pivotpainter/pp2_rgb_xvect_a_xextent.srv,d0e27459-a5d5-499b-a754-90fa4f857e27" />
+    <e_0 Value="Game,tutorials/pivotpainter/pp2_rgb_xvect_a_xextent.srv,6d94e776-a1c9-4246-8532-7aa06a83d2fb" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

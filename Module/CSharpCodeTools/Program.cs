@@ -27,8 +27,7 @@ namespace CSharpCodeTools
         }
         static void Main(string[] args)
         {
-            string DefNewLine = "\n";
-            /*
+            string DefNewLine = "\r\n";
             switch (System.Environment.OSVersion.Platform)
             {
                 case PlatformID.Xbox:
@@ -47,7 +46,6 @@ namespace CSharpCodeTools
                     DefNewLine = "\n";
                     break;
             }
-            */
             var file = args[0].Replace('\\', '/');
             var idx = file.LastIndexOf('/');
             var dir = file.Substring(0, idx);

@@ -31,6 +31,7 @@ namespace EngineNS.Bricks.SourceControl
         public abstract TtSourceOpResult AddFile(string file);
         public abstract TtSourceOpResult AddDirectory(string dir);
         public abstract TtSourceOpResult RemoveFile(string file, bool delLocal = true);
+        public abstract TtSourceOpResult RemoveDirectory(string dir, bool delLocal = true);
         //public virtual async System.Threading.Tasks.Task<USourceOpResult> Pull(URepository reps)
         //{
         //    await Thread.TtAsyncDummyClass.DummyFunc();

@@ -1280,7 +1280,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     }
                 }
             }, Thread.Async.EAsyncTarget.AsyncIO);
-
+            if (result != null && result.AssetName != rn)
+            {
+                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Material({rn}): AssetName({result.AssetName})");
+            }
             return result;
         }
         public async Thread.Async.TtTask<bool> ReloadMaterial(RName rn)
@@ -1380,6 +1383,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             if (result != null)
             {
+                if (result.AssetName != rn)
+                {
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Material({rn}): AssetName({result.AssetName})");
+                }
                 Materials[rn] = result;
                 return result;
             }

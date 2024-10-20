@@ -221,25 +221,19 @@ namespace EngineNS.Editor.Forms
             TtEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
-        public async TtTask OnPreviewMeshChange(TtMeshPrimitives meshPrimitives)
+        public async TtTask OnPreviewMeshChange(TtMaterialMesh materialMesh)
         {
             if(mCurrentMeshNode != null)
             {
                 mCurrentMeshNode.Parent = null;
             }
-            var mtl = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(TtEngine.Instance.Config.MeshPrimitiveEditorConfig.MaterialName);
-            var materials = new Graphics.Pipeline.Shader.TtMaterial[meshPrimitives.mCoreObject.GetAtomNumber()];
-            for (int i = 0; i < materials.Length; i++)
-            {
-                materials[i] = mtl;
-            }
 
             var meshData = new EngineNS.GamePlay.Scene.TtMeshNode.TtMeshNodeData();
-            meshData.MeshName = meshPrimitives.AssetName;
+            meshData.MeshName = materialMesh.AssetName;
             meshData.MdfQueueType = EngineNS.Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh));
             meshData.AtomType = EngineNS.Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.TtMesh.TtAtom));
             var mesh = new Graphics.Mesh.TtMesh();
-            mesh.Initialize(meshPrimitives, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfSkinMesh>.TypeDesc);
+            mesh.Initialize(materialMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfSkinMesh>.TypeDesc);
 
             var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(PreviewViewport.World, PreviewViewport.World.Root, meshData, typeof(GamePlay.TtPlacement), mesh,
                         DVector3.Zero, Vector3.One, Quaternion.Identity);
@@ -267,7 +261,7 @@ namespace EngineNS.Editor.Forms
             [Browsable(false)]
             public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
             private RName mPreivewMeshName;
-            [RName.PGRName(FilterExts = TtMeshPrimitives.AssetExt)]
+            [RName.PGRName(FilterExts = TtMaterialMesh.AssetExt)]
             public RName PreivewMesh
             {
                 get
@@ -282,8 +276,8 @@ namespace EngineNS.Editor.Forms
                     AssetState = IO.EAssetState.Loading;
                     System.Action exec = async () =>
                     {
-                        var Mesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value);
-                        if (Mesh.mCoreObject.IsValidPointer == false)
+                        var Mesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(value);
+                        if (Mesh == null)
                         {
                             AssetState = IO.EAssetState.LoadFailed;
                             return;

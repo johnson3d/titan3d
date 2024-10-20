@@ -142,7 +142,9 @@ namespace EngineNS.NxRHI
 
                     cmdParams.IsNormalMap = 0;
                     if (SnapTask.Value.Result.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || SnapTask.Value.Result.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || SnapTask.Value.Result.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
+                    {
                         cmdParams.IsNormalMap = 1;
+                    }
 
                     CmdParameters = cmdParams;
                 }
@@ -152,6 +154,13 @@ namespace EngineNS.NxRHI
                 if (SnapTask.Value.Result != null)
                 {
                     cmdlist.AddImage(CmdParameters.GetHandle(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
+                    if (CmdParameters.IsNormalMap==1)
+                    {
+                        var indiactorPos = start + new Vector2(3, 2);
+                        //cmdlist.AddText(in indiactorPos, 0xFF00FF00, "N", null);
+                        var font = ImGuiAPI.GetDrawListFont(cmdlist);
+                        cmdlist.AddText(font, 25, &indiactorPos, 0xFF00FF00, "N", null, 2.0f, null);
+                    }
                 }
 
                 // support preview A channel
@@ -165,6 +174,11 @@ namespace EngineNS.NxRHI
             }
             //cmdlist.AddText(in start, 0xFFFFFFFF, "texture", null);
         }
+
+        public override void OnDrawIndicator(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        {
+        }
+
         protected override void OnDrawPopMenu(EGui.Controls.TtContentBrowser ContentBrowser)
         {
             base.OnDrawPopMenu(ContentBrowser);
@@ -1489,7 +1503,10 @@ namespace EngineNS.NxRHI
                     for (int i = 0; i < desc.MipSizes.Count; i++)
                     {
                         ar.Write(desc.MipSizes[i]);
-                        ar.Write(desc.BlockDimenstions[i]);
+                        if (i < desc.BlockDimenstions.Count)
+                            ar.Write(desc.BlockDimenstions[i]);
+                        else
+                            ar.Write(Vector2i.Zero);
                     }
                     ar.Write(desc.BlockSize);
                 }
@@ -1621,7 +1638,10 @@ namespace EngineNS.NxRHI
                     for (int i = 0; i < desc.MipSizes.Count; i++)
                     {
                         ar.Write(desc.MipSizes[i]);
-                        ar.Write(desc.BlockDimenstions[i]);
+                        if (i < desc.BlockDimenstions.Count)
+                            ar.Write(desc.BlockDimenstions[i]);
+                        else
+                            ar.Write(Vector2i.Zero);
                     }
                     ar.Write(desc.BlockSize);
                 }
@@ -1839,7 +1859,10 @@ namespace EngineNS.NxRHI
                     for (int i = 0; i < desc.MipSizes.Count; i++)
                     {
                         ar.Write(desc.MipSizes[i]);
-                        ar.Write(desc.BlockDimenstions[i]);
+                        if(i < desc.BlockDimenstions.Count)
+                            ar.Write(desc.BlockDimenstions[i]);
+                        else
+                            ar.Write(Vector2i.Zero);
                     }
                     ar.Write(desc.BlockSize);
                 }
@@ -2696,6 +2719,7 @@ namespace EngineNS.NxRHI
             if (exrNode.NativePointer == IntPtr.Zero)
                 return null;
 
+            desc.CubeFaces = Math.Max(desc.CubeFaces, 1);
             var num = (int)desc.CubeFaces * mipLevel;
             if (num == 0)
                 return null;

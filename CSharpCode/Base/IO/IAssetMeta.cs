@@ -322,14 +322,17 @@ namespace EngineNS.IO
 
             var savedName = mAssetName.Name;
             var savedType = mAssetName.RNameType;
-            IO.TtFileManager.MoveFile(mAssetName.Address + ".snap", TtEngine.Instance.FileManager.GetRoot(type) + name + ".snap");            
-            TtEngine.Instance.SourceControlModule.AddFile(TtEngine.Instance.FileManager.GetRoot(type) + name + ".snap", true);
+            var targetSnapName = TtEngine.Instance.FileManager.GetRoot(type) + name + ".snap";
+            IO.TtFileManager.MoveFile(mAssetName.Address + ".snap", targetSnapName);
+            if (IO.TtFileManager.FileExists(targetSnapName))
+                TtEngine.Instance.SourceControlModule.AddFile(targetSnapName, true);
 
             TtEngine.Instance.AssetMetaManager.RemoveAMeta(this);
             OnBeforeRenamedAsset(asset, mAssetName);
 
             mAssetName = RName.GetRName(name, type);
             this.SaveAMeta(asset);
+            asset.AssetName = mAssetName;
             asset.SaveAssetTo(mAssetName);
 
             TtEngine.Instance.AssetMetaManager.RegAsset(this);
@@ -358,7 +361,9 @@ namespace EngineNS.IO
             }
 
             ameta.SaveAMeta(asset);
+            asset.AssetName = tarName;
             asset.SaveAssetTo(tarName);
+            asset.AssetName = mAssetName;
 
             IO.TtFileManager.CopyFile(mAssetName.Address + ".snap", tarName.Address + ".snap");
             TtEngine.Instance.SourceControlModule.AddFile(mAssetName.Address + ".snap", true);
@@ -466,6 +471,9 @@ namespace EngineNS.IO
             TtEngine.Instance.GfxDevice.SlateRenderer.PopFont();
 
             //ImGuiAPI.PushClipRect(in start, in end, true);
+            var indicatorStart = new Vector2(tpos.X + snapSize*0.5f, tpos.Y);
+            var indicatorEnd = indicatorStart + new Vector2(snapSize * 0.5f, 18*scale);
+            OnDrawIndicator(cmdlist, ref indicatorStart, ref indicatorEnd);
 
             var snapStart = new Vector2(start.X + delta, tpos.Y + 18 * scale);
             var snapEnd = snapStart + new Vector2(snapSize, snapSize);
@@ -590,6 +598,10 @@ namespace EngineNS.IO
                 }
             }
         }
+        public unsafe virtual void OnDrawIndicator(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
+        {
+        }
+
         public virtual async Thread.Async.TtTask<bool> AutoGenSnap()
         {
             return true;

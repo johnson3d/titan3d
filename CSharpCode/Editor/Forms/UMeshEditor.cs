@@ -236,6 +236,7 @@ namespace EngineNS.Editor.Forms
             if (Mesh == null)
             {
                 Mesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.CreateMaterialMesh(name);
+                Mesh.AssetName = AssetName;
                 if (Mesh == null)
                     return false;
             }

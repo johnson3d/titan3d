@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using Assimp;
 using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
@@ -143,6 +144,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             MaterialGraph.ResetGraph();
             IsStarting = true;
             Material = await TtEngine.Instance.GfxDevice.MaterialManager.CreateMaterial(name);
+            Material.AssetName = name;
             Material.IsEditingMaterial = true;
             //Material = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(name);
             if (Material == null)

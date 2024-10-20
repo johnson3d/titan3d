@@ -678,6 +678,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             if (result != null)
             {
+                if (result != null)
+                {
+                    if (result.AssetName != rn)
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"MaterialInstance({rn}): AssetName({result.AssetName})");
+                    }
+                    Materials[rn] = result;
+                    return result;
+                }
                 Materials[rn] = result;
                 return result;
             }

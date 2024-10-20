@@ -1,6 +1,7 @@
 ﻿using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
+using EngineNS.Profiler;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -572,9 +573,17 @@ namespace EngineNS.Graphics.Mesh
                     base.OnPreRead(tagObject, hostObject, fromXml);
                 }
                 [Rtti.Meta]
-                public RName MeshName { get; set; }
+                public RName MeshName 
+                { 
+                    get; 
+                    set;
+                }
                 [Rtti.Meta]
-                public List<RName> Materials { get; } = new List<RName>();
+                public List<RName> Materials 
+                { 
+                    get;
+                    set; 
+                } = new List<RName>();
             }
             [Rtti.Meta(Order = 1)]
             [Browsable(false)]
@@ -688,6 +697,10 @@ namespace EngineNS.Graphics.Mesh
                     }
                 }
             }, Thread.Async.EAsyncTarget.AsyncIO);
+            if (result != null && result.AssetName != name)
+            {
+                Profiler.Log.WriteLine<Profiler.TtIOCategory>(ELogTag.Warning, $"MaterialMesh({name}): AssetName({result.AssetName})");
+            }
             return result;
         }
         public async Thread.Async.TtTask<bool> ReloadMaterialMesh(RName rn)
@@ -752,6 +765,10 @@ namespace EngineNS.Graphics.Mesh
 
             if (result != null)
             {
+                if (result != null && result.AssetName != name)
+                {
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(ELogTag.Warning, $"MaterialMesh({name}): AssetName({result.AssetName})");
+                }
                 Meshes[name] = result;
                 return result;
             }
