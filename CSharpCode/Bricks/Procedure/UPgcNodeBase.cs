@@ -155,7 +155,7 @@ namespace EngineNS.Bricks.Procedure
             var uv1 = new Vector2(1, 1);
             unsafe
             {
-                cmdlist.AddImage(PreviewSRV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
+                cmdlist.AddImage((ulong)PreviewSRV.GetTextureHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
             }
         }
         public override void OnLButtonClicked(NodePin clickedPin)

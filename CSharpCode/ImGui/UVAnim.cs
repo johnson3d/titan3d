@@ -67,7 +67,7 @@ namespace EngineNS.EGui
                 {
                     var uv0 = SnapUVStart;
                     var uv1 = SnapUVEnd;
-                    cmdlist.AddImage(SnapTask.Value.Result.GetTextureHandle().ToPointer(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
+                    cmdlist.AddImage((ulong)SnapTask.Value.Result.GetTextureHandle(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
                 }
                 else
                 {
@@ -262,7 +262,7 @@ namespace EngineNS.EGui
                 return false;
             return true;
         }
-        public void OnDraw(in ImDrawList cmdlist, in Vector2 rectMin, in Vector2 rectMax, int frame)
+        public unsafe void OnDraw(in ImDrawList cmdlist, in Vector2 rectMin, in Vector2 rectMax, int frame)
         {
             if (!IsReadyToDraw())
                 return;
@@ -271,10 +271,7 @@ namespace EngineNS.EGui
                 Vector2 uvMin;
                 Vector2 uvMax;
                 this.GetUV(frame, out uvMin, out uvMax);
-                unsafe
-                {
-                    cmdlist.AddImage(mTextureTask.Value.Result.GetTextureHandle().ToPointer(), in rectMin, in rectMax, in uvMin, in uvMax, Color);
-                }
+                cmdlist.AddImage((ulong)mTextureTask.Value.Result.GetTextureHandle(), in rectMin, in rectMax, in uvMin, in uvMax, Color);
             }
             else
             {

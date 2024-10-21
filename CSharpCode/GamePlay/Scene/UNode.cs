@@ -537,7 +537,7 @@ namespace EngineNS.GamePlay.Scene
         {
             foreach (var i in Children)
             {
-                if (i.NodeName == name)
+                if (i.NodeName.Contains(name))
                 {
                     if (type == null)
                     {
@@ -572,7 +572,7 @@ namespace EngineNS.GamePlay.Scene
                         return i;
                     else
                     {
-                        if (i.NodeName == name)
+                        if (i.NodeName.Contains(name))
                             return i;
                     }
                 }
@@ -1052,7 +1052,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 if (mParent == value)
                     return;
-                var newScene = value.GetNearestParentScene();
+                var newScene = value?.GetNearestParentScene();
                 if (ParentScene != null && newScene != ParentScene)
                 {
                     Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, "UNode", $"{GetType().FullName}:{NodeName} cann't move to another UScene");

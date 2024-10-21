@@ -3,6 +3,7 @@ using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.GamePlay.Movemnet
@@ -17,11 +18,11 @@ namespace EngineNS.GamePlay.Movemnet
 
         }
         public Vector3 LinearVelocity { get; private set; }
-
-        private Vector3 SettedLinearVelocity = Vector3.Zero;
+        [Category("Option")]
+        public Vector3 DesiredLinearVelocity { get; set; } = Vector3.Zero;
         public void SetLinearVelocity(Vector3 linearVelocity)
         {
-            SettedLinearVelocity = linearVelocity;
+            DesiredLinearVelocity = linearVelocity;
         }
         public Vector3 AngularVelocity { get; private set; }
 
@@ -60,8 +61,8 @@ namespace EngineNS.GamePlay.Movemnet
 
         protected Vector3 ConsumeSettedLinearVelocity()
         {
-            var temp = SettedLinearVelocity;
-            SettedLinearVelocity = Vector3.Zero;
+            var temp = DesiredLinearVelocity;
+            //DesiredLinearVelocity = Vector3.Zero;
             return temp;
         }
         protected Vector3 ConsumeSettedAngularVelocity()

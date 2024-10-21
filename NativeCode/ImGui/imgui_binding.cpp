@@ -213,7 +213,7 @@ bool ImGuiAPI::DragScalar2(const char* label, ImGuiDataType data_type, void* p_d
 		format = PatchFormatStringFloatToInt(format);
 
 	// Tabbing or CTRL-clicking on Drag turns it into an InputText
-	const bool hovered = ImGui::ItemHoverable(frame_bb, id, g.LastItemData.InFlags);
+	const bool hovered = ImGui::ItemHoverable(frame_bb, id, g.LastItemData.ItemFlags);
 	if(hovered)
 		ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
 	bool temp_input_is_active = temp_input_allowed && ImGui::TempInputIsActive(id);
@@ -439,8 +439,9 @@ bool ImGuiAPI::ToggleButton(const char* label, bool* v, const ImVec2* size_arg, 
 	if (!ImGui::ItemAdd(bb, id))
 		return false;
 
-	if (g.CurrentItemFlags & ImGuiItemFlags_ButtonRepeat)
-		flags |= ImGuiButtonFlags_Repeat;
+	/*if (g.CurrentItemFlags & ImGuiItemFlags_ButtonRepeat)
+		flags |= ImGuiButtonFlags_Repeat;*/
+
 	bool hovered, held;
 	bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, flags);
 	if (pressed)

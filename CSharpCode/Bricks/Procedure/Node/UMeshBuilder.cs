@@ -170,7 +170,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 }
                 else
                 {
-                    cmdlist.AddImage(Task.Result.mTextureRSV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in Vector2.Zero, in Vector2.One, 0xFFFFFFFF);
+                    cmdlist.AddImage((ulong)Task.Result.mTextureRSV.GetTextureHandle(), in prevStart, in prevEnd, in Vector2.Zero, in Vector2.One, 0xFFFFFFFF);
                 }
             }
         }

@@ -315,7 +315,7 @@ namespace EngineNS.Editor.Forms
                 max1 = max1 + pos;
 
                 if (CmdParameters != null)
-                    drawlist.AddImage(CmdParameters.GetHandle(), in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
+                    drawlist.AddImage((ulong)CmdParameters.GetHandle(), in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
                 //drawlist.AddImage(TextureSRV.GetTextureHandle().ToPointer(), in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
                 drawlist.AddRect(in min1, in max1, 0xFF00FF00, 0, ImDrawFlags_.ImDrawFlags_None, 0);
             }

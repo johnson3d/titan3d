@@ -204,11 +204,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
                                methodDescription.Expressions.Remove(ExpressionDescription);
                                foreach (var line in executionLinesToBeRemoved)
                                {
-                                   methodDescription.ExecutionLines.Remove(line);
+                                   methodDescription.RemoveExecutionLine(line);
                                }
                                foreach (var line in dataLinesToBeRemoved)
                                {
-                                   methodDescription.DataLines.Remove(line);
+                                   methodDescription.RemoveDataLine(line);
                                }
                            }
 
@@ -220,11 +220,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
                                methodDescription.Expressions.Add(ExpressionDescription);
                                foreach (var line in executionLinesToBeRemoved)
                                {
-                                   methodDescription.ExecutionLines.Add(line);
+                                   methodDescription.AddExecutionLine(line);
                                }
                                foreach (var line in dataLinesToBeRemoved)
                                {
-                                   methodDescription.DataLines.Add(line);
+                                   methodDescription.AddDataLine(line);
                                }
                            }
                        });

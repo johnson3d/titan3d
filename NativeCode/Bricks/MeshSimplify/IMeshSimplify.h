@@ -22,4 +22,13 @@ public:
 						int target_count, double agressiveness = 7, bool verbose = false);
 };
 
+class TR_CLASS(SV_Dispose = delete self)
+	IMeshOptimizer
+{
+public:
+	void OptimizeVertexCache(unsigned int* destination, const unsigned int* indices, UINT index_count, UINT vertex_count);
+	void OptimizeVertexCacheStrip(unsigned int* destination, const unsigned int* indices, UINT index_count, UINT vertex_count);
+	void OptimizeMeshlet(unsigned int* meshlet_vertices, unsigned char* meshlet_triangles, UINT triangle_count, UINT vertex_count);
+};
+
 NS_END

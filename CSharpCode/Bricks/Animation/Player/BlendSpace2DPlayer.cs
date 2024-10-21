@@ -27,6 +27,7 @@ namespace EngineNS.Animation.Player
                 mInput = value;
             }
         }
+
         public Asset.BlendSpace.TtBlendSpace2D BlendSpace2D { get; set; } = null;
         public SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose BindedPose { get; set; } = null;
         public TtLocalSpaceRuntimePose RuntimePose = null;
@@ -109,7 +110,6 @@ namespace EngineNS.Animation.Player
                 animEvaluateCmd.Time = PlayPercent * clip.Duration;
 
                 mEvaluateCmd.AnimCmds.Add(animEvaluateCmd);
-                //mEvaluateCmd.AnimPoses.Add(clipPose);
                 mEvaluateCmd.Desc.Weights.Add(mRuntimeBlendSamples[i].TotalWeight);
                 mEvaluateCmd.Desc.Times.Add(PlayPercent * clip.Duration);
             }
@@ -118,15 +118,6 @@ namespace EngineNS.Animation.Player
 
         public void Evaluate()
         {
-            //make command  now is expensive of clonePose and BindingSetter need to optimize
-
-            
-            //if(IsImmediate)
-            for(int i = 0;i< mEvaluateCmd.AnimCmds.Count; ++i)
-            {
-                //TODO: 
-                mEvaluateCmd.AnimCmds[i].Execute();
-            }
             mEvaluateCmd.Execute();
             TtRuntimePoseUtility.CopyPose(ref RuntimePose, mEvaluateCmd.OutPose);
             //else Insert to pipeline

@@ -1,5 +1,6 @@
 #include "IMeshSimplify.h"
 #include "Simplify.h"
+#include "meshoptimizer.h"
 
 #define new VNEW
 
@@ -52,6 +53,21 @@ void IMeshSimplify::SimplifyMesh(const v3dxVector3* posArray, int numOfPos, cons
 
 	Simplify::vertices.clear();
 	Simplify::triangles.clear();
+}
+
+void IMeshOptimizer::OptimizeVertexCache(unsigned int* destination, const unsigned int* indices, UINT index_count, UINT vertex_count)
+{
+	meshopt_optimizeVertexCache(destination, indices, (size_t)index_count, (size_t)vertex_count);
+}
+
+void IMeshOptimizer::OptimizeVertexCacheStrip(unsigned int* destination, const unsigned int* indices, UINT index_count, UINT vertex_count)
+{
+	meshopt_optimizeVertexCacheStrip(destination, indices, (size_t)index_count, (size_t)vertex_count);
+}
+
+void IMeshOptimizer::OptimizeMeshlet(unsigned int* meshlet_vertices, unsigned char* meshlet_triangles, UINT triangle_count, UINT vertex_count)
+{
+	meshopt_optimizeMeshlet(meshlet_vertices, meshlet_triangles, (size_t)triangle_count, (size_t)vertex_count);
 }
 
 NS_END

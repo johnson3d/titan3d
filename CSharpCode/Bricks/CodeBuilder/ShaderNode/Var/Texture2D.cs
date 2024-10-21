@@ -72,7 +72,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             var uv1 = new Vector2(1, 1);
             unsafe
             {
-                cmdlist.AddImage(TextureSRV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
+                cmdlist.AddImage((ulong)TextureSRV.GetTextureHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
             }
         }
         public override void OnLButtonClicked(NodePin clickedPin)

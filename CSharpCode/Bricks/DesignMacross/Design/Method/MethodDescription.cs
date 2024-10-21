@@ -197,6 +197,7 @@ namespace EngineNS.DesignMacross.Design
             dataLine.Parent = this;
             var fromPin = GetDataPinById(dataLine.FromId);
             var toPin = GetDataPinById(dataLine.ToId);
+            System.Diagnostics.Debug.Assert(fromPin != null && toPin != null);
             if (fromPin.Parent is TtExpressionDescription fromParentExpressionDesc)
             {
                 fromParentExpressionDesc.OnPinConnected(fromPin, toPin, this);
@@ -222,20 +223,20 @@ namespace EngineNS.DesignMacross.Design
             dataLine.Parent = null;
             var fromPin = GetDataPinById(dataLine.FromId);
             var toPin = GetDataPinById(dataLine.ToId);
-            if (fromPin.Parent is TtExpressionDescription fromParentExpressionDesc)
+            if (fromPin?.Parent is TtExpressionDescription fromParentExpressionDesc)
             {
                 fromParentExpressionDesc.OnPinDisConnected(fromPin, toPin, this);
             }
-            if (toPin.Parent is TtExpressionDescription toParentExpressionDesc)
+            if (toPin?.Parent is TtExpressionDescription toParentExpressionDesc)
             {
                 toParentExpressionDesc.OnPinDisConnected(toPin, fromPin, this);
             }
 
-            if (fromPin.Parent is TtStatementDescription fromParentStatementDesc)
+            if (fromPin?.Parent is TtStatementDescription fromParentStatementDesc)
             {
                 fromParentStatementDesc.OnPinDisConnected(fromPin, toPin, this);
             }
-            if (toPin.Parent is TtStatementDescription toParentStatementDesc)
+            if (toPin?.Parent is TtStatementDescription toParentStatementDesc)
             {
                 toParentStatementDesc.OnPinDisConnected(toPin, fromPin, this);
             }

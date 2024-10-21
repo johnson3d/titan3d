@@ -6,7 +6,7 @@ namespace EngineNS.GamePlay.Camera
 {
     public interface ICameraControlNode
     {
-        public UCamera Camera { get; }
+        public TtGamePlayCamera Camera { get; }
         public void AddDelta(in FRotator delta);
         public void AddYaw(float delta);
         public void AddPitch(float delta);

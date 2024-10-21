@@ -1076,7 +1076,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var sz = new Vector2(0, 0);
             ImGuiTableRowData rowData = new ImGuiTableRowData()
             {
-                IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer().ToPointer(),
+                IndentTextureId = (ulong)info.HostPropertyGrid.IndentDec.GetImagePtrPointer(),
                 MinHeight = 0,
                 CellPaddingYEnd = info.HostPropertyGrid.EndRowPadding,
                 CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
@@ -1222,7 +1222,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var sz = new Vector2(0, 0);
             ImGuiTableRowData rowData = new ImGuiTableRowData()
             {
-                IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer().ToPointer(),
+                IndentTextureId = (ulong)info.HostPropertyGrid.IndentDec.GetImagePtrPointer(),
                 MinHeight = 0,
                 CellPaddingYEnd = info.HostPropertyGrid.EndRowPadding,
                 CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
@@ -1409,7 +1409,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             int idx = 0;
             ImGuiTableRowData rowData = new ImGuiTableRowData()
             {
-                IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer().ToPointer(),
+                IndentTextureId = (ulong)info.HostPropertyGrid.IndentDec.GetImagePtrPointer(),
                 MinHeight = 0,
                 CellPaddingYEnd = info.HostPropertyGrid.EndRowPadding,
                 CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,

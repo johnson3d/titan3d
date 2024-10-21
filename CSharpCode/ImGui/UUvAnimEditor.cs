@@ -240,7 +240,7 @@ namespace EngineNS.EGui
                 max1 = max1 + winPt;
                 if (UvAnim.Texture != null)
                 {
-                    drawlist.AddImage(UvAnim.Texture.GetTextureHandle().ToPointer(), in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
+                    drawlist.AddImage((ulong)UvAnim.Texture.GetTextureHandle(), in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
                     if (IsSelectingRect)
                     {
                         var sb = SelectBegin * ScaleFactor + min1;

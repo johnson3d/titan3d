@@ -16,14 +16,14 @@ namespace EngineNS.Animation.BlendTree.Node
     {
         // Array??
         public List<TtExtractPoseFromClipCommand<S>> AnimCmds { get; set; } = new List<TtExtractPoseFromClipCommand<S>>();
-        public List<TtAnimatableSkeletonPose> AnimPoses { get; set; } = new List<TtAnimatableSkeletonPose>();
         public TtAnimatableSkeletonPose AnimatableSkeletonPose { get; set; } = null;
 
         public TtBlendSpaceEvaluateCommandDesc Desc { get; set; } = new();
         public void Reset()
         {
             AnimCmds.Clear();
-            //AnimPoses.Clear();
+            Desc.Weights.Clear();
+            Desc.Times.Clear();
         }
         public override void Execute()
         {
@@ -128,7 +128,10 @@ namespace EngineNS.Animation.BlendTree.Node
             for (int i = 0; i < mRuntimeBlendSamples.Count; ++i)
             {
                 var anim = mRuntimeBlendSamples[i].Animation;
-                newDuration += anim.Duration * mRuntimeBlendSamples[i].TotalWeight;
+                if(anim != null)
+                {
+                    newDuration += anim.Duration * mRuntimeBlendSamples[i].TotalWeight;
+                }
             }
             float scale = 1;
             if (Duration > 0)

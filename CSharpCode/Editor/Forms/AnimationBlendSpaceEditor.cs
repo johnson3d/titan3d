@@ -1,5 +1,6 @@
 ﻿using EngineNS.Animation.Asset;
 using EngineNS.Animation.Asset.BlendSpace;
+using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.Thread.Async;
@@ -222,25 +223,19 @@ namespace EngineNS.Editor.Forms
             TtEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }
-        public async TtTask OnPreviewMeshChange(TtMeshPrimitives meshPrimitives)
+        public async TtTask OnPreviewMeshChange(TtMaterialMesh materialMesh)
         {
             if(mCurrentMeshNode != null)
             {
                 mCurrentMeshNode.Parent = null;
             }
-            var mtl = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(TtEngine.Instance.Config.MeshPrimitiveEditorConfig.MaterialName);
-            var materials = new Graphics.Pipeline.Shader.TtMaterial[meshPrimitives.mCoreObject.GetAtomNumber()];
-            for (int i = 0; i < materials.Length; i++)
-            {
-                materials[i] = mtl;
-            }
 
             var meshData = new EngineNS.GamePlay.Scene.TtMeshNode.TtMeshNodeData();
-            meshData.MeshName = meshPrimitives.AssetName;
+            meshData.MeshName = materialMesh.AssetName;
             meshData.MdfQueueType = EngineNS.Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh));
             meshData.AtomType = EngineNS.Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.TtMesh.TtAtom));
             var mesh = new Graphics.Mesh.TtMesh();
-            mesh.Initialize(meshPrimitives, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfSkinMesh>.TypeDesc);
+            mesh.Initialize(materialMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfSkinMesh>.TypeDesc);
 
             var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(PreviewViewport.World, PreviewViewport.World.Root, meshData, typeof(GamePlay.TtPlacement), mesh,
                         DVector3.Zero, Vector3.One, Quaternion.Identity);
@@ -254,10 +249,11 @@ namespace EngineNS.Editor.Forms
             //await EngineNS.Animation.SceneNode.TtAnimStateMachinePlayNode.Add(PreviewViewport.World, mCurrentMeshNode, new GamePlay.Scene.UNodeData(),
             //                EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UIdentityPlacement));
 
-            var sapnd = new EngineNS.Animation.SceneNode.TtSkeletonAnimPlayNode.TtSkeletonAnimPlayNodeData();
-            sapnd.Name = "PlayAnim";
+            var sapnd = new TtBlendSpaceAnimPreviewNode.TtBlendSpaceAnimPreviewNodeData();
+            sapnd.Name = "PlayBlendSpaceAnim";
             sapnd.AnimatinName = AssetName;
-            await EngineNS.Animation.SceneNode.TtSkeletonAnimPlayNode.AddSkeletonAnimPlayNode(PreviewViewport.World, mCurrentMeshNode, sapnd,
+            sapnd.Preview = AnimationPreview;
+            await TtBlendSpaceAnimPreviewNode.AddBlendSpace2DAnimPreviewNode(PreviewViewport.World, mCurrentMeshNode, sapnd,
                             EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtIdentityPlacement));
         }
         [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
@@ -270,7 +266,7 @@ namespace EngineNS.Editor.Forms
             [Browsable(false)]
             private RName mPreivewMeshName;
             [Category("Option")]
-            [RName.PGRName(FilterExts = TtMeshPrimitives.AssetExt)]
+            [RName.PGRName(FilterExts = TtMaterialMesh.AssetExt)]
             public RName PreivewMesh
             {
                 get
@@ -285,20 +281,102 @@ namespace EngineNS.Editor.Forms
                     AssetState = IO.EAssetState.Loading;
                     System.Action exec = async () =>
                     {
-                        var Mesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(value);
-                        if (Mesh.mCoreObject.IsValidPointer == false)
+                        var mesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(value);
+                        if (mesh == null)
                         {
                             AssetState = IO.EAssetState.LoadFailed;
                             return;
                         }
                         AssetState = IO.EAssetState.LoadFinished;
-                        await Editor.OnPreviewMeshChange(Mesh);
+                        await Editor.OnPreviewMeshChange(mesh);
                     };
                     exec();
                 }
             }
             [Category("Option")]
             public TtBlendSpace2D Animation { get; set; } = new();
+            [Category("Option")]
+            public Vector2 PreviewInput { get; set; } = Vector2.Zero;
+        }
+
+        class TtBlendSpaceAnimPreviewNode : GamePlay.Scene.TtLightWeightNodeBase
+        {
+            public class TtBlendSpaceAnimPreviewNodeData : TtNodeData
+            {
+                public RName AnimatinName { get; set; }
+                public TtAnimationBlendSpacePreview Preview { get; set; }
+            }
+            public Animation.Player.TtBlendSpace2DPlayer Player { get; set; }
+
+            public override TtNode Parent
+            {
+                get => base.Parent;
+                set
+                {
+                    base.Parent = value;
+
+                }
+            }
+            public Vector3 Input = Vector3.Zero;
+
+            public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+            {
+                SetStyle(ENodeStyles.Invisible);
+                if (!await base.InitializeNode(world, data, bvType, placementType))
+                {
+                    return false;
+                }
+
+                var animPlayNodeData = data as TtBlendSpaceAnimPreviewNodeData;
+                var bs2D = await TtEngine.Instance.AnimationModule.BlendSpaceClipManager.GetAnimation(animPlayNodeData.AnimatinName);
+                Player = new Animation.Player.TtBlendSpace2DPlayer(bs2D);
+
+                return true;
+            }
+            public void BindingTo(TtMeshNode meshNode)
+            {
+                System.Diagnostics.Debug.Assert(meshNode != null);
+
+                var pose = meshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as Animation.SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
+                var skinMDfQueue = meshNode.Mesh.MdfQueue as Graphics.Mesh.UMdfSkinMesh;
+
+                skinMDfQueue.SkinModifier.RuntimePose = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(pose);
+                Player.BindingPose(pose);
+                Player.RuntimePose = skinMDfQueue.SkinModifier.RuntimePose;
+
+            }
+            [ThreadStatic]
+            private static Profiler.TimeScope mScopeTick;
+            private static Profiler.TimeScope ScopeTick
+            {
+                get
+                {
+                    if (mScopeTick == null)
+                        mScopeTick = new Profiler.TimeScope(typeof(TtBlendSpaceAnimPreviewNode), nameof(TickLogic));
+                    return mScopeTick;
+                }
+            }
+            public override void TickLogic(TtNodeTickParameters args)
+            {
+                using (new Profiler.TimeScopeHelper(ScopeTick))
+                {
+                    var animPlayNodeData = NodeData as TtBlendSpaceAnimPreviewNodeData;
+                    var previewInput = animPlayNodeData.Preview.PreviewInput;
+                    Player.Input = new Vector3(previewInput.X, previewInput.Y, 0);
+                    Player.Update(args.World.DeltaTimeSecond);
+                    Player.Evaluate();
+                }
+            }
+
+            public static async System.Threading.Tasks.Task<TtBlendSpaceAnimPreviewNode> AddBlendSpace2DAnimPreviewNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+            {
+                System.Diagnostics.Debug.Assert(parent is TtMeshNode);
+                var node = new TtBlendSpaceAnimPreviewNode();
+                await node.InitializeNode(world, data, bvType, placementType);
+                node.BindingTo(parent as TtMeshNode);
+                node.Parent = parent;
+                return node;
+            }
         }
 
         #endregion IAssetEditor

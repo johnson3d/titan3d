@@ -14,8 +14,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Action\UPropertyUtility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Axis.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Camera\ICameraControlNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Camera\UCamera.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Camera\UCameraSpringArm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\Camera.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Camera\CameraSpringArm.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Character\Character.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\PlayerStart.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\PrefabNode.cs" />

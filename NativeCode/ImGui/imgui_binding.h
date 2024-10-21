@@ -49,7 +49,7 @@ struct TR_CLASS(SV_LayoutStruct = 8)
 {
 	ImGuiTableRowData()
 	{
-		IndentTextureId = nullptr;
+		IndentTextureId = 0;
 		MinHeight = 0;
 		CellPaddingYEnd = 0;
 		CellPaddingYBegin = 0;

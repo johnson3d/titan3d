@@ -231,7 +231,7 @@ namespace EngineNS.EGui.Slate
             srvDesc.Texture2D.MipLevels = 1;
             fontData.FontSRV = rc.CreateSRV(fontData.FontTexture, in srvDesc);
 
-            io.Fonts.SetTexID(fontData.SRCGCHandle.ToPointer());
+            io.Fonts.SetTexID((ulong)fontData.SRCGCHandle);
 
             io.Fonts.ClearTexData();
 

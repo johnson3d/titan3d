@@ -388,9 +388,10 @@ namespace EngineNS.UI.Bind
                 if (!ImGuiAPI.ItemAdd(in start, in end, id, 0))
                     return;
                 bool hovered = false, held = false;
-                var pressed = ImGuiAPI.ButtonBehavior(in start, in end, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_.ImGuiButtonFlags_Internal_PressedOnRelease);
+                //var pressed = ImGuiAPI.ButtonBehavior(in start, in end, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_.ImGuiButtonFlags_Internal_PressedOnRelease);
+                var pressed = ImGuiAPI.ButtonBehavior(in start, in end, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
 
-                if(hovered)
+                if (hovered)
                 {
                     drawList.AddRectFilled(in start, in end, EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor, 2.0f, ImDrawFlags_.ImDrawFlags_None);
                 }

@@ -41,6 +41,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             return true;
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("PhyCapsule", "PhyCapsule", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtCapsulePhyControllerNode.TtCapsulePhyControllerNodeData), DefaultNamePrefix = "PhyCapsule")]
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtCapsulePhyControllerNode : TtPhyControllerNodeBase
     {
         public class TtCapsulePhyControllerNodeData : TtPhyControllerNodeDataBase
@@ -87,6 +90,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         }
        
     }
+    [Bricks.CodeBuilder.ContextMenu("PhyBox", "PhyBox", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtBoxPhyControllerNode.TtBoxPhyControllerNodeData), DefaultNamePrefix = "PhyBox")]
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtBoxPhyControllerNode : TtPhyControllerNodeBase
     {
         public class TtBoxPhyControllerNodeData : TtPhyControllerNodeDataBase

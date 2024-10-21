@@ -369,7 +369,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             drawList.AddRect(in startPos, in endPos, EGui.UIProxy.StyleConfig.Instance.PGItemBorderNormalColor, EGui.UIProxy.StyleConfig.Instance.PGColorBoxRound, ImDrawFlags_.ImDrawFlags_None, 1);
             bool hovered = false;
             bool held = false;
-            var click = ImGuiAPI.ButtonBehavior(in startPos, in endPos, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_.ImGuiButtonFlags_Internal_PressedOnRelease);
+            //var click = ImGuiAPI.ButtonBehavior(in startPos, in endPos, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_.ImGuiButtonFlags_Internal_PressedOnRelease);
+            var click = ImGuiAPI.ButtonBehavior(in startPos, in endPos, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
             if (mPopupOn == false && click && !info.Readonly)
             {
                 var pos = startPos + new Vector2(0, EGui.UIProxy.StyleConfig.Instance.PGColorBoxSize.Y);
@@ -439,7 +440,8 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             drawList.AddRect(in startPos, in endPos, EGui.UIProxy.StyleConfig.Instance.PGItemBorderNormalColor, EGui.UIProxy.StyleConfig.Instance.PGColorBoxRound, ImDrawFlags_.ImDrawFlags_None, 1);
             bool hovered = false;
             bool held = false;
-            var click = ImGuiAPI.ButtonBehavior(in startPos, in endPos, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_.ImGuiButtonFlags_Internal_PressedOnRelease);
+            //var click = ImGuiAPI.ButtonBehavior(in startPos, in endPos, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_.ImGuiButtonFlags_Internal_PressedOnRelease);
+            var click = ImGuiAPI.ButtonBehavior(in startPos, in endPos, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
             if (mPopupOn == false && click && !info.Readonly)
             {
                 var pos = startPos + new Vector2(0, EGui.UIProxy.StyleConfig.Instance.PGColorBoxSize.Y);
@@ -514,8 +516,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             drawList.AddRect(in startPos, in endPos, EGui.UIProxy.StyleConfig.Instance.PGItemBorderNormalColor, EGui.UIProxy.StyleConfig.Instance.PGColorBoxRound, ImDrawFlags_.ImDrawFlags_None, 1);
             bool hovered = false;
             bool held = false;
-            var click = ImGuiAPI.ButtonBehavior(in startPos, in endPos, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_.ImGuiButtonFlags_Internal_PressedOnRelease);
-            if(mPopupOn == false && click && !info.Readonly)
+            //var click = ImGuiAPI.ButtonBehavior(in startPos, in endPos, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_.ImGuiButtonFlags_Internal_PressedOnRelease);
+            var click = ImGuiAPI.ButtonBehavior(in startPos, in endPos, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+            if (mPopupOn == false && click && !info.Readonly)
             {
                 var pos = startPos + new Vector2(0, EGui.UIProxy.StyleConfig.Instance.PGColorBoxSize.Y);
                 var pivot = Vector2.Zero;

@@ -879,8 +879,8 @@ namespace Simplify
 				{
 					uv.z = 0;
 					uvs.push_back(uv);
-				} else
-				if(sscanf(line,"vt %lf %lf %lf",
+				} 
+				else if(sscanf(line,"vt %lf %lf %lf",
 					&uv.x,&uv.y,&uv.z)==3)
 				{
 					uvs.push_back(uv);

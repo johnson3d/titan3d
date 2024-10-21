@@ -676,7 +676,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 ImGuiTableRowData rowData = new ImGuiTableRowData()
                 {
-                    IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer().ToPointer(),
+                    IndentTextureId = (ulong)info.HostPropertyGrid.IndentDec.GetImagePtrPointer(),
                     MinHeight = 0,
                     CellPaddingYEnd = info.HostPropertyGrid.EndRowPadding,
                     CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,
@@ -797,7 +797,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 ImGuiTableRowData rowData = new ImGuiTableRowData()
                 {
-                    IndentTextureId = info.HostPropertyGrid.IndentDec.GetImagePtrPointer().ToPointer(),
+                    IndentTextureId = (ulong)info.HostPropertyGrid.IndentDec.GetImagePtrPointer(),
                     MinHeight = 0,
                     CellPaddingYEnd = info.HostPropertyGrid.EndRowPadding,
                     CellPaddingYBegin = info.HostPropertyGrid.BeginRowPadding,

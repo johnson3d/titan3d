@@ -594,7 +594,7 @@ namespace EngineNS.IO
                 }
                 else
                 {
-                    cmdlist.AddImage(Task.Result.mTextureRSV.GetTextureHandle().ToPointer(), in start, in end, in Vector2.Zero, in Vector2.One, 0xFFFFFFFF);
+                    cmdlist.AddImage((ulong)Task.Result.mTextureRSV.GetTextureHandle(), in start, in end, in Vector2.Zero, in Vector2.One, 0xFFFFFFFF);
                 }
             }
         }

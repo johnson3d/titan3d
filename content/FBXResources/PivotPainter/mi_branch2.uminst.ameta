@@ -11,9 +11,13 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="6">
     <e_0 Value="Game,fbxresources/pivotpainter/pivot_hierarchy.material,3f1ec76a-5e2d-4c69-9291-1d3bb4121a19" />
     <e_1 Value="Game,fbxresources/pivotpainter/t_craghead_oak_limbtile_02_d_tex.srv,8a5d04a0-f49b-4f17-9c3c-cc8f0996d463" />
+    <e_2 Value="Game,fbxresources/pivotpainter/t_craghead_oak_tile_01_n_tex.srv,00000000-0000-0000-0000-000000000000" />
+    <e_3 Value="Game,fbxresources/pivotpainter/hilltree_p2_rgb_pivotpos_a_parentindexint_uv_2.srv,00000000-0000-0000-0000-000000000000" />
+    <e_4 Value="Game,fbxresources/pivotpainter/ht_p2_xvec_xexdiv2048r2048_uv_2.srv,00000000-0000-0000-0000-000000000000" />
+    <e_5 Value="Game,fbxresources/pivotpainter/windturblencevectorandgustmagnitude.srv,00000000-0000-0000-0000-000000000000" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
 </Root>

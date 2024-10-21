@@ -214,7 +214,7 @@ namespace EngineNS.GamePlay.Scene
 
                     min1 = min1 + pos;
                     max1 = max1 + pos;
-                    drawlist.AddImage(RenderPolicy.GetFinalShowRSV().GetTextureHandle().ToPointer(), in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
+                    drawlist.AddImage((ulong)RenderPolicy.GetFinalShowRSV().GetTextureHandle(), in min1, in max1, in uv1, in uv2, 0xFFFFFFFF);
                 }
                 ImGuiAPI.EndChild();
             }

@@ -153,7 +153,7 @@ namespace EngineNS.NxRHI
                 var uv1 = new Vector2(1, 1);
                 if (SnapTask.Value.Result != null)
                 {
-                    cmdlist.AddImage(CmdParameters.GetHandle(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
+                    cmdlist.AddImage((ulong)CmdParameters.GetHandle(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
                     if (CmdParameters.IsNormalMap==1)
                     {
                         var indiactorPos = start + new Vector2(3, 2);

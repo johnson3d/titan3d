@@ -150,7 +150,7 @@ namespace EngineNS.Editor.Forms
             if (mAddToNode == null)
                 return null;
             var ntype = Rtti.TtTypeDesc.TypeOf(i.ClassType.TypeString);
-            var newNode = Rtti.TtTypeDescManager.CreateInstance(ntype) as GamePlay.Scene.TtSceneActorNode;
+            var newNode = Rtti.TtTypeDescManager.CreateInstance(ntype) as GamePlay.Scene.TtNode;
             var attrs = newNode.GetType().GetCustomAttributes(typeof(GamePlay.Scene.TtNodeAttribute), false);
             GamePlay.Scene.TtNodeData nodeData = null;
             string prefix = "Node";

@@ -72,7 +72,8 @@ namespace EngineNS.Animation.SceneNode
             }
             else
             {
-                System.Diagnostics.Debug.Assert(false); //should be have asset editor and saveload manager
+                bs2D = await TtEngine.Instance.AnimationModule.BlendSpaceClipManager.GetAnimation(animPlayNodeData.AnimatinName);
+                Player = new Player.TtBlendSpace2DPlayer(bs2D);
             }
 
             return true;

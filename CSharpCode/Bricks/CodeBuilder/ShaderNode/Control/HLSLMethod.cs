@@ -653,7 +653,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
                 var uv0 = new Vector2(0, 0);
                 var uv1 = new Vector2(1, 1);
-                cmdlist.AddImage(CmdParameters.GetHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
+                cmdlist.AddImage((ulong)CmdParameters.GetHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
             }
 
         }
@@ -863,7 +863,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
                 var uv0 = new Vector2(0, 0);
                 var uv1 = new Vector2(1, 1);
-                cmdlist.AddImage(CmdParameters.GetHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
+                cmdlist.AddImage((ulong)CmdParameters.GetHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
 
                 // support preview A channel
                 //var textPos = end - new Vector2(32, 32);
@@ -1041,7 +1041,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             var uv1 = new Vector2(1, 1);
             unsafe
             {
-                cmdlist.AddImage(TextureSRV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
+                cmdlist.AddImage((ulong)TextureSRV.GetTextureHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
             }
         }
         //protected override OpExpress OnNoneLinkedParameter(UMaterialGraph funGraph, ICodeGen cGen, int i)
@@ -1210,7 +1210,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             var uv1 = new Vector2(1, 1);
             unsafe
             {
-                cmdlist.AddImage(TextureSRV.GetTextureHandle().ToPointer(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
+                cmdlist.AddImage((ulong)TextureSRV.GetTextureHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
             }
         }
         //protected override OpExpress OnNoneLinkedParameter(UMaterialGraph funGraph, ICodeGen cGen, int i)
