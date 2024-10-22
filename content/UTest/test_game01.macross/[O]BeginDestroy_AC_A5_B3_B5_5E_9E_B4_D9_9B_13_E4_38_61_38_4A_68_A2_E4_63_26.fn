@@ -36,13 +36,13 @@
       </MethodDec>
     </e_0>
   </MethodDatas>
-  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="2">
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode@EngineCore">
       <MethodDecKeyword Type="System.String@Unknown" Value=" BeginDestroy(EngineNS.GamePlay.UGameInstance)" />
       <Name Type="System.String@Unknown" Value="BeginDestroy" />
       <NodeId Type="System.Guid@Unknown" Value="f3bbff24-cba9-43a3-aab8-50f526be6c3a" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="100,100" />
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
     <e_1 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
       <InputControlWidth Type="System.Single@Unknown" Value="60" />
@@ -52,7 +52,7 @@
       <NodeId Type="System.Guid@Unknown" Value="ccad0296-1ff5-41f2-9a4f-5c333c92c9e3" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="368,99" />
       <SelfMethod Type="System.Boolean@Unknown" Value="False" />
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
       <SaveData Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode.TSaveData@EngineCore">
         <DefaultArguments Type="System.Collections.Generic.Dictionary&lt;System.String@Unknown,System.String@Unknown,&gt;@Unknown" Count="0" />
         <DelegateArgumentSaveDatas Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode.DelegateArgumentSaveData@EngineCore,&gt;@Unknown" Count="0" />

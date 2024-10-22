@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="4b577a35-2f02-4df2-b588-f95e21d92c60" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/character/charactertest.scene,4b577a35-2f02-4df2-b588-f95e21d92c60" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtScene&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Value="Engine,mesh/base/box_1.ums,b91bb4f4-7d54-4ba5-8342-a0767ec2e0ac" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
+</Root>

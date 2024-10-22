@@ -11,8 +11,6 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
-    <e_0 Value="Game,tutorials/pivotpainter/simpexpivpos.srv,09e7679b-e9a4-4e93-b05e-aa6a1a3d1f78" />
-  </RefAssetRNames>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore" />
 </Root>

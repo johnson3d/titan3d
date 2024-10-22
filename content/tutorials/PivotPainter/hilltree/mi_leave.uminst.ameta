@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="25a300fe-b7e8-43b7-beb8-533281a2e5bc" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/pivotpainter/hilltree/mi_leave.uminst,25a300fe-b7e8-43b7-beb8-533281a2e5bc" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Pipeline.Shader.UMaterialInstance&#xA;Hahah" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="5">
+    <e_0 Value="Game,tutorials/pivotpainter/hilltree/pivot_hierarchy.material,3f1ec76a-5e2d-4c69-9291-1d3bb4121a19" />
+    <e_1 Value="Game,tutorials/pivotpainter/hilltree/hilltree_01_atlas_tex.srv,c53bef15-6f4c-4658-9b00-94ba55edab40" />
+    <e_2 Value="Game,tutorials/pivotpainter/hilltree/hilltree_p2_rgb_pivotpos_a_parentindexint_uv_2.srv,b2a5e12d-7e34-405d-831b-490a8abe2876" />
+    <e_3 Value="Game,tutorials/pivotpainter/hilltree/ht_p2_xvec_xexdiv2048r2048_uv_2.srv,62a60e45-937c-461d-968b-b1d85ae6c434" />
+    <e_4 Value="Game,tutorials/pivotpainter/hilltree/windturblencevectorandgustmagnitude.srv,02adb684-5bcd-4938-a5e6-d95c8505229f" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
+</Root>

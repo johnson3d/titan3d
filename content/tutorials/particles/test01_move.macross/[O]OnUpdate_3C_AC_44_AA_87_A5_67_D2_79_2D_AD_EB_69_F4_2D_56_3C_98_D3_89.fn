@@ -82,13 +82,13 @@
       </MethodDec>
     </e_0>
   </MethodDatas>
-  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="1">
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode@EngineCore">
       <MethodDecKeyword Type="System.String@Unknown" Value=" OnUpdate(EngineNS.Bricks.Particle.TtNebulaParticle,EngineNS.Bricks.Particle.UParticleGraphNode,System.Single)" />
       <Name Type="System.String@Unknown" Value="OnUpdate" />
       <NodeId Type="System.Guid@Unknown" Value="e325d418-90a4-48d5-a3b1-1971c3f5087c" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="100,100" />
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
   </Nodes>
   <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="0" />

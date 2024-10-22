@@ -1,4 +1,6 @@
 ﻿using BCnEncoder.Shared;
+using EngineNS;
+using MathNet.Numerics;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -204,7 +206,9 @@ namespace StbImageSharp
                     for (int j = 0; j < hW; j++)
                     {
                         uint color = GetSamplerStride(pSrc, src.Width, src.Height, (int)((float)j * scaleX), (int)((float)i * scaleY), 4);
-                        ((uint*)curTar)[j] = color;
+                        var c = Color4b.FromArgb((int)color);
+                        c.A = 255;
+                        ((uint*)curTar)[j] = c.ToArgb();
                     }
                     curTar += result.Width * 4;
                 }

@@ -4,66 +4,7 @@
     <ClassName Type="System.String@Unknown" Value="do_assets" />
     <IsStruct Type="System.Boolean@Unknown" Value="False" />
     <IsUnsafe Type="System.Boolean@Unknown" Value="False" />
-    <Methods Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtMethodDeclaration@EngineCore,&gt;@Unknown" Count="1">
-      <e_0 Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration@EngineCore">
-        <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore,&gt;@Unknown" Count="1">
-          <e_0 Type="EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore">
-            <HasDefaultValue Type="System.Boolean@Unknown" Value="False" />
-            <InitValue Type="EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore">
-              <ObjectStr Type="System.String@Unknown" Value="0" />
-              <Type Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Int32@Unknown" />
-              <TypeIsTypeof Type="System.Boolean@Unknown" Value="True" />
-              <ValueStr Type="System.String@Unknown" Value="0" />
-            </InitValue>
-            <InitValueVisible Type="System.Boolean@Unknown" Value="True" />
-            <IsParamArray Type="System.Boolean@Unknown" Value="False" />
-            <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="Default" />
-            <OperationVisible Type="System.Boolean@Unknown" Value="True" />
-            <VariableName Type="System.String@Unknown" Value="host" />
-            <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
-              <IsEnum Type="System.Boolean@Unknown" Value="False" />
-              <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.TtMcCommand@EngineCore" />
-              <TypeFullName Type="System.String@Unknown" Value="EngineNS.TtMcCommand" />
-            </VariableType>
-          </e_0>
-        </Arguments>
-        <AsyncType Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration.EAsyncType@EngineCore" Value="CustomTask" />
-        <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="1">
-          <e_0 Type="EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore">
-            <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtExpressionBase@EngineCore,&gt;@Unknown" Count="0" />
-            <AttributeType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
-              <IsEnum Type="System.Boolean@Unknown" Value="False" />
-              <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Rtti.MetaAttribute@EngineCore" />
-              <TypeFullName Type="System.String@Unknown" Value="EngineNS.Rtti.MetaAttribute" />
-            </AttributeType>
-          </e_0>
-        </Attributes>
-        <IsOverride Type="System.Boolean@Unknown" Value="True" />
-        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="1">
-          <e_0 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
-            <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
-            <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
-              <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
-                <IsEnum Type="System.Boolean@Unknown" Value="False" />
-                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.String@Unknown" />
-                <TypeFullName Type="System.String@Unknown" Value="System.String" />
-              </Type>
-            </InitValue>
-            <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
-            <IsBindable Type="System.Boolean@Unknown" Value="False" />
-            <VariableName Type="System.String@Unknown" Value="tmp_r_FindArgument_2126302734" />
-            <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
-              <IsEnum Type="System.Boolean@Unknown" Value="False" />
-              <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.String@Unknown" />
-              <TypeFullName Type="System.String@Unknown" Value="System.String" />
-            </VariableType>
-            <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
-          </e_0>
-        </LocalVariables>
-        <MethodName Type="System.String@Unknown" Value="DoCommand" />
-        <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
-      </e_0>
-    </Methods>
+    <Methods Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtMethodDeclaration@EngineCore,&gt;@Unknown" Count="0" />
     <Properties Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
     <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">
       <e_0 Value="EngineNS.TtCommandMacross" />

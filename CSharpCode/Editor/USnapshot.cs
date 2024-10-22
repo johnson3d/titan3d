@@ -82,7 +82,7 @@ namespace EngineNS.Editor
                         break;
                 }
                 
-                if (pBitmapDesc->Width > 128)
+                if (image.Width > 128)
                 {
                     float rate = 128 / (float)image.Width;// pBitmapDesc->Width;
                     int height = (int)((float)image.Height * rate);

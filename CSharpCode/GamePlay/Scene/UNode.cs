@@ -537,6 +537,8 @@ namespace EngineNS.GamePlay.Scene
         {
             foreach (var i in Children)
             {
+                if (i.NodeName == null)
+                    continue;
                 if (i.NodeName.Contains(name))
                 {
                     if (type == null)

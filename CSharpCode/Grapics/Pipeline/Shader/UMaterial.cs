@@ -439,14 +439,16 @@ namespace EngineNS.Graphics.Pipeline.Shader
         } = true;
 
         [Flags]
-        public enum ERenderFlags
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "ERenderFlags")]
+        public enum ERenderFlags : uint
         {
             None = 0,
             DisableEnvColor = 1,
         }
         private ERenderFlags mRenderFlags = ERenderFlags.None;
-        public virtual ERenderFlags RenderFlags { get => mRenderFlags; }
         [Rtti.Meta]
+        [Category("Option")]
+        public virtual ERenderFlags RenderFlags { get => mRenderFlags; }
         [Category("Option")]
         public virtual bool DisableEnvColor
         {

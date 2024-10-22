@@ -64,13 +64,13 @@
       </MethodDec>
     </e_0>
   </MethodDatas>
-  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="1">
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode@EngineCore">
       <MethodDecKeyword Type="System.String@Unknown" Value=" OnTimer(EngineNS.Bricks.Particle.TtEmitter,System.Single)" />
       <Name Type="System.String@Unknown" Value="OnTimer" />
       <NodeId Type="System.Guid@Unknown" Value="d683a740-fcc9-49df-b5db-abab66d91c0c" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="100,100" />
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
   </Nodes>
   <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="0" />

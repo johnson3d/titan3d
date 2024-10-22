@@ -778,6 +778,15 @@ namespace EngineNS
             ret.B = (byte)(value);
             return ret;
         }
+        public static Color4b FromAbgr(int value)
+        {
+            var ret = new Color4b();
+            ret.A = (byte)(value >> 24);
+            ret.B = (byte)(value >> 16);
+            ret.G = (byte)(value >> 8);
+            ret.R = (byte)(value);
+            return ret;
+        }
         public uint ToArgb()
         {
             return (((uint)(B)) | ((uint)(G) << 8) | ((uint)(R << 16)) | ((uint)(A << 24)));

@@ -158,10 +158,15 @@ namespace EngineNS.Editor.ShaderCompiler
                 Codes.Add(rn, code);
             }
 
+            try
             {
                 var rn = RName.GetRName("@engine_preprosessors.cginc", RName.ERNameType.Engine);
                 var code = GetEnginePreprocessors(rn, true);
                 Codes.Add(rn, code);
+            }
+            catch (Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
             }
 
             foreach (var i in Codes)

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossMethodGraph@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/character/charactertestgame.macross,33fd079b-722b-4ad2-8faf-a04f20cc9d2c" />
+  <GraphName Type="System.String@Unknown" Value="BeginDestroy" />
+  <IsUseCustumCode Type="System.Boolean@Unknown" Value="False" />
+  <LocalVars Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
+  <MethodDatas Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.MacrossNode.MethodData@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodData@EngineCore">
+      <IsDelegate Type="System.Boolean@Unknown" Value="False" />
+      <MethodDec Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration@EngineCore">
+        <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore,&gt;@Unknown" Count="1">
+          <e_0 Type="EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore">
+            <HasDefaultValue Type="System.Boolean@Unknown" Value="False" />
+            <InitValue Type="EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore">
+              <ObjectStr Type="System.String@Unknown" Value="0" />
+              <Type Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Int32@Unknown" />
+              <TypeIsTypeof Type="System.Boolean@Unknown" Value="True" />
+              <ValueStr Type="System.String@Unknown" Value="0" />
+            </InitValue>
+            <InitValueVisible Type="System.Boolean@Unknown" Value="True" />
+            <IsParamArray Type="System.Boolean@Unknown" Value="False" />
+            <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="Default" />
+            <OperationVisible Type="System.Boolean@Unknown" Value="True" />
+            <VariableName Type="System.String@Unknown" Value="host" />
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+              <IsEnum Type="System.Boolean@Unknown" Value="False" />
+              <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.GamePlay.UGameInstance@EngineCore" />
+              <TypeFullName Type="System.String@Unknown" Value="EngineNS.GamePlay.UGameInstance" />
+            </VariableType>
+          </e_0>
+        </Arguments>
+        <AsyncType Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration.EAsyncType@EngineCore" Value="None" />
+        <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="1">
+          <e_0 Type="EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore">
+            <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtExpressionBase@EngineCore,&gt;@Unknown" Count="0" />
+            <AttributeType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+              <IsEnum Type="System.Boolean@Unknown" Value="False" />
+              <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Rtti.MetaAttribute@EngineCore" />
+              <TypeFullName Type="System.String@Unknown" Value="EngineNS.Rtti.MetaAttribute" />
+            </AttributeType>
+          </e_0>
+        </Attributes>
+        <IsOverride Type="System.Boolean@Unknown" Value="True" />
+        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
+        <MethodName Type="System.String@Unknown" Value="BeginDestroy" />
+        <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+      </MethodDec>
+    </e_0>
+  </MethodDatas>
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode@EngineCore">
+      <MethodDecKeyword Type="System.String@Unknown" Value=" BeginDestroy(EngineNS.GamePlay.UGameInstance)" />
+      <Name Type="System.String@Unknown" Value="BeginDestroy" />
+      <NodeId Type="System.Guid@Unknown" Value="6dbe1e46-5ff1-45fb-9b10-2950ba7c9134" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="100,100" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_0>
+    <e_1 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
+      <InputControlWidth Type="System.Single@Unknown" Value="60" />
+      <Label Type="System.String@Unknown" Value="FinalViewportSlate" />
+      <MethodMeta Type="System.String@Unknown" Value="EngineNS.GamePlay.UGameInstance@EngineCore#System.Void FinalViewportSlate()" />
+      <Name Type="System.String@Unknown" Value="FinalViewportSlate" />
+      <NodeId Type="System.Guid@Unknown" Value="32ef468a-4626-4dbc-afa8-6a9cd9678de8" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="364.00003,107" />
+      <SelfMethod Type="System.Boolean@Unknown" Value="False" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <SaveData Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode.TSaveData@EngineCore">
+        <DefaultArguments Type="System.Collections.Generic.Dictionary&lt;System.String@Unknown,System.String@Unknown,&gt;@Unknown" Count="0" />
+        <DelegateArgumentSaveDatas Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode.DelegateArgumentSaveData@EngineCore,&gt;@Unknown" Count="0" />
+      </SaveData>
+    </e_1>
+  </Nodes>
+  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="32ef468a-4626-4dbc-afa8-6a9cd9678de8" />
+        <InPinName Type="System.String@Unknown" Value="Self" />
+        <OutNodeId Type="System.Guid@Unknown" Value="6dbe1e46-5ff1-45fb-9b10-2950ba7c9134" />
+        <OutPinName Type="System.String@Unknown" Value="host" />
+      </SaveData>
+    </e_0>
+    <e_1 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="32ef468a-4626-4dbc-afa8-6a9cd9678de8" />
+        <InPinName Type="System.String@Unknown" Value=" &gt;&gt;" />
+        <OutNodeId Type="System.Guid@Unknown" Value="6dbe1e46-5ff1-45fb-9b10-2950ba7c9134" />
+        <OutPinName Type="System.String@Unknown" Value="&gt;&gt; " />
+      </SaveData>
+    </e_1>
+  </Linkers>
+</Root>

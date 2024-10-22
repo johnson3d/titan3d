@@ -29,5 +29,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)vertexfilter.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)vfetchanalyzer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)vfetchoptimizer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)quantization.cpp" />
   </ItemGroup>
 </Project>

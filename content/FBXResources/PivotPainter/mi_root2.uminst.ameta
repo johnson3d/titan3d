@@ -12,7 +12,7 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
-    <e_0 Value="Game,fbxresources/pivotpainter/pivot_hierarchy.material,3f1ec76a-5e2d-4c69-9291-1d3bb4121a19" />
+    <e_0 Value="Engine,material/sysdft_color.material,baf3aa75-f9a3-4fbc-a413-4465f746a90b" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
 </Root>

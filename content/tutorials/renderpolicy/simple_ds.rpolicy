@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyGraph@EngineCore">
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/renderpolicy/simple_ds.rpolicy,821a48b8-ab07-4859-aaa1-d188a7d033b9" />
   <GraphName Type="System.String@Unknown" Value="NodeGraph" />
-  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="6">
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="6">
     <e_0 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.TtCopy2SwapChainNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="Copy2SwapChainNode" />
@@ -10,7 +10,7 @@
       <NodeId Type="System.Guid@Unknown" Value="10b8d57c-c0c7-43e2-9472-253d9de4135a" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="1820.0001,265" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtCopy2SwapChainNode@EngineCore" />
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
     <e_1 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.TtCpuCullingNode@EngineCore" />
@@ -19,7 +19,7 @@
       <NodeId Type="System.Guid@Unknown" Value="9a549be8-446c-448c-8830-52a0fd1d607e" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="831.7001,65.499985" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.TtCpuCullingNode@EngineCore" />
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_1>
     <e_2 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.TtClearMRTNode@EngineCore" />
@@ -31,7 +31,7 @@
         <OutputDS Type="System.Boolean@Unknown" Value="True" />
         <OutputRT Type="System.Int32@Unknown" Value="1" />
       </GraphNode>
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_2>
     <e_3 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Deferred.TtForwordNode@EngineCore" />
@@ -46,7 +46,7 @@
           <e_2 Value="RL_Opaque" />
         </LayerFilters>
       </GraphNode>
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_3>
     <e_4 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Deferred.TtSdfForwordNode@EngineCore" />
@@ -60,7 +60,7 @@
           <e_1 Value="RL_Sky" />
         </LayerFilters>
       </GraphNode>
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_4>
     <e_5 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Deferred.TtForwordNode@EngineCore" />
@@ -75,7 +75,7 @@
           <e_2 Value="RL_Sky" />
         </LayerFilters>
       </GraphNode>
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_5>
   </Nodes>
   <PolicyType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore" />

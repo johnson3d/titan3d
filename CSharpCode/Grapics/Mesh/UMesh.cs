@@ -69,22 +69,29 @@ namespace EngineNS.Graphics.Mesh
         NxRHI.TtCbView mPerMeshCBuffer;
         protected System.Action OnAfterCBufferCreated;
 
-        int ObjectFlags_2Bit = 0;
+        [Flags]
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "EObjectFlags_2Bit")]
+        public enum EObjectFlags_2Bit : uint
+        {
+            AcceptShadow = 1,
+            UnLight = (1 << 1),
+        }
+        EObjectFlags_2Bit ObjectFlags_2Bit = 0;
         public bool IsAcceptShadow
         {
             get
             {
-                return (ObjectFlags_2Bit & 1) != 0;
+                return (ObjectFlags_2Bit & EObjectFlags_2Bit.AcceptShadow) != 0;
             }
             set
             {
                 if (value)
                 {
-                    ObjectFlags_2Bit |= 1;
+                    ObjectFlags_2Bit |= EObjectFlags_2Bit.AcceptShadow;
                 }
                 else
                 {
-                    ObjectFlags_2Bit &= (~1);
+                    ObjectFlags_2Bit &= (~EObjectFlags_2Bit.AcceptShadow);
                 }
                 PerMeshCBuffer?.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.ObjectFLags_2Bit, in ObjectFlags_2Bit);
             }
@@ -93,17 +100,17 @@ namespace EngineNS.Graphics.Mesh
         {
             get
             {
-                return (ObjectFlags_2Bit & (2)) != 0;
+                return (ObjectFlags_2Bit & EObjectFlags_2Bit.UnLight) != 0;
             }
             set
             {
                 if (value)
                 {
-                    ObjectFlags_2Bit |= (2);
+                    ObjectFlags_2Bit |= EObjectFlags_2Bit.UnLight;
                 }
                 else
                 {
-                    ObjectFlags_2Bit &= (~(2));
+                    ObjectFlags_2Bit &= (~EObjectFlags_2Bit.UnLight);
                 }
                 PerMeshCBuffer.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.ObjectFLags_2Bit, in ObjectFlags_2Bit);
             }

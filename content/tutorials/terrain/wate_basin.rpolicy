@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyGraph@EngineCore">
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/terrain/wate_basin.rpolicy,f4b63915-3920-4819-b6b3-da34fe47c591" />
   <GraphName Type="System.String@Unknown" Value="NodeGraph" />
-  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="4">
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="4">
     <e_0 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.GpuShading.TtHeigh2FlowMapNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="Heigh2FlowMap" />
@@ -10,7 +10,7 @@
       <NodeId Type="System.Guid@Unknown" Value="61d28d7f-d25d-47d2-9c2a-eabc6810aab7" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="471,250" />
       <GraphNode Type="EngineNS.Bricks.Procedure.Node.GpuShading.TtHeigh2FlowMapNode@EngineCore" />
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
     <e_1 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.GpuShading.TtErosionIncWaterNode@EngineCore" />
@@ -22,7 +22,7 @@
         <Rain Type="EngineNS.RName@EngineCore" Value="Game,tutorials/terrain/rain.srv,d2ea56cf-55e9-408a-9c9f-492ad2e37de3" />
         <RainScalar Type="System.Single@Unknown" Value="10" />
       </GraphNode>
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_1>
     <e_2 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.GpuShading.TtWaterBasinNode@EngineCore" />
@@ -33,7 +33,7 @@
       <GraphNode Type="EngineNS.Bricks.Procedure.Node.GpuShading.TtWaterBasinNode@EngineCore">
         <Step Type="System.Int32@Unknown" Value="16" />
       </GraphNode>
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_2>
     <e_3 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.GpuShading.TtGpuFetchNode@EngineCore" />
@@ -42,7 +42,7 @@
       <NodeId Type="System.Guid@Unknown" Value="64878fc4-b50b-46b8-9a14-98288d5024d0" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="1181,346.00003" />
       <GraphNode Type="EngineNS.Bricks.Procedure.Node.GpuShading.TtGpuFetchNode@EngineCore" />
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_3>
   </Nodes>
   <PolicyType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore" />

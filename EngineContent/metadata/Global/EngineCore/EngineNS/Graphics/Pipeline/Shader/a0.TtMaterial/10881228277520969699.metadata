@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_10881228277520969699 Type="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore">
+  <AlphaTest Type="System.Boolean@Unknown" Order="0" />
+  <AssetName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Blend Type="EngineNS.NxRHI.FBlendDesc@EngineCore" Order="0" />
+  <DepthStencil Type="EngineNS.NxRHI.FDepthStencilDesc@EngineCore" Order="0" />
+  <Flags Type="EngineNS.Graphics.Pipeline.Shader.TtMaterial.InnerFlags@EngineCore" Order="0" />
+  <GraphXMLString Type="System.String@Unknown" Order="0" />
+  <HLSLCode Type="System.String@Unknown" Order="0" />
+  <IncludeFiles Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Order="0" />
+  <LightingMode Type="EngineNS.Graphics.Pipeline.Shader.TtMaterial.ELightingMode@EngineCore" Order="0" />
+  <MaterialHash Type="EngineNS.Hash160@EngineCore" Order="0" />
+  <NormalMode Type="EngineNS.Graphics.Pipeline.Shader.TtMaterial.ENormalMode@EngineCore" Order="0" />
+  <PSNeedInputs Type="System.Collections.Generic.List&lt;EngineNS.Graphics.Pipeline.Shader.EPixelShaderInput@EngineCore,&gt;@Unknown" Order="0" />
+  <Rasterizer Type="EngineNS.NxRHI.FRasterizerDesc@EngineCore" Order="0" />
+  <RenderFlags Type="EngineNS.Graphics.Pipeline.Shader.TtMaterial.ERenderFlags@EngineCore" Order="0" />
+  <RenderLayer Type="EngineNS.Graphics.Pipeline.ERenderLayer@EngineCore" Order="0" />
+  <UsedSamplerStates Type="System.Collections.Generic.List&lt;EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair@EngineCore,&gt;@Unknown" Order="0" />
+  <UsedSrView Type="System.Collections.Generic.List&lt;EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameRNamePair@EngineCore,&gt;@Unknown" Order="0" />
+  <UsedUniformVars Type="System.Collections.Generic.List&lt;EngineNS.Graphics.Pipeline.Shader.TtMaterial.NameValuePair@EngineCore,&gt;@Unknown" Order="0" />
+  <UserDefines Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Order="0" />
+  <VSNeedStreams Type="System.Collections.Generic.List&lt;EngineNS.NxRHI.EVertexStreamType@EngineCore,&gt;@Unknown" Order="0" />
+</Hash_10881228277520969699>

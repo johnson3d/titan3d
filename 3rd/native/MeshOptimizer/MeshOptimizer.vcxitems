@@ -20,6 +20,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)indexgenerator.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)overdrawanalyzer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)overdrawoptimizer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)quantization.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)simplifier.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)spatialorder.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)stripifier.cpp" />

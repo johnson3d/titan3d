@@ -44,23 +44,23 @@ struct GBufferData
 	}
 	bool IsAcceptShadow()
 	{
-        return (ObjectFlags_2Bit & ObjectFlags_2Bit_Shadow) != 0;
+        return (ObjectFlags_2Bit & EObjectFlags_2Bit_AcceptShadow) != 0;
     }
 
 	bool IsUnlit()
 	{
 		//return GBuffer.ObjectFlags_2Bit == 1;
-        return (ObjectFlags_2Bit & ObjectFlags_2Bit_Lighting) != 0;
+        return (ObjectFlags_2Bit & EObjectFlags_2Bit_UnLight) != 0;
     }
     void SetUnlit(bool bUnlit)
     {
         if (bUnlit)
         {
-            ObjectFlags_2Bit |= ObjectFlags_2Bit_Lighting;
+            ObjectFlags_2Bit |= EObjectFlags_2Bit_UnLight;
         }
         else
         {
-            ObjectFlags_2Bit &= ~ObjectFlags_2Bit_Lighting;
+            ObjectFlags_2Bit &= ~EObjectFlags_2Bit_UnLight;
         }
     }
 

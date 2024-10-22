@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossMethodGraph@EngineCore">
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/character/charactertestgame.macross,33fd079b-722b-4ad2-8faf-a04f20cc9d2c" />
+  <GraphName Type="System.String@Unknown" Value="BeginPlay" />
+  <IsUseCustumCode Type="System.Boolean@Unknown" Value="False" />
+  <LocalVars Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
+  <MethodDatas Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.MacrossNode.MethodData@EngineCore,&gt;@Unknown" Count="1">
+    <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodData@EngineCore">
+      <IsDelegate Type="System.Boolean@Unknown" Value="False" />
+      <MethodDec Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration@EngineCore">
+        <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore,&gt;@Unknown" Count="1">
+          <e_0 Type="EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration@EngineCore">
+            <HasDefaultValue Type="System.Boolean@Unknown" Value="False" />
+            <InitValue Type="EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore">
+              <ObjectStr Type="System.String@Unknown" Value="0" />
+              <Type Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Int32@Unknown" />
+              <TypeIsTypeof Type="System.Boolean@Unknown" Value="True" />
+              <ValueStr Type="System.String@Unknown" Value="0" />
+            </InitValue>
+            <InitValueVisible Type="System.Boolean@Unknown" Value="True" />
+            <IsParamArray Type="System.Boolean@Unknown" Value="False" />
+            <OperationType Type="EngineNS.Bricks.CodeBuilder.EMethodArgumentAttribute@EngineCore" Value="Default" />
+            <OperationVisible Type="System.Boolean@Unknown" Value="True" />
+            <VariableName Type="System.String@Unknown" Value="host" />
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+              <IsEnum Type="System.Boolean@Unknown" Value="False" />
+              <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.GamePlay.UGameInstance@EngineCore" />
+              <TypeFullName Type="System.String@Unknown" Value="EngineNS.GamePlay.UGameInstance" />
+            </VariableType>
+          </e_0>
+        </Arguments>
+        <AsyncType Type="EngineNS.Bricks.CodeBuilder.TtMethodDeclaration.EAsyncType@EngineCore" Value="SystemTask" />
+        <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="1">
+          <e_0 Type="EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore">
+            <Arguments Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtExpressionBase@EngineCore,&gt;@Unknown" Count="0" />
+            <AttributeType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+              <IsEnum Type="System.Boolean@Unknown" Value="False" />
+              <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Rtti.MetaAttribute@EngineCore" />
+              <TypeFullName Type="System.String@Unknown" Value="EngineNS.Rtti.MetaAttribute" />
+            </AttributeType>
+          </e_0>
+        </Attributes>
+        <IsOverride Type="System.Boolean@Unknown" Value="True" />
+        <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="1">
+          <e_0 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
+            <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+            <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
+              <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+                <IsEnum Type="System.Boolean@Unknown" Value="False" />
+                <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
+                <TypeFullName Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene" />
+              </Type>
+            </InitValue>
+            <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
+            <IsBindable Type="System.Boolean@Unknown" Value="False" />
+            <VariableName Type="System.String@Unknown" Value="tmp_r_InitViewportSlateWithScene_4202790171" />
+            <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+              <IsEnum Type="System.Boolean@Unknown" Value="False" />
+              <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
+              <TypeFullName Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene" />
+            </VariableType>
+            <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+          </e_0>
+        </LocalVariables>
+        <MethodName Type="System.String@Unknown" Value="BeginPlay" />
+        <ReturnValue Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
+          <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+          <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
+            <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+              <IsEnum Type="System.Boolean@Unknown" Value="False" />
+              <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
+              <TypeFullName Type="System.String@Unknown" Value="System.Boolean" />
+            </Type>
+          </InitValue>
+          <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
+          <IsBindable Type="System.Boolean@Unknown" Value="False" />
+          <VariableName Type="System.String@Unknown" Value="ret_3332842155" />
+          <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
+            <IsEnum Type="System.Boolean@Unknown" Value="False" />
+            <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="System.Boolean@Unknown" />
+            <TypeFullName Type="System.String@Unknown" Value="System.Boolean" />
+          </VariableType>
+          <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+        </ReturnValue>
+        <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
+      </MethodDec>
+    </e_0>
+  </MethodDatas>
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="5">
+    <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode@EngineCore">
+      <MethodDecKeyword Type="System.String@Unknown" Value="System.Boolean BeginPlay(EngineNS.GamePlay.UGameInstance)" />
+      <Name Type="System.String@Unknown" Value="BeginPlay" />
+      <NodeId Type="System.Guid@Unknown" Value="ba243eb0-790a-40f9-b62b-b378ed277f15" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="100,100" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_0>
+    <e_1 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
+      <InputControlWidth Type="System.Single@Unknown" Value="60" />
+      <Label Type="System.String@Unknown" Value="InitViewportSlateWithScene" />
+      <MethodMeta Type="System.String@Unknown" Value="EngineNS.GamePlay.UGameInstance@EngineCore#System.Threading.Tasks.Task`1[[EngineNS.GamePlay.Scene.TtScene, Engine.Window, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]] InitViewportSlateWithScene(EngineNS.RName,System.Single,System.Single,System.Boolean)" />
+      <Name Type="System.String@Unknown" Value="InitViewportSlateWithScene" />
+      <NodeId Type="System.Guid@Unknown" Value="85543e17-d109-4009-a06e-b09ca5fc6ca3" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="385.99997,100.000015" />
+      <SelfMethod Type="System.Boolean@Unknown" Value="False" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="4">
+        <e_0 Type="EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore">
+          <PinName Type="System.String@Unknown" Value="mapName" />
+          <Value Type="EngineNS.RName@EngineCore" Value="Game,tutorials/character/charactertest.scene,4b577a35-2f02-4df2-b588-f95e21d92c60" />
+        </e_0>
+        <e_1 Type="EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore">
+          <PinName Type="System.String@Unknown" Value="zMin" />
+          <Value Type="System.Single@Unknown" Value="0" />
+        </e_1>
+        <e_2 Type="EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore">
+          <PinName Type="System.String@Unknown" Value="zMax" />
+          <Value Type="System.Single@Unknown" Value="1" />
+        </e_2>
+        <e_3 Type="EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore">
+          <PinName Type="System.String@Unknown" Value="bSetToWorld" />
+          <Value Type="System.Boolean@Unknown" Value="True" />
+        </e_3>
+      </InputEditableValues>
+      <SaveData Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode.TSaveData@EngineCore">
+        <DefaultArguments Type="System.Collections.Generic.Dictionary&lt;System.String@Unknown,System.String@Unknown,&gt;@Unknown" Count="4">
+          <e_0>
+            <Key Value="mapName" />
+            <Value Value="tutorials/character/charactertest.scene:Game" />
+          </e_0>
+          <e_1>
+            <Key Value="zMin" />
+            <Value Value="0" />
+          </e_1>
+          <e_2>
+            <Key Value="zMax" />
+            <Value Value="1" />
+          </e_2>
+          <e_3>
+            <Key Value="bSetToWorld" />
+            <Value Value="True" />
+          </e_3>
+        </DefaultArguments>
+        <DelegateArgumentSaveDatas Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode.DelegateArgumentSaveData@EngineCore,&gt;@Unknown" Count="0" />
+      </SaveData>
+    </e_1>
+    <e_2 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
+      <InputControlWidth Type="System.Single@Unknown" Value="60" />
+      <Label Type="System.String@Unknown" Value="CreateCharacterFromPrefab" />
+      <MethodMeta Type="System.String@Unknown" Value="EngineNS.GamePlay.UGameInstance@EngineCore#System.Threading.Tasks.Task CreateCharacterFromPrefab(EngineNS.GamePlay.Scene.TtScene,EngineNS.RName)" />
+      <Name Type="System.String@Unknown" Value="CreateCharacterFromPrefab" />
+      <NodeId Type="System.Guid@Unknown" Value="d6551f7d-5e2d-42bc-852d-344539b97d26" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="801,100" />
+      <SelfMethod Type="System.Boolean@Unknown" Value="False" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="1">
+        <e_0 Type="EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore">
+          <PinName Type="System.String@Unknown" Value="prefabName" />
+          <Value Type="EngineNS.RName@EngineCore" Value="Game,project_factory/belica/prefab_belica.prefab,fc1594fc-eaf9-4f45-99c5-a88b2aa0b893" />
+        </e_0>
+      </InputEditableValues>
+      <SaveData Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode.TSaveData@EngineCore">
+        <DefaultArguments Type="System.Collections.Generic.Dictionary&lt;System.String@Unknown,System.String@Unknown,&gt;@Unknown" Count="1">
+          <e_0>
+            <Key Value="prefabName" />
+            <Value Value="project_factory/belica/prefab_belica.prefab:Game" />
+          </e_0>
+        </DefaultArguments>
+        <DelegateArgumentSaveDatas Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode.DelegateArgumentSaveData@EngineCore,&gt;@Unknown" Count="0" />
+      </SaveData>
+    </e_2>
+    <e_3 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ReturnNode@EngineCore">
+      <Label Type="System.String@Unknown" Value="Return" />
+      <Name Type="System.String@Unknown" Value="Return" />
+      <NodeId Type="System.Guid@Unknown" Value="c19dead8-a20d-4ca1-a75d-7743f5cbbe56" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="1195,108.600075" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_3>
+    <e_4 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.BoolLVar@EngineCore">
+      <Label Type="System.String@Unknown" Value="Bool_3" />
+      <Name Type="System.String@Unknown" Value="Bool_3" />
+      <NodeId Type="System.Guid@Unknown" Value="06067d8b-b046-4833-977a-7686fbdcb7f2" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="1000,568.1" />
+      <Value Type="System.Boolean@Unknown" Value="True" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_4>
+  </Nodes>
+  <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="7">
+    <e_0 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="85543e17-d109-4009-a06e-b09ca5fc6ca3" />
+        <InPinName Type="System.String@Unknown" Value="Self" />
+        <OutNodeId Type="System.Guid@Unknown" Value="ba243eb0-790a-40f9-b62b-b378ed277f15" />
+        <OutPinName Type="System.String@Unknown" Value="host" />
+      </SaveData>
+    </e_0>
+    <e_1 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="d6551f7d-5e2d-42bc-852d-344539b97d26" />
+        <InPinName Type="System.String@Unknown" Value="Self" />
+        <OutNodeId Type="System.Guid@Unknown" Value="ba243eb0-790a-40f9-b62b-b378ed277f15" />
+        <OutPinName Type="System.String@Unknown" Value="host" />
+      </SaveData>
+    </e_1>
+    <e_2 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="85543e17-d109-4009-a06e-b09ca5fc6ca3" />
+        <InPinName Type="System.String@Unknown" Value=" &gt;&gt;" />
+        <OutNodeId Type="System.Guid@Unknown" Value="ba243eb0-790a-40f9-b62b-b378ed277f15" />
+        <OutPinName Type="System.String@Unknown" Value="&gt;&gt; " />
+      </SaveData>
+    </e_2>
+    <e_3 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="d6551f7d-5e2d-42bc-852d-344539b97d26" />
+        <InPinName Type="System.String@Unknown" Value="scene" />
+        <OutNodeId Type="System.Guid@Unknown" Value="85543e17-d109-4009-a06e-b09ca5fc6ca3" />
+        <OutPinName Type="System.String@Unknown" Value="Result" />
+      </SaveData>
+    </e_3>
+    <e_4 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="c19dead8-a20d-4ca1-a75d-7743f5cbbe56" />
+        <InPinName Type="System.String@Unknown" Value="ret_3332842155" />
+        <OutNodeId Type="System.Guid@Unknown" Value="06067d8b-b046-4833-977a-7686fbdcb7f2" />
+        <OutPinName Type="System.String@Unknown" Value="Get" />
+      </SaveData>
+    </e_4>
+    <e_5 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="d6551f7d-5e2d-42bc-852d-344539b97d26" />
+        <InPinName Type="System.String@Unknown" Value=" &gt;&gt;" />
+        <OutNodeId Type="System.Guid@Unknown" Value="85543e17-d109-4009-a06e-b09ca5fc6ca3" />
+        <OutPinName Type="System.String@Unknown" Value="&gt;&gt; " />
+      </SaveData>
+    </e_5>
+    <e_6 Type="EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore">
+      <SaveData Type="EngineNS.Bricks.NodeGraph.UPinLinker.TSaveData@EngineCore">
+        <InNodeId Type="System.Guid@Unknown" Value="c19dead8-a20d-4ca1-a75d-7743f5cbbe56" />
+        <InPinName Type="System.String@Unknown" Value=" &gt;&gt;" />
+        <OutNodeId Type="System.Guid@Unknown" Value="d6551f7d-5e2d-42bc-852d-344539b97d26" />
+        <OutPinName Type="System.String@Unknown" Value="&gt;&gt; " />
+      </SaveData>
+    </e_6>
+  </Linkers>
+</Root>

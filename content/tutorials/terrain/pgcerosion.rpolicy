@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyGraph@EngineCore">
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/terrain/pgcerosion.rpolicy,f14a4349-6779-4c09-9dbb-cf23ed5f8cdf" />
   <GraphName Type="System.String@Unknown" Value="NodeGraph" />
-  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="2">
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.GpuShading.TtErosionIncWaterNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="ErosionIncWater" />
@@ -13,7 +13,7 @@
         <Rain Type="EngineNS.RName@EngineCore" Value="Game,tutorials/terrain/rain.srv,d2ea56cf-55e9-408a-9c9f-492ad2e37de3" />
         <RainScalar Type="System.Single@Unknown" Value="10" />
       </GraphNode>
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
     <e_1 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Bricks.Procedure.Node.GpuShading.TtGpuFetchNode@EngineCore" />
@@ -22,7 +22,7 @@
       <NodeId Type="System.Guid@Unknown" Value="02b38455-9fcc-4e9c-ab1d-76338535e8ca" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="853,375" />
       <GraphNode Type="EngineNS.Bricks.Procedure.Node.GpuShading.TtGpuFetchNode@EngineCore" />
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_1>
   </Nodes>
   <PolicyType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore" />

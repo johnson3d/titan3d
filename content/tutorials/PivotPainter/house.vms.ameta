@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Mesh.TtMeshPrimitivesAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="7b9abf7c-d9ad-4812-80cd-0eef58babf10" />
-  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/pivotpainter/house.vms,00000000-0000-0000-0000-000000000000" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/pivotpainter/house.vms,7b9abf7c-d9ad-4812-80cd-0eef58babf10" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMeshPrimitives&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
