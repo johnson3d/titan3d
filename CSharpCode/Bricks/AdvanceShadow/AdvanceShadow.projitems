@@ -6,9 +6,9 @@
     <SharedGUID>f6ed5999-dc74-462b-8434-5be3e976b236</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>EngineNS.Bricks.FarShadow</Import_RootNamespace>
+    <Import_RootNamespace>EngineNS.Bricks.AdvanceShadow</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)UDepthTile.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DepthTile.cs" />
   </ItemGroup>
 </Project>

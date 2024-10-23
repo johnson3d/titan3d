@@ -236,6 +236,7 @@ namespace NxRHI
 		mDevice->QueryInterface(IID_ID3D12InfoQueue, (void**)mDebugInfoQueue.GetAddressOf());
 		if (mDebugInfoQueue != nullptr)
 		{
+			mDebugInfoQueue->SetMuteDebugOutput(TRUE);
 			mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_COMMAND_ALLOCATOR_SYNC, TRUE);
 			mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_COMMAND_LIST_CLOSED, TRUE);
 			mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_COMMAND_ALLOCATOR_RESET, TRUE);

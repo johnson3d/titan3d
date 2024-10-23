@@ -239,7 +239,7 @@ namespace EngineNS.Bricks.Input
                 target.Keyboard.State = source.key.state;
                 target.Keyboard.Repeat = source.key.repeat;
                 target.Keyboard.Keysym.Scancode = (Scancode)source.key.scancode;
-                target.Keyboard.Keysym.Sym = (Keycode)source.key.raw;
+                target.Keyboard.Keysym.Sym = (Keycode)source.key.key;
                 target.Keyboard.Keysym.Mod = (Keymod)source.key.mod;
                 //target.Keyboard.Keysym.Unicode = source.key.keysym.unicode;
             }

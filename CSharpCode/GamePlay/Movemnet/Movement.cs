@@ -62,7 +62,7 @@ namespace EngineNS.GamePlay.Movemnet
         protected Vector3 ConsumeSettedLinearVelocity()
         {
             var temp = DesiredLinearVelocity;
-            //DesiredLinearVelocity = Vector3.Zero;
+            DesiredLinearVelocity = Vector3.Zero;
             return temp;
         }
         protected Vector3 ConsumeSettedAngularVelocity()
