@@ -46,18 +46,18 @@ namespace EngineNS.IO
         unsafe void ReadPtr(void* p, int length);
     }
 
-    public struct UMemReader : IO.ICoreReader, IDisposable
+    public struct TtMemReader : IO.ICoreReader, IDisposable
     {
-        public unsafe static UMemReader CreateInstance(byte* ptr, ulong len)
+        public unsafe static TtMemReader CreateInstance(byte* ptr, ulong len)
         {
-            UMemReader result = new UMemReader();
+            TtMemReader result = new TtMemReader();
             result.Reader = MemStreamReader.CreateInstance();
             result.Reader.ProxyPointer(ptr, len);
             return result;
         }
-        public unsafe static UMemReader CreateInstance(in UMemWriter writer)
+        public unsafe static TtMemReader CreateInstance(in TtMemWriter writer)
         {
-            UMemReader result = new UMemReader();
+            TtMemReader result = new TtMemReader();
             result.Reader = MemStreamReader.CreateInstance();
             result.Reader.ProxyPointer((byte*)writer.Ptr, writer.GetPosition());
             return result;
@@ -201,11 +201,11 @@ namespace EngineNS.IO
                 ReadPtr(v.Data, (int)v.DataByteSize);
             }
         }
-        public unsafe void Read(out UMemWriter v)
+        public unsafe void Read(out TtMemWriter v)
         {
             uint len = 0;
             Read(out len);
-            v = UMemWriter.CreateInstance();
+            v = TtMemWriter.CreateInstance();
             v.ResetSize(len + 1);
             v.Seek(len);
             ReadPtr(v.Ptr, (int)len);

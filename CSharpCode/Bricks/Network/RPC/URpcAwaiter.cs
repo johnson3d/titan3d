@@ -57,7 +57,7 @@ namespace EngineNS.Bricks.Network.RPC
         public void OnCompleted(Action continuation)
         {
             Waiter.ContinuationAction = continuation;
-            Waiter.RetCallBack = static (ref IO.AuxReader<EngineNS.IO.UMemReader> pkg, bool isTimeOut, TtReturnAwaiterBase awaiter) =>
+            Waiter.RetCallBack = static (ref IO.AuxReader<EngineNS.IO.TtMemReader> pkg, bool isTimeOut, TtReturnAwaiterBase awaiter) =>
             {
                 var typedAwaiter = (TtReturnAwaiter<T>)awaiter;
                 if (isTimeOut)
@@ -113,7 +113,7 @@ namespace EngineNS.Bricks.Network.RPC
         public void OnCompleted(Action continuation)
         {
             Waiter.ContinuationAction = continuation;
-            Waiter.RetCallBack = static (ref IO.AuxReader<EngineNS.IO.UMemReader> pkg, bool isTimeOut, TtReturnAwaiterBase awaiter) =>
+            Waiter.RetCallBack = static (ref IO.AuxReader<EngineNS.IO.TtMemReader> pkg, bool isTimeOut, TtReturnAwaiterBase awaiter) =>
             {
                 var typedAwaiter = (TtReturnAwaiter<T>)awaiter;
                 EngineNS.IO.ISerializer tmp;
@@ -171,7 +171,7 @@ namespace EngineNS.Bricks.Network.RPC
         public void OnCompleted(Action continuation)
         {
             Waiter.ContinuationAction = continuation;
-            Waiter.RetCallBack = static (ref IO.AuxReader<EngineNS.IO.UMemReader> pkg, bool isTimeOut, TtReturnAwaiterBase awaiter) =>
+            Waiter.RetCallBack = static (ref IO.AuxReader<EngineNS.IO.TtMemReader> pkg, bool isTimeOut, TtReturnAwaiterBase awaiter) =>
             {
                 var typedAwaiter = (TtReturnAwaiter<string>)awaiter;
                 if (isTimeOut)

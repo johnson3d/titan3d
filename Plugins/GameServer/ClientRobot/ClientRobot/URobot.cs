@@ -133,9 +133,9 @@ namespace RobotClient
         {//call by tick per second
             if (AutoSyncData.IsDirty == false)
                 return;
-            using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+            using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
             {
-                var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+                var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
                 EngineNS.Bricks.Network.AutoSync.FSyncHelper.BuildModify(AutoSyncData, ar);
 
                 var rpcArg = new EngineNS.Bricks.Network.RPC.FRpcCallArg();
@@ -145,16 +145,16 @@ namespace RobotClient
 
         #region RPC
         [URpcMethod(Index = 100 + 0)]
-        public void UpdatePosition(Vector3 pos, UCallContext context)
+        public void UpdatePosition(Vector3 pos, TtCallContext context)
         {
 
         }
         [URpcMethod(Index = 100 + 1)]
-        public void GhostsAutoSync(EngineNS.IO.UMemWriter data, UCallContext context)
+        public void GhostsAutoSync(EngineNS.IO.TtMemWriter data, TtCallContext context)
         {
-            using (var reader = EngineNS.IO.UMemReader.CreateInstance(in data))
+            using (var reader = EngineNS.IO.TtMemReader.CreateInstance(in data))
             {
-                var ar = new EngineNS.IO.AuxReader<EngineNS.IO.UMemReader>(reader, null);
+                var ar = new EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader>(reader, null);
                 UInt16 num = 0;
                 ar.Read(out num);
                 for (byte i = 0; i < num; i++)
@@ -181,11 +181,11 @@ namespace RobotClient
             }
         }
         [URpcMethod(Index = 100 + 2)]
-        public void GhostsUpdatePlacement(EngineNS.IO.UMemWriter data, UCallContext context)
+        public void GhostsUpdatePlacement(EngineNS.IO.TtMemWriter data, TtCallContext context)
         {
-            using (var reader = EngineNS.IO.UMemReader.CreateInstance(in data))
+            using (var reader = EngineNS.IO.TtMemReader.CreateInstance(in data))
             {
-                var ar = new EngineNS.IO.AuxReader<EngineNS.IO.UMemReader>(reader, null);
+                var ar = new EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader>(reader, null);
                 UInt16 num = 0;
                 ar.Read(out num);
                 for (byte i = 0; i < num; i++)
@@ -218,21 +218,21 @@ namespace RobotClient
 {
 	partial class URobot
 	{
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_UpdatePosition = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_UpdatePosition = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			Vector3 pos;
 			reader.Read(out pos);
 			((RobotClient.URobot)host).UpdatePosition(pos, context);
 		};
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_GhostsAutoSync = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_GhostsAutoSync = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
-			EngineNS.IO.UMemWriter data;
+			EngineNS.IO.TtMemWriter data;
 			reader.Read(out data);
 			((RobotClient.URobot)host).GhostsAutoSync(data, context);
 		};
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_GhostsUpdatePlacement = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_GhostsUpdatePlacement = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
-			EngineNS.IO.UMemWriter data;
+			EngineNS.IO.TtMemWriter data;
 			reader.Read(out data);
 			((RobotClient.URobot)host).GhostsUpdatePlacement(data, context);
 		};

@@ -6,13 +6,13 @@ namespace EngineNS.Bricks.Network
 {
     public class UNetPackageManager
     {
-        public List<IO.UMemWriter> RcvPacakages = new List<IO.UMemWriter>();
-        public List<IO.UMemWriter> PushList = new List<IO.UMemWriter>();
+        public List<IO.TtMemWriter> RcvPacakages = new List<IO.TtMemWriter>();
+        public List<IO.TtMemWriter> PushList = new List<IO.TtMemWriter>();
         public unsafe void PushPackage(void* ptr, uint size, INetConnect connect)
         {
-            using (var reader = IO.UMemReader.CreateInstance((byte*)ptr, size))
+            using (var reader = IO.TtMemReader.CreateInstance((byte*)ptr, size))
             {
-                var pkg = new IO.AuxReader<IO.UMemReader>(reader, null);
+                var pkg = new IO.AuxReader<IO.TtMemReader>(reader, null);
                 var pkgHeader = new RPC.FPkgHeader();
                 pkg.Read(out pkgHeader);
                 if (pkgHeader.IsHasReturn())
@@ -60,7 +60,7 @@ namespace EngineNS.Bricks.Network
                     }
                 }
             }
-            EngineNS.IO.UMemWriter tmp = EngineNS.IO.UMemWriter.CreateInstance();
+            EngineNS.IO.TtMemWriter tmp = EngineNS.IO.TtMemWriter.CreateInstance();
             tmp.WritePtr(ptr, (int)size);
             tmp.Tag = connect;
 
@@ -81,9 +81,9 @@ namespace EngineNS.Bricks.Network
 
             foreach (var i in RcvPacakages)
             {
-                using (var reader = EngineNS.IO.UMemReader.CreateInstance((byte*)i.Writer.GetPointer(), i.Writer.Tell()))
+                using (var reader = EngineNS.IO.TtMemReader.CreateInstance((byte*)i.Writer.GetPointer(), i.Writer.Tell()))
                 {
-                    var pkg = new IO.AuxReader<EngineNS.IO.UMemReader>(reader, null);
+                    var pkg = new IO.AuxReader<EngineNS.IO.TtMemReader>(reader, null);
                     var pkgHeader = new RPC.FPkgHeader();
                     pkg.Read(out pkgHeader);
                     if (pkgHeader.IsHasReturn())
@@ -111,7 +111,7 @@ namespace EngineNS.Bricks.Network
                             var conn = i.Tag as INetConnect;
                             if (fun.Method != null && fun.Attribute.Authority <= conn.Authority && fun.Attribute.Authority <= router1.Authority)
                             {
-                                UCallContext context = new UCallContext();
+                                TtCallContext context = new TtCallContext();
                                 context.NetConnect = conn;
                                 context.Callee = TtEngine.Instance.RpcModule.RpcManager.CurrentTarget;
                                 fun.Method(pkg, exe, context);

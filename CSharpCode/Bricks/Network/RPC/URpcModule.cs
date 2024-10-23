@@ -62,7 +62,7 @@ namespace EngineNS.Bricks.Network.RPC
             return $"Target = {RunTarget}, Executer = {Executer}, Index = {Index}, Authority = {Authority}";
         }
     }
-    public struct UCallContext
+    public struct TtCallContext
     {
         public INetConnect NetConnect;
         public ERunTarget Caller;
@@ -80,7 +80,7 @@ namespace EngineNS.Bricks.Network.RPC
 	{
         public bool IsAlloc { get; set; } = false;
         protected static UInt32 CurrentId = 0;
-        public delegate void FReturnCallBack(ref IO.AuxReader<IO.UMemReader> pkg, bool isTimeOut, TtReturnAwaiterBase awaiter);
+        public delegate void FReturnCallBack(ref IO.AuxReader<IO.TtMemReader> pkg, bool isTimeOut, TtReturnAwaiterBase awaiter);
         public FReturnContext Context;
 		public long BeginWaitTime;
 		public uint Timeout;
@@ -98,7 +98,7 @@ namespace EngineNS.Bricks.Network.RPC
             Timeout = 0;
             IsCompleted = false;
         }
-        public abstract void RemoteReturnCall(ref IO.AuxReader<IO.UMemReader> pkg, bool isTimeOut);
+        public abstract void RemoteReturnCall(ref IO.AuxReader<IO.TtMemReader> pkg, bool isTimeOut);
 		public abstract void Dispose();
 	}
 	public class TtReturnContext
@@ -175,7 +175,7 @@ namespace EngineNS.Bricks.Network.RPC
 		#endregion
 		public TtReturnContext ReturnContext;
         public T Result = default(T);
-        public override void RemoteReturnCall(ref IO.AuxReader<IO.UMemReader> pkg, bool isTimeOut)
+        public override void RemoteReturnCall(ref IO.AuxReader<IO.TtMemReader> pkg, bool isTimeOut)
 		{
 			RetCallBack(ref pkg, isTimeOut, this);
 			IsCompleted = true;
@@ -185,7 +185,7 @@ namespace EngineNS.Bricks.Network.RPC
             mAllocator.ReleaseObject(this);
         }
     }
-    public delegate void FCallMethod(IO.AuxReader<IO.UMemReader> pkg, object host, UCallContext context);
+    public delegate void FCallMethod(IO.AuxReader<IO.TtMemReader> pkg, object host, TtCallContext context);
     public interface IRpcHost
     {
         URpcClass GetRpcClass();
@@ -227,7 +227,7 @@ namespace EngineNS.Bricks.Network.RPC
 		}
         Profiler.TtRpcProfiler RpcProfiler = new Profiler.TtRpcProfiler();
         [URpcMethod(Index = 0)]
-        public int TestBaseRpc1(float arg, UCallContext context)
+        public int TestBaseRpc1(float arg, TtCallContext context)
         {
             //AutoGenProp0 = 1;
             //AutoGenProp0 = 2;
@@ -250,7 +250,7 @@ namespace EngineNS.Bricks.Network.RPC
 				ReturnAwaiters[awaiter.Context.Handle] = awaiter;
 			}
 		}
-		public void RemoteReturn(UInt32 handle, ref IO.AuxReader<IO.UMemReader> pkg)
+		public void RemoteReturn(UInt32 handle, ref IO.AuxReader<IO.TtMemReader> pkg)
 		{
             TtReturnAwaiterBase awaiter = null;
 			lock (ReturnAwaiters)
@@ -283,7 +283,7 @@ namespace EngineNS.Bricks.Network.RPC
         {
             NetPackageManager.Tick();
 			var now = Support.TtTime.GetTickCount();
-			var nullPkg = new IO.AuxReader<EngineNS.IO.UMemReader>();
+			var nullPkg = new IO.AuxReader<EngineNS.IO.TtMemReader>();
             lock (ReturnAwaiters)
 			{
                 foreach (var i in ReturnAwaiters)
@@ -366,29 +366,29 @@ namespace EngineNS.UTest
         //}
 
         [URpcMethod(Index = 100 + 0, PkgFlags = EPkgTypes.WeakPkg)]
-        public int TestRpc1(float arg, UCallContext context)
+        public int TestRpc1(float arg, TtCallContext context)
         {
             //AutoGenProp1 = 1;
             //AutoGenProp1 = 2;
             return (int)arg + 2;
         }
         [URpcMethod(Index = 100 + 1)]
-        public void TestRpc2(string arg, UCallContext context)
+        public void TestRpc2(string arg, TtCallContext context)
         {
             Console.WriteLine(arg);
         }
         [URpcMethod(Index = 100 + 2)]
-        public IO.ISerializer TestRpc3(int arg, UCallContext context)
+        public IO.ISerializer TestRpc3(int arg, TtCallContext context)
         {
             return null;
         }
         [URpcMethod(Index = 100 + 3)]
-        public string TestRpc4(string arg, UCallContext context)
+        public string TestRpc4(string arg, TtCallContext context)
         {
             return arg.ToString();
         }
         [URpcMethod(Index = 100 + 4)]
-        public async Task<Vector3> TestRpc5(Vector3 arg, UCallContext context)
+        public async Task<Vector3> TestRpc5(Vector3 arg, TtCallContext context)
         {
             var ret3 = await UTest_Rpc_RpcCaller.TestRpc4("10.1", new FRpcCallArg());
             var result = arg * 2;
@@ -409,7 +409,7 @@ namespace EngineNS.UTest
             }
         }
         [URpcMethod(Index = 100 + 5)]
-        public EngineNS.UTest.UTest_Rpc.TestRPCArgument TestRpc6(EngineNS.UTest.UTest_Rpc.TestRPCArgument arg, UCallContext context)
+        public EngineNS.UTest.UTest_Rpc.TestRPCArgument TestRpc6(EngineNS.UTest.UTest_Rpc.TestRPCArgument arg, TtCallContext context)
         {
             arg.AA += 5;
             return arg;
@@ -420,7 +420,7 @@ namespace EngineNS.UTest
             public Vector3 B;
         }
         [URpcMethod(Index = 100 + 6)]
-        public int TestRpc7(EngineNS.UTest.UTest_Rpc.TestUnmanagedStruct arg, UCallContext context)
+        public int TestRpc7(EngineNS.UTest.UTest_Rpc.TestUnmanagedStruct arg, TtCallContext context)
         {
             arg.A += 15;
             return arg.A;
@@ -498,9 +498,9 @@ namespace EngineNS.Bricks.Network.RPC
 			{
 				retContext.Context.Index = ExeIndex;
 			}
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				URouter router = new URouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
@@ -526,16 +526,16 @@ namespace EngineNS.Bricks.Network.RPC
 {
 	partial class TtRpcManager
 	{
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TestBaseRpc1 = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TestBaseRpc1 = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			float arg;
 			reader.Read(out arg);
 			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Bricks.Network.RPC.TtRpcManager)host).TestBaseRpc1(arg, context);
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
@@ -571,9 +571,9 @@ namespace EngineNS.UTest
 			{
 				retContext.Context.Index = ExeIndex;
 			}
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				URouter router = new URouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
@@ -604,9 +604,9 @@ namespace EngineNS.UTest
 			{
 				NetConnect = TtEngine.Instance.RpcModule.DefaultNetConnect;
 			}
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				URouter router = new URouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
@@ -639,9 +639,9 @@ namespace EngineNS.UTest
 			{
 				retContext.Context.Index = ExeIndex;
 			}
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				URouter router = new URouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
@@ -676,9 +676,9 @@ namespace EngineNS.UTest
 			{
 				retContext.Context.Index = ExeIndex;
 			}
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				URouter router = new URouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
@@ -713,9 +713,9 @@ namespace EngineNS.UTest
 			{
 				retContext.Context.Index = ExeIndex;
 			}
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				URouter router = new URouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
@@ -750,9 +750,9 @@ namespace EngineNS.UTest
 			{
 				retContext.Context.Index = ExeIndex;
 			}
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				URouter router = new URouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
@@ -787,9 +787,9 @@ namespace EngineNS.UTest
 			{
 				retContext.Context.Index = ExeIndex;
 			}
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				URouter router = new URouter();
 				router.RunTarget = ERunTarget.None;
 				router.Executer = EExecuter.Root;
@@ -815,16 +815,16 @@ namespace EngineNS.UTest
 {
 	partial class UTest_Rpc
 	{
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TestRpc1 = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TestRpc1 = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			float arg;
 			reader.Read(out arg);
 			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.UTest.UTest_Rpc)host).TestRpc1(arg, context);
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
@@ -834,22 +834,22 @@ namespace EngineNS.UTest
 				context.NetConnect?.Send(in pkg);
 			}
 		};
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TestRpc2 = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TestRpc2 = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			string arg;
 			reader.Read(out arg);
 			((EngineNS.UTest.UTest_Rpc)host).TestRpc2(arg, context);
 		};
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TestRpc3 = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TestRpc3 = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			int arg;
 			reader.Read(out arg);
 			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.UTest.UTest_Rpc)host).TestRpc3(arg, context);
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
@@ -859,16 +859,16 @@ namespace EngineNS.UTest
 				context.NetConnect?.Send(in pkg);
 			}
 		};
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TestRpc4 = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TestRpc4 = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			string arg;
 			reader.Read(out arg);
 			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.UTest.UTest_Rpc)host).TestRpc4(arg, context);
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
@@ -878,16 +878,16 @@ namespace EngineNS.UTest
 				context.NetConnect?.Send(in pkg);
 			}
 		};
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TestRpc5 = async (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host,  EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TestRpc5 = async (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host,  EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			Vector3 arg;
 			reader.Read(out arg);
 			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = await ((EngineNS.UTest.UTest_Rpc)host).TestRpc5(arg, context);
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
@@ -897,16 +897,16 @@ namespace EngineNS.UTest
 				context.NetConnect?.Send(in pkg);
 			}
 		};
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TestRpc6 = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TestRpc6 = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			EngineNS.UTest.UTest_Rpc.TestRPCArgument arg;
 			reader.Read(out arg);
 			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.UTest.UTest_Rpc)host).TestRpc6(arg, context);
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
@@ -916,16 +916,16 @@ namespace EngineNS.UTest
 				context.NetConnect?.Send(in pkg);
 			}
 		};
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TestRpc7 = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TestRpc7 = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			EngineNS.UTest.UTest_Rpc.TestUnmanagedStruct arg;
 			reader.Read(out arg);
 			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.UTest.UTest_Rpc)host).TestRpc7(arg, context);
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);

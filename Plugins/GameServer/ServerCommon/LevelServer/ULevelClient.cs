@@ -41,16 +41,16 @@ namespace EngineNS.Plugins.LevelServer
 
         #region RPC
         [URpcMethod(Index = 100 + 0)]
-        public int GetHP(UCallContext context)
+        public int GetHP(TtCallContext context)
         {
             return 5;
         }
         [URpcMethod(Index = 100 + 1)]
-        public void UpdateAutoSyncData(IO.UMemWriter data, UCallContext context)
+        public void UpdateAutoSyncData(IO.TtMemWriter data, TtCallContext context)
         {
-            using (var reader = IO.UMemReader.CreateInstance(in data))
+            using (var reader = IO.TtMemReader.CreateInstance(in data))
             {
-                var ar = new IO.AuxReader<IO.UMemReader>(reader, null);
+                var ar = new IO.AuxReader<IO.TtMemReader>(reader, null);
                 Bricks.Network.AutoSync.FSyncHelper.SyncValues(AutoSyncData, ar);
             }
         }
@@ -77,7 +77,7 @@ namespace EngineNS.Plugins.LevelServer
         {
             return 0;
         }
-        public virtual unsafe void Send(in IO.AuxWriter<IO.UMemWriter> pkg)
+        public virtual unsafe void Send(in IO.AuxWriter<IO.TtMemWriter> pkg)
         {
             var enumerator = GetEnumerator();
             enumerator.Reset();
@@ -123,14 +123,14 @@ namespace EngineNS.Plugins.LevelServer
 {
 	partial class ULevelClient
 	{
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_GetHP = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_GetHP = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Plugins.LevelServer.ULevelClient)host).GetHP(context);
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
@@ -140,9 +140,9 @@ namespace EngineNS.Plugins.LevelServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_UpdateAutoSyncData = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_UpdateAutoSyncData = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
-			IO.UMemWriter data;
+			IO.TtMemWriter data;
 			reader.Read(out data);
 			((EngineNS.Plugins.LevelServer.ULevelClient)host).UpdateAutoSyncData(data, context);
 		};

@@ -2127,7 +2127,7 @@ namespace EngineNS.NxRHI
                 {
                     using (var reader = blobResult.CreateReader())
                     {
-                        var ar = new IO.AuxReader<EngineNS.IO.UMemReader>(reader, null);
+                        var ar = new IO.AuxReader<EngineNS.IO.TtMemReader>(reader, null);
                         var loadDesc = new FPictureDesc();
                         ar.Read(out loadDesc);
 

@@ -47,7 +47,7 @@ namespace EngineNS.Bricks.Network
         object Tag { get; set; }
         UInt16 GetConnectId();
         void Send(void* ptr, uint size);
-        void Send(in IO.AuxWriter<IO.UMemWriter> pkg);
+        void Send(in IO.AuxWriter<IO.TtMemWriter> pkg);
     }
     public class UFakeNetConnect : INetConnect
     {
@@ -65,7 +65,7 @@ namespace EngineNS.Bricks.Network
         {
             return 0;
         }
-        public void Send(in IO.AuxWriter<IO.UMemWriter> pkg)
+        public void Send(in IO.AuxWriter<IO.TtMemWriter> pkg)
         {
             unsafe
             {

@@ -80,11 +80,11 @@ namespace CSharpCodeTools
                     {
                         if (i.IsAsync)
                         {
-                            AddLine($"public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_{i.Name} = async (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host,  EngineNS.Bricks.Network.RPC.UCallContext context) =>");
+                            AddLine($"public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_{i.Name} = async (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host,  EngineNS.Bricks.Network.RPC.TtCallContext context) =>");
                         }
                         else
                         {
-                            AddLine($"public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_{i.Name} = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>");
+                            AddLine($"public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_{i.Name} = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>");
                         }
                         PushBrackets();
                         {
@@ -116,10 +116,10 @@ namespace CSharpCodeTools
                                     AddLine($"var ret = (({this.FullName})host).{i.Name}({argCallStr}context);");
                                 }
 
-                                AddLine($"using (var writer = EngineNS.IO.UMemWriter.CreateInstance())");
+                                AddLine($"using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())");
                                 PushBrackets();
                                 {
-                                    AddLine($"var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);");
+                                    AddLine($"var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);");
                                     AddLine($"var pkgHeader = new FPkgHeader();");
                                     AddLine($"pkgHeader.SetHasReturn(true);");
                                     AddLine($"pkg.Write(pkgHeader);");
@@ -208,10 +208,10 @@ namespace CSharpCodeTools
                                 }
                                 PopBrackets();
                             }
-                            AddLine($"using (var writer = EngineNS.IO.UMemWriter.CreateInstance())");
+                            AddLine($"using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())");
                             PushBrackets();
                             {
-                                AddLine($"var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);");
+                                AddLine($"var pkg = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);");
                                 AddLine($"URouter router = new URouter();");
                                 AddLine($"router.RunTarget = {this.RunTarget};");
                                 AddLine($"router.Executer = {this.Executer};");

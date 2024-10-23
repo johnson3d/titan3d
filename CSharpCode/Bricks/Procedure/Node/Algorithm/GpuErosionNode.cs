@@ -43,7 +43,7 @@ namespace EngineNS.Bricks.Procedure.Node
             var readTexture = ending.ReadableTexture;
             var blob = new Support.TtBlobObject();
             readTexture.FetchGpuData(0, blob.mCoreObject);
-            using (var reader = IO.UMemReader.CreateInstance((byte*)blob.DataPointer, blob.Size))
+            using (var reader = IO.TtMemReader.CreateInstance((byte*)blob.DataPointer, blob.Size))
             {
                 uint rowPitch, depthPitch;
                 reader.Read(out rowPitch);

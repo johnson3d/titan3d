@@ -100,17 +100,17 @@ namespace EngineNS.Bricks.Network.AutoSync
 
         public void RealObjectUpdate2Server()
         {
-            using (var writer = IO.UMemWriter.CreateInstance())
+            using (var writer = IO.TtMemWriter.CreateInstance())
             {
-                var ar = new IO.AuxWriter<IO.UMemWriter>(writer);
+                var ar = new IO.AuxWriter<IO.TtMemWriter>(writer);
                 FSyncHelper.BuildModify(this, ar);
             }
         }
-        public unsafe void GhostObjectUpdateByServer(IO.UMemWriter writer)
+        public unsafe void GhostObjectUpdateByServer(IO.TtMemWriter writer)
         {
-            using (var reader = IO.UMemReader.CreateInstance((byte*)writer.Ptr, writer.GetPosition()))
+            using (var reader = IO.TtMemReader.CreateInstance((byte*)writer.Ptr, writer.GetPosition()))
             {
-                var ar = new IO.AuxReader<IO.UMemReader>(reader, null);
+                var ar = new IO.AuxReader<IO.TtMemReader>(reader, null);
                 FSyncHelper.SyncValues(this, ar);
             }
         }

@@ -31,9 +31,9 @@ namespace EngineNS.Support
         {
             mCoreObject.PushData(data, size);
         }
-        public unsafe IO.UMemReader CreateReader()
+        public unsafe IO.TtMemReader CreateReader()
         {
-            var result = IO.UMemReader.CreateInstance((byte*)mCoreObject.GetData(), (ulong)mCoreObject.GetSize());
+            var result = IO.TtMemReader.CreateInstance((byte*)mCoreObject.GetData(), (ulong)mCoreObject.GetSize());
             return result;
         }
     }

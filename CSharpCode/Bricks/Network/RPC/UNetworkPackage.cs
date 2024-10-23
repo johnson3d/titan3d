@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.IO
 {
-    public partial struct UMemWriter
+    public partial struct TtMemWriter
     {
         public void SurePkgHeader()
         {

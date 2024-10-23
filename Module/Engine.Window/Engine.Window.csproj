@@ -82,7 +82,6 @@
   <Import Project="..\..\CSharpCode\Bricks\Input\Input.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\VirtualTexture\VirtualTexture.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\Particle\Particle.projitems" Label="Shared" />
-  <Import Project="..\..\CSharpCode\Bricks\FarShadow\FarShadow.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\RenderPolicyEditor\RenderPolicyEditor.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\NodeGraph\NodeGraph.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\StateMachine\StateMachine.projitems" Label="Shared" />
@@ -109,6 +108,7 @@
   <Import Project="..\..\CSharpCode\CompilingGenerator\CompilingGenerator.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\Localization\Localization.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\DistanceField\DistanceField.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\AdvanceShadow\AdvanceShadow.projitems" Label="Shared" />
   <ItemGroup>
     <PackageReference Include="BCnEncoder.Net" Version="2.1.0" />
     <PackageReference Include="MemoryInterop.ILPatcher" Version="2.2.1">

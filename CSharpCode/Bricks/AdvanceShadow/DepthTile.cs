@@ -18,7 +18,7 @@ namespace EngineNS.Bricks.AdvanceShadow
         public unsafe Hash160 UpdateShadowHash(List<GamePlay.Scene.TtNode> nodes)
         {
             nodes.Sort();
-            using (var ar = IO.UMemWriter.CreateInstance())
+            using (var ar = IO.TtMemWriter.CreateInstance())
             {
                 foreach(var i in nodes)
                 {

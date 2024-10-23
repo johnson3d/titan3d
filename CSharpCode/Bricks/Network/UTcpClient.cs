@@ -29,7 +29,7 @@ namespace EngineNS.Bricks.Network
                 return;
             mCoreObject.Send((sbyte*)ptr, size);
         }
-        public void Send(in IO.AuxWriter<IO.UMemWriter> pkg)
+        public void Send(in IO.AuxWriter<IO.TtMemWriter> pkg)
         {
             if (Connected == false)
                 return;

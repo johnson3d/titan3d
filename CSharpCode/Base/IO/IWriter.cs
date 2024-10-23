@@ -37,11 +37,11 @@ namespace EngineNS.IO
         unsafe void* Ptr { get; }
     }
 
-    public partial struct UMemWriter : IO.ICoreWriter, IDisposable
+    public partial struct TtMemWriter : IO.ICoreWriter, IDisposable
     {
-        public static UMemWriter CreateInstance()
+        public static TtMemWriter CreateInstance()
         {
-            UMemWriter result = new UMemWriter();
+            TtMemWriter result = new TtMemWriter();
             result.Writer = MemStreamWriter.CreateInstance();
             return result;
         }
@@ -194,7 +194,7 @@ namespace EngineNS.IO
                 WritePtr(v.Data, (int)v.DataByteSize);
             }
         }
-        public unsafe void Write(UMemWriter v)
+        public unsafe void Write(TtMemWriter v)
         {
             Write((uint)v.GetPosition());
             WritePtr(v.Ptr, (int)v.GetPosition());

@@ -58,9 +58,9 @@ namespace EngineNS.Plugins.LevelServer
             }
             if(mGhostPlacementChangedActors.Count > 0)
             {
-                using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+                using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
                 {
-                    var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+                    var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
                     ar.Write((UInt16)mGhostPlacementChangedActors.Count);
                     for (int i = 0; i < mGhostPlacementChangedActors.Count; i++)
                     {
@@ -74,9 +74,9 @@ namespace EngineNS.Plugins.LevelServer
             }
             if (mGhostAutoSyncDataChangedActors.Count > 0)
             {
-                using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+                using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
                 {
-                    var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+                    var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
                     ar.Write((UInt16)mGhostAutoSyncDataChangedActors.Count);
                     for (int i = 0; i < mGhostAutoSyncDataChangedActors.Count; i++)
                     {

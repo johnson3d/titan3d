@@ -100,7 +100,7 @@ namespace EngineNS.Bricks.Network.RPC
                 }
                     
             }
-            if (parms[parms.Length - 1].ParameterType != typeof(UCallContext))
+            if (parms[parms.Length - 1].ParameterType != typeof(TtCallContext))
                 return false;
             return true;
         }

@@ -125,7 +125,7 @@ namespace EngineNS.Plugins.GateServer
 
         #region RPC
         [URpcMethod(Index = 100 + 0)]
-        public bool WaitSession(Guid sessionId, string user, UCallContext context)
+        public bool WaitSession(Guid sessionId, string user, TtCallContext context)
         {
 			var client = ClientManager.FindClient(sessionId);
 			if (client != null)
@@ -136,7 +136,7 @@ namespace EngineNS.Plugins.GateServer
         }
         Dictionary<string, KeyValuePair<Guid,System.DateTime>> WaitSessions = new Dictionary<string, KeyValuePair<Guid, System.DateTime>>();
         [URpcMethod(Index = 100 + 1)]
-        public UInt16 RegClient(Guid sessionId, string user, UCallContext context)
+        public UInt16 RegClient(Guid sessionId, string user, TtCallContext context)
         {
             KeyValuePair<Guid, System.DateTime> id;
             if (WaitSessions.TryGetValue(user, out id) == false)
@@ -158,7 +158,7 @@ namespace EngineNS.Plugins.GateServer
 			return client.ClientIndex;// "OK";
         }
         [URpcMethod(Index = 100 + 2, Authority = EAuthority.Server)]
-        public UInt16 ClientEnterLevel(Guid sessionId, string user, UInt16 indexInLevel, UCallContext context)
+        public UInt16 ClientEnterLevel(Guid sessionId, string user, UInt16 indexInLevel, TtCallContext context)
 		{
             var client = ClientManager.FindClient(in sessionId) as UGateClient;
             if (client == null)
@@ -180,7 +180,7 @@ namespace EngineNS.Plugins.GateServer
 {
 	partial class UGateServer
 	{
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_WaitSession = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_WaitSession = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			Guid sessionId;
 			reader.Read(out sessionId);
@@ -189,9 +189,9 @@ namespace EngineNS.Plugins.GateServer
 			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Plugins.GateServer.UGateServer)host).WaitSession(sessionId, user, context);
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
@@ -201,7 +201,7 @@ namespace EngineNS.Plugins.GateServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegClient = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegClient = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			Guid sessionId;
 			reader.Read(out sessionId);
@@ -210,9 +210,9 @@ namespace EngineNS.Plugins.GateServer
 			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Plugins.GateServer.UGateServer)host).RegClient(sessionId, user, context);
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
@@ -222,7 +222,7 @@ namespace EngineNS.Plugins.GateServer
 				context.NetConnect?.Send(in pkg);
 			}
 		};
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_ClientEnterLevel = (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host, EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_ClientEnterLevel = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			Guid sessionId;
 			reader.Read(out sessionId);
@@ -233,9 +233,9 @@ namespace EngineNS.Plugins.GateServer
 			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = ((EngineNS.Plugins.GateServer.UGateServer)host).ClientEnterLevel(sessionId, user, indexInLevel, context);
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);

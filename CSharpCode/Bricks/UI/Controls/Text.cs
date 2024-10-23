@@ -335,7 +335,7 @@ namespace EngineNS.UI.Controls
                 batch.Middleground.AddText(text, x, y, in drawCmdInsData, blobObj);
                 unsafe
                 {
-                    using(var reader = IO.UMemReader.CreateInstance((byte*)blobObj.DataPointer, blobObj.Size))
+                    using(var reader = IO.TtMemReader.CreateInstance((byte*)blobObj.DataPointer, blobObj.Size))
                     {
                         int count = 0;
                         reader.Read(out count);

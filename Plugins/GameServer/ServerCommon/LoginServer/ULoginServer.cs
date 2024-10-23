@@ -72,7 +72,7 @@ namespace EngineNS.Plugins.LoginServer
         public UAccountManager AccountManager { get; } = new UAccountManager();
         #region RPC
         [URpcMethod(Index = 100 + 0)]
-        public async System.Threading.Tasks.Task<Bricks.Network.FLoginResultArgument> LoginAccount(string user, string psw, UCallContext context)
+        public async System.Threading.Tasks.Task<Bricks.Network.FLoginResultArgument> LoginAccount(string user, string psw, TtCallContext context)
         {
             var info = AccountManager.LoginAccount(user, psw);
             if (info == null)
@@ -100,7 +100,7 @@ namespace EngineNS.Plugins.LoginServer
 {
 	partial class ULoginServer
 	{
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_LoginAccount = async (EngineNS.IO.AuxReader<EngineNS.IO.UMemReader> reader, object host,  EngineNS.Bricks.Network.RPC.UCallContext context) =>
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_LoginAccount = async (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host,  EngineNS.Bricks.Network.RPC.TtCallContext context) =>
 		{
 			string user;
 			reader.Read(out user);
@@ -109,9 +109,9 @@ namespace EngineNS.Plugins.LoginServer
 			FReturnContext retContext;
 			reader.Read(out retContext);
 			var ret = await ((EngineNS.Plugins.LoginServer.ULoginServer)host).LoginAccount(user, psw, context);
-			using (var writer = EngineNS.IO.UMemWriter.CreateInstance())
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
 			{
-				var pkg = new IO.AuxWriter<EngineNS.IO.UMemWriter>(writer);
+				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
 				var pkgHeader = new FPkgHeader();
 				pkgHeader.SetHasReturn(true);
 				pkg.Write(pkgHeader);
