@@ -23,9 +23,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Scene\UPBRTestNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UCenterData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controller\IController.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Controller\UNPCController.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Controller\UCharacterController.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Macross\UGameplayMacross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controller\NPCController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controller\CharacterController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Movemnet\CharacterMovement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Movemnet\Movement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Scene\Actor\UActor.cs" />

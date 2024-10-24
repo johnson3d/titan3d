@@ -3,166 +3,89 @@ using EngineNS.Graphics.Pipeline.Shader;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Text;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 {
-    public class TtHLSLProviderAttribute : Attribute
+    public class TtMaterialShaderAttribute : Attribute
     {
         public string Name;
         public string Include;
     }
 
     [Rtti.Meta]
-    [TtHLSLProvider]
-    public partial class TtCoreHLSLMethod
+    [TtMaterialShader]
+    public partial class TtCoreMaterialShader
     {
+        #region Texture
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "SampleLevel2D")]
+        [TtMaterialShader(Name = "SampleLevel2D")]
         [UserCallNode(CallNodeType = typeof(SampleLevel2DNode))]
-        [ContextMenu("samplelevel2d", "Sample\\Level2D", TtMaterialGraph.MaterialEditorKeyword)]
+        [ContextMenu("SampleLevel2D", "Texture\\SampleLevel2D", TtMaterialGraph.MaterialEditorKeyword)]
         public static Vector4 SampleLevel2D(Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, float level, out Vector3 rgb)
         {
             rgb = new Vector3();
             return new Vector4();
         }
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Sample2D")]
+        [TtMaterialShader(Name = "Sample2D")]
         [UserCallNode(CallNodeType = typeof(Sample2DNode))]
+        [ContextMenu("Sample2D", "Texture\\Sample2D", TtMaterialGraph.MaterialEditorKeyword)]
         public static Vector4 Sample2D(Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, out Vector3 rgb)
         {
             rgb = new Vector3();
             return new Vector4();
         }
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "SampleArrayLevel2D")]
+        [TtMaterialShader(Name = "SampleArrayLevel2D")]
         [UserCallNode(CallNodeType = typeof(SampleArrayLevel2DNode))]
+        [ContextMenu("SampleArrayLevel2D", "Texture\\SampleArrayLevel2D", TtMaterialGraph.MaterialEditorKeyword)]
         public static Vector4 SampleArrayLevel2D(Var.Texture2DArray texture, Var.SamplerState sampler, Vector2 uv, float arrayIndex, float level, out Vector3 rgb)
         {
             rgb = new Vector3();
             return new Vector4();
         }
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "SampleArray2D")]
+        [TtMaterialShader(Name = "SampleArray2D")]
         [UserCallNode(CallNodeType = typeof(SampleArray2DNode))]
+        [ContextMenu("SampleArray2D", "Texture\\SampleArray2D", TtMaterialGraph.MaterialEditorKeyword)]
         public static Vector4 SampleArray2D(Var.Texture2DArray texture, Var.SamplerState sampler, Vector2 uv, float arrayIndex, out Vector3 rgb)
         {
             rgb = new Vector3();
             return new Vector4();
         }
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "TextureSize")]
+        [TtMaterialShader(Name = "TextureSize")]
+        [ContextMenu("TextureSize", "Texture\\TextureSize", TtMaterialGraph.MaterialEditorKeyword)]
         public static Vector2 TextureSize(Var.Texture2D texture)
         {
             return Vector2.Zero;
         }
+        #endregion
+
+        #region Terrain
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "UnpackNormal")]
-        public static void UnpackNormal(Vector3 packedNormal, out Vector3 normal)
-        {
-            normal = packedNormal * 2.0f - Vector3.One;
-        }
-        [Rtti.Meta]
-        [TtHLSLProvider(Name = "GetTerrainDiffuse")]
+        [TtMaterialShader(Name = "GetTerrainDiffuse")]
+        [ContextMenu("GetTerrainDiffuse", "Terrain\\GetTerrainDiffuse", TtMaterialGraph.MaterialEditorKeyword)]
         public static Vector3 GetTerrainDiffuse(Vector2 uv, Graphics.Pipeline.Shader.PS_INPUT input)
         {
             return Vector3.Zero;
         }
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "GetTerrainNormal")]
+        [TtMaterialShader(Name = "GetTerrainNormal")]
+        [ContextMenu("GetTerrainNormal", "Terrain\\GetTerrainNormal", TtMaterialGraph.MaterialEditorKeyword)]
         public static Vector3 GetTerrainNormal(Vector2 uv, Graphics.Pipeline.Shader.PS_INPUT input)
         {
             return Vector3.Zero;
         }
-        [Rtti.Meta]
-        [TtHLSLProvider(Name = "Frac")]
-        public static void Frac(float x, out float ret)
-        {
-            ret = 0;
-        }
-        [Rtti.Meta]
-        [TtHLSLProvider(Name = "Pow")]
-        public static void Pow(float v1, float v2, out float ret)
-        {
-            ret = 0;
-        }
-        [Rtti.Meta]
-        [TtHLSLProvider(Name = "Clamp")]
-        public static void Clamp(float x, float min, float max, out float ret)
-        {
-            ret = 0;
-        }
-        [Rtti.Meta]
-        [TtHLSLProvider(Name = "Sin")]
-        public static void Sin(float x, out float sin)
-        {
-            sin = (float)Math.Sin(x);
-        }
-        [Rtti.Meta]
-        [TtHLSLProvider(Name = "Cos")]
-        public static void Cos(float x, out float cos)
-        {
-            cos = (float)Math.Cos(x);
-        }
-        [Rtti.Meta]
-        [TtHLSLProvider(Name = "SinRemapped")]
-        public static float SinRemapped(float SinPhase, float v1, float v2)
-        {
-            v1 = 0;
-            return 0.0f;
-        }
+        #endregion
 
+        #region Effect
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "SinCos")]
-        public static void SinCos(float x, out float sin, out float cos)
-        {
-            sin = (float)Math.Sin(x);
-            cos = (float)Math.Cos(x);
-        }
-
-        [Rtti.Meta]
-        [TtHLSLProvider(Name = "Ceil")]
-        public static void Ceil(float x, out float ret)
-        {
-            ret = 0;
-        }
-
-        [Rtti.Meta]
-        [TtHLSLProvider(Name = "Max")]
-        public static void Max(float v1, float v2, out float ret)
-        {
-            ret = Math.Max(v1, v2);
-        }
-        [Rtti.Meta]
-        [TtHLSLProvider(Name = "Min")]
-        public static void Min(float v1, float v2, out float ret)
-        {
-            ret = Math.Min(v1, v2);
-        }
-        [Rtti.Meta]
-        [TtHLSLProvider(Name = "Lerp")]
-        public static void Lerp(float v1, float v2, float s, out float ret)
-        {
-            ret = v1 + s * (v2 - v1);
-        }
-        [Rtti.Meta]
-        [TtHLSLProvider(Name = "Lerp2D")]
-        public static void Lerp2D(Vector2 v1, Vector2 v2, Vector2 s, out Vector2 ret)
-        {
-            ret.X = v1.X + s.X * (v2.X - v1.X);
-            ret.Y = v1.Y + s.Y * (v2.Y - v1.Y);
-        }
-        [Rtti.Meta]
-        [TtHLSLProvider(Name = "Lerp3D")]
-        public static void Lerp3D(Vector3 v1, Vector3 v2, Vector3 s, out Vector3 ret)
-        {
-            ret.X = v1.X + s.X * (v2.X - v1.X);
-            ret.Y = v1.Y + s.Y * (v2.Y - v1.Y);
-            ret.Z = v1.Z + s.Z * (v2.Z - v1.Z);
-        }
-        [Rtti.Meta]
-        [TtHLSLProvider(Name = "NormalMap")]
+        [TtMaterialShader(Name = "NormalMap")]
+        [ContextMenu(filterStrings: "Effect", "Effect\\NormalMap", TtMaterialGraph.MaterialEditorKeyword)]
         public static void NormalMap(Vector3 Nt, Vector4 Tw, Vector3 Nw, out Vector3 UnpackedNormal)
         {
             //   Vector3 Bw = new Vector3(0.0h, 0.0h, 0.0h);
@@ -183,7 +106,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             UnpackedNormal = Vector3.Zero;
         }
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Panner")]
+        [TtMaterialShader(Name = "Panner")]
+        [ContextMenu(filterStrings: "Panner", "Effect\\Panner", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Panner(Vector2 uv, float time, Vector2 speed, Vector2 scale, out Vector2 outUV)
         {
             Vector2 uvTrans = speed * time;
@@ -200,81 +124,30 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
         }
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Rotator")]
+        [TtMaterialShader(Name = "Rotator")]
+        [ContextMenu(filterStrings: "Rotator", "Effect\\Rotator", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Rotator(Vector2 uv, float time, Vector2 center, Vector2 scale, float speed, out Vector2 outUV)
         {
             outUV = Vector2.Zero;
-            /*
-             * float angle = time * speed;
-
-	//matrix <float, 4, 4> scaleM = {
-	float4x4 scaleM = {
-		1.0f, 0.0f, 0.0f, 0.0f, // row 1
-		0.0f, 1.0f, 0.0f, 0.0f, // row 2
-		0.0f, 0.0f, 1.0f, 0.0f, // row 3
-		0.0f, 0.0f, 0.0f, 1.0f, // row 4
-	};
-
-	scaleM[0][0] = 1 / scale.x;
-	scaleM[1][1] = 1 / scale.y;
-	// Skip matrix concat since first matrix update
-	scaleM[3][0] = (-0.5f * scaleM[0][0]) + 0.5f;
-	scaleM[3][1] = (-0.5f * scaleM[1][1]) + 0.5f;
-
-	//matrix <float, 4, 4> trans = {
-	float4x4 trans = {
-		1.0f, 0.0f, 0.0f, 0.0f, // row 1
-		0.0f, 1.0f, 0.0f, 0.0f, // row 2
-		0.0f, 0.0f, 1.0f, 0.0f, // row 3
-		0.0f, 0.0f, 0.0f, 1.0f, // row 4
-	};
-
-	trans[3][0] = center.x;
-	trans[3][1] = center.y;
-
-	//matrix <float, 4, 4> rot = { 
-	float4x4 rot = { 
-		1.0f, 0.0f, 0.0f, 0.0f, // row 1
-		0.0f, 1.0f, 0.0f, 0.0f, // row 2
-		0.0f, 0.0f, 1.0f, 0.0f, // row 3
-		0.0f, 0.0f, 0.0f, 1.0f, // row 4
-	};
-
-	float theta = radians(angle);
-	float cosTheta = cos(theta);
-	float sinTheta = sin(theta);
-
-
-	rot[0][0] = cosTheta;
-	rot[1][0] = -sinTheta;
-	rot[0][1] = sinTheta;
-	rot[1][1] = cosTheta;
-
-	rot[3][0] = 0.5f + ((-0.5f * cosTheta) - (-0.5f * sinTheta));
-	rot[3][1] = 0.5f + ((-0.5f * sinTheta) + (-0.5f * cosTheta));
-
-
-	float4 inUV = { uv.x, uv.y, 1.0f, 1.0f };
-	inUV = mul(inUV, scaleM);
-	inUV = mul(inUV, trans);
-	outUV = mul(inUV, rot).xy;
-            */
         }
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "TransformToWorldPos")]
+        [TtMaterialShader(Name = "TransformToWorldPos")]
+        [ContextMenu(filterStrings: "TransformToWorldPos", "Effect\\TransformToWorldPos", TtMaterialGraph.MaterialEditorKeyword)]
         public static void TransformToWorldPos(Vector3 localPos, out Vector3 worldPos)
         {
             worldPos = Vector3.Zero;
         }
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Distortion")]
+        [TtMaterialShader(Name = "Distortion")]
+        [ContextMenu(filterStrings: "Distortion", "Effect\\Distortion", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Distortion(Vector4 localPos, Vector4 localNorm, Vector4 viewPos, Vector4 projPos, Vector3 localCameraPos, float strength, float transparency, float distortionOffset, out Vector2 distortionUV, out float distortionAlpha)
         {
             distortionUV = Vector2.Zero;
             distortionAlpha = 0;
         }
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "RimLight")]
+        [TtMaterialShader(Name = "RimLight")]
+        [ContextMenu(filterStrings: "RimLight", "Effect\\RimLight", TtMaterialGraph.MaterialEditorKeyword)]
         public void RimLight(Vector3 N, Vector3 V, float rimPower, float rimIntensity, out float OutRimFactor)
         {
             OutRimFactor = 0;
@@ -284,7 +157,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             //OutRimFactor = NdotV;
         }
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "VecMultiplyQuat")]
+        [TtMaterialShader(Name = "VecMultiplyQuat")]
+        [ContextMenu(filterStrings: "VecMultiplyQuat", "Effect\\VecMultiplyQuat", TtMaterialGraph.MaterialEditorKeyword)]
         public static void VecMultiplyQuat(Vector3 vec, Vector4 quat, out Vector3 outVector)
         {
             outVector = Vector3.Zero;
@@ -295,20 +169,133 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
             //outVector = vec + uv + uuv;
         }
+        #endregion
+
+        #region Math
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "SmoothStep3D")]
+        [TtMaterialShader(Name = "UnpackNormal")]
+        [ContextMenu("UnpackNormal", "Math\\UnpackNormal", TtMaterialGraph.MaterialEditorKeyword)]
+        public static void UnpackNormal(Vector3 packedNormal, out Vector3 normal)
+        {
+            normal = packedNormal * 2.0f - Vector3.One;
+        }
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "Frac")]
+        [ContextMenu("Frac", "Math\\Frac", TtMaterialGraph.MaterialEditorKeyword)]
+        public static void Frac(float x, out float ret)
+        {
+            ret = 0;
+        }
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "Pow")]
+        [ContextMenu("Pow", "Math\\Pow", TtMaterialGraph.MaterialEditorKeyword)]
+        public static void Pow(float v1, float v2, out float ret)
+        {
+            ret = 0;
+        }
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "Clamp")]
+        [ContextMenu(filterStrings: "Clamp", "Math\\Clamp", TtMaterialGraph.MaterialEditorKeyword)]
+        public static void Clamp(float x, float min, float max, out float ret)
+        {
+            ret = 0;
+        }
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "Sin")]
+        [ContextMenu(filterStrings: "Sin", "Math\\Sin", TtMaterialGraph.MaterialEditorKeyword)]
+        public static void Sin(float x, out float sin)
+        {
+            sin = (float)Math.Sin(x);
+        }
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "Cos")]
+        [ContextMenu(filterStrings: "Cos", "Math\\Cos", TtMaterialGraph.MaterialEditorKeyword)]
+        public static void Cos(float x, out float cos)
+        {
+            cos = (float)Math.Cos(x);
+        }
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "SinRemapped")]
+        [ContextMenu(filterStrings: "SinRemapped", "Math\\SinRemapped", TtMaterialGraph.MaterialEditorKeyword)]
+        public static float SinRemapped(float SinPhase, float v1, float v2)
+        {
+            v1 = 0;
+            return 0.0f;
+        }
+
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "SinCos")]
+        [ContextMenu(filterStrings: "SinCos", "Math\\SinCos", TtMaterialGraph.MaterialEditorKeyword)]
+        public static void SinCos(float x, out float sin, out float cos)
+        {
+            sin = (float)Math.Sin(x);
+            cos = (float)Math.Cos(x);
+        }
+
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "Ceil")]
+        [ContextMenu(filterStrings: "Ceil", "Math\\Ceil", TtMaterialGraph.MaterialEditorKeyword)]
+        public static void Ceil(float x, out float ret)
+        {
+            ret = 0;
+        }
+
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "Max")]
+        [ContextMenu(filterStrings: "Max", "Math\\Max", TtMaterialGraph.MaterialEditorKeyword)]
+        public static void Max(float v1, float v2, out float ret)
+        {
+            ret = Math.Max(v1, v2);
+        }
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "Min")]
+        [ContextMenu(filterStrings: "Min", "Math\\Min", TtMaterialGraph.MaterialEditorKeyword)]
+        public static void Min(float v1, float v2, out float ret)
+        {
+            ret = Math.Min(v1, v2);
+        }
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "Lerp")]
+        [ContextMenu(filterStrings: "Lerp", "Math\\Lerp", TtMaterialGraph.MaterialEditorKeyword)]
+        public static void Lerp(float v1, float v2, float s, out float ret)
+        {
+            ret = v1 + s * (v2 - v1);
+        }
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "Lerp2D")]
+        [ContextMenu(filterStrings: "Lerp2D", "Math\\Lerp2D", TtMaterialGraph.MaterialEditorKeyword)]
+        public static void Lerp2D(Vector2 v1, Vector2 v2, Vector2 s, out Vector2 ret)
+        {
+            ret.X = v1.X + s.X * (v2.X - v1.X);
+            ret.Y = v1.Y + s.Y * (v2.Y - v1.Y);
+        }
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "Lerp3D")]
+        [ContextMenu(filterStrings: "Lerp3D", "Math\\Lerp3D", TtMaterialGraph.MaterialEditorKeyword)]
+        public static void Lerp3D(Vector3 v1, Vector3 v2, Vector3 s, out Vector3 ret)
+        {
+            ret.X = v1.X + s.X * (v2.X - v1.X);
+            ret.Y = v1.Y + s.Y * (v2.Y - v1.Y);
+            ret.Z = v1.Z + s.Z * (v2.Z - v1.Z);
+        }
+
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "SmoothStep3D")]
+        [ContextMenu(filterStrings: "SmoothStep3D", "Math\\SmoothStep3D", TtMaterialGraph.MaterialEditorKeyword)]
         public static Vector3 Smoothstep3D(Vector3 InColor)
         {
             return Vector3.Zero;
         }
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "floor3D")]
+        [TtMaterialShader(Name = "floor3D")]
+        [ContextMenu(filterStrings: "floor3D", "Math\\floor3D", TtMaterialGraph.MaterialEditorKeyword)]
         public static Vector3 floor3D(Vector3 InColor)
         {
             return Vector3.Zero;
         }
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "PolarCoodP2D")]
+        [TtMaterialShader(Name = "PolarCoodP2D")]
+        [ContextMenu(filterStrings: "PolarCoodP2D", "Math\\PolarCoodP2D", TtMaterialGraph.MaterialEditorKeyword)]
         public static void PolarCoodP2D(Vector2 uv, out Vector2 polar)
         {
             float a, b, x, y;
@@ -320,7 +307,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             polar.Y = b;
         }
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "PolarCoodD2P")]
+        [TtMaterialShader(Name = "PolarCoodD2P")]
+        [ContextMenu(filterStrings: "PolarCoodD2P", "Math\\PolarCoodD2P", TtMaterialGraph.MaterialEditorKeyword)]
         public static void PolarCoodD2P(Vector2 uv, out Vector2 polar)
         {
             float pi;
@@ -344,37 +332,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             polar.X = x;
             polar.Y = y;
         }
-        //[Rtti.Meta]
-        //public static void GetGridUV(Vector2 uv, Vector4 lightmapUV, Vector2 min, Vector2 max, out Vector2 outUV)
-        //{
-        //    var v = new Vector2(lightmapUV.X, lightmapUV.Y);
-        //    var u = new Vector2(lightmapUV.Z, lightmapUV.W);
-        //    var min_v = new Vector2(min.Y);
-        //    var max_v = new Vector2(max.Y);
-        //    var min_u = new Vector2(min.X);
-        //    var max_u = new Vector2(max.X);
-        //    var t1 = Vector2.Lerp(in min_u, in max_u, in u);
-        //    var t2 = Vector2.Lerp(in min_v, in max_v, in v);
-
-        //    var slt = new Vector2[4]
-        //        {
-        //            new Vector2(t1.X, t2.X),
-        //            new Vector2(t1.X, t2.Y),
-        //            new Vector2(t1.Y, t2.Y),
-        //            new Vector2(t1.Y, t2.X),
-        //        };
-        //    outUV = slt[(int)uv.X];
-        //}
-
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Cross3D")]
+        [TtMaterialShader(Name = "Cross3D")]
+        [ContextMenu(filterStrings: "Cross3D", "Math\\Cross3D", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Cross3D(Vector3 v1, Vector3 v2, out Vector3 ret)
         {
             ret = Vector3.Zero;
         }
 
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "SphereMask")]
+        [TtMaterialShader(Name = "SphereMask")]
+        [ContextMenu(filterStrings: "SphereMask", "Math\\SphereMask", TtMaterialGraph.MaterialEditorKeyword)]
         public static float SphereMask(Vector3 A, Vector3 B, float Radius, float Hardness)
         {
             Radius = 2.0f;
@@ -382,21 +350,24 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
 
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "RotateAboutAxis")]
+        [TtMaterialShader(Name = "RotateAboutAxis")]
+        [ContextMenu(filterStrings: "RotateAboutAxis", "Math\\RotateAboutAxis", TtMaterialGraph.MaterialEditorKeyword)]
         public static void RotateAboutAxis(Vector3 rotationAxis, float rotationAngle, Vector3 pivotPos, Vector3 localPos, out Vector3 localOffset)
         {
             localOffset = Vector3.Zero;
         }
+        #endregion
 
+        #region Pivot
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Pivot_DecodePosition")]
+        [TtMaterialShader(Name = "Pivot_DecodePosition")]
         [ContextMenu("Pivot_DecodePosition", "Pivot\\DecodePosition", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Pivot_DecodePosition(Vector3 rgb, out Vector3 localPos)
         {
             localPos = Vector3.Zero;
         }
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Pivot_DecodeAxisVector")]
+        [TtMaterialShader(Name = "Pivot_DecodeAxisVector")]
         [ContextMenu("Pivot_DecodeAxisVector", "Pivot\\DecodeAxisVector", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Pivot_DecodeAxisVector(Vector3 rgb, out Vector3 localAxis)
         {
@@ -404,7 +375,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
 
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Pivot_UnpackIntAsFloat")]
+        [TtMaterialShader(Name = "Pivot_UnpackIntAsFloat")]
         [ContextMenu("Pivot_UnpackIntAsFloat", "Pivot\\UnpackIntAsFloat", TtMaterialGraph.MaterialEditorKeyword)]
         public static float Pivot_UnpackIntAsFloat(float N)
         {
@@ -412,7 +383,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
 
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Pivot_GetPivotIndex")]
+        [TtMaterialShader(Name = "Pivot_GetPivotIndex")]
         [ContextMenu("Pivot_GetPivotIndex", "Pivot\\GetPivotIndex", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Pivot_GetPivotIndex(Vector2 uv, Vector2 texSize, out float index)
         {
@@ -420,7 +391,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
 
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Pivot_GetParentPivotData")]
+        [TtMaterialShader(Name = "Pivot_GetParentPivotData")]
         [ContextMenu("Pivot_GetParentPivotData", "Pivot\\GetParentPivotData", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Pivot_GetParentPivotData(float parentIdx, Vector2 texSize, float currentIdx, out Vector2 parentUV, out float isChild)
         {
@@ -429,7 +400,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
 
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Pivot_GetHierarchyData")]
+        [TtMaterialShader(Name = "Pivot_GetHierarchyData")]
         [ContextMenu("Pivot_GetHierarchyData", "Pivot\\GetHierarchyData", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Pivot_GetHierarchyData(float pivotDepth, Vector2 pivot1UV, Vector2 pivot2UV, Vector2 pivot3UV, Vector2 pivot4UV, out Vector2 rootUV, out Vector2 mainBranchUV, out Vector2 smallBranchUV, out Vector2 leaveUV, out float mainBranchMask, out float smallBranchMask, out float leaveMask)
         {
@@ -438,7 +409,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
 
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Pivot_WindAnimation")]
+        [TtMaterialShader(Name = "Pivot_WindAnimation")]
         [ContextMenu("Pivot_WindAnimation", "Pivot\\WindAnimation", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Pivot_WindAnimation(Vector3 prePos,
             Var.Texture2D posTex, Var.Texture2D xTex, Var.SamplerState samp, Vector2 uv,
@@ -452,7 +423,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
 
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Pivot_WindAnimation_Sway2")]
+        [TtMaterialShader(Name = "Pivot_WindAnimation_Sway2")]
         [ContextMenu("Pivot_WindAnimation_Sway2", "Pivot\\WindAnimation_Sway2", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Pivot_WindAnimation_Sway2(Vector3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, Vector3 localPos, float time, out Vector3 localVertexOffset)
         {
@@ -460,7 +431,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
 
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Pivot_WindAnimation_Sway3")]
+        [TtMaterialShader(Name = "Pivot_WindAnimation_Sway3")]
         [ContextMenu("Pivot_WindAnimation_Sway3", "Pivot\\WindAnimation_Sway3", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Pivot_WindAnimation_Sway3(Vector3 windSwayDirection, float windSwayGustFrequency, float windSwayIntensity, Vector3 localPos, float time, float windSwayEffectOffset, float windSwayEffectFalloff, out Vector3 localVertexOffset)
         {
@@ -468,7 +439,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
 
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Pivot_WindAnimation_Rustle")]
+        [TtMaterialShader(Name = "Pivot_WindAnimation_Rustle")]
         [ContextMenu("Pivot_WindAnimation_Rustle", "Pivot\\WindAnimation_Rustle", TtMaterialGraph.MaterialEditorKeyword)]
         public static void Pivot_WindAnimation_Rustle(float windSpeed, float windIntensity, Vector3 localPos, float time, out Vector3 localVertexOffset)
         {
@@ -476,7 +447,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
 
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Pivot_Gradient")]
+        [TtMaterialShader(Name = "Pivot_Gradient")]
         [ContextMenu("Pivot_Gradient", "Pivot\\Pivot_Gradient", TtMaterialGraph.MaterialEditorKeyword)]
         public static float Pivot_Gradient(Vector3 worldPos, float gradientOffset, float gradientFallout)
         {
@@ -484,14 +455,15 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
 
         [Rtti.Meta]
-        [TtHLSLProvider(Name = "Pivot_LeafNormal")]
+        [TtMaterialShader(Name = "Pivot_LeafNormal")]
         [ContextMenu("Pivot_LeafNormal", "Pivot\\Pivot_LeafNormal", TtMaterialGraph.MaterialEditorKeyword)]
         public static Vector3 Pivot_LeafNormal(bool frontFace, Vector3 normal)
         {
             return Vector3.UnitY;
         }
+        #endregion
     }
-    public partial class TtHLSLMethodManager
+    public partial class TtMaterialMethodManager
     {
         public Dictionary<string, Rtti.TtClassMeta.TtMethodMeta> Methods { get; } = new Dictionary<string, Rtti.TtClassMeta.TtMethodMeta>();
         public void SureMethods()
@@ -500,12 +472,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 return;
             foreach (var i in Rtti.TtClassMetaManager.Instance.Metas)
             {
-                var hlslAttr = i.Value.ClassType.GetCustomAttribute<TtHLSLProviderAttribute>(false);
+                var hlslAttr = i.Value.ClassType.GetCustomAttribute<TtMaterialShaderAttribute>(false);
                 if (hlslAttr == null)
                     continue;
                 foreach (var j in i.Value.Methods)
                 {
-                    var methodAttr = j.GetMethod().GetCustomAttribute<TtHLSLProviderAttribute>();
+                    var methodAttr = j.GetMethod().GetCustomAttribute<TtMaterialShaderAttribute>();
                     if (hlslAttr == null)
                         continue;
                     System.Diagnostics.Debug.Assert(Methods.TryGetValue(methodAttr.Name, out var m) == false);
@@ -1306,13 +1278,13 @@ namespace EngineNS
 {
     public partial class TtEngine
     {
-        Bricks.CodeBuilder.ShaderNode.Control.TtHLSLMethodManager mHLSLMethodManager = new Bricks.CodeBuilder.ShaderNode.Control.TtHLSLMethodManager();
-        public Bricks.CodeBuilder.ShaderNode.Control.TtHLSLMethodManager HLSLMethodManager 
+        Bricks.CodeBuilder.ShaderNode.Control.TtMaterialMethodManager mMaterialMethodManager = new Bricks.CodeBuilder.ShaderNode.Control.TtMaterialMethodManager();
+        public Bricks.CodeBuilder.ShaderNode.Control.TtMaterialMethodManager MaterialMethodManager 
         { 
             get
             {
-                mHLSLMethodManager.SureMethods();
-                return mHLSLMethodManager;
+                mMaterialMethodManager.SureMethods();
+                return mMaterialMethodManager;
             }
         }
     }

@@ -3,10 +3,12 @@ using EngineNS.GamePlay.Scene;
 using ICSharpCode.SharpZipLib.Zip;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.GamePlay
 {
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtWorld : IDisposable
     {
         public void Dispose()
@@ -56,6 +58,8 @@ namespace EngineNS.GamePlay
         }
         internal DVector3 mCameraOffset = DVector3.Zero;
         internal uint CameralOffsetSerialId = 1;
+        [Category("Option")]
+        [ReadOnly(true)]
         public DVector3 CameraOffset 
         {
             get => mCameraOffset;
@@ -79,6 +83,7 @@ namespace EngineNS.GamePlay
             return mSuns[index];
         }
         TtDirectionLight mDirectionLight;
+        [Category("Option")]
         public TtDirectionLight DirectionLight 
         {
             get
@@ -259,6 +264,7 @@ namespace EngineNS.GamePlay
                 return mScopeChildren;
             }
         }
+        //private static bool bUpdateAABB = false;
         internal unsafe static bool OnVisitNode_GatherVisibleMeshes(Scene.TtNode node, TtVisParameter rp)
         {
             if (rp.OnVisitNode != null)
@@ -281,10 +287,15 @@ namespace EngineNS.GamePlay
                 else
                 {
                     type = rp.CullCamera.WhichContainTypeFast(rp.World, in node.AbsAABB, true);
+                    //if (bUpdateAABB)
+                    //{
+                    //    node.UpdateTreeAABB();
+                    //}
+                    //node.OnAfterCheckContainType(type);
 
                     //var absAABB = DBoundingBox.TransformNoScale(in node.AABB, in node.Placement.AbsTransform);
                     //type = rp.CullCamera.WhichContainTypeFast(this, in absAABB, true);
-                    
+
                     //这里还没想明白，把Frustum的6个平面变换到AABB所在坐标为啥不行
                     //type = frustom->whichContainTypeFast(ref node.AABB, ref node.Placement.AbsTransformInv, 1);
                 }

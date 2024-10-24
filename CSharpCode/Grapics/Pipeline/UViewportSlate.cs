@@ -2,9 +2,11 @@
 using EngineNS.GamePlay.Scene;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace EngineNS.Graphics.Pipeline
 {
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtViewportSlate : IEventProcessor, IDisposable
     {
         public TtViewportSlate()
@@ -24,6 +26,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         GamePlay.TtWorld mWorld;
         [Rtti.Meta()]
+        [Category("Option")]
         public GamePlay.TtWorld World { get => mWorld; protected set => mWorld = value; }
         public void SetCameraOffset(in DVector3 offset)
         {
@@ -442,6 +445,7 @@ namespace EngineNS.Graphics.Pipeline
             mHUDStack.Pop();
         }
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly | Rtti.MetaAttribute.EMetaFlags.Unserializable)]
+        [Category("Option")]
         public UI.TtUIHost HUD
         {
             get

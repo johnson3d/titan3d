@@ -39,11 +39,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 //var meta = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(typeof(HLSLMethod).FullName);
                 //Method = meta.GetMethod(value);
 
-                Method = TtEngine.Instance.HLSLMethodManager.GetMethodByDeclString(value);
+                Method = TtEngine.Instance.MaterialMethodManager.GetMethodByDeclString(value);
                 if (Method == null)
                 {
                     var name = Rtti.TtClassMeta.GetNameByDeclstring(value);
-                    Method = TtEngine.Instance.HLSLMethodManager.GetMethod(name);
+                    Method = TtEngine.Instance.MaterialMethodManager.GetMethod(name);
                 }
                 if (Method != null)
                     this.Initialize(Method);
@@ -488,7 +488,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             var method = Method;
-            var incAttr = Method.DeclaringType?.GetCustomAttribute<EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtHLSLProviderAttribute>(false);
+            var incAttr = Method.DeclaringType?.GetCustomAttribute<EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtMaterialShaderAttribute>(false);
             if (incAttr != null && incAttr.Include != null)
             {
                 data.ClassDec.PushPreInclude(incAttr.Include);

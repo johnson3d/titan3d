@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>6dd92289-578c-4a00-8db2-bfb56c520fb5</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Sprache</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)CommentParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IComment.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ICommentedOfT.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IInput.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Input.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IPositionAware.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IResultOfT.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ITextSpanOfT.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Option.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parse.Commented.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parse.Optional.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parse.Positioned.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parse.Primitives.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parse.Regex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parse.Sequence.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ParseException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ParserOfT.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Position.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Result.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ResultHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StringExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)licence.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)README.md" />
+  </ItemGroup>
+</Project>

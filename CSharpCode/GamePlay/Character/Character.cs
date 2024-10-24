@@ -30,6 +30,8 @@ namespace EngineNS.GamePlay.Character
                 return false;
             }
 
+            var bv = this.BoundVolume as UBoxBV;
+            bv.LocalAABB = new BoundingBox(Vector3.Zero, 1.0f);
             return true;
         }
         public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)

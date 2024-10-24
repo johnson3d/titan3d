@@ -32,9 +32,9 @@ namespace EngineNS.GamePlay.Scene
         public TtNode.ENodeStyles NodeStyles { get; set; } = 0;
         [Rtti.Meta(Order = 0)]
         public string Name { get; set; }
-        UBoundVolume mBoundVolume;
+        TtBoundVolume mBoundVolume;
         [Rtti.Meta(Order = 1)]
-        public UBoundVolume BoundVolume
+        public TtBoundVolume BoundVolume
         {
             get => mBoundVolume;
             set => mBoundVolume = value;
@@ -457,7 +457,7 @@ namespace EngineNS.GamePlay.Scene
             get { return NodeData?.Placement; }
         }
         [Category("Option")]
-        public UBoundVolume BoundVolume
+        public TtBoundVolume BoundVolume
         {
             get { return NodeData?.BoundVolume; }
         }
@@ -808,6 +808,14 @@ namespace EngineNS.GamePlay.Scene
                 i.UpdateAbsTransform();
             }
         }
+        public void UpdateTreeAABB()
+        {
+            foreach (var i in Children)
+            {
+                i.UpdateTreeAABB();
+            }
+            UpdateAABB();
+        }
         public virtual void UpdateAABB()
         {
             if (NodeData == null || BoundVolume == null || Placement == null || HasStyle(ENodeStyles.DiscardAABB))
@@ -855,6 +863,12 @@ namespace EngineNS.GamePlay.Scene
                 {
                     AABB = DBoundingBox.Merge(AABB, i.AABB);
                 }
+            }
+
+            if (AABB.IsEmpty())
+            {
+                AABB.Minimum = DVector3.Zero;
+                AABB.Maximum = DVector3.Zero;
             }
             if (BoundVolume != null)
                 DBoundingBox.TransformNoScale(in AABB, in Placement.AbsTransform, out AbsAABB);

@@ -19,6 +19,32 @@ namespace EngineNS.DesignMacross
             public RName DesignMacrossName { get; set; }
         }
         Macross.UMacrossGetter<TtDesignMacrossBase> mMacrossGetter = null;
+        public Macross.UMacrossGetter<TtDesignMacrossBase> MacrossGetter
+        {
+            get
+            {
+                if(mMacrossGetter != null)
+                {
+                    return mMacrossGetter;
+                }
+                else
+                {
+                    if (DesignMacross != null && !RName.IsEmpty(DesignMacross))
+                    {
+                        var macrossGetter = Macross.UMacrossGetter<TtDesignMacrossBase>.NewInstance();
+                        macrossGetter.Name = DesignMacross;
+                        if (macrossGetter.Get() != null)
+                        {
+                            mMacrossGetter = macrossGetter;
+                            mMacrossGetter.Get().MacrossNode = this;
+                            _ = mMacrossGetter.Get().Initialize();
+                            return mMacrossGetter;
+                        }
+                    }
+                    return null;
+                }
+            }
+        }
         public override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             NodeData = data;
@@ -78,11 +104,11 @@ namespace EngineNS.DesignMacross
         }
         public override void TickLogic(TtNodeTickParameters args)
         {
-            if(mMacrossGetter!= null && mMacrossGetter.Get() != null && mMacrossGetter.Get().IsInitialized)
+            if(MacrossGetter != null && MacrossGetter.Get() != null && MacrossGetter.Get().IsInitialized)
             {
-                mMacrossGetter.Get().PreTick(args.World.DeltaTimeSecond);
-                mMacrossGetter.Get().Tick(args.World.DeltaTimeSecond);
-                mMacrossGetter.Get().AfterTick(args.World.DeltaTimeSecond);
+                MacrossGetter.Get().PreTick(args.World.DeltaTimeSecond);
+                MacrossGetter.Get().Tick(args.World.DeltaTimeSecond);
+                MacrossGetter.Get().AfterTick(args.World.DeltaTimeSecond);
             }
             base.TickLogic(args);
         }

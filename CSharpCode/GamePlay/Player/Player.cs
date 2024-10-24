@@ -14,7 +14,7 @@ namespace EngineNS.GamePlay.Player
         public partial class TtPlayerData : TtNodeData
         {
             [Rtti.Meta]
-            public UCharacterController CharacterController { get; set; } = null; //there maybe many controllers cause of one player can control many characters, for now assume only one
+            public TtCharacterController CharacterController { get; set; } = null; //there maybe many controllers cause of one player can control many characters, for now assume only one
         }
         
         public TtPlayerData PlayerData

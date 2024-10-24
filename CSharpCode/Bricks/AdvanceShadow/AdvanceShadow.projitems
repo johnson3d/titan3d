@@ -9,6 +9,7 @@
     <Import_RootNamespace>EngineNS.Bricks.AdvanceShadow</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AdvShadowMapNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DepthTile.cs" />
   </ItemGroup>
 </Project>

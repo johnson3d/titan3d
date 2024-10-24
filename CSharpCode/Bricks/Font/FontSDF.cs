@@ -417,11 +417,11 @@ namespace EngineNS.Bricks.Font
     }
 
     [Rtti.Meta]
-    [Bricks.CodeBuilder.ShaderNode.Control.TtHLSLProvider(Include = "@Engine/Shaders/Bricks/TextFont/FontSDF.cginc")]
+    [Bricks.CodeBuilder.ShaderNode.Control.TtMaterialShader(Include = "@Engine/Shaders/Bricks/TextFont/FontSDF.cginc")]
     public partial class TtFontHLSLMethod
     {
         [Rtti.Meta]
-        [Bricks.CodeBuilder.ShaderNode.Control.TtHLSLProvider(Name = "GetFontSDF")]
+        [Bricks.CodeBuilder.ShaderNode.Control.TtMaterialShader(Name = "GetFontSDF")]
         [Bricks.CodeBuilder.ContextMenu("font", "Bricks\\Font\\GetFontSDF", Bricks.CodeBuilder.ShaderNode.TtMaterialGraph.MaterialEditorKeyword)]
         public static Vector4 GetFontSDF(int effect, Vector3 baseColor, Vector3 borderColor, float alpha, float lowThreshold = 0, float highThreshold = 0.8f, float smoothValue = 0.5f)
         {

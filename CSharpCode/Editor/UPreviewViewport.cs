@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Security.Permissions;
 
 namespace EngineNS.Editor
@@ -105,6 +106,8 @@ namespace EngineNS.Editor
                 RenderPolicy?.OnResize(vpSize.X, vpSize.Y);
             }
         }
+        [Category("Option")]
+        [ReadOnly(true)]
         public RName PreviewAsset { get; set; } = null;
         public delegate void Delegate_OnDrawViewportUIAction(in Vector2 startDrawPos);
         public Delegate_OnDrawViewportUIAction OnDrawViewportUIAction;

@@ -17,6 +17,7 @@ namespace EngineNS.GamePlay.Movemnet
         {
 
         }
+        public float Speed { get; set; } = 3;
         public Vector3 LinearVelocity { get; private set; }
         [Category("Option")]
         public Vector3 DesiredLinearVelocity { get; set; } = Vector3.Zero;

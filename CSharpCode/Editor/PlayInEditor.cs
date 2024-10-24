@@ -1,5 +1,6 @@
 ﻿using EngineNS.Bricks.Input.Control;
 using EngineNS.Bricks.Input.Device.Keyboard;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Editor
 {
-    public partial class UPIEModule : TtModule<TtEngine>
+    public partial class TtPIEModule : TtModule<TtEngine>
     {
         public override void TickModule(TtEngine engine)
         {
@@ -29,7 +30,7 @@ namespace EngineNS.Editor
         }
     }
 
-    public class UPIEController : IRootForm
+    public class TtPIEController : IRootForm
     {
         bool mVisible = false;
         public bool Visible 
@@ -47,7 +48,7 @@ namespace EngineNS.Editor
         RName.PGRNameAttribute mRNameEditor = new RName.PGRNameAttribute();
         RName mCurrentName;
 
-        public UPIEController()
+        public TtPIEController()
         {
             TtEngine.RootFormManager.RegRootForm(this);
         }
@@ -61,7 +62,15 @@ namespace EngineNS.Editor
             if (!await mRNameEditor.Initialize())
                 return false;
 
-            mCurrentName = TtEngine.Instance.Config.PlayGameName;
+            var cfgName = TtEngine.Instance.DynConfigData.GetConfig("LastPIEName") as RName;
+            if (cfgName == null)
+            {
+                mCurrentName = TtEngine.Instance.Config.PlayGameName;
+            }
+            else
+            {
+                mCurrentName = cfgName;
+            }
             mRNameEditor.FilterExts = Bricks.CodeBuilder.TtMacross.AssetExt;
             mRNameEditor.MacrossType = typeof(GamePlay.UMacrossGame);
 
@@ -75,16 +84,6 @@ namespace EngineNS.Editor
             if (result)
             {
                 var drawList = ImGuiAPI.GetWindowDrawList();
-                //EGui.UIProxy.Toolbar.BeginToolbar(drawList);
-
-                //if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(drawList, ref mToolBtn_IsMouseDown[1], ref mToolBtn_IsMouseHover[1], null, "Play"))
-                //{
-                //    var task = OnPlayGame(TtEngine.Instance.Config.PlayGameName);
-                //}
-                //if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(drawList, ref mToolBtn_IsMouseDown[2], ref mToolBtn_IsMouseHover[2], null, "Stop"))
-                //{
-
-                //}
 
                 var info = new EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute.EditorInfo()
                 {
@@ -96,7 +95,11 @@ namespace EngineNS.Editor
                 object newValue;
                 ImGuiAPI.SetNextItemWidth(200);
                 mRNameEditor.OnDraw(info, out newValue);
-                mCurrentName = (RName)newValue;
+                if (mCurrentName != (RName)newValue)
+                {
+                    mCurrentName = (RName)newValue;
+                    TtEngine.Instance.DynConfigData.SetConfig("LastPIEName", mCurrentName);
+                }
 
                 Vector2 sz = new Vector2(-1, 40);
                 if (ImGuiAPI.Button("Play", sz))
@@ -145,7 +148,7 @@ namespace EngineNS
             }
         }
 
-        public Editor.UPIEModule PIEModule { get; } = new Editor.UPIEModule();
+        public Editor.TtPIEModule PIEModule { get; } = new Editor.TtPIEModule();
         public readonly static System.Version Version = System.Environment.Version;
         public static string DotNetVersion { get; private set; } = "net7.0";
         public virtual async System.Threading.Tasks.Task<bool> StartPlayInEditor(TtSlateApplication application, RName main)

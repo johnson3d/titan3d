@@ -180,16 +180,16 @@ namespace EngineNS.GamePlay
             world.Root.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
             scene.Parent = world.Root;
         }
-        public Controller.UCharacterController CharacterController { get; set; } = null;
+        public Controller.TtCharacterController CharacterController { get; set; } = null;
         [Rtti.Meta]
         public async System.Threading.Tasks.Task CreateCharacterFromPrefab(Scene.TtScene scene, RName prefabName)
         {
             var playerStart = scene.FindFirstChild<TtPlayerStart>();
             EngineNS.GamePlay.Scene.TtNode root = scene;
-            var prefab = await EngineNS.TtEngine.Instance.PrefabManager.GetPrefab(prefabName);
-            var prefabRoot = await prefab.ConcreatePrefab(scene.World, null);
-            prefabRoot.Parent = scene;
-            var actor = prefabRoot.FindFirstChild<TtActor>() as TtActor;
+
+            var prefab = await TtPrefab.LoadPrefab(scene.World, prefabName);
+             prefab.Root.Parent = root;
+            var actor = prefab.Root.FindFirstChild<TtActor>() as TtActor;
             if (playerStart == null)
             {
                 actor.Placement.SetTransform(new DVector3(0, 0, 0), Vector3.One, Quaternion.Identity);
@@ -198,7 +198,7 @@ namespace EngineNS.GamePlay
             {
                 actor.Placement.SetTransform(playerStart.Placement.TransformData);
             }
-            CharacterController = new EngineNS.GamePlay.Controller.UCharacterController();
+            CharacterController = new EngineNS.GamePlay.Controller.TtCharacterController();
             await CharacterController.InitializeNode(scene.World, new EngineNS.GamePlay.Scene.TtNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             CharacterController.Parent = root;
             CharacterController.ControlledCharacter = actor;
@@ -258,7 +258,7 @@ namespace EngineNS.GamePlay
             sapnd.Points.Add(new EngineNS.Animation.SceneNode.FBlendSpacePoint(RName.GetRName("utest/puppet/animation/w2_run_f_loop_ip.animclip"), new Vector3(3, 0, 0)));
             await EngineNS.Animation.SceneNode.TtBlendSpaceAnimPlayNode.AddBlendSpace2DAnimPlayNode(scene.World, meshNode1, sapnd, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtIdentityPlacement));
 
-            var characterController = new EngineNS.GamePlay.Controller.UCharacterController();
+            var characterController = new EngineNS.GamePlay.Controller.TtCharacterController();
             await characterController.InitializeNode(scene.World, new EngineNS.GamePlay.Scene.TtNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             characterController.Parent = root;
             characterController.ControlledCharacter = ChiefPlayer;

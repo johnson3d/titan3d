@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AuxPtrType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CNativeString.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Command.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\DynConfigData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\IStreaming.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\UAssetOperator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\IAssemblyLoader.cs" />

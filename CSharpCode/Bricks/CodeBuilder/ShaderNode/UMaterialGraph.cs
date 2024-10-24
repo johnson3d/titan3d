@@ -59,7 +59,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 }
             }
             //var kls = Rtti.UClassMetaManager.Instance.GetMetaFromFullName(typeof(Control.HLSLMethod).FullName);
-            var methods = TtEngine.Instance.HLSLMethodManager.Methods;
+            var methods = TtEngine.Instance.MaterialMethodManager.Methods;
             var funcMenu = CanvasMenus.AddMenuItem("Function", null, null);
             foreach (var i in methods.Values)
             {
@@ -124,43 +124,89 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 mtlFuncMenu.AddMenuItem(i.Name, null, action);
             }
             var uniformVarMenus = CanvasMenus.AddMenuItem("UniformVars", null, null);
-            var perFrameMenus = uniformVarMenus.AddMenuItem("PerFrame", null, null);
-            var members = TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerFrame.GetType().GetFields();
-            foreach (var i in members)
             {
-                var attrs = i.GetCustomAttributes(typeof(NxRHI.TtShader.UShaderVarAttribute), false);
-                if (attrs.Length == 0)
-                    continue;
-                perFrameMenus.AddMenuItem(i.Name, null,
-                    (TtMenuItem item, object sender) =>
-                    {
-                        var node = new UUniformVar();
-                        node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.UShaderVarAttribute).VarType);
-                        node.Name = i.Name;
-                        node.UserData = this;
-                        node.Position = PopMenuPosition;
-                        SetDefaultActionForNode(node);
-                        this.AddNode(node);
-                    });
+                var perFrameMenus = uniformVarMenus.AddMenuItem("PerFrame", null, null);
+                var members = TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerFrame.GetType().GetFields();
+                foreach (var i in members)
+                {
+                    var attrs = i.GetCustomAttributes(typeof(NxRHI.TtShader.UShaderVarAttribute), false);
+                    if (attrs.Length == 0)
+                        continue;
+                    perFrameMenus.AddMenuItem(i.Name, null,
+                        (TtMenuItem item, object sender) =>
+                        {
+                            var node = new UUniformVar();
+                            node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.UShaderVarAttribute).VarType);
+                            node.Name = i.Name;
+                            node.UserData = this;
+                            node.Position = PopMenuPosition;
+                            SetDefaultActionForNode(node);
+                            this.AddNode(node);
+                        });
+                }
             }
-            var perCameraMenus = uniformVarMenus.AddMenuItem("PerCamera", null, null);
-            var cameraMembers = TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.GetType().GetFields();
-            foreach (var i in cameraMembers)
             {
-                var attrs = i.GetCustomAttributes(typeof(NxRHI.TtShader.UShaderVarAttribute), false);
-                if (attrs.Length == 0)
-                    continue;
-                perCameraMenus.AddMenuItem(i.Name, null,
-                    (TtMenuItem item, object sender) =>
-                    {
-                        var node = new UUniformVar();
-                        node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.UShaderVarAttribute).VarType);
-                        node.Name = i.Name;
-                        node.UserData = this;
-                        node.Position = PopMenuPosition;
-                        SetDefaultActionForNode(node);
-                        this.AddNode(node);
-                    });
+                var perCameraMenus = uniformVarMenus.AddMenuItem("PerCamera", null, null);
+                var cameraMembers = TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.GetType().GetFields();
+                foreach (var i in cameraMembers)
+                {
+                    var attrs = i.GetCustomAttributes(typeof(NxRHI.TtShader.UShaderVarAttribute), false);
+                    if (attrs.Length == 0)
+                        continue;
+                    perCameraMenus.AddMenuItem(i.Name, null,
+                        (TtMenuItem item, object sender) =>
+                        {
+                            var node = new UUniformVar();
+                            node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.UShaderVarAttribute).VarType);
+                            node.Name = i.Name;
+                            node.UserData = this;
+                            node.Position = PopMenuPosition;
+                            SetDefaultActionForNode(node);
+                            this.AddNode(node);
+                        });
+                }
+            }
+            {
+                var perCbMenus = uniformVarMenus.AddMenuItem("PerViewport", null, null);
+                var Members = TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerViewport.GetType().GetFields();
+                foreach (var i in Members)
+                {
+                    var attrs = i.GetCustomAttributes(typeof(NxRHI.TtShader.UShaderVarAttribute), false);
+                    if (attrs.Length == 0)
+                        continue;
+                    perCbMenus.AddMenuItem(i.Name, null,
+                        (TtMenuItem item, object sender) =>
+                        {
+                            var node = new UUniformVar();
+                            node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.UShaderVarAttribute).VarType);
+                            node.Name = i.Name;
+                            node.UserData = this;
+                            node.Position = PopMenuPosition;
+                            SetDefaultActionForNode(node);
+                            this.AddNode(node);
+                        });
+                }
+            }
+            {
+                var perCbMenus = uniformVarMenus.AddMenuItem("PerMesh", null, null);
+                var Members = TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.GetType().GetFields();
+                foreach (var i in Members)
+                {
+                    var attrs = i.GetCustomAttributes(typeof(NxRHI.TtShader.UShaderVarAttribute), false);
+                    if (attrs.Length == 0)
+                        continue;
+                    perCbMenus.AddMenuItem(i.Name, null,
+                        (TtMenuItem item, object sender) =>
+                        {
+                            var node = new UUniformVar();
+                            node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.UShaderVarAttribute).VarType);
+                            node.Name = i.Name;
+                            node.UserData = this;
+                            node.Position = PopMenuPosition;
+                            SetDefaultActionForNode(node);
+                            this.AddNode(node);
+                        });
+                }
             }
             var inputVarMenus = CanvasMenus.AddMenuItem("InputVars", null, null);
             var psInputMenus = inputVarMenus.AddMenuItem("PSInput", null, null);

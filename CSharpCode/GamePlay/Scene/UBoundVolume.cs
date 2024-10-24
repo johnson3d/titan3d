@@ -11,9 +11,9 @@ namespace EngineNS.GamePlay.Scene
         Sphere,
     }
 
-    public class UBoundVolume : IO.ISerializer
+    public class TtBoundVolume : IO.ISerializer
     {
-        public UBoundVolume()
+        public TtBoundVolume()
         {
             
         }
@@ -61,7 +61,7 @@ namespace EngineNS.GamePlay.Scene
         //    return null;
         //}
     }
-    public class UBoxBV : UBoundVolume
+    public class UBoxBV : TtBoundVolume
     {     
         public Vector3 mExtent = new Vector3(1,1,1);        
         protected override void OnVolumeChanged()
@@ -69,7 +69,7 @@ namespace EngineNS.GamePlay.Scene
             HostNode.UpdateAABB();
         }
     }
-    public class USphereBV : UBoundVolume
+    public class USphereBV : TtBoundVolume
     {
         Vector3 mCenter;
         [Rtti.Meta]

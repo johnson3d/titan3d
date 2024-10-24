@@ -47,6 +47,12 @@ namespace EngineNS.EGui.Controls
 
             InitializeDirContextMenu();
 
+            var cfgContentCurrentDir = TtEngine.Instance.DynConfigData.GetConfig("ContentCurrentDir");
+            if (cfgContentCurrentDir != null)
+            {
+                this.CurrentDir = cfgContentCurrentDir as RName;
+            }
+
             return true;
         }
         public void Draw(in Vector2 size)
@@ -97,6 +103,7 @@ namespace EngineNS.EGui.Controls
             if (CurrentDir == dir)
                 return;
             CurrentDir = dir;
+            TtEngine.Instance.DynConfigData.SetConfig("ContentCurrentDir", dir);
             if (CurrentDirHistoryIdx + 1 < DirHistory.Count)
             {
                 DirHistory.RemoveRange(CurrentDirHistoryIdx + 1, DirHistory.Count - CurrentDirHistoryIdx - 1);

@@ -34,7 +34,7 @@ namespace EngineNS.Editor
 
             mBrickManager = new Bricks.ProjectGen.UBrickManager();
             mEditorSettings = new Forms.TtEditorSettings();
-            mPIEController = new UPIEController();
+            mPIEController = new TtPIEController();
         }
         private bool IsVisible = true;
         //public Editor.Forms.UWorldOutliner mWorldOutliner;
@@ -45,7 +45,7 @@ namespace EngineNS.Editor
         public Editor.Forms.UInspector mMainInspector;
         public Bricks.ProjectGen.UBrickManager mBrickManager = null;
         public Editor.Forms.TtEditorSettings mEditorSettings;
-        public UPIEController mPIEController;
+        public TtPIEController mPIEController;
 
         //public UEditorWorldViewportSlate WorldViewportSlate = null;
         //public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()
@@ -807,18 +807,7 @@ namespace EngineNS.Editor
                     (meshNode1.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).MdfQueueType = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfSkinMesh));
                     (meshNode1.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).AtomType = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMesh.TtAtom));
 
-                    var gameplayMacrossNodeData = new EngineNS.GamePlay.GamePlayMacross.UGamePlayMacrossNode.UGamePlayMacrossNodeData();
-                    gameplayMacrossNodeData.MacrossName = RName.GetRName("utest/puppet/testgameplay.macross");
-                    
-                    {
-                        var gamePlayMacrossNode = new GamePlay.GamePlayMacross.UGamePlayMacrossNode();
-                        await gamePlayMacrossNode.InitializeNode(world, gameplayMacrossNodeData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
-                        gamePlayMacrossNode.Parent = meshNode1;
-                        //await gameplayMacrossNodeData.McGamePlay.Get().ConstructAnimGraph(meshNode1);
-                    }
-
-                    //await EngineNS.GamePlay.GamePlayMacross.UGamePlayMacrossNode.AddGamePlayMacrossNodeNode(world, meshNode, gameplayMacrossNodeData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.UPlacement));
-                }
+                   }
             }
 
             {
@@ -943,7 +932,7 @@ namespace EngineNS.Editor
 
         public static async System.Threading.Tasks.Task TestCreateCharacter(GamePlay.TtWorld world, GamePlay.Scene.TtNode root, bool hideTerrain = false)
         {
-            var characterController = new GamePlay.Controller.UCharacterController();
+            var characterController = new GamePlay.Controller.TtCharacterController();
             var player = new GamePlay.Player.TtPlayer();
             var playerData = new GamePlay.Player.TtPlayer.TtPlayerData() { CharacterController = characterController };
             await player.InitializeNode(world, playerData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));

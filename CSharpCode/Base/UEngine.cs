@@ -352,6 +352,14 @@ namespace EngineNS
                 Config.SaveConfig(cfgFile);
             }
 
+            this.DynConfigData.LoadConfigData();
+
+            var Config_UseRenderDoc = this.DynConfigData.GetConfig("UseRenderDoc");
+            if (Config_UseRenderDoc != null)
+            {
+                Config.UseRenderDoc = (bool)Config_UseRenderDoc;
+            }
+
             if (Config.IsGpuDump)
             {
                 if (Config.HasDebugLayer)

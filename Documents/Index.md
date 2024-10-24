@@ -1,6 +1,10 @@
 -  启动编辑器
 - - 调试运行MainEditor工程
 - - 修改启动配置，其中cfg文件可以修改引擎的各种启动参数
+- - Cache/DynConfigData.dcd文件是一些当前引擎编辑器配置保存文件
+- - - 程序设置配置示例：TtEngine.Instance.DynConfigData.SetConfig("LastPIEName", mCurrentName)
+- - - 程序读取配置示例：var cfgName = TtEngine.Instance.DynConfigData.GetConfig("LastPIEName") as RName;
+- - - 配置格式：\{key\}:\{TypeString\}=\{Value\}
 ![启动配置](picture/run_config.png)
 	- [引擎配置文件](engine/EngineConfig.md)
 -  编辑器总览

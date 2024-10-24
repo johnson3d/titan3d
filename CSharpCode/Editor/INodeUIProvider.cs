@@ -119,5 +119,10 @@ namespace EngineNS.GamePlay.Scene
             }
             return ret;
         }
+
+        //public virtual void OnAfterCheckContainType(CONTAIN_TYPE type)
+        //{
+
+        //}
     }
 }

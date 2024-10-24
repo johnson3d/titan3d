@@ -103,7 +103,7 @@ namespace EngineNS.GamePlay.Scene
     [IO.AssetCreateMenu(MenuName = "Prefab")]
     public partial class TtPrefab : IO.IAsset
     {
-        public TtPrefabNode Root;
+        public TtPrefabNode Root { get; set; }
         public static bool TryParsePrefabPath(string prefabPath, out RName name, out string[] path)
         {
             name = null;
