@@ -1,0 +1,8 @@
+- 记录的最后一个运行的PIE
+	- LastPIEName:EngineNS.RName@EngineCore=tutorials/character/charactertestgame.macross:Game
+- 是否使用RenderDoc
+	- UseRenderDoc:System.Boolean@Unknown=False
+- 记录的最后一个浏览目录
+	- ContentCurrentDir:EngineNS.RName@EngineCore=utest/:Game
+- 保存最新资产类型列表
+	- CookSaveNewestAssetType:System.String@Unknown=Scene+Mesh+Material+MaterialInst+AnimClip+MeshPrimitive+UI+Prefab+Macross+UVAnim+RPolicy+AnimationClip

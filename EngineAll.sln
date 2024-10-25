@@ -416,6 +416,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "editor", "editor", "{8E8463
 		Documents\editor\ClrProfiler.md = Documents\editor\ClrProfiler.md
 		Documents\editor\ContentBrowser.md = Documents\editor\ContentBrowser.md
 		Documents\editor\CpuProfiler.md = Documents\editor\CpuProfiler.md
+		Documents\editor\DynConfig.md = Documents\editor\DynConfig.md
 		Documents\editor\GpuProfiler.md = Documents\editor\GpuProfiler.md
 		Documents\editor\LogWatcher.md = Documents\editor\LogWatcher.md
 		Documents\editor\MacrossEditor.md = Documents\editor\MacrossEditor.md

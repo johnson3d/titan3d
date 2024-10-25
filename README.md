@@ -17,7 +17,7 @@
 1. 设置MainEditor为当前项目
 2. 调试命令行参数为config=\$(SolutionDir)content\EngineConfig.cfg use_renderdoc=false
 3. 调试工作目录为$(SolutionDir)binaries\
-4. Run/Debug [编辑器使用文档](Documents/Index.md)。
+4. 运行与调试，请阅读[**引擎配置与编辑器使用文档**](Documents/Index.md)。
 5. 遇到一些奇怪IO相关Crash或者异常，可以尝试删除本地cache目录
 # 开发者注意事项
 1. 不要提交大文件(20M以上)，避免lfs使用
