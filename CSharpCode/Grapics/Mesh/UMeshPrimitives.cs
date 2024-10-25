@@ -160,6 +160,7 @@ namespace EngineNS.Graphics.Mesh
                 ar.Write(PartialSkeleton);
             }
             xnd.SaveXnd(name.Address);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
         }
         [Rtti.Meta]
         public RName AssetName

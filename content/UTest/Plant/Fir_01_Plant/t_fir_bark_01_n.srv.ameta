@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="d6ad543f-2115-47b3-ab6b-1dad9f93e463" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/plant/fir_01_plant/t_fir_bark_01_n.srv,d6ad543f-2115-47b3-ab6b-1dad9f93e463" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
@@ -10,6 +11,7 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
+  <OriginImageAddress Type="System.String@Unknown" Value="utest/plant/fir_01_plant/t_fir_bark_01_n.srv:Game" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.NxRHI.TtSrView@EngineCore" />
 </Root>

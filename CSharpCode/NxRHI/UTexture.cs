@@ -24,6 +24,9 @@ using System.Text;
 using System.Linq;
 using EngineNS.Graphics.Pipeline.Shader;
 using Mono.Cecil.Cil;
+using MathNet.Numerics.Distributions;
+using Mono.CompilerServices.SymbolWriter;
+using NPOI.HPSF;
 
 namespace EngineNS.NxRHI
 {
@@ -41,6 +44,45 @@ namespace EngineNS.NxRHI
         public override string GetAssetTypeName()
         {
             return "SrView";
+        }
+        string mOriginImageAddress = null;
+        [Rtti.Meta]
+        public string OriginImageAddress 
+        {
+            get
+            {
+                if (mOriginImageAddress == null)
+                {
+                    var address = AssetName.Address;
+                    if (IO.TtFileManager.FileExists(address + ".png") == true)
+                        mOriginImageAddress = address + ".png";
+                    else if (IO.TtFileManager.FileExists(address + ".hdr") == true)
+                        mOriginImageAddress = address + ".hdr";
+                    else if (IO.TtFileManager.FileExists(address + ".exr") == true)
+                        mOriginImageAddress = address + ".exr";
+                    else
+                        mOriginImageAddress = AssetName.ToString();
+                }
+                return mOriginImageAddress;
+            }
+            set
+            {
+                mOriginImageAddress = value;
+            }
+        }
+        public UImageType OriginImageType
+        {
+            get
+            {
+                var ext = IO.TtFileManager.GetExtName(OriginImageAddress);
+                if (ext == ".png")
+                    return UImageType.PNG;
+                else if (ext == ".hdr")
+                    return UImageType.HDR;
+                if (ext == ".exr")
+                    return UImageType.EXR;
+                return UImageType.Unkown;
+            }
         }
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
@@ -162,15 +204,6 @@ namespace EngineNS.NxRHI
                         cmdlist.AddText(font, 25, &indiactorPos, 0xFF00FF00, "N", null, 2.0f, null);
                     }
                 }
-
-                // support preview A channel
-                //var textPos = end - new Vector2(32, 32);
-                //cmdlist.AddText(textPos, mShowA ? 0xFFFFFFFF : 0x00FF00FF, "A", null);
-                //if (ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Left, false) && ImGuiAPI.IsMouseHoveringRect(textPos, end, true))
-                //{
-                //    CmdParameters.ColorMask.W = mShowA ? 1 : 0;
-                //    mShowA = !mShowA;
-                //}
             }
             //cmdlist.AddText(in start, 0xFFFFFFFF, "texture", null);
         }
@@ -907,6 +940,7 @@ namespace EngineNS.NxRHI
                     ameta.AssetId = Guid.NewGuid();
                     ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(typeof(TtSrView));
                     ameta.Description = $"This is a {typeof(TtSrView).FullName}\n";
+                    ameta.OriginImageAddress = mSourceFile;
                     ameta.SaveAMeta((IAsset)null);
 
                     TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
@@ -1049,7 +1083,8 @@ namespace EngineNS.NxRHI
         object mOriginImageObject = null;
         internal void LoadOriginImageObject()
         {
-            var imgType = GetOriginImageType(this.AssetName);
+            var ameta = GetAMeta() as TtSrViewAMeta;
+            var imgType = ameta.OriginImageType;
             switch (imgType)
             {
                 case EngienNS.Bricks.ImageDecoder.UImageType.PNG:
@@ -1081,6 +1116,7 @@ namespace EngineNS.NxRHI
         }
         public void SaveAssetTo(RName name)
         {
+            var ameta = this.GetAMeta() as TtSrViewAMeta;
             if (mOriginImageObject != null)
             {
                 if (mOriginImageObject.GetType() == typeof(ImageResult))
@@ -1098,7 +1134,7 @@ namespace EngineNS.NxRHI
                 return;
             }
 
-            var imgType = GetOriginImageType(this.AssetName);
+            var imgType = GetOriginImageType(AssetName);// ameta.OriginImageType;
             switch (imgType)
             {
                 case EngienNS.Bricks.ImageDecoder.UImageType.PNG:
@@ -1131,13 +1167,38 @@ namespace EngineNS.NxRHI
                         ImportAttribute.SaveSrv(file, name, this.PicDesc);
                     }
                     break;
+                case UImageType.Unkown:
+                    {
+                        var segs = ameta.OriginImageAddress.Split(':');
+                        if (segs.Length == 2)
+                        {
+                            var rnType = (RName.ERNameType)Support.TConvert.ToEnumValue(typeof(RName.ERNameType), segs[1]);
+                            var src = RName.GetAddress(rnType, segs[0]);
+                            IO.TtFileManager.CopyFile(src, name.Address);
+                            TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.Assert(false);
+                        }
+                    }
+                    break;
             }
 
-            var ameta = this.GetAMeta();
             if (ameta != null)
             {
                 UpdateAMetaReferences(ameta);
+                string saved = null;
+                if (imgType == UImageType.Unkown)
+                {
+                    saved = ameta.OriginImageAddress;
+                    ameta.OriginImageAddress = AssetName.ToString();
+                }
                 ameta.SaveAMeta(this);
+                if (imgType == UImageType.Unkown)
+                {
+                    ameta.OriginImageAddress = saved;
+                }
             }
         }
         [Rtti.Meta]
@@ -1236,21 +1297,18 @@ namespace EngineNS.NxRHI
         }
         #endregion
 
-        public static UImageType GetOriginImageType(RName name)
+        private static UImageType GetOriginImageType(string address)
         {
-            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
+            if (IO.TtFileManager.GetExtName(address) != ".srv")
+                return UImageType.Unkown;
+            using (var xnd = IO.TtXndHolder.LoadXnd(address))
             {
-                if(xnd==null)
+                if (xnd == null)
                 {
-                    if (System.IO.File.Exists(name.Address + ".png") == true)
-                        return UImageType.PNG;
-                    else if (System.IO.File.Exists(name.Address + ".hdr") == true)
-                        return UImageType.HDR;
-                    else if (System.IO.File.Exists(name.Address + ".exr") == true)
-                        return UImageType.EXR;
+                    return UImageType.Unkown;
                 }
                 var attr = xnd.RootNode.TryGetAttribute("Png");
-                if(attr.IsValidPointer)
+                if (attr.IsValidPointer)
                     return UImageType.PNG;
                 attr = xnd.RootNode.TryGetAttribute("Hdr");
                 if (attr.IsValidPointer)
@@ -1259,36 +1317,54 @@ namespace EngineNS.NxRHI
                 if (attr.IsValidPointer)
                     return UImageType.EXR;
             }
-            return UImageType.PNG;
+            return UImageType.Unkown;
+        }
+        public static UImageType GetOriginImageType(RName name)
+        {
+            var meta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(name) as TtSrViewAMeta;
+            if (meta.OriginImageType != UImageType.Unkown)
+            {
+                return meta.OriginImageType;
+            }
+
+            return GetOriginImageType(name.Address);
         }
 
         public static Jither.OpenEXR.EXRFile LoadOriginExr(RName name, ref System.IO.Stream outStream)
         {
-            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
+            //优先读真正的原始文件
+            var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(name) as TtSrViewAMeta;
+            if (ameta != null && ameta.OriginImageAddress != null)
             {
-                if (xnd == null)
+                if (ameta.OriginImageType == UImageType.EXR)
                 {
-                    var sourceFile = name.Address + ".exr";
-                    outStream = System.IO.File.OpenRead(sourceFile);
+                    outStream = System.IO.File.OpenRead(ameta.OriginImageAddress);
                     {
                         if (outStream == null)
                             return null;
                         return new Jither.OpenEXR.EXRFile(outStream);
                     }
                 }
-                var attr = xnd.RootNode.TryGetAttribute("Exr");
-                if (attr.IsValidPointer)
+            }
+            //尝试读保存在xnd里面的原始数据
+            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
+            {
+                if (xnd == null)
                 {
-                    byte[] rawData;
-                    using (var ar = attr.GetReader(null))
+                    var attr = xnd.RootNode.TryGetAttribute("Exr");
+                    if (attr.IsValidPointer)
                     {
-                        ar.ReadNoSize(out rawData, (int)attr.GetReaderLength());
-                    }
+                        byte[] rawData;
+                        using (var ar = attr.GetReader(null))
+                        {
+                            ar.ReadNoSize(out rawData, (int)attr.GetReaderLength());
+                        }
 
-                    outStream = new System.IO.MemoryStream(rawData);
-                    {
-                        var file = new Jither.OpenEXR.EXRFile(outStream);
-                        return file;
+                        outStream = new System.IO.MemoryStream(rawData);
+                        {
+                            var file = new Jither.OpenEXR.EXRFile(outStream);
+                            return file;
+                        }
                     }
                 }
             }
@@ -1296,80 +1372,57 @@ namespace EngineNS.NxRHI
         }
 
 
-        public static void LoadOriginHdr(RName name, ref StbImageSharp.ImageResultFloat outImage)
+        public static bool LoadOriginHdr(RName name, ref StbImageSharp.ImageResultFloat outImage)
         {
-            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
+            //优先读真正的原始文件
+            var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(name) as TtSrViewAMeta;
+            if (ameta != null && ameta.OriginImageAddress != null)
             {
-                if (xnd == null)
+                if (ameta.OriginImageType == UImageType.HDR)
                 {
-                    var sourceFile = name.Address + ".hdr";
-                    using (var stream = System.IO.File.OpenRead(sourceFile))
+                    using (var stream = System.IO.File.OpenRead(ameta.OriginImageAddress))
                     {
                         if (stream == null)
-                            return;
+                            return false;
                         outImage = StbImageSharp.ImageResultFloat.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
                     }
                 }
-                var attr = xnd.RootNode.TryGetAttribute("Hdr");
-                if (attr.IsValidPointer)
+            }
+            //尝试读保存在xnd里面的原始数据
+            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
+            {
+                if (xnd != null)
                 {
-                    byte[] rawData;
-                    using (var ar = attr.GetReader(null))
+                    var attr = xnd.RootNode.TryGetAttribute("Hdr");
+                    if (attr.IsValidPointer)
                     {
-                        ar.ReadNoSize(out rawData, (int)attr.GetReaderLength());
-                    }
+                        byte[] rawData;
+                        using (var ar = attr.GetReader(null))
+                        {
+                            ar.ReadNoSize(out rawData, (int)attr.GetReaderLength());
+                        }
 
-                    using (var memStream = new System.IO.MemoryStream(rawData))
-                    {
-                        outImage = StbImageSharp.ImageResultFloat.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
-                        return;
+                        using (var memStream = new System.IO.MemoryStream(rawData))
+                        {
+                            outImage = StbImageSharp.ImageResultFloat.FromStream(memStream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                            return true;
+                        }
                     }
                 }
             }
+
+            return false;
         }
 
         public static StbImageSharp.ImageResult LoadOriginPng(RName name)
         {
-            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
+            //优先读真正的原始文件
+            var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(name) as TtSrViewAMeta;
+            if (ameta != null && ameta.OriginImageAddress != null)
             {
-                if (xnd == null)
+                if (ameta.OriginImageType == UImageType.PNG)
                 {
-                    var sourceFile = name.Address + ".png";
-                    using (var stream = System.IO.File.OpenRead(sourceFile))
-                    {
-                        if (stream == null)
-                            return null;
-                        return StbImageSharp.ImageResult.FromStream(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
-                    }
-                }
-                var attr = xnd.RootNode.TryGetAttribute("OriginSource");
-                if (attr.IsValidPointer == false)
-                {
-                    attr = xnd.RootNode.TryGetAttribute("Png");
-                }
-                if (attr.IsValidPointer)
-                {
-                    byte[] pngData;
-                    using (var ar = attr.GetReader(null))
-                    {
-                        ar.ReadNoSize(out pngData, (int)attr.GetReaderLength());
-                    }
-
-                    using (var memStream = new System.IO.MemoryStream(pngData))
-                    {
-                        var image = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.Default);
-                        return image;
-                    }
-                }
-                else
-                {
-                    var sourceFile = name.Address + ".png";
-                    if (System.IO.File.Exists(sourceFile) == false)
-                    {
-                        Profiler.Log.WriteLine<Profiler.TtEditorGategory>(Profiler.ELogTag.Warning, $"LoadOriginImage({name}) failed");
-                        return null;
-                    }
-                    using (var stream = System.IO.File.OpenRead(sourceFile))
+                    using (var stream = System.IO.File.OpenRead(ameta.OriginImageAddress))
                     {
                         if (stream == null)
                             return null;
@@ -1377,6 +1430,35 @@ namespace EngineNS.NxRHI
                     }
                 }
             }
+
+            //尝试读保存在xnd里面的原始数据
+            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
+            {
+                if (xnd != null)
+                {
+                    var attr = xnd.RootNode.TryGetAttribute("OriginSource");
+                    if (attr.IsValidPointer == false)
+                    {
+                        attr = xnd.RootNode.TryGetAttribute("Png");
+                    }
+                    if (attr.IsValidPointer)
+                    {
+                        byte[] pngData;
+                        using (var ar = attr.GetReader(null))
+                        {
+                            ar.ReadNoSize(out pngData, (int)attr.GetReaderLength());
+                        }
+
+                        using (var memStream = new System.IO.MemoryStream(pngData))
+                        {
+                            var image = StbImageSharp.ImageResult.FromStream(memStream, StbImageSharp.ColorComponents.Default);
+                            return image;
+                        }
+                    }
+                }
+            }
+
+            return null;
         }
         #region static function
         public static int CalcMipLevel(int width, int height, bool isAnyZero)
@@ -1676,7 +1758,7 @@ namespace EngineNS.NxRHI
             }
             else
             {
-                if(desc.IsAutoSaveSrcImage==true)
+                if (desc.IsAutoSaveSrcImage == true)
                 {
                     using (var memStream = new System.IO.MemoryStream(image.Data.Length))
                     {

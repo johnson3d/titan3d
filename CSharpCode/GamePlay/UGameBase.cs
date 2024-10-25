@@ -182,7 +182,9 @@ namespace EngineNS.GamePlay
         }
         public Controller.TtCharacterController CharacterController { get; set; } = null;
         [Rtti.Meta]
-        public async System.Threading.Tasks.Task CreateCharacterFromPrefab(Scene.TtScene scene, RName prefabName)
+        public async System.Threading.Tasks.Task CreateCharacterFromPrefab(Scene.TtScene scene,
+            [RName.PGRName(FilterExts = TtPrefab.AssetExt)]
+            RName prefabName)
         {
             var playerStart = scene.FindFirstChild<TtPlayerStart>();
             EngineNS.GamePlay.Scene.TtNode root = scene;

@@ -99,6 +99,9 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "AssemblyLoader", "CSharpCode\Bricks\AssemblyLoader\AssemblyLoader.shproj", "{3C885B44-0233-4B59-9E6D-3F5BD2AD67DC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameProject", "Module\GameProject\GameProject.csproj", "{52C1E4B9-D416-471C-8B95-F8A149067D8E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B250DCC4-B510-47BB-9CF4-19CDDE36EFEE} = {B250DCC4-B510-47BB-9CF4-19CDDE36EFEE}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MainEditor", "Module\MainEditor\MainEditor.csproj", "{921E9FEA-31DA-4BA4-BD83-19C0C0EBFBD2}"
 EndProject
@@ -169,8 +172,6 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Particle", "CSharpCode\Bricks\Particle\Particle.shproj", "{D15C508D-F0BB-4843-8B50-38728B79BBA9}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Particle", "NativeCode\Bricks\Particle\Particle.vcxitems", "{74808257-00B1-488F-B8F4-80FA333FDBEF}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "FarShadow", "CSharpCode\Bricks\FarShadow\FarShadow.shproj", "{F6ED5999-DC74-462B-8434-5BE3E976B236}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "RenderPolicyEditor", "CSharpCode\Bricks\RenderPolicyEditor\RenderPolicyEditor.shproj", "{B158AC21-F715-4BE5-8827-B147607F90DE}"
 EndProject
@@ -409,6 +410,53 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DistanceField", "CSharpCode\Bricks\DistanceField\DistanceField.shproj", "{8481F1E1-E0EA-4805-95BC-E74C65B16A00}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DistanceField", "NativeCode\Bricks\DistanceField\DistanceField.vcxitems", "{579066EA-1563-47F7-B50E-ACAEA875DDF6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "editor", "editor", "{8E84635C-80A1-4697-8F89-4E0C9FA756E8}"
+	ProjectSection(SolutionItems) = preProject
+		Documents\editor\ClrProfiler.md = Documents\editor\ClrProfiler.md
+		Documents\editor\ContentBrowser.md = Documents\editor\ContentBrowser.md
+		Documents\editor\CpuProfiler.md = Documents\editor\CpuProfiler.md
+		Documents\editor\GpuProfiler.md = Documents\editor\GpuProfiler.md
+		Documents\editor\LogWatcher.md = Documents\editor\LogWatcher.md
+		Documents\editor\MacrossEditor.md = Documents\editor\MacrossEditor.md
+		Documents\editor\MaterialEditor.md = Documents\editor\MaterialEditor.md
+		Documents\editor\MaterialedMeshEditor.md = Documents\editor\MaterialedMeshEditor.md
+		Documents\editor\MaterialFunctionEditor.md = Documents\editor\MaterialFunctionEditor.md
+		Documents\editor\MaterialInstanceEditor.md = Documents\editor\MaterialInstanceEditor.md
+		Documents\editor\MemProfiler.md = Documents\editor\MemProfiler.md
+		Documents\editor\MeshPrimitiveEditor.md = Documents\editor\MeshPrimitiveEditor.md
+		Documents\editor\NebulaParticleEditor.md = Documents\editor\NebulaParticleEditor.md
+		Documents\editor\PGCEditor.md = Documents\editor\PGCEditor.md
+		Documents\editor\PIEController.md = Documents\editor\PIEController.md
+		Documents\editor\RendPolicyEditor.md = Documents\editor\RendPolicyEditor.md
+		Documents\editor\SceneEditor.md = Documents\editor\SceneEditor.md
+		Documents\editor\TextureEditor.md = Documents\editor\TextureEditor.md
+		Documents\editor\UIEditor.md = Documents\editor\UIEditor.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tutorials", "tutorials", "{19012D66-506C-47B5-94F7-8F7778FF1302}"
+	ProjectSection(SolutionItems) = preProject
+		Documents\tutorials\character.md = Documents\tutorials\character.md
+		Documents\tutorials\helloworld.md = Documents\tutorials\helloworld.md
+		Documents\tutorials\material.md = Documents\tutorials\material.md
+		Documents\tutorials\mcshader.md = Documents\tutorials\mcshader.md
+		Documents\tutorials\mc_cmd.md = Documents\tutorials\mc_cmd.md
+		Documents\tutorials\particles.md = Documents\tutorials\particles.md
+		Documents\tutorials\pbr.md = Documents\tutorials\pbr.md
+		Documents\tutorials\pivotpainter.md = Documents\tutorials\pivotpainter.md
+		Documents\tutorials\prefab.md = Documents\tutorials\prefab.md
+		Documents\tutorials\renderpolicy.md = Documents\tutorials\renderpolicy.md
+		Documents\tutorials\terrain.md = Documents\tutorials\terrain.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "engine", "engine", "{D42002C2-3056-4AD1-988C-EEE323B012A0}"
+	ProjectSection(SolutionItems) = preProject
+		Documents\engine\EngineConfig.md = Documents\engine\EngineConfig.md
+	EndProjectSection
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "AdvanceShadow", "CSharpCode\Bricks\AdvanceShadow\AdvanceShadow.shproj", "{34E25A8D-5522-4358-9DD2-59D899999501}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Sprache", "3rd\csharp\Sprache\Sprache.shproj", "{6DD92289-578C-4A00-8DB2-BFB56C520FB5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -959,7 +1007,6 @@ Global
 		{1CA2814E-C99C-419B-A83A-33BF1B1088C9} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{D15C508D-F0BB-4843-8B50-38728B79BBA9} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{74808257-00B1-488F-B8F4-80FA333FDBEF} = {041F2057-6090-446E-8CEF-D524C973477F}
-		{F6ED5999-DC74-462B-8434-5BE3E976B236} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{B158AC21-F715-4BE5-8827-B147607F90DE} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{406055CD-ECC3-4AEF-A7F2-B2FF5F8EA54C} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{FCA99047-6E09-44E6-B6D6-31BF2C3B2653} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
@@ -1059,6 +1106,11 @@ Global
 		{410D0BD4-4FE7-4D97-AFE3-1AE527D8B56E} = {041F2057-6090-446E-8CEF-D524C973477F}
 		{8481F1E1-E0EA-4805-95BC-E74C65B16A00} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{579066EA-1563-47F7-B50E-ACAEA875DDF6} = {041F2057-6090-446E-8CEF-D524C973477F}
+		{8E84635C-80A1-4697-8F89-4E0C9FA756E8} = {9DD1EA3E-A1BD-43B5-9F2A-B1AA3DD5F01A}
+		{19012D66-506C-47B5-94F7-8F7778FF1302} = {9DD1EA3E-A1BD-43B5-9F2A-B1AA3DD5F01A}
+		{D42002C2-3056-4AD1-988C-EEE323B012A0} = {9DD1EA3E-A1BD-43B5-9F2A-B1AA3DD5F01A}
+		{34E25A8D-5522-4358-9DD2-59D899999501} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
+		{6DD92289-578C-4A00-8DB2-BFB56C520FB5} = {1BEAD919-8866-4753-B5EE-64ACC9CC2E5B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}
@@ -1083,6 +1135,7 @@ Global
 		3rd\csharp\AstcDecoder\AstcDecoder.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		3rd\csharp\JitherOpenEXR\JitherOpenEXR.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		3rd\csharp\NvTriStrip\NvTriStrip.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
+		3rd\csharp\Sprache\Sprache.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		3rd\csharp\StbImageSharp\StbImageSharp.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		3rd\csharp\StbImageWriteSharp\StbImageWriteSharp.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		3rd\csharp\xxHash\xxHash.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -1091,6 +1144,7 @@ Global
 		codegen\NativeBinder\CodeGenCSharp.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		codegen\Serializer\Engine\EngineSerializer.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Base\Base.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
+		CSharpCode\Bricks\AdvanceShadow\AdvanceShadow.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Animation\Animation.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\AssemblyLoader\AssemblyLoader.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\AssetImpExp\AssetImpExp.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -1104,7 +1158,6 @@ Global
 		CSharpCode\Bricks\DestinyPX\NxMath\NxMath.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\DestinyPX\NxPhysics\NxPhysics.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\DistanceField\DistanceField.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
-		CSharpCode\Bricks\FarShadow\FarShadow.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\FBX\FBX.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Font\Font.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\GpuDriven\GpuDriven.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -1163,6 +1216,7 @@ Global
 		codegen\NativeBinder\CodeGenCSharp.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		codegen\Serializer\Engine\EngineSerializer.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Base\Base.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\AdvanceShadow\AdvanceShadow.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Animation\Animation.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\AssemblyLoader\AssemblyLoader.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\BehaviorTree\BehaviorTree.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
@@ -1170,7 +1224,6 @@ Global
 		CSharpCode\Bricks\CodeCompiler\CodeCompiler.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Collision\Collision.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\DataSet\DataSet.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
-		CSharpCode\Bricks\FarShadow\FarShadow.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\FBX\FBX.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Font\Font.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\GpuDriven\GpuDriven.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
@@ -1207,6 +1260,7 @@ Global
 		CSharpCode\Bricks\Localization\Localization.projitems*{2e83d749-257f-4cea-9370-cb44422524b9}*SharedItemsImports = 13
 		CSharpCode\ImGui\ImGui.projitems*{30bc6f10-34dc-43fc-aa1e-ea73602b074f}*SharedItemsImports = 13
 		CSharpCode\Grapics\Mesh\Mesh.projitems*{34d2b60f-879e-4656-882f-810e3fbbf177}*SharedItemsImports = 13
+		CSharpCode\Bricks\AdvanceShadow\AdvanceShadow.projitems*{34e25a8d-5522-4358-9dd2-59d899999501}*SharedItemsImports = 13
 		CSharpCode\Bricks\VXGI\VXGI.projitems*{3806a9cf-7036-4eed-982b-f0f925be69c1}*SharedItemsImports = 13
 		Plugins\GameServer\ClientCommon\ClientCommon.projitems*{386fe1d3-e277-43d0-9f42-85ea7657962a}*SharedItemsImports = 13
 		3rd\native\Recast\DetourTileCache\DetourTileCache.vcxitems*{388bf26c-2c5c-4e68-9821-530c1594e14d}*SharedItemsImports = 9
@@ -1238,6 +1292,7 @@ Global
 		CSharpCode\Platform\Android\Android.projitems*{696256cb-8710-4790-805b-1f2424bf19cd}*SharedItemsImports = 13
 		CSharpCode\Bricks\Collision\Collision.projitems*{6d4b708f-a316-44e4-8a92-e4fae48c9a70}*SharedItemsImports = 13
 		CSharpCode\Bricks\Plugins\Plugins.projitems*{6d8c1a1c-c33f-4034-80c4-4cf08530b3d5}*SharedItemsImports = 13
+		3rd\csharp\Sprache\Sprache.projitems*{6dd92289-578c-4a00-8db2-bfb56c520fb5}*SharedItemsImports = 13
 		3rd\csharp\StbImageWriteSharp\StbImageWriteSharp.projitems*{6eb3104e-609f-4157-9dd5-5e510d939bf2}*SharedItemsImports = 13
 		NativeCode\Bricks\Particle\Particle.vcxitems*{74808257-00b1-488f-b8f4-80fa333fdbef}*SharedItemsImports = 9
 		NativeCode\Bricks\Canvas\Canvas.vcxitems*{7728662f-e281-4e3b-af11-c2ee3d68bea1}*SharedItemsImports = 9
@@ -1410,7 +1465,6 @@ Global
 		3rd\native\EtcLib\EtcLib.vcxitems*{ef01b997-e212-488d-83c0-9f250eb73429}*SharedItemsImports = 9
 		3rd\native\zlib\zlib.vcxitems*{f1dd2a4a-55d2-4799-8cb5-070049e33055}*SharedItemsImports = 9
 		3rd\native\Image.Shared\Image.Shared.vcxitems*{f5bfbfc3-132b-48f3-85e5-63a88a7fc5d0}*SharedItemsImports = 9
-		CSharpCode\Bricks\FarShadow\FarShadow.projitems*{f6ed5999-dc74-462b-8434-5be3e976b236}*SharedItemsImports = 13
 		NativeCode\Bricks\GpuDump\GpuDump.vcxitems*{f8b576d2-a578-4f55-b513-95bb92abe489}*SharedItemsImports = 9
 		CSharpCode\Bricks\PhysicsCore\PhysicsCore.projitems*{f90694fa-d9fb-4be4-bfb0-d0973ec6741c}*SharedItemsImports = 13
 		CSharpCode\Bricks\FBX\FBX.projitems*{fa20df81-66d6-4949-b053-7f33852aa1e1}*SharedItemsImports = 13

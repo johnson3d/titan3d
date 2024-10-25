@@ -31,7 +31,14 @@ namespace ProjectCooker.Command
                 }
             });
             System.Console.WriteLine("End AssetType");
+
             var assetTypes = GetArguments(args, Param_Types);
+            var cfg_CookSaveNewestAssetType = TtEngine.Instance.DynConfigData.GetConfig("CookSaveNewestAssetType");
+            if (cfg_CookSaveNewestAssetType != null)
+            {
+                assetTypes = ((string)cfg_CookSaveNewestAssetType).Split('+');
+            }
+            
             if (assetTypes == null)
             {
                 //throw new Exception("AssetType error");

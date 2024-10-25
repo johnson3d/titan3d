@@ -47,6 +47,8 @@ namespace EngineNS.IO
         }
         public static TtXndHolder LoadXnd(string file)
         {
+            if (file == null)
+                return null;
             var result = new TtXndHolder();
             if (result.mCoreObject.LoadXnd(file) == false)
                 return null;

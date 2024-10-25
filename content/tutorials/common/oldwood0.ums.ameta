@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Graphics.Mesh.TtMaterialMeshAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="dc6ec359-fb69-4d56-a6e0-c4551078cf05" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/oldwood0.ums,dc6ec359-fb69-4d56-a6e0-c4551078cf05" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.UMaterialMesh&#xA;Hahah" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="4">
+    <e_0 Value="Game,tutorials/common/utest/sm_oldwoodentable_lod0.vms,0b51904f-da58-40da-8af9-ddd92866c0cd" />
+    <e_1 Value="Game,tutorials/common/utest/oldwood.uminst,94293abe-2cdf-4072-be59-2f6bb03e9cff" />
+    <e_2 Value="Game,tutorials/common/utest/mesh/box1.vms,bec7f39a-94c5-45b6-b032-3e4d24c68c8d" />
+    <e_3 Value="Game,tutorials/common/utest/ddd.uminst,da21bb21-134c-4d00-bdbb-00459e7a91c1" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
+</Root>

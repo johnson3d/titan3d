@@ -11,6 +11,7 @@ namespace EngienNS.Bricks.ImageDecoder
         PNG = 0,
         HDR,
         EXR,
+        Unkown,
     }
 
 

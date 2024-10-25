@@ -8,6 +8,7 @@ namespace EngineNS.IO
     public class TtDynConfigData
     {
         public Dictionary<string, object> ConfigDatas { get; } = new Dictionary<string, object>();
+        public List<string> CommentLines { get; } = new List<string>();
         public void SetConfig(string key, object value, bool bSave = true)
         {
             ConfigDatas[key] = value;
@@ -43,11 +44,16 @@ namespace EngineNS.IO
                 stringBuilder.Append(i.Value.ToString());
                 stringBuilder.Append("\n");
             }
+            foreach(var i in CommentLines)
+            {
+                stringBuilder.Append(i);
+            }
             TtFileManager.WriteAllText(file, stringBuilder.ToString());
         }
         public void LoadConfigData()
         {
             ConfigDatas.Clear();
+            CommentLines.Clear();
             var file = TtEngine.Instance.FileManager.GetRoot(TtFileManager.ERootDir.Cache) + "DynConfigData.dcd";
             var textAll = TtFileManager.ReadAllText(file);
             if (textAll == null)
@@ -57,6 +63,11 @@ namespace EngineNS.IO
             {
                 if (string.IsNullOrEmpty(l))
                     continue;
+                if (l.StartsWith("##"))
+                {
+                    CommentLines.Add(l);
+                    continue;
+                }
                 var text = l;
                 var pos = text.IndexOf(":");
                 var key = text.Substring(0, pos);

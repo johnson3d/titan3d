@@ -941,6 +941,7 @@ namespace EngineNS.EGui.Controls
             MoveTo,
             CopyTo,
             Rename,
+            PackTo,
         }
         EAssetOperationType mOperationType = EAssetOperationType.None;
         IAssetMeta mOperationAsset = null;
@@ -968,6 +969,9 @@ namespace EngineNS.EGui.Controls
                 case EAssetOperationType.CopyTo:
                     keyName = $"Copy {sourceName.Name} To";
                     break;
+                case EAssetOperationType.PackTo:
+                    keyName = $"Copy {sourceName.Name} To";
+                    break;
             }
 
             ImGuiAPI.OpenPopup(keyName, ImGuiPopupFlags_.ImGuiPopupFlags_None | ImGuiPopupFlags_.ImGuiPopupFlags_NoOpenOverExistingPopup);
@@ -984,7 +988,8 @@ namespace EngineNS.EGui.Controls
                 {
                     var winSize = new Vector2(ImGuiAPI.GetWindowWidth(), ImGuiAPI.GetWindowHeight() - mSelectFolderOKButtonHeight);
                     if (mOperationType == EAssetOperationType.MoveTo ||
-                        mOperationType == EAssetOperationType.CopyTo)
+                        mOperationType == EAssetOperationType.CopyTo ||
+                        mOperationType == EAssetOperationType.PackTo)
                     {
                         mSelectFolderView.Draw(in winSize);
                     }
@@ -1014,6 +1019,12 @@ namespace EngineNS.EGui.Controls
                                         {
                                             var name = mSelectFolderView.CurrentDir.Name + sourceName.PureName + sourceName.ExtName;
                                             AssetOpTask = mOperationAsset.CopyTo(name, sourceName.RNameType);
+                                        }
+                                        break;
+                                    case EAssetOperationType.PackTo:
+                                        {
+                                            var name = mSelectFolderView.CurrentDir.Name;// + sourceName.PureName + sourceName.ExtName;
+                                            AssetOpTask = mOperationAsset.PackRefAssetsTo(RName.GetRName(name, sourceName.RNameType));
                                         }
                                         break;
                                     case EAssetOperationType.Rename:

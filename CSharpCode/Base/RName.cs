@@ -175,6 +175,12 @@ namespace EngineNS
             mRNameType = type;
             ChangeAddressWithRNameType();
         }
+        internal void VeryDangrouseUpdate(string name, ERNameType type)
+        {
+            mName = name;
+            mRNameType = type;
+            mAddress = GetAddress(mRNameType, Name);
+        }
         public enum ERNameType : ushort
         {
             Game = 0,

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="01c690a9-3147-45da-9a74-6695252d4203" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,utest/plant/tree/t_leafs_diffuse.srv,01c690a9-3147-45da-9a74-6695252d4203" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
@@ -10,6 +11,7 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
+  <OriginImageAddress Type="System.String@Unknown" Value="utest/plant/tree/t_leafs_diffuse.srv:Game" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.NxRHI.TtSrView@EngineCore" />
 </Root>

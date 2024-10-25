@@ -5,6 +5,7 @@
 - - - 程序设置配置示例：TtEngine.Instance.DynConfigData.SetConfig("LastPIEName", mCurrentName)
 - - - 程序读取配置示例：var cfgName = TtEngine.Instance.DynConfigData.GetConfig("LastPIEName") as RName;
 - - - 配置格式：\{key\}:\{TypeString\}=\{Value\}
+- - - 希望注释一行，就在行开始用##标志
 ![启动配置](picture/run_config.png)
 	- [引擎配置文件](engine/EngineConfig.md)
 -  编辑器总览
@@ -62,3 +63,5 @@
 - - [terrain](tutorials/terrain.md)
 - - [viewinstance](tutorials/viewinstance.md)
 - - [mc_cmd](tutorials/mc_cmd.md)
+- - [pivotpainter](tutorials/pivotpainter.md)
+- - [character](tutorials/character.md)

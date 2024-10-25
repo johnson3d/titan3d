@@ -1,7 +1,9 @@
 ﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
 using EngineNS.EGui.Controls;
 using EngineNS.Thread;
+using Microsoft.Toolkit.HighPerformance;
 using NPOI.SS.Formula.Functions;
+using NPOI.SS.Formula.PTG;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -412,6 +414,115 @@ namespace EngineNS.IO
             IO.TtFileManager.SaveObjectToXml(fileName, this);
             TtEngine.Instance.SourceControlModule.AddFile(fileName, true);
         }
+        public void GetAllRefAssets(HashSet<RName> names)
+        {
+            foreach (var i in RefAssetRNames)
+            {
+                if (names.Contains(i))
+                    continue;
+                
+                var rAMeta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(i);
+                if (rAMeta == null)
+                    continue;
+                
+                names.Add(i);
+                rAMeta.GetAllRefAssets(names);
+            }
+        }
+        public async System.Threading.Tasks.Task PackRefAssetsTo(RName target)
+        {
+            TtEngine.Instance.StopOperation($"{this.AssetName}: PackRefAssetsTo {target}");
+            var names = new HashSet<RName>();
+            names.Add(this.AssetName);
+            GetAllRefAssets(names);
+
+            List<IAsset> holders = new List<IAsset>();
+            foreach (var i in names)
+            {
+                var meta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(i);
+                var asset = await meta.LoadAsset();
+                holders.Add(asset);
+            }
+
+            var saveDict = new Dictionary<RName, KeyValuePair<string, RName.ERNameType>>();
+            foreach (var i in names)
+            {
+                string outName;
+                RName.ERNameType outType;
+                NameMap(target, i.Name, i.RNameType, out outName, out outType);
+                i.VeryDangrouseUpdate(outName, outType);
+            }
+
+            foreach (var i in holders)
+            {
+                var dir = IO.TtFileManager.GetBaseDirectory(i.AssetName.Address);
+                IO.TtFileManager.SureDirectory(dir);
+                var saveId = i.GetAMeta().AssetId;
+                i.GetAMeta().AssetId = Guid.NewGuid();
+                i.SaveAssetTo(i.AssetName);
+                i.GetAMeta().AssetId = saveId;
+            }
+
+            foreach (var i in names)
+            {
+                if (saveDict.TryGetValue(i, out var sv))
+                {
+                    i.VeryDangrouseUpdate(sv.Key, sv.Value);
+                }
+            }
+
+            TtEngine.Instance.AssetMetaManager.LoadMetas(target.Address);
+
+            TtEngine.Instance.ResumeOperation();
+        }
+        protected void NameMap(RName target, string name, RName.ERNameType type, out string outName, out RName.ERNameType outType)
+        {
+            outType = target.RNameType;
+            if (RName.GetRName(name, type) == this.AssetName)
+            {
+                outName = target.Name + this.AssetName.PureName + this.AssetName.ExtName;
+                return;
+            }
+
+            var left = this.AssetName.Name.Split('/');
+            var right = name.Split('/');
+
+            int cmpPos = 0;
+            while (true)
+            {
+                if (cmpPos >= left.Length || cmpPos >= right.Length)
+                    break;
+                if (left[cmpPos] == right[cmpPos])
+                    cmpPos++;
+                else
+                    break;
+            }
+            outName = target.Name;
+            for (; cmpPos < right.Length; cmpPos++)
+            {
+                outName += right[cmpPos];
+                if (cmpPos != right.Length - 1)
+                    outName += "/";
+            }
+            //int cmpPos = 0;
+            //while (true)
+            //{
+            //    if (cmpPos >= this.AssetName.Name.Length || cmpPos >= name.Length)
+            //    {
+            //        break;
+            //    }
+            //    if (string.Compare(this.AssetName.Name, 0, name, 0, cmpPos, true) == 0)
+            //    {
+            //        cmpPos++;
+            //    }
+            //    else
+            //    {
+            //        break;
+            //    }
+            //}
+
+            //outName = target.Name + name.Substring(cmpPos);
+        }
         public virtual bool CanRefAssetType(IAssetMeta ameta)
         {
             return true;
@@ -558,6 +669,10 @@ namespace EngineNS.IO
             if (EGui.UIProxy.MenuItemProxy.MenuItem("CopyTo", null, false, null, in drawList, in menuData, ref mCopyToMenuState))
             {
                 ContentBrowser.OperationAsset(this, EGui.Controls.TtContentBrowser.EAssetOperationType.CopyTo);
+            }
+            if (EGui.UIProxy.MenuItemProxy.MenuItem("PackTo", null, false, null, in drawList, in menuData, ref mCopyToMenuState))
+            {
+                ContentBrowser.OperationAsset(this, EGui.Controls.TtContentBrowser.EAssetOperationType.PackTo);
             }
 
             if (OnDrawContextMenu(ref drawList))
@@ -708,11 +823,22 @@ namespace EngineNS.IO
             return null;
         }
         public static string ItemShadowImgName = "uestyle/content/uniformshadow.srv";
-        public void LoadMetas()
+        public void LoadMetas(string dir)
         {
-            var root = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine);
-            var metas = IO.TtFileManager.GetFiles(RName.GetRName("", RName.ERNameType.Engine).Address, "*" + IAssetMeta.MetaExt, true);
-            foreach(var i in metas)
+            var type = TtEngine.Instance.FileManager.GetRootDirType(dir);
+            RName.ERNameType rnType = RName.ERNameType.Game;
+            switch(type)
+            {
+                case TtFileManager.ERootDir.Game:
+                    rnType = RName.ERNameType.Game;
+                    break;
+                case TtFileManager.ERootDir.Engine:
+                    rnType = RName.ERNameType.Engine;
+                    break;
+            }
+            var root = TtEngine.Instance.FileManager.GetRoot(type);
+            var metas = IO.TtFileManager.GetFiles(dir, "*" + IAssetMeta.MetaExt, true);
+            foreach (var i in metas)
             {
                 var m = IO.TtFileManager.LoadXmlToObject(i) as IAssetMeta;
                 if (m == null)
@@ -721,7 +847,7 @@ namespace EngineNS.IO
                     continue;
                 }
                 var rn = IO.TtFileManager.GetRelativePath(root, i);
-                m.SetAssetName(RName.GetRName(rn.Substring(0, rn.Length - 6), RName.ERNameType.Engine));
+                m.SetAssetName(RName.GetRName(rn.Substring(0, rn.Length - 6), rnType));
                 IAssetMeta om;
                 if (Assets.TryGetValue(m.AssetId, out om))
                 {
@@ -731,27 +857,53 @@ namespace EngineNS.IO
                 Assets.Add(m.AssetId, m);
                 RNameAssets[m.GetAssetName()] = m;
             }
+        }
+        public void LoadMetas()
+        {
+            LoadMetas(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine));
+            LoadMetas(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game));
+            //var root = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Engine);
+            //var metas = IO.TtFileManager.GetFiles(RName.GetRName("", RName.ERNameType.Engine).Address, "*" + IAssetMeta.MetaExt, true);
+            //foreach(var i in metas)
+            //{
+            //    var m = IO.TtFileManager.LoadXmlToObject(i) as IAssetMeta;
+            //    if (m == null)
+            //    {
+            //        Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"{i} is not a IAssetMeta");
+            //        continue;
+            //    }
+            //    var rn = IO.TtFileManager.GetRelativePath(root, i);
+            //    m.SetAssetName(RName.GetRName(rn.Substring(0, rn.Length - 6), RName.ERNameType.Engine));
+            //    IAssetMeta om;
+            //    if (Assets.TryGetValue(m.AssetId, out om))
+            //    {
+            //        Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"{m.RefAssetRNames} ID repeat:{om.GetAssetName()}");
+            //        continue;
+            //    }
+            //    Assets.Add(m.AssetId, m);
+            //    RNameAssets[m.GetAssetName()] = m;
+            //}
 
-            root = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
-            metas = IO.TtFileManager.GetFiles(RName.GetRName("", RName.ERNameType.Game).Address, "*" + IAssetMeta.MetaExt, true);
-            foreach (var i in metas)
-            {
-                var m = IO.TtFileManager.LoadXmlToObject<IAssetMeta>(i);
-                if(m == null)
-                {
-                    continue;
-                }
-                var rn = IO.TtFileManager.GetRelativePath(root, i);
-                m.SetAssetName(RName.GetRName(rn.Substring(0, rn.Length - 6), RName.ERNameType.Game));
-                IAssetMeta om;
-                if (Assets.TryGetValue(m.AssetId, out om))
-                {
-                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"{m.RefAssetRNames} ID repeat:{om.GetAssetName()}");
-                    continue;
-                }
-                Assets.Add(m.AssetId, m);
-                RNameAssets[m.GetAssetName()] = m;
-            }
+            //root = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
+            //metas = IO.TtFileManager.GetFiles(RName.GetRName("", RName.ERNameType.Game).Address, "*" + IAssetMeta.MetaExt, true);
+            //foreach (var i in metas)
+            //{
+            //    var m = IO.TtFileManager.LoadXmlToObject<IAssetMeta>(i);
+            //    if(m == null)
+            //    {
+            //        continue;
+            //    }
+            //    var rn = IO.TtFileManager.GetRelativePath(root, i);
+            //    m.SetAssetName(RName.GetRName(rn.Substring(0, rn.Length - 6), RName.ERNameType.Game));
+            //    IAssetMeta om;
+            //    if (Assets.TryGetValue(m.AssetId, out om))
+            //    {
+            //        Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"{m.RefAssetRNames} ID repeat:{om.GetAssetName()}");
+            //        continue;
+            //    }
+            //    Assets.Add(m.AssetId, m);
+            //    RNameAssets[m.GetAssetName()] = m;
+            //}
 
             if (TtEngine.Instance.UIProxyManager[ItemShadowImgName] == null)
                 TtEngine.Instance.UIProxyManager[ItemShadowImgName] = new EGui.UIProxy.BoxImageProxy(RName.GetRName(ItemShadowImgName, RName.ERNameType.Engine), new Thickness(16.0f / 64.0f, 16.0f / 64.0f, 16.0f / 64.0f, 16.0f / 64.0f));
