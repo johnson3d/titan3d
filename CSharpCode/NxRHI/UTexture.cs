@@ -26,7 +26,6 @@ using EngineNS.Graphics.Pipeline.Shader;
 using Mono.Cecil.Cil;
 using MathNet.Numerics.Distributions;
 using Mono.CompilerServices.SymbolWriter;
-using NPOI.HPSF;
 
 namespace EngineNS.NxRHI
 {
