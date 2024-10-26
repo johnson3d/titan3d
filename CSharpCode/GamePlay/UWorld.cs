@@ -28,7 +28,7 @@ namespace EngineNS.GamePlay
             mRoot = new Scene.TtScene();
             mRoot.World = this;
         }
-        UMemberTickables mMemberTickables = new UMemberTickables();
+        TtMemberTickables mMemberTickables = new TtMemberTickables();
         Graphics.Pipeline.Shader.TtMaterialInstance mBoundingDebugMaterial;
         public async System.Threading.Tasks.Task<bool> InitWorld()
         {

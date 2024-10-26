@@ -26,7 +26,7 @@ namespace EngineNS
         void TickLogic(object host, float ellapse);
         void OnHostNotify(object host, in FHostNotify notify);
     }
-    public class UMemberTickables
+    public class TtMemberTickables
     {
         public List<IMemberTickable> Members = new List<IMemberTickable>();
         public void CollectMembers(object host)

@@ -136,7 +136,7 @@ namespace EngineNS.Plugins.GameItems
             set;
         }
         #endregion
-        public class ADescriptorAttribute : URNameTagObjectAttribute
+        public class ADescriptorAttribute : TtRNameTagObjectAttribute
         {
             public override object GetTagObject(RName rn)
             {

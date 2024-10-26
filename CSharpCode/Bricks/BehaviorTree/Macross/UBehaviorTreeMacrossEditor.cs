@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.BehaviorTree.Macross
 {
-    public class UBehaviorTreeMacrossEditor : UMacrossEditor
+    public class TtBehaviorTreeMacrossEditor : UMacrossEditor
     {
         //TODO: 后续自定义
     }

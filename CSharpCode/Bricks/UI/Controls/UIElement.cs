@@ -582,7 +582,7 @@ namespace EngineNS.UI.Controls
         {
         }
 
-        class AttachedPropertiesSaverAttribute : IO.UCustomSerializerAttribute
+        class AttachedPropertiesSaverAttribute : IO.TtCustomSerializerAttribute
         {
             public override void Save(IWriter ar, object host, string propName)
             {

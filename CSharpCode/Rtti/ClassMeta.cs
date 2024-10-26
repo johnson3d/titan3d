@@ -909,13 +909,13 @@ namespace EngineNS.Rtti
                         this.Order = meta.Order;
                 }
 
-                attrs = info.GetCustomAttributes(typeof(IO.UCustomSerializerAttribute), true);
+                attrs = info.GetCustomAttributes(typeof(IO.TtCustomSerializerAttribute), true);
                 if (attrs.Length != 0)
                 {
-                    CustumSerializer = attrs[0] as IO.UCustomSerializerAttribute;
+                    CustumSerializer = attrs[0] as IO.TtCustomSerializerAttribute;
                 }
             }
-            public IO.UCustomSerializerAttribute CustumSerializer;
+            public IO.TtCustomSerializerAttribute CustumSerializer;
             Rtti.TtTypeDesc mFieldType;
             public Rtti.TtTypeDesc FieldType
             {

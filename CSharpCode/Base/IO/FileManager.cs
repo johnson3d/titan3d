@@ -441,7 +441,7 @@ namespace EngineNS.IO
         }
     }
 
-    public partial class UOpenFileDialog
+    public partial class TtOpenFileDialog
     {
         public string Title { get; set; }
         public string InitialDirectory { get; set; }

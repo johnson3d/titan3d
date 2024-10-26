@@ -130,7 +130,7 @@ namespace EngineNS.Plugins.GameTasks
             set;
         }
         #endregion
-        public class ADescriptorAttribute : URNameTagObjectAttribute
+        public class ADescriptorAttribute : TtRNameTagObjectAttribute
         {
             public override object GetTagObject(RName rn)
             {

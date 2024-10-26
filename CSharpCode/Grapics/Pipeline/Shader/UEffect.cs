@@ -467,7 +467,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             Effects.Clear();
         }
-        private Thread.UAwaitSessionManager<Hash160, TtEffect> mCreatingSession = new Thread.UAwaitSessionManager<Hash160, TtEffect>();
+        private Thread.TtAwaitSessionManager<Hash160, TtEffect> mCreatingSession = new Thread.TtAwaitSessionManager<Hash160, TtEffect>();
         public Dictionary<Hash160, TtEffect> Effects { get; } = new Dictionary<Hash160, TtEffect>();
         public Dictionary<Hash160, NxRHI.TtComputeEffect> ComputeEffects { get; } = new Dictionary<Hash160, NxRHI.TtComputeEffect>();
         public NxRHI.TtComputeEffect TryGetComputeEffect(Hash160 hash)

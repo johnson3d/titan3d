@@ -3522,7 +3522,7 @@ namespace EngineNS.NxRHI
         {
             DefaultTexture = await GetTexture(engine.Config.DefaultTexture);
         }
-        private Thread.UAwaitSessionManager<RName, TtSrView> mCreatingSession = new Thread.UAwaitSessionManager<RName, TtSrView>();
+        private Thread.TtAwaitSessionManager<RName, TtSrView> mCreatingSession = new Thread.TtAwaitSessionManager<RName, TtSrView>();
         List<RName> mWaitRemoves = new List<RName>();
         public async Thread.Async.TtTask<TtSrView> CreateTexture(string file)
         {

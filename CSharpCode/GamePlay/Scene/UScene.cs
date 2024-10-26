@@ -323,7 +323,7 @@ namespace EngineNS.GamePlay.Scene
         }
         #endregion
 
-        UMemberTickables mMemberTickables = new UMemberTickables();
+        TtMemberTickables mMemberTickables = new TtMemberTickables();
         public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             mMemberTickables.TickLogic(this, TtEngine.Instance.ElapseTickCountMS);

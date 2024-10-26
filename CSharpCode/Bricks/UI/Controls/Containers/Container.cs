@@ -540,7 +540,7 @@ namespace EngineNS.UI.Controls.Containers
     public abstract partial class TtContainer : TtUIElement
     {
         internal TtUIElementCollection mChildren;
-        public class ElementCollectionSaverAttribute : IO.UCustomSerializerAttribute
+        public class ElementCollectionSaverAttribute : IO.TtCustomSerializerAttribute
         {
             public override void Save(IWriter ar, object host, string propName)
             {

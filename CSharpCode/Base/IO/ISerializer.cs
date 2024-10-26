@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.IO
 {
-    public class UCustomSerializerAttribute : Attribute
+    public class TtCustomSerializerAttribute : Attribute
     {
         public virtual void Save(IWriter ar, object host, string propName)
         {

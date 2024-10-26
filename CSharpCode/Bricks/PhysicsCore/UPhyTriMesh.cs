@@ -172,7 +172,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         #endregion
 
-        public class UMeshDataSave : IO.UCustomSerializerAttribute
+        public class UMeshDataSave : IO.TtCustomSerializerAttribute
         {
             public override unsafe void Save(IO.IWriter ar, object host, string propName)
             {

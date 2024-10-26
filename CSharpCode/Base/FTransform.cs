@@ -635,11 +635,11 @@ namespace EngineNS
         #endregion
     }
 
-    public class UBigWorldManager
+    public class TtBigWorldManager
     {
-        public class UWorldBrick
+        public class TtWorldBrick
         {
-            public UBigWorldManager BigWorld;
+            public TtBigWorldManager BigWorld;
             public int X;
             public int Y;
             public int Z;
@@ -650,20 +650,20 @@ namespace EngineNS
         }
         public Vector3 GridSize;
         public Vector3 RcpGridSize;
-        UWorldBrick[,,] Bricks;
+        TtWorldBrick[,,] Bricks;
         public void InitBricks(in Vector3 size, int x = 1024, int y = 1, int z = 1024)
         {
             GridSize = size;
-            Bricks = new UWorldBrick[1024, 1, 1024];            
+            Bricks = new TtWorldBrick[1024, 1, 1024];            
             RcpGridSize.X = 1.0f / size.X;
             RcpGridSize.Y = 1.0f / size.Y;
             RcpGridSize.Z = 1.0f / size.Z;
         }
-        public UWorldBrick GetBrick(int x, int y, int z)
+        public TtWorldBrick GetBrick(int x, int y, int z)
         {
             return Bricks[x, y, z];
         }
-        public UWorldBrick GetBrick(in Vector3 pos)
+        public TtWorldBrick GetBrick(in Vector3 pos)
         {
             var tmp = pos * RcpGridSize;
             int x = (int)tmp.X;
@@ -677,7 +677,7 @@ namespace EngineNS
             {
                 if (Bricks[x, y, z] == null)
                 {
-                    Bricks[x, y, z] = new UWorldBrick();
+                    Bricks[x, y, z] = new TtWorldBrick();
                     Bricks[x, y, z].BigWorld = this;
                     Bricks[x, y, z].X = x;
                     Bricks[x, y, z].Y = y;

@@ -31,21 +31,21 @@ namespace EngineNS.Editor.ShaderCompiler
         }
         public void CollectIncludes()
         {
-            var code = Support.UTextUtility.RemoveCStyleComments(SourceCode.TextCode);
+            var code = Support.TtTextUtility.RemoveCStyleComments(SourceCode.TextCode);
             int cur = 0;
             cur = code.IndexOf("#", cur);
             while (cur >=0 && cur < code.Length)
             {
                 cur++;
-                var token = Support.UTextUtility.GetTokenString(ref cur, code);
+                var token = Support.TtTextUtility.GetTokenString(ref cur, code);
                 if (token == "include")
                 {
-                    Support.UTextUtility.SkipBlank(ref cur, code);
+                    Support.TtTextUtility.SkipBlank(ref cur, code);
                     string inc = "";
                     if (code[cur] == '"')
                     {
                         var start = cur + 1;
-                        Support.UTextUtility.SkipString(ref cur, code);
+                        Support.TtTextUtility.SkipString(ref cur, code);
                         inc = code.Substring(start, cur - start);
                     }
                     else if (code[cur] == '<')

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS
 {
-    public abstract class URNameTagObjectAttribute : Attribute 
+    public abstract class TtRNameTagObjectAttribute : Attribute 
     {
         public abstract object GetTagObject(RName rn);
     }
@@ -19,10 +19,10 @@ namespace EngineNS
         {
             if (mTagReference == null || mTagReference.IsAlive == false)
             {
-                var attrs = typeof(T).GetCustomAttributes(typeof(URNameTagObjectAttribute), true);
+                var attrs = typeof(T).GetCustomAttributes(typeof(TtRNameTagObjectAttribute), true);
                 if (attrs.Length > 0)
                 {
-                    var attrTag = attrs[0] as URNameTagObjectAttribute;
+                    var attrTag = attrs[0] as TtRNameTagObjectAttribute;
                     mTagReference = new WeakReference(attrTag.GetTagObject(this));
                 }
             }

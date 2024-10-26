@@ -135,9 +135,9 @@ namespace EngineNS.Thread
         }
     }
 
-    public class UAwaitSessionManager<K,T>
+    public class TtAwaitSessionManager<K,T>
     {
-        public class UAwaitSession
+        public class TtAwaitSession
         {
             private List<Thread.TtSemaphore> Smph = new List<Thread.TtSemaphore>();
             public T Result;
@@ -170,16 +170,16 @@ namespace EngineNS.Thread
                 return this.Result;
             }
         }
-        public Dictionary<K, UAwaitSession> mSessions = new Dictionary<K, UAwaitSession>();
-        public UAwaitSession GetOrNewSession(K key, out bool isNewSession)
+        public Dictionary<K, TtAwaitSession> mSessions = new Dictionary<K, TtAwaitSession>();
+        public TtAwaitSession GetOrNewSession(K key, out bool isNewSession)
         {
             lock (mSessions)
             {
-                UAwaitSession result;
+                TtAwaitSession result;
                 if (mSessions.TryGetValue(key, out result) == false)
                 {
                     isNewSession = true;
-                    result = new UAwaitSession();
+                    result = new TtAwaitSession();
                     mSessions.Add(key, result);
                 }
                 else
@@ -189,7 +189,7 @@ namespace EngineNS.Thread
                 return result;
             }
         }
-        public void FinishSession(K key, UAwaitSession session, T result)
+        public void FinishSession(K key, TtAwaitSession session, T result)
         {
             lock (mSessions)
             {

@@ -31,7 +31,7 @@ namespace EngineNS.IO
             SetRoot(ERootDir.GameSource, root);
         }
     }
-    public partial class UOpenFileDialog
+    public partial class TtOpenFileDialog
     {
         partial void ShowDialogImpl(ref int result)
         {

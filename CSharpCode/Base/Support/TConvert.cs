@@ -12,11 +12,11 @@ namespace EngineNS.Support
         }
         public static string GetMatchPair(string text, ref int cur, char startChar, char endChar)
         {
-            return UTextUtility.GetMatchPair(text, ref cur, startChar, endChar);
+            return TtTextUtility.GetMatchPair(text, ref cur, startChar, endChar);
         }
     }
 
-    public class UTextUtility
+    public class TtTextUtility
     {
         public class Symbol
         {

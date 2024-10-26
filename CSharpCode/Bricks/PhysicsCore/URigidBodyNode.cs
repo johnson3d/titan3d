@@ -16,7 +16,7 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             [Rtti.Meta]
             public EPhyActorType PxActorType { get; set; }
-            public class TtShapeSerializer : IO.UCustomSerializerAttribute
+            public class TtShapeSerializer : IO.TtCustomSerializerAttribute
             {
                 public override unsafe void Save(IO.IWriter ar, object host, string propName)
                 {
