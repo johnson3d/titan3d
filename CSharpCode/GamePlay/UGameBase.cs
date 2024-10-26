@@ -12,22 +12,23 @@ using System.Text;
 namespace EngineNS.GamePlay
 {
     [Macross.TtMacross]
-    public partial class UMacrossGame
+    //[Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.UMacrossGame@EngineCore", "EngineNS.GamePlay.UMacrossGame" })]
+    public partial class TtMacrossGame
     {
         [Rtti.Meta]
-        public virtual async System.Threading.Tasks.Task<bool> BeginPlay(UGameInstance host)
+        public virtual async System.Threading.Tasks.Task<bool> BeginPlay(TtGameInstance host)
         {
             await host.InitViewportSlate(TtEngine.Instance.Config.MainRPolicyName);
 
             return true;
         }
         [Rtti.Meta]
-        public virtual void Tick(UGameInstance host, float elapsedMillisecond)
+        public virtual void Tick(TtGameInstance host, float elapsedMillisecond)
         {
 
         }
         [Rtti.Meta]
-        public virtual void BeginDestroy(UGameInstance host)
+        public virtual void BeginDestroy(TtGameInstance host)
         {
             host.FinalViewportSlate();
         }
@@ -46,7 +47,7 @@ namespace EngineNS.GamePlay
         }
     }
     [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoMacrossCreate)]
-    public partial class UGameInstance : TtModuleHost<UGameInstance>, ITickable
+    public partial class TtGameInstance : TtModuleHost<TtGameInstance>, ITickable
     {
         public int GetTickOrder()
         {
@@ -76,17 +77,17 @@ namespace EngineNS.GamePlay
         {
             get => WorldViewportSlate.RenderPolicy.DefaultCamera;
         }
-        Macross.UMacrossGetter<UMacrossGame> mMcObject;
-        public Macross.UMacrossGetter<UMacrossGame> McObject
+        Macross.UMacrossGetter<TtMacrossGame> mMcObject;
+        public Macross.UMacrossGetter<TtMacrossGame> McObject
         {
             get
             {
                 if (mMcObject == null)
-                    mMcObject = Macross.UMacrossGetter<UMacrossGame>.NewInstance();
+                    mMcObject = Macross.UMacrossGetter<TtMacrossGame>.NewInstance();
                 return mMcObject;
             }
         }
-        protected override UGameInstance GetHost()
+        protected override TtGameInstance GetHost()
         {
             return this;
         }
@@ -341,7 +342,7 @@ namespace EngineNS
     public partial class TtEngine
     {
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.Unserializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
-        public GamePlay.UGameInstance GameInstance
+        public GamePlay.TtGameInstance GameInstance
         {
             get;
             set;

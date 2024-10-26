@@ -8,10 +8,10 @@ using EngineNS.GamePlay;
 
 namespace GameProject
 {
-    public class GAloneGame : EngineNS.GamePlay.UMacrossGame
+    public class GAloneGame : EngineNS.GamePlay.TtMacrossGame
     {   
         EngineNS.Macross.TtMacrossStackFrame mFrame_BeginPlay = new EngineNS.Macross.TtMacrossStackFrame();
-        public async override System.Threading.Tasks.Task<bool> BeginPlay(EngineNS.GamePlay.UGameInstance host)
+        public async override System.Threading.Tasks.Task<bool> BeginPlay(EngineNS.GamePlay.TtGameInstance host)
         {
             //WorldViewportSlate = new EngineNS.GamePlay.UGameViewportSlate(true);
 
@@ -107,11 +107,11 @@ namespace GameProject
         //    camera.Parent = springArm;
         //    camera.Camera = WorldViewportSlate.RenderPolicy.DefaultCamera;
         //}
-        public override void Tick(EngineNS.GamePlay.UGameInstance host, float elapsedMillisecond)
+        public override void Tick(EngineNS.GamePlay.TtGameInstance host, float elapsedMillisecond)
         {
             base.Tick(host, elapsedMillisecond);
         }
-        public override void BeginDestroy(EngineNS.GamePlay.UGameInstance host)
+        public override void BeginDestroy(EngineNS.GamePlay.TtGameInstance host)
         {
             base.BeginDestroy(host);
         }

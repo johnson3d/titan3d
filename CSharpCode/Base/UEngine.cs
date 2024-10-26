@@ -162,7 +162,7 @@ namespace EngineNS
         [Rtti.Meta]
         [Category("Option")]
         public RName DefaultMaterialInstance { get; set; }// = RName.GetRName("UTest/box_wite.uminst");
-        [RName.PGRName(FilterExts = Bricks.CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(GamePlay.UMacrossGame))]
+        [RName.PGRName(FilterExts = Bricks.CodeBuilder.TtMacross.AssetExt, MacrossType = typeof(GamePlay.TtMacrossGame))]
         [Rtti.Meta]
         [Category("Option")]
         public RName PlayGameName { get; set; }

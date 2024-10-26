@@ -1040,13 +1040,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if((buttonFlags & EDrawMethodButtonFlag.Delete) != 0)
             {
                 ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
-                var delFunckeyName = $"Delete func {displayName}?";
+                var delFunckeyName = $"Delete func {displayName + "##" + keyName}?";
                 if (EGui.UIProxy.CustomButton.ToolButton("x", in buttonSize, 0xFF0000FF, "func_X_" + displayName + keyName))
                 {
                     EGui.UIProxy.MessageBox.Open(delFunckeyName);
                     return false;
                 }
-                EGui.UIProxy.MessageBox.Draw(delFunckeyName, $"Are you sure to delete {displayName}?", EGui.UIProxy.MessageBox.EButtonType.YesNo,
+                EGui.UIProxy.MessageBox.Draw(delFunckeyName, $"Are you sure to delete {displayName + "##" + keyName}?", EGui.UIProxy.MessageBox.EButtonType.YesNo,
                 () =>
                 {
                     RemoveMethod(method, realDelete);

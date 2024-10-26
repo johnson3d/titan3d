@@ -10,7 +10,7 @@ namespace EngineNS.GamePlay
         {
             return -1;
         }
-        public UGameInstance GameInstance;
+        public TtGameInstance GameInstance;
         //public override EGui.Slate.UWorldViewportSlate GetWorldViewportSlate()
         //{
         //    return GameInstance.WorldViewportSlate;

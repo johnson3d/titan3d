@@ -260,7 +260,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             get => mIsGet;
             set => mIsGet = value;
         }
-
+        public override bool CopyTo(TtNodeBase target, bool withId = false)
+        {
+            (target as MemberVar).mDefClass = mDefClass;
+            return base.CopyTo(target, withId);
+        }
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             if (IsGet)

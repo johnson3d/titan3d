@@ -72,7 +72,7 @@ namespace EngineNS.Editor
                 mCurrentName = cfgName;
             }
             mRNameEditor.FilterExts = Bricks.CodeBuilder.TtMacross.AssetExt;
-            mRNameEditor.MacrossType = typeof(GamePlay.UMacrossGame);
+            mRNameEditor.MacrossType = typeof(GamePlay.TtMacrossGame);
 
             return true;
         }
@@ -159,7 +159,7 @@ namespace EngineNS
             var root = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute);
             TtEngine.Instance.MacrossModule.ReloadAssembly(root + $"/{DotNetVersion}/GameProject.dll");
 
-            this.GameInstance = new GamePlay.UGameInstance();
+            this.GameInstance = new GamePlay.TtGameInstance();
             this.GameInstance.WorldViewportSlate.Title = $"Game:{main.Name}";
 
             this.GameInstance.McObject.Name = main;
