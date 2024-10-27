@@ -1,1 +1,2 @@
+EngineCore
 EngineNS.UI.Animation.DoubleAnimation@EngineCore

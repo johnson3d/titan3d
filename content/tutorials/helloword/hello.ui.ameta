@@ -2,7 +2,7 @@
 <Root Type="EngineNS.UI.TtUIAssetAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="e1520501-a052-4abe-a7d6-e9cfdf41e8e0" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.UI.TtUIAsset&#xA;Hahah" />
-  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">

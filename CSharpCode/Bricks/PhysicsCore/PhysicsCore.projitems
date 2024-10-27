@@ -9,22 +9,22 @@
     <Import_RootNamespace>EngineNS.Bricks.PhysicsCore</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Actor\UActor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Actor\UCharacter.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SceneNode\UPhyCollisionNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SceneNode\UPhyControllerNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UPhyActor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UPhyContext.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UPhyController.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UPhyConvexMesh.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UPhyHeightfield.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UPhyMaterial.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UPhyMaterialEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UPhyScene.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UPhyShape.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UPhyTriMesh.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UPhyTriMeshEditor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)URigidBodyNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Actor\Actor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Actor\Character.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SceneNode\PhyCollisionNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SceneNode\PhyControllerNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PhyActor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PhyContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PhyController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PhyConvexMesh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PhyHeightfield.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PhyMaterial.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PhyMaterialEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PhyScene.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PhyShape.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PhyTriMesh.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PhyTriMeshEditor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RigidBodyNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)PhysicsCore.brick" />

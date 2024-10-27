@@ -426,18 +426,35 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return true;
         }
 
-        public TtCoreShaderBinder.UShaderResourceIndexer mBindIndexer;
-        public TtCoreShaderBinder.UShaderResourceIndexer BindIndexer
+        protected NxRHI.TtShader.TtShaderBinderIndexer mBindIndexer;
+        public NxRHI.TtShader.TtShaderBinderIndexer BindIndexer
         {
             get
             {
-                if (mBindIndexer == null)
-                {
-                    mBindIndexer = new TtCoreShaderBinder.UShaderResourceIndexer();
-                    mBindIndexer.UpdateBindResouce(this.ShaderEffect);
-                }
+                GetTypedBindIndexer<NxRHI.TtShader.TtCommonShaderResourceIndexer>();
                 return mBindIndexer;
             }
+        }
+        public T GetTypedBindIndexer<T>() where T : NxRHI.TtShader.TtShaderBinderIndexer, new()
+        {
+            if (mBindIndexer == null && typeof(T) == typeof(NxRHI.TtShader.TtCommonShaderResourceIndexer))
+            {
+                mBindIndexer = NxRHI.TtShader.AuxShaderBinderIndexer<T>.Instance;
+            }
+            else
+            {
+                if (mBindIndexer != null && typeof(T) == typeof(NxRHI.TtShader.TtCommonShaderResourceIndexer))
+                {
+                    return mBindIndexer as T;
+                }
+                if (mBindIndexer == null || typeof(T) != mBindIndexer.GetType())
+                {
+                    mBindIndexer = new T();
+                    NxRHI.TtShader.TtShaderBinderIndexer.RemoveBinderIndexer(mBindIndexer);
+                    mBindIndexer.UpdateBindResouce(this.ShaderEffect);
+                }
+            }
+            return mBindIndexer as T;
         }
     }
     public class TtEffectManager : IDisposable
@@ -445,7 +462,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public TtEffect DummyEffect;
         public async System.Threading.Tasks.Task<bool> Initialize(TtGfxDevice device)
         {
-            DummyEffect = await this.GetEffect(await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDummyShading>(), device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
+            var shading = TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDummyShading>();
+            DummyEffect = await this.GetEffect(await shading, device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
 
             if (DummyEffect == null)
             {
@@ -455,7 +473,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (DummyEffect == null)
                 return false;
 
-            device.CoreShaderBinder.UpdateIndex(DummyEffect.ShaderEffect);
+            TtCoreShaderBinder.InitializeCoreBinder(DummyEffect.ShaderEffect);
             return true;
         }
         public void Dispose()
@@ -466,6 +484,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 i.Value.Dispose();
             }
             Effects.Clear();
+            DummyEffect = null;
+            TtCoreShaderBinder.FinalCleanup();
         }
         private Thread.TtAwaitSessionManager<Hash160, TtEffect> mCreatingSession = new Thread.TtAwaitSessionManager<Hash160, TtEffect>();
         public Dictionary<Hash160, TtEffect> Effects { get; } = new Dictionary<Hash160, TtEffect>();

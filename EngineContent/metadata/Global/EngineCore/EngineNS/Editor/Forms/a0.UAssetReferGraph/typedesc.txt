@@ -1,1 +1,2 @@
+EngineCore
 EngineNS.Editor.Forms.UAssetReferGraph@EngineCore

@@ -302,7 +302,7 @@ namespace EngineNS
             EngineNS.Rtti.TtTypeDescManager.Instance.InitTypes();
             var t2 = Support.TtTime.HighPrecision_GetTickCount();
 
-            EngineNS.Rtti.TtClassMetaManager.Instance.LoadMetas();
+            EngineNS.Rtti.TtClassMetaManager.Instance.LoadMetas("EngineCore");
             var t3 = Support.TtTime.HighPrecision_GetTickCount();
             
             EngineNS.Profiler.Log.InitLogger();

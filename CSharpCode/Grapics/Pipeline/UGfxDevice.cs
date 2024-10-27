@@ -75,21 +75,20 @@ namespace EngineNS.Graphics.Pipeline
         }
         public override void TickModule(TtEngine engine)
         {
-            var binder = CoreShaderBinder;
             if (PerFrameCBuffer != null)
             {
                 var tm = engine.CurrentTick24BitMS;
                 var timeOfSecend = (float)tm * 0.001f;
-                PerFrameCBuffer.SetValue(binder.CBPerFrame.Time, in timeOfSecend);
+                PerFrameCBuffer.SetValue(TtCoreShaderBinder.TtPerFrameCBufferVarIndexer.Instance.Time, in timeOfSecend);
                 var fracTime = (float)(tm % 1000) * 0.001f;
-                PerFrameCBuffer.SetValue(binder.CBPerFrame.TimeFracSecond, in fracTime);
+                PerFrameCBuffer.SetValue(TtCoreShaderBinder.TtPerFrameCBufferVarIndexer.Instance.TimeFracSecond, in fracTime);
                 var timeSin = (float)Math.Sin(fracTime * Math.PI * 2);
-                PerFrameCBuffer.SetValue(binder.CBPerFrame.TimeSin, in timeSin);
+                PerFrameCBuffer.SetValue(TtCoreShaderBinder.TtPerFrameCBufferVarIndexer.Instance.TimeSin, in timeSin);
                 var timeCos = (float)Math.Cos(fracTime * Math.PI * 2);
-                PerFrameCBuffer.SetValue(binder.CBPerFrame.TimeCos, in timeCos);
+                PerFrameCBuffer.SetValue(TtCoreShaderBinder.TtPerFrameCBufferVarIndexer.Instance.TimeCos, in timeCos);
 
                 float elapsed = (float)engine.ElapseTickCountMS / 1000.0f;
-                PerFrameCBuffer.SetValue(binder.CBPerFrame.ElapsedTime, in elapsed);
+                PerFrameCBuffer.SetValue(TtCoreShaderBinder.TtPerFrameCBufferVarIndexer.Instance.ElapsedTime, in elapsed);
             }
         }
         public override void TickLogic(TtEngine host)
@@ -287,9 +286,9 @@ namespace EngineNS.Graphics.Pipeline
             {
                 if (mPerFrameCBuffer == null)
                 {
-                    if (TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerFrame.Binder != null)
+                    if (TtCoreShaderBinder.TtPerFrameCBufferVarIndexer.Instance.Binder != null)
                     {
-                        mPerFrameCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerFrame.Binder.mCoreObject);
+                        mPerFrameCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(TtCoreShaderBinder.TtPerFrameCBufferVarIndexer.Instance.Binder.mCoreObject);
                     }
                     else
                     {

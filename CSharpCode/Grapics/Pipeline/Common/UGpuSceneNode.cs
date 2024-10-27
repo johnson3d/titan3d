@@ -76,7 +76,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 {
                     mExposure = value;
                     
-                    PerGpuSceneCbv.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.Exposure, in mExposure);
+                    PerGpuSceneCbv.SetValue(TtCoreShaderBinder.TtPerGpuSceneCBufferVarIndexer.Instance.Exposure, in mExposure);
                 }
             }
         }
@@ -89,7 +89,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (PerGpuSceneCbv != null)
                 {
                     mEyeAdapterTimeRange = value;
-                    PerGpuSceneCbv.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.EyeAdapterTimeRange, in mEyeAdapterTimeRange);
+                    PerGpuSceneCbv.SetValue(TtCoreShaderBinder.TtPerGpuSceneCBufferVarIndexer.Instance.EyeAdapterTimeRange, in mEyeAdapterTimeRange);
                 }
             }
         }
@@ -102,7 +102,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 mHdrMiddleGrey = value;
                 if (PerGpuSceneCbv != null)
                 {
-                    PerGpuSceneCbv.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.HdrMiddleGrey, in mHdrMiddleGrey);
+                    PerGpuSceneCbv.SetValue(TtCoreShaderBinder.TtPerGpuSceneCBufferVarIndexer.Instance.HdrMiddleGrey, in mHdrMiddleGrey);
                 }
             }
         }
@@ -115,7 +115,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (PerGpuSceneCbv != null)
                 {
                     mHdrMaxLuminance = value;
-                    PerGpuSceneCbv.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.HdrMaxLuminance, in mHdrMaxLuminance);
+                    PerGpuSceneCbv.SetValue(TtCoreShaderBinder.TtPerGpuSceneCBufferVarIndexer.Instance.HdrMaxLuminance, in mHdrMaxLuminance);
                 }
             }
         }
@@ -128,7 +128,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (PerGpuSceneCbv != null)
                 {
                     mHdrMinLuminance = value;
-                    PerGpuSceneCbv.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.HdrMinLuminance, in mHdrMinLuminance);
+                    PerGpuSceneCbv.SetValue(TtCoreShaderBinder.TtPerGpuSceneCBufferVarIndexer.Instance.HdrMinLuminance, in mHdrMinLuminance);
                 }
             }
         }
@@ -161,7 +161,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 GpuSceneDescBuffer.SetSize(1, IntPtr.Zero.ToPointer(), NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
             }
-            PerGpuSceneCbv = rc.CreateCBV(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerGpuScene.Binder.mCoreObject);
+            PerGpuSceneCbv = rc.CreateCBV(TtCoreShaderBinder.TtPerGpuSceneCBufferVarIndexer.Instance.Binder.mCoreObject);
 
             Initialize_Light(policy, debugName);
             await Initialize_Instance(policy, debugName);

@@ -6,13 +6,54 @@ namespace EngineNS.NxRHI
 {
     public class TtShader : AuxPtrType<NxRHI.IShader>
     {
-        public class UShaderVarAttribute : Attribute
+        #region ShaderBinder
+        public class TtShaderVarAttribute : Attribute
         {
             public System.Type VarType;
             public int NumElement = 1;
         }
-        public class UShaderBinderIndexer
+        public class TtShaderBinderIndexer
         {
+            private static bool mFinalized = false;
+            public static List<TtShaderBinderIndexer> ShaderBinderIndexers { get; } = new List<TtShaderBinderIndexer>();
+            internal static void RemoveBinderIndexer(TtShaderBinderIndexer obj)
+            {
+                lock (ShaderBinderIndexers)
+                {
+                    ShaderBinderIndexers.Remove(obj);
+                }
+            }
+            public static void FinalCleanup()
+            {
+                mFinalized = true;
+                foreach (var i in ShaderBinderIndexers)
+                {
+                    i.Dispose();
+                }
+                ShaderBinderIndexers.Clear();
+            }
+            public TtShaderBinderIndexer()
+            {
+                if (mFinalized)
+                    return;
+                ShaderBinderIndexers.Add(this);
+            }
+            public void Dispose()
+            {
+                if (mEffect == null)
+                    return;
+                var members = this.GetType().GetFields();
+                foreach (var i in members)
+                {
+                    var attrs = i.GetCustomAttributes(typeof(TtShaderVarAttribute), true);
+                    if (attrs.Length == 0)
+                    {
+                        continue;
+                    }
+                    i.SetValue(this, null);
+                }
+                mEffect = null;
+            }
             NxRHI.TtShaderEffect mEffect;
             public unsafe void UpdateBindResouce(NxRHI.TtShaderEffect effect)
             {
@@ -22,7 +63,7 @@ namespace EngineNS.NxRHI
                 var members = this.GetType().GetFields();
                 foreach (var i in members)
                 {
-                    var attrs = i.GetCustomAttributes(typeof(UShaderVarAttribute), true);
+                    var attrs = i.GetCustomAttributes(typeof(TtShaderVarAttribute), true);
                     if (attrs.Length == 0)
                     {
                         continue;
@@ -31,16 +72,118 @@ namespace EngineNS.NxRHI
                     i.SetValue(this, index);
                 }
             }
+
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
+            public NxRHI.TtEffectBinder cbPerViewport;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
+            public NxRHI.TtEffectBinder cbPerFrame;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
+            public NxRHI.TtEffectBinder cbPerCamera;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
+            public NxRHI.TtEffectBinder cbPerMesh;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
+            public NxRHI.TtEffectBinder cbPreFramePerMesh;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
+            public NxRHI.TtEffectBinder cbPerMaterial;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtSrView))]
+            public NxRHI.TtEffectBinder gEnvMap;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtSrView))]
+            public NxRHI.TtEffectBinder gShadowMap;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtSampler))]
+            public NxRHI.TtEffectBinder Samp_gEnvMap;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtSampler))]
+            public NxRHI.TtEffectBinder Samp_gShadowMap;
         }
-        public class UShaderVarIndexer
+        public class AuxShaderBinderIndexer<T> : TtShaderBinderIndexer where T : TtShaderBinderIndexer, new()
         {
+            public static T Instance { get; } = new T();
+        }
+        public class TtCommonShaderResourceIndexer : AuxShaderBinderIndexer<TtCommonShaderResourceIndexer>
+        {
+
+        }
+        public class TtCBufferVarIndexer
+        {
+            private static bool mFinalized = false;
+            public static List<TtCBufferVarIndexer> CBufferVarIndexers { get; } = new List<TtCBufferVarIndexer>();
+            public static void FinalCleanup()
+            {
+                mFinalized = true;
+                foreach (var i in CBufferVarIndexers)
+                {
+                    i.Dispose();
+                }
+                CBufferVarIndexers.Clear();
+            }
+            public void Dispose()
+            {
+                var members = this.GetType().GetFields();
+                foreach (var i in members)
+                {
+                    if (i.FieldType != typeof(FShaderVarDesc))
+                        continue;
+                    var attrs = i.GetCustomAttributes(typeof(TtShaderVarAttribute), true);
+                    if (attrs.Length == 0)
+                    {
+                        continue;
+                    }
+                    i.SetValue(this, null);
+                }
+                mBinder = null;
+            }
+            public TtCBufferVarIndexer()
+            {
+                if (mFinalized)
+                    return;
+                CBufferVarIndexers.Add(this);
+            }
             TtShaderBinder mBinder;
             public TtShaderBinder Binder
             {
                 get => mBinder;
             }
             public uint BufferSize;
-            
+            public bool FindShaderVar(string name, ref FShaderVarDesc result)
+            {
+                var members = this.GetType().GetFields();
+                foreach (var i in members)
+                {
+                    if (i.FieldType != typeof(FShaderVarDesc))
+                        continue;
+                    var attrs = i.GetCustomAttributes(typeof(TtShaderVarAttribute), true);
+                    if (attrs.Length == 0)
+                    {
+                        continue;
+                    }
+                    if (i.Name == name)
+                    {
+                        result = (FShaderVarDesc)i.GetValue(this);
+                        return true;
+                    }
+                }
+                return false;
+            }
+            public bool FindFirstShaderVarName<Type>(ref string result)
+            {
+                var members = this.GetType().GetFields();
+                foreach (var i in members)
+                {
+                    if (i.FieldType != typeof(FShaderVarDesc))
+                        continue;
+                    var attrs = i.GetCustomAttributes(typeof(TtShaderVarAttribute), true);
+                    if (attrs.Length == 0)
+                    {
+                        continue;
+                    }
+                    var var = attrs[0] as TtShaderVarAttribute;
+                    if (var.VarType == typeof(Type))
+                    {
+                        result = i.Name;
+                        return true;
+                    }
+                }
+                return false;
+            }
             public bool UpdateFieldVar(IGraphicsEffect effect, string name)
             {
                 if (mBinder != null)
@@ -61,7 +204,7 @@ namespace EngineNS.NxRHI
                 UpdateFieldVar(new TtShaderBinder(binder));
                 return true;
             }
-            public unsafe void UpdateFieldVar(TtShaderBinder binder)
+            private unsafe void UpdateFieldVar(TtShaderBinder binder)
             {
                 if (mBinder != null)
                     return;
@@ -70,13 +213,13 @@ namespace EngineNS.NxRHI
                 var members = this.GetType().GetFields();
                 foreach (var i in members)
                 {
-                    var attrs = i.GetCustomAttributes(typeof(UShaderVarAttribute), true);
+                    var attrs = i.GetCustomAttributes(typeof(TtShaderVarAttribute), true);
                     if (attrs.Length == 0)
                     {
                         continue;
                     }
 
-                    var varAttr = attrs[0] as UShaderVarAttribute;
+                    var varAttr = attrs[0] as TtShaderVarAttribute;
                     var fld = binder.FindField(i.Name);
                     if (fld.IsValidPointer)
                     {
@@ -88,8 +231,13 @@ namespace EngineNS.NxRHI
                     }
                 }
             }
-            public UShaderVarIndexer NextIndexer = null;
         }
+        public class AuxCBufferVarIndexer<T> : TtCBufferVarIndexer where T : TtCBufferVarIndexer, new()
+        {
+            public static T Instance { get; } = new T();
+        }
+        #endregion
+
         internal TtShaderReflector mReflector;
         public TtShaderReflector Reflector
         {

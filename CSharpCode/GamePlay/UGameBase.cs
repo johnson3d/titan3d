@@ -310,7 +310,7 @@ namespace EngineNS.GamePlay
             actor.Placement.SetTransform(new DVector3(100, 10, 50), Vector3.One, Quaternion.Identity);
 
             var phyControl = new TtPhySphereCollisionNode();
-            var phyNodeData = new TtPhySphereCollisionNode.UPhySphereCollisionNodeData();
+            var phyNodeData = new TtPhySphereCollisionNode.TtPhySphereCollisionNodeData();
             phyNodeData.Radius = 0.5f;
             await phyControl.InitializeNode(scene.World, phyNodeData, Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             phyControl.Parent = actor;
@@ -329,7 +329,7 @@ namespace EngineNS.GamePlay
             actor.Placement.SetTransform(new DVector3(100, 2, 50), Vector3.One, Quaternion.Identity);
 
             var phyControl = new TtPhyBoxCollisionNode();
-            var phyNodeData = new TtPhyBoxCollisionNode.UPhyBoxCollisionNodeData();
+            var phyNodeData = new TtPhyBoxCollisionNode.TtPhyBoxCollisionNodeData();
             phyNodeData.PhyActorType = EPhyActorType.PAT_Static;
             await phyControl.InitializeNode(scene.World, phyNodeData, Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             phyControl.Parent = actor;

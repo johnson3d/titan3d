@@ -459,8 +459,7 @@ namespace EngineNS.Graphics.Pipeline
             {
                 if (mPerViewportCBuffer == null)
                 {
-                    var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
-                    mPerViewportCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerViewport.Binder.mCoreObject);
+                    mPerViewportCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.Binder.mCoreObject);
                     PerViewportCBuffer.SetDebugName($"Viewport");
                     UpdateViewportCBuffer();
                 }
@@ -472,42 +471,41 @@ namespace EngineNS.Graphics.Pipeline
             NxRHI.TtCbView cBuffer = PerViewportCBuffer;
             if (cBuffer == null)
                 return;
-            var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
             var shadowNode = mobilePolicy.FindFirstNode<Shadow.TtShadowMapNode>();
             if (shadowNode != null)
             {
-                cBuffer.SetValue(coreBinder.CBPerViewport.gFadeParam, in shadowNode.mFadeParam);
-                cBuffer.SetValue(coreBinder.CBPerViewport.gShadowTransitionScale, in shadowNode.mShadowTransitionScale);
-                cBuffer.SetValue(coreBinder.CBPerViewport.gShadowMapSizeAndRcp, in shadowNode.mShadowMapSizeAndRcp);
-                cBuffer.SetValue(coreBinder.CBPerViewport.gViewer2ShadowMtx, in shadowNode.mViewer2ShadowMtx);
+                cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gFadeParam, in shadowNode.mFadeParam);
+                cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gShadowTransitionScale, in shadowNode.mShadowTransitionScale);
+                cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gShadowMapSizeAndRcp, in shadowNode.mShadowMapSizeAndRcp);
+                cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gViewer2ShadowMtx, in shadowNode.mViewer2ShadowMtx);
 
-                cBuffer.SetValue(coreBinder.CBPerViewport.gShadowDistance, in shadowNode.mShadowDistance);
+                cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gShadowDistance, in shadowNode.mShadowDistance);
 
-                cBuffer.SetValue(coreBinder.CBPerViewport.gCsmDistanceArray, in shadowNode.mSumDistanceFarVec);
+                cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gCsmDistanceArray, in shadowNode.mSumDistanceFarVec);
 
-                cBuffer.SetMatrix(coreBinder.CBPerViewport.gViewer2ShadowMtxArray, 0, in shadowNode.mViewer2ShadowMtxArray[0]);
-                cBuffer.SetMatrix(coreBinder.CBPerViewport.gViewer2ShadowMtxArray, 1, in shadowNode.mViewer2ShadowMtxArray[1]);
-                cBuffer.SetMatrix(coreBinder.CBPerViewport.gViewer2ShadowMtxArray, 2, in shadowNode.mViewer2ShadowMtxArray[2]);
-                cBuffer.SetMatrix(coreBinder.CBPerViewport.gViewer2ShadowMtxArray, 3, in shadowNode.mViewer2ShadowMtxArray[3]);
+                cBuffer.SetMatrix(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gViewer2ShadowMtxArray, 0, in shadowNode.mViewer2ShadowMtxArray[0]);
+                cBuffer.SetMatrix(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gViewer2ShadowMtxArray, 1, in shadowNode.mViewer2ShadowMtxArray[1]);
+                cBuffer.SetMatrix(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gViewer2ShadowMtxArray, 2, in shadowNode.mViewer2ShadowMtxArray[2]);
+                cBuffer.SetMatrix(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gViewer2ShadowMtxArray, 3, in shadowNode.mViewer2ShadowMtxArray[3]);
 
-                cBuffer.SetValue(coreBinder.CBPerViewport.gShadowTransitionScaleArray, in shadowNode.mShadowTransitionScaleVec);
-                cBuffer.SetValue(coreBinder.CBPerViewport.gCsmNum, in shadowNode.mCsmNum);
+                cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gShadowTransitionScaleArray, in shadowNode.mShadowTransitionScaleVec);
+                cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gCsmNum, in shadowNode.mCsmNum);
             }
 
             var dirLight = world.DirectionLight;
             //dirLight.mDirection = MathHelper.RandomDirection();
             var dir = dirLight.Direction;
             var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, dirLight.mSunLightLeak);
-            cBuffer.SetValue(coreBinder.CBPerViewport.gDirLightDirection_Leak, in gDirLightDirection_Leak);
+            cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gDirLightDirection_Leak, in gDirLightDirection_Leak);
             var gDirLightColor_Intensity = new Vector4(dirLight.SunLightColor.X, dirLight.SunLightColor.Y, dirLight.SunLightColor.Z, dirLight.mSunLightIntensity);
-            cBuffer.SetValue(coreBinder.CBPerViewport.gDirLightColor_Intensity, in gDirLightColor_Intensity);
+            cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gDirLightColor_Intensity, in gDirLightColor_Intensity);
 
-            cBuffer.SetValue(coreBinder.CBPerViewport.mSkyLightColor, in dirLight.mSkyLightColor);
-            cBuffer.SetValue(coreBinder.CBPerViewport.mGroundLightColor, in dirLight.mGroundLightColor);
+            cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.mSkyLightColor, in dirLight.mSkyLightColor);
+            cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.mGroundLightColor, in dirLight.mGroundLightColor);
 
             float EnvMapMaxMipLevel = 10.0f;
-            cBuffer.SetValue(coreBinder.CBPerViewport.gEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
-            cBuffer.SetValue(coreBinder.CBPerViewport.gEyeEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
+            cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
+            cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gEyeEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
         }
         public void BuildFrameBuffers(TtRenderGraph policy)
         {
@@ -610,10 +608,8 @@ namespace EngineNS.Graphics.Pipeline
             {
                 if (PerViewportCBuffer != null)
                 {
-                    var indexer = TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerViewport;
-
                     Vector4 gViewportSizeAndRcp = new Vector4(Viewport.Width, Viewport.Height, 1 / Viewport.Width, 1 / Viewport.Height);
-                    PerViewportCBuffer.SetValue(indexer.gViewportSizeAndRcp, in gViewportSizeAndRcp);
+                    PerViewportCBuffer.SetValue(TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gViewportSizeAndRcp, in gViewportSizeAndRcp);
                 }
             }
         }

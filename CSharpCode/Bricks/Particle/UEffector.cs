@@ -22,25 +22,26 @@ namespace EngineNS.Bricks.Particle
         {
             TtGpuParticleResources gpuResources = emitter.GpuResources;
 
-            var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
+            var coreBinder = Graphics.Pipeline.TtCoreShaderBinder.TtPerParticleCBufferVarIndexer.Instance;
             if (mParticleUpdateDrawcall == null)
             {
                 mParticleUpdateDrawcall = rc.CreateComputeDraw();
-                coreBinder.CBPerParticle.UpdateFieldVar(Shader.Particle_Update.mComputeShader, "cbParticleDesc");
-                CBuffer = rc.CreateCBV(coreBinder.CBPerParticle.Binder.mCoreObject);
+                var cbvIndexer = Graphics.Pipeline.TtCoreShaderBinder.TtPerParticleCBufferVarIndexer.Instance;
+                cbvIndexer.UpdateFieldVar(Shader.Particle_Update.mComputeShader, "cbParticleDesc");
+                CBuffer = rc.CreateCBV(coreBinder.Binder.mCoreObject);
 
-                CBuffer.SetValue(coreBinder.CBPerParticle.ParticleRandomPoolSize, TtEngine.Instance.NebulaTemplateManager.ShaderRandomPoolSize);
+                CBuffer.SetValue(cbvIndexer.ParticleRandomPoolSize, TtEngine.Instance.NebulaTemplateManager.ShaderRandomPoolSize);
                 var dpDesc = emitter.Mesh.SubMeshes[0].Atoms[0].GetMeshAtomDesc(0);
-                CBuffer.SetValue(coreBinder.CBPerParticle.Draw_IndexCountPerInstance, dpDesc->m_NumPrimitives * 3);
-                CBuffer.SetValue(coreBinder.CBPerParticle.Draw_StartIndexLocation, dpDesc->m_StartIndex);
-                CBuffer.SetValue(coreBinder.CBPerParticle.Draw_BaseVertexLocation, dpDesc->m_BaseVertexIndex);
-                CBuffer.SetValue(coreBinder.CBPerParticle.Draw_StartInstanceLocation, 0);
-                CBuffer.SetValue(coreBinder.CBPerParticle.ParticleMaxSize, emitter.MaxParticle);
+                CBuffer.SetValue(coreBinder.Draw_IndexCountPerInstance, dpDesc->m_NumPrimitives * 3);
+                CBuffer.SetValue(cbvIndexer.Draw_StartIndexLocation, dpDesc->m_StartIndex);
+                CBuffer.SetValue(cbvIndexer.Draw_BaseVertexLocation, dpDesc->m_BaseVertexIndex);
+                CBuffer.SetValue(cbvIndexer.Draw_StartInstanceLocation, 0);
+                CBuffer.SetValue(cbvIndexer.ParticleMaxSize, emitter.MaxParticle);
                 
-                CBuffer.SetValue(coreBinder.CBPerParticle.AllocatorCapacity, emitter.MaxParticle);
-                CBuffer.SetValue(coreBinder.CBPerParticle.CurAliveCapacity, emitter.MaxParticle);
-                CBuffer.SetValue(coreBinder.CBPerParticle.BackendAliveCapacity, emitter.MaxParticle);
-                CBuffer.SetValue(coreBinder.CBPerParticle.ParticleCapacity, emitter.MaxParticle);
+                CBuffer.SetValue(cbvIndexer.AllocatorCapacity, emitter.MaxParticle);
+                CBuffer.SetValue(cbvIndexer.CurAliveCapacity, emitter.MaxParticle);
+                CBuffer.SetValue(cbvIndexer.BackendAliveCapacity, emitter.MaxParticle);
+                CBuffer.SetValue(cbvIndexer.ParticleCapacity, emitter.MaxParticle);
 
                 mParticleUpdateDrawcall.SetComputeEffect(Shader.Particle_Update);
 
@@ -57,8 +58,8 @@ namespace EngineNS.Bricks.Particle
                 mParticleUpdateDrawcall.BindIndirectDispatchArgsBuffer(gpuResources.DispatchArgBuffer);
             }
 
-            CBuffer.SetValue(coreBinder.CBPerParticle.ParticleElapsedTime, TtEngine.Instance.ElapsedSecond);
-            CBuffer.SetValue(coreBinder.CBPerParticle.ParticleRandomSeed, TtEngine.Instance.NebulaTemplateManager.mRandom.Next());
+            CBuffer.SetValue(coreBinder.ParticleElapsedTime, TtEngine.Instance.ElapsedSecond);
+            CBuffer.SetValue(coreBinder.ParticleRandomSeed, TtEngine.Instance.NebulaTemplateManager.mRandom.Next());
 
             emitter.SetCBuffer(CBuffer);
 

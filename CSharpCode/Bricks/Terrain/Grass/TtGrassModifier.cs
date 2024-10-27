@@ -325,31 +325,26 @@ namespace EngineNS.Bricks.Terrain.Grass
         }
         private void SureCBuffer(NxRHI.IGraphicsEffect shaderProg)
         {
-            var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
             if(GrassType.GrassCBuffer == null)
             {
-                coreBinder.CBPerGrassType.UpdateFieldVar(shaderProg, "cbPerGrassType");
-                if(coreBinder.CBPerGrassType.Binder != null)
-                    GrassType.GrassCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerGrassType.Binder.mCoreObject);
+                Graphics.Pipeline.TtCoreShaderBinder.TtPerGrassCBufferVarIndexer.Instance.UpdateFieldVar(shaderProg, "cbPerGrassType");
+                if(Graphics.Pipeline.TtCoreShaderBinder.TtPerGrassCBufferVarIndexer.Instance.Binder != null)
+                    GrassType.GrassCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(Graphics.Pipeline.TtCoreShaderBinder.TtPerGrassCBufferVarIndexer.Instance.Binder.mCoreObject);
             }
         }
-        public class UMdfShaderBinder : Graphics.Pipeline.TtCoreShaderBinder.UShaderResourceIndexer
+        public class TtMdfShaderBinder : NxRHI.TtShader.AuxShaderBinderIndexer<TtMdfShaderBinder>//NxRHI.TtShader.TtShaderBinderIndexer
         {
-            public void Init(NxRHI.TtShaderEffect effect)
-            {
-                UpdateBindResouce(effect);
-                HeightMapTexture = effect.FindBinder("HeightMapTexture");
-                Samp_HeightMapTexture = effect.FindBinder("Samp_HeightMapTexture");
-                cbPerPatch = effect.FindBinder("cbPerPatch");
-                cbPerTerrain = effect.FindBinder("cbPerTerrain");
-                cbPerGrassType = effect.FindBinder("cbPerGrassType");
-                VSGrassDataArray = effect.FindBinder("VSGrassDataArray");
-            }
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtSrView))]
             public NxRHI.TtEffectBinder HeightMapTexture;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtSampler))]
             public NxRHI.TtEffectBinder Samp_HeightMapTexture;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
             public NxRHI.TtEffectBinder cbPerPatch;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
             public NxRHI.TtEffectBinder cbPerTerrain;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
             public NxRHI.TtEffectBinder cbPerGrassType;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
             public NxRHI.TtEffectBinder VSGrassDataArray;
         }
         public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
@@ -359,13 +354,13 @@ namespace EngineNS.Bricks.Terrain.Grass
 
             SureCBuffer(drawcall.mCoreObject.GetGraphicsEffect());
 
-            var effectBinder = drawcall.Effect.mBindIndexer as UMdfShaderBinder;
-            if (effectBinder == null)
-            {
-                effectBinder = new UMdfShaderBinder();
-                effectBinder.Init(drawcall.Effect.ShaderEffect);
-                drawcall.Effect.mBindIndexer = effectBinder;
-            }
+            var effectBinder = drawcall.Effect.GetTypedBindIndexer<TtMdfShaderBinder>();
+            //if (effectBinder == null)
+            //{
+            //    effectBinder = new UMdfShaderBinder();
+            //    effectBinder.Init(drawcall.Effect.ShaderEffect);
+            //    drawcall.Effect.mBindIndexer = effectBinder;
+            //}
 
             //var index = drawcall.FindBinder("HeightMapTexture");
             if (effectBinder.HeightMapTexture != null)
@@ -383,15 +378,15 @@ namespace EngineNS.Bricks.Terrain.Grass
             //var cbIndex = drawcall.FindBinder("cbPerPatch");
             if (effectBinder.cbPerPatch != null)
             {
-                var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
-                pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.StartPosition, in pat.StartPosition);
+                var coreBinder = Graphics.Pipeline.TtCoreShaderBinder.TtPerTerrainPatchCBufferVarIndexer.Instance;
+                pat.PatchCBuffer.SetValue(coreBinder.StartPosition, in pat.StartPosition);
 
-                pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.CurrentLOD, pat.CurrentLOD);
+                pat.PatchCBuffer.SetValue(coreBinder.CurrentLOD, pat.CurrentLOD);
 
                 pat.TexUVOffset.X = ((float)pat.XInLevel / (float)pat.Level.GetTerrainNode().PatchSide);
                 pat.TexUVOffset.Y = ((float)pat.ZInLevel / (float)pat.Level.GetTerrainNode().PatchSide);
 
-                pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.TexUVOffset, in pat.TexUVOffset);
+                pat.PatchCBuffer.SetValue(coreBinder.TexUVOffset, in pat.TexUVOffset);
 
                 drawcall.BindCBuffer(effectBinder.cbPerPatch.mCoreObject, pat.PatchCBuffer);
             }
@@ -417,14 +412,14 @@ namespace EngineNS.Bricks.Terrain.Grass
             //index = drawcall.FindBinder("cbPerGrassType");
             if (effectBinder.cbPerGrassType != null)
             {
-                var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
-                GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.MinScale, GrassType.GrassDesc.MinScale);
-                GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.MaxScale, GrassType.GrassDesc.MaxScale);
-                GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.HeightMapMinHeight, in pat.Level.HeightMapMinHeight);
+                var coreBinder = Graphics.Pipeline.TtCoreShaderBinder.TtPerGrassCBufferVarIndexer.Instance;
+                GrassType.GrassCBuffer.SetValue(coreBinder.MinScale, GrassType.GrassDesc.MinScale);
+                GrassType.GrassCBuffer.SetValue(coreBinder.MaxScale, GrassType.GrassDesc.MaxScale);
+                GrassType.GrassCBuffer.SetValue(coreBinder.HeightMapMinHeight, in pat.Level.HeightMapMinHeight);
                 //GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.HeightMapMinHeight, (int)1);
-                GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.PatchIdxX, pat.IndexX);
-                GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.PatchIdxZ, pat.IndexZ);
-                GrassType.GrassCBuffer.SetValue(coreBinder.CBPerGrassType.MaxGrassInstanceNum, instCount);
+                GrassType.GrassCBuffer.SetValue(coreBinder.PatchIdxX, pat.IndexX);
+                GrassType.GrassCBuffer.SetValue(coreBinder.PatchIdxZ, pat.IndexZ);
+                GrassType.GrassCBuffer.SetValue(coreBinder.MaxGrassInstanceNum, instCount);
                 drawcall.BindCBuffer(effectBinder.cbPerGrassType, GrassType.GrassCBuffer);
             }
         }
@@ -435,21 +430,21 @@ namespace EngineNS.Graphics.Pipeline
 {
     public partial class TtCoreShaderBinder
     {
-        public class UCBufferPerGrassTypeIndexer : NxRHI.TtShader.UShaderVarIndexer
+        public class TtPerGrassCBufferVarIndexer : NxRHI.TtShader.AuxCBufferVarIndexer<TtPerGrassCBufferVarIndexer>
         {
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(float))]
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc MinScale;
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(float))]
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc MaxScale;
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(float))]
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc HeightMapMinHeight;
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(float))]
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc PatchIdxX;
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(float))]
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc PatchIdxZ;
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(int))]
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(int))]
             public NxRHI.FShaderVarDesc MaxGrassInstanceNum;
         }
-        public readonly UCBufferPerGrassTypeIndexer CBPerGrassType = new UCBufferPerGrassTypeIndexer();
+        public readonly TtPerGrassCBufferVarIndexer CBPerGrassType = new TtPerGrassCBufferVarIndexer();
     }
 }

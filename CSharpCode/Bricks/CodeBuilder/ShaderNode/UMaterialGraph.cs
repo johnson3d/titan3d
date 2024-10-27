@@ -126,17 +126,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             var uniformVarMenus = CanvasMenus.AddMenuItem("UniformVars", null, null);
             {
                 var perFrameMenus = uniformVarMenus.AddMenuItem("PerFrame", null, null);
-                var members = TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerFrame.GetType().GetFields();
+                var members = Graphics.Pipeline.TtCoreShaderBinder.TtPerFrameCBufferVarIndexer.Instance.GetType().GetFields();
                 foreach (var i in members)
                 {
-                    var attrs = i.GetCustomAttributes(typeof(NxRHI.TtShader.UShaderVarAttribute), false);
+                    var attrs = i.GetCustomAttributes(typeof(NxRHI.TtShader.TtShaderVarAttribute), false);
                     if (attrs.Length == 0)
                         continue;
                     perFrameMenus.AddMenuItem(i.Name, null,
                         (TtMenuItem item, object sender) =>
                         {
                             var node = new UUniformVar();
-                            node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.UShaderVarAttribute).VarType);
+                            node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.TtShaderVarAttribute).VarType);
                             node.Name = i.Name;
                             node.UserData = this;
                             node.Position = PopMenuPosition;
@@ -147,17 +147,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             }
             {
                 var perCameraMenus = uniformVarMenus.AddMenuItem("PerCamera", null, null);
-                var cameraMembers = TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.GetType().GetFields();
+                var cameraMembers =  Graphics.Pipeline.TtCoreShaderBinder.TtPerCameraCBufferVarIndexer.Instance.GetType().GetFields();
                 foreach (var i in cameraMembers)
                 {
-                    var attrs = i.GetCustomAttributes(typeof(NxRHI.TtShader.UShaderVarAttribute), false);
+                    var attrs = i.GetCustomAttributes(typeof(NxRHI.TtShader.TtShaderVarAttribute), false);
                     if (attrs.Length == 0)
                         continue;
                     perCameraMenus.AddMenuItem(i.Name, null,
                         (TtMenuItem item, object sender) =>
                         {
                             var node = new UUniformVar();
-                            node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.UShaderVarAttribute).VarType);
+                            node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.TtShaderVarAttribute).VarType);
                             node.Name = i.Name;
                             node.UserData = this;
                             node.Position = PopMenuPosition;
@@ -168,17 +168,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             }
             {
                 var perCbMenus = uniformVarMenus.AddMenuItem("PerViewport", null, null);
-                var Members = TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerViewport.GetType().GetFields();
+                var Members = Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.GetType().GetFields();
                 foreach (var i in Members)
                 {
-                    var attrs = i.GetCustomAttributes(typeof(NxRHI.TtShader.UShaderVarAttribute), false);
+                    var attrs = i.GetCustomAttributes(typeof(NxRHI.TtShader.TtShaderVarAttribute), false);
                     if (attrs.Length == 0)
                         continue;
                     perCbMenus.AddMenuItem(i.Name, null,
                         (TtMenuItem item, object sender) =>
                         {
                             var node = new UUniformVar();
-                            node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.UShaderVarAttribute).VarType);
+                            node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.TtShaderVarAttribute).VarType);
                             node.Name = i.Name;
                             node.UserData = this;
                             node.Position = PopMenuPosition;
@@ -189,17 +189,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             }
             {
                 var perCbMenus = uniformVarMenus.AddMenuItem("PerMesh", null, null);
-                var Members = TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.GetType().GetFields();
+                var Members = Graphics.Pipeline.TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.GetType().GetFields();
                 foreach (var i in Members)
                 {
-                    var attrs = i.GetCustomAttributes(typeof(NxRHI.TtShader.UShaderVarAttribute), false);
+                    var attrs = i.GetCustomAttributes(typeof(NxRHI.TtShader.TtShaderVarAttribute), false);
                     if (attrs.Length == 0)
                         continue;
                     perCbMenus.AddMenuItem(i.Name, null,
                         (TtMenuItem item, object sender) =>
                         {
                             var node = new UUniformVar();
-                            node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.UShaderVarAttribute).VarType);
+                            node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.TtShaderVarAttribute).VarType);
                             node.Name = i.Name;
                             node.UserData = this;
                             node.Position = PopMenuPosition;

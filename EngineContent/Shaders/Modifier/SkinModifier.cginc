@@ -1,9 +1,4 @@
-
-cbuffer cbSkinMesh DX_AUTOBIND//
-{
-	float4 AbsBonePos[360];
-	float4 AbsBoneQuat[360];
-};
+#include "../CBuffer/VarBase_PerSkinMesh.cginc"
 
 half3 RotateVec(in half3 inPos, in half4 inQuat)
 {

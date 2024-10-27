@@ -13,8 +13,8 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
-    <e_0 Value="Game,tutorials/common/utest/ttt.material,4099c4b0-f565-4347-820a-7644edc4a0d5" />
-    <e_1 Value="Game,tutorials/common/utest/taxi.srv,b31e5467-f924-4646-ae70-929082eccccf" />
+    <e_0 Value="Game,tutorials/common/utest/ttt.material,22a64b03-1048-42de-801f-9cd6ef88dcb2" />
+    <e_1 Value="Game,tutorials/common/utest/taxi.srv,babfeb65-4511-4601-b421-f653fbbebda3" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance@EngineCore" />
 </Root>

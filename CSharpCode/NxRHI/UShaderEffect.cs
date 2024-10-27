@@ -36,6 +36,10 @@ namespace EngineNS.NxRHI
             mCoreObject = ptr;
             mCoreObject.NativeSuper.AddRef();
         }
+        public override void Dispose()
+        {
+            base.Dispose();
+        }
         public TtShaderVarDesc FindField(string name)
         {
             var ptr = mCoreObject.FindField(name);

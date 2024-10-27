@@ -243,14 +243,14 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
             if (TerrainCBuffer == null)
                 return;
-            var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
-            TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.EyeCenter, EyeLocalCenter);
-            TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.GridSize, GridSize);
+            var coreBinder = Graphics.Pipeline.TtCoreShaderBinder.TtPerTerrainCBufferVarIndexer.Instance;
+            TerrainCBuffer.SetValue(coreBinder.EyeCenter, EyeLocalCenter);
+            TerrainCBuffer.SetValue(coreBinder.GridSize, GridSize);
 
-            TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.PatchSize, PatchSize);
-            TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.TexUVScale, TexUVScale);
-            TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.MaterialIdUVStep, MaterialIdUVStep);
-            TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.DiffuseUVStep, DiffuseUVStep);
+            TerrainCBuffer.SetValue(coreBinder.PatchSize, PatchSize);
+            TerrainCBuffer.SetValue(coreBinder.TexUVScale, TexUVScale);
+            TerrainCBuffer.SetValue(coreBinder.MaterialIdUVStep, MaterialIdUVStep);
+            TerrainCBuffer.SetValue(coreBinder.DiffuseUVStep, DiffuseUVStep);
 
             for (int i = 0; i < MorphRange.Length; i++)
             {
@@ -264,7 +264,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 tmp.HalfDim = 0.5f * (float)tmp.Dimension;
                 tmp.TwoRcpDim = 2.0f / (float)tmp.Dimension;
 
-                TerrainCBuffer.SetValue(coreBinder.CBPerTerrain.MorphLODs, i, in tmp);
+                TerrainCBuffer.SetValue(coreBinder.MorphLODs, i, in tmp);
             }
         }
         protected override void OnParentSceneChanged(GamePlay.Scene.TtScene prev, GamePlay.Scene.TtScene cur)

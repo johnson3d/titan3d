@@ -61,40 +61,37 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         {
 
         }
-        public class UMdfShaderBinder : Graphics.Pipeline.TtCoreShaderBinder.UShaderResourceIndexer
+        public class TtMdfShaderBinder : NxRHI.TtShader.AuxShaderBinderIndexer<TtMdfShaderBinder>
         {
-            public void Init(NxRHI.TtShaderEffect effect)
-            {
-                UpdateBindResouce(effect);
-                TextureSlotBuffer = effect.FindBinder("TextureSlotBuffer");
-                HeightMapTexture = effect.FindBinder("HeightMapTexture");
-                Samp_HeightMapTexture = effect.FindBinder("Samp_HeightMapTexture");
-                HeightMapTextureArray = effect.FindBinder("HeightMapTextureArray");
-                NormalMapTexture = effect.FindBinder("NormalMapTexture");
-                Samp_NormalMapTexture = effect.FindBinder("Samp_NormalMapTexture");
-                MaterialIdTexture = effect.FindBinder("MaterialIdTexture");
-                Samp_MaterialIdTexture = effect.FindBinder("Samp_MaterialIdTexture");
-                DiffuseTextureArray = effect.FindBinder("DiffuseTextureArray");
-                Samp_DiffuseTextureArray = effect.FindBinder("Samp_DiffuseTextureArray");
-                NormalTextureArray = effect.FindBinder("NormalTextureArray");
-                Samp_NormalTextureArray = effect.FindBinder("Samp_NormalTextureArray");
-                cbPerPatch = effect.FindBinder("cbPerPatch");
-                cbPerTerrain = effect.FindBinder("cbPerTerrain");
-            }
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
             public NxRHI.TtEffectBinder TextureSlotBuffer;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtSrView))]
             public NxRHI.TtEffectBinder HeightMapTexture;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtSampler))]
             public NxRHI.TtEffectBinder Samp_HeightMapTexture;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtSrView))]
             public NxRHI.TtEffectBinder HeightMapTextureArray;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtSrView))]
             public NxRHI.TtEffectBinder NormalMapTexture;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtSrView))]
             public NxRHI.TtEffectBinder MaterialIdMapTexture;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtSampler))]
             public NxRHI.TtEffectBinder Samp_NormalMapTexture;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtSrView))]
             public NxRHI.TtEffectBinder MaterialIdTexture;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtSampler))]
             public NxRHI.TtEffectBinder Samp_MaterialIdTexture;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtSrView))]
             public NxRHI.TtEffectBinder DiffuseTextureArray;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtSampler))]
             public NxRHI.TtEffectBinder Samp_DiffuseTextureArray;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtSrView))]
             public NxRHI.TtEffectBinder NormalTextureArray;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtSampler))]
             public NxRHI.TtEffectBinder Samp_NormalTextureArray;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
             public NxRHI.TtEffectBinder cbPerPatch;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
             public NxRHI.TtEffectBinder cbPerTerrain;
         }
         [ThreadStatic]
@@ -113,14 +110,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             bool bUseRVT = TtEngine.Instance.Config.Feature_UseRVT;
             using (new Profiler.TimeScopeHelper(ScopeOnDrawCall))
             {
-                var effectBinder = drawcall.Effect.mBindIndexer as UMdfShaderBinder;
-                if (effectBinder == null)
-                {
-                    effectBinder = new UMdfShaderBinder();
-                    effectBinder.Init(drawcall.Effect.ShaderEffect);
-                    drawcall.Effect.mBindIndexer = effectBinder;
-                }
-
+                var effectBinder = drawcall.Effect.GetTypedBindIndexer<TtMdfShaderBinder>();
                 var shaderProg = drawcall.mCoreObject.GetGraphicsEffect();
 
                 if (bUseRVT)
@@ -139,9 +129,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
                     if (TerrainNode.TerrainCBuffer == null)
                     {
-                        var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
-                        coreBinder.CBPerTerrain.UpdateFieldVar(shaderProg, "cbPerTerrain");
-                        TerrainNode.TerrainCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerTerrain.Binder.mCoreObject);
+                        var coreBinder = Graphics.Pipeline.TtCoreShaderBinder.TtPerTerrainCBufferVarIndexer.Instance;
+                        coreBinder.UpdateFieldVar(shaderProg, "cbPerTerrain");
+                        TerrainNode.TerrainCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.Binder.mCoreObject);
                     }
 
                     drawcall.BindCBuffer(effectBinder.cbPerTerrain, TerrainNode.TerrainCBuffer);
@@ -163,11 +153,11 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     pat.SureCBuffer(drawcall.mCoreObject.GetGraphicsEffect(), ref pat.PatchCBuffer);
                     if (effectBinder.cbPerPatch != null)
                     {
-                        var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
+                        var coreBinder = Graphics.Pipeline.TtCoreShaderBinder.TtPerTerrainPatchCBufferVarIndexer.Instance;
                         var terrain = pat.Level.GetTerrainNode();
 
-                        pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.StartPosition, in pat.StartPosition);
-                        pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.CurrentLOD, pat.CurrentLOD);                        
+                        pat.PatchCBuffer.SetValue(coreBinder.StartPosition, in pat.StartPosition);
+                        pat.PatchCBuffer.SetValue(coreBinder.CurrentLOD, pat.CurrentLOD);                        
                         
                         //pat.TexUVOffset.X = (Patch.XInLevel * 64.0f) / 1024.0f;
                         //pat.TexUVOffset.Y = (Patch.ZInLevel * 64.0f) / 1024.0f;
@@ -178,7 +168,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                         pat.TexUVOffset.X = ((float)Patch.XInLevel / (float)pat.Level.GetTerrainNode().PatchSide);
                         pat.TexUVOffset.Y = ((float)Patch.ZInLevel / (float)pat.Level.GetTerrainNode().PatchSide);
 
-                        pat.PatchCBuffer.SetValue(coreBinder.CBPerTerrainPatch.TexUVOffset, in pat.TexUVOffset);
+                        pat.PatchCBuffer.SetValue(coreBinder.TexUVOffset, in pat.TexUVOffset);
 
                         drawcall.BindCBuffer(effectBinder.cbPerPatch, pat.PatchCBuffer);
                     }
@@ -201,12 +191,12 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public static void SetInstanceData(Graphics.Mesh.TtMesh mesh, Bricks.Terrain.CDLOD.UTerrainMdfQueue mdfQueue, ref Graphics.Pipeline.Shader.FVSInstanceData instance)
         {
             var cb =  mesh.PerMeshCBuffer;
-            var matrix = cb.GetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
+            var matrix = cb.GetMatrix(Graphics.Pipeline.TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.WorldMatrix);
 
             instance.Position = matrix.Translation;
             instance.Scale = matrix.Scale;// mdfQueue.Patch.StartPosition;
             instance.Quat = matrix.Rotation;
-            instance.HitProxyId = cb.GetValue<uint>(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.HitProxyId);
+            instance.HitProxyId = cb.GetValue<uint>(Graphics.Pipeline.TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.HitProxyId);
 
             var patch = mdfQueue.Patch;
             if(mdfQueue.TerrainModifier.IsWater)

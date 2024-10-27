@@ -331,8 +331,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)
             {
-                var preMatrix = i.Mesh.PerMeshCBuffer.GetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
-                i.Mesh.PerMeshCBuffer.SetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.PreWorldMatrix, preMatrix);
+                var preMatrix = i.Mesh.PerMeshCBuffer.GetMatrix(TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.WorldMatrix);
+                i.Mesh.PerMeshCBuffer.SetMatrix(TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.PreWorldMatrix, preMatrix);
             }
         }
         

@@ -1,4 +1,5 @@
-﻿using EngineNS.Support;
+﻿using EngineNS.IO;
+using EngineNS.Support;
 using EngineNS.UI;
 using NPOI.SS.Formula.Functions;
 using System;
@@ -328,8 +329,20 @@ namespace EngineNS.Rtti
                 EngineNS.IO.TtFileManager.CreateDirectory(tmpPath);
             }
             var txtFilepath = EngineNS.IO.TtFileManager.CombinePath(tmpPath, $"typedesc.txt");
-            EngineNS.IO.TtFileManager.WriteAllText(txtFilepath, ClassType.TypeString);
+            EngineNS.IO.TtFileManager.WriteAllText(txtFilepath, TypeDescText(ClassType.Assembly.Name, ClassType.TypeString));
             TtEngine.Instance.SourceControlModule.AddFile(txtFilepath);
+        }
+        public static string TypeDescText(string assembly, string typeStr)
+        {
+            string text = assembly + '\n';
+            text += typeStr;
+            return text;
+        }
+        public static void TypeDescText(string text, out string assembly, out string typeStr)
+        {
+            var segs = text.Split('\n');
+            assembly = segs[0];
+            typeStr = segs[1];
         }
         public TtMetaVersion BuildCurrentVersion()
         {
@@ -1202,21 +1215,26 @@ namespace EngineNS.Rtti
                         foreach (var k in kls)
                         {
                             var tmpPath = EngineNS.IO.TtFileManager.CombinePath(k, $"typedesc.txt");
-                            var strName = EngineNS.IO.TtFileManager.ReadAllText(tmpPath);
-                            if (strName == null)
+                            var text = EngineNS.IO.TtFileManager.ReadAllText(tmpPath);
+                            if (text == null)
                                 continue;
-                            var type = TtTypeDesc.TypeOf(strName);// EngineNS.Rtti.UTypeDescManager.Instance.GetTypeDescFromString(strName);
-                            if (type != null)
+                            string readModule, strName;
+                            TtClassMeta.TypeDescText(text, out readModule, out strName);
+                            if (moduleName == null || (moduleName != null && readModule == moduleName))
                             {
-                                if (moduleName == null || (moduleName != null && type.Assembly.Name == moduleName))
+                                var type = TtTypeDesc.TypeOf(strName);// EngineNS.Rtti.UTypeDescManager.Instance.GetTypeDescFromString(strName);
+                                if (type != null)
                                 {
-                                    var meta = new TtClassMeta(type);
-                                    meta.LoadClass(k);
 
-                                    //mMetas.Add(meta.ClassMetaName, meta);
-                                    mMetas[meta.ClassMetaName] = meta;
+                                    {
+                                        var meta = new TtClassMeta(type);
+                                        meta.LoadClass(k);
+
+                                        //mMetas.Add(meta.ClassMetaName, meta);
+                                        mMetas[meta.ClassMetaName] = meta;
+                                    }
                                 }
-                            }
+                            }   
                         }
                     }
                 }
@@ -1355,7 +1373,7 @@ namespace EngineNS.Rtti
                 var txtFilepath = EngineNS.IO.TtFileManager.CombinePath(i.Value.Path, $"typedesc.txt");
                 if (EngineNS.IO.TtFileManager.FileExists(txtFilepath) == false)
                 {
-                    EngineNS.IO.TtFileManager.WriteAllText(txtFilepath, i.Value.ClassType.TypeString);
+                    EngineNS.IO.TtFileManager.WriteAllText(txtFilepath, TtClassMeta.TypeDescText(i.Value.ClassType.Assembly.Name, i.Value.ClassType.TypeString));
                     TtEngine.Instance.SourceControlModule.AddFile(txtFilepath);
                 }
             }

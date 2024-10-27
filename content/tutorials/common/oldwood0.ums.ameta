@@ -12,10 +12,10 @@
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="4">
-    <e_0 Value="Game,tutorials/common/utest/sm_oldwoodentable_lod0.vms,0b51904f-da58-40da-8af9-ddd92866c0cd" />
-    <e_1 Value="Game,tutorials/common/utest/oldwood.uminst,94293abe-2cdf-4072-be59-2f6bb03e9cff" />
-    <e_2 Value="Game,tutorials/common/utest/mesh/box1.vms,bec7f39a-94c5-45b6-b032-3e4d24c68c8d" />
-    <e_3 Value="Game,tutorials/common/utest/ddd.uminst,da21bb21-134c-4d00-bdbb-00459e7a91c1" />
+    <e_0 Value="Game,tutorials/common/utest/sm_oldwoodentable_lod0.vms,8da99c65-c9e6-49a3-9e18-22f808a0c46c" />
+    <e_1 Value="Game,tutorials/common/utest/oldwood.uminst,d5415439-8adb-42c5-a555-ee87f1a53fb5" />
+    <e_2 Value="Game,tutorials/common/utest/mesh/box1.vms,587c3272-cd50-47b0-b3c3-2c4aacc54c3f" />
+    <e_3 Value="Game,tutorials/common/utest/ddd.uminst,4d2fa0bb-f182-4e00-8173-9e65996403db" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMaterialMesh@EngineCore" />
 </Root>

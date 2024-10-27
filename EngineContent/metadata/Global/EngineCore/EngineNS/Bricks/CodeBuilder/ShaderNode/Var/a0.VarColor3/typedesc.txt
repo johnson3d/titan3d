@@ -1,1 +1,2 @@
+EngineCore
 EngineNS.Bricks.CodeBuilder.ShaderNode.Var.VarColor3@EngineCore

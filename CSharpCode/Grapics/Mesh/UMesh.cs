@@ -1,4 +1,5 @@
 ﻿using EngineNS.Bricks.Terrain.CDLOD;
+using EngineNS.Graphics.Pipeline;
 using EngineNS.Graphics.Pipeline.Deferred;
 using Org.BouncyCastle.Asn1.Mozilla;
 using System;
@@ -93,7 +94,7 @@ namespace EngineNS.Graphics.Mesh
                 {
                     ObjectFlags_2Bit &= (~EObjectFlags_2Bit.AcceptShadow);
                 }
-                PerMeshCBuffer?.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.ObjectFLags_2Bit, in ObjectFlags_2Bit);
+                PerMeshCBuffer?.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.ObjectFLags_2Bit, in ObjectFlags_2Bit);
             }
         }
         public bool IsUnlit
@@ -112,7 +113,7 @@ namespace EngineNS.Graphics.Mesh
                 {
                     ObjectFlags_2Bit &= (~EObjectFlags_2Bit.UnLight);
                 }
-                PerMeshCBuffer.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.ObjectFLags_2Bit, in ObjectFlags_2Bit);
+                PerMeshCBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.ObjectFLags_2Bit, in ObjectFlags_2Bit);
             }
         }
         public NxRHI.TtCbView PerMeshCBuffer 
@@ -121,7 +122,7 @@ namespace EngineNS.Graphics.Mesh
             {
                 if (mPerMeshCBuffer == null)
                 {
-                    var binder = TtEngine.Instance.GfxDevice.CoreShaderBinder.CBufferCreator.cbPerMesh;
+                    var binder = NxRHI.TtShader.TtCommonShaderResourceIndexer.Instance.cbPerMesh;
                     mPerMeshCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
                     if (mPerMeshCBuffer == null)
                         return null;
@@ -280,7 +281,6 @@ namespace EngineNS.Graphics.Mesh
                         #region CBuffer
                         unsafe
                         {
-                            var coreBinder = device.CoreShaderBinder;
                             if (TtEngine.Instance.GfxDevice.PerFrameCBuffer != null)
                             {
                                 drawcall.BindCBuffer(effect.BindIndexer.cbPerFrame, TtEngine.Instance.GfxDevice.PerFrameCBuffer);
@@ -765,7 +765,7 @@ namespace EngineNS.Graphics.Mesh
         {
             if (PerMeshCBuffer == null || world == null)
                 return;
-            var tm = PerMeshCBuffer.GetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
+            var tm = PerMeshCBuffer.GetMatrix(TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.WorldMatrix);
             var realPos = WorldLocation - world.CameraOffset;
             tm.Translation = realPos.ToSingleVector3();
             this.DirectSetWorldMatrix(in tm);
@@ -813,15 +813,15 @@ namespace EngineNS.Graphics.Mesh
                 {
                     if (saved != null)
                         saved();
-                    PerMeshCBuffer.SetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix, in savedTM);
+                    PerMeshCBuffer.SetMatrix(TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.WorldMatrix, in savedTM);
                     var inv = Matrix.Invert(in savedTM);
-                    PerMeshCBuffer.SetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrixInverse, in inv);
+                    PerMeshCBuffer.SetMatrix(TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.WorldMatrixInverse, in inv);
                 };
                 return;
             }   
-            PerMeshCBuffer.SetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix, in tm);
+            PerMeshCBuffer.SetMatrix(TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.WorldMatrix, in tm);
             var inv = Matrix.Invert(in tm);
-            PerMeshCBuffer.SetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrixInverse, in inv);
+            PerMeshCBuffer.SetMatrix(TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.WorldMatrixInverse, in inv);
         }
         public void SetValue<T>(NxRHI.FShaderVarDesc index, in T value, int elem = 0) where T : unmanaged
         {
@@ -851,11 +851,11 @@ namespace EngineNS.Graphics.Mesh
                     if (saved != null)
                         saved();
 
-                    PerMeshCBuffer.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.HitProxyId, in savedValue);
+                    PerMeshCBuffer.SetValue(TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.HitProxyId, in savedValue);
                 };
                 return;
             }
-            PerMeshCBuffer.SetValue(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.HitProxyId, in value);
+            PerMeshCBuffer.SetValue(TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.HitProxyId, in value);
         }
     }
 }

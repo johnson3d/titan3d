@@ -385,6 +385,10 @@ namespace EngineNS.Profiler
         {
             GpuTimeScopeManager.UpdateSync();
         }
+        public override void Cleanup(TtEngine host)
+        {
+            GpuTimeScopeManager.Dispose();
+        }
     }
 }
 

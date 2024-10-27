@@ -135,6 +135,7 @@ namespace ProjectCooker.Command
             {
                 var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(t);
                 var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + extType, true);
+                int procNum = 0;
                 foreach (var i in files)
                 {
                     var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -161,6 +162,8 @@ namespace ProjectCooker.Command
                     {
                         EngineNS.Profiler.Log.WriteLineSingle($"LoadAsset {rn} failed");
                     }
+                    procNum++;
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"{type.FullName}: {procNum}/{files.Length}");
                 }
             }
         }
@@ -168,6 +171,7 @@ namespace ProjectCooker.Command
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.EGui.TtUVAnim.AssetExt, true);
+            int procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -181,10 +185,13 @@ namespace ProjectCooker.Command
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetUVAnim {rn} failed");
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"UVAnim: {procNum}/{files.Length}");
             }
 
             root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
             files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.EGui.TtUVAnim.AssetExt, true);
+            procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -198,12 +205,15 @@ namespace ProjectCooker.Command
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetUVAnim {rn} failed");
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"UVAnim: {procNum}/{files.Length}");
             }
         }
         async System.Threading.Tasks.Task ProcTextures()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.NxRHI.TtSrView.AssetExt, true);
+            int procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -219,10 +229,13 @@ namespace ProjectCooker.Command
 
                 //asset.SaveAssetTo(rn);
                 asset.GetAMeta().SaveAMeta(asset);
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Texture: {procNum}/{files.Length}");
             }
 
             root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
             files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.NxRHI.TtSrView.AssetExt, true);
+            procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -237,12 +250,15 @@ namespace ProjectCooker.Command
 
                 //asset.SaveAssetTo(rn);
                 asset.GetAMeta().SaveAMeta(asset);
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Texture: {procNum}/{files.Length}");
             }
         }
         async System.Threading.Tasks.Task ProcUMesh()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Mesh.TtMaterialMesh.AssetExt, true);
+            int procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -256,10 +272,13 @@ namespace ProjectCooker.Command
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetMaterialMesh {rn} failed");
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Mesh: {procNum}/{files.Length}");
             }
 
             root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
             files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Mesh.TtMaterialMesh.AssetExt, true);
+            procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -273,12 +292,15 @@ namespace ProjectCooker.Command
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetMaterialMesh {rn} failed");
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Mesh: {procNum}/{files.Length}");
             }
         }
         async System.Threading.Tasks.Task ProcMeshPrimitive()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Mesh.TtMeshPrimitives.AssetExt, true);
+            int procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -292,10 +314,13 @@ namespace ProjectCooker.Command
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetMeshPrimitive {rn} failed");
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"MeshPrimitive: {procNum}/{files.Length}");
             }
 
             root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
             files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Mesh.TtMeshPrimitives.AssetExt, true);
+            procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -309,12 +334,15 @@ namespace ProjectCooker.Command
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetMeshPrimitive {rn} failed");
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"MeshPrimitive: {procNum}/{files.Length}");
             }
         }
         async System.Threading.Tasks.Task ProcAnimClip()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Animation.Asset.TtAnimationClip.AssetExt, true);
+            int procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -328,10 +356,13 @@ namespace ProjectCooker.Command
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetAnimationClip {rn} failed");
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"AnimClip: {procNum}/{files.Length}");
             }
 
             root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
             files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Animation.Asset.TtAnimationClip.AssetExt, true);
+            procNum++;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -345,12 +376,15 @@ namespace ProjectCooker.Command
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetAnimationClip {rn} failed");
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"AnimClip: {procNum}/{files.Length}");
             }
         }
         async System.Threading.Tasks.Task ProcMaterial()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Pipeline.Shader.TtMaterial.AssetExt, true);
+            int procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -381,10 +415,13 @@ namespace ProjectCooker.Command
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetMaterial {rn} failed");
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Material: {procNum}/{files.Length}");
             }
 
             root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
             files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Pipeline.Shader.TtMaterial.AssetExt, true);
+            procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -415,12 +452,15 @@ namespace ProjectCooker.Command
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetMaterial {rn} failed");
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Material: {procNum}/{files.Length}");
             }
         }
         async System.Threading.Tasks.Task ProcMaterialInstance()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt, true);
+            int procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -434,10 +474,13 @@ namespace ProjectCooker.Command
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetMaterialInstance {rn} failed");
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"MaterialInstance: {procNum}/{files.Length}");
             }
 
             root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
             files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt, true);
+            procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -451,12 +494,15 @@ namespace ProjectCooker.Command
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetMaterialInstance {rn} failed");
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"MaterialInstance: {procNum}/{files.Length}");
             }
         }
         async System.Threading.Tasks.Task ProcScene()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.GamePlay.Scene.TtScene.AssetExt, true);
+            int procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -472,10 +518,13 @@ namespace ProjectCooker.Command
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetScene {rn} failed");
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Scene: {procNum}/{files.Length}");
             }
 
             root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
             files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.GamePlay.Scene.TtScene.AssetExt, true);
+            procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -491,12 +540,15 @@ namespace ProjectCooker.Command
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetScene {rn} failed");
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Scene: {procNum}/{files.Length}");
             }
         }
         async System.Threading.Tasks.Task ProcPrefab()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.GamePlay.Scene.TtPrefab.AssetExt, true);
+            int procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -512,10 +564,13 @@ namespace ProjectCooker.Command
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetPrefab {rn} failed");
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Prefab: {procNum}/{files.Length}");
             }
 
             root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
             files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.GamePlay.Scene.TtPrefab.AssetExt, true);
+            procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
@@ -531,6 +586,8 @@ namespace ProjectCooker.Command
                 {
                     EngineNS.Profiler.Log.WriteLineSingle($"GetPrefab {rn} failed");
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Prefab: {procNum}/{files.Length}");
             }
         }
         async System.Threading.Tasks.Task ProcUI()
@@ -539,6 +596,7 @@ namespace ProjectCooker.Command
             await macrossEditor.Initialize();
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = new List<string>(EngineNS.IO.TtFileManager.GetDirectories(root, "*" + EngineNS.UI.TtUIAsset.AssetExt, true));
+            int procNum = 0;
             foreach (var i in files)
             {
                 try
@@ -554,9 +612,12 @@ namespace ProjectCooker.Command
                 {
                     Log.WriteLine<TtCookGategory>(ELogTag.Error, "UI SaveAsLasted", ex.ToString());
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"UI: {procNum}/{files.Count}");
             }
             root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
             files = new List<string>(EngineNS.IO.TtFileManager.GetDirectories(root, "*" + EngineNS.UI.TtUIAsset.AssetExt, true));
+            procNum = 0;
             foreach (var i in files)
             {
                 try
@@ -572,12 +633,15 @@ namespace ProjectCooker.Command
                 {
                     Log.WriteLine<TtCookGategory>(ELogTag.Error, "UI SaveAsLasted", ex.ToString());
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"UI: {procNum}/{files.Count}");
             }
         }
         async System.Threading.Tasks.Task ProcMacross()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = new List<string>(EngineNS.IO.TtFileManager.GetDirectories(root, "*" + TtMacross.AssetExt, true));
+            int procNum = 0;
             foreach (var i in files)
             {
                 try
@@ -601,9 +665,12 @@ namespace ProjectCooker.Command
                 {
                     Log.WriteLine<TtCookGategory>(ELogTag.Error, "Macross SaveAsLasted", ex.ToString());
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Macross: {procNum}/{files.Count}");
             }
             root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
             files = new List<string>(EngineNS.IO.TtFileManager.GetDirectories(root, "*" + TtMacross.AssetExt, true));
+            procNum = 0;
             foreach (var i in files)
             {
                 try
@@ -627,6 +694,8 @@ namespace ProjectCooker.Command
                 {
                     Log.WriteLine<TtCookGategory>(ELogTag.Error, "Macross SaveAsLasted", ex.ToString());
                 }
+                procNum++;
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtCookGategory>(ELogTag.Info, $"Macross: {procNum}/{files.Count}");
             }
         }
     }

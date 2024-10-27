@@ -1,0 +1,2 @@
+EngineCore
+EngineNS.BehaviorTree.Macross.TtBehaviorTreeMacrossAMeta@EngineCore

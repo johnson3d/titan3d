@@ -1,1 +1,2 @@
+GameTasks
 EngineNS.Plugins.GameTasks.AGameTaskDescriptorAMeta@GameTasks

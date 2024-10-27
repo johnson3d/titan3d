@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Bricks.Procedure.UPgcAssetAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="39025ad5-415f-4585-9357-fac812394c3f" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.Procedure.UPgcAsset&#xA;Hahah" />
-  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="11">

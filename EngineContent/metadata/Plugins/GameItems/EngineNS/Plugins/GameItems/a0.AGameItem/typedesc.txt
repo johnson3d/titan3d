@@ -1,1 +1,2 @@
+GameItems
 EngineNS.Plugins.GameItems.AGameItem@GameItems

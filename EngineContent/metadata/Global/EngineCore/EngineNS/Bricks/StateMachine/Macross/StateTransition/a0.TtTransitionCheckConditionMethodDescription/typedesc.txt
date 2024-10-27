@@ -1,1 +1,2 @@
+EngineCore
 EngineNS.Bricks.StateMachine.Macross.StateTransition.TtTransitionCheckConditionMethodDescription@EngineCore

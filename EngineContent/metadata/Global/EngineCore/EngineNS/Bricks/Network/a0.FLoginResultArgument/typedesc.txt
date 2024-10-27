@@ -1,1 +1,2 @@
+EngineCore
 EngineNS.Bricks.Network.FLoginResultArgument@EngineCore

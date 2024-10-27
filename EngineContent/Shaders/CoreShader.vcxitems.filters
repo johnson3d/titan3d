@@ -422,6 +422,9 @@
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\MultiViewID\BasePass.cginc">
       <Filter>ShadingEnv\Deferred\MultiViewID</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerSkinMesh.cginc">
+      <Filter>CBuffer</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

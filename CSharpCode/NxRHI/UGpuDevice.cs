@@ -145,6 +145,12 @@ namespace EngineNS.NxRHI
         {
             return CreateCBV(binder.GetShaderBinder(EShaderType.SDT_Unknown));
         }
+        public TtCbView CreateCBV(TtShaderBinder binder)
+        {
+            if (binder == null)
+                return null;
+            return CreateCBV(binder.mCoreObject);
+        }
         public TtCbView CreateCBV(FShaderBinder binder)
         {
             return CreateCBV(null, binder);

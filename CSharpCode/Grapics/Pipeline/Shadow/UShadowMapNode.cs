@@ -468,12 +468,11 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                     float DepthBiasClipSpace = UniformDepthBias / (shadowZFar - shadowZNear) * (FrustumSphereDiameter / mInnerResolutionY) * PerObjCustomDepthBias;
                     //float DepthBiasClipSpace = UniformDepthBias / (ShadowCameraZFar - ShadowCameraZNear) * PerObjCustomDepthBias;
 
-                    var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
                     var cBuffer = GBuffersArray[CsmIdx].PerViewportCBuffer;
                     if (cBuffer != null)
                     {
                         var tmp = new Vector2(0.0f, 1.0f / shadowZFar);
-                        cBuffer.SetValue(coreBinder.CBPerViewport.gDepthBiasAndZFarRcp, in tmp);
+                        cBuffer.SetValue(TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gDepthBiasAndZFarRcp, in tmp);
                     }
 
                     //mShadowTransitionScale = 1.0f / (DepthBiasClipSpace + 0.00001f);

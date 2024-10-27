@@ -10,12 +10,12 @@ namespace EngineNS.Graphics.Pipeline
 {
     public partial class TtCoreShaderBinder
     {
-        public class TtCBufferPerUIMeshIndexer : NxRHI.TtShader.UShaderVarIndexer
+        public class TtPerUIMeshCBufferVarIndexer : NxRHI.TtShader.AuxCBufferVarIndexer<TtPerUIMeshCBufferVarIndexer>
         {
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(Matrix))]
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Matrix))]
             public NxRHI.FShaderVarDesc AbsTransform;
         }
-        public readonly TtCBufferPerUIMeshIndexer CBPerUIMesh = new TtCBufferPerUIMeshIndexer();
+        public readonly TtPerUIMeshCBufferVarIndexer CBPerUIMesh = new TtPerUIMeshCBufferVarIndexer();
     }
 }
 namespace EngineNS.Graphics.Mesh
@@ -86,12 +86,12 @@ namespace EngineNS.UI
             base.OnDrawCall(cmdlist, drawcall, policy, atom);
             unsafe
             {
-                var shaderBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
+                var shaderBinder = Graphics.Pipeline.TtCoreShaderBinder.TtPerUIMeshCBufferVarIndexer.Instance;
                 if(PerUIMeshCBuffer == null)
                 {
-                    if(shaderBinder.CBPerUIMesh.UpdateFieldVar(drawcall.GraphicsEffect, "cbUIMesh"))
+                    if(shaderBinder.UpdateFieldVar(drawcall.GraphicsEffect, "cbUIMesh"))
                     {
-                        PerUIMeshCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(shaderBinder.CBPerUIMesh.Binder.mCoreObject);
+                        PerUIMeshCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(shaderBinder.Binder.mCoreObject);
                     }
                 }
 
@@ -103,7 +103,7 @@ namespace EngineNS.UI
                 EngineNS.Canvas.FDrawCmd cmd = new EngineNS.Canvas.FDrawCmd();
                 cmd.NativePointer = atom.MaterialMesh.SubMeshes[0].Mesh.mCoreObject.GetAtomExtData((uint)atom.AtomIndex).NativePointer;
                 var length = UIHost.TransformedUIElementCount;
-                Matrix* absTrans = (Matrix*)PerUIMeshCBuffer.mCoreObject.GetVarPtrToWrite(shaderBinder.CBPerUIMesh.AbsTransform, (uint)length);
+                Matrix* absTrans = (Matrix*)PerUIMeshCBuffer.mCoreObject.GetVarPtrToWrite(shaderBinder.AbsTransform, (uint)length);
                 for(var i=0; i<length; i++)
                 {
                     var data = UIHost.TransformedElements[i];

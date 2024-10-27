@@ -1,1 +1,2 @@
+GameServer
 EngineNS.Plugins.LoginServer.UAccountData@GameServer

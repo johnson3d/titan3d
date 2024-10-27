@@ -378,6 +378,69 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     EPixelShaderInput.PST_Position,
                 };
         }
+        public override string ToString()
+        {
+            return base.ToString();
+            //string code = $"//{CodeName}:Permutation={mCurrentPermutationId}\n";
+            //var indexers = NxRHI.TtShader.TtCBufferVarIndexer.CBufferVarIndexers;
+            //foreach (var i in indexers)
+            //{
+            //    string Name = "";
+            //    if (i.FindFirstShaderVarName<float>(ref Name))
+            //    {
+            //        code += $"result += {Name};\n";
+            //    }
+            //    else if (i.FindFirstShaderVarName<Vector2>(ref Name))
+            //    {
+            //        code += $"result += {Name}.x;\n";
+            //    }
+            //    else if (i.FindFirstShaderVarName<Vector3>(ref Name))
+            //    {
+            //        code += $"result += {Name}.x;\n";
+            //    }
+            //    else if (i.FindFirstShaderVarName<Vector4>(ref Name))
+            //    {
+            //        code += $"result += {Name}.x;\n";
+            //    }
+            //    else if (i.FindFirstShaderVarName<int>(ref Name))
+            //    {
+            //        code += $"result += (float){Name};\n";
+            //    }
+            //    else if (i.FindFirstShaderVarName<Vector2i>(ref Name))
+            //    {
+            //        code += $"result += (float){Name}.x;\n";
+            //    }
+            //    else if (i.FindFirstShaderVarName<Vector3i>(ref Name))
+            //    {
+            //        code += $"result += (float){Name}.x;\n";
+            //    }
+            //    else if (i.FindFirstShaderVarName<Vector4i>(ref Name))
+            //    {
+            //        code += $"result += (float){Name}.x;\n";
+            //    }
+            //    else if (i.FindFirstShaderVarName<Matrix>(ref Name))
+            //    {
+            //        code += $"result += (float){Name}[0];\n";
+            //    }
+            //    else
+            //    {
+            //        //int xx = 0;
+            //    }
+            //}
+            //return code;
+        }
+        protected override void EnvShadingDefines(in FPermutationId id, TtShaderDefinitions defines)
+        {
+            base.EnvShadingDefines(id, defines);
+
+            var indexers = NxRHI.TtShader.TtCBufferVarIndexer.CBufferVarIndexers;
+            foreach (var i in indexers)
+            {
+                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, $"请确保Shaders/ShadingEnv/DummyShading.cginc包含了{i.GetType().FullName}的cbuffer定义");
+            }
+            //var code = ToString();
+            //defines.AddDefine("DummyShadingUseCBuffer", code);
+        }
     }
     public class TtShadingEnvManager : TtModule<TtEngine>
     {

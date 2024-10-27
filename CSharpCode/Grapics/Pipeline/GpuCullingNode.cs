@@ -344,10 +344,10 @@ namespace EngineNS.Graphics.Pipeline
                     StaticMeshBatches.Add(hash, batch);
                 }
                 var cb = mesh.PerMeshCBuffer;
-                var matrix = cb.GetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.WorldMatrix);
+                var matrix = cb.GetMatrix(TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.WorldMatrix);
                 var instance = new Graphics.Pipeline.Shader.FVSInstanceData();
                 instance.SetMatrix(matrix);
-                instance.HitProxyId = cb.GetValue<uint>(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerMesh.HitProxyId);
+                instance.HitProxyId = cb.GetValue<uint>(TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.HitProxyId);
                 batch.GetInstanceModifier().PushInstance(in instance, new Graphics.Mesh.Modifier.FCullBounding());
             }
             return new FVisibleMesh(){Mesh = mesh, DrawMode = FVisibleMesh.EDrawMode.Instance };

@@ -1,1 +1,2 @@
+EngineCore
 EngineNS.GamePlay.Scene.UBezierSplineNode.UBezierSplineNodeData@EngineCore

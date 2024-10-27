@@ -86,16 +86,16 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public NxRHI.TtCbView PatchCBuffer;
         public void SureCBuffer(NxRHI.IGraphicsEffect shaderProg, ref NxRHI.TtCbView cbuffer)
         {
-            var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
+            var coreBinder = Graphics.Pipeline.TtCoreShaderBinder.TtPerTerrainPatchCBufferVarIndexer.Instance;
             if (cbuffer == null)
             {
-                coreBinder.CBPerTerrainPatch.UpdateFieldVar(shaderProg, "cbPerPatch");
-                cbuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerTerrainPatch.Binder.mCoreObject);
+                coreBinder.UpdateFieldVar(shaderProg, "cbPerPatch");
+                cbuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.Binder.mCoreObject);
             }
             if (TerrainNode.TerrainCBuffer == null)
             {
-                coreBinder.CBPerTerrain.UpdateFieldVar(shaderProg, "cbPerTerrain");
-                TerrainNode.TerrainCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.CBPerTerrain.Binder.mCoreObject);
+                coreBinder.UpdateFieldVar(shaderProg, "cbPerTerrain");
+                TerrainNode.TerrainCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.Binder.mCoreObject);
             }
         }
 

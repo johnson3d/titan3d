@@ -25,15 +25,15 @@ namespace EngineNS.Graphics.Pipeline.Common
             public Vector4i HZBTestViewRect;
         }
 
-        public class UCBufferHZBCullData : NxRHI.TtShader.UShaderVarIndexer
+        public class TtHZBCullDataCBufferVarIndexer : NxRHI.TtShader.AuxCBufferVarIndexer<TtHZBCullDataCBufferVarIndexer>
         {
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(Matrix))]
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Matrix))]
             public NxRHI.FShaderVarDesc PrevTranslatedWorldToClip;
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(Matrix))]
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Matrix))]
             public NxRHI.FShaderVarDesc PrevPreViewTranslation;
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(Matrix))]
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Matrix))]
             public NxRHI.FShaderVarDesc WorldToClip;
-            [NxRHI.TtShader.UShaderVar(VarType = typeof(Vector4i))]
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector4i))]
             public NxRHI.FShaderVarDesc HZBTestViewRect;
         }
 
@@ -137,8 +137,8 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 node.cbPerHZBCullData_CullInstance = CurrentEffect.FindBinder("cbPerPatchHZBCullData");
 
-                node.HZBCullInstanceData.UpdateFieldVar(CurrentEffect.mComputeShader, "cbPerPatchHZBCullData");
-                node.HZBCullInstanceCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(node.HZBCullInstanceData.Binder.mCoreObject);
+                TtHZBCullDataCBufferVarIndexer.Instance.UpdateFieldVar(CurrentEffect.mComputeShader, "cbPerPatchHZBCullData");
+                node.HZBCullInstanceCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(TtHZBCullDataCBufferVarIndexer.Instance.Binder.mCoreObject);
 
                 //HZBCullInstanceCBuffer.SetValue
 
@@ -244,8 +244,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         public NxRHI.TtShaderBinder cbPerHZBCullData_CullInstance;
         public NxRHI.TtShaderBinder cbPerHZBCullData_CullCluster;
 
-        public UCBufferHZBCullData HZBCullInstanceData = new UCBufferHZBCullData();
-        public UCBufferHZBCullData HZBCullClusterData = new UCBufferHZBCullData();
+        //public TtHZBCullDataCBufferVarIndexer HZBCullInstanceData = new TtHZBCullDataCBufferVarIndexer();
+        //public TtHZBCullDataCBufferVarIndexer HZBCullClusterData = new TtHZBCullDataCBufferVarIndexer();
 
         public NxRHI.TtCbView HZBCullInstanceCBuffer;
         public NxRHI.TtCbView HZBCullClusterCBuffer;

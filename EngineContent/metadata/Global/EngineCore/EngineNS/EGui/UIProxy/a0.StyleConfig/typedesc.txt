@@ -1,1 +1,2 @@
+EngineCore
 EngineNS.EGui.UIProxy.StyleConfig@EngineCore

@@ -37,6 +37,7 @@ namespace EngineNS.NxRHI
     {
         public override void Dispose()
         {
+            CurrentGpuScope = null;
             base.Dispose();
         }
         public string DebugName
@@ -347,7 +348,7 @@ namespace EngineNS.NxRHI
         }
     }
 
-    public class TtGpuTimeScopeManager
+    public class TtGpuTimeScopeManager : IDisposable
     {
         public bool IsGpuProfiling { get; set; } = true;
         public Dictionary<string, TtGpuScope> Scopes { get; } = new Dictionary<string, TtGpuScope>();
@@ -371,6 +372,14 @@ namespace EngineNS.NxRHI
             {
                 i.Value.Update();
             }
+        }
+        public void Dispose()
+        {
+            foreach (var i in Scopes)
+            {
+                i.Value.Dispose();
+            }
+            Scopes.Clear();
         }
     }
 

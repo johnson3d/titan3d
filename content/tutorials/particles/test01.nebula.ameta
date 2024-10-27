@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Bricks.Particle.TtNebulaParticleAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="10bdb02a-4950-4098-a8f7-e7095087b244" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.Particle.TtNebulaParticle&#xA;" />
-  <Icon Type="EngineNS.EGui.UUvAnim@EngineCore">
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
     <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">

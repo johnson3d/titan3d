@@ -1,4 +1,5 @@
 ﻿using EngineNS.Graphics.Pipeline.Shader;
+using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -20,6 +21,11 @@ namespace EngineNS.Graphics.Mesh
             base.CopyFrom(mdf);
             PerSkinMeshCBuffer = (mdf as UMdfSkinMesh).PerSkinMeshCBuffer;
         }
+        public class TtSkinMeshBinderIndexer : NxRHI.TtShader.AuxShaderBinderIndexer<TtSkinMeshBinderIndexer>
+        {
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
+            public NxRHI.TtEffectBinder cbSkinMesh;
+        }
         public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Pipeline.TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
@@ -35,24 +41,21 @@ namespace EngineNS.Graphics.Mesh
                 }
                 var runtimePose = SkinModifier.RuntimePose;
 
-                var shaderBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
+                var shaderBinder = Graphics.Pipeline.TtCoreShaderBinder.TtPerSkinMeshCBufferVarIndexer.Instance;
                 if (PerSkinMeshCBuffer == null)
                 {
-                    if (shaderBinder.CBPerSkinMesh.UpdateFieldVar(drawcall.GraphicsEffect, "cbSkinMesh"))
-                    {
-                        PerSkinMeshCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(shaderBinder.CBPerSkinMesh.Binder.mCoreObject);
-                    }
+                    PerSkinMeshCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(Pipeline.TtCoreShaderBinder.TtPerSkinMeshCBufferVarIndexer.Instance.Binder);
                 }
 
-                var binder = drawcall.FindBinder("cbSkinMesh");
-                if (binder.IsValidPointer == false)
+                var binder = drawcall.Effect.GetTypedBindIndexer<TtSkinMeshBinderIndexer>().cbSkinMesh;
+                if (binder == null)
                 {
                     return;
                 }
                 drawcall.BindCBuffer(binder, PerSkinMeshCBuffer);
 
-                Vector4* absPos = (Vector4*)PerSkinMeshCBuffer.mCoreObject.GetVarPtrToWrite(shaderBinder.CBPerSkinMesh.AbsBonePos, (uint)length);
-                Quaternion* absQuat = (Quaternion*)PerSkinMeshCBuffer.mCoreObject.GetVarPtrToWrite(shaderBinder.CBPerSkinMesh.AbsBoneQuat, (uint)length);
+                Vector4* absPos = (Vector4*)PerSkinMeshCBuffer.mCoreObject.GetVarPtrToWrite(shaderBinder.AbsBonePos, (uint)length);
+                Quaternion* absQuat = (Quaternion*)PerSkinMeshCBuffer.mCoreObject.GetVarPtrToWrite(shaderBinder.AbsBoneQuat, (uint)length);
 
                 var meshSpaceRuntimePose = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(runtimePose);
                 foreach (var bone in bones)

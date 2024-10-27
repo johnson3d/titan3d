@@ -21,7 +21,7 @@ namespace EngineNS.Graphics.Pipeline
             {
                 if (mPerCameraCBuffer == null)
                 {
-                    mPerCameraCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBufferCreator.cbPerCamera);
+                    mPerCameraCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(NxRHI.TtShader.TtCommonShaderResourceIndexer.Instance.cbPerCamera);
                     mPerCameraCBuffer.SetDebugName($"Camera");
                     //mCoreObject.BindConstBuffer(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, mPerCameraCBuffer.mCoreObject);
                 }
@@ -311,8 +311,8 @@ namespace EngineNS.Graphics.Pipeline
             {
                 JitterPreFrameViewProjectionMatrix = GetJitterViewProjection();
             }
-            PerCameraCBuffer.SetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.PreFrameViewPrjMtx, PreFrameViewProjectionMatrix.Value, true, mode);
-            PerCameraCBuffer.SetMatrix(TtEngine.Instance.GfxDevice.CoreShaderBinder.CBPerCamera.JitterPreFrameViewPrjMtx, JitterPreFrameViewProjectionMatrix.Value, true, mode);
+            PerCameraCBuffer.SetMatrix(TtCoreShaderBinder.TtPerCameraCBufferVarIndexer.Instance.PreFrameViewPrjMtx, PreFrameViewProjectionMatrix.Value, true, mode);
+            PerCameraCBuffer.SetMatrix(TtCoreShaderBinder.TtPerCameraCBufferVarIndexer.Instance.JitterPreFrameViewPrjMtx, JitterPreFrameViewProjectionMatrix.Value, true, mode);
             mCoreObject.UpdateConstBufferData(rc.mCoreObject, PerCameraCBuffer.mCoreObject, true, mode == NxRHI.TtCbView.EUpdateMode.Immediately ? new NxRHI.FCbvUpdater() : TtEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
             PreFrameViewProjectionMatrix = GetViewProjection();
             JitterPreFrameViewProjectionMatrix = GetJitterViewProjection();

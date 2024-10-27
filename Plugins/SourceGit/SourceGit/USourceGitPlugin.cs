@@ -63,18 +63,29 @@ namespace EngineNS.Plugins.SourceGit
             System.Diagnostics.Process result = new System.Diagnostics.Process();
             result.StartInfo = processStartInfo;
             result.Start();
-            result.WaitForExit();
-
-            var q = new System.Text.StringBuilder();
-            while (!result.HasExited)
+            Action action = async () =>
             {
-                q.Append(result.StandardOutput.ReadToEnd());
-            }
-            string r = q.ToString();
-            if (r == "")
-                return new Bricks.SourceControl.TtSourceOpResult(0);
-            else
-                return new Bricks.SourceControl.TtSourceOpResult(-2);
+                var timeoutSignal = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                await result.WaitForExitAsync(timeoutSignal.Token);
+
+                var q = new System.Text.StringBuilder();
+                while (!result.HasExited)
+                {
+                    q.Append(result.StandardOutput.ReadToEnd());
+                }
+                string r = q.ToString();
+
+                if (r == "")
+                {
+
+                }
+                else
+                {
+
+                }
+            };
+
+            return new Bricks.SourceControl.TtSourceOpResult(0);
 
             //ProcessStartInfo processStartInfo = new ProcessStartInfo();
             //processStartInfo.FileName = @"git.exe";
@@ -85,7 +96,7 @@ namespace EngineNS.Plugins.SourceGit
             //try
             //{
             //    result = System.Diagnostics.Process.Start(processStartInfo);
-                
+
             //    var hr = new Bricks.SourceControl.TtSourceOpResult(0);
             //    if (result != null)
             //    {
@@ -114,7 +125,7 @@ namespace EngineNS.Plugins.SourceGit
             System.Diagnostics.Process result = new System.Diagnostics.Process();
             result.StartInfo = processStartInfo;
             result.Start();
-            result.WaitForExit();
+            result.WaitForExit(5000);
 
             var q = new System.Text.StringBuilder();
             while (!result.HasExited)
@@ -140,7 +151,7 @@ namespace EngineNS.Plugins.SourceGit
             System.Diagnostics.Process result = new System.Diagnostics.Process();
             result.StartInfo = processStartInfo;
             result.Start();
-            result.WaitForExit();
+            result.WaitForExit(5000);
 
             var q = new System.Text.StringBuilder();
             while (!result.HasExited)

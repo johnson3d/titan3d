@@ -3,7 +3,7 @@
 
 #include "../Inc/VertexLayout.cginc"
 #include "../Inc/GpuSceneCommon.cginc"
-
+#include "../CBuffer/VarBase_PerSkinMesh.cginc"
 #include "../Inc/SysFunctionDefImpl.cginc"
 
 PS_INPUT VS_Main(VS_INPUT input1)
@@ -45,7 +45,16 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 {
 	PS_OUTPUT output = (PS_OUTPUT)0;
 
-    float result = (float) PickedID + (float) gZFar + (float) gViewportSizeAndRcp.x + Time + HdrMiddleGrey + MaterialRenderFlags + PreWorldMatrix[0];
+    float result = (float) PickedID; //cbPerMesh
+    result += (float) gZFar; //cbPerCamera
+    result += (float) gViewportSizeAndRcp.x; //cbPerViewport
+    result += Time; //cbPerFrame
+    result += HdrMiddleGrey; //cbPerGpuScene
+    result += MaterialRenderFlags; //cbPerMaterial
+    result += AbsBonePos[0].x; //cbSkinMesh
+    
+	//todo: use other cbuffer
+
 	output.RT0 = float4(result, result, result, result);
 
 	return output;

@@ -445,19 +445,19 @@ namespace EngineNS.Bricks.Particle
                 return;
             var quat = Quaternion.RotationMatrix(policy.DefaultCamera.GetViewMatrix());
             EmitterData.CameralEuler = quat.ToEuler();
-            var coreBinder = TtEngine.Instance.GfxDevice.CoreShaderBinder;
+            var coreBinder = Graphics.Pipeline.TtCoreShaderBinder.TtPerParticleCBufferVarIndexer.Instance;
             var timeSecond = TtEngine.Instance.TickCountSecond - mParticleStartSecond;
-            CurrentQueue?.CBuffer?.SetValue(coreBinder.CBPerParticle.ParticleStartSecond, timeSecond);
+            CurrentQueue?.CBuffer?.SetValue(coreBinder.ParticleStartSecond, timeSecond);
             TimerRemain -= elapsed;
             if (TimerRemain < 0)
             {   
-                CurrentQueue?.CBuffer?.SetValue(coreBinder.CBPerParticle.OnTimerState, 1);
+                CurrentQueue?.CBuffer?.SetValue(coreBinder.OnTimerState, 1);
                 TimerRemain = TimerInterval;
                 OnTimer(timeSecond);
             }
             else
             {
-                CurrentQueue?.CBuffer?.SetValue(coreBinder.CBPerParticle.OnTimerState, 0);
+                CurrentQueue?.CBuffer?.SetValue(coreBinder.OnTimerState, 0);
             }
             if (IsGpuDriven)
             {

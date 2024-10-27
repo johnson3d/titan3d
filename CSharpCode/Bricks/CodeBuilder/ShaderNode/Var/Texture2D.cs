@@ -11,6 +11,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
     {
         [Browsable(false)]
         public PinOut OutTex { get; set; } = new PinOut();
+        RName mAssetName;
         [Rtti.Meta]
         [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
         [Category("Option")]
@@ -19,11 +20,12 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             get
             {
                 if (TextureSRV == null)
-                    return null;
+                    return mAssetName;
                 return TextureSRV.AssetName;
             }
             set
             {
+                mAssetName = value;
                 System.Action exec = async () =>
                 {
                     TextureSRV = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
