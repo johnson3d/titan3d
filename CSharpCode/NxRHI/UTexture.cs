@@ -113,7 +113,7 @@ namespace EngineNS.NxRHI
                 shading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>();
             return await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(shading,
                 TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial,
-                new Graphics.Mesh.UMdfStaticMesh());
+                new Graphics.Mesh.TtMdfStaticMesh());
         }
         public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {

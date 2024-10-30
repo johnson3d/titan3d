@@ -21,7 +21,7 @@ namespace ProjectCooker
             ShowWindow(handle, 1);
 
             Console.WriteLine("Hello Titan");
-            var extCmd = UCookCommand.FindArgument(args, "ExtraCmd=");
+            var extCmd = TtCookCommand.FindArgument(args, "ExtraCmd=");
             if (extCmd != null)
             {
                 List<string> argList = new List<string>(args);
@@ -35,12 +35,12 @@ namespace ProjectCooker
                 args = argList.ToArray();
             }
             
-            var cfgFile = UCookCommand.FindArgument(args, "CookCfg=");
+            var cfgFile = TtCookCommand.FindArgument(args, "CookCfg=");
             //var cfgFile = @"F:\titan3d\content\EngineConfigForCook.cfg";
             //EngineNS.UEngine.UGfxDeviceType = typeof(EngineNS.Graphics.Pipeline.UGfxDeviceConsole);
             var task = EngineNS.TtEngine.StartEngine(new EngineNS.TtEngine(args), cfgFile);
 
-            var cmd = UCookCommand.FindArgument(args, "ExeCmd=");
+            var cmd = TtCookCommand.FindArgument(args, "ExeCmd=");
             Action action = async () =>
             {
                 switch (cmd)
@@ -48,13 +48,7 @@ namespace ProjectCooker
                     case "SaveAsLastest":
                         {
                             //ExeCmd=SaveAsLastest AssetType=Scene+Mesh CookCfg=$(SolutionDir)content\EngineConfigForCook.cfg 
-                            var exe = new Command.USaveAsLastest();
-                            await exe.ExecuteCommand(args);
-                        }
-                        break;
-                    case "RenameAsset":
-                        {
-                            var exe = new Command.URenameAsset();
+                            var exe = new Command.TtSaveAsLastest();
                             await exe.ExecuteCommand(args);
                         }
                         break;
@@ -71,7 +65,7 @@ namespace ProjectCooker
                         break;
                     case "StartDS":
                         {
-                            var exe = new Command.UStartDS();
+                            var exe = new Command.TtStartDS();
                             await exe.ExecuteCommand(args);
                         }
                         return;
@@ -132,7 +126,7 @@ namespace ProjectCooker
                     case "BuildSerializer":
                         {
                             //ExeCmd=BuildSerializer DS_Port=5555 CookCfg=$(SolutionDir)content\EngineConfigForCook.cfg Serializer_Path=$(SolutionDir)codegen\Serializer\Engine 
-                            var exe = new Command.UBuildSerializer();
+                            var exe = new Command.TtBuildSerializer();
                             await exe.ExecuteCommand(args);
                         }
                         break;

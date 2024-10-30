@@ -6,6 +6,18 @@
 #include "../CBuffer/VarBase_PerSkinMesh.cginc"
 #include "../Inc/SysFunctionDefImpl.cginc"
 
+float GetReferValue()
+{
+    float result = (float) PickedID; //cbPerMesh
+    result += (float) gZFar; //cbPerCamera
+    result += (float) gViewportSizeAndRcp.x; //cbPerViewport
+    result += Time; //cbPerFrame
+    result += HdrMiddleGrey; //cbPerGpuScene
+    result += MaterialRenderFlags; //cbPerMaterial
+    result += AbsBonePos[0].x; //cbSkinMesh
+    return result;
+}
+
 PS_INPUT VS_Main(VS_INPUT input1)
 {
 	VS_MODIFIER input = VS_INPUT_TO_VS_MODIFIER(input1);
@@ -32,6 +44,7 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	output.vTangent.xyz = normalize(mul(float4(output.vTangent.xyz, 0), WorldMatrix).xyz);
 #endif
 	output.vPosition = mul(float4(output.vWorldPos, 1), GetViewPrjMtx(true));
+    output.vPosition.x = GetReferValue();
 
 	return output;
 }
@@ -45,13 +58,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 {
 	PS_OUTPUT output = (PS_OUTPUT)0;
 
-    float result = (float) PickedID; //cbPerMesh
-    result += (float) gZFar; //cbPerCamera
-    result += (float) gViewportSizeAndRcp.x; //cbPerViewport
-    result += Time; //cbPerFrame
-    result += HdrMiddleGrey; //cbPerGpuScene
-    result += MaterialRenderFlags; //cbPerMaterial
-    result += AbsBonePos[0].x; //cbSkinMesh
+    float result = GetReferValue();
     
 	//todo: use other cbuffer
 

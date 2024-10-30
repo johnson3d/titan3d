@@ -572,7 +572,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
                     mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
                         await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
-                        TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
+                        TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
                 };
                 exec();
             }
@@ -783,7 +783,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
                     mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
                         await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
-                        TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
+                        TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
 
                 };
                 exec();

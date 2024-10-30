@@ -59,7 +59,7 @@ namespace EngineNS.Bricks.Procedure
             {
                 srv.SrvObject = this.PreviewSRV;
             }
-            mesh.Initialize(vms, materials1, Rtti.TtTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh)));
+            mesh.Initialize(vms, materials1, Rtti.TtTypeDesc.TypeOf(typeof(Graphics.Mesh.TtMdfStaticMesh)));
             var nodeData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
             nodeData.Name = "TexturePreivew";
             var prevMesh = await GamePlay.Scene.TtMeshNode.AddMeshNode(graph.GraphEditor.PreviewViewport.World, graph.GraphEditor.PreviewRoot, 

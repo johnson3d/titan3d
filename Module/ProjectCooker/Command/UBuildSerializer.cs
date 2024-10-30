@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace ProjectCooker.Command
 {
-    class USerializerCode : EngineNS.Bricks.CodeBuilder.UCodeWriter
+    class TtSerializerCode : EngineNS.Bricks.CodeBuilder.TtCodeWriter
     {
 
     }
-    class UBuildSerializer : UCookCommand
+    class TtBuildSerializer : TtCookCommand
     {
         public static bool IsValueType(System.Type type)
         {
@@ -25,7 +25,7 @@ namespace ProjectCooker.Command
             var metas = EngineNS.Rtti.TtClassMetaManager.Instance.Metas;
             foreach (var i in metas)
             {
-                USerializerCode codeWriter = new USerializerCode();
+                TtSerializerCode codeWriter = new TtSerializerCode();
                 codeWriter.AddLine($"#if UseSerializerCodeGen");
                 codeWriter.AddLine($"using System;");
 

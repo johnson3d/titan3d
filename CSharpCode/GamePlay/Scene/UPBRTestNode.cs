@@ -37,7 +37,7 @@ namespace EngineNS.GamePlay.Scene
             public RName CollideName { get; set; }
             [Rtti.Meta]
             [ReadOnly(true)]
-            public string MdfQueueType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfStaticMesh));
+            public string MdfQueueType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMdfStaticMesh));
             [Rtti.Meta]
             [ReadOnly(true)]
             public string AtomType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMesh.TtAtom));

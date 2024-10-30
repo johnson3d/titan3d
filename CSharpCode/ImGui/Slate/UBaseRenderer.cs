@@ -20,7 +20,7 @@ namespace EngineNS.EGui.Slate
 
             SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
                 await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Shader.CommanShading.USlateGUIShading>(),
-                TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
+                TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
 
             var iptDesc = new NxRHI.TtInputLayoutDesc();
             unsafe

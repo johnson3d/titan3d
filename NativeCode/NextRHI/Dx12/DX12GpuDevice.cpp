@@ -305,6 +305,24 @@ namespace NxRHI
 		FFenceDesc fcDesc{};
 		mFrameFence = MakeWeakRef(this->CreateFence(&fcDesc, "Dx12 Frame Fence"));
 
+		if (CmdSigForIndirectDraw == nullptr)
+		{
+			D3D12_COMMAND_SIGNATURE_DESC desc{};
+
+			D3D12_INDIRECT_ARGUMENT_DESC argDesc[1]{};
+			argDesc[0].Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
+			//argDesc[1].Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
+			//argDesc[1].Constant.RootParameterIndex = 18;//shader register...
+			//argDesc[1].Constant.DestOffsetIn32BitValues = 0;
+			//argDesc[1].Constant.Num32BitValuesToSet = 1;
+
+			desc.ByteStride = sizeof(FIndirectDrawArgument);
+			desc.NumArgumentDescs = sizeof(argDesc) / sizeof(D3D12_INDIRECT_ARGUMENT_DESC);
+			desc.pArgumentDescs = argDesc;
+			auto hr = mDevice->CreateCommandSignature(&desc, nullptr, IID_PPV_ARGS(CmdSigForIndirectDrawIndex.GetAddressOf()));
+			ASSERT(hr == S_OK);
+		}
+
 		if (CmdSigForIndirectDrawIndex == nullptr)
 		{
 			D3D12_COMMAND_SIGNATURE_DESC desc{};
@@ -316,7 +334,7 @@ namespace NxRHI
 			//argDesc[1].Constant.DestOffsetIn32BitValues = 0;
 			//argDesc[1].Constant.Num32BitValuesToSet = 1;
 
-			desc.ByteStride = sizeof(FIndirectDrawArgument);
+			desc.ByteStride = sizeof(FIndirectDrawIndexArgument);
 			desc.NumArgumentDescs = sizeof(argDesc) / sizeof(D3D12_INDIRECT_ARGUMENT_DESC);
 			desc.pArgumentDescs = argDesc;
 			auto hr = mDevice->CreateCommandSignature(&desc, nullptr, IID_PPV_ARGS(CmdSigForIndirectDrawIndex.GetAddressOf()));

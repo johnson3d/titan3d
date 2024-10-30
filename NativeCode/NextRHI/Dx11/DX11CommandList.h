@@ -45,6 +45,7 @@ namespace NxRHI
 		virtual void EndPass() override;
 
 		virtual void Draw(EPrimitiveType topology, UINT BaseVertex, UINT DrawCount, UINT Instance = 1) override;
+		virtual void IndirectDraw(EPrimitiveType topology, IBuffer* indirectArg, UINT AlignedByteOffsetForArgs, IBuffer* countBuffer) override;
 		virtual void DrawIndexed(EPrimitiveType topology, UINT BaseVertex, UINT StartIndex, UINT DrawCount, UINT Instance = 1) override;
 		virtual void IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset = 0, IBuffer* countBuffer = nullptr) override;
 		virtual void Dispatch(UINT x, UINT y, UINT z) override;

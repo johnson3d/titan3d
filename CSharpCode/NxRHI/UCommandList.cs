@@ -141,6 +141,10 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.Draw(topology, BaseVertex, DrawCount, Instance);
         }
+        public void IndirectDraw(EPrimitiveType topology, TtBuffer indirectArg, uint indirectArgOffset = 0, TtBuffer countBuffer = null)
+        {
+            mCoreObject.IndirectDrawIndexed(topology, indirectArg.mCoreObject, indirectArgOffset, countBuffer.mCoreObject);
+        }
         public void DrawIndexed(EPrimitiveType topology, uint BaseVertex, uint StartIndex, uint DrawCount, uint Instance = 1)
         {
             mCoreObject.DrawIndexed(topology, BaseVertex, StartIndex, DrawCount, Instance);

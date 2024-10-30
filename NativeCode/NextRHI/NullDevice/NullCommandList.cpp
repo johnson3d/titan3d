@@ -107,6 +107,10 @@ namespace NxRHI
 	{
 		
 	}
+	void NullCommandList::IndirectDraw(EPrimitiveType topology, IBuffer* indirectArg, UINT AlignedByteOffsetForArgs, IBuffer* countBuffer)
+	{
+
+	}
 	void NullCommandList::DrawIndexed(EPrimitiveType topology, UINT BaseVertex, UINT StartIndex, UINT DrawCount, UINT Instance)
 	{
 		

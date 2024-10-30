@@ -220,7 +220,7 @@ namespace EngineNS.Bricks.Particle
                 bfDesc.InitData = &pInitData;
                 DispatchArgBuffer = rc.CreateBuffer(in bfDesc);
                 
-                bfDesc.Size = (uint)sizeof(NxRHI.FIndirectDrawArgument) * NumOfArgument;
+                bfDesc.Size = (uint)sizeof(NxRHI.FIndirectDrawIndexArgument) * NumOfArgument;
                 bfDesc.InitData = IntPtr.Zero.ToPointer();
                 DrawArgBuffer = rc.CreateBuffer(in bfDesc);
 
@@ -232,7 +232,7 @@ namespace EngineNS.Bricks.Particle
                 uavDesc.Buffer.NumElements = (uint)(sizeof(NxRHI.FIndirectDispatchArgument) / sizeof(int)) * NumOfArgument;
                 uavDesc.Buffer.StructureByteStride = bfDesc.StructureStride;
                 DispatchArgUav = rc.CreateUAV(DispatchArgBuffer, in uavDesc);
-                uavDesc.Buffer.NumElements = (uint)(sizeof(NxRHI.FIndirectDrawArgument) / sizeof(int)) * NumOfArgument;
+                uavDesc.Buffer.NumElements = (uint)(sizeof(NxRHI.FIndirectDrawIndexArgument) / sizeof(int)) * NumOfArgument;
                 DrawArgUav = rc.CreateUAV(DrawArgBuffer, in uavDesc);                
             }
         }

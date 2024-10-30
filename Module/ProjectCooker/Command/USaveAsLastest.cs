@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace ProjectCooker.Command
 {
-    class USaveAsLastest : UCookCommand
+    class TtSaveAsLastest : TtCookCommand
     {
         public Dictionary<string, Type> AssetTypes = new Dictionary<string, Type>();
         public override async System.Threading.Tasks.Task ExecuteCommand(string[] args)

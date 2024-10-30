@@ -114,13 +114,13 @@ namespace EngineNS.Editor.Forms
                 ImageSize.Y = ImageSize.Y*3;
                 SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
                      await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<USlateTextureCubeViewerShading>(),
-                     TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
+                     TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
             }
             else
             {
                 SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
                     await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<USlateTextureViewerShading>(),
-                    TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.UMdfStaticMesh());
+                    TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
             }
             var iptDesc = new NxRHI.TtInputLayoutDesc();
             unsafe

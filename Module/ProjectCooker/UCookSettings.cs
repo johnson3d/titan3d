@@ -6,12 +6,7 @@ using System.Threading.Tasks;
 
 namespace ProjectCooker
 {
-
-    class UCookSettings
-    {
-    }
-
-    class UCookCommand
+    class TtCookCommand
     {
         public const string Param_Types = "AssetType=";
         public const string Type_Texture = "Texture";

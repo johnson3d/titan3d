@@ -5,6 +5,7 @@ using NPOI.POIFS.Properties;
 using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 using static EngineNS.Bricks.PhysicsCore.SceneNode.TtCapsulePhyControllerNode;
@@ -41,8 +42,8 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             return true;
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("PhyCapsule", "PhyCapsule", TtNode.EditorKeyword)]
-    [TtNode(NodeDataType = typeof(TtCapsulePhyControllerNode.TtCapsulePhyControllerNodeData), DefaultNamePrefix = "PhyCapsule")]
+    [Bricks.CodeBuilder.ContextMenu("PhyCapsuleController", "PhyCapsuleController", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtCapsulePhyControllerNode.TtCapsulePhyControllerNodeData), DefaultNamePrefix = "PhyCapsuleController")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtCapsulePhyControllerNode : TtPhyControllerNodeBase
     {
@@ -90,14 +91,15 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         }
        
     }
-    [Bricks.CodeBuilder.ContextMenu("PhyBox", "PhyBox", TtNode.EditorKeyword)]
-    [TtNode(NodeDataType = typeof(TtBoxPhyControllerNode.TtBoxPhyControllerNodeData), DefaultNamePrefix = "PhyBox")]
+    [Bricks.CodeBuilder.ContextMenu("PhyBoxController", "PhyBoxController", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtBoxPhyControllerNode.TtBoxPhyControllerNodeData), DefaultNamePrefix = "PhyBoxController")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtBoxPhyControllerNode : TtPhyControllerNodeBase
     {
+        [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
         public class TtBoxPhyControllerNodeData : TtPhyControllerNodeDataBase
         {
-            [Rtti.Meta]
+            [Rtti.Meta, Category("Option")]
             public Vector3 Extent { get; set; } = Vector3.One;
         }
         public TtBoxPhyControllerNodeData BoxPhyControllerNodeData

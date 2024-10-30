@@ -34,14 +34,14 @@ namespace EngineNS.Graphics.Pipeline
     {
         public bool IsDraw = false;
         public Graphics.Mesh.TtMesh RenderMesh;
-        public Mesh.UMdfInstanceStaticMesh MdfQueue;
+        public Mesh.TtMdfInstanceStaticMesh MdfQueue;
         public Graphics.Mesh.Modifier.TtGpuDrivenData GpuDrivenData = new Graphics.Mesh.Modifier.TtGpuDrivenData();
-        public void Initialize(Graphics.Pipeline.TtGpuCullingNode node, Mesh.TtMaterialMesh mesh, Mesh.UMdfInstanceStaticMesh mdfQueue)
+        public void Initialize(Graphics.Pipeline.TtGpuCullingNode node, Mesh.TtMaterialMesh mesh, Mesh.TtMdfInstanceStaticMesh mdfQueue)
         {
             RenderMesh = new Graphics.Mesh.TtMesh();
-            RenderMesh.Initialize(mesh, Rtti.TtTypeDescGetter<Mesh.UMdfInstanceStaticMesh>.TypeDesc);
+            RenderMesh.Initialize(mesh, Rtti.TtTypeDescGetter<Mesh.TtMdfInstanceStaticMesh>.TypeDesc);
 
-            MdfQueue = RenderMesh.MdfQueue as Mesh.UMdfInstanceStaticMesh;
+            MdfQueue = RenderMesh.MdfQueue as Mesh.TtMdfInstanceStaticMesh;
             GpuDrivenData.SetupGpuData(node, mdfQueue.InstanceModifier);
             MdfQueue.InstanceModifier.GpuDrivenData = GpuDrivenData;
             IsDraw = true;
@@ -55,10 +55,10 @@ namespace EngineNS.Graphics.Pipeline
     }
     public class TtStaticMeshBatch : TtMeshBatchBase
     {
-        public Mesh.UMdfInstanceStaticMesh MdfQueue;
+        public Mesh.TtMdfInstanceStaticMesh MdfQueue;
         public void Initialize(Graphics.Pipeline.TtGpuCullingNode node, Mesh.TtMaterialMesh.TtSubMaterialedMesh mesh)
         {
-            MdfQueue = InitRenderMesh<Mesh.UMdfInstanceStaticMesh>(mesh);
+            MdfQueue = InitRenderMesh<Mesh.TtMdfInstanceStaticMesh>(mesh);
             MdfQueue.InstanceModifier.SetCapacity(512, true);
             GpuDrivenData.SetupGpuData(node, MdfQueue.InstanceModifier);
             MdfQueue.InstanceModifier.GpuDrivenData = GpuDrivenData;
@@ -182,7 +182,7 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     if (EnableInstanceMeshCullling)
                     {
-                        var mdfQueue = visibleMeshes[i].Mesh.MdfQueue as Mesh.UMdfInstanceStaticMesh;
+                        var mdfQueue = visibleMeshes[i].Mesh.MdfQueue as Mesh.TtMdfInstanceStaticMesh;
                         if (mdfQueue != null)
                         {
                             visibleMeshes[i] = PushInstanceMesh(visibleMeshes[i].Mesh, mdfQueue);
@@ -191,7 +191,7 @@ namespace EngineNS.Graphics.Pipeline
                     }
                     if (EnableStaticMeshBatch)
                     {
-                        var mdfQueue = visibleMeshes[i].Mesh.MdfQueue as Mesh.UMdfStaticMesh;
+                        var mdfQueue = visibleMeshes[i].Mesh.MdfQueue as Mesh.TtMdfStaticMesh;
                         if (mdfQueue != null)
                         {
                             visibleMeshes[i] = PushStaticMeshBatch(visibleMeshes[i].Mesh);
@@ -303,7 +303,7 @@ namespace EngineNS.Graphics.Pipeline
                 i.IsDraw = false;
             }
         }
-        private FVisibleMesh PushInstanceMesh(Mesh.TtMesh mesh, Mesh.UMdfInstanceStaticMesh mdfQueue)
+        private FVisibleMesh PushInstanceMesh(Mesh.TtMesh mesh, Mesh.TtMdfInstanceStaticMesh mdfQueue)
         {
             var hash = TtInstanceStaticMeshBatch.MeshBatchHash(mesh);
             TtInstanceStaticMeshBatch batch;

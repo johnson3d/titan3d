@@ -402,6 +402,14 @@ namespace NxRHI
 		else
 			mContext->DrawInstanced(dpCount, Instance, BaseVertex, 0);
 	}
+	void DX11CommandList::IndirectDraw(EPrimitiveType topology, IBuffer* indirectArg, UINT AlignedByteOffsetForArgs, IBuffer* countBuffer)
+	{
+		UINT dpCount = 0;
+		mContext->IASetPrimitiveTopology(PrimitiveTypeToDX(topology, 0, &dpCount));
+
+		ASSERT(countBuffer == nullptr);
+		mContext->DrawInstancedIndirect(((DX11Buffer*)indirectArg)->mBuffer, AlignedByteOffsetForArgs);
+	}
 	void DX11CommandList::DrawIndexed(EPrimitiveType topology, UINT BaseVertex, UINT StartIndex, UINT DrawCount, UINT Instance)
 	{
 		UINT dpCount = 0;

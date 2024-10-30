@@ -73,6 +73,7 @@ namespace NxRHI
 
 		void Push2Root(FEffectBinder* binder);
 		AutoRef<ID3D12CommandSignature> GetIndirectDrawIndexCmdSig(DX12GpuDevice* device, ICommandList* cmdlist);
+		AutoRef<ID3D12CommandSignature> GetIndirectDrawCmdSig(DX12GpuDevice* device, ICommandList* cmdlist);
 	public:
 		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
 		AutoRef<ID3D12RootSignature>	mSignature;

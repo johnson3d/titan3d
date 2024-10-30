@@ -95,6 +95,7 @@ namespace NxRHI
 		AutoRef<DX12DefaultGpuMemAllocator>		mUploadBufferMemAllocator;
 		AutoRef<DX12DefaultGpuMemAllocator>		mUavBufferMemAllocator;
 
+		AutoRef<ID3D12CommandSignature>		CmdSigForIndirectDraw;
 		AutoRef<ID3D12CommandSignature>		CmdSigForIndirectDrawIndex;
 		AutoRef<ID3D12CommandSignature>		CmdSigForIndirectDispatch;
 

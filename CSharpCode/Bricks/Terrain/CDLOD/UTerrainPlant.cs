@@ -73,7 +73,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 {
                     DebugHitproxyMesh = new Graphics.Mesh.TtMesh();
                     DebugHitproxyMesh.Initialize(PlantType.MaterialMesh,
-                        Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                        Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
                     DebugHitproxyMesh.SetWorldTransform(Placement.TransformData, PlantType.Terrain.GetWorld(), false);
                     DebugHitproxyMesh.IsAcceptShadow = false;
                 }
@@ -91,7 +91,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             public List<UPlantInstance> ObjInstances { get; } = new List<UPlantInstance>();
             public Graphics.Mesh.TtMaterialMesh MaterialMesh;
             public Graphics.Mesh.TtMesh Mesh;
-            public Graphics.Mesh.UMdfInstanceStaticMesh InstanceMdf;
+            public Graphics.Mesh.TtMdfInstanceStaticMesh InstanceMdf;
             public DVector3 InstanceOffset;
             public bool CreateFinished = false;
             public async System.Threading.Tasks.Task Create(Bricks.Terrain.CDLOD.TtTerrainNode trn, DVector3 levelOffset, UTerrainPlant desc)
@@ -101,10 +101,10 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 MaterialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(desc.MeshName);
                 Mesh = new Graphics.Mesh.TtMesh();
                 Mesh.Initialize(MaterialMesh, 
-                    Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfInstanceStaticMesh>.TypeDesc);
+                    Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfInstanceStaticMesh>.TypeDesc);
 
                 Mesh.IsCastShadow = true;
-                InstanceMdf = Mesh.MdfQueue as Graphics.Mesh.UMdfInstanceStaticMesh;
+                InstanceMdf = Mesh.MdfQueue as Graphics.Mesh.TtMdfInstanceStaticMesh;
 
                 Mesh.IsDrawHitproxy = true;
                 InstanceOffset = levelOffset;

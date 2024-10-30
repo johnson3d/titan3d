@@ -211,9 +211,9 @@ namespace EngineNS.Graphics.Pipeline
 
         public class TtPerSkinMeshCBufferVarIndexer : NxRHI.TtShader.AuxCBufferVarIndexer<TtPerSkinMeshCBufferVarIndexer>
         {
-            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector3))]
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector4), NumElement = 360)]
             public NxRHI.FShaderVarDesc AbsBonePos;
-            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Quaternion))]
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Quaternion), NumElement = 360)]
             public NxRHI.FShaderVarDesc AbsBoneQuat;
         }
 

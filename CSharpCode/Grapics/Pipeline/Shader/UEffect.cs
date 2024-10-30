@@ -463,12 +463,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public async System.Threading.Tasks.Task<bool> Initialize(TtGfxDevice device)
         {
             var shading = TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDummyShading>();
-            DummyEffect = await this.GetEffect(await shading, device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
+            DummyEffect = await this.GetEffect(await shading, device.MaterialManager.ScreenMaterial, new Mesh.TtMdfStaticMesh());
 
             if (DummyEffect == null)
             {
                 DummyEffect = await TtEffect.CreateEffect(await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDummyShading>(),
-                   new TtShadingEnv.FPermutationId(0), device.MaterialManager.ScreenMaterial, new Mesh.UMdfStaticMesh());
+                   new TtShadingEnv.FPermutationId(0), device.MaterialManager.ScreenMaterial, new Mesh.TtMdfStaticMesh());
             }
             if (DummyEffect == null)
                 return false;

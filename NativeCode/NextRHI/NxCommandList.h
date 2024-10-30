@@ -30,6 +30,14 @@ namespace NxRHI
 	{
 		UINT VertexCountPerInstance;
 		UINT InstanceCount;
+		UINT StartVertex;
+		UINT StartInstance;
+	};
+	struct TR_CLASS(SV_LayoutStruct = 8)
+		FIndirectDrawIndexArgument
+	{
+		UINT VertexCountPerInstance;
+		UINT InstanceCount;
 		UINT StartIndex;
 		UINT StartVertex;
 		UINT StartInstance;
@@ -143,6 +151,7 @@ namespace NxRHI
 		void InheritPass(ICommandList* cmdlist);
 
 		virtual void Draw(EPrimitiveType topology, UINT BaseVertex, UINT DrawCount, UINT Instance = 1) = 0;
+		virtual void IndirectDraw(EPrimitiveType topology, IBuffer* indirectArg, UINT AlignedByteOffsetForArgs, IBuffer* countBuffer = nullptr) = 0;
 		virtual void DrawIndexed(EPrimitiveType topology, UINT BaseVertex, UINT StartIndex, UINT DrawCount, UINT Instance = 1) = 0;
 		virtual void IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset = 0, IBuffer* countBuffer = nullptr) = 0;
 		virtual void Dispatch(UINT x, UINT y, UINT z) = 0;

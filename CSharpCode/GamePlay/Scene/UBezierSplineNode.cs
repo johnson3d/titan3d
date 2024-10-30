@@ -136,7 +136,7 @@ namespace EngineNS.GamePlay.Scene
                 materials1[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine));
                 var mesh2 = new Graphics.Mesh.TtMesh();
                 var ok1 = mesh2.Initialize(cookedMesh, materials1,
-                    Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+                    Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
                 if (ok1)
                 {
                     mesh2.IsAcceptShadow = false;
@@ -168,7 +168,7 @@ namespace EngineNS.GamePlay.Scene
                 materials1[0] = TtEngine.Instance.GfxDevice.MaterialInstanceManager.FindMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));
                 var mesh2 = new Graphics.Mesh.TtMesh();
                 var ok1 = mesh2.Initialize(cookedMesh, materials1,
-                    Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfInstanceStaticMesh>.TypeDesc);
+                    Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfInstanceStaticMesh>.TypeDesc);
                 if (ok1)
                 {
                     mesh2.IsUnlit = true;
@@ -178,7 +178,7 @@ namespace EngineNS.GamePlay.Scene
 
                     //BoundVolume.LocalAABB = mDebugPointMesh.MaterialMesh.Mesh.mCoreObject.mAABB;
 
-                    var instantMesh = mDebugPointMesh.MdfQueue as Graphics.Mesh.UMdfInstanceStaticMesh;
+                    var instantMesh = mDebugPointMesh.MdfQueue as Graphics.Mesh.TtMdfInstanceStaticMesh;
 
                     instantMesh.InstanceModifier.SetCapacity((uint)Spline.Curves.Count, false);
 

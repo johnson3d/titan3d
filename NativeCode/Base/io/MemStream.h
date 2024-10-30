@@ -19,7 +19,7 @@ NS_BEGIN
 class IStreamWriter : public IWeakReference
 {
 public:
-	virtual UINT64 Tell() = 0;
+	virtual UINT64 Tell() const = 0;
 	virtual bool Seek(UINT64 offset) = 0;
 	virtual void Write(const void* pSrc, UINT t) = 0;
 
@@ -40,7 +40,7 @@ class IStreamReader : public IWeakReference
 {
 public:
 	virtual UINT64 GetLength() const = 0;
-	virtual UINT64 Tell() = 0;
+	virtual UINT64 Tell() const = 0;
 	virtual bool Seek(UINT64 offset) = 0;
 	virtual UINT Read(void* pSrc, UINT t) = 0;
 
@@ -70,21 +70,16 @@ public:
 	MemStreamWriter(UINT size);
 	~MemStreamWriter();
 
-	TR_FUNCTION(SV_SuppressGC = true)
 	void ResetBufferSize(UINT64 size = 0);
-	TR_FUNCTION(SV_SuppressGC = true)
 	inline void* GetPointer() {
 		return &mDataStream[0];
 	}
-	TR_FUNCTION(SV_SuppressGC = true)
 	virtual UINT64 GetLength() const {
 		return mBufferSize;
 	}
-	TR_FUNCTION(SV_SuppressGC = true)
-	virtual UINT64 Tell() {
+	virtual UINT64 Tell() const {
 		return mPosition;
 	}
-	TR_FUNCTION(SV_SuppressGC = true)
 	virtual bool Seek(UINT64 offset);
 	virtual void Write(const void* pSrc, UINT t);
 	
@@ -109,7 +104,6 @@ public:
 	{
 
 	}
-	TR_FUNCTION(SV_SuppressGC = true)
 	void ProxyPointer(BYTE* ptr, UINT64 len)
 	{
 		mProxyPointer = ptr;
@@ -122,19 +116,15 @@ public:
 		mLength = 0;
 		mPosition = 0;
 	}
-	TR_FUNCTION(SV_SuppressGC = true)
 	BYTE* GetPointer() {
 		return mProxyPointer;
 	}
-	TR_FUNCTION(SV_SuppressGC = true)
 	virtual UINT64 GetLength() const{
 		return mLength;
 	}
-	TR_FUNCTION(SV_SuppressGC = true)
-	virtual UINT64 Tell() {
+	virtual UINT64 Tell() const {
 		return mPosition;
 	}
-	TR_FUNCTION(SV_SuppressGC = true)
 	virtual bool Seek(UINT64 offset) {
 		if (mLength <= offset)
 		{
@@ -160,7 +150,7 @@ public:
 	{
 
 	}
-	virtual UINT64 Tell() {
+	virtual UINT64 Tell() const {
 		return mFile.GetPosition();
 	}
 	virtual bool Seek(UINT64 offset) {
@@ -190,7 +180,7 @@ public:
 	virtual UINT64 GetLength() const {
 		return (UINT64)mFile.GetLength();
 	}
-	virtual UINT64 Tell() {
+	virtual UINT64 Tell() const {
 		return mFile.GetPosition();
 	}
 	virtual bool Seek(UINT64 offset) {

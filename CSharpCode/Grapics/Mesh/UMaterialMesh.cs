@@ -47,7 +47,7 @@ namespace EngineNS.Graphics.Mesh
             
             Graphics.Mesh.TtMaterialMesh Mesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.CreateMaterialMesh(GetAssetName());
             var mesh = new Graphics.Mesh.TtMesh();
-            var ok = mesh.Initialize(Mesh, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfStaticMesh>.TypeDesc);
+            var ok = mesh.Initialize(Mesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
             if (ok)
             {
                 var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(renderer.World, renderer.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), mesh, DVector3.Zero, Vector3.One, Quaternion.Identity);

@@ -557,6 +557,18 @@ namespace NxRHI
 
 		vkCmdDraw(mCommandBuffer->RealObject, dpCount, Instance, BaseVertex, 0);
 	}
+	void VKCommandList::IndirectDraw(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset, IBuffer* countBuffer)
+	{
+		ASSERT(mIsRecording);
+
+		const auto argOffset = offsetof(FIndirectDrawArgument, VertexCountPerInstance);
+
+		if (countBuffer == nullptr)
+			vkCmdDrawIndirect(mCommandBuffer->RealObject, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset, 1, sizeof(UINT) * 4);
+		else
+			vkCmdDrawIndirectCount(mCommandBuffer->RealObject, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset,
+				((VKBuffer*)countBuffer)->mBuffer, 0, 1024, sizeof(UINT) * 4);
+	}
 	void VKCommandList::DrawIndexed(EPrimitiveType topology, UINT BaseVertex, UINT StartIndex, UINT DrawCount, UINT Instance)
 	{
 		ASSERT(mIsRecording);
@@ -570,7 +582,7 @@ namespace NxRHI
 	{
 		ASSERT(mIsRecording);
 		
-		const auto argOffset = offsetof(FIndirectDrawArgument, VertexCountPerInstance);
+		const auto argOffset = offsetof(FIndirectDrawIndexArgument, VertexCountPerInstance);
 		
 		if (countBuffer == nullptr)
 			vkCmdDrawIndexedIndirect(mCommandBuffer->RealObject, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset, 1, sizeof(UINT) * 5);

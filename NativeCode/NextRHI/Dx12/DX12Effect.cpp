@@ -293,13 +293,17 @@ namespace NxRHI
 			break;
 		}
 	}
+	AutoRef<ID3D12CommandSignature> DX12GraphicsEffect::GetIndirectDrawCmdSig(DX12GpuDevice* device, ICommandList* cmdlist)
+	{
+		return device->CmdSigForIndirectDraw;;
+	}
 	
 	AutoRef<ID3D12CommandSignature> DX12GraphicsEffect::GetIndirectDrawIndexCmdSig(DX12GpuDevice* device, ICommandList* cmdlist)
 	{
 		if (mCmdSignature != nullptr)
 			return mCmdSignature;
 		mCmdSignature = device->CmdSigForIndirectDrawIndex;
-		mIndirectOffset = offsetof(FIndirectDrawArgument, VertexCountPerInstance);
+		mIndirectOffset = offsetof(FIndirectDrawIndexArgument, VertexCountPerInstance);
 		/*if (mVSMutiDrawRootIndex == -1)
 		{
 			

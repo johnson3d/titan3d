@@ -6,117 +6,117 @@ using System.Threading.Tasks;
 
 namespace ProjectCooker.Command
 {
-    class URenameAsset : UCookCommand
-    {
-        public const string Param_Source = "Source=";
-        public const string Param_Target = "Target=";
-        public override async System.Threading.Tasks.Task ExecuteCommand(string[] args)
-        {
-            var source = FindArgument(args, Param_Source);
-            var target = FindArgument(args, Param_Target);
+    //class URenameAsset : UCookCommand
+    //{
+    //    public const string Param_Source = "Source=";
+    //    public const string Param_Target = "Target=";
+    //    public override async System.Threading.Tasks.Task ExecuteCommand(string[] args)
+    //    {
+    //        var source = FindArgument(args, Param_Source);
+    //        var target = FindArgument(args, Param_Target);
 
-            var srcName = RName.ParseFrom(source);
-            var tarName = RName.ParseFrom(target);
-            srcName = RName.GetRName("utest/mesh/puppet_low_ue4.vms");
-            tarName = RName.GetRName("utest/mesh/puppet_low_ue4_renamed.vms");
-            if (srcName == null || tarName == null || tarName.ExtName != srcName.ExtName)
-            {
-                throw new Exception("Source Or Target is invalid");
-            }
-            switch (srcName.ExtName)
-            {
-                case ".srv":
-                    {
+    //        var srcName = RName.ParseFrom(source);
+    //        var tarName = RName.ParseFrom(target);
+    //        srcName = RName.GetRName("utest/mesh/puppet_low_ue4.vms");
+    //        tarName = RName.GetRName("utest/mesh/puppet_low_ue4_renamed.vms");
+    //        if (srcName == null || tarName == null || tarName.ExtName != srcName.ExtName)
+    //        {
+    //            throw new Exception("Source Or Target is invalid");
+    //        }
+    //        switch (srcName.ExtName)
+    //        {
+    //            case ".srv":
+    //                {
                         
-                    }
-                    break;
-                case ".vms":
-                    {
-                        await ProcMesh(srcName, tarName);
-                    }
-                    break;
-                case ".material":
-                    {
+    //                }
+    //                break;
+    //            case ".vms":
+    //                {
+    //                    await ProcMesh(srcName, tarName);
+    //                }
+    //                break;
+    //            case ".material":
+    //                {
 
-                    }
-                    break;
-                case ".uminst":
-                    {
+    //                }
+    //                break;
+    //            case ".uminst":
+    //                {
 
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-        async System.Threading.Tasks.Task<EngineNS.IO.IAsset> LoadAsset(RName name)
-        {
-            switch (name.ExtName)
-            {
-                case ".srv":
-                    {
+    //                }
+    //                break;
+    //            default:
+    //                break;
+    //        }
+    //    }
+    //    async System.Threading.Tasks.Task<EngineNS.IO.IAsset> LoadAsset(RName name)
+    //    {
+    //        switch (name.ExtName)
+    //        {
+    //            case ".srv":
+    //                {
 
-                    }
-                    break;
-                case ".vms":
-                    {
+    //                }
+    //                break;
+    //            case ".vms":
+    //                {
                         
-                    }
-                    break;
-                case ".ums":
-                    {
-                        return await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(name);
-                    }
-                case ".material":
-                    {
+    //                }
+    //                break;
+    //            case ".ums":
+    //                {
+    //                    return await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(name);
+    //                }
+    //            case ".material":
+    //                {
 
-                    }
-                    break;
-                case ".uminst":
-                    {
+    //                }
+    //                break;
+    //            case ".uminst":
+    //                {
 
-                    }
-                    break;
-                default:
-                    break;
-            }
-            return null;
-        }
-        async System.Threading.Tasks.Task ProcMesh(EngineNS.RName src, EngineNS.RName tar)
-        {
-            var asset = await EngineNS.TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(src);
-            if (asset == null)
-                return;
-            var ameta = asset.GetAMeta();
-            if (ameta == null)
-                return;
+    //                }
+    //                break;
+    //            default:
+    //                break;
+    //        }
+    //        return null;
+    //    }
+    //    async System.Threading.Tasks.Task ProcMesh(EngineNS.RName src, EngineNS.RName tar)
+    //    {
+    //        var asset = await EngineNS.TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(src);
+    //        if (asset == null)
+    //            return;
+    //        var ameta = asset.GetAMeta();
+    //        if (ameta == null)
+    //            return;
 
-            List<EngineNS.IO.IAssetMeta> holders = new List<EngineNS.IO.IAssetMeta>();
-            TtEngine.Instance.AssetMetaManager.GetAssetHolder(ameta, holders);
+    //        List<EngineNS.IO.IAssetMeta> holders = new List<EngineNS.IO.IAssetMeta>();
+    //        TtEngine.Instance.AssetMetaManager.GetAssetHolder(ameta, holders);
 
-            List<EngineNS.IO.IAsset> holdAssets = new List<EngineNS.IO.IAsset>();
-            foreach (var i in holders)
-            {
-                var holdAsset = await LoadAsset(i.GetAssetName());
-                if (holdAsset != null)
-                {
-                    holdAssets.Add(holdAsset);
-                }
-            }
+    //        List<EngineNS.IO.IAsset> holdAssets = new List<EngineNS.IO.IAsset>();
+    //        foreach (var i in holders)
+    //        {
+    //            var holdAsset = await LoadAsset(i.GetAssetName());
+    //            if (holdAsset != null)
+    //            {
+    //                holdAssets.Add(holdAsset);
+    //            }
+    //        }
 
-            var ametaPath = ameta.GetAssetName().Address + EngineNS.IO.IAssetMeta.MetaExt;
-            ameta.SetAssetName(tar);
-            ameta.SaveAMeta(asset);
-            System.IO.File.Delete(ametaPath);
-            //asset.SaveAssetTo(tar);
-            System.IO.File.Move(src.Address, tar.Address);
+    //        var ametaPath = ameta.GetAssetName().Address + EngineNS.IO.IAssetMeta.MetaExt;
+    //        ameta.SetAssetName(tar);
+    //        ameta.SaveAMeta(asset);
+    //        System.IO.File.Delete(ametaPath);
+    //        //asset.SaveAssetTo(tar);
+    //        System.IO.File.Move(src.Address, tar.Address);
 
-            EngineNS.TtEngine.Instance.GfxDevice.MeshPrimitiveManager.UnsafeRenameForCook(src, tar);
+    //        EngineNS.TtEngine.Instance.GfxDevice.MeshPrimitiveManager.UnsafeRenameForCook(src, tar);
 
-            foreach (var i in holdAssets)
-            {
-                i.SaveAssetTo(i.GetAMeta().GetAssetName());
-            }
-        }
-    }
+    //        foreach (var i in holdAssets)
+    //        {
+    //            i.SaveAssetTo(i.GetAMeta().GetAssetName());
+    //        }
+    //    }
+    //}
 }

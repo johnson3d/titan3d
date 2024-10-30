@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ProjectCooker.Command
 {
-    class UStartDS : UCookCommand
+    class TtStartDS : TtCookCommand
     {
         public override async System.Threading.Tasks.Task ExecuteCommand(string[] args)
         {

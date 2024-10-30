@@ -3,6 +3,7 @@ using EngineNS.GamePlay.Scene;
 using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 using static EngineNS.Bricks.PhysicsCore.SceneNode.TtCapsulePhyControllerNode;
@@ -10,6 +11,8 @@ using static EngineNS.Bricks.PhysicsCore.SceneNode.TtPhyCollisionNode;
 
 namespace EngineNS.Bricks.PhysicsCore.SceneNode
 {
+
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public abstract class TtPhyCollisionNode : GamePlay.Scene.TtLightWeightNodeBase
     {
         public class TtPhyCollisionNodeData : GamePlay.Scene.TtNodeData
@@ -50,10 +53,10 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     //only contians one shape
     public class TtPhySingleShapeCollisionNode : TtPhyCollisionNode
     {
-        public class UPhySingleShapeCollisionNodeData : TtPhyCollisionNodeData
+        public class TtPhySingleShapeCollisionNodeData : TtPhyCollisionNodeData
         {
             [Rtti.Meta]
-            public EPhyActorType PhyActorType { get; set; } = EPhyActorType.PAT_Dynamic;
+            public EPhyActorType PhyActorType { get; set; } = EPhyActorType.PAT_Static;
             [Rtti.Meta]
             public RName PxMaterial { get; set; }
             [Rtti.Meta]
@@ -63,6 +66,20 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             [Rtti.Meta]
             public PhyFilterData SimulationFilterData { get; set; }
         }
+        public TtPhySingleShapeCollisionNodeData SingleShapeCollisionNodeData
+        {
+            get => NodeData as TtPhySingleShapeCollisionNodeData;
+        }
+        [Category("Option")]
+        public EPhyActorType PhyActorType { get => SingleShapeCollisionNodeData.PhyActorType; set => SingleShapeCollisionNodeData.PhyActorType = value; }
+        [Category("Option")]
+        public RName PxMaterial { get => SingleShapeCollisionNodeData.PxMaterial; set => SingleShapeCollisionNodeData.PxMaterial = value; }
+        [Category("Option")]
+        public float Mass { get => SingleShapeCollisionNodeData.Mass; set => SingleShapeCollisionNodeData.Mass = value; }
+        [Category("Option")]
+        public PhyFilterData QueryFilterData { get => SingleShapeCollisionNodeData.QueryFilterData; set => SingleShapeCollisionNodeData.QueryFilterData = value; }
+        [Category("Option")]
+        public PhyFilterData SimulationFilterData { get => SingleShapeCollisionNodeData.SimulationFilterData; set => SingleShapeCollisionNodeData.SimulationFilterData = value; }
     }
 
     //contain some shapes
@@ -71,18 +88,22 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
 
     }
 
-    [Bricks.CodeBuilder.ContextMenu("SphereCollisionNode", "SphereCollisionNode", TtNode.EditorKeyword)]
-    [TtNode(NodeDataType = typeof(TtPhySphereCollisionNode.UPhySphereCollisionNodeData), DefaultNamePrefix = "SphereCollisionNode")]
+    [Bricks.CodeBuilder.ContextMenu("SphereCollision", "Collision\\SphereCollision", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtPhySphereCollisionNode.TtPhySphereCollisionNodeData), DefaultNamePrefix = "SphereCollision")]
     public class TtPhySphereCollisionNode : TtPhySingleShapeCollisionNode
     {
-        public class UPhySphereCollisionNodeData : UPhySingleShapeCollisionNodeData
+        public class TtPhySphereCollisionNodeData : TtPhySingleShapeCollisionNodeData
         {
+            [Category("Option")]
             public float Radius = 1.0f;
         }
-        public UPhySphereCollisionNodeData CollisionNodeData
+        
+        public TtPhySphereCollisionNodeData CollisionNodeData
         {
-            get => NodeData as UPhySphereCollisionNodeData;
+            get => NodeData as TtPhySphereCollisionNodeData;
         }
+        [Category("Option")]
+        public float Radius { get => CollisionNodeData.Radius; set => CollisionNodeData.Radius = value; }
         public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var baseResult = await base.InitializeNode(world, data, bvType, placementType);
@@ -110,15 +131,17 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             return true;
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("BoxCollision", "Collision\\BoxCollision", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtPhySphereCollisionNode.TtPhySphereCollisionNodeData), DefaultNamePrefix = "BoxCollision")]
     public class TtPhyBoxCollisionNode : TtPhySingleShapeCollisionNode
     {
-        public class UPhyBoxCollisionNodeData : UPhySingleShapeCollisionNodeData
+        public class TtPhyBoxCollisionNodeData : TtPhySingleShapeCollisionNodeData
         {
             public Vector3 HalfExtent = Vector3.One;
         }
-        public UPhyBoxCollisionNodeData CollisionNodeData
+        public TtPhyBoxCollisionNodeData CollisionNodeData
         {
-            get => NodeData as UPhyBoxCollisionNodeData;
+            get => NodeData as TtPhyBoxCollisionNodeData;
         }
         public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
@@ -147,33 +170,39 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             return true;
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("PlaneCollision", "Collision\\PlaneCollision", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtPhySphereCollisionNode.TtPhySphereCollisionNodeData), DefaultNamePrefix = "PlaneCollision")]
     public class TtPhyPlaneCollisionNode : TtPhySingleShapeCollisionNode
     {
-        public class UPhySphereCollisionNodeData : UPhySingleShapeCollisionNodeData
+        public class TtPhySphereCollisionNodeData : TtPhySingleShapeCollisionNodeData
         {
             public Vector3 HalfExtent = Vector3.One * 0.5f;
         }
     }
-
+    [Bricks.CodeBuilder.ContextMenu("CapsuleCollision", "Collision\\CapsuleCollision", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtPhySphereCollisionNode.TtPhySphereCollisionNodeData), DefaultNamePrefix = "CapsuleCollision")]
     public class TtPhyCapsuleCollisionNode : TtPhySingleShapeCollisionNode
     {
-        public class UPhyCapsuleCollisionNodeData : UPhySingleShapeCollisionNodeData
+        public class TtPhyCapsuleCollisionNodeData : TtPhySingleShapeCollisionNodeData
         {
             public float Radius = 1.0f;
             public float HalfHeight = 0.5f;
         }
     }
-
+    [Bricks.CodeBuilder.ContextMenu("ConvexCollision", "Collision\\ConvexCollision", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtPhySphereCollisionNode.TtPhySphereCollisionNodeData), DefaultNamePrefix = "ConvexCollision")]
     public class TtPhyConvexCollisionNode : TtPhySingleShapeCollisionNode
     {
-        public class UPhyConvexCollisionNodeData : UPhySingleShapeCollisionNodeData
+        public class TtPhyConvexCollisionNodeData : TtPhySingleShapeCollisionNodeData
         {
             public RName ConvexSource;
         }
     }
+    [Bricks.CodeBuilder.ContextMenu("TriMeshCollision", "Collision\\TriMeshCollision", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtPhySphereCollisionNode.TtPhySphereCollisionNodeData), DefaultNamePrefix = "TriMeshCollision")]
     public class TtPhyTriMeshCollisionNode : TtPhySingleShapeCollisionNode
     {
-        public class UPhyTriMeshCollisionNodeData : UPhySingleShapeCollisionNodeData
+        public class TtPhyTriMeshCollisionNodeData : TtPhySingleShapeCollisionNodeData
         {
             public RName TriMeshSource;
         }
