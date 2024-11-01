@@ -63,7 +63,7 @@ namespace EngineNS.Windows
 
 namespace EngineNS.Editor
 {
-    public partial class UMainEditorApplication
+    public partial class TtMainEditorApplication
     {
         public EngineNS.Windows.TtClrProfiler mClrProfiler = new Windows.TtClrProfiler();
     }

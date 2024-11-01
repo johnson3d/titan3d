@@ -421,7 +421,7 @@ namespace EngineNS.EGui.Controls
                         //}
                         if (ImGuiAPI.IsMouseDoubleClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                         {
-                            var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                            var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
                             if (mainEditor != null)
                             {
                                 var type = Rtti.TtTypeDesc.TypeOf(ameta.TypeStr).SystemType;

@@ -154,7 +154,7 @@ namespace EngineNS.Graphics.Mesh
             {
                 mCoreObject.Save2Xnd(rc.mCoreObject, xnd.RootNode.mCoreObject);
             }
-            var attr = xnd.RootNode.mCoreObject.GetOrAddAttribute("PartialSkeleton",0,0);
+            var attr = xnd.RootNode.mCoreObject.GetOrAddAttribute("PartialSkeleton",0,0, true);
             using (var ar = attr.GetWriter(512))
             {
                 ar.Write(PartialSkeleton);

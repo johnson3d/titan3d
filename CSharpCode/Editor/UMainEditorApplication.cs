@@ -14,7 +14,7 @@ using System.Runtime.InteropServices;
 
 namespace EngineNS.Editor
 {
-    public partial class UMainEditorApplication : TtSlateApplication, ITickable
+    public partial class TtMainEditorApplication : TtSlateApplication, ITickable
     {
         public int GetTickOrder()
         {
@@ -22,13 +22,14 @@ namespace EngineNS.Editor
         }
         public UAssetEditorManager AssetEditorManager { get; } = new UAssetEditorManager();
         
-        public UMainEditorApplication()
+        public TtMainEditorApplication()
         {
             mLogWatcher = new EGui.Controls.ULogWatcher();
             mCpuProfiler = new Editor.Forms.TtCpuProfiler();
             mGpuProfiler = new Editor.Forms.TtGpuProfiler();
             mMemProfiler = new Forms.TtMemoryProfiler();
-            mMainInspector = new Forms.UInspector();
+            mMainInspector = new Forms.TtInspector();
+            mMetaViewer = new TtMetaVersionViewer();
             //WorldViewportSlate = new UEditorWorldViewportSlate(true);
             //mWorldOutliner = new Editor.Forms.UWorldOutliner(WorldViewportSlate);
 
@@ -42,7 +43,8 @@ namespace EngineNS.Editor
         public Editor.Forms.TtCpuProfiler mCpuProfiler;
         public Editor.Forms.TtGpuProfiler mGpuProfiler;
         public Editor.Forms.TtMemoryProfiler mMemProfiler;
-        public Editor.Forms.UInspector mMainInspector;
+        public Editor.Forms.TtInspector mMainInspector;
+        public TtMetaVersionViewer mMetaViewer;
         public Bricks.ProjectGen.UBrickManager mBrickManager = null;
         public Editor.Forms.TtEditorSettings mEditorSettings;
         public TtPIEController mPIEController;
@@ -246,7 +248,7 @@ namespace EngineNS.Editor
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 ContentBrowser.Visible = !ContentBrowser.Visible;
-                                var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
+                                var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.TtMainEditorApplication;
                                 item.Selected = ContentBrowser.Visible;
                             },
                         },
@@ -257,7 +259,7 @@ namespace EngineNS.Editor
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 mLogWatcher.Visible = !mLogWatcher.Visible;
-                                var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
+                                var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.TtMainEditorApplication;
                                 item.Selected = mLogWatcher.Visible;
                             },
                         },
@@ -268,7 +270,7 @@ namespace EngineNS.Editor
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 mCpuProfiler.Visible = !mCpuProfiler.Visible;
-                                var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
+                                var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.TtMainEditorApplication;
                                 //mCpuProfiler.DockId = application.CenterDockId;
                                 item.Selected = mCpuProfiler.Visible;
                             },
@@ -280,7 +282,7 @@ namespace EngineNS.Editor
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 mGpuProfiler.Visible = !mGpuProfiler.Visible;
-                                var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
+                                var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.TtMainEditorApplication;
                                 //mCpuProfiler.DockId = application.CenterDockId;
                                 item.Selected = mGpuProfiler.Visible;
                             },
@@ -292,7 +294,7 @@ namespace EngineNS.Editor
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
                                 mMemProfiler.Visible = !mMemProfiler.Visible;
-                                var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
+                                var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.TtMainEditorApplication;
                                 item.Selected = mMemProfiler.Visible;
                             },
                         },
@@ -304,6 +306,16 @@ namespace EngineNS.Editor
                             {
                                 mMainInspector.Visible = !mMainInspector.Visible;
                                 item.Selected = mMainInspector.Visible;
+                            },
+                        },
+                        new EGui.UIProxy.MenuItemProxy()
+                        {
+                            MenuName = "MetaViewer",
+                            Selected = true,
+                            Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
+                            {
+                                mMetaViewer.Visible = !mMetaViewer.Visible;
+                                item.Selected = mMetaViewer.Visible;
                             },
                         },
                         new EGui.UIProxy.MenuItemProxy()

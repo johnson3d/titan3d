@@ -1,9 +1,5 @@
 ﻿using EngineNS.Graphics.Pipeline.Common;
 using EngineNS.Thread;
-using Microsoft.CodeAnalysis.Host.Mef;
-using NPOI.SS.Formula.Functions;
-using NPOI.Util;
-using Org.BouncyCastle.Asn1.X509;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -513,7 +509,7 @@ namespace EngineNS.Graphics.Pipeline
             set
             {
                 mDisableAO = value;
-                var finalShading = FindFirstNode<Mobile.UFinalCopyNode>()?.GetPassShading() as Mobile.UFinalCopyShading;
+                var finalShading = FindFirstNode<Mobile.TtFinalCopyNode>()?.GetPassShading() as Mobile.TtFinalCopyShading;
                 if (finalShading != null)
                 {
                     finalShading.SetDisableAO(value);
@@ -531,35 +527,35 @@ namespace EngineNS.Graphics.Pipeline
             set
             {
                 mDisableHDR = value;
-                var node = FindFirstNode<Mobile.UFinalCopyNode>();
+                var node = FindFirstNode<Mobile.TtFinalCopyNode>();
                 if (node == null)
                     return;
-                var shading = node.GetPassShading() as Mobile.UFinalCopyShading;
+                var shading = node.GetPassShading() as Mobile.TtFinalCopyShading;
                 shading?.SetDisableHDR(value);
             }
         }
         #endregion
 
-        Mobile.UMobileOpaqueNode mBasePassNode;
-        Mobile.UMobileOpaqueNode BasePassNode
+        Mobile.TtMobileOpaqueNode mBasePassNode;
+        Mobile.TtMobileOpaqueNode BasePassNode
         {
             get
             {
                 if (mBasePassNode == null)
                 {
-                    mBasePassNode = FindFirstNode<Mobile.UMobileOpaqueNode>();
+                    mBasePassNode = FindFirstNode<Mobile.TtMobileOpaqueNode>();
                 }
                 return mBasePassNode;
             }
         }
-        Mobile.UMobileTranslucentNode mTranslucentNode;
-        Mobile.UMobileTranslucentNode TranslucentNode
+        Mobile.TtMobileTranslucentNode mTranslucentNode;
+        Mobile.TtMobileTranslucentNode TranslucentNode
         {
             get
             {
                 if (mTranslucentNode == null)
                 {
-                    mTranslucentNode = FindFirstNode<Mobile.UMobileTranslucentNode>();
+                    mTranslucentNode = FindFirstNode<Mobile.TtMobileTranslucentNode>();
                 }
                 return mTranslucentNode;
             }

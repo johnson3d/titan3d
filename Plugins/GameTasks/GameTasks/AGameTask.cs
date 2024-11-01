@@ -45,7 +45,7 @@ namespace EngineNS.Plugins.GameTasks
         public AGameTaskDescriptorManager TaskDescriptorManager = new AGameTaskDescriptorManager();
         public void OnLoadedPlugin()
         {
-            var editor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+            var editor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
             if (editor != null)
             {
                 editor.ContentBrowser.OnTypeChanged();
@@ -53,7 +53,7 @@ namespace EngineNS.Plugins.GameTasks
         }
         public void OnUnloadPlugin()
         {
-            var editor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+            var editor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
             if (editor != null)
             {
                 editor.ContentBrowser.OnTypeChanged();

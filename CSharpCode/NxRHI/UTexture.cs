@@ -1507,7 +1507,7 @@ namespace EngineNS.NxRHI
                     part.DataWriter.WriteInterleaved(pixelData, channelNames);
 
                     var rawData = memStream.ToArray();
-                    var rawAttr = node.GetOrAddAttribute("Exr", 0, 0);
+                    var rawAttr = node.GetOrAddAttribute("Exr", 0, 0, true);
                     using (var ar = rawAttr.GetWriter((ulong)memStream.Position))
                     {
                         ar.WriteNoSize(rawData, (int)memStream.Position);
@@ -1549,7 +1549,7 @@ namespace EngineNS.NxRHI
             {
                 case ETextureCompressFormat.TCF_None:
                     {
-                        var hdrMipsNode = node.GetOrAddNode("ExrMips", 0, 0);
+                        var hdrMipsNode = node.GetOrAddNode("ExrMips", 0, 0, true);
                         mipLevel = SaveExrMips(hdrMipsNode, file, desc);
                     }
                     break;
@@ -1558,7 +1558,7 @@ namespace EngineNS.NxRHI
             {
                 desc.Desc.MipLevel = mipLevel;
                 desc.Desc.dwStructureSize = (uint)sizeof(FPictureDesc);
-                var attr = node.GetOrAddAttribute("Desc", 2, 0);
+                var attr = node.GetOrAddAttribute("Desc", 2, 0, true);
                 using (var ar = attr.GetWriter((ulong)sizeof(FPictureDesc)))
                 {
                     ar.Write(desc.Desc);
@@ -1605,8 +1605,7 @@ namespace EngineNS.NxRHI
                         }
                         var rawData = memStream.ToArray();
 
-
-                        var rawAttr = node.GetOrAddAttribute("Hdr", 0, 0);
+                        var rawAttr = node.GetOrAddAttribute("Hdr", 0, 0, true);
                         using (var ar = rawAttr.GetWriter((ulong)memStream.Position))
                         {
                             ar.WriteNoSize(rawData, (int)memStream.Position);
@@ -1647,13 +1646,13 @@ namespace EngineNS.NxRHI
             {
                 case ETextureCompressFormat.TCF_None:
                     {
-                        var hdrMipsNode = node.GetOrAddNode("HdrMips", 0, 0);
+                        var hdrMipsNode = node.GetOrAddNode("HdrMips", 0, 0, true);
                         mipLevel = SaveHdrMips(hdrMipsNode, curImage, desc);
                     }
                     break;
                 case ETextureCompressFormat.TCF_BC6:
                     {
-                        var pngMipsNode = node.GetOrAddNode("DxtMips", 0, 0);
+                        var pngMipsNode = node.GetOrAddNode("DxtMips", 0, 0, true);
                         mipLevel = SaveDxtMips_BcEncoder(pngMipsNode, curImage, desc);
                     }
                     break;
@@ -1684,7 +1683,7 @@ namespace EngineNS.NxRHI
                 case ETextureCompressFormat.TCF_Astc_12x12:
                 case ETextureCompressFormat.TCF_Astc_12x12_Float:
                     {
-                        var pngMipsNode = node.GetOrAddNode("AstcMips", 0, 0);
+                        var pngMipsNode = node.GetOrAddNode("AstcMips", 0, 0, true);
                         //mipLevel = SaveAstcMips_ActcEncoder(pngMipsNode, curImage, desc);
                     }
                     break;
@@ -1693,7 +1692,7 @@ namespace EngineNS.NxRHI
             {
                 desc.Desc.MipLevel = mipLevel;
                 desc.Desc.dwStructureSize = (uint)sizeof(FPictureDesc);
-                var attr = node.GetOrAddAttribute("Desc", 2, 0);
+                var attr = node.GetOrAddAttribute("Desc", 2, 0, true);
                 using (var ar = attr.GetWriter((ulong)sizeof(FPictureDesc)))
                 {
                     ar.Write(desc.Desc);
@@ -1759,7 +1758,7 @@ namespace EngineNS.NxRHI
                             }
                         }
 
-                        var attr = node.GetOrAddAttribute("Png", 0, 0);
+                        var attr = node.GetOrAddAttribute("Png", 0, 0, true);
                         using (var ar = attr.GetWriter((ulong)memStream.Position))
                         {
                             ar.WriteNoSize(pngData, (int)memStream.Position);
@@ -1832,7 +1831,7 @@ namespace EngineNS.NxRHI
             {
                 case ETextureCompressFormat.TCF_None:
                     {
-                        var pngMipsNode = node.GetOrAddNode("PngMips", 0, 0);
+                        var pngMipsNode = node.GetOrAddNode("PngMips", 0, 0, true);
                         mipLevel = SavePngMips(pngMipsNode, curImage, desc);
                         switch (curImage.Comp)
                         {
@@ -1862,7 +1861,7 @@ namespace EngineNS.NxRHI
                 case ETextureCompressFormat.TCF_BC6_FLOAT:
                 case ETextureCompressFormat.TCF_BC7_UNORM:
                     {
-                        var pngMipsNode = node.GetOrAddNode("DxtMips", 0, 0);
+                        var pngMipsNode = node.GetOrAddNode("DxtMips", 0, 0, true);
                         mipLevel = SaveDxtMips_BcEncoder(pngMipsNode, curImage, desc);
                     }
                     break;
@@ -1874,7 +1873,7 @@ namespace EngineNS.NxRHI
                 case ETextureCompressFormat.TCF_Etc2_RG11:
                 case ETextureCompressFormat.TCF_Etc2_SIGNED_RG11:
                     {
-                        var pngMipsNode = node.GetOrAddNode("EtcMips", 0, 0);
+                        var pngMipsNode = node.GetOrAddNode("EtcMips", 0, 0, true);
                         mipLevel = SaveDxtMips_BcEncoder(pngMipsNode, curImage, desc);
                     }
                     break;
@@ -1905,7 +1904,7 @@ namespace EngineNS.NxRHI
                 case ETextureCompressFormat.TCF_Astc_12x12:
                 case ETextureCompressFormat.TCF_Astc_12x12_Float:
                     {
-                        var pngMipsNode = node.GetOrAddNode("AstcMips", 0, 0);
+                        var pngMipsNode = node.GetOrAddNode("AstcMips", 0, 0, true);
                         mipLevel = SaveAstcMips_ActcEncoder(pngMipsNode, curImage, desc);
                     }
                     break;
@@ -1914,7 +1913,7 @@ namespace EngineNS.NxRHI
             {
                 desc.Desc.MipLevel = mipLevel;
                 desc.Desc.dwStructureSize = (uint)sizeof(FPictureDesc);
-                var attr = node.GetOrAddAttribute("Desc", 2, 0);
+                var attr = node.GetOrAddAttribute("Desc", 2, 0, true);
                 using (var ar = attr.GetWriter((ulong)sizeof(FPictureDesc)))
                 {
                     ar.Write(desc.Desc);
@@ -1978,7 +1977,7 @@ namespace EngineNS.NxRHI
             }
             do
             {
-                var attr = pngMipsNode.GetOrAddAttribute($"ExrMip{mipLevel}", 0, 0);
+                var attr = pngMipsNode.GetOrAddAttribute($"ExrMip{mipLevel}", 0, 0, true);
                 var dataSize = part.DataReader.GetTotalByteCount();
                 byte[] pixelData = new byte[dataSize];
                 int destChannelCount = part.Channels.Count;
@@ -2112,7 +2111,7 @@ namespace EngineNS.NxRHI
                     }
 
                     var hdrData = memStream.ToArray();
-                    var attr = pngMipsNode.GetOrAddAttribute($"HdrMip{mipLevel}", 0, 0);
+                    var attr = pngMipsNode.GetOrAddAttribute($"HdrMip{mipLevel}", 0, 0, true);
                     using (var ar = attr.GetWriter((ulong)memStream.Position))
                     {
                         ar.WriteNoSize(hdrData, (int)memStream.Position);
@@ -2151,7 +2150,7 @@ namespace EngineNS.NxRHI
                     var writer = new StbImageWriteSharp.ImageWriter();
                     writer.WritePng(curImage.Data, curImage.Width, curImage.Height, GetImageWriteFormat(curImage), memStream);
                     var pngData = memStream.ToArray();
-                    var attr = pngMipsNode.GetOrAddAttribute($"PngMip{mipLevel}", 0, 0);
+                    var attr = pngMipsNode.GetOrAddAttribute($"PngMip{mipLevel}", 0, 0, true);
                     using (var ar = attr.GetWriter((ulong)memStream.Position))
                     {
                         ar.WriteNoSize(pngData, (int)memStream.Position);
@@ -2203,7 +2202,7 @@ namespace EngineNS.NxRHI
                         desc.MipSizes.Clear();
                         for (uint i = 0; i < desc.Desc.CubeFaces; i++)
                         {
-                            var faceNode = mipsNode.GetOrAddNode($"Face{i}", 0, 0);
+                            var faceNode = mipsNode.GetOrAddNode($"Face{i}", 0, 0, true);
                             for (uint j = 0; j < desc.Desc.MipLevel; j++)
                             {
                                 var mipSize = new Vector3i();
@@ -2214,7 +2213,7 @@ namespace EngineNS.NxRHI
                                 var pixels = new byte[total_face_size];
                                 ar.ReadNoSize(pixels, (int)total_face_size);
 
-                                var attr = faceNode.GetOrAddAttribute($"DxtMip{j}", 0, 0);
+                                var attr = faceNode.GetOrAddAttribute($"DxtMip{j}", 0, 0, true);
                                 {
                                     using (var ar2 = attr.GetWriter((ulong)total_face_size))
                                     {
@@ -2273,7 +2272,7 @@ namespace EngineNS.NxRHI
                 }
                 var memory2DFace = colorDataFace.AsMemory().AsMemory2D(imageHeight, imageWidth);
 
-                var faceNode = mipsNode.GetOrAddNode($"Face{i}", 0, 0);
+                var faceNode = mipsNode.GetOrAddNode($"Face{i}", 0, 0, true);
                 for (uint j = 0; j < desc.MipLevel; j++)
                 {
                     var mipSize = new Vector3i();
@@ -2289,7 +2288,7 @@ namespace EngineNS.NxRHI
                         desc.BlockDimenstions.Add(blockDimension);
                     }
 
-                    var attr = faceNode.GetOrAddAttribute($"DxtMip{j}", 0, 0);
+                    var attr = faceNode.GetOrAddAttribute($"DxtMip{j}", 0, 0, true);
                     {
                         using (var ar2 = attr.GetWriter((ulong)pixelsBcn.Length))
                         {
@@ -2425,7 +2424,7 @@ namespace EngineNS.NxRHI
                 }
 
 
-                var faceNode = mipsNode.GetOrAddNode($"Face{i}", 0, 0);
+                var faceNode = mipsNode.GetOrAddNode($"Face{i}", 0, 0, true);
                 for (uint j = 0; j < desc.Desc.MipLevel; j++)
                 {
                     var mipSize = new Vector3i();
@@ -2447,7 +2446,7 @@ namespace EngineNS.NxRHI
 
                     if (IsKtx)
                     {
-                        var attr = faceNode.GetOrAddAttribute($"EtcMip{j}", 0, 0);
+                        var attr = faceNode.GetOrAddAttribute($"EtcMip{j}", 0, 0, true);
                         {
                             using (var ar2 = attr.GetWriter((ulong)pixelsBcn.Length))
                             {
@@ -2457,7 +2456,7 @@ namespace EngineNS.NxRHI
                     }
                     else
                     {
-                        var attr = faceNode.GetOrAddAttribute($"DxtMip{j}", 0, 0);
+                        var attr = faceNode.GetOrAddAttribute($"DxtMip{j}", 0, 0, true);
                         {
                             using (var ar2 = attr.GetWriter((ulong)pixelsBcn.Length))
                             {

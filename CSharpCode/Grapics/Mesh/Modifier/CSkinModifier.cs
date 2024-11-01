@@ -7,7 +7,6 @@ namespace EngineNS.Graphics.Mesh.Modifier
 {
     public class TtSkinModifier : AuxPtrType<ISkinModifier>, Pipeline.Shader.IMeshModifier
     {
-        public Animation.SkeletonAnimation.Runtime.Pose.TtLocalSpaceRuntimePose RuntimePose;
         public TtSkinModifier()
         {
             mCoreObject = ISkinModifier.CreateInstance();

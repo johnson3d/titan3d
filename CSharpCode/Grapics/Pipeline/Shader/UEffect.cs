@@ -82,7 +82,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             var file = path + hash.ToString() + TtEffect.AssetExt;
             var xnd = new IO.TtXndHolder("UEffect", 0, 0);
 
-            var descAttr = new XndAttribute(xnd.RootNode.mCoreObject.GetOrAddAttribute("Desc", 0, 0));
+            var descAttr = new XndAttribute(xnd.RootNode.mCoreObject.GetOrAddAttribute("Desc", 0, 0, true));
             using (var ar = descAttr.GetWriter(30))
             {
                 ar.Write(Desc);

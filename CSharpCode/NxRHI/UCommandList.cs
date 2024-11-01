@@ -157,6 +157,10 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.Dispatch(x, y, z);
         }
+        public void IndirectDispatch(TtBuffer indirectArg, uint indirectArgOffset)
+        {
+            mCoreObject.IndirectDispatch(indirectArg.mCoreObject, indirectArgOffset);
+        }
         public void CopyBufferRegion(TtBuffer target, ulong DstOffset, TtBuffer src, ulong SrcOffset, ulong Size)
         {
             mCoreObject.CopyBufferRegion(target.mCoreObject, DstOffset, src.mCoreObject, SrcOffset, Size);

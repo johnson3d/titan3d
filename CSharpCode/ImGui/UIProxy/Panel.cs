@@ -97,10 +97,10 @@ namespace EngineNS.EGui.UIProxy
         public static bool BeginPanel(in ImGuiWindowClass dockClass, string name, ref bool open, ImGuiWindowFlags_ flags)
         {
             name = GetDockWindowName(name, dockClass);
-            if(Editor.UMainEditorApplication.NeedFocusPanelName == name)
+            if(Editor.TtMainEditorApplication.NeedFocusPanelName == name)
             {
                 ImGuiAPI.SetNextWindowFocus();
-                Editor.UMainEditorApplication.NeedFocusPanelName = null;
+                Editor.TtMainEditorApplication.NeedFocusPanelName = null;
             }
             ImGuiAPI.SetNextWindowClass(dockClass);
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, StyleConfig.Instance.PanelFramePadding);
@@ -116,10 +116,10 @@ namespace EngineNS.EGui.UIProxy
         public static unsafe bool BeginPanel(in ImGuiWindowClass dockClass, string name, bool* open, ImGuiWindowFlags_ flags)
         {
             name = GetDockWindowName(name, dockClass);
-            if (Editor.UMainEditorApplication.NeedFocusPanelName == name)
+            if (Editor.TtMainEditorApplication.NeedFocusPanelName == name)
             {
                 ImGuiAPI.SetNextWindowFocus();
-                Editor.UMainEditorApplication.NeedFocusPanelName = null;
+                Editor.TtMainEditorApplication.NeedFocusPanelName = null;
             }
             ImGuiAPI.SetNextWindowClass(dockClass);
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, StyleConfig.Instance.PanelFramePadding);
@@ -136,10 +136,10 @@ namespace EngineNS.EGui.UIProxy
         public static bool BeginPanel(string name, ref bool open, ImGuiWindowFlags_ flags)
         {
             ImGuiAPI.SetNextWindowClass(MainFormDockClass);
-            if (Editor.UMainEditorApplication.NeedFocusPanelName == name)
+            if (Editor.TtMainEditorApplication.NeedFocusPanelName == name)
             {
                 ImGuiAPI.SetNextWindowFocus();
-                Editor.UMainEditorApplication.NeedFocusPanelName = null;
+                Editor.TtMainEditorApplication.NeedFocusPanelName = null;
             }
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, StyleConfig.Instance.PanelFramePadding);
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_WindowBg, StyleConfig.Instance.PanelBackground);
@@ -154,10 +154,10 @@ namespace EngineNS.EGui.UIProxy
         public static unsafe bool BeginPanel(string name, bool* open, ImGuiWindowFlags_ flags)
         {
             ImGuiAPI.SetNextWindowClass(MainFormDockClass);
-            if (Editor.UMainEditorApplication.NeedFocusPanelName == name)
+            if (Editor.TtMainEditorApplication.NeedFocusPanelName == name)
             {
                 ImGuiAPI.SetNextWindowFocus();
-                Editor.UMainEditorApplication.NeedFocusPanelName = null;
+                Editor.TtMainEditorApplication.NeedFocusPanelName = null;
             }
             ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, StyleConfig.Instance.PanelFramePadding);
             ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_WindowBg, StyleConfig.Instance.PanelBackground);

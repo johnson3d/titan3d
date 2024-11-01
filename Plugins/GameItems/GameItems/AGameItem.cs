@@ -49,7 +49,7 @@ namespace EngineNS.Plugins.GameItems
         public void OnLoadedPlugin()
         {
             //ItemDescriptorManager.Initialize();
-            var editor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+            var editor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
             if (editor != null)
             {
                 editor.ContentBrowser.OnTypeChanged();
@@ -58,7 +58,7 @@ namespace EngineNS.Plugins.GameItems
         public void OnUnloadPlugin()
         {
             //UPluginDescriptor.mPluginObject = null;
-            var editor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+            var editor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
             if (editor != null)
             {
                 editor.ContentBrowser.OnTypeChanged();

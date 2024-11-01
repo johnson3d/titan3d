@@ -30,7 +30,7 @@ namespace EngineNS.Editor.Forms
             }
         }
         public void Dispose() { }
-        bool mVisible = true;
+        bool mVisible = false;
         public bool Visible 
         { 
             get => mVisible; 

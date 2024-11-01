@@ -50,11 +50,19 @@ void XndAttribute::EndWrite()
 	//mMemWriter->ResetStream(0);
 }
 
-XndAttribute* XndNode::GetOrAddAttribute(const char* name, UINT ver, UINT flags)
+XndAttribute* XndNode::GetOrAddAttribute(const char* name, UINT ver, UINT flags, bool bCheckName)
 {
 	auto xnd = mHolder.GetPtr();
 	if (xnd == nullptr)
 		return nullptr;
+	if (bCheckName)
+	{
+		for (auto& i : mAttributes)
+		{
+			if (i->GetName() == name)
+				return nullptr;
+		}
+	}
 	auto result = xnd->NewAttribute(name, ver, flags);
 	AutoRef<XndAttribute> tmp;
 	tmp.StrongRef(result);
@@ -63,11 +71,19 @@ XndAttribute* XndNode::GetOrAddAttribute(const char* name, UINT ver, UINT flags)
 	return result;
 }
 
-XndNode* XndNode::GetOrAddNode(const char* name, UINT ver, UINT flags)
+XndNode* XndNode::GetOrAddNode(const char* name, UINT ver, UINT flags, bool bCheckName)
 {
 	auto xnd = mHolder.GetPtr();
 	if (xnd == nullptr)
 		return nullptr;
+	if (bCheckName)
+	{
+		for (auto& i : mAttributes)
+		{
+			if (i->GetName() == name)
+				return nullptr;
+		}
+	}
 	auto result = xnd->NewNode(name, ver, flags);
 	AutoRef<XndNode> tmp;
 	tmp.StrongRef(result);

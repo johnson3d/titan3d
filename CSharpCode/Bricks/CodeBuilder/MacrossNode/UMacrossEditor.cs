@@ -817,7 +817,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -1328,7 +1328,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 mSettingCurrentFuncIndex = OpenFunctions.Count;
                 OpenFunctions.Add(method);
             }
-            UMainEditorApplication.NeedFocusPanelName = EGui.UIProxy.DockProxy.GetDockWindowName("GraphWindow", mDockKeyClass);
+            TtMainEditorApplication.NeedFocusPanelName = EGui.UIProxy.DockProxy.GetDockWindowName("GraphWindow", mDockKeyClass);
         }
         bool mNodePropertyShow = true;
         protected void DrawPropertyGrid()
@@ -1470,7 +1470,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
-        public async Thread.Async.TtTask<bool> OpenEditor(Editor.UMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(Editor.TtMainEditorApplication mainEditor, RName name, object arg)
         {
             LoadClassGraph(AssetName);
             //LoadClassGraph(RName.GetRName("UTest/class_graph.xml"));

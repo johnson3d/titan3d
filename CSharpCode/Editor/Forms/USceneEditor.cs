@@ -231,12 +231,12 @@ namespace EngineNS.Editor.Forms
             {
                 if(mIsDrawing && !value)
                 {
-                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
                     mainEditor?.RemoveFromMainMenu(mMenuItems);
                 }
                 else if(!mIsDrawing && value)
                 {
-                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
                     mainEditor?.AppendToMainMenu(mMenuItems);
                 }
                 mIsDrawing = value;
@@ -245,7 +245,7 @@ namespace EngineNS.Editor.Forms
         List<EGui.UIProxy.MenuItemProxy> mMenuItems = new List<EGui.UIProxy.MenuItemProxy>();
         public void InitMainMenu()
         {
-            var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+            var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
             mMenuItems.Clear();
             mMenuItems.Add(new EGui.UIProxy.MenuItemProxy()
             {
@@ -514,7 +514,7 @@ namespace EngineNS.Editor.Forms
                 CpuCullNode.VisParameter.CullFilters = value;
             }
         }
-        public async virtual Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
+        public async virtual Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
             Scene = await TtEngine.Instance.SceneManager.CreateScene(PreviewViewport.World, name);
@@ -607,7 +607,7 @@ namespace EngineNS.Editor.Forms
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -1074,7 +1074,7 @@ namespace EngineNS.Editor.Forms
             mWorldOutliner = new TtPrefabEditorOutliner(PreviewViewport, false);
         }
         public override bool IsAssetLoaed { get => Prefab != null; }
-        public async override Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
+        public async override Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg)
         {
             Prefab = await TtEngine.Instance.PrefabManager.CreatePrefab(name);
             if (Prefab == null)

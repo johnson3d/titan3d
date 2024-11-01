@@ -1,4 +1,9 @@
-﻿using EngineNS.Rtti;
+﻿using EngineNS.Animation.SkeletonAnimation.AnimatablePose;
+using EngineNS.Animation.SkeletonAnimation.Skeleton;
+using EngineNS.Graphics.Mesh;
+using EngineNS.Graphics.Mesh.Modifier;
+using EngineNS.Rtti;
+using EngineNS.UI.Animation;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -268,6 +273,10 @@ namespace EngineNS.GamePlay.Scene
                     if (ok == false)
                         return;
                     Mesh = mesh;
+                    if (HasSkin && mesh.MdfQueue is UMdfSkinMesh mdfSkin)
+                    {
+                        mdfSkin.PerSkinMeshCBuffer = PerSkinMeshCBuffer;
+                    }
                     var world = this.GetWorld();
                     if (world != null)
                     {
@@ -312,6 +321,10 @@ namespace EngineNS.GamePlay.Scene
                             if (ok == false)
                                 return;
                             Mesh = mesh;
+                            if(HasSkin && mesh.MdfQueue is UMdfSkinMesh mdfSkin)
+                            {
+                                mdfSkin.PerSkinMeshCBuffer = PerSkinMeshCBuffer;
+                            }
                             var world = this.GetWorld();
                             if (world != null)
                             {
@@ -348,6 +361,10 @@ namespace EngineNS.GamePlay.Scene
                 mesh.Initialize(cookedMesh, materials1, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
                 mesh.IsAcceptShadow = this.IsAcceptShadow;
                 Mesh = mesh;
+                if (HasSkin && mesh.MdfQueue is UMdfSkinMesh mdfSkin)
+                {
+                    mdfSkin.PerSkinMeshCBuffer = PerSkinMeshCBuffer;
+                }
                 return;
             }
             else
@@ -380,38 +397,61 @@ namespace EngineNS.GamePlay.Scene
             mMesh.SetWorldTransform(in Placement.AbsTransform, world, false);
         }
 
-/* 项目“Engine.Window”的未合并的更改
-在此之前:
-        static Macross.UMacrossStackFrame mLogicTickFrame = new Macross.UMacrossStackFrame();
-        static Macross.UMacrossBreak mTestBreak = new Macross.UMacrossBreak("UMeshNode.OnTickLogic", false);
-在此之后:
         static Macross.TtMacrossStackFrame mLogicTickFrame = new Macross.TtMacrossStackFrame();
-        static Macross.UMacrossBreak mTestBreak = new Macross.UMacrossBreak("UMeshNode.OnTickLogic", false);
-*/
-
-/* 项目“Engine.Window”的未合并的更改
-在此之前:
-        static Macross.UMacrossStackFrame mLogicTickFrame = new Macross.UMacrossStackFrame();
-在此之后:
-        static Macross.TtMacrossStackFrame mLogicTickFrame = new Macross.TtMacrossStackFrame();
-*/
-        static Macross.TtMacrossStackFrame mLogicTickFrame = new Macross.TtMacrossStackFrame();
-
-/* 项目“Engine.Window”的未合并的更改
-在此之前:
-        static Macross.UMacrossBreak mTestBreak = new Macross.UMacrossBreak("UMeshNode.OnTickLogic", false);
-        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
-在此之后:
-        static Macross.TtMacrossBreak mTestBreak = new Macross.TtMacrossBreak("UMeshNode.OnTickLogic", false);
-        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
-*/
-        static Macross.TtMacrossBreak mTestBreak = new Macross.TtMacrossBreak("UMeshNode.OnTickLogic", false);
-        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        NxRHI.TtCbView mPerSkinMeshCBuffer = null;
+        public NxRHI.TtCbView PerSkinMeshCBuffer
         {
-            //using (var guard = new Macross.UMacrossStackGuard(mLogicTickFrame))
-            //{
-            //    mTestBreak.TryBreak();
-            //}
+            get
+            {
+                if (mPerSkinMeshCBuffer == null && HasSkin)
+                {
+                    mPerSkinMeshCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(EngineNS.Graphics.Pipeline.TtCoreShaderBinder.TtPerSkinMeshCBufferVarIndexer.Instance.Binder);
+                }
+                return mPerSkinMeshCBuffer;
+            }
+        }
+        public bool HasSkin
+        {
+            get => MdfQueue == TtTypeDescGetter<UMdfSkinMesh>.TypeDesc;
+        }
+
+        public Animation.SkeletonAnimation.Runtime.Pose.TtLocalSpaceRuntimePose RuntimePose { get; set; } = null;        
+        public unsafe override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        {
+            if (HasSkin && Mesh.MdfQueue is UMdfSkinMesh mdfSkin)
+            {
+                if(mdfSkin.PerSkinMeshCBuffer == null)
+                {
+                    mdfSkin.PerSkinMeshCBuffer = PerSkinMeshCBuffer;
+                }
+                if(RuntimePose != null)
+                {
+                    var meshSpaceRuntimePose = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.ConvetToMeshSpaceRuntimePose(RuntimePose);
+                    var length = meshSpaceRuntimePose.Descs.Count;
+                    var shaderBinder = Graphics.Pipeline.TtCoreShaderBinder.TtPerSkinMeshCBufferVarIndexer.Instance;
+                    Vector4* absPos = (Vector4*)PerSkinMeshCBuffer.mCoreObject.GetVarPtrToWrite(shaderBinder.AbsBonePos, (uint)length);
+                    Quaternion* absQuat = (Quaternion*)PerSkinMeshCBuffer.mCoreObject.GetVarPtrToWrite(shaderBinder.AbsBoneQuat, (uint)length);
+
+                    for (var i = 0; i < meshSpaceRuntimePose.Descs.Count; ++i)
+                    {
+                        var boneDesc = meshSpaceRuntimePose.Descs[i] as Animation.SkeletonAnimation.Skeleton.Limb.TtBoneDesc;
+                        //var index = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.GetIndex(boneDesc.NameHash, meshSpaceRuntimePose);
+                        var index = new IndexInSkeleton(i);
+                        if (index.IsValid())
+                        {
+                            var trans = meshSpaceRuntimePose.Transforms[index.Value];
+                            *((Vector3*)absPos) = trans.Position.ToSingleVector3() + trans.Quat * boneDesc.InvPos;
+                            absPos->W = 0;
+                            *absQuat = boneDesc.InvQuat * trans.Quat;
+                        }
+
+                        absPos++;
+                        absQuat++;
+                    }
+
+                    PerSkinMeshCBuffer.mCoreObject.FlushWrite(true, TtEngine.Instance.GfxDevice.CbvUpdater.mCoreObject);
+                }
+            }
                 
             return true;
         }
