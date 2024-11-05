@@ -168,7 +168,7 @@ namespace EngineNS.Graphics.Pipeline
             return mOpaqueShading;
         }
         
-        private  unsafe void Culling(TtRenderPolicy policy, NxRHI.UCommandList cmd)
+        private  unsafe void Culling(TtRenderPolicy policy, NxRHI.TtCommandList cmd)
         {
             bool UseRVT = TtEngine.Instance.Config.Feature_UseRVT;
             ResetInstanceMesh();
@@ -245,7 +245,7 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }   
         }
-        public void Commit(TtRenderPolicy policy, NxRHI.UCommandList cmd, TtGraphicsBuffers GBuffers)
+        public void Commit(TtRenderPolicy policy, NxRHI.TtCommandList cmd, TtGraphicsBuffers GBuffers)
         {
             var camera = policy.DefaultCamera;//CpuCullNode.VisParameter.CullCamera;
             foreach (var i in TerrainMeshBatches.Values)

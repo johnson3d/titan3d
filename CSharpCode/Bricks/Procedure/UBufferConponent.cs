@@ -199,7 +199,7 @@ namespace EngineNS.Bricks.Procedure
             }
             return GpuBuffer;
         }
-        public unsafe void Upload2GpuBuffer(NxRHI.UCommandList cmd)
+        public unsafe void Upload2GpuBuffer(NxRHI.TtCommandList cmd)
         {
             GpuBuffer.GpuBuffer.UpdateGpuData(cmd.mCoreObject, 0, SuperPixels.DataPointer, SuperPixels.Size);
         }
@@ -212,7 +212,7 @@ namespace EngineNS.Bricks.Procedure
             }
             return GpuBuffer;
         }
-        public unsafe void Upload2GpuTexture2D(NxRHI.UCommandList cmd, EPixelFormat format)
+        public unsafe void Upload2GpuTexture2D(NxRHI.TtCommandList cmd, EPixelFormat format)
         {
             NxRHI.FSubResourceFootPrint footprint = new NxRHI.FSubResourceFootPrint();
             footprint.SetDefault();

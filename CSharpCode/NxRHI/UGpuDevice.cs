@@ -111,9 +111,9 @@ namespace EngineNS.NxRHI
             }
             mGlobalEnvHash = Hash160.CreateHash160(GlobalEnvDefines.ToString());
         }
-        public UCommandList CreateCommandList()
+        public TtCommandList CreateCommandList()
         {
-            var result = new UCommandList();
+            var result = new TtCommandList();
             result.mCoreObject = mCoreObject.CreateCommandList();
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
@@ -450,7 +450,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.Flush(type);
         }
-        public void ExecuteCommandList(UCommandList Cmdlist, EngineNS.NxRHI.EQueueType type = EQueueType.QU_Default)
+        public void ExecuteCommandList(TtCommandList Cmdlist, EngineNS.NxRHI.EQueueType type = EQueueType.QU_Default)
         {
             ExecuteCommandList(Cmdlist.mCoreObject, type);
         }

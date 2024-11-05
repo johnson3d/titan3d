@@ -7,12 +7,7 @@ namespace EngineNS.Graphics.Pipeline.Common
     public partial class TtGpuSceneNode
     {
         public TtRenderGraphPin PointLightsPinOut = TtRenderGraphPin.CreateOutput("PointLights", false, EPixelFormat.PXF_UNKNOWN);
-        public struct FPointLight
-        {
-            public Vector4 PositionAndRadius;
-            public Vector4 ColorAndIntensity;
-        }
-        public TtCpu2GpuBuffer<FPointLight> PointLights = new TtCpu2GpuBuffer<FPointLight>();
+        public TtCpu2GpuBuffer<Shader.FPointLight> PointLights = new TtCpu2GpuBuffer<Shader.FPointLight>();
         public void Initialize_Light(TtRenderPolicy policy, string debugName)
         {
             PointLights.Initialize(NxRHI.EBufferType.BFT_SRV);
@@ -26,7 +21,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         private unsafe void FrameBuild_Light()
         {
             PointLightsPinOut.Attachement.Height = (uint)PointLights.DataArray.Count;
-            PointLightsPinOut.Attachement.Width = (uint)sizeof(FPointLight);
+            PointLightsPinOut.Attachement.Width = (uint)sizeof(Shader.FPointLight);
             var attachement = RenderGraph.AttachmentCache.ImportAttachment(PointLightsPinOut);
             //if (attachement.Buffer == null)
             //{
@@ -36,7 +31,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             attachement.Srv = PointLights.Srv;
             attachement.Uav = PointLights.Uav;
         }
-        private void TickLogic_Light(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.UCommandList cmd)
+        private void TickLogic_Light(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList cmd)
         {
             PointLights.Clear();
             if (policy.DisablePointLight == false)
@@ -49,7 +44,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                     var lightData = pointLight.NodeData as GamePlay.Scene.UPointLightNode.ULightNodeData;
 
-                    FPointLight light;
+                    Shader.FPointLight light;
                     var pos = pointLight.Placement.Position;
                     light.PositionAndRadius = new Vector4(pos.ToSingleVector3(), lightData.Radius);
                     light.ColorAndIntensity = new Vector4(lightData.Color.X, lightData.Color.Y, lightData.Color.Z, lightData.Intensity);

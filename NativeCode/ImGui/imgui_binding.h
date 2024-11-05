@@ -1987,9 +1987,17 @@ public:
 		return true;
 	}
 
-	static bool ButtonBehavior(const ImVec2* min, const ImVec2* max, ImGuiID id, bool* out_hovered, bool* out_held, ImGuiButtonFlags_ flags)
+	static bool ButtonBehavior(const ImVec2* min, const ImVec2* max, ImGuiID id, bool* out_hovered, bool* out_held, bool pressOnRelease, ImGuiButtonFlags_ flags)
 	{
+		ImGuiContext& g = *GImGui;
+		const ImGuiStyle& style = g.Style;
+
 		ImRect rect(*min, *max);
+		ImGui::ItemSize(rect, style.FramePadding.y);
+		if (!ImGui::ItemAdd(rect, id))
+			return false;
+		if (pressOnRelease)
+			flags = (ImGuiButtonFlags_)(flags | ImGuiButtonFlags_PressedOnRelease);
 		return ImGui::ButtonBehavior(rect, id, out_hovered, out_held, flags);
 	}
 

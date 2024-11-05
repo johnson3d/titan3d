@@ -51,13 +51,6 @@ VK_BIND(0) cbuffer cbPerCamera DX_BIND_B(0)
 	float pad2;
 
 	float3 CameraOffset;
-
-	#ifndef UserDef_PerCamera
-		#define UserDef_PerCamera 
-	#endif
-
-	UserDef_PerCamera
-
 };
 
 inline matrix GetPrjMtx(bool bJitter = true)

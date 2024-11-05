@@ -86,7 +86,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		half PerPixelViewerDistance = (half)input.psCustomUV0.w;
 
 	#if MODE_EDITOR == 1
-		for (int CsmIdx = 0; CsmIdx < gCsmNum; CsmIdx++)
+		for (int CsmIdx = 0; CsmIdx < CsmNum; CsmIdx++)
 		{
 			if (PerPixelViewerDistance < (half)gCsmDistanceArray[CsmIdx])
 			{
@@ -139,14 +139,14 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		half3 BaseShading = half3(0.0h, 0.0h, 0.0h);
 
 		half3 WorldPos = (half3)input.vWorldPos;
-		half3 L = -(half3)normalize(gDirLightDirection_Leak.xyz);
+		half3 L = -(half3)normalize(DirLight.Direction.xyz);
 		half3 V = (half3)normalize(CameraPosition - WorldPos);
-		half3 Cdir = (half3)gDirLightColor_Intensity.rgb;
-		half  Idir = (half)gDirLightColor_Intensity.w;
+		half3 Cdir = (half3)DirLight.SunLightColor.rgb;
+		half  Idir = (half)DirLight.SunLightIntensity;
 		half Ienv_light = Idir * 0.2h;
-		half3 Csky = (half3)mSkyLightColor;
-		half3 Cground = (half3)mGroundLightColor;
-		half DirLightLeak = (half)gDirLightDirection_Leak.w;
+		half3 Csky = (half3)DirLight.SkyLightColor;
+		half3 Cground = (half3)DirLight.GroundLightColor;
+        half DirLightLeak = (half) DirLightLeak.SunLightLeak;
 
 #ifdef MTL_ID_SKIN
 		/*{

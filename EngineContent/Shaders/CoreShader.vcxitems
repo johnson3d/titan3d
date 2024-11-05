@@ -14,7 +14,7 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)..\..\cache\debugutility\engine_preprosessors.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\cache\debugutility\engine_preprocessors.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\ClusterCulling.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\FRaster.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\GpuCulling.cginc" />
@@ -24,6 +24,7 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\NebulaParticle.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Particle\ParticleCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Procedure\Erosion\IncWater.compute" />
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Procedure\Lut3S\SkinLUT3SGen.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Procedure\PgcCommon.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\SoftRaster\FRaster.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\Terrain\Common.cginc" />

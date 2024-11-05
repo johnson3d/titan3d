@@ -308,7 +308,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
 
-        public void CopyAttachBuff(TtRenderGraphPin SrcPin, TtAttachBuffer DesAttachBuffer, NxRHI.TtCopyDraw CopyDrawcall, NxRHI.UCommandList DrawCommandList)
+        public void CopyAttachBuff(TtRenderGraphPin SrcPin, TtAttachBuffer DesAttachBuffer, NxRHI.TtCopyDraw CopyDrawcall, NxRHI.TtCommandList DrawCommandList)
         {
             var srcPin = GetAttachBuffer(SrcPin);
 

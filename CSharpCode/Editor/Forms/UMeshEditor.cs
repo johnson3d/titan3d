@@ -5,7 +5,7 @@ using EngineNS.Graphics.Pipeline;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UMeshEditor : Editor.IAssetEditor, ITickable, IRootForm
+    public class TtMeshEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
         public int GetTickOrder()
         {
@@ -120,7 +120,7 @@ namespace EngineNS.Editor.Forms
         #endregion
 
 
-        ~UMeshEditor()
+        ~TtMeshEditor()
         {
             Dispose();
         }
@@ -229,7 +229,7 @@ namespace EngineNS.Editor.Forms
         }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
-        public async Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
             Mesh = arg as Graphics.Mesh.TtMaterialMesh;
@@ -247,7 +247,7 @@ namespace EngineNS.Editor.Forms
             var SimpleRPolicyName = RName.GetRName("graphics/deferred_simple.rpolicy", RName.ERNameType.Engine);
             await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, SimpleRPolicyName, 0, 1);
             //await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.MainRPolicyName, 0, 1);
-            PreviewViewport.World.DirectionLight.mSunLightIntensity = 1.0f;
+            PreviewViewport.World.DirectionLight.SunLightIntensity = 1.0f;
 
             #region sdf
             var sdfRPolicyName = RName.GetRName("graphics/sdf.rpolicy", RName.ERNameType.Engine);
@@ -293,7 +293,7 @@ namespace EngineNS.Editor.Forms
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -524,7 +524,7 @@ namespace EngineNS.Editor.Forms
 
 namespace EngineNS.Graphics.Mesh
 {
-    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.UMeshEditor))]
+    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.TtMeshEditor))]
     public partial class TtMaterialMesh
     {
         

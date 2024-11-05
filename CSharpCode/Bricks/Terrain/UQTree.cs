@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Bricks.Terrain
 {
-    public class UQTree : AuxPtrType<QTree>
+    public class TtQTree : AuxPtrType<QTree>
     {
-        public UQTree()
+        public TtQTree()
         {
             mCoreObject = QTree.CreateInstance();
         }
@@ -46,7 +46,7 @@ namespace EngineNS.UTest
     {
         public unsafe void UnitTestEntrance()
         {
-            var qtree = new Bricks.Terrain.UQTree();
+            var qtree = new Bricks.Terrain.TtQTree();
             qtree.mCoreObject.Initialize(4, 64.0f);
         }
     }

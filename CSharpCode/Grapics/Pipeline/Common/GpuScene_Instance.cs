@@ -358,7 +358,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             // TODO CullInstancesBuffer
         }
-        private void TickLogic_Instance(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, UCommandList cmd)
+        private void TickLogic_Instance(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, TtCommandList cmd)
         {
             //GpuInstances.Clear(); Fixd
 

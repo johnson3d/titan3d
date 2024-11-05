@@ -534,7 +534,7 @@ namespace EngineNS.IO
         protected EGui.UIProxy.MenuItemProxy.MenuState mMoveToMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         protected EGui.UIProxy.MenuItemProxy.MenuState mCopyToMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         internal System.Threading.Tasks.Task<Editor.USnapshot> Task;
-        protected virtual Color4b GetBorderColor()
+        public virtual Color4b GetBorderColor()
         {
             return EGui.UCoreStyles.Instance.SnapBorderColor;
         }
@@ -637,7 +637,7 @@ namespace EngineNS.IO
             }
             if (EGui.UIProxy.MenuItemProxy.MenuItem("RefGraph", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
             {
-                var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
                 var rn = RName.GetRName(mAssetName.Name + ".ameta", mAssetName.RNameType);
                 var task = mainEditor.AssetEditorManager.OpenEditor(mainEditor, typeof(Editor.Forms.UAssetReferViewer), rn, this);
             }

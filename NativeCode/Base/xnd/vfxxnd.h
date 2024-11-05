@@ -139,13 +139,13 @@ public:
 	XndNode()
 	{
 	}
-	XndAttribute* GetOrAddAttribute(const char* name, UINT ver, UINT flags);
+	XndAttribute* GetOrAddAttribute(const char* name, UINT ver, UINT flags, bool bCheckName = true);
 	void AddAttribute(XndAttribute* pAttr) {
 		AutoRef<XndAttribute> tmp;
 		tmp.StrongRef(pAttr);
 		mAttributes.push_back(tmp);
 	}
-	XndNode* GetOrAddNode(const char* name, UINT ver, UINT flags);
+	XndNode* GetOrAddNode(const char* name, UINT ver, UINT flags, bool bCheckName = true);
 	void AddNode(XndNode* pNode) {
 		AutoRef<XndNode> tmp;
 		tmp.StrongRef(pNode);

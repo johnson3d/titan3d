@@ -1,4 +1,5 @@
-﻿using EngineNS.Bricks.NodeGraph;
+﻿using EngineNS.Bricks.CodeBuilder.ShaderNode.Var;
+using EngineNS.Bricks.NodeGraph;
 using EngineNS.Graphics.Pipeline.Shader;
 using System;
 using System.Collections.Generic;
@@ -24,36 +25,50 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [TtMaterialShader(Name = "SampleLevel2D")]
         [UserCallNode(CallNodeType = typeof(SampleLevel2DNode))]
         [ContextMenu("SampleLevel2D", "Texture\\SampleLevel2D", TtMaterialGraph.MaterialEditorKeyword)]
-        public static Vector4 SampleLevel2D(Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, float level, out Vector3 rgb)
+        public static Vector4 SampleLevel2D(Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, float level, out Vector3 rgb, out float a)
         {
             rgb = new Vector3();
+            a = 0;
             return new Vector4();
         }
         [Rtti.Meta]
         [TtMaterialShader(Name = "Sample2D")]
         [UserCallNode(CallNodeType = typeof(Sample2DNode))]
         [ContextMenu("Sample2D", "Texture\\Sample2D", TtMaterialGraph.MaterialEditorKeyword)]
-        public static Vector4 Sample2D(Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, out Vector3 rgb)
+        public static Vector4 Sample2D(Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, out Vector3 rgb, out float a)
         {
             rgb = new Vector3();
+            a = 0f;
+            return new Vector4();
+        }
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "Sample2DBias")]
+        [UserCallNode(CallNodeType = typeof(Sample2DBiasNode))]
+        [ContextMenu("Sample2DBias", "Texture\\Sample2DBias", TtMaterialGraph.MaterialEditorKeyword)]
+        public static Vector4 Sample2DBias(Var.Texture2D texture, Var.SamplerState sampler, Vector2 uv, float bias, out Vector3 rgb, out float a)
+        {
+            rgb = new Vector3();
+            a = 0;
             return new Vector4();
         }
         [Rtti.Meta]
         [TtMaterialShader(Name = "SampleArrayLevel2D")]
         [UserCallNode(CallNodeType = typeof(SampleArrayLevel2DNode))]
         [ContextMenu("SampleArrayLevel2D", "Texture\\SampleArrayLevel2D", TtMaterialGraph.MaterialEditorKeyword)]
-        public static Vector4 SampleArrayLevel2D(Var.Texture2DArray texture, Var.SamplerState sampler, Vector2 uv, float arrayIndex, float level, out Vector3 rgb)
+        public static Vector4 SampleArrayLevel2D(Var.Texture2DArray texture, Var.SamplerState sampler, Vector2 uv, float arrayIndex, float level, out Vector3 rgb, out float a)
         {
             rgb = new Vector3();
+            a = 0;
             return new Vector4();
         }
         [Rtti.Meta]
         [TtMaterialShader(Name = "SampleArray2D")]
         [UserCallNode(CallNodeType = typeof(SampleArray2DNode))]
         [ContextMenu("SampleArray2D", "Texture\\SampleArray2D", TtMaterialGraph.MaterialEditorKeyword)]
-        public static Vector4 SampleArray2D(Var.Texture2DArray texture, Var.SamplerState sampler, Vector2 uv, float arrayIndex, out Vector3 rgb)
+        public static Vector4 SampleArray2D(Var.Texture2DArray texture, Var.SamplerState sampler, Vector2 uv, float arrayIndex, out Vector3 rgb, out float a)
         {
             rgb = new Vector3();
+            a = 0;
             return new Vector4();
         }
         [Rtti.Meta]
@@ -169,15 +184,50 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
             //outVector = vec + uv + uuv;
         }
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "Lut3S")]
+        [ContextMenu(filterStrings: "Lut3S", "Effect\\Lut3S", TtMaterialGraph.MaterialEditorKeyword)]
+        public static void Lut3S(Var.Texture2D Texture, float NoL, float Curvature, out Vector3 OutColor)
+        {
+            OutColor = Vector3.Zero;
+        }
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "CalcCurvature")]
+        [ContextMenu(filterStrings: "CalcCurvature", "Effect\\CalcCurvature", TtMaterialGraph.MaterialEditorKeyword)]
+        public static float CalcCurvature(Var.Texture2D normMap, PS_INPUT input, float norBias)
+        {
+            return 0;
+        }
         #endregion
 
         #region Math
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "Dot3D")]
+        [ContextMenu("Dot3D", "Math\\Dot3D", TtMaterialGraph.MaterialEditorKeyword)]
+        public static float Dot3D(Vector3 v1, Vector3 v2)
+        {
+            return Vector3.Dot(v1, v2);
+        }
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "Cross3D")]
+        [ContextMenu("Cross3D", "Math\\Cross3D", TtMaterialGraph.MaterialEditorKeyword)]
+        public static Vector3 Cross3D(Vector3 v1, Vector3 v2)
+        {
+            return Vector3.Cross(v1, v2);
+        }
         [Rtti.Meta]
         [TtMaterialShader(Name = "UnpackNormal")]
         [ContextMenu("UnpackNormal", "Math\\UnpackNormal", TtMaterialGraph.MaterialEditorKeyword)]
         public static void UnpackNormal(Vector3 packedNormal, out Vector3 normal)
         {
             normal = packedNormal * 2.0f - Vector3.One;
+        }
+        [Rtti.Meta]
+        [TtMaterialShader(Name = "BumpToWorldNormal")]
+        [ContextMenu("BumpToWorldNormal", "Math\\BumpToWorldNormal", TtMaterialGraph.MaterialEditorKeyword)]
+        public static Vector3 BumpToWorldNormal(Vector3 normMap, PS_INPUT input)
+        {
+            return normMap;
         }
         [Rtti.Meta]
         [TtMaterialShader(Name = "Frac")]
@@ -332,14 +382,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             polar.X = x;
             polar.Y = y;
         }
-        [Rtti.Meta]
-        [TtMaterialShader(Name = "Cross3D")]
-        [ContextMenu(filterStrings: "Cross3D", "Math\\Cross3D", TtMaterialGraph.MaterialEditorKeyword)]
-        public static void Cross3D(Vector3 v1, Vector3 v2, out Vector3 ret)
-        {
-            ret = Vector3.Zero;
-        }
-
         [Rtti.Meta]
         [TtMaterialShader(Name = "SphereMask")]
         [ContextMenu(filterStrings: "SphereMask", "Math\\SphereMask", TtMaterialGraph.MaterialEditorKeyword)]
@@ -504,772 +546,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     return i.Value;
             }
             return null;
-        }
-    }
-
-    public class SampleLevel2DNode : CallNode
-    {
-        public SampleLevel2DNode()
-        {
-            PrevSize = new Vector2(100, 100);
-            TextureVarName = $"Texture_{(uint)NodeId.GetHashCode()}";
-            
-            mSampler.SetDefault();
-        }
-        ~SampleLevel2DNode()
-        {
-            CoreSDK.DisposeObject(ref CmdParameters);
-        }
-        //public override void OnMaterialEditorGenCode(UMaterial Material)
-        //{
-        //    var texNode = this;
-        //    var texturePinIn = texNode.FindPinIn("texture");
-        //    if (texturePinIn.HasLinker() == false)
-        //    {
-        //        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
-        //        tmp.Name = texNode.TextureVarName;
-        //        tmp.ShaderType = "Texture2D";
-        //        if (Material.FindSRV(tmp.Name) == null)
-        //        {
-        //            tmp.Value = texNode.AssetName;
-        //            Material.UsedRSView.Add(tmp);
-        //        }
-        //    }
-        //    var samplerPinIn = texNode.FindPinIn("sampler");
-        //    if (samplerPinIn.HasLinker() == false)
-        //    {
-        //        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
-        //        tmp.Name = "Samp_" + texNode.TextureVarName;
-        //        if (Material.FindSampler(tmp.Name) == null)
-        //        {
-        //            tmp.Value = texNode.Sampler;
-        //            Material.UsedSamplerStates.Add(tmp);
-        //        }
-        //    }
-        //}
-        [Rtti.Meta]
-        public string TextureVarName { get; set; }
-        [Rtti.Meta]
-        [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
-        public RName AssetName
-        {
-            get
-            {
-                if (TextureSRV == null)
-                    return null;
-                return TextureSRV.AssetName;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    TextureSRV = null;
-                    return;
-                }
-                System.Action exec = async () =>
-                {
-                    TextureSRV = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
-
-                    mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
-                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
-                        TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
-                };
-                exec();
-            }
-        }
-        TtEffect mSlateEffect;
-        EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
-        NxRHI.FSamplerDesc mSampler;
-        [Rtti.Meta]
-        public NxRHI.FSamplerDesc Sampler { 
-            get => mSampler; 
-            set => mSampler = value; }
-        private NxRHI.TtSrView TextureSRV;
-        public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
-        {
-            if (TextureSRV == null || mSlateEffect == null)
-                return;
-
-            unsafe
-            {
-                if (CmdParameters == null)
-                {
-                    var rc = TtEngine.Instance.GfxDevice.RenderContext;
-
-                    var iptDesc = new NxRHI.TtInputLayoutDesc();
-                    unsafe
-                    {
-                        iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
-                        iptDesc.mCoreObject.AddElement("TEXCOORD", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, (uint)sizeof(Vector2), 0, 0);
-                        iptDesc.mCoreObject.AddElement("COLOR", 0, EPixelFormat.PXF_R8G8B8A8_UNORM, 0, (uint)sizeof(Vector2) * 2, 0, 0);
-                        //iptDesc.SetShaderDesc(SlateEffect.GraphicsEffect);
-                    }
-                    iptDesc.mCoreObject.SetShaderDesc(mSlateEffect.DescVS.mCoreObject);
-                    var InputLayout = rc.CreateInputLayout(iptDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
-                    mSlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
-
-                    var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<EngineNS.Editor.Forms.TtTextureViewerCmdParams>();
-                    var cbBinder = mSlateEffect.ShaderEffect.FindBinder("ProjectionMatrixBuffer");
-                    cmdParams.CBuffer = rc.CreateCBV(cbBinder);
-                    cmdParams.Drawcall.BindShaderEffect(mSlateEffect);
-                    cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
-                    cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, TextureSRV);
-                    cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
-
-                    cmdParams.IsNormalMap = 0;
-                    if (TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
-                        cmdParams.IsNormalMap = 1;
-
-                    CmdParameters = cmdParams;
-                }
-
-                var uv0 = new Vector2(0, 0);
-                var uv1 = new Vector2(1, 1);
-                cmdlist.AddImage((ulong)CmdParameters.GetHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
-            }
-
-        }
-        //protected override OpExpress OnNoneLinkedParameter(UMaterialGraph funGraph, ICodeGen cGen, int i)
-        //{
-        //    if (Method.Parameters[i].Name == "texture")
-        //    {
-        //        var retVar = new DefineVar();
-        //        retVar.IsLocalVar = false;
-        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
-        //        retVar.VarName = TextureVarName;
-        //        return new OpUseDefinedVar(retVar);
-        //    }
-        //    else if (Method.Parameters[i].Name == "sampler")
-        //    {
-        //        var retVar = new DefineVar();
-        //        retVar.IsLocalVar = false;
-        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
-        //        retVar.VarName = "Samp_" + TextureVarName;
-        //        return new OpUseDefinedVar(retVar);
-        //    }
-        //    else if (Method.Parameters[i].Name == "uv")
-        //    {
-        //        var retVar = new DefineVar();
-        //        retVar.IsLocalVar = false;
-        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
-        //        retVar.VarName = "input.vUV";
-        //        return new OpUseDefinedVar(retVar);
-        //    }
-
-        //    return base.OnNoneLinkedParameter(funGraph, cGen, i);
-        //}
-
-        protected override TtExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
-        {
-            var method = Method;
-            if (method.Parameters[argIdx].Name == "texture")
-            {
-                var retVal = new TtVariableReferenceExpression()
-                {
-                    VariableName = TextureVarName
-                };
-                return retVal;
-            }
-            else if (method.Parameters[argIdx].Name == "sampler")
-            {
-                var retVal = new TtVariableReferenceExpression()
-                {
-                    VariableName = "Samp_" + TextureVarName
-                };
-                return retVal;
-            }
-            else if (method.Parameters[argIdx].Name == "uv")
-            {
-                var retVal = new TtVariableReferenceExpression()
-                {
-                    VariableName = "input.vUV"
-                };
-                return retVal;
-            }
-            return base.GetNoneLinkedParameterExp(pin, argIdx, ref data);
-        }
-        public override void BuildStatements(NodePin pin, ref NodeGraph.BuildCodeStatementsData data)
-        {
-            var material = data.UserData as TtMaterial;
-            var texturePinIn = FindPinIn("texture");
-            if (texturePinIn.HasLinker() == false)
-            {
-                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameRNamePair();
-                tmp.Name = TextureVarName;
-                tmp.ShaderType = "Texture2D";
-                if (material.FindSRV(tmp.Name) == null)
-                {
-                    tmp.Value = AssetName;
-                    material.UsedSrView.Add(tmp);
-                }
-            }
-            var samplerPinIn = FindPinIn("sampler");
-            if (samplerPinIn.HasLinker() == false)
-            {
-                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair();
-                tmp.Name = "Samp_" + TextureVarName;
-                if (material.FindSampler(tmp.Name) == null)
-                {
-                    tmp.Value = Sampler;
-                    material.UsedSamplerStates.Add(tmp);
-                }
-            }
-            base.BuildStatements(pin, ref data);
-        }
-    }
-
-    public class Sample2DNode : CallNode
-    {
-        public Sample2DNode()
-        {
-            PrevSize = new Vector2(100, 100);
-            TextureVarName = $"Texture_{(uint)NodeId.GetHashCode()}";
-
-            mSampler.SetDefault();
-        }
-        ~Sample2DNode()
-        {
-            CoreSDK.DisposeObject(ref CmdParameters);
-        }
-        //public override void OnMaterialEditorGenCode(UMaterial Material)
-        //{
-        //    var texNode = this;
-        //    var texturePinIn = texNode.FindPinIn("texture");
-        //    if (texturePinIn.HasLinker() == false)
-        //    {
-        //        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
-        //        tmp.Name = texNode.TextureVarName;
-        //        tmp.ShaderType = "Texture2D";
-        //        if (Material.FindSRV(tmp.Name) == null)
-        //        {
-        //            tmp.Value = texNode.AssetName;
-        //            Material.UsedRSView.Add(tmp);
-        //        }
-        //    }
-        //    var samplerPinIn = texNode.FindPinIn("sampler");
-        //    if (samplerPinIn.HasLinker() == false)
-        //    {
-        //        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
-        //        tmp.Name = "Samp_" + texNode.TextureVarName;
-        //        if (Material.FindSampler(tmp.Name) == null)
-        //        {
-        //            tmp.Value = texNode.Sampler;
-        //            Material.UsedSamplerStates.Add(tmp);
-        //        }
-        //    }
-        //}
-        [Rtti.Meta]
-        public string TextureVarName { get; set; }
-        [Rtti.Meta]
-        [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
-        public RName AssetName
-        {
-            get
-            {
-                if (TextureSRV == null)
-                    return null;
-                return TextureSRV.AssetName;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    TextureSRV = null;
-                    return;
-                }
-                System.Action exec = async () =>
-                {
-                    TextureSRV = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
-
-                    mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
-                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
-                        TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
-
-                };
-                exec();
-            }
-        }
-        TtEffect mSlateEffect;
-        EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
-        NxRHI.FSamplerDesc mSampler;
-        [Rtti.Meta]
-        public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
-        private NxRHI.TtSrView TextureSRV;
-        public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
-        {
-            if (TextureSRV == null || mSlateEffect == null)
-                return;
-
-            unsafe
-            {
-                if (CmdParameters == null)
-                {
-                    var rc = TtEngine.Instance.GfxDevice.RenderContext;
-
-                    var iptDesc = new NxRHI.TtInputLayoutDesc();
-                    unsafe
-                    {
-                        iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
-                        iptDesc.mCoreObject.AddElement("TEXCOORD", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, (uint)sizeof(Vector2), 0, 0);
-                        iptDesc.mCoreObject.AddElement("COLOR", 0, EPixelFormat.PXF_R8G8B8A8_UNORM, 0, (uint)sizeof(Vector2) * 2, 0, 0);
-                        //iptDesc.SetShaderDesc(SlateEffect.GraphicsEffect);
-                    }
-                    iptDesc.mCoreObject.SetShaderDesc(mSlateEffect.DescVS.mCoreObject);
-                    var InputLayout = rc.CreateInputLayout(iptDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
-                    mSlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
-
-                    var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<EngineNS.Editor.Forms.TtTextureViewerCmdParams>();
-                    var cbBinder = mSlateEffect.ShaderEffect.FindBinder("ProjectionMatrixBuffer");
-                    cmdParams.CBuffer = rc.CreateCBV(cbBinder);
-                    cmdParams.Drawcall.BindShaderEffect(mSlateEffect);
-                    cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
-                    cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, TextureSRV);
-                    cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
-
-                    cmdParams.IsNormalMap = 0;
-                    if (TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
-                        cmdParams.IsNormalMap = 1;
-
-                    CmdParameters = cmdParams;
-                }
-
-                var uv0 = new Vector2(0, 0);
-                var uv1 = new Vector2(1, 1);
-                cmdlist.AddImage((ulong)CmdParameters.GetHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
-
-                // support preview A channel
-                //var textPos = end - new Vector2(32, 32);
-                //cmdlist.AddText(textPos, mShowA ? 0xFFFFFFFF : 0x00FF00FF, "A", null);
-                //if (ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Left, false) && ImGuiAPI.IsMouseHoveringRect(textPos, end, true))
-                //{
-                //    CmdParameters.ColorMask.W = mShowA ? 1 : 0;
-                //    mShowA = !mShowA;
-                //}
-            }
-        }
-        //protected override OpExpress OnNoneLinkedParameter(UMaterialGraph funGraph, ICodeGen cGen, int i)
-        //{
-        //    if (Method.Parameters[i].Name == "texture")
-        //    {
-        //        var retVar = new DefineVar();
-        //        retVar.IsLocalVar = false;
-        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
-        //        retVar.VarName = TextureVarName;
-        //        return new OpUseDefinedVar(retVar);
-        //    }
-        //    else if (Method.Parameters[i].Name == "sampler")
-        //    {
-        //        var retVar = new DefineVar();
-        //        retVar.IsLocalVar = false;
-        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
-        //        retVar.VarName = "Samp_" + TextureVarName;
-        //        return new OpUseDefinedVar(retVar);
-        //    }
-        //    else if (Method.Parameters[i].Name == "uv")
-        //    {
-        //        var retVar = new DefineVar();
-        //        retVar.IsLocalVar = false;
-        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
-        //        retVar.VarName = "input.vUV";
-        //        return new OpUseDefinedVar(retVar);
-        //    }
-
-        //    return base.OnNoneLinkedParameter(funGraph, cGen, i);
-        //}
-        protected override TtExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
-        {
-            var method = Method;
-            if(method.Parameters[argIdx].Name == "texture")
-            {
-                var retVal = new TtVariableReferenceExpression()
-                {
-                    VariableName = TextureVarName
-                };
-                return retVal;
-            }
-            else if(method.Parameters[argIdx].Name == "sampler")
-            {
-                var retVal = new TtVariableReferenceExpression()
-                {
-                    VariableName = "Samp_" + TextureVarName
-                };
-                return retVal;
-            }
-            else if(method.Parameters[argIdx].Name == "uv")
-            {
-                var retVal = new TtVariableReferenceExpression()
-                {
-                    VariableName = "input.vUV"
-                };
-                return retVal;
-            }
-            return base.GetNoneLinkedParameterExp(pin, argIdx, ref data);
-        }
-        public override void BuildStatements(NodePin pin, ref NodeGraph.BuildCodeStatementsData data)
-        {
-            var material = data.UserData as TtMaterial;
-            var texturePinIn = FindPinIn("texture");
-            if(texturePinIn.HasLinker() == false)
-            {
-                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameRNamePair();
-                tmp.Name = TextureVarName;
-                tmp.ShaderType = "Texture2D";
-                if (material.FindSRV(tmp.Name) == null)
-                {
-                    tmp.Value = AssetName;
-                    material.UsedSrView.Add(tmp);
-                }
-            }
-            var samplerPinIn = FindPinIn("sampler");
-            if (samplerPinIn.HasLinker() == false)
-            {
-                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair();
-                tmp.Name = "Samp_" + TextureVarName;
-                if (material.FindSampler(tmp.Name) == null)
-                {
-                    tmp.Value = Sampler;
-                    material.UsedSamplerStates.Add(tmp);
-                }
-            }
-            base.BuildStatements(pin, ref data);
-        }
-    }
-
-    public class SampleArrayLevel2DNode : CallNode
-    {
-        public SampleArrayLevel2DNode()
-        {
-            PrevSize = new Vector2(100, 100);
-            TextureVarName = $"TextureArray_{(uint)NodeId.GetHashCode()}";
-
-            mSampler.SetDefault();
-        }
-        ~SampleArrayLevel2DNode()
-        {
-        }
-        //public override void OnMaterialEditorGenCode(UMaterial Material)
-        //{
-        //    var texNode = this;
-        //    var texturePinIn = texNode.FindPinIn("texture");
-        //    if (texturePinIn.HasLinker() == false)
-        //    {
-        //        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
-        //        tmp.Name = texNode.TextureVarName;
-        //        tmp.ShaderType = "Texture2DArray";
-        //        if (Material.FindSRV(tmp.Name) == null)
-        //        {
-        //            tmp.Value = texNode.AssetName;
-        //            Material.UsedRSView.Add(tmp);
-        //        }
-        //    }
-        //    var samplerPinIn = texNode.FindPinIn("sampler");
-        //    if (samplerPinIn.HasLinker() == false)
-        //    {
-        //        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
-        //        tmp.Name = "Samp_" + texNode.TextureVarName;
-        //        if (Material.FindSampler(tmp.Name) == null)
-        //        {
-        //            tmp.Value = texNode.Sampler;
-        //            Material.UsedSamplerStates.Add(tmp);
-        //        }
-        //    }
-        //}
-        [Rtti.Meta]
-        public string TextureVarName { get; set; }
-        [Rtti.Meta]
-        [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
-        public RName AssetName
-        {
-            get
-            {
-                if (TextureSRV == null)
-                    return null;
-                return TextureSRV.AssetName;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    TextureSRV = null;
-                    return;
-                }
-                System.Action exec = async () =>
-                {
-                    TextureSRV = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
-                };
-                exec();
-            }
-        }
-        NxRHI.FSamplerDesc mSampler;
-        [Rtti.Meta]
-        public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
-        private NxRHI.TtSrView TextureSRV;
-        public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
-        {
-            if (TextureSRV == null)
-                return;
-
-            var uv0 = new Vector2(0, 0);
-            var uv1 = new Vector2(1, 1);
-            unsafe
-            {
-                cmdlist.AddImage((ulong)TextureSRV.GetTextureHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
-            }
-        }
-        //protected override OpExpress OnNoneLinkedParameter(UMaterialGraph funGraph, ICodeGen cGen, int i)
-        //{
-        //    if (Method.Parameters[i].Name == "texture")
-        //    {
-        //        var retVar = new DefineVar();
-        //        retVar.IsLocalVar = false;
-        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
-        //        retVar.VarName = TextureVarName;
-        //        return new OpUseDefinedVar(retVar);
-        //    }
-        //    else if (Method.Parameters[i].Name == "sampler")
-        //    {
-        //        var retVar = new DefineVar();
-        //        retVar.IsLocalVar = false;
-        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
-        //        retVar.VarName = "Samp_" + TextureVarName;
-        //        return new OpUseDefinedVar(retVar);
-        //    }
-        //    else if (Method.Parameters[i].Name == "uv")
-        //    {
-        //        var retVar = new DefineVar();
-        //        retVar.IsLocalVar = false;
-        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
-        //        retVar.VarName = "input.vUV";
-        //        return new OpUseDefinedVar(retVar);
-        //    }
-
-        //    return base.OnNoneLinkedParameter(funGraph, cGen, i);
-        //}
-        protected override TtExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
-        {
-            var method = Method;
-            if (method.Parameters[argIdx].Name == "texture")
-            {
-                var retVal = new TtVariableReferenceExpression()
-                {
-                    VariableName = TextureVarName
-                };
-                return retVal;
-            }
-            else if (method.Parameters[argIdx].Name == "sampler")
-            {
-                var retVal = new TtVariableReferenceExpression()
-                {
-                    VariableName = "Samp_" + TextureVarName
-                };
-                return retVal;
-            }
-            else if (method.Parameters[argIdx].Name == "uv")
-            {
-                var retVal = new TtVariableReferenceExpression()
-                {
-                    VariableName = "input.vUV"
-                };
-                return retVal;
-            }
-            return base.GetNoneLinkedParameterExp(pin, argIdx, ref data);
-        }
-        public override void BuildStatements(NodePin pin, ref NodeGraph.BuildCodeStatementsData data)
-        {
-            var material = data.UserData as TtMaterial;
-            var texturePinIn = FindPinIn("texture");
-            if (texturePinIn.HasLinker() == false)
-            {
-                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameRNamePair();
-                tmp.Name = TextureVarName;
-                tmp.ShaderType = "Texture2D";
-                if (material.FindSRV(tmp.Name) == null)
-                {
-                    tmp.Value = AssetName;
-                    material.UsedSrView.Add(tmp);
-                }
-            }
-            var samplerPinIn = FindPinIn("sampler");
-            if (samplerPinIn.HasLinker() == false)
-            {
-                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair();
-                tmp.Name = "Samp_" + TextureVarName;
-                if (material.FindSampler(tmp.Name) == null)
-                {
-                    tmp.Value = Sampler;
-                    material.UsedSamplerStates.Add(tmp);
-                }
-            }
-            base.BuildStatements(pin, ref data);
-        }
-    }
-
-    public class SampleArray2DNode : CallNode
-    {
-        public SampleArray2DNode()
-        {
-            PrevSize = new Vector2(100, 100);
-            TextureVarName = $"TextureArray_{(uint)NodeId.GetHashCode()}";
-
-            mSampler.SetDefault();
-        }
-        ~SampleArray2DNode()
-        {
-        }
-        //public override void OnMaterialEditorGenCode(UMaterial Material)
-        //{
-        //    var texNode = this;
-        //    var texturePinIn = texNode.FindPinIn("texture");
-        //    if (texturePinIn.HasLinker() == false)
-        //    {
-        //        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameRNamePair();
-        //        tmp.Name = texNode.TextureVarName;
-        //        tmp.ShaderType = "Texture2DArray";
-        //        if (Material.FindSRV(tmp.Name) == null)
-        //        {
-        //            tmp.Value = texNode.AssetName;
-        //            Material.UsedRSView.Add(tmp);
-        //        }
-        //    }
-        //    var samplerPinIn = texNode.FindPinIn("sampler");
-        //    if (samplerPinIn.HasLinker() == false)
-        //    {
-        //        var tmp = new Graphics.Pipeline.Shader.UMaterial.NameSamplerStateDescPair();
-        //        tmp.Name = "Samp_" + texNode.TextureVarName;
-        //        if (Material.FindSampler(tmp.Name) == null)
-        //        {
-        //            tmp.Value = texNode.Sampler;
-        //            Material.UsedSamplerStates.Add(tmp);
-        //        }
-        //    }
-        //}
-        [Rtti.Meta]
-        public string TextureVarName { get; set; }
-        [Rtti.Meta]
-        [RName.PGRName(FilterExts = NxRHI.TtSrView.AssetExt)]
-        public RName AssetName
-        {
-            get
-            {
-                if (TextureSRV == null)
-                    return null;
-                return TextureSRV.AssetName;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    TextureSRV = null;
-                    return;
-                }
-                System.Action exec = async () =>
-                {
-                    TextureSRV = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
-                };
-                exec();
-            }
-        }
-        NxRHI.FSamplerDesc mSampler;
-        [Rtti.Meta]
-        public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
-        private NxRHI.TtSrView TextureSRV;
-        public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
-        {
-            if (TextureSRV == null)
-                return;
-
-            var uv0 = new Vector2(0, 0);
-            var uv1 = new Vector2(1, 1);
-            unsafe
-            {
-                cmdlist.AddImage((ulong)TextureSRV.GetTextureHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
-            }
-        }
-        //protected override OpExpress OnNoneLinkedParameter(UMaterialGraph funGraph, ICodeGen cGen, int i)
-        //{
-        //    if (Method.Parameters[i].Name == "texture")
-        //    {
-        //        var retVar = new DefineVar();
-        //        retVar.IsLocalVar = false;
-        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
-        //        retVar.VarName = TextureVarName;
-        //        return new OpUseDefinedVar(retVar);
-        //    }
-        //    else if (Method.Parameters[i].Name == "sampler")
-        //    {
-        //        var retVar = new DefineVar();
-        //        retVar.IsLocalVar = false;
-        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
-        //        retVar.VarName = "Samp_" + TextureVarName;
-        //        return new OpUseDefinedVar(retVar);
-        //    }
-        //    else if (Method.Parameters[i].Name == "uv")
-        //    {
-        //        var retVar = new DefineVar();
-        //        retVar.IsLocalVar = false;
-        //        retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
-        //        retVar.VarName = "input.vUV";
-        //        return new OpUseDefinedVar(retVar);
-        //    }
-
-        //    return base.OnNoneLinkedParameter(funGraph, cGen, i);
-        //}
-        protected override TtExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
-        {
-            var method = Method;
-            if (method.Parameters[argIdx].Name == "texture")
-            {
-                var retVal = new TtVariableReferenceExpression()
-                {
-                    VariableName = TextureVarName
-                };
-                return retVal;
-            }
-            else if (method.Parameters[argIdx].Name == "sampler")
-            {
-                var retVal = new TtVariableReferenceExpression()
-                {
-                    VariableName = "Samp_" + TextureVarName
-                };
-                return retVal;
-            }
-            else if (method.Parameters[argIdx].Name == "uv")
-            {
-                var retVal = new TtVariableReferenceExpression()
-                {
-                    VariableName = "input.vUV"
-                };
-                return retVal;
-            }
-            return base.GetNoneLinkedParameterExp(pin, argIdx, ref data);
-        }
-        public override void BuildStatements(NodePin pin, ref NodeGraph.BuildCodeStatementsData data)
-        {
-            var material = data.UserData as TtMaterial;
-            var texturePinIn = FindPinIn("texture");
-            if (texturePinIn.HasLinker() == false)
-            {
-                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameRNamePair();
-                tmp.Name = TextureVarName;
-                tmp.ShaderType = "Texture2D";
-                if (material.FindSRV(tmp.Name) == null)
-                {
-                    tmp.Value = AssetName;
-                    material.UsedSrView.Add(tmp);
-                }
-            }
-            var samplerPinIn = FindPinIn("sampler");
-            if (samplerPinIn.HasLinker() == false)
-            {
-                var tmp = new Graphics.Pipeline.Shader.TtMaterial.NameSamplerStateDescPair();
-                tmp.Name = "Samp_" + TextureVarName;
-                if (material.FindSampler(tmp.Name) == null)
-                {
-                    tmp.Value = Sampler;
-                    material.UsedSamplerStates.Add(tmp);
-                }
-            }
-            base.BuildStatements(pin, ref data);
         }
     }
 }

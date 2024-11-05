@@ -39,7 +39,7 @@ namespace EngineNS.NxRHI
             info.Tag = tag;
             Cmds.Enqueue(info);
         }
-        public void QueueCmdlist(UCommandList cmd, string name = null, EQueueType qType = EQueueType.QU_Default)
+        public void QueueCmdlist(TtCommandList cmd, string name = null, EQueueType qType = EQueueType.QU_Default)
         {
             System.Diagnostics.Debug.Assert(cmd.mCoreObject.IsRecording() == false);
             var info = new FRCmdInfo();
@@ -48,7 +48,7 @@ namespace EngineNS.NxRHI
             info.Tag = cmd;
             info.Cmd = static (NxRHI.ICommandList im_cmd, ref FRCmdInfo info) =>
             {
-                TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(info.Tag as UCommandList, info.QueueType);
+                TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(info.Tag as TtCommandList, info.QueueType);
             };
             Cmds.Enqueue(info);
 
@@ -130,7 +130,7 @@ namespace EngineNS.NxRHI
                 }
             }   
         }
-        public void QueueCmdlist(UCommandList cmd, string name = null, EQueueType qType = EQueueType.QU_Default)
+        public void QueueCmdlist(TtCommandList cmd, string name = null, EQueueType qType = EQueueType.QU_Default)
         {
             System.Diagnostics.Debug.Assert(cmd.mCoreObject.IsRecording() == false);
             lock (RenderCmds)

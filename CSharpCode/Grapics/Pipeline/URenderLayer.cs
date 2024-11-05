@@ -13,7 +13,7 @@ namespace EngineNS.Graphics.Pipeline
             //CoreSDK.DisposeObject(ref mCmdLists[0]);
             //CoreSDK.DisposeObject(ref mCmdLists[1]);
         }
-        private NxRHI.UCommandList[] mCmdLists = new NxRHI.UCommandList[2];
+        private NxRHI.TtCommandList[] mCmdLists = new NxRHI.TtCommandList[2];
         public void Initialize(NxRHI.TtGpuDevice rc, string debugName)
         {
             mCmdLists[0] = rc.CreateCommandList();
@@ -35,11 +35,11 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         public uint DrawcallNumber { get; set; }
-        public NxRHI.UCommandList DrawCmdList
+        public NxRHI.TtCommandList DrawCmdList
         {
             get { return mCmdLists[0]; }
         }
-        public NxRHI.UCommandList CommitCmdList
+        public NxRHI.TtCommandList CommitCmdList
         {
             get { return mCmdLists[1]; }
         }
@@ -255,7 +255,7 @@ namespace EngineNS.Graphics.Pipeline
                 PassBuffers[(int)layer].DrawCmdList.PushGpuDraw(drawcall);
             }
         }
-        public NxRHI.UCommandList GetCmdList(ERenderLayer layer)
+        public NxRHI.TtCommandList GetCmdList(ERenderLayer layer)
         {
             return PassBuffers[(int)layer].DrawCmdList;
         }

@@ -160,7 +160,7 @@ namespace EngineNS.Editor.ShaderCompiler
 
             try
             {
-                var rn = RName.GetRName("@engine_preprosessors.cginc", RName.ERNameType.Engine);
+                var rn = RName.GetRName("@engine_preprocessors.cginc", RName.ERNameType.Engine);
                 var code = GetEnginePreprocessors(rn, true);
                 Codes.Add(rn, code);
             }
@@ -423,7 +423,7 @@ namespace EngineNS.Editor.ShaderCompiler
 
             if (bWriteFile)
             {
-                var file = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.DebugUtility) + $"/engine_preprosessors.cginc";
+                var file = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.DebugUtility) + $"/engine_preprocessors.cginc";
                 var code = IO.TtFileManager.ReadAllText(file);
                 if (code != sourceCode)
                 {

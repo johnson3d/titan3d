@@ -467,7 +467,7 @@ namespace EngineNS.Bricks.NodeGraph
             {
                 return null;
             }
-            return linker.OutPin.HostNode;
+            return linker.OutPin?.HostNode;
         }
         public TtNodeBase GetOppositePinNode(PinOut pin)
         {
@@ -476,21 +476,21 @@ namespace EngineNS.Bricks.NodeGraph
             {
                 return null;
             }
-            return linker.InPin.HostNode;
+            return linker.InPin?.HostNode;
         }
         public CodeBuilder.TtExpressionBase GetOppositePinExpression(PinIn pin, ref BuildCodeStatementsData data)
         {
             var linker = GetFirstLinker(pin);
             if (linker == null)
                 return null;
-            return linker.OutPin.HostNode.GetExpression(linker.OutPin, ref data);
+            return linker.OutPin?.HostNode.GetExpression(linker.OutPin, ref data);
         }
         public CodeBuilder.TtExpressionBase GetOppositePinExpression(PinOut pin, ref BuildCodeStatementsData data)
         {
             var linker = GetFirstLinker(pin);
             if (linker == null)
                 return null;
-            return linker.InPin.HostNode.GetExpression(linker.InPin, ref data);
+            return linker.InPin?.HostNode.GetExpression(linker.InPin, ref data);
         }
         public PinOut GetOppositePin(PinIn pin)
         {
@@ -511,14 +511,14 @@ namespace EngineNS.Bricks.NodeGraph
             var linker = GetFirstLinker(pin);
             if (linker == null)
                 return null;
-            return linker.OutPin.HostNode.GetOutPinType(linker.OutPin);
+            return linker.OutPin?.HostNode.GetOutPinType(linker.OutPin);
         }
         public Rtti.TtTypeDesc GetOppositePinType(PinOut pin)
         {
             var linker = GetFirstLinker(pin);
             if (linker == null)
                 return null;
-            return linker.InPin.HostNode.GetInPinType(linker.InPin);
+            return linker.InPin?.HostNode.GetInPinType(linker.InPin);
         }
 
         public TtNodeBase AddNode(TtNodeBase node)

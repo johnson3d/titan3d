@@ -95,7 +95,7 @@ namespace EngineNS.Editor.Forms
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
-                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
                     if (mainEditor != null)
                         mainEditor.AssetEditorManager.CurrentActiveEditor = this;
                 }
@@ -205,7 +205,7 @@ namespace EngineNS.Editor.Forms
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
         TtAnimationBlendSpacePreview AnimationPreview = null;
-        public async Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg)
+        public async Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
             BlendSpace = await TtEngine.Instance.AnimationModule.BlendSpaceClipManager.GetAnimation(name);
@@ -340,9 +340,9 @@ namespace EngineNS.Editor.Forms
                 var pose = meshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as Animation.SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
                 var skinMDfQueue = meshNode.Mesh.MdfQueue as Graphics.Mesh.UMdfSkinMesh;
 
-                skinMDfQueue.SkinModifier.RuntimePose = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(pose);
+                meshNode.RuntimePose = Animation.SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(pose);
                 Player.BindingPose(pose);
-                Player.RuntimePose = skinMDfQueue.SkinModifier.RuntimePose;
+                Player.RuntimePose = meshNode.RuntimePose;
 
             }
             [ThreadStatic]

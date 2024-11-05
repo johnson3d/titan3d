@@ -51,7 +51,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         public Graphics.Pipeline.TtRenderGraphPin WaterPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Water", false, EPixelFormat.PXF_R32_FLOAT);
 
         public TtErosionIncWaterShading ShadingEnv;
-        public NxRHI.UCommandList mCmdList;
+        public NxRHI.TtCommandList mCmdList;
         private NxRHI.TtComputeDraw mDrawcall;
         public Vector3ui DispatchThread = new Vector3ui(1, 1, 1);
         public RName mRain;
@@ -178,7 +178,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         public Graphics.Pipeline.TtRenderGraphPin GapMapPinOut = Graphics.Pipeline.TtRenderGraphPin.CreateOutput("Gap", true, EPixelFormat.PXF_R32_FLOAT);
 
         public TtHeigh2FlowMapShading ShadingEnv;
-        public NxRHI.UCommandList mCmdList;
+        public NxRHI.TtCommandList mCmdList;
         private NxRHI.TtComputeDraw mDrawcall;
         public Vector3ui DispatchThread = new Vector3ui(1,1,1);
         public TtHeigh2FlowMapNode()
@@ -277,7 +277,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         public Graphics.Pipeline.TtRenderGraphPin WaterPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Water");
 
         public TtWaterBasinShading ShadingEnv;
-        public NxRHI.UCommandList mCmdList;
+        public NxRHI.TtCommandList mCmdList;
         private NxRHI.TtComputeDraw mDrawcall;
         private NxRHI.TtCopyDraw mCopyDrawcall;
         public Vector3ui DispatchThread = new Vector3ui(1, 1, 1);

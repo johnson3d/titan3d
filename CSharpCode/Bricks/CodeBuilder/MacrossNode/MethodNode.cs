@@ -107,12 +107,22 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     var mtd = GetMethodMeta(value.TrimStart('@'));
                     if (mtd != null)
                         Initialize(mtd);
+                    else
+                    {
+                        HasError = true;
+                        CodeExcept = new GraphException(this, null, $"Method not found");
+                    }
                 }
                 else
                 {
                     var mtd = GetMethodMeta(value);
                     if (mtd != null)
                         Initialize(mtd);
+                    else
+                    {
+                        HasError = true;
+                        CodeExcept = new GraphException(this, null, $"Method not found");
+                    }
                 }
             }
         }

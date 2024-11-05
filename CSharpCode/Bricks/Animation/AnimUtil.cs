@@ -46,13 +46,13 @@ namespace EngineNS.Animation
         public static TtLocalSpaceRuntimePose BindRuntimeSkeletonPoseToNode(TtNode node)
         {
             var meshNode = GetParentMeshNode(node);
-            if (meshNode != null)
+            if (meshNode != null && meshNode.HasSkin)
             {
                 var animatablePose = meshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
                 var skinMDfQueue = meshNode.Mesh.MdfQueue as Graphics.Mesh.UMdfSkinMesh;
                 var animatedPose = SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animatablePose);
-                skinMDfQueue.SkinModifier.RuntimePose = animatedPose;
-                return skinMDfQueue.SkinModifier.RuntimePose;
+                meshNode.RuntimePose = animatedPose;
+                return meshNode.RuntimePose;
             }
             return null;
         }
@@ -156,7 +156,7 @@ namespace EngineNS.Animation
 
         public TtClassDescription GetActiveEditorClassDescription()
         {
-            if (TtEngine.Instance.GfxDevice.SlateApplication is EngineNS.Editor.UMainEditorApplication mainEditor)
+            if (TtEngine.Instance.GfxDevice.SlateApplication is EngineNS.Editor.TtMainEditorApplication mainEditor)
             {
                 if (mainEditor.AssetEditorManager.CurrentActiveEditor is TtDesignMacrossEditor designMacrossEditor)
                 {
@@ -266,7 +266,7 @@ namespace EngineNS.Animation
 
         public TtClassDescription GetActiveEditorClassDescription()
         {
-            if (TtEngine.Instance.GfxDevice.SlateApplication is EngineNS.Editor.UMainEditorApplication mainEditor)
+            if (TtEngine.Instance.GfxDevice.SlateApplication is EngineNS.Editor.TtMainEditorApplication mainEditor)
             {
                 if(mainEditor.AssetEditorManager.CurrentActiveEditor is TtDesignMacrossEditor designMacrossEditor)
                 {

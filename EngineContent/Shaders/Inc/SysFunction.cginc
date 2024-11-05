@@ -1,11 +1,15 @@
 #ifndef _COMMON_FUNCTION_
 #define _COMMON_FUNCTION_
 #include "Math.cginc"
+#include "../CBuffer/VarBase_PerMesh.cginc"
 
-float4 SampleLevel2D(Texture2D tex, SamplerState samp, float2 uv, float level, out float3 outRgb)
+SamplerState DefaultSampLinear DX_AUTOBIND;
+
+float4 SampleLevel2D(Texture2D tex, SamplerState samp, float2 uv, float level, out float3 outRgb, out float a)
 {
 	float4 clr = tex.SampleLevel(samp, uv, level);
 	outRgb = clr.rgb;
+    a = clr.a;
 	return clr;
 }
 
@@ -16,24 +20,35 @@ float2 TextureSize(Texture2D tex)
 	return texSize;
 }
 
-float4 Sample2D(Texture2D tex, SamplerState samp, float2 uv, out float3 outRgb)
+float4 Sample2D(Texture2D tex, SamplerState samp, float2 uv, out float3 outRgb, out float a)
 {
 	float4 clr = tex.Sample(samp, uv);
 	outRgb = clr.rgb;
+    a = clr.a;
 	return clr;
 }
 
-float4 SampleArrayLevel2D(Texture2DArray tex, SamplerState samp, float2 uv, int arrayIndex, float level, out float3 outRgb)
+float4 Sample2DBias(Texture2D tex, SamplerState samp, float2 uv, float bias, out float3 outRgb, out float a)
+{
+    float4 clr = tex.SampleBias(samp, uv, bias);
+    outRgb = clr.rgb;
+    a = clr.a;
+    return clr;
+}
+
+float4 SampleArrayLevel2D(Texture2DArray tex, SamplerState samp, float2 uv, int arrayIndex, float level, out float3 outRgb, out float a)
 {
 	float4 clr = tex.SampleLevel(samp, float3(uv.xy, arrayIndex), level);
 	outRgb = clr.rgb;
+    a = clr.a;
 	return clr;
 }
 
-float4 SampleArray2D(Texture2DArray tex, SamplerState samp, float2 uv, int arrayIndex, out float3 outRgb)
+float4 SampleArray2D(Texture2DArray tex, SamplerState samp, float2 uv, int arrayIndex, out float3 outRgb, out float a)
 {
 	float4 clr = tex.Sample(samp, float3(uv.xy, arrayIndex));
 	outRgb = clr.rgb;
+    a = clr.a;
 	return clr;
 }
 
@@ -134,19 +149,19 @@ void Reflect3D( half3 v1, half3 normal, out half3 ret )
 	ret = (half3)reflect(v1, normal);
 }
 
-void Cross3D( half3 v1, half3 v2, out half3 ret )
+float3 Cross3D(float3 v1, float3 v2)
 {
-	ret = (half3)cross(v1, v2);
+	return cross(v1, v2);
 }
 
-void Dot2D( half2 v1, half2 v2, out half ret )
+float Dot2D(float2 v1, float2 v2)
 {
-	ret = (half)dot(v1, v2);
+	return dot(v1, v2);
 }
 
-void Dot3D( half3 v1, half3 v2, out half ret )
+float Dot3D(float3 v1, float3 v2)
 {
-	ret = (half)dot(v1, v2);
+	return dot(v1, v2);
 }
 
 void Exp( half x, out half ret )
@@ -590,6 +605,13 @@ void NormalMap(half3 Nt, half4 Tw, half3 Nw, out half3 UnpackedNormal)
 	
 	UnpackedNormal = mul(Nt, TBN);
     //UnpackedNormal.xyz = UnpackedNormal.xzy;
+}
+
+half3 BumpToWorldNormal(float3 normMap, PS_INPUT input)
+{
+    half3 worldNorm;
+    NormalMap(normMap, input.Get_vTangent(), input.Get_vNormal(), worldNorm);
+    return worldNorm;
 }
 
 void BlingSpec(half4 flo4 , half intensity , half powIn , half4 worldNorm , half4 worldPos , half3 LP ,  out half BlingSpec)
@@ -1162,6 +1184,25 @@ float3 Pivot_LeafNormal(bool frontFace, float3 normal)
 	float faceSign = frontFace?1:-1;
 	return lerp(-normal, normal, faceSign);
 }
+
+float CalcCurvature(Texture2D normMap, PS_INPUT input, float norBias)
+{
+    float3 normalBlur;
+    UnpackNormal(normMap.SampleBias(DefaultSampLinear, input.Get_vUV(), norBias).rgb, normalBlur);
+    float3 worldNorm = BumpToWorldNormal(normalBlur, input);
+    float curvature = length(fwidth(worldNorm) / fwidth(input.Get_vWorldPos()));
+    return curvature;
+}
+
+void Lut3S(Texture2D lutTexture, float NoL, float Curvature, out float3 OutColor)
+{
+    float2 uv;
+    uv.x = (NoL * 0.5f + 0.5f);
+    uv.y = Curvature;
+    float4 lutValue = lutTexture.SampleLevel(DefaultSampLinear, uv, 0);
+    OutColor = lutValue.rgb;
+}
+
 
 //void GetGridUV(float2 uv, float4 lightmapUV, float2 min, float2 max, out float2 outUV)
 //{

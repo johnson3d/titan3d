@@ -19,7 +19,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return "MaterialFunction";
         }
-        protected override Color4b GetBorderColor()
+        public override Color4b GetBorderColor()
         {
             return TtEngine.Instance.EditorInstance.Config.MaterialFunctionBoderColor;
         }

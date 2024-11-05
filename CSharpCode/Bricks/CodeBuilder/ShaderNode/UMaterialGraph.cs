@@ -135,8 +135,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     perFrameMenus.AddMenuItem(i.Name, null,
                         (TtMenuItem item, object sender) =>
                         {
+                            var shaderVarAttr = attrs[0] as NxRHI.TtShader.TtShaderVarAttribute;
                             var node = new UUniformVar();
-                            node.VarType = Rtti.TtTypeDesc.TypeOf((attrs[0] as NxRHI.TtShader.TtShaderVarAttribute).VarType);
+                            node.VarType = Rtti.TtTypeDesc.TypeOf(shaderVarAttr.VarType);
                             node.Name = i.Name;
                             node.UserData = this;
                             node.Position = PopMenuPosition;

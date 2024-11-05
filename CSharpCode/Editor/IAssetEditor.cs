@@ -15,7 +15,7 @@ namespace EngineNS.Editor
     }
     public interface IAssetEditor : IProgressBar
     {
-        Thread.Async.TtTask<bool> OpenEditor(UMainEditorApplication mainEditor, RName name, object arg);
+        Thread.Async.TtTask<bool> OpenEditor(TtMainEditorApplication mainEditor, RName name, object arg);
         void OnCloseEditor();
         RName AssetName { get; set; }
         bool Visible { get; set; }
@@ -33,7 +33,7 @@ namespace EngineNS.Editor
         }
         public List<IAssetEditor> OpenedEditors { get; } = new List<IAssetEditor>();
         public IAssetEditor CurrentActiveEditor = null;
-        public async System.Threading.Tasks.Task OpenEditor(UMainEditorApplication mainEditor, Type editorType, RName name, object arg)
+        public async System.Threading.Tasks.Task OpenEditor(TtMainEditorApplication mainEditor, Type editorType, RName name, object arg)
         {
             IAssetEditor editor = null;
             foreach(var i in OpenedEditors)
@@ -57,7 +57,7 @@ namespace EngineNS.Editor
                 if (await editor.Initialize() == false)
                     return;
                 ok = await editor.OpenEditor(mainEditor, name, arg);
-                UMainEditorApplication.NeedFocusWindowName = editor.GetWindowsName();
+                TtMainEditorApplication.NeedFocusWindowName = editor.GetWindowsName();
             }
             catch (Exception exp)
             {
@@ -83,7 +83,7 @@ namespace EngineNS.Editor
                     }
                     else
                     {
-                        var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.UMainEditorApplication;
+                        var application = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.TtMainEditorApplication;
                         form.DockId = EGui.UIProxy.DockProxy.MainFormDockClass.ClassId;
                         form.DockCond = ImGuiCond_.ImGuiCond_Appearing;
                     }

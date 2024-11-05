@@ -20,7 +20,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         public VirtualTexture.TtVirtualTextureArray HeightmapRVT;
         public VirtualTexture.TtVirtualTextureArray NormalmapRVT;
         public VirtualTexture.TtVirtualTextureArray MaterialIdRVT;
-        public NxRHI.UCommandList UpdateRvtPass;
+        public NxRHI.TtCommandList UpdateRvtPass;
 
         public int MipLevels { get; set; } = 6;
         public Graphics.Mesh.TtMeshPrimitives[] GridMipLevels;

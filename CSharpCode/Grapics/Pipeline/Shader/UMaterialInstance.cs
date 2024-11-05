@@ -47,7 +47,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             HasSnapshot = true;
             OnShowIconTimout(0);
         }
-        protected override Color4b GetBorderColor()
+        public override Color4b GetBorderColor()
         {
             return TtEngine.Instance.EditorInstance.Config.MaterialInstanceBoderColor;
         }

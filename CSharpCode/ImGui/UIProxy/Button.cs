@@ -64,12 +64,8 @@ namespace EngineNS.EGui.UIProxy
             var size = ImGuiAPI.CalcItemSize(ref mSize, ImageSize.X + style->FramePadding.X * 2.0f, ImageSize.Y + style->FramePadding.Y * 2.0f);
             var rectEnd = rectStart + size;
 
-            ImGuiAPI.ItemSize(in size, 0);
-            if (!ImGuiAPI.ItemAdd(in rectStart, in rectEnd, id, 0))
-                return false;
-
             bool hovered = false, held = false;
-            var pressed = ImGuiAPI.ButtonBehavior(in rectStart, in rectEnd, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+            var pressed = ImGuiAPI.ButtonBehavior(in rectStart, in rectEnd, id, ref hovered, ref held, false, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
             if (pressed)
                 mImage.Color = ImageActiveColor;
             else if (hovered)
@@ -200,12 +196,8 @@ namespace EngineNS.EGui.UIProxy
             var size = ImGuiAPI.CalcItemSize(ref sizeScaled, sizeScaled.X + style->FramePadding.X * 2.0f, sizeScaled.Y + style->FramePadding.Y * 2.0f);
             var rectEnd = rectStart + size;
 
-            ImGuiAPI.ItemSize(in size, 0);
-            if (!ImGuiAPI.ItemAdd(in rectStart, in rectEnd, id, 0))
-                return false;
-
             bool hovered = false, held = false;
-            var pressed = ImGuiAPI.ButtonBehavior(in rectStart, in rectEnd, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+            var pressed = ImGuiAPI.ButtonBehavior(in rectStart, in rectEnd, id, ref hovered, ref held, false, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
 
             if (pressed)
             {
@@ -251,12 +243,8 @@ namespace EngineNS.EGui.UIProxy
             size = ImGuiAPI.CalcItemSize(ref size, label_size.X + style->FramePadding.X * 2.0f, label_size.Y + style->FramePadding.Y * 2.0f);
             var rectEnd = rectStart + size;
 
-            ImGuiAPI.ItemSize(in size, 0);
-            if (!ImGuiAPI.ItemAdd(in rectStart, in rectEnd, id, 0))
-                return false;
-
             bool hovered = false, held = false;
-            var pressed = ImGuiAPI.ButtonBehavior(in rectStart, in rectEnd, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+            var pressed = ImGuiAPI.ButtonBehavior(in rectStart, in rectEnd, id, ref hovered, ref held, false, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
             var color = StyleConfig.Instance.ToolButtonTextColor;
             if (pressed)
                 color = StyleConfig.Instance.ToolButtonTextColor_Press;
@@ -283,12 +271,8 @@ namespace EngineNS.EGui.UIProxy
             size = ImGuiAPI.CalcItemSize(ref size, label_size.X + style->FramePadding.X * 2.0f, label_size.Y + style->FramePadding.Y * 2.0f);
             var rectEnd = rectStart + size;
 
-            ImGuiAPI.ItemSize(in size, 0);
-            if (!ImGuiAPI.ItemAdd(in rectStart, in rectEnd, id, 0))
-                return false;
-
             bool hovered = false, held = false;
-            var pressed = ImGuiAPI.ButtonBehavior(in rectStart, in rectEnd, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+            var pressed = ImGuiAPI.ButtonBehavior(in rectStart, in rectEnd, id, ref hovered, ref held, false, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
             var color = StyleConfig.Instance.ToolButtonTextColor;
             if (pressed)
                 color = hightLightColor;
@@ -326,12 +310,8 @@ namespace EngineNS.EGui.UIProxy
             size = ImGuiAPI.CalcItemSize(ref size, label_size.X + style->FramePadding.X * 2.0f, label_size.Y + style->FramePadding.Y * 2.0f);
             var rectEnd = rectStart + size;
 
-            ImGuiAPI.ItemSize(in size, 0);
-            if (!ImGuiAPI.ItemAdd(in rectStart, in rectEnd, id, 0))
-                return false;
-
             bool hovered = false, held = false;
-            var pressed = ImGuiAPI.ButtonBehavior(in rectStart, in rectEnd, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+            var pressed = ImGuiAPI.ButtonBehavior(in rectStart, in rectEnd, id, ref hovered, ref held, false, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
             var color = textColor;
             var bgColor = backgroundColor;
             if (pressed)
@@ -366,12 +346,8 @@ namespace EngineNS.EGui.UIProxy
             size = ImGuiAPI.CalcItemSize(ref size, label_size.X + style->FramePadding.X * 2.0f, label_size.Y + style->FramePadding.Y * 2.0f);
             var rectEnd = rectStart + size;
 
-            ImGuiAPI.ItemSize(in size, 0);
-            if (!ImGuiAPI.ItemAdd(in rectStart, in rectEnd, id, 0))
-                return false;
-
             bool hovered = false, held = false;
-            var pressed = ImGuiAPI.ButtonBehavior(in rectStart, in rectEnd, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+            var pressed = ImGuiAPI.ButtonBehavior(in rectStart, in rectEnd, id, ref hovered, ref held, false, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
             if(pressed)
                 toggle = !toggle;
             var color = StyleConfig.Instance.ToolButtonTextColor;

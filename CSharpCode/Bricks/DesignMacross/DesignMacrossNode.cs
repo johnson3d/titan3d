@@ -1,5 +1,6 @@
 ﻿using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
+using EngineNS.Graphics.Pipeline;
 using EngineNS.Thread.Async;
 using System;
 using System.Collections.Generic;
@@ -102,14 +103,19 @@ namespace EngineNS.DesignMacross
                 }
             }
         }
+        public override bool OnTickLogic(TtWorld world, TtRenderPolicy policy)
+        {
+            if (MacrossGetter != null && MacrossGetter.Get() != null && MacrossGetter.Get().IsInitialized)
+            {
+                MacrossGetter.Get().PreTick(world.DeltaTimeSecond);
+                MacrossGetter.Get().Tick(world.DeltaTimeSecond);
+                MacrossGetter.Get().AfterTick(world.DeltaTimeSecond);
+            }
+            return base.OnTickLogic(world, policy);
+        }
         public override void TickLogic(TtNodeTickParameters args)
         {
-            if(MacrossGetter != null && MacrossGetter.Get() != null && MacrossGetter.Get().IsInitialized)
-            {
-                MacrossGetter.Get().PreTick(args.World.DeltaTimeSecond);
-                MacrossGetter.Get().Tick(args.World.DeltaTimeSecond);
-                MacrossGetter.Get().AfterTick(args.World.DeltaTimeSecond);
-            }
+            
             base.TickLogic(args);
         }
     }

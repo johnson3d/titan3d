@@ -107,7 +107,10 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Operator
             if(data.NodeGraph.PinHasLinker(Right))
             {
                 var opPin = data.NodeGraph.GetOppositePin(Right);
-                data.NodeGraph.GetOppositePinNode(Right).BuildStatements(opPin, ref data);
+                if (opPin != null)
+                {
+                    data.NodeGraph.GetOppositePinNode(Right).BuildStatements(opPin, ref data);
+                }
             }
         }
         public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)

@@ -42,7 +42,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.NativeSuper.Commit(cmdlist, false);
         }
-        public void Commit(UCommandList cmdlist)
+        public void Commit(TtCommandList cmdlist)
         {
             mCoreObject.NativeSuper.Commit(cmdlist.mCoreObject, false);
         }
@@ -167,7 +167,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.NativeSuper.Commit(cmdlist, false);
         }
-        public void Commit(UCommandList cmdlist)
+        public void Commit(TtCommandList cmdlist)
         {
             mCoreObject.NativeSuper.Commit(cmdlist.mCoreObject, false);
         }
@@ -266,7 +266,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.NativeSuper.Commit(cmdlist, false);
         }
-        public void Commit(UCommandList cmdlist)
+        public void Commit(TtCommandList cmdlist)
         {
             mCoreObject.NativeSuper.Commit(cmdlist.mCoreObject, false);
         }

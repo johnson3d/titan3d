@@ -32,7 +32,7 @@ namespace EngineNS.Graphics.Pipeline
             var wtType = Rtti.TtTypeDesc.TypeOf(engine.Config.MainWindowType).SystemType;
             if (wtType == null)
             {
-                wtType = typeof(EngineNS.Editor.UMainEditorApplication);
+                wtType = typeof(EngineNS.Editor.TtMainEditorApplication);
             }
             SlateApplication = Rtti.TtTypeDescManager.CreateInstance(wtType) as TtSlateApplication;
             var winRect = engine.Config.MainWindow;

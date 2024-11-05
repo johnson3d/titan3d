@@ -79,7 +79,7 @@ namespace EngineNS.NxRHI
         unsafe void Map(uint subRes, FMappedSubResource* mapped, bool forRead);
         unsafe void Umap(uint subRes);
         void TransitionTo(ICommandList cmd, EGpuResourceState state);
-        void TransitionTo(UCommandList cmd, EGpuResourceState state);
+        void TransitionTo(TtCommandList cmd, EGpuResourceState state);
         unsafe void UpdateGpuData(NxRHI.ICommandList cmd, uint subRes, void* pData, EngineNS.NxRHI.FSubResourceFootPrint* footPrint);
         void SetDebugName(string name);
         EGpuResourceState GpuState
@@ -147,7 +147,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.NativeSuper.TransitionTo(cmd, state);
         }
-        public void TransitionTo(UCommandList cmd, EGpuResourceState state)
+        public void TransitionTo(TtCommandList cmd, EGpuResourceState state)
         {
             mCoreObject.NativeSuper.TransitionTo(cmd.mCoreObject, state);
         }
@@ -238,7 +238,7 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.NativeSuper.TransitionTo(cmd, state);
         }
-        public void TransitionTo(UCommandList cmd, EGpuResourceState state)
+        public void TransitionTo(TtCommandList cmd, EGpuResourceState state)
         {
             mCoreObject.NativeSuper.TransitionTo(cmd.mCoreObject, state);
         }

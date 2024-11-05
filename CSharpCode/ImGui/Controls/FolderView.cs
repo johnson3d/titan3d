@@ -132,6 +132,10 @@ namespace EngineNS.EGui.Controls
             if (root == CurrentDir)
                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
             TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)EGui.Slate.UBaseRenderer.enFont.Font_Bold_13px);
+            if (CurrentDir.Address.Contains(root.Address))
+            {
+                flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen;
+            }
             var treeNodeResult = ImGuiAPI.TreeNodeEx(root.RNameType.ToString(), flags);
             TtEngine.Instance.GfxDevice.SlateRenderer.PopFont();
             DrawDirContextMenu(root.Address);
@@ -278,7 +282,13 @@ namespace EngineNS.EGui.Controls
             if (rn == CurrentDir)
             {
                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
+                //ImGuiAPI.SetScrollHereX(0.5f);
+                //ImGuiAPI.SetScrollHereY(0.5f);
                 textColor = 0xffffffff;
+            }
+            else if (CurrentDir.Address.Contains(path))
+            {
+                flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen;
             }
 
             var style = ImGuiAPI.GetStyle();

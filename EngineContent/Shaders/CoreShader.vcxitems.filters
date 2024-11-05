@@ -97,6 +97,9 @@
     <Filter Include="ShadingEnv\Deferred\MultiViewID">
       <UniqueIdentifier>{d195b1b5-9fd6-465a-8be4-0c73f0ad731b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Bricks\Procedure\Lut3S">
+      <UniqueIdentifier>{1e9851e3-ede9-4466-ac65-423a8ef88742}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -415,7 +418,7 @@
     <None Include="$(MSBuildThisFileDirectory)Compute\MacrossComputeShadingEnvImpl.cginc">
       <Filter>Compute</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\cache\debugutility\engine_preprosessors.cginc">
+    <None Include="$(MSBuildThisFileDirectory)..\..\cache\debugutility\engine_preprocessors.cginc">
       <Filter>Inc</Filter>
     </None>
     <None Include="$(MSBuildThisFileDirectory)slate\Slate_TextureCubeViewer.cginc" />
@@ -424,6 +427,9 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)CBuffer\VarBase_PerSkinMesh.cginc">
       <Filter>CBuffer</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\Procedure\Lut3S\SkinLUT3SGen.cginc">
+      <Filter>Bricks\Procedure\Lut3S</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

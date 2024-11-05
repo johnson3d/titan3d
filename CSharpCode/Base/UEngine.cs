@@ -334,7 +334,7 @@ namespace EngineNS
                 Config.DefaultTexture = RName.GetRName("texture/checkboard.txpic", RName.ERNameType.Engine);
                 Config.DefaultMaterial = RName.GetRName("material/SysDft.material", RName.ERNameType.Engine);
                 Config.DefaultMaterialInstance = RName.GetRName("material/box_wite.uminst", RName.ERNameType.Game);
-                Config.MainWindowType = Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Editor.UMainEditorApplication));
+                Config.MainWindowType = Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Editor.TtMainEditorApplication));
                 Config.MainRPolicyName = RName.GetRName("utest/deferred.rpolicy", RName.ERNameType.Game);
                 Config.SimpleRPolicyName = RName.GetRName("graphics/deferred_simple.rpolicy", RName.ERNameType.Engine);                
                 Config.GlobalConfigs.Add(new TtGlobalConfig()

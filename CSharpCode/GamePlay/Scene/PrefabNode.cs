@@ -79,7 +79,7 @@ namespace EngineNS.GamePlay.Scene
         {
             return "Prefab";
         }
-        protected override Color4b GetBorderColor()
+        public override Color4b GetBorderColor()
         {
             return TtEngine.Instance.EditorInstance.Config.PrefabBoderColor;
         }

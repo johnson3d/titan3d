@@ -45,7 +45,7 @@ namespace EngineNS.Plugins.GameTasks
         public AGameTaskDescriptorManager TaskDescriptorManager = new AGameTaskDescriptorManager();
         public void OnLoadedPlugin()
         {
-            var editor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+            var editor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
             if (editor != null)
             {
                 editor.ContentBrowser.OnTypeChanged();
@@ -53,7 +53,7 @@ namespace EngineNS.Plugins.GameTasks
         }
         public void OnUnloadPlugin()
         {
-            var editor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.UMainEditorApplication;
+            var editor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
             if (editor != null)
             {
                 editor.ContentBrowser.OnTypeChanged();
@@ -88,7 +88,7 @@ namespace EngineNS.Plugins.GameTasks
         //    base.OnDrawSnapshot(in cmdlist, ref start, ref end);
         //    cmdlist.AddText(in start, 0xFFFFFFFF, "vms", null);
         //}
-        protected override Color4b GetBorderColor()
+        public override Color4b GetBorderColor()
         {
             return Color4b.LightYellow;
         }

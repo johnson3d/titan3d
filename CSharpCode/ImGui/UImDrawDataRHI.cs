@@ -66,7 +66,7 @@ namespace EngineNS.EGui
 
     public class UImDrawDataRHI : IDisposable
     {
-        public NxRHI.UCommandList CmdList;
+        public NxRHI.TtCommandList CmdList;
         public NxRHI.TtEffectBinder FontTextureBindInfo;
         public NxRHI.TtCbView FontCBuffer;
         public NxRHI.TtGraphicDraw Drawcall;

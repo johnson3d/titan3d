@@ -11,7 +11,7 @@ namespace EngineNS.Bricks.Particle
         {
             get => TtNebulaParticle.AssetExt;
         }
-        protected override Color4b GetBorderColor()
+        public override Color4b GetBorderColor()
         {
             return TtEngine.Instance.EditorInstance.Config.NebulaBoderColor;
         }

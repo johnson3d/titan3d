@@ -85,9 +85,9 @@ namespace EngineNS.Animation.SceneNode
             var pose = meshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
             var skinMDfQueue = meshNode.Mesh.MdfQueue as Graphics.Mesh.UMdfSkinMesh;
 
-            skinMDfQueue.SkinModifier.RuntimePose = SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(pose);
+            meshNode.RuntimePose = SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(pose);
             Player.BindingPose(pose);
-            Player.RuntimePose = skinMDfQueue.SkinModifier.RuntimePose;
+            Player.RuntimePose = meshNode.RuntimePose;
 
         }
         GamePlay.Movemnet.TtMovement Movement = null;

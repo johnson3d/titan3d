@@ -20,7 +20,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Node\GpuNode\GpuNodeBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\GpuNode\Height2FlowMap.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\GpuNode\Height2Water.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\GpuNode\Lut3SGen.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\GpuShading\GpuFetch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Node\GpuShading\GpuLUT3S.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\GpuShading\GpuTerrainShading.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\Morphology.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Node\Algorithm\NoiseNode.cs" />

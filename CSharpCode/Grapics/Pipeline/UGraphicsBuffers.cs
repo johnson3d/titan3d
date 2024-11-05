@@ -489,19 +489,11 @@ namespace EngineNS.Graphics.Pipeline
                 cBuffer.SetMatrix(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gViewer2ShadowMtxArray, 3, in shadowNode.mViewer2ShadowMtxArray[3]);
 
                 cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gShadowTransitionScaleArray, in shadowNode.mShadowTransitionScaleVec);
-                cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gCsmNum, in shadowNode.mCsmNum);
+                cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.CsmNum, in shadowNode.mCsmNum);
             }
 
-            var dirLight = world.DirectionLight;
-            //dirLight.mDirection = MathHelper.RandomDirection();
-            var dir = dirLight.Direction;
-            var gDirLightDirection_Leak = new Vector4(dir.X, dir.Y, dir.Z, dirLight.mSunLightLeak);
-            cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gDirLightDirection_Leak, in gDirLightDirection_Leak);
-            var gDirLightColor_Intensity = new Vector4(dirLight.SunLightColor.X, dirLight.SunLightColor.Y, dirLight.SunLightColor.Z, dirLight.mSunLightIntensity);
-            cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gDirLightColor_Intensity, in gDirLightColor_Intensity);
-
-            cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.mSkyLightColor, in dirLight.mSkyLightColor);
-            cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.mGroundLightColor, in dirLight.mGroundLightColor);
+            var dirLight = world.DirectionLight.mDirLight;
+            cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.DirLight, in dirLight);
 
             float EnvMapMaxMipLevel = 10.0f;
             cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gEnvMapMaxMipLevel, in EnvMapMaxMipLevel);

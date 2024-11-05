@@ -75,7 +75,7 @@ namespace EngineNS.Graphics.Mesh
         //    base.OnDrawSnapshot(in cmdlist, ref start, ref end);
         //    cmdlist.AddText(in start, 0xFFFFFFFF, "ums", null);
         //}
-        protected override Color4b GetBorderColor()
+        public override Color4b GetBorderColor()
         {
             return TtEngine.Instance.EditorInstance.Config.MaterialMeshBoderColor;
         }

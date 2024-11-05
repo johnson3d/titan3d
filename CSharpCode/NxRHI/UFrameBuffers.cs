@@ -147,11 +147,11 @@ namespace EngineNS.NxRHI
             }
             return mBackFrameBuffers[index];
         }
-        public TtFrameBuffers BeginFrameBuffers(UCommandList cmd)
+        public TtFrameBuffers BeginFrameBuffers(TtCommandList cmd)
         {
             return BeginFrameBuffers(cmd.mCoreObject);
         }
-        public void EndFrameBuffers(UCommandList cmd)
+        public void EndFrameBuffers(TtCommandList cmd)
         {
             EndFrameBuffers(cmd.mCoreObject);
         }

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Mobile
 {
-    public class UFinalCopyShading : Shader.TtGraphicsShadingEnv
+    public class TtFinalCopyShading : Shader.TtGraphicsShadingEnv
     {
         public UPermutationItem DisableAO
         {
@@ -38,7 +38,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             get;
             set;
         }
-        public UFinalCopyShading()
+        public TtFinalCopyShading()
         {
             CodeName = RName.GetRName("shaders/ShadingEnv/Mobile/MobileCopyEditor.cginc", RName.ERNameType.Engine);
 
@@ -95,7 +95,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
 
             var Manager = policy.TagObject as TtRenderPolicy;
 
-            var node = Manager.FindFirstNode<UFinalCopyNode>();
+            var node = Manager.FindFirstNode<TtFinalCopyNode>();
             var index = drawcall.FindBinder("gBaseSceneView");
             if (index.IsValidPointer)
             {
@@ -125,14 +125,14 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
     }
     [Bricks.CodeBuilder.ContextMenu("FinalCopy", "Mobile\\FinalCopy", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UFinalCopyNode : Common.TtSceenSpaceNode
+    public class TtFinalCopyNode : Common.TtSceenSpaceNode
     {
         public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
         //public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");
 
         public TtRenderGraphPin PickPinIn = TtRenderGraphPin.CreateInput("Pick");
         public TtRenderGraphPin VignettePinIn = TtRenderGraphPin.CreateInput("Vignette");
-        public UFinalCopyNode()
+        public TtFinalCopyNode()
         {
             Name = "UFinalCopyNode";
         }
@@ -147,7 +147,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
             //result by base
         }
-        public UFinalCopyShading mBasePassShading;
+        public TtFinalCopyShading mBasePassShading;
         public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mBasePassShading;
@@ -155,7 +155,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
-            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UFinalCopyShading>();
+            mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtFinalCopyShading>();
         }
     }
 }

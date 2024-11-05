@@ -1,9 +1,22 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EngineNS.EGui.Controls
 {
+    public struct ImguiIDHolder : IDisposable
+    {
+        public ImguiIDHolder(in string idStr)
+        {
+            ImGuiAPI.PushID(idStr);
+        }
+        public void Dispose()
+        {
+            ImGuiAPI.PopID();
+        }
+    }
+
     public class CtrlUtility
     {
         public static void DrawHelper(string desc)

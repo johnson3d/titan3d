@@ -7,21 +7,100 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 {
     public partial class UUniformVar : TtNodeBase
     {
-        public Rtti.TtTypeDesc VarType;
-        [Browsable(false)]
-        public PinOut Out { get; set; } = new PinOut();
-        [Browsable(false)]
-        public PinOut OutXY { get; set; } = new PinOut();
-        [Browsable(false)]
-        public PinOut OutXYZ { get; set; } = new PinOut();
-        [Browsable(false)]
-        public PinOut OutX { get; set; } = new PinOut();
-        [Browsable(false)]
-        public PinOut OutY { get; set; } = new PinOut();
-        [Browsable(false)]
-        public PinOut OutZ { get; set; } = new PinOut();
-        [Browsable(false)]
-        public PinOut OutW { get; set; } = new PinOut();
+        Rtti.TtTypeDesc mVarType;
+        [Rtti.Meta]
+        public Rtti.TtTypeDesc VarType 
+        {
+            get => mVarType;
+            set
+            {
+                mVarType = value;
+                BuildOutPins();
+            }
+        }
+        public void BuildOutPins()
+        {
+            Outputs.Clear();
+            Swizzles.Clear();
+            if (VarType.SystemType == typeof(float))
+            {
+                var Out = new PinOut();
+                Out.Name = "v";
+                Out.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
+                Out.MultiLinks = true;
+                Out.Tag = typeof(float);
+                this.AddPinOut(Out);
+                Swizzles.Add(Out);
+            }
+            else if (VarType.SystemType == typeof(uint))
+            {
+                var Out = new PinOut();
+                Out.Name = "v";
+                Out.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
+                Out.MultiLinks = true;
+                Out.Tag = typeof(uint);
+                this.AddPinOut(Out);
+                Swizzles.Add(Out);
+            }
+            else if (VarType.SystemType == typeof(Vector2))
+            {
+                var Out = new PinOut();
+                Out.Name = "v";
+                Out.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
+                Out.MultiLinks = true;
+                Out.Tag = typeof(Vector2);
+                this.AddPinOut(Out);
+                Swizzles.Add(Out);
+            }
+            else if (VarType.SystemType == typeof(Vector3))
+            {
+                var Out = new PinOut();
+                Out.Name = "v";
+                Out.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
+                Out.MultiLinks = true;
+                Out.Tag = typeof(Vector3);
+                this.AddPinOut(Out);
+                Swizzles.Add(Out);
+            }
+            else if (VarType.SystemType == typeof(Vector4))
+            {
+                var Out = new PinOut();
+                Out.Name = "v";
+                Out.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
+                Out.MultiLinks = true;
+                Out.Tag = typeof(Vector4);
+                this.AddPinOut(Out);
+                Swizzles.Add(Out);
+            }
+            else if (VarType.IsValueType)
+            {
+                {
+                    var Out = new PinOut();
+                    Out.Name = "Self";
+                    Out.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
+                    Out.MultiLinks = true;
+                    Out.Tag = VarType.SystemType;
+                    this.AddPinOut(Out);
+                    Swizzles.Add(Out);
+                }
+                var members = VarType.SystemType.GetFields();
+                foreach (var i in members)
+                {
+                    var attrs = i.GetCustomAttributes(typeof(Editor.ShaderCompiler.TtShaderDefineAttribute), false);
+                    if (attrs.Length == 0)
+                        continue;
+                    var attr = attrs[0] as Editor.ShaderCompiler.TtShaderDefineAttribute;
+                    var Out = new PinOut();
+                    Out.Name = attr.ShaderName;
+                    Out.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
+                    Out.MultiLinks = true;
+                    Out.Tag = i.FieldType;
+                    this.AddPinOut(Out);
+                    Swizzles.Add(Out);
+                }
+            }
+        }
+        public List<PinOut> Swizzles { get; set; } = new List<PinOut>();
         public UUniformVar()
         {
             VarType = Rtti.TtTypeDescGetter<float>.TypeDesc;
@@ -30,65 +109,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             Icon.Color = 0xFF80FF40;
             TitleColor = 0xFF804020;
             BackColor = 0x80808080;
-
-            //Name = $"{Value}";
-
-            Out.Name = "v";
-            Out.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
-            Out.MultiLinks = true;
-            this.AddPinOut(Out);
-
-            OutXY.Name = "xy";
-            OutXY.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
-            OutXY.MultiLinks = true;
-            this.AddPinOut(OutXY);
-
-            OutXYZ.Name = "xyz";
-            OutXYZ.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
-            OutXYZ.MultiLinks = true;
-            this.AddPinOut(OutXYZ);
-            OutX.Name = "x";
-            OutX.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
-            OutX.MultiLinks = true;
-            this.AddPinOut(OutX);
-            OutY.Name = "y";
-            OutY.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
-            OutY.MultiLinks = true;
-            this.AddPinOut(OutY);
-            OutZ.Name = "z";
-            OutZ.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
-            OutZ.MultiLinks = true;
-            this.AddPinOut(OutZ);
-            OutW.Name = "w";
-            OutW.LinkDesc = TtMaterialEditorStyles.Instance.NewInOutPinDesc();
-            OutW.MultiLinks = true;
-            this.AddPinOut(OutW);
         }
         public override Rtti.TtTypeDesc GetOutPinType(PinOut pin)
         {
-            if(pin == OutXY)
-            {
-                return Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.Vector2));
-            }
-            else if (pin == OutXYZ)
-            {
-                return Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.Vector3));
-            }
-            else if((pin == OutX) ||
-                    (pin == OutY) ||
-                    (pin == OutZ) ||
-                    (pin == OutW))
-            {
-                return Rtti.TtTypeDesc.TypeOf(typeof(float));
-            }
-            
-            return VarType;
+            return Rtti.TtTypeDesc.TypeOf(pin.Tag as System.Type);
         }
         public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)
         {
-            if (VarType == null)
+            var pinType = stayPin.Tag as System.Type;
+            if (VarType == null || pinType == null)
                 return;
-            EGui.Controls.CtrlUtility.DrawHelper($"VarType:{VarType.ToString()}");
+            EGui.Controls.CtrlUtility.DrawHelper($"VarType:{pinType.ToString()}");
         }
         public override bool CanLinkFrom(PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
@@ -107,68 +138,45 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             return true;
         }
-        public static string Type2HLSLType(Type type, bool IsHalfPrecision)
-        {
-            if (type == typeof(float))
-                return IsHalfPrecision ? "half" : "float";
-            else if (type == typeof(Vector2))
-                return IsHalfPrecision ? "half2" : "float2";
-            else if (type == typeof(Vector3))
-                return IsHalfPrecision ? "half3" : "float3";
-            else if (type == typeof(Vector4))
-                return IsHalfPrecision ? "half4" : "float4";
-            return type.FullName;
-        }
-        //public virtual IExpression GetVarExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
-        //{
-        //    DefineVar Var = new DefineVar();
-        //    Var.IsLocalVar = false;
-        //    Var.VarName = this.Name;
-        //    Var.DefType = Type2HLSLType(VarType.SystemType, false);
-
-        //    return new OpUseDefinedVar(Var);
-        //}
-        //public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
-        //{
-        //    var expr = GetVarExpr(funGraph, cGen, oPin, bTakeResult);
-        //    if (oPin == Out)
-        //    {
-        //        return expr;
-        //    }
-        //    return null;
-        //}
-
+        
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
         }
 
         public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
         {
-            if(pin == OutXY)
+            if (VarType.SystemType == typeof(float))
+            {
+                return new TtVariableReferenceExpression(Name);
+            }
+            else if (VarType.SystemType == typeof(uint))
+            {
+                return new TtVariableReferenceExpression(Name);
+            }
+            else if (VarType.SystemType == typeof(Vector2))
             {
                 return new TtVariableReferenceExpression("xy", new TtVariableReferenceExpression(Name));
             }
-            else if (pin == OutXYZ)
+            else if (VarType.SystemType == typeof(Vector3))
             {
                 return new TtVariableReferenceExpression("xyz", new TtVariableReferenceExpression(Name));
             }
-            else if (pin == OutX)
+            else if (VarType.SystemType == typeof(Vector4))
             {
-                return new TtVariableReferenceExpression("x", new TtVariableReferenceExpression(Name));
+                return new TtVariableReferenceExpression("xyzw", new TtVariableReferenceExpression(Name));
             }
-            else if (pin == OutY)
+            else 
             {
-                return new TtVariableReferenceExpression("y", new TtVariableReferenceExpression(Name));
+                if(pin.Name == "Self")
+                {
+                    return new TtVariableReferenceExpression(Name);
+                }
+                else
+                {
+                    var outType = pin.Tag as System.Type;
+                    return new TtVariableReferenceExpression(pin.Name, new TtVariableReferenceExpression(Name));
+                }
             }
-            else if (pin == OutZ)
-            {
-                return new TtVariableReferenceExpression("z", new TtVariableReferenceExpression(Name));
-            }
-            else if (pin == OutW)
-            {
-                return new TtVariableReferenceExpression("w", new TtVariableReferenceExpression(Name));
-            }
-            return new TtVariableReferenceExpression(Name);
         }
     }
 }

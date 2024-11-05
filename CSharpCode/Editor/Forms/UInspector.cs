@@ -4,13 +4,13 @@ using System.Text;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UInspector : IRootForm, EGui.IPanel
+    public class TtInspector : IRootForm, EGui.IPanel
     {
-        public UInspector()
+        public TtInspector()
         {
             TtEngine.RootFormManager.RegRootForm(this);
         }
-        public bool Visible { get; set; } = true;
+        public bool Visible { get; set; } = false;
         public uint DockId { get => mPropertyGrid.DockId; set => mPropertyGrid.DockId = value; }
         public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond { get => mPropertyGrid.DockCond; set => mPropertyGrid.DockCond = value; }

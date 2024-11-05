@@ -19,14 +19,14 @@ void GetDirLightingColor(out half3 OutDirLightDiffuseShading, out half3 OutDirLi
 
 	half3 BaseShading = half3(0.0h, 0.0h, 0.0h);
 
-	half3 L = -(half3)normalize(gDirLightDirection_Leak.xyz);
+    half3 L = -(half3) normalize(DirLight.Direction.xyz);
 	half3 V = (half3)normalize(CameraPosition - WorldPos);
-	half3 Cdir = (half3)gDirLightColor_Intensity.rgb;
-	half  Idir = (half)gDirLightColor_Intensity.w;
+    half3 Cdir = (half3) DirLight.SunLightColor.rgb;
+    half Idir = (half) DirLight.SunLightIntensity;
 	half Ienv_light = Idir * 0.2h;
-	half3 Csky = (half3)mSkyLightColor;
-	half3 Cground = (half3)mGroundLightColor;
-	half DirLightLeak = (half)gDirLightDirection_Leak.w;
+	half3 Csky = (half3)DirLight.SkyLightColor;
+    half3 Cground = (half3) DirLight.GroundLightColor;
+    half DirLightLeak = (half) DirLight.SunLightLeak;
 
 	half Sdiff = 1.0h - Metallic;
 	half3 OptDiffShading = Sdiff * Albedo;
@@ -54,12 +54,12 @@ half3 GetSkyColor(half3 Albedo, MTL_OUTPUT mtl, float ShadowValue)
 	half3 OptDiffShading = Sdiff * Albedo;
 
 	half3 N = normalize((half3)mtl.mNormal);
-	half3 L = -(half3)normalize(gDirLightDirection_Leak.xyz);
+	half3 L = -(half3)normalize(DirLight.Direction.xyz);
 	half NoLsigned = dot(N, L);
 	half NoL = max(NoLsigned, 0.0h);
-	half3 Csky = (half3)mSkyLightColor;
-	half3 Cground = (half3)mGroundLightColor;
-	half  Idir = (half)gDirLightColor_Intensity.w;
+	half3 Csky = (half3)DirLight.SkyLightColor;
+	half3 Cground = (half3)DirLight.GroundLightColor;
+	half  Idir = (half)DirLight.SunLightIntensity;
 	half Ienv_light = Idir * 0.2h;
 
 	half SkyAtten = min(1.0h, 2.0h - NoL - ShadowValue);

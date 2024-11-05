@@ -214,7 +214,7 @@ namespace EngineNS.Bricks.VirtualTexture
             ActiveTexIDs.Clear();
             return (AddTexIDs.Count + RemoveTexIDs.Count + DirtyTexIDs.Count) > 0;
         }
-        public void TickSync(NxRHI.UCommandList cmd)
+        public void TickSync(NxRHI.TtCommandList cmd)
         {
             if (ProcessChanged() == false)
                 return;
@@ -251,7 +251,7 @@ namespace EngineNS.Bricks.VirtualTexture
             TextureSlotBuffer.Flush2GPU(cmd);
             TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(cmd, NxRHI.EQueueType.QU_Transfer);
         }
-        public void UpLoadRVT(NxRHI.UCommandList cmd, TtRVT rvt)
+        public void UpLoadRVT(NxRHI.TtCommandList cmd, TtRVT rvt)
         {
             //Copy rvt to
             //TextureArrays[rvt.SlotDesc.TextureIndex]

@@ -19,9 +19,6 @@ VK_BIND(5) cbuffer cbPerMesh DX_BIND_B(5)
 	int PointLightNum;
 
     int ObjectFLags_2Bit;
-
-	//float4 PointLightPos_RadiusInv[4];
-	//float4 PointLightColor_Intensity[4];
 	
 	bool IsAcceptShadow()
 	{

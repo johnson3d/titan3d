@@ -17,7 +17,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         {
             return "RPolicy";
         }
-        protected override Color4b GetBorderColor()
+        public override Color4b GetBorderColor()
         {
             return TtEngine.Instance.EditorInstance.Config.RenderPolicyBoderColor;
         }

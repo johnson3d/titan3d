@@ -38,7 +38,7 @@ namespace EngineNS.Bricks.Font
         {
             return false;
         }
-        protected override Color4b GetBorderColor()
+        public override Color4b GetBorderColor()
         {
             return TtEngine.Instance.EditorInstance.Config.FontSDFBoderColor;
         }

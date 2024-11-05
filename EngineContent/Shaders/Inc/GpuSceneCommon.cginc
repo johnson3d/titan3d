@@ -2,26 +2,8 @@
 #define _GPUSCENE_COMMON_INC_
 #include "Math.cginc"
 
-struct FGpuSceneDesc
-{
-	uint			ScreenAverageColorI;
-	uint			AverageColorDivider;	
-	float			ScreenAverageBrightness;	
-	float			PrevScreenAverageBrightness;
-
-	float			EyeAdapterTime;
-	float			EyeAdapter;
-	int				FreeGroupIndex;
-};
-
 RWStructuredBuffer<FGpuSceneDesc> GpuSceneDesc DX_AUTOBIND;
 StructuredBuffer<FGpuSceneDesc> GpuSceneDescSRV DX_AUTOBIND;
-
-struct FPointLight
-{
-    float4 PositionAndRadius;
-    float4 ColorAndIntensity;
-};
 
 struct FRVTArray
 {

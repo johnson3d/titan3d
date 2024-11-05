@@ -450,4 +450,59 @@ namespace EngineNS.Graphics.Pipeline.Shader
             Quat = mat.Rotation;
         }
     };
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
+    [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FDirLight")]
+    public struct FDirLight
+    {
+        public FDirLight()
+        {
+            SunLightLeak = 0.05f;
+            SunLightIntensity = 2.5f;
+        }
+        [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "Direction")]
+        public Vector3 Direction;
+        [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "SunLightLeak")]
+        public float SunLightLeak;
+        [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "SunLightColor")]
+        public Vector3 SunLightColor;
+        [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "SunLightIntensity")]
+        public float SunLightIntensity;
+        [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "SkyLightColor")]
+        public Vector3 SkyLightColor;
+        [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "SkyLightIntensity")]
+        public float SkyLightIntensity;
+        [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "GroundLightColor")]
+        public Vector3 GroundLightColor;
+        [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "GroundLightIntensity")]
+        public float GroundLightIntensity;
+    }
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
+    [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FPointLight")]
+    public struct FPointLight
+    {
+        [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "PositionAndRadius")]
+        public Vector4 PositionAndRadius;
+        [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "ColorAndIntensity")]
+        public Vector4 ColorAndIntensity;
+    }
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
+    [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FGpuSceneDesc")]
+    public struct FGpuSceneDesc
+    {
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "ScreenAverageColorI")]
+        public uint ScreenAverageColorI;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "AverageColorDivider")]
+        public uint AverageColorDivider;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "ScreenAverageBrightness")]
+        public float ScreenAverageBrightness;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "PrevScreenAverageBrightness")]
+        public float PrevScreenAverageBrightness;
+
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "EyeAdapterTime")]
+        public float EyeAdapterTime;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "EyeAdapter")]
+        public float EyeAdapter;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FreeGroupNum")]
+        public int FreeGroupNum;
+    }
 }

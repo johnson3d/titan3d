@@ -10,18 +10,13 @@ namespace EngineNS.GamePlay
     public class TtDirectionLight
         : IO.BaseSerializer
     {
-        public Vector3 mDirection;
-        public float mSunLightLeak = 0.05f;
-        public Vector3 mSunLightColor;
-        public float mSunLightIntensity = 2.5f;
-        public Vector3 mSkyLightColor;
-        public Vector3 mGroundLightColor;
+        public Graphics.Pipeline.Shader.FDirLight mDirLight;
         [Rtti.Meta]
         [Category("Option")]
         public Vector3 Direction
         {
-            get => mDirection;
-            set => mDirection = value;
+            get => mDirLight.Direction;
+            set => mDirLight.Direction = value;
         }
 
         [EGui.Controls.PropertyGrid.Color3PickerEditor]
@@ -29,10 +24,10 @@ namespace EngineNS.GamePlay
         [Category("Option")]
         public Vector3 SunLightColor
         {
-            get => mSunLightColor;
+            get => mDirLight.SunLightColor;
             set
             {
-                mSunLightColor = value;
+                mDirLight.SunLightColor = value;
             }
         }
         [EGui.Controls.PropertyGrid.Color3PickerEditor]
@@ -40,10 +35,10 @@ namespace EngineNS.GamePlay
         [Category("Option")]
         public Vector3 SkyLightColor
         {
-            get => mSkyLightColor;
+            get => mDirLight.SkyLightColor;
             set
             {
-                mSkyLightColor = value;
+                mDirLight.SkyLightColor = value;
             }
         }
         [EGui.Controls.PropertyGrid.Color3PickerEditor]
@@ -51,34 +46,34 @@ namespace EngineNS.GamePlay
         [Category("Option")]
         public Vector3 GroundLightColor
         {
-            get => mGroundLightColor;
+            get => mDirLight.GroundLightColor;
             set
             {
-                mGroundLightColor = value;
+                mDirLight.GroundLightColor = value;
             }
         }
         [Rtti.Meta]
         [Category("Option")]
         public float SunLightIntensity
         {
-            get => mSunLightIntensity;
+            get => mDirLight.SunLightIntensity;
             set
             {
-                mSunLightIntensity = value;
+                mDirLight.SunLightIntensity = value;
             }
         }
 
         public TtDirectionLight()
         {
-            mDirection = new Vector3(1, -1, 1);
-            mDirection.Normalize();
-            mSunLightLeak = 0.05f;
+            mDirLight.Direction = new Vector3(1, -1, 1);
+            mDirLight.Direction.Normalize();
+            mDirLight.SunLightLeak = 0.05f;
 
-            mSunLightColor = new Vector3(1, 1, 1);
-            mSunLightIntensity = 2.5f;
-                    
-            mSkyLightColor = new Vector3(0.5f, 0.5f, 0.5f);
-            mGroundLightColor = new Vector3(0.5f, 0.5f, 0.5f);
+            mDirLight.SunLightColor = new Vector3(1, 1, 1);
+            mDirLight.SunLightIntensity = 2.5f;
+
+            mDirLight.SkyLightColor = new Vector3(0.5f, 0.5f, 0.5f);
+            mDirLight.GroundLightColor = new Vector3(0.5f, 0.5f, 0.5f);
         }
     }
 }

@@ -82,7 +82,7 @@ namespace EngineNS.Graphics.Pipeline
             Dirty = true;
             DataArray.Clear();
         }
-        public unsafe void Flush2GPU(NxRHI.UCommandList cmd)
+        public unsafe void Flush2GPU(NxRHI.TtCommandList cmd)
         {
             if (cmd == null)
             {

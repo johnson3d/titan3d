@@ -384,12 +384,8 @@ namespace EngineNS.UI.Bind
                 var start = new Vector2(cursorPos.X + style->FramePadding.X, cursorPos.Y + style->FramePadding.Y);
                 var end = new Vector2(start.X + size.X, start.Y + size.Y);
                 //drawList.AddRect(in start, in end, 0xff0000ff, 2.0f, ImDrawFlags_.ImDrawFlags_None, 2.0f);
-                ImGuiAPI.ItemSize(in size, 0);
-                if (!ImGuiAPI.ItemAdd(in start, in end, id, 0))
-                    return;
                 bool hovered = false, held = false;
-                //var pressed = ImGuiAPI.ButtonBehavior(in start, in end, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_.ImGuiButtonFlags_Internal_PressedOnRelease);
-                var pressed = ImGuiAPI.ButtonBehavior(in start, in end, id, ref hovered, ref held, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
+                var pressed = ImGuiAPI.ButtonBehavior(in start, in end, id, ref hovered, ref held, true, ImGuiButtonFlags_.ImGuiButtonFlags_MouseButtonLeft);
 
                 if (hovered)
                 {

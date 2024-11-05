@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Mobile
 {
-    public class UMobileEditorFSPolicy : UMobileFSPolicy
+    public class TtMobileEditorFSPolicy : TtMobileFSPolicy
     {
-        public UMobileEditorFSPolicy()
+        public TtMobileEditorFSPolicy()
         {
             RegRenderNode2("BasePassNode", BasePassNode);
             RegRenderNode2("ShadowMapNode", mShadowMapNode);
@@ -35,7 +35,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             set
             {
                 mDisableAO = value;
-                var finalShading = FinalCopyNode.GetPassShading() as UFinalCopyShading;
+                var finalShading = FinalCopyNode.GetPassShading() as TtFinalCopyShading;
                 if (finalShading != null)
                 {
                     finalShading.SetDisableAO(value);
@@ -51,7 +51,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             set
             {
                 mDisableHDR = value;
-                var shading = FinalCopyNode.GetPassShading() as UFinalCopyShading;
+                var shading = FinalCopyNode.GetPassShading() as TtFinalCopyShading;
                 shading?.SetDisableHDR(value);
             }
         }
@@ -67,8 +67,24 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         #endregion
 
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
         public UMobileTranslucentNode TranslucentNode = new UMobileTranslucentNode();
         public UFinalCopyNode FinalCopyNode = new UFinalCopyNode();
+在此之后:
+        public TtMobileTranslucentNode TranslucentNode = new UMobileTranslucentNode();
+        public UFinalCopyNode FinalCopyNode = new UFinalCopyNode();
+*/
+        public TtMobileTranslucentNode TranslucentNode = new TtMobileTranslucentNode();
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
+        public UFinalCopyNode FinalCopyNode = new UFinalCopyNode();
+在此之后:
+        public TtFinalCopyNode FinalCopyNode = new UFinalCopyNode();
+*/
+        public TtFinalCopyNode FinalCopyNode = new TtFinalCopyNode();
 
 /* 项目“Engine.Android”的未合并的更改
 在此之前:

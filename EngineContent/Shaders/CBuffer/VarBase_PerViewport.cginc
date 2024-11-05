@@ -7,28 +7,17 @@
 
 VK_BIND(1) cbuffer cbPerViewport DX_BIND_B(1)
 {	
-	float2 ViewportPos; // leftup position
-	float mDirLightSpecularIntensity;
-	float mDirLightShadingSSS;
-
-	float4 mDirLightingAmbient;
-	float4 mDirLightingDiffuse;
-	float4 mDirLightingSpecular;
+    FDirLight DirLight;
 	
-	float3 mGroundLightColor;
-	int gCsmNum;
-
-	float3 mSkyLightColor;
-	float FogStart;// = 30;
-
+	float2 ViewportPos; // leftup position
+    int CsmNum;
+    float FogStart; // = 30;
+    
 	float FogHorizontalRange;// = 170;
 	float FogCeil;// = 70;
 	float FogVerticalRange;// = 150;
 	float FogDensity;// = 1.57;
 
-	float4 gDirLightColor_Intensity;
-	float4 gDirLightDirection_Leak;
-	
 	float4 gViewportSizeAndRcp;
 	
 	float2 gDepthBiasAndZFarRcp;
@@ -51,15 +40,6 @@ VK_BIND(1) cbuffer cbPerViewport DX_BIND_B(1)
 	float gShadowDistance;
 	float gEnvMapMaxMipLevel;
 	float gEyeEnvMapMaxMipLevel;
-
-	float4 PointLightPos_RadiusInv[MaxPointLightNumber];
-	float4 PointLightColor_Intensity[MaxPointLightNumber];
-	
-	#ifndef UserDef_Viewport
-		#define UserDef_Viewport
-	#endif
-
-	UserDef_Viewport
 };
 
 #endif

@@ -36,7 +36,7 @@ namespace EngineNS.Graphics.Mesh
         //    base.OnDrawSnapshot(in cmdlist, ref start, ref end);
         //    cmdlist.AddText(in start, 0xFFFFFFFF, "vms", null);
         //}
-        protected override Color4b GetBorderColor()
+        public override Color4b GetBorderColor()
         {
             return TtEngine.Instance.EditorInstance.Config.MeshPrimitivesBoderColor;
         }
@@ -154,7 +154,7 @@ namespace EngineNS.Graphics.Mesh
             {
                 mCoreObject.Save2Xnd(rc.mCoreObject, xnd.RootNode.mCoreObject);
             }
-            var attr = xnd.RootNode.mCoreObject.GetOrAddAttribute("PartialSkeleton",0,0);
+            var attr = xnd.RootNode.mCoreObject.GetOrAddAttribute("PartialSkeleton",0,0, true);
             using (var ar = attr.GetWriter(512))
             {
                 ar.Write(PartialSkeleton);

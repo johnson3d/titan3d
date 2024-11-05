@@ -34,7 +34,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //必须是TextureAsset
             return true;
         }
-        protected override Color4b GetBorderColor()
+        public override Color4b GetBorderColor()
         {
             return TtEngine.Instance.EditorInstance.Config.MaterialBoderColor;
         }
@@ -289,46 +289,53 @@ namespace EngineNS.Graphics.Pipeline.Shader
             Material.UsedUniformVars.Clear();
             Material.UsedSamplerStates.Clear();
 
-            var MaterialClass = new TtClassDeclaration();
+            try
+            {
+                var MaterialClass = new TtClassDeclaration();
 
-            var gen = mHLSLCodeGen.GetCodeObjectGen(Rtti.TtTypeDescGetter<TtMethodDeclaration>.TypeDesc);
-            BuildCodeStatementsData data = new BuildCodeStatementsData()
-            {
-                ClassDec = MaterialClass,
-                NodeGraph = MaterialGraph,
-                UserData = Material,
-                CodeGen = mHLSLCodeGen,
-            };
-            MaterialOutput.BuildStatements(null, ref data);
-            var incGen = mHLSLCodeGen.GetCodeObjectGen(Rtti.TtTypeDescGetter<TtIncludeDeclaration>.TypeDesc);
-            TtCodeGeneratorData genData = new TtCodeGeneratorData()
-            {
-                Method = null,
-                CodeGen = mHLSLCodeGen,
-                UserData = Material,
-            };
-            Material.IncludeFiles.Clear();
-            foreach (var i in MaterialClass.PreIncludeHeads)
-            {
-                incGen.GenCodes(i, ref code, ref genData);
-                Material.IncludeFiles.Add(i.FilePath);
+                var gen = mHLSLCodeGen.GetCodeObjectGen(Rtti.TtTypeDescGetter<TtMethodDeclaration>.TypeDesc);
+                BuildCodeStatementsData data = new BuildCodeStatementsData()
+                {
+                    ClassDec = MaterialClass,
+                    NodeGraph = MaterialGraph,
+                    UserData = Material,
+                    CodeGen = mHLSLCodeGen,
+                };
+                MaterialOutput.BuildStatements(null, ref data);
+                var incGen = mHLSLCodeGen.GetCodeObjectGen(Rtti.TtTypeDescGetter<TtIncludeDeclaration>.TypeDesc);
+                TtCodeGeneratorData genData = new TtCodeGeneratorData()
+                {
+                    Method = null,
+                    CodeGen = mHLSLCodeGen,
+                    UserData = Material,
+                };
+                Material.IncludeFiles.Clear();
+                foreach (var i in MaterialClass.PreIncludeHeads)
+                {
+                    incGen.GenCodes(i, ref code, ref genData);
+                    Material.IncludeFiles.Add(i.FilePath);
+                }
+                genData = new TtCodeGeneratorData()
+                {
+                    Method = MaterialOutput.VSFunction,
+                    CodeGen = mHLSLCodeGen,
+                    UserData = Material,
+                };
+                gen.GenCodes(MaterialOutput.VSFunction, ref code, ref genData);
+                genData = new TtCodeGeneratorData()
+                {
+                    Method = MaterialOutput.PSFunction,
+                    CodeGen = mHLSLCodeGen,
+                    UserData = Material,
+                };
+                gen.GenCodes(MaterialOutput.PSFunction, ref code, ref genData);
+
+                Material.HLSLCode = code;
             }
-            genData = new TtCodeGeneratorData()
+            catch (Exception ex)
             {
-                Method = MaterialOutput.VSFunction,
-                CodeGen = mHLSLCodeGen,
-                UserData = Material,
-            };
-            gen.GenCodes(MaterialOutput.VSFunction, ref code, ref genData);
-            genData = new TtCodeGeneratorData()
-            {
-                Method = MaterialOutput.PSFunction,
-                CodeGen = mHLSLCodeGen,
-                UserData = Material,
-            };
-            gen.GenCodes(MaterialOutput.PSFunction, ref code, ref genData);
-
-            Material.HLSLCode = code;
+                Profiler.Log.WriteException(ex);
+            }
             Material.VSNeedStreams = MaterialOutput.GetVSNeedStreams();
             Material.PSNeedInputs = MaterialOutput.GetPSNeedInputs();
 

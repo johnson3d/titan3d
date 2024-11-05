@@ -135,7 +135,7 @@ namespace EngineNS.Bricks.GpuDriven
         public uint[] Indices = null;
 
         private Graphics.Mesh.TtMeshPrimitives Mesh;
-        public static unsafe TtClusteredMesh Merge(List<TtClusteredMesh> meshes, NxRHI.UCommandList cmdlist)
+        public static unsafe TtClusteredMesh Merge(List<TtClusteredMesh> meshes, NxRHI.TtCommandList cmdlist)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 

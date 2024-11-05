@@ -67,7 +67,7 @@
 	#define VK_OFFSET(n) [[vk::offset(n)]]
 #endif
 
-#include "@engine_preprosessors.cginc"
+#include "@engine_preprocessors.cginc"
 
 void PS_INPUT::Set_vTangent(float3 v)
 {

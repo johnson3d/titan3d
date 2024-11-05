@@ -80,19 +80,21 @@ namespace EngineNS.IO
             result.Core_AddRef();
             return result;
         }
-        public XndAttribute TryGetAttribute(string name)
+        public unsafe XndAttribute TryGetAttribute(string name)
         {
-            unsafe
-            {
-                return new XndAttribute(mCoreObject.TryGetAttribute(name));
-            }
+            return new XndAttribute(mCoreObject.TryGetAttribute(name));
         }
-        public XndNode TryGetChildNode(string name)
+        public unsafe XndAttribute GetOrAddAttribute(string name, uint ver, uint flags, bool bCheckName = true)
         {
-            unsafe
-            {
-                return new XndNode(mCoreObject.TryGetChildNode(name));
-            }
+            return new XndAttribute(mCoreObject.GetOrAddAttribute(name, ver, flags, bCheckName));
+        }
+        public unsafe XndNode TryGetChildNode(string name)
+        {
+            return new XndNode(mCoreObject.TryGetChildNode(name));
+        }
+        public unsafe XndNode GetOrAddNode(string name, uint ver, uint flags, bool bCheckName)
+        {
+            return new XndNode(mCoreObject.GetOrAddNode(name, ver, flags, bCheckName));
         }
         public void AddAttributePtr(XndAttribute attr)
         {

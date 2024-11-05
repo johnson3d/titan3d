@@ -101,7 +101,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	Color = TexelAA.rgb;
 #else
 	//sun shaft
-	half3 DirLightColor = (half3)gDirLightColor_Intensity.rgb;
+	half3 DirLightColor = (half3)DirLight.SunLightColor.rgb;
 	half4 SunShaftParam = (half4)input.vLightMap;
 	if (SunShaftParam.w > 0)
 	{

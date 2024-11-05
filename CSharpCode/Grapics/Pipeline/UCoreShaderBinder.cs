@@ -38,23 +38,11 @@ namespace EngineNS.Graphics.Pipeline
         {
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector2))]
             public NxRHI.FShaderVarDesc ViewportPos;
-            [NxRHI.TtShader.TtShaderVar(VarType = typeof(float))]
-            public NxRHI.FShaderVarDesc mDirLightSpecularIntensity;
-            [NxRHI.TtShader.TtShaderVar(VarType = typeof(float))]
-            public NxRHI.FShaderVarDesc mDirLightShadingSSS;
-            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector4))]
-            public NxRHI.FShaderVarDesc mDirLightingAmbient;
-            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector4))]
-            public NxRHI.FShaderVarDesc mDirLightingDiffuse;
-            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector4))]
-            public NxRHI.FShaderVarDesc mDirLightingSpecular;
-            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector3))]
-            public NxRHI.FShaderVarDesc mGroundLightColor;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Graphics.Pipeline.Shader.FDirLight))]
+            public NxRHI.FShaderVarDesc DirLight;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(uint))]
-            public NxRHI.FShaderVarDesc gCsmNum;
+            public NxRHI.FShaderVarDesc CsmNum;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector4))]
-            public NxRHI.FShaderVarDesc mSkyLightColor;
-            [NxRHI.TtShader.TtShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc FogStart;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc FogHorizontalRange;
@@ -65,10 +53,6 @@ namespace EngineNS.Graphics.Pipeline
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc FogDensity;
 
-            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector4))]
-            public NxRHI.FShaderVarDesc gDirLightColor_Intensity;
-            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector4))]
-            public NxRHI.FShaderVarDesc gDirLightDirection_Leak;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector2))]
             public NxRHI.FShaderVarDesc gViewportSizeAndRcp;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector2))]
@@ -98,10 +82,6 @@ namespace EngineNS.Graphics.Pipeline
             public NxRHI.FShaderVarDesc gEnvMapMaxMipLevel;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(float))]
             public NxRHI.FShaderVarDesc gEyeEnvMapMaxMipLevel;
-            [NxRHI.TtShader.TtShaderVar(VarType = typeof(Vector4))]
-            public NxRHI.FShaderVarDesc PointLightPos_RadiusInv;
-            [NxRHI.TtShader.TtShaderVar(VarType = typeof(float))]
-            public NxRHI.FShaderVarDesc PointLightColor_Intensity;
         }
         public class TtPerCameraCBufferVarIndexer : NxRHI.TtShader.AuxCBufferVarIndexer<TtPerCameraCBufferVarIndexer>
         {

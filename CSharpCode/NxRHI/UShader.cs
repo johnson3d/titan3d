@@ -262,7 +262,7 @@ namespace EngineNS.NxRHI
             var file = path + hash.ToString() + TtShader.AssetExt;
             var xnd = new IO.TtXndHolder("UShader", 0, 0);
 
-            var descAttr = new XndAttribute(xnd.RootNode.mCoreObject.GetOrAddAttribute("Desc", 0, 0));
+            var descAttr = new XndAttribute(xnd.RootNode.mCoreObject.GetOrAddAttribute("Desc", 0, 0, true));
             using (var ar = descAttr.GetWriter(30))
             {
                 ar.Write(shader);

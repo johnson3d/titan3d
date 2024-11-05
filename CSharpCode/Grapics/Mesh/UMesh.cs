@@ -276,6 +276,13 @@ namespace EngineNS.Graphics.Mesh
                                 drawcall.BindSampler(binder, sampler);
                             }
                         }
+                        {
+                            var binder = drawcall.FindBinder("DefaultSampLinear");
+                            if (binder.IsValidPointer)
+                            {
+                                drawcall.BindSampler(binder, TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState);
+                            }
+                        }
                         #endregion
 
                         #region CBuffer

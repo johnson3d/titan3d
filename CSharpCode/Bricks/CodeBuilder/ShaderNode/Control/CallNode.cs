@@ -7,7 +7,6 @@ using Org.BouncyCastle.Asn1.Mozilla;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 {
-    //[Obsolete]
     public class UserCallNodeAttribute : Attribute
     {
         public Type CallNodeType;
@@ -52,11 +51,15 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         public static CallNode NewMethodNode(Rtti.TtClassMeta.TtMethodMeta m)
         {
             CallNode result = null;
-            if (m.MethodName == "Sample2D")
-            {
-                result = new Sample2DNode();
-            }
-            else
+            //if (m.MethodName == "Sample2D")
+            //{
+            //    result = new Sample2DNode();
+            //}
+            //else if (m.MethodName == "Sample2DBias")
+            //{
+            //    result = new Sample2DBiasNode();
+            //}
+            //else
             {
                 result = new CallNode();
             }
@@ -158,31 +161,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                     return;
                 }
             }
-            //for (int i = 0; i < Arguments.Count; i++)
-            //{
-            //    if (pin == Arguments[i])
-            //    {
-            //        var inPin = pin as PinIn;
-            //        var paramMeta = GetInPinParamMeta(inPin);
-            //        if (paramMeta != null)
-            //        {
-            //            EGui.Controls.CtrlUtility.DrawHelper($"{paramMeta.ParameterType.FullName}");
-            //        }
-            //        return;
-            //    }
-            //}
-            //for (int i = 0; i < OutArguments.Count; i++)
-            //{
-            //    if (pin == OutArguments[i])
-            //    {
-            //        var paramMeta = Method.FindParameter(pin.Name);
-            //        if (paramMeta != null)
-            //        {
-            //            EGui.Controls.CtrlUtility.DrawHelper($"{paramMeta.ParameterType.FullName}");
-            //        }
-            //        return;
-            //    }
-            //}
         }
         public Rtti.TtClassMeta.TtMethodMeta.TtParamMeta GetInPinParamMeta(PinIn pin)
         {
@@ -244,158 +222,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             return true;
         }
-        //public override void PreGenExpr()
-        //{
-        //    Executed = false;
-        //}
-        //bool Executed = false;
-        //[Obsolete]
-        //public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
-        //{
-        //    if (Executed)
-        //    {
-        //        if (oPin == Result)
-        //        {
-        //            var mth_ret_temp_name = $"tmp_r_{Method.MethodName}_{(uint)this.NodeId.GetHashCode()}";
-        //            return new OpUseVar(mth_ret_temp_name, false);
-        //        }
-        //        else
-        //        {
-        //            var parameters = Method.GetParameters();
-        //            for (int i = 0; i < parameters.Length; i++)
-        //            {
-        //                if (parameters[i].Name == oPin.Name)
-        //                {
-        //                    System.Diagnostics.Debug.Assert(parameters[i].IsOut);
-        //                    var mth_outarg_temp_name = $"tmp_o_{parameters[i].Name}_{Method.MethodName}_{(uint)this.NodeId.GetHashCode()}";
-        //                    return new OpUseVar(mth_outarg_temp_name, false);
-        //                }
-        //            }
-        //        }
-        //        System.Diagnostics.Debug.Assert(false);
-        //    }
-        //    Executed = true;
-
-        //    ConvertTypeOp cvtExpr = null;
-        //    DefineVar retVar = null;
-
-        //    if (!Method.ReturnType.IsEqual(typeof(void)))
-        //    {
-        //        var mth_ret_temp_name = $"tmp_r_{Method.MethodName}_{(uint)this.NodeId.GetHashCode()}";
-        //        retVar = new DefineVar();
-        //        retVar.IsLocalVar = true;
-        //        retVar.DefType = cGen.GetTypeString(Method.ReturnType);
-        //        retVar.VarName = mth_ret_temp_name;
-        //        retVar.InitValue = cGen.GetDefaultValue(Method.ReturnType);
-        //        funGraph.ShaderEditor.MaterialOutput.Function.AddLocalVar(retVar);
-
-        //        if (Result != null && Result.Tag != null && ((Result.Tag as Rtti.TtTypeDesc) != Method.ReturnType))
-        //        {
-        //            var cvtTargetType = (Result.Tag as System.Type);
-        //            retVar.DefType = cvtTargetType.FullName;
-        //            cvtExpr = new ConvertTypeOp();
-        //            cvtExpr.TargetType = retVar.DefType;
-        //        }
-        //    }
-
-        //    var callExpr = GetExpr_Impl(funGraph, cGen) as CallOp;
-
-        //    if (retVar != null)
-        //    {
-        //        callExpr.FunReturnLocalVar = retVar.VarName;
-        //    }
-        //    if (cvtExpr != null)
-        //    {
-        //        callExpr.ConvertType = cvtExpr;
-        //    }
-
-        //    if (oPin == Result)
-        //    {
-        //        var mth_ret_temp_name = $"tmp_r_{Method.MethodName}_{(uint)this.NodeId.GetHashCode()}";
-        //        callExpr.FunOutLocalVar = mth_ret_temp_name;
-        //    }
-        //    else
-        //    {
-        //        var parameters = Method.GetParameters();
-        //        for (int i = 0; i < parameters.Length; i++)
-        //        {
-        //            if (parameters[i].Name == oPin.Name)
-        //            {
-        //                System.Diagnostics.Debug.Assert(parameters[i].IsOut);
-        //                var mth_outarg_temp_name = $"tmp_o_{parameters[i].Name}_{Method.MethodName}_{(uint)this.NodeId.GetHashCode()}";
-        //                callExpr.FunOutLocalVar = mth_outarg_temp_name;
-        //            }
-        //        }
-        //    }
-
-        //    return callExpr;
-        //}
-        //private IExpression GetExpr_Impl(UMaterialGraph funGraph, ICodeGen cGen)
-        //{
-        //    CallOp CallExpr = new CallOp();
-        //    var links = new List<UPinLinker>();
-
-        //    {
-        //        //这里要处理Static名字获取
-        //        //CallExpr.Host = selfExpr;
-        //        CallExpr.IsStatic = true;
-        //        CallExpr.Host = new HardCodeOp() { Code = "" };
-        //        CallExpr.Name = Method.MethodName;
-        //    }
-
-        //    for (int i = 0; i < Arguments.Count; i++)
-        //    {
-        //        if (Method.Parameters[i].IsOut)
-        //        {
-        //            var mth_outarg_temp_name = $"tmp_o_{Method.Parameters[i].Name}_{Method.MethodName}_{(uint)this.NodeId.GetHashCode()}";
-        //            var retVar = new DefineVar();
-        //            retVar.IsLocalVar = true;
-        //            retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
-        //            retVar.VarName = mth_outarg_temp_name;
-        //            retVar.InitValue = cGen.GetDefaultValue(Method.Parameters[i].ParameterType);
-
-        //            funGraph.ShaderEditor.MaterialOutput.Function.AddLocalVar(retVar);
-        //            CallExpr.Arguments.Add(new OpUseDefinedVar(retVar));
-        //            continue;
-        //        }
-
-        //        links.Clear();
-        //        links = new List<UPinLinker>();
-        //        funGraph.FindInLinker(Arguments[i], links);
-        //        OpExpress argExpr = null;
-        //        if (links.Count == 1)
-        //        {
-        //            var argNode = links[0].OutNode as IBaseNode;
-        //            argExpr = argNode.GetExpr(funGraph, cGen, links[0].OutPin, true) as OpExpress;
-        //            if (argExpr == null)
-        //                throw new GraphException(this, Arguments[i], $"argExpr = null:{Arguments[i].Name}");
-        //        }
-        //        else if (links.Count == 0)
-        //        {
-        //            argExpr = OnNoneLinkedParameter(funGraph, cGen, i);
-        //        }
-        //        else
-        //        {
-        //            throw new GraphException(this, Arguments[i], $"Arg error:{Arguments[i].Name}");
-        //        }
-        //        CallExpr.Arguments.Add(argExpr);
-        //    }
-
-        //    return CallExpr;
-        //}
-        //protected virtual OpExpress OnNoneLinkedParameter(UMaterialGraph funGraph, ICodeGen cGen, int i)
-        //{
-        //    var mth_arg_temp_name = $"t_{Method.Parameters[i].Name}_{Method.MethodName}_{(uint)this.NodeId.GetHashCode()}";
-        //    var retVar = new DefineVar();
-        //    retVar.IsLocalVar = true;
-        //    retVar.DefType = cGen.GetTypeString(Method.Parameters[i].ParameterType);
-        //    retVar.VarName = mth_arg_temp_name;
-        //    retVar.InitValue = cGen.GetDefaultValue(Method.Parameters[i].ParameterType);
-        //    funGraph.ShaderEditor.MaterialOutput.Function.AddLocalVar(retVar);
-
-        //    return new OpUseDefinedVar(retVar);
-        //}
-
         string GetReturnValueName()
         {
             return $"tmp_r_{Method.MethodName}_{(uint)NodeId.GetHashCode()}";
@@ -404,7 +230,6 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         {
             return $"tmp_o_{paramName}_{Method.MethodName}_{(uint)NodeId.GetHashCode()}";
         }
-
         protected virtual TtExpressionBase GetNoneLinkedParameterExp(PinIn pin, int argIdx, ref BuildCodeStatementsData data)
         {
             var paramName = GetParamValueName(pin.Name);

@@ -494,20 +494,13 @@ half CelAA(half Ir, half It, half Id, half Ib)
 	return 0.0h;
 }
 
-struct PbrPointLight
+half3 PbrPointLightMobile(FPointLight light, float3 WorldPos, half3 V, half3 N, half3 OptDiffShading, half3 OptSpecShading, half Roughness)
 {
-	float4 PointLightPos_RadiusInv;
-	float4 PointLightColor_Intensity;
-};
-#define MaxPointLightNumber		128
-
-half3 PbrPointLightMobile(PbrPointLight light, float3 WorldPos, half3 V, half3 N, half3 OptDiffShading, half3 OptSpecShading, half Roughness)
-{
-	half3 Lp = (half3)(light.PointLightPos_RadiusInv.xyz - WorldPos);
+    half3 Lp = (half3) (light.PositionAndRadius.xyz - WorldPos);
 	half DistSqr = dot(Lp, Lp);
 
 	half AttenPL = rcp(DistSqr + 1.0h);
-	AttenPL = AttenPL * (half)Pow2(saturate(1.0h - (half)Pow2(DistSqr * (half)light.PointLightPos_RadiusInv.w * (half)light.PointLightPos_RadiusInv.w)));
+    AttenPL = AttenPL * (half) Pow2(saturate(1.0h - (half) Pow2(DistSqr * (half) light.PositionAndRadius.w * (half) light.PositionAndRadius.w)));
 
 	Lp = normalize(Lp);
 	half NoLp = max(0.0h, dot(N, Lp));
@@ -516,7 +509,7 @@ half3 PbrPointLightMobile(PbrPointLight light, float3 WorldPos, half3 V, half3 N
 	half LoHp = max(0.0h, dot(Lp, Hp));
 
 	half3 BaseShading = (OptDiffShading * pow(NoLp, -1.5h * Roughness + 2.0h) + BRDFMobilePointLight(Roughness, N, Hp, NoHp, LoHp, OptSpecShading) * (half)sqrt(NoLp))
-		* (half3)light.PointLightColor_Intensity.rgb * (half)light.PointLightColor_Intensity.a * AttenPL;
+		* (half3) light.ColorAndIntensity.rgb * (half) light.ColorAndIntensity.a * AttenPL;
 	return BaseShading;
 }
 

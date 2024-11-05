@@ -105,7 +105,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		half3 SubAlbedo = sRGB2Linear((half3)mtl.mSubAlbedo);
 		
 		half3 WorldPos = (half3)input.vWorldPos;
-		half3 L = -(half3)normalize(gDirLightDirection_Leak.xyz);
+		half3 L = -(half3)normalize(DirLight.Direction.xyz);
 		half3 V = (half3)normalize(CameraPosition - WorldPos);*/
 
 #ifdef MTL_ID_UNLIT

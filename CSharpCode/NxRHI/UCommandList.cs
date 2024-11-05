@@ -29,11 +29,11 @@ namespace EngineNS.NxRHI
             PushGpuDraw(draw);
         }
     }
-    public class UCmdRecorder : AuxPtrType<NxRHI.ICmdRecorder>
+    public class TtCmdRecorder : AuxPtrType<NxRHI.ICmdRecorder>
     {
 
     }
-    public class UCommandList : AuxPtrType<NxRHI.ICommandList>
+    public class TtCommandList : AuxPtrType<NxRHI.ICommandList>
     {
         public override void Dispose()
         {
@@ -99,7 +99,7 @@ namespace EngineNS.NxRHI
                 CurrentGpuScope.End(this);
             CurrentGpuScope = null;
         }
-        public void InheritPass(UCommandList cmdlist)
+        public void InheritPass(TtCommandList cmdlist)
         {
             mCoreObject.InheritPass(cmdlist.mCoreObject);
         }
@@ -157,6 +157,10 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.Dispatch(x, y, z);
         }
+        public void IndirectDispatch(TtBuffer indirectArg, uint indirectArgOffset)
+        {
+            mCoreObject.IndirectDispatch(indirectArg.mCoreObject, indirectArgOffset);
+        }
         public void CopyBufferRegion(TtBuffer target, ulong DstOffset, TtBuffer src, ulong SrcOffset, ulong Size)
         {
             mCoreObject.CopyBufferRegion(target.mCoreObject, DstOffset, src.mCoreObject, SrcOffset, Size);
@@ -190,7 +194,7 @@ namespace EngineNS.NxRHI
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UCommandList), nameof(FlushDraws));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtCommandList), nameof(FlushDraws));
                 return mScopeTick;
             }
         }
@@ -259,8 +263,8 @@ namespace EngineNS.NxRHI
 
     public struct TtCmdListScope : IDisposable
     {
-        UCommandList mCmdList;
-        public TtCmdListScope(UCommandList cmdlist)
+        TtCommandList mCmdList;
+        public TtCmdListScope(TtCommandList cmdlist)
         {
             mCmdList = cmdlist;
             mCmdList.BeginCommand();
@@ -295,7 +299,7 @@ namespace EngineNS.NxRHI
         public TtGpuScope Parent;
         [ThreadStatic]
         public static TtGpuScope CurrentScope = null;
-        public void Begin(UCommandList cmdlist)
+        public void Begin(TtCommandList cmdlist)
         {
             if (ScopeFrameValue == 0)
             {
@@ -304,7 +308,7 @@ namespace EngineNS.NxRHI
                 CurrentScope = this;
             }
         }
-        public void End(UCommandList cmdlist)
+        public void End(TtCommandList cmdlist)
         {
             if (ScopeFrameValue == 0)
             {
@@ -333,8 +337,8 @@ namespace EngineNS.NxRHI
     public struct TtGpuScopeHelper : IDisposable//Waiting for C#8 ,ref struct -> Dispose
     {
         public TtGpuScope mTime;
-        public UCommandList mCmdList;
-        public TtGpuScopeHelper(TtGpuScope t, UCommandList cmdlist)
+        public TtCommandList mCmdList;
+        public TtGpuScopeHelper(TtGpuScope t, TtCommandList cmdlist)
         {
             mTime = t;
             mCmdList = cmdlist;
@@ -389,8 +393,8 @@ namespace EngineNS.NxRHI
 
     public class TtGpuEventScope : IDisposable
     {
-        UCommandList mCmdList;
-        public unsafe TtGpuEventScope(UCommandList cmdlist, VNameString name)
+        TtCommandList mCmdList;
+        public unsafe TtGpuEventScope(TtCommandList cmdlist, VNameString name)
         {
             mCmdList = cmdlist;
             mCmdList.PushAction(static (EngineNS.NxRHI.ICommandList cmd, void* arg1) =>

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Mobile
 {
-    public class UMobileFSPolicy : TtRenderPolicy
+    public class TtMobileFSPolicy : TtRenderPolicy
     {
         #region Feature On/Off
         public override bool DisableShadow
@@ -42,7 +42,14 @@ namespace EngineNS.Graphics.Pipeline.Mobile
             }
         }
         #endregion
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
         public UMobileOpaqueNode BasePassNode = new UMobileOpaqueNode();
+在此之后:
+        public TtMobileOpaqueNode BasePassNode = new UMobileOpaqueNode();
+*/
+        public TtMobileOpaqueNode BasePassNode = new TtMobileOpaqueNode();
 
 /* 项目“Engine.Android”的未合并的更改
 在此之前:

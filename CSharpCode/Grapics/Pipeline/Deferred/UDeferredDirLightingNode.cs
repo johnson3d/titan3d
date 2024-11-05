@@ -338,7 +338,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public float RimIntensity { get; set; } = 0.5f;
         public TtDeferredDirLightingNode()
         {
-            Name = "UDeferredDirLightingNode";
+            Name = "DeferredDirLightingNode";
         }
         public override void Dispose()
         {

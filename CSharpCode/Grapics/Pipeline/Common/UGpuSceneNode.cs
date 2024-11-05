@@ -38,7 +38,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public unsafe override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             GpuScenePinOut.Attachement.Height = 1;
-            GpuScenePinOut.Attachement.Width = (uint)sizeof(FGpuSceneDesc);
+            GpuScenePinOut.Attachement.Width = (uint)sizeof(Shader.FGpuSceneDesc);
 
             var attachement = RenderGraph.AttachmentCache.ImportAttachment(GpuScenePinOut);
             attachement.GpuResource = GpuSceneDescBuffer.GpuResource;
@@ -49,19 +49,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             FrameBuild_Light();
             FrameBuild_Instance();
         }
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
-        public struct FGpuSceneDesc
-        {
-            public uint ScreenAverageColorI;
-            public uint AverageColorDivider;            
-            public float ScreenAverageBrightness;
-            public float PrevScreenAverageBrightness;
-
-            public float EyeAdapterTime;
-            public float EyeAdapter;
-            public int FreeGroupNum;
-        }
-        public TtGpuBuffer<FGpuSceneDesc> GpuSceneDescBuffer;
+        
+        public TtGpuBuffer<Shader.FGpuSceneDesc> GpuSceneDescBuffer;
 
         public NxRHI.TtCbView PerGpuSceneCbv { get; set; }
 
@@ -156,7 +145,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             BasePass.Initialize(rc, debugName + ".BasePass");
 
-            GpuSceneDescBuffer = new TtGpuBuffer<FGpuSceneDesc>();
+            GpuSceneDescBuffer = new TtGpuBuffer<Shader.FGpuSceneDesc>();
             unsafe
             {
                 GpuSceneDescBuffer.SetSize(1, IntPtr.Zero.ToPointer(), NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);

@@ -1011,7 +1011,6 @@ namespace EngineNS.Rtti
         //    ImGuiAPI.PopClipRect();
         //}
     }
-    [Editor.UAssetEditor(EditorType = typeof(Editor.TtMetaVersionViewer))]
     public class TtMetaVersion
     {
         public TtMetaVersion(TtClassMeta kls)
