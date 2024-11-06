@@ -67,44 +67,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             if (TextureSRV == null || mSlateEffect == null)
                 return;
 
-            unsafe
-            {
-                if (CmdParameters == null)
-                {
-                    var rc = TtEngine.Instance.GfxDevice.RenderContext;
-
-                    var iptDesc = new NxRHI.TtInputLayoutDesc();
-                    unsafe
-                    {
-                        iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
-                        iptDesc.mCoreObject.AddElement("TEXCOORD", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, (uint)sizeof(Vector2), 0, 0);
-                        iptDesc.mCoreObject.AddElement("COLOR", 0, EPixelFormat.PXF_R8G8B8A8_UNORM, 0, (uint)sizeof(Vector2) * 2, 0, 0);
-                        //iptDesc.SetShaderDesc(SlateEffect.GraphicsEffect);
-                    }
-                    iptDesc.mCoreObject.SetShaderDesc(mSlateEffect.DescVS.mCoreObject);
-                    var InputLayout = rc.CreateInputLayout(iptDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
-                    mSlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
-
-                    var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<EngineNS.Editor.Forms.TtTextureViewerCmdParams>();
-                    var cbBinder = mSlateEffect.ShaderEffect.FindBinder("ProjectionMatrixBuffer");
-                    cmdParams.CBuffer = rc.CreateCBV(cbBinder);
-                    cmdParams.Drawcall.BindShaderEffect(mSlateEffect);
-                    cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
-                    cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, TextureSRV);
-                    cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
-
-                    cmdParams.IsNormalMap = 0;
-                    if (TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
-                        cmdParams.IsNormalMap = 1;
-
-                    CmdParameters = cmdParams;
-                }
-
-                var uv0 = new Vector2(0, 0);
-                var uv1 = new Vector2(1, 1);
-                cmdlist.AddImage((ulong)CmdParameters.GetHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
-            }
-
+            Var.Texture2D.PreviewDraw(ref CmdParameters, mSlateEffect, TextureSRV, in prevStart, in prevEnd, cmdlist);
         }
         
         protected override TtExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
@@ -224,52 +187,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             if (TextureSRV == null || mSlateEffect == null)
                 return;
 
-            unsafe
-            {
-                if (CmdParameters == null)
-                {
-                    var rc = TtEngine.Instance.GfxDevice.RenderContext;
-
-                    var iptDesc = new NxRHI.TtInputLayoutDesc();
-                    unsafe
-                    {
-                        iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
-                        iptDesc.mCoreObject.AddElement("TEXCOORD", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, (uint)sizeof(Vector2), 0, 0);
-                        iptDesc.mCoreObject.AddElement("COLOR", 0, EPixelFormat.PXF_R8G8B8A8_UNORM, 0, (uint)sizeof(Vector2) * 2, 0, 0);
-                        //iptDesc.SetShaderDesc(SlateEffect.GraphicsEffect);
-                    }
-                    iptDesc.mCoreObject.SetShaderDesc(mSlateEffect.DescVS.mCoreObject);
-                    var InputLayout = rc.CreateInputLayout(iptDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
-                    mSlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
-
-                    var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<EngineNS.Editor.Forms.TtTextureViewerCmdParams>();
-                    var cbBinder = mSlateEffect.ShaderEffect.FindBinder("ProjectionMatrixBuffer");
-                    cmdParams.CBuffer = rc.CreateCBV(cbBinder);
-                    cmdParams.Drawcall.BindShaderEffect(mSlateEffect);
-                    cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
-                    cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, TextureSRV);
-                    cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
-
-                    cmdParams.IsNormalMap = 0;
-                    if (TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
-                        cmdParams.IsNormalMap = 1;
-
-                    CmdParameters = cmdParams;
-                }
-
-                var uv0 = new Vector2(0, 0);
-                var uv1 = new Vector2(1, 1);
-                cmdlist.AddImage((ulong)CmdParameters.GetHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
-
-                // support preview A channel
-                //var textPos = end - new Vector2(32, 32);
-                //cmdlist.AddText(textPos, mShowA ? 0xFFFFFFFF : 0x00FF00FF, "A", null);
-                //if (ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Left, false) && ImGuiAPI.IsMouseHoveringRect(textPos, end, true))
-                //{
-                //    CmdParameters.ColorMask.W = mShowA ? 1 : 0;
-                //    mShowA = !mShowA;
-                //}
-            }
+            Var.Texture2D.PreviewDraw(ref CmdParameters, mSlateEffect, TextureSRV, in prevStart, in prevEnd, cmdlist);
         }
         protected override TtExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
         {
@@ -404,40 +322,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             if (TextureSRV == null || mSlateEffect == null)
                 return;
 
-            if (CmdParameters == null)
-            {
-                var rc = TtEngine.Instance.GfxDevice.RenderContext;
-
-                var iptDesc = new NxRHI.TtInputLayoutDesc();
-                unsafe
-                {
-                    iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
-                    iptDesc.mCoreObject.AddElement("TEXCOORD", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, (uint)sizeof(Vector2), 0, 0);
-                    iptDesc.mCoreObject.AddElement("COLOR", 0, EPixelFormat.PXF_R8G8B8A8_UNORM, 0, (uint)sizeof(Vector2) * 2, 0, 0);
-                    //iptDesc.SetShaderDesc(SlateEffect.GraphicsEffect);
-                }
-                iptDesc.mCoreObject.SetShaderDesc(mSlateEffect.DescVS.mCoreObject);
-                var InputLayout = rc.CreateInputLayout(iptDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
-                mSlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
-
-                var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<EngineNS.Editor.Forms.TtTextureViewerCmdParams>();
-                var cbBinder = mSlateEffect.ShaderEffect.FindBinder("ProjectionMatrixBuffer");
-                cmdParams.CBuffer = rc.CreateCBV(cbBinder);
-                cmdParams.Drawcall.BindShaderEffect(mSlateEffect);
-                cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
-                cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, TextureSRV);
-                cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
-
-                cmdParams.IsNormalMap = 0;
-                if (TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || TextureSRV.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
-                    cmdParams.IsNormalMap = 1;
-
-                CmdParameters = cmdParams;
-            }
-
-            var uv0 = new Vector2(0, 0);
-            var uv1 = new Vector2(1, 1);
-            cmdlist.AddImage((ulong)CmdParameters.GetHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
+            Var.Texture2D.PreviewDraw(ref CmdParameters, mSlateEffect, TextureSRV, in prevStart, in prevEnd, cmdlist);
         }
         protected override TtExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
         {
@@ -542,26 +427,31 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 System.Action exec = async () =>
                 {
                     TextureSRV = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
+
+                    mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
+                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
+                        TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
                 };
                 exec();
             }
         }
+        TtEffect mSlateEffect;
+        EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta]
         [Category("Option")]
-        public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
+        public NxRHI.FSamplerDesc Sampler
+        {
+            get => mSampler;
+            set => mSampler = value;
+        }
         private NxRHI.TtSrView TextureSRV;
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
             if (TextureSRV == null)
                 return;
 
-            var uv0 = new Vector2(0, 0);
-            var uv1 = new Vector2(1, 1);
-            unsafe
-            {
-                cmdlist.AddImage((ulong)TextureSRV.GetTextureHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
-            }
+            Var.Texture2D.PreviewDraw(ref CmdParameters, mSlateEffect, TextureSRV, in prevStart, in prevEnd, cmdlist);
         }
         protected override TtExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
         {
@@ -658,26 +548,30 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                 System.Action exec = async () =>
                 {
                     TextureSRV = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(value);
+                    mSlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
+                        await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>(),
+                        TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
                 };
                 exec();
             }
         }
+        TtEffect mSlateEffect;
+        EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
         NxRHI.FSamplerDesc mSampler;
         [Rtti.Meta]
         [Category("Option")]
-        public NxRHI.FSamplerDesc Sampler { get => mSampler; set => mSampler = value; }
+        public NxRHI.FSamplerDesc Sampler
+        {
+            get => mSampler;
+            set => mSampler = value;
+        }
         private NxRHI.TtSrView TextureSRV;
         public unsafe override void OnPreviewDraw(in Vector2 prevStart, in Vector2 prevEnd, ImDrawList cmdlist)
         {
             if (TextureSRV == null)
                 return;
 
-            var uv0 = new Vector2(0, 0);
-            var uv1 = new Vector2(1, 1);
-            unsafe
-            {
-                cmdlist.AddImage((ulong)TextureSRV.GetTextureHandle(), in prevStart, in prevEnd, in uv0, in uv1, 0xFFFFFFFF);
-            }
+            Var.Texture2D.PreviewDraw(ref CmdParameters, mSlateEffect, TextureSRV, in prevStart, in prevEnd, cmdlist);
         }
         protected override TtExpressionBase GetNoneLinkedParameterExp(NodeGraph.PinIn pin, int argIdx, ref NodeGraph.BuildCodeStatementsData data)
         {

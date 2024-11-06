@@ -187,7 +187,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         [Rtti.Meta]
         [TtMaterialShader(Name = "Lut3S")]
         [ContextMenu(filterStrings: "Lut3S", "Effect\\Lut3S", TtMaterialGraph.MaterialEditorKeyword)]
-        public static void Lut3S(Var.Texture2D Texture, float NoL, float Curvature, out Vector3 OutColor)
+        public static void Lut3S(Var.Texture2D LutTex, float NoL, float Curvature, out Vector3 OutColor)
         {
             OutColor = Vector3.Zero;
         }

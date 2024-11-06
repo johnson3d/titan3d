@@ -1201,6 +1201,8 @@ void Lut3S(Texture2D lutTexture, float NoL, float Curvature, out float3 OutColor
     uv.y = Curvature;
     float4 lutValue = lutTexture.SampleLevel(DefaultSampLinear, uv, 0);
     OutColor = lutValue.rgb;
+	
+    //OutColor = dot(lutValue.rgb, float3(0.3, 0.6, 0.1));
 }
 
 
