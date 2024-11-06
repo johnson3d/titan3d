@@ -313,7 +313,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
             var method = Method;
-            var incAttr = Method.DeclaringType?.GetCustomAttribute<EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtMaterialShaderAttribute>(false);
+            var incAttr = Method.GetFirstCustomAttribute<EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtMaterialShaderAttribute>(false);
             if (incAttr != null && incAttr.Include != null)
             {
                 data.ClassDec.PushPreInclude(incAttr.Include);

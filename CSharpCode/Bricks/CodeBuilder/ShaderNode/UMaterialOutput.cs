@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using EngineNS.Bricks.NodeGraph;
+using EngineNS.Graphics.Pipeline.Shader;
 using NPOI.POIFS.Crypt.Dsig;
 
 namespace EngineNS.Bricks.CodeBuilder.ShaderNode
@@ -174,17 +175,32 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                     if (result.Contains(Graphics.Pipeline.Shader.EPixelShaderInput.PST_UV) == false)
                         result.Add(Graphics.Pipeline.Shader.EPixelShaderInput.PST_UV);
                 }
-                else
+                else if (i.Name == "input")
                 {
-                    if (i.Name.StartsWith("input."))
+                    var type = typeof(PS_INPUT);
+                    var flds = type.GetFields();
+                    foreach (var j in flds)
                     {
-                        var name = i.Name.Substring("input.".Length);
-                        var t = Graphics.Pipeline.Shader.PS_INPUT.NameToInput(name);
-                        if (t != Graphics.Pipeline.Shader.EPixelShaderInput.PST_Number)
+                        var pin = i.FindPinOut(j.Name);
+                        if (this.ParentGraph.PinHasLinker(pin))
                         {
-                            if (result.Contains(t) == false)
-                                result.Add(t);
+                            var t = Graphics.Pipeline.Shader.PS_INPUT.NameToInput(j.Name);
+                            if (t != Graphics.Pipeline.Shader.EPixelShaderInput.PST_Number)
+                            {
+                                if (result.Contains(t) == false)
+                                    result.Add(t);
+                            }
                         }
+                    }
+                }
+                else if (i.Name.StartsWith("input."))
+                {
+                    var name = i.Name.Substring("input.".Length);
+                    var t = Graphics.Pipeline.Shader.PS_INPUT.NameToInput(name);
+                    if (t != Graphics.Pipeline.Shader.EPixelShaderInput.PST_Number)
+                    {
+                        if (result.Contains(t) == false)
+                            result.Add(t);
                     }
                 }
             }
