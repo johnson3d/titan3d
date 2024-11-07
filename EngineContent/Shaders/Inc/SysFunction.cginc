@@ -3,6 +3,7 @@
 #include "Math.cginc"
 #include "../CBuffer/VarBase_PerMesh.cginc"
 
+Texture2D DefaultTexture DX_AUTOBIND;
 SamplerState DefaultSampLinear DX_AUTOBIND;
 
 float4 SampleLevel2D(Texture2D tex, SamplerState samp, float2 uv, float level, out float3 outRgb, out float a)

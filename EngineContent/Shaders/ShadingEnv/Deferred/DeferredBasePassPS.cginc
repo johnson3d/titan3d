@@ -62,7 +62,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 	GBuffer.AO = (half)(AOMultiBounce( CalcLuminance( SpecularColor ), SpecOcclusion ).g);
 
 	GBuffer.ObjectFlags_2Bit = ObjectFLags_2Bit;
-#ifdef MTL_ID_UNLIT
+#if MTL_LightingMode == ELightingMode_Unlight
 	GBuffer.SetUnlit(true);
 #endif
     GBuffer.RenderFlags_10Bit = MaterialRenderFlags;

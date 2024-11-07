@@ -119,7 +119,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 	clip(Alpha - AlphaTestThreshold);
 #endif // AlphaTest
 
-#ifdef MTL_ID_UNLIT
+#if MTL_LightingMode == ELightingMode_Unlight
 	{
 		half3 Emissive = (half3)mtl.mEmissive;
 		half3 UnlitShading = Albedo + Emissive;
@@ -196,13 +196,13 @@ PS_OUTPUT PS_Main(PS_INPUT input)
         half3 Cground = (half3) DirLight.GroundLightColor;
         half DirLightLeak = (half) DirLight.SunLightLeak;
 
-#ifdef MTL_ID_SKIN
+#if MTL_LightingMode == ELightingMode_Skin
 		
-#elif  defined(MTL_ID_TRANSMIT)
+#elif  MTL_LightingMode == ELightingMode_Transimit
 		
-#elif defined(MTL_ID_HAIR)
+#elif MTL_LightingMode == ELightingMode_Hair
 		
-#elif defined(MTL_ID_EYE)
+#elif MTL_LightingMode == ELightingMode_Eye
 		
 #else
         half Sdiff = 1.0h - Metallic;

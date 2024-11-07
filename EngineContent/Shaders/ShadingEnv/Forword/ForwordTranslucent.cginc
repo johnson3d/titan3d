@@ -97,7 +97,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		half3 Emissive = (half3)mtl.mEmissive;
 		half3 BaseShading = half3(0.0h, 0.0h, 0.0h);
 
-#ifdef MTL_ID_UNLIT
+#if MTL_LightingMode == ELightingMode_Unlight
 		BaseShading = (half3)mtl.mAlbedo;
 #else
 		//lighting for translucent

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.NodeGraph;
+using EnumsNET;
 
 namespace EngineNS.Graphics.Pipeline.Shader
 {
@@ -382,14 +383,16 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     Flags &= ~InnerFlags.Is64bitVColorAlpha;
             }
         }
-        public enum ELightingMode
+        [Editor.ShaderCompiler.TtShaderDefine(ShaderName = "ELightingMode")]
+        public enum ELightingMode : uint
         {
-            Stand,
+            Stand = 0,
             Unlight,
             Skin,
             Transmit,
             Hair,
             Eye,
+            Num,
         }
         [Rtti.Meta]
         [Category("Option")]
@@ -548,24 +551,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             codeBuilder.AddLine($"#define MTL_RENDERFLAGS {(uint)mRenderFlags}", ref sourceCode);
 
-            switch (LightingMode)
-            {
-                case ELightingMode.Unlight:
-                    codeBuilder.AddLine("#define MTL_ID_UNLIT", ref sourceCode);
-                    break;
-                case ELightingMode.Skin:
-                    codeBuilder.AddLine("#define MTL_ID_SKIN", ref sourceCode);
-                    break;
-                case ELightingMode.Transmit:
-                    codeBuilder.AddLine("#define MTL_ID_TRANSMIT", ref sourceCode);
-                    break;
-                case ELightingMode.Hair:
-                    codeBuilder.AddLine("#define MTL_ID_HAIR", ref sourceCode);
-                    break;
-                case ELightingMode.Eye:
-                    codeBuilder.AddLine("#define MTL_ID_EYE", ref sourceCode);
-                    break;
-            }
+            codeBuilder.AddLine($"#define MTL_LightingMode {nameof(ELightingMode)}_{System.Enum.GetName(LightingMode)}", ref sourceCode);
             switch (NormalMode)
             {
                 case ENormalMode.Normal:

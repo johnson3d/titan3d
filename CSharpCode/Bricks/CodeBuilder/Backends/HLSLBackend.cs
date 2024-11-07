@@ -561,6 +561,10 @@ namespace EngineNS.Bricks.CodeBuilder
                     case "half4":
                         sourceCode += "(half4)0";
                         break;
+                    case "Texture2D":
+                        sourceCode = 
+                        sourceCode += "DefaultTexture";
+                        break;
                     default:
                         {
                             var meta = defaultValExp.Type.TypeDesc.GetCustomAttribute<Rtti.MetaAttribute>(false);

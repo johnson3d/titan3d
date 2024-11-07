@@ -44,7 +44,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 	clip(Alpha - AlphaTestThreshold);
 #endif // AlphaTest
 
-#ifdef MTL_ID_UNLIT
+#if MTL_LightingMode == ELightingMode_Unlight
 	{
 		half3 Emissive = (half3)mtl.mEmissive;
 		half3 UnlitShading = Albedo + Emissive;
@@ -148,7 +148,8 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		half3 Cground = (half3)DirLight.GroundLightColor;
         half DirLightLeak = (half) DirLight.SunLightLeak;
 
-#ifdef MTL_ID_SKIN
+#if MTL_LightingMode == ELightingMode_Skin
+		BaseShading = Albedo;
 		/*{
 			half Sbrtf = Transmit * 0.25h;
 			half Sbrdf = 1.0h - Sbrtf;
@@ -181,7 +182,7 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 			BaseShading = (DirLightDiffuseShading + DirLightSpecShading + TransmitShading) * ShadowValue + SkyDiffuseShading;
 
 		}*/
-#elif  defined(MTL_ID_TRANSMIT)
+#elif MTL_LightingMode == ELightingMode_Transmit
 		half Sbrdf = 1.0h - Transmit * 0.5h;
 		half Sdiff = 1.0h - Metallic;
 		AbsSpecular = 0.08h * AbsSpecular;
@@ -222,7 +223,8 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 
 		AoOffsetEncoded = 0.0h;
 
-#elif defined(MTL_ID_HAIR)
+#elif MTL_LightingMode == ELightingMode_Hair
+		BaseShading = Albedo;
 		//{
 		//	half3 SkyDiffuseShading = (half3)(0.45h * (half)input.vNormal.y + 0.55h) * Csky * Albedo * ECCd * Ienv_light * 0.15h;
 
@@ -239,7 +241,8 @@ PS_OUTPUT PS_MobileBasePass(PS_INPUT input)
 		//	//BaseShading = HairShading + SkyDiffuseShading;
 		//	//BaseShading = HairShading;
 		//}
-#elif defined(MTL_ID_EYE)
+#elif MTL_LightingMode == ELightingMode_Eye
+		BaseShading = Albedo;
 		//{
 			//half Sdiff = 1.0f - Metallic;
 

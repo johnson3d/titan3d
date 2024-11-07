@@ -108,7 +108,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		half3 L = -(half3)normalize(DirLight.Direction.xyz);
 		half3 V = (half3)normalize(CameraPosition - WorldPos);*/
 
-#ifdef MTL_ID_UNLIT
+#if MTL_LightingMode == ELightingMode_Unlight
 		BaseShading = Albedo;
 #else
 		//lighting for translucent

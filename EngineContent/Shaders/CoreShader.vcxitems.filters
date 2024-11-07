@@ -431,6 +431,7 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\Procedure\Lut3S\SkinLUT3SGen.cginc">
       <Filter>Bricks\Procedure\Lut3S</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\FX\Hair.cginc" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">
