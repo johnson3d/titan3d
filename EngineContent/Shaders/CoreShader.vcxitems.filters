@@ -100,6 +100,9 @@
     <Filter Include="Bricks\Procedure\Lut3S">
       <UniqueIdentifier>{1e9851e3-ede9-4466-ac65-423a8ef88742}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Bricks\FX">
+      <UniqueIdentifier>{dd2412f0-dc3c-4980-99ff-42063394cf9e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -431,7 +434,9 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\Procedure\Lut3S\SkinLUT3SGen.cginc">
       <Filter>Bricks\Procedure\Lut3S</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)Bricks\FX\Hair.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Bricks\FX\Hair.cginc">
+      <Filter>Bricks\FX</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">
