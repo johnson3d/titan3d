@@ -90,6 +90,13 @@ namespace EngineNS.Profiler
             return "Editor";
         }
     }
+    public class TtAssetGategory : TtLogCategory
+    {
+        public override string ToString()
+        {
+            return "Asset";
+        }
+    }
     public class TtPgcGategory : TtLogCategory
     {
         public override string ToString()

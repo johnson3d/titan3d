@@ -10,6 +10,7 @@ using System.Dynamic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using static EngineNS.RName;
 
 namespace EngineNS.IO
 {
@@ -257,11 +258,11 @@ namespace EngineNS.IO
         }
         public virtual void OnBeforeRenamedAsset(IAsset asset, RName name)
         {
-            //Manager.RemapAsset
+            
         }
         public virtual void OnAfterRenamedAsset(IAsset asset, RName name)
         {
-            //Manager.RemapAsset
+            
         }
         public virtual async Thread.Async.TtTask SaveRefAssets()
         {
@@ -330,15 +331,31 @@ namespace EngineNS.IO
                 TtEngine.Instance.SourceControlModule.AddFile(targetSnapName, true);
 
             TtEngine.Instance.AssetMetaManager.RemoveAMeta(this);
-            OnBeforeRenamedAsset(asset, mAssetName);
+            try
+            {
+                OnBeforeRenamedAsset(asset, mAssetName);
+            }
+            catch (Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+            }
 
-            mAssetName = RName.GetRName(name, type);
+            RNameManager.Instance.VeryDangrouseRemove(mAssetName);
+            mAssetName.VeryDangrouseUpdate(name, type);
+            RNameManager.Instance.VeryDangrouseAdd(mAssetName);
             this.SaveAMeta(asset);
-            asset.AssetName = mAssetName;
+            
             asset.SaveAssetTo(mAssetName);
 
             TtEngine.Instance.AssetMetaManager.RegAsset(this);
-            OnAfterRenamedAsset(asset, mAssetName);
+            try
+            {
+                OnAfterRenamedAsset(asset, mAssetName);
+            }
+            catch (Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+            }
 
             foreach (var i in holdAssets)
             {
@@ -991,6 +1008,7 @@ namespace EngineNS.IO
             if (Assets.ContainsKey(ameta.AssetId) ||
                 RNameAssets.ContainsKey(ameta.GetAssetName()) )
             {
+                Profiler.Log.WriteLine<Profiler.TtAssetGategory>(Profiler.ELogTag.Error, $"RegAsset {ameta.AssetName}/{ameta.AssetId} failed ");
                 return false;
             }
             Assets.Add(ameta.AssetId, ameta);

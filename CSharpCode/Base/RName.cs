@@ -14,21 +14,6 @@ namespace EngineNS
     [RName.PGRName]
     public class RName : IComparable<RName>, IComparable
     {
-        public WeakReference mTagReference = null;
-        public T GetTagObject<T>()
-        {
-            if (mTagReference == null || mTagReference.IsAlive == false)
-            {
-                var attrs = typeof(T).GetCustomAttributes(typeof(TtRNameTagObjectAttribute), true);
-                if (attrs.Length > 0)
-                {
-                    var attrTag = attrs[0] as TtRNameTagObjectAttribute;
-                    mTagReference = new WeakReference(attrTag.GetTagObject(this));
-                }
-            }
-            return (T)mTagReference.Target;
-        }
-
         public class PGRNameAttribute : EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute
         {
             public string FilterExts;   // "ext1" / "ext1,ext2"
@@ -55,7 +40,7 @@ namespace EngineNS
                     ComboOpenAction = ComboOpenAction
                 };
                 await mComboBox.Initialize();
-                
+
                 return await base.Initialize_Override();
             }
             ~PGRNameAttribute()
@@ -75,7 +60,7 @@ namespace EngineNS
             public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
             {
                 newValue = info.Value;
-                
+
                 var name = info.Value as RName;
                 mDrawData.NewValue = name;
                 //var newName = EGui.Controls.CtrlUtility.DrawRName(name, info.Name, FilterExts, info.Readonly, mSnap);
@@ -115,7 +100,7 @@ namespace EngineNS
                 ContentBrowser.ShaderType = ShaderType;
                 ContentBrowser.SelectedAssets.Clear();
                 mComboBox.OnDraw(in drawList, in anyPt);
-                if(ContentBrowser.SelectedAssets.Count > 0 &&
+                if (ContentBrowser.SelectedAssets.Count > 0 &&
                     ContentBrowser.SelectedAssets[0].GetAssetName() != name)
                 {
                     mDrawData.NewValue = ContentBrowser.SelectedAssets[0].GetAssetName();
@@ -131,7 +116,7 @@ namespace EngineNS
                 else
                 {
                     var sz = new Vector2(0, 0);
-                    if(ImGuiAPI.Button("F", in sz))
+                    if (ImGuiAPI.Button("F", in sz))
                     {
                         EGui.Controls.TtContentBrowser.GlobalFocusAsset = mDrawData.NewValue;
                     }
@@ -157,6 +142,43 @@ namespace EngineNS
                 return false;
             }
         }
+        private static object Locker = new object();
+        private static uint NameUniqueIdAllocator = 0;
+        private uint NameUniqueId;
+        public enum ERNameType : ushort
+        {
+            Game = 0,
+            Engine,
+            Transient,
+            Count,
+        }
+        ERNameType mRNameType = ERNameType.Game;
+        string mName;
+        string mAddress;
+        public WeakReference mTagReference = null;
+        internal RName(string name, ERNameType type)
+        {
+            lock (Locker)
+            {
+                System.Diagnostics.Debug.Assert(NameUniqueIdAllocator < uint.MaxValue - 1);
+                NameUniqueId = NameUniqueIdAllocator;
+                NameUniqueIdAllocator++;
+            }
+            VeryDangrouseUpdate(name, type);
+        }
+        public T GetTagObject<T>()
+        {
+            if (mTagReference == null || mTagReference.IsAlive == false)
+            {
+                var attrs = typeof(T).GetCustomAttributes(typeof(TtRNameTagObjectAttribute), true);
+                if (attrs.Length > 0)
+                {
+                    var attrTag = attrs[0] as TtRNameTagObjectAttribute;
+                    mTagReference = new WeakReference(attrTag.GetTagObject(this));
+                }
+            }
+            return (T)mTagReference.Target;
+        }
 
         public static bool IsEmpty(RName rName)
         {
@@ -168,30 +190,6 @@ namespace EngineNS
                 return false;
             return IO.TtFileManager.FileExists(rName.Address) || IO.TtFileManager.DirectoryExists(rName.Address);
         }
-
-        internal RName(string name, ERNameType type)
-        {
-            mName = name;
-            mRNameType = type;
-            ChangeAddressWithRNameType();
-        }
-        internal void VeryDangrouseUpdate(string name, ERNameType type)
-        {
-            mName = name;
-            mRNameType = type;
-            mAddress = GetAddress(mRNameType, Name);
-        }
-        public enum ERNameType : ushort
-        {
-            Game = 0,
-            Engine,
-            Transient,
-            Count,
-        }
-        ERNameType mRNameType = ERNameType.Game;
-        string mName;
-        string mAddress;
-        int RNameHashValue;
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public Guid AssetId
         {
@@ -289,15 +287,6 @@ namespace EngineNS
         {
             return $"{mName}:{mRNameType}";
         }
-        public int CompareTo(RName other)
-        {
-            if (this.mRNameType > other.mRNameType)
-                return 1;
-            else if (this.mRNameType < other.mRNameType)
-                return -1;
-            else
-                return Name.CompareTo(other.Name);
-        }
         public static string GetAddress(ERNameType type, string name)
         {
             switch (type)
@@ -312,29 +301,35 @@ namespace EngineNS
                     }
             }
         }
-        private void ChangeAddressWithRNameType()
-        {
-            mAddress = GetAddress(mRNameType, Name);
-            RNameHashValue = (Name + RNameType.ToString()).GetHashCode();
-        }
-        public override int GetHashCode()
-        {
-            return RNameHashValue;
-        }
-        public int CompareTo(object obj)
-        {
-            var rName = (RName)obj;
-            if (rName == null)
-                return -1;
-            return Name.CompareTo(rName.Name);
-        }
-
         public RName GetDirectoryRName()
         {
             var dir = IO.TtFileManager.GetBaseDirectory(mName);
             return GetRName(dir, RNameType);
         }
 
+        #region IComparable
+        internal void VeryDangrouseUpdate(string name, ERNameType type)
+        {
+            mName = name;
+            mRNameType = type;
+            mAddress = GetAddress(mRNameType, Name);
+        }
+        public override int GetHashCode()
+        {
+            return (int)NameUniqueId;
+        }
+        public int CompareTo(object obj)
+        {
+            var rName = (RName)obj;
+            if (rName == null)
+                return -1;
+            return NameUniqueId.CompareTo(rName.NameUniqueId);
+        }
+        public int CompareTo(RName other)
+        {
+            return NameUniqueId.CompareTo(other.NameUniqueId);
+        }
+        #endregion
         internal class RNameManager
         {
             public static RNameManager Instance = new RNameManager();
@@ -381,30 +376,17 @@ namespace EngineNS
                     return null;
                 }
             }
-            public void UnsafeUpdateRName(RName rn, string name, ERNameType type)
+            internal void VeryDangrouseRemove(RName rn)
             {
-                lock (this)
+                foreach (var i in mNameSets[(int)rn.RNameType])
                 {
-                    var dict = mNameSets[(int)rn.RNameType];
-                    if (dict.TryGetValue(rn.Name, out var result))
-                    {
-                        System.Diagnostics.Debug.Assert(result == rn);
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.Assert(false);
-                    }
-                    dict.Remove(rn.Name);
-                    dict = mNameSets[(int)type];
-                    if (dict.TryGetValue(name, out result) == false)
-                    {
-                        dict.Add(name, rn);
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.Assert(result == rn);
-                    }
+                    if (i.Value == rn)
+                        mNameSets[(int)rn.RNameType].Remove(i.Key);
                 }
+            }
+            internal void VeryDangrouseAdd(RName rn)
+            {
+                mNameSets[(int)rn.RNameType][rn.Name] = rn;
             }
         }
     }    

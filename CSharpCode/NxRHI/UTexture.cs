@@ -8,6 +8,8 @@ using Microsoft.Toolkit.HighPerformance;
 using StbImageSharp;
 using System.ComponentModel;
 using EngineNS.Graphics.Pipeline.Shader;
+using System.Collections.Generic;
+using static EngineNS.RName;
 
 namespace EngineNS.NxRHI
 {
@@ -69,6 +71,49 @@ namespace EngineNS.NxRHI
         {
             return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
         }
+        public override async System.Threading.Tasks.Task MoveTo(string name, RName.ERNameType type)
+        {
+            if (mAssetName.Name == name && mAssetName.RNameType == type)
+                return;
+
+            if (mAssetName.Name == name && mAssetName.RNameType == type)
+                return;
+            IAsset asset = await LoadAsset();
+            List<EngineNS.IO.IAssetMeta> holders = new List<EngineNS.IO.IAssetMeta>();
+            TtEngine.Instance.AssetMetaManager.GetAssetHolder(this, holders);
+            List<EngineNS.IO.IAsset> holdAssets = new List<EngineNS.IO.IAsset>();
+            foreach (var i in holders)
+            {
+                var holdAsset = await i.LoadAsset();
+                if (holdAsset != null)
+                {
+                    holdAssets.Add(holdAsset);
+                }
+            }
+
+            var savedName = mAssetName.Name;
+            var savedType = mAssetName.RNameType;
+            var targetSnapName = TtEngine.Instance.FileManager.GetRoot(type) + name;
+            IO.TtFileManager.CopyFile(mAssetName.Address, targetSnapName);
+            if (IO.TtFileManager.FileExists(targetSnapName))
+                TtEngine.Instance.SourceControlModule.AddFile(targetSnapName, true);
+
+            TtEngine.Instance.AssetMetaManager.RemoveAMeta(this);
+
+            RNameManager.Instance.VeryDangrouseRemove(mAssetName);
+            mAssetName.VeryDangrouseUpdate(name, type);
+            RNameManager.Instance.VeryDangrouseAdd(mAssetName);
+            this.SaveAMeta(asset);
+
+            TtEngine.Instance.AssetMetaManager.RegAsset(this);
+
+            foreach (var i in holdAssets)
+            {
+                i.SaveAssetTo(i.GetAMeta().GetAssetName());
+            }
+
+            DeleteAsset(savedName, savedType);
+        }
         public override void DeleteAsset(string name, RName.ERNameType type)
         {
             var address = RName.GetAddress(type, name);
@@ -77,16 +122,14 @@ namespace EngineNS.NxRHI
 
             DeleteFile(address + MetaExt);
         }
-        public override void OnBeforeRenamedAsset(IAsset asset, RName name)
-        {
-            ((TtSrView)asset).LoadOriginImageObject();
-            CoreSDK.CheckResult(TtEngine.Instance.GfxDevice.TextureManager.UnsafeRemove(name) == asset);
-        }
-        public override void OnAfterRenamedAsset(IAsset asset, RName name)
-        {
-            ((TtSrView)asset).FreeOriginImageObject();
-            TtEngine.Instance.GfxDevice.TextureManager.UnsafeAdd(name, (TtSrView)asset);
-        }
+        //public override void OnBeforeRenamedAsset(IAsset asset, RName name)
+        //{
+        //    ((TtSrView)asset).LoadOriginImageObject(this);
+        //}
+        //public override void OnAfterRenamedAsset(IAsset asset, RName name)
+        //{
+        //    ((TtSrView)asset).FreeOriginImageObject();
+        //}
         Thread.Async.TtTask<TtSrView>? SnapTask;
         Thread.Async.TtTask<EngineNS.Graphics.Pipeline.Shader.TtEffect>? EffectTask;
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
@@ -1062,9 +1105,11 @@ namespace EngineNS.NxRHI
             ameta.RefAssetRNames.Clear();
         }
         object mOriginImageObject = null;
-        internal void LoadOriginImageObject()
+        internal void LoadOriginImageObject(TtSrViewAMeta ameta)
         {
-            var ameta = GetAMeta() as TtSrViewAMeta;
+            //var ameta = GetAMeta() as TtSrViewAMeta;
+            if (ameta == null)
+                return;
             var imgType = ameta.OriginImageType;
             switch (imgType)
             {

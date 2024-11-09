@@ -22,14 +22,6 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             return await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(GetAssetName());
         }
-        public override void OnBeforeRenamedAsset(IO.IAsset asset, RName name)
-        {
-            CoreSDK.CheckResult(TtEngine.Instance.GfxDevice.MaterialManager.UnsafeRemove(name) == asset);
-        }
-        public override void OnAfterRenamedAsset(IO.IAsset asset, RName name)
-        {
-            TtEngine.Instance.GfxDevice.MaterialManager.UnsafeAdd(name, (TtMaterial)asset);
-        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //必须是TextureAsset

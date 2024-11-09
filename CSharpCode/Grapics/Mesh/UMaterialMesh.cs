@@ -26,14 +26,6 @@ namespace EngineNS.Graphics.Mesh
         {
             return await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(GetAssetName());
         }
-        public override void OnBeforeRenamedAsset(IO.IAsset asset, RName name)
-        {
-            CoreSDK.CheckResult(TtEngine.Instance.GfxDevice.MaterialMeshManager.UnsafeRemove(name) == asset);
-        }
-        public override void OnAfterRenamedAsset(IO.IAsset asset, RName name)
-        {
-            TtEngine.Instance.GfxDevice.MaterialMeshManager.UnsafeAdd(name, (TtMaterialMesh)asset);
-        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //必须是TextureAsset

@@ -19,14 +19,6 @@ namespace EngineNS.Graphics.Mesh
         {
             return await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(GetAssetName());
         }
-        public override void OnBeforeRenamedAsset(IO.IAsset asset, RName name)
-        {
-            CoreSDK.CheckResult(TtEngine.Instance.GfxDevice.MeshPrimitiveManager.UnsafeRemove(name) == asset);
-        }
-        public override void OnAfterRenamedAsset(IO.IAsset asset, RName name)
-        {
-            TtEngine.Instance.GfxDevice.MeshPrimitiveManager.UnsafeAdd(name, (TtMeshPrimitives)asset);
-        }
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             return false;
