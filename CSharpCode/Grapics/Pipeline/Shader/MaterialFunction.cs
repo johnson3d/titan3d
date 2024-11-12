@@ -114,7 +114,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 ameta.SaveAMeta(this);
             }
 
-            HLSLCode = GenMateralFunctionGraphCode(new UHLSLCodeGenerator(), MaterialGraph);
+            HLSLCode = GenMateralFunctionGraphCode(new UHLSLCodeGenerator(), MaterialGraph, new TtMaterial());
 
             var typeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(this.GetType());
             using (var xnd = new IO.TtXndHolder(typeStr, 0, 0))
@@ -138,7 +138,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             _ = ameta.SaveRefAssets();
         }
         public string GenMateralFunctionGraphCode(UHLSLCodeGenerator mHLSLCodeGen,
-            Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionGraph MaterialGraph)
+            Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionGraph MaterialGraph, TtMaterial material)
         {
             var lstInput = new List<IMaterialFunctionInput>();
             foreach (var i in MaterialGraph.Nodes)
@@ -165,6 +165,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return x.VarName.CompareTo(y.VarName);
             });
             MethodMeta.Parameters = new List<Rtti.TtClassMeta.TtMethodMeta.TtParamMeta>();
+            {
+                var t = new Rtti.TtClassMeta.TtMethodMeta.TtParamMeta();
+                t.Name = "input";
+                t.ParameterType = Rtti.TtTypeDescGetter<PS_INPUT>.TypeDesc;
+                t.ArgumentAttribute = Bricks.CodeBuilder.EMethodArgumentAttribute.In;
+                t.DefaultValue = new PS_INPUT();
+                MethodMeta.Parameters.Add(t);
+            }
             foreach (var i in lstInput)
             {
                 var t = new Rtti.TtClassMeta.TtMethodMeta.TtParamMeta();
@@ -193,7 +201,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 ClassDec = MaterialClass,
                 NodeGraph = MaterialGraph,
-                UserData = this,
+                UserData = material,
                 CodeGen = mHLSLCodeGen,
             };
             TtMethodDeclaration MtlFunction = new TtMethodDeclaration();
@@ -331,7 +339,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             {
                 if (mCallNodeName != null)
                     return mCallNodeName;
-                return AssetName.Name;
+                return AssetName?.Name;
             }
             set
             {

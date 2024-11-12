@@ -13,6 +13,14 @@ namespace NxRHI
 
 	struct FRootParameter
 	{
+		void Reset()
+		{
+			IsSamplers = false;
+			RootIndex = -1;
+			HeapStartIndex = -1;
+			Descriptors.clear();
+			TempShaderBinders.clear();
+		}
 		enum EGraphicsRootType
 		{
 			VS_Begin = 0,
@@ -62,6 +70,38 @@ namespace NxRHI
 		inline bool IsValidRoot() const {
 			return Descriptors.size() > 0;
 		}
+		void PushShaderBinder(FShaderBinder* pBinder, D3D12_DESCRIPTOR_RANGE_TYPE type)
+		{
+			if (pBinder == nullptr)
+				return;
+			D3D12_DESCRIPTOR_RANGE rangeVS{};
+			rangeVS.RangeType = type;
+			rangeVS.NumDescriptors = pBinder->BindCount;
+			rangeVS.BaseShaderRegister = pBinder->Slot;
+			rangeVS.RegisterSpace = pBinder->Space;
+			rangeVS.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+			//ASSERT(pBinder->DescriptorIndex == -1); DescriptorIndex saved by shader, check valid only for GraphicsEffect
+			pBinder->DescriptorIndex = (UINT)Descriptors.size();
+			Descriptors.push_back(rangeVS);
+			TempShaderBinders.push_back(pBinder);
+		}
+
+		void BuildDX12RootParameters(int& StartIndex, D3D12_SHADER_VISIBILITY shaderVis, std::vector<D3D12_ROOT_PARAMETER>& dxRootParameters)
+		{
+			D3D12_ROOT_PARAMETER tmp{};
+			tmp.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			tmp.ShaderVisibility = shaderVis;
+			tmp.DescriptorTable.NumDescriptorRanges = (UINT)Descriptors.size();
+			if (tmp.DescriptorTable.NumDescriptorRanges > 0)
+			{
+				tmp.DescriptorTable.pDescriptorRanges = GetDescriptorAddress();
+				RootIndex = (UINT)dxRootParameters.size();
+				dxRootParameters.push_back(tmp);
+				HeapStartIndex = StartIndex;
+				StartIndex += (int)tmp.DescriptorTable.NumDescriptorRanges;
+				BuildShaderBinders();
+			}
+		}
 	};
 	
 	class DX12GraphicsEffect : public IGraphicsEffect
@@ -71,7 +111,7 @@ namespace NxRHI
 		virtual void BuildState(IGpuDevice* device) override;
 		virtual void Commit(ICommandList* cmdlist, IGraphicDraw* drawcall) override;
 
-		void Push2Root(FEffectBinder* binder);
+		void Push2RootParamters(FEffectBinder* binder);
 		AutoRef<ID3D12CommandSignature> GetIndirectDrawIndexCmdSig(DX12GpuDevice* device, ICommandList* cmdlist);
 		AutoRef<ID3D12CommandSignature> GetIndirectDrawCmdSig(DX12GpuDevice* device, ICommandList* cmdlist);
 	public:

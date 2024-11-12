@@ -117,8 +117,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         public override void OnLButtonClicked(NodePin clickedPin)
         {
             base.OnLButtonClicked(clickedPin);
-            var graph = UserData as TtMaterialGraph;
-            graph.ShaderEditor.NodePropGrid.HideInheritDeclareType = Rtti.TtTypeDescGetter<VarNode>.TypeDesc;
+            //var graph = UserData as TtMaterialGraphBase;
+            //if (graph != null)
+            //{
+            //    graph.ShaderEditor.NodePropGrid.HideInheritDeclareType = Rtti.TtTypeDescGetter<VarNode>.TypeDesc;
+            //}
         }
         //public override IExpression GetExpr(UMaterialGraph funGraph, ICodeGen cGen, PinOut oPin, bool bTakeResult)
         //{

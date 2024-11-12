@@ -206,11 +206,11 @@ namespace EngineNS.Animation.Macross.BlendTree
                 new TtCreateObjectExpression(typeof(FAnimBlendTreeContext).FullName));
             afterTickMethod.MethodBody.Sequence.Add(blendTreeContextCreate);
 
-            var finalPoseInitializeInvoke = new TtMethodInvokeStatement("Tick",
+            var tickInvoke = new TtMethodInvokeStatement("Tick",
                 null, new TtVariableReferenceExpression(VariableName),
                 new TtMethodInvokeArgumentExpression { OperationType = EMethodArgumentAttribute.Default, Expression = new TtVariableReferenceExpression("elapseSecond") },
                 new TtMethodInvokeArgumentExpression { OperationType = EMethodArgumentAttribute.Ref, Expression = new TtVariableReferenceExpression(blendTreeContext_VarName) });
-            afterTickMethod.MethodBody.Sequence.Add(finalPoseInitializeInvoke);
+            afterTickMethod.MethodBody.Sequence.Add(tickInvoke);
 
         }
         public override void GenerateCodeInClass(TtClassDeclaration classDeclaration, ref FClassBuildContext classBuildContext)

@@ -95,7 +95,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
             bool bIsSetInitialActiveState = false;
             foreach (var state in States)
             {
-                TtStateMachineASTBuildUtil.CreateNewAndInitInvokeStatement(state, methodDeclaration);
+                TtStateMachineASTBuildUtil.CreateNewThenCenterDataAssignThenInitInvokeStatement(state, methodDeclaration);
 
                 var stateMachineAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
                                             new TtVariableReferenceExpression("StateMachine", new TtVariableReferenceExpression(state.VariableName)),
@@ -126,6 +126,8 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
 
                 var attachmentAssign = TtASTBuildUtil.CreateAssignOperatorStatement(new TtVariableReferenceExpression(transition.Name), new TtCreateObjectExpression(transition.VariableType.TypeFullName));
                 methodDeclaration.MethodBody.Sequence.Add(attachmentAssign);
+
+                TtASTBuildUtil.CreateCenterDataAssignStatement(transition, methodDeclaration);
 
                 var tansitionFromAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
                                             new TtVariableReferenceExpression("From", new TtVariableReferenceExpression(transition.VariableName)),
@@ -180,6 +182,8 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
 
                     var tansitionDec = TtASTBuildUtil.CreateVariableDeclaration(transition.VariableName, transition.VariableType, new TtCreateObjectExpression(transition.VariableType.TypeFullName));
                     methodDeclaration.MethodBody.Sequence.Add(tansitionDec);
+
+                    TtASTBuildUtil.CreateCenterDataAssignStatement(transition, methodDeclaration);
 
                     var tansitionFromAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
                                                     new TtVariableReferenceExpression("From", new TtVariableReferenceExpression(transition.VariableName)),

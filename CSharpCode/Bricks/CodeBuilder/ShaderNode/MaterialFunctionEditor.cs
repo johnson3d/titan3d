@@ -280,7 +280,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Compile", in btSize))
             {
-                var code = MaterialFunction.GenMateralFunctionGraphCode(new UHLSLCodeGenerator(), MaterialGraph);
+                var code = MaterialFunction.GenMateralFunctionGraphCode(new UHLSLCodeGenerator(), MaterialGraph, new TtMaterial());
                 System.Diagnostics.Trace.WriteLine(MaterialFunction.DefineCode.TextCode);
                 System.Diagnostics.Trace.WriteLine(code);
 

@@ -211,7 +211,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         public TtMethodDeclaration VSFunction { get; } = new TtMethodDeclaration();
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
-            var graph = data.NodeGraph as TtMaterialGraph;
+            var graph = data.NodeGraph as TtMaterialGraphBase;
             graph.UniformVars.Clear();
 
             PSFunction.MethodName = "DO_PS_MATERIAL_IMPL";

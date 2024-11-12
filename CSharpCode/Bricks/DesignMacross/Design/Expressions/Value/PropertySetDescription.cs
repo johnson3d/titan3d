@@ -37,7 +37,62 @@ namespace EngineNS.DesignMacross.Design.Expressions
         }
         public override TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
-            return base.BuildStatement(ref statementBuildContext);
+            var methodDesc = statementBuildContext.MethodDescription as TtMethodDescription;
+            
+            TtExpressionBase hostExp = null;
+            var hostPin = DataInPins[0];
+            if (hostPin != null)
+            {
+                var linkedHostPin = methodDesc.GetLinkedDataPin(hostPin);
+                var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, Sequence = statementBuildContext.ExecuteSequenceStatement };
+                var linkedDesc = linkedHostPin.Parent;
+                if (linkedDesc is TtExpressionDescription linkedExpressionDesc)
+                {
+                    hostExp = linkedExpressionDesc.BuildExpression(ref buildContext);
+                }
+                if (linkedDesc is TtStatementDescription linkedStatementDesc)
+                {
+                    hostExp = linkedStatementDesc.BuildExpressionForOutPin(linkedHostPin);
+                }
+            }
+            var leftSideExp = new TtVariableReferenceExpression(Name, hostExp);
+
+            TtExpressionBase rightSideExp = null;
+            var otherInPin = DataInPins[1];
+            var linkedDataPin = methodDesc.GetLinkedDataPin(otherInPin);
+            if (linkedDataPin == null)
+            {
+                //TODO: TtMethodInvokeReflectedDescription 要报错
+            }
+            else
+            {
+                System.Diagnostics.Debug.Assert(linkedDataPin is TtDataOutPinDescription);
+                var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, Sequence = statementBuildContext.ExecuteSequenceStatement };
+                var linkedDesc = linkedDataPin.Parent;
+                if (linkedDesc is TtExpressionDescription linkedExpressionDesc)
+                {
+                    rightSideExp = linkedExpressionDesc.BuildExpression(ref buildContext);
+                }
+                if (linkedDesc is TtStatementDescription linkedStatementDesc)
+                {
+                    rightSideExp = linkedStatementDesc.BuildExpressionForOutPin(linkedDataPin);
+                }
+            }
+
+            var propertySetStatement = TtASTBuildUtil.CreateAssignOperatorStatement(leftSideExp, rightSideExp);
+            statementBuildContext.AddStatement(propertySetStatement);
+            var executionOutPin = ExecutionOutPins[0];
+            var linkedExecPin = methodDesc.GetLinkedExecutionPin(executionOutPin);
+            if (linkedExecPin == null)
+            {
+                //空语句
+            }
+            else
+            {
+                System.Diagnostics.Debug.Assert(linkedExecPin is TtExecutionInPinDescription);
+                (linkedExecPin.Parent as TtStatementDescription).BuildStatement(ref statementBuildContext);
+            }
+            return propertySetStatement;
         }
         public override TtExpressionBase BuildExpressionForOutPin(TtDataPinDescription pin)
         {

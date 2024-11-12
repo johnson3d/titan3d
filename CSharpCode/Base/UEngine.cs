@@ -359,6 +359,11 @@ namespace EngineNS
             {
                 Config.UseRenderDoc = (bool)Config_UseRenderDoc;
             }
+            var Config_HasDebugLayer = this.DynConfigData.GetConfig("HasDebugLayer");
+            if (Config_HasDebugLayer != null)
+            {
+                Config.HasDebugLayer = (bool)Config_HasDebugLayer;
+            }
 
             if (Config.IsGpuDump)
             {

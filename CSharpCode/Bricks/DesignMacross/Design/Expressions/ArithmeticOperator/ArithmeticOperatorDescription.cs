@@ -3,6 +3,7 @@ using EngineNS.Bricks.CodeBuilder;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Design.ConnectingLine;
+using EngineNS.DesignMacross.Design.Statement;
 using EngineNS.Rtti;
 using Mono.Cecil;
 
@@ -20,6 +21,19 @@ namespace EngineNS.DesignMacross.Design.Expressions
             
         }
 
+        public override bool IsPinsLinkable(TtDataPinDescription selfPin, TtDataPinDescription targetPin)
+        {
+            if(base.IsPinsLinkable(selfPin, targetPin))
+            {
+                return true;
+            }
+            if(selfPin.TypeDesc == null)
+            {
+                return true;
+            }
+            return false;
+        }
+
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
             var methodDesc = expressionBuildContext.MethodDescription as TtMethodDescription;
@@ -32,15 +46,30 @@ namespace EngineNS.DesignMacross.Design.Expressions
             if (leftLinkedDataPin != null)
             {
                 System.Diagnostics.Debug.Assert(leftLinkedDataPin is TtDataOutPinDescription);
-                FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription };
-                expression.Left = (leftLinkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
+                if (leftLinkedDataPin.Parent is TtExpressionDescription expressionDescription)
+                {
+                    FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription };
+                    expression.Left = (leftLinkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
+                }
+                if (leftLinkedDataPin.Parent is TtStatementDescription statementDescription)
+                {
+                    expression.Left = (leftLinkedDataPin.Parent as TtStatementDescription).BuildExpressionForOutPin(leftLinkedDataPin);
+                }
             }
             var rightLinkedDataPin = methodDesc.GetLinkedDataPin(dataInPin_Right);
             if (rightLinkedDataPin != null)
             {
                 System.Diagnostics.Debug.Assert(rightLinkedDataPin is TtDataOutPinDescription);
-                FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription };
-                expression.Right = (rightLinkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
+
+                if (rightLinkedDataPin.Parent is TtExpressionDescription expressionDescription)
+                {
+                    FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription };
+                    expression.Right = (rightLinkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
+                }
+                if (rightLinkedDataPin.Parent is TtStatementDescription statementDescription)
+                {
+                    expression.Right = (rightLinkedDataPin.Parent as TtStatementDescription).BuildExpressionForOutPin(rightLinkedDataPin);
+                }
             }
             return expression;
         }

@@ -15,28 +15,31 @@ namespace EngineNS.NxRHI
         public class TtShaderBinderIndexer
         {
             private static bool mFinalized = false;
-            public static List<TtShaderBinderIndexer> ShaderBinderIndexers { get; } = new List<TtShaderBinderIndexer>();
-            internal static void RemoveBinderIndexer(TtShaderBinderIndexer obj)
+            public static List<TtShaderBinderIndexer> GlobalShaderBinderIndexers { get; } = new List<TtShaderBinderIndexer>();
+            internal static void RemoveGlobalBinderIndexer(TtShaderBinderIndexer obj)
             {
-                lock (ShaderBinderIndexers)
+                lock (GlobalShaderBinderIndexers)
                 {
-                    ShaderBinderIndexers.Remove(obj);
+                    GlobalShaderBinderIndexers.Remove(obj);
                 }
             }
             public static void FinalCleanup()
             {
                 mFinalized = true;
-                foreach (var i in ShaderBinderIndexers)
+                foreach (var i in GlobalShaderBinderIndexers)
                 {
                     i.Dispose();
                 }
-                ShaderBinderIndexers.Clear();
+                GlobalShaderBinderIndexers.Clear();
             }
             public TtShaderBinderIndexer()
             {
                 if (mFinalized)
                     return;
-                ShaderBinderIndexers.Add(this);
+                lock (GlobalShaderBinderIndexers)
+                {
+                    GlobalShaderBinderIndexers.Add(this);
+                }
             }
             public void Dispose()
             {

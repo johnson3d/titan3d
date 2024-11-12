@@ -57,6 +57,7 @@ namespace NxRHI
 		void SetAABB(v3dxBox3* box) {
 			mAABB = *box;
 		}
+		void CalcAABB();
 		UINT GetVertexNumber() const;
 		UINT GetPrimitiveNumber() const;
 		UINT GetAtomNumber() const;

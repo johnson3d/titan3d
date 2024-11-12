@@ -86,7 +86,7 @@ namespace NxRHI
 			return;
 		DXGI_ADAPTER_DESC dxdesc{};
 		mGIAdapters[index]->GetDesc(&dxdesc);
-		desc->RhiType = ERhiType::RHI_D3D11;
+		desc->RhiType = ERhiType::RHI_D3D12;
 		desc->VendorId = dxdesc.VendorId;
 		desc->AdapterId = index;
 		desc->DedicatedVideoMemory = dxdesc.DedicatedVideoMemory;
@@ -236,7 +236,7 @@ namespace NxRHI
 		mDevice->QueryInterface(IID_ID3D12InfoQueue, (void**)mDebugInfoQueue.GetAddressOf());
 		if (mDebugInfoQueue != nullptr)
 		{
-			mDebugInfoQueue->SetMuteDebugOutput(TRUE);
+			mDebugInfoQueue->SetMuteDebugOutput(FALSE);
 			mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_COMMAND_ALLOCATOR_SYNC, TRUE);
 			mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_COMMAND_LIST_CLOSED, TRUE);
 			mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_COMMAND_ALLOCATOR_RESET, TRUE);
@@ -319,7 +319,7 @@ namespace NxRHI
 			desc.ByteStride = sizeof(FIndirectDrawArgument);
 			desc.NumArgumentDescs = sizeof(argDesc) / sizeof(D3D12_INDIRECT_ARGUMENT_DESC);
 			desc.pArgumentDescs = argDesc;
-			auto hr = mDevice->CreateCommandSignature(&desc, nullptr, IID_PPV_ARGS(CmdSigForIndirectDrawIndex.GetAddressOf()));
+			auto hr = mDevice->CreateCommandSignature(&desc, nullptr, IID_PPV_ARGS(CmdSigForIndirectDraw.GetAddressOf()));
 			ASSERT(hr == S_OK);
 		}
 

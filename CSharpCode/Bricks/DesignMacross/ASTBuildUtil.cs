@@ -212,5 +212,12 @@ namespace EngineNS.DesignMacross
 
             return methodDeclaration;
         }
+        public static void CreateCenterDataAssignStatement(IDesignableVariableDescription description, TtMethodDeclaration method)
+        {
+            var centerDataAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
+                new TtVariableReferenceExpression("CenterData", new TtVariableReferenceExpression(description.VariableName)),
+                new TtVariableReferenceExpression("CenterData"));
+            method.MethodBody.Sequence.Add(centerDataAssign);
+        }
     }
 }

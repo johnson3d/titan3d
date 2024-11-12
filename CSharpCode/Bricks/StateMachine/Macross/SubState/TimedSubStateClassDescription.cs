@@ -86,14 +86,10 @@ namespace EngineNS.Bricks.StateMachine.Macross.SubState
         private TtMethodDeclaration BuildOverrideInitializeMethod()
         {
             var methodDeclaration = TtStateMachineASTBuildUtil.CreateOverridedInitMethodStatement();
-
             foreach (var attachment in Attachments)
             {
-                var stateAddAttachMentMethodInvoke = new TtMethodInvokeStatement();
-                stateAddAttachMentMethodInvoke.Host = new TtSelfReferenceExpression();
-                stateAddAttachMentMethodInvoke.MethodName = "AddAttachment";
-                stateAddAttachMentMethodInvoke.Arguments.Add(new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression(attachment.VariableName) });
-                methodDeclaration.MethodBody.Sequence.Add(stateAddAttachMentMethodInvoke);
+                TtAnimASTBuildUtil.CreateNewThenCenterDataAssignThenInitInvokeStatement(attachment, methodDeclaration);
+                CreateAddAttachmentMethodStatement(attachment, methodDeclaration);
             }
 
             var returnValueAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
@@ -101,6 +97,14 @@ namespace EngineNS.Bricks.StateMachine.Macross.SubState
                                         new TtPrimitiveExpression(true));
             methodDeclaration.MethodBody.Sequence.Add(returnValueAssign);
             return methodDeclaration;
+        }
+        protected void CreateAddAttachmentMethodStatement(TtDesignableVariableDescription desc, TtMethodDeclaration method)
+        {
+            var stateAddAttachMentMethodInvoke = new TtMethodInvokeStatement();
+            stateAddAttachMentMethodInvoke.Host = new TtSelfReferenceExpression();
+            stateAddAttachMentMethodInvoke.MethodName = "AddAttachment";
+            stateAddAttachMentMethodInvoke.Arguments.Add(new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression(desc.VariableName) });
+            method.MethodBody.Sequence.Add(stateAddAttachMentMethodInvoke);
         }
         #endregion
     }

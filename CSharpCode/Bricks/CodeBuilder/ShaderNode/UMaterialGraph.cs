@@ -282,7 +282,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         }
         private void NodeOnLinkedFrom(TtNodeBase node, PinIn iPin, TtNodeBase OutNode, PinOut oPin)
         {
-            var funcGraph = ParentGraph as TtMaterialGraph;
+            var funcGraph = ParentGraph as TtMaterialGraphBase;
             if (funcGraph == null || oPin.LinkDesc == null || iPin.LinkDesc == null)
             {
                 return;
@@ -292,13 +292,14 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 funcGraph.RemoveLinkedInExcept(iPin, OutNode, oPin.Name);
             }
         }
+
+        public List<TtVariableDeclaration> UniformVars { get; } = new List<TtVariableDeclaration>();
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialGraph@EngineCore", "EngineNS.Bricks.CodeBuilder.ShaderNode.UMaterialGraph" })]
     public partial class TtMaterialGraph : TtMaterialGraphBase
     {
         public TtMaterialEditor ShaderEditor;
-        public List<TtVariableDeclaration> UniformVars { get; } = new List<TtVariableDeclaration>();
     }
 
     public interface IMaterialFunctionInput
@@ -315,6 +316,25 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         string GetSetter(TtNodeBase node, PinIn pin);
         object GetDefaultValueObject();
     }
+    public partial class TtMaterialFunctionInputTexture2D : Var.Texture2D, IMaterialFunctionInput
+    {
+        public Rtti.TtTypeDesc InputType { get => VarType; }
+        public TtMaterialFunctionInputTexture2D()
+        {
+            TitleColor = Color4b.AliceBlue.ToArgb();
+            Inputs.Clear();
+        }
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            //do nothing
+        }
+        [Rtti.Meta]
+        public float DefaultValue { get; set; } = 0;
+        public object GetDefaultValueObject()
+        {
+            return DefaultValue;
+        }
+    }
     public partial class TtMaterialFunctionInputF1 : Var.VarDimF1, IMaterialFunctionInput
     {
         public Rtti.TtTypeDesc InputType { get => VarType; }
@@ -329,6 +349,44 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         }
         [Rtti.Meta]
         public float DefaultValue { get; set; } = 0;
+        public object GetDefaultValueObject()
+        {
+            return DefaultValue;
+        }
+    }
+    public partial class TtMaterialFunctionInputF2 : Var.VarDimF2, IMaterialFunctionInput
+    {
+        public Rtti.TtTypeDesc InputType { get => VarType; }
+        public TtMaterialFunctionInputF2()
+        {
+            TitleColor = Color4b.AliceBlue.ToArgb();
+            Inputs.Clear();
+        }
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            //do nothing
+        }
+        [Rtti.Meta]
+        public Vector2 DefaultValue { get; set; } = Vector2.Zero;
+        public object GetDefaultValueObject()
+        {
+            return DefaultValue;
+        }
+    }
+    public partial class TtMaterialFunctionInputF3 : Var.VarDimF3, IMaterialFunctionInput
+    {
+        public Rtti.TtTypeDesc InputType { get => VarType; }
+        public TtMaterialFunctionInputF3()
+        {
+            TitleColor = Color4b.AliceBlue.ToArgb();
+            Inputs.Clear();
+        }
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            //do nothing
+        }
+        [Rtti.Meta]
+        public Vector3 DefaultValue { get; set; } = Vector3.Zero;
         public object GetDefaultValueObject()
         {
             return DefaultValue;
@@ -373,6 +431,62 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             return DefaultValue;
         }
     }
+    public partial class TtMaterialFunctionOutputF2 : Var.VarDimF2, IMaterialFunctionOutput
+    {
+        public Rtti.TtTypeDesc OutputType { get => VarType; }
+        public List<PinIn> OutPins { get => this.Inputs; }
+        public TtMaterialFunctionOutputF2()
+        {
+            TitleColor = Color4b.IndianRed.ToArgb();
+            Outputs.Clear();
+        }
+        public string GetSetter(TtNodeBase node, PinIn pin)
+        {
+            if (pin == base.InXY)
+                return node.Name;
+            else if (pin == base.InX)
+                return node.Name + ".x";
+            else if (pin == base.InY)
+                return node.Name + ".y";
+            System.Diagnostics.Debug.Assert(false);
+            return node.Name;
+        }
+        [Rtti.Meta]
+        public Vector2 DefaultValue { get; set; } = Vector2.Zero;
+        public object GetDefaultValueObject()
+        {
+            return DefaultValue;
+        }
+    }
+    public partial class TtMaterialFunctionOutputF3 : Var.VarDimF3, IMaterialFunctionOutput
+    {
+        public Rtti.TtTypeDesc OutputType { get => VarType; }
+        public List<PinIn> OutPins { get => this.Inputs; }
+        public TtMaterialFunctionOutputF3()
+        {
+            TitleColor = Color4b.IndianRed.ToArgb();
+            Outputs.Clear();
+        }
+        public string GetSetter(TtNodeBase node, PinIn pin)
+        {
+            if (pin == base.InXYZ)
+                return node.Name;
+            else if (pin == base.InX)
+                return node.Name + ".x";
+            else if (pin == base.InY)
+                return node.Name + ".y";
+            else if (pin == base.InZ)
+                return node.Name + ".z";
+            System.Diagnostics.Debug.Assert(false);
+            return node.Name;
+        }
+        [Rtti.Meta]
+        public Vector3 DefaultValue { get; set; } = Vector3.Zero;
+        public object GetDefaultValueObject()
+        {
+            return DefaultValue;
+        }
+    }
     public partial class TtMaterialFunctionOutputF4 : Var.VarDimF4, IMaterialFunctionOutput
     {
         public Rtti.TtTypeDesc OutputType { get => VarType; }
@@ -412,10 +526,40 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
         {
             base.UpdateCanvasMenus();
             var mfuncMenus = CanvasMenus.AddMenuItem("MFunctionArgs", null, null);
+            mfuncMenus.AddMenuItem("InTex2D", null,
+                (TtMenuItem item, object sender) =>
+                {
+                    var node = new TtMaterialFunctionInputTexture2D ();
+                    node.Name = $"InArg{NameSerialId++}";
+                    node.UserData = this;
+                    node.Position = PopMenuPosition;
+                    SetDefaultActionForNode(node);
+                    this.AddNode(node);
+                });
             mfuncMenus.AddMenuItem("InF1", null,
                 (TtMenuItem item, object sender) =>
                 {
                     var node = new TtMaterialFunctionInputF1();
+                    node.Name = $"InArg{NameSerialId++}";
+                    node.UserData = this;
+                    node.Position = PopMenuPosition;
+                    SetDefaultActionForNode(node);
+                    this.AddNode(node);
+                });
+            mfuncMenus.AddMenuItem("InF2", null,
+                (TtMenuItem item, object sender) =>
+                {
+                    var node = new TtMaterialFunctionInputF2();
+                    node.Name = $"InArg{NameSerialId++}";
+                    node.UserData = this;
+                    node.Position = PopMenuPosition;
+                    SetDefaultActionForNode(node);
+                    this.AddNode(node);
+                });
+            mfuncMenus.AddMenuItem("InF3", null,
+                (TtMenuItem item, object sender) =>
+                {
+                    var node = new TtMaterialFunctionInputF3();
                     node.Name = $"InArg{NameSerialId++}";
                     node.UserData = this;
                     node.Position = PopMenuPosition;
@@ -436,6 +580,26 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
                 (TtMenuItem item, object sender) =>
                 {
                     var node = new TtMaterialFunctionOutputF1();
+                    node.Name = $"OutArg{NameSerialId++}";
+                    node.UserData = this;
+                    node.Position = PopMenuPosition;
+                    SetDefaultActionForNode(node);
+                    this.AddNode(node);
+                });
+            mfuncMenus.AddMenuItem("OutF2", null,
+                (TtMenuItem item, object sender) =>
+                {
+                    var node = new TtMaterialFunctionOutputF2();
+                    node.Name = $"OutArg{NameSerialId++}";
+                    node.UserData = this;
+                    node.Position = PopMenuPosition;
+                    SetDefaultActionForNode(node);
+                    this.AddNode(node);
+                });
+            mfuncMenus.AddMenuItem("OutF3", null,
+                (TtMenuItem item, object sender) =>
+                {
+                    var node = new TtMaterialFunctionOutputF3();
                     node.Name = $"OutArg{NameSerialId++}";
                     node.UserData = this;
                     node.Position = PopMenuPosition;

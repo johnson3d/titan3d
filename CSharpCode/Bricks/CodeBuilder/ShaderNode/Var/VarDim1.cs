@@ -74,7 +74,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
         {
             if (IsUniform)
             {
-                var graph = data.NodeGraph as TtMaterialGraph;
+                var graph = data.NodeGraph as TtMaterialGraphBase;
                 graph.UniformVars.Add(val);
             }
             else
@@ -86,7 +86,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
             {
                 foreach (var i in this.Inputs)
                 {
-                    this.ParentGraph.RemoveLinkedIn(i);
+                    this.ParentGraph?.RemoveLinkedIn(i);
                 }
                 TitleColor = 0xFF2040af;
             }

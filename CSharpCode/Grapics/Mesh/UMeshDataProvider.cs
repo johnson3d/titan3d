@@ -1567,6 +1567,7 @@ namespace EngineNS.Graphics.Mesh
                 builder.AddTriangle(pIndex[i * 3], pIndex[i * 3 + 1], pIndex[i * 3 + 2]);
             }
             builder.PushAtomLOD(0, &dpDesc);
+            builder.CalcAABB();
             return meshBuilder;
         }
         #endregion
@@ -1680,6 +1681,10 @@ namespace EngineNS.Graphics.Mesh
         }
         #endregion
 
+        public void CalcAABB()
+        {
+            mCoreObject.CalcAABB();
+        }
         public IBlobObject CreateStream(EngineNS.NxRHI.EVertexStreamType index)
         {
             return mCoreObject.CreateStream(index);

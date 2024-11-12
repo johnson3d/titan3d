@@ -187,6 +187,9 @@ namespace NxRHI
 		if (effect->mCbvSrvUavNumber > 0)
 		{
 			mCbvSrvUavHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+			/*if (mCbvSrvUavHeap == nullptr)
+				mCbvSrvUavHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+			ASSERT(mCbvSrvUavHeap->Heap->RefResources.size() == effect->mCbvSrvUavNumber);*/
 		}
 		else
 		{
@@ -195,6 +198,8 @@ namespace NxRHI
 		if (effect->mSamplerNumber > 0)
 		{
 			mSamplerHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
+			/*if (mSamplerHeap == nullptr)
+				mSamplerHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));*/
 		}
 		else
 		{

@@ -58,10 +58,71 @@ namespace EngineNS.Bricks.StateMachine.Macross
         {
             return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);
         }
+        void GenerateCodeInMainClassInitMethod(TtClassDeclaration classDeclaration, ref FClassBuildContext classBuildContext)
+        {
+            var initMethod = classDeclaration.FindMethod("Initialize");
+            if (initMethod == null)
+            {
+                initMethod = TtASTBuildUtil.CreateInitMethodDeclaration();
+                classDeclaration.AddMethod(initMethod);
+            }
 
+            var stateMachineContext_VarName = "stateMachineContext" + VariableName;
+
+            var stateMachineContextCreate = TtASTBuildUtil.CreateVariableDeclaration(stateMachineContext_VarName,
+                new TtTypeReference(typeof(TtStateMachineContext)),
+                new TtCreateObjectExpression(typeof(TtStateMachineContext).FullName));
+
+            initMethod.MethodBody.Sequence.Add(stateMachineContextCreate);
+
+            var stateMachineAssign = TtASTBuildUtil.CreateAssignOperatorStatement(new TtVariableReferenceExpression(VariableName),
+                new TtCreateObjectExpression(VariableType.TypeFullName));
+            initMethod.MethodBody.Sequence.Add(stateMachineAssign);
+
+            var centerDataAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
+                new TtVariableReferenceExpression("CenterData", new TtVariableReferenceExpression(VariableName)),
+                new TtSelfReferenceExpression());
+            initMethod.MethodBody.Sequence.Add(centerDataAssign);
+
+            var stateMachineInitializeInvoke = new TtMethodInvokeStatement("Initialize",
+                null, new TtVariableReferenceExpression(VariableName),
+                new TtMethodInvokeArgumentExpression { OperationType = EMethodArgumentAttribute.Default, Expression = new TtVariableReferenceExpression(stateMachineContext_VarName) });
+            stateMachineInitializeInvoke.IsAsync = true;
+            initMethod.MethodBody.Sequence.Add(stateMachineInitializeInvoke);
+
+            var baseInitializeInvoke = new TtMethodInvokeStatement("Initialize", null, new TtBaseReferenceExpression());
+            baseInitializeInvoke.IsAsync = true;
+            initMethod.MethodBody.Sequence.Add(baseInitializeInvoke);
+        }
+
+        void GenerateCodeInMainClassAfterTickMethod(TtClassDeclaration classDeclaration, ref FClassBuildContext classBuildContext)
+        {
+            var afterTickMethod = classDeclaration.FindMethod("AfterTick");
+            if (afterTickMethod == null)
+            {
+                afterTickMethod = TtASTBuildUtil.CreateAfterTickMethodDeclaration();
+                classDeclaration.AddMethod(afterTickMethod);
+            }
+            var stateMachineContext_VarName = "stateMachine" + VariableName;
+
+            var stateMachineContextCreate = TtASTBuildUtil.CreateVariableDeclaration(stateMachineContext_VarName,
+                new TtTypeReference(typeof(TtStateMachineContext)),
+                new TtCreateObjectExpression(typeof(TtStateMachineContext).FullName));
+            afterTickMethod.MethodBody.Sequence.Add(stateMachineContextCreate);
+
+            var stateMachineTickInvoke = new TtMethodInvokeStatement("Tick",
+                null, new TtVariableReferenceExpression(VariableName),
+                new TtMethodInvokeArgumentExpression { OperationType = EMethodArgumentAttribute.Default, Expression = new TtVariableReferenceExpression("elapseSecond") },
+                new TtMethodInvokeArgumentExpression { OperationType = EMethodArgumentAttribute.In, Expression = new TtVariableReferenceExpression(stateMachineContext_VarName) });
+            afterTickMethod.MethodBody.Sequence.Add(stateMachineTickInvoke);
+
+        }
         public override void GenerateCodeInClass(TtClassDeclaration classDeclaration, ref FClassBuildContext classBuildContext)
         {
             base.GenerateCodeInClass(classDeclaration, ref classBuildContext);
+
+            GenerateCodeInMainClassInitMethod(classDeclaration, ref classBuildContext);
+            GenerateCodeInMainClassAfterTickMethod(classDeclaration, ref classBuildContext);
         }
 
         #region Internal AST Build
@@ -80,6 +141,8 @@ namespace EngineNS.Bricks.StateMachine.Macross
                 stateMachineAssign.To = new TtVariableReferenceExpression("StateMachine", new TtVariableReferenceExpression(compoundState.VariableName));
                 stateMachineAssign.From = new TtSelfReferenceExpression();
                 methodDeclaration.MethodBody.Sequence.Add(stateMachineAssign);
+
+                TtASTBuildUtil.CreateCenterDataAssignStatement(compoundState, methodDeclaration);
             }
             foreach (var compoundState in CompoundStates)
             {

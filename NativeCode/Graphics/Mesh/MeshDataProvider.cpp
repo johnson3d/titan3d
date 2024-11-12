@@ -441,6 +441,17 @@ namespace NxRHI
 		return true;
 	}
 
+	void FMeshDataProvider::CalcAABB()
+	{
+		mAABB.InitializeBox();
+		auto vb = mVertexBuffers[VST_Position];
+		auto pPos = (v3dxVector3*)vb->GetData();
+		for (UINT i = 0; i < VertexNumber; i++)
+		{
+			mAABB.MergeVertex(pPos[i]);
+		}
+	}
+
 	UINT FMeshDataProvider::GetVertexNumber() const
 	{
 		return VertexNumber;

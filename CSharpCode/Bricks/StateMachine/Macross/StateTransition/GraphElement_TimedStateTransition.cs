@@ -4,6 +4,7 @@ using EngineNS.DesignMacross.Base.Description;
 using EngineNS.EGui.Controls;
 using EngineNS.Bricks.StateMachine.Macross.CompoundState;
 using EngineNS.Bricks.StateMachine.Macross.SubState;
+using Sprache;
 
 namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
 {
@@ -25,6 +26,138 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
         West,
         South,
         North,
+    }
+    public class AStarPoint : IEquatable<AStarPoint>
+    {
+        public AStarPoint Parent;
+        public Vector2 Position;
+        public float F;
+        public float G;
+        public float H;
+
+        public bool Equals(AStarPoint other)
+        {
+            return other.Position == Position;
+        }
+        public static bool operator ==(in AStarPoint left, in AStarPoint right)
+        {
+            return left.Equals(right);
+        }
+        public static bool operator !=(in AStarPoint left, in AStarPoint right)
+        {
+            return !left.Equals(right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is AStarPoint && Equals((AStarPoint)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Position.GetHashCode();
+        }
+    }
+
+    public struct AStarCollision
+    {
+        public Rect Bounds;
+        public bool IsCollide(AStarPoint point)
+        {
+            return Bounds.Contains(point.Position.X, point.Position.Y);
+        }
+    }
+    public class ManhattanAStart
+    {
+        AStarPoint StartPoint;
+        AStarPoint EndPoint;
+        List<AStarCollision> Collisions = new List<AStarCollision>();
+        System.Collections.Generic.PriorityQueue<AStarPoint, float> OpenQueue = new();
+        List<AStarPoint> CloseList = new List<AStarPoint>();
+        public List<Vector2> GetPath(Vector2 startPosition, ELineDirection startDirection, Vector2 endPosition, ELineDirection endDirection, List<Rect> collisioins)
+        {
+            OpenQueue.Clear();
+            CloseList.Clear();
+            Collisions.Clear();
+            StartPoint = CreatePoint(startPosition + new Vector2(0, 50), startPosition + new Vector2(0, 50), endPosition);
+            EndPoint = CreatePoint(endPosition + new Vector2(-50, 0), startPosition, endPosition + new Vector2(-50, 0));
+            foreach(var collision in collisioins)
+            {
+                Collisions.Add(new AStarCollision() { Bounds = collision });
+            }
+
+            OpenQueue.Enqueue(StartPoint, StartPoint.F);
+            while(OpenQueue.Count > 0)
+            {
+                var current = OpenQueue.Dequeue();
+                CloseList.Add(current);
+                if(current.Position == EndPoint.Position)
+                {
+
+                }
+                var neighbors = GetNeighbors(current);
+                foreach(var next in neighbors)
+                {
+            
+                    if(IsCollided(next) || CloseList.Contains(next))
+                    {
+                        continue;
+                    }
+                    if(NeedAddToOpenList(next))
+                    {
+                        OpenQueue.Enqueue(next, next.F);
+                    }
+                }
+            }
+
+            return null;
+        }
+        public bool NeedAddToOpenList(AStarPoint point)
+        {
+            foreach(var item in OpenQueue.UnorderedItems)
+            {
+                if(point == item.Element && point.G > item.Element.G)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        public AStarPoint CreatePoint(Vector2 position, Vector2 startPosition, Vector2 endPosition, AStarPoint parent = null, float g = 0)
+        {
+            AStarPoint point = new AStarPoint();
+            point.Parent = parent;
+            point.Position = position;
+            point.G = g;
+            point.H = GetManhattanLength(position, endPosition);
+            point.F = point.G + point.H;
+            return point;
+        }
+        public float GetManhattanLength(Vector2 a, Vector2 b)
+        {
+            return MathF.Sqrt(Math.Abs(a.X - b.X) * Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y) * Math.Abs(a.Y - b.Y));
+        }
+        List<AStarPoint> GetNeighbors(AStarPoint point)
+        {
+            List<AStarPoint> neighbors = new List<AStarPoint>();
+            neighbors.Add(CreatePoint(point.Position + new Vector2(1, 0), StartPoint.Position, EndPoint.Position, point, point.G + 10));
+            neighbors.Add(CreatePoint(point.Position + new Vector2(-1, 0), StartPoint.Position, EndPoint.Position, point, point.G + 10));
+            neighbors.Add(CreatePoint(point.Position + new Vector2(0, 1), StartPoint.Position, EndPoint.Position, point, point.G + 10));
+            neighbors.Add(CreatePoint(point.Position + new Vector2(0, -1), StartPoint.Position, EndPoint.Position, point, point.G + 10));
+            return neighbors;
+        }
+        bool IsCollided(AStarPoint point)
+        {
+            bool isCollide = false;
+            foreach (var collision in Collisions)
+            {
+                if (collision.IsCollide(point))
+                {
+                    isCollide = true;
+                }
+            }
+            return isCollide;
+        }
     }
     public class ManhattanConnectionRouter
     {
@@ -179,7 +312,15 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
 
             if (transitionElement.From is IStateTransitionInitial initiable && transitionElement.To is IStateTransitionAcceptable acceptable)
             {
-                var lines = ManhattanConnectionRouter.GetLines((transitionElement.AbsLocation * 2 + new Vector2(size.Width, 10)) / 2, ELineDirection.South, acceptable.GetTransitionLinkPosition(ELineDirection.East), ELineDirection.East, null);
+                List<Rect> rects = new List<Rect>();
+                foreach(var element in context.DesignedGraph.Elements)
+                {
+                    Rect rect = new Rect();
+                    rect.Location = element.Location;
+                    rect.Size = element.Size;
+                    rects.Add(rect);
+                }
+                var lines = ManhattanConnectionRouter.GetLines((transitionElement.AbsLocation * 2 + new Vector2(size.Width, 10)) / 2, ELineDirection.South, acceptable.GetTransitionLinkPosition(ELineDirection.East), ELineDirection.East, rects);
                 foreach(var line in lines)
                 {
                     cmdlist.AddLine(context.ViewPortTransform(line.Start), context.ViewPortTransform(line.End), ImGuiAPI.ColorConvertFloat4ToU32(clolr), 5);

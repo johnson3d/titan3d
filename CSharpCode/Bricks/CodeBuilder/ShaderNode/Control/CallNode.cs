@@ -222,11 +222,11 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             }
             return true;
         }
-        string GetReturnValueName()
+        protected string GetReturnValueName()
         {
             return $"tmp_r_{Method.MethodName}_{(uint)NodeId.GetHashCode()}";
         }
-        string GetParamValueName(string paramName)
+        protected string GetParamValueName(string paramName)
         {
             return $"tmp_o_{paramName}_{Method.MethodName}_{(uint)NodeId.GetHashCode()}";
         }
@@ -249,7 +249,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
             return retVal;
         }
 
-        void GenArgumentCodes(int argIdx, ref BuildCodeStatementsData data, out TtExpressionBase exp,
+        protected void GenArgumentCodes(int argIdx, ref BuildCodeStatementsData data, out TtExpressionBase exp,
             List<TtStatementBase> beforeStatements = null,
             List<TtStatementBase> afterStatements = null)
         {
@@ -408,5 +408,60 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
         }
 
         public TtMaterialFunction MaterialFunction { get; private set; }
+        public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
+        {
+            var method = Method;
+            var incAttr = Method.GetFirstCustomAttribute<EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtMaterialShaderAttribute>(false);
+            if (incAttr != null && incAttr.Include != null)
+            {
+                data.ClassDec.PushPreInclude(incAttr.Include);
+            }
+
+            var methodInvokeExp = new TtMethodInvokeStatement()
+            {
+                MethodName = method.MethodName,
+                Method = method,
+            };
+
+            if (method.HasReturnValue())
+            {
+                var retValName = GetReturnValueName();
+                methodInvokeExp.ReturnValue = new TtVariableDeclaration()
+                {
+                    VariableType = new TtTypeReference(method.ReturnType),
+                    VariableName = retValName,
+                    InitValue = new TtDefaultValueExpression(method.ReturnType),
+                };
+                if (!data.MethodDec.HasLocalVariable(retValName))
+                    data.MethodDec.AddLocalVar(methodInvokeExp.ReturnValue);
+            }
+
+            List<TtStatementBase> beforeSt = new List<TtStatementBase>();
+            List<TtStatementBase> afterSt = new List<TtStatementBase>();
+            {
+                var inputExpr = new TtMethodInvokeArgumentExpression();
+                var varRef = new TtVariableReferenceExpression("input");
+                inputExpr.Expression = varRef;
+                methodInvokeExp.Arguments.Add(inputExpr);
+            }
+            for (int i = 1; i < Arguments.Count; i++)
+            {
+                var arg = new TtMethodInvokeArgumentExpression()
+                {
+                    OperationType = Arguments[i].OpType,
+                };
+                TtExpressionBase exp;
+                GenArgumentCodes(i, ref data, out exp, beforeSt, afterSt);
+                arg.Expression = exp;
+                methodInvokeExp.Arguments.Add(arg);
+            }
+
+            if (data.CurrentStatements.Contains(methodInvokeExp))
+                return;
+
+            data.CurrentStatements.AddRange(beforeSt);
+            data.CurrentStatements.Add(methodInvokeExp);
+            data.CurrentStatements.AddRange(afterSt);
+        }
     }
 }

@@ -106,7 +106,7 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
             {
                 //if (attachment.Check())
                 {
-                    attachment.Tick(elapseSecond, context);
+                    attachment?.Tick(elapseSecond, context);
                 }
             }
 

@@ -73,14 +73,6 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.SubState
             methodDeclaration.MethodBody.Sequence.Add(returnValueAssign);
             return methodDeclaration;
         }
-        private void CreateAddAttachmentMethodStatement(TtDesignableVariableDescription desc,TtMethodDeclaration method)
-        {
-            var stateAddAttachMentMethodInvoke = new TtMethodInvokeStatement();
-            stateAddAttachMentMethodInvoke.Host = new TtSelfReferenceExpression();
-            stateAddAttachMentMethodInvoke.MethodName = "AddAttachment";
-            stateAddAttachMentMethodInvoke.Arguments.Add(new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression(desc.VariableName) });
-            method.MethodBody.Sequence.Add(stateAddAttachMentMethodInvoke);
-        }
         #endregion
     }
 }

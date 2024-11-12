@@ -184,20 +184,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
             //outVector = vec + uv + uuv;
         }
-        [Rtti.Meta]
-        [TtMaterialShader(Name = "Lut3S")]
-        [ContextMenu(filterStrings: "Lut3S", "Effect\\Lut3S", TtMaterialGraph.MaterialEditorKeyword)]
-        public static void Lut3S(Var.Texture2D LutTex, float NoL, float Curvature, out Vector3 OutColor)
-        {
-            OutColor = Vector3.Zero;
-        }
-        [Rtti.Meta]
-        [TtMaterialShader(Name = "CalcCurvature")]
-        [ContextMenu(filterStrings: "CalcCurvature", "Effect\\CalcCurvature", TtMaterialGraph.MaterialEditorKeyword)]
-        public static float CalcCurvature(Var.Texture2D normMap, PS_INPUT input, float norBias)
-        {
-            return 0;
-        }
+        
         #endregion
 
         #region Math

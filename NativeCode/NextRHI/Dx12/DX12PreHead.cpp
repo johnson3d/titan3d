@@ -210,6 +210,7 @@ namespace NxRHI
 	/// DX12DescriptorSetPagedObject-----------------------------------------------------------
 	void DX12PagedHeap::BindToHeap(DX12GpuDevice* device, DX12PagedHeap* dest, UINT destIndex, UINT srcIndex, D3D12_DESCRIPTOR_HEAP_TYPE HeapType)
 	{
+		ASSERT(destIndex < dest->RefResources.size());
 		dest->RefResources[destIndex] = this->RefResources[srcIndex];
 		device->mDevice->CopyDescriptorsSimple(1, dest->GetCpuAddress(destIndex),
 			this->GetCpuAddress(srcIndex), HeapType);

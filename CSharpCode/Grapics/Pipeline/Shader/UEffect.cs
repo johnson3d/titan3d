@@ -437,22 +437,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public T GetTypedBindIndexer<T>() where T : NxRHI.TtShader.TtShaderBinderIndexer, new()
         {
-            if (mBindIndexer == null && typeof(T) == typeof(NxRHI.TtShader.TtCommonShaderResourceIndexer))
+            if (mBindIndexer == null ||
+                (mBindIndexer.GetType() != typeof(T) && typeof(T) != typeof(NxRHI.TtShader.TtCommonShaderResourceIndexer)))
             {
-                mBindIndexer = NxRHI.TtShader.AuxShaderBinderIndexer<T>.Instance;
-            }
-            else
-            {
-                if (mBindIndexer != null && typeof(T) == typeof(NxRHI.TtShader.TtCommonShaderResourceIndexer))
-                {
-                    return mBindIndexer as T;
-                }
-                if (mBindIndexer == null || typeof(T) != mBindIndexer.GetType())
-                {
-                    mBindIndexer = new T();
-                    NxRHI.TtShader.TtShaderBinderIndexer.RemoveBinderIndexer(mBindIndexer);
-                    mBindIndexer.UpdateBindResouce(this.ShaderEffect);
-                }
+                mBindIndexer = new T();
+                NxRHI.TtShader.TtShaderBinderIndexer.RemoveGlobalBinderIndexer(mBindIndexer);
+                mBindIndexer.UpdateBindResouce(this.ShaderEffect);
             }
             return mBindIndexer as T;
         }

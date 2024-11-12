@@ -567,7 +567,7 @@ namespace EngineNS.Bricks.CodeBuilder
                         break;
                     default:
                         {
-                            var meta = defaultValExp.Type.TypeDesc.GetCustomAttribute<Rtti.MetaAttribute>(false);
+                            var meta = defaultValExp.Type.TypeDesc.GetCustomAttribute<Editor.ShaderCompiler.TtShaderDefineAttribute>(false);
                             if (meta != null)
                             {
                                 sourceCode += $"({meta.ShaderName})0";

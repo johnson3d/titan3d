@@ -19,6 +19,23 @@ namespace EngineNS.Bricks.StateMachine.Macross
             method.MethodBody.Sequence.Add(initializeInvoke);
         }
 
+        public static void CreateNewThenCenterDataAssignThenInitInvokeStatement(TtDesignableVariableDescription description, TtMethodDeclaration method)
+        {
+            var createAssign = TtASTBuildUtil.CreateAssignOperatorStatement(new TtVariableReferenceExpression(description.Name), new TtCreateObjectExpression(description.VariableType.TypeFullName));
+            method.MethodBody.Sequence.Add(createAssign);
+
+            var centerDataAssign = TtASTBuildUtil.CreateAssignOperatorStatement(
+                new TtVariableReferenceExpression("CenterData", new TtVariableReferenceExpression(description.VariableName)),
+                new TtVariableReferenceExpression("CenterData"));
+            method.MethodBody.Sequence.Add(centerDataAssign);
+
+            var initializeInvoke = new TtMethodInvokeStatement("Initialize",
+                null, new TtVariableReferenceExpression(description.Name),
+                new TtMethodInvokeArgumentExpression { Expression = new TtVariableReferenceExpression("context") });
+            initializeInvoke.IsAsync = true;
+            method.MethodBody.Sequence.Add(initializeInvoke);
+        }
+
         public static TtMethodDeclaration CreateOverridedInitMethodStatement()
         {
             var returnVar = TtASTBuildUtil.CreateMethodReturnVariableDeclaration(new(typeof(bool)), TtASTBuildUtil.CreateDefaultValueExpression(new(typeof(bool))));

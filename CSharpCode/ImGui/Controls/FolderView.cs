@@ -132,7 +132,7 @@ namespace EngineNS.EGui.Controls
             if (root == CurrentDir)
                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
             TtEngine.Instance.GfxDevice.SlateRenderer.PushFont((int)EGui.Slate.UBaseRenderer.enFont.Font_Bold_13px);
-            if (CurrentDir.Address.Contains(root.Address))
+            if (CurrentDir != null && CurrentDir.Address.Contains(root.Address))
             {
                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen;
             }
