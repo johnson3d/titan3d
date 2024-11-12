@@ -459,6 +459,12 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "AdvanceShadow", "CSharpCode
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Sprache", "3rd\csharp\Sprache\Sprache.shproj", "{6DD92289-578C-4A00-8DB2-BFB56C520FB5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FX", "FX", "{1C7247C9-8835-4D68-B2F4-3180297E2836}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Hair", "CSharpCode\Bricks\FX\Hair\Hair.shproj", "{A62536F2-65FA-4FF1-8485-706BC637F585}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Skin", "CSharpCode\Bricks\FX\Skin\Skin.shproj", "{5CAC7D56-5EB9-4EEA-B197-B5F7563101AC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1112,6 +1118,9 @@ Global
 		{D42002C2-3056-4AD1-988C-EEE323B012A0} = {9DD1EA3E-A1BD-43B5-9F2A-B1AA3DD5F01A}
 		{34E25A8D-5522-4358-9DD2-59D899999501} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{6DD92289-578C-4A00-8DB2-BFB56C520FB5} = {1BEAD919-8866-4753-B5EE-64ACC9CC2E5B}
+		{1C7247C9-8835-4D68-B2F4-3180297E2836} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
+		{A62536F2-65FA-4FF1-8485-706BC637F585} = {1C7247C9-8835-4D68-B2F4-3180297E2836}
+		{5CAC7D56-5EB9-4EEA-B197-B5F7563101AC} = {1C7247C9-8835-4D68-B2F4-3180297E2836}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}
@@ -1293,6 +1302,7 @@ Global
 		CSharpCode\Bricks\ProjectGen\ProjectGen.projitems*{587b8268-f3bc-4ed2-8913-6c95115780ed}*SharedItemsImports = 13
 		Plugins\GameServer\Root\RootServer\RootServer.projitems*{5a2456d3-51f6-46ed-8eff-4c16f500f6b5}*SharedItemsImports = 13
 		NativeCode\Bricks\TcpServer\TcpServer.vcxitems*{5b10575b-b34e-4644-8a58-e6ca5b3dbe3f}*SharedItemsImports = 9
+		CSharpCode\Bricks\FX\Skin\Skin.projitems*{5cac7d56-5eb9-4eea-b197-b5f7563101ac}*SharedItemsImports = 13
 		NativeCode\Bricks\DestinyPX\NxMath\NxMath.vcxitems*{66d1bb78-d377-4b8b-964a-b12f946205e6}*SharedItemsImports = 9
 		CSharpCode\Platform\Android\Android.projitems*{696256cb-8710-4790-805b-1f2424bf19cd}*SharedItemsImports = 13
 		CSharpCode\Bricks\Collision\Collision.projitems*{6d4b708f-a316-44e4-8a92-e4fae48c9a70}*SharedItemsImports = 13
@@ -1373,6 +1383,7 @@ Global
 		3rd\csharp\NvTriStrip\NvTriStrip.projitems*{a2ec9f38-402e-4af3-b718-dbbbbae41e33}*SharedItemsImports = 13
 		CSharpCode\Bricks\ImageDecoder\ImageDecoder.projitems*{a3697ce8-7369-4d92-84e6-6f5667d03c79}*SharedItemsImports = 13
 		NativeCode\Bricks\Animation\Animation.vcxitems*{a415eb90-cf3a-4cbc-bd98-14eed4d0fcd1}*SharedItemsImports = 9
+		CSharpCode\Bricks\FX\Hair\Hair.projitems*{a62536f2-65fa-4ff1-8485-706bc637f585}*SharedItemsImports = 13
 		CSharpCode\Bricks\UI\UI.projitems*{a78776fc-f5ba-4eec-b8f6-f17b2202e1b0}*SharedItemsImports = 13
 		NativeCode\Platform\Windows\Windows.vcxitems*{a8ca4be8-8f39-4696-ab3b-265f4294de5b}*SharedItemsImports = 9
 		3rd\native\EtcLib\EtcLib.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
