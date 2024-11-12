@@ -21,20 +21,20 @@ namespace EngineNS.Graphics.Pipeline.Common
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UHitproxyNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UHitproxyNode" })]
     public class TtHitproxyNode : TtRenderGraphNode
     {
-        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
-        public TtRenderGraphPin HitIdPinOut = TtRenderGraphPin.CreateOutput("HitId", false, EPixelFormat.PXF_R8G8B8A8_UNORM);
-        public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth", false, EPixelFormat.PXF_D16_UNORM);
-        public TtRenderGraphPin GizmosDepthPinOut = TtRenderGraphPin.CreateOutput("GizmosDepth", false, EPixelFormat.PXF_D16_UNORM);
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
+        public TtRenderGraphPin HitIdPinOut = TtRenderGraphPin.CreateOutput("HitId", false, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth", false, EPixelFormat.PXF_D16_UNORM, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin GizmosDepthPinOut = TtRenderGraphPin.CreateOutput("GizmosDepth", false, EPixelFormat.PXF_D16_UNORM, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         public TtHitproxyNode()
         {
             Name = "Hitproxy";
         }
         public override void InitNodePins()
         {
-            AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
-            AddOutput(HitIdPinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
-            AddOutput(GizmosDepthPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV); 
+            AddInput(VisiblesPinIn);
+            AddOutput(HitIdPinOut);
+            AddInputOutput(DepthPinInOut);
+            AddOutput(GizmosDepthPinOut); 
             DepthPinInOut.IsAllowInputNull = true;
         }
         #region GetHitproxy

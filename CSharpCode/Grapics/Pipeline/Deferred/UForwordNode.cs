@@ -92,18 +92,18 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.UForwordNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.UForwordNode" })]
     public class TtForwordNode : Common.TtBasePassNode
     {
-        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
-        public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color");
-        public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth");
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
+        public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth", NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         public TtForwordNode()
         {
             Name = "UForwordNode";
         }
         public override void InitNodePins()
         {
-            AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
-            AddInputOutput(ColorPinInOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+            AddInput(VisiblesPinIn);
+            AddInputOutput(ColorPinInOut);
+            AddInputOutput(DepthPinInOut);
         }
         public TtOpaqueShading mOpaqueShading;
         public TtTranslucentShading mTranslucentShading;
@@ -296,10 +296,10 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     [Bricks.CodeBuilder.ContextMenu("Gizmos", "Deferred\\Gizmos", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtGizmosNode : Common.TtBasePassNode
     {
-        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
-        public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color");
-        public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth");
-        public TtRenderGraphPin GizmosDepthPinOut = TtRenderGraphPin.CreateOutput("GizmosDepth", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
+        public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth", NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin GizmosDepthPinOut = TtRenderGraphPin.CreateOutput("GizmosDepth", true, EPixelFormat.PXF_D24_UNORM_S8_UINT, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
 
         public TtOpaqueShading mOpaqueShading;
         public TtTranslucentShading mTranslucentShading;
@@ -314,11 +314,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void InitNodePins()
         {
-            AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
-            AddInputOutput(ColorPinInOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+            AddInput(VisiblesPinIn);
+            AddInputOutput(ColorPinInOut);
+            AddInputOutput(DepthPinInOut);
 
-            AddOutput(GizmosDepthPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+            AddOutput(GizmosDepthPinOut);
         }
         public TtCpuCullingNode CpuCullNode = null;
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)

@@ -8,8 +8,8 @@ namespace EngineNS.Graphics.Pipeline.Common
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UFindNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UFindNode" })]
     public class TtFindNode : TtRenderGraphNode
     {
-        public TtRenderGraphPin InputPinInOut = TtRenderGraphPin.CreateInputOutput("Input");
-        public TtRenderGraphPin ResultPinOut = TtRenderGraphPin.CreateOutput("Result", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin InputPinInOut = TtRenderGraphPin.CreateInputOutput("Input", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin ResultPinOut = TtRenderGraphPin.CreateOutput("Result", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         TtRenderGraphNode mNode;
         public string mProxyNodeName = "";
         [Rtti.Meta]
@@ -57,11 +57,11 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override void InitNodePins()
         {
             InputPinInOut.IsAllowInputNull = true;
-            AddInputOutput(InputPinInOut, NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(InputPinInOut);
             ResultPinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
-            AddOutput(ResultPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+            AddOutput(ResultPinOut);
         }
-        public override async Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
         }

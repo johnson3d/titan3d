@@ -8,14 +8,14 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
     [Bricks.CodeBuilder.ContextMenu("GpuFetch", "PGC\\GpuFetch", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtGpuFetchNode : Graphics.Pipeline.Common.TtEndingNode
     {
-        public Graphics.Pipeline.TtRenderGraphPin SrcPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInput("Src");
+        public Graphics.Pipeline.TtRenderGraphPin SrcPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInput("Src", NxRHI.EBufferType.BFT_SRV);
         public TtGpuFetchNode()
         {
             Name = "GpuFetch";
         }
         public override void InitNodePins()
         {
-            AddInput(SrcPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(SrcPinIn);
             SrcPinIn.IsAllowInputNull = true;
         }
         public override void Dispose()
@@ -24,7 +24,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             CoreSDK.DisposeObject(ref mFinishFence);
             CoreSDK.DisposeObject(ref mCmdList);
         }
-        public override async Task Initialize(TtRenderPolicy policy, string debugName)
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
 

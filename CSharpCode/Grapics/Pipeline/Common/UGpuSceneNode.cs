@@ -10,8 +10,8 @@ namespace EngineNS.Graphics.Pipeline.Common
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UGpuSceneNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UGpuSceneNode" })]
     public partial class TtGpuSceneNode : Graphics.Pipeline.TtRenderGraphNode
     {
-        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
-        public TtRenderGraphPin GpuScenePinOut = TtRenderGraphPin.CreateOutput("GpuScene", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
+        public TtRenderGraphPin GpuScenePinOut = TtRenderGraphPin.CreateOutput("GpuScene", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         public TtGpuSceneNode()
         {
             Name = "GpuSceneNode";
@@ -27,13 +27,13 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void InitNodePins()
         {
-            AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
+            AddInput(VisiblesPinIn);
             GpuScenePinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
-            AddOutput(GpuScenePinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+            AddOutput(GpuScenePinOut);
             PointLightsPinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
-            AddOutput(PointLightsPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+            AddOutput(PointLightsPinOut);
             InstancePinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
-            AddOutput(InstancePinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+            AddOutput(InstancePinOut);
         }
         public unsafe override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {

@@ -70,8 +70,8 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     [Bricks.CodeBuilder.ContextMenu("Additive", "Post\\Additive", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtAdditiveNode : TtSceenSpaceNode
     {
-        public TtRenderGraphPin Color1PinIn = TtRenderGraphPin.CreateInput("Color1");
-        public TtRenderGraphPin Color2PinIn = TtRenderGraphPin.CreateInput("Color2");
+        public TtRenderGraphPin Color1PinIn = TtRenderGraphPin.CreateInput("Color1", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin Color2PinIn = TtRenderGraphPin.CreateInput("Color2", NxRHI.EBufferType.BFT_SRV);
         public TtAdditiveNode()
         {
             Name = "AdditiveNode";
@@ -80,8 +80,8 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
         public override void InitNodePins()
         {
-            AddInput(Color1PinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(Color2PinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(Color1PinIn);
+            AddInput(Color2PinIn);
 
             base.InitNodePins();
         }

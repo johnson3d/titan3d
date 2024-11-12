@@ -6,7 +6,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 {
     public partial class TtGpuSceneNode
     {
-        public TtRenderGraphPin PointLightsPinOut = TtRenderGraphPin.CreateOutput("PointLights", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin PointLightsPinOut = TtRenderGraphPin.CreateOutput("PointLights", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         public TtCpu2GpuBuffer<Shader.FPointLight> PointLights = new TtCpu2GpuBuffer<Shader.FPointLight>();
         public void Initialize_Light(TtRenderPolicy policy, string debugName)
         {

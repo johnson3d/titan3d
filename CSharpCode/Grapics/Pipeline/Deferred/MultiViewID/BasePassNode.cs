@@ -82,11 +82,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
     [Bricks.CodeBuilder.ContextMenu("BassPass", "Deferred\\MultiViewID\\BassPass", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtBasePassNode : Common.TtBasePassNode
     {
-        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
-        public TtRenderGraphPin GpuCullPinIn = TtRenderGraphPin.CreateInput("GpuCull");
-        public TtRenderGraphPin Rt0PinOut = TtRenderGraphPin.CreateInputOutput("MRT0", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);//rgb - metallicty
-        public TtRenderGraphPin Rt1PinOut = TtRenderGraphPin.CreateInputOutput("MRT1", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);//rgb - metallicty
-        public TtRenderGraphPin DepthStencilPinOut = TtRenderGraphPin.CreateInputOutput("DepthStencil", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
+        public TtRenderGraphPin GpuCullPinIn = TtRenderGraphPin.CreateInput("GpuCull", NxRHI.EBufferType.BFT_NONE);
+        public TtRenderGraphPin Rt0PinOut = TtRenderGraphPin.CreateInputOutput("MRT0", true, EPixelFormat.PXF_R16G16B16A16_FLOAT, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//rgb - metallicty
+        public TtRenderGraphPin Rt1PinOut = TtRenderGraphPin.CreateInputOutput("MRT1", true, EPixelFormat.PXF_R16G16B16A16_FLOAT, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//rgb - metallicty
+        public TtRenderGraphPin DepthStencilPinOut = TtRenderGraphPin.CreateInputOutput("DepthStencil", true, EPixelFormat.PXF_D24_UNORM_S8_UINT, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         public TtBasePassShading mOpaqueShading;
         public NxRHI.TtRenderPass RenderPass;
         public TtLayerDrawBuffers LayerBasePass = new TtLayerDrawBuffers();
@@ -107,11 +107,11 @@ namespace EngineNS.Graphics.Pipeline.Deferred.MultiViewID
         }
         public override void InitNodePins()
         {
-            AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
-            AddInput(GpuCullPinIn, NxRHI.EBufferType.BFT_NONE);
-            AddInputOutput(Rt0PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(Rt1PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(DepthStencilPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+            AddInput(VisiblesPinIn);
+            AddInput(GpuCullPinIn);
+            AddInputOutput(Rt0PinOut);
+            AddInputOutput(Rt1PinOut);
+            AddInputOutput(DepthStencilPinOut);
 
             GpuCullPinIn.IsAllowInputNull = true;
             Rt0PinOut.IsAllowInputNull = true;

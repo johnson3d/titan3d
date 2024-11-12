@@ -9,11 +9,11 @@ namespace EngineNS.Bricks.VXGI
 {
     public partial class UVoxelsNode : Graphics.Pipeline.TtRenderGraphNode
     {
-        public Graphics.Pipeline.TtRenderGraphPin GpuScenePinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("GpuScene");
-        public Graphics.Pipeline.TtRenderGraphPin AlbedoPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Albedo");
-        public Graphics.Pipeline.TtRenderGraphPin DepthPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Depth");
+        public Graphics.Pipeline.TtRenderGraphPin GpuScenePinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("GpuScene", NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+        public Graphics.Pipeline.TtRenderGraphPin AlbedoPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Albedo", NxRHI.EBufferType.BFT_SRV);
+        public Graphics.Pipeline.TtRenderGraphPin DepthPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Depth", NxRHI.EBufferType.BFT_SRV);
 
-        public Graphics.Pipeline.TtRenderGraphPin VxPoolPinOut = Graphics.Pipeline.TtRenderGraphPin.CreateOutput("VxPool", false, EPixelFormat.PXF_UNKNOWN);
+        public Graphics.Pipeline.TtRenderGraphPin VxPoolPinOut = Graphics.Pipeline.TtRenderGraphPin.CreateOutput("VxPool", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_UAV);
 
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         unsafe struct FVoxelGroup
@@ -37,13 +37,13 @@ namespace EngineNS.Bricks.VXGI
         }
         public override void InitNodePins()
         {
-            AddInputOutput(GpuScenePinInOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+            AddInputOutput(GpuScenePinInOut);
 
-            AddInputOutput(AlbedoPinInOut, NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(AlbedoPinInOut);
+            AddInputOutput(DepthPinInOut);
             
             VxPoolPinOut.LifeMode = Graphics.Pipeline.TtAttachBuffer.ELifeMode.Imported;
-            AddOutput(VxPoolPinOut, NxRHI.EBufferType.BFT_UAV);
+            AddOutput(VxPoolPinOut);
         }
 
         public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)

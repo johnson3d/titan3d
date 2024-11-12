@@ -53,9 +53,9 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
     [Bricks.CodeBuilder.ContextMenu("Skin3S", "PGC\\Skin3S", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtGpuSkinLUT3SGenNode : Graphics.Pipeline.TtRenderGraphNode
     {
-        public Graphics.Pipeline.TtRenderGraphPin HeightPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInput("Height");
-        public Graphics.Pipeline.TtRenderGraphPin FlowPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInput("Flow");
-        public Graphics.Pipeline.TtRenderGraphPin WaterPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Water");
+        public Graphics.Pipeline.TtRenderGraphPin HeightPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInput("Height", NxRHI.EBufferType.BFT_SRV);
+        public Graphics.Pipeline.TtRenderGraphPin FlowPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInput("Flow", NxRHI.EBufferType.BFT_SRV);
+        public Graphics.Pipeline.TtRenderGraphPin WaterPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Water", NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
         public TtWaterBasinShading ShadingEnv;
         public NxRHI.TtCommandList mCmdList;
@@ -78,9 +78,9 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         }
         public override void InitNodePins()
         {
-            AddInput(HeightPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(FlowPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(WaterPinInOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+            AddInput(HeightPinIn);
+            AddInput(FlowPinIn);
+            AddInputOutput(WaterPinInOut);
 
             base.InitNodePins();
         }

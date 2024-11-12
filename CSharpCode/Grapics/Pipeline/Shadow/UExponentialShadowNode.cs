@@ -57,7 +57,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Shadow.UExponentialShadowNode@EngineCore", "EngineNS.Graphics.Pipeline.Shadow.UExponentialShadowNode" })]
     public class TtExponentialShadowNode : TtSceenSpaceNode
     {
-        public TtRenderGraphPin ShadowMapPinIn = TtRenderGraphPin.CreateInput("ShadowMap");
+        public TtRenderGraphPin ShadowMapPinIn = TtRenderGraphPin.CreateInput("ShadowMap", NxRHI.EBufferType.BFT_SRV);
         //public TtRenderGraphPin ExponentialShadowMapPinOut = TtRenderGraphPin.CreateOutput("ExponentialShadowMap", false, EPixelFormat.PXF_R32G32B32A32_FLOAT); //EPixelFormat.. Debug
         public TtExponentialShadowNode()
         {
@@ -66,7 +66,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
 
         public override void InitNodePins()
         {
-            AddInput(ShadowMapPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(ShadowMapPinIn);
 
             ResultPinOut.IsAutoResize = false;
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16_FLOAT;

@@ -145,31 +145,31 @@ namespace EngineNS.Graphics.Pipeline.Mobile
     [Bricks.CodeBuilder.ContextMenu("Forword", "Mobile\\Forword", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtMobileForwordNodeBase : Common.TtBasePassNode
     {
-        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
-        public TtRenderGraphPin ShadowMapPinIn = TtRenderGraphPin.CreateInput("ShadowMap");
-        public TtRenderGraphPin EnvMapPinIn = TtRenderGraphPin.CreateInput("EnvMap");
-        public TtRenderGraphPin VignettePinIn = TtRenderGraphPin.CreateInput("Vignette");        
-        public TtRenderGraphPin TileScreenPinIn = TtRenderGraphPin.CreateInput("TileScreen");
-        public TtRenderGraphPin PointLightsPinIn = TtRenderGraphPin.CreateInput("PointLights");
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
+        public TtRenderGraphPin ShadowMapPinIn = TtRenderGraphPin.CreateInput("ShadowMap", NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
+        public TtRenderGraphPin EnvMapPinIn = TtRenderGraphPin.CreateInput("EnvMap", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin VignettePinIn = TtRenderGraphPin.CreateInput("Vignette", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin TileScreenPinIn = TtRenderGraphPin.CreateInput("TileScreen", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin PointLightsPinIn = TtRenderGraphPin.CreateInput("PointLights", NxRHI.EBufferType.BFT_SRV);
 
         public TtCpuCullingNode CpuCullNode = null;
         public override void InitNodePins()
         {
-            AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
-            AddInput(ShadowMapPinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
-            AddInput(EnvMapPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(VignettePinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(TileScreenPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(PointLightsPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(VisiblesPinIn);
+            AddInput(ShadowMapPinIn);
+            AddInput(EnvMapPinIn);
+            AddInput(VignettePinIn);
+            AddInput(TileScreenPinIn);
+            AddInput(PointLightsPinIn);
         }
     }
 
     [Bricks.CodeBuilder.ContextMenu("Opaque", "Mobile\\Opaque", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtMobileOpaqueNode : TtMobileForwordNodeBase
     {
-        public TtRenderGraphPin ColorPinOut = TtRenderGraphPin.CreateOutput("Color", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);
-        public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
-        public TtRenderGraphPin GizmosDepthPinOut = TtRenderGraphPin.CreateOutput("GizmosDepth", true, EPixelFormat.PXF_D16_UNORM);
+        public TtRenderGraphPin ColorPinOut = TtRenderGraphPin.CreateOutput("Color", true, EPixelFormat.PXF_R16G16B16A16_FLOAT, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_RTV);
+        public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", true, EPixelFormat.PXF_D24_UNORM_S8_UINT, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
+        public TtRenderGraphPin GizmosDepthPinOut = TtRenderGraphPin.CreateOutput("GizmosDepth", true, EPixelFormat.PXF_D16_UNORM, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
 
         public TtGraphicsBuffers GGizmosBuffers { get; protected set; } = new TtGraphicsBuffers();
         public TtMobileOpaqueNode()
@@ -180,9 +180,9 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         {
             base.InitNodePins();
 
-            AddOutput(ColorPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_RTV);
-            AddOutput(DepthPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
-            AddOutput(GizmosDepthPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
+            AddOutput(ColorPinOut);
+            AddOutput(DepthPinOut);
+            AddOutput(GizmosDepthPinOut);
         }
         public TtBasePassOpaque mOpaqueShading;
         public TtLayerDrawBuffers LayerBasePass = new TtLayerDrawBuffers();
@@ -359,11 +359,11 @@ namespace EngineNS.Graphics.Pipeline.Mobile
     [Bricks.CodeBuilder.ContextMenu("Translucent", "Mobile\\Translucent", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtMobileTranslucentNode : Common.TtBasePassNode
     {
-        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
-        public Graphics.Pipeline.TtRenderGraphPin AlbedoPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Albedo");
-        public Graphics.Pipeline.TtRenderGraphPin DepthPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Depth");
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
+        public Graphics.Pipeline.TtRenderGraphPin AlbedoPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Albedo", NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_RTV);
+        public Graphics.Pipeline.TtRenderGraphPin DepthPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Depth", NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
 
-        public Graphics.Pipeline.TtRenderGraphPin GizmosDepthPinOut = Graphics.Pipeline.TtRenderGraphPin.CreateOutput("GizmosDepth", true, EPixelFormat.PXF_D16_UNORM);
+        public Graphics.Pipeline.TtRenderGraphPin GizmosDepthPinOut = Graphics.Pipeline.TtRenderGraphPin.CreateOutput("GizmosDepth", true, EPixelFormat.PXF_D16_UNORM, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
 
         public TtGraphicsBuffers GGizmosBuffers { get; protected set; } = new TtGraphicsBuffers();
         public TtMobileTranslucentNode()
@@ -374,10 +374,10 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         {
             base.InitNodePins();
 
-            AddInputOutput(AlbedoPinInOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_RTV);
-            AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
+            AddInputOutput(AlbedoPinInOut);
+            AddInputOutput(DepthPinInOut);
             
-            AddOutput(GizmosDepthPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
+            AddOutput(GizmosDepthPinOut);
         }
         public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {

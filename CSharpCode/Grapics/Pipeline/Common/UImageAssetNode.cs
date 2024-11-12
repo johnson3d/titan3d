@@ -9,7 +9,7 @@ namespace EngineNS.Graphics.Pipeline.Common
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UImageAssetNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UImageAssetNode" })]
     public class TtImageAssetNode : TtRenderGraphNode
     {
-        public TtRenderGraphPin ImagePinOut = TtRenderGraphPin.CreateOutput("Image", false, EPixelFormat.PXF_R8G8B8A8_UNORM);
+        public TtRenderGraphPin ImagePinOut = TtRenderGraphPin.CreateOutput("Image", false, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
         public TtImageAssetNode()
         {
             Name = "ImageAssetNode";
@@ -29,7 +29,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override void InitNodePins()
         {
             ImagePinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
-            AddOutput(ImagePinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+            AddOutput(ImagePinOut);
 
             if(ImageName == null)
                 ImageName = RName.GetRName("texture/hdri_epic_courtyard_daylight.srv", RName.ERNameType.Engine);

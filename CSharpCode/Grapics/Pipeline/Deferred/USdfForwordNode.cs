@@ -91,10 +91,10 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.USdfForwordNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.USdfForwordNode" })]
     public class TtSdfForwordNode : Common.TtBasePassNode
     {
-        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
-        public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color");
-        public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth");
-        public TtRenderGraphPin VoxelPinOut = TtRenderGraphPin.CreateOutput("Voxel", true, EPixelFormat.PXF_R8G8B8A8_UNORM);
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
+        public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth", NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin VoxelPinOut = TtRenderGraphPin.CreateOutput("Voxel", true, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
         public TtSdfForwordNode()
         {
@@ -102,10 +102,10 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void InitNodePins()
         {
-            AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
-            AddInputOutput(ColorPinInOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
-            AddOutput(VoxelPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+            AddInput(VisiblesPinIn);
+            AddInputOutput(ColorPinInOut);
+            AddInputOutput(DepthPinInOut);
+            AddOutput(VoxelPinOut);
         }
         public TtSdfOpaqueShading mOpaqueShading;
         public TtSdfTranslucentShading mTranslucentShading;

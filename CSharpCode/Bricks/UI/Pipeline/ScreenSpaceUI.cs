@@ -30,8 +30,8 @@ namespace EngineNS.Graphics.Pipeline.Common
     [Bricks.CodeBuilder.ContextMenu("ScreenUI", "ScreenUI", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public partial class TtScreenSpaceUINode : TtSceenSpaceNode
     {
-        public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color");
-        public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth");
+        public TtRenderGraphPin ColorPinInOut = TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin DepthPinInOut = TtRenderGraphPin.CreateInputOutput("Depth", NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
 
         public TtScreenSpaceUIShading mScreenSpaceShading;
 
@@ -41,8 +41,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void InitNodePins()
         {
-            AddInputOutput(ColorPinInOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(ColorPinInOut);
+            AddInputOutput(DepthPinInOut);
         }
         public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom)
         {

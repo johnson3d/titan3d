@@ -7,7 +7,7 @@ namespace EngineNS.Graphics.Pipeline
     [Bricks.CodeBuilder.ContextMenu("CpuCulling", "Culling\\CpuCulling", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtCpuCullingNode : TtRenderGraphNode
     {
-        public TtRenderGraphPin VisiblesOut = TtRenderGraphPin.CreateOutput("Visibles", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin VisiblesOut = TtRenderGraphPin.CreateOutput("Visibles", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_NONE);
         public TtCpuCullingNode()
         {
             Name = "CpuCulling";
@@ -15,7 +15,7 @@ namespace EngineNS.Graphics.Pipeline
         public override void InitNodePins()
         {
             VisiblesOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
-            AddOutput(VisiblesOut, NxRHI.EBufferType.BFT_NONE);
+            AddOutput(VisiblesOut);
         }
         public async override System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {

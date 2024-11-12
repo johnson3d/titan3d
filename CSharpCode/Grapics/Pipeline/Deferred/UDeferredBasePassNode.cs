@@ -39,13 +39,13 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.UDeferredBasePassNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.UDeferredBasePassNode" })]
     public class TtDeferredBasePassNode : Common.TtBasePassNode
     {
-        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
-        public TtRenderGraphPin GpuCullPinIn = TtRenderGraphPin.CreateInput("GpuCull");
-        public TtRenderGraphPin Rt0PinOut = TtRenderGraphPin.CreateInputOutput("MRT0", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);//rgb - metallicty
-        public TtRenderGraphPin Rt1PinOut = TtRenderGraphPin.CreateInputOutput("MRT1", true, EPixelFormat.PXF_R10G10B10A2_UNORM);//normal - Flags
-        public TtRenderGraphPin Rt2PinOut = TtRenderGraphPin.CreateInputOutput("MRT2", true, EPixelFormat.PXF_R8G8B8A8_UNORM);//Roughness,Emissive,Specular,unused
-        public TtRenderGraphPin Rt3PinOut = TtRenderGraphPin.CreateInputOutput("MRT3", true, EPixelFormat.PXF_R16G16_UNORM);//EPixelFormat.PXF_R10G10B10A2_UNORM//motionXY
-        public TtRenderGraphPin DepthStencilPinOut = TtRenderGraphPin.CreateInputOutput("DepthStencil", true, EPixelFormat.PXF_D32_FLOAT);//EPixelFormat.PXF_D24_UNORM_S8_UINT Stencil is not necessity
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
+        public TtRenderGraphPin GpuCullPinIn = TtRenderGraphPin.CreateInput("GpuCull", NxRHI.EBufferType.BFT_NONE);
+        public TtRenderGraphPin Rt0PinOut = TtRenderGraphPin.CreateInputOutput("MRT0", true, EPixelFormat.PXF_R16G16B16A16_FLOAT, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//rgb - metallicty
+        public TtRenderGraphPin Rt1PinOut = TtRenderGraphPin.CreateInputOutput("MRT1", true, EPixelFormat.PXF_R10G10B10A2_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//normal - Flags
+        public TtRenderGraphPin Rt2PinOut = TtRenderGraphPin.CreateInputOutput("MRT2", true, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//Roughness,Emissive,Specular,unused
+        public TtRenderGraphPin Rt3PinOut = TtRenderGraphPin.CreateInputOutput("MRT3", true, EPixelFormat.PXF_R16G16_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//EPixelFormat.PXF_R10G10B10A2_UNORM//motionXY
+        public TtRenderGraphPin DepthStencilPinOut = TtRenderGraphPin.CreateInputOutput("DepthStencil", true, EPixelFormat.PXF_D32_FLOAT, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);//EPixelFormat.PXF_D24_UNORM_S8_UINT Stencil is not necessity
 
         public TtCpuCullingNode CpuCullNode = null;
         public TtGpuCullingNode GpuCullNode = null;
@@ -63,14 +63,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override void InitNodePins()
         {
-            AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
-            AddInput(GpuCullPinIn, NxRHI.EBufferType.BFT_NONE);
+            AddInput(VisiblesPinIn);
+            AddInput(GpuCullPinIn);
             GpuCullPinIn.IsAllowInputNull = true;
-            AddInputOutput(Rt0PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(Rt1PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(Rt2PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(Rt3PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(DepthStencilPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(Rt0PinOut);
+            AddInputOutput(Rt1PinOut);
+            AddInputOutput(Rt2PinOut);
+            AddInputOutput(Rt3PinOut);
+            AddInputOutput(DepthStencilPinOut);
 
             Rt0PinOut.IsAllowInputNull = true;
             Rt1PinOut.IsAllowInputNull = true;

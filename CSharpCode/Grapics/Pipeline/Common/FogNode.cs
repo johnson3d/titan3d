@@ -59,9 +59,9 @@ namespace EngineNS.Graphics.Pipeline.Common
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtFogNode : TtSceenSpaceNode
     {
-        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
-        public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");
-        public TtRenderGraphPin NoisePinIn = TtRenderGraphPin.CreateInput("Noise");
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin NoisePinIn = TtRenderGraphPin.CreateInput("Noise", NxRHI.EBufferType.BFT_SRV);
         public TtFogNode()
         {
             Name = "FogNode";
@@ -69,11 +69,11 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void InitNodePins()
         {
-            AddInput(ColorPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(ColorPinIn);
 
-            AddInput(DepthPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(DepthPinIn);
 
-            AddInput(NoisePinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(NoisePinIn);
 
             base.InitNodePins();
         }

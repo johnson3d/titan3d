@@ -16,16 +16,16 @@ namespace EngineNS.Graphics.Pipeline.Common
             CoreSDK.DisposeObject(ref CountAvgBrightnessDrawcall);
             base.Dispose();
         }
-        public TtRenderGraphPin GpuScenePinInOut = TtRenderGraphPin.CreateInputOutput("GpuScene");
-        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
+        public TtRenderGraphPin GpuScenePinInOut = TtRenderGraphPin.CreateInputOutput("GpuScene", NxRHI.EBufferType.BFT_UAV);
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
         public TtAvgBrightnessNode()
         {
             Name = "AvgBrightnessNode";
         }
         public override void InitNodePins()
         {
-            AddInputOutput(GpuScenePinInOut, NxRHI.EBufferType.BFT_UAV);
-            AddInput(ColorPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(GpuScenePinInOut);
+            AddInput(ColorPinIn);
         }
         public static readonly Vector3ui Dispatch_SetupDimArray1 = new Vector3ui(1, 1, 1);
         public static readonly Vector3ui Dispatch_SetupDimArray2 = new Vector3ui(32, 32, 1);

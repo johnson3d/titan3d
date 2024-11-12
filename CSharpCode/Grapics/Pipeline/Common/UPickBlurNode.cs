@@ -54,14 +54,14 @@ namespace EngineNS.Graphics.Pipeline.Common
     [Bricks.CodeBuilder.ContextMenu("PickBlur", "Pick\\PickBlur", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class UPickBlurNode : TtSceenSpaceNode
     {
-        public TtRenderGraphPin PickedPinIn = TtRenderGraphPin.CreateInput("Picked");
+        public TtRenderGraphPin PickedPinIn = TtRenderGraphPin.CreateInput("Picked", NxRHI.EBufferType.BFT_SRV);
         public UPickBlurNode()
         {
             Name = "PickBlurNode";            
         }
         public override void InitNodePins()
         {
-            AddInput(PickedPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(PickedPinIn);
             
             ResultPinOut.IsAutoResize = false;
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16G16_FLOAT;

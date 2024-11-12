@@ -11,7 +11,7 @@ namespace EngineNS.Graphics.Pipeline.Common
     public class TtClearMRTNode : TtRenderGraphNode
     {
         public TtRenderGraphPin[] RtPinOut;
-        public TtRenderGraphPin DepthStencilPinOut = TtRenderGraphPin.CreateInputOutput("DepthStencil", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
+        public TtRenderGraphPin DepthStencilPinOut = TtRenderGraphPin.CreateInputOutput("DepthStencil", true, EPixelFormat.PXF_D24_UNORM_S8_UINT, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         public EPixelFormat[] RtDefaultFormat = new EPixelFormat[] {
             EPixelFormat.PXF_R16G16B16A16_FLOAT, 
             EPixelFormat.PXF_R10G10B10A2_UNORM, 
@@ -47,11 +47,11 @@ namespace EngineNS.Graphics.Pipeline.Common
             RtPinOut = new TtRenderGraphPin[4];
             for (int i = 0; i < 4; i++)
             {
-                RtPinOut[i] = TtRenderGraphPin.CreateInputOutput($"MRT{i}", true, RtDefaultFormat[i]);
-                AddInputOutput(RtPinOut[i], NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+                RtPinOut[i] = TtRenderGraphPin.CreateInputOutput($"MRT{i}", true, RtDefaultFormat[i], NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+                AddInputOutput(RtPinOut[i]);
                 RtPinOut[i].IsAllowInputNull = true;
             }
-            AddInputOutput(DepthStencilPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(DepthStencilPinOut);
             DepthStencilPinOut.IsAllowInputNull = true;
         }
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)

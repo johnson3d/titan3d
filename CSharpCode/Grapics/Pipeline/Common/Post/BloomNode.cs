@@ -10,8 +10,8 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     [Bricks.CodeBuilder.ContextMenu("Bloom", "Post\\Bloom", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtBloomNode : TtRenderGraphNode
     {
-        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInputOutput("Color");
-        public TtRenderGraphPin ResultPinOut = TtRenderGraphPin.CreateOutput("Result", true, EPixelFormat.PXF_R8G8B8A8_UNORM);
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin ResultPinOut = TtRenderGraphPin.CreateOutput("Result", true, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
         public TtBloomNode()
         {
             Name = "BloomNode";
@@ -20,8 +20,8 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
         public override void InitNodePins()
         {
-            AddInputOutput(ColorPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddOutput(ResultPinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(ColorPinIn);
+            AddOutput(ResultPinOut);
 
             base.InitNodePins();
         }

@@ -133,9 +133,9 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     [Bricks.CodeBuilder.ContextMenu("Fsr", "Post\\Fsr", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtFsrNode : TtRenderGraphNode
     {
-        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInputOutput("Color");
-        public TtRenderGraphPin UpSamplePinOut = TtRenderGraphPin.CreateOutput("UpSample", false, EPixelFormat.PXF_R8G8B8A8_UNORM);
-        public TtRenderGraphPin RcasPinOut = TtRenderGraphPin.CreateOutput("Rcas", false, EPixelFormat.PXF_R8G8B8A8_UNORM);
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin UpSamplePinOut = TtRenderGraphPin.CreateOutput("UpSample", false, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin RcasPinOut = TtRenderGraphPin.CreateOutput("Rcas", false, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
         [Rtti.Meta]
         public float Scale { get; set; } = 2.0f;
         public NxRHI.TtCbView CBShadingEnv;
@@ -156,9 +156,9 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
         public override void InitNodePins()
         {
-            AddInputOutput(ColorPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddOutput(UpSamplePinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
-            AddOutput(RcasPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(ColorPinIn);
+            AddOutput(UpSamplePinOut);
+            AddOutput(RcasPinOut);
 
             base.InitNodePins();
         }

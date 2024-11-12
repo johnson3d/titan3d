@@ -9,7 +9,7 @@ namespace EngineNS.Bricks.AdvanceShadow
     [Bricks.CodeBuilder.ContextMenu("AdvShadow", "Shadow\\AdvShadow", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtAdvShadowMapNode : Graphics.Pipeline.TtRenderGraphNode
     {
-        public TtRenderGraphPin AdvDepthPinOut = TtRenderGraphPin.CreateOutput("AdvDepth", false, EPixelFormat.PXF_D16_UNORM);//or D32
+        public TtRenderGraphPin AdvDepthPinOut = TtRenderGraphPin.CreateOutput("AdvDepth", false, EPixelFormat.PXF_D16_UNORM, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);//or D32
         public TtAdvanceShadow mAdvanceShadow = new TtAdvanceShadow();
         public TtAdvShadowMapNode()
         {
@@ -17,7 +17,7 @@ namespace EngineNS.Bricks.AdvanceShadow
         }
         public override void InitNodePins()
         {
-            AddOutput(AdvDepthPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+            AddOutput(AdvDepthPinOut);
         }
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {

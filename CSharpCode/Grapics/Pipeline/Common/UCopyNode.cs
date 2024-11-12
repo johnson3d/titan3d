@@ -8,16 +8,16 @@ namespace EngineNS.Graphics.Pipeline.Common
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UCopyNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UCopyNode" })]
     public class TtCopyNode : Graphics.Pipeline.TtRenderGraphNode
     {
-        public TtRenderGraphPin SrcPinIn = TtRenderGraphPin.CreateInput("Src");
-        public TtRenderGraphPin DestPinOut = TtRenderGraphPin.CreateOutput("Dest", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin SrcPinIn = TtRenderGraphPin.CreateInput("Src", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin DestPinOut = TtRenderGraphPin.CreateOutput("Dest", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_SRV);
         public TtCopyNode()
         {
             Name = "CopyNode";
         }
         public override void InitNodePins()
         {
-            AddInput(SrcPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddOutput(DestPinOut, NxRHI.EBufferType.BFT_SRV);
+            AddInput(SrcPinIn);
+            AddOutput(DestPinOut);
         }
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
@@ -121,8 +121,8 @@ namespace EngineNS.Graphics.Pipeline.Common
     [Bricks.CodeBuilder.ContextMenu("Copy", "Copy2NextFrame", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class UCopy2NextFrameNode : Graphics.Pipeline.TtRenderGraphNode
     {
-        public TtRenderGraphPin SrcPinIn = TtRenderGraphPin.CreateInput("Src");
-        public TtRenderGraphPin PrevPinOut = TtRenderGraphPin.CreateOutput("Prev", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin SrcPinIn = TtRenderGraphPin.CreateInput("Src", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin PrevPinOut = TtRenderGraphPin.CreateOutput("Prev", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_SRV);
 
         public UCopy2NextFrameNode()
         {
@@ -130,8 +130,8 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void InitNodePins()
         {
-            AddInput(SrcPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddOutput(PrevPinOut, NxRHI.EBufferType.BFT_SRV);
+            AddInput(SrcPinIn);
+            AddOutput(PrevPinOut);
         }
         public override Color4b GetTileColor()
         {

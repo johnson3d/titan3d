@@ -338,13 +338,13 @@ namespace EngineNS.Bricks.GpuDriven
 
     public class TtSwRasterizeNode : TtRenderGraphNode
     {
-        public TtRenderGraphPin VerticesPinIn = TtRenderGraphPin.CreateInput("Vertices");
-        public TtRenderGraphPin IndicesPinIn = TtRenderGraphPin.CreateInput("Indices");
-        public TtRenderGraphPin ClustersPinIn = TtRenderGraphPin.CreateInput("Clusters");
-        public TtRenderGraphPin VisibleClustersPinIn = TtRenderGraphPin.CreateInput("VisibleClusters");
+        public TtRenderGraphPin VerticesPinIn = TtRenderGraphPin.CreateInput("Vertices", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin IndicesPinIn = TtRenderGraphPin.CreateInput("Indices", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin ClustersPinIn = TtRenderGraphPin.CreateInput("Clusters", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin VisibleClustersPinIn = TtRenderGraphPin.CreateInput("VisibleClusters", NxRHI.EBufferType.BFT_SRV);
 
-        public TtRenderGraphPin QuarkRTPinOut = TtRenderGraphPin.CreateOutput("QuarkRT", true, EPixelFormat.PXF_R8G8B8A8_UNORM);//PXF_R32G32_UINT
-        public TtRenderGraphPin DepthStencilPinOut = TtRenderGraphPin.CreateOutput("DepthStencil", false, EPixelFormat.PXF_D24_UNORM_S8_UINT);
+        public TtRenderGraphPin QuarkRTPinOut = TtRenderGraphPin.CreateOutput("QuarkRT", true, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);//PXF_R32G32_UINT
+        public TtRenderGraphPin DepthStencilPinOut = TtRenderGraphPin.CreateOutput("DepthStencil", false, EPixelFormat.PXF_D24_UNORM_S8_UINT, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
 
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
         struct FShadingStruct
@@ -385,17 +385,17 @@ namespace EngineNS.Bricks.GpuDriven
         }
         public override void InitNodePins()
         {
-            AddInput(VerticesPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(IndicesPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(ClustersPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(VisibleClustersPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(VerticesPinIn);
+            AddInput(IndicesPinIn);
+            AddInput(ClustersPinIn);
+            AddInput(VisibleClustersPinIn);
 
             VerticesPinIn.IsAllowInputNull = true;
             IndicesPinIn.IsAllowInputNull = true;
             ClustersPinIn.IsAllowInputNull = true;
 
-            AddOutput(QuarkRTPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
-            AddOutput(DepthStencilPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+            AddOutput(QuarkRTPinOut);
+            AddOutput(DepthStencilPinOut);
 
             base.InitNodePins();
         }
@@ -521,16 +521,16 @@ namespace EngineNS.Bricks.GpuDriven
     }
     public class TtQuarkResolveNode : TtSceenSpaceNode
     {
-        public TtRenderGraphPin QuarkRTPinIn = TtRenderGraphPin.CreateInput("QuarkRT");
+        public TtRenderGraphPin QuarkRTPinIn = TtRenderGraphPin.CreateInput("QuarkRT", NxRHI.EBufferType.BFT_SRV);
 
         // TODO: for test
-        public TtRenderGraphPin DepthStencilPinIn = TtRenderGraphPin.CreateOutput("DepthStencil", true, EPixelFormat.PXF_D32_FLOAT);
+        public TtRenderGraphPin DepthStencilPinIn = TtRenderGraphPin.CreateOutput("DepthStencil", true, EPixelFormat.PXF_D32_FLOAT, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         //public TtRenderGraphPin DepthStencilPinIn = TtRenderGraphPin.CreateOutput("DepthStencil", true, EPixelFormat.PXF_D24_UNORM_S8_UINT);
 
-        public TtRenderGraphPin Rt0PinOut = TtRenderGraphPin.CreateOutput("MRT0", true, EPixelFormat.PXF_R16G16B16A16_FLOAT);//rgb - metallicty
-        public TtRenderGraphPin Rt1PinOut = TtRenderGraphPin.CreateOutput("MRT1", true, EPixelFormat.PXF_R10G10B10A2_UNORM);//normal - Flags
-        public TtRenderGraphPin Rt2PinOut = TtRenderGraphPin.CreateOutput("MRT2", true, EPixelFormat.PXF_R8G8B8A8_UNORM);//Roughness,Emissive,Specular,unused
-        public TtRenderGraphPin Rt3PinOut = TtRenderGraphPin.CreateOutput("MRT3", true, EPixelFormat.PXF_R16G16_UNORM);//EPixelFormat.PXF_R10G10B10A2_UNORM//motionXY
+        public TtRenderGraphPin Rt0PinOut = TtRenderGraphPin.CreateOutput("MRT0", true, EPixelFormat.PXF_R16G16B16A16_FLOAT, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//rgb - metallicty
+        public TtRenderGraphPin Rt1PinOut = TtRenderGraphPin.CreateOutput("MRT1", true, EPixelFormat.PXF_R10G10B10A2_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//normal - Flags
+        public TtRenderGraphPin Rt2PinOut = TtRenderGraphPin.CreateOutput("MRT2", true, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//Roughness,Emissive,Specular,unused
+        public TtRenderGraphPin Rt3PinOut = TtRenderGraphPin.CreateOutput("MRT3", true, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);//EPixelFormat.PXF_R10G10B10A2_UNORM//motionXY
 
         public TtQuarkResolveNode()
         {
@@ -539,13 +539,13 @@ namespace EngineNS.Bricks.GpuDriven
         }
         public override void InitNodePins()
         {
-            AddInput(QuarkRTPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(QuarkRTPinIn);
 
-            AddOutput(Rt0PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddOutput(Rt1PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddOutput(Rt2PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddOutput(Rt3PinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddOutput(DepthStencilPinIn, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+            AddOutput(Rt0PinOut);
+            AddOutput(Rt1PinOut);
+            AddOutput(Rt2PinOut);
+            AddOutput(Rt3PinOut);
+            AddOutput(DepthStencilPinIn);
 
             //base.InitNodePins();
         }

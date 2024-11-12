@@ -145,11 +145,11 @@ namespace EngineNS.Graphics.Pipeline.Common
     [Bricks.CodeBuilder.ContextMenu("AntiAliasing", "Post\\AntiAliasing", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtAntiAliasingNode : TtSceenSpaceNode
     {
-        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
-        public TtRenderGraphPin PreColorPinIn = TtRenderGraphPin.CreateInput("PreColor");
-        public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");
-        public TtRenderGraphPin PreDepthPinIn = TtRenderGraphPin.CreateInput("PreDepth");
-        public TtRenderGraphPin MotionVectorPinIn = TtRenderGraphPin.CreateInput("MotionVector");
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin PreColorPinIn = TtRenderGraphPin.CreateInput("PreColor", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin PreDepthPinIn = TtRenderGraphPin.CreateInput("PreDepth", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin MotionVectorPinIn = TtRenderGraphPin.CreateInput("MotionVector", NxRHI.EBufferType.BFT_SRV);
 
         public NxRHI.TtCopyDraw mCopyColorDrawcall;
         public NxRHI.TtCopyDraw mCopyDepthDrawcall;
@@ -164,13 +164,13 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void InitNodePins()
         {
-            AddInput(ColorPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(PreColorPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(ColorPinIn);
+            AddInput(PreColorPinIn);
 
-            AddInput(DepthPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(PreDepthPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(DepthPinIn);
+            AddInput(PreDepthPinIn);
 
-            AddInput(MotionVectorPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(MotionVectorPinIn);
 
             base.InitNodePins();
         }

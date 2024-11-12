@@ -9,16 +9,16 @@ namespace EngineNS.Bricks.Particle
     [Bricks.CodeBuilder.ContextMenu("Particle", "Particle\\Particle", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class UParticleGraphNode : Graphics.Pipeline.TtRenderGraphNode
     {
-        public Graphics.Pipeline.TtRenderGraphPin ColorPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Color");
-        public Graphics.Pipeline.TtRenderGraphPin DepthPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Depth");
+        public Graphics.Pipeline.TtRenderGraphPin ColorPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+        public Graphics.Pipeline.TtRenderGraphPin DepthPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Depth", NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
         public UParticleGraphNode()
         {
             Name = "ParticleGraphNode";
         }
         public override void InitNodePins()
         {
-            AddInputOutput(ColorPinInOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(DepthPinInOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(ColorPinInOut);
+            AddInputOutput(DepthPinInOut);
         }
         public async override System.Threading.Tasks.Task Initialize(Graphics.Pipeline.TtRenderPolicy policy,
                     string debugName)

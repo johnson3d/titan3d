@@ -38,13 +38,13 @@ namespace EngineNS.Graphics.Pipeline.Shadow
     public class TtShadowMapNode : TtRenderGraphNode
     {
         public TtRenderGraphPin[] VisiblePinIn = new TtRenderGraphPin[]{
-            TtRenderGraphPin.CreateInput("Visible0"),
-            TtRenderGraphPin.CreateInput("Visible1"),
-            TtRenderGraphPin.CreateInput("Visible2"),
-            TtRenderGraphPin.CreateInput("Visible3"),
+            TtRenderGraphPin.CreateInput("Visible0", EBufferType.BFT_NONE),
+            TtRenderGraphPin.CreateInput("Visible1", EBufferType.BFT_NONE),
+            TtRenderGraphPin.CreateInput("Visible2", EBufferType.BFT_NONE),
+            TtRenderGraphPin.CreateInput("Visible3", EBufferType.BFT_NONE),
         };
         //public TtRenderGraphPin ColorPinOut = TtRenderGraphPin.CreateOutput("Color", false, EPixelFormat.PXF_B8G8R8A8_UNORM);
-        public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D16_UNORM);//or D32
+        public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D16_UNORM, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);//or D32
         bool mIsDepth32 = false;
         [Rtti.Meta]
         public bool IsDepth32 
@@ -64,12 +64,12 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         {
             foreach (var i in VisiblePinIn)
             {
-                AddInput(i, NxRHI.EBufferType.BFT_NONE);
+                AddInput(i);
                 i.IsAllowInputNull = true;
             }
 
             //AddOutput(ColorPinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
-            AddOutput(DepthPinOut, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);
+            AddOutput(DepthPinOut);
         }
         public GamePlay.TtWorld.TtVisParameter mVisParameter = new GamePlay.TtWorld.TtVisParameter();
         // public CCamera ShadowCamera;

@@ -56,7 +56,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     [Bricks.CodeBuilder.ContextMenu("Gauss", "Post\\Gauss", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtGaussNode : TtSceenSpaceNode
     {
-        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
         public TtGaussNode()
         {
             Name = "GaussNode";
@@ -65,7 +65,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
         public override void InitNodePins()
         {
-            AddInput(ColorPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(ColorPinIn);
 
             base.InitNodePins();
         }
@@ -212,8 +212,8 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     [Bricks.CodeBuilder.ContextMenu("GaussAdditive", "Post\\GaussAdditive", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtGaussAdditiveNode : TtSceenSpaceNode
     {
-        public TtRenderGraphPin Color1PinIn = TtRenderGraphPin.CreateInput("Color1");
-        public TtRenderGraphPin Color2PinIn = TtRenderGraphPin.CreateInput("Color2");
+        public TtRenderGraphPin Color1PinIn = TtRenderGraphPin.CreateInput("Color1", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin Color2PinIn = TtRenderGraphPin.CreateInput("Color2", NxRHI.EBufferType.BFT_SRV);
         public TtGaussAdditiveNode()
         {
             Name = "GaussAdditiveNode";
@@ -222,8 +222,8 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
         public override void InitNodePins()
         {
-            AddInput(Color1PinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(Color2PinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(Color1PinIn);
+            AddInput(Color2PinIn);
 
             base.InitNodePins();
         }

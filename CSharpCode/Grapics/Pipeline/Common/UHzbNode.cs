@@ -9,17 +9,17 @@ namespace EngineNS.Graphics.Pipeline.Common
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UHzbNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UHzbNode" })]
     public class TtHzbNode : Graphics.Pipeline.TtRenderGraphNode
     {
-        public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");
-        public TtRenderGraphPin HzbPinOut = TtRenderGraphPin.CreateOutput("Hzb", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth", NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
+        public TtRenderGraphPin HzbPinOut = TtRenderGraphPin.CreateOutput("Hzb", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_SRV);
         public TtHzbNode()
         {
             Name = "Hzb";
         }
         public override void InitNodePins()
         {
-            AddInput(DepthPinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
+            AddInput(DepthPinIn);
             HzbPinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
-            AddOutput(HzbPinOut, NxRHI.EBufferType.BFT_SRV);
+            AddOutput(HzbPinOut);
         }
         public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {

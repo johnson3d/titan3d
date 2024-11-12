@@ -61,14 +61,14 @@ namespace EngineNS.Bricks.GpuDriven
     }
     public class TtCullClusterNode : TtRenderGraphNode
     {
-        public TtRenderGraphPin HzbPinIn = TtRenderGraphPin.CreateInput("Hzb");
-        public TtRenderGraphPin SrcClustersPin = TtRenderGraphPin.CreateInput("SrcClusters");
+        public TtRenderGraphPin HzbPinIn = TtRenderGraphPin.CreateInput("Hzb", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin SrcClustersPin = TtRenderGraphPin.CreateInput("SrcClusters", NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
 
-        public TtRenderGraphPin VerticesPinOut = TtRenderGraphPin.CreateInputOutput("Vertices", false, EPixelFormat.PXF_UNKNOWN);
-        public TtRenderGraphPin IndicesPinOut = TtRenderGraphPin.CreateInputOutput("Indices", false, EPixelFormat.PXF_UNKNOWN);
-        public TtRenderGraphPin ClustersPinOut = TtRenderGraphPin.CreateInputOutput("Clusters", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin VerticesPinOut = TtRenderGraphPin.CreateInputOutput("Vertices", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin IndicesPinOut = TtRenderGraphPin.CreateInputOutput("Indices", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin ClustersPinOut = TtRenderGraphPin.CreateInputOutput("Clusters", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
         
-        public TtRenderGraphPin VisibleClutersPinOut = TtRenderGraphPin.CreateOutput("VisibleClusters", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin VisibleClutersPinOut = TtRenderGraphPin.CreateOutput("VisibleClusters", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
         
         public TtCullClusterShading CullClusterShading;
         private NxRHI.TtComputeDraw CullClusterShadingDrawcall;
@@ -109,14 +109,14 @@ namespace EngineNS.Bricks.GpuDriven
         }
         public override void InitNodePins()
         {
-            AddInput(HzbPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(SrcClustersPin, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+            AddInput(HzbPinIn);
+            AddInput(SrcClustersPin);
 
-            AddInputOutput(VerticesPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(IndicesPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(ClustersPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(VerticesPinOut);
+            AddInputOutput(IndicesPinOut);
+            AddInputOutput(ClustersPinOut);
             
-            AddOutput(VisibleClutersPinOut, NxRHI.EBufferType.BFT_UAV | NxRHI.EBufferType.BFT_SRV);
+            AddOutput(VisibleClutersPinOut);
 
             HzbPinIn.IsAllowInputNull = true;
             VerticesPinOut.IsAllowInputNull = true;

@@ -111,9 +111,9 @@ namespace EngineNS.Graphics.Pipeline
     [Bricks.CodeBuilder.ContextMenu("GpuCulling", "Culling\\GpuCulling", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtGpuCullingNode : TtRenderGraphNode
     {
-        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles");
-        public TtRenderGraphPin HzbPinIn = TtRenderGraphPin.CreateInput("Hzb");
-        public TtRenderGraphPin GpuCullOut = TtRenderGraphPin.CreateOutput("GpuCull", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin VisiblesPinIn = TtRenderGraphPin.CreateInput("Visibles", NxRHI.EBufferType.BFT_NONE);
+        public TtRenderGraphPin HzbPinIn = TtRenderGraphPin.CreateInput("Hzb", NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
+        public TtRenderGraphPin GpuCullOut = TtRenderGraphPin.CreateOutput("GpuCull", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_NONE);
 
         public Mesh.Modifier.TtGpuCullSetupShading GpuCullSetupShading;
         public Mesh.Modifier.TtGpuCullFlushShading GpuCullFlushShading;
@@ -125,11 +125,11 @@ namespace EngineNS.Graphics.Pipeline
         }
         public override void InitNodePins()
         {
-            AddInput(VisiblesPinIn, NxRHI.EBufferType.BFT_NONE);
-            AddInput(HzbPinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
+            AddInput(VisiblesPinIn);
+            AddInput(HzbPinIn);
             
             GpuCullOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
-            AddOutput(GpuCullOut, NxRHI.EBufferType.BFT_NONE);
+            AddOutput(GpuCullOut);
         }
         public Shader.TtGraphicsShadingEnv mOpaqueShading;
         public TtCpuCullingNode CpuCullNode = null;

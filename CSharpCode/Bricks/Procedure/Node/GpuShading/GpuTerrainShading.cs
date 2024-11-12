@@ -48,7 +48,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
     [Bricks.CodeBuilder.ContextMenu("IncWater", "PGC\\Erosion\\IncWater", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtErosionIncWaterNode : Graphics.Pipeline.TtRenderGraphNode
     {
-        public Graphics.Pipeline.TtRenderGraphPin WaterPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Water", false, EPixelFormat.PXF_R32_FLOAT);
+        public Graphics.Pipeline.TtRenderGraphPin WaterPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Water", false, EPixelFormat.PXF_R32_FLOAT, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
         public TtErosionIncWaterShading ShadingEnv;
         public NxRHI.TtCommandList mCmdList;
@@ -98,7 +98,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         }
         public override void InitNodePins()
         {
-            AddInputOutput(WaterPinInOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+            AddInputOutput(WaterPinInOut);
             WaterPinInOut.IsAllowInputNull = true;
 
             base.InitNodePins();
@@ -173,9 +173,9 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
     [Bricks.CodeBuilder.ContextMenu("Height2Flow", "PGC\\Height2Flow", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtHeigh2FlowMapNode : Graphics.Pipeline.TtRenderGraphNode
     {
-        public Graphics.Pipeline.TtRenderGraphPin HeightPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Height");
-        public Graphics.Pipeline.TtRenderGraphPin FlowMapPinOut = Graphics.Pipeline.TtRenderGraphPin.CreateOutput("Flow", true, EPixelFormat.PXF_R32G32_FLOAT);
-        public Graphics.Pipeline.TtRenderGraphPin GapMapPinOut = Graphics.Pipeline.TtRenderGraphPin.CreateOutput("Gap", true, EPixelFormat.PXF_R32_FLOAT);
+        public Graphics.Pipeline.TtRenderGraphPin HeightPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Height", NxRHI.EBufferType.BFT_SRV);
+        public Graphics.Pipeline.TtRenderGraphPin FlowMapPinOut = Graphics.Pipeline.TtRenderGraphPin.CreateOutput("Flow", true, EPixelFormat.PXF_R32G32_FLOAT, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+        public Graphics.Pipeline.TtRenderGraphPin GapMapPinOut = Graphics.Pipeline.TtRenderGraphPin.CreateOutput("Gap", true, EPixelFormat.PXF_R32_FLOAT, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
         public TtHeigh2FlowMapShading ShadingEnv;
         public NxRHI.TtCommandList mCmdList;
@@ -192,10 +192,10 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         }
         public override void InitNodePins()
         {
-            AddInputOutput(HeightPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInputOutput(HeightPinIn);
             HeightPinIn.IsAllowInputNull = true;
-            AddOutput(FlowMapPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
-            AddOutput(GapMapPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+            AddOutput(FlowMapPinOut);
+            AddOutput(GapMapPinOut);
 
             base.InitNodePins();
         }
@@ -272,9 +272,9 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
     [Bricks.CodeBuilder.ContextMenu("WaterBasin", "PGC\\WaterBasin", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtWaterBasinNode : Graphics.Pipeline.TtRenderGraphNode
     {
-        public Graphics.Pipeline.TtRenderGraphPin HeightPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInput("Height");
-        public Graphics.Pipeline.TtRenderGraphPin FlowPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInput("Flow");
-        public Graphics.Pipeline.TtRenderGraphPin WaterPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Water");
+        public Graphics.Pipeline.TtRenderGraphPin HeightPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInput("Height", NxRHI.EBufferType.BFT_SRV);
+        public Graphics.Pipeline.TtRenderGraphPin FlowPinIn = Graphics.Pipeline.TtRenderGraphPin.CreateInput("Flow", NxRHI.EBufferType.BFT_SRV);
+        public Graphics.Pipeline.TtRenderGraphPin WaterPinInOut = Graphics.Pipeline.TtRenderGraphPin.CreateInputOutput("Water", NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
         public TtWaterBasinShading ShadingEnv;
         public NxRHI.TtCommandList mCmdList;
@@ -297,9 +297,9 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
         }
         public override void InitNodePins()
         {
-            AddInput(HeightPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(FlowPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(WaterPinInOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+            AddInput(HeightPinIn);
+            AddInput(FlowPinIn);
+            AddInputOutput(WaterPinInOut);
 
             base.InitNodePins();
         }

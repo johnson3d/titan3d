@@ -22,16 +22,16 @@ namespace EngineNS.Graphics.Pipeline.Common
     [Bricks.CodeBuilder.ContextMenu("Picked", "Pick\\Picked", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class UPickedNode : TtRenderGraphNode
     {
-        public TtRenderGraphPin PickedPinOut = TtRenderGraphPin.CreateOutput("Picked", false, EPixelFormat.PXF_R16G16_FLOAT);
-        public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D16_UNORM);
+        public TtRenderGraphPin PickedPinOut = TtRenderGraphPin.CreateOutput("Picked", false, EPixelFormat.PXF_R16G16_FLOAT, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_RTV);
+        public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D16_UNORM, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
         public UPickedNode()
         {
             Name = "PickedNode";
         }
         public override void InitNodePins()
         {
-            AddOutput(PickedPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_RTV);
-            AddOutput(DepthPinOut, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
+            AddOutput(PickedPinOut);
+            AddOutput(DepthPinOut);
         }
         public override void OnResize(TtRenderPolicy policy, float x, float y)
         {

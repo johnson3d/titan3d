@@ -48,16 +48,16 @@ namespace EngineNS.Graphics.Pipeline.Common
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UHdrNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UHdrNode" })]
     public class TtHdrNode : TtSceenSpaceNode
     {
-        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
-        public TtRenderGraphPin GpuScenePinIn = TtRenderGraphPin.CreateInput("GpuScene");
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin GpuScenePinIn = TtRenderGraphPin.CreateInput("GpuScene", NxRHI.EBufferType.BFT_SRV);
         public TtHdrNode()
         {
             Name = "HdrNode";            
         }
         public override void InitNodePins()
         {
-            AddInput(ColorPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(GpuScenePinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(ColorPinIn);
+            AddInput(GpuScenePinIn);
 
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
             base.InitNodePins();

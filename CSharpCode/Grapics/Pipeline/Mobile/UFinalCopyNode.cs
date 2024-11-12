@@ -127,21 +127,21 @@ namespace EngineNS.Graphics.Pipeline.Mobile
     [Bricks.CodeBuilder.ContextMenu("FinalCopy", "Mobile\\FinalCopy", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtFinalCopyNode : Common.TtSceenSpaceNode
     {
-        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
         //public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");
 
-        public TtRenderGraphPin PickPinIn = TtRenderGraphPin.CreateInput("Pick");
-        public TtRenderGraphPin VignettePinIn = TtRenderGraphPin.CreateInput("Vignette");
+        public TtRenderGraphPin PickPinIn = TtRenderGraphPin.CreateInput("Pick", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin VignettePinIn = TtRenderGraphPin.CreateInput("Vignette", NxRHI.EBufferType.BFT_SRV);
         public TtFinalCopyNode()
         {
             Name = "UFinalCopyNode";
         }
         public override void InitNodePins()
         {
-            AddInput(ColorPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(ColorPinIn);
             //AddInput(DepthPinIn);
-            AddInput(PickPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(VignettePinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(PickPinIn);
+            AddInput(VignettePinIn);
 
             base.InitNodePins();
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;

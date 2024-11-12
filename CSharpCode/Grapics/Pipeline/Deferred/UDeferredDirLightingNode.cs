@@ -318,18 +318,18 @@ namespace EngineNS.Graphics.Pipeline.Deferred
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Deferred.UDeferredDirLightingNode@EngineCore", "EngineNS.Graphics.Pipeline.Deferred.UDeferredDirLightingNode" })]
     public partial class TtDeferredDirLightingNode : Common.TtSceenSpaceNode
     {
-        public TtRenderGraphPin Rt0PinIn = TtRenderGraphPin.CreateInput("MRT0");
-        public TtRenderGraphPin Rt1PinIn = TtRenderGraphPin.CreateInput("MRT1");
-        public TtRenderGraphPin Rt2PinIn = TtRenderGraphPin.CreateInput("MRT2");
-        public TtRenderGraphPin Rt3PinIn = TtRenderGraphPin.CreateInputOutput("MRT3");
-        public TtRenderGraphPin DepthStencilPinIn = TtRenderGraphPin.CreateInputOutput("DepthStencil");
+        public TtRenderGraphPin Rt0PinIn = TtRenderGraphPin.CreateInput("MRT0", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin Rt1PinIn = TtRenderGraphPin.CreateInput("MRT1", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin Rt2PinIn = TtRenderGraphPin.CreateInput("MRT2", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin Rt3PinIn = TtRenderGraphPin.CreateInputOutput("MRT3", NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_RTV);
+        public TtRenderGraphPin DepthStencilPinIn = TtRenderGraphPin.CreateInputOutput("DepthStencil", NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_DSV);
         
-        public TtRenderGraphPin ShadowMapPinIn = TtRenderGraphPin.CreateInput("ShadowMap");
-        public TtRenderGraphPin EnvMapPinIn = TtRenderGraphPin.CreateInput("EnvMap");
-        public TtRenderGraphPin VignettePinIn = TtRenderGraphPin.CreateInput("Vignette");
-        public TtRenderGraphPin TileScreenPinIn = TtRenderGraphPin.CreateInput("TileScreen");
-        public TtRenderGraphPin GpuScenePinIn = TtRenderGraphPin.CreateInput("GpuScene");
-        public TtRenderGraphPin PointLightsPinIn = TtRenderGraphPin.CreateInput("PointLights");
+        public TtRenderGraphPin ShadowMapPinIn = TtRenderGraphPin.CreateInput("ShadowMap", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin EnvMapPinIn = TtRenderGraphPin.CreateInput("EnvMap", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin VignettePinIn = TtRenderGraphPin.CreateInput("Vignette", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin TileScreenPinIn = TtRenderGraphPin.CreateInput("TileScreen", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin GpuScenePinIn = TtRenderGraphPin.CreateInput("GpuScene", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin PointLightsPinIn = TtRenderGraphPin.CreateInput("PointLights", NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
         public NxRHI.TtCbView CBShadingEnv;
         [Category("Shading")]
@@ -350,18 +350,18 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16G16B16A16_FLOAT;
             base.InitNodePins();
 
-            AddInput(Rt0PinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(Rt1PinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(Rt2PinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInputOutput(Rt3PinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(Rt0PinIn);
+            AddInput(Rt1PinIn);
+            AddInput(Rt2PinIn);
+            AddInputOutput(Rt3PinIn);
             //Rt3PinIn.IsAllowInputNull = true;
-            AddInputOutput(DepthStencilPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(ShadowMapPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(EnvMapPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(VignettePinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(TileScreenPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(PointLightsPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(GpuScenePinIn, NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
+            AddInputOutput(DepthStencilPinIn);
+            AddInput(ShadowMapPinIn);
+            AddInput(EnvMapPinIn);
+            AddInput(VignettePinIn);
+            AddInput(TileScreenPinIn);
+            AddInput(PointLightsPinIn);
+            AddInput(GpuScenePinIn);
         }
         public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {

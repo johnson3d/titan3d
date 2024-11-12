@@ -27,11 +27,11 @@ namespace EngineNS.Graphics.Pipeline.Common
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UCopy2SwapChainNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UCopy2SwapChainNode" })]
     public class TtCopy2SwapChainNode : TtEndingNode
     {
-        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
-        public TtRenderGraphPin HitIdPinIn = TtRenderGraphPin.CreateInput("HitId");
-        public TtRenderGraphPin HzbPinIn = TtRenderGraphPin.CreateInput("Hzb");
-        public TtRenderGraphPin SavedPinIn0 = TtRenderGraphPin.CreateInput("Save0");
-        public TtRenderGraphPin ColorPinOut = TtRenderGraphPin.CreateOutput("Color", true, EPixelFormat.PXF_R8G8B8A8_UNORM);
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin HitIdPinIn = TtRenderGraphPin.CreateInput("HitId", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin HzbPinIn = TtRenderGraphPin.CreateInput("Hzb", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin SavedPinIn0 = TtRenderGraphPin.CreateInput("Save0", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin ColorPinOut = TtRenderGraphPin.CreateOutput("Color", true, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_SRV);
 
         public NxRHI.TtCopyDraw mCopyDrawcall;
 
@@ -44,15 +44,15 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void InitNodePins()
         {
-            AddInput(ColorPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(ColorPinIn);
             HitIdPinIn.IsAllowInputNull = true;
-            AddInput(HitIdPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(HitIdPinIn);
             HzbPinIn.IsAllowInputNull = true;
-            AddInput(HzbPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(HzbPinIn);
             SavedPinIn0.IsAllowInputNull = true;
-            AddInput(SavedPinIn0, NxRHI.EBufferType.BFT_SRV);
+            AddInput(SavedPinIn0);
 
-            AddOutput(ColorPinOut, NxRHI.EBufferType.BFT_SRV);
+            AddOutput(ColorPinOut);
         }
         public override async Task Initialize(TtRenderPolicy policy, string debugName)
         {

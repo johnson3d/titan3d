@@ -86,8 +86,8 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     [Bricks.CodeBuilder.ContextMenu("SunShaftDepthThreshole", "Post\\SunShaftDepthThreshole", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtSunShaftDepthThresholeNode : TtSceenSpaceNode
     {
-        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
-        public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth");
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin DepthPinIn = TtRenderGraphPin.CreateInput("Depth", NxRHI.EBufferType.BFT_SRV);
         public TtSunShaftDepthThresholeNode()
         {
             Name = "SunShaftDepthThreshole";
@@ -96,8 +96,8 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
         public override void InitNodePins()
         {
-            AddInput(ColorPinIn, NxRHI.EBufferType.BFT_SRV);
-            AddInput(DepthPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(ColorPinIn);
+            AddInput(DepthPinIn);
 
             base.InitNodePins();
             ResultPinOut.Attachement.Format = EPixelFormat.PXF_R16_FLOAT;
@@ -225,7 +225,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     [Bricks.CodeBuilder.ContextMenu("SunShaftRadialBlur", "Post\\SunShaftRadialBlur", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtSunShaftRadialBlurNode : TtSceenSpaceNode
     {
-        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
         public TtSunShaftRadialBlurNode()
         {
             Name = "SunShaftRadialBlurNode";
@@ -234,7 +234,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
         public override void InitNodePins()
         {
-            AddInput(ColorPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(ColorPinIn);
 
             base.InitNodePins();
             ResultPinOut.IsAutoResize = false;

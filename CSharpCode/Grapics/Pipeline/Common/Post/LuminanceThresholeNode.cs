@@ -60,7 +60,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
     [Bricks.CodeBuilder.ContextMenu("LuminanceThreshole", "Post\\LuminanceThreshole", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtLuminanceThresholeNode : TtSceenSpaceNode
     {
-        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color");
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
         public TtLuminanceThresholeNode()
         {
             Name = "LuminanceThresholeNode";
@@ -69,7 +69,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
         public override void InitNodePins()
         {
-            AddInput(ColorPinIn, NxRHI.EBufferType.BFT_SRV);
+            AddInput(ColorPinIn);
 
             base.InitNodePins();
         }

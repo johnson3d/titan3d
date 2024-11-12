@@ -39,40 +39,44 @@ namespace EngineNS.Graphics.Pipeline
         {
             return HostNode.RenderGraph.FindInLinker(this);
         }
-        public static TtRenderGraphPin CreateInput(string name)
+        public static TtRenderGraphPin CreateInput(string name, NxRHI.EBufferType types)
         {
             var result = new TtRenderGraphPin();
             result.Name = name;
             result.PinType = EPinType.Input;
             result.IsAutoResize = false;
             result.Attachement.Format = EPixelFormat.PXF_UNKNOWN;
+            result.Attachement.BufferViewTypes = types;
             return result;
         }
-        public static TtRenderGraphPin CreateOutput(string name, bool isAutoSize, EPixelFormat defaultFormat)
+        public static TtRenderGraphPin CreateOutput(string name, bool isAutoSize, EPixelFormat defaultFormat, NxRHI.EBufferType types)
         {
             var result = new TtRenderGraphPin();
             result.Name = name;
             result.PinType = EPinType.Output;
             result.IsAutoResize = isAutoSize;
             result.Attachement.Format = defaultFormat;
+            result.Attachement.BufferViewTypes = types;
             return result;
         }
-        public static TtRenderGraphPin CreateInputOutput(string name)
+        public static TtRenderGraphPin CreateInputOutput(string name, NxRHI.EBufferType types)
         {
             var result = new TtRenderGraphPin();
             result.Name = name;
             result.PinType = EPinType.InputOutput;
             result.IsAutoResize = false;
             result.Attachement.Format = EPixelFormat.PXF_UNKNOWN;
+            result.Attachement.BufferViewTypes = types;
             return result;
         }
-        public static TtRenderGraphPin CreateInputOutput(string name, bool isAutoSize, EPixelFormat defaultFormat)
+        public static TtRenderGraphPin CreateInputOutput(string name, bool isAutoSize, EPixelFormat defaultFormat, NxRHI.EBufferType types)
         {
             var result = new TtRenderGraphPin();
             result.Name = name;
             result.PinType = EPinType.InputOutput;
             result.IsAutoResize = isAutoSize;
             result.Attachement.Format = defaultFormat;
+            result.Attachement.BufferViewTypes = types;
             return result;
         }
     }
@@ -144,7 +148,7 @@ namespace EngineNS.Graphics.Pipeline
                 return OutputGraphPins.Count;
             }
         }
-        public bool AddInput(TtRenderGraphPin pin, NxRHI.EBufferType needTypes)
+        public bool AddInput(TtRenderGraphPin pin)
         {
             if (pin.PinType != TtRenderGraphPin.EPinType.Input)
                 return false;
@@ -154,11 +158,10 @@ namespace EngineNS.Graphics.Pipeline
                     return false;
             }
             pin.HostNode = this;
-            pin.Attachement.BufferViewTypes = needTypes;
             InputGraphPins.Add(pin);
             return true;
         }
-        public bool AddOutput(TtRenderGraphPin pin, NxRHI.EBufferType provideTypes)
+        public bool AddOutput(TtRenderGraphPin pin)
         {
             if (pin.PinType != TtRenderGraphPin.EPinType.Output)
                 return false;
@@ -169,17 +172,15 @@ namespace EngineNS.Graphics.Pipeline
             }
             pin.Attachement.AttachmentName = FHashText.Create($"{Name}->{pin.Name}");
             pin.HostNode = this;
-            pin.Attachement.BufferViewTypes = provideTypes;
             OutputGraphPins.Add(pin);
             return true;
         }
-        public bool AddInputOutput(TtRenderGraphPin pin, NxRHI.EBufferType needTypes)
+        public bool AddInputOutput(TtRenderGraphPin pin)
         {
             if (pin.PinType != TtRenderGraphPin.EPinType.InputOutput)
                 return false;
             pin.Attachement.AttachmentName = FHashText.Create($"{Name}->{pin.Name}");
             pin.HostNode = this;
-            pin.Attachement.BufferViewTypes = needTypes;
             foreach (var i in InputGraphPins)
             {
                 if (i.Name == pin.Name)

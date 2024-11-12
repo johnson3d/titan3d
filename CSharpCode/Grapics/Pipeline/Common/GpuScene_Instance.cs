@@ -9,7 +9,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 {
     public partial class TtGpuSceneNode
     {
-        public TtRenderGraphPin InstancePinOut = TtRenderGraphPin.CreateOutput("Instances", false, EPixelFormat.PXF_UNKNOWN);
+        public TtRenderGraphPin InstancePinOut = TtRenderGraphPin.CreateOutput("Instances", false, EPixelFormat.PXF_UNKNOWN, EBufferType.BFT_SRV | EBufferType.BFT_UAV);
         public List<GamePlay.Scene.TtGpuSceneNode> GpuSceneActors = new List<GamePlay.Scene.TtGpuSceneNode>();
         public struct FActorInstance
         {

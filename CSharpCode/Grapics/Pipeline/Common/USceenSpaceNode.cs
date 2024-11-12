@@ -17,14 +17,14 @@ namespace EngineNS.Graphics.Pipeline.Common
             GBuffers = null;
             base.Dispose();
         }
-        public TtRenderGraphPin ResultPinOut = TtRenderGraphPin.CreateOutput("Result", true, EPixelFormat.PXF_R8G8B8A8_UNORM);
+        public TtRenderGraphPin ResultPinOut = TtRenderGraphPin.CreateOutput("Result", true, EPixelFormat.PXF_R8G8B8A8_UNORM, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
         public TtSceenSpaceNode()
         {
             Name = "USceenSpaceNode";
         }
         public override void InitNodePins()
         {
-            AddOutput(ResultPinOut, NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV);
+            AddOutput(ResultPinOut);
         }
         [Rtti.Meta]
         [Category("Option")]
