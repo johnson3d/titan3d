@@ -341,6 +341,12 @@ namespace EngineNS.Rtti
         public static void TypeDescText(string text, out string assembly, out string typeStr)
         {
             var segs = text.Split('\n');
+            if (segs.Length != 2)
+            {
+                assembly = null;
+                typeStr = null;
+                return;
+            }
             assembly = segs[0];
             typeStr = segs[1];
         }
