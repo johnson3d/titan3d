@@ -84,7 +84,7 @@ namespace EngineNS.Bricks.Procedure
             GpuSystem = NxRHI.TtGpuSystem.CreateGpuSystem(NxRHI.ERhiType.RHI_D3D11, in gpuDesc);
             NxRHI.FGpuDeviceDesc desc = new NxRHI.FGpuDeviceDesc();
             GpuDevice = GpuSystem.CreateGpuDevice(in desc);
-            
+
             return true;
         }
         protected async System.Threading.Tasks.Task<bool> Initialize_PreviewMaterial(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)

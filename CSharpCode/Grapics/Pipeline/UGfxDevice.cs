@@ -99,6 +99,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             RenderSwapQueue.TickRender(host.ElapsedSecond);
         }
+        bool bSetBreakOnId = false;
         public void TickSync(TtEngine host)
         {
             var testTime = Support.TtTime.GetTickCount();
@@ -109,6 +110,8 @@ namespace EngineNS.Graphics.Pipeline
 
             RenderSwapQueue.TickSync(host.ElapsedSecond);
             CbvUpdater.UpdateCBVs();
+
+            RenderContext.SetDX12BreakOnId(EDx12MessageId.DESTROY_HEAP, bSetBreakOnId);
         }
         public override void EndFrame(TtEngine engine)
         {
@@ -215,6 +218,9 @@ namespace EngineNS.Graphics.Pipeline
                 RenderContext = RenderSystem.CreateGpuDevice(in rcDesc);
                 if (RenderContext == null)
                     return false;
+
+                //RenderContext.SetDX12BreakOnId(EDx12MessageId.DESTROY_HEAP);
+                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CLEARDEPTHSTENCILVIEW_MISMATCHINGCLEARVALUE, false);
             }
 
             RenderPassManager.Initialize(engine);

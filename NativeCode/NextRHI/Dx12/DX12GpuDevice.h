@@ -69,6 +69,7 @@ namespace NxRHI
 		virtual FVertexArray* CreateVertexArray() override;
 
 		virtual void SetBreakOnID(int id, bool open) override;
+		virtual void ShowDeviceMessage(int id, bool show) override;
 		virtual void TickPostEvents() override;
 
 		typedef void FDeviceRemovedCallback();
@@ -114,6 +115,7 @@ namespace NxRHI
 
 		AutoRef<DX12CommandList>			mPostCmdList;
 		AutoRef<ICmdRecorder>				mPostCmdRecorder;
+		std::vector<D3D12_MESSAGE_ID>		mDenyMessages;
 	};
 
 	class DX12CmdQueue : public ICmdQueue

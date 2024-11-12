@@ -139,6 +139,39 @@ namespace NxRHI
 			mDebugInfoQueue->SetBreakOnID((D3D12_MESSAGE_ID)id, open ? TRUE : FALSE);
 		}
 	}
+
+	void DX12GpuDevice::ShowDeviceMessage(int id, bool show)
+	{
+		if (mDebugInfoQueue == nullptr)
+			return;
+		D3D12_INFO_QUEUE_FILTER filter{};
+		
+		for (auto iter = mDenyMessages.begin(); iter != mDenyMessages.end(); iter++)
+		{
+			if (*iter == id)
+			{
+				if (show == false)
+				{
+					return;
+				}
+				else
+				{
+					mDenyMessages.erase(iter);
+					break;
+				}
+			}	
+		}
+		if (show == false)
+		{
+			mDenyMessages.push_back((D3D12_MESSAGE_ID)id);
+		}
+		
+		filter.DenyList.NumIDs = (UINT)mDenyMessages.size();
+		filter.DenyList.pIDList = &mDenyMessages[0];
+		mDebugInfoQueue->PopStorageFilter();
+		mDebugInfoQueue->PushStorageFilter(&filter);
+	}
+
 	bool DX12GpuDevice::InitDevice(IGpuSystem* pGpuSystem, const FGpuDeviceDesc* desc)
 	{
 		mDeviceThreadId = vfxThread::GetCurrentThreadId();
@@ -273,18 +306,18 @@ namespace NxRHI
 			//mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_DESTROY_MONITOREDFENCE, TRUE);
 			//mDebugInfoQueue->SetBreakOnID(D3D12_MESSAGE_ID_GPU_BASED_VALIDATION_INCOMPATIBLE_RESOURCE_STATE, TRUE);
 			D3D12_INFO_QUEUE_FILTER filter{};
-			D3D12_MESSAGE_ID denyIds[]{
-				D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,
-				D3D12_MESSAGE_ID_DRAW_EMPTY_SCISSOR_RECTANGLE,
-				D3D12_MESSAGE_ID_CREATE_COMMANDLIST12,
-				D3D12_MESSAGE_ID_DESTROY_COMMANDLIST12,
-				D3D12_MESSAGE_ID_CREATE_RESOURCE,
-				D3D12_MESSAGE_ID_DESTROY_RESOURCE,
-				D3D12_MESSAGE_ID_GPU_BASED_VALIDATION_INCOMPATIBLE_RESOURCE_STATE,
-				D3D12_MESSAGE_ID_CREATEGRAPHICSPIPELINESTATE_RENDERTARGETVIEW_NOT_SET,
-			};
-			filter.DenyList.NumIDs = _countof(denyIds);
-			filter.DenyList.pIDList = denyIds;
+			mDenyMessages.clear();
+			mDenyMessages.push_back(D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE);
+			mDenyMessages.push_back(D3D12_MESSAGE_ID_DRAW_EMPTY_SCISSOR_RECTANGLE);
+			mDenyMessages.push_back(D3D12_MESSAGE_ID_CREATE_COMMANDLIST12);
+			mDenyMessages.push_back(D3D12_MESSAGE_ID_DESTROY_COMMANDLIST12);
+			mDenyMessages.push_back(D3D12_MESSAGE_ID_CREATE_RESOURCE);
+			mDenyMessages.push_back(D3D12_MESSAGE_ID_DESTROY_RESOURCE);
+			mDenyMessages.push_back(D3D12_MESSAGE_ID_GPU_BASED_VALIDATION_INCOMPATIBLE_RESOURCE_STATE);
+			mDenyMessages.push_back(D3D12_MESSAGE_ID_CREATEGRAPHICSPIPELINESTATE_RENDERTARGETVIEW_NOT_SET);
+			
+			filter.DenyList.NumIDs = (UINT)mDenyMessages.size();
+			filter.DenyList.pIDList = &mDenyMessages[0];
 			mDebugInfoQueue->PushStorageFilter(&filter);
 		}
 

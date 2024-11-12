@@ -1,6 +1,7 @@
 ﻿using EngineNS.Profiler;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
 
 namespace EngineNS.NxRHI
@@ -419,9 +420,13 @@ namespace EngineNS.NxRHI
                 return null;
             return result;
         }
-        public void SetBreakOnId(int id, bool open)
+        public void SetDX12BreakOnId(NxRHI.EDx12MessageId id, bool open)
         {
-            mCoreObject.SetBreakOnID(id, open);
+            mCoreObject.SetBreakOnID((int)id, open);
+        }
+        public void ShowDX12DeviceMessage(NxRHI.EDx12MessageId id, bool show)
+        {//id->D3D12_MESSAGE_ID 
+            mCoreObject.ShowDeviceMessage((int)id, show);
         }
 
         internal TtGpuQueue mGpuQueue;

@@ -1,10 +1,12 @@
-﻿using System;
+﻿using NPOI.SS.Formula.Functions;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
 {
-    public struct FAttachBufferDesc : IComparable<FAttachBufferDesc>
+    public struct FAttachBufferDesc
     {
         public NxRHI.EBufferType BufferViewTypes;// = NxRHI.EBufferType.BFT_RTV | NxRHI.EBufferType.BFT_SRV
         public EPixelFormat Format;
@@ -12,7 +14,8 @@ namespace EngineNS.Graphics.Pipeline
         public uint Height;
         public bool IsMatch(in FAttachBufferDesc desc)
         {
-            return (Format == desc.Format) && (Width == desc.Width) && (Height == desc.Height);
+            return (Format == desc.Format) && (Width == desc.Width) && (Height == desc.Height) && 
+                ((BufferViewTypes & desc.BufferViewTypes) != NxRHI.EBufferType.BFT_NONE);
         }
         public bool IsMatchSize(in FAttachBufferDesc desc)
         {
@@ -21,6 +24,10 @@ namespace EngineNS.Graphics.Pipeline
         public override string ToString()
         {
             return $"{Format}({Width},{Height})";
+        }
+        public override int GetHashCode()
+        {
+            return (int)(Width + Height + (uint)Format + (uint)BufferViewTypes);
         }
         public int CompareTo(FAttachBufferDesc other)
         {
@@ -315,9 +322,14 @@ namespace EngineNS.Graphics.Pipeline
             }
             public string Name;
             public FAttachBufferDesc BufferDesc;
-            public int FrameMaxLiveCount = 0;
-            public int FrameLiveCount = 0;
-            public int FrameAllocCount = 0;
+            //本帧内，最高同时存活数量
+            public int FrameMaxLiveCount { get; set; } = 0;
+            //当前存活的帧数量
+            public int FrameLiveCount { get; set; } = 0;
+            //当前帧，pool内分配的数量
+            public int FrameAllocCount { get; set; } = 0;
+            //有多少帧没有用过本Pool了
+            public int NoHitFrameCount { get; set; } = 0;
             protected override TtAttachBuffer CreateObjectSync()
             {
                 var result = new TtAttachBuffer();
@@ -334,7 +346,7 @@ namespace EngineNS.Graphics.Pipeline
                 System.Diagnostics.Debug.Assert(obj.IsAlloc == false);
                 FrameAllocCount++;
                 FrameLiveCount++;
-                if (FrameMaxLiveCount < FrameLiveCount)
+                if (FrameLiveCount > FrameMaxLiveCount)
                     FrameMaxLiveCount = FrameLiveCount;
             }
             protected override bool OnObjectRelease(TtAttachBuffer obj)
@@ -356,7 +368,18 @@ namespace EngineNS.Graphics.Pipeline
             }
             Pools.Clear();
         }
-        public Dictionary<FAttachBufferDesc, TtAttachBufferPool> Pools { get; } = new Dictionary<FAttachBufferDesc, TtAttachBufferPool>();
+        public struct TtPoolCmp : IEqualityComparer<FAttachBufferDesc>
+        {
+            public bool Equals(FAttachBufferDesc x, FAttachBufferDesc y)
+            {
+                return x.IsMatch(in y);
+            }
+            public int GetHashCode(FAttachBufferDesc obj)
+            {
+                return obj.GetHashCode();
+            }
+        }
+        public Dictionary<FAttachBufferDesc, TtAttachBufferPool> Pools { get; } = new Dictionary<FAttachBufferDesc, TtAttachBufferPool>(new TtPoolCmp());
         public TtAttachBuffer Alloc(in FAttachBufferDesc desc)
         {
             TtAttachBufferPool pool;
@@ -388,19 +411,28 @@ namespace EngineNS.Graphics.Pipeline
             mRmvPools.Clear();
             foreach (var i in Pools)
             {
-                if (i.Value.FrameMaxLiveCount == 0)
-                {
-                    i.Value.Dispose();
-                    mRmvPools.Add(i.Key);
-                    continue;
+                if (i.Value.FrameAllocCount == 0)
+                {//本帧内，这个Pool没有分配过Buffer，可能需要丢弃
+                    i.Value.NoHitFrameCount++;
+                    if (i.Value.NoHitFrameCount >= 5)
+                    {//连续5帧没有命中使用，丢弃
+                        i.Value.Dispose();
+                        mRmvPools.Add(i.Key);
+                        continue;
+                    }
                 }
-                else if(i.Value.PoolSize > i.Value.FrameMaxLiveCount + 3)
+                else
                 {
-                    //i.Value.Shrink(i.Value.FrameMaxLiveCount);
+                    i.Value.NoHitFrameCount = 0;
+
+                    if (i.Value.PoolSize > i.Value.FrameMaxLiveCount + 3)
+                    {
+                        //i.Value.Shrink(i.Value.FrameMaxLiveCount);
+                    }
                 }
-                i.Value.FrameMaxLiveCount = 0;
                 i.Value.FrameLiveCount = 0;
                 i.Value.FrameAllocCount = 0;
+                i.Value.FrameMaxLiveCount = 0;
             }
             foreach (var i in mRmvPools)
             {

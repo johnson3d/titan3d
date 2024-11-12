@@ -70,6 +70,8 @@ namespace EngineNS
         {
             return new T();
         }
+        public int TotalQueryTimes = 0;
+        public int TotalReleaseTimes = 0;
         public T QueryObjectSync()
         {
             lock (this)
@@ -89,6 +91,7 @@ namespace EngineNS
                 OnObjectQuery(result);
                 result.IsAlloc = true;
                 AliveNumber++;
+                TotalQueryTimes++;
                 return result;
             }
         }
@@ -111,6 +114,7 @@ namespace EngineNS
                 obj.IsAlloc = false;
                 mPool.Push(obj);
                 AliveNumber--;
+                TotalReleaseTimes--;
                 return true;
             }
         }

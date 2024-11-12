@@ -284,7 +284,7 @@ namespace EngineNS
                     open = false;
                 }
             }
-            TtEngine.Instance.GfxDevice.RenderContext.SetBreakOnId(int.Parse(id), open);
+            TtEngine.Instance.GfxDevice.RenderContext.mCoreObject.SetBreakOnID(int.Parse(id), open);
         }
     }
 
