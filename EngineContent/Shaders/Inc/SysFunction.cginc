@@ -69,6 +69,12 @@ float MipLevel(float2 uv, float SUB_TEXTURE_SIZE, float SUB_TEXTURE_MIPCOUNT)
 	return mipLevel;
 }
 
+float3 GrayColor(float3 color)
+{
+    float gray = dot(color, float3(0.3, 0.6, 0.1));
+    return float3(gray, gray, gray);
+}
+
 void Clamp( half x, half min, half max, out half ret )
 {
 	ret = clamp( x, min, max );

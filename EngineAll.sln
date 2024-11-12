@@ -1161,6 +1161,8 @@ Global
 		CSharpCode\Bricks\DistanceField\DistanceField.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\FBX\FBX.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Font\Font.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
+		CSharpCode\Bricks\FX\Hair\Hair.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
+		CSharpCode\Bricks\FX\Skin\Skin.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\GpuDriven\GpuDriven.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\ImageDecoder\ImageDecoder.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Input\Input.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -1227,6 +1229,8 @@ Global
 		CSharpCode\Bricks\DataSet\DataSet.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\FBX\FBX.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Font\Font.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\FX\Hair\Hair.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\FX\Skin\Skin.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\GpuDriven\GpuDriven.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\ImageDecoder\ImageDecoder.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Input\Input.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5

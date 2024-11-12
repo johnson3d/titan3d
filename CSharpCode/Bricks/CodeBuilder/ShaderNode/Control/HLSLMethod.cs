@@ -99,8 +99,15 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
 
         #region Effect
         [Rtti.Meta]
+        [TtMaterialShader(Name = "GrayColor")]
+        [ContextMenu(filterStrings: "GrayColor", "Effect\\GrayColor", TtMaterialGraph.MaterialEditorKeyword)]
+        public static Vector3 GrayColor(Vector3 color)
+        {
+            return new Vector3(Vector3.Dot(color, new Vector3(0.3f, 0.6f, 0.1f)));
+        }
+        [Rtti.Meta]
         [TtMaterialShader(Name = "NormalMap")]
-        [ContextMenu(filterStrings: "Effect", "Effect\\NormalMap", TtMaterialGraph.MaterialEditorKeyword)]
+        [ContextMenu(filterStrings: "NormalMap", "Effect\\NormalMap", TtMaterialGraph.MaterialEditorKeyword)]
         public static void NormalMap(Vector3 Nt, Vector4 Tw, Vector3 Nw, out Vector3 UnpackedNormal)
         {
             //   Vector3 Bw = new Vector3(0.0h, 0.0h, 0.0h);
