@@ -180,11 +180,11 @@ namespace EngineNS.IO
                 Profiler.Log.WriteException(ex);
             }
         }
-        public static void CopyFile(string src, string tar)
+        public static void CopyFile(string src, string tar, bool bOverride = true)
         {
             if (System.IO.File.Exists(src))
             {
-                System.IO.File.Copy(src, tar);
+                System.IO.File.Copy(src, tar, bOverride);
             }
         }
         public static void MoveFile(string src, string tar)

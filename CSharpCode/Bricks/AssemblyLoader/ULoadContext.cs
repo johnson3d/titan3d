@@ -70,7 +70,7 @@ namespace EngineNS.Bricks.AssemblyLoader
         }
         public Assembly LoadOnMemory(string assemblyPath)
         {
-            string pdbPath = assemblyPath.Replace(".dll", ".pdb");
+            string pdbPath = assemblyPath.Replace(".dll", ".tpdb");
             using (FileStream sr = new FileStream(assemblyPath, FileMode.OpenOrCreate, FileAccess.Read))
             {
                 byte[] buffer = new byte[sr.Length];

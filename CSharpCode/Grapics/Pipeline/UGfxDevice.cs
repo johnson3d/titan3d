@@ -99,7 +99,7 @@ namespace EngineNS.Graphics.Pipeline
         {
             RenderSwapQueue.TickRender(host.ElapsedSecond);
         }
-        bool bSetBreakOnId = false;
+        //bool bSetBreakOnId = false;
         public void TickSync(TtEngine host)
         {
             var testTime = Support.TtTime.GetTickCount();
@@ -111,7 +111,7 @@ namespace EngineNS.Graphics.Pipeline
             RenderSwapQueue.TickSync(host.ElapsedSecond);
             CbvUpdater.UpdateCBVs();
 
-            RenderContext.SetDX12BreakOnId(EDx12MessageId.DESTROY_HEAP, bSetBreakOnId);
+            //RenderContext.SetDX12BreakOnId(EDx12MessageId.CREATE_HEAP, bSetBreakOnId);
         }
         public override void EndFrame(TtEngine engine)
         {

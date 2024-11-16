@@ -291,6 +291,9 @@ namespace EngineNS
         #endregion
         public async System.Threading.Tasks.Task<bool> PreInitEngine(string cfgFile)
         {
+            var byteorder = CoreSDK.IsLittleEndian() ? "Little" : "Big";
+            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, 
+                $"ByteOrder: {byteorder}");
             EngineStartTickCountUS = Support.TtTime.HighPrecision_GetTickCount();
             RttiStructManager.GetInstance().BuildRtti();
 

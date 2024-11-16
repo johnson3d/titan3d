@@ -48,6 +48,7 @@ public:
 	static FWriteLogString mWriteLogString;
 	static FAssertEvent mAssertEvent;
 public:
+	static bool IsLittleEndian();
 	static int GetPixelFormatByteWidth(EPixelFormat fmt);
 	static void MessageDialog(char* txt);
 	static void Print2Console(TR_META(SV_NoStringConverter = true) char* txt, bool newLine);

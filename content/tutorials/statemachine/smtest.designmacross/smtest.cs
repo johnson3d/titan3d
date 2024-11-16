@@ -10,9 +10,9 @@
             {
                 System.Boolean returnedValue = default(System.Boolean);
                 mFrame_CheckCondition_2304976243.SetWatchVariable("context", context);
-                EngineNS.Vector3 result_ToSingleVector3_3552239884 = default(EngineNS.Vector3);
-                result_ToSingleVector3_3552239884 = CenterData.MacrossNode.Parent.Placement.Position.ToSingleVector3();
-                returnedValue = (result_ToSingleVector3_3552239884.y > 2f);
+                EngineNS.Vector3 result_ToSingleVector3_1354508431 = default(EngineNS.Vector3);
+                result_ToSingleVector3_1354508431 = CenterData.MacrossNode.Parent.Placement.Position.ToSingleVector3();
+                returnedValue = (result_ToSingleVector3_1354508431.y > 2f);
                 return returnedValue;
                 return returnedValue;
             }
@@ -31,11 +31,11 @@ namespace NS_tutorials.statemachine
             {
                 mFrame_Update_3355887419.SetWatchVariable("elapseSecond", elapseSecond);
                 mFrame_Update_3355887419.SetWatchVariable("context", context);
-                EngineNS.Vector3 result_CreateVector3f_1867382767 = default(EngineNS.Vector3);
-                result_CreateVector3f_1867382767 = EngineNS.MathHelper.CreateVector3f(0f,0.1f,0f);
-                EngineNS.DVector3 result_AsDVector_528613241 = default(EngineNS.DVector3);
-                result_AsDVector_528613241 = result_CreateVector3f_1867382767.AsDVector();
-                CenterData.MacrossNode.Parent.Placement.Position = (CenterData.MacrossNode.Parent.Placement.Position + result_AsDVector_528613241);
+                EngineNS.Vector3 result_CreateVector3f_367467338 = default(EngineNS.Vector3);
+                result_CreateVector3f_367467338 = EngineNS.MathHelper.CreateVector3f(0f,0.1f,0f);
+                EngineNS.DVector3 result_AsDVector_2400955472 = default(EngineNS.DVector3);
+                result_AsDVector_2400955472 = result_CreateVector3f_367467338.AsDVector();
+                CenterData.MacrossNode.Parent.Placement.Position = (CenterData.MacrossNode.Parent.Placement.Position + result_AsDVector_2400955472);
             }
         }
     }
@@ -78,9 +78,9 @@ namespace NS_tutorials.statemachine
             {
                 System.Boolean returnedValue = default(System.Boolean);
                 mFrame_CheckCondition_2304976243.SetWatchVariable("context", context);
-                EngineNS.Vector3 result_ToSingleVector3_1023095188 = default(EngineNS.Vector3);
-                result_ToSingleVector3_1023095188 = CenterData.MacrossNode.Parent.Placement.Position.ToSingleVector3();
-                returnedValue = (result_ToSingleVector3_1023095188.y < 0f);
+                EngineNS.Vector3 result_ToSingleVector3_1501465443 = default(EngineNS.Vector3);
+                result_ToSingleVector3_1501465443 = CenterData.MacrossNode.Parent.Placement.Position.ToSingleVector3();
+                returnedValue = (result_ToSingleVector3_1501465443.y < 0f);
                 return returnedValue;
                 return returnedValue;
             }
@@ -99,11 +99,11 @@ namespace NS_tutorials.statemachine
             {
                 mFrame_Update_3355887419.SetWatchVariable("elapseSecond", elapseSecond);
                 mFrame_Update_3355887419.SetWatchVariable("context", context);
-                EngineNS.Vector3 result_CreateVector3f_1601524131 = default(EngineNS.Vector3);
-                result_CreateVector3f_1601524131 = EngineNS.MathHelper.CreateVector3f(0f,-0.1f,0f);
-                EngineNS.DVector3 result_AsDVector_2767448039 = default(EngineNS.DVector3);
-                result_AsDVector_2767448039 = result_CreateVector3f_1601524131.AsDVector();
-                CenterData.MacrossNode.Parent.Placement.Position = (CenterData.MacrossNode.Parent.Placement.Position + result_AsDVector_2767448039);
+                EngineNS.Vector3 result_CreateVector3f_2584956292 = default(EngineNS.Vector3);
+                result_CreateVector3f_2584956292 = EngineNS.MathHelper.CreateVector3f(0f,-0.1f,0f);
+                EngineNS.DVector3 result_AsDVector_4029544812 = default(EngineNS.DVector3);
+                result_AsDVector_4029544812 = result_CreateVector3f_2584956292.AsDVector();
+                CenterData.MacrossNode.Parent.Placement.Position = (result_AsDVector_4029544812 + CenterData.MacrossNode.Parent.Placement.Position);
             }
         }
     }

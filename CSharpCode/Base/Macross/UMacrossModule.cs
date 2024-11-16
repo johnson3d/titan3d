@@ -139,6 +139,7 @@ namespace EngineNS.Macross
             Rtti.TtAssemblyDesc desc;
             if (Rtti.TtTypeDescManager.Instance.RegAssembly(newAssembly, out manager, out desc))
             {
+
                 List<Type> removed = new List<Type>();
                 List<Type> changed = new List<Type>();
                 List<Type> added = new List<Type>();

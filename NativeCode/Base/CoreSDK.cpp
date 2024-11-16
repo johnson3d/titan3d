@@ -76,6 +76,24 @@ FGetManagedObjectFromGCHandle CoreSDK::GetManagedObjectFromGCHandle = nullptr;
 FOnShaderTranslated CoreSDK::OnShaderTranslated = nullptr;
 FOnGpuDeviceRemoved CoreSDK::OnGpuDeviceRemoved = nullptr;
 
+bool CoreSDK::IsLittleEndian()
+{
+	typedef union {
+		unsigned int num;
+		unsigned char buf[2];
+	} UNType;
+	UNType data;
+	data.num = 0x0201;
+	if (data.buf[0] == 0x01 && data.buf[1] == 0x02)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 int CoreSDK::GetPixelFormatByteWidth(EPixelFormat fmt)
 {
 	return GetPixelByteWidth(fmt);
