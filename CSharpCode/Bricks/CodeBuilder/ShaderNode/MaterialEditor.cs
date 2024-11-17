@@ -31,7 +31,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.ShaderNode.UShaderEditor@EngineCore" })]
-    public partial class TtMaterialEditor : Editor.IAssetEditor, ITickable, IRootForm
+    public partial class TtMaterialEditor : EngineNS.Editor.Forms.ULightEnvironemnt, Editor.IAssetEditor, IRootForm
     {
         public int GetTickOrder()
         {
@@ -69,19 +69,23 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
             return this;
         }
         #region Tickable
-        public void TickLogic(float ellapse)
+        public override void TickLogic(float ellapse)
         {
             PreviewViewport.TickLogic(ellapse);
         }
-        public void TickRender(float ellapse)
+
+        public override void TickRender(float ellapse)
         {
             PreviewViewport.TickRender(ellapse);
+            if (IsDrawing == false)
+                return;
+            base.TickRender(ellapse);
         }
-        public void TickBeginFrame(float ellapse)
+        public override void TickBeginFrame(float ellapse)
         {
 
         }
-        public void TickSync(float ellapse)
+        public override void TickSync(float ellapse)
         {
             PreviewViewport.TickSync(ellapse);
         }
@@ -132,6 +136,9 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
 
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
+
+            await InitializeLightEnv(PreviewViewport, radius);
+
             return true;
         }
         public async Thread.Async.TtTask<bool> OpenEditor(Editor.TtMainEditorApplication mainEditor, RName name, object arg)

@@ -117,10 +117,31 @@ namespace NxRHI
 			mCmdQueue = nullptr;
 			mCmdAllocatorManager = nullptr;
 		}
+
+		mPostCmdList = nullptr;
+		mPostCmdRecorder = nullptr;
+		mCmdQueue = nullptr;
 		
+		mNullCBV = nullptr;
+		mNullSRV = nullptr;
+		mNullUAV = nullptr;
+		mNullSampler = nullptr;
+		mNullRTV = nullptr;
+		mNullDSV = nullptr;
 		//mDevice = nullptr;;
 		//Safe_Release(mDevice);
 		//Safe_Release(mDXGIFactory);
+		mCmdAllocatorManager = nullptr;
+		mCBufferMemAllocator = nullptr;
+		mDefaultBufferMemAllocator = nullptr;
+		mUploadBufferMemAllocator = nullptr;
+		mUavBufferMemAllocator = nullptr;
+
+		mRtvAllocator = nullptr;
+		mDsvAllocator = nullptr;
+		mSamplerAllocator = nullptr;
+		mCbvSrvUavAllocator = nullptr;
+		mDescriptorSetAllocator = nullptr;
 	}
 	void DX12GpuDevice::TryFinalizeDevice(IGpuSystem* pGpuSystem) 
 	{

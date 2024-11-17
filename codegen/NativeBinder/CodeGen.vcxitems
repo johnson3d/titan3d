@@ -75,6 +75,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IImageDecoder_2581692454.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IManagedObjectHolder_2581692454.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IMdfQueue_2581692454.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IMeshOptimizer_2581692454.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IMeshSimplify_2581692454.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IMeshTriangle_2581692454.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/IMesh_2581692454.cpp2cs.cpp" />
@@ -218,6 +219,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FIbvDesc_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FIndirectDispatchArgument_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FIndirectDrawArgument_910209287.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FIndirectDrawIndexArgument_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FInputLayoutDesc_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FLayoutElement_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FMappedSubResource_910209287.cpp2cs.cpp" />

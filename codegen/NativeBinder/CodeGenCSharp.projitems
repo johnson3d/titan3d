@@ -118,6 +118,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IImageDecoder_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IManagedObjectHolder_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IMdfQueue_2581692454.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IMeshOptimizer_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IMeshSimplify_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IMeshTriangle_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IMesh_2581692454.cpp2cs.cs" />
@@ -267,6 +268,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/ECullMode_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EDepthWriteMask_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EDimensionUAV_910209287.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EDx12MessageId_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EFenceType_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EFillMode_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EFrameBufferLoadAction_910209287.cpp2cs.cs" />
@@ -314,6 +316,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FIbvDesc_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FIndirectDispatchArgument_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FIndirectDrawArgument_910209287.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FIndirectDrawIndexArgument_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FInputLayoutDesc_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FLayoutElement_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FMappedSubResource_910209287.cpp2cs.cs" />

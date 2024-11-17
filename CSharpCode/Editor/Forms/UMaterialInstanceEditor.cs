@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UMaterialInstanceEditor : Editor.IAssetEditor, ITickable, IRootForm
+    public class UMaterialInstanceEditor : ULightEnvironemnt, Editor.IAssetEditor, IRootForm
     {
         public int GetTickOrder()
         {
@@ -54,6 +54,7 @@ namespace EngineNS.Editor.Forms
         {
             return this;
         }
+
         protected async System.Threading.Tasks.Task<bool> Initialize_PreviewMaterialInstance(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
@@ -99,6 +100,9 @@ namespace EngineNS.Editor.Forms
 
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
+
+            await InitializeLightEnv(PreviewViewport, radius);
+
             return true;
         }
         async System.Threading.Tasks.Task CreateAnother(Graphics.Pipeline.TtViewportSlate viewport, Graphics.Mesh.TtMeshPrimitives rectMesh, Graphics.Pipeline.Shader.TtMaterial[] materials)
@@ -306,19 +310,22 @@ namespace EngineNS.Editor.Forms
             //throw new NotImplementedException();
         }
         #region Tickable
-        public void TickLogic(float ellapse)
+        public override void TickLogic(float ellapse)
         {
             PreviewViewport.TickLogic(ellapse);
         }
-        public void TickRender(float ellapse)
+        public override void TickRender(float ellapse)
         {
             PreviewViewport.TickRender(ellapse);
+            if (IsDrawing == false)
+                return;
+            base.TickRender(ellapse);
         }
-        public void TickBeginFrame(float ellapse)
+        public override void TickBeginFrame(float ellapse)
         {
 
         }
-        public void TickSync(float ellapse)
+        public override void TickSync(float ellapse)
         {
             PreviewViewport.TickSync(ellapse);
         }
