@@ -9,9 +9,11 @@
     <Import_RootNamespace>CodeGenCSharp</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreHLSLMethod.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Font.TtFontHLSLMethod.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.NodeGraph.UNodeGraph.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.FX.Hair.TtHairShader.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.FX.Skin.TtSkinShader.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.NodeGraph.TtNodeGraph.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Particle.TtEmitter.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Particle.TtEmitterMacross.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Particle.TtNebulaMacross.macross.cs" />
@@ -31,11 +33,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Converter.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.CustomConvert.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.GamePlay.Scene.TtNode.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.GamePlay.UGameInstance.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.GamePlay.UMacrossGame.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.GamePlay.TtGameInstance.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.GamePlay.TtMacrossGame.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Mesh.TtMesh.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Pipeline.Shader.TtMacrossShaderUtility.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Pipeline.Shader.TtMaterial.macross.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Pipeline.Shader.TtMaterialFunction.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceManager.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Pipeline.Shader.TtMaterialManager.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Pipeline.Shader.TtShadingMacross.macross.cs" />

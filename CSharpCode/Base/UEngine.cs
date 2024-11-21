@@ -367,6 +367,11 @@ namespace EngineNS
             {
                 Config.HasDebugLayer = (bool)Config_HasDebugLayer;
             }
+            var Config_HasGpuBaseValidation = this.DynConfigData.GetConfig("IsGpuBaseValidation");
+            if (Config_HasGpuBaseValidation != null)
+            {
+                Config.IsGpuBaseValidation = (bool)Config_HasGpuBaseValidation;
+            }
 
             if (Config.IsGpuDump)
             {

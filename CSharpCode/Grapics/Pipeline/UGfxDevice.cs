@@ -221,6 +221,12 @@ namespace EngineNS.Graphics.Pipeline
 
                 //RenderContext.SetDX12BreakOnId(EDx12MessageId.DESTROY_HEAP);
                 RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CLEARDEPTHSTENCILVIEW_MISMATCHINGCLEARVALUE, false);
+                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_HEAP, false);
+                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.DESTROY_HEAP, false);
+                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_COMMANDALLOCATOR, false);
+                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_DESCRIPTORHEAP, false);
+                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_PIPELINESTATE, false);
+                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_QUERYHEAP, false);
             }
 
             RenderPassManager.Initialize(engine);
