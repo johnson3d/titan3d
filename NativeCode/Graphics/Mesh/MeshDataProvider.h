@@ -19,7 +19,7 @@ namespace NxRHI
 	};
 
 	class TR_CLASS()
-		FMeshDataProvider : public IWeakReference
+		FMeshDataProvider : public IWeakRefObject
 	{
 	public:
 		std::vector<std::vector<FMeshAtomDesc>>	mAtoms;

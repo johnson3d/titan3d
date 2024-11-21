@@ -62,7 +62,7 @@ namespace EngineNS
         }
         public unsafe void Core_SetMemDebugInfo(string info)
         {
-            CoreSDK.SetMemDebugInfo(mCoreObject.NativePointer.ToPointer(), info);
+            CoreSDK.SetMemDebugText(mCoreObject.NativePointer.ToPointer(), info);
         }
     }
 }

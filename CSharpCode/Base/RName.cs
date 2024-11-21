@@ -1,4 +1,8 @@
-﻿using System;
+﻿using EngineNS.EGui.Controls.PropertyGrid;
+using EngineNS.Macross;
+using EngineNS.Rtti;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -96,7 +100,7 @@ namespace EngineNS
                 var contentBrowserSize = new Vector2(500, 600);
                 ImGuiAPI.SetNextWindowSize(in contentBrowserSize, ImGuiCond_.ImGuiCond_Appearing);
                 ContentBrowser.ExtNames = FilterExts;
-                ContentBrowser.MacrossBase = Rtti.TtTypeDesc.TypeOf(MacrossType);
+                ContentBrowser.MacrossBase = TtTypeDesc.TypeOf(MacrossType);
                 ContentBrowser.ShaderType = ShaderType;
                 ContentBrowser.SelectedAssets.Clear();
                 mComboBox.OnDraw(in drawList, in anyPt);
@@ -178,6 +182,72 @@ namespace EngineNS
                 }
             }
             return (T)mTagReference.Target;
+        }
+
+        public class PGMacrossRNameAttribute<T> : PGRNameAttribute where T : class
+        {
+            //public UMacrossGetter<T> MacrossGetter;
+
+            public PGMacrossRNameAttribute()
+            {
+                MacrossType = typeof(T);
+            }
+
+            public override bool OnDraw(in EditorInfo info, out object newValue)
+            {
+                var changed = base.OnDraw(info, out newValue);
+
+                //if(MacrossGetter == null)
+                //    MacrossGetter = UMacrossGetter<T>.NewInstance();
+                //var newRName = (RName)newValue;
+                //if (MacrossGetter.Name != newRName)
+                //{
+                //    MacrossGetter.Reset(TtEngine.Instance.MacrossModule);
+                //    MacrossGetter.Name = newRName;
+                //}
+                //var obj = MacrossGetter.Get();
+
+                ISceneNodeMacrossInterface mi = null;
+                var enumrableInterface = info.ObjectInstance.GetType().GetInterface(typeof(IEnumerable).FullName, false);
+                if(enumrableInterface != null)
+                {
+                    foreach (var objIns in (IEnumerable)info.ObjectInstance)
+                    {
+                        if (objIns == null)
+                            continue;
+
+                        mi = objIns as ISceneNodeMacrossInterface;
+                        if (mi != null)
+                            break;
+                    }
+                }
+                else
+                {
+                    mi = info.ObjectInstance as ISceneNodeMacrossInterface;
+                }
+                if (mi != null)
+                {
+                    var obj = mi.GetMacrossObject();
+                    if (obj != null)
+                    {
+                        var macrossObjInfo = new EditorInfo()
+                        {
+                            Name = info.Name,
+                            Type = Rtti.TtTypeDesc.TypeOf(obj.GetType()),
+                            Value = obj,
+                            Readonly = info.Readonly,
+                            HostPropertyGrid = info.HostPropertyGrid,
+                            Flags = info.Flags,
+                            Expand = true,
+                            HostProperty = info.HostProperty,
+                        };
+                        object macrossObjVal;
+                        PropertyGrid.DrawPropertyGridObjectItem(ref macrossObjInfo, out macrossObjVal);
+                    }
+                }
+
+                return changed;
+            }
         }
 
         public static bool IsEmpty(RName rName)

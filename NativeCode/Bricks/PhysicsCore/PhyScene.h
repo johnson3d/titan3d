@@ -214,7 +214,7 @@ struct PhySimulationFilterShader
 };
 
 class TR_CLASS() 
-	PhySceneDesc : public IWeakReference
+	PhySceneDesc : public IWeakRefObject
 {
 	friend PhyContext;
 public:

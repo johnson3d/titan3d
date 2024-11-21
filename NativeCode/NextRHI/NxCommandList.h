@@ -115,7 +115,7 @@ namespace NxRHI
 	};
 
 	class TR_CLASS()
-		ICommandList : public IWeakReference
+		ICommandList : public IWeakRefObject
 	{
 	public:
 		ENGINE_RTTI(ICommandList);

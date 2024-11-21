@@ -53,12 +53,19 @@ namespace EngineNS.Graphics.Pipeline
                 return result;
             }
         }
-        public TtAttachBuffer ImportAttachment(TtRenderGraphPin pin)
+        public TtAttachBuffer ImportAttachment(TtRenderGraphPin pin, TtAttachBuffer attachBuffer)
         {
             TtAttachBuffer result;
             if (CachedAttachments.TryGetValue(pin.Attachement.AttachmentName, out result))
                 return result;
-            result = new TtAttachBuffer();
+            if (attachBuffer == null)
+            {
+                result = new TtAttachBuffer();
+            }
+            else
+            {
+                result = attachBuffer;
+            }
             result.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             CachedAttachments.Add(pin.Attachement.AttachmentName, result);
             return result;

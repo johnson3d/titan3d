@@ -22,7 +22,7 @@ namespace EngineNS.Editor.Forms
 
         }
     }
-    public class TtSceneEditor : Editor.IAssetEditor, ITickable, IRootForm
+    public partial class TtSceneEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
         public int GetTickOrder()
         {
@@ -203,7 +203,11 @@ namespace EngineNS.Editor.Forms
         }
         public RName AssetName { get; set; }
         protected bool mVisible = true;
-        public bool Visible { get => mVisible; set => mVisible = value; }
+        public bool Visible 
+        { 
+            get => mVisible; 
+            set => mVisible = value; 
+        }
         public uint DockId { get; set; }
         ImGuiWindowClass mDockKeyClass;
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
@@ -229,16 +233,16 @@ namespace EngineNS.Editor.Forms
             get => mIsDrawing;
             set
             {
-                if(mIsDrawing && !value)
-                {
-                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
-                    mainEditor?.RemoveFromMainMenu(mMenuItems);
-                }
-                else if(!mIsDrawing && value)
-                {
-                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
-                    mainEditor?.AppendToMainMenu(mMenuItems);
-                }
+                //if(mIsDrawing && !value)
+                //{
+                //    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
+                //    mainEditor?.RemoveFromMainMenu(mMenuItems);
+                //}
+                //else if(!mIsDrawing && value)
+                //{
+                //    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
+                //    mainEditor?.AppendToMainMenu(mMenuItems);
+                //}
                 mIsDrawing = value;
             }
         }
@@ -411,6 +415,7 @@ namespace EngineNS.Editor.Forms
                     mCameraSettingsShow,
                     mOutlinerShow,
                     mPreviewShow,
+                    //mMacrossShow,
                     mContentBrowserShow,
                     mPlaceItemPanelShow,
                 }
@@ -544,6 +549,8 @@ namespace EngineNS.Editor.Forms
 
             TtEngine.Instance.TickableManager.AddTickable(this);
 
+            InitializeMacrossEditor();
+
             CpuCullNode = PreviewViewport.RenderPolicy.FindNode<Graphics.Pipeline.TtCpuCullingNode>("CpuCulling");
             System.Diagnostics.Debug.Assert(CpuCullNode != null);
             return true;
@@ -587,6 +594,7 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Camera Settings", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Outliner", mDockKeyClass), rightUpId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), middleId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Macross", mDockKeyClass), middleId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Content Browser", mDockKeyClass), downId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Place Items", mDockKeyClass), leftId);
 
@@ -681,6 +689,19 @@ namespace EngineNS.Editor.Forms
             var drawList = ImGuiAPI.GetWindowDrawList();
             EGui.UIProxy.Toolbar.BeginToolbar(drawList);
             var btSize = Vector2.Zero;
+            if (EGui.UIProxy.CustomButton.ToolButton("Open Macross", in btSize,
+                EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor,
+                EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor_Press,
+                EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor_Hover,
+                EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGColor,
+                EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGActiveColor,
+                EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGHoverColor
+                ))
+            {
+                var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
+                _ = mainEditor.AssetEditorManager.OpenEditor(mainEditor, Scene.MacrossEditor, AssetName, null);
+            }
+            ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Save", in btSize))
             {
                 Save();
@@ -793,6 +814,15 @@ namespace EngineNS.Editor.Forms
                 item.Selected = !item.Selected;
             },
         };
+        //EGui.UIProxy.MenuItemProxy mMacrossShow = new EGui.UIProxy.MenuItemProxy()
+        //{
+        //    MenuName = "Macross",
+        //    Selected = true,
+        //    Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
+        //    {
+        //        item.Selected = !item.Selected;
+        //    },
+        //};
         EGui.UIProxy.MenuItemProxy mContentBrowserShow = new EGui.UIProxy.MenuItemProxy()
         {
             MenuName = "Content Browser",

@@ -9,7 +9,7 @@ NS_BEGIN
 class MemStreamWriter;
 
 class TR_CLASS()
-	IShaderConductor : public IWeakReference
+	IShaderConductor : public IWeakRefObject
 {
 public:
 	static IShaderConductor* GetInstance();	

@@ -450,7 +450,7 @@ namespace NxRHI
 			return GpuMem->GetHWBuffer();
 		}
 	};
-	struct IGpuMemAllocator : public IWeakReference
+	struct IGpuMemAllocator : public IWeakRefObject
 	{
 		virtual AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT64 size, const char* name) = 0;
 		virtual void Free(FGpuMemory* memory) = 0;
@@ -461,7 +461,7 @@ namespace NxRHI
 		FPooledGpuMemory* Next = nullptr;
 		virtual void FreeMemory() override;
 	};
-	struct FGpuHeapSizedPool : public IWeakReference
+	struct FGpuHeapSizedPool : public IWeakRefObject
 	{//pool for different size;
 		~FGpuHeapSizedPool();
 		TWeakRefHandle<IPagedGpuMemAllocator> HostAllocator;
@@ -509,7 +509,7 @@ namespace NxRHI
 		FAddressRange			AddressRange{};
 		virtual void FreeMemory() override;
 	};
-	struct FLinearGpuHeapPool : public IWeakReference
+	struct FLinearGpuHeapPool : public IWeakRefObject
 	{
 		~FLinearGpuHeapPool();
 		TWeakRefHandle<ILinearGpuMemAllocator> HostAllocator;

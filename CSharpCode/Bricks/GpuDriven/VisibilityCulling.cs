@@ -153,6 +153,21 @@ namespace EngineNS.Bricks.GpuDriven
                 }
             }
         }
+        public override void Dispose()
+        {
+            CoreSDK.DisposeObject(ref VisibleClutersAttachment);
+            CoreSDK.DisposeObject(ref VerticesAttachment);
+            CoreSDK.DisposeObject(ref IndicesAttachment);
+            CoreSDK.DisposeObject(ref ClustersAttachment);
+            CoreSDK.DisposeObject(ref SrcClustersAttachment);
+            CoreSDK.DisposeObject(ref CullClusterShadingDrawcall); 
+            base.Dispose();
+        }
+        TtAttachBuffer VisibleClutersAttachment = new TtAttachBuffer();
+        TtAttachBuffer VerticesAttachment = new TtAttachBuffer();
+        TtAttachBuffer IndicesAttachment = new TtAttachBuffer();
+        TtAttachBuffer ClustersAttachment = new TtAttachBuffer();
+        TtAttachBuffer SrcClustersAttachment = new TtAttachBuffer();
         private unsafe void UpdateBuffers(NxRHI.ICommandList cmd, Vector3[] vb, uint[] ib, List<FClusterData> clusters, EngineNS.Graphics.Pipeline.TtCamera camera)
         {
             // TODO: update once?
@@ -224,20 +239,20 @@ namespace EngineNS.Bricks.GpuDriven
             }
 
             {
-                var attachment = ImportAttachment(VerticesPinOut);
+                var attachment = ImportAttachment(VerticesPinOut, VerticesAttachment);
                 attachment.Srv = Vertices.Srv;
             }
             {
-                var attachment = ImportAttachment(IndicesPinOut);
+                var attachment = ImportAttachment(IndicesPinOut, IndicesAttachment);
                 attachment.Srv = Indices.Srv;
             }
             {
-                var attachment = ImportAttachment(ClustersPinOut);
+                var attachment = ImportAttachment(ClustersPinOut, ClustersAttachment);
                 attachment.Srv = Clusters.Srv;
             }
 
             {
-                var attachment = ImportAttachment(SrcClustersPin);
+                var attachment = ImportAttachment(SrcClustersPin, SrcClustersAttachment);
                 attachment.Srv = SrcClusters.Srv;
             }
         }
@@ -246,7 +261,7 @@ namespace EngineNS.Bricks.GpuDriven
             base.BeforeTickLogic(policy);
 
             {
-                var attachment = ImportAttachment(VisibleClutersPinOut);
+                var attachment = ImportAttachment(VisibleClutersPinOut, VisibleClutersAttachment);
                 attachment.Uav = VisClusters.Uav;
                 attachment.Srv = VisClusters.Srv;
             }

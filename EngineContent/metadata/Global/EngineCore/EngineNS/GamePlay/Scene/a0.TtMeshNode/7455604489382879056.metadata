@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_7455604489382879056 Type="EngineNS.GamePlay.Scene.TtMeshNode@EngineCore">
+  <Mesh Type="EngineNS.Graphics.Mesh.TtMesh@EngineCore" Order="0" />
+  <NodeId Type="System.Guid@Unknown" Order="0" />
+</Hash_7455604489382879056>

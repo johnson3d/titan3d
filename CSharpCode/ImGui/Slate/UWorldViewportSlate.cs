@@ -150,7 +150,6 @@ namespace EngineNS.EGui.Slate
         public bool CameralWheelMoveWithLookAt { get; set; } = false;
         public unsafe override bool OnEvent(in Bricks.Input.Event e)
         {
-            mAxis?.OnEvent(this, in e);
             var keyboards = TtEngine.Instance.InputSystem;
             if (e.Type == Bricks.Input.EventType.MOUSEBUTTONDOWN)
             {
@@ -214,6 +213,7 @@ namespace EngineNS.EGui.Slate
                     ProcessHitproxySelected(e.MouseMotion.X, e.MouseMotion.Y);
                 }
             }
+            mAxis?.OnEvent(this, in e);
 
             return base.OnEvent(in e);
         }
@@ -312,7 +312,7 @@ namespace EngineNS.EGui.Slate
         {
             base.OnHitproxySelectedMulti(clearPre, proxies);
             if (proxies == null || proxies.Length == 0)
-                mAxis.SetSelectedNodes(null);
+                mAxis.SetSelectedNodes((List<TtNode>)null);
             else
             {
                 var nodes = new List<TtNode>(proxies.Length);
@@ -321,7 +321,7 @@ namespace EngineNS.EGui.Slate
                     var uNode = proxies[i] as TtNode;
                     nodes.Add(uNode);
                 }
-                mAxis.SetSelectedNodes(nodes.ToArray());
+                mAxis.SetSelectedNodes(nodes);
             }
         }
         public override void OnHitproxyUnSelectedMulti(params IProxiable[] proxies)

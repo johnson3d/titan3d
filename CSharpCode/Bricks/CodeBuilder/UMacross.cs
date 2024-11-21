@@ -318,7 +318,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 MacrossEditor = new MacrossNode.UMacrossEditor();
             MacrossEditor.AssetName = name;
             MacrossEditor.DefClass.ClassName = name.PureName;
-            MacrossEditor.DefClass.Namespace = new TtNamespaceDeclaration(IO.TtFileManager.GetParentPathName(name.Name).TrimEnd('/').Replace('/', '.'));
+            MacrossEditor.DefClass.Namespace = TtNamespaceDeclaration.GetNameSpaceFromRName(name);
             if (SelectedType != null)
                 MacrossEditor.DefClass.SupperClassNames.Add(SelectedType.FullName);
             MacrossEditor.SaveClassGraph(name);

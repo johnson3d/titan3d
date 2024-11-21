@@ -28,7 +28,7 @@ namespace MemAlloc
 		void Free();
 	};
 
-	struct IAllocator : public IWeakReference
+	struct IAllocator : public IWeakRefObject
 	{
 		UINT							LiveCount = 0;
 		UINT							PoolCount = 0;
@@ -54,7 +54,7 @@ namespace MemAlloc
 	};
 
 	template<typename _Type>
-	struct FPage : public IWeakReference
+	struct FPage : public IWeakRefObject
 	{
 		TWeakRefHandle<FAllocatorBase<_Type>>	Allocator;
 	};

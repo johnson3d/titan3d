@@ -18,6 +18,10 @@ namespace EngineNS.Bricks.NodeGraph
             PinOutStyle.Image.Size = new Vector2(15, 11);
             PinOutStyle.DisconnectImage.TextureName = RName.GetRName(PinDisconnectedVarImg, RName.ERNameType.Engine);
             PinOutStyle.DisconnectImage.Size = new Vector2(15, 11);
+            TtEngine.Instance.RegFinalCleanupAction(()=>
+            {
+                UNodeGraphStyles.DefaultStyles = null;
+            });
         }
         public enum EFlowMode
         {

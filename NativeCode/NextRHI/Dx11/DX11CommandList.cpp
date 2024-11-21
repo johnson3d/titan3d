@@ -239,7 +239,7 @@ namespace NxRHI
 	{
 		if (view == nullptr)
 			return;
-		view->GetResourceState()->SetAccessFrame(IWeakReference::EngineCurrentFrame);
+		view->GetResourceState()->SetAccessFrame(IWeakRefObject::EngineCurrentFrame);
 		switch (type)
 		{
 			case EShaderType::SDT_ComputeShader:

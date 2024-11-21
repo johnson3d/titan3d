@@ -1,6 +1,6 @@
 ﻿using EngineNS.EGui.Slate;
 using EngineNS.NxRHI;
-using NPOI.SS.Formula.Functions;
+using EngineNS.Graphics.Pipeline;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -45,10 +45,10 @@ namespace EngineNS.Bricks.VXGI
             VxPoolPinOut.LifeMode = Graphics.Pipeline.TtAttachBuffer.ELifeMode.Imported;
             AddOutput(VxPoolPinOut);
         }
-
+        TtAttachBuffer PoolAttachement = new TtAttachBuffer();
         public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
-            var attachement = RenderGraph.AttachmentCache.ImportAttachment(VxPoolPinOut);
+            var attachement = RenderGraph.AttachmentCache.ImportAttachment(VxPoolPinOut, PoolAttachement);
             attachement.GpuResource = VoxelPool;
             attachement.Uav = UavVoxelPool;
         }
@@ -75,7 +75,7 @@ namespace EngineNS.Bricks.VXGI
             CoreSDK.DisposeObject(ref VoxelGroupDebugger);
             CoreSDK.DisposeObject(ref VoxelDebugger);
             CoreSDK.DisposeObject(ref VxIndirectDebugDraws);
-
+            CoreSDK.DisposeObject(ref PoolAttachement);
             //UavAbedo?.Dispose();
             //UavAbedo = null;
             base.Dispose();

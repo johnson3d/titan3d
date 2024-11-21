@@ -69,7 +69,7 @@ namespace NxRHI
 	}
 	void NullCommandList::SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view)
 	{
-		view->GetResourceState()->SetAccessFrame(IWeakReference::EngineCurrentFrame);
+		view->GetResourceState()->SetAccessFrame(IWeakRefObject::EngineCurrentFrame);
 	}
 	void NullCommandList::SetUav(EShaderType type, const FShaderBinder* binder, IUaView* view)
 	{

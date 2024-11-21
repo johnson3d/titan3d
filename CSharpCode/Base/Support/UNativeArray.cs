@@ -45,7 +45,7 @@ namespace EngineNS.Support
             unsafe
             {
                 mCoreObject = CsValueList.CreateInstance(sizeof(T));
-                CoreSDK.SetMemDebugInfo(mCoreObject.CppPointer, typeof(T).FullName);
+                CoreSDK.SetMemDebugText(mCoreObject.CppPointer, typeof(T).FullName);
             }
         }
 

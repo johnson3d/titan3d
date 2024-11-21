@@ -340,18 +340,20 @@ namespace GpuDump
 		}
 		return opStr;
 	}
-	void DX12_OnDredDump(ID3D12Device* mDevice, ID3D12DeviceRemovedExtendedDataSettings* mDredSettings, const char* GDredDir)
+	void DX12_OnDredDump(ID3D12Device* mDevice, ID3D12DeviceRemovedExtendedDataSettings1* mDredSettings, const char* GDredDir)
 	{
 		auto hr = mDevice->GetDeviceRemovedReason();
 		if (mDredSettings != nullptr)
 		{
-			AutoRef<ID3D12DeviceRemovedExtendedData> pDred;
+			AutoRef<ID3D12DeviceRemovedExtendedData1> pDred;
 			mDevice->QueryInterface(IID_PPV_ARGS(pDred.GetAddressOf()));
 
-			D3D12_DRED_AUTO_BREADCRUMBS_OUTPUT DredAutoBreadcrumbsOutput;
-			D3D12_DRED_PAGE_FAULT_OUTPUT DredPageFaultOutput;
-			pDred->GetAutoBreadcrumbsOutput(&DredAutoBreadcrumbsOutput);
-			pDred->GetPageFaultAllocationOutput(&DredPageFaultOutput);
+			D3D12_DRED_AUTO_BREADCRUMBS_OUTPUT1 DredAutoBreadcrumbsOutput;
+			D3D12_DRED_PAGE_FAULT_OUTPUT1 DredPageFaultOutput;
+			hr = pDred->GetAutoBreadcrumbsOutput1(&DredAutoBreadcrumbsOutput);
+			ASSERT(hr == S_OK);
+			hr = pDred->GetPageFaultAllocationOutput1(&DredPageFaultOutput);
+			ASSERT(hr == S_OK);
 
 #define AddCodeLine(txt, ...) {code.AddLine(VStringA_FormatV(txt, __VA_ARGS__).c_str());}
 			{

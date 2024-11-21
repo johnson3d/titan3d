@@ -1295,7 +1295,7 @@ namespace EngineNS.NxRHI
                 if (xnd == null)
                     return null;
 
-                return LoadTexture2DMipLevel(xnd.RootNode, this.PicDesc, level, oldTexture);
+                return LoadTexture2DMipLevel(this.AssetName, xnd.RootNode, this.PicDesc, level, oldTexture);
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
@@ -2741,7 +2741,7 @@ namespace EngineNS.NxRHI
             LoadPictureDesc(node, desc);
             return desc;
         }
-        public static unsafe TtTexture LoadTexture2DMipLevel(IO.TtXndNode node, TtPicDesc desc, int level, TtTexture oldTexture)
+        public static unsafe TtTexture LoadTexture2DMipLevel(RName rn, IO.TtXndNode node, TtPicDesc desc, int level, TtTexture oldTexture)
         {
             switch (desc.CompressFormat)
             {
@@ -2749,17 +2749,17 @@ namespace EngineNS.NxRHI
                     {
                         var pngNode = node.TryGetChildNode("PngMips");
                         if (pngNode.IsValidPointer)
-                            return LoadPngTexture2DMipLevel(node, desc, level);
+                            return LoadPngTexture2DMipLevel(rn, node, desc, level);
                         else
                         {
                             var hdrNode = node.TryGetChildNode("HdrMips");
                             if (hdrNode.IsValidPointer)
-                                return LoadHdrTexture2DMipLevel(node, desc, level);
+                                return LoadHdrTexture2DMipLevel(rn, node, desc, level);
                             else
                             {
                                 var exrNode = node.TryGetChildNode("ExrMips");
                                 if (exrNode.IsValidPointer)
-                                    return LoadExrTexture2DMipLevel(node, desc, level);
+                                    return LoadExrTexture2DMipLevel(rn, node, desc, level);
                             }
                         }
                         return null;
@@ -2773,13 +2773,13 @@ namespace EngineNS.NxRHI
                 case ETextureCompressFormat.TCF_BC6_FLOAT:
                     {
                         oldTexture = null;
-                        return LoadDxtTexture2DMipLevel(node, desc, level, oldTexture);
+                        return LoadDxtTexture2DMipLevel(rn, node, desc, level, oldTexture);
                     }
                 default:
                     return null;
             }
         }
-        public static unsafe TtTexture LoadTexture2DMipLevel(IO.TtXndNode node, TtPicDesc desc, int level, int channelR, int channelG, int channelB, int channelA)
+        public static unsafe TtTexture LoadTexture2DMipLevel(RName rn, IO.TtXndNode node, TtPicDesc desc, int level, int channelR, int channelG, int channelB, int channelA)
         {
             switch (desc.CompressFormat)
             {
@@ -2787,17 +2787,17 @@ namespace EngineNS.NxRHI
                     {
                         var pngNode = node.TryGetChildNode("PngMips");
                         if (pngNode.IsValidPointer)
-                            return LoadPngTexture2DMipLevel(node, desc, level);
+                            return LoadPngTexture2DMipLevel(rn, node, desc, level);
                         else
                         {
                             var hdrNode = node.TryGetChildNode("HdrMips");
                             if (hdrNode.IsValidPointer)
-                                return LoadHdrTexture2DMipLevel(node, desc, level);
+                                return LoadHdrTexture2DMipLevel(rn, node, desc, level);
                             else
                             {
                                 var exrNode = node.TryGetChildNode("ExrMips");
                                 if (exrNode.IsValidPointer)
-                                    return LoadExrTexture2DMipLevel(node, desc, level, channelR, channelG, channelB, channelA);
+                                    return LoadExrTexture2DMipLevel(rn, node, desc, level, channelR, channelG, channelB, channelA);
                             }
                         }
                         return null;
@@ -2809,14 +2809,14 @@ namespace EngineNS.NxRHI
                 case ETextureCompressFormat.TCF_BC6:
                 case ETextureCompressFormat.TCF_BC6_FLOAT:
                     {
-                        return LoadDxtTexture2DMipLevel(node, desc, level);
+                        return LoadDxtTexture2DMipLevel(rn, node, desc, level);
                     }
                 default:
                     return null;
             }
         }
         #region Load Mips
-        private static unsafe TtTexture LoadExrTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel)
+        private static unsafe TtTexture LoadExrTexture2DMipLevel(RName rn, TtXndNode node, TtPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
                 return null;
@@ -2864,6 +2864,7 @@ namespace EngineNS.NxRHI
                 texDesc.Format = desc.Format;
 
                 var result = rc.CreateTexture(in texDesc);
+                CoreSDK.SetMemDebugText(result.mCoreObject, rn.ToString());
                 if (result == null)
                     return null;
                 return result;
@@ -2877,7 +2878,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        private static unsafe TtTexture LoadExrTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel, int channelR, int channelG, int channelB, int channelA)
+        private static unsafe TtTexture LoadExrTexture2DMipLevel(RName rn, TtXndNode node, TtPicDesc desc, int mipLevel, int channelR, int channelG, int channelB, int channelA)
         {
             if (mipLevel == 0)
                 return null;
@@ -3003,6 +3004,7 @@ namespace EngineNS.NxRHI
                 texDesc.Format = desc.Format;
 
                 var result = rc.CreateTexture(in texDesc);
+                CoreSDK.SetMemDebugText(result.mCoreObject, rn.ToString());
                 if (result == null)
                     return null;
                 return result;
@@ -3016,7 +3018,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        private static unsafe TtTexture LoadHdrTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel)
+        private static unsafe TtTexture LoadHdrTexture2DMipLevel(RName rn, TtXndNode node, TtPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
                 return null;
@@ -3078,6 +3080,7 @@ namespace EngineNS.NxRHI
                 texDesc.Format = desc.Format;
 
                 var result = rc.CreateTexture(in texDesc);
+                CoreSDK.SetMemDebugText(result.mCoreObject, rn.ToString());
                 if (result == null)
                     return null;
                 return result;
@@ -3092,7 +3095,7 @@ namespace EngineNS.NxRHI
             }
         }
 
-        private static unsafe TtTexture LoadPngTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel)
+        private static unsafe TtTexture LoadPngTexture2DMipLevel(RName rn, TtXndNode node, TtPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
                 return null;
@@ -3149,6 +3152,7 @@ namespace EngineNS.NxRHI
                 }
 
                 var result = rc.CreateTexture(in texDesc);
+                CoreSDK.SetMemDebugText(result.mCoreObject, rn.ToString());
                 if (result == null)
                     return null;
                 return result;
@@ -3162,7 +3166,7 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        private static unsafe TtTexture LoadDxtTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel)
+        private static unsafe TtTexture LoadDxtTexture2DMipLevel(RName rn, TtXndNode node, TtPicDesc desc, int mipLevel)
         {
             if (mipLevel == 0)
                 return null;
@@ -3230,6 +3234,7 @@ namespace EngineNS.NxRHI
                 }
 
                 var result = rc.CreateTexture(in texDesc);
+                CoreSDK.SetMemDebugText(result.mCoreObject, rn.ToString());
                 return result;
             }
             finally
@@ -3242,11 +3247,11 @@ namespace EngineNS.NxRHI
             }
         }
 
-        private static unsafe TtTexture LoadDxtTexture2DMipLevel(TtXndNode node, TtPicDesc desc, int mipLevel, TtTexture oldTexture)
+        private static unsafe TtTexture LoadDxtTexture2DMipLevel(RName rn, TtXndNode node, TtPicDesc desc, int mipLevel, TtTexture oldTexture)
         {
             if (oldTexture == null)
             {
-                return LoadDxtTexture2DMipLevel(node, desc, mipLevel);
+                return LoadDxtTexture2DMipLevel(rn, node, desc, mipLevel);
             }
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
@@ -3284,6 +3289,7 @@ namespace EngineNS.NxRHI
                         cpDraw.DestSubResource = i;
                         cpDraw.SrcSubResource = i;
                         tsCmd.CmdList.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                        cpDraw.Dispose();
                     }
                 }
             }
@@ -3345,6 +3351,7 @@ namespace EngineNS.NxRHI
                                 cpDraw.DestSubResource = i;
                                 cpDraw.SrcSubResource = 0;
                                 tsCmd.CmdList.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                                cpDraw.Dispose();
                             }
                         }
                     }
@@ -3439,7 +3446,7 @@ namespace EngineNS.NxRHI
                 if (mipLevel == -1 || mipLevel > desc.MipLevel)
                     mipLevel = desc.MipLevel;
 
-                return LoadTexture2DMipLevel(xnd.RootNode, desc, mipLevel, oldTexture);
+                return LoadTexture2DMipLevel(rn, xnd.RootNode, desc, mipLevel, oldTexture);
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
             if (tex2d == null)
@@ -3493,7 +3500,7 @@ namespace EngineNS.NxRHI
                 if (mipLevel == -1 || mipLevel > desc.MipLevel)
                     mipLevel = desc.MipLevel;
 
-                return LoadTexture2DMipLevel(xnd.RootNode, desc, mipLevel, channelR, channelG, channelB, channelA);
+                return LoadTexture2DMipLevel(rn, xnd.RootNode, desc, mipLevel, channelR, channelG, channelB, channelA);
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
             if (tex2d == null)
@@ -3611,6 +3618,7 @@ namespace EngineNS.NxRHI
 
                 var rc = TtEngine.Instance.GfxDevice.RenderContext;
                 var texture2d = rc.CreateTexture(in texDesc);
+                CoreSDK.SetMemDebugText(texture2d.mCoreObject, file);
                 texture2d.SetDebugName(file);
 
                 var srvDesc = new FSrvDesc();

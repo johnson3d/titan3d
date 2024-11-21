@@ -79,17 +79,35 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         }
         protected override void OnParentChanged(TtNode prev, TtNode cur)
         {
-            PhyController = ParentScene.PxSceneMB.PxScene.CreateCapsuleController(PhyControllerDesc.mCoreObject);
-            if (PhyController == null)
+            if(ParentScene != null)
             {
-                System.Diagnostics.Debug.Assert(false);
+                PhyController = ParentScene.PxSceneMB.PxScene.CreateCapsuleController(PhyControllerDesc.mCoreObject);
+                if (PhyController == null)
+                {
+                    System.Diagnostics.Debug.Assert(false);
+                }
+                PhyController.mCoreObject.SetFootPosition(cur.Placement.AbsTransform.Position.ToSingleVector3());
+                PhyController.mCoreObject.SetQueryFilterData(CapsulePhyControllerNodeData.QueryFilterData);
+                PhyController.mCoreObject.SetSimulationFilterData(CapsulePhyControllerNodeData.SimulationFilterData);
             }
-            PhyController.mCoreObject.SetFootPosition(cur.Placement.AbsTransform.Position.ToSingleVector3());
-            PhyController.mCoreObject.SetQueryFilterData(CapsulePhyControllerNodeData.QueryFilterData);
-            PhyController.mCoreObject.SetSimulationFilterData(CapsulePhyControllerNodeData.SimulationFilterData);
+            
             base.OnParentChanged(prev, cur);
         }
-       
+        protected override void OnParentSceneChanged(TtScene prev, TtScene cur)
+        {
+            base.OnParentSceneChanged(prev, cur);
+            if (cur != null)
+            {
+                PhyController = cur.PxSceneMB.PxScene.CreateCapsuleController(PhyControllerDesc.mCoreObject);
+                if (PhyController == null)
+                {
+                    System.Diagnostics.Debug.Assert(false);
+                }
+                PhyController.mCoreObject.SetFootPosition(cur.Placement.AbsTransform.Position.ToSingleVector3());
+                PhyController.mCoreObject.SetQueryFilterData(CapsulePhyControllerNodeData.QueryFilterData);
+                PhyController.mCoreObject.SetSimulationFilterData(CapsulePhyControllerNodeData.SimulationFilterData);
+            }
+        }
     }
     [Bricks.CodeBuilder.ContextMenu("PhyBoxController", "PhyBoxController", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtBoxPhyControllerNode.TtBoxPhyControllerNodeData), DefaultNamePrefix = "PhyBoxController")]

@@ -5,7 +5,7 @@
 NS_BEGIN
 
 class TR_CLASS()
-	IMesh : public IWeakReference
+	IMesh : public IWeakRefObject
 {
 protected:
 	AutoRef<NxRHI::FMeshPrimitives>		mGeoms;

@@ -28,6 +28,8 @@ namespace EngineNS.Editor
                 im_cmd.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
                 im_cmd.FlushDraws();
                 TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.IncreaseSignal(fence);
+                cpDraw.Dispose();
+                cpDraw = null;
             }, "Copy Snap Texture");
 
             TtEngine.Instance.EventPoster.RunOn((Thread.Async.FPostEvent<bool>)((state) =>

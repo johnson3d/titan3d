@@ -12,6 +12,7 @@ namespace EngineNS.GamePlay.Movemnet
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtCharacterMovement : TtMovement
     {
+        [Rtti.Meta]
         public class TtCharacterMovementData : TtMovementData
         {
 

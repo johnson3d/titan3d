@@ -13,10 +13,15 @@ namespace EngineNS.GamePlay.Movemnet
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtMovement : Scene.TtLightWeightNodeBase
     {
+        [Rtti.Meta]
         public class TtMovementData : TtNodeData
         {
-
+            [Rtti.Meta]
+            public bool EnableGravity { get; set; } = false;
+            [Rtti.Meta]
+            public Vector3 GravityAcceleration { get; set; } = Vector3.Down * 9.8f;
         }
+        public TtMovementData MovementData { get=> NodeData as TtMovementData;}
         public float Speed { get; set; } = 3;
         public Vector3 LinearVelocity { get; private set; }
         [Category("Option")]
@@ -32,8 +37,10 @@ namespace EngineNS.GamePlay.Movemnet
         {
             SettedAngularVelocity = angularVelocity;
         }
-        public bool EnableGravity { get; set; } = false;
-        public Vector3 GravityAcceleration { get; set; } = Vector3.Down * 9.8f;
+        [Category("Option")]
+        public bool EnableGravity { get=>MovementData.EnableGravity; set=> MovementData.EnableGravity = value; }
+        [Category("Option")]
+        public Vector3 GravityAcceleration { get => MovementData.GravityAcceleration; set => MovementData.GravityAcceleration = value; }
         protected Vector3 GravityVelocity = Vector3.Zero;
         public float MaxGravitySpeed = 10;
 

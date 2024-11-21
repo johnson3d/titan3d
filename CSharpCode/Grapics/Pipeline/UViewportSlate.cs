@@ -23,6 +23,11 @@ namespace EngineNS.Graphics.Pipeline
         public virtual void Dispose()
         {
             CoreSDK.DisposeObject(ref mWorld);
+            if (RenderPolicy != null)
+            {
+                RenderPolicy.Dispose();
+                RenderPolicy = null;
+            }
         }
         GamePlay.TtWorld mWorld;
         [Rtti.Meta()]
@@ -209,7 +214,7 @@ namespace EngineNS.Graphics.Pipeline
                 //    }
                 //}
 
-                IsMouseIn = ImGuiAPI.IsMouseHoveringRect(in min, in max, true);
+                IsMouseIn = ImGuiAPI.IsMouseHoveringRect(pos + min, pos + max, true);
 
                 if(ImGuiAPI.BeginChild("ViewportClient", in sz, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove| ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground))
                 {

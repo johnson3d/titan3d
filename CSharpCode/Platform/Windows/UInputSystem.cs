@@ -1,4 +1,5 @@
-﻿using SixLabors.ImageSharp.Advanced;
+﻿using SDL;
+using SixLabors.ImageSharp.Advanced;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -173,7 +174,7 @@ namespace EngineNS.Bricks.Input
                 target.MouseButton.WindowID = (uint)source.button.windowID;
                 target.MouseButton.Which = (uint)source.button.which;
                 target.MouseButton.Button = (byte)source.button.button;
-                target.MouseButton.State = source.button.state;
+                target.MouseButton.State = (byte)(source.button.down ? 1 : 0);
                 target.MouseButton.Clicks = source.button.clicks;
                 target.MouseButton.X = (int)source.button.x;
                 target.MouseButton.Y = (int)source.button.y;
@@ -236,8 +237,8 @@ namespace EngineNS.Bricks.Input
                 target.Keyboard.Type = (EventType)source.key.type;
                 target.Keyboard.Timestamp = (uint)source.key.timestamp;
                 target.Keyboard.WindowID = (uint)source.key.windowID;
-                target.Keyboard.State = source.key.state;
-                target.Keyboard.Repeat = source.key.repeat;
+                target.Keyboard.State = (byte)(source.key.down ? 1 : 0);
+                target.Keyboard.Repeat = (byte)(source.key.repeat ? 1 : 0);
                 target.Keyboard.Keysym.Scancode = (Scancode)source.key.scancode;
                 target.Keyboard.Keysym.Sym = (Keycode)source.key.key;
                 target.Keyboard.Keysym.Mod = (Keymod)source.key.mod;
@@ -286,7 +287,7 @@ namespace EngineNS.Bricks.Input
         public unsafe bool PullEvent(ref Input.Event evt)
         {
             SDL.SDL_Event sdlEvt;
-            bool ret = (SDL.SDL3.SDL_PollEvent(&sdlEvt) != 0);
+            bool ret = (SDL.SDL3.SDL_PollEvent(&sdlEvt) != false);
             if (ret)
             {
                 if (ImGuiAPI.GetCurrentContext() != (void*)0)

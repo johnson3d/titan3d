@@ -116,7 +116,10 @@ namespace EngineNS
         public bool IsDebugShader { get; set; } = false;
         [Rtti.Meta]
         [Category("Option")]
-        public bool IsGpuDump { get; set; } = true;//if true, engine will disable debuglayer&renderdoc
+        public bool IsGpuDred { get; set; } = false;
+        [Rtti.Meta]
+        [Category("Option")]
+        public bool IsAftermath { get; set; } = false;//if true, engine will disable debuglayer&renderdoc
         [Rtti.Meta]
         [Category("Option")]
         public string MainWindowType { get; set; }// = Rtti.TypeManager.Instance.GetTypeStringFromType(typeof(Editor.MainEditorWindow));
@@ -372,8 +375,18 @@ namespace EngineNS
             {
                 Config.IsGpuBaseValidation = (bool)Config_HasGpuBaseValidation;
             }
+            var Config_IsGpuDred = this.DynConfigData.GetConfig("IsGpuDred");
+            if (Config_IsGpuDred != null)
+            {
+                Config.IsGpuDred = (bool)Config_IsGpuDred;
+            }
+            var Config_IsAftermath = this.DynConfigData.GetConfig("IsAftermath");
+            if (Config_IsAftermath != null)
+            {
+                Config.IsAftermath = (bool)Config_IsAftermath;
+            }
 
-            if (Config.IsGpuDump)
+            if (Config.IsAftermath)
             {
                 if (Config.HasDebugLayer)
                 {
@@ -583,6 +596,8 @@ namespace EngineNS
             }
             
             Profiler.TimeScopeManager.FinalCleanup();
+            vfxMTLockerManager.FinalCleanup();
+            mInstance.Dispose();
             mInstance = null;
         }
         List<System.Action> FinalCleanupActions = new List<Action>();

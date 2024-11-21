@@ -30,7 +30,7 @@ struct VPakPair
 	UINT			Pad0;
 };
 
-class VPakFile : public IWeakReference
+class VPakFile : public IWeakRefObject
 {
 	friend class VPackFile2Memory;
 private:

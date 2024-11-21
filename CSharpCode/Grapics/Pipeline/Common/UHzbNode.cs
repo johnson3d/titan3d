@@ -21,9 +21,10 @@ namespace EngineNS.Graphics.Pipeline.Common
             HzbPinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(HzbPinOut);
         }
+        TtAttachBuffer HzbAttachement = new TtAttachBuffer();
         public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
-            var hzbBuffer = RenderGraph.AttachmentCache.ImportAttachment(HzbPinOut);
+            var hzbBuffer = RenderGraph.AttachmentCache.ImportAttachment(HzbPinOut, HzbAttachement);
             hzbBuffer.GpuResource = HzbTexture;
             hzbBuffer.Srv = HzbSRV;
         }
@@ -158,6 +159,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 var drawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateComputeDraw();
                 CoreSDK.DisposeObject(ref MipsDrawcalls[i - 1]);
                 MipsDrawcalls[i - 1] = drawcall;
+
                 DownSample.SetDrawcallDispatch(this, policy, drawcall, width, height, 1, true);
                 //drawcall.SetComputeEffect(DownSample);
                 //drawcall.SetDispatch(MathHelper.Roundup(width, Dispatch_SetupDimArray2.X), MathHelper.Roundup(height, Dispatch_SetupDimArray2.Y), 1);
@@ -176,6 +178,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void Dispose()
         {
+            CoreSDK.DisposeObject(ref HzbAttachement);
             CoreSDK.DisposeObject(ref SetupDrawcall);
             if (MipsDrawcalls != null)
             {

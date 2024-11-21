@@ -16,7 +16,7 @@ NS_BEGIN
 class v3dSampMgr;
 
 struct TR_CLASS()
-	SampResult : public IWeakReference
+	SampResult : public IWeakRefObject
 {
 	friend v3dSampMgr;
 
@@ -101,7 +101,7 @@ struct TR_CLASS()
 };
 
 class TR_CLASS()
-	v3dSampMgr : public IWeakReference
+	v3dSampMgr : public IWeakRefObject
 {
 	int UpdateCount;
 public:

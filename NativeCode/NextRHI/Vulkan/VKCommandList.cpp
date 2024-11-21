@@ -424,7 +424,7 @@ namespace NxRHI
 	void VKCommandList::SetSrv(EShaderType type, const FShaderBinder* binder, ISrView* view)
 	{
 		ASSERT(mIsRecording);
-		view->GetResourceState()->SetAccessFrame(IWeakReference::EngineCurrentFrame);
+		view->GetResourceState()->SetAccessFrame(IWeakRefObject::EngineCurrentFrame);
 		/*if (type == EShaderType::SDT_PixelShader)
 			view->Buffer->TransitionTo(this, EGpuResourceState::GRS_SrvPS);
 		else

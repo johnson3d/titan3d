@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Assimp;
+using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Macross;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -210,6 +213,24 @@ namespace EngineNS.GamePlay.Scene
         }
         #endregion
 
+        #region Macross
+        Bricks.CodeBuilder.MacrossNode.UMacrossEditor mMacrossEditor = null;
+        [Browsable(false)]
+        public Bricks.CodeBuilder.MacrossNode.UMacrossEditor MacrossEditor
+        {
+            get
+            {
+                if (mMacrossEditor == null)
+                {
+                    mMacrossEditor = new Bricks.CodeBuilder.MacrossNode.UMacrossEditor();
+                    mMacrossEditor.AssetName = AssetName;
+                    //mMacrossEditor.FolderExt = ".Macross";
+                }
+                return mMacrossEditor;
+            }
+        }
+        #endregion
+
         #region IAsset
         public RName AssetName { get; set; }
         public const uint SceneDescAttributeFlags = 1;
@@ -240,12 +261,40 @@ namespace EngineNS.GamePlay.Scene
 
             SaveChildNode(this, xnd.mCoreObject, node.mCoreObject);
 
-            xndHolder.SaveXnd(name.Address);
-            TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
+            var file = name.Address + "/" + name.PureName + AssetExt;
+            xndHolder.SaveXnd(file);
+            TtEngine.Instance.SourceControlModule.AddFile(file, true);
+
+            if(IO.TtFileManager.FileExists(name.Address))
+                IO.TtFileManager.DeleteFile(name.Address);
+
+            // Macross
+            MacrossEditor.AssetName = name;
+            MacrossEditor.DefClass.ClassName = name.PureName;
+            MacrossEditor.DefClass.Namespace = TtNamespaceDeclaration.GetNameSpaceFromRName(AssetName);
+            MacrossEditor.DefClass.SupperClassNames.Clear();
+            MacrossEditor.DefClass.SupperClassNames.Add(typeof(TtSceneMacrossBase).FullName);
+            MacrossEditor.SaveClassGraph(AssetName);
+            MacrossEditor.GenerateCode();
+            MacrossEditor.CompileCode();
+
+            if (MacrossGetter != null)
+            {
+                MacrossGetter.Name = name;
+                var mc = MacrossGetter.Get();
+                if (mc != null)
+                {
+                    mc.Root = this;
+                    mc.InitializeMacrossNodePropertyValues();
+                }
+            }
         }
         internal static async System.Threading.Tasks.Task<TtScene> LoadScene(GamePlay.TtWorld world, RName name)
         {
-            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
+            var file = name.Address + "/" + name.PureName + AssetExt;
+            if (IO.TtFileManager.FileExists(name.Address))
+                file = name.Address;
+            using (var xnd = IO.TtXndHolder.LoadXnd(file))
             {
                 var descAttr = xnd.RootNode.mCoreObject.FindFirstAttributeByFlags(SceneDescAttributeFlags);
                 if (descAttr.NativePointer == IntPtr.Zero)
@@ -292,9 +341,31 @@ namespace EngineNS.GamePlay.Scene
                 var notify = new FHostNotify();
                 notify.Info = "OnSceneLoaded";
                 scene.mMemberTickables.SendNotify(scene, in notify);
+                if(scene.MacrossGetter != null)
+                {
+                    scene.MacrossGetter.Name = name;
+                    var mc = scene.MacrossGetter.Get();
+                    if (mc != null)
+                    {
+                        mc.Root = scene;
+                        mc.InitializeMacrossNodePropertyValues();
+                    }
+                }
                 return scene;
             }
         }
+
+        UMacrossGetter<TtSceneMacrossBase> mMacrossGetter;
+        public UMacrossGetter<TtSceneMacrossBase> MacrossGetter
+        {
+            get
+            {
+                if (mMacrossGetter == null)
+                    mMacrossGetter = UMacrossGetter<TtSceneMacrossBase>.NewInstance();
+                return mMacrossGetter;
+            }
+        }
+
         public IO.IAssetMeta CreateAMeta()
         {
             var result = new TtSceneAMeta();
@@ -453,6 +524,24 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
             return false;
+        }
+    }
+
+    public partial class TtSceneMacrossBase
+    {
+        public TtScene Root;
+
+        public TtNode FindSceneNode(in Guid id)
+        {
+            if (Root == null)
+                return null;
+
+            return Root.FindNode(in id);
+        }
+
+        public virtual void InitializeMacrossNodePropertyValues()
+        {
+
         }
     }
 

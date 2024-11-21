@@ -50,6 +50,13 @@ namespace EngineNS.Bricks.PhysicsCore
                 return mCoreObject.AddToScene(scene.mCoreObject);
             }
         }
+        public void RemoveFromScene(TtPhyScene scene)
+        {
+            if (scene != null)
+            {
+                mCoreObject.RemoveFromScene(scene.mCoreObject);
+            }
+        }
         public TtPhyScene GetScene()
         {
             unsafe

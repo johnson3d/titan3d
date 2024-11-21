@@ -277,6 +277,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 return mScopeTick;
             }
         }
+        Support.TtBlobObject FetchGpuDataBlob = new Support.TtBlobObject();
         public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             if (IsHitproxyBuilding)
@@ -375,6 +376,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     cmdlist_post.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
                     cmdlist_post.FlushDraws();
                 }
+                cpDraw.Dispose();
             }
             cmdlist_post.EndCommand();
             policy.CommitCommandList(HitproxyPass.PostCmds.DrawCmdList);
@@ -394,8 +396,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                     }
                     if (fence.CompletedValue >= targetValue)
                     {
-                        var gpuDataBlob = new Support.TtBlobObject();
-                        readTexture.GetGpuBufferDataPointer().FetchGpuData(0, (IBlobObject)gpuDataBlob.mCoreObject);
+                        FetchGpuDataBlob.mCoreObject.ReSize(0);
+                        readTexture.GetGpuBufferDataPointer().FetchGpuData(0, (IBlobObject)FetchGpuDataBlob.mCoreObject);
                         //var ptr = (uint*)gpuDataBlob.mCoreObject.GetData();
                         //var num = gpuDataBlob.mCoreObject.GetSize() / 4;
                         //for (int i = 2; i < num; i++)
@@ -405,7 +407,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                         //        int xxx = 0;
                         //    }
                         //}
-                        NxRHI.ITexture.BuildImage2DBlob(mHitProxyData.mCoreObject, (IBlobObject)gpuDataBlob.mCoreObject, in CopyTexDesc);
+                        NxRHI.ITexture.BuildImage2DBlob(mHitProxyData.mCoreObject, (IBlobObject)FetchGpuDataBlob.mCoreObject, in CopyTexDesc);
                         IsHitproxyBuilding = false;
 
                         return true;

@@ -845,7 +845,68 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
             return true;
         }
+        public static unsafe bool DrawPropertyGridObjectItem(ref PGCustomValueEditorAttribute.EditorInfo info, out object newValue)
+        {
+            bool valueChanged = false;
+            newValue = info.Value;
 
+            PGCustomValueEditorAttribute editorOnDraw = null;
+            var attrs = info.Type.SystemType.GetCustomAttributes(typeof(PGCustomValueEditorAttribute), false);
+            if (attrs != null && attrs.Length > 0)
+            {
+                editorOnDraw = attrs[0] as PGCustomValueEditorAttribute;
+            }
+            if (editorOnDraw != null)
+            {
+                if (editorOnDraw.IsFullRedraw)
+                {
+                    ImGuiAPI.NextColumn();
+                    //ImGuiAPI.TableNextColumn();
+                    valueChanged = editorOnDraw.OnDraw(in info, out newValue);
+                }
+                else
+                    valueChanged = editorOnDraw.OnDraw(in info, out newValue);
+            }
+            else
+            {
+                //var multiValue = info.Value as PropertyMultiValue;
+                //if (multiValue != null)
+                //{
+                //    ImGuiAPI.Text(multiValue.MultiValueString);
+                //}
+                //else
+                {
+                    ImGuiAPI.Text(info.Type.ToString());
+                    ImGuiAPI.SameLine(0, 10);
+                    if (info.Type.IsValueType == false)
+                    {
+                        var drawList = ImGuiAPI.GetWindowDrawList();
+                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Button, EGui.UIProxy.StyleConfig.Instance.PGDeleteButtonBGColor);
+                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonActive, EGui.UIProxy.StyleConfig.Instance.PGDeleteButtonBGActiveColor);
+                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonHovered, EGui.UIProxy.StyleConfig.Instance.PGDeleteButtonBGHoverColor);
+                        if (info.Readonly == false && info.HostPropertyGrid.mDelete.OnDraw(in drawList, in Support.TtAnyPointer.Default))
+                        {
+                            newValue = null;
+                            valueChanged = true;
+                        }
+                        ImGuiAPI.PopStyleColor(3);
+                    }
+                    if (info.Expand)
+                    {
+                        var multiValue = info.Value as PropertyMultiValue;
+                        if (multiValue != null)
+                        {
+                            valueChanged = info.HostPropertyGrid.OnDraw(multiValue.Values, out newValue, true);
+                            newValue = multiValue;
+                        }
+                        else
+                            valueChanged = info.HostPropertyGrid.OnDraw(info.Value, out newValue, true);
+                    }
+                }
+            }
+
+            return valueChanged;
+        }
         public static unsafe bool DrawPropertyGridItem(ref PGCustomValueEditorAttribute.EditorInfo info, out object newValue)
         {
             PushPGEditorStyleValues();
@@ -883,60 +944,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 }
                 else
                 {
-                    PGCustomValueEditorAttribute editorOnDraw = null;
-                    var attrs = info.Type.SystemType.GetCustomAttributes(typeof(PGCustomValueEditorAttribute), false);
-                    if(attrs != null && attrs.Length > 0)
-                    {
-                        editorOnDraw = attrs[0] as PGCustomValueEditorAttribute;
-                    }
-                    if (editorOnDraw != null)
-                    {
-                        if(editorOnDraw.IsFullRedraw)
-                        {
-                            ImGuiAPI.NextColumn();
-                            //ImGuiAPI.TableNextColumn();
-                            valueChanged = editorOnDraw.OnDraw(in info, out newValue);
-                        }
-                        else
-                            valueChanged = editorOnDraw.OnDraw(in info, out newValue);
-                    }
-                    else
-                    {
-                        //var multiValue = info.Value as PropertyMultiValue;
-                        //if (multiValue != null)
-                        //{
-                        //    ImGuiAPI.Text(multiValue.MultiValueString);
-                        //}
-                        //else
-                        {
-                            ImGuiAPI.Text(info.Type.ToString());
-                            ImGuiAPI.SameLine(0, 10);
-                            if (info.Type.IsValueType == false)
-                            {
-                                var drawList = ImGuiAPI.GetWindowDrawList();
-                                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Button, EGui.UIProxy.StyleConfig.Instance.PGDeleteButtonBGColor);
-                                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonActive, EGui.UIProxy.StyleConfig.Instance.PGDeleteButtonBGActiveColor);
-                                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_ButtonHovered, EGui.UIProxy.StyleConfig.Instance.PGDeleteButtonBGHoverColor);
-                                if (info.Readonly == false && info.HostPropertyGrid.mDelete.OnDraw(in drawList, in Support.TtAnyPointer.Default))
-                                {
-                                    newValue = null;
-                                    valueChanged = true;
-                                }
-                                ImGuiAPI.PopStyleColor(3);
-                            }
-                            if (info.Expand)
-                            {
-                                var multiValue = info.Value as PropertyMultiValue;
-                                if(multiValue != null)
-                                {
-                                    valueChanged = info.HostPropertyGrid.OnDraw(multiValue.Values, out newValue, true);
-                                    newValue = multiValue;
-                                }
-                                else
-                                    valueChanged = info.HostPropertyGrid.OnDraw(info.Value, out newValue, true);
-                            }
-                        }
-                    }
+                    valueChanged = DrawPropertyGridObjectItem(ref info, out newValue);
                 }
             }
             catch

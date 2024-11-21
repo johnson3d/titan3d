@@ -22,6 +22,7 @@ namespace NxRHI
 {
 	class DX12GpuDevice;
 	class DX12CmdRecorder;
+	class DX12CommandList;
 
 	inline DXGI_FORMAT FormatToDX12Format(EPixelFormat pixel_fmt)
 	{
@@ -31,14 +32,22 @@ namespace NxRHI
 	{
 		return DXFormatToFormat(fmt);
 	}
-	class DX12CommandAllocatorManager : public VIUnknown
+	class TR_CLASS()
+		DX12CommandAllocatorManager : public VIUnknown
 	{
 	public:
-		AutoRef<DX12CmdRecorder> Alloc(ID3D12Device* device);
+		AutoRef<DX12CmdRecorder> Alloc(ID3D12Device* device, DX12CommandList* cmdlist);
 		void Free(const AutoRef<DX12CmdRecorder>& allocator, UINT64 waitValue, AutoRef<IFence>& fence);
 		void TickRecycle();
 		void Finalize();
 		void UnsafeDirectFree(const AutoRef<DX12CmdRecorder>& allocator);
+		int GetNumOfAllocators() {
+			return (int)CmdAllocators.size();
+		}
+		int GetNumOfRecycles() {
+			return (int)Recycles.size();
+		}
+		int GetNumOfRecyclesRefs();
 	public:
 		VSLLock				mLocker;
 		std::queue<AutoRef<DX12CmdRecorder>>		CmdAllocators;
@@ -47,6 +56,7 @@ namespace NxRHI
 			UINT64							WaitValue = 0;
 			AutoRef<IFence>					Fence;
 			AutoRef<DX12CmdRecorder>		Allocator;
+			int								WaitFrameCount = 0;
 		};
 		std::vector<FWaitRecycle>	Recycles;
 	};
@@ -202,7 +212,7 @@ namespace NxRHI
 		}
 	};	
 	
-	class DX12HeapAllocatorManager : public IWeakReference
+	class DX12HeapAllocatorManager : public IWeakRefObject
 	{
 		std::map<UINT64, AutoRef<DX12HeapAllocator>>		mAllocators;
 	public:

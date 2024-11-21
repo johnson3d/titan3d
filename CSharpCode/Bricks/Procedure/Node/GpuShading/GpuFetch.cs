@@ -46,6 +46,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
                 ReadableTexture = texture.CreateReadable(0, cpDraw.mCoreObject);
                 mCmdList.PushGpuDraw(cpDraw);
                 mCmdList.FlushDraws();
+                CoreSDK.DisposeObject(ref cpDraw);
             }
             TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(mCmdList, NxRHI.EQueueType.QU_Compute);
             TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.IncreaseSignal(mFinishFence, NxRHI.EQueueType.QU_Compute);

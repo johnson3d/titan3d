@@ -184,7 +184,7 @@ RttiStructManager::~RttiStructManager()
 	FinalCleanup();
 }
 
-struct Test_ConstantVarDesc : public IWeakReference, public v3dxVector3
+struct Test_ConstantVarDesc : public IWeakRefObject, public v3dxVector3
 {
 	Test_ConstantVarDesc()
 	{
@@ -280,12 +280,12 @@ StructBegin(Test_ConstantVarDesc, EngineNS)
 		AppendConstructorMetaInfo(FTestMeta, "Test_ConstantVarDesc info");
 	}
 }
-StructEnd(Test_ConstantVarDesc, v3dxVector3, IWeakReference)
+StructEnd(Test_ConstantVarDesc, v3dxVector3, IWeakRefObject)
 
 void TestReflection()
 {
-	AutoRef<IWeakReference> a = MakeWeakRef(new IWeakReference());
-	AutoRef<VIUnknown> b = MakeWeakRef(new IWeakReference());
+	AutoRef<IWeakRefObject> a = MakeWeakRef(new IWeakRefObject());
+	AutoRef<VIUnknown> b = MakeWeakRef(new IWeakRefObject());
 	b = a;
 	{
 		typedef VTypeList<std::string, float> TestTypeList_base;
@@ -368,15 +368,15 @@ void TestReflection()
 	ASSERT(pMember->Offset == __vsizeof(Test_ConstantVarDesc, Size));
 	ASSERT(pMember->MemberName == "Size");
 
-	bool isIUnknown = rtti->IsA(GetClassObject<IWeakReference>());
+	bool isIUnknown = rtti->IsA(GetClassObject<IWeakRefObject>());
 	ASSERT(isIUnknown);
 	auto pCastVector3 = (v3dxVector3*)rtti->CastSuper(tmp, GetClassObject<v3dxVector3>());
 	ASSERT(pCastVector3->X==1 && pCastVector3->Y == 1 && pCastVector3->Z == 1);
-	auto pCastIUnknown = (IWeakReference*)rtti->CastSuper(tmp, GetClassObject<IWeakReference>());
+	auto pCastIUnknown = (IWeakRefObject*)rtti->CastSuper(tmp, GetClassObject<IWeakRefObject>());
 	ASSERT(pCastIUnknown!=nullptr);
 
 	[[maybe_unused]] auto pDownCastTest = (Test_ConstantVarDesc*)GetClassObject<Test_ConstantVarDesc>()->DownCast(pCastVector3, GetClassObject<v3dxVector3>());
-	[[maybe_unused]] auto pDownCastTest2 = (Test_ConstantVarDesc*)GetClassObject<Test_ConstantVarDesc>()->DownCast(pCastIUnknown, GetClassObject<IWeakReference>());
+	[[maybe_unused]] auto pDownCastTest2 = (Test_ConstantVarDesc*)GetClassObject<Test_ConstantVarDesc>()->DownCast(pCastIUnknown, GetClassObject<IWeakRefObject>());
 	tmp->Release();
 }
 
@@ -414,8 +414,8 @@ void RttiStructManager::BuildRtti()
 	pRtti->BuildClassInfo<std::string>("string", "std");	
 	pRtti = GetClassObject<VIUnknown>();
 	pRtti->BuildClassInfo<VIUnknown>("VIUnknownBase", "EngineNS");
-	pRtti = GetClassObject<IWeakReference>();
-	pRtti->BuildClassInfo<IWeakReference>("VIUnknown", "EngineNS");
+	pRtti = GetClassObject<IWeakRefObject>();
+	pRtti->BuildClassInfo<IWeakRefObject>("VIUnknown", "EngineNS");
 
 	for (auto i : StructBuilders)
 	{

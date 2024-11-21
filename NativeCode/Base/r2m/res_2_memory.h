@@ -16,7 +16,7 @@ typedef const void * VResPtr;
 
 NS_BEGIN
 
-struct VRes2Memory : public EngineNS::IWeakReference
+struct VRes2Memory : public EngineNS::IWeakRefObject
 {
 	virtual VResPtr		Ptr(UINT64 offset=0, UINT64 size=0 ) = 0;
 	virtual vBOOL		Free() = 0;
@@ -33,7 +33,7 @@ struct VRes2Memory : public EngineNS::IWeakReference
 	}
 };
 
-struct VResFactory : public EngineNS::IWeakReference
+struct VResFactory : public EngineNS::IWeakRefObject
 {
 	virtual VRes2Memory* CreateRes(LPCSTR pszFile,vBOOL bShareFile) = 0;
 	virtual bool IsDownloading(LPCSTR pszFile) = 0;

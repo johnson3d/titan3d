@@ -413,14 +413,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
 namespace EngineNS
 {
-    partial class TtEngine
+    partial class TtEngine : IDisposable
     {
-        public void Dispose()
+        public unsafe void Dispose()
         {
-            unsafe
+            if (PreIntegratedDFData != IntPtr.Zero)
             {
-                if(PreIntegratedDFData != IntPtr.Zero)
-                    CoreSDK.Free(PreIntegratedDFData.ToPointer());
+                CoreSDK.Free(PreIntegratedDFData.ToPointer());
+                PreIntegratedDFData = IntPtr.Zero;
             }
 
             PreIntegratedDFTexture?.Dispose();

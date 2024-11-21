@@ -1041,7 +1041,7 @@ namespace NxRHI
 	};
 
 	class TR_CLASS()
-		IGpuSystem : public IWeakReference
+		IGpuSystem : public IWeakRefObject
 	{
 	public:
 		static IGpuSystem* CreateGpuSystem(ERhiType type, const FGpuSystemDesc* desc);
@@ -1069,7 +1069,8 @@ namespace NxRHI
 			DeviceHandle = nullptr;
 			DeviceContextHandle = nullptr;
 			CreateDebugLayer = true;
-			GpuDump = true;
+			IsGpuDred = true;
+			IsAftermath = false;
 		}
 		bool IsNVIDIA() const{
 			return 0x10DE == VendorId;
@@ -1088,7 +1089,8 @@ namespace NxRHI
 		void*	DeviceHandle = nullptr;
 		void*	DeviceContextHandle = nullptr;
 		bool	CreateDebugLayer = true;
-		bool	GpuDump = true;
+		bool	IsGpuDred = true;
+		bool	IsAftermath = false;
 
 		const char* GetName() const {
 			return Name;
@@ -1141,7 +1143,7 @@ namespace NxRHI
 		}
 	};
 	class TR_CLASS()
-		IGpuDevice : public IWeakReference
+		IGpuDevice : public IWeakRefObject
 	{
 	protected:
 		bool mIsTryFinalize = false;
@@ -1253,7 +1255,7 @@ namespace NxRHI
 		void WaitFrameFence(int beforeFrame = 3);
 	};
 	class TR_CLASS()
-		ICmdQueue : public IWeakReference
+		ICmdQueue : public IWeakRefObject
 	{
 	public:
 		ENGINE_RTTI(ICmdQueue);

@@ -38,7 +38,7 @@ namespace NxPhysics
 	template <class T>
 	using NxWeakRef = EngineNS::TWeakRefHandle<T>;
 	using NxBase = EngineNS::VIUnknown;
-	using NxWeakableBase = EngineNS::IWeakReference;
+	using NxWeakableBase = EngineNS::IWeakRefObject;
 	using NxTransform = NxMath::NxTransform<NxReal>;
 	class NxActor;
 	struct NxRigidBodyDesc;

@@ -183,7 +183,7 @@ inline const v3dxVector3& QuarkCluster::GetPositionConst( UINT VertIndex ) const
 
 
 class TR_CLASS()
-    ClusterBuilder : public IWeakReference
+    ClusterBuilder : public IWeakRefObject
 {
 public:
 	ClusterBuilder() {}

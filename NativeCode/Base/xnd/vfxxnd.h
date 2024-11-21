@@ -216,7 +216,7 @@ public:
 };
 
 class TR_CLASS(SV_Dispose = self->Release())
-	XndHolder : public IWeakReference
+	XndHolder : public IWeakRefObject
 {
 	AutoRef<XndNode>			mRootNode;
 	AutoRef<VRes2Memory>		mResource;

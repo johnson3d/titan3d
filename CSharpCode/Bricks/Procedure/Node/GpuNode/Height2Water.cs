@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using EngineNS.Bricks.NodeGraph;
+using EngineNS.Graphics.Pipeline;
 
 namespace EngineNS.Bricks.Procedure.Node.GpuNode
 {
@@ -19,6 +20,8 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
         public int Step { get; set; } = 16;
         [Rtti.Meta]
         public float RainScalar { get; set; } = 20.0f;
+        TtAttachBuffer HeightAttachement = new TtAttachBuffer();
+        TtAttachBuffer IncWaterAttachement = new TtAttachBuffer();
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
             if (Policy == null)
@@ -28,7 +31,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
             var buffer = Input.GetGpuTexture2D<float>();
             Policy.OnResize(Input.Width, Input.Height);
             var h2flow = Policy.FindNode<GpuShading.TtHeigh2FlowMapNode>();
-            var heightAttachement = Policy.AttachmentCache.ImportAttachment(h2flow.HeightPinIn);
+            var heightAttachement = Policy.AttachmentCache.ImportAttachment(h2flow.HeightPinIn, HeightAttachement);
             heightAttachement.SetImportedBuffer(buffer);
 
             var waterBuffer = Output.GetGpuBuffer<float>();
@@ -37,7 +40,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
             incWater.RainScalar = RainScalar;
             incWater.TextureWidth = Output.Width;
             incWater.TextureHeight = Output.Height;
-            var incWaterAttachement = Policy.AttachmentCache.ImportAttachment(incWater.WaterPinInOut);
+            var incWaterAttachement = Policy.AttachmentCache.ImportAttachment(incWater.WaterPinInOut, IncWaterAttachement);
             incWaterAttachement.SetImportedBuffer(waterBuffer);
 
             var waterBasin = Policy.FindNode<GpuShading.TtWaterBasinNode>();

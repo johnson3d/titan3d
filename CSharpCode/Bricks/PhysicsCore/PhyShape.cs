@@ -214,7 +214,10 @@ namespace EngineNS.Bricks.PhysicsCore
         {
             mCoreObject = self;
         }
-        
+        public bool AddToActor(Bricks.PhysicsCore.TtPhyActor actor, in EngineNS.Vector3 p, in EngineNS.Quaternion q)
+        {
+            return mCoreObject.AddToActor(actor.mCoreObject, in p, in q);
+        }
         public void RemoveFromActor()
         {
             mCoreObject.RemoveFromActor();

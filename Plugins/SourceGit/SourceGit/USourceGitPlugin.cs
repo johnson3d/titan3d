@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Profiler;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -56,36 +57,44 @@ namespace EngineNS.Plugins.SourceGit
             if (IO.TtFileManager.FileExists(file) == false)
                 return new Bricks.SourceControl.TtSourceOpResult(-1);
 
-            ProcessStartInfo processStartInfo = new ProcessStartInfo();
-            processStartInfo.FileName = @"git.exe";
-            processStartInfo.Arguments = $"add {file}";
-            processStartInfo.RedirectStandardOutput = true;
-            System.Diagnostics.Process result = new System.Diagnostics.Process();
-            result.StartInfo = processStartInfo;
-            result.Start();
-            Action action = async () =>
+            try
             {
-                var timeoutSignal = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                await result.WaitForExitAsync(timeoutSignal.Token);
-
-                var q = new System.Text.StringBuilder();
-                while (!result.HasExited)
+                ProcessStartInfo processStartInfo = new ProcessStartInfo();
+                processStartInfo.FileName = @"git.exe";
+                processStartInfo.Arguments = $"add {file}";
+                processStartInfo.RedirectStandardOutput = true;
+                System.Diagnostics.Process result = new System.Diagnostics.Process();
+                result.StartInfo = processStartInfo;
+                result.Start();
+                Action action = async () =>
                 {
-                    q.Append(result.StandardOutput.ReadToEnd());
-                }
-                string r = q.ToString();
+                    var timeoutSignal = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                    await result.WaitForExitAsync(timeoutSignal.Token);
 
-                if (r == "")
-                {
+                    var q = new System.Text.StringBuilder();
+                    while (!result.HasExited)
+                    {
+                        q.Append(result.StandardOutput.ReadToEnd());
+                    }
+                    string r = q.ToString();
 
-                }
-                else
-                {
+                    if (r == "")
+                    {
 
-                }
-            };
+                    }
+                    else
+                    {
 
-            return new Bricks.SourceControl.TtSourceOpResult(0);
+                    }
+                };
+
+                return new Bricks.SourceControl.TtSourceOpResult(0);
+            }
+            catch (Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+                return new Bricks.SourceControl.TtSourceOpResult(-1);
+            }
 
             //ProcessStartInfo processStartInfo = new ProcessStartInfo();
             //processStartInfo.FileName = @"git.exe";
@@ -118,96 +127,120 @@ namespace EngineNS.Plugins.SourceGit
             if (IO.TtFileManager.DirectoryExists(dir) == false)
                 return new Bricks.SourceControl.TtSourceOpResult(-1);
 
-            ProcessStartInfo processStartInfo = new ProcessStartInfo();
-            processStartInfo.FileName = @"git.exe";
-            processStartInfo.Arguments = $"add {dir}";
-            processStartInfo.RedirectStandardOutput = true;
-            System.Diagnostics.Process result = new System.Diagnostics.Process();
-            result.StartInfo = processStartInfo;
-            result.Start();
-            result.WaitForExit(5000);
-
-            var q = new System.Text.StringBuilder();
-            while (!result.HasExited)
+            try
             {
-                q.Append(result.StandardOutput.ReadToEnd());
+                ProcessStartInfo processStartInfo = new ProcessStartInfo();
+                processStartInfo.FileName = @"git.exe";
+                processStartInfo.Arguments = $"add {dir}";
+                processStartInfo.RedirectStandardOutput = true;
+                System.Diagnostics.Process result = new System.Diagnostics.Process();
+                result.StartInfo = processStartInfo;
+                result.Start();
+                result.WaitForExit(5000);
+
+                var q = new System.Text.StringBuilder();
+                while (!result.HasExited)
+                {
+                    q.Append(result.StandardOutput.ReadToEnd());
+                }
+                string r = q.ToString();
+                if (r == "")
+                    return new Bricks.SourceControl.TtSourceOpResult(0);
+                else
+                    return new Bricks.SourceControl.TtSourceOpResult(-2);
             }
-            string r = q.ToString();
-            if (r == "")
-                return new Bricks.SourceControl.TtSourceOpResult(0);
-            else
-                return new Bricks.SourceControl.TtSourceOpResult(-2);
+            catch (Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+                return new Bricks.SourceControl.TtSourceOpResult(-1);
+            }
         }
         public override Bricks.SourceControl.TtSourceOpResult RemoveFile(string file, bool delLocal = true)
         {
             if (IO.TtFileManager.FileExists(file) == false)
                 return new Bricks.SourceControl.TtSourceOpResult(-1);
 
-            ProcessStartInfo processStartInfo = new ProcessStartInfo();
-            processStartInfo.FileName = @"git.exe";
-            string arg_delLocal = delLocal ? "" : " --cached";
-            processStartInfo.Arguments = $"rm{arg_delLocal} {file}";
-            processStartInfo.RedirectStandardOutput = true;
-            System.Diagnostics.Process result = new System.Diagnostics.Process();
-            result.StartInfo = processStartInfo;
-            result.Start();
-            result.WaitForExit(5000);
-
-            var q = new System.Text.StringBuilder();
-            while (!result.HasExited)
+            try
             {
-                q.Append(result.StandardOutput.ReadToEnd());
-            }
-            string r = q.ToString();
-            if (r == "")
-                return new Bricks.SourceControl.TtSourceOpResult(0);
-            else
-                return new Bricks.SourceControl.TtSourceOpResult(-2);
-            //System.Diagnostics.Process? result = null;
-            //try
-            //{
-            //    result = System.Diagnostics.Process.Start(processStartInfo);
-            //    var hr = new Bricks.SourceControl.TtSourceOpResult(0);
-            //    if (result != null)
-            //    {
-            //        //if (result.StandardOutput != null)
-            //        //    hr.Info = result.StandardOutput.ReadToEnd();
-            //    }
+                ProcessStartInfo processStartInfo = new ProcessStartInfo();
+                processStartInfo.FileName = @"git.exe";
+                string arg_delLocal = delLocal ? "" : " --cached";
+                processStartInfo.Arguments = $"rm{arg_delLocal} {file}";
+                processStartInfo.RedirectStandardOutput = true;
+                System.Diagnostics.Process result = new System.Diagnostics.Process();
+                result.StartInfo = processStartInfo;
+                result.Start();
+                result.WaitForExit(5000);
 
-            //    if (delLocal)
-            //        System.IO.File.Delete(file);
-            //    return hr;
-            //}
-            //catch (Exception)
-            //{
-            //    return new Bricks.SourceControl.TtSourceOpResult(-2);
-            //}
+                var q = new System.Text.StringBuilder();
+                while (!result.HasExited)
+                {
+                    q.Append(result.StandardOutput.ReadToEnd());
+                }
+                string r = q.ToString();
+                if (r == "")
+                    return new Bricks.SourceControl.TtSourceOpResult(0);
+                else
+                    return new Bricks.SourceControl.TtSourceOpResult(-2);
+                //System.Diagnostics.Process? result = null;
+                //try
+                //{
+                //    result = System.Diagnostics.Process.Start(processStartInfo);
+                //    var hr = new Bricks.SourceControl.TtSourceOpResult(0);
+                //    if (result != null)
+                //    {
+                //        //if (result.StandardOutput != null)
+                //        //    hr.Info = result.StandardOutput.ReadToEnd();
+                //    }
+
+                //    if (delLocal)
+                //        System.IO.File.Delete(file);
+                //    return hr;
+                //}
+                //catch (Exception)
+                //{
+                //    return new Bricks.SourceControl.TtSourceOpResult(-2);
+                //}
+            }
+            catch (Exception ex)
+            {
+                Log.WriteException(ex);
+                return new Bricks.SourceControl.TtSourceOpResult(-1);
+            }
         }
         public override Bricks.SourceControl.TtSourceOpResult RemoveDirectory(string dir, bool delLocal = true)
         {
             if (IO.TtFileManager.FileExists(dir) == false)
                 return new Bricks.SourceControl.TtSourceOpResult(-1);
 
-            ProcessStartInfo processStartInfo = new ProcessStartInfo();
-            processStartInfo.FileName = @"git.exe";
-            string arg_delLocal = delLocal ? "" : " -r --cached";
-            processStartInfo.Arguments = $"rm{arg_delLocal} {dir}";
-            processStartInfo.RedirectStandardOutput = true;
-            System.Diagnostics.Process result = new System.Diagnostics.Process();
-            result.StartInfo = processStartInfo;
-            result.Start();
-            result.WaitForExit();
-
-            var q = new System.Text.StringBuilder();
-            while (!result.HasExited)
+            try
             {
-                q.Append(result.StandardOutput.ReadToEnd());
+                ProcessStartInfo processStartInfo = new ProcessStartInfo();
+                processStartInfo.FileName = @"git.exe";
+                string arg_delLocal = delLocal ? "" : " -r --cached";
+                processStartInfo.Arguments = $"rm{arg_delLocal} {dir}";
+                processStartInfo.RedirectStandardOutput = true;
+                System.Diagnostics.Process result = new System.Diagnostics.Process();
+                result.StartInfo = processStartInfo;
+                result.Start();
+                result.WaitForExit();
+
+                var q = new System.Text.StringBuilder();
+                while (!result.HasExited)
+                {
+                    q.Append(result.StandardOutput.ReadToEnd());
+                }
+                string r = q.ToString();
+                if (r == "")
+                    return new Bricks.SourceControl.TtSourceOpResult(0);
+                else
+                    return new Bricks.SourceControl.TtSourceOpResult(-2);
             }
-            string r = q.ToString();
-            if (r == "")
-                return new Bricks.SourceControl.TtSourceOpResult(0);
-            else
-                return new Bricks.SourceControl.TtSourceOpResult(-2);
+            catch (Exception e)
+            {
+                Profiler.Log.WriteException(e);
+                return new Bricks.SourceControl.TtSourceOpResult(-1);
+            }
         }
     }
 }

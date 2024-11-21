@@ -62,7 +62,7 @@ namespace NxRHI
 		VkSurfaceKHR					mSurface = nullptr;
 		VkSwapchainKHR					mSwapChain = nullptr;
 		VkSurfaceCapabilitiesKHR		mCapabilities{};
-		struct FBackBuffer : public IWeakReference
+		struct FBackBuffer : public IWeakRefObject
 		{
 			FBackBuffer();
 			void CleanupVK(VKGpuDevice* device);

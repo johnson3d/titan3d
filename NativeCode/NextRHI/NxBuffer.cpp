@@ -24,6 +24,8 @@ StructEnd(EngineNS::NxRHI::ISrView, VIUnknown)
 
 namespace NxRHI
 {
+	std::atomic<int> ITexture::AliveCount;
+	std::atomic<int> ITexture::AliveAttachBufferCount;
 	IBuffer* IBuffer::CreateReadable(IGpuDevice* device, int subRes, ICopyDraw* cpDraw)
 	{
 		auto cpDesc = this->Desc;

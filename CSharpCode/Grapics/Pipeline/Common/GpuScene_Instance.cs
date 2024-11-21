@@ -345,12 +345,16 @@ namespace EngineNS.Graphics.Pipeline.Common
             CullInstancesBuffer?.Dispose();
             CullInstancesBuffer = null;
 
+            CoreSDK.DisposeObject(ref InstanceAttachement);
+            CoreSDK.DisposeObject(ref Cull_CullGpuIndexsDrawcall);
+            CoreSDK.DisposeObject(ref Cull_SetupCullClusterArgsDrawcall);
         }
+        TtAttachBuffer InstanceAttachement = new TtAttachBuffer();
         private unsafe void FrameBuild_Instance()
         {
             InstancePinOut.Attachement.Height = (uint)GpuInstances.DataArray.Count;
             InstancePinOut.Attachement.Width = (uint)sizeof(FActorInstance);
-            var attachement = RenderGraph.AttachmentCache.ImportAttachment(InstancePinOut);
+            var attachement = RenderGraph.AttachmentCache.ImportAttachment(InstancePinOut, InstanceAttachement);
             
             attachement.GpuResource = GpuInstances.GpuBuffer;
             attachement.Srv = GpuInstances.Srv;

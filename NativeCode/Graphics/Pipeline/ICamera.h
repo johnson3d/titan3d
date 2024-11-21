@@ -6,7 +6,7 @@
 NS_BEGIN
 
 class TR_CLASS()
-	ICamera : public IWeakReference
+	ICamera : public IWeakRefObject
 {
 public:
 	struct CameraData

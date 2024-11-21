@@ -10,7 +10,7 @@ namespace NxRHI
 }
 class IRenderContext;
 class TR_CLASS()
-	IRenderDocTool : public IWeakReference
+	IRenderDocTool : public IWeakRefObject
 {
 	RENDERDOC_API_1_4_0* mApi;
 	NxRHI::IGpuDevice*					mRenderContext = nullptr;

@@ -33,6 +33,7 @@ namespace EngineNS.Editor
         }
         public List<IAssetEditor> OpenedEditors { get; } = new List<IAssetEditor>();
         public IAssetEditor CurrentActiveEditor = null;
+
         public async System.Threading.Tasks.Task OpenEditor(TtMainEditorApplication mainEditor, Type editorType, RName name, object arg)
         {
             IAssetEditor editor = null;
@@ -48,7 +49,12 @@ namespace EngineNS.Editor
             {
                 editor = Rtti.TtTypeDescManager.CreateInstance(editorType) as IAssetEditor;
             }
+            await OpenEditor(mainEditor, editor, name, arg);
+        }
+        public async System.Threading.Tasks.Task OpenEditor(TtMainEditorApplication mainEditor, IAssetEditor editor, RName name, object arg)
+        {
             editor.AssetName = name;
+            editor.Visible = true;
             TtEngine.Instance.StopOperation($"{name}: OpenEditor");
 
             bool ok = false;

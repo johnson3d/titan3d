@@ -66,7 +66,8 @@ namespace EngineNS.DesignMacross
                 await mMacrossGetter.Get().Initialize();
             }
         }
-        [RName.PGRName(FilterExts = UDesignMacross.AssetExt)]
+        //[RName.PGRName(FilterExts = UDesignMacross.AssetExt)]
+        [RName.PGMacrossRName<TtDesignMacrossBase>(FilterExts = UDesignMacross.AssetExt)]
         [Category("Option")]
         public RName DesignMacross
         {

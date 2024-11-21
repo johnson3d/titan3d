@@ -90,7 +90,7 @@ __memory_init::~__memory_init()
 	}
 	
 	VMem::MemPoolManager::GetInstance()->FinalCleanup();
-	vfxMTLockerManager::Instance.Cleanup();
+	vfxMTLockerManager::GetInstance()->Cleanup();
 	EngineNS::RttiStructManager::GetInstance()->FinalCleanup();
 
 	vfxMemory_DumpMemoryState("Finalizer__memory_init", TRUE);

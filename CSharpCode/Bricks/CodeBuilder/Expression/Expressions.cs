@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace EngineNS.Bricks.CodeBuilder
 {
@@ -21,6 +22,7 @@ namespace EngineNS.Bricks.CodeBuilder
         Private,
         Local,
         Internal,
+        None,
     }
 
     public enum EValueType
@@ -816,6 +818,8 @@ namespace EngineNS.Bricks.CodeBuilder
         [Rtti.Meta]
         public TtVariableDeclaration ReturnValue { get; set; }
         [Rtti.Meta]
+        public TtExpressionBase Host;
+        [Rtti.Meta]
         public string MethodName { get; set; } = "Unknow";
         public Func<TtMethodDeclaration, string> GetDisplayNameFunc;
         public string UniqueMethodName
@@ -1078,6 +1082,8 @@ namespace EngineNS.Bricks.CodeBuilder
             var dec = obj as TtMethodDeclaration;
             if (dec == null)
                 return false;
+            if (Host != dec.Host)
+                return false;
             if (Arguments.Count != dec.Arguments.Count)
                 return false;
             for(int i=0; i<Arguments.Count; i++)
@@ -1093,7 +1099,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
         public override string ToString()
         {
-            string retStr = MethodName + "(";
+            string retStr = (Host != null) ? (Host.ToString() + ".") : "" + MethodName + "(";
             for(int i=0; i<Arguments.Count; i++)
             {
                 retStr += Arguments[i].ToString() + ",";
@@ -1136,6 +1142,17 @@ namespace EngineNS.Bricks.CodeBuilder
             if (lh is null)
                 return rh is null;
             return lh.Equals(rh);
+        }
+        public static TtNamespaceDeclaration GetNameSpaceFromRName(RName rName)
+        {
+            var nsName = IO.TtFileManager.GetBaseDirectory(rName.Name).TrimEnd('/').Replace("/", ".");
+            if (Regex.IsMatch(nsName, "^[a-zA-Z](?:[a-zA-Z0-9_]*|\\.(?=[a-zA-Z]))*$"))
+                return new TtNamespaceDeclaration("NS_" + nsName);
+            else
+            {
+                Profiler.Log.WriteLine<Profiler.TtMacrossCategory>(Profiler.ELogTag.Warning, $"Get namespace failed, {rName.Name} has invalid char!");
+                return new TtNamespaceDeclaration("NS_" + ((UInt32)nsName.GetHashCode()).ToString());
+            }
         }
         public override string ToString()
         {
@@ -1290,6 +1307,20 @@ namespace EngineNS.Bricks.CodeBuilder
             dec.SupperClassNames.Add(type.BaseType.FullName);
             return dec;
         }
+
+        public void TourSuperClassMeta(Action<TtClassDeclaration, Rtti.TtClassMeta> tourAction)
+        {
+            if (tourAction == null)
+                return;
+
+            for(int i=0; i<SupperClassNames.Count; i++)
+            {
+                var cls = Rtti.TtClassMetaManager.Instance.GetMetaFromFullName(SupperClassNames[i]);
+                if (cls == null)
+                    continue;
+                tourAction.Invoke(this, cls);
+            }
+        }
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UClassReferenceExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UClassReferenceExpression" })]
@@ -1322,6 +1353,34 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
+    public class TtTypeDescGetterExpression : TtExpressionBase, IO.ISerializer
+    {
+        public TtTypeReference GenericType { get; set; }
+
+        public TtTypeDescGetterExpression(TtTypeReference genericType)
+        {
+            GenericType = genericType;
+        }
+
+        public override bool Equals(object obj)
+        {
+            var exp = obj as TtTypeDescGetterExpression;
+            if(exp == null) 
+                return false;
+            if (GenericType != exp.GenericType)
+                return false;
+            return true;
+        }
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+        public override string ToString()
+        {
+            return "TypeDescGetter" + GenericType.ToString();
+        }
+    }
+
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UVariableReferenceExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UVariableReferenceExpression" })]
     public class TtVariableReferenceExpression : TtExpressionBase, IO.ISerializer
     {
@@ -1332,7 +1391,9 @@ namespace EngineNS.Bricks.CodeBuilder
         public bool IsProperty { get; set; }
         [Rtti.Meta]
         public TtTypeDesc PropertyDeclClass { get; set; } = null;
-        
+        [Rtti.Meta]
+        public List<TtTypeReference> GenericTypes { get; set; } = new List<TtTypeReference>();
+
         public TtVariableReferenceExpression()
         {
         }
@@ -1348,10 +1409,18 @@ namespace EngineNS.Bricks.CodeBuilder
                 return false;
             if (VariableName != vRef.VariableName)
                 return false;
+            if (GenericTypes.Count != vRef.GenericTypes.Count)
+                return false;
+            for(int i=0; i<GenericTypes.Count; i++)
+            {
+                if (GenericTypes[i] != vRef.GenericTypes[i])
+                    return false;
+            }
             if (Host == null && vRef.Host == null)
                 return true;
             if (Host != null)
                 return Host.Equals(vRef.Host);
+
             return false;
         }
         public override int GetHashCode()
@@ -1361,7 +1430,12 @@ namespace EngineNS.Bricks.CodeBuilder
 
         public override string ToString()
         {
-            return ((Host != null) ? Host.ToString() : "") + "." + VariableName;
+            var str = ((Host != null) ? Host.ToString() : "") + "." + VariableName;
+            for(int i=0; i<GenericTypes.Count; i++)
+            {
+                str += GenericTypes[i].ToString() + ",";
+            }
+            return str;
         }
     }
 
@@ -1501,6 +1575,8 @@ namespace EngineNS.Bricks.CodeBuilder
                 return false;
             if (Host == null && invoke.Host != null)
                 return false;
+            if(GenericTypes.Count != invoke.GenericTypes.Count) 
+                return false;
             return true;
         }
         public override int GetHashCode()
@@ -1517,6 +1593,10 @@ namespace EngineNS.Bricks.CodeBuilder
             for (int i = 0; i < Arguments.Count; i++)
             {
                 retStr += Arguments[i].ToString() + ",";
+            }
+            for (int i = 0; i < GenericTypes.Count; i++)
+            {
+                retStr += GenericTypes[i].ToString() + ",";
             }
             retStr = retStr.TrimEnd(',') + ")";
             return retStr;
@@ -1726,6 +1806,33 @@ namespace EngineNS.Bricks.CodeBuilder
         public override string ToString()
         {
             return mValueStr;
+        }
+        public static bool IsValidType(Rtti.TtTypeDesc type)
+        {
+            if (type == Rtti.TtTypeDescGetter<Byte>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<UInt16>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<UInt32>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<UInt64>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<SByte>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<Int16>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<Int32>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<Int64>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<float>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<double>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<string>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<bool>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<Vector2>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<Vector3>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<Vector4>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<Vector2i>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<Vector3i>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<Vector4i>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<Matrix>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<RName>.TypeDesc ||
+               type == Rtti.TtTypeDescGetter<System.Type>.TypeDesc ||
+               type.IsEnum)
+                return true;
+            return false;
         }
 
         public TtPrimitiveExpression(Byte val)
@@ -2022,6 +2129,59 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
+    public class TtStackallocStatement : TtStatementBase, IO.ISerializer
+    {
+        [Rtti.Meta]
+        public int Length { get; set; } = 0;
+        [Rtti.Meta]
+        public string VarName { get; set; }
+        [Rtti.Meta]
+        public TtTypeReference Type { get; set; }
+        [Rtti.Meta]
+        public List<TtExpressionBase> Contents { get; set; } = new List<TtExpressionBase>();
+
+        public TtStackallocStatement(TtTypeReference type, int length)
+        {
+            Type = type;
+            Length = length;
+        }
+        public TtStackallocStatement(TtTypeReference type, params TtExpressionBase[] contents)
+        {
+            Type = type;
+            Contents = new List<TtExpressionBase>(contents);
+        }
+
+        public override bool Equals(object obj)
+        {
+            var sa = obj as TtStackallocStatement;
+            if (Length != sa.Length)
+                return false;
+            if(VarName != sa.VarName) 
+                return false;
+            if(Type != sa.Type)
+                return false;
+            if(Contents.Count != sa.Contents.Count) 
+                return false;
+            for(int i=0; i<Contents.Count; i++)
+            {
+                if (Contents[i] != sa.Contents[i]) 
+                    return false;
+            }
+            return true;
+        }
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+        public override string ToString()
+        {
+            var retVal = Type.ToString() + VarName + "_" + Length.ToString();
+            for (int i = 0; i < Contents.Count; i++)
+                retVal += Contents[i].ToString() + ",";
+            return retVal;
+        }
+    }
+
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UCreateObjectExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UCreateObjectExpression" })]
     public class TtCreateObjectExpression : TtExpressionBase, IO.ISerializer
     {
@@ -2231,6 +2391,45 @@ namespace EngineNS.Bricks.CodeBuilder
         }
     }
 
+    public class TtSwitchStatement : TtStatementBase
+    {
+        [Rtti.Meta]
+        public TtExpressionBase Condition { get; set; }
+        [Rtti.Meta]
+        public Dictionary<TtPrimitiveExpression, TtStatementBase> Statements { get; set; } = new Dictionary<TtPrimitiveExpression, TtStatementBase>();
+
+        public override bool Equals(object obj)
+        {
+            var val = obj as TtSwitchStatement;
+            if (val == null)
+                return false;
+            if (Statements.Count != val.Statements.Count)
+                return false;
+            foreach(var v in Statements)
+            {
+                TtStatementBase outVal;
+                if (!val.Statements.TryGetValue(v.Key, out outVal))
+                    return false;
+                if (!v.Value.Equals(outVal))
+                    return false;
+            }
+            return true;
+        }
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+        public override string ToString()
+        {
+            var retVal = "switch(" + ((Condition != null) ? Condition.ToString() : "") + ")";
+            foreach(var v in Statements)
+            {
+                retVal += v.Key.ToString() + ":" + v.Value.ToString();
+            }
+            return base.ToString();
+        }
+    }
+
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UIfStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UIfStatement" })]
     public class TtIfStatement : TtStatementBase, IO.ISerializer
     {
@@ -2265,11 +2464,11 @@ namespace EngineNS.Bricks.CodeBuilder
         }
         public override string ToString()
         {
-            var retVal = "if(" + Condition.ToString() + ")";
+            var retVal = "if(" + ((Condition != null)? Condition.ToString() : "") + ")";
             if (TrueStatement != null)
-                retVal = "true=(" + TrueStatement.ToString() + ")";
+                retVal = "true=(" + ((TrueStatement != null)? TrueStatement.ToString() : "") + ")";
             if(FalseStatement != null)
-                retVal = "false=(" + FalseStatement.ToString() + ")";
+                retVal = "false=(" + ((FalseStatement != null)? FalseStatement.ToString() : "") + ")";
             for(int i=0; i<ElseIfs.Count; i++)
                 retVal += "else " + ElseIfs[i].ToString() + "; ";
             return retVal;

@@ -41,7 +41,7 @@ namespace NxRHI
 		UINT64 InitValue = 0;
 	};
 	class TR_CLASS()
-		IFence : public IWeakReference
+		IFence : public IWeakRefObject
 	{
 	public:
 		ENGINE_RTTI(IFence);

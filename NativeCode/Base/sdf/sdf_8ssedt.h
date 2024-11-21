@@ -41,7 +41,7 @@ struct TR_CLASS(SV_LayoutStruct = 8)
 };
 
 class TR_CLASS()
-	SdfGrid : public IWeakReference
+	SdfGrid : public IWeakRefObject
 {
 public:
 	std::vector<SdfPoint> mGrid;

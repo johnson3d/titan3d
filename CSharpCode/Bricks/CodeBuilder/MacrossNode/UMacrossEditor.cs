@@ -1,5 +1,6 @@
 ﻿using EngineNS.DesignMacross.Design;
 using EngineNS.Editor;
+using EngineNS.Macross;
 using Microsoft.CodeAnalysis;
 using NPOI.SS.Formula.Functions;
 using NPOI.Util;
@@ -156,8 +157,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 declName += k.MethodDec.GetKeyword();
             }
-            return $"{rn.Address}/{method.Name}_{Hash160.CreateHash160(declName)}.fn";
+            return $"{rn.Address + FolderExt}/{method.Name}_{Hash160.CreateHash160(declName)}.fn";
         }
+        public string FolderExt = "";
         public void SaveClassGraph(RName rn)
         {
             var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as TtMacrossAMeta;
@@ -185,15 +187,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
             }
 
-            if (!IO.TtFileManager.DirectoryExists(rn.Address))
-                IO.TtFileManager.CreateDirectory(rn.Address);
+            if (!IO.TtFileManager.DirectoryExists(rn.Address + FolderExt))
+                IO.TtFileManager.CreateDirectory(rn.Address + FolderExt);
             
             var xml = new System.Xml.XmlDocument();
             var xmlRoot = xml.CreateElement($"Root", xml.NamespaceURI);
             xml.AppendChild(xmlRoot);
             IO.SerializerHelper.WriteObjectMetaFields(xml, xmlRoot, this);
             var xmlText = IO.TtFileManager.GetXmlText(xml);
-            var graphDataFileName = $"{rn.Address}/class_graph.dat";
+            var graphDataFileName = $"{rn.Address + FolderExt}/class_graph.dat";
             IO.TtFileManager.WriteAllText(graphDataFileName, xmlText);
             TtEngine.Instance.SourceControlModule.AddFile(graphDataFileName);
 
@@ -228,25 +230,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 //IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
             }
             {
-                var xml = IO.TtFileManager.LoadXml($"{rn.Address}/class_graph.dat");
+                var xml = IO.TtFileManager.LoadXml($"{rn.Address + FolderExt}/class_graph.dat");
                 if (xml == null)
                     return;
                 object pThis = this;
                 IO.SerializerHelper.ReadObjectMetaFields(this, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
-
-                var nsName = IO.TtFileManager.GetBaseDirectory(rn.Name).TrimEnd('/').Replace("/", ".");
-                if (Regex.IsMatch(nsName, "^[a-zA-Z](?:[a-zA-Z0-9_]*|\\.(?=[a-zA-Z]))*$"))
-                    DefClass.Namespace = new TtNamespaceDeclaration("NS_" + nsName);
-                else
-                {
-                    DefClass.Namespace = new TtNamespaceDeclaration("NS_" + ((UInt32)nsName.GetHashCode()).ToString());
-                    Profiler.Log.WriteLine<Profiler.TtMacrossCategory>(Profiler.ELogTag.Warning, $"Get namespace failed, {rn.Name} has invalid char!");
-                }    
+                DefClass.Namespace = TtNamespaceDeclaration.GetNameSpaceFromRName(rn); 
                 DefClass.ClearMethods();
-                var funcFiles = IO.TtFileManager.GetFiles(rn.Address, "*.fn", false);
+                var funcFiles = IO.TtFileManager.GetFiles(rn.Address + FolderExt, "*.fn", false);
                 if (funcFiles.Length == 0)
                 {
-                    funcFiles = IO.TtFileManager.GetFiles(rn.Address, "*.func", false);
+                    funcFiles = IO.TtFileManager.GetFiles(rn.Address + FolderExt, "*.func", false);
                 }
                 Type clsType = null;
                 for(int clsNameIdx=0; clsNameIdx < DefClass.SupperClassNames.Count; clsNameIdx++)
@@ -340,7 +334,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     }
                 }
 
-                var delFuncFiles = IO.TtFileManager.GetFiles(rn.Address, "*.delfn", false);
+                var delFuncFiles = IO.TtFileManager.GetFiles(rn.Address + FolderExt, "*.delfn", false);
                 for(int i=0; i<delFuncFiles.Length; i++)
                 {
                     try
@@ -373,6 +367,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
         public Action<TtClassDeclaration> BeforeGenerateCode;
+
         public string GenerateCode()
         {
             try
@@ -426,6 +421,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
                 else
                 {
+                    var superClassNames = new List<string>(DefClass.SupperClassNames);
+                    foreach(var clsName in superClassNames)
+                    {
+                        var type = Rtti.TtTypeDesc.TypeOfFullName(clsName);
+                        if (type == null)
+                            continue;
+                        var att = (TtMacrossCustomCodeGenAttribute)(type.GetCustomAttribute<TtMacrossCustomCodeGenAttribute>(true));
+                        if (att != null)
+                            att.GenCustomCode(DefClass, CodeGen);
+                    }
+
                     mCSCodeGen.GenerateClassCode(DefClass, AssetName, ref code);
                     SaveCSFile(code);
                     mCodeEditor.mCoreObject.SetText(code);
@@ -607,7 +613,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         void SaveCSFile(string code)
         {
-            var fileName = AssetName.Address + "/" + DefClass.ClassName + ".cs";
+            var fileName = AssetName.Address + FolderExt + "/" + DefClass.ClassName + ".cs";
             using(var sr = new System.IO.StreamWriter(fileName, false, Encoding.UTF8))
             {
                 sr.Write(code);
@@ -616,7 +622,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         void SaveHlslFile(string code)
         {
-            var fileName = AssetName.Address + "/" + DefClass.ClassName + ".shader";
+            var fileName = AssetName.Address + FolderExt + "/" + DefClass.ClassName + ".shader";
             using (var sr = new System.IO.StreamWriter(fileName, false, Encoding.UTF8))
             {
                 sr.Write(code);
@@ -673,12 +679,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
 
         public bool DockInitialized = false;
+        public string DockPostName = "";
         protected ImGuiWindowClass mDockKeyClass;
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
         protected unsafe void ResetDockspace(bool force = false)
         {
             var pos = ImGuiAPI.GetCursorPos();
-            var id = ImGuiAPI.GetID(AssetName.Name + "_Dockspace");
+            var id = ImGuiAPI.GetID(AssetName.Name + DockPostName + "_Dockspace");
             mDockKeyClass.ClassId = id;
             ImGuiAPI.DockSpace(id, Vector2.Zero, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_None, mDockKeyClass);
             if (DockInitialized && !force)
@@ -802,10 +809,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return string.IsNullOrEmpty(FormName) ? $"Macross:{IO.TtFileManager.GetPureName(AssetName != null ? AssetName.Name : "NoName")}" : FormName;
         }
 
+        public IRootForm HostForm = null;
         public IRootForm RootForm = null;
         public string FormName = null;
         public virtual unsafe void OnDraw()
         {
+            if (HostForm != null && !HostForm.Visible)
+                Visible = false;
+
             //ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
             var result = EGui.UIProxy.DockProxy.BeginMainForm(
                 GetWindowsName(),
@@ -1541,6 +1552,8 @@ namespace EngineNS.Rtti
         {{
             public override object CreateInstance(EngineNS.RName name)
             {{
+                if(name == null)
+                    return null;
                 var nameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(name.ToString());
                 switch(nameHash)
                 {{";

@@ -75,7 +75,7 @@ struct TR_CLASS(SV_LayoutStruct = 8)
 };
 
 class TR_CLASS()
-	PhyEntity : public IWeakReference
+	PhyEntity : public IWeakRefObject
 {
 public:
 	void*			mCSharpHandle;

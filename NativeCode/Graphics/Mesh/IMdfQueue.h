@@ -5,7 +5,7 @@
 NS_BEGIN
 
 class TR_CLASS()
-	IMdfQueue : public IWeakReference
+	IMdfQueue : public IWeakRefObject
 {
 public:
 	std::vector<AutoRef<IModifier>>		mMdfQueue;

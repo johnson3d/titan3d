@@ -18,7 +18,7 @@ EPhyControllerCollisionFlag
 
 
 class TR_CLASS()
-	PhyControllerDesc : public IWeakReference
+	PhyControllerDesc : public IWeakRefObject
 {
 public:
 	PhyControllerDesc()

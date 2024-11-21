@@ -8,7 +8,7 @@
 NS_BEGIN
 
 class TR_CLASS()
-	RcNavCrowd : public IWeakReference
+	RcNavCrowd : public IWeakRefObject
 {
 private:
 	static const int AGENT_MAX_TRAIL = 64;

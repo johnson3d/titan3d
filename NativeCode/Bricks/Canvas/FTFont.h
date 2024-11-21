@@ -9,7 +9,7 @@ namespace Canvas
 {
 	class FTFontManager;
 	class TR_CLASS()
-		FTFont : public IWeakReference
+		FTFont : public IWeakRefObject
 	{
 	public:
 		FTWord* GetWord(int x, int y, UINT c, UInt16 transformIndex, Canvas::FCanvasVertex vert[4]) const;
@@ -108,7 +108,7 @@ namespace Canvas
 	};
 
 	class TR_CLASS()
-		FTFontManager : public IWeakReference
+		FTFontManager : public IWeakRefObject
 	{
 	public:
 		ENGINE_RTTI(FTFontManager)

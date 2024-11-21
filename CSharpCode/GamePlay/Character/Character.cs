@@ -40,11 +40,7 @@ namespace EngineNS.GamePlay.Character
         }
         protected override void OnParentSceneChanged(TtScene prev, TtScene cur)
         {
-            if (cur != null)
-            {
-                bool ok = true;
-                CreatePxCapsuleController(ref ok, cur, CharacterData.Radius, CharacterData.Height);
-            }
+
         }
     }
 }

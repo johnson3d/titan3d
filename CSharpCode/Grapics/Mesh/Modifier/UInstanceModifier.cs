@@ -100,7 +100,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
                 return;
         }
     }
-    public class TtGpuDrivenData
+    public class TtGpuDrivenData : IDisposable
     {
         public unsafe struct FDrawArgs
         {
@@ -119,7 +119,13 @@ namespace EngineNS.Graphics.Mesh.Modifier
         public Mesh.Modifier.TtGpuCullSetupShading GpuCullSetupShading;
         public Mesh.Modifier.TtGpuCullFlushShading GpuCullFlushShading;
         public Mesh.Modifier.TtGpuCullShading GpuCullShading;
-
+        public void Dispose()
+        {
+            CoreSDK.DisposeObject(ref GpuCullSetupDrawcall);
+            CoreSDK.DisposeObject(ref GpuCullFlushDrawcall);
+            CoreSDK.DisposeObject(ref GpuCullDrawcall);
+            CoreSDK.DisposeObject(ref GPUCullingCBV);
+        }
         public void SetupGpuData(Graphics.Pipeline.TtGpuCullingNode node, TtInstanceModifier instanceModifier)
         {
             GpuCullSetupShading = node.GpuCullSetupShading;

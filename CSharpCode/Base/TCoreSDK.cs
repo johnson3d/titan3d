@@ -1,5 +1,4 @@
 ﻿using EngineNS.Rtti;
-using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -10,7 +9,14 @@ namespace EngineNS
     public unsafe partial struct CoreSDK
     {
         public const string CoreModule = "Core.Window.dll";
-
+        public static void SetMemDebugText(void* memory, string info)
+        {
+            if ("uestyle/graph/pin_disconnected_vara.srv:Engine" == info)
+            {
+                int xx = 0;
+            }
+            SetMemDebugInfo(memory, info);
+        }
         public static void CopyString2Ansi(BigStackBuffer buffer, string srcStr)
         {
             unsafe

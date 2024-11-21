@@ -221,9 +221,9 @@ namespace EngineNS.Graphics.Pipeline
             }
             return null;
         }
-        public TtAttachBuffer ImportAttachment(TtRenderGraphPin pin)
+        public TtAttachBuffer ImportAttachment(TtRenderGraphPin pin, TtAttachBuffer attachBuffer)
         {
-            return RenderGraph.AttachmentCache.ImportAttachment(pin);
+            return RenderGraph.AttachmentCache.ImportAttachment(pin, attachBuffer);
         }
         public TtAttachBuffer FindAttachBuffer(TtRenderGraphPin pin)
         {

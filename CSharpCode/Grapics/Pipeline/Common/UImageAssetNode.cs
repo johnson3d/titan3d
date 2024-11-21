@@ -17,6 +17,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override void Dispose()
         {
             ImageSrv = null;
+            CoreSDK.DisposeObject(ref ImageAttachement);
             base.Dispose();
         }
         public EPixelFormat ImageFormat 
@@ -34,9 +35,10 @@ namespace EngineNS.Graphics.Pipeline.Common
             if(ImageName == null)
                 ImageName = RName.GetRName("texture/hdri_epic_courtyard_daylight.srv", RName.ERNameType.Engine);
         }
+        TtAttachBuffer ImageAttachement = new TtAttachBuffer();
         public unsafe override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
-            var attachement = RenderGraph.AttachmentCache.ImportAttachment(ImagePinOut);
+            var attachement = RenderGraph.AttachmentCache.ImportAttachment(ImagePinOut, ImageAttachement);
             attachement.Srv = ImageSrv;
             var desc = ImageSrv.mCoreObject.Desc;
             attachement.BufferDesc.Format = desc.Format;

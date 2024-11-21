@@ -28,7 +28,7 @@ namespace AssetImportAndExport::FBX
 	};
 
 	class TR_CLASS(SV_NameSpace = EngineNS, SV_Dispose = self->Release())
-		FBXSkeletonDesc : public IWeakReference
+		FBXSkeletonDesc : public IWeakRefObject
 	{
 	public:
 		inline FBXBoneDesc GetBoneDesc(int index) const {

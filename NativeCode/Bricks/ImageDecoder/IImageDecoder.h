@@ -42,7 +42,7 @@ enum XDecoderType
 };
 
 class TR_CLASS()
-	IImageDecoder : public IWeakReference
+	IImageDecoder : public IWeakRefObject
 {
 public:
 	virtual ~IImageDecoder();
@@ -65,7 +65,7 @@ public:
 };
 
 class TR_CLASS()
-	IImageDecoderTest : public IWeakReference
+	IImageDecoderTest : public IWeakRefObject
 {
 public:
 	ENGINE_RTTI(IImageDecoderTest);

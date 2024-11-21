@@ -73,6 +73,23 @@ bool PhyActor::AddToScene(PhyScene* scene)
 	}
 	return true;
 }
+bool PhyActor::RemoveFromScene(PhyScene* scene)
+{
+	auto current = mScene.GetPtr();
+	if(current != scene)
+		return true;
+
+	if (current != nullptr)
+	{
+		//scene remove
+		if (current->mScene != nullptr)
+		{
+			physx::PxSceneWriteLock writeLock(*current->mScene);
+			current->mScene->removeActor(*mActor, true);
+		}
+	}
+	return true;
+}
 
 void PhyActor::UpdateTransform()
 {
@@ -222,4 +239,3 @@ void PhyActor::SetMinCCDAdvanceCoefficient(float advanceCoefficient)
 }
 
 NS_END
-

@@ -23,7 +23,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public override string ToString()
         {
-            return $"{Format}({Width},{Height})";
+            return $"{Format}({Width},{Height},{BufferViewTypes})";
         }
         public override int GetHashCode()
         {
@@ -201,6 +201,7 @@ namespace EngineNS.Graphics.Pipeline
                     desc.m_BindFlags |= NxRHI.EBufferType.BFT_DSV;
                 }
                 GpuResource = rc.CreateTexture(in desc);
+                GpuResource.SetDebugName("TtAttachBuffer");
                 System.Diagnostics.Debug.Assert(GpuResource != null);
 
                 if ((types & NxRHI.EBufferType.BFT_RTV) != 0)
@@ -251,31 +252,8 @@ namespace EngineNS.Graphics.Pipeline
                 desc.SetDefault(false, types);
                 desc.Size = BufferDesc.Width * BufferDesc.Height;
                 desc.StructureStride = BufferDesc.Width;
-                //if ((types & NxRHI.EBufferType.BFT_Vertex) != 0)
-                //{
-                //    desc.Type |= NxRHI.EBufferType.BFT_Vertex;
-                //}
-                //if ((types & NxRHI.EBufferType.BFT_Index) != 0)
-                //{
-                //    desc.Type |= NxRHI.EBufferType.BFT_Index;
-                //}
-                //if ((types & NxRHI.EBufferType.BFT_IndirectArgs) != 0)
-                //{
-                //    desc.Type |= NxRHI.EBufferType.BFT_IndirectArgs;
-                //}
-                //if ((types & NxRHI.EBufferType.BFT_CBuffer) != 0)
-                //{
-                //    desc.Type |= NxRHI.EBufferType.BFT_CBuffer;
-                //}
-                //if ((types & NxRHI.EBufferType.BFT_SRV) != 0)
-                //{
-                //    desc.Type |= NxRHI.EBufferType.BFT_SRV;
-                //}
-                //if ((types & NxRHI.EBufferType.BFT_UAV) != 0)
-                //{
-                //    desc.Type |= NxRHI.EBufferType.BFT_UAV;
-                //}
                 GpuResource = rc.CreateBuffer(in desc);
+                GpuResource.SetDebugName("TtAttachBuffer");
                 if ((types & NxRHI.EBufferType.BFT_SRV) != 0)
                 {
                     var viewDesc = new NxRHI.FSrvDesc();
@@ -425,9 +403,9 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     i.Value.NoHitFrameCount = 0;
 
-                    if (i.Value.PoolSize > i.Value.FrameMaxLiveCount + 3)
+                    if (i.Value.PoolSize > i.Value.FrameMaxLiveCount + 2)
                     {
-                        //i.Value.Shrink(i.Value.FrameMaxLiveCount);
+                        i.Value.Shrink(i.Value.FrameMaxLiveCount);
                     }
                 }
                 i.Value.FrameLiveCount = 0;
@@ -461,7 +439,8 @@ namespace EngineNS.Graphics.Pipeline
         public void Dispose()
         {
             CoreSDK.DisposeObject(ref mFrameBuffers);
-            FrameBuffers = null;
+            RenderTargets = null;
+            DepthStencil = null;
         }
         public class TtTargetViewIdentifier
         {

@@ -381,6 +381,8 @@ namespace EngineNS.Bricks.GpuDriven
         public override void Dispose()
         {
             CoreSDK.DisposeObject(ref SWRasterizerDrawcall);
+            CoreSDK.DisposeObject(ref SetUpRasterizeDrawcall);
+            CoreSDK.DisposeObject(ref SWRasterizerDrawcall);
             base.Dispose();
         }
         public override void InitNodePins()

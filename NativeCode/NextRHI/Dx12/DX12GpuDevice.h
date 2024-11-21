@@ -31,7 +31,8 @@ namespace NxRHI
 		AutoRef<ID3D12Debug1>					mDebugLayer;
 	};
 
-	class DX12GpuDevice : public IGpuDevice
+	class TR_CLASS()
+		DX12GpuDevice : public IGpuDevice
 	{
 	public:
 		DX12GpuDevice();
@@ -75,6 +76,9 @@ namespace NxRHI
 		typedef void FDeviceRemovedCallback();
 		std::function<FDeviceRemovedCallback> mDeviceRemovedCallback;
 		void OnDeviceRemoved();
+		DX12CommandAllocatorManager* GetCommandAllocatorManager() {
+			return mCmdAllocatorManager;
+		}
 	private: 
 		void QueryDevice();
 	public:
@@ -87,7 +91,7 @@ namespace NxRHI
 		
 		AutoRef<ID3D12InfoQueue>		mDebugInfoQueue;
 		VCritical						mDredLocker;
-		AutoRef<ID3D12DeviceRemovedExtendedDataSettings>	mDredSettings;
+		AutoRef<ID3D12DeviceRemovedExtendedDataSettings1>	mDredSettings;
 		AutoRef<DX12CmdQueue>			mCmdQueue;
 		
 		AutoRef<DX12CommandAllocatorManager>	mCmdAllocatorManager;

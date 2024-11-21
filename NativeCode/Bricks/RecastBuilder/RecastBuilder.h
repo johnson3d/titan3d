@@ -19,7 +19,7 @@ NS_BEGIN
 
 class InputGeom;
 class TR_CLASS()
-	RecastBuilder : public IWeakReference
+	RecastBuilder : public IWeakRefObject
 {
 public:
 	ENGINE_RTTI(RecastBuilder);

@@ -224,6 +224,7 @@ namespace EngineNS.Bricks.GpuDriven
 
                 cmdlist.PushGpuDraw(i.Value);
                 //i.Value.mCoreObject.Commit(cmdlist.mCoreObject);
+                i.Value.Dispose();
             }
 
             foreach (var i in cpIbDrawcalls)
@@ -232,6 +233,7 @@ namespace EngineNS.Bricks.GpuDriven
                 i.mCoreObject.BindBufferDest(ib.Buffer);
                 cmdlist.PushGpuDraw(i);
                 //i.mCoreObject.Commit(cmdlist.mCoreObject);
+                i.Dispose();
             }
 
             //notice:PushGpuDraw replace drawcall.Commit, user need cmdlist.FlushDraws at EndPass

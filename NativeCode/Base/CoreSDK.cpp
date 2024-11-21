@@ -155,23 +155,23 @@ void CoreSDK::SetMemDebugInfo(void* memory, const char* info)
 
 void CoreSDK::UpdateEngineFrame(UINT64 frame)
 {
-	IWeakReference::EngineCurrentFrame = frame;
+	IWeakRefObject::EngineCurrentFrame = frame;
 }
 
 void CoreSDK::IUnknown_Release(void* unk)
 {
-	auto p = (IWeakReference*)unk;
+	auto p = (IWeakRefObject*)unk;
 	Safe_Release(p);
 }
 
 int CoreSDK::IUnknown_AddRef(void* unk)
 {
-	auto p = (IWeakReference*)unk;
+	auto p = (IWeakRefObject*)unk;
 	return p->AddRef();
 }
 int CoreSDK::IUnknown_UnsafeGetRefCount(void* unk)
 {
-	auto p = (IWeakReference*)unk;
+	auto p = (IWeakRefObject*)unk;
 	return p->UnsafeGetRefCount();
 }
 

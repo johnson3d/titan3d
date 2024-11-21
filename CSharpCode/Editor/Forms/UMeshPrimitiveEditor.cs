@@ -3,6 +3,7 @@ using EngineNS.GamePlay.Camera;
 using EngineNS.Graphics.Mesh;
 using ICSharpCode.SharpZipLib.Tar;
 using NPOI.OpenXmlFormats.Dml;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -157,7 +158,7 @@ namespace EngineNS.Editor.Forms
         public RName MaterialName { get; set; }
         public RName PlaneMaterialName { get; set; }
     }
-    public class UMeshPrimitiveEditor : Editor.IAssetEditor, ITickable, IRootForm
+    public class UMeshPrimitiveEditor : ULightEnvironemnt, Editor.IAssetEditor, IRootForm
     {
         public int GetTickOrder()
         {
@@ -278,24 +279,11 @@ namespace EngineNS.Editor.Forms
             await DebugShowTool.Initialize(MeshPrimitivesList, PreviewViewport.World);
 
             var aabb = mesh.MaterialMesh.AABB;
+            float radius = aabb.GetMaxSide();
             DBoundingSphere sphere;
             sphere.Center = aabb.GetCenter().AsDVector();
             sphere.Radius = mCurrentMeshRadius;
             policy.DefaultCamera.AutoZoom(in sphere);
-
-            {
-                var arrowMaterialMesh = await TtEngine.Instance.GfxDevice.MaterialMeshManager.GetMaterialMesh(RName.GetRName("mesh/base/arrow.ums", RName.ERNameType.Engine));
-                var arrowMesh = new Graphics.Mesh.TtMesh();
-                var ok = arrowMesh.Initialize(arrowMaterialMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
-                if (ok)
-                {
-                    mArrowMeshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(viewport.World, viewport.World.Root, new GamePlay.Scene.TtMeshNode.TtMeshNodeData(), typeof(GamePlay.TtPlacement), arrowMesh, DVector3.UnitX * 3, Vector3.One, Quaternion.Identity);
-                    mArrowMeshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
-                    mArrowMeshNode.NodeData.Name = "PreviewArrow";
-                    mArrowMeshNode.IsAcceptShadow = false;
-                    mArrowMeshNode.IsCastShadow = false;
-                }
-            }
 
             {
                 var meshCenter = aabb.GetCenter();
@@ -322,6 +310,8 @@ namespace EngineNS.Editor.Forms
 
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
+
+            await InitializeLightEnv(PreviewViewport, radius);
 
             return true;
         }
@@ -701,65 +691,24 @@ namespace EngineNS.Editor.Forms
             //throw new NotImplementedException();
         }
         #region Tickable
-        public void TickLogic(float ellapse)
+        public override void TickLogic(float ellapse)
         {
             PreviewViewport.TickLogic(ellapse);
         }
-        //[Category("Light")]
-        [EGui.Controls.PropertyGrid.PGValueRange(-3.1416f, 3.1416f)]
-        [EGui.Controls.PropertyGrid.PGValueChangeStep(3.1416f / 100.0f)]
-        public float Yaw { get; set; } = -0.955047f;
-        //[Category("Light")]
-        //[EGui.Controls.PropertyGrid.PGValueRange(-3.1416f, 3.1416f)]
-        //[EGui.Controls.PropertyGrid.PGValueChangeStep(3.1416f / 100.0f)]
-        //public float Pitch { get; set; }
-        //[Category("Light")]
-        [EGui.Controls.PropertyGrid.PGValueRange(-3.1416f, 3.1416f)]
-        [EGui.Controls.PropertyGrid.PGValueChangeStep(3.1416f / 100.0f)]
-        public float Roll { get; set; } = -0.552922f;
-
-        public void TickRender(float ellapse)
+        public override void TickRender(float ellapse)
         {
             PreviewViewport.TickRender(ellapse);
 
             if (IsDrawing == false)
                 return;
 
-            if (ImGuiAPI.IsMouseDragging(ImGuiMouseButton_.ImGuiMouseButton_Left, -1) || ImGuiAPI.IsMouseDragging(ImGuiMouseButton_.ImGuiMouseButton_Right, -1))
-            {
-                if (TtEngine.Instance.InputSystem.IsKeyDown(EngineNS.Bricks.Input.Keycode.KEY_l))
-                {
-                    var delta = ImGuiAPI.GetMouseDragDelta(ImGuiMouseButton_.ImGuiMouseButton_Left, -1);
-                    var delta2 = ImGuiAPI.GetMouseDragDelta(ImGuiMouseButton_.ImGuiMouseButton_Right, -1);
-                    delta.X = Math.Max(delta.X, delta.X);
-                    delta.Y = Math.Max(delta.Y, delta.Y);
-
-                    var step = 3.1416f / 500.0f;
-                    Yaw -= delta.X * step;
-                    Roll += delta.Y * step;
-                    ImGuiAPI.ResetMouseDragDelta(ImGuiMouseButton_.ImGuiMouseButton_Left);
-                    ImGuiAPI.ResetMouseDragDelta(ImGuiMouseButton_.ImGuiMouseButton_Right);
-                    mArrowMeshNode.Placement.Scale = new Vector3(Math.Min(mCurrentMeshRadius * 0.5f, 2.0f));
-                }
-            }
-            else
-            {
-                mArrowMeshNode.Placement.Scale = Vector3.Zero;
-            }
-
-
-            var quat = EngineNS.Quaternion.RotationYawPitchRoll(Yaw, 0, Roll);
-            PreviewViewport.World.DirectionLight.Direction = quat * Vector3.UnitX;
-
-            var arrowPos = -mCurrentMeshRadius * PreviewViewport.World.DirectionLight.Direction;
-            mArrowMeshNode.Placement.Position = new DVector3(arrowPos.X, arrowPos.Y, arrowPos.Z);
-            mArrowMeshNode.Placement.Quat = quat;
+            base.TickRender(ellapse);
         }
-        public void TickBeginFrame(float ellapse)
+        public override void TickBeginFrame(float ellapse)
         {
 
         }
-        public void TickSync(float ellapse)
+        public override void TickSync(float ellapse)
         {
             PreviewViewport.TickSync(ellapse);
         }

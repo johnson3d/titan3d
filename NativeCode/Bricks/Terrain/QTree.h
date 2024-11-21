@@ -129,7 +129,7 @@ public:
 };
 
 class TR_CLASS()
-	QTree : public IWeakReference
+	QTree : public IWeakRefObject
 {
 public:
 	QTree();

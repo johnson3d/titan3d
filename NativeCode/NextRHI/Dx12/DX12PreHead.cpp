@@ -19,8 +19,16 @@ namespace NxRHI
 	/// 
 	/// </summary>
 	//const int NumHeapDescriptor = 2;//cbv,srv,uav:(vs,ps)|sampler(vs,ps)
-	
-	AutoRef<DX12CmdRecorder> DX12CommandAllocatorManager::Alloc(ID3D12Device* device)
+	int DX12CommandAllocatorManager::GetNumOfRecyclesRefs()
+	{
+		int count = 0;
+		for (auto& i : Recycles)
+		{
+			count += (int)i.Allocator->mRefBuffers.size();
+		}
+		return count;
+	}
+	AutoRef<DX12CmdRecorder> DX12CommandAllocatorManager::Alloc(ID3D12Device* device, DX12CommandList* cmdlist)
 	{
 		VAutoVSLLock lk(mLocker);
 		if (CmdAllocators.size() == 0)
@@ -36,7 +44,9 @@ namespace NxRHI
 		}
 		auto result = CmdAllocators.front();
 		ASSERT(result->GetDrawcallNumber() == 0);
+		result->mCmdlist = cmdlist;
 		result->ResetGpuDraws();
+
 		CmdAllocators.pop();
 		return result;
 	}
@@ -48,6 +58,7 @@ namespace NxRHI
 		if (allocator->GetDrawcallNumber() == 0)
 		{
 			allocator->ResetGpuDraws();
+			allocator->mCmdlist = nullptr;
 			CmdAllocators.push(allocator);
 			return;
 		}
@@ -55,10 +66,11 @@ namespace NxRHI
 		tmp.Allocator = allocator;
 		tmp.WaitValue = waitValue;
 		tmp.Fence = fence;
+		tmp.WaitFrameCount = 5;
 		Recycles.push_back(tmp);
 	}
 	void DX12CommandAllocatorManager::UnsafeDirectFree(const AutoRef<DX12CmdRecorder>& allocator)
-	{
+	{//never used
 		ASSERT(allocator != nullptr);
 		VAutoVSLLock lk(mLocker);
 		CmdAllocators.push(allocator);
@@ -72,24 +84,21 @@ namespace NxRHI
 			auto waitValue = i->WaitValue;
 			ASSERT(waitValue > 0);
 			//fuck off: d12 or driver reference the resource but didn't AddRef
-			if (value > waitValue)
+			if (value >= waitValue)
 			{
-				//i->Allocator->mAllocator->Reset();
 				ASSERT(i->Allocator->GetDrawcallNumber() != 0);
 				i->Allocator->ResetGpuDraws();
-				/*auto cmdlist = i->Allocator->mCmdList.GetCastPtr<DX12CommandList>();
-				if (cmdlist != nullptr && cmdlist->mCmdRecorder == nullptr)
-				{
-					cmdlist->mContext->Reset(i->Allocator->mAllocator, nullptr);
-					cmdlist->mContext->Close();
-				}
-				i->Allocator->mCmdList.FromObject(nullptr);*/
 				CmdAllocators.push(i->Allocator);
 				i = Recycles.erase(i);
 			}
 			else
 			{
-				i++;
+				i->WaitFrameCount--;
+				if (i->WaitFrameCount == 0)
+				{
+					VFX_LTRACE(ELTT_Warning, "DX12CmdAllocator always alive %d / %d\r\n", value, waitValue);
+				}
+				i++;	
 			}
 		}
 	}
@@ -150,7 +159,7 @@ namespace NxRHI
 			std::wstring n = StringHelper::strtowstr(name);
 			result->GetDX12GpuHeap()->mGpuResource->SetName(n.c_str());
 		}
-		if (device->Desc.GpuDump)
+		if (device->Desc.IsAftermath)
 		{
 			DX12ResourceDebugMapper::Get()->SetDebugMapper(result->GetDX12GpuHeap()->mGpuResource, name);
 		}
@@ -171,7 +180,7 @@ namespace NxRHI
 			std::wstring n = StringHelper::strtowstr(name);
 			result->GetDX12GpuHeap()->mGpuResource->SetName(n.c_str());
 		}
-		if (device->Desc.GpuDump)
+		if (device->Desc.IsAftermath)
 		{
 			DX12ResourceDebugMapper::Get()->SetDebugMapper(result->GetDX12GpuHeap()->mGpuResource, name);
 		}
@@ -199,7 +208,7 @@ namespace NxRHI
 			std::wstring n = StringHelper::strtowstr(name);
 			result->mGpuResource->SetName(n.c_str());
 		}
-		if (device->Desc.GpuDump)
+		if (device->Desc.IsAftermath)
 		{
 			DX12ResourceDebugMapper::Get()->SetDebugMapper(result->mGpuResource, name);
 		}

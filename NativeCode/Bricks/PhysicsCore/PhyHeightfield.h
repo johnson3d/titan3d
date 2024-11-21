@@ -17,7 +17,7 @@ struct TR_CLASS(SV_LayoutStruct = 4)
 #pragma pack(pop)
 
 class TR_CLASS()
-	PhyHeightfield : public IWeakReference
+	PhyHeightfield : public IWeakRefObject
 {
 public:
 	physx::PxHeightField*		mHeightField;

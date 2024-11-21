@@ -153,7 +153,7 @@ namespace NxRHI
 		};
 		UINT numFeatureLevels = ARRAYSIZE(featureLevels);
 #if defined(HasModule_GpuDump)
-		if (desc->GpuDump && desc->IsNVIDIA())
+		if (desc->IsAftermath && desc->IsNVIDIA())
 		{
 			GpuDump::NvAftermath::InitDump(NxRHI::RHI_D3D11);
 		}
@@ -164,7 +164,7 @@ namespace NxRHI
 			return false;
 
 #if defined(HasModule_GpuDump)
-		if (desc->GpuDump && desc->IsNVIDIA())
+		if (desc->IsAftermath && desc->IsNVIDIA())
 		{
 			GpuDump::NvAftermath::DeviceCreated(NxRHI::RHI_D3D11, this);
 		}

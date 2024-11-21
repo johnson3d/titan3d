@@ -513,7 +513,7 @@ namespace NxRHI
 		}
 
 #if defined(HasModule_GpuDump)
-		if (desc->GpuDump && desc->IsNVIDIA())
+		if (desc->IsAftermath && desc->IsNVIDIA())
 		{
 			GpuDump::NvAftermath::InitDump(NxRHI::RHI_VK);
 			VkDeviceDiagnosticsConfigCreateInfoNV nvDiagnosticsInfo{};

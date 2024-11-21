@@ -203,7 +203,8 @@ struct VPagedCritical
 	}
 };
 
-class vfxMTLockerManager
+class TR_CLASS() 
+	vfxMTLockerManager
 {
 	struct MyAllocator
 	{
@@ -223,7 +224,8 @@ class vfxMTLockerManager
 	void NewPool();
 public:
 	VSLLock mSelfLocker;
-	static vfxMTLockerManager Instance;
+	static vfxMTLockerManager* GetInstance();
+	static void FinalCleanup();
 
 	 vfxMTLockerManager();
 	 ~vfxMTLockerManager();
@@ -264,11 +266,11 @@ public:
 	inline void Lock(LPCSTR file, DWORD line)
 	{
 		{
-			VSLLock& locker = vfxMTLockerManager::Instance.mSelfLocker;
+			VSLLock& locker = vfxMTLockerManager::GetInstance()->mSelfLocker;
 			locker.Lock();
 			if (mLocker == NULL)
 			{
-				mLocker = vfxMTLockerManager::Instance.AllocLocker();
+				mLocker = vfxMTLockerManager::GetInstance()->AllocLocker();
 			}
 			mLocker->mLockCount++;
 			locker.Unlock();
@@ -282,12 +284,12 @@ public:
 		mLocker->Unlock();
 
 		{
-			VSLLock& locker = vfxMTLockerManager::Instance.mSelfLocker;
+			VSLLock& locker = vfxMTLockerManager::GetInstance()->mSelfLocker;
 			locker.Lock();
 			mLocker->mLockCount--;
 			if (mLocker->mLockCount == 0)
 			{
-				vfxMTLockerManager::Instance.FreeLocker(mLocker);
+				vfxMTLockerManager::GetInstance()->FreeLocker(mLocker);
 				mLocker = NULL;
 			}
 			locker.Unlock();

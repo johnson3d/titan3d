@@ -70,7 +70,7 @@ namespace NxRHI
 		bool LoadXnd(IGpuDevice* device, XndAttribute* pAttr);
 	};
 	class TR_CLASS()
-		IShaderReflector : public IWeakReference
+		IShaderReflector : public IWeakRefObject
 	{
 	public:
 		ENGINE_RTTI(IShaderReflector);
@@ -95,7 +95,7 @@ namespace NxRHI
 			SDT_AllStages = SDT_VertexShader | SDT_PixelShader | SDT_ComputeShader,
 	};
 	class TR_CLASS()
-		IShader : public IWeakReference
+		IShader : public IWeakRefObject
 	{
 	public:
 		ENGINE_RTTI(IShader);
@@ -110,7 +110,7 @@ namespace NxRHI
 		}
 	};
 	struct TR_CLASS()
-		FShaderDesc : public IWeakReference
+		FShaderDesc : public IWeakRefObject
 	{
 		ENGINE_RTTI(FShaderDesc);
 		FShaderDesc()
@@ -178,7 +178,7 @@ namespace NxRHI
 		}
 	};
 	class TR_CLASS()
-		IShaderDefinitions : public IWeakReference
+		IShaderDefinitions : public IWeakRefObject
 	{
 	public:
 		ENGINE_RTTI(IShaderDefinitions);
@@ -224,7 +224,7 @@ namespace NxRHI
 		SL_METAL = (1 << 4)
 	};
 	struct TR_CLASS()
-		FShaderCode : public IWeakReference
+		FShaderCode : public IWeakRefObject
 	{
 		ENGINE_RTTI(FShaderCode);
 		FShaderCode()
@@ -245,7 +245,7 @@ namespace NxRHI
 	TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl, SV_NameSpace = EngineNS)
 	typedef NxRHI::FShaderCode* (*FnGetShaderCodeStream)(TR_META(SV_NoStringConverter) const char* name, TR_META(SV_NoStringConverter) const char* oriName);
 	class TR_CLASS()
-		FShaderCompiler : public IWeakReference
+		FShaderCompiler : public IWeakRefObject
 	{
 		typedef NxRHI::FShaderCode* (*FnGetShaderCodeStream)(TR_META(SV_NoStringConverter) const char* name, TR_META(SV_NoStringConverter) const char* oriName);
 		FnGetShaderCodeStream			GetShaderCodeStreamPtr;

@@ -190,11 +190,28 @@ VPagedCritical::~VPagedCritical()
 }
 
 VCriticalInfoManager VCriticalInfoManager::Instance;
-vfxMTLockerManager vfxMTLockerManager::Instance;
+vfxMTLockerManager* vfxMTLockerManager_Instance = nullptr;
+
+vfxMTLockerManager* vfxMTLockerManager::GetInstance()
+{
+	if (vfxMTLockerManager_Instance == nullptr)
+	{
+		vfxMTLockerManager_Instance = new vfxMTLockerManager();
+	}
+	return vfxMTLockerManager_Instance;
+}
+void vfxMTLockerManager::FinalCleanup()
+{
+	if (vfxMTLockerManager_Instance)
+	{
+		delete vfxMTLockerManager_Instance;
+		vfxMTLockerManager_Instance = nullptr;
+	}
+}
 
 void WINAPI FMemoryFinalizer_MTLockerManager()
 {
-	vfxMTLockerManager::Instance.Cleanup();
+	vfxMTLockerManager::GetInstance()->Cleanup();
 	if (SavedOnMemoryFinal != nullptr)
 		SavedOnMemoryFinal();
 }

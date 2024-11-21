@@ -24,7 +24,7 @@ namespace EngineNS.Graphics.Pipeline
             }
 
 #if PWindow
-            if (SDL.SDL3.SDL_Init(SDL.SDL_InitFlags.SDL_INIT_TIMER| SDL.SDL_InitFlags.SDL_INIT_EVENTS) == -1)
+            if (SDL.SDL3.SDL_Init(SDL.SDL_InitFlags.SDL_INIT_EVENTS) == false)
                 return false;
             TtNativeWindow.PropertiesID_WindowData = SDL.SDL3.SDL_CreateProperties();
 #endif
@@ -210,7 +210,8 @@ namespace EngineNS.Graphics.Pipeline
                     }
                 }
                 RenderSystem.GetDeviceDesc(Adapter, ref rcDesc);
-                rcDesc.GpuDump = engine.Config.IsGpuDump;
+                rcDesc.IsGpuDred = engine.Config.IsGpuDred;
+                rcDesc.IsAftermath = engine.Config.IsAftermath;
                 rcDesc.CreateDebugLayer = bDebugLayer;
                 //rcDesc.Han = window.ToPointer();
                 rcDesc.AdapterId = (int)Adapter;
@@ -219,14 +220,54 @@ namespace EngineNS.Graphics.Pipeline
                 if (RenderContext == null)
                     return false;
 
-                //RenderContext.SetDX12BreakOnId(EDx12MessageId.DESTROY_HEAP);
+                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE, false);
+                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.DRAW_EMPTY_SCISSOR_RECTANGLE, false);
+                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.GPU_BASED_VALIDATION_INCOMPATIBLE_RESOURCE_STATE, false);
                 RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CLEARDEPTHSTENCILVIEW_MISMATCHINGCLEARVALUE, false);
-                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_HEAP, false);
-                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.DESTROY_HEAP, false);
-                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_COMMANDALLOCATOR, false);
-                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_DESCRIPTORHEAP, false);
-                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_PIPELINESTATE, false);
-                RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_QUERYHEAP, false);
+                //RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_COMMANDLIST12, false);
+                //RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.DESTROY_COMMANDLIST12, false);
+                //RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_RESOURCE, false);
+                //RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.DESTROY_RESOURCE, false);
+                //RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_HEAP, false);
+                //RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.DESTROY_HEAP, false);                
+                //RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_COMMANDALLOCATOR, false);
+                //RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_DESCRIPTORHEAP, false);
+                //RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_PIPELINESTATE, false);
+                //RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATE_QUERYHEAP, false);
+                //RenderContext.ShowDX12DeviceMessage(NxRHI.EDx12MessageId.CREATEGRAPHICSPIPELINESTATE_RENDERTARGETVIEW_NOT_SET, false);
+
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.COMMAND_LIST_OUTOFMEMORY, true);
+
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.COMMAND_ALLOCATOR_SYNC, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.COMMAND_LIST_CLOSED, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.COMMAND_ALLOCATOR_RESET, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.RENDER_TARGET_FORMAT_MISMATCH_PIPELINE_STATE, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.INVALID_SUBRESOURCE_STATE, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.MAP_INVALIDHEAP, true);
+                //RenderContext.SetDX12BreakOnId(EDx12MessageId.CREATEGRAPHICSPIPELINESTATE_RENDERTARGETVIEW_NOT_SET, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.CREATEUNORDEREDACCESSVIEW_INVALIDFORMAT, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.CREATERESOURCEANDHEAP_INVALIDHEAPPROPERTIES, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.CREATE_CONSTANT_BUFFER_VIEW_INVALID_RESOURCE, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.RESOURCE_BARRIER_INVALID_HEAP, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.COPYRESOURCE_INVALIDDSTRESOURCE, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.RESOURCE_BARRIER_MATCHING_STATES, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.OBJECT_DELETED_WHILE_STILL_IN_USE, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.CREATESHADERRESOURCEVIEW_INVALIDFORMAT, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.CREATEUNORDEREDACCESSVIEW_INVALIDDIMENSIONS, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.DEPTH_STENCIL_FORMAT_MISMATCH_PIPELINE_STATE, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.CREATESHADERRESOURCEVIEW_INVALIDFORMAT, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.SET_DESCRIPTOR_HEAP_INVALID, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.SET_DESCRIPTOR_TABLE_INVALID, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.INVALID_DESCRIPTOR_HANDLE, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.RESOURCE_BARRIER_BEFORE_AFTER_MISMATCH, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.DEVICE_REMOVAL_PROCESS_AT_FAULT, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.UNMAP_RANGE_NOT_EMPTY, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.EXECUTECOMMANDLISTS_OPENCOMMANDLIST, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.COPYTEXTUREREGION_INVALIDSRCDIMENSIONS, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.EXECUTECOMMANDLISTS_FAILEDCOMMANDLIST, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.DEVICE_REMOVAL_PROCESS_AT_FAULT, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.DEVICE_REMOVAL_PROCESS_POSSIBLY_AT_FAULT, true);
+                RenderContext.SetDX12BreakOnId(EDx12MessageId.DEVICE_REMOVAL_PROCESS_NOT_AT_FAULT, true);
             }
 
             RenderPassManager.Initialize(engine);

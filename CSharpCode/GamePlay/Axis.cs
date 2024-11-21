@@ -1065,14 +1065,20 @@ namespace EngineNS.GamePlay
         }
         #endregion
 
-        public class SelectedNodeData
+        public struct FSelectedNodeData
         {
+            public FSelectedNodeData(GamePlay.Scene.TtNode node)
+            {
+                Node = node;
+                StartAbsTransform = FTransform.Identity;
+                StartTransform = FTransform.Identity;
+            }
             public GamePlay.Scene.TtNode Node;
-            public FTransform StartAbsTransform = FTransform.Identity;
-            public FTransform StartTransform = FTransform.Identity;
+            public FTransform StartAbsTransform;
+            public FTransform StartTransform;
         }
-        List<SelectedNodeData> mSelectedNodes;
-        List<SelectedNodeData> SelectedNodes
+        List<FSelectedNodeData> mSelectedNodes;
+        List<FSelectedNodeData> SelectedNodes
         {
             get => mSelectedNodes;
             set
@@ -1081,14 +1087,15 @@ namespace EngineNS.GamePlay
                 mSelectedNodes = value;
             }
         }
-        SelectedNodeData mPosNode = null;
-        public SelectedNodeData GetPosNode()
+        FSelectedNodeData mPosNode;
+        public FSelectedNodeData GetPosNode()
         {
-            if (mPosNode != null)
+            if (mPosNode.Node != null)
+            {
                 return mPosNode;
-
-            if (mSelectedNodes == null || mSelectedNodes.Count == 0)
-                return null;
+            }
+            if (mSelectedNodes.Count == 0)
+                return mPosNode;
             return mSelectedNodes[mSelectedNodes.Count - 1];
         }
         public void UnSelectedNode(GamePlay.Scene.TtNode node)
@@ -1104,27 +1111,53 @@ namespace EngineNS.GamePlay
                 }
             }
         }
+        public void SetSelectedNodes(List<GamePlay.Scene.TtNode> nodes)
+        {
+            if (nodes != null)
+            {
+                if (SelectedNodes == null)
+                    SelectedNodes = new List<FSelectedNodeData>(nodes.Count);
+                SelectedNodes.Clear();
+                DVector3 axisPos = DVector3.Zero;
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    if (nodes[i] == null)
+                        continue;
+                    var nodeData = new FSelectedNodeData()
+                    {
+                        Node = nodes[i],
+                    };
+                    SelectedNodes.Add(nodeData);
+
+                    axisPos += nodes[i].Placement.Position;
+                }
+            }
+            else
+            {
+                SelectedNodes.Clear();
+            }
+        }
         public void SetSelectedNodes(params GamePlay.Scene.TtNode[] nodes)
         {
             if (nodes != null)
             {
-                var tempNodes = new List<SelectedNodeData>(nodes.Length);
+                if (SelectedNodes == null)
+                    SelectedNodes = new List<FSelectedNodeData>(nodes.Length);
 
                 DVector3 axisPos = DVector3.Zero;
                 for (int i = 0; i < nodes.Length; i++)
                 {
                     if (nodes[i] == null)
                         continue;
-                    var nodeData = new SelectedNodeData()
+                    var nodeData = new FSelectedNodeData()
                     {
                         Node = nodes[i],
                     };
-                    tempNodes.Add(nodeData);
+                    SelectedNodes.Add(nodeData);
 
                     axisPos += nodes[i].Placement.Position;
                 }
-                SelectedNodes = (tempNodes.Count != 0) ? tempNodes : null;
-                    
+
                 //if(tempNodes.Count == 0)
                 //{
                 //    mRootNode.SetStyle(Scene.UNode.ENodeStyles.Invisible);
@@ -1153,7 +1186,10 @@ namespace EngineNS.GamePlay
                 //}
             }
             else
-                SelectedNodes = null;
+            {
+                //SelectedNodes = null;
+                SelectedNodes.Clear();
+            }
         }
 
         enAxisSpace mOldAxisSpace;
@@ -1951,8 +1987,19 @@ namespace EngineNS.GamePlay
             {
                 for (int i = 0; i < mSelectedNodes.Count; i++)
                 {
-                    mSelectedNodes[i].StartAbsTransform = ((TtPlacement)mSelectedNodes[i].Node.Placement).AbsTransform;// .TransformData;
-                    mSelectedNodes[i].StartTransform = ((TtPlacement)mSelectedNodes[i].Node.Placement).TransformData;
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
+                    SelectedNodeData tmp = new SelectedNodeData(mSelectedNodes[i].Node);
+                    tmp.StartTransform = ((TtPlacement)mSelectedNodes[i].Node.Placement).AbsTransform;// .TransformData;
+在此之后:
+                    FSelectedNodeData tmp = new SelectedNodeData(mSelectedNodes[i].Node);
+                    tmp.StartTransform = ((TtPlacement)mSelectedNodes[i].Node.Placement).AbsTransform;// .TransformData;
+*/
+                    FSelectedNodeData tmp = new FSelectedNodeData(mSelectedNodes[i].Node);
+                    tmp.StartTransform = ((TtPlacement)mSelectedNodes[i].Node.Placement).AbsTransform;// .TransformData;
+                    tmp.StartTransform = ((TtPlacement)mSelectedNodes[i].Node.Placement).TransformData;
+                    mSelectedNodes[i] = tmp;
                 }
             }
         }
@@ -2672,7 +2719,7 @@ namespace EngineNS.GamePlay
                     for (int i = 0; i < mSelectedNodes.Count; i++)
                     {
                         DMatrix startMat;
-                        DMatrix.Transformation(in mSelectedNodes[i].StartAbsTransform.mScale, in mSelectedNodes[i].StartAbsTransform.mQuat, in mSelectedNodes[i].StartAbsTransform.mPosition, out startMat);
+                        DMatrix.Transformation(mSelectedNodes[i].StartAbsTransform.mScale, mSelectedNodes[i].StartAbsTransform.mQuat, mSelectedNodes[i].StartAbsTransform.mPosition, out startMat);
                         var nodeMat = startMat * transMat;// mLastSelectedActorMatWithoutScaleInv * transMat * mLastSelectedActorMatWithoutScale;
                         if(mSelectedNodes[i].Node.Parent != null)
                         {

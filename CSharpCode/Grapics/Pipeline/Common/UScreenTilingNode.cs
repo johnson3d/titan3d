@@ -24,12 +24,13 @@ namespace EngineNS.Graphics.Pipeline.Common
             AddInput(DepthPinIn);
             AddInputOutput(PointLightsPinIn);
         }
+        TtAttachBuffer TilingAttachement = new TtAttachBuffer();
         public unsafe override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             TilingPinOut.Attachement.Height = TileX * TileY;
             TilingPinOut.Attachement.Width = (uint)sizeof(FTileData);
 
-            var attachement = RenderGraph.AttachmentCache.ImportAttachment(TilingPinOut);
+            var attachement = RenderGraph.AttachmentCache.ImportAttachment(TilingPinOut, TilingAttachement);
             attachement.GpuResource = TileBuffer;
             attachement.Srv = TileSRV;
             attachement.Uav = TileUAV;
@@ -180,6 +181,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void Dispose()
         {
+            CoreSDK.DisposeObject(ref TilingAttachement);
             CoreSDK.DisposeObject(ref TileUAV);
 
             CoreSDK.DisposeObject(ref TileSRV);

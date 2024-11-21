@@ -9,7 +9,7 @@ namespace Canvas
 	class ICanvasBrush;
 
 	class TR_CLASS()
-		FCanvas : public IWeakReference
+		FCanvas : public IWeakRefObject
 	{
 	public:
 		ENGINE_RTTI(FCanvas);

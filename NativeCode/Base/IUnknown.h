@@ -20,15 +20,15 @@ struct WeakRefHandle;
 struct FResourceState;
 
 class TR_CLASS()
-	IWeakReference : public VIUnknown
+	IWeakRefObject : public VIUnknown
 {
 private:
 	WeakRefHandle* Handle;
 public:
 	static UINT64	EngineCurrentFrame;
 public:	
-	IWeakReference();
-	virtual ~IWeakReference();
+	IWeakRefObject();
+	virtual ~IWeakRefObject();
 	virtual long AddRef() override
 	{
 		return ++RefCount;
@@ -50,7 +50,7 @@ public:
 	
 	WeakRefHandle* GetHandle();
 
-	vfxObjectLocker* GetLocker(int index = 0) const;	
+	//vfxObjectLocker* GetLocker(int index = 0) const;	
 };
 
 
@@ -114,8 +114,8 @@ struct WeakRefHandle
 	int AddRef();
 	void Release();
 	std::atomic<int> RefCount;
-	IWeakReference*	mPtrAddress;
-	static WeakRefHandle* NewHandle(IWeakReference* ptr);
+	IWeakRefObject*	mPtrAddress;
+	static WeakRefHandle* NewHandle(IWeakRefObject* ptr);
 };
 
 template<class T>
@@ -133,7 +133,7 @@ public:
 	{
 		Safe_Release(Handle);
 	}
-	void FromObject(IWeakReference* obj)
+	void FromObject(IWeakRefObject* obj)
 	{
 		Safe_Release(Handle);
 		if(obj!=nullptr)
@@ -173,7 +173,7 @@ public:
 
 class VDefferedDeleteManager
 {
-	std::queue<IWeakReference*>		ObjectPool;
+	std::queue<IWeakRefObject*>		ObjectPool;
 	int							IsCleared;
 public:
 	VDefferedDeleteManager()
@@ -184,7 +184,7 @@ public:
 		return IsCleared;
 	}
 	static VDefferedDeleteManager* GetInstance();
-	void PushObject(IWeakReference* obj);
+	void PushObject(IWeakRefObject* obj);
 	void Tick(int limitTimes);
 	void Cleanup();
 };
@@ -250,7 +250,7 @@ public:
 	virtual void InvalidateResource() {
 		return;
 	}
-	virtual bool RestoreResource(IWeakReference* pDevice) {
+	virtual bool RestoreResource(IWeakRefObject* pDevice) {
 		return true;
 	}
 };

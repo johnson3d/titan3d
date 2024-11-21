@@ -62,6 +62,13 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             mCopyDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
         }
+        public override void Dispose()
+        {
+            CoreSDK.DisposeObject(ref ColorAttachement);
+            CoreSDK.DisposeObject(ref ColorOutAttachement);
+            CoreSDK.DisposeObject(ref mCopyDrawcall);
+            base.Dispose();
+        }
         public override void OnResize(TtRenderPolicy policy, float x, float y)
         {
             ColorPinOut.Attachement.Width = (uint)x;
@@ -72,6 +79,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             base.FrameBuild(policy);
         }
+        TtAttachBuffer ColorOutAttachement = new TtAttachBuffer();
         public override void BeforeTickLogic(TtRenderPolicy policy)
         {
             var buffer = this.FindAttachBuffer(ColorPinIn);
@@ -84,7 +92,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     ColorAttachement.CreateBufferViews(in buffer.BufferDesc);
                 }
 
-                var attachement = RenderGraph.AttachmentCache.ImportAttachment(ColorPinOut);
+                var attachement = RenderGraph.AttachmentCache.ImportAttachment(ColorPinOut, ColorOutAttachement);
 
                 attachement.GpuResource = ColorAttachement.GpuResource;
                 attachement.Srv = ColorAttachement.Srv;

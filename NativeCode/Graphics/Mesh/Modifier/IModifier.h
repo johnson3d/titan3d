@@ -4,7 +4,7 @@
 NS_BEGIN
 
 class TR_CLASS()
-	IModifier : public IWeakReference
+	IModifier : public IWeakRefObject
 {
 public:
 	virtual void SetInputStreams(EngineNS::NxRHI::FMeshPrimitives* mesh, EngineNS::NxRHI::FVertexArray* vao) {}

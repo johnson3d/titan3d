@@ -197,6 +197,7 @@ namespace EngineNS.Thread.Async
         {
             PostAction = null;
             PostActionCondition = null;
+            Result = default(T);
             base.Reset();
         }
         public override TtAsyncTaskStateBase ExecutePostEvent()

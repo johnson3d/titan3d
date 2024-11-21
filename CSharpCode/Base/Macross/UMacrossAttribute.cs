@@ -1,10 +1,18 @@
-﻿using System;
+﻿using EngineNS.Bricks.CodeBuilder;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace EngineNS.Macross
 {
+    public class TtMacrossCustomCodeGenAttribute : Attribute
+    {
+        public virtual void GenCustomCode(TtClassDeclaration classDec, TtCodeGeneratorBase codeGen)
+        {
+
+        }
+    }
     public class TtMacrossAttribute : Attribute
     {
         public bool IsGenShader = false;

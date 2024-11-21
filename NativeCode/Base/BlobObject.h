@@ -7,7 +7,7 @@ NS_BEGIN
 class XndAttribute;
 
 struct TR_CLASS()
-	IBlobObject : public IWeakReference
+	IBlobObject : public IWeakRefObject
 {
 	ENGINE_RTTI(IBlobObject);
 	std::vector<BYTE>		mDatas;
@@ -47,7 +47,7 @@ struct TR_CLASS()
 };
 
 class TR_CLASS()
-	FBitset : public IWeakReference
+	FBitset : public IWeakRefObject
 {
 	UINT mBitCount;
 	std::vector<BYTE> mData;

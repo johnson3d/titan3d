@@ -28,7 +28,7 @@ struct NavMeshTileHeader
 class RcNavQuery;
 
 class TR_CLASS()
-	RcNavMesh : public IWeakReference
+	RcNavMesh : public IWeakRefObject
 {
 protected:
 	dtNavMesh*		mNavMesh;

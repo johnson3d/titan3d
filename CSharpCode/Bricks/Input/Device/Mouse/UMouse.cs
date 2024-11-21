@@ -1,5 +1,4 @@
-﻿using Org.BouncyCastle.Asn1.Crmf;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -15,10 +14,10 @@ namespace EngineNS.Bricks.Input.Device.Mouse
             {
                 bShowCursor = value;
 
-                OnSetShowCursor();
+                OnSetShowCursor(IntPtr.Zero);
             }
         }
-        partial void OnSetShowCursor();
+        partial void OnSetShowCursor(IntPtr window);
 
         public int GlobalMouseX;
         public int GlobalMouseY;

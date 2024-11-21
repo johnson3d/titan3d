@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_4406185169294587720 Type="EngineNS.GamePlay.Movemnet.TtMovement.TtMovementData@EngineCore">
+  <EnableGravity Type="System.Boolean@Unknown" Order="0" />
+  <GravityAcceleration Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.TtNode.ENodeStyles@EngineCore" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.TtBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.TtPlacementBase@EngineCore" Order="2" />
+</Hash_4406185169294587720>

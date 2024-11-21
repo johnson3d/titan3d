@@ -64,6 +64,15 @@ namespace EngineNS.NxRHI
             this.GpuQueue.Dispose();
             base.Dispose();
         }
+        public unsafe NxRHI.DX12GpuDevice AsDX12Deivce
+        {
+            get
+            {
+                if (RhiType == ERhiType.RHI_D3D12)
+                    return new NxRHI.DX12GpuDevice(mCoreObject.CppPointer);
+                return new NxRHI.DX12GpuDevice();
+            }
+        }
         public ERhiType RhiType
         {
             get
@@ -78,15 +87,6 @@ namespace EngineNS.NxRHI
                 return mCoreObject.mCaps;
             }
         }
-
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-        public UShaderDefinitions GlobalEnvDefines { get; } = new UShaderDefinitions();
-        Hash160 mGlobalEnvHash;
-在此之后:
-        public TtShaderDefinitions GlobalEnvDefines { get; } = new UShaderDefinitions();
-        Hash160 mGlobalEnvHash;
-*/
         public TtShaderDefinitions GlobalEnvDefines { get; } = new TtShaderDefinitions();
         Hash160 mGlobalEnvHash;
         public Hash160 GlobalEnvHash

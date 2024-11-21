@@ -38,6 +38,29 @@ namespace EngineNS.Editor.Forms
 
                     var stats = TtStatistic.Instance.RenderCmdQueue;
                     ImGuiAPI.Text($"CmdList = {stats.NumOfCmdlist};Drawcall = {stats.NumOfDrawcall};Primitive = {stats.NumOfPrimitive};");
+                    
+                    ImGuiAPI.Separator();
+                    ImGuiAPI.Text($"UseMemory = {CoreSDK.NativeMemoryUsed()};MaxMemory = {CoreSDK.NativeMemoryMax()};AllocTimes = {CoreSDK.NativeMemoryAllocTimes()};");
+                    ImGuiAPI.Text($"Texture Alive = {NxRHI.ITexture.GetAliveCount()};");
+                    ImGuiAPI.Text($"Texture Alive AttachBuffer = {NxRHI.ITexture.GetAliveAttachBufferCount()};");
+                    if (TtEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_D3D12)
+                    {
+                        var dx12 = TtEngine.Instance.GfxDevice.RenderContext.AsDX12Deivce;
+                        ImGuiAPI.Separator();
+                        ImGuiAPI.Text($"DX12 CmdAllocator = {dx12.GetCommandAllocatorManager().GetNumOfAllocators()};");
+                        ImGuiAPI.Text($"DX12 CmdAllocator Recycles= {dx12.GetCommandAllocatorManager().GetNumOfRecycles()};");
+                        ImGuiAPI.Text($"DX12 CmdAllocator RecycleRefs= {dx12.GetCommandAllocatorManager().GetNumOfRecyclesRefs()};");
+                        ImGuiAPI.Separator();
+                    }
+                    
+
+                    ImGuiAPI.Separator();
+                    ImGuiAPI.Text("Begin AttachBuffer");
+                    foreach (var i in TtEngine.Instance.GfxDevice.AttachBufferManager.Pools)
+                    {
+                        ImGuiAPI.Text($"{i.Key.ToString()} X {i.Value.PoolSize} => Max({i.Value.FrameMaxLiveCount}) / Alloc({i.Value.FrameAllocCount})");
+                    }
+                    ImGuiAPI.Text("End AttachBuffer");
                     ImGuiAPI.EndTabBar();
                 }
                 

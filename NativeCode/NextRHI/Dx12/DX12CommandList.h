@@ -13,6 +13,8 @@ namespace NxRHI
 	{
 	public:
 		AutoRef<ID3D12CommandAllocator>		mAllocator;
+		AutoRef<DX12CommandList>			mCmdlist;
+		bool								mIsRecording = false;
 		virtual void ResetGpuDraws() override;
 	};
 	class DX12CommandList : public ICommandList
@@ -24,7 +26,7 @@ namespace NxRHI
 		virtual ICmdRecorder* BeginCommand() override;
 		virtual void EndCommand() override;
 		virtual bool IsRecording() const override {
-			return mIsRecording;
+			return mCmdListState == ECmdListState::Recording;
 		}
 		virtual void SetDebugName(const char* name) override;
 		virtual void SetShader(IShader* shader) override;
@@ -84,7 +86,15 @@ namespace NxRHI
 		AutoRef<ID3D12CommandSignature>		mCurrentCmdSig;
 
 		std::wstring				mDebugNameW;
-		bool						mIsRecording = false;
+
+		enum ECmdListState
+		{
+			None = 0,
+			Recording,
+			ExecuteWaiting,
+			Executing,
+		};
+		ECmdListState				mCmdListState = ECmdListState::None;
 	private:
 		DX12CmdRecorder* GetDX12CmdRecorder()
 		{

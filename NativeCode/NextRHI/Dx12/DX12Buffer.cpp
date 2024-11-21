@@ -527,7 +527,7 @@ namespace NxRHI
 		std::wstring n = StringHelper::strtowstr(name);
 		pTarGpuResource->SetName(n.c_str());
 
-		if (mDeviceRef.GetPtr()->Desc.GpuDump)
+		if (mDeviceRef.GetPtr()->Desc.IsAftermath)
 		{
 			DX12ResourceDebugMapper::Get()->SetDebugMapper(pTarGpuResource, name);
 		}
@@ -539,9 +539,14 @@ namespace NxRHI
 
 	DX12Texture::~DX12Texture()
 	{
+		if (DebugName == "TtAttachBuffer")
+		{
+			AliveAttachBufferCount--;
+		}
 		auto device = mDeviceRef.GetPtr();
 		if (device == nullptr)
 			return;
+
 		mGpuResource = nullptr;
 	}
 	D3D12_RESOURCE_FLAGS BufferTypeToDXBindFlags(EBufferType type)
@@ -1097,10 +1102,22 @@ namespace NxRHI
 
 	void DX12Texture::SetDebugName(const char* name)
 	{
+		if (DebugName == "TtAttachBuffer")
+		{
+			//DebugName = name;
+		}
+		else
+		{
+			DebugName = name;
+			if (DebugName == "TtAttachBuffer")
+			{
+				AliveAttachBufferCount++;
+			}
+		}
 		std::wstring n = StringHelper::strtowstr(name);
 		mGpuResource->SetName(n.c_str());
 
-		if (mDeviceRef.GetPtr()->Desc.GpuDump)
+		if (mDeviceRef.GetPtr()->Desc.IsAftermath)
 		{
 			DX12ResourceDebugMapper::Get()->SetDebugMapper(mGpuResource, name);
 		}

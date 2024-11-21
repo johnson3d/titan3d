@@ -313,6 +313,25 @@ namespace EngineNS.GamePlay.Scene
             return false;
         }
 
+        [Rtti.Meta]
+        public virtual Guid NodeId
+        {
+            get => Guid.Empty;
+            set { }
+        }
+
+        public TtNode FindNode(in Guid nodeId)
+        {
+            if(nodeId == Guid.Empty)
+                return null;
+            for(int i=0; i<Children.Count; i++)
+            {
+                if(Children[i].NodeId == nodeId)
+                    return Children[i];
+            }
+            return null;
+        }
+
         public virtual UInt32 SceneId
         {
             get => UInt32.MaxValue;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using EngineNS.Graphics.Pipeline;
 
 namespace EngineNS.Bricks.Procedure.Node.GpuNode
 {
@@ -19,6 +20,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
             }
             return null;
         }
+        TtAttachBuffer HeightAttachement = new TtAttachBuffer();
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
             if (Policy == null)
@@ -29,7 +31,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuNode
             Policy.OnResize(Input.Width, Input.Height);
             //Input.Upload2GpuTexture2D()
             var h2flow = Policy.FindNode<GpuShading.TtHeigh2FlowMapNode>();
-            var heightAttachement = Policy.AttachmentCache.ImportAttachment(h2flow.HeightPinIn);
+            var heightAttachement = Policy.AttachmentCache.ImportAttachment(h2flow.HeightPinIn, HeightAttachement);
             heightAttachement.SetImportedBuffer(buffer);
             var ending = Policy.RootNode as GpuShading.TtGpuFetchNode;
 

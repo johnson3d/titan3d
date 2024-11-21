@@ -65,6 +65,12 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             await base.Initialize(policy, debugName);
         }
+        public override void Dispose()
+        {
+            CoreSDK.DisposeObject(ref ResultAttachement);
+            base.Dispose();
+        }
+        TtAttachBuffer ResultAttachement = new TtAttachBuffer();
         public override void BeforeTickLogic(TtRenderPolicy policy)
         {
             if (string.IsNullOrEmpty(ProxyNodeName))
@@ -87,7 +93,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             var refAttachement = RenderGraph.AttachmentCache.FindAttachement(pin.Attachement.AttachmentName);
             if (refAttachement == null)
                 return;
-            var attachement = RenderGraph.AttachmentCache.ImportAttachment(ResultPinOut);            
+            var attachement = RenderGraph.AttachmentCache.ImportAttachment(ResultPinOut, ResultAttachement);
             attachement.Srv = refAttachement.Srv;
             attachement.Uav = refAttachement.Uav;
         }

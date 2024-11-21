@@ -408,9 +408,26 @@ namespace NxRHI
 	};
 	class TR_CLASS(SV_Dispose = self->Release())
 		ITexture : public IGpuBufferData
-	{//1,2,3d
+	{
+	protected:
+		static std::atomic<int> AliveCount;
+		static std::atomic<int> AliveAttachBufferCount;
 	public:
 		ENGINE_RTTI(ITexture);
+		static int GetAliveCount() {
+			return AliveCount;
+		}
+		static int GetAliveAttachBufferCount() {
+			return AliveAttachBufferCount;
+		}
+		ITexture()
+		{
+			AliveCount++;
+		}
+		~ITexture()
+		{
+			AliveCount--;
+		}
 
 		int GetDimension() const {
 			if (Desc.Height == 0 && Desc.Depth == 0)
@@ -452,6 +469,7 @@ namespace NxRHI
 	public:
 		FTextureDesc		Desc{};
 		FResourceState		mResourceState{};
+		std::string			DebugName;
 	};
 
 	struct TR_CLASS(SV_LayoutStruct = 8)

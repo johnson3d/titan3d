@@ -988,7 +988,7 @@ namespace NxRHI
 		return false;
 	}
 
-	bool FMeshPrimitives::RestoreResource(IWeakReference* pDevice)
+	bool FMeshPrimitives::RestoreResource(IWeakRefObject* pDevice)
 	{
 		if (mXnd == nullptr)
 			return false;

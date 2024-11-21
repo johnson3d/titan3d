@@ -13,19 +13,19 @@ void VIUnknown::DeleteThis()
 	delete this;
 }
 
-UINT64 IWeakReference::EngineCurrentFrame = 0;
+UINT64 IWeakRefObject::EngineCurrentFrame = 0;
 
 FOnManagedObjectHolderDestroy IManagedObjectHolder::OnManagedObjectHolderDestroy = nullptr;
 
-vfxObjectLocker gDefaultObjectLocker;
+//vfxObjectLocker gDefaultObjectLocker;
 
-IWeakReference::IWeakReference()
+IWeakRefObject::IWeakRefObject()
 {
 	//Handle = ObjectHandle::NewHandle(this);
 	Handle = nullptr;
 }
 
-IWeakReference::~IWeakReference()
+IWeakRefObject::~IWeakRefObject()
 {
 	if (Handle != nullptr)
 	{
@@ -34,17 +34,17 @@ IWeakReference::~IWeakReference()
 	}
 }
 
-void IWeakReference::Cleanup()
+void IWeakRefObject::Cleanup()
 {
 
 }
 
-vfxObjectLocker* IWeakReference::GetLocker(int index) const
-{
-	return &gDefaultObjectLocker;
-}
+//vfxObjectLocker* IWeakReference::GetLocker(int index) const
+//{
+//	return &gDefaultObjectLocker;
+//}
 
-WeakRefHandle* IWeakReference::GetHandle()
+WeakRefHandle* IWeakRefObject::GetHandle()
 {
 	if (Handle == nullptr)
 	{
@@ -54,7 +54,7 @@ WeakRefHandle* IWeakReference::GetHandle()
 	return Handle;
 }
 
-Hash64 IWeakReference::GetHash64() 
+Hash64 IWeakRefObject::GetHash64() 
 {
 	return Hash64::Empty;
 }
@@ -71,7 +71,7 @@ void WeakRefHandle::Release()
 		delete this;
 }
 
-WeakRefHandle* WeakRefHandle::NewHandle(IWeakReference* ptr)
+WeakRefHandle* WeakRefHandle::NewHandle(IWeakRefObject* ptr)
 {
 	auto handle = new WeakRefHandle();
 	handle->mPtrAddress = ptr;
@@ -91,7 +91,7 @@ void VDefferedDeleteManager::Cleanup()
 }
 
 VCritical GDefferedDeleteLocker;
-void VDefferedDeleteManager::PushObject(IWeakReference* obj)
+void VDefferedDeleteManager::PushObject(IWeakRefObject* obj)
 {
 	if (IsCleared == 1)
 	{
@@ -118,7 +118,7 @@ void VDefferedDeleteManager::Tick(int limitTimes)
 {
 	while (ObjectPool.size() > 0)
 	{
-		IWeakReference* cur;
+		IWeakRefObject* cur;
 		{
 			VAutoLock(GDefferedDeleteLocker);
 			cur = ObjectPool.front();

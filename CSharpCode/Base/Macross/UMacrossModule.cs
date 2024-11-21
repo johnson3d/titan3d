@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using EngineNS.Bricks.CodeBuilder;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,9 +7,28 @@ using System.Xml.Linq;
 
 namespace EngineNS.Macross
 {
+    public struct PropertyData
+    {
+        public string Name;
+        public Rtti.TtTypeDesc Type;
+        public ulong NameHash;
+        public ulong GetNameHash()
+        {
+            return Standart.Hash.xxHash.xxHash64.ComputeHash(Name);
+        }
+    }
+
+    public interface ISceneNodeMacrossInterface
+    {
+        public RName MacrossName { get; set; }
+        public List<PropertyData> CollectionMacrossProperties();
+        public TtExpressionBase GetPropertyExpression(in PropertyData propData);
+        public object GetMacrossObject();
+    }
+
     public class UMacrossGetterBase
     {
-        public RName Name { get; set; }
+        public virtual RName Name { get; set; }
         public uint Version { get; protected set; }
         public virtual object InnerObject { get; set; }
         public virtual void Clear(UMacrossModule module)
@@ -41,6 +61,16 @@ namespace EngineNS.Macross
             result.Version = ver;
             result.InnerObject = innerObj;
             return result;
+        }
+
+        public override RName Name 
+        { 
+            get => base.Name; 
+            set
+            {
+                base.Name = value;
+                Reset(TtEngine.Instance.MacrossModule);
+            }
         }
 
         public override object InnerObject
@@ -80,7 +110,8 @@ namespace EngineNS.Macross
         {//不要保存返回值!!
             if (mAssemblyDesc == null)
                 return null;
-
+            if (name == null)
+                return null;
             return mAssemblyDesc.CreateInstance(name) as T;
         }
         public List<WeakReference<UMacrossGetterBase>> mGetters = new List<WeakReference<UMacrossGetterBase>>();

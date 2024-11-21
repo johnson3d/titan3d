@@ -7,7 +7,7 @@
 NS_BEGIN
 
 class TR_CLASS()
-CsValueList : public IWeakReference
+CsValueList : public IWeakRefObject
 {
 public:
 	ENGINE_RTTI(CsValueList);
@@ -78,7 +78,7 @@ struct CSList
 };
 
 class TR_CLASS()
-	CsQueue : public IWeakReference
+	CsQueue : public IWeakRefObject
 {
 protected:
 	TR_MEMBER()

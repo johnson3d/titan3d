@@ -15,7 +15,7 @@ typedef int SOCKET;
 NS_BEGIN
 
 class TR_CLASS()
-TcpClient : public IWeakReference
+TcpClient : public IWeakRefObject
 {
 private:
 	SOCKET			mSocket;

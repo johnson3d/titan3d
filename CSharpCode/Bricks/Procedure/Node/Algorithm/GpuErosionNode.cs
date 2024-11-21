@@ -20,6 +20,7 @@ namespace EngineNS.Bricks.Procedure.Node
             get;
             set;
         }
+        TtAttachBuffer WaterAttachement = new TtAttachBuffer();
         public unsafe override bool OnProcedure(UPgcGraph graph)
         {
             if (Policy == null)
@@ -29,7 +30,7 @@ namespace EngineNS.Bricks.Procedure.Node
             var buffer = Input.GetGpuBuffer<float>();
             var incWater = Policy.FindNode<GpuShading.TtErosionIncWaterNode>();
             incWater.Rain = RainMap;
-            var waterAttachement = Policy.AttachmentCache.ImportAttachment(incWater.WaterPinInOut);
+            var waterAttachement = Policy.AttachmentCache.ImportAttachment(incWater.WaterPinInOut, WaterAttachement);
             waterAttachement.SetImportedBuffer(buffer);
             var ending = Policy.RootNode as GpuShading.TtGpuFetchNode;
 

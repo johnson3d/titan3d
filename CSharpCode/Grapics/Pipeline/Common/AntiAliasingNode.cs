@@ -174,6 +174,14 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             base.InitNodePins();
         }
+        public override void Dispose()
+        {
+            CoreSDK.DisposeObject(ref ResultBuffer[0]);
+            CoreSDK.DisposeObject(ref ResultBuffer[1]);
+            CoreSDK.DisposeObject(ref mCopyColorDrawcall);
+            CoreSDK.DisposeObject(ref mCopyDepthDrawcall);
+            base.Dispose();
+        }
         public TtAntiAliasingShading mBasePassShading;
         public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {

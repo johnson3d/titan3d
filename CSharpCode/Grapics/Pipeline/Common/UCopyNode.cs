@@ -28,12 +28,20 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             mCopyDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
         }
+        public override void Dispose()
+        {
+            CoreSDK.DisposeObject(ref ResultBuffer);
+            CoreSDK.DisposeObject(ref DestAttachement);
+            CoreSDK.DisposeObject(ref mCopyDrawcall); 
+            base.Dispose();
+        }
         public TtAttachBuffer ResultBuffer;
         public bool IsCpuAceesResult { get; set; } = false;
         public NxRHI.TtCopyDraw mCopyDrawcall;
+        TtAttachBuffer DestAttachement = new TtAttachBuffer();
         public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
-            var attachement = RenderGraph.AttachmentCache.ImportAttachment(DestPinOut);
+            var attachement = RenderGraph.AttachmentCache.ImportAttachment(DestPinOut, DestAttachement);
             if (SrcPinIn.Attachement.Format != DestPinOut.Attachement.Format ||
                 SrcPinIn.Attachement.Width != DestPinOut.Attachement.Width ||
                 SrcPinIn.Attachement.Height != DestPinOut.Attachement.Height)
@@ -146,14 +154,23 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             mCopyDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
         }
+        public override void Dispose()
+        {
+            CoreSDK.DisposeObject(ref PrevOutAttachement);
+            CoreSDK.DisposeObject(ref ResultBuffer[0]);
+            CoreSDK.DisposeObject(ref ResultBuffer[1]);
+            CoreSDK.DisposeObject(ref mCopyDrawcall); 
+            base.Dispose();
+        }
         public TtAttachBuffer[] ResultBuffer = new TtAttachBuffer[2];
         public TtAttachBuffer Current { get => ResultBuffer[0]; }
         public TtAttachBuffer Previos { get => ResultBuffer[1]; }
         public bool IsCpuAceesResult { get; set; } = false;
         public NxRHI.TtCopyDraw mCopyDrawcall;
+        TtAttachBuffer PrevOutAttachement = new TtAttachBuffer();
         public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
-            var attachement = RenderGraph.AttachmentCache.ImportAttachment(PrevPinOut);
+            var attachement = RenderGraph.AttachmentCache.ImportAttachment(PrevPinOut, PrevOutAttachement);
             if (SrcPinIn.Attachement.Format != PrevPinOut.Attachement.Format ||
                 SrcPinIn.Attachement.Width != PrevPinOut.Attachement.Width ||
                 SrcPinIn.Attachement.Height != PrevPinOut.Attachement.Height)

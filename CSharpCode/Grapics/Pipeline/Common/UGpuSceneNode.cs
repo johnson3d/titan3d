@@ -21,8 +21,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             Dispose_Light();
             Dispose_Instance();
 
-            GpuSceneDescBuffer?.Dispose();
-            
+            CoreSDK.DisposeObject(ref GpuSceneDescBuffer);
+            CoreSDK.DisposeObject(ref GpuSceneAttachement);
+
             base.Dispose();
         }
         public override void InitNodePins()
@@ -35,12 +36,13 @@ namespace EngineNS.Graphics.Pipeline.Common
             InstancePinOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(InstancePinOut);
         }
+        TtAttachBuffer GpuSceneAttachement = new TtAttachBuffer();
         public unsafe override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             GpuScenePinOut.Attachement.Height = 1;
             GpuScenePinOut.Attachement.Width = (uint)sizeof(Shader.FGpuSceneDesc);
 
-            var attachement = RenderGraph.AttachmentCache.ImportAttachment(GpuScenePinOut);
+            var attachement = RenderGraph.AttachmentCache.ImportAttachment(GpuScenePinOut, GpuSceneAttachement);
             attachement.GpuResource = GpuSceneDescBuffer.GpuResource;
             attachement.Srv = GpuSceneDescBuffer.Srv;
             attachement.Uav = GpuSceneDescBuffer.Uav;

@@ -17,12 +17,15 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             PointLights?.Dispose();
             PointLights = null;
+
+            CoreSDK.DisposeObject(ref PointLightsAttachement);
         }
+        TtAttachBuffer PointLightsAttachement = new TtAttachBuffer();
         private unsafe void FrameBuild_Light()
         {
             PointLightsPinOut.Attachement.Height = (uint)PointLights.DataArray.Count;
             PointLightsPinOut.Attachement.Width = (uint)sizeof(Shader.FPointLight);
-            var attachement = RenderGraph.AttachmentCache.ImportAttachment(PointLightsPinOut);
+            var attachement = RenderGraph.AttachmentCache.ImportAttachment(PointLightsPinOut, PointLightsAttachement);
             //if (attachement.Buffer == null)
             //{
             //    PointLights.Flush2GPU(this.BasePass.DrawCmdList.mCoreObject);

@@ -188,7 +188,7 @@ namespace NxRHI
 			return &mResourceState;
 		}
 		virtual void InvalidateResource() override;
-		virtual bool RestoreResource(IWeakReference* pDevice) override;
+		virtual bool RestoreResource(IWeakRefObject* pDevice) override;
 
 		bool Init(IGpuDevice* device, const char* name, UINT atom);
 		bool Init(IGpuDevice* device, FGeomMesh* mesh, const v3dxBox3 * aabb);

@@ -57,6 +57,7 @@ public:
 	virtual void Cleanup() override;
 	void BindPhysX();
 	bool AddToScene(PhyScene* scene);
+	bool RemoveFromScene(PhyScene* scene);
 	virtual void UpdateTransform();
 
 	bool SetPose2Physics(const v3dxVector3* p, const v3dxQuaternion* q, bool autowake)
