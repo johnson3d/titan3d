@@ -131,7 +131,7 @@ namespace EngineNS
         //public virtual EGui.Slate.UWorldViewportSlate GetWorldViewportSlate() { return null; }
 
         public IntPtr mImGuiContext;
-        public EGui.UImDrawDataRHI mDrawData = new EGui.UImDrawDataRHI();
+        public EGui.TtImDrawDataRHI mDrawData = new EGui.TtImDrawDataRHI();
 
         bool[] MousePressed = new bool[3] { false, false, false };
         IntPtr[] MouseCursors = new IntPtr[(int)ImGuiMouseCursor_.ImGuiMouseCursor_COUNT];
@@ -300,7 +300,7 @@ namespace EngineNS
                 if (TtEngine.Instance.Config.SupportMultWindows == false)
                 {
                     var draw_data = ImGuiAPI.GetDrawData();
-                    EGui.UImDrawDataRHI.RenderImDrawData(ref *draw_data, NativeWindow, mDrawData);
+                    EGui.TtImDrawDataRHI.RenderImDrawData(ref *draw_data, NativeWindow, mDrawData);
                     NativeWindow.SwapChain.Present(0, 0);
                 }
 

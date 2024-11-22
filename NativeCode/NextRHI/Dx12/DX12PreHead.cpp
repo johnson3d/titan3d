@@ -146,7 +146,10 @@ namespace NxRHI
 	{
 		auto result = MakeWeakRef(new FDX12DefaultGpuMemory());
 		result->GpuHeap = new DX12GpuHeap();
+		result->Size = (resDesc->Width * resDesc->Height) * GetPixelByteWidth(DXFormatToFormat(resDesc->Format));
 		result->Offset = 0;
+
+		TotalAllocSize += result->Size;
 		auto hr = ((DX12GpuDevice*)device)->mDevice->CreateCommittedResource(heapDesc, D3D12_HEAP_FLAG_NONE,
 			resDesc, resState, nullptr, IID_PPV_ARGS(result->GetDX12GpuHeap()->mGpuResource.GetAddressOf()));
 		if (hr == DXGI_ERROR_DEVICE_REMOVED)
@@ -167,9 +170,11 @@ namespace NxRHI
 	}
 	AutoRef<FGpuMemory> DX12DefaultGpuMemAllocator::Alloc(IGpuDevice* device, UINT64 size, const char* name)
 	{
+		TotalAllocSize += size;//(resDesc.Width * resDesc.Height) * GetPixelByteWidth(DXFormatToFormat(resDesc->Format));
 		auto result = MakeWeakRef(new FDX12DefaultGpuMemory());
 		result->GpuHeap = new DX12GpuHeap();
 		result->Offset = 0;
+		result->Size = size;
 		auto resDesc = mResDesc;
 		resDesc.Width = size;
 		((DX12GpuDevice*)device)->mDevice->CreateCommittedResource(&mHeapProperties, D3D12_HEAP_FLAG_NONE,
@@ -189,6 +194,7 @@ namespace NxRHI
 	
 	void DX12DefaultGpuMemAllocator::Free(FGpuMemory* memory)
 	{
+		TotalFreeSize -= memory->Size;
 		memory->GpuHeap->Release();
 		memory->GpuHeap = nullptr;
 		memory->Offset = -1;
@@ -219,8 +225,8 @@ namespace NxRHI
 	/// DX12DescriptorSetPagedObject-----------------------------------------------------------
 	void DX12PagedHeap::BindToHeap(DX12GpuDevice* device, DX12PagedHeap* dest, UINT destIndex, UINT srcIndex, D3D12_DESCRIPTOR_HEAP_TYPE HeapType)
 	{
-		ASSERT(destIndex < dest->RefResources.size());
-		dest->RefResources[destIndex] = this->RefResources[srcIndex];
+		//ASSERT(destIndex < dest->RefResources.size());
+		//dest->RefResources[destIndex] = this->RefResources[srcIndex];
 		device->mDevice->CopyDescriptorsSimple(1, dest->GetCpuAddress(destIndex),
 			this->GetCpuAddress(srcIndex), HeapType);
 	}
@@ -268,7 +274,7 @@ namespace NxRHI
 		auto result = new DX12PagedHeap();
 		result->OffsetInPage = pAllocator->mDescriptorStride * mDesc.NumDescriptors * index;
 		result->RealObject = page->mGpuHeap;
-		result->RefResources.resize(this->mDesc.NumDescriptors);
+		//result->RefResources.resize(this->mDesc.NumDescriptors);
 		/*auto hr = device->mDevice->CreateDescriptorHeap(&mDesc, IID_ID3D12DescriptorHeap, (void**)result->RealObject.GetAddressOf());
 		if (hr != S_OK)
 		{

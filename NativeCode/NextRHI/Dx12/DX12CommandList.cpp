@@ -476,7 +476,7 @@ namespace NxRHI
 	void DX12CommandList::SetIndexBuffer(IIbView* buffer, bool IsBit32)
 	{
 		ASSERT(mCmdListState = ECmdListState::Recording);
-		GetCmdRecorder()->UseResource(buffer);
+		//GetCmdRecorder()->UseResource(buffer);
 		D3D12_INDEX_BUFFER_VIEW tmp{};
 		if (IsBit32)
 		{
@@ -997,7 +997,7 @@ namespace NxRHI
 		resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 		resState = D3D12_RESOURCE_STATE_COPY_DEST;
 		
-		mResultBuffer = MakeWeakRef(DX12DefaultGpuMemAllocator::AllocGpuMem(device, &resDesc, &properties, resState, "GpuScopeResult"));
+		mResultBuffer = MakeWeakRef(device->GetDefaultBufferMemAllocator()->AllocGpuMem(device, &resDesc, &properties, resState, "GpuScopeResult"));
 
 		/*FFenceDesc fcDesc{};
 		mFence = MakeWeakRef(device->CreateFence(&fcDesc, "DX12GpuScope"));*/

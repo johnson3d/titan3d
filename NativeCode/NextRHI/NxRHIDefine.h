@@ -408,6 +408,7 @@ namespace NxRHI
 	class IGpuDevice;
 	struct FGpuHeapSizedPool;
 	struct IPagedGpuMemAllocator;
+	struct IGpuMemAllocator;
 	struct IGpuHeap : public VIUnknown
 	{
 		virtual UINT64 GetGPUVirtualAddress() = 0;
@@ -417,7 +418,7 @@ namespace NxRHI
 	{
 		IGpuHeap* GpuHeap = nullptr;
 		UINT64 Offset = -1;
-		//UINT64 Size = 0;
+		UINT64 Size = 0;
 
 		inline UINT64 GetGPUVirtualAddress()
 		{
@@ -433,15 +434,9 @@ namespace NxRHI
 	};
 	struct FGpuMemHolder : public IGpuResource
 	{
+		IGpuMemAllocator*	Allocator = nullptr;
 		AutoRef<FGpuMemory>	GpuMem;
-		~FGpuMemHolder()
-		{
-			if (GpuMem != nullptr)
-			{
-				GpuMem->FreeMemory();
-				GpuMem = nullptr;
-			}
-		}
+		~FGpuMemHolder();
 		inline UINT64 GetGPUVirtualAddress()
 		{
 			return GpuMem->GetGPUVirtualAddress();
@@ -452,6 +447,8 @@ namespace NxRHI
 	};
 	struct IGpuMemAllocator : public IWeakRefObject
 	{
+		UINT64						TotalAllocSize = 0;
+		UINT64						TotalFreeSize = 0;
 		virtual AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT64 size, const char* name) = 0;
 		virtual void Free(FGpuMemory* memory) = 0;
 	};
@@ -491,6 +488,18 @@ namespace NxRHI
 			return 64;
 		}
 		virtual IGpuHeap* CreateGpuHeap(IGpuDevice* device, UINT64 size, UINT count, const char* name) = 0;
+
+		int GetPoolsCount() {
+			return (int)Pools.size();
+		}
+		UINT64 GetTotalPoolSize() {
+			UINT64 total = 0;
+			for (auto& i : Pools)
+			{
+				total += i.second->ChunkSize * GetBatchCount(i.second->ChunkSize);
+			}
+			return total;
+		}
 	};
 
 	struct FAddressRange

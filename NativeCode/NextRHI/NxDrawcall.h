@@ -26,6 +26,7 @@ namespace NxRHI
 		ENGINE_RTTI(IGpuDraw);
 		virtual void Commit(ICommandList * cmdlist, bool bRefResource) = 0;
 		virtual UINT GetPrimitiveNum() = 0;
+		virtual void ResetResources() = 0;
 
 		typedef bool FOnVisit(EShaderBindType type, IGpuResource* resource);
 		virtual void ForeachGpuResource(const std::function<FOnVisit>&fun) {
@@ -49,6 +50,9 @@ namespace NxRHI
 			NumOfInstance++;
 		}
 		~IGraphicDraw();
+		virtual void ResetResources() override {
+			BindResources.clear();
+		}
 		const FEffectBinder* FindBinder(const char* name) const;
 		bool BindResource(VNameString name, IGpuResource* resource);
 		void BindResource(const FEffectBinder* binder, IGpuResource * resource);
@@ -125,6 +129,9 @@ namespace NxRHI
 		{
 			NumOfInstance--;
 		}
+		virtual void ResetResources() override {
+			BindResources.clear();
+		}
 		virtual void Commit(ICommandList * cmdlist, bool bRefResource) override;
 		void SetComputeEffect(IComputeEffect * effect) {
 			mEffect = effect;
@@ -191,6 +198,10 @@ namespace NxRHI
 		{
 			NumOfInstance--;
 		}
+		virtual void ResetResources() override {
+			mSrc = nullptr;
+			mDest = nullptr;
+		}
 		virtual void Commit(ICommandList * cmdlist, bool bRefResource) override;
 		void BindBufferSrc(IBuffer* res);
 		void BindBufferDest(IBuffer* res);
@@ -226,6 +237,9 @@ namespace NxRHI
 	{
 	public:
 		TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+		virtual void ResetResources() override {
+			
+		}
 		typedef void(*FOnActionDraw)(ICommandList* cmdlist, void* arg);
 		FOnActionDraw OnActionDraw = nullptr;
 		void* Arg = nullptr;

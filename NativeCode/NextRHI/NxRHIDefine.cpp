@@ -7,6 +7,19 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	FGpuMemHolder::~FGpuMemHolder()
+	{
+		if (GpuMem != nullptr)
+		{
+			if (Allocator != nullptr)
+			{
+				Allocator->TotalFreeSize += GpuMem->Size;
+			}
+			GpuMem->FreeMemory();
+			GpuMem = nullptr;
+		}
+	}
+
 	IGpuResource::~IGpuResource()
 	{
 		ASSERT(CmdRefCount == 0);

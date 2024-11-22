@@ -15,6 +15,10 @@ namespace NxRHI
 	public:
 		DX12GraphicDraw();
 		~DX12GraphicDraw();
+		virtual void ResetResources() override {
+			IGraphicDraw::ResetResources();
+			IsDirty = true;
+		}
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 
 		virtual void OnGpuDrawStateUpdated() override;
@@ -40,6 +44,10 @@ namespace NxRHI
 	public:
 		DX12ComputeDraw();
 		~DX12ComputeDraw();
+		virtual void ResetResources() override {
+			IComputeDraw::ResetResources();
+			IsDirty = true;
+		}
 		virtual void OnBindResource(const FShaderBinder* binder, IGpuResource* resource) override;
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 

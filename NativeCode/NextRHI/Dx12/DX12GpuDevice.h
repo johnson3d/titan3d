@@ -79,6 +79,33 @@ namespace NxRHI
 		DX12CommandAllocatorManager* GetCommandAllocatorManager() {
 			return mCmdAllocatorManager;
 		}
+		DX12PagedGpuMemAllocator* GetCBufferMemAllocator() {
+			return mCBufferMemAllocator;
+		}
+		DX12DefaultGpuMemAllocator* GetDefaultBufferMemAllocator() {
+			return mDefaultBufferMemAllocator;
+		}
+		DX12DefaultGpuMemAllocator* GetUploadBufferMemAllocator() {
+			return mUploadBufferMemAllocator;
+		}
+		DX12DefaultGpuMemAllocator* GetUavBufferMemAllocator() {
+			return mUavBufferMemAllocator;
+		}
+		DX12HeapAllocator* GetRtvAllocator() {
+			return mRtvAllocator;
+		}
+		DX12HeapAllocator* GetDsvAllocator() {
+			return mDsvAllocator;
+		}
+		DX12HeapAllocator* GetSamplerAllocator() {
+			return mSamplerAllocator;
+		}
+		DX12HeapAllocator* GetCbvSrvUavAllocator() {
+			return mCbvSrvUavAllocator;
+		}
+		DX12HeapAllocatorManager* GetDescriptorSetAllocator() {
+			return mDescriptorSetAllocator;
+		}
 	private: 
 		void QueryDevice();
 	public:

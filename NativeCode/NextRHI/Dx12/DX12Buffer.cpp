@@ -81,7 +81,7 @@ namespace NxRHI
 		uploadBuffer->Desc.CpuAccess = (ECpuAccess)(CAS_READ | CAS_WRITE);
 		uploadBuffer->Desc.RowPitch = (UINT)totalSize;
 		uploadBuffer->Desc.Size = size;
-		uploadBuffer->mGpuMemory = MakeWeakRef(DX12DefaultGpuMemAllocator::AllocGpuMem(device, &resDesc, &properties, D3D12_RESOURCE_STATE_GENERIC_READ, name));
+		uploadBuffer->mGpuMemory = MakeWeakRef(device->GetUploadBufferMemAllocator()->AllocGpuMem(device, &resDesc, &properties, D3D12_RESOURCE_STATE_GENERIC_READ, name));
 		uploadBuffer->GpuState = GRS_CopySrc;
 		FMappedSubResource mapped;
 		
@@ -229,7 +229,7 @@ namespace NxRHI
 			}
 			else*/
 			{
-				mGpuMemory = MakeWeakRef(DX12DefaultGpuMemAllocator::AllocGpuMem(device, &resDesc, &properties, resState, "Buffer"));
+				mGpuMemory = MakeWeakRef(device->GetDefaultBufferMemAllocator()->AllocGpuMem(device, &resDesc, &properties, resState, "Buffer"));
 			}
 			
 			//mGpuMemory->GetDX12GpuHeap()-> mGpuResource->SetName(L"Memory:Pooled");
@@ -597,7 +597,7 @@ namespace NxRHI
 		uploadBuffer->Desc.CpuAccess = (ECpuAccess)(CAS_READ | CAS_WRITE);
 		uploadBuffer->Desc.RowPitch = (UINT)rowPitch;
 		uploadBuffer->Desc.Size = (UINT)uploadSize;
-		uploadBuffer->mGpuMemory = MakeWeakRef(DX12DefaultGpuMemAllocator::AllocGpuMem(device, &resDesc, &properties, D3D12_RESOURCE_STATE_GENERIC_READ, name));
+		uploadBuffer->mGpuMemory = MakeWeakRef(device->GetUploadBufferMemAllocator()->AllocGpuMem(device, &resDesc, &properties, D3D12_RESOURCE_STATE_GENERIC_READ, name));
 		uploadBuffer->GpuState = GRS_CopySrc;
 
 		if (uploadBuffer != nullptr)
@@ -1391,7 +1391,7 @@ namespace NxRHI
 		}
 		auto pD3DRes = (ID3D12Resource*)pBuffer->GetHWBuffer();
 		device->mDevice->CreateShaderResourceView(pD3DRes, &d3dDesc, mView->GetCpuAddress(0));
-		mView->Heap->RefResources[0] = Buffer;
+		//mView->Heap->RefResources[0] = Buffer;
 		
 		return true;
 	}
@@ -1436,7 +1436,7 @@ namespace NxRHI
 		auto pD3DRes = (ID3D12Resource*)pBuffer->GetHWBuffer();
 		((DX12GpuDevice*)device)->mDevice->CreateShaderResourceView(pD3DRes, &d3dDesc, mView->GetCpuAddress(0));
 
-		mView->Heap->RefResources[0] = Buffer;
+		//mView->Heap->RefResources[0] = Buffer;
 		return true;
 	}
 

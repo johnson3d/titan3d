@@ -351,7 +351,7 @@ namespace EngineNS.EGui
         {
             public Graphics.Pipeline.TtPresentWindow PresentWindow;
             
-            public UImDrawDataRHI DrawData = new UImDrawDataRHI();
+            public TtImDrawDataRHI DrawData = new TtImDrawDataRHI();
 
             public void Dispose()
             {
@@ -408,7 +408,7 @@ namespace EngineNS.EGui
 
             //ImGui_ImplOpenGL3_RenderDrawData(viewport->DrawData);
             var draw_data = viewport->DrawData;
-            UImDrawDataRHI.RenderImDrawData(ref *draw_data, vpData.PresentWindow, vpData.DrawData);
+            TtImDrawDataRHI.RenderImDrawData(ref *draw_data, vpData.PresentWindow, vpData.DrawData);
         }
         unsafe static ImGuiPlatformIO.FDelegate_Renderer_SwapBuffers ImGui_Renderer_SwapBuffers = ImGui_Renderer_SwapBuffers_Impl;
         unsafe static void ImGui_Renderer_SwapBuffers_Impl(ImGuiViewport* viewport, void* dummy)

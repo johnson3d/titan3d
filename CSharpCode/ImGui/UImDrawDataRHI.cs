@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -64,16 +65,46 @@ namespace EngineNS.EGui
         }
     }
 
-    public class UImDrawDataRHI : IDisposable
+    public class TtImDrawDataRHI : IDisposable
     {
         public NxRHI.TtCommandList CmdList;
         public NxRHI.TtEffectBinder FontTextureBindInfo;
         public NxRHI.TtCbView FontCBuffer;
-        public NxRHI.TtGraphicDraw Drawcall;
+        public NxRHI.TtGpuPipeline Pipeline;
 
         public NxRHI.TtGeomMesh GeomMesh;
         public Graphics.Mesh.TtMeshPrimitives PrimitiveMesh;
 
+        public List<NxRHI.TtGraphicDraw> Drawcalls = new List<NxRHI.TtGraphicDraw>();
+        public int UsedDrawcall = 0;
+        public NxRHI.TtGraphicDraw CreateGraphicDraw()
+        {
+            if (UsedDrawcall == Drawcalls.Count)
+            {
+                var rc = TtEngine.Instance.GfxDevice.RenderContext;
+                var renderer = TtEngine.Instance.GfxDevice.SlateRenderer;
+                var shaderProg = renderer.SlateEffect.ShaderEffect;
+                var result = rc.CreateGraphicDraw();
+                result.BindShaderEffect(renderer.SlateEffect);
+                result.BindGeomMesh(GeomMesh);
+                var cbBinder = shaderProg.FindBinder("ProjectionMatrixBuffer");
+                result.BindCBuffer(cbBinder.mCoreObject, FontCBuffer);
+                result.BindSampler(FontTextureBindInfo, renderer.SamplerState);
+                result.BindPipeline(Pipeline);
+
+                Drawcalls.Add(result);
+            }
+            
+            return Drawcalls[UsedDrawcall++];
+        }
+        public void FreeDrawcalls()
+        {
+            foreach (var i in Drawcalls)
+            {
+                i.BindSRV(FontTextureBindInfo, null);
+            }
+            UsedDrawcall = 0;
+        }
         #region TriangleData
         public NxRHI.TtVbView VertexBuffer;
         public NxRHI.TtIbView IndexBuffer;
@@ -96,18 +127,12 @@ namespace EngineNS.EGui
             PrimitiveMesh.PushAtom(0, in dpDesc);
 
             var shaderProg = renderer.SlateEffect.ShaderEffect;
-            Drawcall = rc.CreateGraphicDraw();
-            Drawcall.BindShaderEffect(renderer.SlateEffect);
-            Drawcall.BindGeomMesh(GeomMesh);
-
+            
             var cbBinder = shaderProg.FindBinder("ProjectionMatrixBuffer");
             FontCBuffer = rc.CreateCBV(cbBinder);
 
-            Drawcall.BindCBuffer(cbBinder.mCoreObject, FontCBuffer);
-
             var smp = shaderProg.FindBinder("Samp_FontTexture");
-            Drawcall.BindSampler(smp.mCoreObject, renderer.SamplerState);
-
+            
             FontTextureBindInfo = shaderProg.FindBinder("FontTexture");
 
             {
@@ -130,9 +155,7 @@ namespace EngineNS.EGui
                 pRenderTarget[0].SrcBlendAlpha = NxRHI.EBlend.BLD_INV_SRC_ALPHA;
                 pRenderTarget[0].DestBlendAlpha = NxRHI.EBlend.BLD_ONE;
                 pRenderTarget[0].BlendEnable = 1;
-                var pipeline = TtEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(TtEngine.Instance.GfxDevice.RenderContext, in pipeDesc);
-                var count = pipeline.UnsafeRefCount;
-                Drawcall.BindPipeline(pipeline);
+                Pipeline = TtEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(TtEngine.Instance.GfxDevice.RenderContext, in pipeDesc);
 
                 //Pipeline.mCoreObject.GetGpuProgram().BindInputLayout(renderer.InputLayout.mCoreObject);
             }
@@ -140,11 +163,15 @@ namespace EngineNS.EGui
         }
         public void Dispose()
         {
+            foreach (var i in Drawcalls)
+            {
+                i.Dispose();
+            }
+            Drawcalls.Clear();
             DataVB.Dispose();
             DataIB.Dispose();
 
             CoreSDK.DisposeObject(ref FontCBuffer);
-            CoreSDK.DisposeObject(ref Drawcall);
             CoreSDK.DisposeObject(ref CmdList);
             CoreSDK.DisposeObject(ref VertexBuffer);
             CoreSDK.DisposeObject(ref IndexBuffer);
@@ -159,11 +186,11 @@ namespace EngineNS.EGui
             get
             {
                 if (mScopeRenderImDrawData == null)
-                    mScopeRenderImDrawData = new Profiler.TimeScope(typeof(UImDrawDataRHI), nameof(RenderImDrawData));
+                    mScopeRenderImDrawData = new Profiler.TimeScope(typeof(TtImDrawDataRHI), nameof(RenderImDrawData));
                 return mScopeRenderImDrawData;
             }
         }
-        public unsafe static void RenderImDrawData(ref ImDrawData draw_data, Graphics.Pipeline.TtPresentWindow presentWindow, UImDrawDataRHI rhiData)
+        public unsafe static void RenderImDrawData(ref ImDrawData draw_data, Graphics.Pipeline.TtPresentWindow presentWindow, TtImDrawDataRHI rhiData)
         {
             using (new Profiler.TimeScopeHelper(ScopeRenderImDrawData))
             {
@@ -177,7 +204,7 @@ namespace EngineNS.EGui
             get
             {
                 if (mScopeUpdateBuffer == null)
-                    mScopeUpdateBuffer = new Profiler.TimeScope(typeof(UImDrawDataRHI), "RenderImDrawData.UpdateBuffer");
+                    mScopeUpdateBuffer = new Profiler.TimeScope(typeof(TtImDrawDataRHI), "RenderImDrawData.UpdateBuffer");
                 return mScopeUpdateBuffer;
             }
         }
@@ -188,11 +215,11 @@ namespace EngineNS.EGui
             get
             {
                 if (mScopeDrawPass == null)
-                    mScopeDrawPass = new Profiler.TimeScope(typeof(UImDrawDataRHI), "RenderImDrawData.DrawPass");
+                    mScopeDrawPass = new Profiler.TimeScope(typeof(TtImDrawDataRHI), "RenderImDrawData.DrawPass");
                 return mScopeDrawPass;
             }
         }
-        private unsafe static void RenderImDrawDataImpl(ref ImDrawData draw_data, Graphics.Pipeline.TtPresentWindow presentWindow, UImDrawDataRHI rhiData)
+        private unsafe static void RenderImDrawDataImpl(ref ImDrawData draw_data, Graphics.Pipeline.TtPresentWindow presentWindow, TtImDrawDataRHI rhiData)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var drawCmd = rhiData.CmdList;
@@ -303,7 +330,7 @@ namespace EngineNS.EGui
                         Vector2 clip_off = draw_data.DisplayPos;
                         for (int n = 0; n < draw_data.CmdListsCount; n++)
                         {
-                            NxRHI.TtGraphicDraw drawcall = null;
+                            NxRHI.TtGraphicDraw drawcall = rhiData.CreateGraphicDraw();
                             var cmd_list = new ImDrawList(draw_data.GetCmdLists()[n]);
                             for (int cmd_i = 0; cmd_i < cmd_list.CmdBufferSize; cmd_i++)
                             {
@@ -317,7 +344,7 @@ namespace EngineNS.EGui
                                     var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)pcmd->TextureId);
                                     if (handle.IsAllocated)
                                     {
-                                        drawcall = rhiData.Drawcall;
+                                        //drawcall = rhiData.Drawcall;
                                         var rsv = handle.Target as NxRHI.TtSrView;
                                         if (rsv != null)
                                         {
@@ -382,6 +409,8 @@ namespace EngineNS.EGui
                 drawCmd.EndCommand();
 
                 rc.GpuQueue.ExecuteCommandList(drawCmd);
+
+                rhiData.FreeDrawcalls();
             }
             
             presentWindow.EndFrame();

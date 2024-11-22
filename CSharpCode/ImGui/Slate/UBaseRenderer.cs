@@ -223,13 +223,15 @@ namespace EngineNS.EGui.Slate
             txDesc.Format = EPixelFormat.PXF_R8G8B8A8_UNORM;
             txDesc.InitData = &initData;
             fontData.FontTexture = rc.CreateTexture(in txDesc);
-
+            
             var srvDesc = new NxRHI.FSrvDesc();
             srvDesc.SetTexture2D();
             srvDesc.Type = NxRHI.ESrvType.ST_Texture2D;
             srvDesc.Format = txDesc.Format;
             srvDesc.Texture2D.MipLevels = 1;
             fontData.FontSRV = rc.CreateSRV(fontData.FontTexture, in srvDesc);
+            fontData.FontSRV.SetDebugName(absFontFile);
+            fontData.FontSRV.AssetName = RName.GetRName(absFontFile, RName.ERNameType.Transient);
 
             io.Fonts.SetTexID((ulong)fontData.SRCGCHandle);
 

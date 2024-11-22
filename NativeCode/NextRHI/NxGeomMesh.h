@@ -70,7 +70,7 @@ namespace NxRHI
 		}
 	};
 	class TR_CLASS()
-		FVertexArray : public VIUnknown
+		FVertexArray : public IGpuResource
 	{
 	public:
 		virtual void Commit(ICommandList * cmdlist);

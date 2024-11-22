@@ -182,29 +182,19 @@ namespace NxRHI
 			FingerPrient = finger;
 		}
 
-		IsDirty = false;
-
-		if (effect->mCbvSrvUavNumber > 0)
+		if (effect->mCbvSrvUavNumber > 0 )
 		{
-			mCbvSrvUavHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-			/*if (mCbvSrvUavHeap == nullptr)
+			if (IsDirty || mCbvSrvUavHeap == nullptr)
 				mCbvSrvUavHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-			ASSERT(mCbvSrvUavHeap->Heap->RefResources.size() == effect->mCbvSrvUavNumber);*/
 		}
-		else
+
+		if (effect->mSamplerNumber > 0 )
 		{
-			mCbvSrvUavHeap = nullptr;
+			if (IsDirty || mSamplerHeap == nullptr)
+				mSamplerHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
 		}
-		if (effect->mSamplerNumber > 0)
-		{
-			mSamplerHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
-			/*if (mSamplerHeap == nullptr)
-				mSamplerHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));*/
-		}
-		else
-		{
-			mSamplerHeap = nullptr;
-		}
+
+		IsDirty = false;
 		ResetHeap(device, effect);
 		
 		for (auto& i : BindResources)
@@ -440,27 +430,18 @@ namespace NxRHI
 			FingerPrient = finger;
 		}
 
-		IsDirty = false;
-
 		if (effect->mCbvSrvUavNumber > 0)
 		{
-			mCbvSrvUavHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-			ASSERT(mCbvSrvUavHeap);
-		}
-		else
-		{
-			mCbvSrvUavHeap = nullptr;
+			if (IsDirty || mCbvSrvUavHeap == nullptr)
+				mCbvSrvUavHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 		}
 		if (effect->mSamplerNumber > 0)
 		{
-			mSamplerHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
-			ASSERT(mSamplerHeap);
-		}
-		else
-		{
-			mSamplerHeap = nullptr;
+			if (IsDirty || mSamplerHeap == nullptr)
+				mSamplerHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
 		}
 		
+		IsDirty = false;
 		ResetHeap(device, effect);
 		BindDescriptors(device, dx12Cmd, effect);
 

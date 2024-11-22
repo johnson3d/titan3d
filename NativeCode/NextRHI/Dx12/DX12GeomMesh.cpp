@@ -16,7 +16,7 @@ namespace NxRHI
 			if (VAs[i] == nullptr)
 				continue;
 
-			dx12Cmd->GetCmdRecorder()->UseResource(VAs[i]->RefResources);
+			//dx12Cmd->GetCmdRecorder()->UseResource(VAs[i]);
 			for (int j = 0; j < VST_Number; j++)
 			{
 				auto vbv = VAs[i]->VertexBuffers[j];
@@ -35,7 +35,8 @@ namespace NxRHI
 	void DX12VertexArray::Commit(ICommandList* cmdlist)
 	{
 		auto dx12Cmd = (DX12CommandList*)cmdlist;
-		dx12Cmd->GetCmdRecorder()->UseResource(RefResources);
+		//dx12Cmd->GetCmdRecorder()->UseResource(RefResources);
+		dx12Cmd->GetCmdRecorder()->UseResource(this);
 		
 		D3D12_VERTEX_BUFFER_VIEW dxVBs[VST_Number]{};
 		for (int i = 0; i < VST_Number; i++)
@@ -55,7 +56,7 @@ namespace NxRHI
 	void DX12VertexArray::BindVB(EVertexStreamType stream, IVbView* buffer)
 	{
 		FVertexArray::BindVB(stream, buffer);
-		RefResources = MakeWeakRef(new FRefResources());
+		/*RefResources = MakeWeakRef(new FRefResources());
 
 		for (int i = 0; i < VST_Number; i++)
 		{
@@ -65,7 +66,7 @@ namespace NxRHI
 			}
 
 			RefResources->Resources.push_back(VertexBuffers[i]);
-		}
+		}*/
 	}
 }
 

@@ -14,12 +14,12 @@ namespace NxRHI
 		static void Commit(DX12CommandList* cmdlist, UINT NumOfVA, DX12VertexArray** VAs);
 		virtual void Commit(ICommandList* cmdlist) override;
 		virtual void BindVB(EVertexStreamType stream, IVbView* buffer) override;
-		struct FRefResources : public IGpuResource
+		/*struct FRefResources : public IGpuResource
 		{
 			std::vector<AutoRef<IGpuResource>>	Resources;
 		};
 
-		AutoRef<FRefResources>	RefResources;
+		AutoRef<FRefResources>	RefResources;*/
 	};
 }
 

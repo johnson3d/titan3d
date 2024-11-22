@@ -15,6 +15,10 @@ namespace EngineNS.NxRHI
                 TtStatistic.Instance.GraphicsDrawcall--;
             base.Dispose();
         }
+        public void ResetResources()
+        {
+            mCoreObject.ResetResources();
+        }
         public uint DrawInstance
         {
             get { return mCoreObject.DrawInstance; }
@@ -83,13 +87,14 @@ namespace EngineNS.NxRHI
         }
         public void BindSRV(FEffectBinder binder, TtSrView srv)
         {
-            if (binder.IsValidPointer == false || srv == null)
+            if (binder.IsValidPointer == false)
                 return;
-            mCoreObject.BindResource(binder, srv.mCoreObject.NativeSuper);
+            var res = (srv == null) ? new IGpuResource() : srv.mCoreObject.NativeSuper;
+            mCoreObject.BindResource(binder, res);
         }
         public void BindSRV(NxRHI.TtEffectBinder binder, TtSrView srv)
         {
-            if (binder == null || srv == null)
+            if (binder == null)
                 return;
             BindSRV(binder.mCoreObject, srv);
         }
@@ -162,6 +167,10 @@ namespace EngineNS.NxRHI
             if (IsDisposed == false)
                 TtStatistic.Instance.ComputeDrawcall--;
             base.Dispose();
+        }
+        public void ResetResources()
+        {
+            mCoreObject.ResetResources();
         }
         public void Commit(ICommandList cmdlist)
         {
@@ -261,6 +270,10 @@ namespace EngineNS.NxRHI
             if (IsDisposed == false)
                 TtStatistic.Instance.TransferDrawcall--;
             base.Dispose();
+        }
+        public void ResetResources()
+        {
+            mCoreObject.ResetResources();
         }
         public void Commit(ICommandList cmdlist)
         {

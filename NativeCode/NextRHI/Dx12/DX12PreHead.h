@@ -85,25 +85,34 @@ namespace NxRHI
 		virtual void FreeMemory();
 	};
 
-	class DX12DefaultGpuMemAllocator : public IGpuMemAllocator
+	class TR_CLASS()
+		DX12DefaultGpuMemAllocator : public IGpuMemAllocator
 	{
 	public:
 		D3D12_RESOURCE_DESC			mResDesc{};
 		D3D12_HEAP_PROPERTIES		mHeapProperties{};
 		D3D12_RESOURCE_STATES		mResState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
 
-		static AutoRef<FGpuMemory> Alloc(IGpuDevice* device, const D3D12_RESOURCE_DESC* resDesc, const D3D12_HEAP_PROPERTIES* heapDesc, D3D12_RESOURCE_STATES resState, const char* debugName);
+		AutoRef<FGpuMemory> Alloc(IGpuDevice* device, const D3D12_RESOURCE_DESC* resDesc, const D3D12_HEAP_PROPERTIES* heapDesc, D3D12_RESOURCE_STATES resState, const char* debugName);
 		virtual AutoRef<FGpuMemory> Alloc(IGpuDevice* device, UINT64 size, const char* name);
 		virtual void Free(FGpuMemory* memory);
 
-		static FGpuMemHolder* AllocGpuMem(IGpuDevice* device, const D3D12_RESOURCE_DESC* resDesc, const D3D12_HEAP_PROPERTIES* heapDesc, D3D12_RESOURCE_STATES resState, const char* debugName) {
+		FGpuMemHolder* AllocGpuMem(IGpuDevice* device, const D3D12_RESOURCE_DESC* resDesc, const D3D12_HEAP_PROPERTIES* heapDesc, D3D12_RESOURCE_STATES resState, const char* debugName) {
 			auto result = new FGpuMemHolder();
+			result->Allocator = this;
 			result->GpuMem = Alloc(device, resDesc, heapDesc, resState, debugName);
 			return result;
 		}
+		UINT64 GetAllocSize() {
+			return TotalAllocSize;
+		}
+		UINT64 GetFreeSize() {
+			return TotalFreeSize;
+		}
 	};
 
-	class DX12PagedGpuMemAllocator : public IPagedGpuMemAllocator
+	class TR_CLASS()
+		DX12PagedGpuMemAllocator : public IPagedGpuMemAllocator
 	{
 	public:
 		D3D12_RESOURCE_DESC			mResDesc{};
@@ -113,6 +122,15 @@ namespace NxRHI
 			return (UINT)(mResDesc.Width / size);
 		}
 		virtual IGpuHeap* CreateGpuHeap(IGpuDevice* device, UINT64 size, UINT count, const char* name) override;
+
+		int GetPoolsCount()
+		{
+			return IPagedGpuMemAllocator::GetPoolsCount();
+		}
+		UINT64 GetTotalPoolSize()
+		{
+			return IPagedGpuMemAllocator::GetTotalPoolSize();
+		}
 	};
 
 	///-----------------------------------------------------------
@@ -126,7 +144,7 @@ namespace NxRHI
 		//D3D12_DESCRIPTOR_HEAP_TYPE	HeapType = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		SIZE_T						OffsetInPage = 0;
 
-		std::vector<AutoRef<IGpuResource>>	RefResources;
+		//std::vector<AutoRef<IGpuResource>>	RefResources;
 	};
 	struct DX12HeapHolder : public IGpuResource
 	{
@@ -136,10 +154,10 @@ namespace NxRHI
 			if (Heap != nullptr)
 			{
 				Heap->Free();
-				for (auto& i : Heap->RefResources)
+				/*for (auto& i : Heap->RefResources)
 				{
 					i = nullptr;
-				}
+				}*/
 
 				Heap = nullptr;
 			}
@@ -201,7 +219,8 @@ namespace NxRHI
 		void FinalCleanup(MemAlloc::FPage<ObjectType>* page);
 	};
 
-	struct DX12HeapAllocator : public MemAlloc::FPagedObjectAllocator<DX12HeapCreator::ObjectType, DX12HeapCreator>
+	struct TR_CLASS()
+		DX12HeapAllocator : public MemAlloc::FPagedObjectAllocator<DX12HeapCreator::ObjectType, DX12HeapCreator>
 	{
 		UINT			mDescriptorStride = 0;
 		DX12HeapHolder* AllocDX12Heap()
@@ -210,13 +229,38 @@ namespace NxRHI
 			result->Heap = this->Alloc<DX12PagedHeap>();
 			return result;
 		}
+		int GetPageCount() {
+			return (int)Pages.size();
+		}
+		int GetTotalSize() {
+			return (int)Pages.size() * Creator.GetPageSize();
+		}
+		int GetAliveCount() {
+			return this->LiveCount;
+		}
 	};	
 	
-	class DX12HeapAllocatorManager : public IWeakRefObject
+	TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+	typedef void(*FDX12HeapAllocatorVisitor)(UINT64 key, EngineNS::NxRHI::DX12HeapAllocator* value);
+
+	class TR_CLASS()
+		DX12HeapAllocatorManager : public IWeakRefObject
 	{
 		std::map<UINT64, AutoRef<DX12HeapAllocator>>		mAllocators;
 	public:
 		DX12HeapHolder* AllocDX12Heap(DX12GpuDevice* pDevice, UINT numOfDescriptor, D3D12_DESCRIPTOR_HEAP_TYPE type);
+		int GetAllocatorCount() {
+			return (int)mAllocators.size();
+		}
+		void IterateAllocator(FDX12HeapAllocatorVisitor fn)
+		{
+			if (fn == nullptr)
+				return;
+			for (auto& i : mAllocators)
+			{
+				fn(i.first, i.second);
+			}
+		}
 	};
 	///-----------------------------------------------------------
 
