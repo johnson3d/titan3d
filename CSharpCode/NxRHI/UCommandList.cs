@@ -73,7 +73,6 @@ namespace EngineNS.NxRHI
             else
                 cp.m_DepthClearValue = 1;
             var ret = mCoreObject.BeginPass(fb.mCoreObject, in cp, name);
-            mCoreObject.SetScissor(0, (NxRHI.FScissorRect*)IntPtr.Zero.ToPointer());
             return ret;
         }
         public unsafe void SetViewport(uint Num, FViewPort* pViewports)

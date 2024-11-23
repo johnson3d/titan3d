@@ -44,9 +44,12 @@ namespace EngineNS.Editor.Forms
                     
                     if(ImGuiAPI.CollapsingHeader("NativeMemory", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                     {
-                        ImGuiAPI.Text($"UseMemory = {CoreSDK.NativeMemoryUsed()};MaxMemory = {CoreSDK.NativeMemoryMax()};AllocTimes = {CoreSDK.NativeMemoryAllocTimes()};");
+                        ImGuiAPI.Text($"UseMemory = {CoreSDK.NativeMemoryUsed() / (1024)}k,;MaxMemory = {CoreSDK.NativeMemoryMax() / (1024)}k;AllocTimes = {CoreSDK.NativeMemoryAllocTimes()};");
                         ImGuiAPI.Text($"Texture Alive = {NxRHI.ITexture.GetAliveCount()};");
                         ImGuiAPI.Text($"Texture Alive AttachBuffer = {NxRHI.ITexture.GetAliveAttachBufferCount()};");
+                        ImGuiAPI.Text($"IGraphicDraw Count = {NxRHI.IGraphicDraw.GetNumOfInstance()};");
+                        ImGuiAPI.Text($"IComputeDraw Count = {NxRHI.IComputeDraw.GetNumOfInstance()};");
+                        ImGuiAPI.Text($"ICopyDraw Count = {NxRHI.ICopyDraw.GetNumOfInstance()};");
                     }
                     
                     if (TtEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_D3D12)

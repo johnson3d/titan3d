@@ -240,6 +240,8 @@ namespace NxRHI
 		
 			for (auto& i : BindResources)
 			{
+				if (i.second == nullptr)
+					continue;
 				switch (i.first->BindType)
 				{
 					case SBT_CBuffer:

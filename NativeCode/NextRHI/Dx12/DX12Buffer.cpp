@@ -506,7 +506,7 @@ namespace NxRHI
 			res->RowPitch = Desc.RowPitch;
 			res->DepthPitch = Desc.DepthPitch;
 		}
-		
+
 		return true;
 	}
 
@@ -532,14 +532,14 @@ namespace NxRHI
 			DX12ResourceDebugMapper::Get()->SetDebugMapper(pTarGpuResource, name);
 		}
 	}
-	
+
 	DX12Texture::DX12Texture()
 	{
 	}
 
 	DX12Texture::~DX12Texture()
 	{
-		if (DebugName == "TtAttachBuffer")
+		if ((Desc.BindFlags & (EBufferType::BFT_RTV | EBufferType::BFT_DSV)) != 0)
 		{
 			AliveAttachBufferCount--;
 		}
@@ -808,6 +808,11 @@ namespace NxRHI
 			//auto cmd = (DX12CommandList*)tsCmd.GetCmdList();
 			////cmd->GetCmdRecorder()->UseResource(this);
 			//this->TransitionTo(cmd, EGpuResourceState::GRS_GenericRead);
+		}
+
+		if ((Desc.BindFlags & (EBufferType::BFT_RTV | EBufferType::BFT_DSV)) != 0)
+		{
+			AliveAttachBufferCount++;
 		}
 			
 		return true;
@@ -1109,10 +1114,6 @@ namespace NxRHI
 		else
 		{
 			DebugName = name;
-			if (DebugName == "TtAttachBuffer")
-			{
-				AliveAttachBufferCount++;
-			}
 		}
 		std::wstring n = StringHelper::strtowstr(name);
 		mGpuResource->SetName(n.c_str());

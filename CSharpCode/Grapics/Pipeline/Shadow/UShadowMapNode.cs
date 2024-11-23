@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.Graphics.Mesh;
 using NPOI.SS.Formula.Functions;
+using Microsoft.Toolkit.HighPerformance.Buffers;
 
 namespace EngineNS.Graphics.Pipeline.Shadow
 {
@@ -525,7 +526,12 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                             Viewport.Height = GBuffersArray[CsmIdx].Viewport.Height;
 
                             cmdlist.SetViewport(in Viewport);
-                            cmdlist.SetScissor(0, (NxRHI.FScissorRect*)0);
+                            var scissor = new NxRHI.FScissorRect();
+                            scissor.MinX = 0;
+                            scissor.MinY = 0;
+                            scissor.MaxX = (int)Viewport.Width;
+                            scissor.MaxY = (int)Viewport.Height;
+                            cmdlist.SetScissor(in scissor);
 
                             var passClear = new NxRHI.FRenderPassClears();
                             //if (CsmIdx == 0)

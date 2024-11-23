@@ -1,5 +1,4 @@
-﻿using NPOI.SS.Formula.Functions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,9 +8,10 @@ namespace EngineNS.Graphics.Pipeline
     {
         public void Dispose() 
         {
-            //don't do it, sth maybe executing
             //CoreSDK.DisposeObject(ref mCmdLists[0]);
             //CoreSDK.DisposeObject(ref mCmdLists[1]);
+            mCmdLists[0] = null;
+            mCmdLists[1] = null;
         }
         private NxRHI.TtCommandList[] mCmdLists = new NxRHI.TtCommandList[2];
         public void Initialize(NxRHI.TtGpuDevice rc, string debugName)
@@ -128,7 +128,12 @@ namespace EngineNS.Graphics.Pipeline
             for (ERenderLayer i = ERenderLayer.RL_Begin; i < ERenderLayer.RL_Num; i++)
             {
                 PassBuffers[(int)i].DrawCmdList.SetViewport(in vp);
-                PassBuffers[(int)i].DrawCmdList.SetScissor(0, (NxRHI.FScissorRect*)0);
+                var scissor = new NxRHI.FScissorRect();
+                scissor.MinX = 0;
+                scissor.MinY = 0;
+                scissor.MaxX = (int)vp.Width;
+                scissor.MaxY = (int)vp.Height;
+                PassBuffers[(int)i].DrawCmdList.SetScissor(in scissor);
             }
         }
         public unsafe void BuildTranslucentRenderPass(TtRenderPolicy policy, in NxRHI.FRenderPassClears passClear, TtGraphicsBuffers frameBuffers, TtGraphicsBuffers gizmosFrameBuffers)

@@ -306,13 +306,18 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                     using (new Profiler.TimeScopeHelper(ScopeFlushDraw))
                     {
                         bgCmdlist.SetViewport(in GBuffers.Viewport);
-                        cmdlist.SetScissor(0, (NxRHI.FScissorRect*)0);
+                        var scissor = new NxRHI.FScissorRect();
+                        scissor.MinX = 0;
+                        scissor.MinY = 0;
+                        scissor.MaxX = (int)GBuffers.Viewport.Width;
+                        scissor.MaxY = (int)GBuffers.Viewport.Height;
+                        cmdlist.SetScissor(in scissor);
                         bgCmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Background.ToString());
                         bgCmdlist.FlushDraws();
                         bgCmdlist.EndPass();
 
                         cmdlist.SetViewport(in GBuffers.Viewport);
-                        cmdlist.SetScissor(0, (NxRHI.FScissorRect*)0);
+                        cmdlist.SetScissor(in scissor);
                         passClears.ClearFlags = (NxRHI.ERenderPassClearFlags)0;
                         cmdlist.BeginPass(GBuffers.FrameBuffers, in passClears, ERenderLayer.RL_Opaque.ToString());
                         cmdlist.FlushDraws();

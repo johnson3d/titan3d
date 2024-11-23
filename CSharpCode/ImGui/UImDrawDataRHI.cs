@@ -68,8 +68,8 @@ namespace EngineNS.EGui
     public class TtImDrawDataRHI : IDisposable
     {
         public NxRHI.TtCommandList CmdList;
-        public NxRHI.TtEffectBinder FontTextureBindInfo;
-        public NxRHI.TtCbView FontCBuffer;
+        public NxRHI.TtEffectBinder SlateTextureBindInfo;
+        public NxRHI.TtCbView SlateCBuffer;
         public NxRHI.TtGpuPipeline Pipeline;
 
         public NxRHI.TtGeomMesh GeomMesh;
@@ -88,20 +88,20 @@ namespace EngineNS.EGui
                 result.BindShaderEffect(renderer.SlateEffect);
                 result.BindGeomMesh(GeomMesh);
                 var cbBinder = shaderProg.FindBinder("ProjectionMatrixBuffer");
-                result.BindCBuffer(cbBinder.mCoreObject, FontCBuffer);
-                result.BindSampler(FontTextureBindInfo, renderer.SamplerState);
+                result.BindCBuffer(cbBinder.mCoreObject, SlateCBuffer);
+                result.BindSampler(SlateTextureBindInfo, renderer.SamplerState);
                 result.BindPipeline(Pipeline);
 
                 Drawcalls.Add(result);
             }
-            
+
             return Drawcalls[UsedDrawcall++];
         }
         public void FreeDrawcalls()
         {
             foreach (var i in Drawcalls)
             {
-                i.BindSRV(FontTextureBindInfo, null);
+                i.BindSRV(SlateTextureBindInfo, null);
             }
             UsedDrawcall = 0;
         }
@@ -129,11 +129,11 @@ namespace EngineNS.EGui
             var shaderProg = renderer.SlateEffect.ShaderEffect;
             
             var cbBinder = shaderProg.FindBinder("ProjectionMatrixBuffer");
-            FontCBuffer = rc.CreateCBV(cbBinder);
+            SlateCBuffer = rc.CreateCBV(cbBinder);
 
             var smp = shaderProg.FindBinder("Samp_FontTexture");
             
-            FontTextureBindInfo = shaderProg.FindBinder("FontTexture");
+            SlateTextureBindInfo = shaderProg.FindBinder("FontTexture");
 
             {
                 var pipeDesc = new NxRHI.FGpuPipelineDesc();
@@ -171,7 +171,7 @@ namespace EngineNS.EGui
             DataVB.Dispose();
             DataIB.Dispose();
 
-            CoreSDK.DisposeObject(ref FontCBuffer);
+            CoreSDK.DisposeObject(ref SlateCBuffer);
             CoreSDK.DisposeObject(ref CmdList);
             CoreSDK.DisposeObject(ref VertexBuffer);
             CoreSDK.DisposeObject(ref IndexBuffer);
@@ -307,7 +307,7 @@ namespace EngineNS.EGui
                     -1.0f,
                     1.0f);
 
-                rhiData.FontCBuffer.SetValue("ProjectionMatrix", in mvp);
+                rhiData.SlateCBuffer.SetValue("ProjectionMatrix", in mvp);
 
                 var fb_scale = io.DisplayFramebufferScale;
                 draw_data.ScaleClipRects(in fb_scale);
@@ -322,7 +322,9 @@ namespace EngineNS.EGui
                     if (drawCmd.BeginPass(swapChain.BeginFrameBuffers(drawCmd), in passClears, "ImGui"))
                     {
                         if (swapChain.Viewport.Width != 0 && swapChain.Viewport.Height != 0)
+                        {
                             drawCmd.SetViewport(swapChain.Viewport);
+                        }
 
                         // Render command lists
                         int vtx_offset = 0;
@@ -330,10 +332,10 @@ namespace EngineNS.EGui
                         Vector2 clip_off = draw_data.DisplayPos;
                         for (int n = 0; n < draw_data.CmdListsCount; n++)
                         {
-                            NxRHI.TtGraphicDraw drawcall = rhiData.CreateGraphicDraw();
                             var cmd_list = new ImDrawList(draw_data.GetCmdLists()[n]);
                             for (int cmd_i = 0; cmd_i < cmd_list.CmdBufferSize; cmd_i++)
                             {
+                                NxRHI.TtGraphicDraw drawcall = rhiData.CreateGraphicDraw();
                                 ImDrawCmd* pcmd = &cmd_list.CmdBufferData[cmd_i];
                                 if (pcmd->UserCallback != null)
                                 {
@@ -348,7 +350,7 @@ namespace EngineNS.EGui
                                         var rsv = handle.Target as NxRHI.TtSrView;
                                         if (rsv != null)
                                         {
-                                            drawcall.BindSRV(rhiData.FontTextureBindInfo.mCoreObject, rsv);
+                                            drawcall.BindSRV(rhiData.SlateTextureBindInfo.mCoreObject, rsv);
                                         }
                                         else
                                         {

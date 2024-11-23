@@ -187,13 +187,10 @@ namespace EngineNS.NxRHI
                     var SlateEffect = EffectTask.Value.Result;
 
                     var iptDesc = new NxRHI.TtInputLayoutDesc();
-                    unsafe
-                    {
-                        iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
-                        iptDesc.mCoreObject.AddElement("TEXCOORD", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, (uint)sizeof(Vector2), 0, 0);
-                        iptDesc.mCoreObject.AddElement("COLOR", 0, EPixelFormat.PXF_R8G8B8A8_UNORM, 0, (uint)sizeof(Vector2) * 2, 0, 0);
-                        //iptDesc.SetShaderDesc(SlateEffect.GraphicsEffect);
-                    }
+                    iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
+                    iptDesc.mCoreObject.AddElement("TEXCOORD", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, (uint)sizeof(Vector2), 0, 0);
+                    iptDesc.mCoreObject.AddElement("COLOR", 0, EPixelFormat.PXF_R8G8B8A8_UNORM, 0, (uint)sizeof(Vector2) * 2, 0, 0);
+                    //iptDesc.SetShaderDesc(SlateEffect.GraphicsEffect);
                     iptDesc.mCoreObject.SetShaderDesc(SlateEffect.DescVS.mCoreObject);
                     var InputLayout = rc.CreateInputLayout(iptDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
                     SlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);

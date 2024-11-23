@@ -68,6 +68,8 @@ namespace NxRHI
 			AUTO_SAMP("NxRHI.GraphicDraw.Commit.BindResouces");
 			for (auto& i : BindResources)
 			{
+				if (i.second == nullptr)
+					continue;
 				switch (i.first->BindType)
 				{
 					case SBT_CBuffer:

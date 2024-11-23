@@ -1,1 +1,6 @@
--  打开
+- 主界面
+- - ![MainUI](MemoryProfiler/MainUI.png)
+	- Drawcall
+	- NativeMemory
+	- DX12
+	- AttachCache

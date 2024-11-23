@@ -2,6 +2,12 @@
 	- LastPIEName:EngineNS.RName@EngineCore=tutorials/character/charactertestgame.macross:Game
 - 是否使用RenderDoc
 	- UseRenderDoc:System.Boolean@Unknown=False
+- 是否打开Device Debug Layer
+	- HasDebugLayer:System.Boolean@Unknown=True
+- 是否打开DX12 DRED
+	- IsGpuDred:System.Boolean@Unknown=True
+- 是否打开NV Aftermath
+	- IsAftermath:System.Boolean@Unknown=False
 - 记录的最后一个浏览目录
 	- ContentCurrentDir:EngineNS.RName@EngineCore=utest/:Game
 - 保存最新资产类型列表

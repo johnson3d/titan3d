@@ -156,7 +156,12 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                     {
                         cmdlist.SetViewport(in PickedBuffer.Viewport);
-                        cmdlist.SetScissor(0, (NxRHI.FScissorRect*)0);
+                        var scissor = new NxRHI.FScissorRect();
+                        scissor.MinX = 0;
+                        scissor.MinY = 0;
+                        scissor.MaxX = (int)PickedBuffer.Viewport.Width;
+                        scissor.MaxY = (int)PickedBuffer.Viewport.Height;
+                        cmdlist.SetScissor(in scissor);
                         var passClears = new NxRHI.FRenderPassClears();
                         passClears.SetDefault();
                         passClears.SetClearColor(0, new Color4f(1, 0, 1, 0));

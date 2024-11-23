@@ -152,7 +152,12 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                     {
                         cmdlist.SetViewport(in GBuffers[MrtNum - 1].Viewport);
-                        cmdlist.SetScissor(0, (NxRHI.FScissorRect*)0);
+                        var scissor = new NxRHI.FScissorRect();
+                        scissor.MinX = 0;
+                        scissor.MinY = 0;
+                        scissor.MaxX = (int)GBuffers[MrtNum - 1].Viewport.Width;
+                        scissor.MaxY = (int)GBuffers[MrtNum - 1].Viewport.Height;
+                        cmdlist.SetScissor(in scissor);
                         passClears.ClearFlags = ClearFlags[MrtNum - 1];
                         if (clearDS)
                         {
