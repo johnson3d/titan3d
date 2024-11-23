@@ -122,7 +122,14 @@ namespace EngineNS.Editor
                 return;
             TtEngine.Instance.EventPoster.RunOn(async (state) =>
             {
-                return await TtEngine.Instance.StartPlayInEditor(TtEngine.Instance.GfxDevice.SlateApplication, assetName);
+                TtEngine.Instance.PlayMode = EPlayMode.PlayerInEditor;
+                var ret = await TtEngine.Instance.StartPlayInEditor(TtEngine.Instance.GfxDevice.SlateApplication, assetName);
+                if (ret == false)
+                {
+                    TtEngine.Instance.EndPlayInEditor();
+                    TtEngine.Instance.PlayMode = EPlayMode.Editor;
+                }
+                return ret;
             }, Thread.Async.EAsyncTarget.Logic);
         }
     }
@@ -213,6 +220,7 @@ namespace EngineNS
                     GC.WaitForPendingFinalizers();
                 }
             }
+            TtEngine.Instance.PlayMode = EPlayMode.Editor;
         }
         private WeakReference EndPlayInEditor_Impl()
         {

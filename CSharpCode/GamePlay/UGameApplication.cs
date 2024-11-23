@@ -23,8 +23,9 @@ namespace EngineNS.GamePlay
         public override async System.Threading.Tasks.Task<bool> InitializeApplication(NxRHI.TtGpuDevice rc, RName rpName)
         {
             await base.InitializeApplication(rc, rpName);
+            TtEngine.Instance.PlayMode = EPlayMode.Game;
             await TtEngine.Instance.StartPlayInEditor(this, rpName);
-
+            
             TtEngine.Instance.TickableManager.AddTickable(this);
             return true;
         }

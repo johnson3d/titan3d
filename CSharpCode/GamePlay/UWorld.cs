@@ -28,6 +28,7 @@ namespace EngineNS.GamePlay
             mRoot = new Scene.TtScene();
             mRoot.World = this;
         }
+        public bool IsGameWorld { get; set; } = false;
         TtMemberTickables mMemberTickables = new TtMemberTickables();
         Graphics.Pipeline.Shader.TtMaterialInstance mBoundingDebugMaterial;
         public async System.Threading.Tasks.Task<bool> InitWorld()
