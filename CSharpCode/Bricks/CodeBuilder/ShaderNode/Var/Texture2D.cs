@@ -86,7 +86,8 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 }
                 iptDesc.mCoreObject.SetShaderDesc(mSlateEffect.DescVS.mCoreObject);
                 var InputLayout = rc.CreateInputLayout(iptDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
-                mSlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
+                mSlateEffect.ShaderEffect.BindInputLayout(InputLayout);
+                mSlateEffect.ShaderEffect.DebugName = "ShaderNode.Var.Texture2D";
 
                 var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<EngineNS.Editor.Forms.TtTextureViewerCmdParams>();
                 var cbBinder = mSlateEffect.ShaderEffect.FindBinder("ProjectionMatrixBuffer");

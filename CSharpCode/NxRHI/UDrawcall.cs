@@ -65,7 +65,7 @@ namespace EngineNS.NxRHI
         }
         public void BindCBuffer(FEffectBinder binder, TtCbView buffer)
         {
-            if (binder.IsValidPointer == false || buffer == null)
+            if (binder.IsValidPointer == false || buffer == null || binder.BindType != EShaderBindType.SBT_CBuffer)
                 return;
             mCoreObject.BindResource(binder, buffer.mCoreObject.NativeSuper);
         }
@@ -87,7 +87,7 @@ namespace EngineNS.NxRHI
         }
         public void BindSRV(FEffectBinder binder, TtSrView srv)
         {
-            if (binder.IsValidPointer == false)
+            if (binder.IsValidPointer == false || binder.BindType != EShaderBindType.SBT_SRV)
                 return;
             var res = (srv == null) ? new IGpuResource() : srv.mCoreObject.NativeSuper;
             mCoreObject.BindResource(binder, res);
@@ -104,7 +104,7 @@ namespace EngineNS.NxRHI
         }
         public void BindUAV(FEffectBinder binder, TtUaView uav)
         {
-            if (binder.IsValidPointer == false || uav == null)
+            if (binder.IsValidPointer == false || uav == null || binder.BindType != EShaderBindType.SBT_UAV)
                 return;
             mCoreObject.BindResource(binder, uav.mCoreObject.NativeSuper);
         }
@@ -122,13 +122,13 @@ namespace EngineNS.NxRHI
         }
         public void BindSampler(FEffectBinder binder, TtSampler sampler)
         {
-            if (binder.IsValidPointer == false || sampler == null)
+            if (binder.IsValidPointer == false || sampler == null || binder.BindType != EShaderBindType.SBT_Sampler)
                 return;
             mCoreObject.BindResource(binder, sampler.mCoreObject.NativeSuper);
         }
         public void BindSampler(TtEffectBinder binder, TtSampler sampler)
         {
-            if (binder == null || sampler == null)
+            if (binder == null || sampler == null )
                 return;
             BindSampler(binder.mCoreObject, sampler);
         }

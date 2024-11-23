@@ -148,6 +148,7 @@ namespace NxRHI
 	};
 	struct DX12HeapHolder : public IGpuResource
 	{
+		int NumOfDescriptor = 0;
 		AutoRef<DX12PagedHeap>	Heap;
 		~DX12HeapHolder()
 		{

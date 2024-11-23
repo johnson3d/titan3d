@@ -6,6 +6,10 @@ namespace EngineNS.NxRHI
 {
     public class TtShaderEffect : AuxPtrType<NxRHI.IGraphicsEffect>
     {
+        public void BindInputLayout(TtInputLayout layout)
+        {
+            mCoreObject.BindInputLayout(layout.mCoreObject);
+        }
         public FEffectBinder FindBinder(VNameString name)
         {
             return mCoreObject.FindBinder(name);

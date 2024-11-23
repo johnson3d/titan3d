@@ -383,7 +383,9 @@ namespace NxRHI
 			allocator = iter->second;
 		}
 
-		return allocator->AllocDX12Heap();
+		auto result = allocator->AllocDX12Heap();
+		result->NumOfDescriptor = numOfDescriptor;
+		return result;
 
 		/*auto result = new DX12HeapHolder();
 		result->Heap = allocator->Alloc<DX12PagedDescriptorHeap>();

@@ -68,7 +68,9 @@ namespace EngineNS.EGui
     public class TtImDrawDataRHI : IDisposable
     {
         public NxRHI.TtCommandList CmdList;
+        public NxRHI.TtEffectBinder SlateCBufferBindInfo;
         public NxRHI.TtEffectBinder SlateTextureBindInfo;
+        public NxRHI.TtEffectBinder SlateSamplerBindInfo;
         public NxRHI.TtCbView SlateCBuffer;
         public NxRHI.TtGpuPipeline Pipeline;
 
@@ -87,9 +89,8 @@ namespace EngineNS.EGui
                 var result = rc.CreateGraphicDraw();
                 result.BindShaderEffect(renderer.SlateEffect);
                 result.BindGeomMesh(GeomMesh);
-                var cbBinder = shaderProg.FindBinder("ProjectionMatrixBuffer");
-                result.BindCBuffer(cbBinder.mCoreObject, SlateCBuffer);
-                result.BindSampler(SlateTextureBindInfo, renderer.SamplerState);
+                result.BindCBuffer(SlateCBufferBindInfo, SlateCBuffer);
+                result.BindSampler(SlateSamplerBindInfo, renderer.SamplerState);
                 result.BindPipeline(Pipeline);
 
                 Drawcalls.Add(result);
@@ -127,13 +128,11 @@ namespace EngineNS.EGui
             PrimitiveMesh.PushAtom(0, in dpDesc);
 
             var shaderProg = renderer.SlateEffect.ShaderEffect;
-            
-            var cbBinder = shaderProg.FindBinder("ProjectionMatrixBuffer");
-            SlateCBuffer = rc.CreateCBV(cbBinder);
 
-            var smp = shaderProg.FindBinder("Samp_FontTexture");
-            
+            SlateCBufferBindInfo = shaderProg.FindBinder("ProjectionMatrixBuffer");
+            SlateCBuffer = rc.CreateCBV(SlateCBufferBindInfo);
             SlateTextureBindInfo = shaderProg.FindBinder("FontTexture");
+            SlateSamplerBindInfo = shaderProg.FindBinder("Samp_FontTexture");
 
             {
                 var pipeDesc = new NxRHI.FGpuPipelineDesc();
@@ -335,8 +334,9 @@ namespace EngineNS.EGui
                             var cmd_list = new ImDrawList(draw_data.GetCmdLists()[n]);
                             for (int cmd_i = 0; cmd_i < cmd_list.CmdBufferSize; cmd_i++)
                             {
-                                NxRHI.TtGraphicDraw drawcall = rhiData.CreateGraphicDraw();
+                                NxRHI.TtGraphicDraw drawcall = null;
                                 ImDrawCmd* pcmd = &cmd_list.CmdBufferData[cmd_i];
+                                TtImDrawCmdParameters parameters = null;
                                 if (pcmd->UserCallback != null)
                                 {
                                     throw new NotImplementedException();
@@ -346,20 +346,24 @@ namespace EngineNS.EGui
                                     var handle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)pcmd->TextureId);
                                     if (handle.IsAllocated)
                                     {
-                                        //drawcall = rhiData.Drawcall;
                                         var rsv = handle.Target as NxRHI.TtSrView;
                                         if (rsv != null)
                                         {
+                                            drawcall = rhiData.CreateGraphicDraw();
                                             drawcall.BindSRV(rhiData.SlateTextureBindInfo.mCoreObject, rsv);
                                         }
                                         else
                                         {
-                                            var parameters = handle.Target as TtImDrawCmdParameters;
+                                            parameters = handle.Target as TtImDrawCmdParameters;
                                             if (parameters != null)
                                             {
                                                 drawcall = parameters.Drawcall;
                                                 drawcall.BindGeomMesh(rhiData.GeomMesh);
                                                 parameters.OnDraw(in mvp);
+                                            }
+                                            else
+                                            {
+                                                drawcall = rhiData.CreateGraphicDraw();
                                             }
                                         }
                                     }
