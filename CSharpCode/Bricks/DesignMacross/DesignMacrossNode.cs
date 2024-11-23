@@ -19,8 +19,8 @@ namespace EngineNS.DesignMacross
             [RName.PGRName(FilterExts = EngineNS.DesignMacross.UDesignMacross.AssetExt)]
             public RName DesignMacrossName { get; set; }
         }
-        Macross.UMacrossGetter<TtDesignMacrossBase> mMacrossGetter = null;
-        public Macross.UMacrossGetter<TtDesignMacrossBase> MacrossGetter
+        Macross.TtMacrossGetter<TtDesignMacrossBase> mMacrossGetter = null;
+        public Macross.TtMacrossGetter<TtDesignMacrossBase> MacrossGetter
         {
             get
             {
@@ -32,7 +32,7 @@ namespace EngineNS.DesignMacross
                 {
                     if (DesignMacross != null && !RName.IsEmpty(DesignMacross))
                     {
-                        var macrossGetter = Macross.UMacrossGetter<TtDesignMacrossBase>.NewInstance();
+                        var macrossGetter = Macross.TtMacrossGetter<TtDesignMacrossBase>.NewInstance();
                         macrossGetter.Name = DesignMacross;
                         if (macrossGetter.Get() != null)
                         {
@@ -59,7 +59,7 @@ namespace EngineNS.DesignMacross
             {
                 if(mMacrossGetter == null)
                 {
-                    mMacrossGetter = Macross.UMacrossGetter<TtDesignMacrossBase>.NewInstance();
+                    mMacrossGetter = Macross.TtMacrossGetter<TtDesignMacrossBase>.NewInstance();
                 }
                 mMacrossGetter.Name = DesignMacross;
                 mMacrossGetter.Get().MacrossNode = this;
@@ -83,7 +83,7 @@ namespace EngineNS.DesignMacross
             {
                 if (mMacrossGetter == null)
                 {
-                    mMacrossGetter = Macross.UMacrossGetter<TtDesignMacrossBase>.NewInstance();
+                    mMacrossGetter = Macross.TtMacrossGetter<TtDesignMacrossBase>.NewInstance();
                 }
                 if (NodeData is TtDesignMacrossNodeData data)
                 {
@@ -95,7 +95,7 @@ namespace EngineNS.DesignMacross
                     }
                 }
                 
-                mMacrossGetter = Macross.UMacrossGetter<TtDesignMacrossBase>.NewInstance();
+                mMacrossGetter = Macross.TtMacrossGetter<TtDesignMacrossBase>.NewInstance();
                 mMacrossGetter.Name = value;
                 if(mMacrossGetter.Get() != null)
                 {

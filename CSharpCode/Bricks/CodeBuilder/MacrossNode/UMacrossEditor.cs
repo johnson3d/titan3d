@@ -1521,7 +1521,7 @@ namespace EngineNS.UTest
 
 namespace EngineNS.Macross
 {
-    public partial class UMacrossModule
+    public partial class TtMacrossModule
     {
         public bool CompileCode(string assemblyFile)
         {

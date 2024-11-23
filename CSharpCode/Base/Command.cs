@@ -163,13 +163,13 @@ namespace EngineNS
                 }
                 if (mMcObject == null)
                 {
-                    mMcObject = Macross.UMacrossGetter<TtCommandMacross>.NewInstance();
+                    mMcObject = Macross.TtMacrossGetter<TtCommandMacross>.NewInstance();
                 }
                 mMcObject.Name = value;
             }
         }
-        Macross.UMacrossGetter<TtCommandMacross> mMcObject;
-        public Macross.UMacrossGetter<TtCommandMacross> McObject
+        Macross.TtMacrossGetter<TtCommandMacross> mMcObject;
+        public Macross.TtMacrossGetter<TtCommandMacross> McObject
         {
             get => mMcObject;
         }

@@ -232,12 +232,12 @@ namespace EngineNS.Bricks.Particle
                 }
                 if (mMcObject == null)
                 {
-                    mMcObject = Macross.UMacrossGetter<TtNebulaMacross>.NewInstance();
+                    mMcObject = Macross.TtMacrossGetter<TtNebulaMacross>.NewInstance();
                 }
                 mMcObject.Name = value;
             }
         }
-        Macross.UMacrossGetter<TtNebulaMacross> mMcObject;
+        Macross.TtMacrossGetter<TtNebulaMacross> mMcObject;
         public async Thread.Async.TtTask<TtNebulaParticle> CloneNebula()
         {
             var result = new TtNebulaParticle();

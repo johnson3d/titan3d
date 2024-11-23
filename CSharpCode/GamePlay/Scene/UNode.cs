@@ -1088,7 +1088,7 @@ namespace EngineNS.GamePlay.Scene
                 if (mParent == value)
                     return;
                 var newScene = value?.GetNearestParentScene();
-                if (ParentScene != null && newScene != ParentScene)
+                if (newScene != null && ParentScene != null && newScene != ParentScene)
                 {
                     Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, "UNode", $"{GetType().FullName}:{NodeName} cann't move to another UScene");
                     return;

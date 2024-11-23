@@ -165,7 +165,7 @@ namespace EngineNS.Editor
                                 var projectFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameProject;
                                 var assemblyFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameAssembly;
 
-                                if (UMacrossModule.CompileGameProject(csFilesPath, projectFile, assemblyFile))
+                                if (TtMacrossModule.CompileGameProject(csFilesPath, projectFile, assemblyFile))
                                 {
                                     TtEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
                                 }

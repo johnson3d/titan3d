@@ -71,7 +71,7 @@ namespace EngineNS
                 {
                     if (rf == form)
                     {
-                        AppendForms.Remove(i);
+                        RootForms.Remove(i);
                         break;
                     }
                 }

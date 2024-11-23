@@ -226,7 +226,7 @@ namespace EngineNS.UI
                     {
                         ar.ReadObject(out element);
 
-                        element.MacrossGetter = UMacrossGetter<TtUIMacrossBase>.NewInstance();
+                        element.MacrossGetter = TtMacrossGetter<TtUIMacrossBase>.NewInstance();
                         element.MacrossGetter.Name = name;
                         var mc = element.MacrossGetter.Get();
                         if(mc != null)

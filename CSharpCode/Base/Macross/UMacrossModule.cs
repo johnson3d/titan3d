@@ -26,36 +26,41 @@ namespace EngineNS.Macross
         public object GetMacrossObject();
     }
 
-    public class UMacrossGetterBase
+    public class TtMacrossGetterBase
     {
         public virtual RName Name { get; set; }
         public uint Version { get; protected set; }
         public virtual object InnerObject { get; set; }
-        public virtual void Clear(UMacrossModule module)
+        public virtual void Clear(TtMacrossModule module)
         {
             Version = 0;
             InnerObject = null;
         }
-        public virtual void Reset(UMacrossModule module)
+        public virtual void Reset(TtMacrossModule module)
         {
             Version = 0;
             InnerObject = null;
         }
     }
-    public class UMacrossGetter<T> : UMacrossGetterBase where T : class
+    public class TtMacrossGetter<T> : TtMacrossGetterBase, IDisposable where T : class
     {
-        private UMacrossGetter()
+        private TtMacrossGetter()
         {
         }
-        public static UMacrossGetter<T> NewInstance()
+        public void Dispose()
         {
-            var result = new UMacrossGetter<T>();
+            Name = null;
+            mInnerObject = null;
+        }
+        public static TtMacrossGetter<T> NewInstance()
+        {
+            var result = new TtMacrossGetter<T>();
             TtEngine.Instance.MacrossModule.AddGetter(result);
             return result;
         }
-        public static UMacrossGetter<T> UnsafeNewInstance(uint ver, object innerObj, bool addGetter = false)
+        public static TtMacrossGetter<T> UnsafeNewInstance(uint ver, object innerObj, bool addGetter = false)
         {
-            var result = new UMacrossGetter<T>();
+            var result = new TtMacrossGetter<T>();
             if (addGetter)
                 TtEngine.Instance.MacrossModule.AddGetter(result);
             result.Version = ver;
@@ -69,6 +74,11 @@ namespace EngineNS.Macross
             set
             {
                 base.Name = value;
+                if (value == null)
+                {
+                    InnerObject = null;
+                    return;
+                }
                 Reset(TtEngine.Instance.MacrossModule);
             }
         }
@@ -88,7 +98,7 @@ namespace EngineNS.Macross
             }
             return mInnerObject;
         }
-        public override void Reset(UMacrossModule module)
+        public override void Reset(TtMacrossModule module)
         {
             Version = 0;
             var newObj = module.NewInnerObject<T>(Name);
@@ -100,7 +110,7 @@ namespace EngineNS.Macross
             InnerObject = newObj;
         }
     }
-    public partial class UMacrossModule : TtModule<TtEngine>
+    public partial class TtMacrossModule : TtModule<TtEngine>
     {
         private IAssemblyLoader mAssemblyLoader;
         public WeakReference mAssembly;
@@ -114,7 +124,7 @@ namespace EngineNS.Macross
                 return null;
             return mAssemblyDesc.CreateInstance(name) as T;
         }
-        public List<WeakReference<UMacrossGetterBase>> mGetters = new List<WeakReference<UMacrossGetterBase>>();
+        public List<WeakReference<TtMacrossGetterBase>> mGetters = new List<WeakReference<TtMacrossGetterBase>>();
         partial void CreateAssemblyLoader(ref IAssemblyLoader loader);
         partial void TryCompileCode(string assemblyFile, ref bool success);
         public void ReloadAssembly(string assemblyPath)
@@ -210,11 +220,11 @@ namespace EngineNS.Macross
         {
             //Rtti.ClassMetaManager.Instance.Metas
         }
-        internal void AddGetter(UMacrossGetterBase getter)
+        internal void AddGetter(TtMacrossGetterBase getter)
         {
             lock (mGetters)
             {
-                mGetters.Add(new WeakReference<UMacrossGetterBase>(getter));
+                mGetters.Add(new WeakReference<TtMacrossGetterBase>(getter));
             }
         }
         int StartUpdateIndex = 0;
@@ -223,7 +233,7 @@ namespace EngineNS.Macross
             var t1 = Support.TtTime.HighPrecision_GetTickCount();
             lock (mGetters)
             {
-                UMacrossGetterBase tmp;
+                TtMacrossGetterBase tmp;
                 for (int i = StartUpdateIndex; i < mGetters.Count; i++)
                 {
                     var v = mGetters[i];
@@ -262,6 +272,6 @@ namespace EngineNS
 {
     partial class TtEngine
     {
-        public Macross.UMacrossModule MacrossModule { get; } = new Macross.UMacrossModule();
+        public Macross.TtMacrossModule MacrossModule { get; } = new Macross.TtMacrossModule();
     }
 }

@@ -314,7 +314,7 @@ namespace EngineNS.UI.Editor
                     {
                         if (mUIHost.Children[0].MacrossGetter == null)
                         {
-                            mUIHost.Children[0].MacrossGetter = Macross.UMacrossGetter<TtUIMacrossBase>.NewInstance();
+                            mUIHost.Children[0].MacrossGetter = Macross.TtMacrossGetter<TtUIMacrossBase>.NewInstance();
                             mUIHost.Children[0].MacrossGetter.Name = AssetName;
                         }
                         var mc = mUIHost.Children[0].MacrossGetter.Get();

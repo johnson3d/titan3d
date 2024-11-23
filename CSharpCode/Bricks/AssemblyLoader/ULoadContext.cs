@@ -536,7 +536,7 @@ namespace EngineNS.Macross
             return Loader;
         }
     }
-    public partial class UMacrossModule
+    public partial class TtMacrossModule
     {
         partial void CreateAssemblyLoader(ref IAssemblyLoader loader)
         {

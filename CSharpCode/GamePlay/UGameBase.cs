@@ -47,11 +47,16 @@ namespace EngineNS.GamePlay
         }
     }
     [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoMacrossCreate)]
-    public partial class TtGameInstance : TtModuleHost<TtGameInstance>, ITickable
+    public partial class TtGameInstance : TtModuleHost<TtGameInstance>, ITickable, IDisposable
     {
         public int GetTickOrder()
         {
             return -1;
+        }
+        public void Dispose()
+        {
+            CoreSDK.DisposeObject(ref mMcObject);
+            FinalViewportSlate();
         }
         public virtual void TickLogic(float ellapse)
         {
@@ -71,19 +76,19 @@ namespace EngineNS.GamePlay
         }
 
         [Rtti.Meta]
-        public TtGameViewportSlate WorldViewportSlate { get; } = new TtGameViewportSlate(true);
+        public TtGameViewportSlate WorldViewportSlate { get; private set; } = new TtGameViewportSlate(true);
         [Rtti.Meta]
         public Graphics.Pipeline.TtCamera DefaultCamera 
         {
             get => WorldViewportSlate.RenderPolicy.DefaultCamera;
         }
-        Macross.UMacrossGetter<TtMacrossGame> mMcObject;
-        public Macross.UMacrossGetter<TtMacrossGame> McObject
+        Macross.TtMacrossGetter<TtMacrossGame> mMcObject;
+        public Macross.TtMacrossGetter<TtMacrossGame> McObject
         {
             get
             {
                 if (mMcObject == null)
-                    mMcObject = Macross.UMacrossGetter<TtMacrossGame>.NewInstance();
+                    mMcObject = Macross.TtMacrossGetter<TtMacrossGame>.NewInstance();
                 return mMcObject;
             }
         }
@@ -122,8 +127,12 @@ namespace EngineNS.GamePlay
         [Rtti.Meta]
         public void FinalViewportSlate()
         {
+            if (WorldViewportSlate == null)
+                return;
             TtEngine.Instance.GfxDevice.SlateApplication?.NativeWindow.UnregEventProcessor(WorldViewportSlate);
             TtEngine.RootFormManager.UnregRootForm(WorldViewportSlate);
+            WorldViewportSlate?.Dispose();
+            WorldViewportSlate = null;
         }
 
         [Rtti.Meta]
@@ -294,45 +303,6 @@ namespace EngineNS.GamePlay
             movement.Parent = ChiefPlayer;
 
             characterController.MovementNode = movement;
-        }
-
-        public async System.Threading.Tasks.Task CreateSpereActor(Scene.TtScene scene)
-        {
-            EngineNS.GamePlay.Scene.TtNode root = scene;
-            var playerData = new EngineNS.GamePlay.Scene.Actor.TtActor.TtActorData();
-            var actor = new EngineNS.GamePlay.Scene.Actor.TtActor();
-            await actor.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
-            actor.Parent = root;
-            actor.NodeData.Name = "UActor";
-            actor.HitproxyType = EngineNS.Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
-            actor.IsCastShadow = true;
-            actor.SetStyle(EngineNS.GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
-            actor.Placement.SetTransform(new DVector3(100, 10, 50), Vector3.One, Quaternion.Identity);
-
-            var phyControl = new TtPhySphereCollisionNode();
-            var phyNodeData = new TtPhySphereCollisionNode.TtPhySphereCollisionNodeData();
-            phyNodeData.Radius = 0.5f;
-            await phyControl.InitializeNode(scene.World, phyNodeData, Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
-            phyControl.Parent = actor;
-        }
-        public async System.Threading.Tasks.Task CreateBoxActor(Scene.TtScene scene)
-        {
-            EngineNS.GamePlay.Scene.TtNode root = scene;
-            var playerData = new EngineNS.GamePlay.Scene.Actor.TtActor.TtActorData();
-            var actor = new EngineNS.GamePlay.Scene.Actor.TtActor();
-            await actor.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
-            actor.Parent = root;
-            actor.NodeData.Name = "UActor";
-            actor.HitproxyType = EngineNS.Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
-            actor.IsCastShadow = true;
-            actor.SetStyle(EngineNS.GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
-            actor.Placement.SetTransform(new DVector3(100, 2, 50), Vector3.One, Quaternion.Identity);
-
-            var phyControl = new TtPhyBoxCollisionNode();
-            var phyNodeData = new TtPhyBoxCollisionNode.TtPhyBoxCollisionNodeData();
-            phyNodeData.PhyActorType = EPhyActorType.PAT_Static;
-            await phyControl.InitializeNode(scene.World, phyNodeData, Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
-            phyControl.Parent = actor;
         }
     }
 }

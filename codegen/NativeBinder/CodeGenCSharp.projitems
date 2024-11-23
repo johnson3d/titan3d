@@ -69,6 +69,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiWindowClass_2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImGuiWindowFlags__2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)v3dxFrustum_2863311530.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)vfxMTLockerManager_2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VHitResult_2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VNameString_2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/BigStackBuffer_2581692454.cpp2cs.cs" />
@@ -134,7 +135,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IShaderConductor_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/ISkinModifier_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IStaticModifier_2581692454.cpp2cs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IWeakReference_2581692454.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/IWeakRefObject_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/KMeamsVector3_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/MemStreamReader_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/MemStreamWriter_2581692454.cpp2cs.cs" />
@@ -255,6 +256,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxPhysics/PxPQ_4247954895.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxPhysics/PxQuat_4247954895.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxPhysics/PxVector3_4247954895.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/DX12CommandAllocatorManager_910209287.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/DX12DefaultGpuMemAllocator_910209287.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/DX12GpuDevice_910209287.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/DX12HeapAllocatorManager_910209287.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/DX12HeapAllocator_910209287.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/DX12PagedGpuMemAllocator_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EAddressMode_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EBarrierAccess_910209287.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/EBlendOp_910209287.cpp2cs.cs" />

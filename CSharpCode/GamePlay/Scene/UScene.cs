@@ -355,13 +355,13 @@ namespace EngineNS.GamePlay.Scene
             }
         }
 
-        UMacrossGetter<TtSceneMacrossBase> mMacrossGetter;
-        public UMacrossGetter<TtSceneMacrossBase> MacrossGetter
+        TtMacrossGetter<TtSceneMacrossBase> mMacrossGetter;
+        public TtMacrossGetter<TtSceneMacrossBase> MacrossGetter
         {
             get
             {
                 if (mMacrossGetter == null)
-                    mMacrossGetter = UMacrossGetter<TtSceneMacrossBase>.NewInstance();
+                    mMacrossGetter = TtMacrossGetter<TtSceneMacrossBase>.NewInstance();
                 return mMacrossGetter;
             }
         }

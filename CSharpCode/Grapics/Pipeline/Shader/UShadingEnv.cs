@@ -634,13 +634,13 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 }
                 if (mMcObject == null)
                 {
-                    mMcObject = Macross.UMacrossGetter<TtShadingMacross>.NewInstance();
+                    mMcObject = Macross.TtMacrossGetter<TtShadingMacross>.NewInstance();
                 }
                 mMcObject.Name = value;
             }
         }
-        Macross.UMacrossGetter<TtShadingMacross> mMcObject;
-        public Macross.UMacrossGetter<TtShadingMacross> McObject
+        Macross.TtMacrossGetter<TtShadingMacross> mMcObject;
+        public Macross.TtMacrossGetter<TtShadingMacross> McObject
         {
             get => mMcObject;
         }

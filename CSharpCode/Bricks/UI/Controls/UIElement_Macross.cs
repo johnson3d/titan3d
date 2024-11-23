@@ -13,7 +13,7 @@ namespace EngineNS.UI.Controls
 {
     public partial class TtUIElement
     {
-        public Macross.UMacrossGetter<TtUIMacrossBase> MacrossGetter;
+        public Macross.TtMacrossGetter<TtUIMacrossBase> MacrossGetter;
 
         #region Property bind
 

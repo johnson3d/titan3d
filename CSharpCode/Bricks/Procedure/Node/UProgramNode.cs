@@ -153,13 +153,13 @@ namespace EngineNS.Bricks.Procedure.Node
             {
                 if (mMcProgram == null)
                 {
-                    mMcProgram = Macross.UMacrossGetter<UProgram>.NewInstance();
+                    mMcProgram = Macross.TtMacrossGetter<UProgram>.NewInstance();
                 }
                 mMcProgram.Name = value;
             }
         }
-        Macross.UMacrossGetter<UProgram> mMcProgram;
-        public Macross.UMacrossGetter<UProgram> McProgram
+        Macross.TtMacrossGetter<UProgram> mMcProgram;
+        public Macross.TtMacrossGetter<UProgram> McProgram
         { 
             get
             {   

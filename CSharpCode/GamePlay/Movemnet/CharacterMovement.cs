@@ -20,6 +20,10 @@ namespace EngineNS.GamePlay.Movemnet
 
         protected override void UpdatePlacement(TtWorld world, TtRenderPolicy policy)
         {
+            var mode = TtEngine.Instance.PlayMode;
+            if (TtEngine.Instance.PlayMode == EPlayMode.Editor)
+                return;
+
             var settedLinearVelocity = ConsumeSettedLinearVelocity();
             var settedAngularVelocity = ConsumeSettedAngularVelocity();
             var currentLinearVelocity = Vector3.Zero;

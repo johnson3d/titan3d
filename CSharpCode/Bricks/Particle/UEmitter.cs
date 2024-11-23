@@ -684,13 +684,13 @@ namespace EngineNS.Bricks.Particle
                 }
                 if (mMcObject == null)
                 {
-                    mMcObject = Macross.UMacrossGetter<TtEmitterMacross>.NewInstance();
+                    mMcObject = Macross.TtMacrossGetter<TtEmitterMacross>.NewInstance();
                 }
                 mMcObject.Name = value;
             }
         }
-        Macross.UMacrossGetter<TtEmitterMacross> mMcObject;
-        public Macross.UMacrossGetter<TtEmitterMacross> McObject
+        Macross.TtMacrossGetter<TtEmitterMacross> mMcObject;
+        public Macross.TtMacrossGetter<TtEmitterMacross> McObject
         {
             get => mMcObject;
         }

@@ -238,13 +238,13 @@ namespace EngineNS.Bricks.Procedure
             {
                 if (mMcProgram == null)
                 {
-                    mMcProgram = Macross.UMacrossGetter<UPgcGraphProgram>.NewInstance();
+                    mMcProgram = Macross.TtMacrossGetter<UPgcGraphProgram>.NewInstance();
                 }
                 mMcProgram.Name = value;
             }
         }
-        Macross.UMacrossGetter<UPgcGraphProgram> mMcProgram;
-        public Macross.UMacrossGetter<UPgcGraphProgram> McProgram
+        Macross.TtMacrossGetter<UPgcGraphProgram> mMcProgram;
+        public Macross.TtMacrossGetter<UPgcGraphProgram> McProgram
         {
             get
             {

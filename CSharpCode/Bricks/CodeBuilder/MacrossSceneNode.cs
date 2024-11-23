@@ -346,13 +346,13 @@ namespace EngineNS.Bricks.CodeBuilder
                 }
             }
 
-            UMacrossGetter<TtSceneNodeMacrossBase> mMacrossGetter;
-            public UMacrossGetter<TtSceneNodeMacrossBase> MacrossGetter
+            TtMacrossGetter<TtSceneNodeMacrossBase> mMacrossGetter;
+            public TtMacrossGetter<TtSceneNodeMacrossBase> MacrossGetter
             {
                 get
                 {
                     if (mMacrossGetter == null)
-                        mMacrossGetter = UMacrossGetter<TtSceneNodeMacrossBase>.NewInstance();
+                        mMacrossGetter = TtMacrossGetter<TtSceneNodeMacrossBase>.NewInstance();
                     return mMacrossGetter;
                 }
             }
@@ -388,7 +388,7 @@ namespace EngineNS.Bricks.CodeBuilder
             }
         }
 
-        public UMacrossGetter<TtSceneNodeMacrossBase> MacrossGetter 
+        public TtMacrossGetter<TtSceneNodeMacrossBase> MacrossGetter 
         {
             get
             {

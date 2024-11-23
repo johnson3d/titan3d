@@ -222,6 +222,7 @@ namespace EngineNS
             TtEngine.Instance?.TickableManager.RemoveTickable(this.GameInstance);
             this.GameInstance.BeginDestroy();
             var wr = new WeakReference(this.GameInstance);
+            this.GameInstance.Dispose();
             this.GameInstance = null;
 
             return wr;

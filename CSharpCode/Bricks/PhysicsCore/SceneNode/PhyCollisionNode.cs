@@ -7,250 +7,171 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
-using static EngineNS.Bricks.PhysicsCore.SceneNode.TtCapsulePhyControllerNode;
-using static EngineNS.Bricks.PhysicsCore.SceneNode.TtPhyCollisionNode;
 
 namespace EngineNS.Bricks.PhysicsCore.SceneNode
 {
-
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public abstract class TtPhyCollisionNode : GamePlay.Scene.TtLightWeightNodeBase
+
+    //only contians one shape
+    public class TtPhyCollisionNode : GamePlay.Scene.TtLightWeightNodeBase
     {
         [Rtti.Meta]
         public class TtPhyCollisionNodeData : GamePlay.Scene.TtNodeData
         {
-           
-        }
-        public Bricks.PhysicsCore.TtPhyActor PhyActor { get; set; }
-        protected override void OnParentChanged(TtNode prev, TtNode cur)
-        {
-            base.OnParentChanged(prev, cur);
-            PhyActor.TagNode = Parent;
-            Parent.UpdateAbsTransform();
-            OnAbsTransformChanged();
-            PhyActor.AddToScene(ParentScene.PxSceneMB.PxScene);
-        }
-
-        protected override void OnParentSceneChanged(TtScene prev, TtScene cur)
-        {
-            base.OnParentSceneChanged(prev, cur);
-            //TODO: Remove from Prev-Scene if exist
-            PhyActor.AddToScene(ParentScene.PxSceneMB.PxScene);
-        }
-        protected override void OnAbsTransformChanged()
-        {
-            var pxScene = ParentScene?.PxSceneMB.PxScene;
-            if (pxScene != null)
-            {
-                if (PhyActor != null && pxScene.IsPxFetchingPose == false)
-                {
-                    ref var transform = ref Placement.AbsTransform;
-                    PhyActor.SetPose2Physics(in transform.mPosition, in transform.mQuat, true);
-                }
-            }
-            base.OnAbsTransformChanged();
-        }
-    }
-
-    //only contians one shape
-    public class TtPhySingleShapeCollisionNode : TtPhyCollisionNode
-    {
-        [Rtti.Meta]
-        public class TtPhySingleShapeCollisionNodeData : TtPhyCollisionNodeData
-        {
-            [Rtti.Meta]
-            public EPhyActorType PhyActorType { get; set; } = EPhyActorType.PAT_Static;
             [Rtti.Meta]
             public RName PxMaterial { get; set; }
             [Rtti.Meta]
-            public float Mass { get; set; } = 10;
+            public Vector3 Center { get; set; }
+            [Rtti.Meta]
+            public FRotator Rotator { get; set; }
+            [Rtti.Meta]
+            public bool IsTrigger { get; set; } = false;
             [Rtti.Meta]
             public PhyFilterData QueryFilterData { get; set; }
             [Rtti.Meta]
             public PhyFilterData SimulationFilterData { get; set; }
         }
-        public TtPhySingleShapeCollisionNodeData SingleShapeCollisionNodeData
+        public TtPhyCollisionNodeData CollisionNodeData
         {
-            get => NodeData as TtPhySingleShapeCollisionNodeData;
+            get => NodeData as TtPhyCollisionNodeData;
         }
-        public Bricks.PhysicsCore.TtPhyShape PhyShape { get; set; }
-        [Category("Option")]
-        public EPhyActorType PhyActorType 
-        { 
-            get => SingleShapeCollisionNodeData.PhyActorType;
-            set
+        public TtPhyActor PhyActor
+        {
+            get
             {
-                var oldValue = SingleShapeCollisionNodeData.PhyActorType;
-                SingleShapeCollisionNodeData.PhyActorType = value;
-                if(oldValue != value)
+                if(Parent is TtPhyRigidbodyNode rigidNode)
                 {
-                    OnActorTypeChange(value);
+                    return rigidNode.PhyActor;
                 }
+                return null;
             }
         }
         [Category("Option")]
-        public RName Material { get => SingleShapeCollisionNodeData.PxMaterial; set => SingleShapeCollisionNodeData.PxMaterial = value; }
+        public RName Material { get => CollisionNodeData.PxMaterial; set => CollisionNodeData.PxMaterial = value; }
         public TtPhyMaterial PhyMaterial
         {
             get
             {
                 Bricks.PhysicsCore.TtPhyMaterial mtl;
-                if (SingleShapeCollisionNodeData.PxMaterial != null)
-                    mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(SingleShapeCollisionNodeData.PxMaterial);
+                if (CollisionNodeData.PxMaterial != null)
+                    mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(CollisionNodeData.PxMaterial);
                 else
                     mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
                 return mtl;
             }
         }
         [Category("Option")]
-        public float Mass { get => SingleShapeCollisionNodeData.Mass; set => SingleShapeCollisionNodeData.Mass = value; }
+        public Vector3 Center { get => CollisionNodeData.Center; set => CollisionNodeData.Center = value; }
         [Category("Option")]
-        public PhyFilterData QueryFilterData { get => SingleShapeCollisionNodeData.QueryFilterData; set => SingleShapeCollisionNodeData.QueryFilterData = value; }
+        public FRotator Rotator { get => CollisionNodeData.Rotator; set => CollisionNodeData.Rotator = value; }
         [Category("Option")]
-        public PhyFilterData SimulationFilterData { get => SingleShapeCollisionNodeData.SimulationFilterData; set => SingleShapeCollisionNodeData.SimulationFilterData = value; }
+        public bool IsTrigger { get => CollisionNodeData.IsTrigger; set => CollisionNodeData.IsTrigger = value; }
+        [Category("Option")]
+        public PhyFilterData QueryFilterData { get => CollisionNodeData.QueryFilterData; set => CollisionNodeData.QueryFilterData = value; }
+        [Category("Option")]
+        public PhyFilterData SimulationFilterData { get => CollisionNodeData.SimulationFilterData; set => CollisionNodeData.SimulationFilterData = value; }
         public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var baseResult = await base.InitializeNode(world, data, bvType, placementType);
             if (!baseResult)
                 return false;
-
-            CreatePhyActor();
-
+            PhyShape = CreatePhyShape();
             return true;
-        }
-        public virtual void OnActorTypeChange(EPhyActorType newType)
-        {
-            PhyActor.RemoveFromScene(ParentScene.PxSceneMB.PxScene);
-            CreatePhyActor();
-            if(Parent != null)
-            {
-                PhyActor.TagNode = Parent;
-            }
-            if(ParentScene != null && ParentScene.PxSceneMB.PxScene != null)
-            {
-                PhyActor.AddToScene(ParentScene.PxSceneMB.PxScene);
-            }
         }
         public virtual TtPhyShape CreatePhyShape()
         {
             return null;
         }
-
-        public void CreatePhyActor()
+        public Bricks.PhysicsCore.TtPhyShape PhyShape { get; set; } = null;
+        protected override void OnParentChanged(TtNode prev, TtNode cur)
         {
-            var pc = TtEngine.Instance.PhyModule.PhyContext;
-            var transform = Placement.TransformData;
-            PhyActor = pc.CreateActor(SingleShapeCollisionNodeData.PhyActorType, in transform.mPosition, in transform.mQuat);
-            PhyActor.mCoreObject.SetActorFlag(EPhyActorFlag.PAF_eVISUALIZATION, true);
-            
-            Bricks.PhysicsCore.TtPhyMaterial mtl;
-            if (SingleShapeCollisionNodeData.PxMaterial != null)
-                mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(SingleShapeCollisionNodeData.PxMaterial);
-            else
-                mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
-
-            PhyShape = CreatePhyShape();
-            if (PhyShape != null)
-            {
-                PhyShape.mCoreObject.SetQueryFilterData(SingleShapeCollisionNodeData.QueryFilterData);
-                PhyShape.mCoreObject.SetSimulationFilterData(SingleShapeCollisionNodeData.SimulationFilterData);
-                PhyShape.mCoreObject.AddToActor(PhyActor.mCoreObject, in Vector3.Zero, in Quaternion.Identity);
-            }
-
-            PhyActor.mCoreObject.SetMass(SingleShapeCollisionNodeData.Mass);
-            PhyActor.mCoreObject.SetMinCCDAdvanceCoefficient(0);
-
-            
+            base.OnParentChanged(prev, cur);
+            AddToActor();
         }
-    }
-
-    //contain some shapes
-    public class TtPhyMutiShapesCollisionNode : TtPhyCollisionNode
-    {
-
+        protected void AddToActor()
+        {
+            if (PhyShape != null && PhyActor != null)
+            {
+                PhyShape.AddToActor(PhyActor, CollisionNodeData.Center, Quaternion.FromEuler(CollisionNodeData.Rotator));
+            }
+        }
     }
 
     [Bricks.CodeBuilder.ContextMenu("SphereCollision", "Collision\\SphereCollision", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtPhySphereCollisionNode.TtPhySphereCollisionNodeData), DefaultNamePrefix = "SphereCollision")]
-    public class TtPhySphereCollisionNode : TtPhySingleShapeCollisionNode
+    public class TtPhySphereCollisionNode : TtPhyCollisionNode
     {
         [Rtti.Meta]
-        public class TtPhySphereCollisionNodeData : TtPhySingleShapeCollisionNodeData
+        public class TtPhySphereCollisionNodeData : TtPhyCollisionNodeData
         {
             [Rtti.Meta]
             public float Radius { get; set; } = 0.5f;
         }
         
-        public TtPhySphereCollisionNodeData CollisionNodeData
+        public TtPhySphereCollisionNodeData SphereCollisionNodeData
         {
             get => NodeData as TtPhySphereCollisionNodeData;
         }
         [Category("Option")]
         public float Radius 
         { 
-            get => CollisionNodeData.Radius;
+            get => SphereCollisionNodeData.Radius;
             set
             {
-                CollisionNodeData.Radius = value;
+                SphereCollisionNodeData.Radius = value;
                 PhyShape.RemoveFromActor();
                 PhyShape = CreatePhyShape();
-                if(PhyActor != null)
-                {
-                    PhyShape.AddToActor(PhyActor, in Vector3.Zero, in Quaternion.Identity);
-                }
+                AddToActor();
             }
         }
         public override TtPhyShape CreatePhyShape()
         {
             var pc = TtEngine.Instance.PhyModule.PhyContext;
-            return pc.CreateShapeSphere(PhyMaterial, CollisionNodeData.Radius);
+            return pc.CreateShapeSphere(PhyMaterial, SphereCollisionNodeData.Radius);
         }
     }
     [Bricks.CodeBuilder.ContextMenu("BoxCollision", "Collision\\BoxCollision", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtPhyBoxCollisionNode.TtPhyBoxCollisionNodeData), DefaultNamePrefix = "BoxCollision")]
-    public class TtPhyBoxCollisionNode : TtPhySingleShapeCollisionNode
+    public class TtPhyBoxCollisionNode : TtPhyCollisionNode
     {
         [Rtti.Meta]
-        public class TtPhyBoxCollisionNodeData : TtPhySingleShapeCollisionNodeData
+        public class TtPhyBoxCollisionNodeData : TtPhyCollisionNodeData
         {
             [Rtti.Meta]
             public Vector3 HalfExtent { get; set; } = Vector3.One * 0.5f;
         }
-        public TtPhyBoxCollisionNodeData CollisionNodeData
+        public TtPhyBoxCollisionNodeData BoxCollisionNodeData 
         {
             get => NodeData as TtPhyBoxCollisionNodeData;
         }
         [Category("Option")]
         public Vector3 HalfExtent
         {
-            get => CollisionNodeData.HalfExtent;
+            get => BoxCollisionNodeData .HalfExtent;
             set
             {
-                CollisionNodeData.HalfExtent = value;
+                BoxCollisionNodeData .HalfExtent = value;
                 PhyShape.RemoveFromActor();
                 PhyShape = CreatePhyShape();
-                if (PhyActor != null)
-                {
-                    PhyShape.AddToActor(PhyActor, in Vector3.Zero, in Quaternion.Identity);
-                }
+                AddToActor();
             }
         }
         public override TtPhyShape CreatePhyShape()
         {
             var pc = TtEngine.Instance.PhyModule.PhyContext;
-            return pc.CreateShapeBox(PhyMaterial, CollisionNodeData.HalfExtent);
+            return pc.CreateShapeBox(PhyMaterial, BoxCollisionNodeData .HalfExtent);
         }
     }
     [Bricks.CodeBuilder.ContextMenu("PlaneCollision", "Collision\\PlaneCollision", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtPhyPlaneCollisionNode.TtPhyPlaneCollisionNodeData), DefaultNamePrefix = "PlaneCollision")]
-    public class TtPhyPlaneCollisionNode : TtPhySingleShapeCollisionNode
+    public class TtPhyPlaneCollisionNode : TtPhyCollisionNode
     {
         [Rtti.Meta]
-        public class TtPhyPlaneCollisionNodeData : TtPhySingleShapeCollisionNodeData
+        public class TtPhyPlaneCollisionNodeData : TtPhyCollisionNodeData
         {
            
         }
-        public TtPhyPlaneCollisionNodeData CollisionNodeData
+        public TtPhyPlaneCollisionNodeData PlaneCollisionNodeData
         {
             get => NodeData as TtPhyPlaneCollisionNodeData;
         }
@@ -263,83 +184,74 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     }
     [Bricks.CodeBuilder.ContextMenu("CapsuleCollision", "Collision\\CapsuleCollision", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtPhyCapsuleCollisionNode.TtPhyCapsuleCollisionNodeData), DefaultNamePrefix = "CapsuleCollision")]
-    public class TtPhyCapsuleCollisionNode : TtPhySingleShapeCollisionNode
+    public class TtPhyCapsuleCollisionNode : TtPhyCollisionNode
     {
         [Rtti.Meta]
-        public class TtPhyCapsuleCollisionNodeData : TtPhySingleShapeCollisionNodeData
+        public class TtPhyCapsuleCollisionNodeData : TtPhyCollisionNodeData
         {
             [Rtti.Meta]
             public float Radius { get; set; } = 0.5f;
             [Rtti.Meta]
             public float HalfHeight { get; set; } = 0.5f;
         }
-        public TtPhyCapsuleCollisionNodeData CollisionNodeData
+        public TtPhyCapsuleCollisionNodeData CapsuleCollisionNodeData
         {
             get => NodeData as TtPhyCapsuleCollisionNodeData;
         }
         [Category("Option")]
         public float Radius
         {
-            get => CollisionNodeData.Radius;
+            get => CapsuleCollisionNodeData.Radius;
             set
             {
-                CollisionNodeData.Radius = value;
+                CapsuleCollisionNodeData.Radius = value;
                 PhyShape.RemoveFromActor();
                 PhyShape = CreatePhyShape();
-                if (PhyActor != null)
-                {
-                    PhyShape.AddToActor(PhyActor, in Vector3.Zero, in Quaternion.Identity);
-                }
+                AddToActor();
             }
         }
         [Category("Option")]
         public float HalfHeight
         {
-            get => CollisionNodeData.HalfHeight;
+            get => CapsuleCollisionNodeData.HalfHeight;
             set
             {
-                CollisionNodeData.HalfHeight = value;
+                CapsuleCollisionNodeData.HalfHeight = value;
                 PhyShape.RemoveFromActor();
                 PhyShape = CreatePhyShape();
-                if (PhyActor != null)
-                {
-                    PhyShape.AddToActor(PhyActor, in Vector3.Zero, in Quaternion.Identity);
-                }
+                AddToActor();
             }
         }
         public override TtPhyShape CreatePhyShape()
         {
             var pc = TtEngine.Instance.PhyModule.PhyContext;
-            return pc.CreateShapeCapsule(PhyMaterial, CollisionNodeData.Radius, CollisionNodeData.HalfHeight);
+            return pc.CreateShapeCapsule(PhyMaterial, CapsuleCollisionNodeData.Radius, CapsuleCollisionNodeData.HalfHeight);
         }
     }
     [Bricks.CodeBuilder.ContextMenu("ConvexCollision", "Collision\\ConvexCollision", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtPhyConvexCollisionNode.TtPhyConvexCollisionNodeData), DefaultNamePrefix = "ConvexCollision")]
-    public class TtPhyConvexCollisionNode : TtPhySingleShapeCollisionNode
+    public class TtPhyConvexCollisionNode : TtPhyCollisionNode
     {
         [Rtti.Meta]
-        public class TtPhyConvexCollisionNodeData : TtPhySingleShapeCollisionNodeData
+        public class TtPhyConvexCollisionNodeData : TtPhyCollisionNodeData
         {
             [Rtti.Meta]
             public RName ConvexSource { get; set; }
         }
-        public TtPhyConvexCollisionNodeData CollisionNodeData
+        public TtPhyConvexCollisionNodeData ConvexCollisionNodeData
         {
             get => NodeData as TtPhyConvexCollisionNodeData;
         }
         [Category("Option")]
         public RName ConvexSource
         {
-            get => CollisionNodeData.ConvexSource;
+            get => ConvexCollisionNodeData.ConvexSource;
             set
             {
-                CollisionNodeData.ConvexSource = value;
+                ConvexCollisionNodeData.ConvexSource = value;
                 PhyShape.RemoveFromActor();
                 PhyShape = CreatePhyShape();
-                if (PhyActor != null)
-                {
-                    PhyShape.AddToActor(PhyActor, in Vector3.Zero, in Quaternion.Identity);
-                }
+                AddToActor();
             }
         }
         public override TtPhyShape CreatePhyShape()
@@ -354,31 +266,28 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
     }
     [Bricks.CodeBuilder.ContextMenu("TriMeshCollision", "Collision\\TriMeshCollision", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtPhyTriMeshCollisionNode.TtPhyTriMeshCollisionNodeData), DefaultNamePrefix = "TriMeshCollision")]
-    public class TtPhyTriMeshCollisionNode : TtPhySingleShapeCollisionNode
+    public class TtPhyTriMeshCollisionNode : TtPhyCollisionNode
     {
         [Rtti.Meta]
-        public class TtPhyTriMeshCollisionNodeData : TtPhySingleShapeCollisionNodeData
+        public class TtPhyTriMeshCollisionNodeData : TtPhyCollisionNodeData
         {
             [Rtti.Meta]
             public RName TriMeshSource { get; set; }
         }
-        public TtPhyTriMeshCollisionNodeData CollisionNodeData
+        public TtPhyTriMeshCollisionNodeData TriMeshCollisionNodeData
         {
             get => NodeData as TtPhyTriMeshCollisionNodeData;
         }
         [Category("Option")]
         public RName TriMeshSource
         {
-            get => CollisionNodeData.TriMeshSource;
+            get => TriMeshCollisionNodeData.TriMeshSource;
             set
             {
-                CollisionNodeData.TriMeshSource = value;
+                TriMeshCollisionNodeData.TriMeshSource = value;
                 PhyShape.RemoveFromActor();
                 PhyShape = CreatePhyShape();
-                if (PhyActor != null)
-                {
-                    PhyShape.AddToActor(PhyActor, in Vector3.Zero, in Quaternion.Identity);
-                }
+                AddToActor();
             }
         }
         public override TtPhyShape CreatePhyShape()
