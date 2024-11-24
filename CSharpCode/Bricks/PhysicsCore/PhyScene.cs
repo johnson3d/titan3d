@@ -128,6 +128,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 return mPxScene;
             }
         }
+        EngineNS.PhySceneDesc.FDelegate_FonContact mOnContackCallBack;
         public async System.Threading.Tasks.Task<bool> Initialize(object host)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
@@ -145,10 +146,19 @@ namespace EngineNS.Bricks.PhysicsCore
             desc.mCoreObject.SetFlags(PhySceneFlag.eENABLE_ACTIVE_ACTORS);
             var gravity = new Vector3(0, -9.8f, 0);
             desc.mCoreObject.SetGravity(in gravity);
+            unsafe
+            {
+                mOnContackCallBack = new PhySceneDesc.FDelegate_FonContact(OnContact);
+                desc.mCoreObject.SetOnContact(mOnContackCallBack);
+            }
             //desc.mCoreObject.SetOnTrigger()
             mPxScene = pc.CreateScene(desc);
 
             return true;
+        }
+        public unsafe void OnContact(void* arg0, EngineNS.PhyContactPairHeader* arg1, EngineNS.PhyContactPair* arg2,uint arg3)
+        {
+
         }
         public void Cleanup(object host)
         {
@@ -181,6 +191,9 @@ namespace EngineNS.Bricks.PhysicsCore
         private float TickLogic_ellapse;
         public void TickLogic(object host, float ellapse)
         {
+            if (!HostScene.World.IsGameWorld)
+                return;
+
             if (TtEngine.Instance.Config.UsePhysxMT)
             {
                 TickLogic_ellapse = ellapse;

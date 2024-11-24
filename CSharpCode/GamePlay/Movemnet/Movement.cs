@@ -81,7 +81,7 @@ namespace EngineNS.GamePlay.Movemnet
         }
         protected virtual void UpdatePlacement(TtWorld world, TtRenderPolicy policy)
         {
-            if (TtEngine.Instance.PlayMode == EPlayMode.Editor)
+            if (!world.IsGameWorld)
                 return;
 
             var settedLinearVelocity = ConsumeSettedLinearVelocity();

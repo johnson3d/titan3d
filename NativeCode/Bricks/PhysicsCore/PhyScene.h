@@ -114,8 +114,9 @@ PhySceneFlag
 	eMUTABLE_FLAGS = eENABLE_ACTIVE_ACTORS | eEXCLUDE_KINEMATICS_FROM_ACTIVE_ACTORS
 };
 
-struct PhySimulationEventCallback : public physx::PxSimulationEventCallback
+class PhySimulationEventCallback : public physx::PxSimulationEventCallback
 {
+public:
 	void* Handle;
 	FonContact _onContact = nullptr;
 	FonTrigger _onTrigger;
@@ -206,7 +207,7 @@ struct PhySimulationFilterShader
 			}
 			return (physx::PxFilterFlags)_CustomSimulationFilterShader(attributes0, &filterData0, attributes1, &filterData1, &pairFlags, constantBlock, constantBlockSize);
 		}
-		pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT;
+		pairFlags = physx::PxPairFlag::eTRIGGER_DEFAULT;
 		return physx::PxFilterFlags();
 	}
 
@@ -253,18 +254,18 @@ public:
 		FonAdvance onAdvance);
 
 	void SetHandle(void* handle) {
-		SimulationEventCallback.Handle = handle;
+		mSimulationEventCallback->Handle = handle;
 	}
 	void SetOnTrigger(FonTrigger onTrigger) {
-		SimulationEventCallback._onTrigger = onTrigger;
+		mSimulationEventCallback->_onTrigger = onTrigger;
 	}
 	void SetOnContact(FonContact onContact) {
-		SimulationEventCallback._onContact = onContact;
+		mSimulationEventCallback->_onContact = onContact;
 	}
 	
 protected:
 	PxSceneDesc*	mDesc;
-	PhySimulationEventCallback SimulationEventCallback;
+	PhySimulationEventCallback* mSimulationEventCallback;
 	PhySimulationFilterShader SimulationFilterShader;
 };
 

@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Actor\Actor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Actor\Character.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PhyEventMacrossBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SceneNode\PhyRigidbodyNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SceneNode\PhyCollisionNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SceneNode\PhyControllerNode.cs" />

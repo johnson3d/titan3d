@@ -15,7 +15,7 @@ try
 
     System.Console.WriteLine($"TitanEngine GameBuilder: {assemblyFile}");
 
-    EngineNS.Macross.UMacrossModule.CompileGameProject(csFilesPath, projectFile, assemblyFile);
+    EngineNS.Macross.TtMacrossModule.CompileGameProject(csFilesPath, projectFile, assemblyFile);
 }
 catch(System.Exception e)
 {
