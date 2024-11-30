@@ -17,7 +17,7 @@
             }
             public override void Execute(string argsText)
             {
-                _ = ExecuteImpl(argsText);
+                TtEngine.Instance.TaskCollector.AddWaitTask(ExecuteImpl(argsText));
             }
             private async Thread.Async.TtTask ExecuteImpl(string argsText)
             {

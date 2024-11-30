@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Bricks.Recast
 {
-    public class UNavQuery : AuxPtrType<RcNavQuery>
+    public class TtNavQuery : AuxPtrType<RcNavQuery>
     {
-        public UNavQuery(RcNavQuery ptr)
+        public TtNavQuery(RcNavQuery ptr)
         {
             mCoreObject = ptr;
         }

@@ -4,20 +4,20 @@ using System.Text;
 
 namespace EngineNS.Bricks.Recast
 {
-    public class UTileMeshBuilder : AuxPtrType<TileMeshBuilder>
+    public class TtTileMeshBuilder : AuxPtrType<TileMeshBuilder>
     {
-        public UTileMeshBuilder()
+        public TtTileMeshBuilder()
         {
             mCoreObject = TileMeshBuilder.CreateInstance();
         }
-        public void SetInputGeom(UInputGeom geom)
+        public void SetInputGeom(TtInputGeom geom)
         {
             mCoreObject.NativeSuper.SetInputGeom(geom.mCoreObject);
         }
-        public UNavMesh BuildNavi()
+        public TtNavMesh BuildNavi()
         {
             var ptr = mCoreObject.BuildNavi();
-            return new UNavMesh(ptr);
+            return new TtNavMesh(ptr);
         }
     }
 }

@@ -135,7 +135,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             TtEngine.Instance.GfxDevice.MaterialFunctionManager.RegMaterialFunctionName(AssetName);
 
-            _ = ameta.SaveRefAssets();
+            TtEngine.Instance.TaskCollector.AddWaitTask(ameta.SaveRefAssets());
         }
         public string GenMateralFunctionGraphCode(UHLSLCodeGenerator mHLSLCodeGen,
             Bricks.CodeBuilder.ShaderNode.TtMaterialFunctionGraph MaterialGraph, TtMaterial material)

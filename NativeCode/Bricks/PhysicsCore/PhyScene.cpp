@@ -21,11 +21,13 @@ FSimulationFilterShader PhySimulationFilterShader::_CustomSimulationFilterShader
 PhySceneDesc::PhySceneDesc()
 {
 	mDesc = nullptr;
+	mSimulationEventCallback = nullptr;
 }
 
 PhySceneDesc::~PhySceneDesc()
 {
 	Safe_Delete(mDesc);
+	Safe_Delete(mSimulationEventCallback);
 }
 
 void PhySceneDesc::Init()

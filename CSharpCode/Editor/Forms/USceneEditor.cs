@@ -591,7 +591,7 @@ namespace EngineNS.Editor.Forms
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("SceneDetails", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeDetails", mDockKeyClass), rightDownId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Editor Settings", mDockKeyClass), rightDownId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Camera Settings", mDockKeyClass), rightDownId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Camera Settings", mDockKeyClass), rightUpId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Outliner", mDockKeyClass), rightUpId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Preview", mDockKeyClass), middleId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("Macross", mDockKeyClass), middleId);
@@ -654,9 +654,12 @@ namespace EngineNS.Editor.Forms
 
             DrawEditorSettings();
             DrawCameraSettings();
-            DrawSceneDetails();
+
             DrawNodeDetails();
+
             DrawOutliner();
+            DrawSceneDetails();
+            
             DrawPreview();
             DrawContentBrowser();
             DrawPlaceItemPanel();
@@ -949,8 +952,10 @@ namespace EngineNS.Editor.Forms
                 for (int i = 0; i < dragData.Metas.Length; i++)
                 {
                     dragData.Metas[i].DraggingInViewport = draggingInViewport;
-                    if(draggingInViewport)
-                        _ = dragData.Metas[i].OnDragging(PreviewViewport);
+                    if (draggingInViewport)
+                    {
+                        TtEngine.Instance.TaskCollector.AddWaitTask(dragData.Metas[i].OnDragging(PreviewViewport));
+                    }
                 }
             }
         }
@@ -987,7 +992,7 @@ namespace EngineNS.Editor.Forms
                         var dragData = (TtContentBrowser.DragDropData)handle.Target;
                         for(int i=0; i<dragData.Metas.Length; i++)
                         {
-                            _ = dragData.Metas[i].OnDragTo(PreviewViewport);
+                            TtEngine.Instance.TaskCollector.AddWaitTask(dragData.Metas[i].OnDragTo(PreviewViewport));
                         }
                     }
                     ImGuiAPI.EndDragDropTarget();

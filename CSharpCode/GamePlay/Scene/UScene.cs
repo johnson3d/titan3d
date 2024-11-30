@@ -447,7 +447,7 @@ namespace EngineNS.GamePlay.Scene
         }
         [Category("Option")]
         public bool IsGatherVisibleByManagedNodes { get; set; } = false;
-        public override bool TreeGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public override bool TryTreeGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             if (IsGatherVisibleByManagedNodes == false)
                 return true;

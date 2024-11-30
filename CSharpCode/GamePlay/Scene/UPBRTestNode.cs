@@ -352,7 +352,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 var meshData = NodeData as UMeshNodeData;
                 if (meshData != null)
-                    _ = InitMeshMatrix(meshData);
+                    TtEngine.Instance.TaskCollector.AddWaitTask(InitMeshMatrix(meshData));
                 bNeedUpdateMeshMatrix = false;
             }
             return true;

@@ -11,10 +11,6 @@ namespace EngineNS
         public const string CoreModule = "Core.Window.dll";
         public static void SetMemDebugText(void* memory, string info)
         {
-            if ("uestyle/graph/pin_disconnected_vara.srv:Engine" == info)
-            {
-                int xx = 0;
-            }
             SetMemDebugInfo(memory, info);
         }
         public static void CopyString2Ansi(BigStackBuffer buffer, string srcStr)

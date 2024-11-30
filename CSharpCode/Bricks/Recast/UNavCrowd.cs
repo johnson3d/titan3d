@@ -4,13 +4,13 @@ using System.Text;
 
 namespace EngineNS.Bricks.Recast
 {
-    public class UNavCrowd : AuxPtrType<RcNavCrowd>
+    public class TtNavCrowd : AuxPtrType<RcNavCrowd>
     {
-        public UNavCrowd()
+        public TtNavCrowd()
         {
             mCoreObject = RcNavCrowd.CreateInstance();
         }
-        public bool Init(UNavQuery navquery, UNavMesh nav, float radius)
+        public bool Init(TtNavQuery navquery, TtNavMesh nav, float radius)
         {
             return mCoreObject.Init(navquery.mCoreObject, nav.mCoreObject, radius);
         }

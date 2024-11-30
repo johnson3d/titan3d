@@ -44,7 +44,7 @@ namespace EngineNS.GamePlay.Scene
                 if (PrefabNodeData == null)
                     return;
                 var save = PrefabNodeData.PrefabName;
-                _ = UpdatePrefab(save, value);
+                TtEngine.Instance.TaskCollector.AddWaitTask(UpdatePrefab(save, value));
                 PrefabNodeData.PrefabName = value;
             }
         }
@@ -157,7 +157,9 @@ namespace EngineNS.GamePlay.Scene
                 
                 var prefab = mAsset as TtPrefab;
                 prefab.Root = new TtPrefabNode();
-                _ = prefab.Root.InitializeNode(world, new TtPrefabNode.TtPrefabNodeData() { PrefabName = dir, }, EBoundVolumeType.Box, typeof(GamePlay.TtIdentityPlacement));
+                TtEngine.Instance.TaskCollector.AddWaitTask(
+                    prefab.Root.InitializeNode(world, new TtPrefabNode.TtPrefabNodeData() { PrefabName = dir, }, EBoundVolumeType.Box, typeof(GamePlay.TtIdentityPlacement))
+                );
             }
         }
         [Category("Option")]

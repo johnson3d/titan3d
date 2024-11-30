@@ -45,6 +45,8 @@
 #define HasModule_Quark
 #define HasModule_NxPhysics
 #define HasModule_DistanceField
+#define HasModule_RecastRuntime
+#define HasModule_RecastBuilder
 
 #include <WinSock2.h>
 #include <mswsock.h>

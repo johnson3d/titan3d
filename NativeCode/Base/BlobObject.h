@@ -25,6 +25,10 @@ struct TR_CLASS()
 			return nullptr;
 		return & mDatas[0];
 	}
+	template <typename T>
+	T* GetDataPtr() {
+		return (T*)GetData();
+	}
 	void ReadFromXnd(XndAttribute * attr);
 	void Write2Xnd(XndAttribute * attr);
 

@@ -69,6 +69,7 @@ namespace MainEditor
             }
         }
 
+        static bool WaitRedgate = false;
         [STAThreadAttribute]
         static void Main(string[] args)
         {
@@ -137,6 +138,11 @@ namespace MainEditor
             {
                 consoleWriter.Close();
                 ostrm.Close();
+            }
+
+            while (WaitRedgate)
+            {
+                System.Threading.Thread.Sleep(1000);
             }
 
             CoreSDK.DumpNativeMemoryState("MainExit:", 0);

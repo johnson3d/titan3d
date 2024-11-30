@@ -39,7 +39,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         {
             get
             {
-                if(Parent is TtPhyRigidbodyNode rigidNode)
+                if (Parent is TtPhyRigidbodyNode rigidNode)
                 {
                     return rigidNode.PhyActor;
                 }
@@ -65,7 +65,15 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         [Category("Option")]
         public FRotator Rotator { get => CollisionNodeData.Rotator; set => CollisionNodeData.Rotator = value; }
         [Category("Option")]
-        public bool IsTrigger { get => CollisionNodeData.IsTrigger; set => CollisionNodeData.IsTrigger = value; }
+        public bool IsTrigger
+        {
+            get => CollisionNodeData.IsTrigger;
+            set
+            {
+                CollisionNodeData.IsTrigger = value;
+                SetTriggerFlag(value, PhyShape);
+            }
+        }
         [Category("Option")]
         public PhyFilterData QueryFilterData { get => CollisionNodeData.QueryFilterData; set => CollisionNodeData.QueryFilterData = value; }
         [Category("Option")]
@@ -81,6 +89,11 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         public virtual TtPhyShape CreatePhyShape()
         {
             return null;
+        }
+        protected void SetTriggerFlag(bool isTrigger, TtPhyShape shape)
+        {
+            shape.mCoreObject.SetFlag(EPhysShapeFlag.eSIMULATION_SHAPE, !IsTrigger);
+            shape.mCoreObject.SetFlag(EPhysShapeFlag.eTRIGGER_SHAPE, IsTrigger);
         }
         public Bricks.PhysicsCore.TtPhyShape PhyShape { get; set; } = null;
         protected override void OnParentChanged(TtNode prev, TtNode cur)
@@ -107,14 +120,14 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             [Rtti.Meta]
             public float Radius { get; set; } = 0.5f;
         }
-        
+
         public TtPhySphereCollisionNodeData SphereCollisionNodeData
         {
             get => NodeData as TtPhySphereCollisionNodeData;
         }
         [Category("Option")]
-        public float Radius 
-        { 
+        public float Radius
+        {
             get => SphereCollisionNodeData.Radius;
             set
             {
@@ -127,7 +140,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         public override TtPhyShape CreatePhyShape()
         {
             var pc = TtEngine.Instance.PhyModule.PhyContext;
-            return pc.CreateShapeSphere(PhyMaterial, SphereCollisionNodeData.Radius);
+            var shape = pc.CreateShapeSphere(PhyMaterial, SphereCollisionNodeData.Radius);
+            SetTriggerFlag(IsTrigger, shape);
+            return shape;
         }
     }
     [Bricks.CodeBuilder.ContextMenu("BoxCollision", "Collision\\BoxCollision", TtNode.EditorKeyword)]
@@ -140,17 +155,17 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             [Rtti.Meta]
             public Vector3 HalfExtent { get; set; } = Vector3.One * 0.5f;
         }
-        public TtPhyBoxCollisionNodeData BoxCollisionNodeData 
+        public TtPhyBoxCollisionNodeData BoxCollisionNodeData
         {
             get => NodeData as TtPhyBoxCollisionNodeData;
         }
         [Category("Option")]
         public Vector3 HalfExtent
         {
-            get => BoxCollisionNodeData .HalfExtent;
+            get => BoxCollisionNodeData.HalfExtent;
             set
             {
-                BoxCollisionNodeData .HalfExtent = value;
+                BoxCollisionNodeData.HalfExtent = value;
                 PhyShape.RemoveFromActor();
                 PhyShape = CreatePhyShape();
                 AddToActor();
@@ -159,7 +174,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         public override TtPhyShape CreatePhyShape()
         {
             var pc = TtEngine.Instance.PhyModule.PhyContext;
-            return pc.CreateShapeBox(PhyMaterial, BoxCollisionNodeData .HalfExtent);
+            var shape = pc.CreateShapeBox(PhyMaterial, BoxCollisionNodeData.HalfExtent);
+            SetTriggerFlag(IsTrigger, shape);
+            return shape;
         }
     }
     [Bricks.CodeBuilder.ContextMenu("PlaneCollision", "Collision\\PlaneCollision", TtNode.EditorKeyword)]
@@ -169,7 +186,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         [Rtti.Meta]
         public class TtPhyPlaneCollisionNodeData : TtPhyCollisionNodeData
         {
-           
+
         }
         public TtPhyPlaneCollisionNodeData PlaneCollisionNodeData
         {
@@ -179,7 +196,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         public override TtPhyShape CreatePhyShape()
         {
             var pc = TtEngine.Instance.PhyModule.PhyContext;
-            return pc.CreateShapePlane(PhyMaterial);
+            var shape = pc.CreateShapePlane(PhyMaterial);
+            SetTriggerFlag(IsTrigger, shape);
+            return shape;
         }
     }
     [Bricks.CodeBuilder.ContextMenu("CapsuleCollision", "Collision\\CapsuleCollision", TtNode.EditorKeyword)]
@@ -225,7 +244,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         public override TtPhyShape CreatePhyShape()
         {
             var pc = TtEngine.Instance.PhyModule.PhyContext;
-            return pc.CreateShapeCapsule(PhyMaterial, CapsuleCollisionNodeData.Radius, CapsuleCollisionNodeData.HalfHeight);
+            var shape = pc.CreateShapeCapsule(PhyMaterial, CapsuleCollisionNodeData.Radius, CapsuleCollisionNodeData.HalfHeight);
+            SetTriggerFlag(IsTrigger, shape);
+            return shape;
         }
     }
     [Bricks.CodeBuilder.ContextMenu("ConvexCollision", "Collision\\ConvexCollision", TtNode.EditorKeyword)]
@@ -261,7 +282,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             TtMeshDataProvider mesh = TtMeshDataProvider.MakeBox(boundingBox);
             var convexMesh = pc.CookConvexMesh(mesh);
             System.Diagnostics.Debug.Assert(false); //need cook convex from mesh
-            return pc.CreateShapeConvex(PhyMaterial, convexMesh, in Vector3.Zero, in Quaternion.Identity);
+            var shape = pc.CreateShapeConvex(PhyMaterial, convexMesh, in Vector3.Zero, in Quaternion.Identity);
+            SetTriggerFlag(IsTrigger, shape);
+            return shape;
         }
     }
     [Bricks.CodeBuilder.ContextMenu("TriMeshCollision", "Collision\\TriMeshCollision", TtNode.EditorKeyword)]
@@ -296,9 +319,11 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             BoundingBox boundingBox = new BoundingBox(Vector3.Zero, Vector3.One);
             TtMeshDataProvider mesh = TtMeshDataProvider.MakeBox(boundingBox);
             System.Diagnostics.Debug.Assert(false); //need cook convex from mesh
-            var triMesh = pc.CookTriMesh(mesh,null,null,null);
+            var triMesh = pc.CookTriMesh(mesh, null, null, null);
             List<TtPhyMaterial> materials = new List<TtPhyMaterial>();
-            return pc.CreateShapeTriMesh(materials, triMesh, in Vector3.Zero, in Quaternion.Identity);
+            var shape = pc.CreateShapeTriMesh(materials, triMesh, in Vector3.Zero, in Quaternion.Identity);
+            SetTriggerFlag(IsTrigger, shape);
+            return shape;
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using NPOI.SS.Formula.Functions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
@@ -12,6 +11,41 @@ namespace EngineNS.Thread.Async
     {
         bool IsCompleted { get; }
     }
+    public class TtTaskCollector : IDisposable
+    {
+        public List<ITask> Tasks { get; } = new List<ITask>();
+        public void AddWaitTask(ITask task)
+        {
+            lock (Tasks)
+            {
+                Tasks.Add(task);
+            }
+        }
+        public void Tick()
+        {
+            lock (Tasks)
+            {
+                for (int i = 0; i < Tasks.Count; i++)
+                {
+                    if (Tasks[i].IsCompleted)
+                    {
+                        Tasks[i].Dispose();
+                        Tasks.RemoveAt(i);
+                        i--;
+                    }
+                }
+            }
+        }
+        public void Dispose()
+        {
+            for (int i = 0; i < Tasks.Count; i++)
+            {
+                Tasks[i].Dispose();
+            }
+            Tasks.Clear();
+        }
+    }
+
     #region task<T>
     public struct AsyncFiberMethodBuilder<T>
     {
@@ -105,7 +139,7 @@ namespace EngineNS.Thread.Async
         Failed = 2
     }
 
-    public class TtTaskData<T> : IPooledObject, IDisposable
+    public class TtTaskData<T> : IPooledObject
     {
         public bool IsAlloc { get; set; } = false;
         internal ETtTaskStatus mStatus;
@@ -522,7 +556,7 @@ namespace EngineNS.Thread.Async
         #endregion
     }
     [AsyncMethodBuilder(typeof(AsyncFiberMethodBuilder))]
-    public struct TtTask : ITask, IDisposable
+    public struct TtTask : ITask
     {
         //make the members as a class type pointer;
         TtTaskData mTaskData;
@@ -565,4 +599,12 @@ namespace EngineNS.Thread.Async
         }
     }
     #endregion
+}
+
+namespace EngineNS
+{
+    public partial class TtEngine
+    {
+        public Thread.Async.TtTaskCollector TaskCollector { get; } = new Thread.Async.TtTaskCollector();
+    }
 }

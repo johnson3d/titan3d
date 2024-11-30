@@ -268,6 +268,38 @@ namespace NxRHI
 		return true;
 	}
 
+	bool FMeshDataProvider::MergeFromMesh(FMeshDataProvider* mesh, const v3dxMatrix4* matrix)
+	{
+		auto startVtx = this->GetVertexNumber();
+		for (UINT i = 0; i < mesh->GetVertexNumber(); i++)
+		{
+			auto vtx = mesh->GetVertex(i);
+			if (matrix != nullptr)
+			{
+				v3dxVec3TransformCoord(&vtx.Position, &vtx.Position, matrix);
+				v3dxVec3TransformNormal(&vtx.Normal, &vtx.Normal, matrix);
+			}
+			this->AddVertex(vtx);
+		}
+
+		auto startIndex = GetPrimitiveNumber();
+		for (UINT i = 0; i < mesh->GetPrimitiveNumber(); i++)
+		{
+			UINT a, b, c;
+			mesh->GetTriangle(a, b, c, i);
+			this->AddTriangle(a + startVtx, b + startVtx, c + startVtx);
+		}
+
+		for (UINT i = 0; i < mesh->GetAtomNumber(); i++)
+		{
+			FMeshAtomDesc atom = *mesh->GetAtom(i, 0);
+			atom.StartIndex = startIndex * 3;
+			PushAtom(&atom, 1, nullptr);
+		}
+
+		return true;
+	}
+
 	void FMeshDataProvider::Reset()
 	{
 		PrimitiveNumber = 0;
@@ -318,7 +350,6 @@ namespace NxRHI
 		}
 
 		IndexBuffer = MakeWeakRef(new IBlobObject());
-
 
 		PrimitiveNumber = 0;
 		VertexNumber = 0;
@@ -1062,8 +1093,79 @@ namespace NxRHI
 
 		return VertexNumber++;
 	}
-
-	vBOOL FMeshDataProvider::AddTriangle(UINT a, UINT b, UINT c)
+	FMeshVertex FMeshDataProvider::GetVertex(UINT index)
+	{
+		FMeshVertex result;
+		result.SetDefault();
+		auto cur = mVertexBuffers[VST_Position];
+		if (cur != nullptr)
+		{
+			result.Position = cur->GetDataPtr<v3dxVector3>()[index];
+		}
+		cur = mVertexBuffers[VST_Normal];
+		if (cur != nullptr)
+		{
+			result.Normal = cur->GetDataPtr<v3dxVector3>()[index];
+		}
+		cur = mVertexBuffers[VST_Tangent];
+		if (cur != nullptr)
+		{
+			result.Tangent = cur->GetDataPtr<v3dxQuaternion>()[index];
+		}
+		cur = mVertexBuffers[VST_Color];
+		if (cur != nullptr)
+		{
+			result.Color = cur->GetDataPtr<DWORD>()[index];
+		}
+		cur = mVertexBuffers[VST_UV];
+		if (cur != nullptr)
+		{
+			result.UV = cur->GetDataPtr<v3dxVector2>()[index];
+		}
+		cur = mVertexBuffers[VST_LightMap];
+		if (cur != nullptr)
+		{
+			result.LightMap = cur->GetDataPtr<v3dxQuaternion>()[index];
+		}
+		cur = mVertexBuffers[VST_SkinIndex];
+		if (cur != nullptr)
+		{
+			result.SkinIndex = cur->GetDataPtr<DWORD>()[index];
+		}
+		cur = mVertexBuffers[VST_SkinWeight];
+		if (cur != nullptr)
+		{
+			result.SkinWeight = cur->GetDataPtr<v3dxQuaternion>()[index];
+		}
+		cur = mVertexBuffers[VST_TerrainIndex];
+		if (cur != nullptr)
+		{
+			
+		}
+		cur = mVertexBuffers[VST_TerrainGradient];
+		if (cur != nullptr)
+		{
+			
+		}
+		return result;
+	}
+	bool FMeshDataProvider::GetTriangle(UINT& a, UINT& b, UINT& c, UINT index)
+	{
+		if (IsIndex32)
+		{
+			a = IndexBuffer->GetDataPtr<UINT>()[index * 3];
+			b = IndexBuffer->GetDataPtr<UINT>()[index * 3 + 1];
+			c = IndexBuffer->GetDataPtr<UINT>()[index * 3 + 2];
+		}
+		else
+		{
+			a = IndexBuffer->GetDataPtr<USHORT>()[index * 3];
+			b = IndexBuffer->GetDataPtr<USHORT>()[index * 3 + 1];
+			c = IndexBuffer->GetDataPtr<USHORT>()[index * 3 + 2];
+		}
+		return true;
+	}
+	bool FMeshDataProvider::AddTriangle(UINT a, UINT b, UINT c)
 	{
 		if (VertexNumber > 0)
 		{
@@ -1096,7 +1198,7 @@ namespace NxRHI
 		return TRUE;
 	}
 
-	vBOOL FMeshDataProvider::AddTriangle(UINT a, UINT b, UINT c, USHORT faceData)
+	bool FMeshDataProvider::AddTriangle(UINT a, UINT b, UINT c, USHORT faceData)
 	{
 		FaceBuffer->PushData(&faceData, sizeof(USHORT));
 		if (FALSE == AddTriangle(a, b, c))
@@ -1104,7 +1206,7 @@ namespace NxRHI
 		return TRUE;
 	}
 
-	vBOOL FMeshDataProvider::AddTriangle(UINT* pTri, UINT numOfTri)
+	bool FMeshDataProvider::AddTriangle(UINT* pTri, UINT numOfTri)
 	{
 		if (IsIndex32)
 		{
@@ -1133,7 +1235,7 @@ namespace NxRHI
 		return true;
 	}
 
-	vBOOL FMeshDataProvider::AddLine(UINT a, UINT b)
+	bool FMeshDataProvider::AddLine(UINT a, UINT b)
 	{
 		if (VertexNumber > 0)
 		{

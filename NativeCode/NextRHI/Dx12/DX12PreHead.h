@@ -39,7 +39,7 @@ namespace NxRHI
 		AutoRef<DX12CmdRecorder> Alloc(ID3D12Device* device, DX12CommandList* cmdlist);
 		void Free(const AutoRef<DX12CmdRecorder>& allocator, UINT64 waitValue, AutoRef<IFence>& fence);
 		void TickRecycle();
-		void Finalize();
+		void FinalCleanup();
 		void UnsafeDirectFree(const AutoRef<DX12CmdRecorder>& allocator);
 		int GetNumOfAllocators() {
 			return (int)CmdAllocators.size();

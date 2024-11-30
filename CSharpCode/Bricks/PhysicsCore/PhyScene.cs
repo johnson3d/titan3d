@@ -129,6 +129,7 @@ namespace EngineNS.Bricks.PhysicsCore
             }
         }
         EngineNS.PhySceneDesc.FDelegate_FonContact mOnContackCallBack;
+        EngineNS.PhySceneDesc.FDelegate_FonTrigger mOnTriggerCallBack;
         public async System.Threading.Tasks.Task<bool> Initialize(object host)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
@@ -150,6 +151,8 @@ namespace EngineNS.Bricks.PhysicsCore
             {
                 mOnContackCallBack = new PhySceneDesc.FDelegate_FonContact(OnContact);
                 desc.mCoreObject.SetOnContact(mOnContackCallBack);
+                mOnTriggerCallBack = new PhySceneDesc.FDelegate_FonTrigger(OnTrigger);
+                desc.mCoreObject.SetOnTrigger(mOnTriggerCallBack);
             }
             //desc.mCoreObject.SetOnTrigger()
             mPxScene = pc.CreateScene(desc);
@@ -158,6 +161,50 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         public unsafe void OnContact(void* arg0, EngineNS.PhyContactPairHeader* arg1, EngineNS.PhyContactPair* arg2,uint arg3)
         {
+            var phyActor1 = new EngineNS.PhyActor(arg1->actors[0]);
+            var actor1 = TtPhyActor.GetActor(phyActor1);
+            var phyActor2 = new EngineNS.PhyActor(arg1->actors[1]);
+            var actor2 = TtPhyActor.GetActor(phyActor2);
+
+            if (actor1 != null && actor2 != null)
+            {
+                actor1.RigidBodyNode.OnContact(actor1.TagNode, actor2.TagNode);
+                actor2.RigidBodyNode.OnContact(actor2.TagNode, actor1.TagNode);
+            }
+        }
+        public unsafe void OnTrigger(void* arg0, EngineNS.PhyTriggerPair* arg1, uint arg2)
+        {
+            var triggerActor = TtPhyActor.GetActor(new EngineNS.PhyActor(arg1->triggerActor));
+            var otherActor = TtPhyActor.GetActor(new EngineNS.PhyActor(arg1->otherActor));
+            var otherController = TtPhyController.GetPhyController(new EngineNS.PhyController(arg1->otherActor));
+            if(otherActor != null)
+            {
+                if (PhyPairFlag.eNOTIFY_TOUCH_FOUND == (arg1->status & PhyPairFlag.eNOTIFY_TOUCH_FOUND))
+                {
+                    triggerActor.RigidBodyNode.OnBeginTrigger(triggerActor.TagNode, otherActor.TagNode);
+                    otherActor.RigidBodyNode.OnBeginTrigger(otherActor.TagNode, triggerActor.TagNode);
+                }
+
+                if (PhyPairFlag.eNOTIFY_TOUCH_LOST == (arg1->status & PhyPairFlag.eNOTIFY_TOUCH_LOST))
+                {
+                    triggerActor.RigidBodyNode.OnEndTrigger(triggerActor.TagNode, otherActor.TagNode);
+                    otherActor.RigidBodyNode.OnEndTrigger(otherActor.TagNode, triggerActor.TagNode);
+                }
+            }
+            if(otherController != null)
+            {
+                if (PhyPairFlag.eNOTIFY_TOUCH_FOUND == (arg1->status & PhyPairFlag.eNOTIFY_TOUCH_FOUND))
+                {
+                    triggerActor.RigidBodyNode.OnBeginTrigger(triggerActor.TagNode, otherController.TagNode);
+                    //otherActor.RigidBodyNode.OnBeginTrigger(otherActor.TagNode, triggerActor.TagNode);
+                }
+
+                if (PhyPairFlag.eNOTIFY_TOUCH_LOST == (arg1->status & PhyPairFlag.eNOTIFY_TOUCH_LOST))
+                {
+                    triggerActor.RigidBodyNode.OnEndTrigger(triggerActor.TagNode, otherController.TagNode);
+                    //otherActor.RigidBodyNode.OnEndTrigger(otherActor.TagNode, triggerActor.TagNode);
+                }
+            }
 
         }
         public void Cleanup(object host)

@@ -401,9 +401,9 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                         mVisParameter.World = world;
                         mVisParameter.CullCamera = CullCamera;
                         mVisParameter.IsGatherVisibleNodes = false;
-                        mVisParameter.OnVisitNode = static (node, arg) =>
+                        mVisParameter.IsGatherVisibleMeshes = static (node, arg) =>
                         {
-                            return node.IsCastShadow || node.Children.Count > 0;
+                            return node.IsCastShadow;
                         };
                         world.GatherVisibleMeshes(mVisParameter);
 

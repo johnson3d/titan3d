@@ -122,9 +122,7 @@ bool RcNavMesh::LoadXnd(XndNode* node)
 
 void RcNavMesh::Save2Xnd(XndNode* node)
 {
-	auto attr = node->mHolder.GetPtr()->NewAttribute("NavMesh", 0, 0);
-	node->AddAttribute(attr);
-
+	auto attr = node->GetOrAddAttribute("NavMesh", 0, 0);
 	attr->BeginWrite();
 	// Store header.
 	NavMeshSetHeader header;

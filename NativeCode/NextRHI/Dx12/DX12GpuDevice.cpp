@@ -838,7 +838,7 @@ namespace NxRHI
 		{
 			mFrameFence->WaitToExpect();
 			mCmdQueue->Flush(EQueueType::QU_ALL);
-			mCmdAllocatorManager->Finalize();
+			mCmdAllocatorManager->FinalCleanup();
 			bool cmdRecycle = mCmdQueue->mWaitRecycleCmdlists.size() == 0;
 			bool allocatorRecycle = mCmdAllocatorManager->Recycles.size() == 0;
 			bool post = mTickingPostEvents.size() == 0 && mPostEvents.size() == 0;

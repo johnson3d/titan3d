@@ -71,13 +71,17 @@ namespace NxRHI
 
 	class DX12VbView : public IVbView
 	{
+		DX12GpuDevice* mDevice = nullptr;
 	public:
+		virtual void DeleteThis() override;
 		bool Init(DX12GpuDevice* device, IBuffer* pBuffer, const FVbvDesc* desc);
 	};
 
 	class DX12IbView : public IIbView
 	{
+		DX12GpuDevice* mDevice = nullptr;
 	public:
+		virtual void DeleteThis() override;
 		bool Init(DX12GpuDevice* device, IBuffer* pBuffer, const FIbvDesc* desc);
 	};
 

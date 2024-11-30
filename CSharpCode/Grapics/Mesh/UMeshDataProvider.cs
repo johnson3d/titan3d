@@ -17,9 +17,28 @@ namespace EngineNS.Graphics.Mesh
         {
             mCoreObject = self;
         }
+        public bool Init(uint streams, bool isIndex32, int atom)
+        {
+            return mCoreObject.Init(streams, isIndex32, atom);
+        }
         public bool InitFrom(TtMeshPrimitives mesh)
         {
             return mCoreObject.InitFromMesh(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, mesh.mCoreObject);
+        }
+        public void Reset()
+        {
+            mCoreObject.Reset();
+        }
+        public unsafe bool MergeFromMesh(TtMeshDataProvider mesh)
+        {
+            return mCoreObject.MergeFromMesh(mesh.mCoreObject, (Matrix*)IntPtr.Zero.ToPointer());
+        }
+        public unsafe bool MergeFromMesh(TtMeshDataProvider mesh, in Matrix matrix)
+        {
+            fixed(Matrix* p = &matrix)
+            {
+                return mCoreObject.MergeFromMesh(mesh.mCoreObject, p);
+            }
         }
         public bool IsIndex32
         {

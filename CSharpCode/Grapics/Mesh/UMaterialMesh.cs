@@ -638,6 +638,10 @@ namespace EngineNS.Graphics.Mesh
         }
         [Rtti.Meta()]
         public List<TtSubMaterialedMesh> SubMeshes { get; set; } = new List<TtSubMaterialedMesh>() { new TtSubMaterialedMesh() };
+        public int GetMeshNum()
+        {
+            return SubMeshes.Count;
+        }
         public Graphics.Mesh.TtMeshPrimitives GetMeshPrimitives(int index)
         {
             return SubMeshes[index].Mesh;

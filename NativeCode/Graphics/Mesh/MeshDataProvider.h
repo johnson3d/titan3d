@@ -8,6 +8,26 @@ namespace NxRHI
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FMeshVertex
 	{
+		void SetDefault()
+		{
+			Position.setValue(0,0,0);
+			Normal.setValue(0, 1, 0);
+			Tangent.X = 1;
+			Tangent.Y = 0;
+			Tangent.Z = 0;
+			Tangent.W = 0;
+			Color = 0xffffffff;
+			UV.setValue(0, 0);
+			LightMap.X = 0;
+			LightMap.Y = 0;
+			LightMap.Z = 0;
+			LightMap.W = 0;
+			SkinIndex = 0;
+			SkinWeight.X = 0;
+			SkinWeight.Y = 0;
+			SkinWeight.Z = 0;
+			SkinWeight.W = 0;
+		}
 		v3dxVector3 Position;
 		v3dxVector3 Normal;
 		v3dVector4_t Tangent;
@@ -44,6 +64,7 @@ namespace NxRHI
 		void Reset();
 
 		bool InitFromMesh(IGpuDevice* device, FMeshPrimitives* mesh);
+		bool MergeFromMesh(FMeshDataProvider* mesh, const v3dxMatrix4* matrix);
 		bool Init(DWORD streams, bool isIndex32, int atom);
 		bool Init();
 
@@ -80,6 +101,8 @@ namespace NxRHI
 		int IntersectTriangle(const v3dxVector3* scale, const v3dxVector3* vStart, const v3dxVector3* vEnd, VHitResult* result);
 		void* GetVertexPtr(EVertexStreamType stream, UINT index);
 
+		FMeshVertex GetVertex(UINT index);
+
 		UINT AddVertex(const v3dxVector3* pos, const v3dxVector3* nor, const v3dxVector2* uv, DWORD color);
 		UINT AddVertex(const v3dxVector3* pos, const v3dxVector3* nor, const v3dxVector3* tangent, const v3dxVector2* uv, DWORD color);
 		UINT AddVertex(const v3dxVector3* pos, const v3dxVector3* nor, const v3dxVector2* uv, const v3dxQuaternion* lighmapUV, DWORD color);
@@ -91,11 +114,12 @@ namespace NxRHI
 		void ResizeVertexBuffers(UINT size);
 
 		//alternative interface for same mesh
-		vBOOL AddTriangle(UINT a, UINT b, UINT c);
-		vBOOL AddTriangle(UINT a, UINT b, UINT c, USHORT faceData);
-		vBOOL AddTriangle(UINT* pTri, UINT numOfTri);
+		bool AddTriangle(UINT a, UINT b, UINT c);
+		bool AddTriangle(UINT a, UINT b, UINT c, USHORT faceData);
+		bool AddTriangle(UINT* pTri, UINT numOfTri);
+		bool GetTriangle(UINT& a, UINT& b, UINT& c, UINT index);
 
-		vBOOL AddLine(UINT a, UINT b);
+		bool AddLine(UINT a, UINT b);
 
 		bool ToMesh(ICommandList* cmd, FMeshPrimitives* mesh);
 		FInputLayoutDesc* GetInputLayoutDesc();

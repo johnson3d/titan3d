@@ -1189,10 +1189,23 @@ namespace NxRHI
 
 		return true;
 	}
+	template<>
+	struct AuxGpuResourceDestroyer<DX12VbView*>
+	{
+		static void Destroy(DX12VbView* obj, IGpuDevice* device1)
+		{
+			delete obj;
+		}
+	};
+	void DX12VbView::DeleteThis()
+	{
+		mDevice->DelayDestroy(this);
+	}
 	bool DX12VbView::Init(DX12GpuDevice* device, IBuffer* pBuffer, const FVbvDesc* desc)
 	{
 		Desc = *desc;
 		Desc.InitData = nullptr;
+		mDevice = device;
 		if (pBuffer == nullptr)
 		{
 			FBufferDesc bfDesc{};
@@ -1213,11 +1226,23 @@ namespace NxRHI
 		}
 		return true;
 	}
-
+	template<>
+	struct AuxGpuResourceDestroyer<DX12IbView*>
+	{
+		static void Destroy(DX12IbView* obj, IGpuDevice* device1)
+		{
+			delete obj;
+		}
+	};
+	void DX12IbView::DeleteThis()
+	{
+		mDevice->DelayDestroy(this);
+	}
 	bool DX12IbView::Init(DX12GpuDevice* device, IBuffer* pBuffer, const FIbvDesc* desc)
 	{
 		Desc = *desc;
 		Desc.InitData = nullptr;
+		mDevice = device;
 		if (pBuffer == nullptr)
 		{
 			FBufferDesc bfDesc{};

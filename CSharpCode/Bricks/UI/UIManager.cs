@@ -173,7 +173,7 @@ namespace EngineNS.UI
         {
             for(int i=mUserUIList.Count - 1; i>=0; i--)
             {
-                _ = mUserUIList[i].BuildMesh();
+                TtEngine.Instance.TaskCollector.AddWaitTask(mUserUIList[i].BuildMesh());
             }
 
             var elapsedSecond = TtEngine.Instance.ElapsedSecond;

@@ -1269,6 +1269,7 @@ namespace EngineNS.GamePlay
                             {
                                 var pos = viewport.Window2Viewport(new Vector2((float)e.MouseMotion.X, (float)e.MouseMotion.Y));
                                 var hitObj = edtorPolicy.GetHitproxy((uint)pos.X, (uint)pos.Y);
+                                mCurrentAxisType = enAxisType.Null;
                                 if (hitObj != null)
                                 {
                                     switch (mAxisOperationType)
@@ -1381,7 +1382,7 @@ namespace EngineNS.GamePlay
                                     {
                                         mAxisMeshDatas[i].Focused = false;
                                     }
-                                    mCurrentAxisType = enAxisType.Null;
+                                    //mCurrentAxisType = enAxisType.Null;
                                 }
                             }
                         }
@@ -1997,7 +1998,7 @@ namespace EngineNS.GamePlay
                     tmp.StartTransform = ((TtPlacement)mSelectedNodes[i].Node.Placement).AbsTransform;// .TransformData;
 */
                     FSelectedNodeData tmp = new FSelectedNodeData(mSelectedNodes[i].Node);
-                    tmp.StartTransform = ((TtPlacement)mSelectedNodes[i].Node.Placement).AbsTransform;// .TransformData;
+                    tmp.StartAbsTransform = ((TtPlacement)mSelectedNodes[i].Node.Placement).AbsTransform;// .TransformData;
                     tmp.StartTransform = ((TtPlacement)mSelectedNodes[i].Node.Placement).TransformData;
                     mSelectedNodes[i] = tmp;
                 }

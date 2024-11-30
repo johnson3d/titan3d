@@ -1214,11 +1214,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         #endregion
     }
-    public partial class TtMaterialManager
+    public partial class TtMaterialManager : IDisposable
     {
-        public void Cleanup()
+        public void Dispose()
         {
-            foreach(var i in Materials)
+            NavMeshDebugMaterial = null;
+            NavMeshDebugWireMaterial = null;
+            PxDebugMaterial = null;
+            ScreenMaterial = null;
+            VtxColorMaterial = null;
+
+            foreach (var i in Materials)
             {
                 foreach(var j in i.Value.UsedSrView)
                 {
@@ -1240,9 +1246,18 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             PxDebugMaterial = await this.CreateMaterial(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
             VtxColorMaterial = await this.CreateMaterial(RName.GetRName("material/vfx_color.material", RName.ERNameType.Engine));
+            NavMeshDebugMaterial = await this.CreateMaterial(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
+            NavMeshDebugMaterial.SetColor4("clr4_0", new Color4f(Color4b.White));
+            NavMeshDebugWireMaterial = await this.CreateMaterial(RName.GetRName("material/sysdft_color.material", RName.ERNameType.Engine));
+            NavMeshDebugWireMaterial.SetColor4("clr4_0", new Color4f(Color4b.PaleVioletRed));
+            var rast = NavMeshDebugWireMaterial.Rasterizer;
+            rast.FillMode = NxRHI.EFillMode.FMD_WIREFRAME;
+            NavMeshDebugWireMaterial.Rasterizer = rast;
         }
         public TtMaterial ScreenMaterial;
         public TtMaterial PxDebugMaterial;
+        public TtMaterial NavMeshDebugMaterial;
+        public TtMaterial NavMeshDebugWireMaterial;
         public TtMaterial VtxColorMaterial;
         public Dictionary<RName, TtMaterial> Materials { get; } = new Dictionary<RName, TtMaterial>();
         public async Thread.Async.TtTask<TtMaterial> CreateMaterial(RName rn)

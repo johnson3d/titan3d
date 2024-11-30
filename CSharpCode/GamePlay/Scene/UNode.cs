@@ -169,6 +169,7 @@ namespace EngineNS.GamePlay.Scene
             NoTick = (1 << 13),
             NotRegActiveNode = (1 << 14),
             ForceGatherNode = (1 << 15),
+            BuildNavMesh = (1 << 16),
             Invisible = SelfInvisible | ChildrenInvisible,
         }
         public ENodeStyles NodeStyles
@@ -302,6 +303,25 @@ namespace EngineNS.GamePlay.Scene
                         ParentScene?.FreeId(this);
                     }
                     UnsetStyle(ENodeStyles.SceneManaged);
+                }
+            }
+        }
+        [Category("Option")]
+        public virtual bool IsBuildNavMesh
+        {
+            get
+            {
+                return HasStyle(ENodeStyles.BuildNavMesh);
+            }
+            set
+            {
+                if (value)
+                {
+                    SetStyle(ENodeStyles.BuildNavMesh);
+                }
+                else
+                {
+                    UnsetStyle(ENodeStyles.BuildNavMesh);
                 }
             }
         }
@@ -524,7 +544,7 @@ namespace EngineNS.GamePlay.Scene
         {
 
         }
-        public virtual bool TreeGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        public virtual bool TryTreeGatherVisibleMeshes(TtWorld.TtVisParameter rp)
         {
             return true;
         }
@@ -1029,10 +1049,6 @@ namespace EngineNS.GamePlay.Scene
         public override bool IsSceneManagedType()
         {
             return true;
-        }
-        public virtual Guid ActorId
-        {
-            get { return Guid.Empty; }
         }
         protected uint CameralOffsetSerialId = 0;
         public void UpdateCameralOffset(TtWorld world)

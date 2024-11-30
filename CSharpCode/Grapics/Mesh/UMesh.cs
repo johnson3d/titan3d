@@ -830,6 +830,12 @@ namespace EngineNS.Graphics.Mesh
             var inv = Matrix.Invert(in tm);
             PerMeshCBuffer.SetMatrix(TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.WorldMatrixInverse, in inv);
         }
+        public Matrix GetWorldMatrix()
+        {
+            if (PerMeshCBuffer == null)
+                return Matrix.Identity;
+            return PerMeshCBuffer.GetMatrix(TtCoreShaderBinder.TtPerMeshCBufferVarIndexer.Instance.WorldMatrix);
+        }
         public void SetValue<T>(NxRHI.FShaderVarDesc index, in T value, int elem = 0) where T : unmanaged
         {
             if (PerMeshCBuffer == null)

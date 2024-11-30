@@ -373,7 +373,7 @@ namespace EngineNS.Editor.Forms
             if (ImGuiAPI.ToggleButton("TestAuto", ref mShowTangent, in btSize, 0))
             {
                 var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
-                _ = ameta.AutoGenSnap();
+                TtEngine.Instance.TaskCollector.AddWaitTask(ameta.AutoGenSnap());
             }
         }
 

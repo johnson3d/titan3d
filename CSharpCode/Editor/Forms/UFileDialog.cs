@@ -47,7 +47,7 @@ namespace EngineNS.Editor
                     ImGuiAPI.CloseCurrentPopup();
                 },
             };
-            _ = result.Initialize();
+            TtEngine.Instance.TaskCollector.AddWaitTask(result.Initialize());
             return result;
         }
     }

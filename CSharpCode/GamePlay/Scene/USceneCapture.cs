@@ -67,7 +67,7 @@ namespace EngineNS.GamePlay.Scene
 
             TtEngine.Instance.TickableManager.AddTickable(this);
 
-            mVisParameter.OnVisitNode = this.OnVisitNode;
+            mVisParameter.IsGatherVisibleMeshes = this.OnVisitNode;
             return true;
         }
         bool OnVisitNode(Scene.TtNode node, TtVisParameter arg)
@@ -84,7 +84,7 @@ namespace EngineNS.GamePlay.Scene
                         if (actor == null)
                             return false;
                         var data = GetNodeData<USceneCaptureData>();
-                        return data.ShowActors.Contains(actor.ActorId);
+                        return data.ShowActors.Contains(actor.NodeId);
                     }
                 case ECaptureMode.ExcludeNodes:
                     {
@@ -92,7 +92,7 @@ namespace EngineNS.GamePlay.Scene
                         if (actor == null)
                             return false;
                         var data = GetNodeData<USceneCaptureData>();
-                        return !data.ExcludeActors.Contains(actor.ActorId);
+                        return !data.ExcludeActors.Contains(actor.NodeId);
                     }
                 default:
                     break;

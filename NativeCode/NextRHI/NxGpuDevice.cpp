@@ -56,6 +56,7 @@ namespace NxRHI
 			xxx2 = 1;
 		}
 	}*/
+	bool IGpuDevice::mIsTryFinalize = false;
 	IGpuSystem* IGpuSystem::CreateGpuSystem(ERhiType type, const FGpuSystemDesc* desc)
 	{
 		if (desc->UseRenderDoc)

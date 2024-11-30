@@ -7,10 +7,9 @@ using System.ComponentModel;
 
 namespace EngineNS.Bricks.PhysicsCore
 {
-    [Bricks.CodeBuilder.ContextMenu("PxMeshNode", "PxMeshNode", GamePlay.Scene.TtNode.EditorKeyword)]
     [GamePlay.Scene.TtNode(NodeDataType = typeof(TtRigidBodyNode.TtRigidBodyNodeData), DefaultNamePrefix = "PxMesh")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public class TtRigidBodyNode : GamePlay.Scene.TtSceneActorNode
+    internal class TtRigidBodyNode : GamePlay.Scene.TtSceneActorNode
     {
         public class TtRigidBodyNodeData : GamePlay.Scene.TtNodeData
         {

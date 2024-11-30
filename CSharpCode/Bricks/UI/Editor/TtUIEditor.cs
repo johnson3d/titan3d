@@ -1194,7 +1194,7 @@ namespace EngineNS.UI.Editor
                 }
             }
             DetailsGrid.Target = mSelectedElements;
-            _ = ProcessSelectElementDecorator();
+            TtEngine.Instance.TaskCollector.AddWaitTask(ProcessSelectElementDecorator());
         }
 
         #region IAssetEditor
@@ -1293,7 +1293,7 @@ namespace EngineNS.UI.Editor
                         mUIHost.MeshDirty = true;
                 }
 
-                _ = WireFrameProcess();
+                TtEngine.Instance.TaskCollector.AddWaitTask(WireFrameProcess());
             }
             /*ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton(mDimensionToolButtonName, in Vector2.Zero))
@@ -1487,8 +1487,8 @@ namespace EngineNS.UI.Editor
             }
             else
             {
-                _ = UpdateDecorator();
-                _ = BuildMesh();
+                TtEngine.Instance.TaskCollector.AddWaitTask(UpdateDecorator());
+                TtEngine.Instance.TaskCollector.AddWaitTask(BuildMesh());
             }
         }
         public void TickRender(float ellapse)

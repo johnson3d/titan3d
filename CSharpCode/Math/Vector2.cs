@@ -146,6 +146,16 @@ namespace EngineNS
 		    X = value;
 		    Y = value;
 	    }
+        public Vector2(Point2f point)
+        {
+            X = point.X;
+            Y = point.Y;
+        }
+        public Vector2(SizeF size)
+        {
+            X = size.Width;
+            Y = size.Height;
+        }
         /// <summary>
         /// 带参构造函数
         /// </summary>

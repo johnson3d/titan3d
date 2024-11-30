@@ -119,18 +119,20 @@ namespace EngineNS.GamePlay
                 LightDebug = (1 << 1),
                 PhyxDebug = (1 << 2),
                 UtilityDebug = (1 << 3),
-                FilterTypeCount = 4,
+                NavMesh = (1 << 4),
+                FilterTypeCount = 5,
 
-                EditorObject = LightDebug | PhyxDebug | UtilityDebug,
+                EditorObject = LightDebug | PhyxDebug | UtilityDebug | NavMesh,
                 All = 0xFFFFFFFF,
                 None = 0,
             }
             public const string FilterTypeCountAs = "PhyxDebug";
-            public Graphics.Pipeline.TtCamera CullCamera;
+            public Graphics.Pipeline.TtCamera CullCamera = null;
 
             public EVisCull CullType = EVisCull.Normal;
             public EVisCullFilter CullFilters = EVisCullFilter.None;// EVisCullFilter.All;
             public bool IsBuildAABB = false;
+            public DBoundingBox CullBox;
             public TtWorld World;
 
             public DBoundingBox AABB;
@@ -140,6 +142,7 @@ namespace EngineNS.GamePlay
             
             public delegate bool FOnVisitNode(Scene.TtNode node, TtVisParameter arg);
             public FOnVisitNode OnVisitNode = null;
+            public FOnVisitNode IsGatherVisibleMeshes = null;
             public void Reset()
             {
                 AABB.InitEmptyBox();
@@ -213,7 +216,8 @@ namespace EngineNS.GamePlay
         }
         public virtual void GatherVisibleMeshes(TtVisParameter rp)
         {
-            rp.CullCamera.VisParameter = rp;
+            if (rp.CullCamera != null)
+                rp.CullCamera.VisParameter = rp;
             using (new Profiler.TimeScopeHelper(ScopeGatherVisibleMeshes))
             {
                 rp.Reset();
@@ -285,7 +289,7 @@ namespace EngineNS.GamePlay
                 {
                     type = CONTAIN_TYPE.CONTAIN_TEST_REFER;
                 }
-                else
+                else if (rp.CullCamera != null)
                 {
                     type = rp.CullCamera.WhichContainTypeFast(rp.World, in node.AbsAABB, true);
                     //if (bUpdateAABB)
@@ -300,6 +304,25 @@ namespace EngineNS.GamePlay
                     //这里还没想明白，把Frustum的6个平面变换到AABB所在坐标为啥不行
                     //type = frustom->whichContainTypeFast(ref node.AABB, ref node.Placement.AbsTransformInv, 1);
                 }
+                else
+                {
+                    var ct = DBoundingBox.Contains(in rp.CullBox, in node.AbsAABB);
+                    switch(ct)
+                    {
+                        case ContainmentType.Contains:
+                            type = CONTAIN_TYPE.CONTAIN_TEST_INNER;
+                            break;
+                        case ContainmentType.Intersects:
+                            type = CONTAIN_TYPE.CONTAIN_TEST_REFER;
+                            break;
+                        case ContainmentType.Disjoint:
+                            type = CONTAIN_TYPE.CONTAIN_TEST_OUTER;
+                            break;
+                        default:
+                            type = CONTAIN_TYPE.CONTAIN_TEST_REFER;
+                            break;
+                    }
+                }
             }
 
             switch (type)
@@ -308,7 +331,7 @@ namespace EngineNS.GamePlay
                     break;
                 case CONTAIN_TYPE.CONTAIN_TEST_INNER:
                     {
-                        if (node.TreeGatherVisibleMeshes(rp))
+                        if (node.TryTreeGatherVisibleMeshes(rp))
                         {
                             node.DFS_VisitNodeTree(mOnVisitNode_GatherVisibleMeshesAll, rp);
                         }
@@ -316,13 +339,16 @@ namespace EngineNS.GamePlay
                     break;
                 case CONTAIN_TYPE.CONTAIN_TEST_REFER:
                     {
-                        if (node.TreeGatherVisibleMeshes(rp))
+                        if (node.TryTreeGatherVisibleMeshes(rp))
                         {
                             if (!node.HasStyle(Scene.TtNode.ENodeStyles.SelfInvisible))
                             {
                                 using (new Profiler.TimeScopeHelper(ScopeOnGatherVisibleMeshes))
                                 {
-                                    node.OnGatherVisibleMeshes(rp);
+                                    if (rp.IsGatherVisibleMeshes == null || rp.IsGatherVisibleMeshes(node, rp))
+                                    {
+                                        node.OnGatherVisibleMeshes(rp);
+                                    }
                                 }
                             }
                             if (!node.HasStyle(Scene.TtNode.ENodeStyles.ChildrenInvisible))
@@ -370,7 +396,8 @@ namespace EngineNS.GamePlay
 
             using (new Profiler.TimeScopeHelper(ScopeOnGatherVisibleMeshes))
             {
-                node.OnGatherVisibleMeshes(rp);
+                if (rp.IsGatherVisibleMeshes == null || rp.IsGatherVisibleMeshes(node, rp))
+                    node.OnGatherVisibleMeshes(rp);
             }
                 
             return false;

@@ -311,7 +311,7 @@ namespace EngineNS.Graphics.Pipeline
             //    mDefaultHUD.WindowSize = new SizeF(this.ClientSize.X, this.ClientSize.Y);
             foreach (var i in mHUDStack)
             {
-                _ = i.WindowSize = new SizeF(this.ClientSize.X, this.ClientSize.Y);
+                i.WindowSize = new SizeF(this.ClientSize.X, this.ClientSize.Y);
             }
         }
         public void ProcessHitproxySelected(float mouseX, float mouseY)
@@ -470,7 +470,7 @@ namespace EngineNS.Graphics.Pipeline
 
             foreach (var i in mHUDStack)
             {
-                _ = i.BuildMesh();
+                TtEngine.Instance.TaskCollector.AddWaitTask(i.BuildMesh());
             }
         }
 

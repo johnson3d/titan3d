@@ -4,9 +4,9 @@ using System.Text;
 
 namespace EngineNS.Bricks.Recast
 {
-    public class UInputGeom : AuxPtrType<InputGeom>
+    public class TtInputGeom : AuxPtrType<InputGeom>
     {
-        public UInputGeom()
+        public TtInputGeom()
         {
             mCoreObject = InputGeom.CreateInstance();
         }

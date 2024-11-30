@@ -123,7 +123,7 @@ namespace EngineNS.Graphics.Pipeline
 
             AttachBufferManager?.Dispose();
             TextureManager?.Cleanup();
-            MaterialManager?.Cleanup();
+            MaterialManager?.Dispose();
             MaterialManager = null;
             MaterialInstanceManager?.Cleanup();
             MaterialInstanceManager = null;

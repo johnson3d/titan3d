@@ -28,9 +28,38 @@ namespace EngineNS.Bricks.PhysicsCore
     }
     public class TtPhyController : AuxPtrType<PhyController>
     {
+        public GamePlay.Scene.TtNode TagNode;
         public TtPhyController(PhyController self)
         {
             mCoreObject = self;
+            var gchandle = System.Runtime.InteropServices.GCHandle.Alloc(this, System.Runtime.InteropServices.GCHandleType.Weak);
+            unsafe
+            {
+                var super = mCoreObject.NativeSuper;
+                super.mCSharpHandle = System.Runtime.InteropServices.GCHandle.ToIntPtr(gchandle).ToPointer();
+            }
+        }
+        ~TtPhyController()
+        {
+            unsafe
+            {
+                var super = mCoreObject.NativeSuper;
+                var gchandle = System.Runtime.InteropServices.GCHandle.FromIntPtr((IntPtr)super.mCSharpHandle);
+                super.mCSharpHandle = (void*)0;
+                gchandle.Free();
+            }
+        }
+
+        public static TtPhyController GetPhyController(PhyController controller)
+        {
+            unsafe
+            {
+                var ptr = (IntPtr)controller.NativeSuper.mCSharpHandle;
+                if (ptr == IntPtr.Zero)
+                    return null;
+                var gchandle = System.Runtime.InteropServices.GCHandle.FromIntPtr(ptr);
+                return gchandle.Target as TtPhyController;
+            }
         }
     }
 }

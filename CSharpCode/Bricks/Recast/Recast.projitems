@@ -9,6 +9,7 @@
     <Import_RootNamespace>EngineNS.Bricks.Recast</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)RecastSceneNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UInputGeom.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UNavCrowd.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UNavMesh.cs" />

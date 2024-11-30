@@ -4,18 +4,18 @@ using System.Text;
 
 namespace EngineNS.Bricks.Recast
 {
-    public class UNavMesh : AuxPtrType<RcNavMesh>
+    public class TtNavMesh : AuxPtrType<RcNavMesh>
     {
-        public UNavMesh(RcNavMesh ptr)
+        public TtNavMesh(RcNavMesh ptr)
         {
             mCoreObject = ptr;
         }
-        public UNavQuery CreateQuery(int maxNodes)
+        public TtNavQuery CreateQuery(int maxNodes)
         {
             var ptr = mCoreObject.CreateQuery(maxNodes);
             if (ptr.IsValidPointer == false)
                 return null;
-            return new UNavQuery(ptr);
+            return new TtNavQuery(ptr);
         }
         public int TilesCount
         {

@@ -39,7 +39,7 @@ namespace EngineNS
         }
         public DBoundingBox AsBoundingBox()
         {
-            return new DBoundingBox(Center + Extent, Center - Extent);
+            return new DBoundingBox(Center - Extent, Center + Extent);
         }
         public static void CalculateClosestPointInBox(in DVector3 point, in Aabb AABB, out DVector3 outPoint, out double outSqrDistance)
         {

@@ -13,7 +13,7 @@
 #include "DetourNavMeshBuilder.h"
 
 #include "RecastCommon.h"
-
+#include "InputGeom.h"
 
 NS_BEGIN
 
@@ -67,13 +67,13 @@ public:
 	virtual float getAgentHeight() { return mAgentHeight; }
 	virtual float getAgentClimb() { return mAgentMaxClimb; }
 	
-	void updateToolStates(const float dt);
+	/*void updateToolStates(const float dt);
 	void resetToolStates();
 	void renderToolStates();
 	void renderOverlayToolStates(double* proj, double* model, int* view);
-
-	void resetCommonSettings();
 	void handleCommonSettings();
+	*/
+	void resetCommonSettings();
 
 	virtual void SetInputGeom(InputGeom* geom);
 	virtual RcNavMesh* BuildNavi() = 0;

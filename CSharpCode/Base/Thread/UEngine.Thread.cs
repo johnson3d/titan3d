@@ -415,6 +415,8 @@ namespace EngineNS
                 }
                 GfxDevice?.TickSync(this);
             }
+
+            this.TaskCollector.Tick();
         }
 
         public static async System.Threading.Tasks.Task RunCoroutine<T>(IAsyncEnumerable<T> enumerable)

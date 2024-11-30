@@ -102,7 +102,7 @@ namespace NxRHI
 			}
 		}
 	}
-	void DX12CommandAllocatorManager::Finalize()
+	void DX12CommandAllocatorManager::FinalCleanup()
 	{
 		VAutoVSLLock lk(mLocker);
 		for (auto i = Recycles.begin(); i != Recycles.end(); )

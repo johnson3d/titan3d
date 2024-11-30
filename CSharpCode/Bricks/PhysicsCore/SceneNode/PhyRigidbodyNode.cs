@@ -154,6 +154,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             var pc = TtEngine.Instance.PhyModule.PhyContext;
             var transform = Placement.AbsTransform;
             PhyActor = pc.CreateActor(RigidbodyNodeData.PhyActorType, in transform.mPosition, in transform.mQuat);
+            PhyActor.RigidBodyNode = this;
             PhyActor.mCoreObject.SetActorFlag(EPhyActorFlag.PAF_eVISUALIZATION, true);
             
             PhyActor.mCoreObject.SetMass(RigidbodyNodeData.Mass);
@@ -191,6 +192,19 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             base.OnParentSceneChanged(prev, cur);
             //TODO: Remove from Prev-Scene if exist
             PhyActor.AddToScene(ParentScene.PxSceneMB.PxScene);
+        }
+
+        public void OnContact(TtNode selfNode, TtNode otherNode)
+        {
+            MacrossGetter?.Get().OnContact(selfNode, otherNode);
+        }
+        public void OnBeginTrigger(TtNode selfNode, TtNode otherNode)
+        {
+            MacrossGetter?.Get().OnBeginTrigger(selfNode, otherNode);
+        }
+        public void OnEndTrigger(TtNode selfNode, TtNode otherNode)
+        {
+            MacrossGetter?.Get().OnEndTrigger(selfNode, otherNode);
         }
     }
 }

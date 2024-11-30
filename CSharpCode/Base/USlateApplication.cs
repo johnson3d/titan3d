@@ -28,6 +28,17 @@ namespace EngineNS
         #region RootForms
         private List<WeakReference<IRootForm>> AppendForms { get; } = new List<WeakReference<IRootForm>>();
         private List<WeakReference<IRootForm>> RootForms { get; } = new List<WeakReference<IRootForm>>();
+        public void TourRootForms(Action<IRootForm> action)
+        {
+            foreach(var i in RootForms)
+            {
+                IRootForm form;
+                if (!i.TryGetTarget(out form))
+                    continue;
+                action?.Invoke(form);
+            }
+        }
+
         public void RegRootForm(IRootForm form)
         {
             foreach (var i in AppendForms)
@@ -395,48 +406,83 @@ namespace EngineNS
                 return TtRootFormManager.Insance;
             }
         }
-        public class TtStopOperateCover : IRootForm
-        {
-            public async Thread.Async.TtTask<bool> Initialize()
-            {
-                await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
-                return true;
-            }
+        //public class TtStopOperateCover : IRootForm
+        //{
+        //    public async Thread.Async.TtTask<bool> Initialize()
+        //    {
+        //        await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
+        //        return true;
+        //    }
 
-            public void Dispose() { }
-            bool mVisible = true;
-            public bool Visible
-            {
-                get => mVisible;
-                set => mVisible = value;
-            }
-            public uint DockId { get; set; }
-            public ImGuiWindowClass DockKeyClass { get; }
-            public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
-            public Editor.IAssetEditor CurrentEditor;
-            public string Info;
-            public Action DrawAction;
-            public void OnDraw()
-            {
-                var size = new Vector2(8000, 6000);
-                ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_Always);
-                ImGuiAPI.SetNextWindowPos(in Vector2.Zero, ImGuiCond_.ImGuiCond_Always, in Vector2.Zero);
-                if (ImGuiAPI.Begin("OpCover", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
-                {
-                    ImGuiAPI.Text(Info);
-                    if (DrawAction != null)
-                        DrawAction();
-                }
-                ImGuiAPI.End();
-                //var result = EGui.UIProxy.DockProxy.BeginMainForm($"Not Allow User Operation", this, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove);
-                //if (result)
-                //{
-                //    ImGuiAPI.Text(Info);
-                //}
-                //EGui.UIProxy.DockProxy.EndMainForm(result);
-            }
-        }
-        TtStopOperateCover mStopOperateCover = new TtStopOperateCover();
+        //    public RectangleF FormRect { get; set; }
+
+        //    public void Dispose() { }
+        //    bool mVisible = true;
+        //    public bool Visible
+        //    {
+        //        get => mVisible;
+        //        set => mVisible = value;
+        //    }
+
+        //    public uint DockId { get; set; }
+        //    public ImGuiWindowClass DockKeyClass { get; }
+        //    public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
+        //    public Editor.IAssetEditor CurrentEditor;
+        //    public string Info;
+        //    public Action DrawAction;
+
+        //    //void DrawRootFormConver(IRootForm rootForm)
+        //    //{
+        //    //    var pos = new Vector2(rootForm.FormRect.Location);
+        //    //    var size = new Vector2(rootForm.FormRect.Size);
+        //    //    ImGuiAPI.SetNextWindowSize(size, ImGuiCond_.ImGuiCond_Always);
+        //    //    ImGuiAPI.SetNextWindowPos(pos, ImGuiCond_.ImGuiCond_Always, in Vector2.Zero);
+        //    //    if (ImGuiAPI.Begin("OpCover", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+        //    //    {
+        //    //        ImGuiAPI.Text(Info);
+        //    //        if (DrawAction != null)
+        //    //            DrawAction();
+        //    //    }
+        //    //    ImGuiAPI.End();
+        //    //}
+        //    public void OnDraw()
+        //    {
+        //        //TtEngine.RootFormManager.TourRootForms(DrawRootFormConver);
+
+        //        //var size = new Vector2(8000, 6000);
+        //        //ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_Always);
+        //        //ImGuiAPI.SetNextWindowPos(in Vector2.Zero, ImGuiCond_.ImGuiCond_Always, in Vector2.Zero);
+        //        //if (ImGuiAPI.Begin("OpCover", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove))
+        //        //{
+        //        //    ImGuiAPI.Text(Info);
+        //        //    if (DrawAction != null)
+        //        //        DrawAction();
+        //        //}
+        //        //ImGuiAPI.End();
+        //        ////var result = EGui.UIProxy.DockProxy.BeginMainForm($"Not Allow User Operation", this, ImGuiWindowFlags_.ImGuiWindowFlags_NoMove);
+        //        ////if (result)
+        //        ////{
+        //        ////    ImGuiAPI.Text(Info);
+        //        ////}
+        //        ////EGui.UIProxy.DockProxy.EndMainForm(result);
+        //    }
+
+        //    public void OnDraw(in Vector2 pos, in Vector2 size)
+        //    {
+        //        ImGuiAPI.SetNextWindowSize(in size, ImGuiCond_.ImGuiCond_Always);
+        //        ImGuiAPI.SetNextWindowPos(in pos, ImGuiCond_.ImGuiCond_Always, in Vector2.Zero);
+        //        ImGuiAPI.SetNextWindowBgAlpha(0.5f);
+        //        if (ImGuiAPI.Begin("OpCover", ref mVisible, ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoInputs))
+        //        {
+        //            ImGuiAPI.Text(Info);
+        //            if (DrawAction != null)
+        //                DrawAction();
+        //        }
+        //        ImGuiAPI.End();
+        //    }
+        //}
+        //TtStopOperateCover mStopOperateCover = new TtStopOperateCover();
+        //public TtStopOperateCover StopOperateCover => mStopOperateCover; 
         private List<IRootForm> TopMostForms { get; } = new List<IRootForm>();
         public void ShowTopMost(IRootForm form)
         {
@@ -460,17 +506,26 @@ namespace EngineNS
                 }
             }
         }
-        public void StopOperation(string info, Action drawAction = null)
+        public bool IsStopOperation = false;
+        public string StopOperationInfo;
+        public Action<ImDrawList, Vector2, Vector2> StopOperationDrawAction;
+        public void StopOperation(string info, Action<ImDrawList, Vector2, Vector2> drawAction = null)
         {
-            mStopOperateCover.Info = info;
-            mStopOperateCover.DrawAction = drawAction;
-            ShowTopMost(mStopOperateCover);
+            IsStopOperation = true;
+            StopOperationInfo = info;
+            StopOperationDrawAction = drawAction;
+            //mStopOperateCover.Info = info;
+            //mStopOperateCover.DrawAction = drawAction;
+            //ShowTopMost(mStopOperateCover);
         }
         public void ResumeOperation()
         {
-            mStopOperateCover.Visible = false;
-            mStopOperateCover.Info = null;
-            mStopOperateCover.DrawAction = null;
+            IsStopOperation = false;
+            StopOperationInfo = "";
+            StopOperationDrawAction = null;
+            //mStopOperateCover.Visible = false;
+            //mStopOperateCover.Info = null;
+            //mStopOperateCover.DrawAction = null;
         }
     }
 }

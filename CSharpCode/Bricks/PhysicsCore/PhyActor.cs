@@ -7,6 +7,7 @@ namespace EngineNS.Bricks.PhysicsCore
     public class TtPhyActor : AuxPtrType<PhyActor>
     {
         public GamePlay.Scene.TtNode TagNode;
+        public PhysicsCore.SceneNode.TtPhyRigidbodyNode RigidBodyNode;
         public TtPhyActor(PhyActor self)
         {
             mCoreObject = self;

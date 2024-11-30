@@ -14,6 +14,31 @@ class PhyShape;
 class PhyActor;
 class PhyObstacleContext;
 
+enum TR_ENUM()
+	PhyPairFlag
+{
+	eSOLVE_CONTACT = (1 << 0),
+	eMODIFY_CONTACTS = (1 << 1),
+	eNOTIFY_TOUCH_FOUND = (1 << 2),
+	eNOTIFY_TOUCH_PERSISTS = (1 << 3),
+	eNOTIFY_TOUCH_LOST = (1 << 4),
+	eNOTIFY_TOUCH_CCD = (1 << 5),
+	eNOTIFY_THRESHOLD_FORCE_FOUND = (1 << 6),
+	eNOTIFY_THRESHOLD_FORCE_PERSISTS = (1 << 7),
+	eNOTIFY_THRESHOLD_FORCE_LOST = (1 << 8),
+	eNOTIFY_CONTACT_POINTS = (1 << 9),
+	eDETECT_DISCRETE_CONTACT = (1 << 10),
+	eDETECT_CCD_CONTACT = (1 << 11),
+	ePRE_SOLVER_VELOCITY = (1 << 12),
+	ePOST_SOLVER_VELOCITY = (1 << 13),
+	eCONTACT_EVENT_POSE = (1 << 14),
+	eNEXT_FREE = (1 << 15),        //!< For internal use only.
+
+	eCONTACT_DEFAULT = eSOLVE_CONTACT | eDETECT_DISCRETE_CONTACT,
+
+	eTRIGGER_DEFAULT = eNOTIFY_TOUCH_FOUND | eNOTIFY_TOUCH_LOST | eDETECT_DISCRETE_CONTACT
+};
+
 struct TR_CLASS(SV_LayoutStruct = 8)
 	PhyQueryFilterData
 {
@@ -37,7 +62,7 @@ struct TR_CLASS(SV_LayoutStruct = 8)
 	void*			triggerActor;	//!< The actor to which triggerShape is attached
 	void*				otherShape;		//!< The shape causing the trigger event. \deprecated (see #PxSimulationEventCallback::onTrigger()) If collision between trigger shapes is enabled, then this member might point to a trigger shape as well.
 	void*			otherActor;		//!< The actor to which otherShape is attached
-	physx::PxPairFlag::Enum		status;			//!< Type of trigger event (eNOTIFY_TOUCH_FOUND or eNOTIFY_TOUCH_LOST). eNOTIFY_TOUCH_PERSISTS events are not supported.
+	PhyPairFlag		status;			//!< Type of trigger event (eNOTIFY_TOUCH_FOUND or eNOTIFY_TOUCH_LOST). eNOTIFY_TOUCH_PERSISTS events are not supported.
 	physx::PxTriggerPairFlags		flags;			//!< Additional information on the pair (see #PxTriggerPairFlag)
 };
 
@@ -163,7 +188,7 @@ public:
 					phyPairs[i].otherShape = pairs[i].otherShape->userData;
 					phyPairs[i].triggerActor = pairs[i].triggerActor->userData;
 					phyPairs[i].triggerShape = pairs[i].triggerShape->userData;
-					phyPairs[i].status = pairs[i].status;
+					phyPairs[i].status = (PhyPairFlag)pairs[i].status;
 					phyPairs[i].flags = pairs[i].flags;
 				}
 				_onTrigger(Handle, phyPairs, count);
@@ -207,7 +232,7 @@ struct PhySimulationFilterShader
 			}
 			return (physx::PxFilterFlags)_CustomSimulationFilterShader(attributes0, &filterData0, attributes1, &filterData1, &pairFlags, constantBlock, constantBlockSize);
 		}
-		pairFlags = physx::PxPairFlag::eTRIGGER_DEFAULT;
+		pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT| physx::PxPairFlag::eTRIGGER_DEFAULT;
 		return physx::PxFilterFlags();
 	}
 

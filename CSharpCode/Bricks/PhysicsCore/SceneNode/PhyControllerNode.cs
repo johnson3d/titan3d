@@ -50,7 +50,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         public class TtCapsulePhyControllerNodeData : TtPhyControllerNodeDataBase
         {
             [Rtti.Meta]
-            public float Radius { get; set; } = 1.0f;
+            public float Radius { get; set; } = 0.3f;
             [Rtti.Meta]
             public float Height { get; set; } = 1.0f;
         }
@@ -59,6 +59,11 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             get => NodeData as TtCapsulePhyControllerNodeData;
         }
         TtPhyCapsuleControllerDesc PhyControllerDesc = null;
+
+        [Category("Option")]
+        public float Radius { get=> CapsulePhyControllerNodeData.Radius; set=> CapsulePhyControllerNodeData.Radius = value; } 
+        [Category("Option")]
+        public float Height { get=> CapsulePhyControllerNodeData.Height; set=> CapsulePhyControllerNodeData.Height = value; }
 
         public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
@@ -86,6 +91,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
                 {
                     System.Diagnostics.Debug.Assert(false);
                 }
+                PhyController.TagNode = cur;
                 PhyController.mCoreObject.SetFootPosition(cur.Placement.AbsTransform.Position.ToSingleVector3());
                 PhyController.mCoreObject.SetQueryFilterData(CapsulePhyControllerNodeData.QueryFilterData);
                 PhyController.mCoreObject.SetSimulationFilterData(CapsulePhyControllerNodeData.SimulationFilterData);
@@ -103,6 +109,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
                 {
                     System.Diagnostics.Debug.Assert(false);
                 }
+                PhyController.TagNode = Parent;
                 PhyController.mCoreObject.SetFootPosition(cur.Placement.AbsTransform.Position.ToSingleVector3());
                 PhyController.mCoreObject.SetQueryFilterData(CapsulePhyControllerNodeData.QueryFilterData);
                 PhyController.mCoreObject.SetSimulationFilterData(CapsulePhyControllerNodeData.SimulationFilterData);
@@ -147,6 +154,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             {
                 System.Diagnostics.Debug.Assert(false);
             }
+            PhyController.TagNode = cur;
             PhyController.mCoreObject.SetFootPosition(cur.Placement.AbsTransform.Position.ToSingleVector3());
             PhyController.mCoreObject.SetQueryFilterData(BoxPhyControllerNodeData.QueryFilterData);
             PhyController.mCoreObject.SetSimulationFilterData(BoxPhyControllerNodeData.SimulationFilterData);

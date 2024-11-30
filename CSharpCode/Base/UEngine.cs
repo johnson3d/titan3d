@@ -572,6 +572,8 @@ namespace EngineNS
         }
         public void FinalCleanup()
         {
+            TaskCollector.Dispose();
+
             GfxDevice.RenderSwapQueue.Reset();
             TickableManager.Cleanup();
             StopSystemThreads();

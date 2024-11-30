@@ -1146,7 +1146,7 @@ namespace NxRHI
 		IGpuDevice : public IWeakRefObject
 	{
 	protected:
-		bool mIsTryFinalize = false;
+		static bool mIsTryFinalize;
 		bool mIsFinalized = false;
 	public:
 		ENGINE_RTTI(IGpuDevice);
@@ -1154,7 +1154,10 @@ namespace NxRHI
 		virtual bool InitDevice(IGpuSystem * pGpuSystem, const FGpuDeviceDesc * desc) = 0;
 		virtual void TryFinalizeDevice(IGpuSystem * pGpuSystem) {
 			mIsTryFinalize = true;
-			mIsFinalized = true;
+			mIsFinalized = false;
+		}
+		static bool IsTryFinalize() {
+			return mIsTryFinalize;
 		}
 		bool IsFinalized() const{
 			return mIsFinalized;
@@ -1240,6 +1243,11 @@ namespace NxRHI
 		template<class _DestroyType>
 		void DelayDestroy(_DestroyType obj, UINT delayFrame = 4)
 		{
+			if (mIsTryFinalize == true)
+			{
+				AuxGpuResourceDestroyer<_DestroyType>::Destroy(obj, this);
+				return;
+			}
 			auto targetValue = mFrameFence->GetExpectValue() + delayFrame;
 			this->PushPostEvent([targetValue, obj](IGpuDevice* pDevice, UINT64 completed)->bool
 				{

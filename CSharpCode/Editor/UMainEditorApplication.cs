@@ -341,7 +341,7 @@ namespace EngineNS.Editor
                                 mPIEController.Visible = !mPIEController.Visible;
                                 item.Selected = mPIEController.Visible;
                                 if(mPIEController.Visible)
-                                    _ = mPIEController.Initialize();
+                                    TtEngine.Instance.TaskCollector.AddWaitTask(mPIEController.Initialize());
                             },
                         },
                         new EGui.UIProxy.MenuItemProxy()
@@ -353,7 +353,7 @@ namespace EngineNS.Editor
                                 mEditorSettings.Visible = !mEditorSettings.Visible;
                                 item.Selected = mEditorSettings.Visible;
                                 if(mEditorSettings.Visible)
-                                    _ = mEditorSettings.Initialize();
+                                    TtEngine.Instance.TaskCollector.AddWaitTask(mEditorSettings.Initialize());
                             },
                         },
                     },
@@ -456,6 +456,7 @@ namespace EngineNS.Editor
                 if (result)
                 {
                     wsz = ImGuiAPI.GetWindowSize();
+                    mainPos = ImGuiAPI.GetWindowPos();
                     //DrawToolBar();
                     DrawMainMenu();
 
@@ -501,8 +502,9 @@ namespace EngineNS.Editor
 #if (UseWindowTest)
                 mWinTest.OnDraw();
 #endif
-
                 AssetEditorManager.OnDraw();
+
+                //TtEngine.Instance.StopOperateCover.OnDraw(in mainPos, in wsz);
             }
             catch
             {

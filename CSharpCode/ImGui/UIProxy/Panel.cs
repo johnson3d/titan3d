@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Security.Policy;
 using System.Text;
 
 namespace EngineNS.EGui.UIProxy
@@ -11,6 +12,7 @@ namespace EngineNS.EGui.UIProxy
         {
             m_ClassId = ImGuiAPI.GetID("MainEditorApplication"),
         };
+
         // 只能dock到Main window中
         public static bool BeginMainForm(string name, IRootForm form, ImGuiWindowFlags_ flags)
         {
@@ -20,6 +22,8 @@ namespace EngineNS.EGui.UIProxy
             {
                 ImGuiAPI.SetNextWindowFocus();
             }
+            if (EngineNS.TtEngine.Instance.IsStopOperation)
+                flags |= ImGuiWindowFlags_.ImGuiWindowFlags_NoInputs;
             var vis = form.Visible;
             //var mainFlag = ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar;
             //if ((flags & ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar) == ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar)
@@ -45,10 +49,12 @@ namespace EngineNS.EGui.UIProxy
         {
             ImGuiAPI.SetNextWindowClass(MainFormDockClass);
             ImGuiAPI.SetNextWindowDockID(MainFormDockClass.m_ClassId, ImGuiCond_.ImGuiCond_FirstUseEver);
+            if (EngineNS.TtEngine.Instance.IsStopOperation)
+                flags |= ImGuiWindowFlags_.ImGuiWindowFlags_NoInputs;
             //var mainFlag = ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar;
             //if ((flags & ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar) == ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar)
             //    mainFlag |= ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar;
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, Vector2.Zero);
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, Vector2.Zero);
             var retValue = ImGuiAPI.Begin(name, ref open, flags);
                 ImGuiAPI.PopStyleVar(1);
             //var presentWin = ImGuiAPI.GetWindowViewportData();
@@ -68,10 +74,12 @@ namespace EngineNS.EGui.UIProxy
         {
             ImGuiAPI.SetNextWindowClass(MainFormDockClass);
             ImGuiAPI.SetNextWindowDockID(MainFormDockClass.m_ClassId, ImGuiCond_.ImGuiCond_FirstUseEver);
+            if (EngineNS.TtEngine.Instance.IsStopOperation)
+                flags |= ImGuiWindowFlags_.ImGuiWindowFlags_NoInputs;
             //var mainFlag = ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar;
             //if ((flags & ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar) == ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar)
             //    mainFlag |= ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar;
-                ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, Vector2.Zero);
+            ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_WindowPadding, Vector2.Zero);
             var retValue = ImGuiAPI.Begin(name, open, flags);
                 ImGuiAPI.PopStyleVar(1);
             //var presentWin = ImGuiAPI.GetWindowViewportData();
@@ -87,8 +95,22 @@ namespace EngineNS.EGui.UIProxy
             //}
             return retValue;
         }
+        static Vector2 offset = new Vector2(10, 50);
         public static void EndMainForm(bool visible)
         {
+            if (EngineNS.TtEngine.Instance.IsStopOperation)
+            {
+                var pos = ImGuiAPI.GetWindowPos();
+                var size = ImGuiAPI.GetWindowSize();
+
+                ImGuiAPI.SetCursorPos(pos);
+                ImGuiAPI.InvisibleButton("##Convert" + pos.ToString(), size, ImGuiButtonFlags_.ImGuiButtonFlags_None);
+                var drawList = ImGuiAPI.GetForegroundDrawList();
+                drawList.AddRectFilled(in pos, pos + size, 0x7f000000, 0.0f, ImDrawFlags_.ImDrawFlags_None);
+                drawList.AddText(pos + offset, 0xffffffff, TtEngine.Instance.StopOperationInfo, null);
+                TtEngine.Instance.StopOperationDrawAction?.Invoke(drawList, pos, size);
+            }
+
             //if(visible)
             //    ImGuiAPI.EndChild();
             ImGuiAPI.End();
