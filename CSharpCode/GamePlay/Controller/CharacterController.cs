@@ -14,16 +14,29 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
+using static EngineNS.GamePlay.Movemnet.TtMovement;
 
 namespace EngineNS.GamePlay.Controller
 {
+    //[Bricks.CodeBuilder.ContextMenu("Movement", "Movement", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtCharacterController.TtCharacterControllerNodeData), DefaultNamePrefix = "CharacterController")]
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public class TtCharacterController : TtNode, IController
     {
+        public class TtCharacterControllerNodeData : TtNodeData
+        {
+            [Rtti.Meta]
+            public bool OrientCameraRoation = true;
+            [Rtti.Meta]
+            public bool OrientToMovmement = false;
+        }
         public Scene.Actor.TtActor ControlledCharacter { get; set; }
         public Camera.ICameraControlNode CameraControlNode { get; set; }
         public TtMovement MovementNode { get; set; }
+        public TtCharacterControllerNodeData CharacterControllerNodeData { get => NodeData as TtCharacterControllerNodeData; }
 
-        public bool OrientCameraRoation = true;
+        public bool OrientCameraRoation { get => CharacterControllerNodeData.OrientCameraRoation; set => CharacterControllerNodeData.OrientCameraRoation = value; }
+        public bool OrientToMovmement { get => CharacterControllerNodeData.OrientToMovmement; set => CharacterControllerNodeData.OrientToMovmement = value; }
 
         public override Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
@@ -44,7 +57,7 @@ namespace EngineNS.GamePlay.Controller
 
         private void Axis2D_OnValueUpdate(UAxis2DAction sender, Vector2 value)
         {
-            VInput = -value.X;
+            VInput = value.X;
             HInput = value.Y;
         }
 
@@ -86,15 +99,29 @@ namespace EngineNS.GamePlay.Controller
                 CameraControlNode.AddDelta(new FRotator(yawDelta * YawSpeed * args.World.DeltaTimeSecond, -pitchDelta * PitchSpeed * args.World.DeltaTimeSecond, 0));
 
                 //MovementNode.AngularVelocity = new DVector3(0, YawDelta * 0.1f, 0);
-                if (OrientCameraRoation)
-                {
-                    ControlledCharacter.Placement.Quat = Quaternion.GetQuaternion(Vector3.Forward, -new DVector3(CameraControlNode.Camera.Direction.X, 0, CameraControlNode.Camera.Direction.Z).ToSingleVector3());
-                }
+
+                
+                
                 PitchDelta = 0;
                 YawDelta = 0;
 
-                Vector3 control = Vector3.Forward * VInput + Vector3.Left * HInput;
-                MovementNode.SetLinearVelocity(ControlledCharacter.Placement.Quat * control * MovementNode.Speed);
+                Vector3 control = Vector3.Forward * VInput + Vector3.Right * HInput;
+                if (OrientCameraRoation)
+                {
+                    ControlledCharacter.Placement.Quat = Quaternion.GetQuaternion(Vector3.Forward, new DVector3(CameraControlNode.Camera.Direction.X, 0, CameraControlNode.Camera.Direction.Z).ToSingleVector3());
+                    MovementNode.SetLinearVelocity(ControlledCharacter.Placement.Quat * control * MovementNode.Speed);
+                }
+                if (OrientToMovmement)
+                {
+                    MovementNode.SetLinearVelocity(control * MovementNode.Speed);
+                    var linearVelDir = MovementNode.LinearVelocity.NormalizeValue;
+                    linearVelDir.y = 0;
+                    if (linearVelDir.LengthSquared() == 0)
+                    {
+                        linearVelDir = Quaternion.RotateVector3(ControlledCharacter.Placement.Quat, Vector3.Forward);
+                    }
+                    ControlledCharacter.Placement.Quat = Quaternion.GetQuaternionUp(Vector3.Forward, linearVelDir);
+                }
             }   
         }
     }

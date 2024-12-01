@@ -24,6 +24,8 @@ namespace EngineNS.UI
         public override void Cleanup(TtEngine host)
         {
             ClearTemplates();
+            mBindObjects.Clear();
+            mBindingTargets.Clear();
             base.Cleanup(host);
         }
 
@@ -248,6 +250,50 @@ namespace EngineNS.UI
         private void Btn_DeviceDown(object sender, TtRoutedEventArgs args)
         {
             throw new NotImplementedException();
+        }
+
+        Dictionary<Bind.BindPropertyAttribute, List<Bind.IBindableObject>> mBindObjects = new Dictionary<Bind.BindPropertyAttribute, List<Bind.IBindableObject>>();
+        Dictionary<Bind.BindPropertyAttribute, List<Bind.IBindableObject>> mBindingTargets = new Dictionary<Bind.BindPropertyAttribute, List<Bind.IBindableObject>>();
+
+        public void ClearBindObjects(Bind.BindPropertyAttribute attr)
+        {
+            if(mBindObjects.ContainsKey(attr))
+                mBindObjects.Remove(attr);
+        }
+        public void ClearBindingTargets(Bind.BindPropertyAttribute attr)
+        {
+            if (mBindingTargets.ContainsKey(attr))
+                mBindingTargets.Remove(attr);
+        }
+        public bool GetBindObjects(Bind.BindPropertyAttribute attr, out List<Bind.IBindableObject> list)
+        {
+            return mBindObjects.TryGetValue(attr, out list);
+        }
+        public void SetBindObjects(Bind.BindPropertyAttribute attr, List<Bind.IBindableObject> list)
+        {
+            mBindObjects[attr] = list;
+        }
+        public int BindObjectsCount(Bind.BindPropertyAttribute attr)
+        {
+            List<Bind.IBindableObject> bindObjects;
+            if (!mBindObjects.TryGetValue(attr, out bindObjects))
+                return 0;
+            return bindObjects.Count;
+        }
+        public bool GetBindingTargets(Bind.BindPropertyAttribute attr, out List<Bind.IBindableObject> list)
+        {
+            return mBindingTargets.TryGetValue(attr, out list);
+        }
+        public void SetBindingTargets(Bind.BindPropertyAttribute attr, List<Bind.IBindableObject> list)
+        {
+            mBindingTargets[attr] = list;
+        }
+        public int BindingTargetsCount(Bind.BindPropertyAttribute attr)
+        {
+            List<Bind.IBindableObject> bindTargets;
+            if (!mBindingTargets.TryGetValue(attr, out bindTargets))
+                return 0;
+            return bindTargets.Count;
         }
     }
 }

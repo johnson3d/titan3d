@@ -90,6 +90,18 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         {
             return null;
         }
+        public virtual bool ChangeShape()
+        {
+            var shape = CreatePhyShape();
+            if(shape != null)
+            {
+                PhyShape = shape;
+                PhyShape.RemoveFromActor();
+                AddToActor();
+                return true;
+            }
+            return false;
+        }
         protected void SetTriggerFlag(bool isTrigger, TtPhyShape shape)
         {
             shape.mCoreObject.SetFlag(EPhysShapeFlag.eSIMULATION_SHAPE, !IsTrigger);
@@ -131,10 +143,10 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             get => SphereCollisionNodeData.Radius;
             set
             {
+                if (value <= 0)
+                    return;
                 SphereCollisionNodeData.Radius = value;
-                PhyShape.RemoveFromActor();
-                PhyShape = CreatePhyShape();
-                AddToActor();
+                ChangeShape();
             }
         }
         public override TtPhyShape CreatePhyShape()
@@ -166,9 +178,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             set
             {
                 BoxCollisionNodeData.HalfExtent = value;
-                PhyShape.RemoveFromActor();
-                PhyShape = CreatePhyShape();
-                AddToActor();
+                if (value.x <= 0 || value.y <= 0 || value.z <= 0)
+                    return;
+                ChangeShape();
             }
         }
         public override TtPhyShape CreatePhyShape()
@@ -223,10 +235,10 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             get => CapsuleCollisionNodeData.Radius;
             set
             {
+                if (value <= 0)
+                    return;
                 CapsuleCollisionNodeData.Radius = value;
-                PhyShape.RemoveFromActor();
-                PhyShape = CreatePhyShape();
-                AddToActor();
+                ChangeShape();
             }
         }
         [Category("Option")]
@@ -235,10 +247,10 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             get => CapsuleCollisionNodeData.HalfHeight;
             set
             {
+                if (value <= 0)
+                    return;
                 CapsuleCollisionNodeData.HalfHeight = value;
-                PhyShape.RemoveFromActor();
-                PhyShape = CreatePhyShape();
-                AddToActor();
+                ChangeShape();
             }
         }
         public override TtPhyShape CreatePhyShape()
@@ -270,9 +282,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             set
             {
                 ConvexCollisionNodeData.ConvexSource = value;
-                PhyShape.RemoveFromActor();
-                PhyShape = CreatePhyShape();
-                AddToActor();
+                ChangeShape();
             }
         }
         public override TtPhyShape CreatePhyShape()
@@ -308,9 +318,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             set
             {
                 TriMeshCollisionNodeData.TriMeshSource = value;
-                PhyShape.RemoveFromActor();
-                PhyShape = CreatePhyShape();
-                AddToActor();
+                ChangeShape();
             }
         }
         public override TtPhyShape CreatePhyShape()

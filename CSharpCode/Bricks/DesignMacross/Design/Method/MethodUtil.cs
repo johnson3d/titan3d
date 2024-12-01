@@ -257,7 +257,7 @@ namespace EngineNS.DesignMacross.Design
                                                      var popMenu = sender as TtPopupMenu;
                                                      if (Rtti.TtTypeDescManager.CreateInstance(getTypeDesc) is TtVarGetDescription expression)
                                                      {
-                                                         expression.VariableDescription = variable;
+                                                         expression.VariableId = variable.Id;
                                                          var style = graphElementStyleManager.GetOrAdd(expression.Id, popMenu.PopedPosition);
                                                          cmdHistory.CreateAndExtuteCommand("AddVarGet",
                                                              (data) => { methodDescription.AddExpression(expression); },

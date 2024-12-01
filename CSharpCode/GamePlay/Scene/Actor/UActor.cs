@@ -8,10 +8,7 @@ namespace EngineNS.GamePlay.Scene.Actor
     {
         public partial class TtActorData : TtNodeData
         {
-            [Rtti.Meta]
-            public float Radius { get; set; } = 1.0f;
-            [Rtti.Meta]
-            public float Height { get; set; } = 1.85f;
+
         }
         public TtActorData ActorData
         {
@@ -31,7 +28,6 @@ namespace EngineNS.GamePlay.Scene.Actor
 
             return true;
         }
-        partial void CreatePxCapsuleActor(ref bool result, Scene.TtScene scene, float radius, float height);
         protected override void OnParentSceneChanged(TtScene prev, TtScene cur)
         {
             if (cur != null)

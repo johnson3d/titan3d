@@ -36,7 +36,7 @@ class dtQueryFilter
 {
 	float m_areaCost[DT_MAX_AREAS];		///< Cost per area type. (Used by default implementation.)
 	unsigned short m_includeFlags;		///< Flags for polygons that can be visited. (Used by default implementation.)
-	unsigned short m_excludeFlags;		///< Flags for polygons that should not be visted. (Used by default implementation.)
+	unsigned short m_excludeFlags;		///< Flags for polygons that should not be visited. (Used by default implementation.)
 	
 public:
 	dtQueryFilter();
@@ -175,10 +175,10 @@ public:
 	dtStatus init(const dtNavMesh* nav, const int maxNodes);
 	
 	/// @name Standard Pathfinding Functions
-	// /@{
+	/// @{
 
 	/// Finds a path from the start polygon to the end polygon.
-	///  @param[in]		startRef	The refrence id of the start polygon.
+	///  @param[in]		startRef	The reference id of the start polygon.
 	///  @param[in]		endRef		The reference id of the end polygon.
 	///  @param[in]		startPos	A position within the start polygon. [(x, y, z)]
 	///  @param[in]		endPos		A position within the end polygon. [(x, y, z)]
@@ -217,8 +217,8 @@ public:
 	///	-# Call finalizeSlicedFindPath() to get the path.
 	///@{ 
 
-	/// Intializes a sliced path query.
-	///  @param[in]		startRef	The refrence id of the start polygon.
+	/// Initializes a sliced path query.
+	///  @param[in]		startRef	The reference id of the start polygon.
 	///  @param[in]		endRef		The reference id of the end polygon.
 	///  @param[in]		startPos	A position within the start polygon. [(x, y, z)]
 	///  @param[in]		endPos		A position within the end polygon. [(x, y, z)]
@@ -396,9 +396,9 @@ public:
 	///  @param[in]		startPos	A position within the start polygon representing 
 	///  							the start of the ray. [(x, y, z)]
 	///  @param[in]		endPos		The position to cast the ray toward. [(x, y, z)]
+	///  @param[in]		filter		The polygon filter to apply to the query.
 	///  @param[out]	t			The hit parameter. (FLT_MAX if no wall hit.)
 	///  @param[out]	hitNormal	The normal of the nearest wall hit. [(x, y, z)]
-	///  @param[in]		filter		The polygon filter to apply to the query.
 	///  @param[out]	path		The reference ids of the visited polygons. [opt]
 	///  @param[out]	pathCount	The number of visited polygons. [opt]
 	///  @param[in]		maxPath		The maximum number of polygons the @p path array can hold.
@@ -414,7 +414,7 @@ public:
 	///  							the start of the ray. [(x, y, z)]
 	///  @param[in]		endPos		The position to cast the ray toward. [(x, y, z)]
 	///  @param[in]		filter		The polygon filter to apply to the query.
-	///  @param[in]		flags		govern how the raycast behaves. See dtRaycastOptions
+	///  @param[in]		options		govern how the raycast behaves. See dtRaycastOptions
 	///  @param[out]	hit			Pointer to a raycast hit structure which will be filled by the results.
 	///  @param[in]		prevRef		parent of start ref. Used during for cost calculation [opt]
 	/// @returns The status flags for the query.
@@ -465,6 +465,7 @@ public:
 	/// The location is not exactly constrained by the circle, but it limits the visited polygons.
 	///  @param[in]		startRef		The reference id of the polygon where the search starts.
 	///  @param[in]		centerPos		The center of the search circle. [(x, y, z)]
+	///  @param[in]		maxRadius		The radius of the search circle. [Units: wu]
 	///  @param[in]		filter			The polygon filter to apply to the query.
 	///  @param[in]		frand			Function returning a random number [0..1).
 	///  @param[out]	randomRef		The reference id of the random location.

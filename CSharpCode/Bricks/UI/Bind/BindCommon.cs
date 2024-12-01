@@ -251,8 +251,6 @@ namespace EngineNS.UI.Bind
         {
         }
 
-        List<IBindableObject> mBindObjects = new List<IBindableObject>();
-        List<IBindableObject> mBindingTargets = new List<IBindableObject>();
         List<TtUIElement.BindingDataBase> mBindingDatas = new List<TtUIElement.BindingDataBase>();
         string mBindPopFilterString = "";
         bool mBindFilterFocus = false;
@@ -265,18 +263,22 @@ namespace EngineNS.UI.Bind
         static Vector2 mCurrentBindBackgroundEnd;
         void DeleteBind(string propertyName, Editor.EditorUIHost host)
         {
-            for (int i = 0; i < mBindingTargets.Count; i++)
+            List<IBindableObject> bindingTargets;
+            if(TtEngine.Instance.UIManager.GetBindingTargets(this, out bindingTargets))
             {
-                var bp = mBindingTargets[i].FindBindableProperty(propertyName);
-                if (bp != null)
-                    mBindingTargets[i].ClearBindExpression(bp);
-
-                dynamic tag = mBindingTargets[i];
-                TtUIElement.BindingDataBase bindData;
-                if (tag.BindingDatas.TryGetValue(propertyName, out bindData))
+                for (int i = 0; i < bindingTargets.Count; i++)
                 {
-                    bindData.OnRemove(host.HostEditor);
-                    tag.BindingDatas.Remove(propertyName);
+                    var bp = bindingTargets[i].FindBindableProperty(propertyName);
+                    if (bp != null)
+                        bindingTargets[i].ClearBindExpression(bp);
+
+                    dynamic tag = bindingTargets[i];
+                    TtUIElement.BindingDataBase bindData;
+                    if (tag.BindingDatas.TryGetValue(propertyName, out bindData))
+                    {
+                        bindData.OnRemove(host.HostEditor);
+                        tag.BindingDatas.Remove(propertyName);
+                    }
                 }
             }
             mBindedDataDirty = true;
@@ -291,9 +293,11 @@ namespace EngineNS.UI.Bind
                 {
                     mBindingDatasIsSameOne = true;
                     mBindingModeNames = Enum.GetNames<EBindingMode>();
-                    mBindObjects.Clear();
-                    mBindingTargets.Clear();
+                    TtEngine.Instance.UIManager.ClearBindObjects(this);
+                    TtEngine.Instance.UIManager.ClearBindingTargets(this);
                     mBindingDatas.Clear();
+                    List<IBindableObject> bindingTargets = new List<IBindableObject>();
+                    List<IBindableObject> bindObjects = new List<IBindableObject>();
                     var enumerableInterfaace = info.Target.GetType().GetInterface(typeof(IEnumerable).FullName, false);
                     if (enumerableInterfaace != null)
                     {
@@ -310,9 +314,9 @@ namespace EngineNS.UI.Bind
                             if (bp == null)
                                 continue;
 
-                            mBindingTargets.Add(bindObj);
+                            bindingTargets.Add(bindObj);
                             //hasBinded = hasBinded || bindObj.HasBinded(bp);
-                            mBindObjects.Add(bindObj);
+                            bindObjects.Add(bindObj);
                             //if (mFirstElement == null)
                             //{
                             //    var element = objIns as TtUIElement;
@@ -332,9 +336,9 @@ namespace EngineNS.UI.Bind
                             if (bp != null)
                             {
                                 //hasBinded = hasBinded || bindObj.HasBinded(bp);
-                                mBindObjects.Add(bindObj);
+                                bindObjects.Add(bindObj);
                             }
-                            mBindingTargets.Add(bindObj);
+                            bindingTargets.Add(bindObj);
                         }
                         //var element = info.Target as TtUIElement;
                         //if (element != null && element.RootUIHost != null && element.RootUIHost.Children.Count > 0)
@@ -344,9 +348,9 @@ namespace EngineNS.UI.Bind
                     }
 
                     // check if has binded value
-                    for (int tagIdx = 0; tagIdx < mBindingTargets.Count; tagIdx++)
+                    for (int tagIdx = 0; tagIdx < bindingTargets.Count; tagIdx++)
                     {
-                        dynamic tag = mBindingTargets[tagIdx];
+                        dynamic tag = bindingTargets[tagIdx];
                         TtUIElement.BindingDataBase data;
                         if(tag.BindingDatas.TryGetValue(info.PropertyDescriptor.Name, out data))
                         {
@@ -358,9 +362,11 @@ namespace EngineNS.UI.Bind
                         }
                     }
                     //mBindedDataDirty = false; // 这里有问题，点击绑定按钮后相应到host而不是本身控件
+                    TtEngine.Instance.UIManager.SetBindingTargets(this, bindingTargets);
+                    TtEngine.Instance.UIManager.SetBindObjects(this, bindObjects);
                 }
 
-                if (mBindObjects.Count == 0)
+                if (TtEngine.Instance.UIManager.BindObjectsCount(this) == 0)
                     return;
                 var uiEditor = info.HostEditor as TtUIEditor;
                 if (uiEditor == null)
@@ -468,114 +474,118 @@ namespace EngineNS.UI.Bind
                     if(ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                     {
                         DeleteBind(info.PropertyDescriptor.Name, host);
-                        for (int i=0; i<mBindingTargets.Count; i++)
+                        List<IBindableObject> bindingTargets;
+                        if (TtEngine.Instance.UIManager.GetBindingTargets(this, out bindingTargets))
                         {
-                            dynamic bindObj = mBindingTargets[i];
-                            if (bindObj == null)
-                                continue;
-                            var bindTarget = new TtUIElement.UIBindingData_Element()
+                            for (int i = 0; i < bindingTargets.Count; i++)
                             {
-                                PropertyName = info.PropertyDescriptor.Name,
-                                PropertyType = info.PropertyDescriptor.PropertyType,
-                                Id = bindObj.Id,
-                            };
-                            var curMode = mSelectedMode;
-                            var bp = bindObj.FindBindableProperty(info.PropertyDescriptor.Name);
-                            if (bp != null && (curMode == EBindingMode.Default))
-                            {
-                                curMode = bp.BindingMode;
-                            }
-                            // ------------------------------------------------------
-                            void ConfigSetMethod(in ExternalInfo info)
-                            {
-                                //var setMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, true);
-                                var setMethodDesc = new TtMethodDeclaration();
-                                //setMethodDesc.MethodName = setMethodName;
-                                //setMethodDesc.GetDisplayNameFunc = bindObj.GetMethodDisplayName;
-                                setMethodDesc.Arguments.Add(new TtMethodArgumentDeclaration()
+                                dynamic bindObj = bindingTargets[i];
+                                if (bindObj == null)
+                                    continue;
+                                var bindTarget = new TtUIElement.UIBindingData_Element()
                                 {
-                                    VariableName = "obj",
-                                    VariableType = new TtTypeReference(typeof(IBindableObject)),
-                                });
-                                setMethodDesc.Arguments.Add(new TtMethodArgumentDeclaration()
-                                {
-                                    VariableName = "prop",
-                                    VariableType = new TtTypeReference(typeof(TtBindableProperty)),
-                                });
-                                setMethodDesc.Arguments.Add(new TtMethodArgumentDeclaration()
-                                {
-                                    VariableName = "valueIn",
-                                    VariableType = new TtTypeReference(info.PropertyDescriptor.PropertyType),
-                                    OperationType = EMethodArgumentAttribute.In,
-                                });
-                                bindObj.InitialMethodDeclaration(info.PropertyDescriptor.Name, setMethodDesc, true);
-                                var setGraph = host.HostEditor.UIAsset.MacrossEditor.AddMethod(setMethodDesc);
-                                //bindObj.SetPropertyBindMethod(info.PropertyDescriptor.Name, setMethodDesc, true);
-                                host.HostEditor.UIAsset.MacrossEditor.OpenMethodGraph(setGraph);                                        
-                            }
-                            void ConfigGetMethod(in ExternalInfo info)
-                            {
-                                //var getMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, false);
-                                var getMethodDesc = new TtMethodDeclaration();
-                                //getMethodDesc.MethodName = getMethodName;
-                                //getMethodDesc.GetDisplayNameFunc = bindObj.GetMethodDisplayName;
-                                getMethodDesc.ReturnValue = new TtVariableDeclaration()
-                                {
-                                    VariableName = "tempReturnValue",
-                                    VariableType = new TtTypeReference(info.PropertyDescriptor.PropertyType),
-                                    InitValue = new Bricks.CodeBuilder.TtDefaultValueExpression(info.PropertyDescriptor.PropertyType),
+                                    PropertyName = info.PropertyDescriptor.Name,
+                                    PropertyType = info.PropertyDescriptor.PropertyType,
+                                    Id = bindObj.Id,
                                 };
-                                getMethodDesc.Arguments.Add(new TtMethodArgumentDeclaration()
+                                var curMode = mSelectedMode;
+                                var bp = bindObj.FindBindableProperty(info.PropertyDescriptor.Name);
+                                if (bp != null && (curMode == EBindingMode.Default))
                                 {
-                                    VariableName = "obj", 
-                                    VariableType = new TtTypeReference(typeof(IBindableObject)),
-                                });
-                                getMethodDesc.Arguments.Add(new TtMethodArgumentDeclaration()
+                                    curMode = bp.BindingMode;
+                                }
+                                // ------------------------------------------------------
+                                void ConfigSetMethod(in ExternalInfo info)
                                 {
-                                    VariableName = "prop",
-                                    VariableType = new TtTypeReference(typeof(TtBindableProperty)),
-                                });
-                                bindObj.InitialMethodDeclaration(info.PropertyDescriptor.Name, getMethodDesc, false);
-                                var getGraph = host.HostEditor.UIAsset.MacrossEditor.AddMethod(getMethodDesc);
-                                //bindObj.SetPropertyBindMethod(info.PropertyDescriptor.Name, getMethodDesc, false);
-                                host.HostEditor.UIAsset.MacrossEditor.OpenMethodGraph(getGraph);
-                            }
-                            // -------------------------------------------------------
-                            var bdMethod = new TtUIElement.BindingData_Method()
-                            {
-                                Target = bindTarget,
-                                Mode = curMode,
-                            };
-                            bindObj.BindingDatas[info.PropertyDescriptor.Name] = bdMethod;
-                            switch (curMode)
-                            {
-                                case EBindingMode.TwoWay:
+                                    //var setMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, true);
+                                    var setMethodDesc = new TtMethodDeclaration();
+                                    //setMethodDesc.MethodName = setMethodName;
+                                    //setMethodDesc.GetDisplayNameFunc = bindObj.GetMethodDisplayName;
+                                    setMethodDesc.Arguments.Add(new TtMethodArgumentDeclaration()
                                     {
-                                        bdMethod.SetMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, true);
-                                        bdMethod.GetMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, false);
+                                        VariableName = "obj",
+                                        VariableType = new TtTypeReference(typeof(IBindableObject)),
+                                    });
+                                    setMethodDesc.Arguments.Add(new TtMethodArgumentDeclaration()
+                                    {
+                                        VariableName = "prop",
+                                        VariableType = new TtTypeReference(typeof(TtBindableProperty)),
+                                    });
+                                    setMethodDesc.Arguments.Add(new TtMethodArgumentDeclaration()
+                                    {
+                                        VariableName = "valueIn",
+                                        VariableType = new TtTypeReference(info.PropertyDescriptor.PropertyType),
+                                        OperationType = EMethodArgumentAttribute.In,
+                                    });
+                                    bindObj.InitialMethodDeclaration(info.PropertyDescriptor.Name, setMethodDesc, true);
+                                    var setGraph = host.HostEditor.UIAsset.MacrossEditor.AddMethod(setMethodDesc);
+                                    //bindObj.SetPropertyBindMethod(info.PropertyDescriptor.Name, setMethodDesc, true);
+                                    host.HostEditor.UIAsset.MacrossEditor.OpenMethodGraph(setGraph);
+                                }
+                                void ConfigGetMethod(in ExternalInfo info)
+                                {
+                                    //var getMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, false);
+                                    var getMethodDesc = new TtMethodDeclaration();
+                                    //getMethodDesc.MethodName = getMethodName;
+                                    //getMethodDesc.GetDisplayNameFunc = bindObj.GetMethodDisplayName;
+                                    getMethodDesc.ReturnValue = new TtVariableDeclaration()
+                                    {
+                                        VariableName = "tempReturnValue",
+                                        VariableType = new TtTypeReference(info.PropertyDescriptor.PropertyType),
+                                        InitValue = new Bricks.CodeBuilder.TtDefaultValueExpression(info.PropertyDescriptor.PropertyType),
+                                    };
+                                    getMethodDesc.Arguments.Add(new TtMethodArgumentDeclaration()
+                                    {
+                                        VariableName = "obj",
+                                        VariableType = new TtTypeReference(typeof(IBindableObject)),
+                                    });
+                                    getMethodDesc.Arguments.Add(new TtMethodArgumentDeclaration()
+                                    {
+                                        VariableName = "prop",
+                                        VariableType = new TtTypeReference(typeof(TtBindableProperty)),
+                                    });
+                                    bindObj.InitialMethodDeclaration(info.PropertyDescriptor.Name, getMethodDesc, false);
+                                    var getGraph = host.HostEditor.UIAsset.MacrossEditor.AddMethod(getMethodDesc);
+                                    //bindObj.SetPropertyBindMethod(info.PropertyDescriptor.Name, getMethodDesc, false);
+                                    host.HostEditor.UIAsset.MacrossEditor.OpenMethodGraph(getGraph);
+                                }
+                                // -------------------------------------------------------
+                                var bdMethod = new TtUIElement.BindingData_Method()
+                                {
+                                    Target = bindTarget,
+                                    Mode = curMode,
+                                };
+                                bindObj.BindingDatas[info.PropertyDescriptor.Name] = bdMethod;
+                                switch (curMode)
+                                {
+                                    case EBindingMode.TwoWay:
+                                        {
+                                            bdMethod.SetMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, true);
+                                            bdMethod.GetMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, false);
 
-                                        ConfigSetMethod(info);
-                                        ConfigGetMethod(info); 
-                                    }
-                                    break;
-                                case EBindingMode.OneWay:
-                                case EBindingMode.OneTime:
-                                    {
-                                        // update target property when source changed
-                                        bdMethod.GetMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, false);
-                                        ConfigGetMethod(info);
-                                    }
-                                    break;
-                                case EBindingMode.OneWayToSource:
-                                    {
-                                        // update source property when target changed
-                                        bdMethod.SetMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, true);
-                                        ConfigSetMethod(info);
-                                    }
-                                    break;
+                                            ConfigSetMethod(info);
+                                            ConfigGetMethod(info);
+                                        }
+                                        break;
+                                    case EBindingMode.OneWay:
+                                    case EBindingMode.OneTime:
+                                        {
+                                            // update target property when source changed
+                                            bdMethod.GetMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, false);
+                                            ConfigGetMethod(info);
+                                        }
+                                        break;
+                                    case EBindingMode.OneWayToSource:
+                                        {
+                                            // update source property when target changed
+                                            bdMethod.SetMethodName = bindObj.GetPropertyBindMethodName(info.PropertyDescriptor.Name, true);
+                                            ConfigSetMethod(info);
+                                        }
+                                        break;
+                                }
+                                host.HostEditor.DrawType = TtUIEditor.enDrawType.Macross;
+                                mBindedDataDirty = true;
                             }
-                            host.HostEditor.DrawType = TtUIEditor.enDrawType.Macross;
-                            mBindedDataDirty = true;
                         }
                         ImGuiAPI.CloseCurrentPopup();
                     }
@@ -593,30 +603,34 @@ namespace EngineNS.UI.Bind
                             if(ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left))
                             {
                                 DeleteBind(info.PropertyDescriptor.Name, host);
-                                for(int i=0; i<mBindingTargets.Count; i++)
+                                List<IBindableObject> bindingTargets;
+                                if (TtEngine.Instance.UIManager.GetBindingTargets(this, out bindingTargets))
                                 {
-                                    dynamic tElement = mBindingTargets[i];
-                                    if(tElement != null)
+                                    for (int i = 0; i < bindingTargets.Count; i++)
                                     {
-                                        var bindTarget = new TtUIElement.UIBindingData_Element()
+                                        dynamic tElement = bindingTargets[i];
+                                        if (tElement != null)
                                         {
-                                            PropertyName = info.PropertyDescriptor.Name,
-                                            PropertyType = info.PropertyDescriptor.PropertyType,
-                                            Id = tElement.Id,
-                                        };
-                                        var curMode = mSelectedMode;
-                                        var tBp = tElement.FindBindableProperty(info.PropertyDescriptor.Name);
-                                        if (tBp != null && (curMode == EBindingMode.Default))
-                                        {
-                                            curMode = tBp.BindingMode;
+                                            var bindTarget = new TtUIElement.UIBindingData_Element()
+                                            {
+                                                PropertyName = info.PropertyDescriptor.Name,
+                                                PropertyType = info.PropertyDescriptor.PropertyType,
+                                                Id = tElement.Id,
+                                            };
+                                            var curMode = mSelectedMode;
+                                            var tBp = tElement.FindBindableProperty(info.PropertyDescriptor.Name);
+                                            if (tBp != null && (curMode == EBindingMode.Default))
+                                            {
+                                                curMode = tBp.BindingMode;
+                                            }
+                                            tElement.BindingDatas[info.PropertyDescriptor.Name] = new TtUIElement.BindingData_SelfProperty()
+                                            {
+                                                Target = bindTarget,
+                                                PropertyName = pro.VariableName,
+                                                Mode = curMode,
+                                            };
+                                            mBindedDataDirty = true;
                                         }
-                                        tElement.BindingDatas[info.PropertyDescriptor.Name] = new TtUIElement.BindingData_SelfProperty()
-                                        {
-                                            Target = bindTarget,
-                                            PropertyName = pro.VariableName,
-                                            Mode = curMode,
-                                        };
-                                        mBindedDataDirty = true;
                                     }
                                 }
                                 ImGuiAPI.CloseCurrentPopup();
@@ -732,13 +746,17 @@ namespace EngineNS.UI.Bind
         void DrawUIElementBindableProperty(TtUIElement element, in ImDrawList drawList, EditorUIHost host, ref int idx, string filter, in ExternalInfo info)
         {
             var container = element as TtContainer;
+            List<IBindableObject> bindingTargets;
+            if (!TtEngine.Instance.UIManager.GetBindingTargets(this, out bindingTargets))
+                return;
+
             var data = new TourPropertiesData()
             {
                 Idx = idx,
                 Filter = filter,
                 TargetType = info.PropertyDescriptor.PropertyType,
                 SourceObject = element,
-                TargetObjects = mBindingTargets,
+                TargetObjects = bindingTargets,
                 TargetName = info.PropertyDescriptor.Name,
                 Host = host,
                 HasProperty = false,

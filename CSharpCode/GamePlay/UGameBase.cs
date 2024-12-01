@@ -1,5 +1,6 @@
 ﻿using EngineNS.Bricks.PhysicsCore.SceneNode;
 using EngineNS.GamePlay.Camera;
+using EngineNS.GamePlay.Controller;
 using EngineNS.GamePlay.Movemnet;
 using EngineNS.GamePlay.Player;
 using EngineNS.GamePlay.Scene;
@@ -196,6 +197,15 @@ namespace EngineNS.GamePlay
             [RName.PGRName(FilterExts = TtPrefab.AssetExt)]
             RName prefabName)
         {
+            await CreateCharacterFromPrefabDetial(scene, prefabName, true, false);
+        }
+        [Rtti.Meta]
+        public async System.Threading.Tasks.Task CreateCharacterFromPrefabDetial(Scene.TtScene scene,
+            [RName.PGRName(FilterExts = TtPrefab.AssetExt)]
+            RName prefabName,
+            bool orientCameraRoation,
+            bool OrientToMovmement)
+        {
             var playerStart = scene.FindFirstChild<TtPlayerStart>();
             EngineNS.GamePlay.Scene.TtNode root = scene;
 
@@ -211,7 +221,9 @@ namespace EngineNS.GamePlay
                 actor.Placement.SetTransform(playerStart.Placement.TransformData);
             }
             CharacterController = new EngineNS.GamePlay.Controller.TtCharacterController();
-            await CharacterController.InitializeNode(scene.World, new EngineNS.GamePlay.Scene.TtNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
+            await CharacterController.InitializeNode(scene.World, new TtCharacterController.TtCharacterControllerNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
+            CharacterController.OrientCameraRoation = orientCameraRoation;
+            CharacterController.OrientToMovmement = OrientToMovmement;
             CharacterController.Parent = root;
             CharacterController.ControlledCharacter = actor;
 
@@ -271,7 +283,7 @@ namespace EngineNS.GamePlay
             await EngineNS.Animation.SceneNode.TtBlendSpaceAnimPlayNode.AddBlendSpace2DAnimPlayNode(scene.World, meshNode1, sapnd, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtIdentityPlacement));
 
             var characterController = new EngineNS.GamePlay.Controller.TtCharacterController();
-            await characterController.InitializeNode(scene.World, new EngineNS.GamePlay.Scene.TtNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
+            await characterController.InitializeNode(scene.World, new TtCharacterController.TtCharacterControllerNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             characterController.Parent = root;
             characterController.ControlledCharacter = ChiefPlayer;
 

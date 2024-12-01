@@ -23,15 +23,16 @@ set_target_properties(DetourTileCache PROPERTIES
 
 
 install(TARGETS DetourTileCache
+        EXPORT recastnavigation-targets
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        COMPONENT library
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT library
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} ${CMAKE_INSTALL_INCLUDEDIR}/recastnavigation
         )
 
 file(GLOB INCLUDES Include/*.h)
 install(FILES ${INCLUDES} DESTINATION
     ${CMAKE_INSTALL_INCLUDEDIR}/recastnavigation)
 if(MSVC)
-    install(FILES "$<TARGET_FILE_DIR:DetourTileCache>/DetourTileCache-d.pdb" CONFIGURATIONS "Debug" DESTINATION "lib")
+    install(FILES "$<TARGET_FILE_DIR:DetourTileCache>/DetourTileCache-d.pdb" CONFIGURATIONS "Debug" DESTINATION "lib" OPTIONAL)
 endif()

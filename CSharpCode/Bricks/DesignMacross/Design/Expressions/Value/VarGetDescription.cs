@@ -8,20 +8,38 @@ namespace EngineNS.DesignMacross.Design.Expressions
     [GraphElement(typeof(TtGraphElement_VarGet))]
     public class TtVarGetDescription : TtExpressionDescription
     {
+        [Rtti.Meta]
+        public Guid VariableId { get; set; } = Guid.Empty;
         public override string Name
         {
             get
             {
-                if(GetVariableDescription() != null)
+                if (VariableDescription != null)
                 {
-
+                    return VariableDescription.Name;
                 }
                 return "";
             }
         }
-        public IVariableDescription VariableDescription { get; set; }
-        public Guid VariableId { get; set; } = Guid.Empty;
-        public TtTypeDesc VarTypeDesc { get=>VariableDescription.VariableType.TypeDesc; }
+        public TtVariableDescription VariableDescription
+        {
+            get
+            {
+                if (Parent is TtClassDescription classDesc)
+                {
+                    foreach(var variable in classDesc.Variables)
+                    {
+                        if(variable.Id == VariableId)
+                        {
+                            return variable as TtVariableDescription;
+                        }
+                    }
+                }
+                return null;
+            }
+        }
+        
+        public TtTypeDesc VarTypeDesc { get => VariableDescription?.VariableType.TypeDesc; }
         public TtVarGetDescription()
         {
             AddDataOutPin(new() { Name = "Get", TypeDesc = TtTypeDesc.TypeOf<bool>() });
@@ -29,7 +47,6 @@ namespace EngineNS.DesignMacross.Design.Expressions
 
         public IVariableDescription GetVariableDescription()
         {
-
             return null;
         }
     }

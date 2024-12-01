@@ -1,6 +1,7 @@
 ﻿using EngineNS.Animation.SceneNode;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
+using EngineNS.Thread.Async;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -30,6 +31,10 @@ namespace EngineNS.GamePlay.Camera
             public float SpringDamping { get; set; } = 0.2f;
             [Rtti.Meta]
             public bool DoCollisionTest { get; set; } = true;
+            [Rtti.Meta]
+            public bool AcceptInput { get; set; } = true;
+            [Rtti.Meta]
+            public FRotator InitRotation { get; set; } = new FRotator();
         }
         [Category("Option")]
         public DVector3 TargetOffset
@@ -61,7 +66,18 @@ namespace EngineNS.GamePlay.Camera
             get => (NodeData as TtCameraSpringArmData).DoCollisionTest;
             set => (NodeData as TtCameraSpringArmData).DoCollisionTest = value;
         }
-
+        [Category("Option")]
+        public bool AcceptInput
+        {
+            get => (NodeData as TtCameraSpringArmData).AcceptInput;
+            set => (NodeData as TtCameraSpringArmData).AcceptInput = value;
+        }
+        [Category("Option")]
+        public FRotator InitRotation
+        {
+            get => (NodeData as TtCameraSpringArmData).InitRotation;
+            set => (NodeData as TtCameraSpringArmData).InitRotation = value;
+        }
         public TtGamePlayCamera Camera
         {
             get
@@ -73,8 +89,12 @@ namespace EngineNS.GamePlay.Camera
                 return Children[0] as TtGamePlayCamera;
             }
         }
-
-        private Quaternion Rotation = Quaternion.Identity;
+        public override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        {
+            var result = await base.InitializeNode(world, data, bvType, placementType);
+            Placement.Quat = Quaternion.FromEuler(InitRotation);
+            return result;
+        }
         [ThreadStatic]
         private static Profiler.TimeScope mScopeTick;
         private static Profiler.TimeScope ScopeTick
@@ -100,6 +120,8 @@ namespace EngineNS.GamePlay.Camera
         #region ICameraControlNode
         public void AddDelta(in FRotator delta)
         {
+            if (!AcceptInput)
+                return;
 
             Placement.Quat = Quaternion.FromEuler(Placement.Quat.ToEuler() + delta);
             //Placement.Quat = Quaternion.RotationAxis(Vector3.Left, delta.X) * Quaternion.RotationAxis(Vector3.Up, delta.Y) * Placement.Quat;
@@ -108,16 +130,23 @@ namespace EngineNS.GamePlay.Camera
         }
         public void AddYaw(float delta)
         {
+            if (!AcceptInput)
+                return;
             //Placement.Quat = Quaternion.FromEuler(new Vector3(0, delta * 0.01f, 0)) * Placement.Quat;
         }
 
         public void AddPitch(float delta)
         {
-           Placement.Quat = Quaternion.FromEuler(new FRotator(delta * 0.01f, 0, 0)) * Placement.Quat;
+            if (!AcceptInput)
+                return;
+            Placement.Quat = Quaternion.FromEuler(new FRotator(delta * 0.01f, 0, 0)) * Placement.Quat;
         }
 
         public void AddRoll(float delta)
         {
+            if (!AcceptInput)
+                return;
+
             throw new NotImplementedException();
         }
         #endregion ICameraControlNode
