@@ -715,6 +715,17 @@ struct TR_CLASS()
 	virtual void Init();
 };
 
+template<typename U>
+struct VHasGetRtti
+{
+	typedef char No[1];
+	typedef char Yes[2];
+	template<typename T, FRttiStruct* (T::*)() = &T::GetRtti>
+	static Yes& Test(T*);
+	static No& Test(...);
+	static const bool Value = sizeof(Test((U*)0)) == sizeof(Yes);
+};
+
 template<typename Type>
 struct AuxRttiStruct
 {

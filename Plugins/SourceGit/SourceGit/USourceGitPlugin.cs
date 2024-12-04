@@ -87,6 +87,7 @@ namespace EngineNS.Plugins.SourceGit
 
                     }
                 };
+                action();
 
                 return new Bricks.SourceControl.TtSourceOpResult(0);
             }
@@ -95,32 +96,6 @@ namespace EngineNS.Plugins.SourceGit
                 Profiler.Log.WriteException(ex);
                 return new Bricks.SourceControl.TtSourceOpResult(-1);
             }
-
-            //ProcessStartInfo processStartInfo = new ProcessStartInfo();
-            //processStartInfo.FileName = @"git.exe";
-            //processStartInfo.Arguments = $"add {file}";
-            //processStartInfo.RedirectStandardOutput = true;
-
-            //System.Diagnostics.Process? result = null;
-            //try
-            //{
-            //    result = System.Diagnostics.Process.Start(processStartInfo);
-
-            //    var hr = new Bricks.SourceControl.TtSourceOpResult(0);
-            //    if (result != null)
-            //    {
-            //        while (result.HasExited == false)
-            //        {
-            //            Profiler.Log.WriteLine<Profiler.TtEditorGategory>(Profiler.ELogTag.Info, result.StandardOutput.ReadToEnd());
-            //        }
-            //        return hr;
-            //    }
-            //    return new Bricks.SourceControl.TtSourceOpResult(-1);
-            //}
-            //catch (Exception)
-            //{
-            //    return new Bricks.SourceControl.TtSourceOpResult(-2);
-            //}
         }
         public override Bricks.SourceControl.TtSourceOpResult AddDirectory(string dir)
         {
@@ -136,18 +111,29 @@ namespace EngineNS.Plugins.SourceGit
                 System.Diagnostics.Process result = new System.Diagnostics.Process();
                 result.StartInfo = processStartInfo;
                 result.Start();
-                result.WaitForExit(5000);
-
-                var q = new System.Text.StringBuilder();
-                while (!result.HasExited)
+                Action action = async () =>
                 {
-                    q.Append(result.StandardOutput.ReadToEnd());
-                }
-                string r = q.ToString();
-                if (r == "")
-                    return new Bricks.SourceControl.TtSourceOpResult(0);
-                else
-                    return new Bricks.SourceControl.TtSourceOpResult(-2);
+                    var timeoutSignal = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                    await result.WaitForExitAsync(timeoutSignal.Token);
+
+                    var q = new System.Text.StringBuilder();
+                    while (!result.HasExited)
+                    {
+                        q.Append(result.StandardOutput.ReadToEnd());
+                    }
+                    string r = q.ToString();
+
+                    if (r == "")
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                };
+                action();
+                return new Bricks.SourceControl.TtSourceOpResult(0);
             }
             catch (Exception ex)
             {
@@ -170,37 +156,29 @@ namespace EngineNS.Plugins.SourceGit
                 System.Diagnostics.Process result = new System.Diagnostics.Process();
                 result.StartInfo = processStartInfo;
                 result.Start();
-                result.WaitForExit(5000);
-
-                var q = new System.Text.StringBuilder();
-                while (!result.HasExited)
+                Action action = async () =>
                 {
-                    q.Append(result.StandardOutput.ReadToEnd());
-                }
-                string r = q.ToString();
-                if (r == "")
-                    return new Bricks.SourceControl.TtSourceOpResult(0);
-                else
-                    return new Bricks.SourceControl.TtSourceOpResult(-2);
-                //System.Diagnostics.Process? result = null;
-                //try
-                //{
-                //    result = System.Diagnostics.Process.Start(processStartInfo);
-                //    var hr = new Bricks.SourceControl.TtSourceOpResult(0);
-                //    if (result != null)
-                //    {
-                //        //if (result.StandardOutput != null)
-                //        //    hr.Info = result.StandardOutput.ReadToEnd();
-                //    }
+                    var timeoutSignal = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                    await result.WaitForExitAsync(timeoutSignal.Token);
 
-                //    if (delLocal)
-                //        System.IO.File.Delete(file);
-                //    return hr;
-                //}
-                //catch (Exception)
-                //{
-                //    return new Bricks.SourceControl.TtSourceOpResult(-2);
-                //}
+                    var q = new System.Text.StringBuilder();
+                    while (!result.HasExited)
+                    {
+                        q.Append(result.StandardOutput.ReadToEnd());
+                    }
+                    string r = q.ToString();
+
+                    if (r == "")
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                };
+                action();
+                return new Bricks.SourceControl.TtSourceOpResult(0);
             }
             catch (Exception ex)
             {
@@ -223,18 +201,29 @@ namespace EngineNS.Plugins.SourceGit
                 System.Diagnostics.Process result = new System.Diagnostics.Process();
                 result.StartInfo = processStartInfo;
                 result.Start();
-                result.WaitForExit();
-
-                var q = new System.Text.StringBuilder();
-                while (!result.HasExited)
+                Action action = async () =>
                 {
-                    q.Append(result.StandardOutput.ReadToEnd());
-                }
-                string r = q.ToString();
-                if (r == "")
-                    return new Bricks.SourceControl.TtSourceOpResult(0);
-                else
-                    return new Bricks.SourceControl.TtSourceOpResult(-2);
+                    var timeoutSignal = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                    await result.WaitForExitAsync(timeoutSignal.Token);
+
+                    var q = new System.Text.StringBuilder();
+                    while (!result.HasExited)
+                    {
+                        q.Append(result.StandardOutput.ReadToEnd());
+                    }
+                    string r = q.ToString();
+
+                    if (r == "")
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                };
+                action();
+                return new Bricks.SourceControl.TtSourceOpResult(0);
             }
             catch (Exception e)
             {

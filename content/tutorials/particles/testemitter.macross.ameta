@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Bricks.CodeBuilder.UMacrossAMeta@EngineCore">
+<Root Type="EngineNS.Bricks.CodeBuilder.TtMacrossAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="b778ef00-25fd-47f3-ac2a-e1c2f71056fd" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/particles/testemitter.macross,b778ef00-25fd-47f3-ac2a-e1c2f71056fd" />
   <BaseTypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.Particle.TtEmitterMacross@EngineCore" />
   <Description Type="System.String@Unknown" Value="MacrossType:EngineNS.Bricks.Particle.TtEmitterMacross@EngineCore&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">

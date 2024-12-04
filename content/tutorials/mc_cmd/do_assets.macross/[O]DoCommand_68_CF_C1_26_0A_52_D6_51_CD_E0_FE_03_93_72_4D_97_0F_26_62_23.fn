@@ -67,13 +67,13 @@
       </MethodDec>
     </e_0>
   </MethodDatas>
-  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="4">
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="4">
     <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode@EngineCore">
       <MethodDecKeyword Type="System.String@Unknown" Value=" DoCommand(EngineNS.TtMcCommand)" />
       <Name Type="System.String@Unknown" Value="DoCommand" />
       <NodeId Type="System.Guid@Unknown" Value="664ee86c-80ba-4733-bb8b-beb51ee4e66d" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="567,396" />
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_0>
     <e_1 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
       <InputControlWidth Type="System.Single@Unknown" Value="60" />
@@ -83,8 +83,8 @@
       <NodeId Type="System.Guid@Unknown" Value="5d06d51d-38cb-446e-9650-9ae04e734e87" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="977,397" />
       <SelfMethod Type="System.Boolean@Unknown" Value="False" />
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="1">
-        <e_0 Type="EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore">
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="1">
+        <e_0 Type="EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore">
           <PinName Type="System.String@Unknown" Value="argName" />
           <Value Type="System.String@Unknown" Value="Dir" />
         </e_0>
@@ -104,7 +104,7 @@
       <Name Type="System.String@Unknown" Value="self" />
       <NodeId Type="System.Guid@Unknown" Value="708eeb6d-a2c0-439f-861c-b49954f6a251" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="1105,615" />
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_2>
     <e_3 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
       <InputControlWidth Type="System.Single@Unknown" Value="60" />
@@ -114,16 +114,16 @@
       <NodeId Type="System.Guid@Unknown" Value="da208cae-5244-4d15-b9d9-8dd6c6116454" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="1494,398" />
       <SelfMethod Type="System.Boolean@Unknown" Value="False" />
-      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="3">
-        <e_0 Type="EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore">
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="3">
+        <e_0 Type="EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore">
           <PinName Type="System.String@Unknown" Value="dir" />
           <Value Type="System.String@Unknown" Value="" />
         </e_0>
-        <e_1 Type="EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore">
+        <e_1 Type="EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore">
           <PinName Type="System.String@Unknown" Value="ext" />
           <Value Type="System.String@Unknown" Value=".srv" />
         </e_1>
-        <e_2 Type="EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore">
+        <e_2 Type="EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore">
           <PinName Type="System.String@Unknown" Value="bAllDir" />
           <Value Type="System.Boolean@Unknown" Value="True" />
         </e_2>
@@ -280,13 +280,13 @@
                   </MethodDec>
                 </e_0>
               </MethodDatas>
-              <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase@EngineCore,&gt;@Unknown" Count="14">
+              <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="14">
                 <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode@EngineCore">
                   <MethodDecKeyword Type="System.String@Unknown" Value="System.Boolean dm_fun_IterateDirectory_366745237(EngineNS.IO.IAssetMeta)" />
                   <Name Type="System.String@Unknown" Value="dm_fun_IterateDirectory_366745237" />
                   <NodeId Type="System.Guid@Unknown" Value="5fe67172-af94-437c-bb1c-dbb37439252d" />
                   <Position Type="EngineNS.Vector2@EngineCore" Value="619.00006,164" />
-                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
                 </e_0>
                 <e_1 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassPropertyVar@EngineCore">
                   <IsGet Type="System.Boolean@Unknown" Value="True" />
@@ -295,7 +295,7 @@
                   <NodeId Type="System.Guid@Unknown" Value="866c8754-360c-4f73-bf4a-038ff2a0ff79" />
                   <Position Type="EngineNS.Vector2@EngineCore" Value="357,491" />
                   <ClassPropertyMeta Type="System.String@Unknown" Value="EngineNS.TtEngine@EngineCore#Instance" />
-                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
                   <SaveData Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassPropertyVar.TSaveData@EngineCore" />
                 </e_1>
                 <e_2 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassPropertyVar@EngineCore">
@@ -305,7 +305,7 @@
                   <NodeId Type="System.Guid@Unknown" Value="172581ac-e3cd-41ab-8291-6deae77cd4a0" />
                   <Position Type="EngineNS.Vector2@EngineCore" Value="656,475" />
                   <ClassPropertyMeta Type="System.String@Unknown" Value="EngineNS.TtEngine@EngineCore#GfxDevice" />
-                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
                   <SaveData Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassPropertyVar.TSaveData@EngineCore" />
                 </e_2>
                 <e_3 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassPropertyVar@EngineCore">
@@ -315,7 +315,7 @@
                   <NodeId Type="System.Guid@Unknown" Value="b554e7cf-0ad6-4864-8313-af27f16509f0" />
                   <Position Type="EngineNS.Vector2@EngineCore" Value="953.0001,576" />
                   <ClassPropertyMeta Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.TtGfxDevice@EngineCore#MaterialInstanceManager" />
-                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
                   <SaveData Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassPropertyVar.TSaveData@EngineCore" />
                 </e_3>
                 <e_4 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
@@ -326,7 +326,7 @@
                   <NodeId Type="System.Guid@Unknown" Value="114664f9-b314-401e-8964-be217cf14062" />
                   <Position Type="EngineNS.Vector2@EngineCore" Value="1716.9999,169.99994" />
                   <SelfMethod Type="System.Boolean@Unknown" Value="False" />
-                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
                   <SaveData Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode.TSaveData@EngineCore">
                     <DefaultArguments Type="System.Collections.Generic.Dictionary&lt;System.String@Unknown,System.String@Unknown,&gt;@Unknown" Count="0" />
                     <DelegateArgumentSaveDatas Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode.DelegateArgumentSaveData@EngineCore,&gt;@Unknown" Count="0" />
@@ -339,7 +339,7 @@
                   <NodeId Type="System.Guid@Unknown" Value="67918604-54d7-4dc1-a8b8-398fdea4db0d" />
                   <Position Type="EngineNS.Vector2@EngineCore" Value="930,353" />
                   <ClassPropertyMeta Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.TtGfxDevice@EngineCore#MaterialManager" />
-                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
                   <SaveData Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassPropertyVar.TSaveData@EngineCore" />
                 </e_5>
                 <e_6 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
@@ -350,8 +350,8 @@
                   <NodeId Type="System.Guid@Unknown" Value="6d09caf0-5cee-4b4b-9e6c-7396e3f8309e" />
                   <Position Type="EngineNS.Vector2@EngineCore" Value="1299,162.99998" />
                   <SelfMethod Type="System.Boolean@Unknown" Value="False" />
-                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="1">
-                    <e_0 Type="EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore">
+                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="1">
+                    <e_0 Type="EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore">
                       <PinName Type="System.String@Unknown" Value="rn" />
                       <Value Type="EngineNS.RName@EngineCore" Value="Game,project_factory/materials/m_common01.material,fe1d69c9-9856-425f-9787-d7c3383a607a" />
                     </e_0>
@@ -374,12 +374,12 @@
                   <NodeId Type="System.Guid@Unknown" Value="b8f30e9d-fb8b-4a32-afc1-e61ba46adca4" />
                   <Position Type="EngineNS.Vector2@EngineCore" Value="2289.9998,171.99997" />
                   <SelfMethod Type="System.Boolean@Unknown" Value="False" />
-                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="2">
-                    <e_0 Type="EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore">
+                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="2">
+                    <e_0 Type="EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore">
                       <PinName Type="System.String@Unknown" Value="name" />
                       <Value Type="System.String@Unknown" Value="DiffuseTexture" />
                     </e_0>
-                    <e_1 Type="EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore">
+                    <e_1 Type="EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore">
                       <PinName Type="System.String@Unknown" Value="srv" />
                     </e_1>
                   </InputEditableValues>
@@ -404,7 +404,7 @@
                   <NodeId Type="System.Guid@Unknown" Value="cdc68894-9f6b-44a0-93bf-0278da36d8f6" />
                   <Position Type="EngineNS.Vector2@EngineCore" Value="1759.0002,368.00024" />
                   <ClassPropertyMeta Type="System.String@Unknown" Value="EngineNS.IO.IAssetMeta@EngineCore#AssetName" />
-                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
                   <SaveData Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassPropertyVar.TSaveData@EngineCore" />
                 </e_8>
                 <e_9 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
@@ -415,8 +415,8 @@
                   <NodeId Type="System.Guid@Unknown" Value="dd3ae05f-51e3-4095-a6b9-17b97cc5ccaa" />
                   <Position Type="EngineNS.Vector2@EngineCore" Value="3047,502" />
                   <SelfMethod Type="System.Boolean@Unknown" Value="False" />
-                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="1">
-                    <e_0 Type="EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore">
+                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="1">
+                    <e_0 Type="EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore">
                       <PinName Type="System.String@Unknown" Value="name" />
                     </e_0>
                   </InputEditableValues>
@@ -437,7 +437,7 @@
                   <NodeId Type="System.Guid@Unknown" Value="78c832a6-0828-4c68-91df-5be3b59dd742" />
                   <Position Type="EngineNS.Vector2@EngineCore" Value="2227,563" />
                   <ClassPropertyMeta Type="System.String@Unknown" Value="EngineNS.RName@EngineCore#Name" />
-                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
                   <SaveData Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassPropertyVar.TSaveData@EngineCore" />
                 </e_10>
                 <e_11 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
@@ -448,12 +448,12 @@
                   <NodeId Type="System.Guid@Unknown" Value="1248f368-1e25-4b8a-aa54-b1ec57d882fd" />
                   <Position Type="EngineNS.Vector2@EngineCore" Value="2648,507" />
                   <SelfMethod Type="System.Boolean@Unknown" Value="False" />
-                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="2">
-                    <e_0 Type="EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore">
+                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="2">
+                    <e_0 Type="EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore">
                       <PinName Type="System.String@Unknown" Value="name" />
                       <Value Type="System.String@Unknown" Value="" />
                     </e_0>
-                    <e_1 Type="EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore">
+                    <e_1 Type="EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore">
                       <PinName Type="System.String@Unknown" Value="type" />
                       <Value Type="EngineNS.RName.ERNameType@EngineCore" Value="Game" />
                     </e_1>
@@ -479,7 +479,7 @@
                   <NodeId Type="System.Guid@Unknown" Value="8fcf14d0-0c58-415e-97b3-07fd3dceabbf" />
                   <Position Type="EngineNS.Vector2@EngineCore" Value="2226.0002,783.99994" />
                   <ClassPropertyMeta Type="System.String@Unknown" Value="EngineNS.IO.IAssetMeta@EngineCore#TypeExt" />
-                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
                   <SaveData Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassPropertyVar.TSaveData@EngineCore" />
                 </e_12>
                 <e_13 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.AddNode@EngineCore">
@@ -488,7 +488,7 @@
                   <Name Type="System.String@Unknown" Value="+" />
                   <NodeId Type="System.Guid@Unknown" Value="61ef7e32-e1d9-4ee8-9d33-5a82dd1ab26b" />
                   <Position Type="EngineNS.Vector2@EngineCore" Value="2438,693" />
-                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+                  <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
                 </e_13>
               </Nodes>
               <Linkers Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.UPinLinker@EngineCore,&gt;@Unknown" Count="21">

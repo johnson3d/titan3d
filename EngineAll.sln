@@ -242,11 +242,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{
 		CodeLib.md = CodeLib.md
 		Documents\Index.md = Documents\Index.md
 		Readme.md = Readme.md
+		Documents\Roadmap.md = Documents\Roadmap.md
 	EndProjectSection
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "GameItems", "Plugins\GameItems\GameItems\GameItems.shproj", "{06A7E536-E6DE-4033-AFCA-27030A7FF2A3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Recast", "Recast", "{2D753BA1-FE34-4E01-A68D-61DB69050471}"
+	ProjectSection(SolutionItems) = preProject
+		3rd\native\Recast\License.txt = 3rd\native\Recast\License.txt
+		3rd\native\Recast\README.md = 3rd\native\Recast\README.md
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DebugUtils", "3rd\native\Recast\DebugUtils\DebugUtils.vcxitems", "{07F7E779-DB97-4A5F-86E2-747BBF05A434}"
 EndProject
@@ -464,6 +469,15 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Hair", "CSharpCode\Bricks\FX\Hair\Hair.shproj", "{A62536F2-65FA-4FF1-8485-706BC637F585}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Skin", "CSharpCode\Bricks\FX\Skin\Skin.shproj", "{5CAC7D56-5EB9-4EEA-B197-B5F7563101AC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Game", "Game", "{893908DF-998A-4265-80F5-8899A5DDC813}"
+	ProjectSection(SolutionItems) = preProject
+		Plugins\Game\Survivor\Survivor.plugin = Plugins\Game\Survivor\Survivor.plugin
+	EndProjectSection
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Survivor", "Plugins\Game\Survivor\Survivor.shproj", "{AC72F5A9-3264-4BF8-866B-3ED629010DB4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Survivor.Window", "Plugins\Game\Survivor\Survivor.Window\Survivor.Window.csproj", "{FE535F66-AAA6-4191-96DD-58669DB01DB3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -939,6 +953,24 @@ Global
 		{CF2E70E8-7133-4D96-92C7-68BB406C0664}.Release|x64.Build.0 = Release|x64
 		{CF2E70E8-7133-4D96-92C7-68BB406C0664}.Release|x86.ActiveCfg = Release|Win32
 		{CF2E70E8-7133-4D96-92C7-68BB406C0664}.Release|x86.Build.0 = Release|Win32
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.Debug|x64.Build.0 = Debug|Any CPU
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.Debug|x86.Build.0 = Debug|Any CPU
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.DebugOnlyCS|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.DebugOnlyCS|Any CPU.Build.0 = Debug|Any CPU
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.DebugOnlyCS|x64.ActiveCfg = Debug|Any CPU
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.DebugOnlyCS|x64.Build.0 = Debug|Any CPU
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.DebugOnlyCS|x86.ActiveCfg = Debug|Any CPU
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.DebugOnlyCS|x86.Build.0 = Debug|Any CPU
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.Release|x64.ActiveCfg = Release|Any CPU
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.Release|x64.Build.0 = Release|Any CPU
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.Release|x86.ActiveCfg = Release|Any CPU
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1121,6 +1153,9 @@ Global
 		{1C7247C9-8835-4D68-B2F4-3180297E2836} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
 		{A62536F2-65FA-4FF1-8485-706BC637F585} = {1C7247C9-8835-4D68-B2F4-3180297E2836}
 		{5CAC7D56-5EB9-4EEA-B197-B5F7563101AC} = {1C7247C9-8835-4D68-B2F4-3180297E2836}
+		{893908DF-998A-4265-80F5-8899A5DDC813} = {E5CE3791-9C8E-4476-8528-B81DFB5FDDF5}
+		{AC72F5A9-3264-4BF8-866B-3ED629010DB4} = {893908DF-998A-4265-80F5-8899A5DDC813}
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3} = {893908DF-998A-4265-80F5-8899A5DDC813}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}
@@ -1386,6 +1421,7 @@ Global
 		CSharpCode\Bricks\FX\Hair\Hair.projitems*{a62536f2-65fa-4ff1-8485-706bc637f585}*SharedItemsImports = 13
 		CSharpCode\Bricks\UI\UI.projitems*{a78776fc-f5ba-4eec-b8f6-f17b2202e1b0}*SharedItemsImports = 13
 		NativeCode\Platform\Windows\Windows.vcxitems*{a8ca4be8-8f39-4696-ab3b-265f4294de5b}*SharedItemsImports = 9
+		Plugins\Game\Survivor\Survivor.projitems*{ac72f5a9-3264-4bf8-866b-3ed629010db4}*SharedItemsImports = 13
 		3rd\native\EtcLib\EtcLib.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		3rd\native\FreeType\FreeType.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		3rd\native\iconv\iconv.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
@@ -1488,6 +1524,7 @@ Global
 		CSharpCode\Bricks\Animation\Animation.projitems*{fd56162e-fcd2-46a7-89fb-e4a0079dfe3e}*SharedItemsImports = 13
 		CSharpCode\Platform\Windows\Windows.projitems*{fe14d481-3aec-489a-95d3-82bc135c698e}*SharedItemsImports = 13
 		Plugins\SourceGit\SourceGit\SourceGit.projitems*{fe1739b7-4b97-49ca-a7ff-f360f036e475}*SharedItemsImports = 13
+		Plugins\Game\Survivor\Survivor.projitems*{fe535f66-aaa6-4191-96dd-58669db01db3}*SharedItemsImports = 5
 		Plugins\GameServer\Level\LevelServer\LevelServer.projitems*{fedc068a-4627-41bc-b6bb-b5d0c3670140}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal

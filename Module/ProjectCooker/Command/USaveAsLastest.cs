@@ -592,7 +592,7 @@ namespace ProjectCooker.Command
         }
         async System.Threading.Tasks.Task ProcUI()
         {
-            var macrossEditor = new UMacrossEditor();
+            var macrossEditor = new TtMacrossEditor();
             await macrossEditor.Initialize();
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
             var files = new List<string>(EngineNS.IO.TtFileManager.GetDirectories(root, "*" + EngineNS.UI.TtUIAsset.AssetExt, true));
@@ -646,7 +646,7 @@ namespace ProjectCooker.Command
             {
                 try
                 {
-                    var macrossEditor = new UMacrossEditor();
+                    var macrossEditor = new TtMacrossEditor();
                     await macrossEditor.Initialize();
                     var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                     var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
@@ -675,7 +675,7 @@ namespace ProjectCooker.Command
             {
                 try
                 {
-                    var macrossEditor = new UMacrossEditor();
+                    var macrossEditor = new TtMacrossEditor();
                     await macrossEditor.Initialize();
                     var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
                     var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);

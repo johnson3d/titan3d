@@ -21,19 +21,16 @@ FSimulationFilterShader PhySimulationFilterShader::_CustomSimulationFilterShader
 PhySceneDesc::PhySceneDesc()
 {
 	mDesc = nullptr;
-	mSimulationEventCallback = nullptr;
 }
 
 PhySceneDesc::~PhySceneDesc()
 {
 	Safe_Delete(mDesc);
-	Safe_Delete(mSimulationEventCallback);
 }
 
 void PhySceneDesc::Init()
 {
-	mSimulationEventCallback = new PhySimulationEventCallback();
-	mDesc->simulationEventCallback = mSimulationEventCallback;
+	mDesc->simulationEventCallback = &mSimulationEventCallback;
 	mDesc->filterShader = PhySimulationFilterShader::DefaultSimulationFilterShader;
 	mDesc->flags |= PxSceneFlag::eREQUIRE_RW_LOCK;
 	if (!mDesc->cpuDispatcher)
@@ -68,13 +65,13 @@ void PhySceneDesc::SetSimulationEventCallback(void* handle, FonContact onContact
 	FonSleep onSleep,
 	FonAdvance onAdvance)
 {
-	mSimulationEventCallback->Handle = handle;
-	mSimulationEventCallback->_onContact = onContact;
-	mSimulationEventCallback->_onTrigger = onTrigger;
-	mSimulationEventCallback->_onConstraintBreak = onConstraintBreak;
-	mSimulationEventCallback->_onWake = onWake;
-	mSimulationEventCallback->_onSleep = onSleep;
-	mSimulationEventCallback->_onAdvance = onAdvance;
+	mSimulationEventCallback.Handle = handle;
+	mSimulationEventCallback._onContact = onContact;
+	mSimulationEventCallback._onTrigger = onTrigger;
+	mSimulationEventCallback._onConstraintBreak = onConstraintBreak;
+	mSimulationEventCallback._onWake = onWake;
+	mSimulationEventCallback._onSleep = onSleep;
+	mSimulationEventCallback._onAdvance = onAdvance;
 	
 	//mDesc->filterShader = &ContactReportCallback::CorePxSimulationFilterShader;
 	/*mDesc->filterShader = (physx::PxSimulationFilterShader)pxSimulationFilterShader;

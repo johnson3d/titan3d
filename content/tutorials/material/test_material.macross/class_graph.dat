@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossEditor@EngineCore">
+<Root Type="EngineNS.Bricks.CodeBuilder.MacrossNode.TtMacrossEditor@EngineCore">
   <DefClass Type="EngineNS.Bricks.CodeBuilder.TtClassDeclaration@EngineCore">
     <ClassName Type="System.String@Unknown" Value="test_material" />
     <IsStruct Type="System.Boolean@Unknown" Value="False" />
@@ -239,7 +239,9 @@
     <Properties Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="1">
       <e_0 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
         <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
-        <Comment Type="EngineNS.Bricks.CodeBuilder.TtCommentStatement@EngineCore" />
+        <Comment Type="EngineNS.Bricks.CodeBuilder.TtCommentStatement@EngineCore">
+          <CommentString Type="System.String@Unknown" Value="" />
+        </Comment>
         <InitValue Type="EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore">
           <Type Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.TtMeshNode@EngineCore" />
           <TypeIsTypeof Type="System.Boolean@Unknown" Value="True" />
@@ -253,7 +255,7 @@
           <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.TtMeshNode@EngineCore" />
           <TypeFullName Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtMeshNode" />
         </VariableType>
-        <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Internal" />
+        <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Local" />
       </e_0>
     </Properties>
     <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">

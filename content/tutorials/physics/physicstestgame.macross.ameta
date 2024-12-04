@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.CodeBuilder.TtMacrossAMeta@EngineCore">
-  <AssetId Type="System.Guid@Unknown" Value="9f463216-c26b-45b3-8f1a-30939daabeec" />
-  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/material/test_material.macross,9f463216-c26b-45b3-8f1a-30939daabeec" />
+  <AssetId Type="System.Guid@Unknown" Value="30868408-be72-4779-b08c-c6729f57946a" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/physics/physicstestgame.macross,30868408-be72-4779-b08c-c6729f57946a" />
   <BaseTypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.TtMacrossGame@EngineCore" />
   <Description Type="System.String@Unknown" Value="MacrossType:EngineNS.GamePlay.TtMacrossGame@EngineCore&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
@@ -12,8 +12,9 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
-    <e_0 Value="Game,tutorials/material/test01.scene,b11365f9-d415-4a8c-a906-8e8da59cdda6" />
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
+    <e_0 Value="Game,project_factory/belica/prefab_belica.prefab,fc1594fc-eaf9-4f45-99c5-a88b2aa0b893" />
+    <e_1 Value="Game,tutorials/physics/physicstest.scene,6c2c165c-f595-45d6-b1d5-352a05135a57" />
   </RefAssetRNames>
   <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.CodeBuilder.TtMacross@EngineCore" />
 </Root>

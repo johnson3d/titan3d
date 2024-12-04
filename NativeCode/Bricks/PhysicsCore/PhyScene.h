@@ -279,18 +279,18 @@ public:
 		FonAdvance onAdvance);
 
 	void SetHandle(void* handle) {
-		mSimulationEventCallback->Handle = handle;
+		mSimulationEventCallback.Handle = handle;
 	}
 	void SetOnTrigger(FonTrigger onTrigger) {
-		mSimulationEventCallback->_onTrigger = onTrigger;
+		mSimulationEventCallback._onTrigger = onTrigger;
 	}
 	void SetOnContact(FonContact onContact) {
-		mSimulationEventCallback->_onContact = onContact;
+		mSimulationEventCallback._onContact = onContact;
 	}
 	
 protected:
 	PxSceneDesc*	mDesc;
-	PhySimulationEventCallback* mSimulationEventCallback;
+	PhySimulationEventCallback mSimulationEventCallback;
 	PhySimulationFilterShader SimulationFilterShader;
 };
 

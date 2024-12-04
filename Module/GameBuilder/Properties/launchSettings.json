@@ -2,7 +2,8 @@
   "profiles": {
     "GameBuilder": {
       "commandName": "Project",
-      "commandLineArgs": "$(ProjectDir)..\\GameProject\\GameProject.csproj $(SolutionDir)content net8.0"
+      "commandLineArgs": "$(SolutionDir) $(SolutionDir)Module\\GameProject\\GameProject.csproj $(SolutionDir)content net8.0 $(SolutionDir)content\\AloneGame.cfg",
+      "workingDirectory": "$(SolutionDir)binaries"
     }
   }
 }

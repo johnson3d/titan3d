@@ -3,7 +3,7 @@
   <AssetId Type="System.Guid@Unknown" Value="2313039c-2bda-4cfa-9953-e4e56363704b" />
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/viewinstance/game01.macross,2313039c-2bda-4cfa-9953-e4e56363704b" />
   <BaseTypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.TtMacrossGame@EngineCore" />
-  <Description Type="System.String@Unknown" Value="MacrossType:EngineNS.GamePlay.UMacrossGame@EngineCore&#xA;" />
+  <Description Type="System.String@Unknown" Value="MacrossType:EngineNS.GamePlay.TtMacrossGame@EngineCore&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
