@@ -957,9 +957,9 @@ namespace EngineNS.Bricks.CodeBuilder
                     if (!methodDesc.ReturnValue.VariableType.IsEqual(methodInfo.ReturnType.GetGenericArguments()[0]))
                         return MethodData.EErrorType.InvalidReturn;
                 }
-                else if(methodInfo.ReturnType.BaseType.GetInterface(nameof(ITask)) != null)
+                else if(methodInfo.ReturnType.GetInterface(nameof(ITask)) != null)
                 {
-                    if (!methodDesc.ReturnValue.VariableType.IsEqual(methodInfo.ReturnType.GetGenericArguments()[0]))
+                    if (methodDesc.ReturnValue != null && !methodDesc.ReturnValue.VariableType.IsEqual(methodInfo.ReturnType.GetGenericArguments()[0]))
                         return MethodData.EErrorType.InvalidReturn;
                 }
                 else

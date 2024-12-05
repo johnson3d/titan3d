@@ -44,6 +44,7 @@ namespace EngineNS.IO
             DebugUtility,
             Count,
         }
+        public string BinariesDir { get; private set; }
         public string[] Roots = new string[(int)ERootDir.Count];
         public string[] SysDirs = new string[(int)ESystemDir.Count];
         public void SetRoot(ERootDir type, string path)

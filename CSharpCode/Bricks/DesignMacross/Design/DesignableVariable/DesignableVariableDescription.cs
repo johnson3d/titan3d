@@ -36,6 +36,17 @@ namespace EngineNS.DesignMacross.Design
         [Rtti.Meta]
         public List<IMethodDescription> Methods { get; set; } = new List<IMethodDescription>();
         public IDescription Parent { get; set; }
+        public virtual void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
+            foreach (var variable in Variables)
+            {
+                variable.UpdateData(ref updateContext);
+            }
+            foreach (var method in Methods)
+            {
+                method.UpdateData(ref updateContext);
+            }
+        }
 
         public virtual List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {

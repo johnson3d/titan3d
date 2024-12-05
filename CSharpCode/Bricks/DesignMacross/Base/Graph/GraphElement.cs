@@ -1,11 +1,48 @@
 ﻿using EngineNS.DesignMacross.Base.Description;
 using EngineNS.Rtti;
 using System.Diagnostics;
+using System.Drawing;
 
 namespace EngineNS.DesignMacross.Base.Graph
 {
+    public struct FDataLineStyle
+    {
+        public Color4b Normal = Color4b.White;
+        
+        public Color4b Selected = Color4b.White;
+
+        public FDataLineStyle()
+        {
+        }
+    }
+    public class TtDesignMacrossGraphStyles
+    {
+        public static float LineBezierMinDelta { get; set; } = 50;
+        public static float LineBezierMaxDelta { get; set; } = 700;
+        public static float LineNormalThickness = 5;
+        public static float LineHighLightThickness = 9;
+        public static float LineLowLightThickness = 3;
+        public static float LineSelectedThickness = 7;
+        static Dictionary<TtTypeDesc, FDataLineStyle> LineStyles { get; set; } = new()
+        {
+            { TtTypeDesc.TypeOf<bool>(), new FDataLineStyle(){ Normal = Color4b.Red, Selected = Color4b.Red } },
+            { TtTypeDesc.TypeOf<int>(), new FDataLineStyle(){ Normal = Color4b.Cyan, Selected = Color4b.Cyan } },
+            { TtTypeDesc.TypeOf<float>(), new FDataLineStyle(){ Normal = Color4b.Green, Selected = Color4b.Green } },
+            { TtTypeDesc.TypeOf<string>(), new FDataLineStyle(){ Normal = Color4b.Magenta, Selected = Color4b.Magenta } },
+            { TtTypeDesc.TypeOf<Vector3>(), new FDataLineStyle(){ Normal = Color4b.Gold, Selected = Color4b.Gold } },
+        };
+        public static FDataLineStyle GetDataLineStyle(TtTypeDesc typeDesc)
+        {
+            if(typeDesc != null && LineStyles.ContainsKey(typeDesc))
+            {
+                return LineStyles[typeDesc];
+            }
+            return new FDataLineStyle() { Normal = Color4b.Blue, Selected = Color4b.Blue };
+        }
+    }
     public class TtGraphElementStyleCollection : IO.BaseSerializer
     {
+        
         [Rtti.Meta]
         public Dictionary<Guid, IGraphElementStyle> GraphElementStyles { get; set; } = new Dictionary<Guid, IGraphElementStyle>();
         public IGraphElementStyle GetOrAdd(Guid id)
@@ -51,8 +88,8 @@ namespace EngineNS.DesignMacross.Base.Graph
         public Vector2 Location { get => Style.Location; set => Style.Location = value; }
         public Vector2 AbsLocation { get => TtDesignGraphUtil.CalculateAbsLocation(this); }
         public virtual SizeF Size { get => Style.Size; set => Style.Size = value; }
-        public SizeF MinSize { get; set; }
-        public SizeF MaxSize { get; set; }
+        public virtual SizeF MinSize { get; set; }
+        public virtual SizeF MaxSize { get; set; }
         public IGraphElement Parent { get; set; } = null;
         public IDescription Description { get; set; } = null;
         public virtual IGraphElementStyle Style { get; set; } = new TtGraphElementStyle();

@@ -130,6 +130,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }
         EngineNS.PhySceneDesc.FDelegate_FonContact mOnContackCallBack;
         EngineNS.PhySceneDesc.FDelegate_FonTrigger mOnTriggerCallBack;
+        private TtPhySceneDesc mPxceneDesc = null;
         public async System.Threading.Tasks.Task<bool> Initialize(object host)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
@@ -142,20 +143,20 @@ namespace EngineNS.Bricks.PhysicsCore
             var pc = TtEngine.Instance.PhyModule.PhyContext;
             if (pc == null)
                 return false;
-            
-            var desc = pc.CreateSceneDesc();
-            desc.mCoreObject.SetFlags(PhySceneFlag.eENABLE_ACTIVE_ACTORS);
+
+            mPxceneDesc = pc.CreateSceneDesc();
+            mPxceneDesc.mCoreObject.SetFlags(PhySceneFlag.eENABLE_ACTIVE_ACTORS);
             var gravity = new Vector3(0, -9.8f, 0);
-            desc.mCoreObject.SetGravity(in gravity);
+            mPxceneDesc.mCoreObject.SetGravity(in gravity);
             unsafe
             {
                 mOnContackCallBack = new PhySceneDesc.FDelegate_FonContact(OnContact);
-                desc.mCoreObject.SetOnContact(mOnContackCallBack);
+                mPxceneDesc.mCoreObject.SetOnContact(mOnContackCallBack);
                 mOnTriggerCallBack = new PhySceneDesc.FDelegate_FonTrigger(OnTrigger);
-                desc.mCoreObject.SetOnTrigger(mOnTriggerCallBack);
+                mPxceneDesc.mCoreObject.SetOnTrigger(mOnTriggerCallBack);
             }
             //desc.mCoreObject.SetOnTrigger()
-            mPxScene = pc.CreateScene(desc);
+            mPxScene = pc.CreateScene(mPxceneDesc);
 
             return true;
         }

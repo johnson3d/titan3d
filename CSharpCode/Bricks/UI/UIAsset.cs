@@ -65,15 +65,15 @@ namespace EngineNS.UI
 
         }
         public TtUIHost UIHost = null;
-        UMacrossEditor mMacrossEditor = null;
+        TtMacrossEditor mMacrossEditor = null;
         [Browsable(false)]
-        public UMacrossEditor MacrossEditor
+        public TtMacrossEditor MacrossEditor
         {
             get
             {
                 if (mMacrossEditor == null)
                 {
-                    mMacrossEditor = new UMacrossEditor();
+                    mMacrossEditor = new TtMacrossEditor();
                     mMacrossEditor.AssetName = AssetName;
                 }
                 return mMacrossEditor;

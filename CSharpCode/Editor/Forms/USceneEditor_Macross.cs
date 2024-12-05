@@ -184,7 +184,7 @@ namespace EngineNS.Editor.Forms
 
             GenMacrossNodeCode(Scene, method.MethodBody);
         }
-        void OnAfterCompileCode(UMacrossEditor editor)
+        void OnAfterCompileCode(TtMacrossEditor editor)
         {
 
         }

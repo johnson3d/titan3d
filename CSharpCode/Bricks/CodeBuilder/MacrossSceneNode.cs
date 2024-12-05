@@ -338,11 +338,12 @@ namespace EngineNS.Bricks.CodeBuilder
                 {
                     mMacrossName = value;
                     var newRName = value;
-                    if (MacrossGetter.Name != newRName)
-                    {
-                        MacrossGetter.Reset(TtEngine.Instance.MacrossModule);
-                        MacrossGetter.Name = newRName;
-                    }
+                    MacrossGetter.Name = newRName;
+                    //if (MacrossGetter.Name != newRName)
+                    //{
+                    //    MacrossGetter.Reset(TtEngine.Instance.MacrossModule);
+                    //    MacrossGetter.Name = newRName;
+                    //}
                 }
             }
 

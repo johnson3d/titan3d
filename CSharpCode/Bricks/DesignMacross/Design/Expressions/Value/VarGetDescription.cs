@@ -1,4 +1,5 @@
-﻿using EngineNS.DesignMacross.Base.Description;
+﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.Rtti;
@@ -14,40 +15,45 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
             get
             {
-                if (VariableDescription != null)
+                if (mVariableDescription != null)
                 {
-                    return VariableDescription.Name;
+                    return "Var" + mVariableDescription.Name;
                 }
                 return "";
             }
         }
-        public TtVariableDescription VariableDescription
-        {
-            get
-            {
-                if (Parent is TtClassDescription classDesc)
-                {
-                    foreach(var variable in classDesc.Variables)
-                    {
-                        if(variable.Id == VariableId)
-                        {
-                            return variable as TtVariableDescription;
-                        }
-                    }
-                }
-                return null;
-            }
-        }
+        TtVariableDescription mVariableDescription = null;
         
-        public TtTypeDesc VarTypeDesc { get => VariableDescription?.VariableType.TypeDesc; }
+        
+        public TtTypeDesc VarTypeDesc { get => mVariableDescription?.VariableType.TypeDesc; }
         public TtVarGetDescription()
         {
             AddDataOutPin(new() { Name = "Get", TypeDesc = TtTypeDesc.TypeOf<bool>() });
         }
 
-        public IVariableDescription GetVariableDescription()
+        public override void UpdateData(ref FDescriptionUpdateContext updateContext)
         {
-            return null;
+            if (mVariableDescription == null && updateContext.ClassDescription is TtClassDescription classDesc)
+            {
+                foreach (var variable in classDesc.Variables)
+                {
+                    if (variable.Id == VariableId)
+                    {
+                        mVariableDescription = variable as TtVariableDescription;
+                    }
+                }
+            }
+            var outPin = DataOutPins[0];
+            if( VarTypeDesc!= null && outPin.TypeDesc != VarTypeDesc)
+            {
+                outPin.TypeDesc = VarTypeDesc;
+            }
+            base.UpdateData(ref updateContext);
+        }
+
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        {
+            return new TtVariableReferenceExpression(mVariableDescription.VariableName, new TtVariableReferenceExpression("CenterData"));
         }
     }
 }

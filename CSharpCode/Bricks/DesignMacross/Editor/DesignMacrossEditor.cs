@@ -49,7 +49,9 @@ namespace EngineNS.DesignMacross.Editor
             }
             ResetDockspace();
             EGui.UIProxy.DockProxy.EndMainForm(result);
-
+            FDescriptionUpdateContext descriptionUpdateContext = new();
+            descriptionUpdateContext.ClassDescription = mDesignMacross.DesignedClassDescription;
+            mDesignMacross.DesignedClassDescription.UpdateData(ref descriptionUpdateContext);
             //draw menu
             //draw toolbar
 

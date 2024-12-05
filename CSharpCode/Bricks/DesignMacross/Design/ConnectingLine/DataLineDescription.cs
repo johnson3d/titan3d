@@ -16,6 +16,10 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         public string Name { get; set; } = "";
         [Rtti.Meta]
         public TtTypeDesc TypeDesc { get; set; } = null;
+        public void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
+
+        }
         #region ISerializer
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
@@ -35,10 +39,10 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         }
         #endregion ISerializer
     }
-    [GraphElement(typeof(TtGraphElement_DataPin))]
+    [GraphElement(typeof(TtGraphElement_DataInPin))]
     public class TtDataInPinDescription : TtDataPinDescription
     {
-        
+        public object TypeVaule { get; set; } = null;
     }
     [GraphElement(typeof(TtGraphElement_DataPin))]
     public class TtDataOutPinDescription : TtDataPinDescription
@@ -64,6 +68,10 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         /// </summary>
         [Rtti.Meta] 
         public Guid ToId { get; set; } = Guid.Empty;
+        public void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
+
+        }
         #region ISerializer
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {

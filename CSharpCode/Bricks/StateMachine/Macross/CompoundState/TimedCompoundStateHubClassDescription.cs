@@ -40,8 +40,11 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
             {
                 mTimedCompoundStateClassDescription = value;
             }
-        } 
+        }
+        public void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
 
+        }
         #region ISerializer
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {

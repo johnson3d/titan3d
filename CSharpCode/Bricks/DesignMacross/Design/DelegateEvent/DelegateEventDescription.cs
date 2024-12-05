@@ -18,6 +18,10 @@ namespace EngineNS.DesignMacross.Design
         public string Name { get; set; } = "Event";
         [Rtti.Meta]
         public Vector2 Location { get; set; }
+        public void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
+
+        }
         #region ISerializer
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {

@@ -10,40 +10,21 @@ namespace EngineNS.DesignMacross.Design.Expressions
     [GraphElement(typeof(TtGraphElement_VarSet))]
     public class TtVarSetDescription : TtStatementDescription
     {
-        public override string Name { get => VariableDescription?.Name; set => VariableDescription.Name = value; }
-        public IVariableDescription VariableDescription
+        public override string Name
         {
             get
             {
-                if (ParentClass != null)
+                if (mVariableDescription != null)
                 {
-                    var variable = ParentClass.GetVariable(VariableId);
-                    if (variable != null)
-                    {
-                        return variable;
-                    }
+                    return "Var" + mVariableDescription.Name;
                 }
-                return null;
+                return "";
             }
         }
+        TtVariableDescription mVariableDescription = null;
         [Rtti.Meta]
         public Guid VariableId { get; set; } = Guid.Empty;
-        public TtTypeDesc VarTypeDesc
-        {
-            get 
-            {
-                if(ParentClass != null)
-                {
-                    var variable = ParentClass.GetVariable(VariableId);
-                    if(variable != null)
-                    {
-                        return variable.VariableType.TypeDesc;
-                    }
-                }
-                return null;
-            }
-        }
-        public TtClassDescription ParentClass { get => Parent.Parent as TtClassDescription; }
+        public TtTypeDesc VarTypeDesc { get => mVariableDescription?.VariableType.TypeDesc; }
 
         public TtVarSetDescription()
         {
@@ -61,6 +42,28 @@ namespace EngineNS.DesignMacross.Design.Expressions
             AddDataOutPin(new() { Name = "Get", TypeDesc = varTypeDesc });
         }
 
+        public override void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
+            if (mVariableDescription == null && updateContext.ClassDescription is TtClassDescription classDesc)
+            {
+                foreach (var variable in classDesc.Variables)
+                {
+                    if (variable.Id == VariableId)
+                    {
+                        mVariableDescription = variable as TtVariableDescription;
+                    }
+                }
+            }
+            var outPin = DataOutPins[0];
+            var inPin = DataInPins[0];
+            if (VarTypeDesc != null && outPin.TypeDesc != VarTypeDesc)
+            {
+                outPin.TypeDesc = VarTypeDesc;
+                inPin.TypeDesc = VarTypeDesc;
+            }
+            base.UpdateData(ref updateContext);
+        }
+
         public override TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
             var linkedDataPin = statementBuildContext.MethodDescription.GetLinkedDataPin(DataPins[0]);
@@ -72,14 +75,16 @@ namespace EngineNS.DesignMacross.Design.Expressions
                 {
                     var right = (linkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
                     var assign = TtASTBuildUtil.CreateAssignOperatorStatement(
-                                    new TtVariableReferenceExpression(Name), right);
+                                    new TtVariableReferenceExpression(mVariableDescription.VariableName, new TtVariableReferenceExpression("CenterData")),
+                                    right);
                     statementBuildContext.AddStatement(assign);
                 }
                 if (linkedDataPin.Parent is TtStatementDescription statementDescription)
                 {
                     var right = (linkedDataPin.Parent as TtStatementDescription).BuildExpressionForOutPin(linkedDataPin);
                     var assign = TtASTBuildUtil.CreateAssignOperatorStatement(
-                                    new TtVariableReferenceExpression(Name), right);
+                                    new TtVariableReferenceExpression(mVariableDescription.VariableName, new TtVariableReferenceExpression("CenterData")), 
+                                    right);
                     statementBuildContext.AddStatement(assign);
                 }
             }
@@ -87,7 +92,8 @@ namespace EngineNS.DesignMacross.Design.Expressions
             {
                 var right = new TtDefaultValueExpression() { Type = new TtTypeReference(linkedDataPin.TypeDesc) };
                 var assign = TtASTBuildUtil.CreateAssignOperatorStatement(
-                                new TtVariableReferenceExpression(Name), right);
+                                new TtVariableReferenceExpression(mVariableDescription.VariableName, new TtVariableReferenceExpression("CenterData")),
+                                right);
                 statementBuildContext.AddStatement(assign);
             }
             

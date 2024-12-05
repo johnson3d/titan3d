@@ -216,6 +216,31 @@ namespace EngineNS.DesignMacross.Design
                         layoutable.Arranging(new Rect(element.Location, size));
                     }
                 }
+                methodGraph.Elements.Sort((e1, e2) => 
+                {
+                    if((e1 is TtGraphElement_DataLine || e1 is TtGraphElement_ExecutionLine))
+                    {
+                        if((e2 is TtGraphElement_DataLine || e2 is TtGraphElement_ExecutionLine))
+                        {
+                            return 0;
+                        }
+                        else
+                        {
+                            return -1;
+                        }
+                    }
+                    else
+                    {
+                        if ((e2 is TtGraphElement_DataLine || e2 is TtGraphElement_ExecutionLine))
+                        {
+                            return 1;
+                        }
+                        else
+                        {
+                            return 0;
+                        }
+                    }
+                });
                 foreach (var element in methodGraph.Elements)
                 {
                     var elementRender = TtElementRenderDevice.CreateGraphElementRender(element);

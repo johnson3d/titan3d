@@ -30,7 +30,7 @@ namespace EngineNS.Editor.Forms
             var result = EGui.UIProxy.DockProxy.BeginMainForm("MemProfiler", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (result)
             {
-                if (ImGuiAPI.BeginTabBar("RHI", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
+                if (ImGuiAPI.BeginTabBar("Memory", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
                 {
                     if(ImGuiAPI.CollapsingHeader("Drawcall", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                     {
@@ -92,6 +92,21 @@ namespace EngineNS.Editor.Forms
                         }
                     }
 
+                    if (ImGuiAPI.CollapsingHeader("Assembly", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                    {
+                        ImGuiAPI.Text($"TtMacrossGetter Count = {TtEngine.Instance.MacrossModule.mGetters.Count};");
+                        ImGuiAPI.Text($"TtAssemblyDesc Count = {Rtti.TtAssemblyDesc.GetNumOfInstance()};");
+                        foreach(var s in Rtti.TtTypeDescManager.Instance.Services)
+                        {
+                            if (ImGuiAPI.CollapsingHeader(s.Key, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet))
+                            {
+                                foreach (var a in s.Value.Assemblies)
+                                {
+                                    ImGuiAPI.Text($"{a.Value.Name}({a.Value.Platform}):{a.Value.Description}");
+                                }
+                            }   
+                        }
+                    }
                     ImGuiAPI.EndTabBar();
                 }
                 

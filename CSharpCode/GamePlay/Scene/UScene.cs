@@ -214,15 +214,15 @@ namespace EngineNS.GamePlay.Scene
         #endregion
 
         #region Macross
-        Bricks.CodeBuilder.MacrossNode.UMacrossEditor mMacrossEditor = null;
+        Bricks.CodeBuilder.MacrossNode.TtMacrossEditor mMacrossEditor = null;
         [Browsable(false)]
-        public Bricks.CodeBuilder.MacrossNode.UMacrossEditor MacrossEditor
+        public Bricks.CodeBuilder.MacrossNode.TtMacrossEditor MacrossEditor
         {
             get
             {
                 if (mMacrossEditor == null)
                 {
-                    mMacrossEditor = new Bricks.CodeBuilder.MacrossNode.UMacrossEditor();
+                    mMacrossEditor = new Bricks.CodeBuilder.MacrossNode.TtMacrossEditor();
                     mMacrossEditor.AssetName = AssetName;
                     //mMacrossEditor.FolderExt = ".Macross";
                 }

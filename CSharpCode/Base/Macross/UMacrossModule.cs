@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Text;
 using System.Xml.Linq;
 
@@ -26,12 +27,13 @@ namespace EngineNS.Macross
         public object GetMacrossObject();
     }
 
-    public class TtMacrossGetterBase
+    public class TtMacrossGetterBase : IDisposable
     {
         public virtual RName Name { get; set; }
         public uint Version { get; protected set; }
+        protected RName InnerObjectName = null;
         public virtual object InnerObject { get; set; }
-        public virtual void Clear(TtMacrossModule module)
+        public virtual void Dispose()
         {
             Version = 0;
             InnerObject = null;
@@ -42,12 +44,12 @@ namespace EngineNS.Macross
             InnerObject = null;
         }
     }
-    public class TtMacrossGetter<T> : TtMacrossGetterBase, IDisposable where T : class
+    public class TtMacrossGetter<T> : TtMacrossGetterBase where T : class
     {
         private TtMacrossGetter()
         {
         }
-        public void Dispose()
+        public override void Dispose()
         {
             Name = null;
             mInnerObject = null;
@@ -58,15 +60,15 @@ namespace EngineNS.Macross
             TtEngine.Instance.MacrossModule.AddGetter(result);
             return result;
         }
-        public static TtMacrossGetter<T> UnsafeNewInstance(uint ver, object innerObj, bool addGetter = false)
-        {
-            var result = new TtMacrossGetter<T>();
-            if (addGetter)
-                TtEngine.Instance.MacrossModule.AddGetter(result);
-            result.Version = ver;
-            result.InnerObject = innerObj;
-            return result;
-        }
+        //public static TtMacrossGetter<T> UnsafeNewInstance(uint ver, object innerObj, bool addGetter = false)
+        //{
+        //    var result = new TtMacrossGetter<T>();
+        //    if (addGetter)
+        //        TtEngine.Instance.MacrossModule.AddGetter(result);
+        //    result.Version = ver;
+        //    result.InnerObject = innerObj;
+        //    return result;
+        //}
 
         public override RName Name 
         { 
@@ -79,7 +81,7 @@ namespace EngineNS.Macross
                     InnerObject = null;
                     return;
                 }
-                Reset(TtEngine.Instance.MacrossModule);
+                //Reset(TtEngine.Instance.MacrossModule);
             }
         }
 
@@ -91,10 +93,17 @@ namespace EngineNS.Macross
         private T mInnerObject;
         public T Get()
         {
-            if (TtEngine.Instance.MacrossModule.Version != Version)
+            if (TtEngine.Instance.MacrossModule.Version != Version || InnerObjectName != Name)
             {
-                InnerObject = TtEngine.Instance.MacrossModule.NewInnerObject<T>(Name);
+                var newObj = TtEngine.Instance.MacrossModule.NewInnerObject<T>(Name);
+                if (mInnerObject != null)
+                {
+                    var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDescGetter<T>.TypeDesc);
+                    meta?.CopyObjectMetaField(newObj, mInnerObject);
+                }
+                mInnerObject = newObj;
                 Version = TtEngine.Instance.MacrossModule.Version;
+                InnerObjectName = Name;
             }
             return mInnerObject;
         }
@@ -112,8 +121,8 @@ namespace EngineNS.Macross
     }
     public partial class TtMacrossModule : TtModule<TtEngine>
     {
+        WeakReference mAssembly;
         private IAssemblyLoader mAssemblyLoader;
-        public WeakReference mAssembly;
         private Rtti.TtAssemblyDesc mAssemblyDesc;
         public uint Version = 1;
         public T NewInnerObject<T>(RName name) where T : class
@@ -138,22 +147,26 @@ namespace EngineNS.Macross
                     if(!success)
                         return;
                 }
-                var hostAlcWeakRef = TtEngine.Instance.MacrossModule.mAssembly;
-
+                
                 Rtti.TtClassMetaManager.Instance.ResetSystemRef();
-                TtEngine.Instance.MacrossModule.ReloadAssembly_Impl(assemblyPath);
+                //TtEngine.Instance.MacrossModule.ResetGetterReferences();
+                WeakReference oldWeakRef = TtEngine.Instance.MacrossModule.ReloadAssemblyImpl(assemblyPath);
 
-                if (hostAlcWeakRef != null)
+                if (oldWeakRef != null)
                 {
-                    for (int i = 0; hostAlcWeakRef.IsAlive && (i < 10); i++)
+                    for (int i = 0; oldWeakRef.IsAlive && (i < 10); i++)
                     {
                         GC.Collect();
                         GC.WaitForPendingFinalizers();
                     }
 
-                    if (hostAlcWeakRef.IsAlive)
+                    if (oldWeakRef.IsAlive)
                     {
                         Profiler.Log.WriteLine<Profiler.TtMacrossCategory>(Profiler.ELogTag.Warning, "MacrossModule Assembly unload failed, Check assembly reference please");
+                    }
+                    else
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtMacrossCategory>(Profiler.ELogTag.Info, "MacrossModule Assembly unload successed");
                     }
                 }
                 else
@@ -166,12 +179,13 @@ namespace EngineNS.Macross
 
             }
         }
-        private void ReloadAssembly_Impl(string assemblyPath)
+        private WeakReference ReloadAssemblyImpl(string assemblyPath)
         {
             IAssemblyLoader loader = null;
             CreateAssemblyLoader(ref loader);
             if (loader == null)
-                return;
+                return null;
+            WeakReference oldWeakRef = null;
             var pdbPath = IO.TtFileManager.RemoveExtName(assemblyPath);
             pdbPath += ".tpdb";
             var newAssembly = loader.LoadAssembly(assemblyPath, pdbPath);
@@ -180,14 +194,13 @@ namespace EngineNS.Macross
             Rtti.TtAssemblyDesc desc;
             if (Rtti.TtTypeDescManager.Instance.RegAssembly(newAssembly, out manager, out desc))
             {
-
                 List<Type> removed = new List<Type>();
                 List<Type> changed = new List<Type>();
                 List<Type> added = new List<Type>();
                 var oldAssembly = mAssembly.Target as System.Reflection.Assembly;
-
                 if (oldAssembly != null)
                 {
+                    oldWeakRef = new WeakReference(oldAssembly);
                     Rtti.TtAssemblyDesc.GetChangedLists(removed, changed, added, newAssembly, oldAssembly);
                 }
 
@@ -201,20 +214,24 @@ namespace EngineNS.Macross
                 }
 
                 StartUpdateIndex = 0;
+                mAssembly = new WeakReference(newAssembly);
+                mAssemblyDesc = desc;
                 UpdateRefercences(int.MaxValue, true);
             }
             else
             {
                 manager.AddAssemblyDesc(desc);
+                mAssembly = new WeakReference(newAssembly);
+                mAssemblyDesc = desc;
             }
-
             Rtti.TtTypeDescManager.Instance.OnTypeChangedInvoke();
 
-            mAssembly = new WeakReference(newAssembly);
             mAssemblyLoader?.TryUnload();
             mAssemblyLoader = loader;
-            mAssemblyDesc = desc;
+            
             System.GC.Collect();
+
+            return oldWeakRef;
         }
         private void UpdateMetaManager(List<Type> removed, List<Type> changed)
         {

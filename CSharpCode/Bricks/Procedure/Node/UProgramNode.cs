@@ -204,7 +204,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 {
                     if (ProgramName != null)
                     {
-                        var task = mainEditor.AssetEditorManager.OpenEditor(mainEditor, typeof(CodeBuilder.MacrossNode.UMacrossEditor), ProgramName, null);
+                        var task = mainEditor.AssetEditorManager.OpenEditor(mainEditor, typeof(CodeBuilder.MacrossNode.TtMacrossEditor), ProgramName, null);
                     }
                 }
             }

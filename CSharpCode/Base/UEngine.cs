@@ -188,6 +188,9 @@ namespace EngineNS
         [Rtti.Meta]
         [Category("Option")]
         public bool IsWriteShaderDebugFile { get; set; } = false;
+        [Rtti.Meta]
+        [Category("Option")]
+        public List<string> Plugins { get; set; } = new List<string>() { "SourceGit", "Survivor" };
         public TtEngineConfig()
         {
             //EditorFont = RName.GetRName("fonts/Roboto-Regular.ttf", RName.ERNameType.Engine);
@@ -265,6 +268,12 @@ namespace EngineNS
         {
             get;
         } = new Profiler.TtNativeMemory();
+        public static void OnlyInitTypes(TtEngine engine, string cfgFile)
+        {
+            mInstance = engine;
+            engine.Config = new TtEngineConfig();
+            engine.InitTypes(cfgFile);
+        }
         public static async System.Threading.Tasks.Task<bool> StartEngine(TtEngine engine, string cfgFile)
         {
             System.Threading.Thread.CurrentThread.Name = "Main";
@@ -292,10 +301,11 @@ namespace EngineNS
         }
         private static CoreSDK.FDelegate_FOnGpuDeviceRemoved OnGpuDeviceRemoved = NativeOnGpuDeviceRemoved;
         #endregion
-        public async System.Threading.Tasks.Task<bool> PreInitEngine(string cfgFile)
+        public void InitTypes(string cfgFile)
         {
+            var t1 = Support.TtTime.HighPrecision_GetTickCount();
             var byteorder = CoreSDK.IsLittleEndian() ? "Little" : "Big";
-            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, 
+            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info,
                 $"ByteOrder: {byteorder}");
             EngineStartTickCountUS = Support.TtTime.HighPrecision_GetTickCount();
             RttiStructManager.GetInstance().BuildRtti();
@@ -304,16 +314,21 @@ namespace EngineNS
             CoreSDK.InitF2MManager();
             NativeMemory.BeginProfiler();
 
-            var t1 = Support.TtTime.HighPrecision_GetTickCount();
             EngineNS.Rtti.TtTypeDescManager.Instance.InitTypes();
             var t2 = Support.TtTime.HighPrecision_GetTickCount();
 
             EngineNS.Rtti.TtClassMetaManager.Instance.LoadMetas("EngineCore");
             var t3 = Support.TtTime.HighPrecision_GetTickCount();
-            
+
             EngineNS.Profiler.Log.InitLogger();
             TtEngine.Instance.AssetMetaManager.LoadMetas();
             var t4 = Support.TtTime.HighPrecision_GetTickCount();
+
+            if (cfgFile == null)
+                cfgFile = FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) + "EngineConfig.cfg";
+            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Load Application Config:{cfgFile}");
+
+            Config = IO.TtFileManager.LoadXmlToObject<TtEngineConfig>(cfgFile);
 
             {
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Collect Type Info:{(t2 - t1) / 1000} ms");
@@ -322,16 +337,17 @@ namespace EngineNS
 
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Load AssetMetas:{(t4 - t3) / 1000} ms");
             }
+        }
+        
+        public async System.Threading.Tasks.Task<bool> PreInitEngine(string cfgFile)
+        {
+            var t1 = Support.TtTime.HighPrecision_GetTickCount();
+            InitTypes(cfgFile);
 
             EngineNS.UCs2CppBase.InitializeNativeCoreProvider();
 
             StartSystemThreads();
 
-            if (cfgFile == null)
-                cfgFile = FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) + "EngineConfig.cfg";
-            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Load Application Config:{cfgFile}");
-
-            Config = IO.TtFileManager.LoadXmlToObject<TtEngineConfig>(cfgFile);
             if (Config == null)
             {
                 System.Diagnostics.Debug.Assert(false);
@@ -418,9 +434,9 @@ namespace EngineNS
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             if (Config.DoUnitTest)
             {
-                t2 = Support.TtTime.HighPrecision_GetTickCount();
+                var t2 = Support.TtTime.HighPrecision_GetTickCount();
                 EngineNS.UTest.UnitTestManager.DoUnitTests();
-                t3 = Support.TtTime.HighPrecision_GetTickCount();
+                var t3 = Support.TtTime.HighPrecision_GetTickCount();
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Unit Test:{(t3 - t2) / 1000} ms");
             }
 

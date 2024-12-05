@@ -31,6 +31,19 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
         {
             Entry.Parent = this;
         }
+        public override void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
+            base.UpdateData(ref updateContext);
+            Entry.UpdateData(ref updateContext);
+            foreach (var state in States)
+            {
+                state.UpdateData(ref updateContext);
+            }
+            foreach (var hub in Hubs)
+            {
+                hub.UpdateData(ref updateContext);
+            }
+        }
         public bool AddState(TtTimedSubStateClassDescription state)
         {
             States.Add(state);

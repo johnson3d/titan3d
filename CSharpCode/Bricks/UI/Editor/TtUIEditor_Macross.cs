@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
-using static EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossEditor;
+using static EngineNS.Bricks.CodeBuilder.MacrossNode.TtMacrossEditor;
 
 namespace EngineNS.UI.Editor
 {
@@ -470,7 +470,7 @@ namespace EngineNS.UI.Editor
 
             mUIHost.QueryElements(GenericElementVariableCode, ref cls);
         }
-        void OnAfterCompileCode(UMacrossEditor editor)
+        void OnAfterCompileCode(TtMacrossEditor editor)
         {
 
         }

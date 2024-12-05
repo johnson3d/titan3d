@@ -26,7 +26,10 @@ namespace EngineNS.DesignMacross.Design
         public EMethodArgumentAttribute OperationType { get; set; } = EMethodArgumentAttribute.Default;
         public Guid Id { get; set; } = Guid.NewGuid();
         public IDescription Parent { get; set; } = null;
+        public void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
 
+        }
         #region ISerializer
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
@@ -77,6 +80,10 @@ namespace EngineNS.DesignMacross.Design
                 //empty method
             }
             return null;
+        }
+        public override TtExpressionBase BuildExpressionForOutPin(TtDataPinDescription pin)
+        {
+            return new TtVariableReferenceExpression(pin.Name);
         }
         public override bool PinsChecking(TtPinsCheckContext pinsCheckContext)
         {
@@ -131,6 +138,10 @@ namespace EngineNS.DesignMacross.Design
         public List<TtExecutionLineDescription> ExecutionLines { get; set; } = new();
         [Rtti.Meta, DrawInGraph]
         public List<TtDataLineDescription> DataLines { get; set; } = new();
+        public TtMethodDescription()
+        {
+            Start = new() { Parent = this };
+        }
 
         public void AddArgument(TtMethodArgumentDescription argument)
         {
@@ -243,9 +254,25 @@ namespace EngineNS.DesignMacross.Design
             return true;
         }
         
-        public TtMethodDescription()
+
+        public void UpdateData(ref FDescriptionUpdateContext updateContext)
         {
-            Start = new() { Parent = this };
+            foreach (var expression in Expressions)
+            {
+                expression.UpdateData(ref updateContext);
+            }
+            foreach (var statement in Statements)
+            {
+                statement.UpdateData(ref updateContext);
+            }
+            foreach (var executionLine in ExecutionLines)
+            {
+                executionLine.UpdateData(ref updateContext);
+            }
+            foreach (var dataLines in DataLines)
+            {
+                dataLines.UpdateData(ref updateContext);
+            }
         }
         public virtual TtMethodDeclaration BuildMethodDeclaration(ref FClassBuildContext classBuildContext)
         {
@@ -275,6 +302,13 @@ namespace EngineNS.DesignMacross.Design
                 {
                     linkedPinId = dataLine.FromId;
                     break;
+                }
+            }
+            foreach(var pin in Start.DataOutPins)
+            {
+                if(pin.Id == linkedPinId)
+                {
+                    return pin;
                 }
             }
             foreach(var expression in Expressions)
@@ -310,18 +344,26 @@ namespace EngineNS.DesignMacross.Design
         }
         public TtDataPinDescription GetDataPinById(Guid dataPinId)
         {
+            foreach (var pin in Start.DataOutPins)
+            {
+                if(pin.Id == dataPinId)
+                {
+                    return pin;
+                }
+            }
+
             foreach (var expression in Expressions)
             {
-                if (expression.TryGetDataPin(dataPinId, out var linkedPin))
+                if (expression.TryGetDataPin(dataPinId, out var dataPin))
                 {
-                    return linkedPin;
+                    return dataPin;
                 }
             }
             foreach (var statement in Statements)
             {
-                if (statement.TryGetDataPin(dataPinId, out var linkedPin))
+                if (statement.TryGetDataPin(dataPinId, out var dataPin))
                 {
-                    return linkedPin;
+                    return dataPin;
                 }
             }
             return null;
@@ -340,6 +382,13 @@ namespace EngineNS.DesignMacross.Design
                 {
                     linkedPinId = executeLine.FromId;
                     break;
+                }
+            }
+            foreach(var pin in Start.ExecutionOutPins)
+            {
+                if(pin.Id == linkedPinId)
+                {
+                    return pin;
                 }
             }
             foreach (var expression in Expressions)

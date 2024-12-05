@@ -35,11 +35,16 @@ namespace EngineNS.DesignMacross.Base.Description
         public TtDataPinDescription SelfPin { get; set; }
         public TtDataPinDescription TargetPin { get; set; }
     }
+    public struct FDescriptionUpdateContext
+    {
+        public IClassDescription ClassDescription { get; set; }
+    }
     public interface IDescription  : IO.ISerializer
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
         public IDescription Parent { get; set; }
+        public void UpdateData(ref FDescriptionUpdateContext updateContext);
     }
     public interface IClassDescription : IDescription
     {

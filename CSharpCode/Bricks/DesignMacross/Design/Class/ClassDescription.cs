@@ -48,7 +48,21 @@ namespace EngineNS.DesignMacross.Design
         [Rtti.Meta]
         public List<IDesignableVariableDescription> DesignableVariables { get; set; } = new List<IDesignableVariableDescription>();
         public IDescription Parent { get; set; }
-
+        public void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
+            foreach(var variable in Variables)
+            {
+                variable.UpdateData(ref updateContext);
+            }
+            foreach(var method in Methods)
+            {
+                method.UpdateData(ref updateContext);
+            }
+            foreach(var designableVariable in DesignableVariables)
+            {
+                designableVariable.UpdateData(ref updateContext);
+            }
+        }
         public List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
             List<TtClassDeclaration> classDeclarationsBuilded = new();

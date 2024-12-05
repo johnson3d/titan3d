@@ -9,6 +9,7 @@ namespace EngineNS.IO
         {
             var mBin = System.IO.Directory.GetCurrentDirectory();//AppDomain.CurrentDomain.BaseDirectory;
             var root = GetBaseDirectory(mBin, 1);
+            BinariesDir = mBin;
 
             //SetRoot(ERootDir.Root, root);
 

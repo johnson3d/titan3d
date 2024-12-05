@@ -1,4 +1,5 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Design;
 
 namespace EngineNS.Bricks.StateMachine.Macross.StateAttachment
@@ -13,8 +14,14 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateAttachment
     {
         public override string Name { get; set; } = "Script";
         [Rtti.Meta]
-        public TtTimedStateScriptMethodDescription TickMethodDescription { get; set; } = null;
-        [Rtti.Meta]
         public TtTimedStateScriptMethodDescription InitMethodDescription { get; set; } = null;
+        [Rtti.Meta]
+        public TtTimedStateScriptMethodDescription TickMethodDescription { get; set; } = null;
+        public override void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
+            base.UpdateData(ref updateContext);
+            InitMethodDescription?.UpdateData(ref updateContext);
+            TickMethodDescription?.UpdateData(ref updateContext);
+        }
     }
 }

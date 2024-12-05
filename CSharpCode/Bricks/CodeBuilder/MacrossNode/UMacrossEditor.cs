@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -17,9 +18,9 @@ using System.Xml.Linq;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
-    public partial class UMacrossEditor : IO.ISerializer, Editor.IAssetEditor, IRootForm, NodeGraph.IGraphEditor, IMacrossMethodHolder
+    public partial class TtMacrossEditor : IO.ISerializer, Editor.IAssetEditor, IRootForm, NodeGraph.IGraphEditor, IMacrossMethodHolder
     {
-        public UMacrossEditor()
+        public TtMacrossEditor()
         {
             mNewMethodMenuState.Reset();
             mOverrideMenuState.Reset();
@@ -583,7 +584,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //    return false;
         //}
 
-        public Action<UMacrossEditor> AfterCompileCode;
+        public Action<TtMacrossEditor> AfterCompileCode;
         public void CompileCode()
         {
             TtEngine.Instance.MacrossManager.ClearGameProjectTemplateBuildFiles();
@@ -1507,7 +1508,16 @@ namespace EngineNS.UTest
     public class UTest_ClassGraph
     {
         public static UTest_ClassGraph Instance = new UTest_ClassGraph();
+
+/* 项目“Engine.Android”的未合并的更改
+在此之前:
         public Bricks.CodeBuilder.MacrossNode.UMacrossEditor mClassGraph = new Bricks.CodeBuilder.MacrossNode.UMacrossEditor();
+        public void UT_Draw()
+在此之后:
+        public Bricks.CodeBuilder.MacrossNode.TtMacrossEditor mClassGraph = new Bricks.CodeBuilder.MacrossNode.UMacrossEditor();
+        public void UT_Draw()
+*/
+        public Bricks.CodeBuilder.MacrossNode.TtMacrossEditor mClassGraph = new Bricks.CodeBuilder.MacrossNode.TtMacrossEditor();
         public void UT_Draw()
         {
             mClassGraph.OnDraw();
@@ -1604,6 +1614,14 @@ namespace EngineNS.Rtti
                 {
                     arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.RefAssemblyFile, projectPath + reference));
                 }
+            }
+
+            var pluginDir = TtEngine.Instance.FileManager.BinariesDir + "/plugins/";
+            foreach (var i in TtEngine.Instance.Config.Plugins)
+            {
+                arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(
+                    EngineNS.CodeCompiler.CSharpCompiler.enCommandType.RefAssemblyFile,
+                    pluginDir + $"{i}/{i}.Window.dll"));
             }
 
             //var references = projDef.Element(projDef.n) 

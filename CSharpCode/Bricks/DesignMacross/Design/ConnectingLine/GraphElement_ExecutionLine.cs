@@ -329,7 +329,14 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
 
             var nodeStart = context.ViewPortTransform(fromPin.Icon.AbsCenter);
             var nodeEnd = context.ViewPortTransform(toPin.Icon.AbsCenter);
-            cmdlist.AddLine(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1,1,1,1)), 5);
+            var p1 = nodeStart;
+            var p4 = nodeEnd;
+            var delta = p4 - p1;
+            var ctDelta = Math.Min(TtDesignMacrossGraphStyles.LineBezierMaxDelta, Math.Max(TtDesignMacrossGraphStyles.LineBezierMinDelta, Math.Max(Math.Abs(delta.X), Math.Abs(delta.Y)) * 0.5f));
+
+            var p2 = new Vector2(p1.X + ctDelta, p1.Y);
+            var p3 = new Vector2(p4.X - ctDelta, p4.Y);
+            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1, 1, 1, 1)), 5, 30);
         }
     }
     public class TtGraphElementRender_PreviewExecutionLine : IGraphElementRender
@@ -338,10 +345,29 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         {
             var line = renderableElement as TtGraphElement_PreviewExecutionLine;
             var cmdlist = ImGuiAPI.GetWindowDrawList();
-            var nodeStart = context.ViewPortTransform(line.AbsLocation);
-            var mousePosInViewPort = context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos());
-            var nodeEnd = context.ViewPortTransform(mousePosInViewPort);
-            cmdlist.AddLine(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1,1,1,1)), 5);
+            var nodeStart = Vector2.Zero;
+            var nodeEnd = Vector2.Zero;
+            if(line.StartPin is TtExecutionOutPinDescription)
+            {
+                nodeStart = context.ViewPortTransform(line.AbsLocation);
+                var mousePosInViewPort = context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos());
+                nodeEnd = context.ViewPortTransform(mousePosInViewPort);
+            }
+            else
+            {
+                nodeEnd = context.ViewPortTransform(line.AbsLocation);
+                var mousePosInViewPort = context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos());
+                nodeStart = context.ViewPortTransform(mousePosInViewPort);
+            }
+
+            var p1 = nodeStart;
+            var p4 = nodeEnd;
+            var delta = p4 - p1;
+            var ctDelta = Math.Min(TtDesignMacrossGraphStyles.LineBezierMaxDelta, Math.Max(TtDesignMacrossGraphStyles.LineBezierMinDelta, Math.Max(Math.Abs(delta.X), Math.Abs(delta.Y)) * 0.5f));
+
+            var p2 = new Vector2(p1.X + ctDelta, p1.Y);
+            var p3 = new Vector2(p4.X - ctDelta, p4.Y);
+            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1, 1, 1, 1)), 5, 30);
         }
     }
     public class TtGraphElementRender_ExecutionPin : IGraphElementRender

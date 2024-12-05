@@ -19,6 +19,10 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
         public string Name { get=> Parent.Name; set { } }
         [Browsable(false)]
         public IDescription Parent { get; set; } = null;
+        public void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
+
+        }
 
         public bool AddTransition(TtTimedStateTransitionClassDescription transition)
         {

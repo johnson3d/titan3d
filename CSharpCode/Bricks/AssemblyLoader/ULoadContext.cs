@@ -447,6 +447,9 @@ namespace EngineNS.Bricks.AssemblyLoader
                     continue;
 
                 var name = IO.TtFileManager.GetPureName(i);
+                if (TtEngine.Instance.Config.Plugins.Contains(name) == false)
+                    continue;
+
                 var module = new TtPluginModule();
                 module.PluginDescriptor = descriptor;
                 module.Manager = this;

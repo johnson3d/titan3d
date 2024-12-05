@@ -42,6 +42,10 @@ namespace EngineNS.Animation.Macross.BlendTree
         /// </summary>
         [Rtti.Meta] 
         public Guid ToId { get; set; } = Guid.Empty;
+        public void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
+
+        }
         #region ISerializer
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {

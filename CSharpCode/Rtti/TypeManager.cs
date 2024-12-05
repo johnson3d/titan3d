@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Org.BouncyCastle.Asn1.Mozilla;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -10,10 +11,24 @@ namespace EngineNS.Rtti
 {
     public class TtAssemblyDesc
     {
+        static int NumOfInstance = 0;
+        public static int GetNumOfInstance()
+        {
+            return NumOfInstance;
+        }
+        public TtAssemblyDesc()
+        {
+            NumOfInstance++;
+        }
+        ~TtAssemblyDesc()
+        {
+            NumOfInstance--;
+        }
         public virtual string Name { get; }
         public virtual string Service { get; }
         public virtual bool IsGameModule { get; }
         public virtual string Platform { get; }
+        public string Description { get; set; } = null;
         public WeakReference<Assembly> ModuleAssembly { get; set; }
         public Assembly UnsafeGetAssembly()
         {
@@ -166,10 +181,11 @@ namespace EngineNS.Rtti
         public override string Service { get { return "Global"; } }
         public override bool IsGameModule { get { return false; } }
         public override string Platform { get { return "Global"; } }
+        
         public override void SetAssembly(System.Reflection.Assembly assm, TtTypeDescManager.ServiceManager manager)
         {
             base.SetAssembly(assm, manager);
-            mName = "Unknown";
+			mName = "Unknown";
         }
     }
     public class TtTypeDesc
@@ -858,6 +874,7 @@ namespace EngineNS.Rtti
                 }
             }
             var assmDesc = new TtGlobalAssemblyDesc();
+            assmDesc.Description = asm.GetName().Name;
             if (Services.TryGetValue(assmDesc.Service, out mgr) == false)
             {
                 mgr = new ServiceManager();

@@ -119,6 +119,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         public TtGraphElement_TextBlock NameTextBlock = new TtGraphElement_TextBlock();
         public TtGraphElement_StackPanel ElementContainer = new();
         public TtGraphElement_Icon Icon= new();
+        public TtGraphElement_TextBox TextBox = new();
         public Color4f BackgroundColor
         {
             get => Style.BackgroundColor;
@@ -157,6 +158,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             {
                 ElementContainer.AddElement(Icon);
             }
+            
         }
         public override SizeF Measuring(SizeF availableSize)
         {
@@ -375,8 +377,22 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
 
         }
     }
+    [ImGuiElementRender(typeof(TtGraphElementRender_DataPin))]
+    public class TtGraphElement_DataInPin : TtGraphElement_DataPin
+    {
+        public TtGraphElement_DataInPin(IDescription description, IGraphElementStyle style) : base(description, style)
+        {
+        }
+
+        public override void ConstructElements(ref FGraphElementRenderingContext context)
+        {
+            base.ConstructElements(ref context);
+            //ElementContainer.AddElement(TextBox);
+        }
+    }
     public class TtGraphElementRender_DataLine : IGraphElementRender
     {
+
         public void Draw(IRenderableElement renderableElement, ref FGraphElementRenderingContext context)
         {
             var line = renderableElement as TtGraphElement_DataLine;
@@ -389,7 +405,15 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             }
             var nodeStart = context.ViewPortTransform(fromPin.Icon.AbsCenter);
             var nodeEnd = context.ViewPortTransform(toPin.Icon.AbsCenter);
-            cmdlist.AddLine(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1,1,1,1)), 5);
+            var p1 = nodeStart;
+            var p4 = nodeEnd;
+            var delta = p4 - p1;
+            var ctDelta = Math.Min(TtDesignMacrossGraphStyles.LineBezierMaxDelta, Math.Max(TtDesignMacrossGraphStyles.LineBezierMinDelta, Math.Max(Math.Abs(delta.X), Math.Abs(delta.Y)) * 0.5f));
+
+            var p2 = new Vector2(p1.X + ctDelta, p1.Y);
+            var p3 = new Vector2(p4.X - ctDelta, p4.Y);
+            var lineStyle = TtDesignMacrossGraphStyles.GetDataLineStyle(fromPin.DataPinDescription.TypeDesc);
+            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, ImGuiAPI.ColorConvertFloat4ToU32(lineStyle.Normal.ToColor4Float()), TtDesignMacrossGraphStyles.LineNormalThickness, 30);
         }
     }
     public class TtGraphElementRender_PreviewDataLine : IGraphElementRender
@@ -398,10 +422,30 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         {
             var line = renderableElement as TtGraphElement_PreviewDataLine;
             var cmdlist = ImGuiAPI.GetWindowDrawList();
-            var nodeStart = context.ViewPortTransform(line.AbsLocation);
-            var mousePosInViewPort = context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos());
-            var nodeEnd = context.ViewPortTransform(mousePosInViewPort);
-            cmdlist.AddLine(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1,1,1,1)), 5);
+            var nodeStart = Vector2.Zero;
+            var nodeEnd = Vector2.Zero;
+            if (line.StartPin is TtDataOutPinDescription)
+            {
+                nodeStart = context.ViewPortTransform(line.AbsLocation);
+                var mousePosInViewPort = context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos());
+                nodeEnd = context.ViewPortTransform(mousePosInViewPort);
+            }
+            else
+            {
+                nodeEnd = context.ViewPortTransform(line.AbsLocation);
+                var mousePosInViewPort = context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos());
+                nodeStart = context.ViewPortTransform(mousePosInViewPort);
+            }
+
+            var p1 = nodeStart;
+            var p4 = nodeEnd;
+            var delta = p4 - p1;
+            var ctDelta = Math.Min(TtDesignMacrossGraphStyles.LineBezierMaxDelta, Math.Max(TtDesignMacrossGraphStyles.LineBezierMinDelta, Math.Max(Math.Abs(delta.X), Math.Abs(delta.Y)) * 0.5f));
+
+            var p2 = new Vector2(p1.X + ctDelta, p1.Y);
+            var p3 = new Vector2(p4.X - ctDelta, p4.Y);
+            var lineStyle = TtDesignMacrossGraphStyles.GetDataLineStyle(line.StartPin.TypeDesc);
+            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, ImGuiAPI.ColorConvertFloat4ToU32(lineStyle.Normal.ToColor4Float()), TtDesignMacrossGraphStyles.LineNormalThickness, 30);
         }
     }
     public class TtGraphElementRender_DataPin : IGraphElementRender

@@ -50,6 +50,7 @@ namespace EngineNS.DesignMacross.Editor
 
         #region ILayoutable
         public FMargin Margin { get; set; } = FMargin.Default;
+        public override SizeF MinSize { get; set; } = new SizeF(40,20);
         public override SizeF Size
         {
             get
@@ -61,6 +62,8 @@ namespace EngineNS.DesignMacross.Editor
                 var size = ImGuiAPI.CalcTextSize(Content, false, 0);
                 font.Scale = oldScale;
                 ImGuiAPI.PopFont();
+                size.X = Math.Max(MinSize.Width, size.X);
+                size.Y = Math.Max(MinSize.Height, size.Y);
                 base.Size = new SizeF(size.X, size.Y);
                 return new SizeF(size.X, size.Y);
             }
@@ -142,10 +145,11 @@ namespace EngineNS.DesignMacross.Editor
             var cmd = ImGuiAPI.GetWindowDrawList();
             var start = context.ViewPortTransform(textBox.AbsLocation);
             ImGuiAPI.SetCursorScreenPos(in start);
+            ImGuiAPI.SetNextItemWidth(textBox.Size.Width);
             string inputValue = "";
-            if(ImGuiAPI.InputText("##in_TextBox", ref inputValue))
+            if(ImGuiAPI.InputText("##in_" + textBox.Id.ToString() + "_TextBox", ref inputValue))
             {
-                textBox.OnValueChange(textBox.Content, inputValue);
+                textBox?.OnValueChange(textBox.Content, inputValue);
             }
         }
     }

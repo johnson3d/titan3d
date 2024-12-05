@@ -95,7 +95,7 @@ namespace EngineNS.Bricks.CodeBuilder
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMacross@EngineCore", "EngineNS.Bricks.CodeBuilder.UMacross" })]
     [TtMacross.MacrossCreate]
     [IO.AssetCreateMenu(MenuName = "Script/Macross")]
-    [Editor.UAssetEditor(EditorType = typeof(Bricks.CodeBuilder.MacrossNode.UMacrossEditor))]
+    [Editor.UAssetEditor(EditorType = typeof(Bricks.CodeBuilder.MacrossNode.TtMacrossEditor))]
     public partial class TtMacross : IO.IAsset
     {
         public const string AssetExt = ".macross";
@@ -248,7 +248,7 @@ namespace EngineNS.Bricks.CodeBuilder
             return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
 
-        public static void UpdateAMetaReferences(MacrossNode.UMacrossEditor graph, TtMacrossAMeta ameta)
+        public static void UpdateAMetaReferences(MacrossNode.TtMacrossEditor graph, TtMacrossAMeta ameta)
         {
             foreach (var i in graph.Methods)
             {
@@ -277,7 +277,7 @@ namespace EngineNS.Bricks.CodeBuilder
             if (macrossMeta != null && SelectedType != null)
                 macrossMeta.BaseTypeStr = SelectedType.TypeString;
 
-            var graph = new MacrossNode.UMacrossEditor();
+            var graph = new MacrossNode.TtMacrossEditor();
             graph.LoadClassGraph(this.AssetName);
             UpdateAMetaReferences(graph, ameta as TtMacrossAMeta);
             //foreach (var i in graph.Methods)
@@ -302,7 +302,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
 
         public TtTypeDesc SelectedType = null;
-        public MacrossNode.UMacrossEditor MacrossEditor = null;
+        public MacrossNode.TtMacrossEditor MacrossEditor = null;
         public void SaveAssetTo(RName name)
         {
             var ameta = GetAMeta() as TtMacrossAMeta;
@@ -315,7 +315,7 @@ namespace EngineNS.Bricks.CodeBuilder
             IO.TtFileManager.CreateDirectory(name.Address);
 
             if (MacrossEditor == null)
-                MacrossEditor = new MacrossNode.UMacrossEditor();
+                MacrossEditor = new MacrossNode.TtMacrossEditor();
             MacrossEditor.AssetName = name;
             MacrossEditor.DefClass.ClassName = name.PureName;
             MacrossEditor.DefClass.Namespace = TtNamespaceDeclaration.GetNameSpaceFromRName(name);

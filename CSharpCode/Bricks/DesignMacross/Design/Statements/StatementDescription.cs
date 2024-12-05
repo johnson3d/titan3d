@@ -45,6 +45,17 @@ namespace EngineNS.DesignMacross.Design.Statement
                 return pins; ;
             }
         }
+        public virtual void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
+            foreach (var executionPin in ExecutionPins)
+            {
+                executionPin.UpdateData(ref updateContext);
+            }
+            foreach (var dataPin in DataPins)
+            {
+                dataPin.UpdateData(ref updateContext);
+            }
+        }
         public virtual TtStatementBase BuildStatement(ref FStatementBuildContext statementBuildContext)
         {
             return null;

@@ -50,6 +50,17 @@ namespace EngineNS.DesignMacross.Design.Expressions
         {
 
         }
+        public virtual void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
+            foreach (var executionPin in ExecutionPins)
+            {
+                executionPin.UpdateData(ref updateContext);
+            }
+            foreach (var dataPin in DataPins)
+            {
+                dataPin.UpdateData(ref updateContext);
+            }
+        }
         public virtual TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
             return null;

@@ -833,7 +833,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public override void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
-            var klsGraph = tagObject as UMacrossEditor;
+            var klsGraph = tagObject as TtMacrossEditor;
             if (klsGraph == null)
                 return;
 
@@ -841,7 +841,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public override void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml)
         {
-            var klsGraph = tagObject as UMacrossEditor;
+            var klsGraph = tagObject as TtMacrossEditor;
             if (klsGraph == null)
                 return;
         }
@@ -1061,7 +1061,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public override void UpdateCanvasMenus()
         {
-            var editor = this.Editor as UMacrossEditor;
+            var editor = this.Editor as TtMacrossEditor;
 
             CanvasMenus.SubMenuItems.Clear();
             CanvasMenus.Text = "Canvas";
@@ -1354,7 +1354,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public bool IsMetaFilter(Rtti.MetaAttribute attr)
         {
-            var editor = this.Editor as UMacrossEditor;
+            var editor = this.Editor as TtMacrossEditor;
             if (editor != null && editor.IsGenShader && attr.ShaderName == null)
                 return false;
             return true;
@@ -1580,7 +1580,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (classMeta != null)
             {
                 UpdateMenuWithClassMeta(classMeta, ObjectMenus);
-                var editor = this.Editor as UMacrossEditor;
+                var editor = this.Editor as TtMacrossEditor;
                 if (editor != null && editor.IsGenShader == false)
                 {
                     // only down cast here
@@ -1909,7 +1909,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         private void NodeOnPreRead(TtNodeBase node, object tagObject, object hostObject, bool fromXml)
         {
-            var klsGraph = tagObject as UMacrossEditor;
+            var klsGraph = tagObject as TtMacrossEditor;
             if (klsGraph == null)
                 return;
 

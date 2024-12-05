@@ -90,9 +90,9 @@ namespace EngineNS.Editor
                 Config.SaveConfig(cfgFile);
             }
 
-            var gameAssembly = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + Config.GameAssembly;
+            //var gameAssembly = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + Config.GameAssembly;
             
-            TtEngine.Instance.MacrossModule.ReloadAssembly(gameAssembly);
+            //TtEngine.Instance.MacrossModule.ReloadAssembly(gameAssembly);
 
             //await RNamePopupContentBrowser.Initialize();
 

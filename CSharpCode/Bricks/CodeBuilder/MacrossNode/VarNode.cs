@@ -110,7 +110,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public override TtTypeDesc GetOutPinType(PinOut pin)
         {
-            var editor = this.ParentGraph.Editor as UMacrossEditor;
+            var editor = this.ParentGraph.Editor as TtMacrossEditor;
             var type = editor.DefClass.TryGetTypeDesc();
             if (type == null && editor.DefClass.SupperClassNames.Count > 0)
                 type = Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(editor.DefClass.SupperClassNames[0]);

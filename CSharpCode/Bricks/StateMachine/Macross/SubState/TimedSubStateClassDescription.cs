@@ -31,6 +31,18 @@ namespace EngineNS.Bricks.StateMachine.Macross.SubState
         [DrawInGraph]
         [Rtti.Meta]
         public List<TtTimedStateAttachmentClassDescription> Attachments { get; set; } = new List<TtTimedStateAttachmentClassDescription>();
+        public override void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
+            base.UpdateData(ref updateContext);
+            foreach (var transition in Transitions)
+            {
+                transition.UpdateData(ref updateContext);
+            }
+            foreach (var attachment in Attachments)
+            {
+                attachment.UpdateData(ref updateContext);
+            }
+        }
         public bool AddTransition(TtTimedStateTransitionClassDescription transition)
         {
             Transitions.Add(transition);

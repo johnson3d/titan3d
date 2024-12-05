@@ -30,7 +30,10 @@ namespace EngineNS.DesignMacross.Design
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
 
         public bool IsPropertyVisibleDirty { get; set; } = false;
+        public void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
 
+        }
         public TtVariableDeclaration BuildVariableDeclaration(ref FClassBuildContext classBuildContext)
         {
             return TtASTBuildUtil.CreateVariableDeclaration(this, ref classBuildContext);

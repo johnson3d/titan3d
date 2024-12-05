@@ -22,6 +22,14 @@ namespace EngineNS.Bricks.StateMachine.Macross
         {
             
         }
+        public override void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
+            base.UpdateData(ref updateContext);
+            foreach(var compoundState in CompoundStates)
+            {
+                compoundState.UpdateData(ref updateContext);
+            }
+        }
         public bool AddCompoundState(TtTimedCompoundStateClassDescription compoundState)
         {
             CompoundStates.Add(compoundState);

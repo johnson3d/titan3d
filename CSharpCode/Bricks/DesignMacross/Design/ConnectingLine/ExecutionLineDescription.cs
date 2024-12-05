@@ -13,6 +13,10 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         public Guid Id { get; set; } = Guid.NewGuid();
         [Rtti.Meta]
         public string Name { get; set; } = "";
+        public void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
+
+        }
         #region ISerializer
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
@@ -61,7 +65,11 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         /// ExecutePinId
         /// </summary>
         [Rtti.Meta]
-        public Guid ToId { get; set; } = Guid.Empty; 
+        public Guid ToId { get; set; } = Guid.Empty;
+        public void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
+
+        }
         #region ISerializer
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
