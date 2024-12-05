@@ -1,6 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 namespace EngineNS.IO
 {
@@ -346,6 +351,7 @@ namespace EngineNS.IO
         {
             System.IO.File.WriteAllText(file, text);
         }
+        #region xml
         public static string GetXmlText(System.Xml.XmlDocument xml)
         {
             var streamXml = new System.IO.MemoryStream();
@@ -439,6 +445,74 @@ namespace EngineNS.IO
             IO.SerializerHelper.ReadObjectMetaFields(null, xml.LastChild as System.Xml.XmlElement, ref pThis, null);
             return true;
         }
+        #endregion
+
+        #region json
+        public static System.Text.Json.Nodes.JsonNode LoadJsonFromString(string jsonString)
+        {
+            return System.Text.Json.Nodes.JsonNode.Parse(jsonString);
+        }
+        public static string SaveJson(System.Text.Json.Nodes.JsonNode jsNode)
+        {
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            return jsNode!.ToJsonString(options);
+        }
+        public static string SaveObjectToJson(object obj)
+        {
+            var options = new JsonSerializerOptions
+            {
+                TypeInfoResolver = new DefaultJsonTypeInfoResolver
+                {
+                    Modifiers =
+                    {
+                        static typeInfo =>
+                        {
+                            if (typeInfo.Kind != JsonTypeInfoKind.Object)
+                                return;
+
+                            foreach (JsonPropertyInfo propertyInfo in typeInfo.Properties)
+                            {
+                                var prop = typeInfo.Type.GetProperty(propertyInfo.Name);
+                                if(prop!=null || prop.GetCustomAttributes<Rtti.MetaAttribute>(false)==null)
+                                {
+                                    propertyInfo.IsRequired = false;
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            string jsonString = JsonSerializer.Serialize(obj, options);
+            return jsonString;
+        }
+        public static T LoadObjectFromJson<T>(string jsonStr)
+        {
+            var options = new JsonSerializerOptions
+            {
+                TypeInfoResolver = new DefaultJsonTypeInfoResolver
+                {
+                    Modifiers =
+                    {
+                        static typeInfo =>
+                        {
+                            if (typeInfo.Kind != JsonTypeInfoKind.Object)
+                                return;
+
+                            foreach (JsonPropertyInfo propertyInfo in typeInfo.Properties)
+                            {
+                                var prop = typeInfo.Type.GetProperty(propertyInfo.Name);
+                                if(prop!=null || prop.GetCustomAttributes<Rtti.MetaAttribute>(false)==null)
+                                {
+                                    propertyInfo.IsRequired = false;
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            return JsonSerializer.Deserialize<T>(jsonStr, options);
+        }
+        #endregion
     }
 
     public partial class TtOpenFileDialog
