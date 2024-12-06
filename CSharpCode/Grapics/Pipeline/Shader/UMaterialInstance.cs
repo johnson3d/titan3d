@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -693,3 +693,31 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
     }
 }
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.Graphics.Pipeline.Shader
+{
+	partial class TtMaterialInstanceManager
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_CreateMaterialInstance_3844077935 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceManager->TtMaterialInstance CreateMaterialInstance(TtMaterial mtl)");
+		public unsafe TtMaterialInstance macross_CreateMaterialInstance (string nodeName, TtMaterial mtl) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":mtl", mtl);
+				}
+			}
+			var _return_value = CreateMaterialInstance(mtl);
+			macross_break_CreateMaterialInstance_3844077935.TryBreak();
+			return _return_value;
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

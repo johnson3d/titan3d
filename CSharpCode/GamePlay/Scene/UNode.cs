@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.GpuDriven;
+using EngineNS.Bricks.GpuDriven;
 using NPOI.SS.UserModel;
 using System;
 using System.Collections.Generic;
@@ -430,7 +430,7 @@ namespace EngineNS.GamePlay.Scene
                 return scene.World;
             return null;
         }
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.Unserializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public TtWorld HostWorld { get => GetWorld(); }
         public List<TtNode> Children { get; } = new List<TtNode>();
         TtNodeData mNodeData = null;
@@ -1114,3 +1114,33 @@ namespace EngineNS.GamePlay.Scene
         }
     }
 }
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.GamePlay.Scene
+{
+	partial class TtNode
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_FindFirstChild_26975848 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtNode->TtNode FindFirstChild(string name, System.Type type, bool bRecursive)");
+		public unsafe TtNode macross_FindFirstChild (string nodeName, string name, System.Type type, bool bRecursive) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":name", name);
+					stackframe.SetWatchVariable(nodeName + ":type", type);
+					stackframe.SetWatchVariable(nodeName + ":bRecursive", bRecursive);
+				}
+			}
+			var _return_value = FindFirstChild(name, type, bRecursive);
+			macross_break_FindFirstChild_26975848.TryBreak();
+			return _return_value;
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

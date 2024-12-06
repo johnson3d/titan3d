@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.PhysicsCore.SceneNode;
+using EngineNS.Bricks.PhysicsCore.SceneNode;
 using EngineNS.GamePlay.Camera;
 using EngineNS.GamePlay.Controller;
 using EngineNS.GamePlay.Movemnet;
@@ -323,7 +323,7 @@ namespace EngineNS
 {
     public partial class TtEngine
     {
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.Unserializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public GamePlay.TtGameInstance GameInstance
         {
             get;
@@ -331,3 +331,207 @@ namespace EngineNS
         }
     }
 }
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.GamePlay
+{
+	partial class TtMacrossGame
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_BeginPlay_2026881306 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtMacrossGame->System.Threading.Tasks.Task<bool> BeginPlay(TtGameInstance host)");
+		public async System.Threading.Tasks.Task<bool> macross_BeginPlay (string nodeName, TtGameInstance host) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":host", host);
+				}
+			}
+			var _return_value = await BeginPlay(host);
+			macross_break_BeginPlay_2026881306.TryBreak();
+			return _return_value;
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_Tick_2968508069 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtMacrossGame->void Tick(TtGameInstance host, float elapsedMillisecond)");
+		public unsafe void macross_Tick (string nodeName, TtGameInstance host, float elapsedMillisecond) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":host", host);
+					stackframe.SetWatchVariable(nodeName + ":elapsedMillisecond", elapsedMillisecond);
+				}
+			}
+			Tick(host, elapsedMillisecond);
+			macross_break_Tick_2968508069.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_BeginDestroy_2026881306 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtMacrossGame->void BeginDestroy(TtGameInstance host)");
+		public unsafe void macross_BeginDestroy (string nodeName, TtGameInstance host) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":host", host);
+				}
+			}
+			BeginDestroy(host);
+			macross_break_BeginDestroy_2026881306.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_DelegateTest_130575545 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtMacrossGame->void DelegateTest(int param1, Delegate_DelegateTest delegateParam)");
+		public unsafe void macross_DelegateTest (string nodeName, int param1, Delegate_DelegateTest delegateParam) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":param1", param1);
+					stackframe.SetWatchVariable(nodeName + ":delegateParam", delegateParam);
+				}
+			}
+			DelegateTest(param1, delegateParam);
+			macross_break_DelegateTest_130575545.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_TestFunction_3182854657 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtMacrossGame->void TestFunction(int paramInt, bool param2)");
+		public unsafe void macross_TestFunction (string nodeName, int paramInt, bool param2) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":paramInt", paramInt);
+					stackframe.SetWatchVariable(nodeName + ":param2", param2);
+				}
+			}
+			TestFunction(paramInt, param2);
+			macross_break_TestFunction_3182854657.TryBreak();
+		}
+	}
+}
+
+
+namespace EngineNS.GamePlay
+{
+	partial class TtGameInstance
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_InitViewportSlate_3191153360 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->System.Threading.Tasks.Task InitViewportSlate(RName rPolicy, float zMin, float zMax)");
+		public async System.Threading.Tasks.Task macross_InitViewportSlate (string nodeName, RName rPolicy, float zMin, float zMax) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":rPolicy", rPolicy);
+					stackframe.SetWatchVariable(nodeName + ":zMin", zMin);
+					stackframe.SetWatchVariable(nodeName + ":zMax", zMax);
+				}
+			}
+			await InitViewportSlate(rPolicy, zMin, zMax);
+			macross_break_InitViewportSlate_3191153360.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_FinalViewportSlate_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->void FinalViewportSlate()");
+		public unsafe void macross_FinalViewportSlate (string nodeName) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+				}
+			}
+			FinalViewportSlate();
+			macross_break_FinalViewportSlate_2609910045.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_LoadScene_1006455375 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->System.Threading.Tasks.Task<GamePlay.Scene.TtScene> LoadScene(RName mapName)");
+		public async System.Threading.Tasks.Task<GamePlay.Scene.TtScene> macross_LoadScene (string nodeName, RName mapName) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":mapName", mapName);
+				}
+			}
+			var _return_value = await LoadScene(mapName);
+			macross_break_LoadScene_1006455375.TryBreak();
+			return _return_value;
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_InitViewportSlateWithScene_2315274476 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->System.Threading.Tasks.Task<TtScene> InitViewportSlateWithScene(RName mapName, float zMin, float zMax, bool bSetToWorld)");
+		public async System.Threading.Tasks.Task<TtScene> macross_InitViewportSlateWithScene (string nodeName, RName mapName, float zMin, float zMax, bool bSetToWorld) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":mapName", mapName);
+					stackframe.SetWatchVariable(nodeName + ":zMin", zMin);
+					stackframe.SetWatchVariable(nodeName + ":zMax", zMax);
+					stackframe.SetWatchVariable(nodeName + ":bSetToWorld", bSetToWorld);
+				}
+			}
+			var _return_value = await InitViewportSlateWithScene(mapName, zMin, zMax, bSetToWorld);
+			macross_break_InitViewportSlateWithScene_2315274476.TryBreak();
+			return _return_value;
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_SetSceneToWorld_2687476761 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->void SetSceneToWorld(TtScene scene)");
+		public unsafe void macross_SetSceneToWorld (string nodeName, TtScene scene) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":scene", scene);
+				}
+			}
+			SetSceneToWorld(scene);
+			macross_break_SetSceneToWorld_2687476761.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_CreateCharacterFromPrefab_401884465 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->System.Threading.Tasks.Task CreateCharacterFromPrefab(Scene.TtScene scene, RName prefabName)");
+		public async System.Threading.Tasks.Task macross_CreateCharacterFromPrefab (string nodeName, Scene.TtScene scene, RName prefabName) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":scene", scene);
+					stackframe.SetWatchVariable(nodeName + ":prefabName", prefabName);
+				}
+			}
+			await CreateCharacterFromPrefab(scene, prefabName);
+			macross_break_CreateCharacterFromPrefab_401884465.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_CreateCharacterFromPrefabDetial_2576849437 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->System.Threading.Tasks.Task CreateCharacterFromPrefabDetial(Scene.TtScene scene, RName prefabName, bool orientCameraRoation, bool OrientToMovmement)");
+		public async System.Threading.Tasks.Task macross_CreateCharacterFromPrefabDetial (string nodeName, Scene.TtScene scene, RName prefabName, bool orientCameraRoation, bool OrientToMovmement) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":scene", scene);
+					stackframe.SetWatchVariable(nodeName + ":prefabName", prefabName);
+					stackframe.SetWatchVariable(nodeName + ":orientCameraRoation", orientCameraRoation);
+					stackframe.SetWatchVariable(nodeName + ":OrientToMovmement", OrientToMovmement);
+				}
+			}
+			await CreateCharacterFromPrefabDetial(scene, prefabName, orientCameraRoation, OrientToMovmement);
+			macross_break_CreateCharacterFromPrefabDetial_2576849437.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_CreateCharacter_3958660289 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->System.Threading.Tasks.Task CreateCharacter(Scene.TtScene scene)");
+		public async System.Threading.Tasks.Task macross_CreateCharacter (string nodeName, Scene.TtScene scene) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":scene", scene);
+				}
+			}
+			await CreateCharacter(scene);
+			macross_break_CreateCharacter_3958660289.TryBreak();
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

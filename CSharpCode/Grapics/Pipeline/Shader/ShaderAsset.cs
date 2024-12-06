@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -384,3 +384,59 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
     }
 }
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.Graphics.Pipeline.Shader
+{
+	partial class TtMacrossShaderUtility
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_InterlockedAddUInt32_1794783931 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtMacrossShaderUtility->static void InterlockedAddUInt32(ref uint location1, uint value, out uint oriValue)");
+		public static unsafe void macross_InterlockedAddUInt32 (string nodeName, ref uint location1, uint value, out uint oriValue) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":location1", location1);
+					stackframe.SetWatchVariable(nodeName + ":value", value);
+				}
+			}
+			InterlockedAddUInt32(ref location1, value, out oriValue);
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":oriValue", oriValue);
+				}
+			}
+			macross_break_InterlockedAddUInt32_1794783931.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_InterlockedAddInt32_655588434 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtMacrossShaderUtility->static void InterlockedAddInt32(ref int location1, int value, out int oriValue)");
+		public static unsafe void macross_InterlockedAddInt32 (string nodeName, ref int location1, int value, out int oriValue) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":location1", location1);
+					stackframe.SetWatchVariable(nodeName + ":value", value);
+				}
+			}
+			InterlockedAddInt32(ref location1, value, out oriValue);
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":oriValue", oriValue);
+				}
+			}
+			macross_break_InterlockedAddInt32_655588434.TryBreak();
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

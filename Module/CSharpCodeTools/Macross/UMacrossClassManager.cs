@@ -106,5 +106,81 @@ namespace CSharpCodeTools.Macross
             //    }
             //}
         }
+
+        public void GatherMacrossClass(string dir)
+        {
+            const string Start_String = "#if TitanEngine_AutoGen_Macross";
+            const string End_String = "#endif//TitanEngine_AutoGen_Macross";
+            foreach (var i in SourceCodes)
+            {
+                string beforeStr = null;
+                string afterStr = null;
+                var code = System.IO.File.ReadAllText(i);
+                var saved_code = code;
+                var istart = code.IndexOf(Start_String);
+                if (istart >= 0)
+                {
+                    beforeStr = code.Substring(0, istart);
+                    var iend = code.IndexOf(End_String, istart);
+                    if (iend >= 0)
+                    {
+                        afterStr = code.Substring(iend + End_String.Length);
+                    }
+                }
+                if (beforeStr != null)
+                {
+                    code = beforeStr + afterStr;
+                }
+                SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
+
+                CompilationUnitSyntax root = tree.GetCompilationUnitRoot();
+
+                ClassDefines.Clear();
+
+                foreach (var j in root.Members)
+                {
+                    IterateClass(root, j);
+                }
+
+                foreach (var j in ClassDefines)
+                {
+                    var klsDefine = j.Value;
+                    klsDefine.Build();
+                }
+
+                string genCode = "";
+                foreach (var j in ClassDefines)
+                {
+                    //j.Value.Usings.Clear();
+                    //j.Value.GenCode(null);
+                    (j.Value as UMacrossClassDefine).GenCode(dir);
+                    if (j.Value.ClassCode.Length > 0)
+                    {
+                        genCode += j.Value.ClassCode;
+                        //genCode += "\r\n";
+                    }
+                }
+
+                if (genCode.Length > 0)
+                {
+                    if (code.EndsWith("\r\n") == false)
+                        code += "\r\n";
+
+                    code += Start_String;
+                    code += "\r\n";
+
+                    code += "#region TitanEngine_AutoGen_Macross\r\n";
+
+                    code += genCode;
+
+                    code += "#endregion//TitanEngine_AutoGen_Macross\r\n";
+
+                    code += End_String;
+
+                    if (saved_code != code)
+                        System.IO.File.WriteAllText(i, code);
+                }
+            }
+        }
     }
 }

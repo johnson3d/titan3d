@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -1368,3 +1368,72 @@ namespace EngineNS.UTest
         }
     }
 }
+
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.UTest
+{
+	partial class UTest_MetaObject
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_TestFunction1_4262414734 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UTest.UTest_MetaObject->void TestFunction1(float a)");
+		public unsafe void macross_TestFunction1 (string nodeName, float a) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":a", a);
+				}
+			}
+			TestFunction1(a);
+			macross_break_TestFunction1_4262414734.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_TestStaticFunction1_650822939 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UTest.UTest_MetaObject->static void TestStaticFunction1(float a)");
+		public static unsafe void macross_TestStaticFunction1 (string nodeName, float a) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":a", a);
+				}
+			}
+			TestStaticFunction1(a);
+			macross_break_TestStaticFunction1_650822939.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_TestOutArguments_730645439 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UTest.UTest_MetaObject->static object TestOutArguments(System.Type rType)");
+		public static unsafe object macross_TestOutArguments (string nodeName, System.Type rType) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":rType", rType);
+				}
+			}
+			var _return_value = TestOutArguments(rType);
+			macross_break_TestOutArguments_730645439.TryBreak();
+			return _return_value;
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_TestOut2_730645439 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UTest.UTest_MetaObject->static object TestOut2(System.Type rType)");
+		public static unsafe object macross_TestOut2 (string nodeName, System.Type rType) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":rType", rType);
+				}
+			}
+			var _return_value = TestOut2(rType);
+			macross_break_TestOut2_730645439.TryBreak();
+			return _return_value;
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

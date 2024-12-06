@@ -189,9 +189,7 @@ namespace CSharpCodeTools
 
                 Macross.UMacrossClassManager.Instance.GatherCodeFiles(includes, excludes);
                 Console.WriteLine("Macross:GatherClass");
-                Macross.UMacrossClassManager.Instance.GatherClass();
-                Console.WriteLine("Macross:WriteCode");
-                Macross.UMacrossClassManager.Instance.WriteCode(macross_target);
+                Macross.UMacrossClassManager.Instance.GatherMacrossClass(macross_target);
 
                 Macross.UMacrossContextMenuManager.Instance.GatherCodeFiles(includes, excludes);
                 Console.WriteLine("MacrossContextMenu:GatherClass");

@@ -152,10 +152,10 @@ namespace CSharpCodeTools.Macross
         {
             if (Functions.Count == 0)
                 return;
-            foreach (var i in Usings)
-            {
-                AddLine(i);
-            }
+            //foreach (var i in Usings)
+            //{
+            //    AddLine(i);
+            //}
             NewLine();
 
             AddLine($"namespace {this.Namespace}");
@@ -288,20 +288,20 @@ namespace CSharpCodeTools.Macross
             }
             PopBrackets();
 
-            var file = dir + "/" + FullName + ".macross.cs";
-            if (!UMacrossClassManager.Instance.WritedFiles.Contains(file.Replace("\\", "/").ToLower()))
-            {
-                UMacrossClassManager.Instance.WritedFiles.Add(file.Replace("\\", "/").ToLower());
-            }
+            //var file = dir + "/" + FullName + ".macross.cs";
+            //if (!UMacrossClassManager.Instance.WritedFiles.Contains(file.Replace("\\", "/").ToLower()))
+            //{
+            //    UMacrossClassManager.Instance.WritedFiles.Add(file.Replace("\\", "/").ToLower());
+            //}
 
-            if (System.IO.File.Exists(file))
-            {
-                var oldCode = System.IO.File.ReadAllText(file);
-                if (oldCode == ClassCode)
-                    return;
-            }
+            //if (System.IO.File.Exists(file))
+            //{
+            //    var oldCode = System.IO.File.ReadAllText(file);
+            //    if (oldCode == ClassCode)
+            //        return;
+            //}
 
-            System.IO.File.WriteAllText(file, ClassCode);
+            //System.IO.File.WriteAllText(file, ClassCode);
         }
     }
 }

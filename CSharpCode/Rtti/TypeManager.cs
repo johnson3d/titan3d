@@ -59,6 +59,7 @@ namespace EngineNS.Rtti
             Rtti.TtAssemblyDesc desc;
             if (Rtti.TtTypeDescManager.Instance.RegAssembly(newAssembly, out manager, out desc))
             {
+                manager.RegAssemblyTypes(desc);
                 List<Type> removed = new List<Type>();
                 List<Type> changed = new List<Type>();
                 List<Type> added = new List<Type>();
@@ -79,7 +80,7 @@ namespace EngineNS.Rtti
             }
             else
             {
-                manager.AddAssemblyDesc(desc);
+                manager.RegAssemblyTypes(desc);
             }
 
             Rtti.TtTypeDescManager.Instance.OnTypeChangedInvoke();
@@ -233,7 +234,7 @@ namespace EngineNS.Rtti
         {
             get
             {
-                return SystemType.Name;
+                return SystemType?.Name;
             }
         }
         public string NickName
@@ -608,6 +609,43 @@ namespace EngineNS.Rtti
             }
             return finded;
         }
+        public void InitAssembly(string name)
+        {
+            var assm = FindAssemblyInCurrentDomain(name);
+            if (assm != null)
+            {
+                InitAssembly(assm);
+            }
+        }
+        public void InitAssembly(Assembly assembly)
+        {
+            TtAssemblyDesc desc;
+            ServiceManager manager;
+            if (RegAssembly(assembly, out manager, out desc) == false)
+            {
+                manager.RegAssemblyTypes(desc);
+                foreach (var j in manager.Types)
+                {
+                    var attr = j.Value.SystemType.GetCustomAttribute(typeof(Rtti.MetaAttribute), false) as Rtti.MetaAttribute;
+                    if (attr == null || attr.NameAlias == null)
+                        continue;
+                    foreach (var k in attr.NameAlias)
+                    {
+                        NameAliasTypes[k] = j.Value;
+                    }
+                }
+            }
+        }
+        public Assembly FindAssemblyInCurrentDomain(string name)
+        {
+            var ass = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (var i in ass)
+            {
+                if (i.GetName().Name == name)
+                    return i;
+            }
+            return null;
+        }
         public void InitTypes()
         {
             var ass = AppDomain.CurrentDomain.GetAssemblies();
@@ -638,7 +676,7 @@ namespace EngineNS.Rtti
             {
                 foreach (var j in i.Value.Assemblies)
                 {
-                    i.Value.AddAssemblyDesc(j.Value);
+                    i.Value.RegAssemblyTypes(j.Value);
                 }
             }
 
@@ -670,7 +708,7 @@ namespace EngineNS.Rtti
         {
             public Dictionary<string, TtTypeDesc> Types = new Dictionary<string, TtTypeDesc>();
             public Dictionary<string, TtAssemblyDesc> Assemblies { get; } = new Dictionary<string, TtAssemblyDesc>();
-            public void AddAssemblyDesc(TtAssemblyDesc desc)
+            public void RegAssemblyTypes(TtAssemblyDesc desc)
             {
                 var tps = desc.UnsafeGetAssembly().GetTypes();
                 foreach (var i in tps)
@@ -723,13 +761,15 @@ namespace EngineNS.Rtti
                 TtTypeDesc tdesc;
                 if (Types.TryGetValue(str, out tdesc) == false)
                 {
-                    tdesc = new TtTypeDesc()
-                    {
-                        //SystemType = t,
-                        Assembly = desc
-                    };
+                    tdesc = new TtTypeDesc();
+                    tdesc.Assembly = desc;
                     tdesc.SystemType = t;
                     Types.Add(str, tdesc);
+                }
+                else
+                {
+                    tdesc.Assembly = desc;
+                    tdesc.SystemType = t;
                 }
             }
         }

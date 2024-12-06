@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.Terrain.CDLOD;
+using EngineNS.Bricks.Terrain.CDLOD;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.Graphics.Pipeline.Deferred;
 using Org.BouncyCastle.Asn1.Mozilla;
@@ -872,3 +872,32 @@ namespace EngineNS.Graphics.Mesh
         }
     }
 }
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.Graphics.Mesh
+{
+	partial class TtMesh
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_GetMaterial_899003873 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Mesh.TtMesh->Pipeline.Shader.TtMaterial GetMaterial(uint subMesh, uint atom)");
+		public unsafe Pipeline.Shader.TtMaterial macross_GetMaterial (string nodeName, uint subMesh, uint atom) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":subMesh", subMesh);
+					stackframe.SetWatchVariable(nodeName + ":atom", atom);
+				}
+			}
+			var _return_value = GetMaterial(subMesh, atom);
+			macross_break_GetMaterial_899003873.TryBreak();
+			return _return_value;
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

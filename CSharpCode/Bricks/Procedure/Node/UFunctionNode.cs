@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.Bricks.NodeGraph;
@@ -701,3 +701,31 @@ namespace EngineNS.Bricks.Procedure.Node
         }
     }
 }
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.Bricks.Procedure.Node
+{
+	partial class UBezier
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_GetY_4262389589 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.Node.UBezier->float GetY(float x)");
+		public unsafe float macross_GetY (string nodeName, float x) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":x", x);
+				}
+			}
+			var _return_value = GetY(x);
+			macross_break_GetY_4262389589.TryBreak();
+			return _return_value;
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

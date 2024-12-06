@@ -1,4 +1,4 @@
-﻿using EngineNS.IO;
+using EngineNS.IO;
 using EngineNS.UI.Bind;
 using EngineNS.UI.Canvas;
 using NPOI.SS.Formula.PTG;
@@ -941,3 +941,30 @@ namespace EngineNS.UI.Controls.Containers
         }
     }
 }
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.UI.Controls.Containers
+{
+	partial class TtUIElementCollection
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_Add_3603961666 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UI.Controls.Containers.TtUIElementCollection->void Add(TtUIElement item)");
+		public unsafe void macross_Add (string nodeName, TtUIElement item) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":item", item);
+				}
+			}
+			Add(item);
+			macross_break_Add_3603961666.TryBreak();
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

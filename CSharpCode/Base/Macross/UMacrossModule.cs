@@ -220,7 +220,7 @@ namespace EngineNS.Macross
             }
             else
             {
-                manager.AddAssemblyDesc(desc);
+                manager.RegAssemblyTypes(desc);
                 mAssembly = new WeakReference(newAssembly);
                 mAssemblyDesc = desc;
             }

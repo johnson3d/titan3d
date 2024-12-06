@@ -1,4 +1,4 @@
-﻿using EngineNS.Bricks.CodeBuilder.ShaderNode;
+using EngineNS.Bricks.CodeBuilder.ShaderNode;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -539,3 +539,30 @@ namespace EngineNS.Graphics.Pipeline.Shader
     }
     
 }
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.Graphics.Pipeline.Shader
+{
+	partial class TtMaterialFunction
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_SaveAssetTo_2037383663 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtMaterialFunction->void SaveAssetTo(RName name)");
+		public unsafe void macross_SaveAssetTo (string nodeName, RName name) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":name", name);
+				}
+			}
+			SaveAssetTo(name);
+			macross_break_SaveAssetTo_2037383663.TryBreak();
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

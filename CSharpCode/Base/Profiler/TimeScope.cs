@@ -400,8 +400,8 @@ namespace EngineNS
     }
 }
 
-#if TitanEngine_AutoGen
-#region TitanEngine_AutoGen
+#if TitanEngine_AutoGen_RPC
+#region TitanEngine_AutoGen_RPC
 #pragma warning disable 105
 
 
@@ -567,5 +567,5 @@ namespace EngineNS.Profiler
 		};
 	}
 }
-#endregion//TitanEngine_AutoGen
-#endif//TitanEngine_AutoGen
+#endregion//TitanEngine_AutoGen_RPC
+#endif//TitanEngine_AutoGen_RPC

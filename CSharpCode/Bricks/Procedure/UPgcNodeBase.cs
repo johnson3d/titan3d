@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.Bricks.NodeGraph;
@@ -553,3 +553,78 @@ namespace EngineNS.Bricks.Procedure
         #endregion
     }
 }
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.Bricks.Procedure
+{
+	partial class UPgcNodeBase
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_DispatchBuffer_1623796334 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UPgcNodeBase->void DispatchBuffer(UPgcGraph graph, UBufferComponent result, object tag, bool bMultThread)");
+		public unsafe void macross_DispatchBuffer (string nodeName, UPgcGraph graph, UBufferComponent result, object tag, bool bMultThread) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":graph", graph);
+					stackframe.SetWatchVariable(nodeName + ":result", result);
+					stackframe.SetWatchVariable(nodeName + ":tag", tag);
+					stackframe.SetWatchVariable(nodeName + ":bMultThread", bMultThread);
+				}
+			}
+			DispatchBuffer(graph, result, tag, bMultThread);
+			macross_break_DispatchBuffer_1623796334.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_FindBuffer_107167771 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UPgcNodeBase->UBufferComponent FindBuffer(string name)");
+		public unsafe UBufferComponent macross_FindBuffer (string nodeName, string name) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":name", name);
+				}
+			}
+			var _return_value = FindBuffer(name);
+			macross_break_FindBuffer_107167771.TryBreak();
+			return _return_value;
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_GetInputNodeByName_904610137 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UPgcNodeBase->UPgcNodeBase GetInputNodeByName(UPgcGraph graph, string pinName, System.Type retType)");
+		public unsafe UPgcNodeBase macross_GetInputNodeByName (string nodeName, UPgcGraph graph, string pinName, System.Type retType) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":graph", graph);
+					stackframe.SetWatchVariable(nodeName + ":pinName", pinName);
+					stackframe.SetWatchVariable(nodeName + ":retType", retType);
+				}
+			}
+			var _return_value = GetInputNodeByName(graph, pinName, retType);
+			macross_break_GetInputNodeByName_904610137.TryBreak();
+			return _return_value;
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_GetInputNode_1656224079 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Procedure.UPgcNodeBase->UPgcNodeBase GetInputNode(UPgcGraph graph, PinIn pin)");
+		public unsafe UPgcNodeBase macross_GetInputNode (string nodeName, UPgcGraph graph, PinIn pin) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":graph", graph);
+					stackframe.SetWatchVariable(nodeName + ":pin", pin);
+				}
+			}
+			var _return_value = GetInputNode(graph, pin);
+			macross_break_GetInputNode_1656224079.TryBreak();
+			return _return_value;
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

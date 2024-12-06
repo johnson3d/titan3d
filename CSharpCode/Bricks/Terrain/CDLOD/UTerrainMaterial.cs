@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
@@ -316,3 +316,31 @@ namespace EngineNS.Bricks.Terrain.CDLOD
         }
     }
 }
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.Bricks.Terrain.CDLOD
+{
+	partial class UTerrainMaterialId
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_GetRandomPlant_1199702923 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Terrain.CDLOD.UTerrainMaterialId->int GetRandomPlant(int rdValue)");
+		public unsafe int macross_GetRandomPlant (string nodeName, int rdValue) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":rdValue", rdValue);
+				}
+			}
+			var _return_value = GetRandomPlant(rdValue);
+			macross_break_GetRandomPlant_1199702923.TryBreak();
+			return _return_value;
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

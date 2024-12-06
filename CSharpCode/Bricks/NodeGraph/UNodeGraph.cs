@@ -1,4 +1,4 @@
-﻿using EngineNS.EGui.Controls;
+using EngineNS.EGui.Controls;
 using EngineNS.EGui.Controls.PropertyGrid;
 using System;
 using System.Collections.Generic;
@@ -1683,3 +1683,32 @@ namespace EngineNS.Bricks.NodeGraph
         public virtual void SetConfigUnionNode(IUnionNode node) { }
     }
 }
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.Bricks.NodeGraph
+{
+	partial class TtNodeGraph
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_FindFirstNode_2300578384 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.NodeGraph.TtNodeGraph->TtNodeBase FindFirstNode(string name, bool findInSubGraphs)");
+		public unsafe TtNodeBase macross_FindFirstNode (string nodeName, string name, bool findInSubGraphs) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":name", name);
+					stackframe.SetWatchVariable(nodeName + ":findInSubGraphs", findInSubGraphs);
+				}
+			}
+			var _return_value = FindFirstNode(name, findInSubGraphs);
+			macross_break_FindFirstNode_2300578384.TryBreak();
+			return _return_value;
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

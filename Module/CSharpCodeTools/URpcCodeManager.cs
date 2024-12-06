@@ -28,8 +28,8 @@ namespace CSharpCodeTools
         }
         public void GatherRpcClass(string dir)
         {
-            const string Start_String = "#if TitanEngine_AutoGen";
-            const string End_String = "#endif//TitanEngine_AutoGen";
+            const string Start_String = "#if TitanEngine_AutoGen_RPC";
+            const string End_String = "#endif//TitanEngine_AutoGen_RPC";
             foreach (var i in SourceCodes)
             {
                 string beforeStr = null;
@@ -85,11 +85,11 @@ namespace CSharpCodeTools
                     code += Start_String;
                     code += "\r\n";
 
-                    code += "#region TitanEngine_AutoGen\r\n";
+                    code += "#region TitanEngine_AutoGen_RPC\r\n";
 
                     code += genCode;
 
-                    code += "#endregion//TitanEngine_AutoGen\r\n";
+                    code += "#endregion//TitanEngine_AutoGen_RPC\r\n";
 
                     code += End_String;
 

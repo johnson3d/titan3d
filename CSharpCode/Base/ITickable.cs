@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace EngineNS
@@ -167,3 +167,43 @@ namespace EngineNS
 
     
 }
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS
+{
+	partial class UTickableManager
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_AddTickable_2414318340 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UTickableManager->void AddTickable(ITickable tickable)");
+		public unsafe void macross_AddTickable (string nodeName, ITickable tickable) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":tickable", tickable);
+				}
+			}
+			AddTickable(tickable);
+			macross_break_AddTickable_2414318340.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_RemoveTickable_2414318340 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UTickableManager->void RemoveTickable(ITickable tickable)");
+		public unsafe void macross_RemoveTickable (string nodeName, ITickable tickable) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":tickable", tickable);
+				}
+			}
+			RemoveTickable(tickable);
+			macross_break_RemoveTickable_2414318340.TryBreak();
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

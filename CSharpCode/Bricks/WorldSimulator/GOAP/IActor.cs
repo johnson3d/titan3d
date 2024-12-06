@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -49,3 +49,32 @@ namespace EngineNS.Bricks.WorldSimulator.GOAP
         }
     }
 }
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.Bricks.WorldSimulator.GOAP
+{
+	partial class IActor
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_OnPickedItem_1798245635 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.WorldSimulator.GOAP.IActor->void OnPickedItem(IItem item, IInventory invetory, IItemContain contain)");
+		public unsafe void macross_OnPickedItem (string nodeName, IItem item, IInventory invetory, IItemContain contain) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":item", item);
+					stackframe.SetWatchVariable(nodeName + ":invetory", invetory);
+					stackframe.SetWatchVariable(nodeName + ":contain", contain);
+				}
+			}
+			OnPickedItem(item, invetory, contain);
+			macross_break_OnPickedItem_1798245635.TryBreak();
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

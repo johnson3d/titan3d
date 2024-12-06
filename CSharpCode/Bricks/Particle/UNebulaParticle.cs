@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -273,3 +273,84 @@ namespace EngineNS.Bricks.Particle
         }
     }
 }
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.Bricks.Particle
+{
+	partial class TtNebulaParticle
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_AddEmitter_3553406330 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Particle.TtNebulaParticle->TtEmitter AddEmitter(System.Type type, string name)");
+		public unsafe TtEmitter macross_AddEmitter (string nodeName, System.Type type, string name) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":type", type);
+					stackframe.SetWatchVariable(nodeName + ":name", name);
+				}
+			}
+			var _return_value = AddEmitter(type, name);
+			macross_break_AddEmitter_3553406330.TryBreak();
+			return _return_value;
+		}
+	}
+}
+
+
+namespace EngineNS.Bricks.Particle
+{
+	partial class TtNebulaMacross
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_OnCreated_2571610209 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Particle.TtNebulaMacross->void OnCreated(TtNebulaParticle nebula)");
+		public unsafe void macross_OnCreated (string nodeName, TtNebulaParticle nebula) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":nebula", nebula);
+				}
+			}
+			OnCreated(nebula);
+			macross_break_OnCreated_2571610209.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_OnUpdate_2992855503 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Particle.TtNebulaMacross->void OnUpdate(TtNebulaParticle nebula, UParticleGraphNode particleSystem, float elpased)");
+		public unsafe void macross_OnUpdate (string nodeName, TtNebulaParticle nebula, UParticleGraphNode particleSystem, float elpased) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":nebula", nebula);
+					stackframe.SetWatchVariable(nodeName + ":particleSystem", particleSystem);
+					stackframe.SetWatchVariable(nodeName + ":elpased", elpased);
+				}
+			}
+			OnUpdate(nebula, particleSystem, elpased);
+			macross_break_OnUpdate_2992855503.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_OnUpdateEmitter_525844223 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.Particle.TtNebulaMacross->void OnUpdateEmitter(TtNebulaParticle nebula, TtEmitter emitter, UParticleGraphNode particleSystem, float elpased)");
+		public unsafe void macross_OnUpdateEmitter (string nodeName, TtNebulaParticle nebula, TtEmitter emitter, UParticleGraphNode particleSystem, float elpased) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":nebula", nebula);
+					stackframe.SetWatchVariable(nodeName + ":emitter", emitter);
+					stackframe.SetWatchVariable(nodeName + ":particleSystem", particleSystem);
+					stackframe.SetWatchVariable(nodeName + ":elpased", elpased);
+				}
+			}
+			OnUpdateEmitter(nebula, emitter, particleSystem, elpased);
+			macross_break_OnUpdateEmitter_525844223.TryBreak();
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

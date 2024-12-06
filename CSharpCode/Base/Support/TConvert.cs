@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -408,3 +408,73 @@ namespace EngineNS.Support
         }
     }
 }
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.Support
+{
+	partial class TConvert
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_ToBoolean_2366470843 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Support.TConvert->static bool ToBoolean(string txt)");
+		public static unsafe bool macross_ToBoolean (string nodeName, string txt) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":txt", txt);
+				}
+			}
+			var _return_value = ToBoolean(txt);
+			macross_break_ToBoolean_2366470843.TryBreak();
+			return _return_value;
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_ToInt32_2366470843 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Support.TConvert->static int ToInt32(string txt)");
+		public static unsafe int macross_ToInt32 (string nodeName, string txt) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":txt", txt);
+				}
+			}
+			var _return_value = ToInt32(txt);
+			macross_break_ToInt32_2366470843.TryBreak();
+			return _return_value;
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_ToUInt32_2366470843 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Support.TConvert->static UInt32 ToUInt32(string txt)");
+		public static unsafe UInt32 macross_ToUInt32 (string nodeName, string txt) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":txt", txt);
+				}
+			}
+			var _return_value = ToUInt32(txt);
+			macross_break_ToUInt32_2366470843.TryBreak();
+			return _return_value;
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_ToSingle_2366470843 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Support.TConvert->static float ToSingle(string txt)");
+		public static unsafe float macross_ToSingle (string nodeName, string txt) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":txt", txt);
+				}
+			}
+			var _return_value = ToSingle(txt);
+			macross_break_ToSingle_2366470843.TryBreak();
+			return _return_value;
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

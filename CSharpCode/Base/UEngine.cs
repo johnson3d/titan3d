@@ -1,4 +1,4 @@
-﻿using NPOI.SS.Formula.Functions;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -226,7 +226,7 @@ namespace EngineNS
             mFileManager = new IO.TtFileManager(args);
         }
         private static TtEngine mInstance;
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.Unserializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable | Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly)]
         public static TtEngine Instance { get => mInstance; }
         [Rtti.Meta]
         public static RName GetRName(string name, RName.ERNameType type = RName.ERNameType.Game)
@@ -323,7 +323,11 @@ namespace EngineNS
             CoreSDK.InitF2MManager();
             NativeMemory.BeginProfiler();
 
-            EngineNS.Rtti.TtTypeDescManager.Instance.InitTypes();
+            //EngineNS.Rtti.TtTypeDescManager.Instance.InitTypes();
+            EngineNS.Rtti.TtTypeDescManager.Instance.InitAssembly("System.Private.CoreLib");
+            EngineNS.Rtti.TtTypeDescManager.Instance.InitAssembly("Engine.Window");
+            EngineNS.Rtti.TtTypeDescManager.Instance.InitAssembly("Engine.Console");
+
             var t2 = Support.TtTime.HighPrecision_GetTickCount();
 
             EngineNS.Rtti.TtClassMetaManager.Instance.LoadMetas("EngineCore");
@@ -645,3 +649,32 @@ namespace EngineNS
         }
     }
 }
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS
+{
+	partial class TtEngine
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_GetRName_1285856471 = new EngineNS.Macross.TtMacrossBreak("EngineNS.TtEngine->static RName GetRName(string name, RName.ERNameType type)");
+		public static unsafe RName macross_GetRName (string nodeName, string name, RName.ERNameType type) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":name", name);
+					stackframe.SetWatchVariable(nodeName + ":type", type);
+				}
+			}
+			var _return_value = GetRName(name, type);
+			macross_break_GetRName_1285856471.TryBreak();
+			return _return_value;
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

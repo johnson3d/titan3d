@@ -1,4 +1,4 @@
-﻿using EngineNS.Editor;
+using EngineNS.Editor;
 using EngineNS.GamePlay.Scene;
 using System;
 using System.Collections.Generic;
@@ -419,7 +419,7 @@ namespace EngineNS.Graphics.Pipeline
 
         #region HUD
         protected UI.TtUIHost mDefaultHUD = new UI.TtUIHost();
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly | Rtti.MetaAttribute.EMetaFlags.Unserializable)]
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly | Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public UI.TtUIHost DefaultHUD
         {
             get => mDefaultHUD;
@@ -449,7 +449,7 @@ namespace EngineNS.Graphics.Pipeline
             hud.ViewportSlate = null;
             mHUDStack.Pop();
         }
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly | Rtti.MetaAttribute.EMetaFlags.Unserializable)]
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly | Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         [Category("Option")]
         public UI.TtUIHost HUD
         {
@@ -614,3 +614,34 @@ namespace EngineNS
         public Graphics.Pipeline.UViewportSlateManager ViewportSlateManager { get; } = new Graphics.Pipeline.UViewportSlateManager();
     }
 }
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.Graphics.Pipeline
+{
+	partial class TtViewportSlate
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_Initialize_3328281008 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.TtViewportSlate->System.Threading.Tasks.Task<bool> Initialize(TtSlateApplication application, RName policyName, float zMin, float zMax)");
+		public async System.Threading.Tasks.Task<bool> macross_Initialize (string nodeName, TtSlateApplication application, RName policyName, float zMin, float zMax) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":application", application);
+					stackframe.SetWatchVariable(nodeName + ":policyName", policyName);
+					stackframe.SetWatchVariable(nodeName + ":zMin", zMin);
+					stackframe.SetWatchVariable(nodeName + ":zMax", zMax);
+				}
+			}
+			var _return_value = await Initialize(application, policyName, zMin, zMax);
+			macross_break_Initialize_3328281008.TryBreak();
+			return _return_value;
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

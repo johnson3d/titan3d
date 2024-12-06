@@ -245,4 +245,101 @@ namespace EngineNS.Plugins.LevelServer
 	}
 }
 #endregion//TitanEngine_AutoGen
-#endif//TitanEngine_AutoGen
+#endif//TitanEngine_AutoGen#if TitanEngine_AutoGen_RPC
+#region TitanEngine_AutoGen_RPC
+
+
+namespace EngineNS.Plugins.LevelServer
+{
+	partial class ULevelServer
+	{
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegClient = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
+		{
+			Guid sessionId;
+			reader.Read(out sessionId);
+			string user;
+			reader.Read(out user);
+			UInt16 indexInGate;
+			reader.Read(out indexInGate);
+			FReturnContext retContext;
+			reader.Read(out retContext);
+			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).RegClient(sessionId, user, indexInGate, context);
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
+			{
+				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
+				var pkgHeader = new FPkgHeader();
+				pkgHeader.SetHasReturn(true);
+				pkg.Write(pkgHeader);
+				pkg.Write(retContext);
+				pkg.Write(ret);
+				pkg.CoreWriter.SurePkgHeader();
+				context.NetConnect?.Send(in pkg);
+			}
+		};
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_RegLevel = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
+		{
+			Guid id;
+			reader.Read(out id);
+			RName name;
+			reader.Read(out name);
+			FReturnContext retContext;
+			reader.Read(out retContext);
+			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).RegLevel(id, name, context);
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
+			{
+				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
+				var pkgHeader = new FPkgHeader();
+				pkgHeader.SetHasReturn(true);
+				pkg.Write(pkgHeader);
+				pkg.Write(retContext);
+				pkg.Write(ret);
+				pkg.CoreWriter.SurePkgHeader();
+				context.NetConnect?.Send(in pkg);
+			}
+		};
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TryClientEnterLevel = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
+		{
+			UInt16 clientIndex;
+			reader.Read(out clientIndex);
+			Guid levelId;
+			reader.Read(out levelId);
+			FReturnContext retContext;
+			reader.Read(out retContext);
+			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).TryClientEnterLevel(clientIndex, levelId, context);
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
+			{
+				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
+				var pkgHeader = new FPkgHeader();
+				pkgHeader.SetHasReturn(true);
+				pkg.Write(pkgHeader);
+				pkg.Write(retContext);
+				pkg.Write(ret);
+				pkg.CoreWriter.SurePkgHeader();
+				context.NetConnect?.Send(in pkg);
+			}
+		};
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_TryClientLeaveLevel = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
+		{
+			UInt16 clientIndex;
+			reader.Read(out clientIndex);
+			Guid levelId;
+			reader.Read(out levelId);
+			FReturnContext retContext;
+			reader.Read(out retContext);
+			var ret = ((EngineNS.Plugins.LevelServer.ULevelServer)host).TryClientLeaveLevel(clientIndex, levelId, context);
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
+			{
+				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
+				var pkgHeader = new FPkgHeader();
+				pkgHeader.SetHasReturn(true);
+				pkg.Write(pkgHeader);
+				pkg.Write(retContext);
+				pkg.Write(ret);
+				pkg.CoreWriter.SurePkgHeader();
+				context.NetConnect?.Send(in pkg);
+			}
+		};
+	}
+}
+#endregion//TitanEngine_AutoGen_RPC
+#endif//TitanEngine_AutoGen_RPC

@@ -1,4 +1,4 @@
-﻿using EngineNS;
+using EngineNS;
 using EngineNS.EGui;
 using EngineNS.Macross;
 using EngineNS.UI.Controls;
@@ -315,3 +315,32 @@ namespace EngineNS
         }
     }
 }
+
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.UI
+{
+	partial class TtUIManager
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_Load_2037383663 = new EngineNS.Macross.TtMacrossBreak("EngineNS.UI.TtUIManager->TtUIElement Load(RName name)");
+		public unsafe TtUIElement macross_Load (string nodeName, RName name) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":name", name);
+				}
+			}
+			var _return_value = Load(name);
+			macross_break_Load_2037383663.TryBreak();
+			return _return_value;
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

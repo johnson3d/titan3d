@@ -124,4 +124,36 @@ namespace EngineNS.Plugins.LoginServer
 	}
 }
 #endregion//TitanEngine_AutoGen
-#endif//TitanEngine_AutoGen
+#endif//TitanEngine_AutoGen#if TitanEngine_AutoGen_RPC
+#region TitanEngine_AutoGen_RPC
+
+
+namespace EngineNS.Plugins.LoginServer
+{
+	partial class ULoginServer
+	{
+		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_LoginAccount = async (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host,  EngineNS.Bricks.Network.RPC.TtCallContext context) =>
+		{
+			string user;
+			reader.Read(out user);
+			string psw;
+			reader.Read(out psw);
+			FReturnContext retContext;
+			reader.Read(out retContext);
+			var ret = await ((EngineNS.Plugins.LoginServer.ULoginServer)host).LoginAccount(user, psw, context);
+			using (var writer = EngineNS.IO.TtMemWriter.CreateInstance())
+			{
+				var pkg = new IO.AuxWriter<EngineNS.IO.TtMemWriter>(writer);
+				var pkgHeader = new FPkgHeader();
+				pkgHeader.SetHasReturn(true);
+				pkg.Write(pkgHeader);
+				pkg.Write(retContext);
+				pkg.Write(ret);
+				pkg.CoreWriter.SurePkgHeader();
+				context.NetConnect?.Send(in pkg);
+			}
+		};
+	}
+}
+#endregion//TitanEngine_AutoGen_RPC
+#endif//TitanEngine_AutoGen_RPC

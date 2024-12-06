@@ -1,25 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using NPOI.HSSF.UserModel;
+using NPOI.XSSF.UserModel;
 
 namespace EngineNS.Bricks.DataSet
 {
     public partial class TtDataSet
     {
-        internal HSSFWorkbook mWorkbook;
-        partial void LoadDataSet_Exel(ref bool isOk, RName name, Type objType)
+        internal XSSFWorkbook mWorkbook;
+        partial void LoadDataSet_Exel(ref bool isOk, string name, Type objType)
         {
-            System.IO.FileStream fs = System.IO.File.OpenRead(name.Address);
+            System.IO.FileStream fs = System.IO.File.OpenRead(name);
             if (fs == null)
             {
                 isOk = false;
             }
 
-            var workbook = new NPOI.HSSF.UserModel.HSSFWorkbook(fs);
+            var workbook = new NPOI.XSSF.UserModel.XSSFWorkbook(fs);
             isOk = LoadDataSetFromExcel(workbook, objType);
         }
-        private bool LoadDataSetFromExcel(HSSFWorkbook workbook, Type type)
+        private bool LoadDataSetFromExcel(XSSFWorkbook workbook, Type type)
         {
             var sheetTypes = new List<Type>();
             BinderManager.CollectSheetTypes(type, sheetTypes);
@@ -43,7 +43,7 @@ namespace EngineNS.Bricks.DataSet
         }
         internal void SaveDataSetToExcel(string filepath)
         {
-            HSSFWorkbook workbook = new HSSFWorkbook();
+            var workbook = new XSSFWorkbook();
             foreach (var i in Tables)
             {
                 var sheet = GetSheetSure(workbook, i.Value.Binder.SheetName);
@@ -55,27 +55,27 @@ namespace EngineNS.Bricks.DataSet
             file.Close();
             workbook.Close();
         }
-        protected NPOI.HSSF.UserModel.HSSFSheet GetSheetSure(HSSFWorkbook workbook, string name)
+        protected NPOI.XSSF.UserModel.XSSFSheet GetSheetSure(XSSFWorkbook workbook, string name)
         {
             for (int i = 0; i < workbook.NumberOfSheets; i++)
             {
                 var sheet = workbook.GetSheetAt(i);
                 if (sheet.SheetName == name)
-                    return (NPOI.HSSF.UserModel.HSSFSheet)sheet;
+                    return (NPOI.XSSF.UserModel.XSSFSheet)sheet;
             }
-            return (NPOI.HSSF.UserModel.HSSFSheet)workbook.CreateSheet(name);
+            return (NPOI.XSSF.UserModel.XSSFSheet)workbook.CreateSheet(name);
         }
     }
     public partial class TtTable
     {
-        HSSFSheet mSheet;
+        XSSFSheet mSheet;
         internal bool LoadTableFromExcel(TtDataSet dataSet, string sheetName, Type objType)
         {
-            HSSFWorkbook workbook = dataSet.mWorkbook;
+            XSSFWorkbook workbook = dataSet.mWorkbook;
             Binder = dataSet.BinderManager.GetBinder(objType);
             if (Binder == null)
                 return false;
-            var sheet = (HSSFSheet)workbook.GetSheet(sheetName);
+            var sheet = (XSSFSheet)workbook.GetSheet(sheetName);
             for (int i = 0; i <= sheet.LastRowNum; i++)
             {
                 var row = sheet.GetRow(i);
@@ -83,7 +83,7 @@ namespace EngineNS.Bricks.DataSet
                 {
                     break;
                 }
-                var obj = Rtti.TtTypeDescManager.CreateInstance(objType) as IDataProvider;
+                var obj = Rtti.TtTypeDescManager.CreateInstance(objType) as TtDataProvider;
                 if (obj == null)
                     return false;
 
@@ -107,7 +107,7 @@ namespace EngineNS.Bricks.DataSet
             mSheet = sheet;
             return true;
         }
-        internal void SaveTableToExcel(TtDataSet dataSet, HSSFSheet sheet)
+        internal void SaveTableToExcel(TtDataSet dataSet, XSSFSheet sheet)
         {
             foreach (var i in DataProviders)
             {
@@ -139,7 +139,7 @@ namespace EngineNS.Bricks.DataSet
             }
             return cell;
         }
-        private object CellParse(NPOI.SS.UserModel.ICell cell, Type type, UDataConverter converter)
+        private object CellParse(NPOI.SS.UserModel.ICell cell, Type type, TtDataConverter converter)
         {
             if (type.IsGenericType && type.GetInterface("IList") != null)
             {
@@ -168,7 +168,7 @@ namespace EngineNS.Bricks.DataSet
                 return Support.TConvert.ToObject(type, cell.ToString());
             }
         }
-        private void SetCellValue(object value, NPOI.SS.UserModel.ICell cell, UDataConverter converter)
+        private void SetCellValue(object value, NPOI.SS.UserModel.ICell cell, TtDataConverter converter)
         {
             if (value == null)
             {
@@ -185,7 +185,7 @@ namespace EngineNS.Bricks.DataSet
                     var text = "";
                     foreach(var i in lst)
                     {
-                        var data = i as IDataProvider;
+                        var data = i as TtDataProvider;
                         if (data == null)
                             continue;
                         text += $"{data.RowInSheet},";
@@ -259,7 +259,7 @@ namespace EngineNS.Bricks.DataSet
             }
             else if (type.GetInterface("IDataProvider") != null)
             {
-                var subObj = value as IDataProvider;
+                var subObj = value as TtDataProvider;
                 cell.SetCellValue(subObj.RowInSheet.ToString());
             }
             else

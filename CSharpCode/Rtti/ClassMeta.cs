@@ -58,7 +58,7 @@ namespace EngineNS.Rtti
 
             ManualMarshal = (1 << 8),
 
-            Unserializable = (1 << 9),// 不能序列化
+            NoSerializable = (1 << 9),// 不能序列化
 
             CanRefForMacross = (1 << 11),// Macross代码生成时，可以用ref做传引用，这里有一个潜规则，需要提供对应名为m{PropertyName}的public成员变量
         }
@@ -74,7 +74,7 @@ namespace EngineNS.Rtti
         public bool IsNoMacrossOverride => (Flags & EMetaFlags.NoMacrossOverride) != 0;
         public bool IsMacrossReadOnly => (Flags & EMetaFlags.MacrossReadOnly) != 0;
         //public bool IsMacrossDeclareable => (Flags & EMetaFlags.MacrossDeclareable) != 0;
-        public bool IsUnserializable => (Flags & EMetaFlags.Unserializable) != 0;
+        public bool IsNoSerializable => (Flags & EMetaFlags.NoSerializable) != 0;
         public bool IsCanRefForMacross => (Flags & EMetaFlags.CanRefForMacross) != 0; 
     }
     public class TtClassMeta
@@ -330,7 +330,7 @@ namespace EngineNS.Rtti
             }
             var txtFilepath = EngineNS.IO.TtFileManager.CombinePath(tmpPath, $"typedesc.txt");
             EngineNS.IO.TtFileManager.WriteAllText(txtFilepath, TypeDescText(ClassType.Assembly.Name, ClassType.TypeString));
-            TtEngine.Instance.SourceControlModule.AddFile(txtFilepath);
+            TtEngine.Instance.SourceControlModule.AddFile(txtFilepath, true);
         }
         public static string TypeDescText(string assembly, string typeStr)
         {
@@ -358,7 +358,7 @@ namespace EngineNS.Rtti
                 if (attrs.Length == 1)
                 {
                     var att = attrs[0] as MetaAttribute;
-                    if(!att.IsUnserializable)
+                    if(!att.IsNoSerializable)
                         MetaAttribute = att;
                 }
             }
@@ -373,7 +373,7 @@ namespace EngineNS.Rtti
                 var fd = new TtPropertyMeta();
                 fd.Build(result, TtTypeDesc.TypeOf(i.PropertyType), i.Name, true);
                 Properties.Add(fd);
-                if (!meta.IsUnserializable)
+                if (!meta.IsNoSerializable)
                     result.Propertys.Add(fd);
             }
             result.Propertys.Sort();
@@ -1190,14 +1190,6 @@ namespace EngineNS.Rtti
         }
         Dictionary<Hash64, TtClassMeta> mHashMetas = new Dictionary<Hash64, TtClassMeta>();
 
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-        public UTypeTreeManager TreeManager = new UTypeTreeManager();
-        public string MetaRoot;
-在此之后:
-        public TtTypeTreeManager TreeManager = new UTypeTreeManager();
-        public string MetaRoot;
-*/
         public TtTypeTreeManager TreeManager = new TtTypeTreeManager();
         public string MetaRoot;
         public void LoadMetas(string moduleName = null)
@@ -1213,10 +1205,10 @@ namespace EngineNS.Rtti
                 var services = EngineNS.IO.TtFileManager.GetDirectories(metaRoot, "*.*", false);
                 foreach (var i in services)
                 {
-                    var assemblies = EngineNS.IO.TtFileManager.GetDirectories(i, "*.*", true);
+                    var assemblies = EngineNS.IO.TtFileManager.GetDirectories(i, "*.*", false);
                     foreach (var j in assemblies)
                     {
-                        var kls = EngineNS.IO.TtFileManager.GetDirectories(j, "*.*", false);
+                        var kls = EngineNS.IO.TtFileManager.GetDirectories(j, "*.*", true);
                         foreach (var k in kls)
                         {
                             var tmpPath = EngineNS.IO.TtFileManager.CombinePath(k, $"typedesc.txt");
@@ -1230,14 +1222,11 @@ namespace EngineNS.Rtti
                                 var type = TtTypeDesc.TypeOf(strName);// EngineNS.Rtti.UTypeDescManager.Instance.GetTypeDescFromString(strName);
                                 if (type != null)
                                 {
+                                    var meta = new TtClassMeta(type);
+                                    meta.LoadClass(k);
 
-                                    {
-                                        var meta = new TtClassMeta(type);
-                                        meta.LoadClass(k);
-
-                                        //mMetas.Add(meta.ClassMetaName, meta);
-                                        mMetas[meta.ClassMetaName] = meta;
-                                    }
+                                    //mMetas.Add(meta.ClassMetaName, meta);
+                                    mMetas[meta.ClassMetaName] = meta;
                                 }
                             }   
                         }
@@ -1379,7 +1368,7 @@ namespace EngineNS.Rtti
                 if (EngineNS.IO.TtFileManager.FileExists(txtFilepath) == false)
                 {
                     EngineNS.IO.TtFileManager.WriteAllText(txtFilepath, TtClassMeta.TypeDescText(i.Value.ClassType.Assembly.Name, i.Value.ClassType.TypeString));
-                    TtEngine.Instance.SourceControlModule.AddFile(txtFilepath);
+                    TtEngine.Instance.SourceControlModule.AddFile(txtFilepath, true);
                 }
             }
         }

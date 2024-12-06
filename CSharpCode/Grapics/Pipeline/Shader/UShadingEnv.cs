@@ -1,4 +1,4 @@
-﻿using EngineNS.NxRHI;
+using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -936,3 +936,44 @@ namespace EngineNS
         }
     }
 }
+
+
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.Graphics.Pipeline.Shader
+{
+	partial class TtShadingMacross
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_GetDispatchArg_2479636034 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtShadingMacross->Vector3ui GetDispatchArg(TtMacrossShadingEnv shading)");
+		public unsafe Vector3ui macross_GetDispatchArg (string nodeName, TtMacrossShadingEnv shading) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":shading", shading);
+				}
+			}
+			var _return_value = GetDispatchArg(shading);
+			macross_break_GetDispatchArg_2479636034.TryBreak();
+			return _return_value;
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_CSMacrossShaderMain_2479636034 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.Shader.TtShadingMacross->void CSMacrossShaderMain(TtMacrossShadingEnv shading)");
+		public unsafe void macross_CSMacrossShaderMain (string nodeName, TtMacrossShadingEnv shading) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":shading", shading);
+				}
+			}
+			CSMacrossShaderMain(shading);
+			macross_break_CSMacrossShaderMain_2479636034.TryBreak();
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

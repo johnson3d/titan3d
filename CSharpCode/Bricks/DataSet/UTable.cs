@@ -5,28 +5,20 @@ using System.Text;
 namespace EngineNS.Bricks.DataSet
 {
     
-    public partial class TtTable
+    public partial class TtTable : IO.BaseSerializer
     {
-        public UDataProviderBinder Binder;
-        private List<IDataProvider> DataProviders { get; } = new List<IDataProvider>();
+        public TtDataProviderBinder Binder;
+        [Rtti.Meta]
+        private List<TtDataProvider> DataProviders { get; set; } = new List<TtDataProvider>();
         public int Count
         {
             get { return DataProviders.Count; }
         }
-        public IDataProvider GetData(int index)
+        public TtDataProvider GetData(int index)
         {
             if (index < 0 || index >= DataProviders.Count)
                 return null;
             return DataProviders[index];
-        }
-        public IDataProvider FindData(object key)
-        {
-            foreach (var i in DataProviders)
-            {
-                if (i.DataKey == key)
-                    return i;
-            }
-            return null;
         }
         partial void GetCellText(int row, int col, ref string outText);
         public void CheckSheetLinks(TtDataSet dataSet, int index)

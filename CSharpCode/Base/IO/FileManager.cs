@@ -158,6 +158,21 @@ namespace EngineNS.IO
                 CreateDirectory(path);
             }
         }
+        public static System.Security.Cryptography.MD5 GetMD5HashFromFile(string fileName)
+        {
+            try
+            {
+                var file = new System.IO.FileStream(fileName, System.IO.FileMode.Open);
+                System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
+                byte[] retVal = md5.ComputeHash(file);
+                file.Close();
+                return md5;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("GetMD5HashFromFile() fail,error:" + ex.Message);
+            }
+        }
         public static System.IO.DirectoryInfo CreateDirectory(string path)
         {
             return System.IO.Directory.CreateDirectory(path);

@@ -10,5 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Assembly.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameMode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Weapon.cs" />
   </ItemGroup>
 </Project>
