@@ -459,58 +459,12 @@ namespace EngineNS.IO
         }
         public static string SaveObjectToJson(object obj)
         {
-            var options = new JsonSerializerOptions
-            {
-                TypeInfoResolver = new DefaultJsonTypeInfoResolver
-                {
-                    Modifiers =
-                    {
-                        static typeInfo =>
-                        {
-                            if (typeInfo.Kind != JsonTypeInfoKind.Object)
-                                return;
-
-                            foreach (JsonPropertyInfo propertyInfo in typeInfo.Properties)
-                            {
-                                var prop = typeInfo.Type.GetProperty(propertyInfo.Name);
-                                if(prop!=null || prop.GetCustomAttributes<Rtti.MetaAttribute>(false)==null)
-                                {
-                                    propertyInfo.IsRequired = false;
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-            string jsonString = JsonSerializer.Serialize(obj, options);
+            string jsonString = JsonSerializer.Serialize(obj, TtJsonOptions.Options);
             return jsonString;
         }
         public static T LoadObjectFromJson<T>(string jsonStr)
         {
-            var options = new JsonSerializerOptions
-            {
-                TypeInfoResolver = new DefaultJsonTypeInfoResolver
-                {
-                    Modifiers =
-                    {
-                        static typeInfo =>
-                        {
-                            if (typeInfo.Kind != JsonTypeInfoKind.Object)
-                                return;
-
-                            foreach (JsonPropertyInfo propertyInfo in typeInfo.Properties)
-                            {
-                                var prop = typeInfo.Type.GetProperty(propertyInfo.Name);
-                                if(prop!=null || prop.GetCustomAttributes<Rtti.MetaAttribute>(false)==null)
-                                {
-                                    propertyInfo.IsRequired = false;
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-            return JsonSerializer.Deserialize<T>(jsonStr, options);
+            return JsonSerializer.Deserialize<T>(jsonStr, TtJsonOptions.Options);
         }
         #endregion
     }

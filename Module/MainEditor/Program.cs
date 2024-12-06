@@ -161,7 +161,7 @@ namespace MainEditor
             Console.WriteLine($"Config={cfg}");
 
             var task = EngineNS.TtEngine.StartEngine(new EngineNS.TtEngine(args), cfg);
-
+            
             while (true)
             {
                 if (EngineNS.TtEngine.Instance.Tick() == false)

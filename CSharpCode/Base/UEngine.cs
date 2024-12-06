@@ -47,7 +47,16 @@ namespace EngineNS
         public const int MiniVersion = 4;
         public void SaveConfig(string sltFile)
         {
-            IO.TtFileManager.SaveObjectToXml(sltFile, this);
+            bool bJson = IO.TtFileManager.GetExtName(sltFile) == ".jscfg";
+            if (bJson)
+            {
+                var text = IO.TtFileManager.SaveObjectToJson(this);
+                IO.TtFileManager.WriteAllText(sltFile, text);
+            }
+            else
+            {
+                IO.TtFileManager.SaveObjectToXml(sltFile, this);
+            }
         }
         [Rtti.Meta]
         [Category("Option")]
@@ -328,7 +337,15 @@ namespace EngineNS
                 cfgFile = FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) + "EngineConfig.cfg";
             Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Load Application Config:{cfgFile}");
 
-            Config = IO.TtFileManager.LoadXmlToObject<TtEngineConfig>(cfgFile);
+            if (IO.TtFileManager.GetExtName(cfgFile) == ".cfg")
+            {
+                Config = IO.TtFileManager.LoadXmlToObject<TtEngineConfig>(cfgFile);
+            }
+            else if (IO.TtFileManager.GetExtName(cfgFile) == ".jscfg")
+            {
+                var jsCode = IO.TtFileManager.ReadAllText(cfgFile);
+                Config = IO.TtFileManager.LoadObjectFromJson<TtEngineConfig>(jsCode);
+            }
 
             {
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Collect Type Info:{(t2 - t1) / 1000} ms");

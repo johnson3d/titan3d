@@ -14,14 +14,11 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)content\AloneGame.cfg" />
-    <None Include="$(MSBuildThisFileDirectory)content\AloneGameForGL.cfg" />
-    <None Include="$(MSBuildThisFileDirectory)content\EngineConfig.cfg" />
-    <None Include="$(MSBuildThisFileDirectory)content\EngineConfigForCook.cfg" />
-    <None Include="$(MSBuildThisFileDirectory)content\EngineConfigForDX12.cfg" />
-    <None Include="$(MSBuildThisFileDirectory)content\EngineConfigForGL.cfg" />
-    <None Include="$(MSBuildThisFileDirectory)content\EngineConfigForRootServer.cfg" />
-    <None Include="$(MSBuildThisFileDirectory)content\EngineConfigForVK.cfg" />
-    <None Include="$(MSBuildThisFileDirectory)content\SlateApp.cfg" />
+    <None Include="$(MSBuildThisFileDirectory)content\alonegame.jscfg" />
+    <None Include="$(MSBuildThisFileDirectory)content\engineconfigdx11.jscfg" />
+    <None Include="$(MSBuildThisFileDirectory)content\engineconfigdx12.jscfg" />
+    <None Include="$(MSBuildThisFileDirectory)content\engineconfigforcook.jscfg" />
+    <None Include="$(MSBuildThisFileDirectory)content\engineconfigforrootserver.jscfg" />
+    <None Include="$(MSBuildThisFileDirectory)content\engineconfigvk.jscfg" />
   </ItemGroup>
 </Project>

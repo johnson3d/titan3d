@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>bf1bc4d1-fa0a-45a3-8e61-8d929cebec5a</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup DisplayName="Configuration">
+    <Import_RootNamespace>MacrossGenCSharp</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/utest/scenenodetest.macross/scenenodetest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/utest/test.scene/test.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/utest/test_game01.macross/test_game01.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/project_factory/belica/animdmc_belica.designmacross/animdmc_belica.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/character/charactertest.scene/charactertest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/character/charactertestgame.macross/charactertestgame.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/helloword/hello.ui/hello.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/helloword/helloword.macross/helloword.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/material/test_material.macross/test_material.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/mc_cmd/do_assets.macross/do_assets.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/particles/test01_move.macross/test01_move.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/particles/testemitter.macross/testemitter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/physics/physicstest.scene/physicstest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/physics/physicstestgame.macross/physicstestgame.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/renderpolicy/test_rpolicy.macross/test_rpolicy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/statemachine/smtest.designmacross/smtest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/viewinstance/game01.macross/game01.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/utest/pgc/terraingen.macross/terraingen.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/utest/pgc/testprog.macross/testprog.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/survivor/maps/firstlevel/mc_firstlevel.macross/mc_firstlevel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/survivor/maps/firstlevel/scene_firstlevel.scene/scene_firstlevel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/survivor/skills/singlebullet/dmc_skill_bullet.designmacross/dmc_skill_bullet.cs" />
+  </ItemGroup>
+</Project>

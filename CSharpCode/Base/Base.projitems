@@ -14,6 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Command.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\DynConfigData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\IStreaming.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\JsonOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\UAssetOperator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\IAssemblyLoader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Macross\UMacrossAttribute.cs" />
