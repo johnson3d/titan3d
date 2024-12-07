@@ -261,12 +261,12 @@ namespace EngineNS.GamePlay.Scene
 
             SaveChildNode(this, xnd.mCoreObject, node.mCoreObject);
 
+            if(IO.TtFileManager.FileExists(name.Address))
+                IO.TtFileManager.DeleteFile(name.Address);
+
             var file = name.Address + "/" + name.PureName + AssetExt;
             xndHolder.SaveXnd(file);
             TtEngine.Instance.SourceControlModule.AddFile(file, true);
-
-            if(IO.TtFileManager.FileExists(name.Address))
-                IO.TtFileManager.DeleteFile(name.Address);
 
             // Macross
             MacrossEditor.AssetName = name;

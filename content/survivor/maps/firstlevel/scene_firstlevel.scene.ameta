@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.GamePlay.Scene.TtSceneAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="026bb84c-e29f-45bc-9403-3707321fb9f5" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,survivor/maps/firstlevel/scene_firstlevel.scene,026bb84c-e29f-45bc-9403-3707321fb9f5" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.GamePlay.Scene.TtScene&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
+    <e_0 Value="Engine,mesh/base/box_1.ums,b91bb4f4-7d54-4ba5-8342-a0767ec2e0ac" />
+    <e_1 Value="Engine,mesh/base/arrow.ums,bde20485-8731-4e02-8385-64a59160da62" />
+    <e_2 Value="Engine,material/gridline.material,fe431749-ed31-45b1-93d8-34462bd00922" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.GamePlay.Scene.TtScene@EngineCore" />
+</Root>

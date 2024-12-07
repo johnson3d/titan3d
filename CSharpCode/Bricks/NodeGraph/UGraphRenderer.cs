@@ -866,7 +866,7 @@ namespace EngineNS.Bricks.NodeGraph
                                 for (var childIdx = 0; childIdx < mGraph.PinMenus.SubMenuItems.Count; childIdx++)
                                     TtMenuItem.Draw(mGraph.PinMenus.SubMenuItems[childIdx], this, mGraph.PopMenuPressObject, "".ToLower(), in cmdList, ref mSelectQuickMenuIdx, ref mCurrentQuickMenuIdx, MenuPostAction, TtMenuItem.EMenuStyle.Menu);
                                 var pressPin = mGraph.PopMenuPressObject as NodePin;
-                                if (pressPin != null)
+                                if (pressPin != null && pressPin.HostNode != null)
                                 {
                                     pressPin.HostNode.OnShowPinMenu(pressPin);
                                 }

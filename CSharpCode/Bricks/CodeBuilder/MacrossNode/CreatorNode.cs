@@ -87,7 +87,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
-            if (pin != null && pin != OutPin)
+            if (pin != BeforeExec && pin != null)
                 return;
             TtTypeDesc resultType = TargetType;
             if(TypePin.HasLinker())

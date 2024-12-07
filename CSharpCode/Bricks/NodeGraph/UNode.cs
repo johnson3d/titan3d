@@ -703,6 +703,14 @@ namespace EngineNS.Bricks.NodeGraph
         {
             OnAfterDrawAction?.Invoke(this, styles, cmdlist);
         }
+        public virtual void RegPinContextMenus(NodePin pin, List<TtMenuItem> menus)
+        {
+
+        }
+        public virtual void UnregPinContextMenus(NodePin pin, List<TtMenuItem> menus)
+        {
+
+        }
         public Action<TtNodeBase, NodePin> OnShowPinMenuAction;
         public virtual void OnShowPinMenu(NodePin pin)
         {

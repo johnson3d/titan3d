@@ -226,29 +226,31 @@ namespace EngineNS.Bricks.DataSet
             {
                 bool bSaveXnd = false;
                 XlsMd5 = IO.TtFileManager.GetMD5HashFromFile(name.Address + ".xlsx").Hash;
-                var xnd = IO.TtXndHolder.LoadXnd(name.Address);
-                if (xnd != null)
+                using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
                 {
-                    var attr = xnd.RootNode.TryGetAttribute("Desc");
-                    if (attr.IsValidPointer)
+                    if (xnd != null)
                     {
-                        using (var ar = attr.GetReader(attr))
+                        var attr = xnd.RootNode.TryGetAttribute("Desc");
+                        if (attr.IsValidPointer)
                         {
-                            byte[] hash;
-                            ar.Read(out hash);
-                            if (IsEqual(hash, XlsMd5))
+                            using (var ar = attr.GetReader(attr))
                             {
-                                LoadDataSetFromXnd(xnd.RootNode);
-                                return true;
+                                byte[] hash;
+                                ar.Read(out hash);
+                                if (IsEqual(hash, XlsMd5))
+                                {
+                                    LoadDataSetFromXnd(xnd.RootNode);
+                                    return true;
+                                }
                             }
                         }
+                        bSaveXnd = true;
                     }
-                    bSaveXnd = true;
-                }
-                else
-                {
-                    bSaveXnd = true;
-                }
+                    else
+                    {
+                        bSaveXnd = true;
+                    }
+                }   
                 bool isOk = false;
                 LoadDataSet_Exel(ref isOk, name.Address + ".xlsx", objType);
                 if (isOk)

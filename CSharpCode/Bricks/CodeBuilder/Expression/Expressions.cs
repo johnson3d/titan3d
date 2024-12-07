@@ -1206,7 +1206,7 @@ namespace EngineNS.Bricks.CodeBuilder
         }
         public Rtti.TtTypeDesc TryGetTypeDesc()
         {
-            return Rtti.TtTypeDescManager.Instance.GetTypeDescFromFullName(GetFullName());
+            return Rtti.TtTypeDesc.TypeOfFullName(GetFullName());
         }
         public void Reset()
         {

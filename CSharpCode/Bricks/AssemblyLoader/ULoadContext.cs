@@ -486,7 +486,7 @@ namespace EngineNS
 
 namespace EngineNS.Macross
 {
-    public class UMacrosAssemblyLoader : IAssemblyLoader
+    public class TtMacrosAssemblyLoader //: IAssemblyLoader
     {
         Bricks.AssemblyLoader.TtLoadContext Loader = null;
         public List<string> IncludeAssemblies { get; } = new List<string>();
@@ -528,6 +528,7 @@ namespace EngineNS.Macross
         }
         public void TryUnload()
         {
+            IncludeAssemblies.Clear();
             if (Loader != null)
             {
                 Loader.Unload();
@@ -541,9 +542,9 @@ namespace EngineNS.Macross
     }
     public partial class TtMacrossModule
     {
-        partial void CreateAssemblyLoader(ref IAssemblyLoader loader)
+        public void CreateAssemblyLoader(ref TtMacrosAssemblyLoader loader)
         {
-            loader = new UMacrosAssemblyLoader();
+            loader = new TtMacrosAssemblyLoader();
         }
     }
 }

@@ -122,7 +122,7 @@ namespace EngineNS.Macross
     public partial class TtMacrossModule : TtModule<TtEngine>
     {
         WeakReference mAssembly;
-        private IAssemblyLoader mAssemblyLoader;
+        private TtMacrosAssemblyLoader mAssemblyLoader;
         private Rtti.TtAssemblyDesc mAssemblyDesc;
         public uint Version = 1;
         public T NewInnerObject<T>(RName name) where T : class
@@ -134,7 +134,6 @@ namespace EngineNS.Macross
             return mAssemblyDesc.CreateInstance(name) as T;
         }
         public List<WeakReference<TtMacrossGetterBase>> mGetters = new List<WeakReference<TtMacrossGetterBase>>();
-        partial void CreateAssemblyLoader(ref IAssemblyLoader loader);
         partial void TryCompileCode(string assemblyFile, ref bool success);
         public void ReloadAssembly(string assemblyPath)
         {
@@ -149,8 +148,7 @@ namespace EngineNS.Macross
                 }
                 
                 Rtti.TtClassMetaManager.Instance.ResetSystemRef();
-                //TtEngine.Instance.MacrossModule.ResetGetterReferences();
-                WeakReference oldWeakRef = TtEngine.Instance.MacrossModule.ReloadAssemblyImpl(assemblyPath);
+                WeakReference oldWeakRef = this.ReloadAssemblyImpl(assemblyPath);
 
                 if (oldWeakRef != null)
                 {
@@ -179,9 +177,10 @@ namespace EngineNS.Macross
 
             }
         }
+        int CurrentVersion = 0;
         private WeakReference ReloadAssemblyImpl(string assemblyPath)
         {
-            IAssemblyLoader loader = null;
+            TtMacrosAssemblyLoader loader = null;
             CreateAssemblyLoader(ref loader);
             if (loader == null)
                 return null;
@@ -192,7 +191,9 @@ namespace EngineNS.Macross
 
             Rtti.TtTypeDescManager.ServiceManager manager;
             Rtti.TtAssemblyDesc desc;
-            if (Rtti.TtTypeDescManager.Instance.RegAssembly(newAssembly, out manager, out desc))
+            var isReplace = Rtti.TtTypeDescManager.Instance.RegAssembly(newAssembly, out manager, out desc);
+            desc.Version = CurrentVersion++;
+            if (isReplace)
             {
                 List<Type> removed = new List<Type>();
                 List<Type> changed = new List<Type>();

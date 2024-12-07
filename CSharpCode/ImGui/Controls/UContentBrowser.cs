@@ -206,10 +206,9 @@ namespace EngineNS.EGui.Controls
                 if (MacrossBase != null && ext == Bricks.CodeBuilder.TtMacross.AssetExt)
                 {
                     var ameta1 = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.GetRName(dir.Name + name, dir.RNameType)) as Bricks.CodeBuilder.TtMacrossAMeta;
-                    if (ameta1 == null)
+                    if (ameta1 == null || ameta1.BaseType == null)
                         return false;
-
-                    if (ameta1.BaseTypeStr != MacrossBase.TypeString)
+                    if (!ameta1.BaseType.IsSubclassOf(MacrossBase) && ameta1.BaseType != MacrossBase)
                     {
                         return false;
                     }

@@ -12,10 +12,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         [Rtti.Meta]
         public int SequenceCount 
         {
-            get => Outputs.Count;
+            get => Sequences.Count;
             set
             {
-                int nSaveCount = Outputs.Count;
+                int nSaveCount = Sequences.Count;
                 if (nSaveCount == value)
                 {
                     return;
@@ -40,6 +40,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         [Browsable(false)]
         public PinIn BeforeExec { get; set; } = new PinIn();
 
+        TtMenuItem mAddPinMenu;
+        TtMenuItem mDelPinMenu;
+
         public SequenceNode()
         {
             Name = "Sequence";
@@ -55,6 +58,45 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             BeforeExec.LinkDesc = MacrossStyles.Instance.NewExecPinDesc();
             AddPinIn(BeforeExec);
             AddPinOut(FirstPin);
+
+            mAddPinMenu = new TtMenuItem()
+            {
+                Text = "AddPin",
+                TextForFilter = "AddPin",
+                Action = (item, sender) =>
+                {
+                    AddSequencePin();
+                    SequenceCount = Sequences.Count;
+                    OnPositionChanged();
+                }
+            };
+            mDelPinMenu = new TtMenuItem()
+            {
+                Text = "DeletePin",
+                TextForFilter = "DeletePin",
+                Action = (item, sender) =>
+                {
+                    var addedPin = sender as PinOut;
+                    if (addedPin == null)
+                        return;
+                    if (Sequences.Contains(addedPin))
+                    {
+                        ParentGraph.RemoveLinkedOut(addedPin);
+                        RemovePinOut(addedPin);
+                        Sequences.Remove(addedPin);
+                        SequenceCount = Sequences.Count;
+
+                        //ParentGraph.mMenuShowPin = null;
+                        //ParentGraph.mMenuType = EGui.Controls.NodeGraph.NodeGraph.EMenuType.None;
+
+                        for (int i = 0; i < Sequences.Count; i++)
+                        {
+                            Sequences[i].Name = $"Pin{i + 1}";
+                        }
+                        OnPositionChanged();
+                    }
+                }
+            };
         }
         [Browsable(false)]
         public PinOut FirstPin { get; set; } = new PinOut();
@@ -89,35 +131,20 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Sequences.RemoveAt(Sequences.Count - 1);
             RemovePinOut(t);
         }
-        public override void OnShowPinMenu(NodePin pin)
+        public override void RegPinContextMenus(NodePin pin, List<TtMenuItem> menus)
         {
-            if(ImGuiAPI.MenuItem("AddPin", null, false, true))
+            if(!menus.Contains(mAddPinMenu))
+                menus.Add(mAddPinMenu);
+            if (pin != FirstPin && pin != BeforeExec)
             {
-                AddSequencePin();
-                SequenceCount = Sequences.Count;
-                OnPositionChanged();
+                if(!menus.Contains(mDelPinMenu))
+                    menus.Add(mDelPinMenu);
             }
-            if(pin != FirstPin && pin != BeforeExec)
-            {
-                if (ImGuiAPI.MenuItem($"DeletePin", null, false, true))
-                {
-                    var addedPin = pin as PinOut;
-                    if (Sequences.Contains(addedPin))
-                    {
-                        ParentGraph.RemoveLinkedOut(addedPin);
-                        RemovePinOut(addedPin);
-                        Sequences.Remove(addedPin);
-
-                        //ParentGraph.mMenuShowPin = null;
-                        //ParentGraph.mMenuType = EGui.Controls.NodeGraph.NodeGraph.EMenuType.None;
-
-                        for (int i = 0; i < Sequences.Count; i++)
-                        {
-                            Sequences[i].Name = $"Pin{i}";
-                        }
-                    }
-                }
-            }
+        }
+        public override void UnregPinContextMenus(NodePin pin, List<TtMenuItem> menus)
+        {
+            menus.Remove(mAddPinMenu);
+            menus.Remove(mDelPinMenu);
         }
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
         {
@@ -222,6 +249,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
         }
 
+        TtMenuItem mAddConditionMenu;
+        TtMenuItem mDelPinMenu;
+
         public IfNode()
         {
             Name = "If";
@@ -252,6 +282,39 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             //AddPinIn(ConditionPin);
             //AddPinOut(TruePin);
             AddPinOut(FalsePin);
+
+            mAddConditionMenu = new TtMenuItem()
+            {
+                Text = "AddCondition",
+                TextForFilter = "AddCondition",
+                Action = (item, sender) =>
+                {
+                    AddConditionResultPair();
+                    mConditionCount = ConditionResultPairs.Count;
+                    OnPositionChanged();
+                }
+            };
+            mDelPinMenu = new TtMenuItem()
+            {
+                Text = "DeletePin",
+                TextForFilter = "DeletePin",
+                Action = (item, sender) =>
+                {
+                    var pin = sender as NodePin;
+                    for (int i = 1; i < ConditionResultPairs.Count; i++)
+                    {
+                        if (pin == ConditionResultPairs[i].Key)
+                        {
+                            ParentGraph.RemoveLinkedOut(ConditionResultPairs[i].Value);
+                            ParentGraph.RemoveLinkedIn(ConditionResultPairs[i].Key);
+                            RemovePinIn(ConditionResultPairs[i].Key);
+                            RemovePinOut(ConditionResultPairs[i].Value);
+                            ConditionResultPairs.RemoveAt(i);
+                            break;
+                        }
+                    }
+                }
+            };
         }
         void AddConditionResultPair()
         {
@@ -294,32 +357,20 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return true;
         }
 
-        public override void OnShowPinMenu(NodePin pin)
+        public override void RegPinContextMenus(NodePin pin, List<TtMenuItem> menus)
         {
-            if(ImGuiAPI.MenuItem("AddCondition", null, false, true))
-            {
-                AddConditionResultPair();
-                mConditionCount = ConditionResultPairs.Count;
-                OnPositionChanged();
-            }
+            if(!menus.Contains(mAddConditionMenu))
+                menus.Add(mAddConditionMenu);
             if(pin != FalsePin && pin != BeforeExec && pin != AfterExec && pin != ConditionResultPairs[0].Key)
             {
-                if(ImGuiAPI.MenuItem("DeletePin", null, false, true))
-                {
-                    for(int i=1; i<ConditionResultPairs.Count; i++)
-                    {
-                        if(pin == ConditionResultPairs[i].Key)
-                        {
-                            ParentGraph.RemoveLinkedOut(ConditionResultPairs[i].Value);
-                            ParentGraph.RemoveLinkedIn(ConditionResultPairs[i].Key);
-                            RemovePinIn(ConditionResultPairs[i].Key);
-                            RemovePinOut(ConditionResultPairs[i].Value);
-                            ConditionResultPairs.RemoveAt(i);
-                            break;
-                        }
-                    }
-                }
+                if(!menus.Contains(mDelPinMenu))
+                    menus.Add(mDelPinMenu);
             }
+        }
+        public override void UnregPinContextMenus(NodePin pin, List<TtMenuItem> menus)
+        {
+            menus.Remove(mAddConditionMenu);
+            menus.Remove(mDelPinMenu);
         }
 
         public override void OnMouseStayPin(NodePin stayPin, TtNodeGraph graph)

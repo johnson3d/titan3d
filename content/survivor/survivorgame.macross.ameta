@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root Type="EngineNS.Bricks.CodeBuilder.TtMacrossAMeta@EngineCore">
+  <AssetId Type="System.Guid@Unknown" Value="a00a9f95-1be2-4899-a745-80d2fa28e48a" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,survivor/survivorgame.macross,a00a9f95-1be2-4899-a745-80d2fa28e48a" />
+  <BaseTypeStr Type="System.String@Unknown" Value="Survivor.TtMacrossSurvivorGame@Survivor" />
+  <Description Type="System.String@Unknown" Value="MacrossType:Survivor.TtMacrossSurvivorGame@Survivor&#xA;" />
+  <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
+    <Color Type="System.UInt32@Unknown" Value="4294967295" />
+    <Duration Type="System.Single@Unknown" Value="1000" />
+    <FrameUVs Type="System.Collections.Generic.List&lt;EngineNS.Vector4@EngineCore,&gt;@Unknown" Count="1">
+      <e_0 Value="0,0,1,1" />
+    </FrameUVs>
+    <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
+  </Icon>
+  <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="3">
+    <e_0 Value="Game,survivor/maps/firstlevel/scene_firstlevel.scene,026bb84c-e29f-45bc-9403-3707321fb9f5" />
+    <e_1 Value="Game,survivor/player/prefab_hero.prefab,3b6deec1-5c38-4acd-831a-39380906f978" />
+    <e_2 Value="Game,survivor/skills/weapon.dataset,d0af2b15-19aa-48a8-96f6-55b92a19533c" />
+  </RefAssetRNames>
+  <TypeStr Type="System.String@Unknown" Value="EngineNS.Bricks.CodeBuilder.TtMacross@EngineCore" />
+</Root>

@@ -54,6 +54,18 @@ namespace EngineNS.Bricks.CodeBuilder
         }
         [Rtti.Meta]
         public string BaseTypeStr { get; set; }
+        Rtti.TtTypeDesc mBaseType;
+        public Rtti.TtTypeDesc BaseType
+        {
+            get
+            {
+                if (mBaseType == null)
+                {
+                    mBaseType = Rtti.TtTypeDesc.TypeOf(BaseTypeStr);
+                }
+                return mBaseType;
+            }
+        }
         public override string GetAssetTypeName()
         {
             return "Macross";

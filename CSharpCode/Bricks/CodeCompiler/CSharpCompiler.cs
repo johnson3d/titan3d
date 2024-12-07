@@ -27,87 +27,94 @@ namespace EngineNS.CodeCompiler
 
         public static bool CompilerCSharpCodes(string[] cshaprFiles, string[] refAssemblyFiles, string[] preprocessorSymbols, string outputFile, string pdbFile, CSharpCompilationOptions option)
         {
-            var syntaxTrees = new SyntaxTree[cshaprFiles.Length];
-            for (int i = 0; i < cshaprFiles.Length; i++)
+            try
             {
-                var fileContent = System.IO.File.ReadAllText(cshaprFiles[i], Encoding.UTF8);
-                syntaxTrees[i] = CSharpSyntaxTree.ParseText(fileContent, 
-                    options: new CSharpParseOptions().WithPreprocessorSymbols(preprocessorSymbols), 
-                    path: cshaprFiles[i],
-                    encoding: Encoding.UTF8);
-            }
-
-            // base reference
-            var metaRefs = new PortableExecutableReference[refAssemblyFiles.Length + mBaseAssemblys.Length];
-            var baseAssembDir = IO.TtFileManager.GetBaseDirectory(typeof(object).Assembly.Location);
-            for(int i=0; i<mBaseAssemblys.Length; i++)
-            {
-                metaRefs[i] = MetadataReference.CreateFromFile(baseAssembDir + mBaseAssemblys[i]);
-            }
-            // reference assemblies
-            for (int i = 0; i < refAssemblyFiles.Length; i++)
-            {
-                metaRefs[i + mBaseAssemblys.Length] = MetadataReference.CreateFromFile(refAssemblyFiles[i]);
-            }
-
-            var name = IO.TtFileManager.GetPureName(outputFile);
-            var compilation = CSharpCompilation.Create(name, syntaxTrees, metaRefs, option);
-            var generatorDriver = CSharpGeneratorDriver.Create(new CompilingGenerator.BindingCodeGenerator());
-            generatorDriver.RunGeneratorsAndUpdateCompilation(compilation, out var updateCompilation, out var diagnostics);
-            bool retValue = true;
-            using (var outStream = new MemoryStream())
-            using (var pdbStream = new MemoryStream())
-            {
-                var emitOptions = new EmitOptions(false);
-                if (option.OptimizationLevel == OptimizationLevel.Debug)
+                var syntaxTrees = new SyntaxTree[cshaprFiles.Length];
+                for (int i = 0; i < cshaprFiles.Length; i++)
                 {
-                    if (string.IsNullOrEmpty(pdbFile))
-                        pdbFile = System.IO.Path.ChangeExtension(outputFile, "tpdb");
-                    emitOptions = emitOptions.WithDebugInformationFormat(DebugInformationFormat.PortablePdb).WithPdbFilePath(pdbFile);
+                    var fileContent = System.IO.File.ReadAllText(cshaprFiles[i], Encoding.UTF8);
+                    syntaxTrees[i] = CSharpSyntaxTree.ParseText(fileContent,
+                        options: new CSharpParseOptions().WithPreprocessorSymbols(preprocessorSymbols),
+                        path: cshaprFiles[i],
+                        encoding: Encoding.UTF8);
                 }
 
-                var emitResult = updateCompilation.Emit(outStream, pdbStream, null, null, null, emitOptions);
-                if (emitResult.Success)
+                // base reference
+                var metaRefs = new PortableExecutableReference[refAssemblyFiles.Length + mBaseAssemblys.Length];
+                var baseAssembDir = IO.TtFileManager.GetBaseDirectory(typeof(object).Assembly.Location);
+                for (int i = 0; i < mBaseAssemblys.Length; i++)
                 {
-                    retValue = true;
-                    using (var fs = new FileStream(outputFile, FileMode.Create))
+                    metaRefs[i] = MetadataReference.CreateFromFile(baseAssembDir + mBaseAssemblys[i]);
+                }
+                // reference assemblies
+                for (int i = 0; i < refAssemblyFiles.Length; i++)
+                {
+                    metaRefs[i + mBaseAssemblys.Length] = MetadataReference.CreateFromFile(refAssemblyFiles[i]);
+                }
+
+                var name = IO.TtFileManager.GetPureName(outputFile);
+                var compilation = CSharpCompilation.Create(name, syntaxTrees, metaRefs, option);
+                var generatorDriver = CSharpGeneratorDriver.Create(new CompilingGenerator.BindingCodeGenerator());
+                generatorDriver.RunGeneratorsAndUpdateCompilation(compilation, out var updateCompilation, out var diagnostics);
+                bool retValue = true;
+                using (var outStream = new MemoryStream())
+                using (var pdbStream = new MemoryStream())
+                {
+                    var emitOptions = new EmitOptions(false);
+                    if (option.OptimizationLevel == OptimizationLevel.Debug)
                     {
-                        fs.Write(outStream.ToArray());
+                        if (string.IsNullOrEmpty(pdbFile))
+                            pdbFile = System.IO.Path.ChangeExtension(outputFile, "tpdb");
+                        emitOptions = emitOptions.WithDebugInformationFormat(DebugInformationFormat.PortablePdb).WithPdbFilePath(pdbFile);
                     }
-                    if(option.OptimizationLevel == OptimizationLevel.Debug)
+
+                    var emitResult = updateCompilation.Emit(outStream, pdbStream, null, null, null, emitOptions);
+                    if (emitResult.Success)
                     {
-                        try
+                        retValue = true;
+                        using (var fs = new FileStream(outputFile, FileMode.Create))
                         {
-                            if (IO.TtFileManager.FileExists(pdbFile))
-                                IO.TtFileManager.DeleteFile(pdbFile);
-                            using (var fs = new FileStream(pdbFile, FileMode.Create))
+                            fs.Write(outStream.ToArray());
+                        }
+                        if (option.OptimizationLevel == OptimizationLevel.Debug)
+                        {
+                            try
                             {
-                                fs.Write(pdbStream.ToArray());
+                                if (IO.TtFileManager.FileExists(pdbFile))
+                                    IO.TtFileManager.DeleteFile(pdbFile);
+                                using (var fs = new FileStream(pdbFile, FileMode.Create))
+                                {
+                                    fs.Write(pdbStream.ToArray());
+                                }
+                            }
+                            catch (System.Exception ex)
+                            {
+                                Log.WriteException(ex);
                             }
                         }
-                        catch(System.Exception ex)
+                        System.Diagnostics.Debug.WriteLine("Macross build success");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("Macross build failed");
+                        foreach (var i in emitResult.Diagnostics)
                         {
-                            Log.WriteException(ex);
+                            System.Diagnostics.Debug.WriteLine(i.ToString());
                         }
+                        foreach (var i in emitResult.Diagnostics)
+                        {
+                            Console.WriteLine(i.ToString());
+                        }
+                        retValue = false;
                     }
-                    System.Diagnostics.Debug.WriteLine("Macross build success");
                 }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("Macross build failed");
-                    foreach (var i in emitResult.Diagnostics)
-                    {
-                        System.Diagnostics.Debug.WriteLine(i.ToString());
-                    }
-                    foreach (var i in emitResult.Diagnostics)
-                    {
-                        Console.WriteLine(i.ToString());
-                    }
-                    retValue = false;
-                }
+                return retValue;
             }
-
-            return retValue;
+            catch (Exception ex)
+            {
+                Log.WriteException(ex);
+                return false;
+            }
         }
 
         public enum enCommandType

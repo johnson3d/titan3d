@@ -24,6 +24,7 @@ namespace EngineNS.Rtti
         {
             NumOfInstance--;
         }
+        public int Version = 0;
         public virtual string Name { get; }
         public virtual string Service { get; }
         public virtual bool IsGameModule { get; }

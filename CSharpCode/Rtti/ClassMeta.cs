@@ -260,6 +260,14 @@ namespace EngineNS.Rtti
         }
         public void ResetSystemRef()
         {
+            foreach (var i in Methods)
+            {
+                
+            }
+            foreach (var i in Properties)
+            {
+                i.ResetSystemRef();
+            }
             foreach (var i in MetaVersions)
             {
                 i.Value.ResetSystemRef();
@@ -911,7 +919,7 @@ namespace EngineNS.Rtti
                 {
                     Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Property {mHostType}.{name}'s type is not match: {propType}!={info.PropertyType}");
                 }
-                mPropInfoRef = info;
+                //mPropInfoRef = info; dont set it this time
                 mHostType = metaVersion.HostClass.ClassType;
                 mFieldType = TtTypeDesc.TypeOf(info.PropertyType);// propType;
 
@@ -1352,6 +1360,11 @@ namespace EngineNS.Rtti
             {
                 i.Value.ResetSystemRef();
             }
+            foreach (var i in mHashMetas)
+            {
+                i.Value.ResetSystemRef();
+            }
+            
         }
         public void ForceSaveAll()
         {

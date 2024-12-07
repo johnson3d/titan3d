@@ -877,6 +877,14 @@ namespace EngineNS.Bricks.NodeGraph
                         PopMenuPressObject = null;
                     }
                 });
+            if (PopMenuPressObject != null)
+            {
+                var pin = PopMenuPressObject as NodePin;
+                if (pin != null)
+                {
+                    pin.HostNode.RegPinContextMenus(pin, PinMenus.SubMenuItems);
+                }
+            }
         }
         public bool PinLinkMenuDirty = false;
         public virtual void UpdatePinLinkMenu()
@@ -1193,6 +1201,17 @@ namespace EngineNS.Bricks.NodeGraph
         public void RightRelease(in Vector2 screenPos)
         {
             PopMenuPosition = ViewportRateToCanvas(in screenPos);
+            if(PopMenuPressObject != null)
+            {
+                var pKls = PopMenuPressObject.GetType();
+                if (pKls == typeof(PinIn) || pKls == typeof(PinOut))
+                {
+                    var pin = PopMenuPressObject as NodePin;
+                    if(pin != null && pin.HostNode != null)
+                        pin.HostNode.UnregPinContextMenus(pin, PinMenus.SubMenuItems);
+                }
+            }
+
             PopMenuPressObject = HitObject(PopMenuPosition.X, PopMenuPosition.Y);
             if (PopMenuPressObject != null)
             {

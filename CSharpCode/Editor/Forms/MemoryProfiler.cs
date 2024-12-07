@@ -102,7 +102,7 @@ namespace EngineNS.Editor.Forms
                             {
                                 foreach (var a in s.Value.Assemblies)
                                 {
-                                    ImGuiAPI.Text($"{a.Value.Name}({a.Value.Platform}):{a.Value.Description}");
+                                    ImGuiAPI.Text($"{a.Value.Name}({a.Value.Platform}):{a.Value.Description} = {a.Value.Version}");
                                 }
                             }   
                         }

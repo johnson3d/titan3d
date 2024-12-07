@@ -18,6 +18,7 @@ using System.Xml.Linq;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossEditor@EngineCore", "EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossEditor" })]
     public partial class TtMacrossEditor : IO.ISerializer, Editor.IAssetEditor, IRootForm, NodeGraph.IGraphEditor, IMacrossMethodHolder
     {
         public TtMacrossEditor()

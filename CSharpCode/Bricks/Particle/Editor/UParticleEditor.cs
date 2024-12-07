@@ -5,7 +5,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Particle.Editor
 {
-    public partial class TtParticleEditor : EngineNS.Editor.IAssetEditor, IO.ISerializer, ITickable, IRootForm, IGraphEditor
+    public partial class TtParticleEditor : EngineNS.Editor.Forms.ULightEnvironemnt, EngineNS.Editor.IAssetEditor, IO.ISerializer, IRootForm, IGraphEditor
     {
         public int GetTickOrder()
         {
@@ -201,19 +201,24 @@ namespace EngineNS.Bricks.Particle.Editor
         }
         #endregion
         #region Tickable
-        public void TickLogic(float ellapse)
+        public override void TickLogic(float ellapse)
         {
             PreviewViewport.TickLogic(ellapse);
         }
-        public void TickRender(float ellapse)
+        public override void TickRender(float ellapse)
         {
             PreviewViewport.TickRender(ellapse);
+
+            if (IsDrawing == false)
+                return;
+
+            base.TickRender(ellapse);
         }
-        public void TickBeginFrame(float ellapse)
+        public override void TickBeginFrame(float ellapse)
         {
 
         }
-        public void TickSync(float ellapse)
+        public override void TickSync(float ellapse)
         {
             PreviewViewport.TickSync(ellapse);
         }
@@ -283,6 +288,9 @@ namespace EngineNS.Bricks.Particle.Editor
 
             var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
+
+            await InitializeLightEnv(PreviewViewport, radius);
+
             return true;
         }
         public float LoadingPercent { get; set; } = 1.0f;

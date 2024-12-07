@@ -35,7 +35,7 @@ VResPtr VFile2Memory::Ptr(UINT64 offset , UINT64 size)
     {
         VFX_LTRACE(ELTT_Error,"%s(%d):F2M(%s) Ptr Refcount is not zero\r\n", __FILE__, __LINE__, mName.c_str());
     }
-	ASSERT(mPtrRef == 0);
+	//ASSERT(mPtrRef == 0);
 	
 	++mPtrRef;
 	
