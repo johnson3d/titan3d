@@ -32,13 +32,23 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateAttachment
         {
             var attachmentElement = renderableElement as TtGraphElement_AnimPlayAttachment;
             var cmd = ImGuiAPI.GetWindowDrawList();
-            var start = context.ViewPortTransform(attachmentElement.AbsLocation);
-            var end = context.ViewPortTransform(attachmentElement.AbsLocation + new Vector2(attachmentElement.Size.Width, attachmentElement.Size.Height));
+            var start = context.ViewportTransform(attachmentElement.AbsLocation);
+            var end = context.ViewportTransform(attachmentElement.AbsLocation + new Vector2(attachmentElement.Size.Width, attachmentElement.Size.Height));
+            var elementHeight = end.Y - start.Y;
             cmd.AddRectFilled(start, end, ImGuiAPI.ColorConvertFloat4ToU32(attachmentElement.BackgroundColor), 0, ImDrawFlags_.ImDrawFlags_RoundCornersNone);
+
+            var oldScale = ImGuiAPI.GetFont().Scale;
+            var font = ImGuiAPI.GetFont();
+            font.Scale = oldScale * context.Camera.Scale;
+            ImGuiAPI.PushFont(font);
+            //cmd.AddText(start, textBlock.TextColor, textBlock.Content, null);
             var nameSize = ImGuiAPI.CalcTextSize(attachmentElement.Name, false, 0);
             var nameTextLocation = start;
-            nameTextLocation.Y += (attachmentElement.Size.Height - nameSize.Y) / 2;
+            nameTextLocation.Y += (elementHeight - nameSize.Y) / 2;
             cmd.AddText(nameTextLocation, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(0, 0, 0)), attachmentElement.Name, null);
+            font.Scale = oldScale;
+            ImGuiAPI.PopFont();
+
         }
     }
 }

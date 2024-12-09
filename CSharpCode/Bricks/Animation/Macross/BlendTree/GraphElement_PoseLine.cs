@@ -63,12 +63,12 @@ namespace EngineNS.Animation.Macross.BlendTree
 
         }
 
-        public bool HitCheck(Vector2 pos)
+        public bool HitCheck(ref FMouseEventContext context)
         {
             return false;
         }
 
-        public void OnSelected(ref FGraphElementRenderingContext context)
+        public void OnSelected(ref FMouseEventContext context)
         {
         }
 
@@ -76,27 +76,27 @@ namespace EngineNS.Animation.Macross.BlendTree
         {
         }
 
-        public void OnMouseOver(ref FGraphElementRenderingContext context)
+        public void OnMouseOver(ref FMouseEventContext context)
         {
         }
 
-        public void OnMouseLeave(ref FGraphElementRenderingContext context)
+        public void OnMouseLeave(ref FMouseEventContext context)
         {
         }
 
-        public void OnMouseLeftButtonDown(ref FGraphElementRenderingContext context)
+        public void OnMouseLeftButtonDown(ref FMouseEventContext context)
         {
         }
 
-        public void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context)
+        public void OnMouseLeftButtonUp(ref FMouseEventContext context)
         {
         }
 
-        public void OnMouseRightButtonDown(ref FGraphElementRenderingContext context)
+        public void OnMouseRightButtonDown(ref FMouseEventContext context)
         {
         }
 
-        public void OnMouseRightButtonUp(ref FGraphElementRenderingContext context)
+        public void OnMouseRightButtonUp(ref FMouseEventContext context)
         {
         }
         #endregion
@@ -216,25 +216,27 @@ namespace EngineNS.Animation.Macross.BlendTree
             Icon.IconName = IconName;
             base.AfterConstructElements(ref context);
         }
-        public override void OnMouseOver(ref FGraphElementRenderingContext context)
+        public override void OnMouseOver(ref FMouseEventContext context)
         {
             BackgroundColor = new Color4f(0.5, 1, 1, 1);
         }
-        public override void OnMouseLeave(ref FGraphElementRenderingContext context)
+        public override void OnMouseLeave(ref FMouseEventContext context)
         {
             BackgroundColor = new Color4f(0, 0, 0, 0);
         }
-        public override void OnMouseLeftButtonDown(ref FGraphElementRenderingContext context)
+        public override void OnMouseLeftButtonDown(ref FMouseEventContext context)
         {
-            var methodGraph = context.DesignedGraph as TtGraph_BlendTree;
+            var renderContext = context.GraphElementRenderingContext;
+            var methodGraph = renderContext.DesignedGraph as TtGraph_BlendTree;
             methodGraph.PreviewPoseLine = new TtGraphElement_PreviewPoseLine();
             methodGraph.PreviewPoseLine.AbsLocation = Icon.AbsCenter;
             methodGraph.PreviewPoseLine.StartPin = PosePinDescription;
         }
 
-        public override void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context)
+        public override void OnMouseLeftButtonUp(ref FMouseEventContext context)
         {
-            var blendTreeGraph = context.DesignedGraph as TtGraph_BlendTree;
+            var renderContext = context.GraphElementRenderingContext;
+            var blendTreeGraph = renderContext.DesignedGraph as TtGraph_BlendTree;
             if (blendTreeGraph.PreviewPoseLine != null)
             {
                 var startPin = blendTreeGraph.PreviewPoseLine.StartPin;
@@ -271,7 +273,7 @@ namespace EngineNS.Animation.Macross.BlendTree
                     if (validLine)
                     {
                         var line = new TtPoseLineDescription() { Name = "Data_" + fromDescName + "_To_" + toDescName, FromId = fromId, ToId = toId };
-                        context.CommandHistory.CreateAndExtuteCommand("AddPoseLine",
+                        renderContext.CommandHistory.CreateAndExtuteCommand("AddPoseLine",
                             (data) => { blendTreeGraph.BlendTreeClassDescription.AddPoseLine(line); },
                             (data) => { blendTreeGraph.BlendTreeClassDescription.RemovePoseLine(line); });
                     }
@@ -315,8 +317,8 @@ namespace EngineNS.Animation.Macross.BlendTree
             var cmdlist = ImGuiAPI.GetWindowDrawList();
             var fromPin = line.From as TtGraphElement_PosePin;
             var toPin = line.To as TtGraphElement_PosePin;
-            var nodeStart = context.ViewPortTransform(fromPin.Icon.AbsCenter);
-            var nodeEnd = context.ViewPortTransform(toPin.Icon.AbsCenter);
+            var nodeStart = context.ViewportTransform(fromPin.Icon.AbsCenter);
+            var nodeEnd = context.ViewportTransform(toPin.Icon.AbsCenter);
             cmdlist.AddLine(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1, 1, 1, 1)), 5);
         }
     }
@@ -326,9 +328,9 @@ namespace EngineNS.Animation.Macross.BlendTree
         {
             var line = renderableElement as TtGraphElement_PreviewPoseLine;
             var cmdlist = ImGuiAPI.GetWindowDrawList();
-            var nodeStart = context.ViewPortTransform(line.AbsLocation);
+            var nodeStart = context.ViewportTransform(line.AbsLocation);
             var mousePosInViewPort = context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos());
-            var nodeEnd = context.ViewPortTransform(mousePosInViewPort);
+            var nodeEnd = context.ViewportTransform(mousePosInViewPort);
             cmdlist.AddLine(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1, 1, 1, 1)), 5);
         }
     }
@@ -338,8 +340,8 @@ namespace EngineNS.Animation.Macross.BlendTree
         {
             var pin = renderableElement as TtGraphElement_PosePin;
             var cmdlist = ImGuiAPI.GetWindowDrawList();
-            var nodeStart = context.ViewPortTransform(pin.AbsLocation);
-            var nodeEnd = context.ViewPortTransform(pin.AbsLocation + new Vector2(pin.Size.Width, pin.Size.Height));
+            var nodeStart = context.ViewportTransform(pin.AbsLocation);
+            var nodeEnd = context.ViewportTransform(pin.AbsLocation + new Vector2(pin.Size.Width, pin.Size.Height));
             var elementContainerRender = TtElementRenderDevice.CreateGraphElementRender(pin.ElementContainer);
             elementContainerRender.Draw(pin.ElementContainer, ref context);
         }

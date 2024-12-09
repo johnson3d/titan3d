@@ -245,7 +245,8 @@ namespace EngineNS.Plugins.LevelServer
 	}
 }
 #endregion//TitanEngine_AutoGen
-#endif//TitanEngine_AutoGen#if TitanEngine_AutoGen_RPC
+#endif//TitanEngine_AutoGen
+#if TitanEngine_AutoGen_RPC
 #region TitanEngine_AutoGen_RPC
 
 

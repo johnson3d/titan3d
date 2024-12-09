@@ -692,7 +692,7 @@ namespace EngineNS.UI.Editor
             return y;
         }
         TtMeshNode mCurrentPointAtAnchor;
-        public void DecoratorEventProcess(in Bricks.Input.Event e)
+        public void DecoratorEventProcessStart(in Bricks.Input.Event e)
         {
             if (!mInitialized)
                 return;
@@ -706,6 +706,7 @@ namespace EngineNS.UI.Editor
                             case EDecoratorType.None:
                                 if (mEditor.HitProxyNode != null)
                                 {
+                                    mEditor.mMouseCursor = ImGuiMouseCursor_.ImGuiMouseCursor_Arrow;
                                     var delta = mEditor.PreviewViewport.WindowPos - mEditor.PreviewViewport.ViewportPos;
                                     var mousePt = new Vector2(e.MouseButton.X - delta.X, e.MouseButton.Y - delta.Y);
                                     var proxy = mEditor.HitProxyNode.GetHitproxy((uint)mousePt.X, (uint)mousePt.Y);
@@ -725,17 +726,22 @@ namespace EngineNS.UI.Editor
                                         mEditor.mMouseCursor = ImGuiMouseCursor_.ImGuiMouseCursor_ResizeAll;
                                     else
                                     {
-                                        mEditor.mMouseCursor = ImGuiMouseCursor_.ImGuiMouseCursor_Arrow;
                                         bool bFind = false;
                                         for(int i=0; i< mAnchorNodes.Length; i++)
                                         {
-                                            if((proxy == mAnchorNodes[i]) && (mAnchorNodes[i] != mCurrentPointAtAnchor))
+                                            if((proxy == mAnchorNodes[i]))
                                             {
-                                                var mesh = mAnchorNodes[i].Mesh;
-                                                mesh.UpdateMesh(0, mesh.MaterialMesh.SubMeshes[0].Mesh, mHighLightAnchorMats);
-                                                mCurrentPointAtAnchor = mAnchorNodes[i];
+                                                if (mAnchorNodes[i] != mCurrentPointAtAnchor)
+                                                {
+                                                    if(mCurrentPointAtAnchor != null)
+                                                    {
+                                                        mCurrentPointAtAnchor.Mesh.UpdateMesh(0, mCurrentPointAtAnchor.Mesh.MaterialMesh.SubMeshes[0].Mesh, mNormalAnchorMats);
+                                                    }
+                                                    var mesh = mAnchorNodes[i].Mesh;
+                                                    mesh.UpdateMesh(0, mesh.MaterialMesh.SubMeshes[0].Mesh, mHighLightAnchorMats);
+                                                    mCurrentPointAtAnchor = mAnchorNodes[i];
+                                                }
                                                 bFind = true;
-                                                Log.WriteLine<Profiler.TtGraphicsGategory>(ELogTag.Info, "Set current point at anchor " + i);
                                                 break;
                                             }
                                         }
@@ -746,7 +752,6 @@ namespace EngineNS.UI.Editor
                                                 mCurrentPointAtAnchor.Mesh.UpdateMesh(0, mCurrentPointAtAnchor.Mesh.MaterialMesh.SubMeshes[0].Mesh, mNormalAnchorMats);
                                             }
                                             mCurrentPointAtAnchor = null;
-                                            Log.WriteLine<Profiler.TtGraphicsGategory>(ELogTag.Info, "clear current point at anchor");
                                         }
                                     }
                                 }
@@ -1248,13 +1253,22 @@ namespace EngineNS.UI.Editor
                         }
                     }
                     break;
+            }
+        }
+        public void DecoratorEventProcessEnd(in Bricks.Input.Event e)
+        {
+            if (!mInitialized)
+                return;
+
+            switch (e.Type)
+            {
                 case Bricks.Input.EventType.MOUSEBUTTONUP:
                     mCurDecoratorType = EDecoratorType.None;
                     break;
             }
         }
 
-        public bool IsInDecoratorOperation()
+            public bool IsInDecoratorOperation()
         {
             return mCurDecoratorType != EDecoratorType.None;
         }

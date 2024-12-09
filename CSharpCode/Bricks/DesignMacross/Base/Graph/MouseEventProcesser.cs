@@ -4,22 +4,32 @@
     public class TtMouseEventProcesser
     {
         static TtMouseEventProcesser mInstance = null;
-        public static TtMouseEventProcesser Instance 
-        { 
+        public static TtMouseEventProcesser Instance
+        {
             get
             {
-                if(mInstance == null)
+                if (mInstance == null)
                     mInstance = new TtMouseEventProcesser();
                 return mInstance;
             }
         }
 
-        IGraphElement ProcessSelectableElement(IGraphElement element, Vector2 pos)
+        bool ElementHitCheck(IGraphElement element, Vector2 pos, ref FGraphElementRenderingContext context)
+        {
+            var start = context.ViewportTransform(element.AbsLocation);
+            var end = context.ViewportTransform(element.AbsLocation + new Vector2(element.Size.Width, element.Size.Height));
+            Rect rect = new Rect(start.X, start.Y, end.X - start.X, end.Y - start.Y);
+            //冗余一点
+            Rect mouseRect = new Rect(pos - Vector2.One, new SizeF(1.0f, 1.0f));
+            return rect.IntersectsWith(mouseRect);
+        }
+
+        IGraphElement ProcessSelectableElementHitCheck(IGraphElement element, Vector2 pos, ref FMouseEventContext context)
         {
             IGraphElement finalHit = null;
             if (element is IGraphElementSelectable selectableElement)
             {
-                if (selectableElement.HitCheck(pos))
+                if (element.HitCheck(ref context))
                 {
                     //selectableElement.OnSelected();
                     finalHit = element;
@@ -29,8 +39,8 @@
                         var children = enumChild.EnumerateChild<IGraphElement>();
                         foreach (var child in children)
                         {
-                            var  hit = ProcessSelectableElement(child, pos);
-                            if(hit != null)
+                            var hit = ProcessSelectableElementHitCheck(child, pos, ref context);
+                            if (hit != null)
                             {
                                 finalHit = hit;
                                 break;
@@ -50,14 +60,19 @@
         private bool IsDragging = false;
         public void Processing(IGraph graph, ref FGraphElementRenderingContext context)
         {
-            var topmostElement = ProcessSelectableElement(graph, context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos()));
-            if(topmostElement != null)
+            var mouseEventContext = new FMouseEventContext();
+            mouseEventContext.GraphElementRenderingContext = context;
+            var MousePos = ImGuiAPI.GetMousePos();
+            mouseEventContext.MouseAbsPos = MousePos;
+            //var topmostElement = ProcessGraphHitCheck(graph, context.ViewPort.ViewportInverseTransform(context.Camera.Location, MousePos), ref context);
+            var topmostElement = ProcessSelectableElementHitCheck(graph, MousePos, ref mouseEventContext);
+            if (topmostElement != null)
             {
                 if (LastElement != null && LastElement != topmostElement)
                 {
-                    LastElement.OnMouseLeave(ref context);
+                    LastElement.OnMouseLeave(ref mouseEventContext);
                 }
-                topmostElement.OnMouseOver(ref context);
+                topmostElement.OnMouseOver(ref mouseEventContext);
                 if (ImGuiAPI.IsMouseDragging(ImGuiMouseButton_.ImGuiMouseButton_Left, -1.0f))
                 {
                     IsDragging = true;
@@ -70,9 +85,9 @@
                 }
                 if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Left) && !IsDragging)
                 {
-                    if(context.ViewPort.IsInViewport(ImGuiAPI.GetMousePos()))
+                    if (context.ViewPort.IsInViewport(ImGuiAPI.GetMousePos()))
                     {
-                        topmostElement.OnMouseLeftButtonDown(ref context);
+                        topmostElement.OnMouseLeftButtonDown(ref mouseEventContext);
                         DraggingElement = topmostElement;
                     }
                 }
@@ -80,12 +95,12 @@
                 {
                     if (context.ViewPort.IsInViewport(ImGuiAPI.GetMousePos()))
                     {
-                        topmostElement.OnMouseRightButtonDown(ref context); 
+                        topmostElement.OnMouseRightButtonDown(ref mouseEventContext);
                     }
                 }
                 if (ImGuiAPI.IsMouseReleased(ImGuiMouseButton_.ImGuiMouseButton_Left))
                 {
-                    topmostElement.OnMouseLeftButtonUp(ref context);
+                    topmostElement.OnMouseLeftButtonUp(ref mouseEventContext);
                     if (IsDragging)
                     {
                         IsDragging = false;
@@ -93,9 +108,9 @@
                         DraggingButton = ImGuiMouseButton_.ImGuiMouseButton_COUNT;
                     }
                 }
-                if(ImGuiAPI.IsMouseReleased(ImGuiMouseButton_.ImGuiMouseButton_Right))
+                if (ImGuiAPI.IsMouseReleased(ImGuiMouseButton_.ImGuiMouseButton_Right))
                 {
-                    topmostElement.OnMouseRightButtonUp(ref context);
+                    topmostElement.OnMouseRightButtonUp(ref mouseEventContext);
                     if (IsDragging)
                     {
                         IsDragging = false;
@@ -105,16 +120,16 @@
                 }
                 if (ImGuiAPI.IsMouseClicked(ImGuiMouseButton_.ImGuiMouseButton_Left, false))
                 {
-                    topmostElement.OnSelected(ref context);
+                    topmostElement.OnSelected(ref mouseEventContext);
                 }
                 if (IsDragging)
                 {
-                    if (DraggingButton == ImGuiMouseButton_.ImGuiMouseButton_Left )
+                    if (DraggingButton == ImGuiMouseButton_.ImGuiMouseButton_Left)
                     {
-                        if(DraggingElement is IGraphElementDraggable draggableEle && draggableEle != graph)
+                        if (DraggingElement is IGraphElementDraggable draggableEle && draggableEle != graph)
                         {
                             var delta = ImGuiAPI.GetMouseDragDelta(ImGuiMouseButton_.ImGuiMouseButton_Left, -1.0f);
-                            draggableEle.OnDragging(delta);
+                            draggableEle.OnDragging(delta / context.Camera.Scale);
                             ImGuiAPI.ResetMouseDragDelta(ImGuiMouseButton_.ImGuiMouseButton_Left);
                         }
                     }
@@ -126,6 +141,11 @@
                     }
 
                 }
+                if (ImGuiAPI.GetIO().MouseWheel != 0)
+                {
+                    graph.Zooming(ImGuiAPI.GetIO().MouseWheel);
+                }
+
             }
             LastElement = topmostElement;
         }

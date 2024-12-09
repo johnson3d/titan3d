@@ -1,6 +1,6 @@
 ﻿using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
-using EngienNS.Bricks.ImageDecoder;
+using EngineNS.Bricks.ImageDecoder;
 using EngineNS.EGui.Controls;
 using EngineNS.IO;
 using Jither.OpenEXR;
@@ -1110,19 +1110,19 @@ namespace EngineNS.NxRHI
             var imgType = ameta.OriginImageType;
             switch (imgType)
             {
-                case EngienNS.Bricks.ImageDecoder.UImageType.PNG:
+                case EngineNS.Bricks.ImageDecoder.UImageType.PNG:
                     {
                         mOriginImageObject = LoadOriginPng(this.AssetName);
                     }
                     break;
-                case EngienNS.Bricks.ImageDecoder.UImageType.HDR:
+                case EngineNS.Bricks.ImageDecoder.UImageType.HDR:
                     {
                         StbImageSharp.ImageResultFloat imageFloat = new StbImageSharp.ImageResultFloat();
                         LoadOriginHdr(AssetName, ref imageFloat);
                         mOriginImageObject = imageFloat;
                     }
                     break;
-                case EngienNS.Bricks.ImageDecoder.UImageType.EXR:
+                case EngineNS.Bricks.ImageDecoder.UImageType.EXR:
                     {
                         System.IO.Stream outStream = null;
                         mOriginImageObject = LoadOriginExr(AssetName, ref outStream);
@@ -1160,7 +1160,7 @@ namespace EngineNS.NxRHI
             var imgType = GetOriginImageType(AssetName);// ameta.OriginImageType;
             switch (imgType)
             {
-                case EngienNS.Bricks.ImageDecoder.UImageType.PNG:
+                case EngineNS.Bricks.ImageDecoder.UImageType.PNG:
                     {
                         var image = LoadOriginPng(this.AssetName);
                         if (image == null)
@@ -1171,14 +1171,14 @@ namespace EngineNS.NxRHI
                         ImportAttribute.SaveSrv(image, name, this.PicDesc);
                     }
                     break;
-                case EngienNS.Bricks.ImageDecoder.UImageType.HDR:
+                case EngineNS.Bricks.ImageDecoder.UImageType.HDR:
                     {
                         StbImageSharp.ImageResultFloat imageFloat = new StbImageSharp.ImageResultFloat();
                         LoadOriginHdr(AssetName, ref imageFloat);
                         ImportAttribute.SaveSrv(imageFloat, name, this.PicDesc);
                     }
                     break;
-                case EngienNS.Bricks.ImageDecoder.UImageType.EXR:
+                case EngineNS.Bricks.ImageDecoder.UImageType.EXR:
                     {
                         System.IO.Stream outStream = null;
                         var file = LoadOriginExr(AssetName, ref outStream);
@@ -3380,7 +3380,7 @@ namespace EngineNS.NxRHI
             var imgType = GetOriginImageType(rn);
             switch (imgType)
             {
-                case EngienNS.Bricks.ImageDecoder.UImageType.PNG:
+                case EngineNS.Bricks.ImageDecoder.UImageType.PNG:
                     {
                         var image = LoadOriginPng(rn);
                         if (image == null)
@@ -3394,7 +3394,7 @@ namespace EngineNS.NxRHI
                         }
                     }
                     break;
-                case EngienNS.Bricks.ImageDecoder.UImageType.HDR:
+                case EngineNS.Bricks.ImageDecoder.UImageType.HDR:
                     {
                         StbImageSharp.ImageResultFloat imageFloat = new StbImageSharp.ImageResultFloat();
                         LoadOriginHdr(rn, ref imageFloat);
@@ -3408,7 +3408,7 @@ namespace EngineNS.NxRHI
                         }
                     }
                     break;
-                case EngienNS.Bricks.ImageDecoder.UImageType.EXR:
+                case EngineNS.Bricks.ImageDecoder.UImageType.EXR:
                     {
                         System.IO.Stream outStream = null;
                         var file = LoadOriginExr(rn, ref outStream);

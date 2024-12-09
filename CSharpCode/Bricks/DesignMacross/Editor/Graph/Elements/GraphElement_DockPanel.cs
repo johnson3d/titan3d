@@ -44,7 +44,7 @@ namespace EngineNS.DesignMacross.Editor
             return false;
         }
 
-        public override bool HitCheck(Vector2 pos)
+        public override bool HitCheck(ref FMouseEventContext context)
         {
             return false;
         }
@@ -55,7 +55,7 @@ namespace EngineNS.DesignMacross.Editor
         }
 
 
-        public override void OnSelected(ref FGraphElementRenderingContext context)
+        public override void OnSelected(ref FMouseEventContext context)
         {
 
         }
@@ -64,32 +64,32 @@ namespace EngineNS.DesignMacross.Editor
         {
 
         }
-        public override void OnMouseLeave(ref FGraphElementRenderingContext context)
+        public override void OnMouseLeave(ref FMouseEventContext context)
         {
 
         }
 
-        public override void OnMouseLeftButtonDown(ref FGraphElementRenderingContext context)
+        public override void OnMouseLeftButtonDown(ref FMouseEventContext context)
         {
 
         }
 
-        public override void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context)
+        public override void OnMouseLeftButtonUp(ref FMouseEventContext context)
         {
 
         }
 
-        public override void OnMouseOver(ref FGraphElementRenderingContext context)
+        public override void OnMouseOver(ref FMouseEventContext context)
         {
 
         }
 
-        public override void OnMouseRightButtonDown(ref FGraphElementRenderingContext context)
+        public override void OnMouseRightButtonDown(ref FMouseEventContext context)
         {
 
         }
 
-        public override void OnMouseRightButtonUp(ref FGraphElementRenderingContext context)
+        public override void OnMouseRightButtonUp(ref FMouseEventContext context)
         {
 
         }

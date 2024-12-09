@@ -76,6 +76,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             OutPin = AddPinOut(new PinOut() { Name = "Instance" });
             OutPin.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
+            OutPin.LinkDesc.CanLinks.Add("Value");
         }
 
         public override TtExpressionBase GetExpression(NodePin pin, ref BuildCodeStatementsData data)
@@ -100,6 +101,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 VariableType = new TtTypeReference(resultType),
                 InitValue = new TtCreateObjectExpression(data.CodeGen.GetTypeString(resultType)),
             };
+            data.CurrentStatements.Add(varDecStatement);
             data.CurrentStatements.Add(new TtDebuggerSetWatchVariable()
             {
                 VariableType = new TtTypeReference(typeof(Type)),
@@ -107,7 +109,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 VariableValue = new TtVariableReferenceExpression(VariableName),
             });
             AddDebugBreakerStatement(BreakerName, ref data);
-            data.CurrentStatements.Add(varDecStatement);
+            
 
             var nextNodePin = data.NodeGraph.GetOppositePin(AfterExec);
             var nextNode = data.NodeGraph.GetOppositePinNode(AfterExec);

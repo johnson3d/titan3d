@@ -112,7 +112,7 @@ namespace EngineNS.Animation.Macross.BlendTree
                     var posePinAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<TtGraphElement_PosePin>(posePin.GetType());
                     if (posePinAttribute != null)
                     {
-                        var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(posePinAttribute.ClassType, posePin, context.GraphElementStyleManager.GetOrAdd(posePin.Id)) as TtGraphElement_PosePin;
+                        var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(posePinAttribute.ClassType, posePin, context.GraphElementStyleManager.GetOrAdd(posePin)) as TtGraphElement_PosePin;
                         instance.Parent = this;
                         instance.ConstructElements(ref context);
                         LeftSidePinsStackPanel.AddElement(instance);
@@ -127,7 +127,7 @@ namespace EngineNS.Animation.Macross.BlendTree
                     var posePinAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<TtGraphElement_PosePin>(posePin.GetType());
                     if (posePinAttribute != null)
                     {
-                        var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(posePinAttribute.ClassType, posePin, context.GraphElementStyleManager.GetOrAdd(posePin.Id)) as TtGraphElement_PosePin;
+                        var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(posePinAttribute.ClassType, posePin, context.GraphElementStyleManager.GetOrAdd(posePin)) as TtGraphElement_PosePin;
                         instance.Parent = this;
                         instance.ConstructElements(ref context);
                         RightSidePinsStackPanel.AddElement(instance);
@@ -144,8 +144,8 @@ namespace EngineNS.Animation.Macross.BlendTree
         {
             var blendTreeNodeElement = renderableElement as TtGraphElement_BlendTreeNode;
             var cmdlist = ImGuiAPI.GetWindowDrawList();
-            var nodeStart = context.ViewPortTransform(blendTreeNodeElement.AbsLocation);
-            var nodeEnd = context.ViewPortTransform(blendTreeNodeElement.AbsLocation + new Vector2(blendTreeNodeElement.Size.Width, blendTreeNodeElement.Size.Height));
+            var nodeStart = context.ViewportTransform(blendTreeNodeElement.AbsLocation);
+            var nodeEnd = context.ViewportTransform(blendTreeNodeElement.AbsLocation + new Vector2(blendTreeNodeElement.Size.Width, blendTreeNodeElement.Size.Height));
             var roundCornerFlags = ImDrawFlags_.ImDrawFlags_RoundCornersAll;
             var borderOffset = new Vector2(blendTreeNodeElement.BorderThickness / 2, blendTreeNodeElement.BorderThickness / 2);
             cmdlist.AddRect(nodeStart - borderOffset, nodeEnd + borderOffset, ImGuiAPI.ColorConvertFloat4ToU32(blendTreeNodeElement.BorderColor), blendTreeNodeElement.Rounding, roundCornerFlags, blendTreeNodeElement.BorderThickness);

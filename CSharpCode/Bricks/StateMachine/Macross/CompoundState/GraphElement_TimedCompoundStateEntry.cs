@@ -51,7 +51,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
                 var graphElementAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<TtGraphElement_TimedStateTransition>(transition.GetType());
                 if (graphElementAttribute != null)
                 {
-                    var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, transition, context.GraphElementStyleManager.GetOrAdd(transition.Id)) as TtGraphElement_TimedStateTransition;
+                    var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, transition, context.GraphElementStyleManager.GetOrAdd(transition)) as TtGraphElement_TimedStateTransition;
                     instance.Parent = this;
                     TransitionsStackPanel.AddElement(instance);
                     ChildrenDescriptionGraphElements.Add(instance);
@@ -128,8 +128,8 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
         {
             var entryElement = renderableElement as TtGraphElement_TimedCompoundStateEntry;
             var cmdlist = ImGuiAPI.GetWindowDrawList();
-            var nodeStart = context.ViewPortTransform(entryElement.AbsLocation);
-            var nodeEnd = context.ViewPortTransform(entryElement.AbsLocation + new Vector2(entryElement.Size.Width, entryElement.Size.Height));
+            var nodeStart = context.ViewportTransform(entryElement.AbsLocation);
+            var nodeEnd = context.ViewportTransform(entryElement.AbsLocation + new Vector2(entryElement.Size.Width, entryElement.Size.Height));
             var roundCornerFlags = ImDrawFlags_.ImDrawFlags_RoundCornersBottomLeft | ImDrawFlags_.ImDrawFlags_RoundCornersTopRight;
             cmdlist.AddRect(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(entryElement.BorderColor), entryElement.Rounding, roundCornerFlags, entryElement.BorderThickness * 2);
             cmdlist.AddRectFilled(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(entryElement.BackgroundColor), entryElement.Rounding, roundCornerFlags);

@@ -33,18 +33,15 @@ namespace EngineNS.DesignMacross.Base.Graph
         public Dictionary<Guid, IGraphElement> DescriptionsElement { get; set; }
         public TtClassDescription DesignedClassDescription { get; set; }
         public TtGraph DesignedGraph { get; set; }
-        public Vector2 ViewPortTransform(Vector2 pos)
+        public Vector2 ViewportTransform(Vector2 pos)
         {
-            return ViewPort.ViewportTransform(Camera.Location, pos);
+            return ViewPort.ViewportTransform(Camera.Location, pos * Camera.Scale);
         }
-        public Vector2 ViewPortInverseTransform(Vector2 pos)
+        public Vector2 ViewportInverseTransform(Vector2 pos)
         {
-            return ViewPort.ViewportInverseTransform(Camera.Location, pos);
+            return ViewPort.ViewportInverseTransform(Camera.Location, pos/ Camera.Scale);
         }
-        public float ViewPortScale(float value)
-        {
-            return Camera.Scale.X * value;
-        }
+        
     }
     public interface IGraphElementRender : IElementRender<FGraphElementRenderingContext>
     {

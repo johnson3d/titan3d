@@ -24,9 +24,9 @@ namespace EngineNS.DesignMacross.Design
         {
 
         }
-        public override void OnSelected(ref FGraphElementRenderingContext context)
+        public override void OnSelected(ref FMouseEventContext context)
         {
-            context.EditorInteroperation.PGMember.Target = Description.Parent;
+            context.GraphElementRenderingContext.EditorInteroperation.PGMember.Target = Description.Parent;
         }
     }
     public struct ElementLocation
@@ -81,11 +81,11 @@ namespace EngineNS.DesignMacross.Design
                             if (!context.GraphElementStyleManager.Contains(desc.Id))
                             {
                                 //set default location
-                                var style = context.GraphElementStyleManager.GetOrAdd(desc.Id);
+                                var style = context.GraphElementStyleManager.GetOrAdd(desc);
                                 style.Location = graphElementAttribute.DefaultLocation;
                             }
 
-                            var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, desc, context.GraphElementStyleManager.GetOrAdd(desc.Id));
+                            var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, desc, context.GraphElementStyleManager.GetOrAdd(desc));
                             instance.Parent = this;
                             Elements.Add(instance);
                             context.DescriptionsElement.Add(desc.Id, instance);
@@ -102,11 +102,11 @@ namespace EngineNS.DesignMacross.Design
                     if (!context.GraphElementStyleManager.Contains(desc.Id))
                     {
                         //set default location
-                        var style = context.GraphElementStyleManager.GetOrAdd(desc.Id);
+                        var style = context.GraphElementStyleManager.GetOrAdd(desc);
                         style.Location = graphElementAttribute.DefaultLocation;
                     }
 
-                    var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, desc, context.GraphElementStyleManager.GetOrAdd(desc.Id));
+                    var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, desc, context.GraphElementStyleManager.GetOrAdd(desc));
                     instance.Parent = this;
                     Elements.Add(instance);
                     context.DescriptionsElement.Add(desc.Id, instance);
@@ -136,11 +136,12 @@ namespace EngineNS.DesignMacross.Design
             }
         }
 
-        public override void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context)
+        public override void OnMouseLeftButtonUp(ref FMouseEventContext context)
         {
             if (PreviewDataLine != null || PreviewExecutionLine != null)
             {
-                TtGraphContextMenuHandler.Instance.HandleLinkedPinContextMenu(this, ref context);
+                var renderContext = context.GraphElementRenderingContext;
+                TtGraphContextMenuHandler.Instance.HandleLinkedPinContextMenu(this, ref renderContext);
                 PreviewDataLine = null;
                 PreviewExecutionLine = null;
             }

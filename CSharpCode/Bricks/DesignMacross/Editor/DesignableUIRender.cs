@@ -95,6 +95,7 @@ namespace EngineNS.DesignMacross.Editor
         public TtGraphElementStyleCollection GraphElementStyleManager { get; set; } = null;
         public Dictionary<Guid, IGraphElement> DescriptionsElement { get; set; } = null;
         public TtClassDescription DesignedClassDescription { get; set; } = null;
+        public RName DesignMacrossAssetName { get; set; }
         public FDesignMacrossEditorRenderingContext()
         {
 

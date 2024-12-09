@@ -54,7 +54,7 @@ namespace EngineNS.DesignMacross.Editor
             return false;
         }
 
-        public override bool HitCheck(Vector2 pos)
+        public override bool HitCheck(ref FMouseEventContext context)
         {
             return false;
         }
@@ -65,7 +65,7 @@ namespace EngineNS.DesignMacross.Editor
         }
 
 
-        public override void OnSelected(ref FGraphElementRenderingContext context)
+        public override void OnSelected(ref FMouseEventContext context)
         {
 
         }

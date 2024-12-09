@@ -43,7 +43,7 @@ namespace EngineNS.DesignMacross.Design.Statements
                     var execPinAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<TtGraphElement_ExecutionPin>(execInPin.GetType());
                     if (execPinAttribute != null)
                     {
-                        var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(execPinAttribute.ClassType, execInPin, context.GraphElementStyleManager.GetOrAdd(execInPin.Id)) as TtGraphElement_ExecutionPin;
+                        var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(execPinAttribute.ClassType, execInPin, context.GraphElementStyleManager.GetOrAdd(execInPin)) as TtGraphElement_ExecutionPin;
                         instance.Parent = this;
                         instance.ConstructElements(ref context);
                         LeftSidePinsStackPanel.AddElement(instance);
@@ -56,7 +56,7 @@ namespace EngineNS.DesignMacross.Design.Statements
                     var dataPinAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<TtGraphElement_DataPin>(dataPin.GetType());
                     if (dataPinAttribute != null)
                     {
-                        var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(dataPinAttribute.ClassType, dataPin, context.GraphElementStyleManager.GetOrAdd(dataPin.Id)) as TtGraphElement_DataPin;
+                        var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(dataPinAttribute.ClassType, dataPin, context.GraphElementStyleManager.GetOrAdd(dataPin)) as TtGraphElement_DataPin;
                         instance.Parent = this;
                         instance.ConstructElements(ref context);
                         LeftSidePinsStackPanel.AddElement(instance);
@@ -71,7 +71,7 @@ namespace EngineNS.DesignMacross.Design.Statements
                     var execPinAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<TtGraphElement_ExecutionPin>(execOutPin.GetType());
                     if (execPinAttribute != null)
                     {
-                        var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(execPinAttribute.ClassType, execOutPin, context.GraphElementStyleManager.GetOrAdd(execOutPin.Id)) as TtGraphElement_ExecutionPin;
+                        var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(execPinAttribute.ClassType, execOutPin, context.GraphElementStyleManager.GetOrAdd(execOutPin)) as TtGraphElement_ExecutionPin;
                         instance.Parent = this;
                         instance.ConstructElements(ref context);
                         RightSidePinsStackPanel.AddElement(instance);
@@ -83,7 +83,7 @@ namespace EngineNS.DesignMacross.Design.Statements
                     var dataPinAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<TtGraphElement_DataPin>(dataPin.GetType());
                     if (dataPinAttribute != null)
                     {
-                        var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(dataPinAttribute.ClassType, dataPin, context.GraphElementStyleManager.GetOrAdd(dataPin.Id)) as TtGraphElement_DataPin;
+                        var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(dataPinAttribute.ClassType, dataPin, context.GraphElementStyleManager.GetOrAdd(dataPin)) as TtGraphElement_DataPin;
                         instance.Parent = this;
                         instance.ConstructElements(ref context);
                         RightSidePinsStackPanel.AddElement(instance);

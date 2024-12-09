@@ -78,9 +78,9 @@ namespace EngineNS.DesignMacross.Design
         {
             var delegateElement = renderableElement as TtGraphElement_DelegateEvent;
             var cmdlist = ImGuiAPI.GetWindowDrawList();
-            var nodeStart = context.ViewPortTransform(delegateElement.AbsLocation);
+            var nodeStart = context.ViewportTransform(delegateElement.AbsLocation);
             //Element.Size = new SizeF(nameTextSize.Width , nameTextSize.Height < minHeight ? minHeight : nameTextSize.Height);
-            var nodeEnd = context.ViewPortTransform(delegateElement.AbsLocation + new Vector2(delegateElement.Size.Width, delegateElement.Size.Height));
+            var nodeEnd = context.ViewportTransform(delegateElement.AbsLocation + new Vector2(delegateElement.Size.Width, delegateElement.Size.Height));
             var roundCornerFlags = ImDrawFlags_.ImDrawFlags_RoundCornersTopRight;
             cmdlist.AddRect(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(delegateElement.BorderColor), delegateElement.Rounding, roundCornerFlags, delegateElement.BorderThickness * 2);
             cmdlist.AddRectFilled(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(delegateElement.BackgroundColor), delegateElement.Rounding, roundCornerFlags);

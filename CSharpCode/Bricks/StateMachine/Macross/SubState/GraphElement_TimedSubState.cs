@@ -246,7 +246,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.SubState{
                 var graphElementAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<TtDescriptionGraphElement>(attachment.GetType());
                 if (graphElementAttribute != null)
                 {
-                    var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, attachment, context.GraphElementStyleManager.GetOrAdd(attachment.Id));
+                    var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, attachment, context.GraphElementStyleManager.GetOrAdd(attachment));
                     instance.Parent = this;
                     AttachmentsStackPanel.AddElement(instance);
                     ChildrenDescriptionGraphElements.Add(instance);
@@ -258,7 +258,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.SubState{
                 var graphElementAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<TtGraphElement_TimedStateTransition>(transition.GetType());
                 if (graphElementAttribute != null)
                 {
-                    var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, transition, context.GraphElementStyleManager.GetOrAdd(transition.Id));
+                    var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, transition, context.GraphElementStyleManager.GetOrAdd(transition));
                     instance.Parent = this;
                     TransitionsStackPanel.AddElement(instance);
                     ChildrenDescriptionGraphElements.Add(instance);
@@ -291,8 +291,8 @@ namespace EngineNS.Bricks.StateMachine.Macross.SubState{
         {
             var stateElement = renderableElement as TtGraphElement_TimedSubState;
             var cmdlist = ImGuiAPI.GetWindowDrawList();
-            var nodeStart = context.ViewPortTransform(stateElement.AbsLocation);
-            var nodeEnd = context.ViewPortTransform(stateElement.AbsLocation + new Vector2(stateElement.Size.Width, stateElement.Size.Height));
+            var nodeStart = context.ViewportTransform(stateElement.AbsLocation);
+            var nodeEnd = context.ViewportTransform(stateElement.AbsLocation + new Vector2(stateElement.Size.Width, stateElement.Size.Height));
             var roundCornerFlags = ImDrawFlags_.ImDrawFlags_RoundCornersBottomRight | ImDrawFlags_.ImDrawFlags_RoundCornersTopLeft;
             cmdlist.AddRect(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(stateElement.BorderColor), stateElement.Rounding, roundCornerFlags, stateElement.BorderThickness * 2);
             cmdlist.AddRectFilled(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(stateElement.BackgroundColor), stateElement.Rounding, roundCornerFlags);

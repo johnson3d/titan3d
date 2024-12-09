@@ -1,5 +1,6 @@
 ﻿using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Render;
+using SixLabors.Fonts;
 
 namespace EngineNS.DesignMacross.Editor
 {
@@ -27,7 +28,7 @@ namespace EngineNS.DesignMacross.Editor
             return false;
         }
 
-        public override bool HitCheck(Vector2 pos)
+        public override bool HitCheck(ref FMouseEventContext context)
         {
             return false;
         }
@@ -38,7 +39,7 @@ namespace EngineNS.DesignMacross.Editor
         }
 
 
-        public override void OnSelected(ref FGraphElementRenderingContext context)
+        public override void OnSelected(ref FMouseEventContext context)
         {
             
         }
@@ -143,14 +144,21 @@ namespace EngineNS.DesignMacross.Editor
         {
             var textBox = renderableElement as TtGraphElement_TextBox;
             var cmd = ImGuiAPI.GetWindowDrawList();
-            var start = context.ViewPortTransform(textBox.AbsLocation);
+            var start = context.ViewportTransform(textBox.AbsLocation);
             ImGuiAPI.SetCursorScreenPos(in start);
             ImGuiAPI.SetNextItemWidth(textBox.Size.Width);
             string inputValue = "";
-            if(ImGuiAPI.InputText("##in_" + textBox.Id.ToString() + "_TextBox", ref inputValue))
+            var oldScale = ImGuiAPI.GetFont().Scale;
+            var font = ImGuiAPI.GetFont();
+            font.Scale = textBox.FontScale * context.Camera.Scale;
+            ImGuiAPI.PushFont(font);
+            if (ImGuiAPI.InputText("##in_" + textBox.Id.ToString() + "_TextBox", ref inputValue))
             {
                 textBox?.OnValueChange(textBox.Content, inputValue);
             }
+            font.Scale = oldScale;
+            ImGuiAPI.PopFont();
+            
         }
     }
 }

@@ -301,4 +301,19 @@ namespace EngineNS.DesignMacross.Design.Expressions
             return new TtPrimitiveExpression(TypeDesc, Color4f.FromString(StrValue));
         }
     }
+    [ContextMenu("RName", "Data\\RName", UDesignMacross.MacrossScriptEditorKeyword)]
+    [GraphElement(typeof(TtGraphElement_ImmediateValue))]
+    public class TtRNameValueDescription : TtImmediateValueDescription
+    {
+        public TtRNameValueDescription()
+        {
+            TypeDesc = TtTypeDesc.TypeOf<RName>();
+            Name = TypeDesc.Name;
+            AddDataOutPin(new() { Name = "", TypeDesc = TypeDesc });
+        }
+        public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
+        {
+            return new TtPrimitiveExpression(TypeDesc, Color4f.FromString(StrValue));
+        }
+    }
 }

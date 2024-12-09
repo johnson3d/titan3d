@@ -17,7 +17,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         public TtGraphElement_ExecutionLine(IDescription description, IGraphElementStyle style) : base(description, style)
         {
         }
-        
+
         public override SizeF Measuring(SizeF availableSize)
         {
             return SizeF.Empty;
@@ -30,16 +30,16 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
 
         public override void ConstructElements(ref FGraphElementRenderingContext context)
         {
-            
+
             base.ConstructElements(ref context);
         }
         public override void AfterConstructElements(ref FGraphElementRenderingContext context)
         {
-            if(context.DescriptionsElement.ContainsKey(ExecutionLineDescription.FromId))
+            if (context.DescriptionsElement.ContainsKey(ExecutionLineDescription.FromId))
             {
                 From = context.DescriptionsElement[ExecutionLineDescription.FromId];
             }
-            if(context.DescriptionsElement.ContainsKey(ExecutionLineDescription.ToId))
+            if (context.DescriptionsElement.ContainsKey(ExecutionLineDescription.ToId))
             {
                 To = context.DescriptionsElement[ExecutionLineDescription.ToId];
             }
@@ -47,7 +47,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         }
     }
     [ImGuiElementRender(typeof(TtGraphElementRender_PreviewExecutionLine))]
-    public class TtGraphElement_PreviewExecutionLine: IGraphElement
+    public class TtGraphElement_PreviewExecutionLine : IGraphElement
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
@@ -67,15 +67,15 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
 
         public void OnDragging(Vector2 delta)
         {
-            
+
         }
 
-        public bool HitCheck(Vector2 pos)
+        public bool HitCheck(ref FMouseEventContext context)
         {
             return false;
         }
 
-        public void OnSelected(ref FGraphElementRenderingContext context)
+        public void OnSelected(ref FMouseEventContext context)
         {
         }
 
@@ -83,31 +83,31 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         {
         }
 
-        public void OnMouseOver(ref FGraphElementRenderingContext context)
+        public void OnMouseOver(ref FMouseEventContext context)
         {
         }
 
-        public void OnMouseLeave(ref FGraphElementRenderingContext context)
+        public void OnMouseLeave(ref FMouseEventContext context)
         {
         }
 
-        public void OnMouseLeftButtonDown(ref FGraphElementRenderingContext context)
+        public void OnMouseLeftButtonDown(ref FMouseEventContext context)
         {
         }
 
-        public void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context)
+        public void OnMouseLeftButtonUp(ref FMouseEventContext context)
         {
         }
 
-        public void OnMouseRightButtonDown(ref FGraphElementRenderingContext context)
+        public void OnMouseRightButtonDown(ref FMouseEventContext context)
         {
         }
 
-        public void OnMouseRightButtonUp(ref FGraphElementRenderingContext context)
+        public void OnMouseRightButtonUp(ref FMouseEventContext context)
         {
         }
         #endregion
-        
+
     }
     [ImGuiElementRender(typeof(TtGraphElementRender_ExecutionPin))]
     public class TtGraphElement_ExecutionPin : TtDescriptionGraphElement
@@ -117,10 +117,10 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         public TtGraphElement_TextBlock NameTextBlock = new TtGraphElement_TextBlock();
         public TtGraphElement_StackPanel ElementContainer = new();
         public TtGraphElement_Icon Icon = new();
-        public Color4f BackgroundColor 
-        { 
-            get=> Style.BackgroundColor; 
-            set=> Style.BackgroundColor = value;
+        public Color4f BackgroundColor
+        {
+            get => Style.BackgroundColor;
+            set => Style.BackgroundColor = value;
         }
         public float Rounding { get; set; } = 5;
         public TtGraphElement_ExecutionPin(IDescription description, IGraphElementStyle style) : base(description, style)
@@ -221,26 +221,34 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             base.AfterConstructElements(ref context);
         }
 
-        public override void OnMouseOver(ref FGraphElementRenderingContext context)
+        public override void OnMouseOver(ref FMouseEventContext context)
         {
             BackgroundColor = new Color4f(0.5, 1, 1, 1);
         }
-        public override void OnMouseLeave(ref FGraphElementRenderingContext context)
+        public override void OnMouseLeave(ref FMouseEventContext context)
         {
             BackgroundColor = new Color4f(0, 0, 0, 0);
         }
 
-        public override void OnMouseLeftButtonDown(ref FGraphElementRenderingContext context)
+        public override void OnMouseLeftButtonDown(ref FMouseEventContext context)
         {
-            var methodGraph = context.DesignedGraph as TtGraph_Method;
-            methodGraph.PreviewExecutionLine = new TtGraphElement_PreviewExecutionLine();
-            methodGraph.PreviewExecutionLine.AbsLocation = Icon.AbsCenter;
-            methodGraph.PreviewExecutionLine.StartPin = ExecutionPinDescription;
+            var start = context.GraphElementRenderingContext.ViewportTransform(Icon.AbsLocation);
+            var end = context.GraphElementRenderingContext.ViewportTransform(Icon.AbsLocation + new Vector2(Icon.Size.Width, Icon.Size.Height));
+            Rect iconRect = new Rect(start.X, start.Y, end.X - start.X, end.Y - start.Y);
+            if (iconRect.Contains(context.MouseAbsPos))
+            {
+                var renderContext = context.GraphElementRenderingContext;
+                var methodGraph = renderContext.DesignedGraph as TtGraph_Method;
+                methodGraph.PreviewExecutionLine = new TtGraphElement_PreviewExecutionLine();
+                methodGraph.PreviewExecutionLine.AbsLocation = Icon.AbsCenter;
+                methodGraph.PreviewExecutionLine.StartPin = ExecutionPinDescription;
+            }
         }
 
-        public override void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context)
+        public override void OnMouseLeftButtonUp(ref FMouseEventContext context)
         {
-            var methodGraph = context.DesignedGraph as TtGraph_Method;
+            var renderContext = context.GraphElementRenderingContext;
+            var methodGraph = renderContext.DesignedGraph as TtGraph_Method;
             if (methodGraph.PreviewDataLine != null)
             {
                 methodGraph.PreviewDataLine = null;
@@ -257,7 +265,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
                     bool validLine = false;
                     if (methodGraph.PreviewExecutionLine.StartPin is TtExecutionInPinDescription)
                     {
-                        if(ExecutionPinDescription is TtExecutionOutPinDescription)
+                        if (ExecutionPinDescription is TtExecutionOutPinDescription)
                         {
                             validLine = true;
                             fromId = ExecutionPinDescription.Id;
@@ -278,10 +286,10 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
                             toDescName = ExecutionPinDescription.Parent.Name;
                         }
                     }
-                    if(validLine)
+                    if (validLine)
                     {
                         var line = new TtExecutionLineDescription() { Name = "Exec_" + fromDescName + "_To_" + toDescName, FromId = fromId, ToId = toId };
-                        context.CommandHistory.CreateAndExtuteCommand("AddExecutionLine",
+                        renderContext.CommandHistory.CreateAndExtuteCommand("AddExecutionLine",
                                 (data) => { methodGraph.MethodDescription.AddExecutionLine(line); },
                                 (data) => { methodGraph.MethodDescription.RemoveExecutionLine(line); });
                     }
@@ -327,8 +335,8 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             if (fromPin == null || toPin == null)
                 return;
 
-            var nodeStart = context.ViewPortTransform(fromPin.Icon.AbsCenter);
-            var nodeEnd = context.ViewPortTransform(toPin.Icon.AbsCenter);
+            var nodeStart = context.ViewportTransform(fromPin.Icon.AbsCenter);
+            var nodeEnd = context.ViewportTransform(toPin.Icon.AbsCenter);
             var p1 = nodeStart;
             var p4 = nodeEnd;
             var delta = p4 - p1;
@@ -336,7 +344,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
 
             var p2 = new Vector2(p1.X + ctDelta, p1.Y);
             var p3 = new Vector2(p4.X - ctDelta, p4.Y);
-            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1, 1, 1, 1)), 5, 30);
+            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1, 1, 1, 1)), TtDesignMacrossGraphStyles.LineNormalThickness * context.Camera.Scale, 30);
         }
     }
     public class TtGraphElementRender_PreviewExecutionLine : IGraphElementRender
@@ -347,17 +355,19 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             var cmdlist = ImGuiAPI.GetWindowDrawList();
             var nodeStart = Vector2.Zero;
             var nodeEnd = Vector2.Zero;
-            if(line.StartPin is TtExecutionOutPinDescription)
+            if (line.StartPin is TtExecutionOutPinDescription)
             {
-                nodeStart = context.ViewPortTransform(line.AbsLocation);
-                var mousePosInViewPort = context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos());
-                nodeEnd = context.ViewPortTransform(mousePosInViewPort);
+                nodeStart = context.ViewportTransform(line.AbsLocation);
+                //var mousePosInViewPort = context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos());
+                //nodeEnd = context.ViewportTransform(mousePosInViewPort);
+                nodeEnd = ImGuiAPI.GetMousePos();
             }
             else
             {
-                nodeEnd = context.ViewPortTransform(line.AbsLocation);
-                var mousePosInViewPort = context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos());
-                nodeStart = context.ViewPortTransform(mousePosInViewPort);
+                nodeEnd = context.ViewportTransform(line.AbsLocation);
+                //var mousePosInViewPort = context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos());
+                //nodeStart = context.ViewportTransform(mousePosInViewPort);
+                nodeStart = ImGuiAPI.GetMousePos();
             }
 
             var p1 = nodeStart;
@@ -367,7 +377,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
 
             var p2 = new Vector2(p1.X + ctDelta, p1.Y);
             var p3 = new Vector2(p4.X - ctDelta, p4.Y);
-            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1, 1, 1, 1)), 5, 30);
+            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, ImGuiAPI.ColorConvertFloat4ToU32(new Color4f(1, 1, 1, 1)), TtDesignMacrossGraphStyles.LineNormalThickness * context.Camera.Scale, 30);
         }
     }
     public class TtGraphElementRender_ExecutionPin : IGraphElementRender
@@ -376,8 +386,8 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         {
             var pin = renderableElement as TtGraphElement_ExecutionPin;
             var cmdlist = ImGuiAPI.GetWindowDrawList();
-            var nodeStart = context.ViewPortTransform(pin.AbsLocation);
-            var nodeEnd = context.ViewPortTransform(pin.AbsLocation + new Vector2(pin.Size.Width, pin.Size.Height));
+            var nodeStart = context.ViewportTransform(pin.AbsLocation);
+            var nodeEnd = context.ViewportTransform(pin.AbsLocation + new Vector2(pin.Size.Width, pin.Size.Height));
             var elementContainerRender = TtElementRenderDevice.CreateGraphElementRender(pin.ElementContainer);
             elementContainerRender.Draw(pin.ElementContainer, ref context);
         }

@@ -40,7 +40,7 @@ namespace EngineNS.DesignMacross.Editor
             return false;
         }
 
-        public override bool HitCheck(Vector2 pos)
+        public override bool HitCheck(ref FMouseEventContext context)
         {
             return false;
         }
@@ -51,7 +51,7 @@ namespace EngineNS.DesignMacross.Editor
         }
 
 
-        public override void OnSelected(ref FGraphElementRenderingContext context)
+        public override void OnSelected(ref FMouseEventContext context)
         {
             
         }
@@ -153,12 +153,12 @@ namespace EngineNS.DesignMacross.Editor
         {
             var textBlock = renderableElement as TtGraphElement_TextBlock;
             var cmd = ImGuiAPI.GetWindowDrawList();
-            var start = context.ViewPortTransform(textBlock.AbsLocation);
-            var end = context.ViewPortTransform(textBlock.AbsLocation + new Vector2(textBlock.Size.Width, textBlock.Size.Height));
+            var start = context.ViewportTransform(textBlock.AbsLocation);
+            var end = context.ViewportTransform(textBlock.AbsLocation + new Vector2(textBlock.Size.Width, textBlock.Size.Height));
             cmd.AddRectFilled(start, end, ImGuiAPI.ColorConvertFloat4ToU32(textBlock.BackgroundColor), textBlock.Rounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll);
             var oldScale = ImGuiAPI.GetFont().Scale;
             var font = ImGuiAPI.GetFont();
-            font.Scale = textBlock.FontScale;
+            font.Scale = textBlock.FontScale * context.Camera.Scale;
             ImGuiAPI.PushFont(font);
             cmd.AddText(start, textBlock.TextColor, textBlock.Content, null);
             font.Scale = oldScale;

@@ -124,9 +124,7 @@
     <Properties Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="1">
       <e_0 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
         <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
-        <Comment Type="EngineNS.Bricks.CodeBuilder.TtCommentStatement@EngineCore">
-          <CommentString Type="System.String@Unknown" Value="" />
-        </Comment>
+        <Comment Type="EngineNS.Bricks.CodeBuilder.TtCommentStatement@EngineCore" />
         <InitValue Type="EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore">
           <Type Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="Survivor.TtGameMode@Survivor" />
           <TypeIsTypeof Type="System.Boolean@Unknown" Value="True" />
@@ -140,7 +138,7 @@
           <TypeDesc Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="Survivor.TtGameMode@Survivor" />
           <TypeFullName Type="System.String@Unknown" Value="Survivor.TtGameMode" />
         </VariableType>
-        <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Local" />
+        <VisitMode Type="EngineNS.Bricks.CodeBuilder.EVisisMode@EngineCore" Value="Public" />
       </e_0>
     </Properties>
     <SupperClassNames Type="System.Collections.Generic.List&lt;System.String@Unknown,&gt;@Unknown" Count="1">

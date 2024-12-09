@@ -67,9 +67,9 @@ namespace EngineNS.DesignMacross.Design.Statement
         public TtGraphElement_ReturnStatementDescription(IDescription description, IGraphElementStyle style) : base(description, style)
         {
         }
-        public override void OnSelected(ref FGraphElementRenderingContext context)
+        public override void OnSelected(ref FMouseEventContext context)
         {
-            context.EditorInteroperation.PGMember.Target = Description.Parent;
+            context.GraphElementRenderingContext.EditorInteroperation.PGMember.Target = Description.Parent;
         }
     }
 }

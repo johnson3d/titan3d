@@ -37,17 +37,21 @@ namespace EngineNS.DesignMacross.Base.Graph
             Camera.Location -= delta;
         }
         #endregion IDraggable
+
+        #region IZoomable
+        public void Zooming(float delta)
+        {
+            var newScale = Camera.Scale + delta * 0.1f;
+            Camera.Scale = Math.Clamp(newScale, 0.5f, 2.0f);
+        }
+        #endregion
         #region ISelectable
 
-        public bool HitCheck(Vector2 pos)
+        public bool HitCheck(ref FMouseEventContext context)
         {
-            Rect rect = new Rect(Location, Size);
-            //冗余一点
-            Rect mouseRect = new Rect(pos - Vector2.One, new SizeF(1.0f, 1.0f));
-            //return rect.IntersectsWith(mouseRect);
             return true;
         }
-        public virtual void OnSelected(ref FGraphElementRenderingContext context)
+        public virtual void OnSelected(ref FMouseEventContext context)
         {
 
         }
@@ -55,32 +59,32 @@ namespace EngineNS.DesignMacross.Base.Graph
         {
            
         }
-        public virtual void OnMouseOver(ref FGraphElementRenderingContext context)
+        public virtual void OnMouseOver(ref FMouseEventContext context)
         {
             
         }
 
-        public virtual void OnMouseLeave(ref FGraphElementRenderingContext context)
+        public virtual void OnMouseLeave(ref FMouseEventContext context)
         {
             
         }
 
-        public virtual void OnMouseLeftButtonDown(ref FGraphElementRenderingContext context)
+        public virtual void OnMouseLeftButtonDown(ref FMouseEventContext context)
         {
             
         }
 
-        public virtual void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context)
+        public virtual void OnMouseLeftButtonUp(ref FMouseEventContext context)
         {
             
         }
 
-        public virtual void OnMouseRightButtonDown(ref FGraphElementRenderingContext context)
+        public virtual void OnMouseRightButtonDown(ref FMouseEventContext context)
         {
             
         }
 
-        public virtual void OnMouseRightButtonUp(ref FGraphElementRenderingContext context)
+        public virtual void OnMouseRightButtonUp(ref FMouseEventContext context)
         {
             
         }

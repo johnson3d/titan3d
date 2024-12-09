@@ -53,7 +53,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
                             Debug.Assert(graphElementAttribute != null);
                             Debug.Assert(propertyValue is IDescription);
                             var desc = propertyValue as IDescription;
-                            var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, desc, context.GraphElementStyleManager.GetOrAdd(desc.Id));
+                            var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, desc, context.GraphElementStyleManager.GetOrAdd(desc));
                             instance.Parent = this;
                             Elements.Add(instance);
                             context.DescriptionsElement.Add(desc.Id, instance);
@@ -66,7 +66,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
                     Debug.Assert(propertyValue is IDescription);
                     var desc = propertyValue as IDescription;
                     var graphElementAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<IGraphElement>(propertyValue.GetType());
-                    var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, desc, context.GraphElementStyleManager.GetOrAdd(desc.Id));
+                    var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, desc, context.GraphElementStyleManager.GetOrAdd(desc));
                     instance.Parent = this;
                     Elements.Add(instance);
                     context.DescriptionsElement.Add(desc.Id, instance);
@@ -103,7 +103,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
                                  if (Rtti.TtTypeDescManager.CreateInstance(typeDesc) is TtAnimSubStateClassDescription state)
                                  {
                                      state.Name = GetValidNodeName(state.Name);
-                                     var style = graphElementStyleManager.GetOrAdd(state.Id, popMenu.PopedPosition);
+                                     var style = graphElementStyleManager.GetOrAdd(state, popMenu.PopedPosition);
                                      cmdHistory.CreateAndExtuteCommand("AddAnimState",
                                          (data) => { TimedCompoundStateClassDescription.AddState(state); },
                                          (data) => { TimedCompoundStateClassDescription.RemoveState(state); });
@@ -133,7 +133,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine.CompoundState
                                      TimedCompoundStateClassDescriptionId = compoundState.Id,
                                      TimedCompoundStateClassDescription = compoundState,
                                  };
-                                 var style = graphElementStyleManager.GetOrAdd(hubDesc.Id, popMenu.PopedPosition);
+                                 var style = graphElementStyleManager.GetOrAdd(hubDesc, popMenu.PopedPosition);
                                  cmdHistory.CreateAndExtuteCommand("AddHub",
                                    (data) => { TimedCompoundStateClassDescription.AddHub(hubDesc); },
                                    (data) => { TimedCompoundStateClassDescription.RemoveHub(hubDesc); });

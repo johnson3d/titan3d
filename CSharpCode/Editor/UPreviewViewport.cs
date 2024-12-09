@@ -154,6 +154,20 @@ namespace EngineNS.Editor
         public bool FreezCameraControl = false;
         public delegate void Delegate_OnEvent(in Bricks.Input.Event e);
         public Delegate_OnEvent OnEventAction;
+        public enum EViewportMotion
+        {
+            None = 0,
+            Rotate,
+            Zoom,
+            Move,
+            ChangeMoveSpeed,
+        }
+        EViewportMotion mViewportMotion = EViewportMotion.None;
+        public EViewportMotion ViewportMotion
+        {
+            get => mViewportMotion;
+            private set => mViewportMotion = value;
+        }
         public unsafe override bool OnEvent(in Bricks.Input.Event e)
         {
             if(e.Type == Bricks.Input.EventType.MOUSEBUTTONDOWN)
@@ -162,10 +176,9 @@ namespace EngineNS.Editor
                 mPreMousePt.Y = e.MouseButton.Y;
             }
 
-            if (this.IsFocused == false)
-            {
+            var viewportPoint = new Vector2(e.MouseMotion.X, e.MouseMotion.Y) + ViewportPos;
+            if (PointInOverlappedArea(in viewportPoint))
                 return true;
-            }
 
             OnEventAction?.Invoke(in e);
 
@@ -174,6 +187,10 @@ namespace EngineNS.Editor
             var keyboards = TtEngine.Instance.InputSystem;
             if (e.Type == Bricks.Input.EventType.MOUSEMOTION)
             {
+                if (this.IsFocused == false)
+                {
+                    return true;
+                }
                 if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_LEFT)
                 {
                     if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
@@ -184,23 +201,27 @@ namespace EngineNS.Editor
                         {
                             TtEngine.Instance.GfxDevice.RenderCmdQueue.CaptureRenderDocFrame = true;
                         }*/
+                        ViewportMotion = EViewportMotion.Rotate;
                     }
                 }
                 else if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_MIDDLE)
                 {
                     CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.X - mPreMousePt.X) * CameraMoveSpeed * TtEngine.Instance.ElapsedSecond);
                     CameraController.Move(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.Y - mPreMousePt.Y) * CameraMoveSpeed * TtEngine.Instance.ElapsedSecond);
+                    ViewportMotion = EViewportMotion.Move;
                 }
                 else if (e.MouseButton.Button == (byte)Bricks.Input.EMouseButton.BUTTON_X1)
                 {
                     if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                     {
                         CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, (e.MouseMotion.Y - mPreMousePt.Y) * 0.03f);
+                        ViewportMotion = EViewportMotion.Zoom;
                     }
                     else
                     {
                         CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Up, (e.MouseMotion.X - mPreMousePt.X) * CameraMouseRotSpeed * TtEngine.Instance.ElapsedSecond, true);
                         CameraController.Rotate(Graphics.Pipeline.ECameraAxis.Right, (e.MouseMotion.Y - mPreMousePt.Y) * CameraMouseRotSpeed * TtEngine.Instance.ElapsedSecond, true);
+                        ViewportMotion = EViewportMotion.Move;
                     }
                 }
 
@@ -212,11 +233,17 @@ namespace EngineNS.Editor
                 if (keyboards.IsKeyDown(Bricks.Input.Keycode.KEY_LALT))
                 {
                     CameraMoveSpeed += (float)(e.MouseWheel.Y * 0.01f);
+                    ViewportMotion = EViewportMotion.ChangeMoveSpeed;
                 }
                 else
                 {
                     CameraController.Move(Graphics.Pipeline.ECameraAxis.Forward, e.MouseWheel.Y * CameraMouseWheelSpeed);
+                    ViewportMotion = EViewportMotion.Zoom;
                 }
+            }
+            else if(e.Type == Bricks.Input.EventType.MOUSEBUTTONUP)
+            {
+                ViewportMotion = EViewportMotion.None;
             }
             return true;
         }

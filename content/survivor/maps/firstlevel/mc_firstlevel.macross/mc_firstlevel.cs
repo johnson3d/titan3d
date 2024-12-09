@@ -4,10 +4,13 @@
     public partial class mc_firstlevel : EngineNS.GamePlay.TtMacrossGame
     {
         [EngineNS.Rtti.Meta]
-        private Survivor.TtGameMode GameMode { get; set; } = null;
+        public Survivor.TtGameMode GameMode { get; set; } = null;
         public EngineNS.Macross.TtMacrossBreak breaker_FinalViewportSlate_560254116 = new EngineNS.Macross.TtMacrossBreak("breaker_FinalViewportSlate_560254116");
         public EngineNS.Macross.TtMacrossBreak breaker_InitViewportSlateWithScene_4277137042 = new EngineNS.Macross.TtMacrossBreak("breaker_InitViewportSlateWithScene_4277137042");
         public EngineNS.Macross.TtMacrossBreak breaker_CreateCharacterFromPrefabDetial_863962771 = new EngineNS.Macross.TtMacrossBreak("breaker_CreateCharacterFromPrefabDetial_863962771");
+        public EngineNS.Macross.TtMacrossBreak breaker_creator_2702113056 = new EngineNS.Macross.TtMacrossBreak("breaker_creator_2702113056");
+        public EngineNS.Macross.TtMacrossBreak breaker_LoadWeapons_2558297129 = new EngineNS.Macross.TtMacrossBreak("breaker_LoadWeapons_2558297129");
+        public EngineNS.Macross.TtMacrossBreak breaker_return_2433468528 = new EngineNS.Macross.TtMacrossBreak("breaker_return_2433468528");
         EngineNS.Macross.TtMacrossStackFrame mFrame_BeginDestroy_2650419528 = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("survivor/maps/firstlevel/mc_firstlevel.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.MetaAttribute]
         public override void BeginDestroy(EngineNS.GamePlay.TtGameInstance host)
@@ -41,6 +44,16 @@
                 mFrame_BeginPlay_1342966456.SetWatchVariable("v_OrientToMovmement_CreateCharacterFromPrefabDetial_863962771", true);
                 breaker_CreateCharacterFromPrefabDetial_863962771.TryBreak();
                 await host.CreateCharacterFromPrefabDetial(tmp_r_InitViewportSlateWithScene_4277137042,EngineNS.RName.GetRName("survivor/player/prefab_hero.prefab", EngineNS.RName.ERNameType.Game),false,true);
+                Survivor.TtGameMode new_2702113056 = new Survivor.TtGameMode();
+                mFrame_BeginPlay_1342966456.SetWatchVariable("Type_2702113056", new_2702113056);
+                breaker_creator_2702113056.TryBreak();
+                GameMode = new_2702113056;
+                mFrame_BeginPlay_1342966456.SetWatchVariable("v_name_LoadWeapons_2558297129", EngineNS.RName.GetRName("survivor/skills/weapon.dataset", EngineNS.RName.ERNameType.Game));
+                breaker_LoadWeapons_2558297129.TryBreak();
+                GameMode.LoadWeapons(EngineNS.RName.GetRName("survivor/skills/weapon.dataset", EngineNS.RName.ERNameType.Game));
+                ret_1466362967 = true;
+                mFrame_BeginPlay_1342966456.SetWatchVariable("ret_1466362967_2433468528", ret_1466362967);
+                breaker_return_2433468528.TryBreak();
                 return ret_1466362967;
             }
         }

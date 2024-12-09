@@ -7,6 +7,7 @@ using EngineNS.DesignMacross.Design.Statement;
 using EngineNS.DesignMacross.Editor;
 using EngineNS.EGui;
 using EngineNS.EGui.Controls;
+using EngineNS.Rtti;
 
 namespace EngineNS.DesignMacross.Design.ConnectingLine
 {
@@ -72,12 +73,12 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             
         }
 
-        public bool HitCheck(Vector2 pos)
+        public bool HitCheck(ref FMouseEventContext context)
         {
             return false;
         }
 
-        public void OnSelected(ref FGraphElementRenderingContext context)
+        public void OnSelected(ref FMouseEventContext context)
         {
         }
 
@@ -85,27 +86,27 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         {
         }
 
-        public void OnMouseOver(ref FGraphElementRenderingContext context)
+        public void OnMouseOver(ref FMouseEventContext context)
         {
         }
 
-        public void OnMouseLeave(ref FGraphElementRenderingContext context)
+        public void OnMouseLeave(ref FMouseEventContext context)
         {
         }
 
-        public void OnMouseLeftButtonDown(ref FGraphElementRenderingContext context)
+        public void OnMouseLeftButtonDown(ref FMouseEventContext context)
         {
         }
 
-        public void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context)
+        public void OnMouseLeftButtonUp(ref FMouseEventContext context)
         {
         }
 
-        public void OnMouseRightButtonDown(ref FGraphElementRenderingContext context)
+        public void OnMouseRightButtonDown(ref FMouseEventContext context)
         {
         }
 
-        public void OnMouseRightButtonUp(ref FGraphElementRenderingContext context)
+        public void OnMouseRightButtonUp(ref FMouseEventContext context)
         {
         }
         #endregion
@@ -119,7 +120,6 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         public TtGraphElement_TextBlock NameTextBlock = new TtGraphElement_TextBlock();
         public TtGraphElement_StackPanel ElementContainer = new();
         public TtGraphElement_Icon Icon= new();
-        public TtGraphElement_TextBox TextBox = new();
         public Color4f BackgroundColor
         {
             get => Style.BackgroundColor;
@@ -139,6 +139,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             }
             ElementContainer.Parent = this;
             ElementContainer.Orientation = EOrientation.Horizontal;
+            ElementContainer.VerticalAlignment = EVerticalAlignment.Center;
             NameTextBlock.Content = DataPinDescription.Name;
             NameTextBlock.VerticalAlignment = EVerticalAlignment.Center;
             NameTextBlock.HorizontalAlignment = EHorizontalAlignment.Left;
@@ -223,10 +224,11 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             Icon.IconName = IconName;
             base.AfterConstructElements(ref context);
         }
-        public override void OnMouseOver(ref FGraphElementRenderingContext context)
+        public override void OnMouseOver(ref FMouseEventContext context)
         {
+            var renderingContext = context.GraphElementRenderingContext;
             BackgroundColor = new Color4f(0.5, 1, 1, 1);
-            var methodGraph = context.DesignedGraph as TtGraph_Method;
+            var methodGraph = renderingContext.DesignedGraph as TtGraph_Method;
             if (methodGraph.PreviewExecutionLine != null)
             {
                 BackgroundColor = new Color4f(0.5, 1, 0, 0);
@@ -272,16 +274,23 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
                 }
             }
         }
-        public override void OnMouseLeave(ref FGraphElementRenderingContext context)
+        public override void OnMouseLeave(ref FMouseEventContext context)
         {
             BackgroundColor = new Color4f(0, 0, 0, 0);
         }
-        public override void OnMouseLeftButtonDown(ref FGraphElementRenderingContext context)
+        public override void OnMouseLeftButtonDown(ref FMouseEventContext context)
         {
-            var methodGraph = context.DesignedGraph as TtGraph_Method;
-            methodGraph.PreviewDataLine = new TtGraphElement_PreviewDataLine();
-            methodGraph.PreviewDataLine.AbsLocation = Icon.AbsCenter;
-            methodGraph.PreviewDataLine.StartPin = DataPinDescription;
+            var start = context.GraphElementRenderingContext.ViewportTransform(Icon.AbsLocation);
+            var end = context.GraphElementRenderingContext.ViewportTransform(Icon.AbsLocation + new Vector2(Icon.Size.Width, Icon.Size.Height));
+            Rect iconRect = new Rect(start.X, start.Y, end.X - start.X, end.Y - start.Y);
+            if(iconRect.Contains(context.MouseAbsPos))
+            {
+                var renderContext = context.GraphElementRenderingContext;
+                var methodGraph = renderContext.DesignedGraph as TtGraph_Method;
+                methodGraph.PreviewDataLine = new TtGraphElement_PreviewDataLine();
+                methodGraph.PreviewDataLine.AbsLocation = Icon.AbsCenter;
+                methodGraph.PreviewDataLine.StartPin = DataPinDescription;
+            }
         }
         public bool CheckPinsLinkable(TtDataPinDescription startPin, TtDataPinDescription endPin)
         {
@@ -301,9 +310,10 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             }
             return false;
         }
-        public override void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context)
+        public override void OnMouseLeftButtonUp(ref FMouseEventContext context)
         {
-            var methodGraph = context.DesignedGraph as TtGraph_Method;
+            var renderContext = context.GraphElementRenderingContext;
+            var methodGraph = renderContext.DesignedGraph as TtGraph_Method;
             if (methodGraph.PreviewExecutionLine != null)
             {
                 methodGraph.PreviewExecutionLine = null;
@@ -342,7 +352,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
                     }
                     
                     var line = new TtDataLineDescription() { Name = "Data_" + fromPin.Parent.Name + "_To_" + toPin.Parent.Name, FromId = fromPin.Id, ToId = toPin.Id };
-                    context.CommandHistory.CreateAndExtuteCommand("AddDataLine",
+                    renderContext.CommandHistory.CreateAndExtuteCommand("AddDataLine",
                         (data) => { methodGraph.MethodDescription.AddDataLine(line); },
                         (data) => { methodGraph.MethodDescription.RemoveDataLine(line); });
                 }
@@ -380,6 +390,9 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
     [ImGuiElementRender(typeof(TtGraphElementRender_DataPin))]
     public class TtGraphElement_DataInPin : TtGraphElement_DataPin
     {
+        public TtDataInPinDescription DataInPinDescription { get => Description as TtDataInPinDescription; }
+        public TtGraphElement_TextBox TextBox = new();
+        public TtGraphElement_RNameSelect RNameSelect = new();
         public TtGraphElement_DataInPin(IDescription description, IGraphElementStyle style) : base(description, style)
         {
         }
@@ -388,6 +401,66 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         {
             base.ConstructElements(ref context);
             //ElementContainer.AddElement(TextBox);
+            if(DataInPinDescription.TypeDesc == TtTypeDesc.TypeOf<RName>())
+            {
+                RNameSelect.Description = Description;
+
+                RNameSelect.GetBrowserRNameValueFunc = () =>
+                {
+                    return DataInPinDescription.TypeVaule as RName;
+                };
+                RNameSelect.SetBrowserRNameValueFunc = (value) =>
+                {
+                    DataInPinDescription.TypeVaule = value;
+                };
+
+                RNameSelect.GetBrowserFilterExtsFunc = () =>
+                {
+                    var dataPinStyle = Style as TtDataPinDescriptionElementStyle;
+                    return dataPinStyle.FilterExts;
+                };
+                RNameSelect.SetBrowserFilterExtsFunc = (filterExts) =>
+                {
+                    var dataPinStyle = Style as TtDataPinDescriptionElementStyle;
+                    dataPinStyle.FilterExts = filterExts;
+                };
+
+                RNameSelect.GetBrowserShowTypeFunc = () =>
+                {
+                    var dataPinStyle = Style as TtDataPinDescriptionElementStyle;
+                    return dataPinStyle.ShowType;
+                };
+                RNameSelect.SetBrowserShowTypeFunc = (showType) =>
+                {
+                    var dataPinStyle = Style as TtDataPinDescriptionElementStyle;
+                    dataPinStyle.ShowType = showType;
+                };
+
+                RNameSelect.GetContentBrowser = () =>
+                {
+                    var dataPinStyle = Style as TtDataPinDescriptionElementStyle;
+                    return dataPinStyle.ContentBrowser;
+                };
+                RNameSelect.SetBrowserVisibleFunc = (visible) =>
+                {
+                    var dataPinStyle = Style as TtDataPinDescriptionElementStyle;
+                    dataPinStyle.BrowserVisible = visible;
+                };
+                RNameSelect.GetBrowserVisibleFunc = () =>
+                {
+                    var dataPinStyle = Style as TtDataPinDescriptionElementStyle;
+                    return dataPinStyle.BrowserVisible;
+                };
+                RNameSelect.OnValueChange = (oldValue, newValue) =>
+                {
+                    DataInPinDescription.TypeVaule = newValue;
+                };
+                if (DataPinDescription.TypeDesc == TtTypeDesc.TypeOf<RName>())
+                {
+                    ElementContainer.AddElement(RNameSelect);
+                }
+            }
+            
         }
     }
     public class TtGraphElementRender_DataLine : IGraphElementRender
@@ -403,8 +476,8 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             {
                 return;
             }
-            var nodeStart = context.ViewPortTransform(fromPin.Icon.AbsCenter);
-            var nodeEnd = context.ViewPortTransform(toPin.Icon.AbsCenter);
+            var nodeStart = context.ViewportTransform(fromPin.Icon.AbsCenter);
+            var nodeEnd = context.ViewportTransform(toPin.Icon.AbsCenter);
             var p1 = nodeStart;
             var p4 = nodeEnd;
             var delta = p4 - p1;
@@ -413,7 +486,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             var p2 = new Vector2(p1.X + ctDelta, p1.Y);
             var p3 = new Vector2(p4.X - ctDelta, p4.Y);
             var lineStyle = TtDesignMacrossGraphStyles.GetDataLineStyle(fromPin.DataPinDescription.TypeDesc);
-            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, ImGuiAPI.ColorConvertFloat4ToU32(lineStyle.Normal.ToColor4Float()), TtDesignMacrossGraphStyles.LineNormalThickness, 30);
+            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, ImGuiAPI.ColorConvertFloat4ToU32(lineStyle.Normal.ToColor4Float()), TtDesignMacrossGraphStyles.LineNormalThickness * context.Camera.Scale, 30);
         }
     }
     public class TtGraphElementRender_PreviewDataLine : IGraphElementRender
@@ -426,15 +499,17 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             var nodeEnd = Vector2.Zero;
             if (line.StartPin is TtDataOutPinDescription)
             {
-                nodeStart = context.ViewPortTransform(line.AbsLocation);
-                var mousePosInViewPort = context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos());
-                nodeEnd = context.ViewPortTransform(mousePosInViewPort);
+                nodeStart = context.ViewportTransform(line.AbsLocation);
+                //var mousePosInViewPort = context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos());
+                //nodeEnd = context.ViewportTransform(mousePosInViewPort);
+                nodeEnd = ImGuiAPI.GetMousePos();
             }
             else
             {
-                nodeEnd = context.ViewPortTransform(line.AbsLocation);
-                var mousePosInViewPort = context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos());
-                nodeStart = context.ViewPortTransform(mousePosInViewPort);
+                nodeEnd = context.ViewportTransform(line.AbsLocation);
+                //var mousePosInViewPort = context.ViewPort.ViewportInverseTransform(context.Camera.Location, ImGuiAPI.GetMousePos());
+                //nodeStart = context.ViewportTransform(mousePosInViewPort);
+                nodeStart = ImGuiAPI.GetMousePos();
             }
 
             var p1 = nodeStart;
@@ -445,7 +520,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             var p2 = new Vector2(p1.X + ctDelta, p1.Y);
             var p3 = new Vector2(p4.X - ctDelta, p4.Y);
             var lineStyle = TtDesignMacrossGraphStyles.GetDataLineStyle(line.StartPin.TypeDesc);
-            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, ImGuiAPI.ColorConvertFloat4ToU32(lineStyle.Normal.ToColor4Float()), TtDesignMacrossGraphStyles.LineNormalThickness, 30);
+            cmdlist.AddBezierCubic(in p1, in p2, in p3, in p4, ImGuiAPI.ColorConvertFloat4ToU32(lineStyle.Normal.ToColor4Float()), TtDesignMacrossGraphStyles.LineNormalThickness * context.Camera.Scale, 30);
         }
     }
     public class TtGraphElementRender_DataPin : IGraphElementRender
@@ -454,8 +529,8 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
         {
             var pin = renderableElement as TtGraphElement_DataPin;
             var cmdlist = ImGuiAPI.GetWindowDrawList();
-            var nodeStart = context.ViewPortTransform(pin.AbsLocation);
-            var nodeEnd = context.ViewPortTransform(pin.AbsLocation + new Vector2(pin.Size.Width, pin.Size.Height));
+            var nodeStart = context.ViewportTransform(pin.AbsLocation);
+            var nodeEnd = context.ViewportTransform(pin.AbsLocation + new Vector2(pin.Size.Width, pin.Size.Height));
             var elementContainerRender = TtElementRenderDevice.CreateGraphElementRender(pin.ElementContainer);
             elementContainerRender.Draw(pin.ElementContainer, ref context);
         }

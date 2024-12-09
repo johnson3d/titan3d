@@ -36,6 +36,18 @@ namespace EngineNS.DesignMacross.Editor.GraphPanel
     {
         public void Draw(TtNavigableGraphsPanel navigableGraphsPanel, FDesignMacrossEditorRenderingContext context)
         {
+            if (ImGuiAPI.Button("Snap"))
+            {
+                var presentWindow = ImGuiAPI.GetWindowViewportData();
+                if (presentWindow != null)
+                {
+                    var graph = navigableGraphsPanel.Navigation.Peek() as TtGraph;
+                    var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(context.DesignMacrossAssetName);
+                    EngineNS.Editor.USnapshot.Save(context.DesignMacrossAssetName, ameta, presentWindow.SwapChain.mCoreObject.GetBackBuffer(0),
+                        (uint)graph.ViewPort.Location.X, (uint)graph.ViewPort.Location.Y, (uint)graph.ViewPort.Size.Width, (uint)graph.ViewPort.Size.Height);
+                }
+            }
+            ImGuiAPI.SameLine(0, 5);
             if (ImGuiAPI.Button("<"))
             {
                 if (navigableGraphsPanel.Navigation.Count > 1)

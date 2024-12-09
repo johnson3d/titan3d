@@ -513,15 +513,15 @@ namespace EngineNS.UI.Editor
                 PreviewViewport.ViewportType = Graphics.Pipeline.TtViewportSlate.EViewportType.ChildWindow;
                 PreviewViewport.OnDraw();
 
-                // debug ///////////////////
                 var drawList = ImGuiAPI.GetForegroundDrawList();
+                /*/ debug ///////////////////
                 drawList.AddText(pos + new Vector2(0, 50), 0xffffffff, 
                     $"x:{TtEngine.Instance.UIManager.DebugMousePt.X}\r\n" +
                     $"y:{TtEngine.Instance.UIManager.DebugMousePt.Y}\r\n" +
                     $"px:{TtEngine.Instance.UIManager.DebugHitPt.X}\r\n" +
                     $"py:{TtEngine.Instance.UIManager.DebugHitPt.Y}\r\n" +
                     $"el:{TtEngine.Instance.UIManager.DebugPointatElement}", null);
-                ////////////////////////////
+                ///////////////////////////*/
                 TtEngine.Instance.UIManager.DebugHitPt = new Vector2(TtEngine.Instance.InputSystem.Mouse.EventMouseX, TtEngine.Instance.InputSystem.Mouse.EventMouseY);
                 var dragDropPayload = ImGuiAPI.GetDragDropPayload();
                 if (dragDropPayload != null)
@@ -796,6 +796,7 @@ namespace EngineNS.UI.Editor
                     }
                     Vector2 offset = getOffsetFunc.Invoke(parent);
                     parent.ProcessNewAddChild(uiControl, offset, size);
+                    mNeedExpandElement.Add(parent);
                 }
 
                 //handle.Free();
@@ -975,6 +976,7 @@ namespace EngineNS.UI.Editor
                 }
             }
         }
+        HashSet<TtUIElement> mNeedExpandElement = new HashSet<TtUIElement>();
         unsafe void DrawUIElementInHierachy(TtUIElement element, ref int idx)
         {
             if (element.TemplateParent != null)
@@ -1003,6 +1005,11 @@ namespace EngineNS.UI.Editor
                 }
             }
 
+            if(mNeedExpandElement.Contains(element))
+            {
+                ImGuiAPI.SetNextItemOpen(true, ImGuiCond_.ImGuiCond_Always);
+                mNeedExpandElement.Remove(element);
+            }
             if (childrenCount == 0)
                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
             var treeNodeResult = ImGuiAPI.TreeNodeEx(name, flags);
@@ -1076,6 +1083,7 @@ namespace EngineNS.UI.Editor
                                 Vector2 offset;
                                 data.Elements[i].GetOffsetFromElement(parent, out offset);
                                 parent.ProcessNewAddChild(data.Elements[i], offset, mNewCreateUISize);
+                                mNeedExpandElement.Add(parent);
                             }
                         }
                     }
@@ -1226,16 +1234,23 @@ namespace EngineNS.UI.Editor
         //string mDimensionToolButtonName = "3D";
         void DrawViewportUIAction(in Vector2 startDrawPos)
         {
+            Vector2 itemRectMin, itemRectMax;
             if (AssetName != null)
             {
                 if (EGui.UIProxy.CustomButton.ToolButton("S", in Vector2.Zero))
                     EngineNS.Editor.USnapshot.Save(AssetName, TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName), PreviewViewport.RenderPolicy.GetFinalShowRSV());
+                itemRectMin = ImGuiAPI.GetItemRectMin();
+                itemRectMax = ImGuiAPI.GetItemRectMax();
+                PreviewViewport.RegisterOverlappedArea("S", new RectangleF(in itemRectMin, in itemRectMax));
                 ImGuiAPI.SameLine(0, -1);
             }
             if (EGui.UIProxy.CustomButton.ToolButton("Reset Camera", in Vector2.Zero))
             {
                 ResetCamera();
             }
+            itemRectMin = ImGuiAPI.GetItemRectMin();
+            itemRectMax = ImGuiAPI.GetItemRectMax();
+            PreviewViewport.RegisterOverlappedArea("Reset Camera", new RectangleF(in itemRectMin, in itemRectMax));
             ImGuiAPI.SameLine(0, -1);
             if(EGui.UIProxy.CustomButton.ToolButton("Focus", in Vector2.Zero))
             {
@@ -1279,9 +1294,13 @@ namespace EngineNS.UI.Editor
                     ResetCamera();
                 }
             }
+            itemRectMin = ImGuiAPI.GetItemRectMin();
+            itemRectMax = ImGuiAPI.GetItemRectMax();
+            PreviewViewport.RegisterOverlappedArea("Focus", new RectangleF(in itemRectMin, in itemRectMax));
             ImGuiAPI.SameLine(0, -1);
             if(EGui.UIProxy.CustomButton.ToggleButton("Wireframe", in Vector2.Zero, ref mIsWireFrame))
             {
+
                 async Thread.Async.TtTask WireFrameProcess()
                 {
                     if (mIsWireFrame)
@@ -1295,6 +1314,9 @@ namespace EngineNS.UI.Editor
 
                 TtEngine.Instance.TaskCollector.AddWaitTask(WireFrameProcess());
             }
+            itemRectMin = ImGuiAPI.GetItemRectMin();
+            itemRectMax = ImGuiAPI.GetItemRectMax();
+            PreviewViewport.RegisterOverlappedArea("Wireframe", new RectangleF(in itemRectMin, in itemRectMax));
             /*ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton(mDimensionToolButtonName, in Vector2.Zero))
             {
@@ -1385,7 +1407,9 @@ namespace EngineNS.UI.Editor
 
         void OnPreviewViewportEvent(in Bricks.Input.Event e)
         {
-            DecoratorEventProcess(in e);
+            if (PreviewViewport.ViewportMotion != EngineNS.Editor.TtPreviewViewport.EViewportMotion.None)
+                return;
+            DecoratorEventProcessStart(in e);
 
             switch(e.Type)
             {
@@ -1402,7 +1426,7 @@ namespace EngineNS.UI.Editor
                         }
                     }
                     break;
-                case Bricks.Input.EventType.MOUSEBUTTONDOWN:
+                case Bricks.Input.EventType.MOUSEBUTTONUP:
                     {
                         var delta = PreviewViewport.WindowPos - PreviewViewport.ViewportPos;
                         var mousePt = new Vector2(e.MouseButton.X - delta.X, e.MouseButton.Y - delta.Y);
@@ -1424,6 +1448,8 @@ namespace EngineNS.UI.Editor
                 case EventType.MOUSEWHEEL:
                     break;
             }
+
+            DecoratorEventProcessEnd(in e);
         }
 
         void CalculateCameraMovingSpeed(in float mousePointX, in float mousePointY)

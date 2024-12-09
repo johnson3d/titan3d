@@ -28,7 +28,8 @@ namespace EngineNS.UI.Editor
         Thread.Async.TtTask UpdateDecorator();
         void ProcessSelectElementDecorator();
         void ClearDecorator();
-        void DecoratorEventProcess(in Bricks.Input.Event e);
+        void DecoratorEventProcessStart(in Bricks.Input.Event e);
+        void DecoratorEventProcessEnd(in Bricks.Input.Event e);
         bool IsInDecoratorOperation();
     }
 
@@ -168,9 +169,13 @@ namespace EngineNS.UI.Editor
             CurrentDecorator?.ProcessSelectElementDecorator();
         }
 
-        void DecoratorEventProcess(in Bricks.Input.Event e)
+        void DecoratorEventProcessStart(in Bricks.Input.Event e)
         {
-            CurrentDecorator?.DecoratorEventProcess(e);
+            CurrentDecorator?.DecoratorEventProcessStart(e);
+        }
+        void DecoratorEventProcessEnd(in Bricks.Input.Event e)
+        {
+            CurrentDecorator?.DecoratorEventProcessEnd(e);
         }
     }
 }

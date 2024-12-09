@@ -282,11 +282,14 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
             base.ConstructElements(ref context);
         }
 
-        public override bool HitCheck(Vector2 pos)
+        public override bool HitCheck(ref FMouseEventContext context)
         {
-            Rect rect = new Rect(AbsLocation, Size);
+            var renderingContext = context.GraphElementRenderingContext;
+            var start = renderingContext.ViewportTransform(AbsLocation);
+            var end = renderingContext.ViewportTransform(AbsLocation + new Vector2(Size.Width, Size.Height));
+            Rect rect = new Rect(start.X, start.Y, end.X - start.X, end.Y - start.Y);
             //冗余一点
-            Rect mouseRect = new Rect(pos - Vector2.One, new SizeF(1.0f, 1.0f));
+            Rect mouseRect = new Rect(context.MouseAbsPos - Vector2.One, new SizeF(1.0f, 1.0f));
             return rect.IntersectsWith(mouseRect);
         }
     }
@@ -299,8 +302,8 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
             transitionElement.ConstructElements(ref context);
             var cmdlist = ImGuiAPI.GetWindowDrawList();
             var size = transitionElement.From.Size;
-            var nodeStart = context.ViewPortTransform(transitionElement.AbsLocation);
-            var nodeEnd = context.ViewPortTransform(transitionElement.AbsLocation + new Vector2(size.Width, 10));
+            var nodeStart = context.ViewportTransform(transitionElement.AbsLocation);
+            var nodeEnd = context.ViewportTransform(transitionElement.AbsLocation + new Vector2(size.Width, 10));
 
             var clolr = new Color4f(233f / 255, 234 / 255f, 236f / 255);
             cmdlist.AddRectFilled(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(clolr), transitionElement.TimeDurationBarRounding, transitionElement.TimeDurationBarRoundCorner);
@@ -323,7 +326,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
                 var lines = ManhattanConnectionRouter.GetLines((transitionElement.AbsLocation * 2 + new Vector2(size.Width, 10)) / 2, ELineDirection.South, acceptable.GetTransitionLinkPosition(ELineDirection.East), ELineDirection.East, rects);
                 foreach(var line in lines)
                 {
-                    cmdlist.AddLine(context.ViewPortTransform(line.Start), context.ViewPortTransform(line.End), ImGuiAPI.ColorConvertFloat4ToU32(clolr), 5);
+                    cmdlist.AddLine(context.ViewportTransform(line.Start), context.ViewportTransform(line.End), ImGuiAPI.ColorConvertFloat4ToU32(clolr), TtDesignMacrossGraphStyles.LineNormalThickness * context.Camera.Scale);
                 }
             }
         }

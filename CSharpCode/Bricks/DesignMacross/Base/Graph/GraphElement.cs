@@ -2,6 +2,7 @@
 using EngineNS.Rtti;
 using System.Diagnostics;
 using System.Drawing;
+using System.Reflection;
 
 namespace EngineNS.DesignMacross.Base.Graph
 {
@@ -40,31 +41,53 @@ namespace EngineNS.DesignMacross.Base.Graph
             return new FDataLineStyle() { Normal = Color4b.Blue, Selected = Color4b.Blue };
         }
     }
+    
     public class TtGraphElementStyleCollection : IO.BaseSerializer
     {
         
         [Rtti.Meta]
         public Dictionary<Guid, IGraphElementStyle> GraphElementStyles { get; set; } = new Dictionary<Guid, IGraphElementStyle>();
-        public IGraphElementStyle GetOrAdd(Guid id)
+        public IGraphElementStyle GetOrAdd(IDescription description)
         {
-            if (!GraphElementStyles.ContainsKey(id))
+            if (!GraphElementStyles.ContainsKey(description.Id))
             {
-                var style = new TtGraphElementStyle();
-                GraphElementStyles.Add(id, style);
-                return style;
+                var styleAttribute = description.GetType().GetCustomAttribute<GraphElementStyleAttribute>();
+                if (styleAttribute == null)
+                {
+                    var style = new TtGraphElementStyle();
+                    GraphElementStyles.Add(description.Id, style);
+                    return style;
+                }
+                else
+                {
+                    var style = TtTypeDescManager.CreateInstance(styleAttribute.GraphElementType) as IGraphElementStyle;
+                    GraphElementStyles.Add(description.Id, style);
+                    return style;
+                }
             }
             else
             {
-                return GraphElementStyles[id];
+                return GraphElementStyles[description.Id];
             }
         }
-        public IGraphElementStyle GetOrAdd(Guid id, Vector2 location)
+
+        public IGraphElementStyle GetOrAdd(IDescription description, Vector2 location)
         {
-            if (!GraphElementStyles.ContainsKey(id))
+            if (!GraphElementStyles.ContainsKey(description.Id))
             {
-                GraphElementStyles.Add(id, new TtGraphElementStyle());
+                var styleAttribute = description.GetType().GetCustomAttribute<GraphElementStyleAttribute>();
+                if (styleAttribute == null)
+                {
+                    var newStyle = new TtGraphElementStyle();
+                    GraphElementStyles.Add(description.Id, newStyle);
+                }
+                else
+                {
+                    var newStyle = TtTypeDescManager.CreateInstance(styleAttribute.GraphElementType) as IGraphElementStyle;
+                    GraphElementStyles.Add(description.Id, newStyle);
+                }
             }
-            var style = GraphElementStyles[id];
+            var style = GraphElementStyles[description.Id];
             style.Location = location;
             return style;
         }
@@ -94,33 +117,33 @@ namespace EngineNS.DesignMacross.Base.Graph
         public IDescription Description { get; set; } = null;
         public virtual IGraphElementStyle Style { get; set; } = new TtGraphElementStyle();
         public abstract bool CanDrag();
-        public abstract bool HitCheck(Vector2 pos);
+        public abstract bool HitCheck(ref FMouseEventContext context);
         public abstract void OnDragging(Vector2 delta);
-        public virtual void OnMouseOver(ref FGraphElementRenderingContext context)
+        public virtual void OnMouseOver(ref FMouseEventContext context)
         {
         }
-        public virtual void OnMouseLeave(ref FGraphElementRenderingContext context)
-        {
-        }
-
-        public virtual void OnMouseLeftButtonDown(ref FGraphElementRenderingContext context)
-        {
-
-        }
-
-        public virtual void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context)
+        public virtual void OnMouseLeave(ref FMouseEventContext context)
         {
         }
 
-        public virtual void OnMouseRightButtonDown(ref FGraphElementRenderingContext context)
+        public virtual void OnMouseLeftButtonDown(ref FMouseEventContext context)
+        {
+
+        }
+
+        public virtual void OnMouseLeftButtonUp(ref FMouseEventContext context)
         {
         }
 
-        public virtual void OnMouseRightButtonUp(ref FGraphElementRenderingContext context)
+        public virtual void OnMouseRightButtonDown(ref FMouseEventContext context)
         {
         }
 
-        public abstract void OnSelected(ref FGraphElementRenderingContext context);
+        public virtual void OnMouseRightButtonUp(ref FMouseEventContext context)
+        {
+        }
+
+        public abstract void OnSelected(ref FMouseEventContext context);
         public abstract void OnUnSelected();
     }
 
@@ -167,42 +190,45 @@ namespace EngineNS.DesignMacross.Base.Graph
             popupMenu.StringId = Name + "_" + Id + "_" + "ContextMenu";
         }
         #region ISelectable
-        public virtual bool HitCheck(Vector2 pos)
+        public virtual bool HitCheck(ref FMouseEventContext context)
         {
-            Rect rect = new Rect(AbsLocation, Size);
+            var renderingContext = context.GraphElementRenderingContext;
+            var start = renderingContext.ViewportTransform(AbsLocation);
+            var end = renderingContext.ViewportTransform(AbsLocation + new Vector2(Size.Width, Size.Height));
+            Rect rect = new Rect(start.X, start.Y, end.X - start.X, end.Y - start.Y);
             //冗余一点
-            Rect mouseRect = new Rect(pos - Vector2.One, new SizeF(1.0f, 1.0f));
+            Rect mouseRect = new Rect(context.MouseAbsPos - Vector2.One, new SizeF(1.0f, 1.0f));
             return rect.IntersectsWith(mouseRect);
         }
-        public virtual void OnSelected(ref FGraphElementRenderingContext context)
+        public virtual void OnSelected(ref FMouseEventContext context)
         {
-            context.EditorInteroperation.PGMember.Target = Description;
+            context.GraphElementRenderingContext.EditorInteroperation.PGMember.Target = Description;
         }
         public virtual void OnUnSelected()
         {
 
         }
-        public virtual void OnMouseOver(ref FGraphElementRenderingContext context)
+        public virtual void OnMouseOver(ref FMouseEventContext context)
         {
         }
-        public virtual void OnMouseLeave(ref FGraphElementRenderingContext context)
+        public virtual void OnMouseLeave(ref FMouseEventContext context)
         {
 
         }
 
-        public virtual void OnMouseLeftButtonDown(ref FGraphElementRenderingContext context)
+        public virtual void OnMouseLeftButtonDown(ref FMouseEventContext context)
         {
         }
 
-        public virtual void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context)
+        public virtual void OnMouseLeftButtonUp(ref FMouseEventContext context)
         {
         }
 
-        public virtual void OnMouseRightButtonDown(ref FGraphElementRenderingContext context)
+        public virtual void OnMouseRightButtonDown(ref FMouseEventContext context)
         {
         }
 
-        public virtual void OnMouseRightButtonUp(ref FGraphElementRenderingContext context)
+        public virtual void OnMouseRightButtonUp(ref FMouseEventContext context)
         {
         }
         #endregion ISelectable

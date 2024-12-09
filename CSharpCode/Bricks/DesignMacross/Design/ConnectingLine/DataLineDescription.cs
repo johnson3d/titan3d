@@ -6,7 +6,15 @@ using System.Reflection;
 
 namespace EngineNS.DesignMacross.Design.ConnectingLine
 {
+    public class TtDataPinDescriptionElementStyle : TtGraphElementStyle
+    {
+        public bool BrowserVisible = false;
+        public EGui.Controls.TtContentBrowser ContentBrowser = EngineNS.Editor.TtEditor.NewPopupContentBrowser();
+        public string FilterExts;
+        public Rtti.TtTypeDesc ShowType;
+    }
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    [GraphElementStyle(typeof(TtDataPinDescriptionElementStyle))]
     public class TtDataPinDescription : IDescription
     {
         public IDescription Parent { get; set; }

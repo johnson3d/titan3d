@@ -23,7 +23,7 @@ namespace EngineNS.DesignMacross.Editor
             return false;
         }
 
-        public override bool HitCheck(Vector2 pos)
+        public override bool HitCheck(ref FMouseEventContext context)
         {
             return false;
         }
@@ -34,7 +34,7 @@ namespace EngineNS.DesignMacross.Editor
         }
 
 
-        public override void OnSelected(ref FGraphElementRenderingContext context)
+        public override void OnSelected(ref FMouseEventContext context)
         {
             
         }
@@ -68,8 +68,8 @@ namespace EngineNS.DesignMacross.Editor
         {
             var pinElement = renderableElement as TtGraphElement_Icon;
             var cmdlist = ImGuiAPI.GetWindowDrawList();
-            var nodeStart = context.ViewPortTransform(pinElement.AbsLocation);
-            var nodeEnd = context.ViewPortTransform(pinElement.AbsLocation + new Vector2(pinElement.Size.Width, pinElement.Size.Height));
+            var nodeStart = context.ViewportTransform(pinElement.AbsLocation);
+            var nodeEnd = context.ViewportTransform(pinElement.AbsLocation + new Vector2(pinElement.Size.Width, pinElement.Size.Height));
             cmdlist.AddRectFilled(nodeStart, nodeEnd, ImGuiAPI.ColorConvertFloat4ToU32(pinElement.BackgroundColor), pinElement.Rounding, ImDrawFlags_.ImDrawFlags_RoundCornersAll);
             var styles = UNodeGraphStyles.DefaultStyles;
             EGui.TtUVAnim icon = new EGui.TtUVAnim();

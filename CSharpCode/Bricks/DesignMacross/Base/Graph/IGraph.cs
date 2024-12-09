@@ -91,23 +91,32 @@ namespace EngineNS.DesignMacross.Base.Graph
     }
     public interface IZoomable
     {
+        public void Zooming(float delta)
+        {
+
+        }
     }
     public interface IGraphElementDraggable
     {
         public bool CanDrag();
         public void OnDragging(Vector2 delta);
     }
+    public struct FMouseEventContext
+    {
+        public FGraphElementRenderingContext GraphElementRenderingContext;
+        public Vector2 MouseAbsPos;
+    }
     public interface IGraphElementSelectable : IGraphElementDraggable
     {
-        public bool HitCheck(Vector2 pos);
-        public void OnSelected(ref FGraphElementRenderingContext context);
+        public bool HitCheck(ref FMouseEventContext context);
+        public void OnSelected(ref FMouseEventContext context);
         public void OnUnSelected();
-        public void OnMouseOver(ref FGraphElementRenderingContext context);
-        public void OnMouseLeave(ref FGraphElementRenderingContext context);
-        public void OnMouseLeftButtonDown(ref FGraphElementRenderingContext context);
-        public void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context);
-        public void OnMouseRightButtonDown(ref FGraphElementRenderingContext context);
-        public void OnMouseRightButtonUp(ref FGraphElementRenderingContext context);
+        public void OnMouseOver(ref FMouseEventContext context);
+        public void OnMouseLeave(ref FMouseEventContext context);
+        public void OnMouseLeftButtonDown(ref FMouseEventContext context);
+        public void OnMouseLeftButtonUp(ref FMouseEventContext context);
+        public void OnMouseRightButtonDown(ref FMouseEventContext context);
+        public void OnMouseRightButtonUp(ref FMouseEventContext context);
     }
     public interface IResizebale
     {
@@ -134,6 +143,14 @@ namespace EngineNS.DesignMacross.Base.Graph
         public IGraphElement Parent { get; set; }
         public IGraphElementStyle Style { get; set; }
     }
+    public class GraphElementStyleAttribute : Attribute
+    {
+        public TtTypeDesc GraphElementType { get; set; }
+        public GraphElementStyleAttribute(Type graphElementType)
+        {
+            GraphElementType = TtTypeDesc.TypeOf(graphElementType);
+        }
+    }
     public interface IGraphElementStyle : IO.ISerializer
     {
         [Rtti.Meta]
@@ -155,7 +172,7 @@ namespace EngineNS.DesignMacross.Base.Graph
 
     }
 
-    public interface IGraph : IGraphElement
+    public interface IGraph : IGraphElement, IZoomable
     {
         public void ConstructElements(ref FGraphRenderingContext context);
         public void AfterConstructElements(ref FGraphRenderingContext context);

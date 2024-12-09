@@ -14,7 +14,7 @@ namespace EngineNS.DesignMacross.Editor
             return false;
         }
 
-        public override bool HitCheck(Vector2 pos)
+        public override bool HitCheck(ref FMouseEventContext context)
         {
             return false;
         }
@@ -24,7 +24,7 @@ namespace EngineNS.DesignMacross.Editor
 
         }
 
-        public override void OnSelected(ref FGraphElementRenderingContext context)
+        public override void OnSelected(ref FMouseEventContext context)
         {
 
         }
@@ -44,7 +44,7 @@ namespace EngineNS.DesignMacross.Editor
             var styles = UNodeGraphStyles.DefaultStyles;
             var gridRect = new Rect(gridLine.Location, gridLine.Size);
             cmd.AddRectFilled(gridRect.TopLeft, gridRect.BottomRight, styles.GridBackgroundColor, 0, ImDrawFlags_.ImDrawFlags_None);
-            var step = styles.GridStep;
+            var step = styles.GridStep * context.Camera.Scale;
             var hCount = (int)(context.Camera.Size.Width / step);
             var vCount = (int)(context.Camera.Size.Height / step);
             var cameraRect = new Rect(context.Camera.Location, context.Camera.Size);

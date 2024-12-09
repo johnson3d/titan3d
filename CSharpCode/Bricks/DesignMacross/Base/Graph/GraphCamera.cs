@@ -4,6 +4,6 @@
     {
         public Vector2 Location { get; set; } = Vector2.Zero;
         public SizeF Size { get; set; } = new SizeF(100, 100);
-        public Vector2 Scale { get; set; } = Vector2.One;
+        public float Scale { get; set; } = 1;
     }
 }

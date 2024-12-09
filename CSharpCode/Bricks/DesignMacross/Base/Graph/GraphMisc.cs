@@ -43,6 +43,9 @@ namespace EngineNS.DesignMacross.Base.Graph
         {
             if (graphElement is IContextMeunable meunable)
             {
+                var mouseEventContext = new FMouseEventContext();
+                mouseEventContext.GraphElementRenderingContext = elementRenderingContext;
+                mouseEventContext.MouseAbsPos = ImGuiAPI.GetMousePos();
 
                 if (ImGuiAPI.IsMouseDown(ImGuiMouseButton_.ImGuiMouseButton_Right))
                 {
@@ -58,8 +61,8 @@ namespace EngineNS.DesignMacross.Base.Graph
                 {
                     ContextMenuElement = graphElement;
                     meunable.SetContextMenuableId(PopupMenu);
-                    var pos = elementRenderingContext.ViewPortInverseTransform(ImGuiAPI.GetMousePos());
-                    if (ContextMenuElement is IGraphElementSelectable selectable && selectable.HitCheck(pos))
+                    var pos = elementRenderingContext.ViewportInverseTransform(ImGuiAPI.GetMousePos());
+                    if (ContextMenuElement is IGraphElementSelectable selectable && selectable.HitCheck(ref mouseEventContext))
                     {
                         ImGuiAPI.CloseCurrentPopup();
                         PopupMenu.StringId = graphElement.Name + "_" + graphElement.Id + "_" + "ContextMenu";
@@ -76,10 +79,13 @@ namespace EngineNS.DesignMacross.Base.Graph
         {
             if (graph is IContextMeunable meunable)
             {
+                var mouseEventContext = new FMouseEventContext();
+                mouseEventContext.GraphElementRenderingContext = elementRenderingContext;
+                mouseEventContext.MouseAbsPos = ImGuiAPI.GetMousePos();
+
                 ContextMenuElement = graph;
                 meunable.SetContextMenuableId(PopupMenu);
-                var pos = elementRenderingContext.ViewPortInverseTransform(ImGuiAPI.GetMousePos());
-                if (ContextMenuElement is IGraphElementSelectable selectable && selectable.HitCheck(pos))
+                if (ContextMenuElement is IGraphElementSelectable selectable && selectable.HitCheck(ref mouseEventContext))
                 {
                     ImGuiAPI.CloseCurrentPopup();
                     PopupMenu.StringId = graph.Name + "_" + graph.Id + "_" + "ContextMenu";

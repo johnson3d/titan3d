@@ -64,6 +64,7 @@ namespace EngineNS.DesignMacross.Editor
             rendingContext.GraphElementStyleManager = GraphElementCollection;
             rendingContext.DescriptionsElement = DescriptionsElement;
             rendingContext.DesignedClassDescription = mDesignMacross.DesignedClassDescription;
+            rendingContext.DesignMacrossAssetName = mDesignMacross.AssetName;
             bool mClassViewShow = true;
             var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "ClassView", ref mClassViewShow, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (show)

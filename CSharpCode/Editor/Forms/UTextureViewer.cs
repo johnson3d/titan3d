@@ -211,7 +211,7 @@ namespace EngineNS.Editor.Forms
 
                 switch (imgType)
                 {
-                    case EngienNS.Bricks.ImageDecoder.UImageType.PNG:
+                    case EngineNS.Bricks.ImageDecoder.UImageType.PNG:
                         {
                             StbImageSharp.ImageResult image = NxRHI.TtSrView.LoadOriginPng(AssetName);
                             using (var xnd = new IO.TtXndHolder("USrView", 0, 0))
@@ -221,7 +221,7 @@ namespace EngineNS.Editor.Forms
                             }
                         }
                         break;
-                    case EngienNS.Bricks.ImageDecoder.UImageType.HDR:
+                    case EngineNS.Bricks.ImageDecoder.UImageType.HDR:
                         {
                             StbImageSharp.ImageResultFloat imageFloat = new StbImageSharp.ImageResultFloat();
                             NxRHI.TtSrView.LoadOriginHdr(AssetName, ref imageFloat);
@@ -232,7 +232,7 @@ namespace EngineNS.Editor.Forms
                             }
                         }
                         break;
-                    case EngienNS.Bricks.ImageDecoder.UImageType.EXR:
+                    case EngineNS.Bricks.ImageDecoder.UImageType.EXR:
                         {
                             System.IO.Stream outStream = null;
                             var file = NxRHI.TtSrView.LoadOriginExr(AssetName, ref outStream);

@@ -57,7 +57,7 @@ namespace EngineNS.Animation.Macross.BlendTree
                             Debug.Assert(graphElementAttribute != null);
                             Debug.Assert(propertyValue is IDescription);
                             var desc = propertyValue as IDescription;
-                            var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, desc, context.GraphElementStyleManager.GetOrAdd(desc.Id));
+                            var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, desc, context.GraphElementStyleManager.GetOrAdd(desc));
                             instance.Parent = this;
                             Elements.Add(instance);
                             context.DescriptionsElement.Add(desc.Id, instance);
@@ -70,7 +70,7 @@ namespace EngineNS.Animation.Macross.BlendTree
                     Debug.Assert(propertyValue is IDescription);
                     var desc = propertyValue as IDescription;
                     var graphElementAttribute = GraphElementAttribute.GetAttributeWithSpecificClassType<IGraphElement>(propertyValue.GetType());
-                    var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, desc, context.GraphElementStyleManager.GetOrAdd(desc.Id));
+                    var instance = TtDescriptionGraphElementsPoolManager.Instance.GetDescriptionGraphElement(graphElementAttribute.ClassType, desc, context.GraphElementStyleManager.GetOrAdd(desc));
                     instance.Parent = this;
                     Elements.Add(instance);
                     context.DescriptionsElement.Add(desc.Id, instance);
@@ -101,11 +101,12 @@ namespace EngineNS.Animation.Macross.BlendTree
             }
         }
 
-        public override void OnMouseLeftButtonUp(ref FGraphElementRenderingContext context)
+        public override void OnMouseLeftButtonUp(ref FMouseEventContext context)
         {
             if (PreviewPoseLine != null)
             {
-                TtGraphContextMenuHandler.Instance.HandleLinkedPinContextMenu(this, ref context);
+                var renderContext = context.GraphElementRenderingContext;
+                TtGraphContextMenuHandler.Instance.HandleLinkedPinContextMenu(this, ref renderContext);
                 PreviewPoseLine = null;
             }
         }
@@ -137,7 +138,7 @@ namespace EngineNS.Animation.Macross.BlendTree
                                  if (Rtti.TtTypeDescManager.CreateInstance(typeDesc) is TtBlendTreeNodeClassDescription node)
                                  {
                                      node.Name = GetValidNodeName(node.Name);
-                                     var style = graphElementStyleManager.GetOrAdd(node.Id, popMenu.PopedPosition);
+                                     var style = graphElementStyleManager.GetOrAdd(node, popMenu.PopedPosition);
                                      cmdHistory.CreateAndExtuteCommand("AddBlendTreeNode",
                                          (data) => { BlendTreeClassDescription.AddNode(node); },
                                          (data) => { BlendTreeClassDescription.RemoveNode(node); });

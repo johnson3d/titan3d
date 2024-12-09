@@ -210,36 +210,7 @@ namespace RobotClient
     }
 }
 
-#if TitanEngine_AutoGen
-#region TitanEngine_AutoGen
-
-
-namespace RobotClient
-{
-	partial class URobot
-	{
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_UpdatePosition = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
-		{
-			Vector3 pos;
-			reader.Read(out pos);
-			((RobotClient.URobot)host).UpdatePosition(pos, context);
-		};
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_GhostsAutoSync = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
-		{
-			EngineNS.IO.TtMemWriter data;
-			reader.Read(out data);
-			((RobotClient.URobot)host).GhostsAutoSync(data, context);
-		};
-		public static EngineNS.Bricks.Network.RPC.FCallMethod rpc_GhostsUpdatePlacement = (EngineNS.IO.AuxReader<EngineNS.IO.TtMemReader> reader, object host, EngineNS.Bricks.Network.RPC.TtCallContext context) =>
-		{
-			EngineNS.IO.TtMemWriter data;
-			reader.Read(out data);
-			((RobotClient.URobot)host).GhostsUpdatePlacement(data, context);
-		};
-	}
-}
-#endregion//TitanEngine_AutoGen
-#endif//TitanEngine_AutoGen#if TitanEngine_AutoGen_RPC
+#if TitanEngine_AutoGen_RPC
 #region TitanEngine_AutoGen_RPC
 
 

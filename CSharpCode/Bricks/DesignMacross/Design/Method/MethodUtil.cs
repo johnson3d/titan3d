@@ -224,14 +224,14 @@ namespace EngineNS.DesignMacross.Design
                                                          var popMenu = sender as TtPopupMenu;
                                                          if (Rtti.TtTypeDescManager.CreateInstance(typeDesc) is TtExpressionDescription expression)
                                                          {
-                                                             var style = graphElementStyleManager.GetOrAdd(expression.Id, popMenu.PopedPosition);
+                                                             var style = graphElementStyleManager.GetOrAdd(expression, popMenu.PopedPosition);
                                                              cmdHistory.CreateAndExtuteCommand("AddExpression",
                                                                  (data) => { methodDescription.AddExpression(expression); },
                                                                  (data) => { methodDescription.RemoveExpression(expression); });
                                                          }
                                                          if (Rtti.TtTypeDescManager.CreateInstance(typeDesc) is TtStatementDescription statement)
                                                          {
-                                                             var style = graphElementStyleManager.GetOrAdd(statement.Id, popMenu.PopedPosition);
+                                                             var style = graphElementStyleManager.GetOrAdd(statement, popMenu.PopedPosition);
                                                              cmdHistory.CreateAndExtuteCommand("AddStatement",
                                                                  (data) => { methodDescription.AddStatement(statement); },
                                                                  (data) => { methodDescription.RemoveStatement(statement); });
@@ -258,7 +258,7 @@ namespace EngineNS.DesignMacross.Design
                                                      if (Rtti.TtTypeDescManager.CreateInstance(getTypeDesc) is TtVarGetDescription expression)
                                                      {
                                                          expression.VariableId = variable.Id;
-                                                         var style = graphElementStyleManager.GetOrAdd(expression.Id, popMenu.PopedPosition);
+                                                         var style = graphElementStyleManager.GetOrAdd(expression, popMenu.PopedPosition);
                                                          cmdHistory.CreateAndExtuteCommand("AddVarGet",
                                                              (data) => { methodDescription.AddExpression(expression); },
                                                              (data) => { methodDescription.RemoveExpression(expression); });
@@ -272,7 +272,7 @@ namespace EngineNS.DesignMacross.Design
                                                  {
                                                      var popMenu = sender as TtPopupMenu;
                                                      var statement = new TtVarSetDescription(variable.Id, variable.VariableType.TypeDesc);
-                                                     var style = graphElementStyleManager.GetOrAdd(statement.Id, popMenu.PopedPosition);
+                                                     var style = graphElementStyleManager.GetOrAdd(statement, popMenu.PopedPosition);
                                                      cmdHistory.CreateAndExtuteCommand("AddVarSet",
                                                          (data) => { methodDescription.AddStatement(statement); },
                                                          (data) => { methodDescription.RemoveStatement(statement); });
@@ -287,7 +287,7 @@ namespace EngineNS.DesignMacross.Design
                                              {
                                                  var popMenu = sender as TtPopupMenu;
                                                  var expression = new TtSelfReferenceDescription(superClassType);
-                                                 var style = graphElementStyleManager.GetOrAdd(expression.Id, popMenu.PopedPosition);
+                                                 var style = graphElementStyleManager.GetOrAdd(expression, popMenu.PopedPosition);
                                                  cmdHistory.CreateAndExtuteCommand("AddSelfRef",
                                                      (data) => { methodDescription.AddExpression(expression); },
                                                      (data) => { methodDescription.RemoveExpression(expression); });
@@ -301,7 +301,7 @@ namespace EngineNS.DesignMacross.Design
                                              {
                                                  var popMenu = sender as TtPopupMenu;
                                                  var expression = new TtCenterDataReferenceDescription(TtTypeDesc.TypeOfFullName(centerDataTypeFullName));
-                                                 var style = graphElementStyleManager.GetOrAdd(expression.Id, popMenu.PopedPosition);
+                                                 var style = graphElementStyleManager.GetOrAdd(expression, popMenu.PopedPosition);
                                                  cmdHistory.CreateAndExtuteCommand("AddCenterData",
                                                      (data) => { methodDescription.AddExpression(expression); },
                                                      (data) => { methodDescription.RemoveExpression(expression); });
@@ -337,7 +337,7 @@ namespace EngineNS.DesignMacross.Design
                                                      {
                                                          var popMenu = sender as TtPopupMenu;
                                                          var methodInvoke = TtMethodInvokeDescription.Create(methodMeta);
-                                                         var style = graphElementStyleManager.GetOrAdd(methodInvoke.Id, popMenu.PopedPosition);
+                                                         var style = graphElementStyleManager.GetOrAdd(methodInvoke, popMenu.PopedPosition);
                                                          cmdHistory.CreateAndExtuteCommand("AddStatement",
                                                              (data) => { methodDescription.AddStatement(methodInvoke); },
                                                              (data) => { methodDescription.RemoveStatement(methodInvoke); });
@@ -386,7 +386,7 @@ namespace EngineNS.DesignMacross.Design
                                                         getExpression.HostReferenceId = previewDataLine.StartPin.Parent.Id;
                                                         var line = new TtDataLineDescription { FromId = previewDataLine.StartPin.Id, ToId = getExpression.GetHostPin().Id };
                                                         var popMenu = sender as TtPopupMenu;
-                                                        var style = graphElementStyleManager.GetOrAdd(getExpression.Id, popMenu.PopedPosition);
+                                                        var style = graphElementStyleManager.GetOrAdd(getExpression, popMenu.PopedPosition);
                                                         cmdHistory.CreateAndExtuteCommand("AddExpressionAndDataLink",
                                                                 (data) => { methodDescription.AddExpression(getExpression); methodDescription.AddDataLine(line); },
                                                                 (data) => { methodDescription.RemoveExpression(getExpression); methodDescription.RemoveDataLine(line); });
@@ -404,7 +404,7 @@ namespace EngineNS.DesignMacross.Design
                                                         setStatement.HostReferenceId = previewDataLine.StartPin.Parent.Id;
                                                         var line = new TtDataLineDescription { FromId = previewDataLine.StartPin.Id, ToId = setStatement.GetHostPin().Id };
                                                         var popMenu = sender as TtPopupMenu;
-                                                        var style = graphElementStyleManager.GetOrAdd(setStatement.Id, popMenu.PopedPosition);
+                                                        var style = graphElementStyleManager.GetOrAdd(setStatement, popMenu.PopedPosition);
                                                         cmdHistory.CreateAndExtuteCommand("AddExpressionAndDataLink",
                                                                 (data) => { methodDescription.AddStatement(setStatement); methodDescription.AddDataLine(line); },
                                                                 (data) => { methodDescription.RemoveStatement(setStatement); methodDescription.RemoveDataLine(line); });
@@ -428,7 +428,7 @@ namespace EngineNS.DesignMacross.Design
                                                                              (TtMenuItem item, object sender) =>
                                                                              {
                                                                                  var popMenu = sender as TtPopupMenu;
-                                                                                 var style = graphElementStyleManager.GetOrAdd(statement.Id, popMenu.PopedPosition);
+                                                                                 var style = graphElementStyleManager.GetOrAdd(statement, popMenu.PopedPosition);
                                                                                  cmdHistory.CreateAndExtuteCommand("AddStatementAndDataLink",
                                                                                             (data) => { methodDescription.AddStatement(statement); methodDescription.AddDataLine(line); },
                                                                                             (data) => { methodDescription.RemoveStatement(statement); methodDescription.RemoveDataLine(line); });
@@ -467,7 +467,7 @@ namespace EngineNS.DesignMacross.Design
                                                                 (TtMenuItem item, object sender) =>
                                                                 {
                                                                     var popMenu = sender as TtPopupMenu;
-                                                                    var style = graphElementStyleManager.GetOrAdd(getExpression.Id, popMenu.PopedPosition);
+                                                                    var style = graphElementStyleManager.GetOrAdd(getExpression, popMenu.PopedPosition);
                                                                     cmdHistory.CreateAndExtuteCommand("AddExpressionAndDataLink",
                                                                             (data) => { methodDescription.AddExpression(getExpression); methodDescription.AddDataLine(line); },
                                                                             (data) => { methodDescription.RemoveExpression(getExpression); methodDescription.RemoveDataLine(line); });
@@ -488,7 +488,7 @@ namespace EngineNS.DesignMacross.Design
                                                                 (TtMenuItem item, object sender) =>
                                                                 {
                                                                     var popMenu = sender as TtPopupMenu;
-                                                                    var style = graphElementStyleManager.GetOrAdd(setStatement.Id, popMenu.PopedPosition);
+                                                                    var style = graphElementStyleManager.GetOrAdd(setStatement, popMenu.PopedPosition);
                                                                     cmdHistory.CreateAndExtuteCommand("AddExpressionAndDataLink",
                                                                             (data) => { methodDescription.AddStatement(setStatement); methodDescription.AddDataLine(line); },
                                                                             (data) => { methodDescription.RemoveStatement(setStatement); methodDescription.RemoveDataLine(line); });
@@ -527,7 +527,7 @@ namespace EngineNS.DesignMacross.Design
                                                                                              (TtMenuItem item, object sender) =>
                                                                                              {
                                                                                                  var popMenu = sender as TtPopupMenu;
-                                                                                                 var style = graphElementStyleManager.GetOrAdd(expression.Id, popMenu.PopedPosition);
+                                                                                                 var style = graphElementStyleManager.GetOrAdd(expression, popMenu.PopedPosition);
                                                                                                  cmdHistory.CreateAndExtuteCommand("AddExpressionAndDataLink",
                                                                                                             (data) => { methodDescription.AddExpression(expression); methodDescription.AddDataLine(line); },
                                                                                                             (data) => { methodDescription.RemoveExpression(expression); methodDescription.RemoveDataLine(line); });
@@ -543,7 +543,7 @@ namespace EngineNS.DesignMacross.Design
                                                                                              (TtMenuItem item, object sender) =>
                                                                                              {
                                                                                                  var popMenu = sender as TtPopupMenu;
-                                                                                                 var style = graphElementStyleManager.GetOrAdd(expression.Id, popMenu.PopedPosition);
+                                                                                                 var style = graphElementStyleManager.GetOrAdd(expression, popMenu.PopedPosition);
                                                                                                  cmdHistory.CreateAndExtuteCommand("AddExpressionAndExecLink",
                                                                                                             (data) => { methodDescription.AddExpression(expression); methodDescription.AddExecutionLine(line); },
                                                                                                             (data) => { methodDescription.RemoveExpression(expression); methodDescription.RemoveExecutionLine(line); });
@@ -563,7 +563,7 @@ namespace EngineNS.DesignMacross.Design
                                                                                              (TtMenuItem item, object sender) =>
                                                                                              {
                                                                                                  var popMenu = sender as TtPopupMenu;
-                                                                                                 var style = graphElementStyleManager.GetOrAdd(statement.Id, popMenu.PopedPosition);
+                                                                                                 var style = graphElementStyleManager.GetOrAdd(statement, popMenu.PopedPosition);
                                                                                                  cmdHistory.CreateAndExtuteCommand("AddStatementAndDataLink",
                                                                                                             (data) => { methodDescription.AddStatement(statement); methodDescription.AddDataLine(line); },
                                                                                                             (data) => { methodDescription.RemoveStatement(statement); methodDescription.RemoveDataLine(line); });
@@ -579,7 +579,7 @@ namespace EngineNS.DesignMacross.Design
                                                                                              (TtMenuItem item, object sender) =>
                                                                                              {
                                                                                                  var popMenu = sender as TtPopupMenu;
-                                                                                                 var style = graphElementStyleManager.GetOrAdd(statement.Id, popMenu.PopedPosition);
+                                                                                                 var style = graphElementStyleManager.GetOrAdd(statement, popMenu.PopedPosition);
                                                                                                  cmdHistory.CreateAndExtuteCommand("AddStatementAndExecLink",
                                                                                                             (data) => { methodDescription.AddStatement(statement); methodDescription.AddExecutionLine(line); },
                                                                                                             (data) => { methodDescription.RemoveStatement(statement); methodDescription.RemoveExecutionLine(line); });
@@ -629,7 +629,7 @@ namespace EngineNS.DesignMacross.Design
                                                                                  (TtMenuItem item, object sender) =>
                                                                                  {
                                                                                      var popMenu = sender as TtPopupMenu;
-                                                                                     var style = graphElementStyleManager.GetOrAdd(statement.Id, popMenu.PopedPosition);
+                                                                                     var style = graphElementStyleManager.GetOrAdd(statement, popMenu.PopedPosition);
                                                                                      cmdHistory.CreateAndExtuteCommand("AddStatementAndDataLink",
                                                                                                 (data) => { methodDescription.AddStatement(statement); methodDescription.AddDataLine(line); },
                                                                                                 (data) => { methodDescription.RemoveStatement(statement); methodDescription.RemoveDataLine(line); });
@@ -645,7 +645,7 @@ namespace EngineNS.DesignMacross.Design
                                                                                  (TtMenuItem item, object sender) =>
                                                                                  {
                                                                                      var popMenu = sender as TtPopupMenu;
-                                                                                     var style = graphElementStyleManager.GetOrAdd(statement.Id, popMenu.PopedPosition);
+                                                                                     var style = graphElementStyleManager.GetOrAdd(statement, popMenu.PopedPosition);
                                                                                      cmdHistory.CreateAndExtuteCommand("AddStatementAndExecLink",
                                                                                                 (data) => { methodDescription.AddStatement(statement); methodDescription.AddExecutionLine(line); },
                                                                                                 (data) => { methodDescription.RemoveStatement(statement); methodDescription.RemoveExecutionLine(line); });

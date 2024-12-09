@@ -33,7 +33,7 @@ namespace EngineNS.DesignMacross.Editor
             return false;
         }
 
-        public override bool HitCheck(Vector2 pos)
+        public override bool HitCheck(ref FMouseEventContext context)
         {
             return false;
         }
@@ -44,7 +44,7 @@ namespace EngineNS.DesignMacross.Editor
         }
 
 
-        public override void OnSelected(ref FGraphElementRenderingContext context)
+        public override void OnSelected(ref FMouseEventContext context)
         {
             
         }
@@ -147,7 +147,7 @@ namespace EngineNS.DesignMacross.Editor
         {
             var comboBoxElement = renderableElement as TtGraphElement_ComboBox;
             var cmd = ImGuiAPI.GetWindowDrawList();
-            var start = context.ViewPortTransform(comboBoxElement.AbsLocation);
+            var start = context.ViewportTransform(comboBoxElement.AbsLocation);
             
             ImGuiAPI.SetCursorScreenPos(in start);
             //ImGuiAPI.PushStyleColor();

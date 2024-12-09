@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace EngienNS.Bricks.ImageDecoder
+namespace EngineNS.Bricks.ImageDecoder
 {
 
     public enum UImageType
