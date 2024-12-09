@@ -170,7 +170,9 @@ namespace EngineNS.IO
             }
             catch (Exception ex)
             {
-                throw new Exception("GetMD5HashFromFile() fail,error:" + ex.Message);
+                Profiler.Log.WriteException(ex);
+                return null; 
+                //throw new Exception("GetMD5HashFromFile() fail,error:" + ex.Message);
             }
         }
         public static System.IO.DirectoryInfo CreateDirectory(string path)

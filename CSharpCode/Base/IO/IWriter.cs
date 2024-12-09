@@ -39,6 +39,20 @@ namespace EngineNS.IO
 
     public partial struct TtMemWriter : IO.ICoreWriter, IDisposable
     {
+        private unsafe static CoreSDK.FDelegate_FSaveMemStream NativeSaveMemStream = NativeSaveMemStreamCB;
+        private unsafe static void NativeSaveMemStreamCB(EngineNS.MemStreamWriter arg0, sbyte* arg1, sbyte* arg2)
+        {
+            var name = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)arg1);
+            var type = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)arg2);
+        }
+        public static void InitNativeCallback()
+        {
+            CoreSDK.SetSaveMemStreamCallback(NativeSaveMemStream);
+        }
+        public static void FinalNativeCallback()
+        {
+            CoreSDK.SetSaveMemStreamCallback(null);
+        }
         public static TtMemWriter CreateInstance()
         {
             TtMemWriter result = new TtMemWriter();

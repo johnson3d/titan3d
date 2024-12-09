@@ -10,6 +10,9 @@ namespace NxRHI
 {
 	struct FShaderDesc;
 }
+
+class MemStreamWriter;
+class MemStreamReader;
 struct TtAnyValue;
 
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
@@ -34,6 +37,11 @@ typedef void (*FOnShaderTranslated)(EngineNS::NxRHI::FShaderDesc* shaderDesc);
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
 typedef void (* FAssertEvent)(const void* str, const void* file, int line);
 
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef void (*FSaveMemStream)(EngineNS::MemStreamWriter* writer, const char* name, const char* type);
+TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)
+typedef bool (*FGetMemStream)(EngineNS::MemStreamReader* reader, const char* name, const char* type);
+
 namespace NxRHI
 {
 	class IGpuDevice;
@@ -47,6 +55,8 @@ class TR_CLASS(SV_LayoutStruct = 8)
 public:
 	static FWriteLogString mWriteLogString;
 	static FAssertEvent mAssertEvent;
+	static FSaveMemStream mSaveMemStream;
+	static FGetMemStream mGetMemStream;
 public:
 	static bool IsLittleEndian();
 	static int GetPixelFormatByteWidth(EPixelFormat fmt);
@@ -54,6 +64,15 @@ public:
 	static void Print2Console(TR_META(SV_NoStringConverter = true) char* txt, bool newLine);
 	static void Print2Console2(const char* txt, bool newLine);
 	static void SetAssertEvent(FAssertEvent fn);
+
+	static void SetSaveMemStreamCallback(FSaveMemStream cb)
+	{
+		mSaveMemStream = cb;
+	}
+	static void SetGetMemStreamCallback(FGetMemStream cb)
+	{
+		mGetMemStream = cb;
+	}
 
 	static void InitF2MManager();
 	static void FinalF2MManager();

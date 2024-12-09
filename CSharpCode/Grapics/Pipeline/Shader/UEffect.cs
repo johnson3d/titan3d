@@ -228,7 +228,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     System.Diagnostics.Debug.Assert(false);
                 }
 
-                result.ShaderEffect = rc.CreateShaderEffect(VertexShader, PixelShader);
+                result.ShaderEffect = rc.CreateShaderEffect(VertexShader, PixelShader, hash.ToString());
                 result.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
             }
 
@@ -323,7 +323,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
                 result.Desc.InputStreams = inputStreams;
 
-                result.ShaderEffect = rc.CreateShaderEffect(VertexShader, PixelShader);
+                var hash = TtEffectManager.GetShaderHash(shading, material, mdf);
+                result.ShaderEffect = rc.CreateShaderEffect(VertexShader, PixelShader, hash.ToString());
                 result.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
             }
             if (await LinkShaders(result) == false)
@@ -409,7 +410,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 Desc.InputStreams = inputSteams;
             }
 
-            ShaderEffect = rc.CreateShaderEffect(VertexShader, PixelShader);
+            var hash = TtEffectManager.GetShaderHash(shading, material, mdf);
+            ShaderEffect = rc.CreateShaderEffect(VertexShader, PixelShader, hash.ToString());
             ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
             if (await LinkShaders(this) == false)
                 return false;

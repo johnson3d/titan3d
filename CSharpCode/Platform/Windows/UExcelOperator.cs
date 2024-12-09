@@ -19,6 +19,41 @@ namespace EngineNS.Bricks.DataSet
             var workbook = new NPOI.XSSF.UserModel.XSSFWorkbook(fs);
             isOk = LoadDataSetFromExcel(workbook, objType);
         }
+        private void UpdateBinderManagerByExcel(XSSFWorkbook workbook)
+        {
+            mWorkbook = workbook;
+            foreach (var i in BinderManager.Binders)
+            {
+                if (i.Value.HeadRow >= 0)
+                {
+                    var sheet = (XSSFSheet)workbook.GetSheet(i.Value.SheetName);
+                    var headRow = sheet.GetRow(i.Value.HeadRow);
+                    foreach (var j in i.Value.Fields)
+                    {
+                        if (j.ColumnIndex == -1)
+                        {   
+                            j.ColumnIndex = FindColumeIndex(headRow, j.HeadName);
+                            System.Diagnostics.Debug.Assert(j.ColumnIndex != -1);
+                        }
+                    }
+                }
+            }
+        }
+        private int FindColumeIndex(NPOI.SS.UserModel.IRow row, string name)
+        {
+            for (int i = 0; i < row.LastCellNum; i++)
+            {
+                var cell = row.GetCell(i);
+                if (cell == null)
+                {
+                    continue;
+                }
+                var text = TtTable.CellParse(cell, typeof(string), null) as string;
+                if (text == name)
+                    return i;
+            }
+            return -1;
+        }
         private bool LoadDataSetFromExcel(XSSFWorkbook workbook, Type type)
         {
             var sheetTypes = new List<Type>();
@@ -26,12 +61,13 @@ namespace EngineNS.Bricks.DataSet
             if (sheetTypes.Count == 0)
                 return false;
 
-            mWorkbook = workbook;
+            UpdateBinderManagerByExcel(workbook);
+            
             foreach (var i in sheetTypes)
             {
                 var tmp = new TtTable();
                 var binder = BinderManager.GetBinder(i);
-                tmp.LoadTableFromExcel(this, binder.SheetName, i);
+                tmp.LoadTableFromExcel(this, binder, i);
                 Tables.Add(binder.SheetName, tmp);
             }
 
@@ -69,15 +105,17 @@ namespace EngineNS.Bricks.DataSet
     public partial class TtTable
     {
         XSSFSheet mSheet;
-        internal bool LoadTableFromExcel(TtDataSet dataSet, string sheetName, Type objType)
+        internal bool LoadTableFromExcel(TtDataSet dataSet, TtDataProviderBinder binder, Type objType)
         {
             XSSFWorkbook workbook = dataSet.mWorkbook;
             Binder = dataSet.BinderManager.GetBinder(objType);
             if (Binder == null)
                 return false;
-            var sheet = (XSSFSheet)workbook.GetSheet(sheetName);
-            for (int i = 0; i <= sheet.LastRowNum; i++)
+            var sheet = (XSSFSheet)workbook.GetSheet(binder.SheetName);
+            for (int i = Binder.DataStartRow; i <= sheet.LastRowNum; i++)
             {
+                if (i == binder.HeadRow)
+                    continue;
                 var row = sheet.GetRow(i);
                 if (row == null)
                 {
@@ -139,7 +177,7 @@ namespace EngineNS.Bricks.DataSet
             }
             return cell;
         }
-        private object CellParse(NPOI.SS.UserModel.ICell cell, Type type, TtDataConverter converter)
+        public static object CellParse(NPOI.SS.UserModel.ICell cell, Type type, TtDataConverter converter)
         {
             if (type.IsGenericType && type.GetInterface("IList") != null)
             {

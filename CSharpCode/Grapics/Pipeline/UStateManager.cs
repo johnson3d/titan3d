@@ -102,7 +102,8 @@ namespace EngineNS.Graphics.Pipeline
         }
         protected unsafe override NxRHI.TtGpuPipeline CreateState(NxRHI.TtGpuDevice rc, void* desc)
         {
-            return rc.CreatePipeline(in *(NxRHI.FGpuPipelineDesc*)desc);
+            var id = Hash160.CreateHash160(desc, (uint)sizeof(NxRHI.FGpuPipelineDesc)).ToString();
+            return rc.CreatePipeline(in *(NxRHI.FGpuPipelineDesc*)desc, id);
         }
         protected override void ReleaseState(NxRHI.TtGpuPipeline state)
         {
@@ -217,7 +218,8 @@ namespace EngineNS.Graphics.Pipeline
         }
         protected unsafe override NxRHI.TtRenderPass CreateState(NxRHI.TtGpuDevice rc, void* desc)
         {
-            return rc.CreateRenderPass(in *(NxRHI.FRenderPassDesc*)desc);
+            var id = Hash160.CreateHash160(desc, (uint)sizeof(NxRHI.FRenderPassDesc)).ToString();
+            return rc.CreateRenderPass(in *(NxRHI.FRenderPassDesc*)desc, id);
         }
         protected override void ReleaseState(NxRHI.TtRenderPass state)
         {

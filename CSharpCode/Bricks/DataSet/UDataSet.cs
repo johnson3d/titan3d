@@ -210,6 +210,8 @@ namespace EngineNS.Bricks.DataSet
         public TtTable MainTable;
         private static bool IsEqual(byte[] lh, byte[] rh)
         {
+            if (lh == null || rh == null)
+                return false;
             if (lh.Length != rh.Length)
                 return false;
 
@@ -264,6 +266,10 @@ namespace EngineNS.Bricks.DataSet
                     }
                     return true;
                 }
+                else
+                {
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"{name.Address}.xlsx load failed, Is it opened?");
+                }
             }
             else
             {
@@ -281,6 +287,10 @@ namespace EngineNS.Bricks.DataSet
                         LoadDataSetFromXnd(xnd.RootNode);
                         return true;
                     }
+                }
+                else
+                {
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"{name.Address} load failed");
                 }
             }
             return false;

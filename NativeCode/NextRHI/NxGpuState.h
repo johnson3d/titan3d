@@ -306,8 +306,12 @@ namespace NxRHI
 		IGpuPipeline : public IGpuResource
 	{
 	public:
-	public:
 		FGpuPipelineDesc		Desc;
+		std::string				Identifier;
+		void SetIdentifier(const char* id)
+		{
+			Identifier = id;
+		}
 	};
 	
 	class IGpuDrawState : public VIUnknown
@@ -317,6 +321,7 @@ namespace NxRHI
 		AutoRef<IGpuPipeline>	Pipeline;
 		AutoRef<IGraphicsEffect>	ShaderEffect;
 		AutoRef<IRenderPass>	RenderPass;
+		std::pair<UINT64, UINT64>	KeyHash;
 		virtual bool BuildState(IGpuDevice* device) {
 			return true;
 		}

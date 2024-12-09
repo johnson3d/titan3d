@@ -75,6 +75,8 @@ FFreeManagedObjectGCHandle CoreSDK::FreeManagedObjectGCHandle = nullptr;
 FGetManagedObjectFromGCHandle CoreSDK::GetManagedObjectFromGCHandle = nullptr;
 FOnShaderTranslated CoreSDK::OnShaderTranslated = nullptr;
 FOnGpuDeviceRemoved CoreSDK::OnGpuDeviceRemoved = nullptr;
+FSaveMemStream CoreSDK::mSaveMemStream = nullptr;
+FGetMemStream CoreSDK::mGetMemStream = nullptr;
 
 bool CoreSDK::IsLittleEndian()
 {

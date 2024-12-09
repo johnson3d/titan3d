@@ -48,6 +48,21 @@ namespace EngineNS.IO
 
     public struct TtMemReader : IO.ICoreReader, IDisposable
     {
+        private unsafe static CoreSDK.FDelegate_FGetMemStream NativeGetMemStream = NativeGetMemStreamCB;
+        private unsafe static bool NativeGetMemStreamCB(EngineNS.MemStreamReader arg0, sbyte* arg1, sbyte* arg2)
+        {
+            var name = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)arg1);
+            var type = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)arg2);
+            return false;
+        }
+        public static void InitNativeCallback()
+        {
+            CoreSDK.SetGetMemStreamCallback(NativeGetMemStream);
+        }
+        public static void FinalNativeCallback()
+        {
+            CoreSDK.SetGetMemStreamCallback(null);
+        }
         public unsafe static TtMemReader CreateInstance(byte* ptr, ulong len)
         {
             TtMemReader result = new TtMemReader();

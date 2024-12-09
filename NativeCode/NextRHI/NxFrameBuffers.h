@@ -162,6 +162,12 @@ namespace NxRHI
 		ENGINE_RTTI(IRenderPass);
 		FRenderPassDesc			Desc;
 
+		std::string				Identifier;
+		void SetIdentifier(const char* id)
+		{
+			Identifier = id;
+		}
+
 		void SetViewInstanceLocations()
 		{
 			

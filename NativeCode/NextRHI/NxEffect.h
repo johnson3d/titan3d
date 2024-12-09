@@ -63,6 +63,10 @@ namespace NxRHI
 	public:
 		IGraphicsEffect();
 		~IGraphicsEffect();
+		void SetIdentifier(const char* id)
+		{
+			Identifier = id;
+		}
 		virtual void BuildState(IGpuDevice * device) {
 
 		}
@@ -102,6 +106,7 @@ namespace NxRHI
 		void PushBinder(EShaderType shaderType, IShaderReflector* pReflector);
 		void PushBinder(EShaderType shaderType, VNameString name, AutoRef<FShaderBinder>& binder);
 	public:
+		std::string				Identifier;
 		AutoRef<IInputLayout>	mInputLayout;
 		AutoRef<IShader>		mVertexShader;
 		AutoRef<IShader>		mPixelShader;

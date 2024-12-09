@@ -287,12 +287,13 @@ namespace EngineNS.NxRHI
             result.InitRenderPass();
             return result;
         }
-        public TtRenderPass CreateRenderPass(in FRenderPassDesc desc)
+        public TtRenderPass CreateRenderPass(in FRenderPassDesc desc, string identifier)
         {
             var result = new TtRenderPass();
             result.mCoreObject = mCoreObject.CreateRenderPass(in desc);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
+            result.mCoreObject.SetIdentifier(identifier);
             return result;
         }
         public TtFrameBuffers CreateFrameBuffers(TtRenderPass rpass)
@@ -312,7 +313,7 @@ namespace EngineNS.NxRHI
                 return null;
             return result;
         }
-        public TtShaderEffect CreateShaderEffect(TtShader vs, TtShader ps)
+        public TtShaderEffect CreateShaderEffect(TtShader vs, TtShader ps, string identifier)
         {
             var result = new TtShaderEffect();
             result.mCoreObject = mCoreObject.CreateShaderEffect();
@@ -320,6 +321,7 @@ namespace EngineNS.NxRHI
             result.mCoreObject.BindPS(ps.mCoreObject);
             result.mCoreObject.LinkShaders();
             result.mCoreObject.BuildState(mCoreObject);
+            result.mCoreObject.SetIdentifier(identifier);
             return result;
         }
         public TtComputeEffect CreateComputeEffect(TtShader cs)
@@ -331,7 +333,7 @@ namespace EngineNS.NxRHI
             result.mCoreObject.BuildState(mCoreObject);
             return result;
         }
-        public TtGpuPipeline CreatePipeline(in FGpuPipelineDesc desc)
+        public TtGpuPipeline CreatePipeline(in FGpuPipelineDesc desc, string identifier)
         {
             var result = new TtGpuPipeline();
             var cp = desc;
@@ -342,6 +344,7 @@ namespace EngineNS.NxRHI
             result.mCoreObject = mCoreObject.CreatePipeline(in cp);
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
+            result.mCoreObject.SetIdentifier(identifier);
             return result;
         }
         public TtInputLayout CreateInputLayout(TtInputLayoutDesc desc)

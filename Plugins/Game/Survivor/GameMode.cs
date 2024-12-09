@@ -10,11 +10,20 @@ namespace Survivor
         [EngineNS.Rtti.Meta]
         public TtWeaponManager WeaponManager { get; } = new TtWeaponManager();
         [EngineNS.Rtti.Meta]
+        public TtHeroManager HeroManager { get; } = new TtHeroManager(); 
+        [EngineNS.Rtti.Meta]
         public void LoadWeapons(
 			[RName.PGRName(FilterExts = EngineNS.Bricks.DataSet.TtDataSet.AssetExt)]
 			RName name)
         {
             WeaponManager.LoadDataSet(name);
+        }
+        [EngineNS.Rtti.Meta]
+        public void LoadHeros(
+            [RName.PGRName(FilterExts = EngineNS.Bricks.DataSet.TtDataSet.AssetExt)]
+            RName name)
+        {
+            HeroManager.LoadDataSet(name);
         }
     }
 }
@@ -39,6 +48,19 @@ namespace Survivor
 			}
 			LoadWeapons(name);
 			macross_break_LoadWeapons_2037383663.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_LoadHeros_2037383663 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtGameMode->void LoadHeros(RName name)");
+		public unsafe void macross_LoadHeros (string nodeName, RName name) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":name", name);
+				}
+			}
+			LoadHeros(name);
+			macross_break_LoadHeros_2037383663.TryBreak();
 		}
 	}
 }

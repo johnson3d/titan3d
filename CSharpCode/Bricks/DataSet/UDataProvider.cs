@@ -11,12 +11,13 @@ namespace EngineNS.Bricks.DataSet
     public class TtDataTableAttribute : Attribute
     {
         public string SheetName;
+        public int HeadRow = -1;
+        public int DataStartRow = 0;
     }
     public class TtDataColumnAttribute : Attribute
     {
         public string SheetName;
-        //public string ColumnName;
-        public int ColumeIndex = -1;
+        public string HeadName;
         public Rtti.TtTypeDesc DataConverter;
     }
     public class TtDataConverter
@@ -28,12 +29,14 @@ namespace EngineNS.Bricks.DataSet
         public class TtDataField
         {
             public string SheetName;
-            //public string Name;
+            public string HeadName;
             public int ColumnIndex = -1;
             public System.Reflection.PropertyInfo PropInfo;
             public TtDataConverter Conveter;
         }
         public string SheetName;
+        public int HeadRow = -1;
+        public int DataStartRow = 0;
         public List<TtDataField> Fields = new List<TtDataField>();
         public bool BuildBinder(Type type)
         {
@@ -43,6 +46,8 @@ namespace EngineNS.Bricks.DataSet
 
             var sheet = attrs[0] as TtDataTableAttribute;
             SheetName = sheet.SheetName;
+            HeadRow = sheet.HeadRow;
+            DataStartRow = sheet.DataStartRow;
 
             var props = type.GetProperties();
             foreach (var i in props)
@@ -54,7 +59,7 @@ namespace EngineNS.Bricks.DataSet
                 var tmp = new TtDataField();
                 tmp.PropInfo = i;
                 var columns = attrs[0] as TtDataColumnAttribute;
-                tmp.ColumnIndex = columns.ColumeIndex;
+                tmp.HeadName = columns.HeadName;
                 if (columns.DataConverter != null)
                 {
                     tmp.Conveter = Rtti.TtTypeDescManager.CreateInstance(columns.DataConverter) as TtDataConverter;
@@ -86,7 +91,7 @@ namespace EngineNS.Bricks.DataSet
 
     public class TtDataProviderBinderManager
     {
-        private Dictionary<Type, TtDataProviderBinder> Binders = new Dictionary<Type, TtDataProviderBinder>();
+        internal Dictionary<Type, TtDataProviderBinder> Binders = new Dictionary<Type, TtDataProviderBinder>();
         public TtDataProviderBinder GetBinder(Type t)
         {
             TtDataProviderBinder binder;
