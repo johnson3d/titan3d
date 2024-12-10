@@ -221,9 +221,19 @@ namespace NxRHI
 		ID3D12PipelineState* pState;
 		if (S_OK != ((DX12GpuDevice*)device)->mDevice->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&pState)))
 		{
-			VFX_LTRACE(ELTT_Error, "CreatePSO failed: VS(%s) PS(%s)", ShaderEffect->mVertexShader->Desc->DebugName.c_str(),
-				ShaderEffect->mPixelShader->Desc->DebugName.c_str());
-			return false;
+			desc.CachedPSO.pCachedBlob = nullptr;
+			desc.CachedPSO.CachedBlobSizeInBytes = 0;
+			if (S_OK != ((DX12GpuDevice*)device)->mDevice->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&pState)))
+			{
+				VFX_LTRACE(ELTT_Error, "CreatePSO failed: VS(%s) PS(%s)", ShaderEffect->mVertexShader->Desc->DebugName.c_str(),
+					ShaderEffect->mPixelShader->Desc->DebugName.c_str());
+				return false;
+			}
+			else
+			{
+				VFX_LTRACE(ELTT_Error, "Try CreatePSO without cache blob successed: VS(%s) PS(%s)", ShaderEffect->mVertexShader->Desc->DebugName.c_str(),
+					ShaderEffect->mPixelShader->Desc->DebugName.c_str());
+			}
 		}
 		mDxState = pState;
 		
