@@ -53,6 +53,22 @@ namespace EngineNS.IO
         {
             var name = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)arg1);
             var type = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)arg2);
+            if (type == "DX12GpuDrawState")
+            {
+                var path = TtEngine.Instance.FileManager.GetPath(TtFileManager.ERootDir.Cache, TtFileManager.ESystemDir.PSO) + "dx12/";
+                using (var xnd = TtXndHolder.LoadXnd(path + name + ".pso"))
+                {
+                    if (xnd == null)
+                        return false;
+                    var attr = xnd.RootNode.TryGetAttribute("Blob");
+                    using (var ar = attr.GetReader(null))
+                    {
+                        arg0.ResetData(attr.GetReaderLength());
+                        ar.ReadPtr(arg0.GetPointer(), (int)attr.GetReaderLength());
+                    }
+                }
+                return true;
+            }
             return false;
         }
         public static void InitNativeCallback()

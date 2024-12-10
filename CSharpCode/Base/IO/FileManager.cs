@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -17,11 +18,13 @@ namespace EngineNS.IO
             SetSysDir(ESystemDir.MetaData, "metadata");
             SetSysDir(ESystemDir.Effect, "effect");
             SetSysDir(ESystemDir.Shader, "shader");
+            SetSysDir(ESystemDir.PSO, "pso");
             SetSysDir(ESystemDir.RenderDoc, "renderdoc");
             SetSysDir(ESystemDir.DebugUtility, "debugutility");
             SureDirectory(GetPath(ERootDir.Engine, ESystemDir.MetaData));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.Effect));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.Shader));
+            SureDirectory(GetPath(ERootDir.Cache, ESystemDir.PSO));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.RenderDoc));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.DebugUtility));
         }
@@ -45,6 +48,7 @@ namespace EngineNS.IO
             MetaData,
             Effect,
             Shader,
+            PSO,
             RenderDoc,
             DebugUtility,
             Count,

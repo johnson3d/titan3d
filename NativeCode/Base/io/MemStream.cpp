@@ -96,4 +96,49 @@ UINT MemStreamReader::Read(void* pSrc, UINT t)
 //	delete[] pDst;
 //}
 
+MemStreamReader::~MemStreamReader()
+{
+	Cleanup();
+}
+
+void MemStreamReader::ProxyPointer(BYTE* ptr, UINT64 len)
+{
+	Cleanup();
+	mCopyData = false;
+	mProxyPointer = ptr;
+	mLength = len;
+	mPosition = 0;
+}
+void MemStreamReader::CopyData(BYTE* ptr, UINT64 len)
+{
+	Cleanup();
+	mCopyData = true;
+	mProxyPointer = new BYTE[len];
+	memcpy(mProxyPointer, ptr, (size_t)len);
+	mLength = len;
+	mPosition = 0;
+}
+void MemStreamReader::ResetData(UINT64 len)
+{
+	Cleanup();
+	mCopyData = true;
+	mProxyPointer = new BYTE[len];
+	mLength = len;
+	mPosition = 0;
+}
+void MemStreamReader::Cleanup()
+{
+	if (mCopyData)
+	{
+		Safe_DeleteArray(mProxyPointer);
+	}
+	else
+	{
+		mProxyPointer = nullptr;
+	}
+
+	mLength = 0;
+	mPosition = 0;
+}
+
 NS_END

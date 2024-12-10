@@ -26,6 +26,7 @@ namespace EngineNS.EGui.UIProxy
             enResult retValue = enResult.None;
             if(ImGuiAPI.BeginPopupModal(title, (bool*)0, ImGuiWindowFlags_.ImGuiWindowFlags_AlwaysAutoResize))
             {
+                ImGuiAPI.AlignTextToFramePadding();
                 ImGuiAPI.Text(inputInfo);
                 ImGuiAPI.SameLine(0, -1);
                 if(string.IsNullOrEmpty(mErrorString))

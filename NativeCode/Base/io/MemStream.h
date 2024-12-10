@@ -96,26 +96,21 @@ class TR_CLASS(SV_Dispose = self->Release())
 	BYTE*					mProxyPointer;
 	UINT64					mLength;
 	UINT64					mPosition;
+	bool					mCopyData = false;
 public:
 	MemStreamReader()
 		: mProxyPointer(nullptr)
 		, mLength(0)
 		, mPosition(0)
+		, mCopyData(false)
 	{
 
 	}
-	void ProxyPointer(BYTE* ptr, UINT64 len)
-	{
-		mProxyPointer = ptr;
-		mLength = len;
-		mPosition = 0;
-	}
-	void Cleanup()
-	{
-		mProxyPointer = nullptr;
-		mLength = 0;
-		mPosition = 0;
-	}
+	~MemStreamReader();
+	void ProxyPointer(BYTE* ptr, UINT64 len);
+	void CopyData(BYTE* ptr, UINT64 len);
+	void ResetData(UINT64 len);
+	void Cleanup();
 	BYTE* GetPointer() {
 		return mProxyPointer;
 	}

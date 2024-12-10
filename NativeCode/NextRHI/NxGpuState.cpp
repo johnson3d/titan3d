@@ -17,14 +17,6 @@ namespace NxRHI
 		auto iter = GpuPipelineCache.find(hash);
 		if (iter == GpuPipelineCache.end())
 		{
-			auto identifier = rpass->Identifier + effect->Identifier + pipeline->Identifier + "_";
-			identifier += VStringA_FormatV("%d", topology);
-			uint128 seed;
-			seed.first = 0;
-			seed.second = 0;
-			auto cachedHash = CityHash128WithSeed(identifier.c_str(), identifier.length(), seed);
-			//try load cachedHash
-
 			auto tmp = MakeWeakRef(device->CreateGpuDrawState());
 			tmp->Pipeline = pipeline;
 			tmp->ShaderEffect = effect;
@@ -35,16 +27,7 @@ namespace NxRHI
 				ASSERT(false);
 				return nullptr;
 			}
-			else
-			{
-				MemStreamWriter ar;
-				if (CoreSDK::mSaveMemStream != nullptr)
-				{
-					CoreSDK::mSaveMemStream(&ar, identifier.c_str(), "IGpuDrawState");
-				}
-			}
-			tmp->KeyHash.first = cachedHash.first;
-			tmp->KeyHash.second = cachedHash.second;
+			
 			GpuPipelineCache.insert(std::make_pair(hash, tmp));
 			return tmp;
 		}

@@ -4,6 +4,7 @@
 #include "DX12Effect.h"
 #include "DX12InputAssembly.h"
 #include "../NxEffect.h"
+#include "../../Base/cityhash/city.h"
 
 #define new VNEW
 
@@ -154,8 +155,20 @@ namespace NxRHI
 	{
 		if (((DX12GpuDevice*)device)->mDevice2 != nullptr)
 		{
-			return BuildStateByDevice2((DX12GpuDevice*)device);
+			if (RenderPass->Desc.ViewInstanceDesc.ViewInstanceCount != 0)
+			{
+				return BuildStateWithViewInstance((DX12GpuDevice*)device);
+			}
 		}
+
+		auto identifier = RenderPass->Identifier + ShaderEffect->Identifier + Pipeline->Identifier + "_";
+		identifier += VStringA_FormatV("%u", TopologyType);
+		uint128 seed;
+		seed.first = 0;
+		seed.second = 0;
+		auto cachedHash = CityHash128WithSeed(identifier.c_str(), identifier.length(), seed);
+		auto name = VStringA_FormatV("%llu%llu", cachedHash.second, cachedHash.first);
+		
 		auto pDx12 = this->Pipeline.UnsafeConvertTo<DX12GpuPipeline>();
 		auto pEffect = ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>();
 		auto pInputLayout = pEffect->mInputLayout.UnsafeConvertTo<DX12InputLayout>();
@@ -191,6 +204,20 @@ namespace NxRHI
 			&ShaderEffect->mPixelShader->Desc->DxIL[0],
 			ShaderEffect->mPixelShader->Desc->DxIL.size()
 		};
+
+		MemStreamReader ar;
+		bool bCached = false;
+		//try load cachedHash
+		if (CoreSDK::mGetMemStream != nullptr)
+		{	
+			if (CoreSDK::mGetMemStream(&ar, name.c_str(), "DX12GpuDrawState"))
+			{
+				desc.CachedPSO.pCachedBlob = ar.GetPointer();
+				desc.CachedPSO.CachedBlobSizeInBytes = (size_t)ar.GetLength();
+				bCached = true;
+			}
+		}
+
 		ID3D12PipelineState* pState;
 		if (S_OK != ((DX12GpuDevice*)device)->mDevice->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&pState)))
 		{
@@ -199,11 +226,24 @@ namespace NxRHI
 			return false;
 		}
 		mDxState = pState;
+		
+		KeyHash.first = cachedHash.first;
+		KeyHash.second = cachedHash.second;
+		
+		if (bCached == false && CoreSDK::mSaveMemStream != nullptr)
+		{
+			AutoRef<ID3DBlob> blob;
+			pState->GetCachedBlob(blob.GetAddressOf());
+			MemStreamWriter ar;
+			ar.Write(blob->GetBufferPointer(), (UINT)blob->GetBufferSize());
+			CoreSDK::mSaveMemStream(&ar, name.c_str(), "DX12GpuDrawState");
+		}
+
 		pState->Release();
 		return true;
 	}
 
-	bool DX12GpuDrawState::BuildStateByDevice2(DX12GpuDevice* device)
+	bool DX12GpuDrawState::BuildStateWithViewInstance(DX12GpuDevice* device)
 	{
 		auto pDx12 = this->Pipeline.UnsafeConvertTo<DX12GpuPipeline>();
 		auto pEffect = ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>();
