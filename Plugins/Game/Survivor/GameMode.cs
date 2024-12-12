@@ -8,6 +8,8 @@ namespace Survivor
     public partial class TtGameMode
     {
         [EngineNS.Rtti.Meta]
+		public EngineNS.GamePlay.Scene.TtScene CurrentScene { get; set; }
+        [EngineNS.Rtti.Meta]
         public TtWeaponManager WeaponManager { get; } = new TtWeaponManager();
         [EngineNS.Rtti.Meta]
         public TtHeroManager HeroManager { get; } = new TtHeroManager(); 

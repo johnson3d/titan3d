@@ -13,4 +13,8 @@
 
   <Import Project="..\GameItems\GameItem.projitems" Label="Shared" />
 
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="$(SolutionDir)CS_Engine.bat" />
+  </Target>
+
 </Project>
