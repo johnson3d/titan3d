@@ -162,9 +162,9 @@ namespace EngineNS.Bricks.AssemblyLoader
     }
 
     [Rtti.Meta]
-    public class UPluginDescriptor
+    public class TtPluginDescriptor
     {
-        public string FilePath;
+        public string FilePath { get; set; }
         [Rtti.Meta]
         public bool Enable { get; set; } = true;
         [Rtti.Meta]
@@ -175,14 +175,15 @@ namespace EngineNS.Bricks.AssemblyLoader
         public List<string> Dependencies { get; set; } = new List<string>();
         public void SaveDescriptor()
         {
-            IO.TtFileManager.SaveObjectToXml(FilePath, this);
+            var jsCode = IO.TtFileManager.SaveObjectToJson(this);
+            IO.TtFileManager.WriteAllText(FilePath, jsCode);
         }
     }
     public class TtPluginModule
     {
-        public UPluginModuleManager Manager;
+        public TtPluginModuleManager Manager;
         public string Name { get; set; }
-        public UPluginDescriptor PluginDescriptor = null;
+        public TtPluginDescriptor PluginDescriptor = null;
         public EPluginModuleState ModuleSate { get; set; } = EPluginModuleState.Unloaded;
         public string AssemblyPath { get; set; }
         WeakReference mLoader = null;
@@ -369,7 +370,7 @@ namespace EngineNS.Bricks.AssemblyLoader
             return PluginObject as T;
         }
     }
-    public class UPluginModuleManager
+    public class TtPluginModuleManager
     {
         public string CoreBinDirectory;
         private FileSystemWatcher mWatcher;
@@ -418,8 +419,8 @@ namespace EngineNS.Bricks.AssemblyLoader
             bool bTest = false;
             if (bTest)
             {
-                var template = new UPluginDescriptor();
-                template.FilePath = path + "template.xml";
+                var template = new TtPluginDescriptor();
+                template.FilePath = path + "template.json";
                 template.SaveDescriptor();
             }
 #elif PAndroid
@@ -438,7 +439,8 @@ namespace EngineNS.Bricks.AssemblyLoader
 
             foreach (var i in files)
             {
-                var descriptor = IO.TtFileManager.LoadXmlToObject<UPluginDescriptor>(i);
+                var jsCode = IO.TtFileManager.ReadAllText(i);
+                var descriptor = IO.TtFileManager.LoadObjectFromJson<TtPluginDescriptor>(jsCode);
                 if (descriptor == null)
                     continue;
                 descriptor.FilePath = i;
@@ -480,7 +482,7 @@ namespace EngineNS
 {
     partial class TtEngine
     {
-        public Bricks.AssemblyLoader.UPluginModuleManager PluginModuleManager { get; } = new Bricks.AssemblyLoader.UPluginModuleManager();
+        public Bricks.AssemblyLoader.TtPluginModuleManager PluginModuleManager { get; } = new Bricks.AssemblyLoader.TtPluginModuleManager();
     }
 }
 

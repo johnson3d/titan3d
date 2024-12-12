@@ -130,7 +130,9 @@ bool XndHolder::LoadXnd(const char* file)
 		UINT64 length = (UINT64)mResource->Length();
 
 		auto ptr = mResource->Ptr(length - sizeof(UINT64), sizeof(UINT64));
-		auto treeOffset = *(UINT64*)ptr;
+		//auto treeOffset = *(UINT64*)ptr; ndk:BUS_ADRALN
+		UINT64 treeOffset = 0;
+		memcpy(&treeOffset, ptr, sizeof(UINT64));
 		mResource->Free();
 
 		ptr = mResource->Ptr(treeOffset, length - treeOffset);

@@ -1,3 +1,4 @@
+using EngineNS.GamePlay.Player;
 using EngineNS.GamePlay.Scene;
 using System;
 using System.Collections.Generic;
@@ -10,10 +11,13 @@ namespace EngineNS.GamePlay
     public partial class TtMacrossFunctionLibrary
     {
         [Rtti.Meta]
-        public static bool InstantiatePrefab(RName prefab, TtScene scene)
+        public static async System.Threading.Tasks.Task<TtPrefabNode> InstantiatePrefab(RName prefab, TtScene scene)
         {
+            EngineNS.GamePlay.Scene.TtNode root = scene;
 
-            return false;
+            var newPrefab = await TtPrefab.LoadPrefab(scene.World, prefab);
+            newPrefab.Root.Parent = root;
+            return newPrefab.Root;
         }
     }
 }
@@ -27,8 +31,8 @@ namespace EngineNS.GamePlay
 {
 	partial class TtMacrossFunctionLibrary
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_InstantiatePrefab_659189569 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtMacrossFunctionLibrary->static bool InstantiatePrefab(RName prefab, TtScene scene)");
-		public static unsafe bool macross_InstantiatePrefab (string nodeName, RName prefab, TtScene scene) 
+		private static EngineNS.Macross.TtMacrossBreak macross_break_InstantiatePrefab_659189569 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtMacrossFunctionLibrary->static System.Threading.Tasks.Task<TtPrefabNode> InstantiatePrefab(RName prefab, TtScene scene)");
+		public static async System.Threading.Tasks.Task<TtPrefabNode> macross_InstantiatePrefab (string nodeName, RName prefab, TtScene scene) 
 		{
 			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
@@ -38,7 +42,7 @@ namespace EngineNS.GamePlay
 					stackframe.SetWatchVariable(nodeName + ":scene", scene);
 				}
 			}
-			var _return_value = InstantiatePrefab(prefab, scene);
+			var _return_value = await InstantiatePrefab(prefab, scene);
 			macross_break_InstantiatePrefab_659189569.TryBreak();
 			return _return_value;
 		}

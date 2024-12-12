@@ -872,15 +872,6 @@ namespace EngineNS.Bricks.CodeBuilder
             }
         }
 
-
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-        public UExecuteSequenceStatement MethodBody = new UExecuteSequenceStatement();
-        public int MethodSegmentDeep = 0;
-在此之后:
-        public TtExecuteSequenceStatement MethodBody = new UExecuteSequenceStatement();
-        public int MethodSegmentDeep = 0;
-*/
         public TtExecuteSequenceStatement MethodBody = new TtExecuteSequenceStatement();
         public int MethodSegmentDeep = 0;
         public bool ReturnHasGenerated = false;

@@ -30,7 +30,7 @@ namespace EngineNS.Bricks.StateMachine.TimedSM
         public virtual void Tick(float elapseSecond, in T context)
         {
             if (ShouldUpdate())
-            {
+            { 
                 Update(elapseSecond, context);
             }
         }

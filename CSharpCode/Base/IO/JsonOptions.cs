@@ -55,6 +55,30 @@ namespace EngineNS.IO
             }
         }
 
+        public class CustomPlatformTypeConverter : JsonConverter<EPlatformType>
+        {
+            public override EPlatformType Read(
+                ref Utf8JsonReader reader,
+                Type typeToConvert,
+                JsonSerializerOptions options)
+            {
+                object rhi;
+                if (Enum.TryParse(typeof(EPlatformType), reader.GetString(), out rhi))
+                {
+                    return (EPlatformType)rhi;
+                }
+                return EPlatformType.PLTF_Windows;
+            }
+
+            public override void Write(
+                Utf8JsonWriter writer,
+                EPlatformType rn,
+                JsonSerializerOptions options)
+            {
+                writer.WriteStringValue(rn.ToString());
+            }
+        }
+
         public static JsonSerializerOptions Options = new JsonSerializerOptions()
         {
             WriteIndented = true,
@@ -87,7 +111,8 @@ namespace EngineNS.IO
             },
             Converters = { 
                 new CustomRNameConverter(), 
-                new CustomRhiTypeConverter() 
+                new CustomRhiTypeConverter(),
+                new CustomPlatformTypeConverter()
             },
         };
     }

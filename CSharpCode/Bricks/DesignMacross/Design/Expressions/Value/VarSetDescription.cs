@@ -96,7 +96,17 @@ namespace EngineNS.DesignMacross.Design.Expressions
                                 right);
                 statementBuildContext.AddStatement(assign);
             }
+
+            var executionOutPin = ExecutionOutPins[0];
+            var linkedExecPin = statementBuildContext.MethodDescription.GetLinkedExecutionPin(executionOutPin);
+            if (linkedExecPin != null)
+            {
+                FStatementBuildContext buildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = statementBuildContext.MethodDescription };
+                (linkedExecPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);
+                statementBuildContext.AddStatement(buildContext.ExecuteSequenceStatement);
+            }
             
+
             return base.BuildStatement(ref statementBuildContext);
         }
         public override TtExpressionBase BuildExpressionForOutPin(TtDataPinDescription pin)

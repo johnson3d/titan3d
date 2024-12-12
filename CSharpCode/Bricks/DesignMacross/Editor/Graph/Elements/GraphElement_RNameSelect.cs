@@ -14,8 +14,8 @@ namespace EngineNS.DesignMacross.Editor
         public Color4f BackgroundColor { get; set; } = new Color4f(0, 0, 0, 0);
         public float Rounding { get; set; } = 5;
 
-        public Func<RName> GetBrowserRNameValueFunc;
-        public Action<RName> SetBrowserRNameValueFunc;
+        public Func<string> GetBrowserRNameValueFunc;
+        public Action<string> SetBrowserRNameValueFunc;
         public Func<string> GetBrowserFilterExtsFunc;
         public Action<string> SetBrowserFilterExtsFunc;
         public Func<Rtti.TtTypeDesc> GetBrowserShowTypeFunc;
@@ -24,7 +24,7 @@ namespace EngineNS.DesignMacross.Editor
         public Func<EGui.Controls.TtContentBrowser> GetContentBrowser;
         public Func<bool> GetBrowserVisibleFunc;
         public Action<bool> SetBrowserVisibleFunc;
-        public Action<RName, RName> OnValueChange;
+        public Action<string, string> OnValueChange;
         public TtGraphElement_RNameSelect(string content = "TextBox", EVerticalAlignment verticalAlignment = EVerticalAlignment.Top, EHorizontalAlignment horizontalAlignment = EHorizontalAlignment.Left)
         {
             Content = content;
@@ -174,7 +174,7 @@ namespace EngineNS.DesignMacross.Editor
                 var iconSize = new Vector2(64, 64) * context.Camera.Scale;
                 var end = start + iconSize;
                 var cmdList = ImGuiAPI.GetWindowDrawList();
-                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(element.GetBrowserRNameValueFunc());
+                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(RName.ParseFrom(element.GetBrowserRNameValueFunc()));
                 if(ameta == null ||!ameta.HasSnapshot)
                 {
                     cmdList.AddRect(in start, in end, 0xFFFFFFFF, 5, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 1);
@@ -186,7 +186,7 @@ namespace EngineNS.DesignMacross.Editor
 
                 var cmdListFont = ImGuiAPI.GetDrawListFont(cmdList);
                 var textPos = new Vector2(start.X, end.Y);
-                cmdList.AddText(cmdListFont, cmdListFont.FontSize, &textPos, 0xFFFFFFFF, element.GetBrowserRNameValueFunc().Name, null, 0.0f, null);
+                cmdList.AddText(cmdListFont, cmdListFont.FontSize, &textPos, 0xFFFFFFFF, element.GetBrowserRNameValueFunc(), null, 0.0f, null);
                 ImGuiAPI.SetCursorScreenPos(new Vector2(start.X + iconSize.X, start.Y));
             }
             else
@@ -216,9 +216,9 @@ namespace EngineNS.DesignMacross.Editor
                 }
             }
             if (element.GetContentBrowser().SelectedAssets.Count > 0 &&
-                    element.GetContentBrowser().SelectedAssets[0].GetAssetName() != element.GetBrowserRNameValueFunc())
+                    element.GetContentBrowser().SelectedAssets[0].GetAssetName().ToString() != element.GetBrowserRNameValueFunc())
             {
-                element.SetBrowserRNameValueFunc(element.GetContentBrowser().SelectedAssets[0].GetAssetName());
+                element.SetBrowserRNameValueFunc(element.GetContentBrowser().SelectedAssets[0].GetAssetName().ToString());
             }
         }
     }

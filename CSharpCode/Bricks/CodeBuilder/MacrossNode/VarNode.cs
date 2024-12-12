@@ -745,10 +745,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 var getMethod = pro.PropInfo.GetGetMethod();
                 if(getMethod.IsStatic == false)
                 {
-                    Self = new PinIn()
-                    {
-                        Name = "Self",
-                    };
+                    Self = new PinIn();
+                    Self.Name = "Self";
+                    Self.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
+                    Self.LinkDesc.CanLinks.Add("Value");
+                    Self.LinkDesc.SetColor(MacrossStyles.Instance.HostClassLinkColor);
                     AddPinIn(Self);
                 }
 
@@ -767,9 +768,10 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 if(setMethod.IsStatic == false)
                 {
                     Self = new PinIn();
+                    Self.Name = "Self";
                     Self.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();
                     Self.LinkDesc.CanLinks.Add("Value");
-                    Self.Name = "Self";
+                    Self.LinkDesc.SetColor(MacrossStyles.Instance.HostClassLinkColor);
                     AddPinIn(Self);
                 }
 
@@ -835,7 +837,18 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 assignSt.From = srcExp;
             }
             else
-                assignSt.From = new TtPrimitiveExpression(SetPin.EditValue.ValueType, SetPin.EditValue.Value);
+            {
+                HasError = true;
+                CodeExcept = new GraphException(this, null, $"SetPin unlink");
+                //if (SetPin.EditValue != null)
+                //{
+                //    assignSt.From = new TtPrimitiveExpression(SetPin.EditValue.ValueType, SetPin.EditValue.Value);
+                //}
+                //else
+                //{
+                //    assignSt.From = new TtDefaultValueExpression(this.VarType);
+                //}   
+            }
 
             assignSt.To = new TtVariableReferenceExpression()
             {

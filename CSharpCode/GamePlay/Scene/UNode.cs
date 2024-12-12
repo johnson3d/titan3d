@@ -67,6 +67,43 @@ namespace EngineNS.GamePlay.Scene
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtNode : IDisposable
     {
+        public struct FTreeCopyStat
+        {
+            public void Reset()
+            {
+                SuccessNode = 0;
+                FailureNode = 0;
+            }
+            public int SuccessNode;
+            public int FailureNode;
+        }
+        public static void NodeTreeCopyData(TtNode tar, TtNode src, ref FTreeCopyStat stat)
+        {
+            var type = src.GetType();
+            if (tar.GetType() != type)
+            {
+                stat.FailureNode++;
+                return;
+            }
+            stat.SuccessNode++;
+            var props = type.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+            foreach (var prop in props)
+            {
+                if (prop.CanWrite == false)
+                    continue;
+                prop.SetValue(tar, prop.GetValue(src));
+            }
+
+            if (tar.Children.Count != src.Children.Count)
+            {
+                stat.FailureNode++;
+                return;
+            }
+            for (int i = 0; i < src.Children.Count; i++)
+            {
+                NodeTreeCopyData(tar.Children[i], src.Children[i], ref stat);
+            }
+        }
         public virtual void Dispose()
         {
 

@@ -250,7 +250,7 @@ namespace NxRHI
 		}
 
 		pState->Release();
-		return true;
+		return true;//can put -> pos
 	}
 
 	bool DX12GpuDrawState::BuildStateWithViewInstance(DX12GpuDevice* device)

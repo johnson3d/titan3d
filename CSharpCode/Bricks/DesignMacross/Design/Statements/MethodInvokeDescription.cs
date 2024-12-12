@@ -1,4 +1,5 @@
-﻿using EngineNS.Bricks.CodeBuilder;
+﻿using EngineNS.Animation.Asset;
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.CodeBuilder.MacrossNode;
 using EngineNS.DesignMacross.Base.Description;
 using EngineNS.DesignMacross.Base.Graph;
@@ -6,6 +7,7 @@ using EngineNS.DesignMacross.Design.ConnectingLine;
 using EngineNS.DesignMacross.Design.Expressions;
 using EngineNS.DesignMacross.Design.Statement;
 using EngineNS.Rtti;
+using NPOI.SS.Formula.Functions;
 using Org.BouncyCastle.Asn1.X509.Qualified;
 using System.Reflection;
 
@@ -37,11 +39,27 @@ namespace EngineNS.DesignMacross.Design.Statement
             //ReturnType OutPin Index 0
             if (methodMeta.ReturnType != TtTypeDesc.TypeOf(typeof(void)))
             {
-                methodInvoke.AddDataOutPin(new TtDataOutPinDescription
+                if (methodMeta.ReturnType.IsSubclassOf(typeof(System.Threading.Tasks.Task)) ||
+                     methodMeta.ReturnType.GetInterface(nameof(EngineNS.Thread.Async.ITask)) != null)
                 {
-                    Name = "Result",
-                    TypeDesc = methodMeta.ReturnType
-                });
+                    methodInvoke.IsAsync = true;
+                    if(methodMeta.ReturnType.GetGenericArguments().Length != 0)
+                    {
+                        methodInvoke.AddDataOutPin(new TtDataOutPinDescription
+                        {
+                            Name = "Result",
+                            TypeDesc = TtTypeDesc.TypeOf(methodMeta.ReturnType.GetGenericArguments()[0])
+                        });
+                    }
+                }
+                else
+                {
+                    methodInvoke.AddDataOutPin(new TtDataOutPinDescription
+                    {
+                        Name = "Result",
+                        TypeDesc = methodMeta.ReturnType
+                    });
+                }
             }
 
             return methodInvoke;
@@ -63,14 +81,35 @@ namespace EngineNS.DesignMacross.Design.Statement
             methodInvoke.ReturnType = TtTypeDesc.TypeOf(methodInfo.ReturnType);
             if (methodInfo.ReturnType != typeof(void))
             {
-                //ReturnType OutPin Index 0
-                methodInvoke.AddDataOutPin(new() { Name = "Result", TypeDesc = TtTypeDesc.TypeOf(methodInfo.ReturnType) });
+                if (methodInfo.ReturnType.IsSubclassOf(typeof(System.Threading.Tasks.Task)) ||
+                     methodInfo.ReturnType.GetInterface(nameof(EngineNS.Thread.Async.ITask)) != null)
+                {
+                    methodInvoke.IsAsync = true;
+                    if(methodInfo.ReturnType.GetGenericArguments().Length != 0)
+                    {
+                        methodInvoke.AddDataOutPin(new TtDataOutPinDescription
+                        {
+                            Name = "Result",
+                            TypeDesc = TtTypeDesc.TypeOf(methodInfo.ReturnType.GetGenericArguments()[0])
+                        });
+                    }
+                }
+                else
+                {
+                    methodInvoke.AddDataOutPin(new TtDataOutPinDescription
+                    {
+                        Name = "Result",
+                        TypeDesc = TtTypeDesc.TypeOf(methodInfo.ReturnType)
+                    });
+                }
             }
             return methodInvoke;
         }
         //ReturnType OutPin Index 0
         [Rtti.Meta]
         public bool IsStatic { get; set; } = false;
+        [Rtti.Meta]
+        public bool IsAsync { get; set; } = false;
         [Rtti.Meta]
         public TtTypeDesc DeclaringType { get; set; } = null;
         [Rtti.Meta]
@@ -97,6 +136,7 @@ namespace EngineNS.DesignMacross.Design.Statement
             {
                 MethodName = Name,
             };
+            methodInvoke.IsAsync = IsAsync;
             if (IsStatic)
             {
                 methodInvoke.Host = new TtClassReferenceExpression() { Class = DeclaringType };
@@ -140,7 +180,37 @@ namespace EngineNS.DesignMacross.Design.Statement
                 var linkedDataPin = methodDesc.GetLinkedDataPin(pin);
                 if (linkedDataPin == null)
                 {
-                    //TODO: TtMethodInvokeReflectedDescription 要报错
+                    var dataInPin = pin as TtDataInPinDescription;
+                    if(dataInPin.TypeVaule != null)
+                    {
+                        if(dataInPin.TypeDesc == TtTypeDesc.TypeOf<RName>())
+                        {
+                            var argName = "result_MethodArg" + ((uint)pin.GetHashCode()).ToString();
+                            var argVarDec = TtASTBuildUtil.CreateVariableDeclaration(argName, new TtTypeReference(dataInPin.TypeDesc), new TtDefaultValueExpression(dataInPin.TypeDesc));
+                            var argStatement = new TtMethodInvokeStatement("ParseFrom",
+                                   argVarDec,
+                                   new TtClassReferenceExpression(dataInPin.TypeDesc),
+                                   new TtMethodInvokeArgumentExpression { Expression = new TtPrimitiveExpression(dataInPin.TypeVaule) });
+                            argStatement.ReturnValue = argVarDec;
+                            
+                            statementBuildContext.AddStatement(argVarDec);
+                            statementBuildContext.AddStatement(argStatement);
+                            methodInvoke.Arguments.Add(new TtMethodInvokeArgumentExpression(new TtVariableReferenceExpression(argName)));
+                        }
+                        else
+                        {
+                            var argName = "result_MethodArg" + ((uint)pin.GetHashCode()).ToString();
+                            var argVarDec = TtASTBuildUtil.CreateVariableDeclaration(argName, new TtTypeReference(dataInPin.TypeDesc), new TtDefaultValueExpression(dataInPin.TypeDesc));
+                            var argStatement = new TtMethodInvokeStatement("Parse",
+                                   argVarDec,
+                                   new TtClassReferenceExpression(dataInPin.TypeDesc),
+                                   new TtMethodInvokeArgumentExpression { Expression = new TtPrimitiveExpression(dataInPin.TypeVaule) });
+                            argStatement.ReturnValue = argVarDec;
+                            statementBuildContext.AddStatement(argVarDec);
+                            statementBuildContext.AddStatement(argStatement);
+                            methodInvoke.Arguments.Add(new TtMethodInvokeArgumentExpression(new TtVariableReferenceExpression(argName)));
+                        }
+                    }
                 }
                 else
                 {

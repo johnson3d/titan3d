@@ -50,7 +50,8 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
     [GraphElement(typeof(TtGraphElement_DataInPin))]
     public class TtDataInPinDescription : TtDataPinDescription
     {
-        public object TypeVaule { get; set; } = null;
+        [Rtti.Meta]
+        public string TypeVaule { get; set; } = null;
     }
     [GraphElement(typeof(TtGraphElement_DataPin))]
     public class TtDataOutPinDescription : TtDataPinDescription

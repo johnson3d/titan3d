@@ -407,7 +407,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
 
                 RNameSelect.GetBrowserRNameValueFunc = () =>
                 {
-                    return DataInPinDescription.TypeVaule as RName;
+                    return DataInPinDescription.TypeVaule;
                 };
                 RNameSelect.SetBrowserRNameValueFunc = (value) =>
                 {
