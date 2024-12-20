@@ -13,12 +13,13 @@ namespace EngineNS.Thread.Async
     }
     public class TtTaskCollector : IDisposable
     {
-        public List<ITask> Tasks { get; } = new List<ITask>();
-        public void AddWaitTask(ITask task)
+        public List<KeyValuePair<ITask, FOnTaskFinished> > Tasks { get; } = new ();
+        public delegate void FOnTaskFinished(ITask task);
+        public void AddWaitTask(ITask task, FOnTaskFinished fn = null)
         {
             lock (Tasks)
             {
-                Tasks.Add(task);
+                Tasks.Add(new KeyValuePair<ITask, FOnTaskFinished>(task, fn));
             }
         }
         public void Tick()
@@ -27,9 +28,13 @@ namespace EngineNS.Thread.Async
             {
                 for (int i = 0; i < Tasks.Count; i++)
                 {
-                    if (Tasks[i].IsCompleted)
+                    if (Tasks[i].Key.IsCompleted)
                     {
-                        Tasks[i].Dispose();
+                        if (Tasks[i].Value != null)
+                        {
+                            Tasks[i].Value(Tasks[i].Key);
+                        }
+                        Tasks[i].Key.Dispose();
                         Tasks.RemoveAt(i);
                         i--;
                     }
@@ -40,7 +45,7 @@ namespace EngineNS.Thread.Async
         {
             for (int i = 0; i < Tasks.Count; i++)
             {
-                Tasks[i].Dispose();
+                Tasks[i].Key.Dispose();
             }
             Tasks.Clear();
         }
@@ -119,7 +124,9 @@ namespace EngineNS.Thread.Async
 
         public T GetResult()
         {
-            var t = mTask.Result;
+            //normal:Call By Compile services at await
+            //special:TtTask<T>.GetResultAndRelease()
+            var t = mTask.DirectResult;
             mTask.Dispose();
             return t;
         }
@@ -134,15 +141,16 @@ namespace EngineNS.Thread.Async
 
     public enum ETtTaskStatus
     {
-        Pending = 0,
-        Success = 1,
-        Failed = 2
+        NotInit = 0,
+        Pending,
+        Success,
+        Failed
     }
 
     public class TtTaskData<T> : IPooledObject
     {
         public bool IsAlloc { get; set; } = false;
-        internal ETtTaskStatus mStatus;
+        internal ETtTaskStatus mStatus = ETtTaskStatus.NotInit;
         internal T mResult;
         internal Action mContinuation;
         internal Exception mException;
@@ -161,6 +169,10 @@ namespace EngineNS.Thread.Async
             {
                 obj.Reset();
                 return true;
+            }
+            public override string ShowName
+            {
+                get => $"TtTaks<{typeof(T).FullName}>";
             }
         }
         static TtTaskDataAllocator mAllocator = new TtTaskDataAllocator();
@@ -315,7 +327,7 @@ namespace EngineNS.Thread.Async
             mTaskData = TtTaskData<T>.CreateInstance();
         }
 
-        public T Result
+        public T DirectResult
         {
             get
             {
@@ -324,12 +336,25 @@ namespace EngineNS.Thread.Async
             }
         }
 
+        public T GetResultAndRelease()
+        {
+            return GetAwaiter().GetResult();
+        }
+
         public Exception Exception 
         { 
             get => mTaskData.mException; 
             private set => mTaskData.mException = value; 
         }
-
+        public ETtTaskStatus TaskState
+        {
+            get
+            {
+                if (mTaskData == null)
+                    return ETtTaskStatus.NotInit;
+                return mTaskData.mStatus;
+            }
+        }
         public bool IsCompleted => mTaskData.mStatus != ETtTaskStatus.Pending;
         public void Wait()
         {

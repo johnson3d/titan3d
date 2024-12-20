@@ -222,7 +222,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
             }
 
-            HzbMipsUAVs = new NxRHI.TtUaView[NxRHI.TtSrView.CalcMipLevel((int)x, (int)y, true)];
+            HzbMipsUAVs = new NxRHI.TtUaView[NxRHI.TtSrView.CalcMipLevel((int)x, (int)y, true, 1)];
             var dsTexDesc = new NxRHI.FTextureDesc();
             dsTexDesc.SetDefault();
             dsTexDesc.Width = (uint)x;

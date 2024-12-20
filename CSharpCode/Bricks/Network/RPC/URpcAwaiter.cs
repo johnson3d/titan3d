@@ -1,5 +1,4 @@
 ﻿using EngineNS.Thread.Async;
-using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -94,7 +93,9 @@ namespace EngineNS.Bricks.Network.RPC
         }
         public T GetResult()
         {
-            return Waiter.Result;
+            var ret = Waiter.Result;
+            Waiter.Dispose();
+            return ret;
         }
     }
     public struct FRpcTaskAwaiter_ISerializer<T> : INotifyCompletion where T : IO.ISerializer
@@ -152,7 +153,9 @@ namespace EngineNS.Bricks.Network.RPC
         }
         public T GetResult()
         {
-            return Waiter.Result;
+            var ret = Waiter.Result;
+            Waiter.Dispose();
+            return ret;
         }
     }
     public struct FRpcTaskAwaiter_String : INotifyCompletion
@@ -206,7 +209,9 @@ namespace EngineNS.Bricks.Network.RPC
         }
         public string GetResult()
         {
-            return Waiter.Result;
+            var ret = Waiter.Result;
+            Waiter.Dispose();
+            return ret;
         }
     }
     public static class TaskExtension

@@ -384,10 +384,15 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             return null;
         }
+
         [Rtti.Meta, Category("Option")]
         public string CustumCode { get; set; } = null;
         [Rtti.Meta, Category("Option")]
         public bool IsUseCustumCode { get; set; } = false;
+
+        [Rtti.Meta, Category("Option")]
+        public bool IsAsync { get; set; } = false;
+
         bool mInputsDirty = true;
         List<TtMethodArgumentDeclaration> mInputs = new List<TtMethodArgumentDeclaration>();
         [InputsOperationCallback, Category("Params")]
@@ -866,6 +871,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             }
             for(int i=0; i<MethodDatas.Count; i++)
             {
+                if (!MethodDatas[i].MethodDec.IsOverride)
+                {
+                    if (IsAsync)
+                        MethodDatas[i].MethodDec.AsyncType = TtMethodDeclaration.EAsyncType.CustomTask;
+                    else
+                        MethodDatas[i].MethodDec.AsyncType = TtMethodDeclaration.EAsyncType.None;
+                }
+
                 MethodDatas[i].MethodDec.MethodBody.Sequence.Clear();
                 MethodDatas[i].MethodDec.LocalVariables.Clear();
                 MethodDatas[i].MethodDec.LocalVariables.AddRange(this.LocalVars);

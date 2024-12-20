@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_2823790343361136958 Type="Survivor.TtGameMode@Survivor">
+  <HeroManager Type="Survivor.TtHeroManager@Survivor" Order="0" />
+  <WeaponManager Type="Survivor.TtWeaponManager@Survivor" Order="0" />
+</Hash_2823790343361136958>

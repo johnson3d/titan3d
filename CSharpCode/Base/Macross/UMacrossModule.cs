@@ -1,8 +1,10 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
+using MathNet.Numerics.Distributions;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
+using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
 
@@ -177,6 +179,26 @@ namespace EngineNS.Macross
 
             }
         }
+        private bool CheckAssembly(System.Reflection.Assembly assembly)
+        {
+            int NumOfStatic = 0;
+            var types = assembly.GetTypes();
+            foreach (var t in types)
+            {
+                if (t.GetCustomAttribute<System.Runtime.CompilerServices.CompilerGeneratedAttribute>() != null)
+                    continue;
+                var fields = t.GetFields(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public);
+                foreach (var f in fields)
+                {
+                    NumOfStatic++;
+                    if (f.Name != "AssmblyDesc")
+                    {
+                        return false;
+                    }
+                }
+            }
+            return NumOfStatic == 1;
+        }
         int CurrentVersion = 0;
         private WeakReference ReloadAssemblyImpl(string assemblyPath)
         {
@@ -188,6 +210,10 @@ namespace EngineNS.Macross
             var pdbPath = IO.TtFileManager.RemoveExtName(assemblyPath);
             pdbPath += ".tpdb";
             var newAssembly = loader.LoadAssembly(assemblyPath, pdbPath);
+            if (CheckAssembly(newAssembly) == false)
+            {
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Error, $"{assemblyPath} contain static fields");
+            }
 
             Rtti.TtTypeDescManager.ServiceManager manager;
             Rtti.TtAssemblyDesc desc;

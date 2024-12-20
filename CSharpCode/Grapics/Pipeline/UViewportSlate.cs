@@ -1,5 +1,6 @@
 using EngineNS.Editor;
 using EngineNS.GamePlay.Scene;
+using EngineNS.UI;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -436,18 +437,36 @@ namespace EngineNS.Graphics.Pipeline
             }
         }
         protected Stack<UI.TtUIHost> mHUDStack = new Stack<UI.TtUIHost>();
-        public void PushHUD(UI.TtUIHost hud)
+        [Rtti.Meta]
+        public void PushHUD(UI.Controls.TtUIElement hud)
         {
-            hud.WriteFlag(UI.Controls.TtUIElement.ECoreFlags.IsScreenSpace, true);
-            hud.ViewportSlate = this;
-            mHUDStack.Push(hud);
+            TtUIHost tempHost = null;
+            if (hud is UI.TtUIHost)
+            {
+                tempHost = hud as UI.TtUIHost;
+            }
+            else
+            {
+                tempHost = new UI.TtUIHost();
+                tempHost.Children.Add(hud);
+            }
+
+            tempHost.WriteFlag(UI.Controls.TtUIElement.ECoreFlags.IsScreenSpace, true);
+            tempHost.ViewportSlate = this;
+            tempHost.RenderCamera = this.RenderPolicy.DefaultCamera;
+            mHUDStack.Push(tempHost);
+
+            TtEngine.Instance.UIManager.AddActivedUI(tempHost);
         }
+        [Rtti.Meta]
         public void PopHUD()
         {
             var hud = mHUDStack.Peek();
             hud.WriteFlag(UI.Controls.TtUIElement.ECoreFlags.IsScreenSpace, false);
             hud.ViewportSlate = null;
             mHUDStack.Pop();
+
+            TtEngine.Instance.UIManager.RemoveActivedUI(hud);
         }
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly | Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         [Category("Option")]
@@ -640,6 +659,31 @@ namespace EngineNS.Graphics.Pipeline
 			var _return_value = await Initialize(application, policyName, zMin, zMax);
 			macross_break_Initialize_3328281008.TryBreak();
 			return _return_value;
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_PushHUD_3408856308 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.TtViewportSlate->void PushHUD(UI.Controls.TtUIElement hud)");
+		public unsafe void macross_PushHUD (string nodeName, UI.Controls.TtUIElement hud) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":hud", hud);
+				}
+			}
+			PushHUD(hud);
+			macross_break_PushHUD_3408856308.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_PopHUD_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.TtViewportSlate->void PopHUD()");
+		public unsafe void macross_PopHUD (string nodeName) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+				}
+			}
+			PopHUD();
+			macross_break_PopHUD_2609910045.TryBreak();
 		}
 	}
 }

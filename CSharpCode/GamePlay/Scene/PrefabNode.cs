@@ -9,7 +9,7 @@ namespace EngineNS.GamePlay.Scene
     [Bricks.CodeBuilder.ContextMenu("Prefab", "Prefab", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtPrefabNode.TtPrefabNodeData), DefaultNamePrefix = "Prefab")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public class TtPrefabNode : GamePlay.Scene.TtSceneActorNode
+    public class TtPrefabNode : GamePlay.Scene.TtSceneActorNode, IPooledObject
     {
         public class TtPrefabNodeData : TtNodeData
         {
@@ -48,6 +48,9 @@ namespace EngineNS.GamePlay.Scene
                 PrefabNodeData.PrefabName = value;
             }
         }
+
+        public bool IsAlloc { get; set; }
+
         private async Thread.Async.TtTask UpdatePrefab(RName save, RName value)
         {
             if (save != null)
@@ -101,7 +104,7 @@ namespace EngineNS.GamePlay.Scene
 
     [TtPrefab.PrefabCreateAttribute]
     [IO.AssetCreateMenu(MenuName = "Prefab")]
-    public partial class TtPrefab : IO.IAsset
+    public partial class TtPrefab : IO.IAsset, IPooledObject
     {
         public TtPrefabNode Root { get; set; }
         public static bool TryParsePrefabPath(string prefabPath, out RName name, out string[] path)
@@ -164,6 +167,8 @@ namespace EngineNS.GamePlay.Scene
         }
         [Category("Option")]
         public RName AssetName { get; set; }
+        public bool IsAlloc { get ; set ; }
+
         public const uint PrefabDescAttributeFlags = 1;
         public void SaveAssetTo(RName name)
         {

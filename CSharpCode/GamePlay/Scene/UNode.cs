@@ -1,5 +1,4 @@
 using EngineNS.Bricks.GpuDriven;
-using NPOI.SS.UserModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -61,6 +60,18 @@ namespace EngineNS.GamePlay.Scene
         public void UnsetStyle(TtNode.ENodeStyles style)
         {
             NodeStyles &= ~style;
+        }
+        public Graphics.Pipeline.TtHitProxy.EHitproxyType HitproxyType
+        {
+            get
+            {
+                return (Graphics.Pipeline.TtHitProxy.EHitproxyType)((uint)(NodeStyles & TtNode.ENodeStyles.HitproxyMasks) >> 2);
+            }
+            set
+            {
+                uint flags = (((uint)value & ((uint)TtNode.ENodeStyles.HitproxyMasks >> 2)) << 2);
+                SetStyle((TtNode.ENodeStyles)flags);
+            }
         }
     }
     [Rtti.Meta()]
@@ -189,7 +200,7 @@ namespace EngineNS.GamePlay.Scene
             DBoundingBox.TransformNoScale(in AABB, in Placement.AbsTransform, out outVal);
         }
         [Flags]
-        public enum ENodeStyles
+        public enum ENodeStyles : uint
         {
             VisibleMeshProvider = (1 << 0),//deprecated
             VisibleFollowParent = (1 << 1),
@@ -207,6 +218,7 @@ namespace EngineNS.GamePlay.Scene
             NotRegActiveNode = (1 << 14),
             ForceGatherNode = (1 << 15),
             BuildNavMesh = (1 << 16),
+            EnableHitproxyInGame = (1 << 17),
             Invisible = SelfInvisible | ChildrenInvisible,
         }
         public ENodeStyles NodeStyles
@@ -359,6 +371,25 @@ namespace EngineNS.GamePlay.Scene
                 else
                 {
                     UnsetStyle(ENodeStyles.BuildNavMesh);
+                }
+            }
+        }
+        [Category("Option")]
+        public virtual bool IsEnableHitproxyInGame
+        {
+            get
+            {
+                return HasStyle(ENodeStyles.EnableHitproxyInGame);
+            }
+            set
+            {
+                if (value)
+                {
+                    SetStyle(ENodeStyles.EnableHitproxyInGame);
+                }
+                else
+                {
+                    UnsetStyle(ENodeStyles.EnableHitproxyInGame);
                 }
             }
         }
@@ -1048,7 +1079,7 @@ namespace EngineNS.GamePlay.Scene
         }
         #endregion
 
-        public async System.Threading.Tasks.Task<TtNode> CloneNode(TtWorld world)
+        public async Thread.Async.TtTask<TtNode> CloneNode(TtWorld world)
         {
             var data = Rtti.TtTypeDescManager.CreateInstance(this.NodeData.GetType()) as TtNodeData;
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDesc.TypeOf(this.NodeData.GetType()));

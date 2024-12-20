@@ -39,11 +39,11 @@ namespace EngineNS.EGui.UIProxy
             }
             else
             {
-                if (mTask.Value.Result == null)
+                if (mTask.Value.DirectResult == null)
                     return IntPtr.Zero;
                 if(ImageSize == Vector2.Zero)
-                    ImageSize = new Vector2(mTask.Value.Result.PicDesc.Width, mTask.Value.Result.PicDesc.Height);
-                return mTask.Value.Result.GetTextureHandle();
+                    ImageSize = new Vector2(mTask.Value.DirectResult.PicDesc.Width, mTask.Value.DirectResult.PicDesc.Height);
+                return mTask.Value.DirectResult.GetTextureHandle();
             }
         }
 
@@ -73,7 +73,7 @@ namespace EngineNS.EGui.UIProxy
         {
             if (mTask != null)
             {
-                mTask.Value.Result?.FreeTextureHandle();
+                mTask.Value.DirectResult?.FreeTextureHandle();
                 mTask = null;
             }
         }
@@ -121,8 +121,8 @@ namespace EngineNS.EGui.UIProxy
             var ptr = base.GetImagePtrPointer();
             if(ptr != IntPtr.Zero && mSizeMargin == Thickness.Empty)
             {
-                var textureWidth = mTask.Value.Result.PicDesc.Width;
-                var textureHeight = mTask.Value.Result.PicDesc.Height;
+                var textureWidth = mTask.Value.DirectResult.PicDesc.Width;
+                var textureHeight = mTask.Value.DirectResult.PicDesc.Height;
                 var uvSize = UVMax - UVMin;
                 mSizeMargin.Left = (mUVMargin.Left * uvSize.X) * textureWidth;
                 mSizeMargin.Right = (mUVMargin.Right * uvSize.X) * textureWidth;

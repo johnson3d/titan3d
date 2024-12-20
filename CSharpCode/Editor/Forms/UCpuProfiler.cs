@@ -29,8 +29,8 @@ namespace EngineNS.Editor.Forms
         public uint DockId { get; set; }
         public ImGuiWindowClass DockKeyClass { get; }
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
-        Task<Profiler.TtRpcProfiler.RpcProfilerData> mRpcProfilerData;
-        Task<Profiler.TtRpcProfiler.RpcProfilerThreads> mRpcProfilerThreads;
+        Thread.Async.TtTask<Profiler.TtRpcProfiler.RpcProfilerData> mRpcProfilerData;
+        Thread.Async.TtTask<Profiler.TtRpcProfiler.RpcProfilerThreads> mRpcProfilerThreads;
         List<string> ProfilerThreadNames = new List<string>();
         List<Profiler.TtRpcProfiler.RpcProfilerData.ScopeInfo> Scopes = new List<Profiler.TtRpcProfiler.RpcProfilerData.ScopeInfo>();
         void SetTimeList(List<Profiler.TtRpcProfiler.RpcProfilerData.ScopeInfo> src)
@@ -74,7 +74,9 @@ namespace EngineNS.Editor.Forms
             }
             else
             {
-                Scopes = src;
+                Scopes.Clear();
+                Scopes.AddRange(src);
+                //Scopes = src;
             }
             //SortScopes();
         }
@@ -153,12 +155,20 @@ namespace EngineNS.Editor.Forms
         }
         private unsafe void OnDrawImpl()
         {
-            if (mRpcProfilerThreads == null || mRpcProfilerThreads.IsCompleted)
+            if (mRpcProfilerThreads.TaskState == Thread.Async.ETtTaskStatus.NotInit || mRpcProfilerThreads.IsCompleted)
             {
                 if (TtEngine.Instance.RpcModule.RpcManager != null)
                 {
-                    if (mRpcProfilerThreads != null)
-                        ProfilerThreadNames = mRpcProfilerThreads.Result.ThreadNames;
+                    if (mRpcProfilerThreads.TaskState == Thread.Async.ETtTaskStatus.Success)
+                    {
+                        //从Task中得到Result，拷贝到ProfilerThreadNames
+                        ProfilerThreadNames.Clear();
+                        ProfilerThreadNames.AddRange(mRpcProfilerThreads.DirectResult.ThreadNames);
+                        //拷贝结束，可以调用GetResultAndRelease()释放Awaiter了
+                        var t = mRpcProfilerThreads.GetResultAndRelease();
+                        //回收mRpcProfilerThreads.DirectResult，也就是Profiler.TtRpcProfiler.RpcProfilerThreads
+                        t.RecycleThis();
+                    }
                     mRpcProfilerThreads = Profiler.TtRpcProfiler_RpcCaller.GetProfilerThreads(0, new Bricks.Network.RPC.FRpcCallArg());
                 }
             }
@@ -194,12 +204,17 @@ namespace EngineNS.Editor.Forms
                                 TimeScopeTree.Reset();
                             }
                             
-                            if (mRpcProfilerData == null || mRpcProfilerData.IsCompleted)
+                            if (mRpcProfilerData.TaskState == Thread.Async.ETtTaskStatus.NotInit|| mRpcProfilerData.IsCompleted)
                             {
-                                if (mRpcProfilerData != null && mRpcProfilerData.Result != null)
+                                if (mRpcProfilerData.TaskState == Thread.Async.ETtTaskStatus.Success)// && mRpcProfilerData.DirectResult != null)
                                 {
-                                    SetTimeList(mRpcProfilerData.Result.Scopes);
-                                    TimeScopeTree.SetTreeNodes(mRpcProfilerData.Result.Scopes);
+                                    var t = mRpcProfilerData.DirectResult;
+                                    var scopes = t.Scopes;
+                                    SetTimeList(scopes);
+                                    TimeScopeTree.SetTreeNodes(scopes);
+                                    //Task.Result使用结束后才可以Release await
+                                    mRpcProfilerData.GetResultAndRelease();
+                                    t.RecycleThis();
                                 }
                                 mRpcProfilerData = Profiler.TtRpcProfiler_RpcCaller.GetProfilerData(i, new());
                             }

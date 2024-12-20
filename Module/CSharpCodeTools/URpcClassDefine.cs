@@ -178,7 +178,7 @@ namespace CSharpCodeTools
                         if (argDeclStr != "")
                             argDeclStr += ", ";
                         if (i.RetType != URpcMethod.EDataType.Void)
-                            AddLine($"public static async System.Threading.Tasks.Task<{i.GetNakedReturnType()}> {i.Name}({argDeclStr}EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)");
+                            AddLine($"public static async Thread.Async.TtTask<{i.GetNakedReturnType()}> {i.Name}({argDeclStr}EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)");
                         else
                             AddLine($"public static void {i.Name}({argDeclStr}in EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)");
                         PushBrackets();

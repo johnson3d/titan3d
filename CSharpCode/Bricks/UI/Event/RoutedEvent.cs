@@ -1,6 +1,7 @@
 ﻿using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.EGui.UIProxy;
 using EngineNS.Rtti;
+using EngineNS.Thread.Async;
 using EngineNS.UI.Bind;
 using EngineNS.UI.Controls;
 using Microsoft.Build.Framework;
@@ -21,7 +22,7 @@ namespace EngineNS.UI.Event
         Direct  // 直接路由事件：直接由事件源进行事件处理并不再传递
     }
 
-    public delegate void TtRoutedEventHandler(object sender, TtRoutedEventArgs args);
+    public delegate TtTask TtRoutedEventHandler(object sender, TtRoutedEventArgs args);
     //public delegate void TtMouseEventHandler(object sender, TtMouseEventArgs args);
     //public delegate void TtTouchEventHandler(object sender, TtTouchEventArgs args);
     //public delegate void TtDeviceEventHandler(object sender, TtDeviceEventArgs args);

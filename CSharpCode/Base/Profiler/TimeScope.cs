@@ -6,6 +6,7 @@ using System.ComponentModel;
 using EngineNS.IO;
 using EngineNS.Rtti;
 using EngineNS.Bricks.Network.RPC;
+using Org.BouncyCastle.Asn1.Mozilla;
 
 namespace EngineNS.Profiler
 {
@@ -253,8 +254,38 @@ namespace EngineNS.Profiler
         }
 
         #region RPC
-        public class RpcProfilerThreads : IO.BaseSerializer
+        [RpcProfilerThreads.TtCreator]
+        public class RpcProfilerThreads : IO.BaseSerializer, IPooledObject
         {
+            public bool IsAlloc { get; set; }
+            public class TtPooled : TtObjectPool<RpcProfilerThreads>
+            {
+                protected override bool OnObjectRelease(RpcProfilerThreads obj)
+                {
+                    obj.ThreadNames.Clear();
+                    return base.OnObjectRelease(obj);
+                }
+            }
+            public void RecycleThis()
+            {
+                TtCreatorAttribute.Pooled.ReleaseObject(this);
+            }
+            public class TtCreatorAttribute : Rtti.TtObjectCreatorAttribute
+            {
+                public static TtPooled Pooled = new TtPooled();
+                public override object CreateInstance(object[] args)
+                {
+                    //return new RpcProfilerThreads();
+                    return Pooled.QueryObjectSync();
+                }
+                public override void DisposeInstance(object obj)
+                {
+                    var v = obj as RpcProfilerThreads;
+                    if (v == null)
+                        return;
+                    Pooled.ReleaseObject(v);
+                }
+            }
             public override void OnWriteMember(IWriter ar, ISerializer obj, TtMetaVersion metaVersion)
             {
                 ar.Write((int)Profiler.TimeScopeManager.AllThreadInstance.Count);
@@ -268,7 +299,8 @@ namespace EngineNS.Profiler
             {
                 int count = 0;
                 ar.Read(out count);
-                ThreadNames = new List<string>(count);
+                //ThreadNames = new List<string>(count);
+                ThreadNames.Clear();
                 for (int i = 0; i < count; i++)
                 {
                     string tmp;
@@ -281,13 +313,43 @@ namespace EngineNS.Profiler
         [URpcMethod(Index = 0)]
         public EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads GetProfilerThreads(sbyte arg, TtCallContext context)
         {
-            mRpcProfilerThreads.ThreadNames.Clear();
+            //mRpcProfilerThreads.ThreadNames.Clear();
             return mRpcProfilerThreads;
         }
-
-        public class RpcProfilerData : IO.BaseSerializer
+        
+        [RpcProfilerData.TtCreator]
+        public class RpcProfilerData : IO.BaseSerializer, IPooledObject
         {
             public Profiler.TimeScopeManager Manager;
+            public bool IsAlloc { get; set; }
+            public class TtPooled : TtObjectPool<RpcProfilerData>
+            {
+                protected override bool OnObjectRelease(RpcProfilerData obj)
+                {
+                    obj.Scopes.Clear();
+                    return base.OnObjectRelease(obj);
+                }
+            }
+            public void RecycleThis()
+            {
+                TtCreatorAttribute.Pooled.ReleaseObject(this);
+            }
+            public class TtCreatorAttribute : Rtti.TtObjectCreatorAttribute
+            {
+                public static TtPooled Pooled = new TtPooled();
+                public override object CreateInstance(object[] args)
+                {
+                    //return new RpcProfilerData();
+                    return Pooled.QueryObjectSync();
+                }
+                public override void DisposeInstance(object obj)
+                {
+                    var v = obj as RpcProfilerData;
+                    if (v == null)
+                        return;
+                    Pooled.ReleaseObject(v);
+                }
+            }
             public override void OnWriteMember(IWriter ar, ISerializer obj, TtMetaVersion metaVersion)
             {
                 if (Manager == null)
@@ -321,7 +383,7 @@ namespace EngineNS.Profiler
             {
                 int count = 0;
                 ar.Read(out count);
-                Scopes = new List<ScopeInfo>(count);
+                Scopes.Clear();
                 for (int i = 0; i < count; i++)
                 {
                     ScopeInfo tmp;
@@ -409,7 +471,7 @@ namespace EngineNS.Profiler
 {
 	public partial class TtRpcProfiler_RpcCaller
 	{
-		public static async System.Threading.Tasks.Task<EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads> GetProfilerThreads(sbyte arg, EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
+		public static async Thread.Async.TtTask<EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads> GetProfilerThreads(sbyte arg, EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
 		{
 			var ExeIndex = rpcArg.ExeIndex;
 			var NetConnect = rpcArg.NetConnect;
@@ -446,7 +508,7 @@ namespace EngineNS.Profiler
 			}
 			return await TtRpcAwaiter.AwaitReturn<EngineNS.Profiler.TtRpcProfiler.RpcProfilerThreads>(retContext);
 		}
-		public static async System.Threading.Tasks.Task<EngineNS.Profiler.TtRpcProfiler.RpcProfilerData> GetProfilerData(string name, EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
+		public static async Thread.Async.TtTask<EngineNS.Profiler.TtRpcProfiler.RpcProfilerData> GetProfilerData(string name, EngineNS.Bricks.Network.RPC.FRpcCallArg rpcArg)
 		{
 			var ExeIndex = rpcArg.ExeIndex;
 			var NetConnect = rpcArg.NetConnect;

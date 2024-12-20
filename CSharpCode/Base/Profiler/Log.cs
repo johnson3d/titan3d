@@ -111,6 +111,13 @@ namespace EngineNS.Profiler
             return "Gameplay";
         }
     }
+    public class TtThreadGategory : TtLogCategory
+    {
+        public override string ToString()
+        {
+            return "Thread";
+        }
+    }
     public class TtLogCategoryGetter<T> where T : TtLogCategory, new()
     {
         static T Object = new T();

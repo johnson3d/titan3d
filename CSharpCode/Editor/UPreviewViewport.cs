@@ -170,6 +170,9 @@ namespace EngineNS.Editor
         }
         public unsafe override bool OnEvent(in Bricks.Input.Event e)
         {
+            if (!IsDrawing)
+                return true;
+
             if(e.Type == Bricks.Input.EventType.MOUSEBUTTONDOWN)
             {
                 mPreMousePt.X = e.MouseButton.X;

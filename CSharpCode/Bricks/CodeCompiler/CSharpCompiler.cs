@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.MSBuild;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +25,15 @@ namespace EngineNS.CodeCompiler
             "System.ComponentModel.Primitives.dll",
             "System.ComponentModel.TypeConverter.dll",
         };
+        static EmitResult mLastEmitResult;
+        public static EmitResult LastEmitResult
+        {
+            get => mLastEmitResult;
+            private set
+            {
+                mLastEmitResult = value;
+            }
+        }
 
         public static bool CompilerCSharpCodes(string[] cshaprFiles, string[] refAssemblyFiles, string[] preprocessorSymbols, string outputFile, string pdbFile, CSharpCompilationOptions option)
         {
@@ -68,8 +78,8 @@ namespace EngineNS.CodeCompiler
                         emitOptions = emitOptions.WithDebugInformationFormat(DebugInformationFormat.PortablePdb).WithPdbFilePath(pdbFile);
                     }
 
-                    var emitResult = updateCompilation.Emit(outStream, pdbStream, null, null, null, emitOptions);
-                    if (emitResult.Success)
+                    LastEmitResult = updateCompilation.Emit(outStream, pdbStream, null, null, null, emitOptions);
+                    if (LastEmitResult.Success)
                     {
                         retValue = true;
                         using (var fs = new FileStream(outputFile, FileMode.Create))
@@ -97,11 +107,11 @@ namespace EngineNS.CodeCompiler
                     else
                     {
                         System.Diagnostics.Debug.WriteLine("Macross build failed");
-                        foreach (var i in emitResult.Diagnostics)
+                        foreach (var i in LastEmitResult.Diagnostics)
                         {
                             System.Diagnostics.Debug.WriteLine(i.ToString());
                         }
-                        foreach (var i in emitResult.Diagnostics)
+                        foreach (var i in LastEmitResult.Diagnostics)
                         {
                             Console.WriteLine(i.ToString());
                         }
@@ -112,6 +122,7 @@ namespace EngineNS.CodeCompiler
             }
             catch (Exception ex)
             {
+                LastEmitResult = null;
                 Log.WriteException(ex);
                 return false;
             }

@@ -24,6 +24,10 @@ namespace EngineNS.GamePlay.Scene
         [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UMeshNode.UMeshNodeData@EngineCore" })]
         public class TtMeshNodeData : TtNodeData
         {
+            public TtMeshNodeData()
+            {
+                HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
+            }
             [Rtti.Meta]
             [RName.PGRName(FilterExts = Graphics.Mesh.TtMaterialMesh.AssetExt)]
             public RName MeshName { get; set; }

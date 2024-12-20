@@ -12,6 +12,16 @@ using System.Threading.Tasks;
 
 namespace EngineNS.UI
 {
+    [Rtti.Meta]
+    public partial class TtUIAssistFunctions
+    {
+        [Rtti.Meta(MacrossDisplayPath = new string[] { "UI", "UIManager" })]
+        public static TtUIManager UIManager
+        {
+            get => TtEngine.Instance.UIManager;
+        }
+    }
+
     public partial class TtUIManager : TtModule<TtEngine>
     {
         TtUIConfig mConfig = new TtUIConfig();
@@ -65,13 +75,22 @@ namespace EngineNS.UI
             }
         }
         List<TtUIHost> mUserUIList = new List<TtUIHost>();
+        public void AddActivedUI(TtUIHost userUI)
+        {
+            mUserUIList.Add(userUI);
+        }
+        public void RemoveActivedUI(TtUIHost userUI)
+        {
+            mUserUIList.Remove(userUI);
+        }
+
         Dictionary<UIKeyName, TtUIHost> mUserUIs = new Dictionary<UIKeyName, TtUIHost>(new UIKeyName.EqualityComparer());
         public void AddUI(RName fileName, string key, TtUIHost ui)
         {
             lock(mUserUIs)
             {
                 var keyName = new UIKeyName(fileName, key);
-                mUserUIList.Add(ui);
+                AddActivedUI(ui);
                 mUserUIs[keyName] = ui;
             }
         }
@@ -81,8 +100,8 @@ namespace EngineNS.UI
             {
                 if(mUserUIs.TryGetValue(key, out var ui))
                 {
-                    mUserUIList.Remove(ui);
-                    mUserUIList.Add(ui);
+                    RemoveActivedUI(ui);
+                    AddActivedUI(ui);
                 }
             }
         }
@@ -93,7 +112,7 @@ namespace EngineNS.UI
                 var key = new UIKeyName(name, keyName);
                 if(mUserUIs.TryGetValue(key, out var ui))
                 {
-                    mUserUIList.Remove(ui);
+                    RemoveActivedUI(ui);
                     return mUserUIs.Remove(key);
                 }
                 return false;
@@ -117,12 +136,13 @@ namespace EngineNS.UI
                 {
                     if(mUserUIs.TryGetValue(keys[i], out var ui))
                     {
-                        mUserUIList.Remove(ui);
+                        RemoveActivedUI(ui);
                         mUserUIs.Remove(keys[i]);
                     }
                 }
             }
         }
+
         public TtUIHost GetFirstIntersectHost(in Ray ray)
         {
             float minDistance = float.MaxValue;

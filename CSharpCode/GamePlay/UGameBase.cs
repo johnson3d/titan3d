@@ -93,6 +93,14 @@ namespace EngineNS.GamePlay
                 return mMcObject;
             }
         }
+        [Rtti.Meta]
+        public TtMacrossGame MacrossGame
+        {
+            get
+            {
+                return McObject?.Get();
+            }
+        }
         protected override TtGameInstance GetHost()
         {
             return this;
@@ -329,6 +337,21 @@ namespace EngineNS
             get;
             set;
         }
+        [Rtti.Meta()]
+        public static object RunMacross(out bool isOk,
+            //[Rtti.MetaParameter(FilterType = typeof(object), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
+            //System.Type type, 
+            Macross.TtMacrossGetterBase getter, string func, params object[] parameters)
+        {
+            isOk = false;
+            if (getter.InnerObject == null)
+                return null;
+            var mtd = getter.InnerObject.GetType().GetMethod(func);
+            if (mtd == null)
+                return null;
+            isOk = true;
+            return mtd.Invoke(getter.InnerObject, parameters);
+        }
     }
 }
 
@@ -530,6 +553,37 @@ namespace EngineNS.GamePlay
 			}
 			await CreateCharacter(scene);
 			macross_break_CreateCharacter_3958660289.TryBreak();
+		}
+	}
+}
+
+
+namespace EngineNS
+{
+	partial class TtEngine
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_RunMacross_3676773373 = new EngineNS.Macross.TtMacrossBreak("EngineNS.TtEngine->static object RunMacross(out bool isOk, Macross.TtMacrossGetterBase getter, string func, object[] parameters)");
+		public static unsafe object macross_RunMacross (string nodeName, out bool isOk, Macross.TtMacrossGetterBase getter, string func, object[] parameters) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":getter", getter);
+					stackframe.SetWatchVariable(nodeName + ":func", func);
+					stackframe.SetWatchVariable(nodeName + ":parameters", parameters);
+				}
+			}
+			var _return_value = RunMacross(out isOk, getter, func, parameters);
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":isOk", isOk);
+				}
+			}
+			macross_break_RunMacross_3676773373.TryBreak();
+			return _return_value;
 		}
 	}
 }

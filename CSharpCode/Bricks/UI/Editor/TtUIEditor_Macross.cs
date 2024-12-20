@@ -119,7 +119,7 @@ namespace EngineNS.UI.Editor
             await UIAsset.MacrossEditor.Initialize();
             UIAsset.MacrossEditor.FormName = UIAsset.AssetName.Name;
             UIAsset.MacrossEditor.RootForm = this;
-            UIAsset.MacrossEditor.LoadClassGraph(AssetName);
+            UIAsset.MacrossEditor.LoadClassGraph(AssetName, CheckMacrossMethodDataValid);
             UIAsset.MacrossEditor.DrawToolbarAction = DrawMacrossToolbar;
             UIAsset.MacrossEditor.OnRemoveMethod = OnMacrossEditorRemoveMethod;
             UIAsset.MacrossEditor.OnAddMember = OnMacrossEditorAddMember;
@@ -130,6 +130,31 @@ namespace EngineNS.UI.Editor
             //mMacrossGetter
             int temp = 0;
             this.mUIHost.QueryElements(ElementBindMacross, ref temp);
+        }
+        struct CheckValidQueryData
+        {
+            public MethodData.EErrorType Result;
+            public MethodData Data;
+        }
+        bool ElementCheckMacrossMethodDataValid(TtUIElement element, ref CheckValidQueryData data)
+        {
+            if(element.CheckMacrossMethodDataValid(data.Data))
+            {
+                data.Result = MethodData.EErrorType.None;
+                return true;
+            }
+
+            return false;
+        }
+        MethodData.EErrorType CheckMacrossMethodDataValid(MethodData data)
+        {
+            CheckValidQueryData queryTemp = new CheckValidQueryData()
+            {
+                Result = MethodData.EErrorType.InvalidMethodName,
+                Data = data,
+            };
+            this.mUIHost.QueryElements(ElementCheckMacrossMethodDataValid, ref queryTemp);
+            return queryTemp.Result;
         }
         bool ElementBindMacross(TtUIElement element, ref int temp)
         {
@@ -283,6 +308,7 @@ namespace EngineNS.UI.Editor
             var methodDesc = new TtMethodDeclaration();
             methodDesc.GetDisplayNameFunc = element.GetMethodDisplayName;
             methodDesc.MethodName = methodName;
+            methodDesc.AsyncType = TtMethodDeclaration.EAsyncType.CustomTask;
             var pams = eventType.GetMethod("Invoke").GetParameters();
             for(int i=0; i<pams.Length; i++)
             {
@@ -293,6 +319,7 @@ namespace EngineNS.UI.Editor
                 });
             }
             var graph = UIAsset.MacrossEditor.AddMethod(methodDesc);
+            graph.IsAsync = true;
             element.SetEventBindMethod(name, methodDesc);
 
             UIAsset.MacrossEditor.OpenMethodGraph(graph);
@@ -330,7 +357,7 @@ namespace EngineNS.UI.Editor
                         VariableName = varName,
                         VariableType = new TtTypeReference(element.GetType()),
                     },
-                    new TtVariableReferenceExpression("HostObject"),
+                    null,
                     new TtMethodInvokeArgumentExpression(new TtPrimitiveExpression(element.Id)))
             {
                 DeclarationReturnValue = true,

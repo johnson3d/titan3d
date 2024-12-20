@@ -3,7 +3,7 @@
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
-    <SharedGUID>1b2fe329-a74a-47d5-87f6-a5cfdb30e6ad</SharedGUID>
+    <SharedGUID>6a6d03b9-2784-4580-805c-e392384df4c6</SharedGUID>
   </PropertyGroup>
   <PropertyGroup DisplayName="Configuration">
     <Import_RootNamespace>MacrossGenCSharp</Import_RootNamespace>
@@ -26,7 +26,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/physics/physicstestgame.macross/physicstestgame.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/renderpolicy/test_rpolicy.macross/test_rpolicy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/statemachine/smtest.designmacross/smtest.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/ui/ui_hud.ui/ui_hud.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/ui/ui_hud.ui/unknow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/viewinstance/game01.macross/game01.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/utest/pgc/terraingen.macross/terraingen.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/utest/pgc/testprog.macross/testprog.cs" />

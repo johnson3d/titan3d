@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EngineNS.Thread;
+using EngineNS.Thread.Async;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -40,50 +42,102 @@ namespace EngineNS
             }
         }
     }
+    public abstract class TtObjectPoolBase : IObjectPoolBase
+    {
+        public abstract bool ReleaseObject(IPooledObject obj);
+        public abstract void Cleanup();
 
-    public class TtObjectPool<T> : IObjectPoolBase where T : IPooledObject, new()
+        public int GrowStep
+        {
+            get;
+            set;
+        } = 10;
+        public abstract int PoolSize { get; }
+        public int AliveNumber
+        {
+            get;
+            protected set;
+        } = 0;
+        public int TotalQueryTimes = 0;
+        public int TotalReleaseTimes = 0;
+        public abstract Type ObjectType { get; }
+        public abstract string ShowName { get; }
+    }
+    public class TtObjectPool<T> : TtObjectPoolBase where T : IPooledObject, new()
     {
         public TtObjectPool()
         {
             TtObjectPoolManager.Instance.RegPoolManager(this);
         }
         public static TtObjectPool<T> DefaultPool = new TtObjectPool<T>();
-        public int GrowStep
+        public override Type ObjectType 
         {
-            get;
-            set;
-        } = 10;
+            get => typeof(T);
+        }
+        public override string ShowName 
+        {
+            get => ObjectType.FullName;
+        }
+        protected virtual bool IsAsyncCreate { get => false; }
         Stack<T> mPool = new Stack<T>();
-        public int PoolSize
+        public override int PoolSize
         {
             get
             {
                 return mPool.Count;
             }
         }
-        public int AliveNumber
-        {
-            get;
-            private set;
-        } = 0;
         protected virtual T CreateObjectSync()
         {
             return new T();
         }
-        public int TotalQueryTimes = 0;
-        public int TotalReleaseTimes = 0;
+        protected virtual async Thread.Async.TtTask<T> CreateObjectAsync()
+        {
+            return default(T);
+        }
+        public void InternalPush(T t)
+        {
+            lock (mPool)
+            {
+                t.IsAlloc = false;
+                mPool.Push(t);
+            }
+        }
         public T QueryObjectSync()
         {
             lock (this)
             {
+                TtPooledSemaphore smp = null;
                 if (mPool.Count == 0)
-                {
+                {    
+                    if (IsAsyncCreate)
+                    {
+                        smp = TtEngine.Instance.EventPoster.ParrallelForSmpAllocator.QueryObjectSync();
+                        smp.Reset(GrowStep);
+                    }
                     for (int i = 0; i < GrowStep; i++)
                     {
-                        var t = CreateObjectSync();
-                        t.IsAlloc = false;
-                        mPool.Push(t);
+                        if (IsAsyncCreate)
+                        {
+                            var task = CreateObjectAsync();
+                            TtEngine.Instance.TaskCollector.AddWaitTask(task, (ft)=>
+                            {
+                                InternalPush(((TtTask<T>)ft).DirectResult);
+                                smp.Semaphore.Release();
+                            });
+                        }
+                        else
+                        {
+                            var t = CreateObjectSync();
+                            InternalPush(t);
+                        }
                     }
+                }
+                if (IsAsyncCreate)
+                {
+                    Thread.TtContextThread.CurrentContext.FlushToSemephore(smp.Semaphore);
+                    TtEngine.Instance.EventPoster.ParrallelForSmpAllocator.ReleaseObject(smp);
+                    //Thread.TtContextThread.CurrentContext.FlushAllThreadEvents();
                 }
                 var result = mPool.Peek();
                 mPool.Pop();
@@ -118,7 +172,7 @@ namespace EngineNS
                 return true;
             }
         }
-        public bool ReleaseObject(IPooledObject tObj)
+        public override bool ReleaseObject(IPooledObject tObj)
         {
             if (tObj == null)
                 return false;
@@ -128,7 +182,7 @@ namespace EngineNS
         {
 
         }
-        public void Cleanup()
+        public override void Cleanup()
         {
             lock (this)
             {
@@ -156,6 +210,38 @@ namespace EngineNS
                     mPool.Pop();
                 }
             }
+        }
+    }
+}
+
+namespace EngineNS.UTest
+{
+    public class TtTestAsyncObject : IPooledObject
+    {
+        public bool IsAlloc { get; set; }
+        public string A;
+    }
+    public class TtTestAsyncObjectPool : TtObjectPool<TtTestAsyncObject>
+    {
+        protected override bool IsAsyncCreate => true;
+        protected override async TtTask<TtTestAsyncObject> CreateObjectAsync()
+        {
+            await TtEngine.Instance.EventPoster.Post((state) =>
+            {
+                System.Threading.Thread.Sleep(1000);
+                return true;
+            }, Thread.Async.EAsyncTarget.AsyncIO);
+            return new TtTestAsyncObject();
+        }
+    }
+    [UTest.UTest]
+    public partial class UTest_TestAsyncObjectPool
+    {
+        TtTestAsyncObjectPool Pool = new TtTestAsyncObjectPool();
+        public void UnitTestEntrance()
+        {
+            //var o = Pool.QueryObjectSync();
+            //o.A = "?";
         }
     }
 }

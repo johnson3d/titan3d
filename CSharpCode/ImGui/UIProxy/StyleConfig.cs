@@ -104,6 +104,11 @@ namespace EngineNS.EGui.UIProxy
         [Category("Common")]
         [Controls.PropertyGrid.PGShowInPropertyGrid]
         [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
+        public UInt32 WarningStringColor = 0xFF00FFFF;
+
+        [Category("Common")]
+        [Controls.PropertyGrid.PGShowInPropertyGrid]
+        [Controls.PropertyGrid.UByte4ToColor4PickerEditor(IsABGR = true)]
         public UInt32 ErrorStringColor = 0xFF0000FF;
 
         [Category("Common")]

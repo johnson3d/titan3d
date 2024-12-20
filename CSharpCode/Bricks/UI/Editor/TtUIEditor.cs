@@ -207,7 +207,6 @@ namespace EngineNS.UI.Editor
                     break;
             }
         }
-
         public unsafe void OnDrawDesignerWindow()
         {
             //mDragTips = mDragItemName;
@@ -216,9 +215,9 @@ namespace EngineNS.UI.Editor
             var pivot = new Vector2(0);
             ImGuiAPI.SetNextWindowSize(in WindowSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             ImGuiAPI.SetNextWindowDockID(DockId, DockCond);
-            var result = EGui.UIProxy.DockProxy.BeginMainForm(GetWindowsName(), this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
+            var show = EGui.UIProxy.DockProxy.BeginMainForm(GetWindowsName(), this, ImGuiWindowFlags_.ImGuiWindowFlags_None |
                 ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings);
-            if (result)
+            if (show)
             {
                 if (ImGuiAPI.IsWindowFocused(ImGuiFocusedFlags_.ImGuiFocusedFlags_RootAndChildWindows))
                 {
@@ -236,7 +235,7 @@ namespace EngineNS.UI.Editor
                 ImGuiAPI.Separator();
             }
             ResetDockspace();
-            EGui.UIProxy.DockProxy.EndMainForm(result);
+            EGui.UIProxy.DockProxy.EndMainForm(show);
 
             DrawDesigner();
             DrawDetails();

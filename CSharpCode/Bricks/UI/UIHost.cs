@@ -143,7 +143,9 @@ namespace EngineNS.UI
         {
             var vp = this.ViewportSlate;
             var aabb = this.BoundingBox;
-            if (aabb.IsEmpty())
+            //if (aabb.Minimum.X >= aabb.Maximum.X ||
+            //    aabb.Minimum.Y >= aabb.Maximum.Y)
+            if(aabb.IsEmpty())
                 return false;
             if (RenderCamera == null)
                 return false;
@@ -178,36 +180,47 @@ namespace EngineNS.UI
         public TtUIElement GetPointAtElement(in Vector2 mousePt, ref RayIntersectData data, out Vector2 pointOffset, bool onlyClipped = true)
         {
             pointOffset = Vector2.Zero;
-            if (this.mSceneNode == null)
-                return null;
-            var vp = this.ViewportSlate;
-            var aabb = this.BoundingBox;
-            if (aabb.Minimum.X >= aabb.Maximum.X ||
-                aabb.Minimum.Y >= aabb.Maximum.Y)
-                return null;
-            if (RenderCamera == null)
-                return null;
-            var delta = vp.WindowPos - vp.ViewportPos;
-            data.Start = RenderCamera.GetLocalPosition();
-            Vector3 dir = Vector3.Zero;
-            //var mousePt = new Vector2(178, 209) + delta;
-            RenderCamera.GetPickRay(ref dir, mousePt.X - delta.X, mousePt.Y - delta.Y, vp.ClientSize.Width, vp.ClientSize.Height);
-            if (dir == Vector3.Zero)
-                return null;
-            data.Direction = dir;
-
-            //TtEngine.Instance.UIManager.DebugMousePt = mousePt;// - delta;
-            var ray = new Ray(data.Start, data.Direction);
-            if (!Ray.Intersects(in ray, BoundingBox, out data.Distance))
-                return null;
-
-            if(QueryElements(RayIntersect3DElements, ref data))
+            Vector2 relativePos = mousePt;
+            if (IsScreenSpace)
             {
-                return data.IntersectedElement.GetPointAtElement(in data.IntersectPos, out pointOffset, onlyClipped);
+                if (!DesignRect.Contains(in mousePt))
+                    return null;
+            }
+            else
+            {
+                if (this.mSceneNode == null)
+                    return null;
+                var vp = this.ViewportSlate;
+                var aabb = this.BoundingBox;
+                if (aabb.Minimum.X >= aabb.Maximum.X ||
+                    aabb.Minimum.Y >= aabb.Maximum.Y)
+                    return null;
+                if (RenderCamera == null)
+                    return null;
+                var delta = vp.WindowPos - vp.ViewportPos;
+                data.Start = RenderCamera.GetLocalPosition();
+                Vector3 dir = Vector3.Zero;
+                //var mousePt = new Vector2(178, 209) + delta;
+                RenderCamera.GetPickRay(ref dir, mousePt.X - delta.X, mousePt.Y - delta.Y, vp.ClientSize.Width, vp.ClientSize.Height);
+                if (dir == Vector3.Zero)
+                    return null;
+                data.Direction = dir;
+
+                //TtEngine.Instance.UIManager.DebugMousePt = mousePt;// - delta;
+                var ray = new Ray(data.Start, data.Direction);
+                if (!Ray.Intersects(in ray, BoundingBox, out data.Distance))
+                    return null;
+
+                relativePos = data.IntersectPos;
+            }
+
+            if (QueryElements(RayIntersect3DElements, ref data))
+            {
+                return data.IntersectedElement.GetPointAtElement(in relativePos, out pointOffset, onlyClipped);
             }
             if (!RayIntersect(ref data))
                 return null;
-            return base.GetPointAtElement(in data.IntersectPos, out pointOffset, onlyClipped);
+            return base.GetPointAtElement(in relativePos, out pointOffset, onlyClipped);
         }
 
         // white a c# method for line intersect triangle in 3d, and with intersect point out

@@ -1,4 +1,5 @@
 ﻿using EngineNS.Rtti;
+using EngineNS.Thread.Async;
 using EngineNS.UI.Bind;
 using EngineNS.UI.Canvas;
 using EngineNS.UI.Controls.Containers;
@@ -59,7 +60,7 @@ namespace EngineNS.UI.Controls
             OnLostMouseCapture += TtButtonBase_OnLostMouseCapture;
         }
 
-        private void TtButtonBase_MouseLeftButtonDown(object sender, TtRoutedEventArgs eventArgs)
+        private async TtTask TtButtonBase_MouseLeftButtonDown(object sender, TtRoutedEventArgs eventArgs)
         {
             if (ClickType != EClickType.Hover)
             {
@@ -83,7 +84,7 @@ namespace EngineNS.UI.Controls
                 }
             }
         }
-        private void TtButtonBase_MouseLeftButtonUp(object sender, TtRoutedEventArgs eventArgs)
+        private async TtTask TtButtonBase_MouseLeftButtonUp(object sender, TtRoutedEventArgs eventArgs)
         {
             if(ClickType != EClickType.Hover)
             {
@@ -133,7 +134,7 @@ namespace EngineNS.UI.Controls
             }
             return false;
         }
-        private void TtButtonBase_MouseEnter(object sender, TtRoutedEventArgs eventArgs)
+        private async TtTask TtButtonBase_MouseEnter(object sender, TtRoutedEventArgs eventArgs)
         {
             if(HandleIsMouseOverChanged(eventArgs))
             {
@@ -141,7 +142,7 @@ namespace EngineNS.UI.Controls
             }
         }
 
-        private void TtButtonBase_MouseLeave(object sender, TtRoutedEventArgs eventArgs)
+        private async TtTask TtButtonBase_MouseLeave(object sender, TtRoutedEventArgs eventArgs)
         {
             if(HandleIsMouseOverChanged(eventArgs))
             {
@@ -149,7 +150,7 @@ namespace EngineNS.UI.Controls
             }
         }
 
-        private void TtButtonBase_MouseMove(object sender, TtRoutedEventArgs eventArgs)
+        private async TtTask TtButtonBase_MouseMove(object sender, TtRoutedEventArgs eventArgs)
         {
             if((ClickType != EClickType.Hover) && 
                 IsMouseCaptured && 
@@ -160,7 +161,7 @@ namespace EngineNS.UI.Controls
                 eventArgs.Handled = true;
             }
         }
-        private unsafe void TtButtonBase_KeyDown(object sender, TtRoutedEventArgs eventArgs)
+        private unsafe async TtTask TtButtonBase_KeyDown(object sender, TtRoutedEventArgs eventArgs)
         {
             if (ClickType == EClickType.Hover)
                 return;
@@ -207,7 +208,7 @@ namespace EngineNS.UI.Controls
                 }
             }
         }
-        private unsafe void TtButtonBase_KeyUp(object sender, TtRoutedEventArgs eventArgs)
+        private unsafe async TtTask TtButtonBase_KeyUp(object sender, TtRoutedEventArgs eventArgs)
         {
             if (ClickType == EClickType.Hover)
                 return;
@@ -248,7 +249,7 @@ namespace EngineNS.UI.Controls
                 IsPressed = false;
             }
         }
-        private void TtButtonBase_OnLostFocus(object sender, TtRoutedEventArgs args)
+        private async TtTask TtButtonBase_OnLostFocus(object sender, TtRoutedEventArgs args)
         {
             if (ClickType == EClickType.Hover)
                 return;
@@ -265,7 +266,7 @@ namespace EngineNS.UI.Controls
             }
         }
 
-        private void TtButtonBase_OnLostMouseCapture(object sender, TtRoutedEventArgs args)
+        private async TtTask TtButtonBase_OnLostMouseCapture(object sender, TtRoutedEventArgs args)
         {
             if((args.Source == this) && (ClickType != EClickType.Hover) && !IsSpaceKeyDown)
             {

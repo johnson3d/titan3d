@@ -487,6 +487,11 @@ namespace EngineNS.Rtti
             }
         }
     }
+    public abstract class TtObjectCreatorAttribute : Attribute
+    {
+        public abstract object CreateInstance(object[] args);
+        public abstract void DisposeInstance(object obj);
+    }
     public class TtTypeDescManager
     {
         static TtTypeDescManager()
@@ -566,9 +571,15 @@ namespace EngineNS.Rtti
         {
             if (t == typeof(string))
                 return "";
-            
+
             try
             {
+                var creator = t.GetCustomAttribute<TtObjectCreatorAttribute>(true);
+                if (creator != null)
+                {
+                    return creator.CreateInstance(args);
+                }
+
                 if (t.IsPrimitive == false && args == null && t.GetConstructor(new Type[] { }) == null)
                 {
                     return RuntimeHelpers.GetUninitializedObject(t);

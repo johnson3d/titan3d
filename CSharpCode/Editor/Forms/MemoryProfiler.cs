@@ -107,6 +107,17 @@ namespace EngineNS.Editor.Forms
                             }   
                         }
                     }
+
+                    if (ImGuiAPI.CollapsingHeader("ObjectPool", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                    {
+                        foreach (var i in TtObjectPoolManager.Instance.Pools)
+                        {
+                            var pool = i as EngineNS.TtObjectPoolBase;
+                            if (pool == null)
+                                continue;
+                            ImGuiAPI.Text($"{pool.ShowName}: Alive = {pool.AliveNumber}; PoolSize = {pool.PoolSize}");
+                        }
+                    }   
                     ImGuiAPI.EndTabBar();
                 }
                 

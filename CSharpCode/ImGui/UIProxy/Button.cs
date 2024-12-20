@@ -135,7 +135,7 @@ namespace EngineNS.EGui.UIProxy
                     return null;
                 if (mNormalUVAnimTask.Value.IsCompleted == false)
                     return null;
-                return mNormalUVAnimTask.Value.Result;
+                return mNormalUVAnimTask.Value.DirectResult;
             }
         }
         public EGui.TtUVAnim CheckedUVAnim
@@ -146,7 +146,7 @@ namespace EngineNS.EGui.UIProxy
                     return null;
                 if (mCheckedUVAnimTask.Value.IsCompleted == false)
                     return null;
-                return mCheckedUVAnimTask.Value.Result;
+                return mCheckedUVAnimTask.Value.DirectResult;
             }
         }
 
@@ -166,14 +166,14 @@ namespace EngineNS.EGui.UIProxy
             {
                 if (mNormalUVAnimTask.Value.IsCompleted == false)
                     return false;
-                if (mNormalUVAnimTask.Value.Result.IsReadyToDraw() == false)
+                if (mNormalUVAnimTask.Value.DirectResult.IsReadyToDraw() == false)
                     return false;
             }
             if (mCheckedUVAnimTask != null)
             {
                 if (mCheckedUVAnimTask.Value.IsCompleted == false)
                     return false;
-                if (mCheckedUVAnimTask.Value.Result.IsReadyToDraw() == false)
+                if (mCheckedUVAnimTask.Value.DirectResult.IsReadyToDraw() == false)
                     return false;
             }
             return true;
@@ -212,14 +212,14 @@ namespace EngineNS.EGui.UIProxy
             {
                 if(mCheckedUVAnimTask != null)
                 {
-                    mCheckedUVAnimTask.Value.Result.OnDraw(in drawList, in imgPos, in imgEnd, 0);
+                    mCheckedUVAnimTask.Value.DirectResult.OnDraw(in drawList, in imgPos, in imgEnd, 0);
                 }
             }
             else
             {
                 if(mNormalUVAnimTask != null)
                 {
-                    mNormalUVAnimTask.Value.Result.OnDraw(in drawList, in imgPos, in imgEnd, 0);
+                    mNormalUVAnimTask.Value.DirectResult.OnDraw(in drawList, in imgPos, in imgEnd, 0);
                 }
             }
 

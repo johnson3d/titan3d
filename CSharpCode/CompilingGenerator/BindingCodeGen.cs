@@ -2000,6 +2000,45 @@ namespace {namespaceName}
             source += $@"
         }}";
             }
+            if(!classSymbol.MemberNames.Any(name => "CheckMacrossMethodDataValid" == name))
+            {
+                source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} bool CheckMacrossMethodDataValid(EngineNS.Bricks.CodeBuilder.MacrossNode.MethodData methodData)
+        {{";
+                if (baseHasBindObjectInterface)
+                {
+                    source += $@"
+            if(base.CheckMacrossMethodDataValid(methodData))
+                return true;";
+                }
+                else
+                {
+                    source += $@"
+            foreach(var evt in MacrossMethods)
+            {{
+                if(evt.Value is EngineNS.UI.Controls.TtUIElement.MacrossEventMethodData)
+                {{
+                    var data = evt.Value as EngineNS.UI.Controls.TtUIElement.MacrossEventMethodData;
+                    var eventName = data.EventName;
+                    if(methodData.MethodDec.MethodName == GetEventMethodName(eventName))
+                        return true;
+                }}
+                else if(evt.Value is EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData)
+                {{
+                    var data = evt.Value as EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData;
+                    var propertyName = data.PropertyName;
+                    if(methodData.MethodDec.MethodName == GetPropertyBindMethodName(propertyName, true))
+                        return true;
+                    if(methodData.MethodDec.MethodName == GetPropertyBindMethodName(propertyName, false))
+                        return true;
+                }}
+            }}";
+                }
+
+                source += $@"
+            return false;
+        }}";
+            }
             if (!classSymbol.MemberNames.Any(name => "BindMacross" == name))
             {
                 source += $@"

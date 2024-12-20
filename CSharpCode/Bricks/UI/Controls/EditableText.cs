@@ -158,7 +158,7 @@ namespace EngineNS.UI.Controls
         }
 
         int mMouseDownCursor = 0;
-        private unsafe void TtEditableText_MouseLeftButtonDown(object sender, TtRoutedEventArgs args)
+        private unsafe async Thread.Async.TtTask TtEditableText_MouseLeftButtonDown(object sender, TtRoutedEventArgs args)
         {
             args.Handled = true;
 
@@ -221,7 +221,7 @@ namespace EngineNS.UI.Controls
             }
             return cursorIndex;
         }
-        private unsafe void TtEditableText_MouseLeftButtonUp(object sender, TtRoutedEventArgs args)
+        private unsafe async Thread.Async.TtTask TtEditableText_MouseLeftButtonUp(object sender, TtRoutedEventArgs args)
         {
             args.Handled = true;
             if (IsMouseCaptured)
@@ -245,7 +245,7 @@ namespace EngineNS.UI.Controls
                     CursorIndex = cursorIdx;
             }
         }
-        private unsafe void TtEditableText_MouseMove(object sender, TtRoutedEventArgs args)
+        private unsafe async Thread.Async.TtTask TtEditableText_MouseMove(object sender, TtRoutedEventArgs args)
         {
             if(IsMouseCaptured && TtEngine.Instance.InputSystem.Mouse.IsMouseButtonDown(Bricks.Input.EMouseButton.BUTTON_LEFT))
             {
@@ -260,7 +260,7 @@ namespace EngineNS.UI.Controls
                 SelectionLength = end - start;
             }
         }
-        private unsafe void TtEditableText_KeyDown(object sender, TtRoutedEventArgs args)
+        private unsafe async Thread.Async.TtTask TtEditableText_KeyDown(object sender, TtRoutedEventArgs args)
         {
             if (args.InputEventPtr == null)
                 return;
@@ -397,12 +397,12 @@ namespace EngineNS.UI.Controls
                     break;
             }
         }
-        private void TtEditableText_KeyUp(object sender, TtRoutedEventArgs args)
+        private async Thread.Async.TtTask TtEditableText_KeyUp(object sender, TtRoutedEventArgs args)
         {
 
         }
 
-        private unsafe void TtEditableText_OnFocus(object sender, TtRoutedEventArgs args)
+        private unsafe async Thread.Async.TtTask TtEditableText_OnFocus(object sender, TtRoutedEventArgs args)
         {
             args.Handled = true;
             
@@ -415,13 +415,13 @@ namespace EngineNS.UI.Controls
                 SelectionLength = Text.Length;
             }
         }
-        private void TtEditableText_OnLostFocus(object sender, TtRoutedEventArgs args)
+        private async Thread.Async.TtTask TtEditableText_OnLostFocus(object sender, TtRoutedEventArgs args)
         {
             args.Handled = true;
             CursorIndex = -1;
             TtInputSystem.StopTextInput();
         }
-        private unsafe void TtEditableText_TextInput(object sender, TtRoutedEventArgs args)
+        private unsafe async Thread.Async.TtTask TtEditableText_TextInput(object sender, TtRoutedEventArgs args)
         {
             if (args.InputEventPtr == null)
                 return;
@@ -452,7 +452,7 @@ namespace EngineNS.UI.Controls
             }
         }
         string mEditingText;
-        private unsafe void TtEditableText_TextEditing(object sender, TtRoutedEventArgs args)
+        private unsafe async Thread.Async.TtTask TtEditableText_TextEditing(object sender, TtRoutedEventArgs args)
         {
             if (args.InputEventPtr == null)
                 return;

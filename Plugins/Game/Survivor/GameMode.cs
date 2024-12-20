@@ -27,6 +27,12 @@ namespace Survivor
         {
             HeroManager.LoadDataSet(name);
         }
+		[EngineNS.Rtti.Meta]
+		public static TtGameMode GetSurvivorGameMode()
+		{
+			var game = TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame;
+			return game.GameMode;
+		}
     }
 }
 
@@ -63,6 +69,19 @@ namespace Survivor
 			}
 			LoadHeros(name);
 			macross_break_LoadHeros_2037383663.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_GetSurvivorGameMode_3323264318 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtGameMode->static TtGameMode GetSurvivorGameMode()");
+		public static unsafe TtGameMode macross_GetSurvivorGameMode (string nodeName) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+				}
+			}
+			var _return_value = GetSurvivorGameMode();
+			macross_break_GetSurvivorGameMode_3323264318.TryBreak();
+			return _return_value;
 		}
 	}
 }

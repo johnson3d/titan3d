@@ -246,19 +246,19 @@ namespace EngineNS.UI
                 mDrawBrush.Name = "@MatInst:" + mMaterial.ToString();
             if (mUVAnimTask != null)
             {
-                var texture = mUVAnimTask.Value.Result.Texture;
+                var texture = mUVAnimTask.Value.DirectResult.Texture;
                 if (texture == null)
-                    texture = mDefaultTextureTask.Value.Result;
+                    texture = mDefaultTextureTask.Value.DirectResult;
                 mDrawBrush.SetSrv(texture);
                 Vector2 uvMin, uvMax;
-                mUVAnimTask.Value.Result.GetUV(0, out uvMin, out uvMax);
+                mUVAnimTask.Value.DirectResult.GetUV(0, out uvMin, out uvMax);
                 mDrawBrush.SetUV(in uvMin, in uvMax);
                 //mDrawBrush.Name = mUVAnimTask.Value.Result.
             }
             else
             {
                 // default texture
-                mDrawBrush.SetSrv(mDefaultTextureTask.Value.Result);
+                mDrawBrush.SetSrv(mDefaultTextureTask.Value.DirectResult);
             }
             mDrawBrush.Color = Color;
 

@@ -159,7 +159,7 @@ namespace EngineNS.Graphics.Mesh
                 return;
             else
             {
-                mPreviewNode = mPreviewNodeTask.Value.Result as TtMeshNode;
+                mPreviewNode = mPreviewNodeTask.Value.DirectResult as TtMeshNode;
             }
 
             if (mPreviewNode.Parent != worldViewport.World.Root)

@@ -296,6 +296,10 @@ namespace EngineNS.Graphics.Pipeline.Common
                         {
                             continue;
                         }
+                        if (world.IsGameWorld && i.Mesh.HostNode.IsEnableHitproxyInGame == false)
+                        {
+                            continue;
+                        }
                         if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
                             continue;
                         foreach (var j in i.Mesh.SubMeshes)

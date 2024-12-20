@@ -2,6 +2,7 @@
 using EngineNS.Editor;
 using EngineNS.Macross;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Emit;
 using NPOI.SS.Formula.Functions;
 using NPOI.Util;
 using System;
@@ -215,7 +216,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             //LoadClassGraph(rn);
         }
-        public void LoadClassGraph(RName rn)
+        public void LoadClassGraph(RName rn, Func<MethodData, MethodData.EErrorType> checkMethodDataValid = null)
         {
             AssetName = rn;
             DefClass.Reset();
@@ -270,22 +271,29 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             var methodInfos = clsType.GetMethods();
                             for (int methodIdx = 0; methodIdx < funcGraph.MethodDatas.Count; methodIdx++)
                             {
-                                bool bFind = false;
-                                MethodData.EErrorType lastErrorType = MethodData.EErrorType.None;
-                                for (int mIIdx = 0; mIIdx < methodInfos.Length; mIIdx++)
+                                if(checkMethodDataValid != null)
                                 {
-                                    if (funcGraph.MethodDatas[methodIdx].GetMethodName() != methodInfos[mIIdx].Name)
-                                        continue;
-                                    lastErrorType = TtMethodDeclaration.IsMatching(funcGraph.MethodDatas[methodIdx].MethodDec, methodInfos[mIIdx]);
-                                    if (lastErrorType == MethodData.EErrorType.None)
-                                    {
-                                        bFind = true;
-                                        break;
-                                    }
+                                    funcGraph.MethodDatas[methodIdx].ErrorType = checkMethodDataValid.Invoke(funcGraph.MethodDatas[methodIdx]);
                                 }
-                                if(!bFind)
+                                else
                                 {
-                                    funcGraph.MethodDatas[methodIdx].ErrorType = (lastErrorType == MethodData.EErrorType.None) ? MethodData.EErrorType.InvalidMethodName : lastErrorType;
+                                    bool bFind = false;
+                                    MethodData.EErrorType lastErrorType = MethodData.EErrorType.None;
+                                    for (int mIIdx = 0; mIIdx < methodInfos.Length; mIIdx++)
+                                    {
+                                        if (funcGraph.MethodDatas[methodIdx].GetMethodName() != methodInfos[mIIdx].Name)
+                                            continue;
+                                        lastErrorType = TtMethodDeclaration.IsMatching(funcGraph.MethodDatas[methodIdx].MethodDec, methodInfos[mIIdx]);
+                                        if (lastErrorType == MethodData.EErrorType.None)
+                                        {
+                                            bFind = true;
+                                            break;
+                                        }
+                                    }
+                                    if(!bFind)
+                                    {
+                                        funcGraph.MethodDatas[methodIdx].ErrorType = (lastErrorType == MethodData.EErrorType.None) ? MethodData.EErrorType.InvalidMethodName : lastErrorType;
+                                    }
                                 }
                             }
                         }
@@ -586,6 +594,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         //}
 
         public Action<TtMacrossEditor> AfterCompileCode;
+        CompileResult mLastCompileResult;
         public void CompileCode()
         {
             TtEngine.Instance.MacrossManager.ClearGameProjectTemplateBuildFiles();
@@ -611,6 +620,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     AfterCompileCode?.Invoke(this);
                 }
             }
+            mLastCompileResult = TtMacrossModule.LastCompileResult;
         }
 
         void SaveCSFile(string code)
@@ -707,7 +717,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             ImGuiAPI.DockBuilderSplitNode(graphId, ImGuiDir.ImGuiDir_Right, 0.4f, ref unionConfigId, ref graphId);
 
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("GraphWindow", mDockKeyClass), graphId);
-            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("CodeEditor", mDockKeyClass), graphId);
+            ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName(GetCodeEditorWindowTitle(), mDockKeyClass), graphId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("NodeProperty", mDockKeyClass), propertyId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("UnionNodeConfig", mDockKeyClass), unionConfigId);
             ImGuiAPI.DockBuilderDockWindow(EGui.UIProxy.DockProxy.GetDockWindowName("ClassView", mDockKeyClass), leftId);
@@ -1375,20 +1385,116 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         bool ShowTextEditor = true;
         string TextEditorTitle = "TextEditor";
         UMacrossMethodGraph CurrentTextoutMethod = null;
-        protected void DrawTextEditor()
+
+        string GetCodeEditorWindowTitle()
+        {
+            string title = "CodeEditor";
+            //if (mLastCompileResult.IsInitialized)
+            //{
+            //    if (mLastCompileResult.Success)
+            //    {
+            //        title += "(Compile Success)";
+            //    }
+            //    else
+            //    {
+            //        title += "(Compile Failed)";
+            //    }
+            //}
+            return title;
+        }
+
+        bool mTextEditorDockInitialized = false;
+        bool mReporterShowSelfOnly = true;
+        uint mTextEditorDockId;
+        protected unsafe void DrawTextEditor()
         {
             var sz = new Vector2(-1);
-            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, "CodeEditor", ref ShowTextEditor, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if(mLastCompileResult.IsInitialized)
+            {
+                if(mLastCompileResult.Success)
+                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.PassStringColor);
+                else
+                    ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.ErrorStringColor);
+            }
+            var show = EGui.UIProxy.DockProxy.BeginPanel(mDockKeyClass, GetCodeEditorWindowTitle(), ref ShowTextEditor, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+            if(mLastCompileResult.IsInitialized)
+                ImGuiAPI.PopStyleColor(1);
             if (show)
             {
-                var winPos = ImGuiAPI.GetWindowPos();
-                var vpMin = ImGuiAPI.GetWindowContentRegionMin();
-                var vpMax = ImGuiAPI.GetWindowContentRegionMax();
-                ImGuiAPI.TextColored(Color4f.FromColor4b(Color4b.LightGoldenrodYellow), TextEditorTitle);
-                mCodeEditor.mCoreObject.Render(AssetName.Name, in Vector2.Zero, false);
+                //var winPos = ImGuiAPI.GetWindowPos();
+                //var vpMin = ImGuiAPI.GetWindowContentRegionMin();
+                //var vpMax = ImGuiAPI.GetWindowContentRegionMax();
+                mTextEditorDockId = ImGuiAPI.GetID(AssetName.Name + DockPostName + "_TextEditor_Dockspace");
+
+                var textWinName = "CodeText##" + mTextEditorDockId;
+                var reporterWinName = "CodeReport##" + mTextEditorDockId;
+
+                var dockSize = Vector2.Zero;
+                ImGuiAPI.DockSpace(mTextEditorDockId, &dockSize, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_NoUndocking | ImGuiDockNodeFlags_.ImGuiDockNodeFlags_AutoHideTabBar, null);
+                if(!mTextEditorDockInitialized)
+                {
+                    mTextEditorDockInitialized = true;
+                    ImGuiAPI.DockBuilderRemoveNode(mTextEditorDockId);
+                    ImGuiAPI.DockBuilderAddNode(mTextEditorDockId, ImGuiDockNodeFlags_.ImGuiDockNodeFlags_NoUndocking | ImGuiDockNodeFlags_.ImGuiDockNodeFlags_AutoHideTabBar);
+                    ImGuiAPI.DockBuilderSetNodePos(mTextEditorDockId, ImGuiAPI.GetCursorPos());
+                    ImGuiAPI.DockBuilderSetNodeSize(mTextEditorDockId, Vector2.One);
+
+                    var textId = mTextEditorDockId;
+                    uint reportId = 0;
+                    ImGuiAPI.DockBuilderSplitNode(textId, ImGuiDir.ImGuiDir_Down, 0.3f, ref reportId, ref textId);
+
+                    ImGuiAPI.DockBuilderDockWindow(textWinName, textId);
+                    ImGuiAPI.DockBuilderDockWindow(reporterWinName, reportId);
+                    ImGuiAPI.DockBuilderFinish(mTextEditorDockId);
+                }
+
+                // code
+                bool open = true;
+                if (ImGuiAPI.Begin(textWinName, ref open, ImGuiWindowFlags_.ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar))
+                {
+                    ImGuiAPI.TextColored(Color4f.FromColor4b(Color4b.LightGoldenrodYellow), TextEditorTitle);
+                    mCodeEditor.mCoreObject.Render(AssetName.Name, in Vector2.Zero, false);
+                }
+                ImGuiAPI.End();
+                // reporter
+                if(ImGuiAPI.Begin(reporterWinName, ref open, ImGuiWindowFlags_.ImGuiWindowFlags_None))
+                {
+                    EGui.UIProxy.CheckBox.DrawCheckBox("Show self only", ref mReporterShowSelfOnly);
+                    if (ImGuiAPI.BeginChild(reporterWinName + "child", Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_None, ImGuiWindowFlags_.ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar))
+                    {
+                        if (mLastCompileResult.IsInitialized)
+                        {
+                            for (int i = 0; i < mLastCompileResult.Diagnostics.Count; i++)
+                            {
+                                if(mReporterShowSelfOnly)
+                                {
+                                    if (!mLastCompileResult.Diagnostics[i].Message.Contains(AssetName.Address))
+                                        continue;
+                                }
+                                switch (mLastCompileResult.Diagnostics[i].Severity)
+                                {
+                                    case CompileDiagnostic.DiagnosticSeverity.Warning:
+                                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.WarningStringColor);
+                                        break;
+                                    case CompileDiagnostic.DiagnosticSeverity.Error:
+                                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.ErrorStringColor);
+                                        break;
+                                    default:
+                                        ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.PassStringColor);
+                                        break;
+                                }
+                                ImGuiAPI.Text(mLastCompileResult.Diagnostics[i].Message);
+                                ImGuiAPI.PopStyleColor(1);
+                            }
+                        }
+                    }
+                    ImGuiAPI.EndChild();
+                }
+                ImGuiAPI.End();
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
         }
+
         Macross.TtMacrossBreak mBreakerStore = null;
         bool mGraphWindowShow = true;
         int mSettingCurrentFuncIndex = -1;
@@ -1532,8 +1638,72 @@ namespace EngineNS.UTest
 
 namespace EngineNS.Macross
 {
+    public struct CompileDiagnostic
+    {
+        public string Id;
+        public bool IsWarningAsError;
+        public string Message;
+        public enum DiagnosticSeverity
+        {
+            Hidden = 0,
+            Info = 1,
+            Warning = 2,
+            Error = 3,
+        }
+        public DiagnosticSeverity Severity;
+    }
+    public struct CompileResult
+    {
+        public bool Success;
+        public List<CompileDiagnostic> Diagnostics = new List<CompileDiagnostic>();
+        EmitResult mEmitResult;
+
+
+        public bool IsInitialized
+        {
+            get
+            {
+                return (mEmitResult != null);
+            }
+        }
+
+        public CompileResult()
+        {
+
+        }
+        public CompileResult(EmitResult result)
+        {
+            mEmitResult = result;
+            Success = result.Success;
+
+            foreach(var diagnostic in result.Diagnostics)
+            {
+                if (diagnostic.Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Hidden)
+                    continue;
+                CompileDiagnostic newDiagnostic = new CompileDiagnostic()
+                {
+                    Id = diagnostic.Id,
+                    IsWarningAsError = diagnostic.IsWarningAsError,
+                    Message = diagnostic.ToString(),
+                    Severity = (CompileDiagnostic.DiagnosticSeverity)diagnostic.Severity
+                };
+                Diagnostics.Add(newDiagnostic);
+            }
+        }
+    }
+
     public partial class TtMacrossModule
     {
+        static CompileResult mLastCompileResult;
+        public static CompileResult LastCompileResult
+        {
+            get => mLastCompileResult;
+            private set
+            {
+                mLastCompileResult = value;
+            }
+        }
+
         public bool CompileCode(string assemblyFile)
         {
             bool success = false;
@@ -1545,6 +1715,8 @@ namespace EngineNS.Macross
             var csFilesPath = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
             var projectFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameProject;
             success = CompileGameProject(csFilesPath, projectFile, assemblyFile);
+
+
         }
         public static bool CompileGameProject(string csFilesPath, string projectFile, string assemblyFile)
         {
@@ -1633,6 +1805,8 @@ namespace EngineNS.Rtti
             arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.AllowUnsafe, "true"));
 
             var retVal = EngineNS.CodeCompiler.CSharpCompiler.CompilerCSharpWithArguments(arguments.ToArray());
+            if (EngineNS.CodeCompiler.CSharpCompiler.LastEmitResult != null)
+                LastCompileResult = new CompileResult(EngineNS.CodeCompiler.CSharpCompiler.LastEmitResult);
 
             var src = assemblyFile.Replace(".dll", ".pdb");
             var tar = assemblyFile.Replace(".dll", ".tpdb");

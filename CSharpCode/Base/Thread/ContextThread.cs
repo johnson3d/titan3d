@@ -8,6 +8,23 @@ namespace EngineNS.Thread
 {
     public class TtContextThread
     {
+        public static List<WeakReference<TtContextThread>> AllContexts = new List<WeakReference<TtContextThread>>();
+        public static int TotalThreadEvents
+        {
+            get 
+            { 
+                int count = 0;
+                foreach (var i in AllContexts)
+                {
+                    TtContextThread context;
+                    if (i.TryGetTarget(out context))
+                    {
+                        count += context.TotalEvents;
+                    }
+                }
+                return count;
+            }
+        }
         [ThreadStatic]
         public static TtContextThread CurrentContext;
         //这个Flag是解决主线程同时是:RHIContext，MainContext
@@ -16,35 +33,39 @@ namespace EngineNS.Thread
         public TtContextThread()
         {
             Interval = 20;
+            lock (AllContexts)
+            {
+                AllContexts.Add(new WeakReference<TtContextThread>(this));
+            }
         }
-        List<object> mMonitorEnterObjects = new List<object>();
-        public int MonitorEnter(object obj)
-        {
-            System.Threading.Monitor.Enter(obj);
-            int index = mMonitorEnterObjects.Count;
-            mMonitorEnterObjects.Add(obj);
-            return index;
-        }
-        public bool MonitorExit(int index)
-        {
-            if (index<0 || index >= mMonitorEnterObjects.Count)
-                return false;
+        //List<object> mMonitorEnterObjects = new List<object>();
+        //public int MonitorEnter(object obj)
+        //{
+        //    System.Threading.Monitor.Enter(obj);
+        //    int index = mMonitorEnterObjects.Count;
+        //    mMonitorEnterObjects.Add(obj);
+        //    return index;
+        //}
+        //public bool MonitorExit(int index)
+        //{
+        //    if (index<0 || index >= mMonitorEnterObjects.Count)
+        //        return false;
 
-            System.Threading.Monitor.Exit(mMonitorEnterObjects[index]);
-            mMonitorEnterObjects[index] = null;
-            return true;
-        }
+        //    System.Threading.Monitor.Exit(mMonitorEnterObjects[index]);
+        //    mMonitorEnterObjects[index] = null;
+        //    return true;
+        //}
         public void ExitWhenFrameFinished()
         {
-            for (int i = 0; i < mMonitorEnterObjects.Count; i++)
-            {
-                if(mMonitorEnterObjects[i]!=null)
-                {
-                    System.Threading.Monitor.Exit(mMonitorEnterObjects[i]);
-                    Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Locker({mMonitorEnterObjects[i]}) is not released");
-                }
-            }
-            mMonitorEnterObjects.Clear();
+            //for (int i = 0; i < mMonitorEnterObjects.Count; i++)
+            //{
+            //    if(mMonitorEnterObjects[i]!=null)
+            //    {
+            //        System.Threading.Monitor.Exit(mMonitorEnterObjects[i]);
+            //        Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Locker({mMonitorEnterObjects[i]}) is not released");
+            //    }
+            //}
+            //mMonitorEnterObjects.Clear();
         }
         protected bool mIsRun = false;
         private bool mIsFinished = false;
@@ -103,30 +124,39 @@ namespace EngineNS.Thread
             }
             mThread = null;
         }
-        public virtual void ExecuteToEmpty()
+        public virtual void FlushAllThreadEvents()
         {
-            while (TotalEvents > 0)
+            var t1 = Support.TtTime.HighPrecision_GetTickCount();
+            while (TotalThreadEvents > 0)
             {
                 FContextTickableManager.GetInstance().ThreadTick();
                 TickAwaitEvent();
+                TtEngine.Instance.TaskCollector.Tick();
             }
-            //Async.PostEvent cur;
-            //while (DoOnePriorityEvent(out cur))
-            //{
-            //    TtEngine.Instance.EventPoster.mRunOnPEAllocator.ReleaseObject(cur);
-            //}
-            //while (DoOneAsyncEvent(out cur))
-            //{
-
-            //}
-            //while (DoOneContnueEvent(out cur))
-            //{
-
-            //}            
-            //lock (RunUntilFinishEvents)
-            //{
-
-            //}
+            var t2 = Support.TtTime.HighPrecision_GetTickCount();
+            if (t2 - t1 > 20000)
+            {
+                Profiler.Log.WriteLine<Profiler.TtThreadGategory>(Profiler.ELogTag.Warning, $"FlushAllThreadEvents Time = {(t2 - t1)/1000} ms");
+            }
+        }
+        public void FlushToSemephore(TtSemaphore smp)
+        {
+            var t1 = Support.TtTime.HighPrecision_GetTickCount();
+            while (true)
+            {
+                FContextTickableManager.GetInstance().ThreadTick();
+                TickAwaitEvent();
+                TtEngine.Instance.TaskCollector.Tick();
+                if (smp.GetCount() == 0)
+                {
+                    var t2 = Support.TtTime.HighPrecision_GetTickCount();
+                    if (t2 - t1 > 20000)
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtThreadGategory>(Profiler.ELogTag.Warning, $"FlushToSemephore Time = {(t2 - t1) / 1000} ms");
+                    }
+                    return;
+                }
+            }
         }
         protected int mThreadId = 0;
         public int ThreadId
@@ -218,9 +248,10 @@ namespace EngineNS.Thread
         {
             get
             {
-                return PriorityNum + AsyncNum + ContinueNum;
+                return PriorityNum + AsyncNum + ContinueNum + TempCount;
             }
         }
+        int TempCount = 0;
         [Browsable(false)]
         protected Queue<Async.TtAsyncTaskStateBase> PriorityEvents
         {
@@ -377,6 +408,7 @@ namespace EngineNS.Thread
             {
                 if (AsyncEvents.Count == 0)
                     return false;
+                TempCount++;
                 e = AsyncEvents.Dequeue();
             }
             try
@@ -389,6 +421,7 @@ namespace EngineNS.Thread
                         AsyncEvents.Enqueue(e);
                     }
                     oe = e;
+                    TempCount--;
                     return true;
                 }
             }
@@ -407,6 +440,7 @@ namespace EngineNS.Thread
                     }
                 }
             }
+            TempCount--;
 
             oe = e;
             return true;

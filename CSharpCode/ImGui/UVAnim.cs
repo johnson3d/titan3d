@@ -63,11 +63,11 @@ namespace EngineNS.EGui
             }
             unsafe
             {
-                if (SnapTask.Value.Result != null)
+                if (SnapTask.Value.DirectResult != null)
                 {
                     var uv0 = SnapUVStart;
                     var uv1 = SnapUVEnd;
-                    cmdlist.AddImage((ulong)SnapTask.Value.Result.GetTextureHandle(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
+                    cmdlist.AddImage((ulong)SnapTask.Value.DirectResult.GetTextureHandle(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
                 }
                 else
                 {
@@ -226,7 +226,7 @@ namespace EngineNS.EGui
                     return null;
                 if (mTextureTask.Value.IsCompleted == false)
                     return null;
-                return mTextureTask.Value.Result;
+                return mTextureTask.Value.DirectResult;
             }
         }
 
@@ -271,7 +271,7 @@ namespace EngineNS.EGui
                 Vector2 uvMin;
                 Vector2 uvMax;
                 this.GetUV(frame, out uvMin, out uvMax);
-                cmdlist.AddImage((ulong)mTextureTask.Value.Result.GetTextureHandle(), in rectMin, in rectMax, in uvMin, in uvMax, Color);
+                cmdlist.AddImage((ulong)mTextureTask.Value.DirectResult.GetTextureHandle(), in rectMin, in rectMax, in uvMin, in uvMax, Color);
             }
             else
             {

@@ -178,6 +178,13 @@ namespace EngineNS.Thread.Async
                 obj.Reset();
                 return true;
             }
+            public override string ShowName
+            {
+                get
+                {
+                    return $"TtAsyncTaskState<{typeof(T).FullName}>";
+                }
+            }
         }
         static TtAsyncTaskStateAllocator mAllocator = new TtAsyncTaskStateAllocator();
         public static TtAsyncTaskState<T> CreateInstance(uint timeOut = uint.MaxValue)
@@ -278,7 +285,7 @@ namespace EngineNS.Thread.Async
         #region for each
         public delegate void Delegate_ParrallelForAction(int index, object arg1, object arg2, TtAsyncTaskStateBase state);
         public bool EnableMTForeach = true;
-        private TtPooledSemaphoreAllocator ParrallelForSmpAllocator = new TtPooledSemaphoreAllocator();
+        internal TtPooledSemaphoreAllocator ParrallelForSmpAllocator = new TtPooledSemaphoreAllocator();
         public void ParrallelFor(int num, Delegate_ParrallelForAction action, object userData1 = null, object userData2 = null)
         {
             if (num == 0)

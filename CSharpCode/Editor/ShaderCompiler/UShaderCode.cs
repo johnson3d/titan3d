@@ -449,7 +449,7 @@ namespace EngineNS.Editor.ShaderCompiler
                 var task = TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(name);
                 task.Wait();
                 Thread.Async.TtContextThreadManager.ImmidiateMode = saveMode;
-                var material = task.Result;
+                var material = task.DirectResult;
                 if (material != null)
                     return material;
                 return null;

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_7162113998313558909 Type="Survivor.TtGameMode@Survivor">
+  <CurrentScene Type="EngineNS.GamePlay.Scene.TtScene@EngineCore" Order="0" />
+  <HeroManager Type="Survivor.TtHeroManager@Survivor" Order="0" />
+  <WeaponManager Type="Survivor.TtWeaponManager@Survivor" Order="0" />
+</Hash_7162113998313558909>

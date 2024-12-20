@@ -142,6 +142,7 @@ namespace EngineNS.NxRHI
             if (SnapTask != null)
             {
                 CoreSDK.DisposeObject(ref CmdParameters);
+                SnapTask.Value.Dispose();
                 SnapTask = null;
             }
         }
@@ -170,8 +171,8 @@ namespace EngineNS.NxRHI
             }
             if (EffectTask == null)
             {
-                if(SnapTask.Value.IsCompleted == true && SnapTask.Value.Result != null)
-                    EffectTask = GetEffect(SnapTask.Value.Result.PicDesc.CubeFaces == 6);
+                if(SnapTask.Value.IsCompleted == true && SnapTask.Value.DirectResult != null)
+                    EffectTask = GetEffect(SnapTask.Value.DirectResult.PicDesc.CubeFaces == 6);
                 return;
             }
             if (SnapTask.Value.IsCompleted == false || EffectTask.Value.IsCompleted == false)
@@ -181,10 +182,10 @@ namespace EngineNS.NxRHI
             }
             unsafe
             {
-                if(CmdParameters==null && SnapTask.Value.Result!=null && EffectTask.Value.Result!=null)
+                if(CmdParameters==null && SnapTask.Value.DirectResult!=null && EffectTask.Value.DirectResult!=null)
                 {
                     var rc = TtEngine.Instance.GfxDevice.RenderContext;
-                    var SlateEffect = EffectTask.Value.Result;
+                    var SlateEffect = EffectTask.Value.DirectResult;
 
                     var iptDesc = new NxRHI.TtInputLayoutDesc();
                     iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
@@ -200,11 +201,11 @@ namespace EngineNS.NxRHI
                     cmdParams.CBuffer = rc.CreateCBV(cbBinder);
                     cmdParams.Drawcall.BindShaderEffect(SlateEffect);
                     cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
-                    cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, SnapTask.Value.Result);
+                    cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, SnapTask.Value.DirectResult);
                     cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 
                     cmdParams.IsNormalMap = 0;
-                    if (SnapTask.Value.Result.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || SnapTask.Value.Result.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || SnapTask.Value.Result.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
+                    if (SnapTask.Value.DirectResult.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || SnapTask.Value.DirectResult.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || SnapTask.Value.DirectResult.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
                     {
                         cmdParams.IsNormalMap = 1;
                     }
@@ -214,7 +215,7 @@ namespace EngineNS.NxRHI
 
                 var uv0 = new Vector2(0, 0);
                 var uv1 = new Vector2(1, 1);
-                if (SnapTask.Value.Result != null)
+                if (SnapTask.Value.DirectResult != null)
                 {
                     cmdlist.AddImage((ulong)CmdParameters.GetHandle(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
                     if (CmdParameters.IsNormalMap==1)
@@ -249,7 +250,7 @@ namespace EngineNS.NxRHI
         {
             if (SnapTask == null || !SnapTask.Value.IsCompleted)
                 return;
-            if (SnapTask.Value.Result == null)
+            if (SnapTask.Value.DirectResult == null)
             {
                 SnapTask = null;
                 return;
@@ -258,12 +259,12 @@ namespace EngineNS.NxRHI
                 "Name: " + GetAssetName().Name,
                 "Desc: " + Description,
                 "Address: " + GetAssetName().Address,
-                "Res: " + SnapTask.Value.Result.PicDesc.Width + "X" + SnapTask.Value.Result.PicDesc.Height + "\r\n" +
-                "Format: " + SnapTask.Value.Result.PicDesc.Format + "\r\n" +
-                "CubeFaces: " + SnapTask.Value.Result.PicDesc.CubeFaces + "\r\n" +
-                "MipLevel: " + SnapTask.Value.Result.PicDesc.MipLevel + "\r\n" +
-                "IsSRGB: " + SnapTask.Value.Result.PicDesc.sRGB + "\r\n" +
-                "IsNormal: " + SnapTask.Value.Result.PicDesc.IsNormal);
+                "Res: " + SnapTask.Value.DirectResult.PicDesc.Width + "X" + SnapTask.Value.DirectResult.PicDesc.Height + "\r\n" +
+                "Format: " + SnapTask.Value.DirectResult.PicDesc.Format + "\r\n" +
+                "CubeFaces: " + SnapTask.Value.DirectResult.PicDesc.CubeFaces + "\r\n" +
+                "MipLevel: " + SnapTask.Value.DirectResult.PicDesc.MipLevel + "\r\n" +
+                "IsSRGB: " + SnapTask.Value.DirectResult.PicDesc.sRGB + "\r\n" +
+                "IsNormal: " + SnapTask.Value.DirectResult.PicDesc.IsNormal);
         }
     }
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.NxRHI.USrView@EngineCore", "EngineNS.NxRHI.USrView" })]
@@ -791,7 +792,7 @@ namespace EngineNS.NxRHI
                         mDesc.Width = image.Width;
                         mDesc.Height = image.Height;
 
-                        mDesc.MipLevel = Math.Max(CalcMipLevel(mDesc.Width, mDesc.Height, true)-2, 1);
+                        mDesc.MipLevel = Math.Max(CalcMipLevel(mDesc.Width, mDesc.Height, true, 4), 1);
                     }
                 }
             }
@@ -1484,7 +1485,7 @@ namespace EngineNS.NxRHI
             return null;
         }
         #region static function
-        public static int CalcMipLevel(int width, int height, bool isAnyZero)
+        public static int CalcMipLevel(int width, int height, bool isAnyZero, int Divisible)
         {
             int mipLevel = 0;
             do
@@ -1492,6 +1493,11 @@ namespace EngineNS.NxRHI
                 height = height / 2;
                 width = width / 2;
                 mipLevel++;
+
+                if (height % Divisible != 0)
+                {
+                    break;
+                }
 
                 if (isAnyZero)
                 {
@@ -2137,7 +2143,7 @@ namespace EngineNS.NxRHI
                     break;
             }
 
-            desc.MipLevel = Math.Max(CalcMipLevel(curImage.Width, curImage.Height, true) - 3, 1);
+            desc.MipLevel = Math.Max(CalcMipLevel(curImage.Width, curImage.Height, true, 4), 1);
             do
             {
                 using (var memStream = new System.IO.MemoryStream())
@@ -2274,7 +2280,7 @@ namespace EngineNS.NxRHI
             System.Diagnostics.Debug.Assert(desc.DontCompress == false);
 
             if(desc.MipLevel == 0)
-                desc.MipLevel = CalcMipLevel(curImage.Width, curImage.Height, true) - 3;
+                desc.MipLevel = CalcMipLevel(curImage.Width, curImage.Height, true, 4);
             EPixelFormat descPixelFormat = EPixelFormat.PXF_UNKNOWN;
             switch (desc.CompressFormat)
             {
@@ -2355,7 +2361,7 @@ namespace EngineNS.NxRHI
             bool IsKtx = false;
             desc.CubeFaces = 1;
             if (desc.MipLevel == 0)
-                desc.MipLevel = CalcMipLevel(curImage.Width, curImage.Height, true)-3;
+                desc.MipLevel = CalcMipLevel(curImage.Width, curImage.Height, true, 4);
             EPixelFormat descPixelFormat = EPixelFormat.PXF_UNKNOWN;
             switch (desc.CompressFormat)
             {

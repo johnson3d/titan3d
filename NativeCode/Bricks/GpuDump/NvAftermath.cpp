@@ -342,6 +342,7 @@ namespace GpuDump
 	}
 	void DX12_OnDredDump(ID3D12Device* mDevice, ID3D12DeviceRemovedExtendedDataSettings1* mDredSettings, const char* GDredDir)
 	{
+		ASSERT(false);
 		auto hr = mDevice->GetDeviceRemovedReason();
 		if (mDredSettings != nullptr)
 		{

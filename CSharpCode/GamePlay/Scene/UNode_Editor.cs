@@ -20,13 +20,15 @@ namespace EngineNS.GamePlay.Scene
         {
             get
             {
-                return (Graphics.Pipeline.TtHitProxy.EHitproxyType)(((uint)(NodeStyles & ENodeStyles.HitproxyMasks)) >> 2);
+                return NodeData.HitproxyType;
+                //return (Graphics.Pipeline.TtHitProxy.EHitproxyType)(((uint)(NodeStyles & ENodeStyles.HitproxyMasks)) >> 2);
             }
             set
             {
                 var oldValue = HitproxyType;
-                uint flags = (((uint)value & ((uint)ENodeStyles.HitproxyMasks >> 2)) << 2);
-                NodeStyles = (NodeStyles & (~ENodeStyles.HitproxyMasks)) | (ENodeStyles)flags;
+                //uint flags = (((uint)value & ((uint)ENodeStyles.HitproxyMasks >> 2)) << 2);
+                //NodeStyles = (NodeStyles & (~ENodeStyles.HitproxyMasks)) | (ENodeStyles)flags;
+                NodeData.HitproxyType = value;
                 OnHipproxyTypeChanged(oldValue, HitproxyType);
                 OnHitProxyChanged();
             }

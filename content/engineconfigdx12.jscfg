@@ -51,7 +51,7 @@
   "RootServerURL": "127.0.0.1:2333",
   "DefaultAuthority": 2,
   "GlobalConfigs": [],
-  "EditorFont": "fonts/roboto-regular.ttf:Engine",
+  "EditorFont": "fonts/notosanssc-regular.otf:Engine",
   "EditorLanguage": "English",
   "UIDefaultTexture": "texture/white.srv:Engine",
   "IsWriteShaderDebugFile": false,
