@@ -76,7 +76,7 @@ namespace EngineNS.GamePlay.Scene
     }
     [Rtti.Meta()]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    public partial class TtNode : IDisposable
+    public partial class TtNode
     {
         public struct FTreeCopyStat
         {
@@ -117,8 +117,9 @@ namespace EngineNS.GamePlay.Scene
         }
         public virtual void Dispose()
         {
-
+            
         }
+        [Rtti.Meta]
         public void DisposeWithChildren()
         {
             foreach (var i in Children)
@@ -1102,7 +1103,12 @@ namespace EngineNS.GamePlay.Scene
             node.Placement.Position = this.Placement.Position;
             node.Placement.Quat = this.Placement.Quat;
             node.Placement.Scale = this.Placement.Scale;
-            //node.BoundVolume
+
+            foreach (var i in Children)
+            {
+                var cn = await i.CloneNode(world);
+                cn.Parent = node;
+            }
             return node;
         }
     }
@@ -1192,6 +1198,18 @@ namespace EngineNS.GamePlay.Scene
 {
 	partial class TtNode
 	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_DisposeWithChildren_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtNode->void DisposeWithChildren()");
+		public unsafe void macross_DisposeWithChildren (string nodeName) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+				}
+			}
+			DisposeWithChildren();
+			macross_break_DisposeWithChildren_2609910045.TryBreak();
+		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_FindFirstChild_26975848 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtNode->TtNode FindFirstChild(string name, System.Type type, bool bRecursive)");
 		public unsafe TtNode macross_FindFirstChild (string nodeName, string name, System.Type type, bool bRecursive) 
 		{

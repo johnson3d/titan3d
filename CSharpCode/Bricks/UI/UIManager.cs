@@ -254,6 +254,7 @@ namespace EngineNS.UI
                         if(mc != null)
                         {
                             mc.HostElement = element;
+                            mc.SimulateMode = true;
                             mc.Initialize();
                         }
                     }

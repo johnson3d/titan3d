@@ -70,6 +70,10 @@ namespace EngineNS.GamePlay.Scene
             await base.OnNodeLoaded(parent);
             await UpdatePrefab(null, PrefabName);
         }
+        protected override void OnParentChanged(TtNode prev, TtNode cur)
+        {
+            base.OnParentChanged(prev, cur);
+        }
     }
     [Rtti.Meta]
     public class TtPrefabAMeta : IO.IAssetMeta
@@ -200,7 +204,7 @@ namespace EngineNS.GamePlay.Scene
             xndHolder.SaveXnd(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
         }
-        internal static async System.Threading.Tasks.Task<TtPrefab> LoadPrefab(GamePlay.TtWorld world, RName name)
+        internal static async Thread.Async.TtTask<TtPrefab> LoadPrefab(GamePlay.TtWorld world, RName name)
         {
             using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
             {
@@ -222,6 +226,7 @@ namespace EngineNS.GamePlay.Scene
                 await node.InitializeNode(world, new TtPrefabNode.TtPrefabNodeData(), EBoundVolumeType.Box, typeof(GamePlay.TtIdentityPlacement));
                 prefab.Root = node;
                 prefab.AssetName = name;
+                node.Parent = world.Root;
 
                 using (var ar = descAttr.GetReader(node))
                 {
@@ -390,7 +395,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public Dictionary<RName, TtPrefab> Prefabs { get; } = new Dictionary<RName, TtPrefab>();
         public GamePlay.TtWorld PrefabWorld;
-        public async System.Threading.Tasks.Task<TtPrefab> GetPrefab(RName name)
+        public async Thread.Async.TtTask<TtPrefab> GetPrefab(RName name)
         {
             TtPrefab scene;
             TtPrefab result;
@@ -410,7 +415,7 @@ namespace EngineNS.GamePlay.Scene
             Prefabs.Add(name, scene);
             return scene;
         }
-        public async System.Threading.Tasks.Task<TtPrefab> ReloadPrefab(RName name)
+        public async Thread.Async.TtTask<TtPrefab> ReloadPrefab(RName name)
         {
             TtPrefab scene;
             TtPrefab result;

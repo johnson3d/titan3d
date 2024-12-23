@@ -51,6 +51,10 @@ namespace EngineNS.EGui.Controls
             if (cfgContentCurrentDir != null)
             {
                 this.CurrentDir = cfgContentCurrentDir as RName;
+                if (IO.TtFileManager.DirectoryExists(this.CurrentDir.Address) == false)
+                {
+                    this.CurrentDir = null;
+                }
             }
 
             return true;

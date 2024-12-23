@@ -180,7 +180,6 @@ namespace EngineNS.UI
         public TtUIElement GetPointAtElement(in Vector2 mousePt, ref RayIntersectData data, out Vector2 pointOffset, bool onlyClipped = true)
         {
             pointOffset = Vector2.Zero;
-            Vector2 relativePos = mousePt;
             if (IsScreenSpace)
             {
                 if (!DesignRect.Contains(in mousePt))
@@ -210,17 +209,15 @@ namespace EngineNS.UI
                 var ray = new Ray(data.Start, data.Direction);
                 if (!Ray.Intersects(in ray, BoundingBox, out data.Distance))
                     return null;
-
-                relativePos = data.IntersectPos;
             }
 
             if (QueryElements(RayIntersect3DElements, ref data))
             {
-                return data.IntersectedElement.GetPointAtElement(in relativePos, out pointOffset, onlyClipped);
+                return data.IntersectedElement.GetPointAtElement(in data.IntersectPos, out pointOffset, onlyClipped);
             }
             if (!RayIntersect(ref data))
                 return null;
-            return base.GetPointAtElement(in relativePos, out pointOffset, onlyClipped);
+            return base.GetPointAtElement(in data.IntersectPos, out pointOffset, onlyClipped);
         }
 
         // white a c# method for line intersect triangle in 3d, and with intersect point out

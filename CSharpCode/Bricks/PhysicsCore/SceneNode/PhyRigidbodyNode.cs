@@ -1,14 +1,8 @@
 ﻿using EngineNS.Bricks.CodeBuilder;
 using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
-using EngineNS.Graphics.Mesh;
 using EngineNS.Thread.Async;
-using NPOI.SS.Formula.Functions;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EngineNS.Bricks.PhysicsCore.SceneNode
 {
@@ -206,5 +200,6 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         {
             MacrossGetter?.Get().OnEndTrigger(selfNode, otherNode);
         }
+
     }
 }

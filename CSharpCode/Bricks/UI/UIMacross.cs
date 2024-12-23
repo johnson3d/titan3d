@@ -9,13 +9,17 @@ namespace EngineNS.UI
     public partial class TtUIMacrossBase
     {
         public TtUIElement HostElement;
+        public bool SimulateMode = false;
         public virtual void Initialize()
         {
             try
             {
-                InitializeEvents();
                 InitializeUIElementVariables();
-                InitializeBindings();
+                if (!SimulateMode)
+                {
+                    InitializeEvents();
+                    InitializeBindings();
+                }
             }
             catch(System.Exception ex)
             {

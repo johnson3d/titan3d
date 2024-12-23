@@ -1,7 +1,10 @@
-﻿using EngineNS.DesignMacross;
+using EngineNS.DesignMacross;
 using EngineNS.DesignMacross.Design.Statement;
+using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
+using EngineNS.Graphics.Pipeline;
 using EngineNS.Macross;
+using EngineNS.Thread.Async;
 using Microsoft.Build.Framework;
 using NPOI.SS.Formula.Functions;
 using Standart.Hash.xxHash;
@@ -296,7 +299,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
     [Macross.TtMacross]
     [TtMacrossNodeCustomCodeGen]
-    public class TtSceneNodeMacrossBase : ISceneNodeMacross<object>
+    public partial class TtSceneNodeMacrossBase : ISceneNodeMacross<object>
     {
         public virtual void InitPros()
         {
@@ -320,6 +323,22 @@ namespace EngineNS.Bricks.CodeBuilder
 
         [Rtti.Meta]
         public bool TestBool { get; set; } = true;
+
+        [Rtti.Meta]
+        public virtual async System.Threading.Tasks.Task<bool> OnNodeInited(TtNode host)
+        {
+            return true;
+        }
+        [Rtti.Meta]
+        public virtual void Tick(TtNode host)
+        {
+
+        }
+        [Rtti.Meta]
+        public virtual void DestroyNode(TtNode host)
+        {
+            
+        }
     }
 
     [Bricks.CodeBuilder.ContextMenu("MacrossNode", "MacrossNode", TtNode.EditorKeyword)]
@@ -443,5 +462,76 @@ namespace EngineNS.Bricks.CodeBuilder
                 return;
             ((ISceneNodeMacross<T>)inner).SetPropertyValue_Gen(nameHash, in value);
         }
+
+        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        {
+            var ret = await base.InitializeNode(world, data, bvType, placementType);
+
+            MacrossGetter?.Get()?.OnNodeInited(this);
+            return ret;
+        }
+        public override bool OnTickLogic(TtWorld world, TtRenderPolicy policy)
+        {
+            base.OnTickLogic(world, policy);
+            MacrossGetter?.Get()?.Tick(this);
+            return true;
+        }
+        public override void Dispose()
+        {
+            MacrossGetter?.Get()?.DestroyNode(this);
+            base.Dispose();
+        }
     }
 }
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.Bricks.CodeBuilder
+{
+	partial class TtSceneNodeMacrossBase
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_OnNodeInited_2673848221 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.TtSceneNodeMacrossBase->System.Threading.Tasks.Task<bool> OnNodeInited(TtNode host)");
+		public async System.Threading.Tasks.Task<bool> macross_OnNodeInited (string nodeName, TtNode host) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":host", host);
+				}
+			}
+			var _return_value = await OnNodeInited(host);
+			macross_break_OnNodeInited_2673848221.TryBreak();
+			return _return_value;
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_Tick_2673848221 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.TtSceneNodeMacrossBase->void Tick(TtNode host)");
+		public unsafe void macross_Tick (string nodeName, TtNode host) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":host", host);
+				}
+			}
+			Tick(host);
+			macross_break_Tick_2673848221.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_DestroyNode_2673848221 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.TtSceneNodeMacrossBase->void DestroyNode(TtNode host)");
+		public unsafe void macross_DestroyNode (string nodeName, TtNode host) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":host", host);
+				}
+			}
+			DestroyNode(host);
+			macross_break_DestroyNode_2673848221.TryBreak();
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

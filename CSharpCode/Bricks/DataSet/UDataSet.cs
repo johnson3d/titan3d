@@ -1,10 +1,9 @@
 ﻿using EngineNS.Algorithm;
-using Mono.CompilerServices.SymbolWriter;
-using NPOI.HSSF.UserModel;
 using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -34,6 +33,13 @@ namespace EngineNS.Bricks.DataSet
         public override string GetAssetTypeName()
         {
             return "DataSet";
+        }
+        public override void DeleteAsset(string name, RName.ERNameType type)
+        {
+            var address = RName.GetAddress(type, name);
+            DeleteFile(address + ".xlsx");
+
+            base.DeleteAsset(name, type);
         }
     }
 
@@ -224,6 +230,17 @@ namespace EngineNS.Bricks.DataSet
         }
         public bool LoadDataSet(RName name, Type objType)
         {
+            var internalResult = InternalLoadDataSet(name, objType);
+            if(internalResult)
+            {
+                var attr = DataType.SystemType.GetCustomAttribute<TtDataTableAttribute>();
+                if (Tables.TryGetValue(attr.SheetName, out MainTable) == false)
+                    return false;
+            }
+            return internalResult;
+        }
+        public bool InternalLoadDataSet(RName name, Type objType)
+        {
             if (IO.TtFileManager.FileExists(name.Address + ".xlsx"))
             {
                 bool bSaveXnd = false;
@@ -368,6 +385,14 @@ namespace EngineNS.Bricks.DataSet
         public T GetData(int index)
         {
             return MainTable.GetData(index) as T;
+        }
+
+        public T GetData(string propName, object key,
+            bool bSorted = true,
+            [Rtti.MetaParameter(FilterType = typeof(TtDataProvider), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
+            System.Type type = null)
+        {
+            return MainTable.FindByKey(propName, key, bSorted, type) as T;
         }
     }
 }

@@ -1,12 +1,7 @@
 ﻿using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Mesh;
-using NPOI.SS.Formula.Functions;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EngineNS.Bricks.PhysicsCore.SceneNode
 {
@@ -119,6 +114,17 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             {
                 PhyShape.AddToActor(PhyActor, CollisionNodeData.Center, Quaternion.FromEuler(CollisionNodeData.Rotator));
             }
+        }
+
+        public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
+        {
+            if ((rp.CullFilters & GamePlay.TtWorld.TtVisParameter.EVisCullFilter.PhyxDebug) == 0)
+                return;
+
+            rp.AddVisibleNode(this);
+            PhyShape.DebugMesh.SetWorldTransform(in this.Placement.AbsTransform, rp.World, true);
+            rp.AddVisibleMesh(PhyShape.DebugMesh);
+            
         }
     }
 

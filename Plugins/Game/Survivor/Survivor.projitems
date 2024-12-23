@@ -10,9 +10,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Assembly.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ActorStateNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GameMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Hero.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossSurvivorGame.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Weapon.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WeaponNode.cs" />
   </ItemGroup>
 </Project>

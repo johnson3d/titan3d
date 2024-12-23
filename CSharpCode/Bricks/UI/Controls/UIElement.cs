@@ -499,7 +499,14 @@ namespace EngineNS.UI.Controls
 
         public void TransformVertex3(in Vector3 inVec, out Vector3 outVec)
         {
-            outVec = Vector3.TransformCoordinate(in inVec, in RootUIHost.TransformedElements[mTransformIndex].Matrix);
+            if (RootUIHost.TransformedElements.Count <= mTransformIndex)
+            {
+                outVec = inVec;
+            }
+            else
+            {
+                outVec = Vector3.TransformCoordinate(in inVec, in RootUIHost.TransformedElements[mTransformIndex].Matrix);
+            }
         }
 
         public struct RayIntersectData

@@ -120,11 +120,20 @@ namespace EngineNS
                         if (IsAsyncCreate)
                         {
                             var task = CreateObjectAsync();
-                            TtEngine.Instance.TaskCollector.AddWaitTask(task, (ft)=>
+                            if (task.IsCompleted)
                             {
-                                InternalPush(((TtTask<T>)ft).DirectResult);
+                                InternalPush(task.DirectResult);
                                 smp.Semaphore.Release();
-                            });
+                                task.Dispose();
+                            }
+                            else
+                            {
+                                TtEngine.Instance.TaskCollector.AddWaitTask(task, (ft) =>
+                                {
+                                    InternalPush(((TtTask<T>)ft).DirectResult);
+                                    smp.Semaphore.Release();
+                                });
+                            }
                         }
                         else
                         {
@@ -133,7 +142,7 @@ namespace EngineNS
                         }
                     }
                 }
-                if (IsAsyncCreate)
+                if (mPool.Count == 0 && IsAsyncCreate)
                 {
                     Thread.TtContextThread.CurrentContext.FlushToSemephore(smp.Semaphore);
                     TtEngine.Instance.EventPoster.ParrallelForSmpAllocator.ReleaseObject(smp);

@@ -8,8 +8,6 @@ namespace EngineNS.GamePlay
 {
 	public class TtPrefabPoolManager
 	{
-		static TtPrefabPoolManager mInstance = new TtPrefabPoolManager();
-		public static TtPrefabPoolManager Instance { get => mInstance; }
 		public Dictionary<RName, TtPrefabPool> Pools = new Dictionary<RName, TtPrefabPool>();
         public void RegPool(RName prefabName, TtPrefabPool pool)
         {
@@ -61,6 +59,7 @@ namespace EngineNS.GamePlay
         public TtPrefabPool(RName prefabName)
         {
             mPrefabName = prefabName;
+            GrowStep = 3;
         }
         protected override bool IsAsyncCreate => true;
         protected override async Thread.Async.TtTask<TtPrefabNode> CreateObjectAsync()
@@ -69,7 +68,7 @@ namespace EngineNS.GamePlay
             {
                 mOriginPrefab = (await TtEngine.Instance.PrefabManager.GetPrefab(mPrefabName)).Root;
             }
-            return await mOriginPrefab.CloneNode(mOriginPrefab.ParentScene.World) as TtPrefabNode;
+            return await mOriginPrefab.CloneNode(TtEngine.Instance.PrefabManager.PrefabWorld) as TtPrefabNode;
         }
         protected override bool OnObjectRelease(TtPrefabNode obj)
         {
@@ -83,10 +82,13 @@ namespace EngineNS.GamePlay
     public partial class TtMacrossFunctionLibrary
     {
         [Rtti.Meta]
-        public static TtPrefabNode InstantiatePrefab(RName prefab, TtScene scene)
+        public static TtPrefabNode InstantiatePrefab(
+            [RName.PGRName(FilterExts = GamePlay.Scene.TtPrefab.AssetExt)]
+            RName prefab, 
+            TtScene scene)
         {
             EngineNS.GamePlay.Scene.TtNode root = scene;
-            var newPrefab = TtPrefabPoolManager.Instance.CreatePrefab(prefab);
+            var newPrefab = TtEngine.Instance.PrefabPoolManager.CreatePrefab(prefab);
             newPrefab.Parent = root;
             return newPrefab;
         }
@@ -94,9 +96,16 @@ namespace EngineNS.GamePlay
         public static void DestroyPrefab(TtPrefabNode prefab)
         {
             prefab.Parent = null;
-            TtPrefabPoolManager.Instance.ReleasePrefab(prefab);
-            
+            TtEngine.Instance.PrefabPoolManager.ReleasePrefab(prefab);
         }
+    }
+}
+
+namespace EngineNS
+{
+    partial class TtEngine
+    {
+        public GamePlay.TtPrefabPoolManager PrefabPoolManager { get; } = new GamePlay.TtPrefabPoolManager();
     }
 }
 

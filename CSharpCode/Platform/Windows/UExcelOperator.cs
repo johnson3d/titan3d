@@ -33,7 +33,10 @@ namespace EngineNS.Bricks.DataSet
                         if (j.ColumnIndex == -1)
                         {   
                             j.ColumnIndex = FindColumeIndex(headRow, j.HeadName);
-                            System.Diagnostics.Debug.Assert(j.ColumnIndex != -1);
+                            if (j.ColumnIndex == -1)
+                            {
+                                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"DataSet:Sheet{i.Value.SheetName} don't have {j.HeadName}");
+                            }
                         }
                     }
                 }
@@ -48,7 +51,8 @@ namespace EngineNS.Bricks.DataSet
                 {
                     continue;
                 }
-                var text = TtTable.CellParse(cell, typeof(string), null) as string;
+                bool hasError = false;
+                var text = TtTable.CellParse(cell, typeof(string), null, out hasError) as string;
                 if (text == name)
                     return i;
             }
@@ -129,13 +133,22 @@ namespace EngineNS.Bricks.DataSet
 
                 foreach (var j in Binder.Fields)
                 {
-                    if (j.SheetName != null)
+                    if (j.SheetName != null || j.ColumnIndex == -1)
                         continue;
 
                     var cell = row.GetCell(j.ColumnIndex);
                     if (cell != null)
                     {
-                        j.PropInfo.SetValue(obj, CellParse(cell, j.PropInfo.PropertyType, j.Conveter));
+                        bool hasError = false;
+                        var value = CellParse(cell, j.PropInfo.PropertyType, j.Conveter, out hasError);
+                        if (hasError)
+                        {
+                            Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"DataSet Sheet({binder.SheetName})[Row={i}, Col={j.ColumnIndex}] format({j.PropInfo.PropertyType.FullName}) error");
+                        }
+                        else
+                        {
+                            j.PropInfo.SetValue(obj, value);
+                        }
                     }
                 }
 
@@ -177,10 +190,11 @@ namespace EngineNS.Bricks.DataSet
             }
             return cell;
         }
-        public static object CellParse(NPOI.SS.UserModel.ICell cell, Type type, TtDataConverter converter)
+        public static object CellParse(NPOI.SS.UserModel.ICell cell, Type type, TtDataConverter converter, out bool hasError)
         {
             if (type.IsGenericType && type.GetInterface("IList") != null)
             {
+                hasError = false;
                 var elemType = type.GetGenericArguments()[0];
                 var lst = Rtti.TtTypeDescManager.CreateInstance(type) as System.Collections.IList;
                 if (elemType == typeof(string))
@@ -195,7 +209,7 @@ namespace EngineNS.Bricks.DataSet
                         var segs = cell.ToString().Split(',');
                         foreach (var j in segs)
                         {
-                            lst.Add(Support.TConvert.ToObject(elemType, j));
+                            lst.Add(Support.TConvert.ToObject(elemType, j, out hasError));
                         }
                     }
                 }
@@ -203,7 +217,12 @@ namespace EngineNS.Bricks.DataSet
             }
             else
             {
-                return Support.TConvert.ToObject(type, cell.ToString());
+                var result = Support.TConvert.ToObject(type, cell.ToString(), out hasError);
+                if (hasError)
+                {
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"");
+                }
+                return result;
             }
         }
         private void SetCellValue(object value, NPOI.SS.UserModel.ICell cell, TtDataConverter converter)

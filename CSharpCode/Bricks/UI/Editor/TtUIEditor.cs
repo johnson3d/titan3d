@@ -318,6 +318,7 @@ namespace EngineNS.UI.Editor
                         }
                         var mc = mUIHost.Children[0].MacrossGetter.Get();
                         mc.HostElement = mUIHost.Children[0];
+                        mc.SimulateMode = mIsSimulateMode;
                         mc.Initialize();
                     }
 

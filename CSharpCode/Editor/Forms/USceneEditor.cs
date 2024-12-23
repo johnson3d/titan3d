@@ -1143,7 +1143,7 @@ namespace EngineNS.Editor.Forms
         protected override void Save()
         {
             Prefab.SaveAssetTo(AssetName);
-            _ = TtEngine.Instance.PrefabManager.ReloadPrefab(AssetName);
+            //TtEngine.Instance.TaskCollector.AddWaitTask(TtEngine.Instance.PrefabManager.ReloadPrefab(AssetName));
         }
         protected override void Reload()
         {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.Support;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,6 +11,7 @@ namespace EngineNS.Bricks.DataSet
         public TtDataProviderBinder Binder;
         [Rtti.Meta]
         private List<TtDataProvider> DataProviders { get; set; } = new List<TtDataProvider>();
+        private Dictionary<string, List<TtDataProvider>> SortedDataProviders { get; } = new Dictionary<string, List<TtDataProvider>>();
         public int Count
         {
             get { return DataProviders.Count; }
@@ -19,6 +21,91 @@ namespace EngineNS.Bricks.DataSet
             if (index < 0 || index >= DataProviders.Count)
                 return null;
             return DataProviders[index];
+        }
+        protected static int CmpKeyEqual(Type objType, object lh, object rh)
+        {
+            switch (objType.FullName)
+            {
+                case "System.String":
+                    return ((string)lh).CompareTo((string)rh);
+                case "System.Int32":
+                    return ((System.Int32)lh).CompareTo((System.Int32)rh);
+                case "System.UInt32":
+                    return ((System.UInt32)lh).CompareTo((System.UInt32)rh);
+                default:
+                    System.Diagnostics.Debug.Assert(false);
+                    return 0;
+            }
+        }
+        public TtDataProvider FindByKey(string propName, object key, 
+            bool bSorted = true,
+            [Rtti.MetaParameter(FilterType = typeof(TtDataProvider), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
+            System.Type type = null)
+        {
+            var prop = DataProviders[0].GetType().GetProperty(propName);
+            if (bSorted == false)
+            {
+                var result = DataProviders.Find((TtDataProvider obj) =>
+                {
+                    return CmpKeyEqual(prop.PropertyType, prop.GetValue(obj), key) == 0;
+                });
+                return result;
+            }
+            else
+            {
+                List<TtDataProvider> dp;
+                if (SortedDataProviders.TryGetValue(propName, out dp) == false)
+                {
+                    dp = new List<TtDataProvider>();
+                    dp.AddRange(DataProviders);
+                    dp.Sort((lh, rh) =>
+                    {
+                        return CmpKeyEqual(prop.PropertyType, prop.GetValue(lh), prop.GetValue(rh));
+                    });
+                    SortedDataProviders.Add(propName, dp);
+                }
+                var index = TtBinarySearchExtension.BinarySearch<TtDataProvider, object>(dp, key, (lh, rh)=>
+                {
+                    return CmpKeyEqual(prop.PropertyType, prop.GetValue(lh), rh);
+                });
+                if (index < 0)
+                    return null;
+                return dp[index];
+            }
+        }
+        public TtDataProvider FindByKey<KeyType>(string propName, KeyType key,
+            bool bSorted = true) where KeyType : IComparable<KeyType>
+        {
+            var prop = DataProviders[0].GetType().GetProperty(propName);
+            if (bSorted == false)
+            {
+                var result = DataProviders.Find((TtDataProvider obj) =>
+                {
+                    return ((KeyType)prop.GetValue(obj)).CompareTo(key) == 0;
+                });
+                return result;
+            }
+            else
+            {
+                List<TtDataProvider> dp;
+                if (SortedDataProviders.TryGetValue(propName, out dp) == false)
+                {
+                    dp = new List<TtDataProvider>();
+                    dp.AddRange(DataProviders);
+                    dp.Sort((lh, rh) =>
+                    {
+                        return ((KeyType)prop.GetValue(lh)).CompareTo((KeyType)prop.GetValue(rh));
+                    });
+                    SortedDataProviders.Add(propName, dp);
+                }
+                var index = TtBinarySearchExtension.BinarySearch<TtDataProvider, KeyType>(dp, key, (lh, rh) =>
+                {
+                    return ((KeyType)prop.GetValue(lh)).CompareTo(rh);
+                });
+                if (index < 0)
+                    return null;
+                return dp[index];
+            }
         }
         partial void GetCellText(int row, int col, ref string outText);
         public void CheckSheetLinks(TtDataSet dataSet, int index)
@@ -66,5 +153,6 @@ namespace EngineNS.Bricks.DataSet
                 }
             }
         }
+
     }
 }

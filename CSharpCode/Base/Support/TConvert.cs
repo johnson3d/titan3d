@@ -1,5 +1,8 @@
+using NPOI.SS.Formula.Functions;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace EngineNS.Support
@@ -294,10 +297,26 @@ namespace EngineNS.Support
         }
         public static object ToObject(System.Type type, string text)
         {
+            bool hasError = false;
+            return ToObject(type, text, out hasError);
+        }
+        public static object ToObject(System.Type type, string text, out bool hasError)
+        {
+            hasError = false;
             try
             {
                 if (type == typeof(bool))
+                {
+                    if (text == "1")
+                    {
+                        return true;
+                    }
+                    else if (text == "0")
+                    {
+                        return false;
+                    }
                     return System.Convert.ToBoolean(text);
+                }
                 else if (type == typeof(sbyte))
                     return System.Convert.ToSByte(text);
                 else if (type == typeof(Int16))
@@ -382,6 +401,7 @@ namespace EngineNS.Support
             }
             catch
             {
+                hasError = true;
                 return Rtti.TtTypeDescManager.CreateInstance(type);
             }
         }
@@ -407,6 +427,38 @@ namespace EngineNS.Support
             return System.Convert.ToSingle(txt);
         }
     }
+
+    public static class TtBinarySearchExtension
+    {
+        public delegate int FComparer<T, KeyType>(T obj, KeyType key);
+        public static int BinarySearch<T,KeyType>(List<T> myArray, KeyType key, FComparer<T, KeyType> cmp)
+        {
+            int lower = 0;
+            int upper = myArray.Count - 1;
+            int middleIndex;
+            while (lower <= upper)
+            {
+                middleIndex = (lower + upper) / 2;
+                if (cmp(myArray[middleIndex], key) == 0)
+                {
+                    return middleIndex;
+                }
+
+                if (cmp(myArray[middleIndex], key) > 0)
+                {
+                    upper = middleIndex - 1;
+                }
+                else
+                {
+                    lower = middleIndex + 1;
+                }
+            }
+
+            return -1;
+        }
+    }
+
+
 }
 
 
