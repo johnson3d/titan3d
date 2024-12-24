@@ -1,13 +1,9 @@
 using EngineNS.DistanceField;
 using EngineNS.Support;
-using NPOI.SS.Formula.Functions;
-using NPOI.SS.Formula.PTG;
-using NPOI.Util;
-using Org.BouncyCastle.Asn1.Crmf;
-using Org.BouncyCastle.Asn1.Mozilla;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -223,14 +219,16 @@ namespace EngineNS.Bricks.Font
             set;
         }
         #endregion
+
+        TtFontManager mFontManager;
         public TtFontSDF()
         {
             mCoreObject = Canvas.FTFont.CreateInstance();
         }
-        public TtFontSDF(Canvas.FTFont self)
+        public TtFontSDF(TtFontManager mgr, Canvas.FTFont self)
         {
+            mFontManager = mgr;
             mCoreObject = self;
-            this.Core_AddRef();
         }
         public string Name
         {
@@ -239,6 +237,13 @@ namespace EngineNS.Bricks.Font
         public int FontSize
         {
             get { return mCoreObject.GetFontSize(); }
+        }
+        public bool IsNeedSave
+        {
+            get
+            {
+                return mCoreObject.IsNeedSave();
+            }
         }
         public class TtFontCharFilter : IO.BaseSerializer
         {
@@ -340,9 +345,37 @@ namespace EngineNS.Bricks.Font
                 System.Diagnostics.Debug.WriteLine($"AddWord {unicode}");
             }
             Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Info, "End SFFont");
-            font.mCoreObject.SaveFontSDF(name.Address);
+            using (var xnd = new IO.TtXndHolder("FontSDF", 0, 0))
+            {
+                font.mCoreObject.SaveFontSDF(xnd.RootNode.mCoreObject);
+
+                xnd.SaveXnd(name.Address);
+            }
         }
 
+        public unsafe uint[] GetTotalWords()
+        {
+            var num = mCoreObject.GetWordNum();
+            uint[] words = new uint[num];
+            fixed (uint* p = &words[0])
+            {
+                mCoreObject.GetTotalWords(p, num);
+            }
+            return words;
+        }
+        public Canvas.FTWord GetWord(uint uniCode)
+        {
+            return mCoreObject.GetWord(uniCode);
+        }
+        public void SaveFontAsset()
+        {
+            using (var xnd = new IO.TtXndHolder("FontSDF", 0, 0))
+            {
+                mCoreObject.SaveFontSDF(xnd.RootNode.mCoreObject);
+
+                xnd.SaveXnd(AssetName.Address);
+            }
+        }
         public unsafe uint GetWords(EngineNS.Canvas.FTWord** pWords, uint count, wchar_t* text, uint numOfChar)
         {
             return mCoreObject.GetWords(pWords, count, text, numOfChar);
@@ -389,6 +422,16 @@ namespace EngineNS.Bricks.Font
             }
 #endif
         }
+
+        public bool LoadFtFaceFromFile(string font)
+        {
+            return mCoreObject.LoadFtFaceFromFile(mFontManager.mCoreObject, font);
+        }
+        public bool LoadFtFaceFromBlob(Support.TtBlobObject blob)
+        {
+            return mCoreObject.LoadFtFaceFromBlob(mFontManager.mCoreObject, blob.mCoreObject);
+        }
+        
     }
 
     public class TtFontManager : AuxPtrType<Canvas.FTFontManager>
@@ -396,6 +439,20 @@ namespace EngineNS.Bricks.Font
         public const string FontSDFAssetExt = ".fontsdf";
         public const string FontAssetExt = ".font";
 
+        public struct FFontKey : IEquatable<FFontKey>
+        {
+            public RName Name;
+            public int FontSize;
+            public override int GetHashCode()
+            {
+                return Name.GetHashCode() + FontSize;
+            }
+            public bool Equals(FFontKey other)
+            {
+                return (Name == other.Name) && (FontSize == other.FontSize);
+            }
+        }
+        public Dictionary<FFontKey, TtFontSDF> CachedFonts = new Dictionary<FFontKey, TtFontSDF>();
         public TtFontManager()
         {
             mCoreObject = Canvas.FTFontManager.CreateInstance();
@@ -403,16 +460,47 @@ namespace EngineNS.Bricks.Font
         }
         public override void Dispose()
         {
+            foreach (var i in CachedFonts)
+            {
+                i.Value.Dispose();
+            }
+            CachedFonts.Clear();
             base.Dispose();
         }
-        public TtFontSDF GetFontSDF(RName font, int fontSize, int texSizeX, int texSizeY)
+        public TtFontSDF GetFontSDF(RName font, int fontSize, int texSizeX = -1, int texSizeY = -1)
         {
-            var result = new TtFontSDF(mCoreObject.GetFont(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, font.Address, fontSize, texSizeX, texSizeY));
+            FFontKey key;
+            key.Name = font;
+            key.FontSize = fontSize;
+            TtFontSDF result;
+            if (CachedFonts.TryGetValue(key, out result))
+            {
+                return result;
+            }
+            if (texSizeX < 0)
+                texSizeX = 512;
+            if (texSizeY < 0)
+                texSizeY = 512;
+            var xnd = IO.TtXndHolder.LoadXnd(font.Address);
+            result = new TtFontSDF(this, mCoreObject.CreateFontSDF(font.ToString(),TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, xnd.mCoreObject, fontSize, texSizeX, texSizeY));
+            result.AssetName = font;
+            result.LoadFtFaceFromFile(IO.TtFileManager.GetBaseDirectory(font.Address) + result.mCoreObject.GetSourceFont());
+            CachedFonts.Add(key, result);
             return result;
         }
         public void Tick(TtEngine host)
         {
-            mCoreObject.Update(host.GfxDevice.RenderContext.mCoreObject, false);
+            foreach(var i in CachedFonts)
+            {
+                if (TtEngine.Instance.PlayMode != EPlayMode.Game)
+                {
+                    if (i.Value.IsNeedSave)
+                    {
+                        i.Value.SaveFontAsset();
+                    }
+                }
+                i.Value.mCoreObject.Update(host.GfxDevice.RenderContext.mCoreObject, false);
+            }
         }
     }
 
@@ -429,7 +517,7 @@ namespace EngineNS.Bricks.Font
         }
     }
 
-    public class UFontModule : TtModule<TtEngine>
+    public class TtFontModule : TtModule<TtEngine>
     {
         TtFontManager mFontManager = new TtFontManager();
         public TtFontManager FontManager { get => mFontManager; }
@@ -459,7 +547,7 @@ namespace EngineNS
 {
     partial class TtEngine
     {
-        public Bricks.Font.UFontModule FontModule { get; } = new Bricks.Font.UFontModule();
+        public Bricks.Font.TtFontModule FontModule { get; } = new Bricks.Font.TtFontModule();
     }
 }
 

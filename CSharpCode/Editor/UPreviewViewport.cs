@@ -20,6 +20,7 @@ namespace EngineNS.Editor
             PresentWindow?.UnregEventProcessor(this);
             RenderPolicy?.Dispose();
             RenderPolicy = null;
+            mVisParameter = null;
             base.Dispose();
         }
         new protected async System.Threading.Tasks.Task<bool> Initialize_Default(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
@@ -84,8 +85,8 @@ namespace EngineNS.Editor
             }
             await OnInitialize(this, application, policy, zMin, zMax);
 
-            mDefaultHUD.RenderCamera = this.RenderPolicy.DefaultCamera;
-            this.PushHUD(mDefaultHUD);
+            //mDefaultHUD.RenderCamera = this.RenderPolicy.DefaultCamera;
+            //this.PushHUD(mDefaultHUD);
 
             mAxis = new GamePlay.UAxis();
             await mAxis.Initialize(this.World, CameraController);

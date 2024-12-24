@@ -406,10 +406,23 @@ void ICamera::LookAtLH(const v3dxDVector3* eye, const v3dxDVector3* lookAt, cons
 	UpdateFrustum();
 }
 
-vBOOL ICamera::GetPickRay(v3dxVector3* pvPickRay, float x, float y, float sw, float sh)
+bool ICamera::GetPickRayInViewSpace(v3dxVector3* pvPickRay, float x, float y, float sw, float sh)
 {
 	if (x<0 || x>sw || y<0 || y>sh)
-		return FALSE;
+		return false;
+
+	pvPickRay->X = (((2.0f * x) / sw) - 1) / mLogicData->mProjectionMatrix.m11;
+	pvPickRay->Y = -(((2.0f * y) / sh) - 1) / mLogicData->mProjectionMatrix.m22;
+	pvPickRay->Z = 1.0f;
+
+	pvPickRay->normalize();
+	return true;
+}
+
+bool ICamera::GetPickRay(v3dxVector3* pvPickRay, float x, float y, float sw, float sh)
+{
+	if (x<0 || x>sw || y<0 || y>sh)
+		return false;
 	v3dVector3_t v;
 	v.X = (((2.0f * x) / sw) - 1) / mLogicData->mProjectionMatrix.m11;
 	v.Y = -(((2.0f * y) / sh) - 1) / mLogicData->mProjectionMatrix.m22;

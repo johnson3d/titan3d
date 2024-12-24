@@ -13,13 +13,31 @@ namespace EngineNS.Thread.Async
     }
     public class TtTaskCollector : IDisposable
     {
-        public List<KeyValuePair<ITask, FOnTaskFinished> > Tasks { get; } = new ();
+        public struct FWaitTask
+        {
+            public ITask Task;
+            public FOnTaskFinished OnFinished;
+            public bool IsCompletedDispose;
+        }
+        public List<FWaitTask> Tasks { get; } = new ();
         public delegate void FOnTaskFinished(ITask task);
-        public void AddWaitTask(ITask task, FOnTaskFinished fn = null)
+        public void AddWaitTask(ITask task, FOnTaskFinished fn = null, bool bCompletedDispose = true)
         {
             lock (Tasks)
             {
-                Tasks.Add(new KeyValuePair<ITask, FOnTaskFinished>(task, fn));
+                if (task.IsCompleted)
+                {
+                    if (fn != null)
+                        fn(task);
+                    if (bCompletedDispose)
+                        task.Dispose();
+                    return;
+                }
+                FWaitTask wt;
+                wt.Task = task;
+                wt.OnFinished = fn;
+                wt.IsCompletedDispose = bCompletedDispose;
+                Tasks.Add(wt);
             }
         }
         public void Tick()
@@ -28,13 +46,14 @@ namespace EngineNS.Thread.Async
             {
                 for (int i = 0; i < Tasks.Count; i++)
                 {
-                    if (Tasks[i].Key.IsCompleted)
+                    if (Tasks[i].Task.IsCompleted)
                     {
-                        if (Tasks[i].Value != null)
+                        if (Tasks[i].OnFinished != null)
                         {
-                            Tasks[i].Value(Tasks[i].Key);
+                            Tasks[i].OnFinished(Tasks[i].Task);
                         }
-                        Tasks[i].Key.Dispose();
+                        if (Tasks[i].IsCompletedDispose)
+                            Tasks[i].Task.Dispose();
                         Tasks.RemoveAt(i);
                         i--;
                     }
@@ -45,7 +64,7 @@ namespace EngineNS.Thread.Async
         {
             for (int i = 0; i < Tasks.Count; i++)
             {
-                Tasks[i].Key.Dispose();
+                Tasks[i].Task.Dispose();
             }
             Tasks.Clear();
         }

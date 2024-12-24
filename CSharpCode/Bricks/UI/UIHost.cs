@@ -130,6 +130,8 @@ namespace EngineNS.UI
 
         bool RayIntersect3DElements(TtUIElement element, ref RayIntersectData data)
         {
+            if (element.NoHitTest)
+                return false;
             if (!element.Is3D)
                 return false;
             if(element.RayIntersect(ref data))
@@ -180,10 +182,23 @@ namespace EngineNS.UI
         public TtUIElement GetPointAtElement(in Vector2 mousePt, ref RayIntersectData data, out Vector2 pointOffset, bool onlyClipped = true)
         {
             pointOffset = Vector2.Zero;
+            if (NoHitTest)
+            {
+                return null;
+            }
             if (IsScreenSpace)
             {
                 if (!DesignRect.Contains(in mousePt))
                     return null;
+                data.Start = Vector3.Zero;
+                var projInvMat = RenderCamera.GetProjectionInverse();
+                var vp = this.ViewportSlate;
+                var delta = vp.WindowPos - vp.ViewportPos;
+                Vector3 dir = Vector3.Zero;
+                var pt = new Vector2(mousePt.X - delta.X, mousePt.Y - delta.Y);
+                RenderCamera.GetPickRay(ref dir, pt.X, pt.Y, vp.ClientSize.Width, vp.ClientSize.Height);
+                var viewMatrix = RenderCamera.GetViewMatrix();
+                data.Direction = Vector3.TransformNormal(in dir, viewMatrix);
             }
             else
             {
@@ -284,5 +299,10 @@ namespace EngineNS.UI
         //    // Assert
         //    Assert.AreEqual(expectedIntersectPoint, actualIntersectPoint);
         //}
+
+        public override void UpdateLayout()
+        {
+            InvalidateMeasure();
+        }
     }
 }

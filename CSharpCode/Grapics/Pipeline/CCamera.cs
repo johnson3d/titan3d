@@ -204,13 +204,23 @@ namespace EngineNS.Graphics.Pipeline
                 }
             }
         }
-        public int GetPickRay(ref EngineNS.Vector3 pvPickRay, float x, float y, float sw, float sh)
+        public bool GetPickRay(ref EngineNS.Vector3 pvPickRay, float x, float y, float sw, float sh)
         {
             unsafe
             {
                 fixed (EngineNS.Vector3* pinned_pvPickRay = &pvPickRay)
                 {
                     return mCoreObject.GetPickRay(pinned_pvPickRay, x, y, sw, sh);
+                }
+            }
+        }
+        public bool GetPickRayInViewSpace(ref EngineNS.Vector3 pvPickRay, float x, float y, float sw, float sh)
+        {
+            unsafe
+            {
+                fixed (EngineNS.Vector3* pinned_pvPickRay = &pvPickRay)
+                {
+                    return mCoreObject.GetPickRayInViewSpace(pinned_pvPickRay, x, y, sw, sh);
                 }
             }
         }

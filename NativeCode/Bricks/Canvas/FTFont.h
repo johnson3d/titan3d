@@ -25,17 +25,23 @@ namespace Canvas
 			}
 			return result;
 		}
+		UINT GetWordNum() const{
+			return (UINT)mWordTable.size();
+		}
+		UINT GetTotalWords(UINT* pUnicodes, UINT Count);
 	public:
 		FTFont();
 		~FTFont();
 		virtual void Cleanup() override;
-		bool Init(NxRHI::IGpuDevice * rc, FTFontManager * ftMgr, const char* name, int fontSize, int texSizeX, int texSizeY);
+		bool Init(const char* name, NxRHI::IGpuDevice * rc, FTFontManager * ftMgr, XndHolder* xnd, int fontSize, int texSizeX, int texSizeY);
+		bool LoadFtFaceFromFile(FTFontManager* manager, const char* font);
+		bool LoadFtFaceFromBlob(FTFontManager* manager, IBlobObject* blob);
 		bool InitForBuildFont(NxRHI::IGpuDevice* rc, FTFontManager* ftMgr, const char* name, int fontSize, 
 			int SdfPixelSize, int SdfSpread, int SdfPixelColored);
 		bool IsNeedSave() const {
 			return NeedSave;
 		}
-		void SaveFontSDF(const char* name);
+		void SaveFontSDF(XndNode* node);
 		FTWord* GetWord(UINT uniCode);
 		void AddWordForBuild(UINT uniCode);
 		void Update(NxRHI::IGpuDevice * rc, bool bflipV);
@@ -54,6 +60,9 @@ namespace Canvas
 		void ResetWords();
 		void SetDirty() {
 			Dirty = true;
+		}
+		const char* GetSourceFont() const{
+			return mSdfSourceFont.c_str();
 		}
 	protected:
 		std::string							mName;
@@ -87,7 +96,7 @@ namespace Canvas
 			static void Load(XndAttribute* attr, FTWord* word, UINT Unicode);
 			static void SaveTo(XndAttribute* attr, FTWord* word, UINT Unicode);
 		};
-		std::vector<AutoRef<FWordHolder>> mWordTable;
+		std::vector<AutoRef<FWordHolder>>	mWordTable;
 
 		bool								NeedSave = false;
 		bool								Dirty = true;
@@ -99,11 +108,12 @@ namespace Canvas
 		FT_Face								mFtFace;
 		FT_Byte*							mFtContent;
 		TWeakRefHandle<FTFontManager>		mManager;
-		std::shared_ptr<BYTE>				mMemFtData;
+		AutoRef<IBlobObject>				mFontBlob;
 
 		VSLLock mLocker;
 	private:
-		FT_Face LoadFtFace(FT_Library ftlib, const char* font);
+		FT_Face LoadFtFaceFromFile(FT_Library ftlib, const char* font);
+		FT_Face LoadFtFaceFromBlob(FT_Library ftlib, IBlobObject* blob);
 		bool LoadChar(FT_Library ftlib, WCHAR unicode, int fontSize, int outline_type, int outline_thickness, FTWord* word);
 	};
 
@@ -117,31 +127,9 @@ namespace Canvas
 		bool Init();
 		virtual void Cleanup() override;
 
-		FTFont* GetFont(NxRHI::IGpuDevice* device, const char* file, int fontSize, int texSizeX, int texSizeY);
-		void Update(NxRHI::IGpuDevice* device, bool bflipV);
+		FTFont* CreateFontSDF(const char* name, NxRHI::IGpuDevice* device, XndHolder* xnd, int fontSize, int texSizeX, int texSizeY);
 	public:
 		FT_Library				mFtlib;
-		struct FontKey
-		{
-			std::string			Name;
-			int					FontSize;
-			struct FontKeyLess
-			{
-				bool operator()(const FontKey& left, const FontKey& right) const
-				{
-					auto cmp = strcmp(left.Name.c_str(), right.Name.c_str());
-					if (cmp < 0)
-						return true;
-					else if (cmp > 0)
-						return false;
-					else
-					{
-						return left.FontSize < right.FontSize;
-					}
-				}
-			};
-		};
-		std::map<FontKey, AutoRef<FTFont>, FontKey::FontKeyLess>	mFonts;
 	};
 }
 

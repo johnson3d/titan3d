@@ -346,6 +346,10 @@ namespace EngineNS.UI
                 var ok = mDrawMesh.Initialize(mMesh,
                     materials,
                     Rtti.TtTypeDescGetter<TtMdfUIMesh>.TypeDesc);
+                if (ok == false)
+                {
+                    return null;
+                }
                 var mdf = mDrawMesh.MdfQueue as TtMdfUIMesh;
                 mdf.UIHost = this;
             }

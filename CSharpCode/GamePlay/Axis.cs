@@ -1686,7 +1686,7 @@ namespace EngineNS.GamePlay
             var pos = viewport.Window2Viewport(new Vector2(x, y));
             var camera = mCameraController.Camera.mCoreObject;
             var pickResult = camera.GetPickRay(ref pickRay, pos.X, pos.Y, viewport.ClientSize.X, viewport.ClientSize.Y);
-            if (pickResult <= 0)
+            if (pickResult == false)
                 return false;
             return Plane.PickPlanePos(pickRay, camera.GetLocalPosition(), camera.GetMatrixStartPosition(), x, y, planePos, planeNormal, out resultPos);
         }

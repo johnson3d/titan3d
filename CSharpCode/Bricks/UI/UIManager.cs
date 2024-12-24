@@ -2,6 +2,7 @@ using EngineNS;
 using EngineNS.EGui;
 using EngineNS.Macross;
 using EngineNS.UI.Controls;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -74,24 +75,39 @@ namespace EngineNS.UI
                 }
             }
         }
-        List<TtUIHost> mUserUIList = new List<TtUIHost>();
+        List<WeakReference<TtUIHost>> mUserUIList = new ();
         public void AddActivedUI(TtUIHost userUI)
         {
-            mUserUIList.Add(userUI);
+            mUserUIList.Add(new WeakReference<TtUIHost>(userUI));
         }
         public void RemoveActivedUI(TtUIHost userUI)
         {
-            mUserUIList.Remove(userUI);
+            for(int i = 0; i<mUserUIList.Count; i++)
+            {
+                if (mUserUIList[i].TryGetTarget(out var t))
+                {
+                    if (t == userUI)
+                    {
+                        mUserUIList.RemoveAt(i);
+                        return;
+                    }
+                }
+                else
+                {
+                    mUserUIList.RemoveAt(i);
+                    i--;
+                }
+            }
         }
 
-        Dictionary<UIKeyName, TtUIHost> mUserUIs = new Dictionary<UIKeyName, TtUIHost>(new UIKeyName.EqualityComparer());
+        Dictionary<UIKeyName, WeakReference<TtUIHost>> mUserUIs = new ();
         public void AddUI(RName fileName, string key, TtUIHost ui)
         {
             lock(mUserUIs)
             {
                 var keyName = new UIKeyName(fileName, key);
                 AddActivedUI(ui);
-                mUserUIs[keyName] = ui;
+                mUserUIs[keyName] = new WeakReference<TtUIHost>(ui);
             }
         }
         public void BringToTop(in UIKeyName key)
@@ -100,8 +116,15 @@ namespace EngineNS.UI
             {
                 if(mUserUIs.TryGetValue(key, out var ui))
                 {
-                    RemoveActivedUI(ui);
-                    AddActivedUI(ui);
+                    if (ui.TryGetTarget(out var t))
+                    {
+                        RemoveActivedUI(t);
+                        AddActivedUI(t);
+                    }
+                    else
+                    {
+                        mUserUIs.Remove(key);
+                    }
                 }
             }
         }
@@ -112,7 +135,10 @@ namespace EngineNS.UI
                 var key = new UIKeyName(name, keyName);
                 if(mUserUIs.TryGetValue(key, out var ui))
                 {
-                    RemoveActivedUI(ui);
+                    if (ui.TryGetTarget(out var t))
+                    {
+                        RemoveActivedUI(t);
+                    }
                     return mUserUIs.Remove(key);
                 }
                 return false;
@@ -136,7 +162,10 @@ namespace EngineNS.UI
                 {
                     if(mUserUIs.TryGetValue(keys[i], out var ui))
                     {
-                        RemoveActivedUI(ui);
+                        if (ui.TryGetTarget(out var t))
+                        {
+                            RemoveActivedUI(t);
+                        }
                         mUserUIs.Remove(keys[i]);
                     }
                 }
@@ -149,32 +178,40 @@ namespace EngineNS.UI
             TtUIHost intersectHost = null;
             for(int i=mUserUIList.Count - 1; i>=0; i--)
             {
-                var ui = mUserUIList[i];
-                float distance;
-                if(Ray.Intersects(ray, ui.BoundingBox, out distance))
+                var t = mUserUIList[i];
+                if(t.TryGetTarget(out var ui))
                 {
-                    if(ui.Has3DElement)
+                    float distance;
+                    if (Ray.Intersects(ray, ui.BoundingBox, out distance))
                     {
-                        var end = ray.Position + ray.Direction * 100.0f;
-                        VHitResult result = new VHitResult();
-                        if(ui.OnLineCheckTriangle(ray.Position, end, ref result))
+                        if (ui.Has3DElement)
                         {
-                            distance = (float)(result.Position - ray.Position).LengthSquared();
-                            if(distance < minDistance)
+                            var end = ray.Position + ray.Direction * 100.0f;
+                            VHitResult result = new VHitResult();
+                            if (ui.OnLineCheckTriangle(ray.Position, end, ref result))
+                            {
+                                distance = (float)(result.Position - ray.Position).LengthSquared();
+                                if (distance < minDistance)
+                                {
+                                    minDistance = distance;
+                                    intersectHost = ui;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (distance < minDistance)
                             {
                                 minDistance = distance;
                                 intersectHost = ui;
                             }
                         }
                     }
-                    else
-                    {
-                        if(distance < minDistance)
-                        {
-                            minDistance = distance;
-                            intersectHost = ui;
-                        }
-                    }
+                }
+                else
+                {
+                    mUserUIList.RemoveAt(i);
+                    i++;
                 }
             }
 
@@ -195,7 +232,15 @@ namespace EngineNS.UI
         {
             for(int i=mUserUIList.Count - 1; i>=0; i--)
             {
-                TtEngine.Instance.TaskCollector.AddWaitTask(mUserUIList[i].BuildMesh());
+                if (mUserUIList[i].TryGetTarget(out var t))
+                {
+                    TtEngine.Instance.TaskCollector.AddWaitTask(t.BuildMesh());
+                }
+                else
+                {
+                    mUserUIList.RemoveAt(i);
+                    i++;
+                }
             }
 
             var elapsedSecond = TtEngine.Instance.ElapsedSecond;
@@ -227,10 +272,8 @@ namespace EngineNS.UI
                 TtEngine.Instance.SourceControlModule.AddFile(fileName);
             }
         }
-        [Rtti.Meta]
-        public TtUIElement Load(
-            [RName.PGRName(FilterExts = TtUIAsset.AssetExt)]
-            RName name)
+
+        public TtUIElement LoadWithSimulateMode(RName name, bool simulateMode = false)
         {
             using (var xnd = IO.TtXndHolder.LoadXnd(name.Address + "/" + name.PureName + name.ExtName))
             {
@@ -241,7 +284,7 @@ namespace EngineNS.UI
                 if (attr.NativePointer == IntPtr.Zero)
                     return null;
 
-                using(var ar = attr.GetReader(null))
+                using (var ar = attr.GetReader(null))
                 {
                     TtUIElement element = null;
                     try
@@ -251,14 +294,14 @@ namespace EngineNS.UI
                         element.MacrossGetter = TtMacrossGetter<TtUIMacrossBase>.NewInstance();
                         element.MacrossGetter.Name = name;
                         var mc = element.MacrossGetter.Get();
-                        if(mc != null)
+                        if (mc != null)
                         {
                             mc.HostElement = element;
-                            mc.SimulateMode = true;
+                            mc.SimulateMode = simulateMode;
                             mc.Initialize();
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         Profiler.Log.WriteException(ex);
                     }
@@ -266,6 +309,14 @@ namespace EngineNS.UI
                     return element;
                 }
             }
+        }
+
+        [Rtti.Meta]
+        public TtUIElement Load(
+            [RName.PGRName(FilterExts = TtUIAsset.AssetExt)]
+            RName name)
+        {
+            return LoadWithSimulateMode(name);
         }
 
         private void Btn_DeviceDown(object sender, TtRoutedEventArgs args)

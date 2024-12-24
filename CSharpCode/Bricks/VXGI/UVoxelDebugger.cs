@@ -246,7 +246,8 @@ namespace EngineNS.Bricks.VXGI
             var rectMesh = rect.ToMesh();
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = material;
-            VxDebugMesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<UMdfVoxelDebugMesh>.TypeDesc);
+            if (false == VxDebugMesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<UMdfVoxelDebugMesh>.TypeDesc))
+                return false;
             VxDebugMesh.MdfQueue.MdfDatas = this;
 
             ResetComputeDrawcall();

@@ -80,8 +80,8 @@ namespace EngineNS.EGui.Slate
 
             SetCameraOffset(in DVector3.Zero);
 
-            mDefaultHUD.RenderCamera = this.RenderPolicy.DefaultCamera;
-            this.PushHUD(mDefaultHUD);
+            //mDefaultHUD.RenderCamera = this.RenderPolicy.DefaultCamera;
+            //this.PushHUD(mDefaultHUD);
             //SetCameraOffset(new DVector3(-300, 0, 0));
 
             mAxis = new GamePlay.UAxis();
@@ -107,6 +107,8 @@ namespace EngineNS.EGui.Slate
             {
                 RenderPolicy?.OnResize(vpSize.X, vpSize.Y);
             }
+
+            base.OnClientChanged(bSizeChanged);
         }
         protected override IntPtr GetShowTexture()
         {

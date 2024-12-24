@@ -1,5 +1,6 @@
 ﻿using EngineNS.IO;
 using EngineNS.Support;
+using EngineNS.Thread.Async;
 using EngineNS.UI;
 using NPOI.SS.Formula.Functions;
 using System;
@@ -667,7 +668,9 @@ namespace EngineNS.Rtti
             {
                 if (ReturnType == null)
                     return false;
-                if (ReturnType.IsEqual(typeof(void)) || ReturnType.IsEqual(typeof(System.Threading.Tasks.Task)))
+                if (ReturnType.IsEqual(typeof(void)) || 
+                    ReturnType.IsEqual(typeof(System.Threading.Tasks.Task)) ||
+                    ReturnType.IsEqual(typeof(Thread.Async.TtTask)))
                     return false;
                 return true;
             }

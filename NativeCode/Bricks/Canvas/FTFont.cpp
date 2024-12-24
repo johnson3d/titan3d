@@ -11,6 +11,17 @@ ENGINE_RTTI_IMPL(EngineNS::Canvas::FTFontManager)
 
 namespace Canvas
 {
+	UINT FTFont::GetTotalWords(UINT* pUnicodes, UINT Count)
+	{
+		UINT ret = 0;
+		for (auto& i : mWordTable)
+		{
+			if (ret >= Count)
+				break;
+			pUnicodes[ret++] = i->Unicode;
+		}
+		return ret;
+	}
 	FTWord* FTFont::GetWord(int x, int y, UINT c, UInt16 transformIndex, Canvas::FCanvasVertex vert[4]) const
 	{
 		auto pThis = (FTFont*)this;
@@ -46,7 +57,7 @@ namespace Canvas
 		int SdfPixelSize, int SdfSpread, int SdfPixelColored)
 	{
 		mManager.FromObject(ftMgr);
-		//mName = name;
+		mName = name;
 		mFontSize = fontSize;
 		mSdfPixelSize = SdfPixelSize;
 		mSdfSpread = SdfSpread;
@@ -58,14 +69,14 @@ namespace Canvas
 		{
 			mSdfSourceFont = mSdfSourceFont.substr(pos + 1);
 		}
-		LoadFtFace(ftMgr->mFtlib, name);
+		LoadFtFaceFromFile(ftMgr->mFtlib, name);
 
 		mFTWordAllocator = MakeWeakRef(new FTPagedWordAllocator());
 		mFTWordAllocator->Creator.Initialize(rc, SdfPixelSize, SdfPixelSize, SdfPixelSize);
 		return true;
 	}
 
-	bool FTFont::Init(NxRHI::IGpuDevice* rc, FTFontManager* ftMgr, const char* name, int fontSize, int texSizeX, int texSizeY)
+	bool FTFont::Init(const char* name, NxRHI::IGpuDevice* rc, FTFontManager* ftMgr, XndHolder* xnd, int fontSize, int texSizeX, int texSizeY)
 	{
 		mManager.FromObject(ftMgr);
 		mName = name;
@@ -74,8 +85,7 @@ namespace Canvas
 		mFTWordAllocator->Creator.Initialize(rc, mFontSize, texSizeX, texSizeY);
 
 		{
-			mSdfXnd = MakeWeakRef(new XndHolder());
-			mSdfXnd->LoadXnd(name);
+			mSdfXnd = xnd;
 			auto attr = mSdfXnd->GetRootNode()->TryGetAttribute("SdfDesc");
 			if (attr != nullptr)
 			{
@@ -114,25 +124,35 @@ namespace Canvas
 			}
 		}
 		
-		auto fdPos = mName.find_last_of('/');
+		/*auto fdPos = mName.find_last_of('/');
 		if (fdPos != std::string::npos)
 		{
 			auto ftf = mName.substr(0, fdPos + 1);
 			ftf += mSdfSourceFont;
 			LoadFtFace(ftMgr->mFtlib, ftf.c_str());
-		}
+		}*/
 
 		NeedSave = false;
 		return true;
 	}
-	void FTFont::SaveFontSDF(const char* name)
-	{
-		auto xnd = MakeWeakRef(new XndHolder());
-		auto root = MakeWeakRef(xnd->NewNode("FontSDF", 0, 0));
-		xnd->SetRootNode(root);
 
-		auto attr = MakeWeakRef(xnd->NewAttribute("SdfDesc", 0, 0));
-		xnd->GetRootNode()->AddAttribute(attr);
+	bool FTFont::LoadFtFaceFromFile(FTFontManager* manager, const char* font)
+	{
+		return LoadFtFaceFromFile(manager->mFtlib, font) != nullptr;
+	}
+
+	bool FTFont::LoadFtFaceFromBlob(FTFontManager* manager, IBlobObject* blob)
+	{
+		return LoadFtFaceFromBlob(manager->mFtlib, blob) != nullptr;
+	}
+
+	void FTFont::SaveFontSDF(XndNode* node)
+	{
+		/*auto xnd = MakeWeakRef(new XndHolder());
+		auto root = MakeWeakRef(xnd->NewNode("FontSDF", 0, 0));
+		xnd->SetRootNode(root);*/
+
+		auto attr = node->GetOrAddAttribute("SdfDesc", 0, 0);
 		if (attr != nullptr)
 		{
 			attr->BeginWrite();
@@ -143,10 +163,8 @@ namespace Canvas
 			attr->Write(mSdfPixelColored);
 			attr->EndWrite();
 		}
-		attr = MakeWeakRef(xnd->NewAttribute("UniCode", 0, 0));
-		auto attrWords = MakeWeakRef(xnd->NewAttribute("Words", 0, 0));
-		xnd->GetRootNode()->AddAttribute(attr);
-		xnd->GetRootNode()->AddAttribute(attrWords);
+		attr = node->GetOrAddAttribute("UniCode", 0, 0);
+		auto attrWords = node->GetOrAddAttribute("Words", 0, 0);
 		if (attr != nullptr)
 		{
 			attr->BeginWrite();
@@ -176,52 +194,9 @@ namespace Canvas
 			attr->EndWrite();
 		}
 
-		if (mSdfXnd != nullptr)
-			mSdfXnd->TryReleaseHolder();
-		xnd->SaveXnd(name);
-		xnd->TryReleaseHolder();
-
 		NeedSave = false;
-		if (mName == name)
-		{
-			ResetWords();
-			
-			mSdfXnd = MakeWeakRef(new XndHolder());
-			mSdfXnd->LoadXnd(name);
-			auto attr = mSdfXnd->GetRootNode()->TryGetAttribute("SdfDesc");
-			if (attr != nullptr)
-			{
-				attr->BeginRead();
-				attr->Read(mSdfSourceFont);
-				attr->Read(mFontSize);
-				attr->Read(mSdfPixelSize);
-				attr->Read(mSdfSpread);
-				attr->Read(mSdfPixelColored);
-				attr->EndRead();
-			}
-			attr = mSdfXnd->GetRootNode()->TryGetAttribute("UniCode");
-			{
-				mWordBitmapAttr = mSdfXnd->GetRootNode()->TryGetAttribute("Words");
-				if (mWordBitmapAttr == nullptr)
-					return;
-
-				attr->BeginRead();
-				attr->Read(mFontSize);
-				int count;
-				attr->Read(count);
-
-				mWordTable.resize(count);
-				for (int i = 0; i < count; i++)
-				{
-					mWordTable[i] = MakeWeakRef(new FWordHolder());
-					attr->Read(mWordTable[i]->Unicode);
-					attr->Read(mWordTable[i]->Offset);
-				}
-				attr->EndRead();
-			}
-		}
 	}
-	FT_Face FTFont::LoadFtFace(FT_Library ftlib, const char* font)
+	FT_Face FTFont::LoadFtFaceFromFile(FT_Library ftlib, const char* font)
 	{
 		FT_Error err = FALSE;
 
@@ -273,6 +248,33 @@ namespace Canvas
 		if (err)
 		{
 			VFX_LTRACE(ELTT_Graphics, "FT_Select_Charmap failed = %s\r\n", font);
+			return NULL;
+		}
+
+		mFtContent = NULL;
+
+		return mFtFace;
+	}
+
+	FT_Face FTFont::LoadFtFaceFromBlob(FT_Library ftlib, IBlobObject* blob)
+	{
+		FT_Error err = FALSE;
+
+		mFontBlob = blob;
+		err = FT_New_Memory_Face(ftlib, (FT_Byte*)blob->GetData(), (FT_Long)blob->GetSize(), 0, &mFtFace);
+		if (err)
+		{
+			VFX_LTRACE(ELTT_Graphics, "FT_New_Memory_Face failed = %s\r\n");
+			return NULL;
+		}
+
+		if (mFtFace == NULL)
+			return NULL;
+		//const int dpi = 64;
+		err = FT_Select_Charmap(mFtFace, FT_ENCODING_UNICODE);
+		if (err)
+		{
+			VFX_LTRACE(ELTT_Graphics, "FT_Select_Charmap failed = %s\r\n");
 			return NULL;
 		}
 
@@ -712,8 +714,6 @@ namespace Canvas
 	}
 	void FTFontManager::Cleanup()
 	{
-		mFonts.clear();
-
 		if (mFtlib)
 		{
 			FT_Done_FreeType(mFtlib);
@@ -731,38 +731,14 @@ namespace Canvas
 		Cleanup();
 	}
 
-	FTFont* FTFontManager::GetFont(NxRHI::IGpuDevice* device, const char* file, int fontSize, int texSizeX, int texSizeY)
+	FTFont* FTFontManager::CreateFontSDF(const char* name, NxRHI::IGpuDevice* device, XndHolder* xnd, int fontSize, int texSizeX, int texSizeY)
 	{
-		if (fontSize > texSizeX || fontSize > texSizeY)
-		{
-			VFX_LTRACE(ELTT_Graphics, "FTFontManager::GetFont(%s,%d) FontSize>(%d,%d)", file, fontSize, texSizeX, texSizeY);
-			return nullptr;
-		}
-		FontKey key;
-		key.Name = file;
-		key.FontSize = fontSize;
-		auto iter = mFonts.find(key);
-		if (iter != mFonts.end())
-		{
-			return iter->second;
-		}
+		auto font = new FTFont();
 
-		auto font = MakeWeakRef(new FTFont());
-		mFonts.insert(std::make_pair(key, font));
-
-		font->Init(device, this, file, fontSize, texSizeX, texSizeY);
+		font->Init(name, device, this, xnd, fontSize, texSizeX, texSizeY);
 		//font->AddRef();
 		return font;
 	}
-
-	void FTFontManager::Update(NxRHI::IGpuDevice* rc, bool bflipV)
-	{
-		for (auto& i : mFonts)
-		{
-			i.second->Update(rc, bflipV);
-		}
-	}
-
 }
 
 NS_END

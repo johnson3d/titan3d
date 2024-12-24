@@ -1378,7 +1378,7 @@ namespace EngineNS.UI.Editor
         public async Thread.Async.TtTask<bool> OpenEditor(EngineNS.Editor.TtMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            mUIHost.Children.Add(TtEngine.Instance.UIManager.Load(AssetName));
+            mUIHost.Children.Add(TtEngine.Instance.UIManager.LoadWithSimulateMode(AssetName, true));
             UIAsset = new TtUIAsset();
             UIAsset.AssetName = name;
             //UIAsset.Mesh = await UI.Canvas.TtCanvas.TestCreate();

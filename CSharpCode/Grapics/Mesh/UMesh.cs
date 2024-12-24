@@ -691,16 +691,18 @@ namespace EngineNS.Graphics.Mesh
         }
         public bool UpdateMesh(int subMesh, TtMeshPrimitives mesh, List<Pipeline.Shader.TtMaterial> materials, Rtti.TtTypeDesc atomType = null)
         {
+            if (materials.Count == 0)
+                return false;
             if (atomType == null)
                 atomType = Rtti.TtTypeDescGetter<TtAtom>.TypeDesc;
 
             var sbMesh = MaterialMesh.SubMeshes[subMesh];
             sbMesh.Mesh = mesh;
-            if (sbMesh.Materials.Count > materials.Count)
-                return false;
+            //if (sbMesh.Materials.Count > materials.Count)
+            //    return false;
             for (int i = 0; i < sbMesh.Materials.Count; i++)
             {
-                sbMesh.Materials[i] = materials[i];
+                sbMesh.Materials[i] = materials[Math.Min(i, materials.Count - 1)];
             }
 
             MeshAtomUpdate(subMesh, atomType);
@@ -747,7 +749,8 @@ namespace EngineNS.Graphics.Mesh
             if (MaterialMesh == null || MaterialMesh.SubMeshes.Count != mesh.Count)
             {
                 MaterialMesh = new TtMaterialMesh();
-                MaterialMesh.Initialize(mesh, materials);
+                if (false == MaterialMesh.Initialize(mesh, materials))
+                    return false;
                 MaterialMeshSerialId = MaterialMesh.SerialId;
 
                 SubMeshes.Clear();

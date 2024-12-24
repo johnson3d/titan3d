@@ -1,7 +1,9 @@
 ﻿using EngineNS.Algorithm;
 using NPOI.SS.Formula.Functions;
+using Sprache;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -256,7 +258,14 @@ namespace EngineNS.Bricks.DataSet
                             {
                                 byte[] hash;
                                 ar.Read(out hash);
-                                if (IsEqual(hash, XlsMd5))
+                                string SheetName;
+                                ar.Read(out SheetName);
+                                int HeadRow;
+                                ar.Read(out HeadRow);
+                                int DataStartRow;
+                                ar.Read(out DataStartRow);
+                                var dtAttr = objType.GetCustomAttribute<TtDataTableAttribute>();
+                                if (IsEqual(hash, XlsMd5) && dtAttr.SheetName == SheetName && dtAttr.HeadRow == HeadRow && dtAttr.DataStartRow == DataStartRow)
                                 {
                                     LoadDataSetFromXnd(xnd.RootNode);
                                     return true;
@@ -336,6 +345,10 @@ namespace EngineNS.Bricks.DataSet
             using (var ar = attr.GetWriter(20))
             {
                 ar.Write(md5Hash);
+                var dtAttr = DataType.SystemType.GetCustomAttribute<TtDataTableAttribute>();
+                ar.Write(dtAttr.SheetName);
+                ar.Write(dtAttr.HeadRow);
+                ar.Write(dtAttr.DataStartRow);
             }
             var tables = node.GetOrAddNode("Tables", 0, 0, true);
             foreach (var i in Tables)
@@ -392,7 +405,12 @@ namespace EngineNS.Bricks.DataSet
             [Rtti.MetaParameter(FilterType = typeof(TtDataProvider), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type type = null)
         {
-            return MainTable.FindByKey(propName, key, bSorted, type) as T;
+            var Result = MainTable.FindByKey(propName, key, bSorted, type) as T;
+            if (Result == null)
+            {
+                Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, $"GetData({propName},{key}) not found");
+            }
+            return Result;
         }
     }
 }

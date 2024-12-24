@@ -300,6 +300,7 @@ namespace EngineNS.Rtti
         public bool IsSealed => (SystemType != null) ? SystemType.IsSealed : false;
         public bool IsDelegate => typeof(Delegate).IsAssignableFrom(SystemType);
         public bool IsPointer => (SystemType != null) ? SystemType.IsPointer : false;
+        public bool IsVoid => (SystemType != null) ? (SystemType == typeof(void)) : false;
         public TtTypeDesc BaseType
         {
             get

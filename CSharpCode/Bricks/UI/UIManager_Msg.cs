@@ -2,8 +2,6 @@
 using EngineNS.Bricks.Input;
 using EngineNS.UI.Controls;
 using EngineNS.UI.Event;
-using NPOI.HSSF.Record.AutoFilter;
-using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,8 +18,8 @@ namespace EngineNS.UI
         }
 
         // 模态对话框
-        internal Stack<TtUIHost> mDialogHosts = new Stack<TtUIHost>();
-        internal List<TtUIHost> mPopupHosts = new List<TtUIHost>();
+        internal Stack<WeakReference<TtUIHost>> mDialogHosts = new Stack<WeakReference<TtUIHost>>();
+        internal List<WeakReference<TtUIHost>> mPopupHosts = new List<WeakReference<TtUIHost>>();
         TtObjectPool<TtRoutedEventArgs> mEventPool = new TtObjectPool<TtRoutedEventArgs>();
         public TtRoutedEventArgs QueryEventSync()
         {
@@ -232,18 +230,29 @@ namespace EngineNS.UI
                 // 后打开的在上面
                 for(int i= mPopupHosts.Count - 1; i >= 0; i--)
                 {
-                    var element = mPopupHosts[i].GetPointAtElement(in pt, out offsetOfElement);
-                    if (element != null)
+                    if (mPopupHosts[i].TryGetTarget(out var ui))
                     {
-                        newStay = element;
-                        break;
+                        var element = ui.GetPointAtElement(in pt, out offsetOfElement);
+                        if (element != null)
+                        {
+                            newStay = element;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        mPopupHosts.RemoveAt(i);
+                        i++;
                     }
                 }
             }
             if(mDialogHosts.Count > 0)
             {
                 var procWin = mDialogHosts.Peek();
-                newStay = procWin.GetPointAtElement(pt, out offsetOfElement);
+                if (procWin.TryGetTarget(out var ui))
+                {
+                    newStay = ui.GetPointAtElement(pt, out offsetOfElement);
+                }
             }
             else
             {
@@ -251,12 +260,15 @@ namespace EngineNS.UI
                 var data = new TtUIElement.RayIntersectData();
                 for (int i = mUserUIList.Count - 1; i >= 0; i--)
                 {
-                    var ui = mUserUIList[i];
-                    var element = ui.GetPointAtElement(in pt, ref data, out offsetOfElement);
-                    if (element != null && minDistance > data.Distance)
+                    var t = mUserUIList[i];
+                    if(t.TryGetTarget(out var ui))
                     {
-                        minDistance = data.Distance;
-                        newStay = element;
+                        var element = ui.GetPointAtElement(in pt, ref data, out offsetOfElement);
+                        if (element != null && minDistance > data.Distance)
+                        {
+                            minDistance = data.Distance;
+                            newStay = element;
+                        }
                     }
                 }
             }
@@ -648,8 +660,14 @@ namespace EngineNS.UI
                         TtUIElement procElement = mActiveHost;
                         if (mKeyboardFocusUIElement != null)
                             procElement = mKeyboardFocusUIElement;
-                        else if(mDialogHosts.Count > 0)
-                            procElement = mDialogHosts.Peek();
+                        else if (mDialogHosts.Count > 0)
+                        {
+                            var t = mDialogHosts.Peek();
+                            if (t.TryGetTarget(out var ui))
+                            {
+                                procElement = ui;
+                            }
+                        }
                         if(procElement != null)
                         {
                             // 处理快捷键

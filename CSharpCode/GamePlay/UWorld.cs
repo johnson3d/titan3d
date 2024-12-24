@@ -1,6 +1,5 @@
 ﻿using EngineNS.EGui.Slate;
 using EngineNS.GamePlay.Scene;
-using ICSharpCode.SharpZipLib.Zip;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

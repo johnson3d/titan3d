@@ -65,15 +65,24 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             get
             {
+                Rtti.TtClassMeta.TtMethodMeta retValue = null;
                 var segs = mMethodMeta.Split('#');
-                if (segs.Length != 2)
-                    return null;
-                var kls = Rtti.TtClassMetaManager.Instance.GetMeta(segs[0]);
-                if (kls != null)
+                if (segs.Length == 2)
                 {
-                    return kls.GetMethod(segs[1]);
+                    var kls = Rtti.TtClassMetaManager.Instance.GetMeta(segs[0]);
+                    if (kls != null)
+                    {
+                        retValue = kls.GetMethod(segs[1]);
+                    }
                 }
-                return null;
+
+                if (retValue == null)
+                {
+                    HasError = true;
+                    CodeExcept = new GraphException(this, null, $"Method not found");
+                }
+
+                return retValue;
             }
         }
         private Rtti.TtClassMeta HostClass
@@ -1491,6 +1500,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         private void BuildStatementsWithMethodMeta(NodePin pin, ref BuildCodeStatementsData data)
         {
             var method = Method;
+            if (HasError)
+                return;
+
             var methodInvokeExp = new TtMethodInvokeStatement()
             {
                 MethodName = method.MethodName,

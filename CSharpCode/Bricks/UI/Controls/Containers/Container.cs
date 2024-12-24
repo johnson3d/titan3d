@@ -705,6 +705,8 @@ namespace EngineNS.UI.Controls.Containers
         {
             // todo: inv transform
             pointOffset = Vector2.Zero;
+            if(NoHitTest)
+                return null;
             if (onlyClipped)
             {
                 if (!DesignRect.Contains(in pt))
@@ -712,6 +714,8 @@ namespace EngineNS.UI.Controls.Containers
                 for (int i = mChildren.Count - 1; i >= 0; i--)
                 {
                     var child = mChildren[i];
+                    if (child.NoHitTest)
+                        continue;
                     if (child.Is3D)
                         continue;
                     if (!child.DesignRect.Contains(in pt))
@@ -734,6 +738,8 @@ namespace EngineNS.UI.Controls.Containers
                 for (int i = mChildren.Count - 1; i >= 0; i--)
                 {
                     var child = mChildren[i];
+                    if (child.NoHitTest)
+                        continue;
                     if (child.Is3D)
                         continue;
                     var container = child as TtContainer;

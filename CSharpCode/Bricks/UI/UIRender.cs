@@ -41,6 +41,14 @@ namespace EngineNS.UI
     [BindableObject, PGNoCategory]
     public partial class TtBrush : IPropertyCustomization
     {
+        ~TtBrush() 
+        {
+            if (mUVAnimTask != null)
+            {
+                mUVAnimTask.Value.Dispose();
+                mUVAnimTask = null;
+            }
+        }
         [System.ComponentModel.Browsable(false)]
         public virtual bool IsPropertyVisibleDirty
         {
@@ -91,7 +99,16 @@ namespace EngineNS.UI
                 if (value == null)
                     mUVAnimTask = null;
                 else
+                {
                     mUVAnimTask = TtEngine.Instance.GfxDevice.UvAnimManager.GetUVAnim(mUVAnimAsset);
+                    TtEngine.Instance.TaskCollector.AddWaitTask(mUVAnimTask, (task) =>
+                    {
+                        if (((Thread.Async.TtTask<EGui.TtUVAnim>)task).DirectResult == null)
+                        {
+                            Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"TtBrush GetUVAnim {mUVAnimAsset} failed");
+                        }
+                    }, false);
+                }
                 UpdateMesh();
             }
         }
@@ -244,7 +261,7 @@ namespace EngineNS.UI
                 mDrawBrush.Name = "@MatInst:ui/uimat_inst_default.uminst:Engine";
             else
                 mDrawBrush.Name = "@MatInst:" + mMaterial.ToString();
-            if (mUVAnimTask != null)
+            if (mUVAnimTask != null && mUVAnimTask.Value.DirectResult != null)
             {
                 var texture = mUVAnimTask.Value.DirectResult.Texture;
                 if (texture == null)

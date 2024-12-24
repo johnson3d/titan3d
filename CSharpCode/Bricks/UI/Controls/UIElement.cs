@@ -68,6 +68,8 @@ namespace EngineNS.UI.Controls
             IsEnable = 1 << 16,
             IsVariable = 1 << 17,
             IsSelectedable = 1 << 18,
+
+            NoHitTest = 1 << 19,
         }
         private ECoreFlags mCoreFlags;
         internal bool ReadFlag(ECoreFlags flag)
@@ -213,6 +215,18 @@ namespace EngineNS.UI.Controls
             }
         }
 
+        [Bind.BindProperty]
+        [Rtti.Meta]
+        public bool NoHitTest
+        {
+            get => ReadFlag(ECoreFlags.NoHitTest);
+            set
+            {
+                OnValueChange(value, NoHitTest);
+                WriteFlag(ECoreFlags.NoHitTest, value);
+            }
+        }
+
         TtUIHost mRootUIHost;
         [Browsable(false)]
         public TtUIHost RootUIHost
@@ -350,6 +364,8 @@ namespace EngineNS.UI.Controls
         public virtual TtUIElement GetPointAtElement(in Vector2 pt, out Vector2 pointOffset, bool onlyClipped = true)
         {
             pointOffset = Vector2.Zero;
+            if (NoHitTest)
+                return null;
             if(IsMousePointIn(in pt))
             {
                 pointOffset = new Vector2(pt.X - DesignRect.X, pt.Y - DesignRect.Y);
@@ -538,8 +554,13 @@ namespace EngineNS.UI.Controls
             TransformVertex3(in v2, out v2);
             var v3 = new Vector3(mCurFinalRect.Right, bottom, 0.0f);
             TransformVertex3(in v3, out v3);
+            return RayIntersectPlane(in ray, in v0, in v1, in v2, in v3, ref data);
+        }
+
+        public virtual bool RayIntersectPlane(in Ray ray, in Vector3 v0, in Vector3 v1, in Vector3 v2, in Vector3 v3, ref RayIntersectData data)
+        {
             float distance, barycentricU, barycentricV;
-            if (Ray.Intersects(in ray, v0, v1, v2, out distance, out barycentricU, out barycentricV))
+            if (Ray.Intersects(in ray, v0, v1 + Vector3.Normalize(v1 - v0) * MathHelper.Epsilon, v2 + Vector3.Normalize(v2 - v0) * MathHelper.Epsilon, out distance, out barycentricU, out barycentricV))
             {
                 data.IntersectPos.X = v0.X + barycentricU * (v1.X - v0.X) + (1 - barycentricV) * (v2.X - v0.X);
                 data.IntersectPos.Y = v0.Y + barycentricU * (v1.Y - v0.Y) + (1 - barycentricV) * (v2.Y - v0.Y);
@@ -551,7 +572,7 @@ namespace EngineNS.UI.Controls
                 //TtEngine.Instance.UIManager.DebugHitPt = data.IntersectPos;
                 return true;
             }
-            else if (Ray.Intersects(in ray, v3, v2, v1, out distance, out barycentricU, out barycentricV))
+            else if (Ray.Intersects(in ray, v3, v2 + Vector3.Normalize(v2 - v3) * MathHelper.Epsilon, v1 + Vector3.Normalize(v1 - v3) * MathHelper.Epsilon, out distance, out barycentricU, out barycentricV))
             {
                 data.IntersectPos.X = v3.X + barycentricU * (v2.X - v3.X) + (1 - barycentricV) * (v1.X - v3.X);
                 data.IntersectPos.Y = v3.Y + barycentricU * (v2.Y - v3.Y) + (1 - barycentricV) * (v1.Y - v3.Y);

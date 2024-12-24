@@ -65,7 +65,8 @@ public:
 	void DoOrthoProjectionForShadow(float w, float h, float znear, float zfar, float TexelOffsetNdcX, float TexelOffsetNdcY);
 	void LookAtLH(const v3dxDVector3* eye, const v3dxDVector3* lookAt, const v3dxVector3* up);
 
-	vBOOL GetPickRay(v3dxVector3* pvPickRay, float x, float y, float sw, float sh);
+	bool GetPickRay(v3dxVector3* pvPickRay, float x, float y, float sw, float sh);
+	bool GetPickRayInViewSpace(v3dxVector3* pvPickRay, float x, float y, float sw, float sh);
 	v3dxVector2 GetJitterOffset() const {
 		return mJitterOffset;
 	}

@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Net.Mail;
+using System.Reflection;
 using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
@@ -459,6 +461,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public TtTargetViewIdentifier TargetViewIdentifier;
         public NxRHI.FViewPort Viewport = new NxRHI.FViewPort();
+        public NxRHI.TtRenderPass RenderPass { get; protected set; }
         NxRHI.TtFrameBuffers mFrameBuffers;
         public NxRHI.TtFrameBuffers FrameBuffers { get => mFrameBuffers; set => mFrameBuffers = value; }
         public TtRenderGraphPin[] RenderTargets;
@@ -510,8 +513,41 @@ namespace EngineNS.Graphics.Pipeline
             cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
             cBuffer.SetValue(Graphics.Pipeline.TtCoreShaderBinder.TtPerViewCBufferVarIndexer.Instance.gEyeEnvMapMaxMipLevel, in EnvMapMaxMipLevel);
         }
-        public void BuildFrameBuffers(TtRenderGraph policy)
+        public unsafe void SureRenderPassFormats(TtRenderGraph policy)
         {
+            var passDesc = RenderPass.mCoreObject.Desc;
+            bool bNeedCreateRenderPass = false;
+            for (int i = 0; i < RenderTargets.Length; i++)
+            {
+                var attachment = policy.AttachmentCache.GetAttachement(RenderTargets[i].Attachement.AttachmentName, RenderTargets[i].Attachement);
+                if (attachment.BufferDesc.Format != passDesc.AttachmentMRTs[i].Format)
+                {
+                    bNeedCreateRenderPass = true;
+                    passDesc.AttachmentMRTs[i].Format = attachment.BufferDesc.Format;
+                }
+            }
+            if (DepthStencil != null)
+            {
+                var attachment = policy.AttachmentCache.GetAttachement(DepthStencil.Attachement.AttachmentName, DepthStencil.Attachement);
+                if (attachment.BufferDesc.Format != passDesc.AttachmentDepthStencil.Format)
+                {
+                    bNeedCreateRenderPass = true;
+                    passDesc.m_AttachmentDepthStencil.Format = attachment.BufferDesc.Format;
+                }
+            }
+            if (bNeedCreateRenderPass)
+            {
+                var rc = TtEngine.Instance.GfxDevice.RenderContext;
+                RenderPass = TtEngine.Instance.GfxDevice.RenderPassManager.GetPipelineState<NxRHI.FRenderPassDesc>(rc, in passDesc);
+
+                CoreSDK.DisposeObject(ref mFrameBuffers);
+                mFrameBuffers = rc.CreateFrameBuffers(RenderPass);
+            }
+        }
+        public unsafe void BuildFrameBuffers(TtRenderGraph policy)
+        {
+            SureRenderPassFormats(policy);
+
             for (int i = 0; i < RenderTargets.Length; i++)
             {
                 var attachment = policy.AttachmentCache.GetAttachement(RenderTargets[i].Attachement.AttachmentName, RenderTargets[i].Attachement);
@@ -533,7 +569,8 @@ namespace EngineNS.Graphics.Pipeline
         public unsafe void Initialize(TtRenderPolicy policy, NxRHI.TtRenderPass renderPass)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            
+
+            RenderPass = renderPass;
             FrameBuffers = rc.CreateFrameBuffers(renderPass);
 
             var rpsDesc = renderPass.mCoreObject.Desc;
@@ -545,8 +582,10 @@ namespace EngineNS.Graphics.Pipeline
             Viewport.m_MaxDepth = 1.0f;
             //UpdateFrameBuffers();
         }
-        public void SetRenderTarget(uint index, NxRHI.TtRenderTargetView rtv)
+        public unsafe bool SetRenderTarget(uint index, NxRHI.TtRenderTargetView rtv)
         {
+            if (RenderPass.mCoreObject.Desc.AttachmentMRTs[index].Format != rtv.mCoreObject.Desc.Format)
+                return false;
             if (RenderTargets[index] == null)
             {
                 RenderTargets[index] = new TtRenderGraphPin();
@@ -555,9 +594,12 @@ namespace EngineNS.Graphics.Pipeline
             RenderTargets[index].ImportedBuffer = new TtAttachBuffer();
             RenderTargets[index].ImportedBuffer.Rtv = rtv;
             FrameBuffers.BindRenderTargetView(index, rtv);
+            return true;
         }
-        public void SetDepthStencil(NxRHI.TtDepthStencilView dsv)
+        public bool SetDepthStencil(NxRHI.TtDepthStencilView dsv)
         {
+            if (RenderPass.mCoreObject.Desc.AttachmentDepthStencil.Format != dsv.mCoreObject.Desc.Format)
+                return false;
             if (DepthStencil == null)
             {
                 DepthStencil = new TtRenderGraphPin();
@@ -566,6 +608,7 @@ namespace EngineNS.Graphics.Pipeline
             DepthStencil.ImportedBuffer = new TtAttachBuffer();
             DepthStencil.ImportedBuffer.Dsv = dsv;
             FrameBuffers.BindDepthStencilView(dsv);
+            return true;
         }
         public bool SetRenderTarget(TtRenderGraph policy, int index, TtRenderGraphPin pin)
         {

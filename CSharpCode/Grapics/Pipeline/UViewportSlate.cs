@@ -23,6 +23,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual void Dispose()
         {
+            ClearHUDs();
             CoreSDK.DisposeObject(ref mWorld);
             if (RenderPolicy != null)
             {
@@ -411,31 +412,32 @@ namespace EngineNS.Graphics.Pipeline
             await this.World.InitWorld();
             SetCameraOffset(in DVector3.Zero);
 
-            mDefaultHUD.RenderCamera = this.RenderPolicy.DefaultCamera;
-            mHUDStack.Push(mDefaultHUD);
+            //mDefaultHUD.RenderCamera = this.RenderPolicy.DefaultCamera;
+            //PushHUD(mDefaultHUD);
 
             IsInlitialized = true;
             return true;
         }
 
         #region HUD
-        protected UI.TtUIHost mDefaultHUD = new UI.TtUIHost();
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly | Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
-        public UI.TtUIHost DefaultHUD
-        {
-            get => mDefaultHUD;
-            set
-            {
-                mDefaultHUD = value;
-                if(mDefaultHUD != null)
-                {
-                    mDefaultHUD.RenderCamera = RenderPolicy.DefaultCamera;
-                    mHUDStack.Clear();
-                    mHUDStack.Push(value);
-                    OnClientChanged(true);
-                }
-            }
-        }
+        //protected UI.TtUIHost mDefaultHUD = new UI.TtUIHost();
+        //[Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly | Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        //public UI.TtUIHost DefaultHUD
+        //{
+        //    get => mDefaultHUD;
+        //    set
+        //    {
+        //        if (mDefaultHUD == value)
+        //            return;
+        //        mDefaultHUD = value;
+        //        if(mDefaultHUD != null)
+        //        {
+        //            mDefaultHUD.RenderCamera = RenderPolicy.DefaultCamera;
+        //            PushHUD(mDefaultHUD);
+        //            OnClientChanged(true);
+        //        }
+        //    }
+        //}
         protected Stack<UI.TtUIHost> mHUDStack = new Stack<UI.TtUIHost>();
         [Rtti.Meta]
         public void PushHUD(UI.Controls.TtUIElement hud)
@@ -454,6 +456,7 @@ namespace EngineNS.Graphics.Pipeline
             tempHost.WriteFlag(UI.Controls.TtUIElement.ECoreFlags.IsScreenSpace, true);
             tempHost.ViewportSlate = this;
             tempHost.RenderCamera = this.RenderPolicy.DefaultCamera;
+            tempHost.WindowSize = new SizeF(this.ClientSize.X, this.ClientSize.Y);
             mHUDStack.Push(tempHost);
 
             TtEngine.Instance.UIManager.AddActivedUI(tempHost);
@@ -467,6 +470,14 @@ namespace EngineNS.Graphics.Pipeline
             mHUDStack.Pop();
 
             TtEngine.Instance.UIManager.RemoveActivedUI(hud);
+        }
+        [Rtti.Meta]
+        public void ClearHUDs()
+        {
+            while (mHUDStack.Count > 0)
+            {
+                PopHUD();
+            }
         }
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.MacrossReadOnly | Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         [Category("Option")]
@@ -684,6 +695,18 @@ namespace EngineNS.Graphics.Pipeline
 			}
 			PopHUD();
 			macross_break_PopHUD_2609910045.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_ClearHUDs_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.TtViewportSlate->void ClearHUDs()");
+		public unsafe void macross_ClearHUDs (string nodeName) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+				}
+			}
+			ClearHUDs();
+			macross_break_ClearHUDs_2609910045.TryBreak();
 		}
 	}
 }

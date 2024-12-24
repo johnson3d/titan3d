@@ -161,7 +161,7 @@ namespace EngineNS.EGui
             }
 
             xnd.SaveXnd(name.Address);
-            TtEngine.Instance.SourceControlModule.AddFile(name.Address);
+            TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
         }
         public static TtUVAnim LoadXnd(TtUvAnimManager manager, IO.TtXndNode node)
         {

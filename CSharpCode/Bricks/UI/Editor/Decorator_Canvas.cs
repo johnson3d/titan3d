@@ -560,7 +560,7 @@ namespace EngineNS.UI.Editor
             var pos = mEditor.PreviewViewport.Window2Viewport(new Vector2(x, y));
             var camera = mEditor.PreviewViewport.CameraController.Camera;
             var pickResult = camera.GetPickRay(ref pickRay, pos.X, pos.Y, mEditor.PreviewViewport.ClientSize.X, mEditor.PreviewViewport.ClientSize.Y);
-            if (pickResult <= 0)
+            if (pickResult == false)
                 return false;
             return Plane.PickPlanePos(pickRay, camera.GetLocalPosition(), camera.GetMatrixStartPosition(), x, y, planePos, planeNormal, out resultPos);
         }

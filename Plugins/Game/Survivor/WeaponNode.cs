@@ -34,6 +34,15 @@ namespace Survivor
             }
             return controller;
         }
+        public static TtWeaponController GetTtWeaponController(string weaponType)
+        {
+            var type = EngineNS.Rtti.TtTypeDesc.TypeOf($"Survivor.TtWeaponController_{weaponType}@Survivor");
+            if (type == null)
+                return null;
+            if (type.IsSubclassOf(typeof(TtWeaponController)) == false)
+                return null;
+            return EngineNS.Rtti.TtTypeDescManager.CreateInstance(type) as TtWeaponController;
+        }
         public TtWeaponNode WeaponNode { get; set; }
         public TtWeaponData WeaponData { get => WeaponNode.WeaponData; }
         protected float mCurrentTime = 0;
@@ -199,9 +208,16 @@ namespace Survivor
             await base.InitializeNode(world, data, bvType, placementType);
             var macrossSurvivorGame = EngineNS.TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame;
             WeaponData = macrossSurvivorGame.GameMode.WeaponManager.GetData("ItemId", WeaponNodeData.WeaponId);
-            mWeaponController = TtWeaponController.GetTtWeaponController(WeaponData.ItemId);
-            mWeaponController.WeaponNode = this;
-            mWeaponController.Init();
+            if (WeaponData == null)
+            {
+                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, $"Weapon({WeaponNodeData.WeaponId}) not found");
+            }
+            else
+            {
+                mWeaponController = TtWeaponController.GetTtWeaponController(WeaponData.ItemId);
+                mWeaponController.WeaponNode = this;
+                mWeaponController.Init();
+            }
             return true;
         }
         public TtWeaponData WeaponData { get; set; }

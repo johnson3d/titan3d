@@ -108,14 +108,20 @@ namespace EngineNS.GamePlay.Camera
         {
             mCamera?.LookAtLH(eye, lookAt, up);
         }
-        public int GetPickRay(ref EngineNS.Vector3 pvPickRay, float x, float y, float sw, float sh)
+        public bool GetPickRay(ref EngineNS.Vector3 pvPickRay, float x, float y, float sw, float sh)
         {
             if (mCamera == null)
-                return 0;
+                return false;
 
             return mCamera.GetPickRay(ref pvPickRay, x, y, sw, sh);
         }
+        public bool GetPickRayInViewSpace(ref EngineNS.Vector3 pvPickRay, float x, float y, float sw, float sh)
+        {
+            if (mCamera == null)
+                return false;
 
+            return mCamera.GetPickRayInViewSpace(ref pvPickRay, x, y, sw, sh);
+        }
 
         #endregion
 

@@ -5,7 +5,7 @@
     {
         public EngineNS.Macross.TtMacrossBreak breaker_InitViewportSlateWithScene_3867568268 = new EngineNS.Macross.TtMacrossBreak("breaker_InitViewportSlateWithScene_3867568268");
         public EngineNS.Macross.TtMacrossBreak breaker_Load_3720817156 = new EngineNS.Macross.TtMacrossBreak("breaker_Load_3720817156");
-        public EngineNS.Macross.TtMacrossBreak breaker_Add_2471246150 = new EngineNS.Macross.TtMacrossBreak("breaker_Add_2471246150");
+        public EngineNS.Macross.TtMacrossBreak breaker_PushHUD_1721239009 = new EngineNS.Macross.TtMacrossBreak("breaker_PushHUD_1721239009");
         public EngineNS.Macross.TtMacrossBreak breaker_return_1164477446 = new EngineNS.Macross.TtMacrossBreak("breaker_return_1164477446");
         EngineNS.Macross.TtMacrossStackFrame mFrame_BeginPlay_1342966456 = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName("tutorials/helloword/helloword.macross", EngineNS.RName.ERNameType.Game));
         [EngineNS.Rtti.MetaAttribute]
@@ -28,13 +28,12 @@
                 breaker_Load_3720817156.TryBreak();
                 tmp_r_Load_3720817156 = EngineNS.TtEngine.Instance.UIManager.Load(EngineNS.RName.GetRName("tutorials/helloword/hello.ui", EngineNS.RName.ERNameType.Game));
                 mFrame_BeginPlay_1342966456.SetWatchVariable("tmp_r_Load_3720817156", tmp_r_Load_3720817156);
-                mFrame_BeginPlay_1342966456.SetWatchVariable("v_item_Add_2471246150", tmp_r_Load_3720817156);
-                breaker_Add_2471246150.TryBreak();
-                host.WorldViewportSlate.DefaultHUD.Children.Add(tmp_r_Load_3720817156);
+                mFrame_BeginPlay_1342966456.SetWatchVariable("v_hud_PushHUD_1721239009", tmp_r_Load_3720817156);
+                breaker_PushHUD_1721239009.TryBreak();
+                host.WorldViewportSlate.PushHUD(tmp_r_Load_3720817156);
                 ret_2105066555 = true;
                 mFrame_BeginPlay_1342966456.SetWatchVariable("ret_2105066555_1164477446", ret_2105066555);
                 breaker_return_1164477446.TryBreak();
-                return ret_2105066555;
                 return ret_2105066555;
             }
         }

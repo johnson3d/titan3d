@@ -530,28 +530,32 @@ namespace EngineNS.Graphics.Mesh
             public IO.EAssetState AssetState { get; private set; } = IO.EAssetState.Initialized;
             public bool Initialize(TtMeshPrimitives mesh, Pipeline.Shader.TtMaterial[] materials)
             {
-                if (mesh.mCoreObject.GetAtomNumber() != materials.Length)
+                if (materials.Length == 0)
+                    return false;
+                
+                Mesh = mesh;
+                if (mesh.mCoreObject.GetAtomNumber() != Materials.Count)
                     return false;
 
-                Mesh = mesh;
-
-                for (int i = 0; i < materials.Length; i++)
+                for (int i = 0; i < (int)mesh.mCoreObject.GetAtomNumber(); i++)
                 {
-                    Materials[i] = materials[i];
+                    Materials[i] = materials[Math.Min(i, materials.Length - 1)];
                 }
 
                 return true;
             }
             public bool Initialize(TtMeshPrimitives mesh, List<Pipeline.Shader.TtMaterial> materials)
             {
-                if (mesh.mCoreObject.GetAtomNumber() != materials.Count)
+                if (materials.Count == 0)
+                    return false;
+                
+                Mesh = mesh;
+                if (mesh.mCoreObject.GetAtomNumber() != Materials.Count)
                     return false;
 
-                Mesh = mesh;
-
-                for (int i = 0; i < materials.Count; i++)
+                for (int i = 0; i < (int)mesh.mCoreObject.GetAtomNumber(); i++)
                 {
-                    Materials[i] = materials[i];
+                    Materials[i] = materials[Math.Min(i, materials.Count - 1)];
                 }
 
                 return true;
@@ -629,6 +633,8 @@ namespace EngineNS.Graphics.Mesh
                                 }
                             }
                         }
+
+                        System.Diagnostics.Debug.Assert(Mesh.mCoreObject.GetAtomNumber() == Materials.Count);
 
                         AssetState = IO.EAssetState.LoadFinished;
                     };
