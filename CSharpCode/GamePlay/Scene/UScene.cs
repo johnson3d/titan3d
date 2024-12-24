@@ -545,14 +545,15 @@ namespace EngineNS.GamePlay.Scene
         }
     }
 
-    public class USceneManager : TtModule<TtEngine>
+    public class TtSceneManager : TtModule<TtEngine>
     {
         public override void Cleanup(TtEngine host)
         {
             Scenes.Clear();
         }
         public Dictionary<RName, WeakReference<TtScene>> Scenes { get; } = new Dictionary<RName, WeakReference<TtScene>>();
-        public async System.Threading.Tasks.Task<TtScene> GetScene(GamePlay.TtWorld world, RName name)
+        private Thread.TtAwaitSessionManager<RName, TtScene> mCreatingSession = new Thread.TtAwaitSessionManager<RName, TtScene>();
+        public async Thread.Async.TtTask<TtScene> GetScene(GamePlay.TtWorld world, RName name)
         {
             //return await UScene.LoadScene(world, name);
             System.GC.Collect();
@@ -571,26 +572,22 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
 
+            bool isNewSession;
+            var session = mCreatingSession.GetOrNewSession(name, out isNewSession);
+            if (isNewSession == false)
+            {
+                return await session.Await();
+            }
+
             scene = await TtScene.LoadScene(world, name);
             if (scene == null)
                 return null;
 
-            if (Scenes.TryGetValue(name, out result))
-            {
-                result.TryGetTarget(out scene);
-                if (scene != null)
-                {
-                    return scene;
-                }
-                else
-                {
-                    Scenes.Remove(name);
-                }
-            }
             Scenes.Add(name, new WeakReference<TtScene>(scene));
+            mCreatingSession.FinishSession(name, session, scene);
             return scene;
         }
-        public async System.Threading.Tasks.Task<TtScene> CreateScene(GamePlay.TtWorld world, RName name)
+        public async Thread.Async.TtTask<TtScene> CreateScene(GamePlay.TtWorld world, RName name)
         {
             System.GC.Collect();
             TtScene scene;
@@ -614,6 +611,6 @@ namespace EngineNS
 {
     partial class TtEngine
     {
-        public GamePlay.Scene.USceneManager SceneManager { get; } = new GamePlay.Scene.USceneManager();
+        public GamePlay.Scene.TtSceneManager SceneManager { get; } = new GamePlay.Scene.TtSceneManager();
     }
 }

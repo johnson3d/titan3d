@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using System.ComponentModel;
-using NPOI.Util;
 
 namespace EngineNS.GamePlay.Scene
 {
@@ -395,6 +394,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public Dictionary<RName, TtPrefab> Prefabs { get; } = new Dictionary<RName, TtPrefab>();
         public GamePlay.TtWorld PrefabWorld;
+        private Thread.TtAwaitSessionManager<RName, TtPrefab> mCreatingSession = new Thread.TtAwaitSessionManager<RName, TtPrefab>();
         public async Thread.Async.TtTask<TtPrefab> GetPrefab(RName name)
         {
             TtPrefab scene;
@@ -404,15 +404,20 @@ namespace EngineNS.GamePlay.Scene
                 return result;
             }
 
+            bool isNewSession;
+            var session = mCreatingSession.GetOrNewSession(name, out isNewSession);
+            if (isNewSession == false)
+            {
+                return await session.Await();
+            }
+
             scene = await TtPrefab.LoadPrefab(PrefabWorld, name);
             if (scene == null)
                 return null;
 
-            if (Prefabs.TryGetValue(name, out result))
-            {
-                return result;
-            }
             Prefabs.Add(name, scene);
+            mCreatingSession.FinishSession(name, session, result);
+
             return scene;
         }
         public async Thread.Async.TtTask<TtPrefab> ReloadPrefab(RName name)

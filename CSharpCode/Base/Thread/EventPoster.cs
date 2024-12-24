@@ -97,10 +97,6 @@ namespace EngineNS.Thread
         }
         public async System.Threading.Tasks.Task Await()
         {
-            if (this == null)
-            {
-                System.Diagnostics.Debug.Assert(false);
-            }
             await TtEngine.Instance.EventPoster.AwaitSemaphore(this);
         }
     }
@@ -163,7 +159,7 @@ namespace EngineNS.Thread
                 }
             }
 
-            public async System.Threading.Tasks.Task<T> Await()
+            public async Thread.Async.TtTask<T> Await()
             {
                 var tmp = this.AddSemaphore();
                 await tmp.Await();

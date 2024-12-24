@@ -289,11 +289,19 @@ namespace EngineNS.Thread
         public void EnqueueContinue(Async.TtAsyncTaskStateBase evt)
         {
             System.Diagnostics.Debug.Assert(IsFinished == false);
+            System.Diagnostics.Debug.Assert(evt.ContinueThread == this);
             lock (ContinueEvents)
             {
-                ContinueEvents.Enqueue(evt);
+                if (this == TtContextThread.CurrentContext)
+                {
+                    evt.ExecuteContinue();
+                }
+                else
+                {
+                    ContinueEvents.Enqueue(evt);
+                    mEnqueueTrigger.Set();
+                }
             }
-            mEnqueueTrigger.Set();
         }
         public long LimitTime
         {
