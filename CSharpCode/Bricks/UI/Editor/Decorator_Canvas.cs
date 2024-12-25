@@ -337,6 +337,10 @@ namespace EngineNS.UI.Editor
         }
         public async Thread.Async.TtTask UpdateDecorator()
         {
+            if (!mInitialized)
+            {
+                return;
+            }
             for (int i = 0; i < mOperatorNodes.Length; i++)
             {
                 if (mOperatorNodes[i] == null)
@@ -404,7 +408,8 @@ namespace EngineNS.UI.Editor
             for (var i = EDecoratorType.Anchor_Start; i < EDecoratorType.Anchor_End; i++)
             {
                 var node = mAnchorNodes[(int)(i - EDecoratorType.Anchor_Start)];
-                node.Parent = null;
+                if(node != null)
+                    node.Parent = null;
             }
 
             var canvas = VisualTreeHelper.GetParent(element);

@@ -3,13 +3,14 @@
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
-    <SharedGUID>a44eefbe-3dd5-48ce-b986-51e14e6701ab</SharedGUID>
+    <SharedGUID>171ac106-d3d8-4fbc-8cd9-7e327ac74006</SharedGUID>
   </PropertyGroup>
   <PropertyGroup DisplayName="Configuration">
     <Import_RootNamespace>MacrossGenCSharp</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/survivor/survivorgame.macross/survivorgame.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/utest/emptyscene.scene/emptyscene.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/utest/scenenodetest.macross/scenenodetest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/utest/test.scene/test.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/utest/test_game01.macross/test_game01.cs" />

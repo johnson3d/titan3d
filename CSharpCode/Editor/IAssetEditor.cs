@@ -55,7 +55,7 @@ namespace EngineNS.Editor
         {
             editor.AssetName = name;
             editor.Visible = true;
-            TtEngine.Instance.StopOperation($"{name}: OpenEditor");
+            TtEngine.Instance.BlockOperation($"{name}: OpenEditor");
 
             bool ok = false;
             try

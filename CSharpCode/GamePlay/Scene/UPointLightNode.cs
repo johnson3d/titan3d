@@ -1,23 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.GamePlay.Scene
 {
     [Bricks.CodeBuilder.ContextMenu("PointLight", "PointLight", TtNode.EditorKeyword)]
-    [TtNode(NodeDataType = typeof(UPointLightNode.ULightNodeData), DefaultNamePrefix = "PointLight")]
-    public partial class UPointLightNode : TtSceneActorNode
+    [TtNode(NodeDataType = typeof(TtPointLightNode.TtLightNodeData), DefaultNamePrefix = "PointLight")]
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UPointLightNode@EngineCore", "EngineNS.GamePlay.Scene.UPointLightNode" })]
+    public partial class TtPointLightNode : TtSceneActorNode
     {
         public override void Dispose()
         {
             CoreSDK.DisposeObject(ref mDebugMesh);
             base.Dispose();
         }
-        public class ULightNodeData : TtNodeData
+        [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UPointLightNode.ULightNodeData@EngineCore", "EngineNS.GamePlay.Scene.UPointLightNode.ULightNodeData" })]
+        public class TtLightNodeData : TtNodeData
         {
-            internal UPointLightNode HostNode;
+            internal TtPointLightNode HostNode;
             Vector3 mColor;
             [Rtti.Meta]
+            [Category("Option")]
             [EGui.Controls.PropertyGrid.Color3PickerEditor()]
             public Vector3 Color 
             { 
@@ -29,29 +33,36 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
             [Rtti.Meta]
+            [Category("Option")]
             public float Intensity { get; set; }
             [Rtti.Meta]
+            [Category("Option")]
             public float Radius { get; set; }
         }
         public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data == null)
             {
-                data = new ULightNodeData();
+                data = new TtLightNodeData();
             }
             
             var ret = await base.InitializeNode(world, data, bvType, placementType);
-            GetNodeData<ULightNodeData>().HostNode = this;
+            GetNodeData<TtLightNodeData>().HostNode = this;
 
             this.IsForceGatherNode = true;
             return ret;
         }
-        public static async Thread.Async.TtTask<UPointLightNode> AddPointLightNode(TtWorld world, TtNode parent, ULightNodeData data, DVector3 pos)
+        [Category("Option")]
+        public TtLightNodeData LightData
+        {
+            get => GetNodeData<TtLightNodeData>();
+        }
+        public static async Thread.Async.TtTask<TtPointLightNode> AddPointLightNode(TtWorld world, TtNode parent, TtLightNodeData data, DVector3 pos)
         {
             var scene = parent.GetNearestParentScene();
             var scale = new Vector3(data.Radius);
 
-            var meshNode = await scene.NewNode(world, typeof(UPointLightNode), data, EBoundVolumeType.Box, typeof(TtPlacement)) as UPointLightNode;            
+            var meshNode = await scene.NewNode(world, typeof(TtPointLightNode), data, EBoundVolumeType.Box, typeof(TtPlacement)) as TtPointLightNode;            
             meshNode.Parent = parent;
             
             meshNode.Placement.SetTransform(in pos, in scale, in Quaternion.Identity);
@@ -66,7 +77,7 @@ namespace EngineNS.GamePlay.Scene
                 var colorVar = mDebugMesh.MaterialMesh.SubMeshes[0].Materials[0].FindVar("clr4_0");
                 if (colorVar != null)
                 {
-                    Vector4 clr4 = new Vector4(GetNodeData<ULightNodeData>().Color, 1);
+                    Vector4 clr4 = new Vector4(GetNodeData<TtLightNodeData>().Color, 1);
                     colorVar.SetValue(in clr4);
                 }
             }
@@ -134,7 +145,7 @@ namespace EngineNS.GamePlay.Scene
         }
         protected override void OnAbsTransformChanged()
         {
-            var lightData = NodeData as ULightNodeData;
+            var lightData = NodeData as TtLightNodeData;
             if (lightData != null)
             {
                 lightData.Radius = Placement.Scale.X;
@@ -169,16 +180,9 @@ namespace EngineNS.GamePlay.Scene
         public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             //test temp code 
-            LightData.Intensity = 120 * (float)Math.Sin(TtEngine.Instance.TickCountSecond * 0.005f);
+            //LightData.Intensity = 120 * (float)Math.Sin(TtEngine.Instance.TickCountSecond * 0.005f);
 
             return true;
-        }
-        public ULightNodeData LightData
-        {
-            get
-            {
-                return NodeData as ULightNodeData;
-            }
         }
 
         public override bool IsAcceptShadow

@@ -31,6 +31,10 @@ namespace EngineNS.Graphics.Pipeline
                 RenderPolicy = null;
             }
         }
+        protected NxRHI.FViewPort mViewport = new NxRHI.FViewPort();
+        public NxRHI.FViewPort Viewport { get => mViewport; }
+        NxRHI.FScissorRect mScissorRect = new NxRHI.FScissorRect();
+        public NxRHI.FScissorRect ScissorRect { get => mScissorRect; }
         GamePlay.TtWorld mWorld;
         [Rtti.Meta()]
         [Category("Option")]
@@ -67,8 +71,18 @@ namespace EngineNS.Graphics.Pipeline
                 return ClientMax - ClientMin;
             }
         }
+        protected Graphics.Pipeline.TtRenderPolicy mRenderPolicy;
         [EGui.Controls.PropertyGrid.PGCustomValueEditor(ReadOnly = true, UserDraw = false)]
-        public Graphics.Pipeline.TtRenderPolicy RenderPolicy { get; set; }
+        [Rtti.Meta]
+        public Graphics.Pipeline.TtRenderPolicy RenderPolicy 
+        { 
+            get => mRenderPolicy; 
+            set
+            {
+                CoreSDK.DisposeObject(ref mRenderPolicy);
+                mRenderPolicy = value;
+            }
+        }
         public Vector2 Window2Viewport(Vector2 pos)
         {//pos为真实窗口的坐标，返回ViewportSlate坐标
             Vector2 tmp;
@@ -309,6 +323,23 @@ namespace EngineNS.Graphics.Pipeline
         }
         protected virtual void OnClientChanged(bool bSizeChanged)
         {
+            var vpSize = this.ClientSize;
+
+            mViewport.TopLeftX = WindowPos.X + ClientMin.X;
+            mViewport.TopLeftY = WindowPos.Y + ClientMin.Y;
+            mViewport.Width = vpSize.X;
+            mViewport.Height = vpSize.Y;
+
+            mScissorRect.MinX = (int)mViewport.TopLeftX;
+            mScissorRect.MinY = (int)mViewport.TopLeftY;
+            mScissorRect.MaxX = (int)(mViewport.TopLeftX + mViewport.Width);
+            mScissorRect.MinX = (int)(mViewport.TopLeftY + mViewport.Height);
+
+            if (bSizeChanged)
+            {
+                RenderPolicy?.OnResize(vpSize.X, vpSize.Y);
+            }
+
             //if (mDefaultHUD != null)
             //    mDefaultHUD.WindowSize = new SizeF(this.ClientSize.X, this.ClientSize.Y);
             foreach (var i in mHUDStack)
@@ -332,7 +363,7 @@ namespace EngineNS.Graphics.Pipeline
             {
                 OnMouseUp(in e);
             }
-            else if(e.Type == Bricks.Input.EventType.MOUSEBUTTONDOWN)
+            else if (e.Type == Bricks.Input.EventType.MOUSEBUTTONDOWN)
             {
                 OnMouseDown(in e);
             }
@@ -348,7 +379,12 @@ namespace EngineNS.Graphics.Pipeline
         }
         protected virtual IntPtr GetShowTexture()
         {
-            return IntPtr.Zero;
+            if (RenderPolicy == null)
+                return IntPtr.Zero;
+            var srv = RenderPolicy.GetFinalShowRSV();
+            if (srv == null)
+                return IntPtr.Zero;
+            return srv.GetTextureHandle();
         }
         public virtual void OnHitproxySelected(Graphics.Pipeline.IProxiable proxy)
         {
@@ -491,8 +527,18 @@ namespace EngineNS.Graphics.Pipeline
             } 
         }
         #endregion
-
         public bool IsInlitialized { get; set; } = false;
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(TtViewportSlate), nameof(TickLogic));
+                return mScopeTick;
+            }
+        }
         public virtual unsafe void TickLogic(float ellapse)
         {
             if (IsInlitialized == false)
@@ -502,8 +548,36 @@ namespace EngineNS.Graphics.Pipeline
             {
                 TtEngine.Instance.TaskCollector.AddWaitTask(i.BuildMesh());
             }
-        }
 
+            using (new Profiler.TimeScopeHelper(ScopeTick))
+            {
+                if (IsDrawing)
+                {
+                    if (this.IsFocused)
+                    {
+                        TickOnFocus();
+                    }
+
+                    RenderPolicy?.BeginTickLogic(World);
+
+                    World.TickLogic(this.RenderPolicy, ellapse);
+
+                    RenderPolicy?.TickLogic(World, null);
+
+                    RenderPolicy?.EndTickLogic(World);
+
+                    IsDrawing = false;
+                }
+            }
+        }
+        protected virtual void TickOnFocus()
+        {
+            
+        }
+        public virtual void TickSync(float ellapse)
+        {
+            RenderPolicy?.TickSync();
+        }
         protected Dictionary<string, RectangleF> mOverlappedAreas = new Dictionary<string, RectangleF>();
         public void RegisterOverlappedArea(string name, in RectangleF rect)
         {

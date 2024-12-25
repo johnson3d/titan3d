@@ -26,7 +26,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public override async Thread.Async.TtTask SaveRefAssets()
         {
             //Stop Editor Operate
-            TtEngine.Instance.StopOperation($"{this.AssetName}: SaveRefAssets");
+            TtEngine.Instance.BlockOperation($"{this.AssetName}: SaveRefAssets");
             var holders = new List<IO.IAssetMeta>();
             TtEngine.Instance.AssetMetaManager.GetAssetHolder(this, holders);
             foreach (var i in holders)

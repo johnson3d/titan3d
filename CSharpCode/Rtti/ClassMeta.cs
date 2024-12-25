@@ -1299,6 +1299,15 @@ namespace EngineNS.Rtti
             GetMeta(TtTypeDesc.TypeOf(typeof(Vector3)));
             GetMeta(TtTypeDesc.TypeOf(typeof(Vector4)));
             GetMeta(TtTypeDesc.TypeOf(typeof(Quaternion)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(Vector2i)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(Vector3i)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(Vector4i)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(Vector2ui)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(Vector3ui)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(Vector4ui)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(DVector2)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(DVector3)));
+            GetMeta(TtTypeDesc.TypeOf(typeof(DVector4)));
         }
         public void BuildMeta(string moduleName = null)
         {

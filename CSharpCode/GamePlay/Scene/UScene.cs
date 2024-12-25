@@ -1,5 +1,6 @@
-﻿using Assimp;
+using Assimp;
 using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Graphics.Pipeline;
 using EngineNS.Macross;
 using System;
 using System.Collections.Generic;
@@ -45,6 +46,8 @@ namespace EngineNS.GamePlay.Scene
         [Rtti.Meta]
         [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]
         public RName RPolicyName { get; set; }
+        [Rtti.Meta]
+        public int NumOfNodes { get; set; }
     }
     [TtScene.SceneCreateAttribute]
     [IO.AssetCreateMenu(MenuName = "Scene")]
@@ -123,6 +126,22 @@ namespace EngineNS.GamePlay.Scene
                     return;
                 SceneData.RPolicyName = value;
             }
+        }
+        [Rtti.Meta]
+        public async Thread.Async.TtTask<TtRenderPolicy> SetRenderPolicyToViewport(TtViewportSlate slate)
+        {
+            TtRenderPolicy policy = null;
+            var rpAsset = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.LoadAsset(RPolicyName);
+            if (rpAsset != null)
+            {
+                policy = rpAsset.CreateRenderPolicy(slate);
+                await policy.Initialize(null);
+                if (slate.Viewport.Width > 1 && slate.Viewport.Height > 1)
+                    policy.OnResize(slate.Viewport.Width, slate.Viewport.Height);
+                slate.RenderPolicy = policy;
+                return policy;
+            }
+            return null;
         }
         public TtWorld World;
         #region Allocator
@@ -243,6 +262,7 @@ namespace EngineNS.GamePlay.Scene
                 ameta.SaveAMeta(this);
             }
 
+            UpdateNumOfNodes();
             var typeStr = Rtti.TtTypeDesc.TypeStr(GetType());
             var xndHolder = new EngineNS.IO.TtXndHolder(typeStr, 1, 0);
             var xnd = xndHolder;
@@ -289,7 +309,30 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        internal static async System.Threading.Tasks.Task<TtScene> LoadScene(GamePlay.TtWorld world, RName name)
+        public int NumOfNodes 
+        { 
+            get
+            {
+                return GetNodeData<TtSceneData>().NumOfNodes;
+            }
+            protected set
+            {
+                GetNodeData<TtSceneData>().NumOfNodes = value;
+            }
+        }
+        public int NumOfLoadedNode { get; internal set; } = 0;
+        public void UpdateNumOfNodes()
+        {
+            NumOfNodes = 0;
+            this.DFS_VisitNodeTree((TtNode inNode, object inArg) =>
+            {
+                if (inNode.HasStyle(ENodeStyles.Transient))
+                    return false;
+                ((TtScene)inArg).NumOfNodes++;
+                return false;
+            }, this);
+        }
+        internal static async Thread.Async.TtTask<TtScene> LoadScene(GamePlay.TtWorld world, RName name)
         {
             var file = name.Address + "/" + name.PureName + AssetExt;
             if (IO.TtFileManager.FileExists(name.Address))
@@ -310,6 +353,8 @@ namespace EngineNS.GamePlay.Scene
                 if (scene == null)
                     return null;
 
+                scene.NumOfLoadedNode = 0;
+
                 using (var ar = descAttr.GetReader(scene))
                 {
                     IO.ISerializer desc = nodeData;
@@ -328,6 +373,7 @@ namespace EngineNS.GamePlay.Scene
                         Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"SceneData({scene.AssetName}): load failed");
                     }
                 }
+                scene.NumOfLoadedNode++;
 
                 scene.AssetName = name;
                 if (await scene.LoadChildNode(world, scene, xnd.RootNode.mCoreObject, false) == false)
@@ -614,3 +660,29 @@ namespace EngineNS
         public GamePlay.Scene.TtSceneManager SceneManager { get; } = new GamePlay.Scene.TtSceneManager();
     }
 }
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.GamePlay.Scene
+{
+	partial class TtScene
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_SetRenderPolicyToViewport_2302347641 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtScene->Thread.Async.TtTask<TtRenderPolicy> SetRenderPolicyToViewport(TtViewportSlate slate)");
+		public async Thread.Async.TtTask<TtRenderPolicy> macross_SetRenderPolicyToViewport (string nodeName, TtViewportSlate slate) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":slate", slate);
+				}
+			}
+			var _return_value = await SetRenderPolicyToViewport(slate);
+			macross_break_SetRenderPolicyToViewport_2302347641.TryBreak();
+			return _return_value;
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

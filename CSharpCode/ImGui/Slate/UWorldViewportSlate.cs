@@ -8,11 +8,6 @@ namespace EngineNS.EGui.Slate
 {
     public class TtWorldViewportSlate : Graphics.Pipeline.TtViewportSlate
     {
-        NxRHI.FViewPort mViewport = new NxRHI.FViewPort();
-        public NxRHI.FViewPort Viewport { get => mViewport; }
-        NxRHI.FScissorRect mScissorRect = new NxRHI.FScissorRect();
-        public NxRHI.FScissorRect ScissorRect { get=> mScissorRect; }
-
         public NxRHI.TtRenderPass SwapChainPassDesc;
 
         protected GamePlay.UAxis mAxis;
@@ -67,8 +62,8 @@ namespace EngineNS.EGui.Slate
             await Initialize();
             
             await policy.Initialize(null);
-            if (mViewport.Width > 1 && mViewport.Height > 1)
-                policy.OnResize(mViewport.Width, mViewport.Height);
+            if (Viewport.Width > 1 && Viewport.Height > 1)
+                policy.OnResize(Viewport.Width, Viewport.Height);
 
             await this.World.InitWorld();
             if (OnInitialize == null)
@@ -88,36 +83,6 @@ namespace EngineNS.EGui.Slate
             await mAxis.Initialize(this.World, CameraController);
 
             return true;
-        }
-        protected override void OnClientChanged(bool bSizeChanged)
-        {
-            var vpSize = this.ClientSize;
-            
-            mViewport.TopLeftX = WindowPos.X + ClientMin.X;
-            mViewport.TopLeftY = WindowPos.Y + ClientMin.Y;
-            mViewport.Width = vpSize.X;
-            mViewport.Height = vpSize.Y;
-
-            mScissorRect.MinX = (int)mViewport.TopLeftX;
-            mScissorRect.MinY = (int)mViewport.TopLeftY;
-            mScissorRect.MaxX = (int)(mViewport.TopLeftX + mViewport.Width);
-            mScissorRect.MinX = (int)(mViewport.TopLeftY + mViewport.Height); 
-
-            if (bSizeChanged)
-            {
-                RenderPolicy?.OnResize(vpSize.X, vpSize.Y);
-            }
-
-            base.OnClientChanged(bSizeChanged);
-        }
-        protected override IntPtr GetShowTexture()
-        {
-            if (RenderPolicy == null)
-                return IntPtr.Zero;
-            var srv = RenderPolicy.GetFinalShowRSV();
-            if (srv == null)
-                return IntPtr.Zero;
-            return srv.GetTextureHandle();
         }
         #region CameraControl
         Vector2 mPreMousePt;
@@ -220,8 +185,7 @@ namespace EngineNS.EGui.Slate
             return base.OnEvent(in e);
         }
         #endregion
-        
-        protected virtual void TickOnFocus()
+        protected override void TickOnFocus()
         {
             float step = (TtEngine.Instance.ElapseTickCountMS * 0.001f) * CameraMoveSpeed;
             var keyboards = TtEngine.Instance.InputSystem;
@@ -243,46 +207,7 @@ namespace EngineNS.EGui.Slate
                 CameraController.Move(Graphics.Pipeline.ECameraAxis.Right, -step, true);
             }
         }
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
-        {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtWorldViewportSlate), nameof(TickLogic));
-                return mScopeTick;
-            }
-        }
         
-        public override unsafe void TickLogic(float ellapse)
-        {
-            base.TickLogic(ellapse);
-            using (new Profiler.TimeScopeHelper(ScopeTick))
-            {
-                if (IsDrawing)
-                {
-                    if (this.IsFocused)
-                    {
-                        TickOnFocus();
-                    }
-
-                    RenderPolicy?.BeginTickLogic(World);
-
-                    World.TickLogic(this.RenderPolicy, ellapse);
-
-                    RenderPolicy?.TickLogic(World, null);
-
-                    RenderPolicy?.EndTickLogic(World);
-
-                    IsDrawing = false;
-                }
-            }   
-        }
-        public virtual void TickSync(float ellapse)
-        {
-            RenderPolicy?.TickSync();
-        }
         #region Debug Assist
         public List<FVisibleMesh> WorldBoundShapes = new List<FVisibleMesh>();
         public void ShowBoundVolumes(bool bClear, bool bShow, params GamePlay.Scene.TtNode[] nodes)

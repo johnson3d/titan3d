@@ -440,7 +440,7 @@ namespace EngineNS.GamePlay.Scene
             Prefabs.Add(name, scene);
             return scene;
         }
-        public async System.Threading.Tasks.Task<TtPrefab> CreatePrefab(RName name)
+        public async Thread.Async.TtTask<TtPrefab> CreatePrefab(RName name)
         {
             var scene = await TtPrefab.LoadPrefab(PrefabWorld, name);
             if (scene == null)

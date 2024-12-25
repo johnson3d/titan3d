@@ -22,7 +22,7 @@ namespace EngineNS.EGui.UIProxy
             {
                 ImGuiAPI.SetNextWindowFocus();
             }
-            if (EngineNS.TtEngine.Instance.IsStopOperation)
+            if (EngineNS.TtEngine.Instance.IsBlockOperation)
                 flags |= ImGuiWindowFlags_.ImGuiWindowFlags_NoInputs;
             var vis = form.Visible;
             //var mainFlag = ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar;
@@ -49,7 +49,7 @@ namespace EngineNS.EGui.UIProxy
         {
             ImGuiAPI.SetNextWindowClass(MainFormDockClass);
             ImGuiAPI.SetNextWindowDockID(MainFormDockClass.m_ClassId, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (EngineNS.TtEngine.Instance.IsStopOperation)
+            if (EngineNS.TtEngine.Instance.IsBlockOperation)
                 flags |= ImGuiWindowFlags_.ImGuiWindowFlags_NoInputs;
             //var mainFlag = ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar;
             //if ((flags & ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar) == ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar)
@@ -74,7 +74,7 @@ namespace EngineNS.EGui.UIProxy
         {
             ImGuiAPI.SetNextWindowClass(MainFormDockClass);
             ImGuiAPI.SetNextWindowDockID(MainFormDockClass.m_ClassId, ImGuiCond_.ImGuiCond_FirstUseEver);
-            if (EngineNS.TtEngine.Instance.IsStopOperation)
+            if (EngineNS.TtEngine.Instance.IsBlockOperation)
                 flags |= ImGuiWindowFlags_.ImGuiWindowFlags_NoInputs;
             //var mainFlag = ImGuiWindowFlags_.ImGuiWindowFlags_None | ImGuiWindowFlags_.ImGuiWindowFlags_NoScrollbar;
             //if ((flags & ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar) == ImGuiWindowFlags_.ImGuiWindowFlags_NoTitleBar)
@@ -98,7 +98,7 @@ namespace EngineNS.EGui.UIProxy
         static Vector2 offset = new Vector2(10, 50);
         public static void EndMainForm(bool visible)
         {
-            if (EngineNS.TtEngine.Instance.IsStopOperation)
+            if (EngineNS.TtEngine.Instance.IsBlockOperation)
             {
                 var pos = ImGuiAPI.GetWindowPos();
                 var size = ImGuiAPI.GetWindowSize();

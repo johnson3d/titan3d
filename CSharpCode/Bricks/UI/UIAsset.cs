@@ -10,6 +10,13 @@ namespace EngineNS.UI
     [Rtti.Meta]
     public class TtUIAssetAMeta : IO.IAssetMeta
     {
+        [Rtti.Meta]
+        public Vector2i DesignResolution
+        {
+            get;
+            set;
+        }
+
         public override string TypeExt
         {
             get => TtUIAsset.AssetExt;

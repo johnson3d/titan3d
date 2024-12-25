@@ -252,6 +252,7 @@ namespace EngineNS.UI.Editor
         bool mIsSimulateMode = false;
         void Save()
         {
+            UIAsset.SaveAssetTo(UIAsset.AssetName);
             TtEngine.Instance.UIManager.Save(AssetName, mUIHost.Children[0]);
             UIAsset.MacrossEditor.SaveClassGraph(AssetName);
             UIAsset.MacrossEditor.GenerateCode();
@@ -710,7 +711,8 @@ namespace EngineNS.UI.Editor
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, EGui.UIProxy.StyleConfig.Instance.TVHeaderActive);
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, EGui.UIProxy.StyleConfig.Instance.TVHeaderHovered);
                 int idx = 0;
-                DrawUIElementInHierachy(mUIHost, ref idx);
+                var region = ImGuiAPI.GetContentRegionAvail();
+                DrawUIElementInHierachy(mUIHost, in region, ref idx);
                 ImGuiAPI.PopStyleColor(3);
             }
             EGui.UIProxy.DockProxy.EndPanel(show);
@@ -977,7 +979,7 @@ namespace EngineNS.UI.Editor
             }
         }
         HashSet<TtUIElement> mNeedExpandElement = new HashSet<TtUIElement>();
-        unsafe void DrawUIElementInHierachy(TtUIElement element, ref int idx)
+        unsafe void DrawUIElementInHierachy(TtUIElement element, in Vector2 region, ref int idx)
         {
             if (element.TemplateParent != null)
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.TextDisableColor);
@@ -986,7 +988,7 @@ namespace EngineNS.UI.Editor
             else
                 ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.TextColor);
 
-            var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth;
+            var flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap;
             var name = GetElementShowName(element) + "##" + idx++;
             if (mSelectedElements.Contains(element))
                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
@@ -1020,6 +1022,20 @@ namespace EngineNS.UI.Editor
             {
                 ProcessSelectElement(element, TtEngine.Instance.InputSystem.IsCtrlKeyDown());
             }
+
+            {
+                var buttonSize = new Vector2(16, 16);
+                float buttonOffset = 16;
+                ImGuiAPI.SameLine(region.X - buttonSize.X - buttonOffset, -1.0f);
+                if (EGui.UIProxy.CustomButton.ToolButton("V", in buttonSize, 0xFF00FF00, "func_V_" + name))
+                {
+                    if (element.Visibility == Visibility.Visible)
+                        element.Visibility = Visibility.Hidden;
+                    else
+                        element.Visibility = Visibility.Visible;
+                }
+            }
+
             if (ImGuiAPI.BeginDragDropTarget())
             {
                 mIsDragDroping = mIsDragDroping || true;
@@ -1129,20 +1145,25 @@ namespace EngineNS.UI.Editor
             {
                 if(container != null)
                 {
-                    container.TourContentsPresenterContainers(TourContentsPresenterContainersAction, ref idx);
+                    var data = new TourContentsPresenterContainersActionData()
+                    {
+                        Region = region,
+                        Idx = idx
+                    };
+                    container.TourContentsPresenterContainers(TourContentsPresenterContainersAction, ref data);
                     if(mShowTemplateControls)
                     {
                         for (int i = 0; i < VisualTreeHelper.GetChildrenCount(container, VisualTreeHelper.EFlag.PassContentsPresenter); i++)
                         {
                             var child = VisualTreeHelper.GetChild(container, i, VisualTreeHelper.EFlag.PassContentsPresenter);
-                            DrawUIElementInHierachy(child, ref idx);
+                            DrawUIElementInHierachy(child, in region, ref idx);
                         }
                     }
                     else
                     {
                         for (int i = 0; i < container.Children.Count; i++)
                         {
-                            DrawUIElementInHierachy(container.Children[i], ref idx);
+                            DrawUIElementInHierachy(container.Children[i], in region, ref idx);
                         }
                     }
                 }
@@ -1152,9 +1173,14 @@ namespace EngineNS.UI.Editor
             ImGuiAPI.PopStyleColor(1);
         }
     
-        void TourContentsPresenterContainersAction(TtUIElement element, ref int idx)
+        struct TourContentsPresenterContainersActionData
         {
-            DrawUIElementInHierachy(element, ref idx);
+            public Vector2 Region;
+            public int Idx;
+        }
+        void TourContentsPresenterContainersAction(TtUIElement element, ref TourContentsPresenterContainersActionData data)
+        {
+            DrawUIElementInHierachy(element, in data.Region, ref data.Idx);
         }
         void DrawInsertLine(sbyte dropType, in Vector2 itemMin, in Vector2 itemMax)
         {
@@ -1361,10 +1387,8 @@ namespace EngineNS.UI.Editor
                         {
                             if((mDesignResolution.X > 0) && (mDesignResolution.Y > 0))
                             {
-                                if(mUIHost.IsScreenSpace)
-                                    mUIHost.DesignWindowSize = new SizeF(mDesignResolution.X, mDesignResolution.Y);
-                                else
-                                    mUIHost.WindowSize = new SizeF(mDesignResolution.X, mDesignResolution.Y);
+                                DesignResolution = mDesignResolution;
+                                ((TtUIAssetAMeta)UIAsset.GetAMeta()).DesignResolution = mDesignResolution;
                             }
                         }
                     }
@@ -1373,6 +1397,21 @@ namespace EngineNS.UI.Editor
             }
         }
         Vector2i mDesignResolution;
+        Vector2i DesignResolution
+        {
+            get => mDesignResolution;
+            set
+            {
+                mDesignResolution = value;
+                if ((mDesignResolution.X > 0) && (mDesignResolution.Y > 0))
+                {
+                    if (mUIHost.IsScreenSpace)
+                        mUIHost.DesignWindowSize = new SizeF(mDesignResolution.X, mDesignResolution.Y);
+                    else
+                        mUIHost.WindowSize = new SizeF(mDesignResolution.X, mDesignResolution.Y);
+                }
+            }
+        }
         public float LoadingPercent { get; set; } = 1.0f;
         public string ProgressText { get; set; } = "Loading";
         public async Thread.Async.TtTask<bool> OpenEditor(EngineNS.Editor.TtMainEditorApplication mainEditor, RName name, object arg)
@@ -1394,6 +1433,8 @@ namespace EngineNS.UI.Editor
 
             await InitializeDecorators();
 
+            var aMeta = UIAsset.GetAMeta() as TtUIAssetAMeta;
+            DesignResolution = aMeta.DesignResolution;
             //DetailsGrid.Target = UIAsset;
             TtEngine.Instance.TickableManager.AddTickable(this);
             return true;

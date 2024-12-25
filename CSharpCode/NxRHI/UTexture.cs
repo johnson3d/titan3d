@@ -1,4 +1,5 @@
-﻿using BCnEncoder.Encoder;
+﻿using System;
+using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
 using EngineNS.Bricks.ImageDecoder;
 using EngineNS.EGui.Controls;
@@ -16,6 +17,14 @@ namespace EngineNS.NxRHI
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.NxRHI.USrViewAMeta@EngineCore", "EngineNS.NxRHI.USrViewAMeta" })]
     public class TtSrViewAMeta : IO.IAssetMeta
     {
+        public TtSrViewAMeta()
+        {
+            mCreateUVAnimMenuState.Reset();
+            mCreateUVAnimMenuState.HasIndent = false;
+            mReImportMenuState.Reset();
+            mReImportMenuState.HasIndent = false;
+        }
+
         public override string TypeExt
         {
             get => TtSrView.AssetExt;
@@ -130,8 +139,7 @@ namespace EngineNS.NxRHI
         //{
         //    ((TtSrView)asset).FreeOriginImageObject();
         //}
-        Thread.Async.TtTask<TtSrView>? SnapTask;
-        Thread.Async.TtTask<EngineNS.Graphics.Pipeline.Shader.TtEffect>? EffectTask;
+        Thread.Async.TtTask? EffectTask;
         public override bool CanRefAssetType(IO.IAssetMeta ameta)
         {
             //纹理不会引用别的资产
@@ -139,86 +147,79 @@ namespace EngineNS.NxRHI
         }
         public override void OnShowIconTimout(int time)
         {
-            if (SnapTask != null)
+            if (EffectTask != null)
             {
                 CoreSDK.DisposeObject(ref CmdParameters);
-                SnapTask.Value.Dispose();
-                SnapTask = null;
+                EffectTask.Value.Dispose();
+                EffectTask = null;
             }
         }
         protected bool mShowA = false;
         EngineNS.Editor.Forms.TtTextureViewerCmdParams CmdParameters = null;
-        private async Thread.Async.TtTask<EngineNS.Graphics.Pipeline.Shader.TtEffect> GetEffect(bool isCubemap)
+        public NxRHI.TtSrView Srv = null;
+        private async Thread.Async.TtTask BuildCmdParameters()
         {
+            Srv = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(this.GetAssetName(), 1);
+            bool isCubemap = Srv.PicDesc.CubeFaces == 6;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
             TtShadingEnv shading = null;
             if(isCubemap)
                 shading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureCubeViewerShading>();
             else
                 shading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>();
-            return await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(shading,
+            var effect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(shading,
                 TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial,
                 new Graphics.Mesh.TtMdfStaticMesh());
+
+            var iptDesc = new NxRHI.TtInputLayoutDesc();
+            unsafe
+            {
+                iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
+                iptDesc.mCoreObject.AddElement("TEXCOORD", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, (uint)sizeof(Vector2), 0, 0);
+                iptDesc.mCoreObject.AddElement("COLOR", 0, EPixelFormat.PXF_R8G8B8A8_UNORM, 0, (uint)sizeof(Vector2) * 2, 0, 0);
+                //iptDesc.SetShaderDesc(SlateEffect.GraphicsEffect);
+                iptDesc.mCoreObject.SetShaderDesc(effect.DescVS.mCoreObject);
+                var InputLayout = rc.CreateInputLayout(iptDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
+                effect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
+            }
+
+            var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<EngineNS.Editor.Forms.TtTextureViewerCmdParams>();
+            cmdParams.ColorMask = new Vector4i(1, 1, 1, 1);
+            var cbBinder = effect.ShaderEffect.FindBinder("ProjectionMatrixBuffer");
+            cmdParams.CBuffer = rc.CreateCBV(cbBinder);
+            cmdParams.Drawcall.BindShaderEffect(effect);
+            cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
+            cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, Srv);
+            cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+
+            cmdParams.IsNormalMap = 0;
+            if (Srv.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || Srv.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || Srv.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
+            {
+                cmdParams.IsNormalMap = 1;
+            }
+
+            CmdParameters = cmdParams;
         }
         public override void OnDrawSnapshot(in ImDrawList cmdlist, ref Vector2 start, ref Vector2 end)
         {
-            if (SnapTask == null)
-            {
-                var rc = TtEngine.Instance.GfxDevice.RenderContext;
-                SnapTask = TtEngine.Instance.GfxDevice.TextureManager.GetTexture(this.GetAssetName(), 1);
-                //cmdlist.AddText(in start, 0xFFFFFFFF, "texture", null);
-
-                return;
-            }
             if (EffectTask == null)
             {
-                if(SnapTask.Value.IsCompleted == true && SnapTask.Value.DirectResult != null)
-                    EffectTask = GetEffect(SnapTask.Value.DirectResult.PicDesc.CubeFaces == 6);
+                EffectTask = BuildCmdParameters();
                 return;
             }
-            if (SnapTask.Value.IsCompleted == false || EffectTask.Value.IsCompleted == false)
+            if (EffectTask.Value.IsCompleted == false)
             {
                 cmdlist.AddText(in start, 0xFFFFFFFF, "loading...", null);
                 return;
             }
-            unsafe
+            if (CmdParameters != null)
             {
-                if(CmdParameters==null && SnapTask.Value.DirectResult!=null && EffectTask.Value.DirectResult!=null)
+                unsafe
                 {
-                    var rc = TtEngine.Instance.GfxDevice.RenderContext;
-                    var SlateEffect = EffectTask.Value.DirectResult;
-
-                    var iptDesc = new NxRHI.TtInputLayoutDesc();
-                    iptDesc.mCoreObject.AddElement("POSITION", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, 0, 0, 0);
-                    iptDesc.mCoreObject.AddElement("TEXCOORD", 0, EPixelFormat.PXF_R32G32_FLOAT, 0, (uint)sizeof(Vector2), 0, 0);
-                    iptDesc.mCoreObject.AddElement("COLOR", 0, EPixelFormat.PXF_R8G8B8A8_UNORM, 0, (uint)sizeof(Vector2) * 2, 0, 0);
-                    //iptDesc.SetShaderDesc(SlateEffect.GraphicsEffect);
-                    iptDesc.mCoreObject.SetShaderDesc(SlateEffect.DescVS.mCoreObject);
-                    var InputLayout = rc.CreateInputLayout(iptDesc); //TtEngine.Instance.GfxDevice.InputLayoutManager.GetPipelineState(rc, iptDesc);
-                    SlateEffect.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
-
-                    var cmdParams = EGui.TtImDrawCmdParameters.CreateInstance<EngineNS.Editor.Forms.TtTextureViewerCmdParams>();
-                    var cbBinder = SlateEffect.ShaderEffect.FindBinder("ProjectionMatrixBuffer");
-                    cmdParams.CBuffer = rc.CreateCBV(cbBinder);
-                    cmdParams.Drawcall.BindShaderEffect(SlateEffect);
-                    cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
-                    cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, SnapTask.Value.DirectResult);
-                    cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
-
-                    cmdParams.IsNormalMap = 0;
-                    if (SnapTask.Value.DirectResult.PicDesc.Format == EPixelFormat.PXF_BC5_UNORM || SnapTask.Value.DirectResult.PicDesc.Format == EPixelFormat.PXF_BC5_TYPELESS || SnapTask.Value.DirectResult.PicDesc.Format == EPixelFormat.PXF_BC5_SNORM)
-                    {
-                        cmdParams.IsNormalMap = 1;
-                    }
-
-                    CmdParameters = cmdParams;
-                }
-
-                var uv0 = new Vector2(0, 0);
-                var uv1 = new Vector2(1, 1);
-                if (SnapTask.Value.DirectResult != null)
-                {
+                    var uv0 = new Vector2(0, 0);
+                    var uv1 = new Vector2(1, 1);
                     cmdlist.AddImage((ulong)CmdParameters.GetHandle(), in start, in end, in uv0, in uv1, 0xFFFFFFFF);
-                    if (CmdParameters.IsNormalMap==1)
+                    if (CmdParameters.IsNormalMap == 1)
                     {
                         var indiactorPos = start + new Vector2(3, 2);
                         //cmdlist.AddText(in indiactorPos, 0xFF00FF00, "N", null);
@@ -234,13 +235,32 @@ namespace EngineNS.NxRHI
         {
         }
 
+        protected EGui.UIProxy.MenuItemProxy.MenuState mCreateUVAnimMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
+        protected EGui.UIProxy.MenuItemProxy.MenuState mReImportMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         protected override void OnDrawPopMenu(EGui.Controls.TtContentBrowser ContentBrowser)
         {
-            base.OnDrawPopMenu(ContentBrowser);
-
             Support.TtAnyPointer menuData = new Support.TtAnyPointer();
             var drawList = ImGuiAPI.GetWindowDrawList();
-            if (EGui.UIProxy.MenuItemProxy.MenuItem("ReImport", null, false, null, in drawList, in menuData, ref mRefGraphMenuState))
+            if(EGui.UIProxy.MenuItemProxy.MenuItem("Create UVAnim", null, false, null, in drawList, in menuData, ref mCreateUVAnimMenuState))
+            {
+                var anim = new EGui.TtUVAnim();
+                var rname = RName.GetRName(AssetName.Name.Replace(TtSrView.AssetExt, EGui.TtUVAnim.AssetExt), AssetName.RNameType);
+                anim.TextureName = AssetName;
+                anim.AssetName = rname;
+                var ameta = anim.CreateAMeta() as EGui.TtUVAnimAMeta;
+                ameta.SetAssetName(rname);
+                ameta.AssetId = Guid.NewGuid();
+                ameta.TextureName = AssetName;
+                ameta.TypeStr = Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(anim.GetType());
+                ameta.SaveAMeta((IAsset)null);
+                TtEngine.Instance.AssetMetaManager.RegAsset(ameta);
+                anim.SaveAssetTo(ameta.AssetName);
+            }
+
+            ImGuiAPI.Separator();
+            base.OnDrawPopMenu(ContentBrowser);
+
+            if (EGui.UIProxy.MenuItemProxy.MenuItem("ReImport", null, false, null, in drawList, in menuData, ref mReImportMenuState))
             {
                 //renwind todo
             }
@@ -248,23 +268,18 @@ namespace EngineNS.NxRHI
 
         public override void DrawTooltip()
         {
-            if (SnapTask == null || !SnapTask.Value.IsCompleted)
+            if (Srv == null)
                 return;
-            if (SnapTask.Value.DirectResult == null)
-            {
-                SnapTask = null;
-                return;
-            }
             CtrlUtility.DrawHelper(
                 "Name: " + GetAssetName().Name,
                 "Desc: " + Description,
                 "Address: " + GetAssetName().Address,
-                "Res: " + SnapTask.Value.DirectResult.PicDesc.Width + "X" + SnapTask.Value.DirectResult.PicDesc.Height + "\r\n" +
-                "Format: " + SnapTask.Value.DirectResult.PicDesc.Format + "\r\n" +
-                "CubeFaces: " + SnapTask.Value.DirectResult.PicDesc.CubeFaces + "\r\n" +
-                "MipLevel: " + SnapTask.Value.DirectResult.PicDesc.MipLevel + "\r\n" +
-                "IsSRGB: " + SnapTask.Value.DirectResult.PicDesc.sRGB + "\r\n" +
-                "IsNormal: " + SnapTask.Value.DirectResult.PicDesc.IsNormal);
+                "Res: " + Srv.PicDesc.Width + "X" + Srv.PicDesc.Height + "\r\n" +
+                "Format: " + Srv.PicDesc.Format + "\r\n" +
+                "CubeFaces: " + Srv.PicDesc.CubeFaces + "\r\n" +
+                "MipLevel: " + Srv.PicDesc.MipLevel + "\r\n" +
+                "IsSRGB: " + Srv.PicDesc.sRGB + "\r\n" +
+                "IsNormal: " + Srv.PicDesc.IsNormal);
         }
     }
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.NxRHI.USrView@EngineCore", "EngineNS.NxRHI.USrView" })]
@@ -890,7 +905,7 @@ namespace EngineNS.NxRHI
             {
                 TtEngine.Instance.EventPoster.RunOn((state)=>
                 {
-                    TtEngine.Instance.StopOperation($"ImportImage:{mSourceFile}");
+                    TtEngine.Instance.BlockOperation($"ImportImage:{mSourceFile}");
                     ImportImageImpl();
                     TtEngine.Instance.ResumeOperation();
                     return true;
@@ -3440,16 +3455,18 @@ namespace EngineNS.NxRHI
             TtPicDesc desc = null;
             var tex2d = await TtEngine.Instance.EventPoster.Post((state) =>
             {
-                var xnd = IO.TtXndHolder.LoadXnd(rn.Address);
-                if (xnd == null)
-                    return null;
+                using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
+                {
+                    if (xnd == null)
+                        return null;
 
-                desc = LoadPictureDesc(xnd.RootNode);
+                    desc = LoadPictureDesc(xnd.RootNode);
 
-                if (mipLevel == -1 || mipLevel > desc.MipLevel)
-                    mipLevel = desc.MipLevel;
+                    if (mipLevel == -1 || mipLevel > desc.MipLevel)
+                        mipLevel = desc.MipLevel;
 
-                return LoadTexture2DMipLevel(rn, xnd.RootNode, desc, mipLevel, oldTexture);
+                    return LoadTexture2DMipLevel(rn, xnd.RootNode, desc, mipLevel, oldTexture);
+                }   
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
             if (tex2d == null)
@@ -3494,16 +3511,18 @@ namespace EngineNS.NxRHI
             TtPicDesc desc = null;
             var tex2d = await TtEngine.Instance.EventPoster.Post((state) =>
             {
-                var xnd = IO.TtXndHolder.LoadXnd(rn.Address);
-                if (xnd == null)
-                    return null;
+                using (var xnd = IO.TtXndHolder.LoadXnd(rn.Address))
+                {
+                    if (xnd == null)
+                        return null;
 
-                desc = LoadPictureDesc(xnd.RootNode);
+                    desc = LoadPictureDesc(xnd.RootNode);
 
-                if (mipLevel == -1 || mipLevel > desc.MipLevel)
-                    mipLevel = desc.MipLevel;
+                    if (mipLevel == -1 || mipLevel > desc.MipLevel)
+                        mipLevel = desc.MipLevel;
 
-                return LoadTexture2DMipLevel(rn, xnd.RootNode, desc, mipLevel, channelR, channelG, channelB, channelA);
+                    return LoadTexture2DMipLevel(rn, xnd.RootNode, desc, mipLevel, channelR, channelG, channelB, channelA);
+                }   
             }, Thread.Async.EAsyncTarget.AsyncIO);
 
             if (tex2d == null)

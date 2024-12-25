@@ -831,6 +831,11 @@ namespace EngineNS.GamePlay.Scene
                             Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"SceneNode Load Initialize failed: NodeDataType={attr.Name}, NodeData={cldTypeStr}");
                             continue;
                         }
+                        var sn = scene as TtScene;
+                        if (sn != null)
+                        {
+                            sn.NumOfLoadedNode++;
+                        }
                         //nd.NodeData = data as UNodeData;
                         //nd.OnNodeLoaded(this);
                     }

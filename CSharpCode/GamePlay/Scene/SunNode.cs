@@ -16,6 +16,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 SunMaterialName = RName.GetRName("material/default_sun.uminst", RName.ERNameType.Engine);
             }
+            [Rtti.Meta]
             public TtDirectionLight DirectionLight { get; set; } = new TtDirectionLight();
             [Rtti.Meta]
             [RName.PGRName(FilterExts = Graphics.Pipeline.Shader.TtMaterialInstance.AssetExt)]

@@ -506,12 +506,12 @@ namespace EngineNS
                 }
             }
         }
-        public bool IsStopOperation = false;
+        public bool IsBlockOperation = false;
         public string StopOperationInfo;
         public Action<ImDrawList, Vector2, Vector2> StopOperationDrawAction;
-        public void StopOperation(string info, Action<ImDrawList, Vector2, Vector2> drawAction = null)
+        public void BlockOperation(string info, Action<ImDrawList, Vector2, Vector2> drawAction = null)
         {
-            IsStopOperation = true;
+            IsBlockOperation = true;
             StopOperationInfo = info;
             StopOperationDrawAction = drawAction;
             //mStopOperateCover.Info = info;
@@ -520,7 +520,7 @@ namespace EngineNS
         }
         public void ResumeOperation()
         {
-            IsStopOperation = false;
+            IsBlockOperation = false;
             StopOperationInfo = "";
             StopOperationDrawAction = null;
             //mStopOperateCover.Visible = false;

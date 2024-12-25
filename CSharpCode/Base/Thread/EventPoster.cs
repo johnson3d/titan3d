@@ -1,5 +1,4 @@
-﻿using NPOI.SS.Formula.Functions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -95,7 +94,7 @@ namespace EngineNS.Thread
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"ASyncSemaphore.Waiter is null");
             }
         }
-        public async System.Threading.Tasks.Task Await()
+        public async Thread.Async.TtTask Await()
         {
             await TtEngine.Instance.EventPoster.AwaitSemaphore(this);
         }

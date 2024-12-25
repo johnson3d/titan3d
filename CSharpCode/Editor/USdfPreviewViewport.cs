@@ -113,7 +113,7 @@ namespace EngineNS.Editor
             return true;
         }
         #endregion
-        protected virtual void TickOnFocus()
+        protected override void TickOnFocus()
         {
             float step = (TtEngine.Instance.ElapseTickCountMS * 0.001f) * CameraMoveSpeed;
             var keyboards = TtEngine.Instance.InputSystem;
@@ -190,7 +190,7 @@ namespace EngineNS.Editor
             
         }
         public Action AfterTickSync;
-        public void TickSync(float ellapse)
+        public override void TickSync(float ellapse)
         {
             if (IsInlitialized == false)
                 return;

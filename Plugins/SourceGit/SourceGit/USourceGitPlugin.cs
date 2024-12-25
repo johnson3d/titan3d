@@ -68,23 +68,30 @@ namespace EngineNS.Plugins.SourceGit
                 result.Start();
                 Action action = async () =>
                 {
-                    var timeoutSignal = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                    await result.WaitForExitAsync(timeoutSignal.Token);
-
-                    var q = new System.Text.StringBuilder();
-                    while (!result.HasExited)
+                    try
                     {
-                        q.Append(result.StandardOutput.ReadToEnd());
+                        var timeoutSignal = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                        await result.WaitForExitAsync(timeoutSignal.Token);
+
+                        var q = new System.Text.StringBuilder();
+                        while (!result.HasExited)
+                        {
+                            q.Append(result.StandardOutput.ReadToEnd());
+                        }
+                        string r = q.ToString();
+
+                        if (r == "")
+                        {
+
+                        }
+                        else
+                        {
+
+                        }
                     }
-                    string r = q.ToString();
-
-                    if (r == "")
+                    catch (Exception actionEx) 
                     {
-
-                    }
-                    else
-                    {
-
+                        Profiler.Log.WriteException(actionEx);
                     }
                 };
                 action();

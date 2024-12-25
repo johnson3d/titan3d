@@ -6,6 +6,7 @@ using NPOI.SS.Formula.Functions;
 using NPOI.SS.Formula.PTG;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Dynamic;
 using System.IO;
 using System.Text;
@@ -223,10 +224,14 @@ namespace EngineNS.IO
             mExplorerToMenuState.HasIndent = false;
             mCopyRNameMenuState.Reset();
             mCopyRNameMenuState.HasIndent = false;
+            mRenameMenuState.Reset();
+            mRenameMenuState.HasIndent = false;
             mMoveToMenuState.Reset();
             mMoveToMenuState.HasIndent = false;
             mCopyToMenuState.Reset();
             mCopyToMenuState.HasIndent = false;
+            mPackToMenuState.Reset();
+            mPackToMenuState.HasIndent = false;
         }
         public virtual string GetAssetTypeName()
         {
@@ -267,7 +272,7 @@ namespace EngineNS.IO
         public virtual async Thread.Async.TtTask SaveRefAssets()
         {
             //Stop Editor Operate
-            TtEngine.Instance.StopOperation($"{this.AssetName}: SaveRefAssets");
+            TtEngine.Instance.BlockOperation($"{this.AssetName}: SaveRefAssets");
             List<IAssetMeta> holders = new List<IAssetMeta>();
             TtEngine.Instance.AssetMetaManager.GetAssetHolder(this, holders);
             foreach (var i in holders)
@@ -408,7 +413,7 @@ namespace EngineNS.IO
         {
             return mAssetName;
         }
-        [Rtti.Meta]
+        [Rtti.Meta, Browsable(false)]
         public RName AssetName
         {
             get { return mAssetName; }
@@ -448,7 +453,7 @@ namespace EngineNS.IO
         }
         public async System.Threading.Tasks.Task PackRefAssetsTo(RName target)
         {
-            TtEngine.Instance.StopOperation($"{this.AssetName}: PackRefAssetsTo {target}");
+            TtEngine.Instance.BlockOperation($"{this.AssetName}: PackRefAssetsTo {target}");
             var names = new HashSet<RName>();
             names.Add(this.AssetName);
             GetAllRefAssets(names);
@@ -548,8 +553,10 @@ namespace EngineNS.IO
         protected EGui.UIProxy.MenuItemProxy.MenuState mRefGraphMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         protected EGui.UIProxy.MenuItemProxy.MenuState mCopyRNameMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         protected EGui.UIProxy.MenuItemProxy.MenuState mDeleteMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
+        protected EGui.UIProxy.MenuItemProxy.MenuState mRenameMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         protected EGui.UIProxy.MenuItemProxy.MenuState mMoveToMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         protected EGui.UIProxy.MenuItemProxy.MenuState mCopyToMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
+        protected EGui.UIProxy.MenuItemProxy.MenuState mPackToMenuState = new EGui.UIProxy.MenuItemProxy.MenuState();
         internal System.Threading.Tasks.Task<Editor.USnapshot> Task;
         public virtual Color4b GetBorderColor()
         {
@@ -675,7 +682,7 @@ namespace EngineNS.IO
                 }
                 ContentBrowser.CreateNewAssets = createNewAssetValueStore;
             }
-            if (EGui.UIProxy.MenuItemProxy.MenuItem("Rename", null, false, null, in drawList, in menuData, ref mMoveToMenuState))
+            if (EGui.UIProxy.MenuItemProxy.MenuItem("Rename", null, false, null, in drawList, in menuData, ref mRenameMenuState))
             {
                 ContentBrowser.OperationAsset(this, EGui.Controls.TtContentBrowser.EAssetOperationType.Rename);
             }
@@ -687,7 +694,7 @@ namespace EngineNS.IO
             {
                 ContentBrowser.OperationAsset(this, EGui.Controls.TtContentBrowser.EAssetOperationType.CopyTo);
             }
-            if (EGui.UIProxy.MenuItemProxy.MenuItem("PackTo", null, false, null, in drawList, in menuData, ref mCopyToMenuState))
+            if (EGui.UIProxy.MenuItemProxy.MenuItem("PackTo", null, false, null, in drawList, in menuData, ref mPackToMenuState))
             {
                 ContentBrowser.OperationAsset(this, EGui.Controls.TtContentBrowser.EAssetOperationType.PackTo);
             }

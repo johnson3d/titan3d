@@ -41,11 +41,11 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 foreach (var i in CpuCullNode.VisParameter.VisibleNodes)
                 {
-                    var pointLight = i as GamePlay.Scene.UPointLightNode;
+                    var pointLight = i as GamePlay.Scene.TtPointLightNode;
                     if (pointLight == null)
                         continue;
 
-                    var lightData = pointLight.NodeData as GamePlay.Scene.UPointLightNode.ULightNodeData;
+                    var lightData = pointLight.NodeData as GamePlay.Scene.TtPointLightNode.TtLightNodeData;
 
                     Shader.FPointLight light;
                     var pos = pointLight.Placement.Position;

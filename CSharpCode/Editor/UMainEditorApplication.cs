@@ -916,12 +916,12 @@ namespace EngineNS.Editor
             }
 
             {
-                var lightData = new GamePlay.Scene.UPointLightNode.ULightNodeData();
+                var lightData = new GamePlay.Scene.TtPointLightNode.TtLightNodeData();
                 lightData.Name = "PointLight0";
                 lightData.Intensity = 100.0f;
                 lightData.Radius = 20.0f;
                 lightData.Color = new Vector3(1, 0, 0);
-                var lightNode = GamePlay.Scene.UPointLightNode.AddPointLightNode(world, root, lightData, new DVector3(10, 10, 10));
+                var lightNode = GamePlay.Scene.TtPointLightNode.AddPointLightNode(world, root, lightData, new DVector3(10, 10, 10));
             }
 
             if (hideTerrain == false)
