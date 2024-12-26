@@ -164,7 +164,7 @@ namespace EngineNS.GamePlay.Scene
                 var prefab = mAsset as TtPrefab;
                 prefab.Root = new TtPrefabNode();
                 TtEngine.Instance.TaskCollector.AddWaitTask(
-                    prefab.Root.InitializeNode(world, new TtPrefabNode.TtPrefabNodeData() { PrefabName = dir, }, EBoundVolumeType.Box, typeof(GamePlay.TtIdentityPlacement))
+                    prefab.Root.InitializeNode(world, new TtPrefabNode.TtPrefabNodeData() { PrefabName = dir, }, EBoundVolumeType.Box, typeof(GamePlay.TtPlacement))
                 );
             }
         }
@@ -222,7 +222,7 @@ namespace EngineNS.GamePlay.Scene
                 if (prefab == null)
                     return null;
                 var node = new TtPrefabNode();
-                await node.InitializeNode(world, new TtPrefabNode.TtPrefabNodeData(), EBoundVolumeType.Box, typeof(GamePlay.TtIdentityPlacement));
+                await node.InitializeNode(world, new TtPrefabNode.TtPrefabNodeData(), EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
                 prefab.Root = node;
                 prefab.AssetName = name;
                 node.Parent = world.Root;
@@ -397,7 +397,6 @@ namespace EngineNS.GamePlay.Scene
         private Thread.TtAwaitSessionManager<RName, TtPrefab> mCreatingSession = new Thread.TtAwaitSessionManager<RName, TtPrefab>();
         public async Thread.Async.TtTask<TtPrefab> GetPrefab(RName name)
         {
-            TtPrefab scene;
             TtPrefab result;
             if (Prefabs.TryGetValue(name, out result))
             {
@@ -411,14 +410,14 @@ namespace EngineNS.GamePlay.Scene
                 return await session.Await();
             }
 
-            scene = await TtPrefab.LoadPrefab(PrefabWorld, name);
-            if (scene == null)
+            result = await TtPrefab.LoadPrefab(PrefabWorld, name);
+            if (result == null)
                 return null;
 
-            Prefabs.Add(name, scene);
+            Prefabs.Add(name, result);
             mCreatingSession.FinishSession(name, session, result);
 
-            return scene;
+            return result;
         }
         public async Thread.Async.TtTask<TtPrefab> ReloadPrefab(RName name)
         {

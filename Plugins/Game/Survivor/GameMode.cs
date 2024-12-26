@@ -50,6 +50,7 @@ namespace Survivor
             var weaponNodeData = new TtWeaponNode.TtWeaponNodeData();
 			weaponNodeData.WeaponId = roleData.Weapon1;
             await weaponNode.InitializeNode(parent.HostWorld, weaponNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
+			weaponNode.RoleData = roleData;
             weaponNode.Parent = parent;
         }
         [EngineNS.Rtti.Meta]

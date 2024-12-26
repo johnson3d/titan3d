@@ -75,7 +75,11 @@ namespace EngineNS.GamePlay
         {
             WorldViewportSlate?.TickSync(ellapse);
         }
-
+        [Rtti.Meta]
+        public TtWorld GameWorld
+        {
+            get => WorldViewportSlate.World;
+        }
         [Rtti.Meta]
         public TtGameViewportSlate WorldViewportSlate { get; private set; } = new TtGameViewportSlate(true);
         [Rtti.Meta]

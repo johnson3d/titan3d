@@ -53,6 +53,8 @@ namespace EngineNS.Bricks.CodeBuilder
             get => TtMacross.AssetExt;
         }
         [Rtti.Meta]
+        public bool IsDisable { get; set; } = false;
+        [Rtti.Meta]
         public string BaseTypeStr { get; set; }
         Rtti.TtTypeDesc mBaseType;
         public Rtti.TtTypeDesc BaseType
@@ -102,6 +104,11 @@ namespace EngineNS.Bricks.CodeBuilder
         //    TtEngine.Instance.EditorInstance.MacrossIcon?.OnDraw(cmdlist, in start, in end, 0);
         //    cmdlist.AddText(in start, 0xFFFFFFFF, "Macross", null);
         //}
+
+        public string GetDisablePredefineMacrosString()
+        {
+            return "disable_" + AssetId.ToString().Replace("-", "_");
+        }
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMacross@EngineCore", "EngineNS.Bricks.CodeBuilder.UMacross" })]
@@ -332,7 +339,10 @@ namespace EngineNS.Bricks.CodeBuilder
             MacrossEditor.DefClass.ClassName = name.PureName;
             MacrossEditor.DefClass.Namespace = TtNamespaceDeclaration.GetNameSpaceFromRName(name);
             if (SelectedType != null)
-                MacrossEditor.DefClass.SupperClassNames.Add(SelectedType.FullName);
+            {
+                if(!MacrossEditor.DefClass.SupperClassNames.Contains(SelectedType.FullName))
+                    MacrossEditor.DefClass.SupperClassNames.Add(SelectedType.FullName);
+            }
             MacrossEditor.SaveClassGraph(name);
             MacrossEditor.GenerateCode();
             MacrossEditor.CompileCode();

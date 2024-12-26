@@ -180,7 +180,7 @@ namespace EngineNS
             
             TtEngine.Instance.TickableManager.AddTickable(this.GameInstance);
 
-            TtEngine.Instance.InputSystem.Mouse.ShowCursor = false;
+            TtEngine.Instance.InputSystem.Mouse.ShowCursor = true;
             var esc = IControl.Create<UKey>(new UKey.UKeyData() { Keycode = Bricks.Input.Keycode.KEY_ESCAPE });
             esc.TriggerPress += (ITriggerControl sender)=>
                                 {

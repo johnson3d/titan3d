@@ -14,10 +14,10 @@ namespace EngineNS.Bricks.Input.Device.Mouse
             {
                 bShowCursor = value;
 
-                OnSetShowCursor(IntPtr.Zero);
+                OnSetShowCursor();
             }
         }
-        partial void OnSetShowCursor(IntPtr window);
+        partial void OnSetShowCursor();
 
         public int GlobalMouseX;
         public int GlobalMouseY;
@@ -34,11 +34,12 @@ namespace EngineNS.Bricks.Input.Device.Mouse
                 {
                     var windowPos = TtEngine.Instance.GameInstance.WorldViewportSlate.ViewportPos;
                     var windowSize = TtEngine.Instance.GameInstance.WorldViewportSlate.ClientSize;
-                    WarpMouseInWindow(IntPtr.Zero, (int)windowSize.X / 2, (int)(windowSize.Y) / 2);
+                    
+                    WarpMouseInWindow((int)windowSize.Width / 2, (int)(windowSize.Height) / 2);
                 }
             }
         }
-        partial void WarpMouseInWindow(IntPtr window, int x, int y);
+        partial void WarpMouseInWindow(int x, int y);
 
         bool mMouseKeyStateDirty = false;
         public void MouseKeyStateDirtyProcess() 

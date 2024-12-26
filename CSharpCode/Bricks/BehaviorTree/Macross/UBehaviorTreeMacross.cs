@@ -230,7 +230,10 @@ namespace EngineNS.BehaviorTree.Macross
             BehaviorTreeMacrossEditor.DefClass.ClassName = name.PureName;
             BehaviorTreeMacrossEditor.DefClass.Namespace = new TtNamespaceDeclaration(IO.TtFileManager.GetParentPathName(name.Name).TrimEnd('/').Replace('/', '.'));
             if (mSelectedType != null)
-                BehaviorTreeMacrossEditor.DefClass.SupperClassNames.Add(mSelectedType.FullName);
+            {
+                if(!BehaviorTreeMacrossEditor.DefClass.SupperClassNames.Contains(mSelectedType.FullName))
+                    BehaviorTreeMacrossEditor.DefClass.SupperClassNames.Add(mSelectedType.FullName);
+            }
             BehaviorTreeMacrossEditor.SaveClassGraph(name);
         }
 

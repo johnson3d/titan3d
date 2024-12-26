@@ -429,21 +429,27 @@ namespace EngineNS.Bricks.Input.Device.Mouse
 {
     public partial class UMouse
     {
-        partial void OnSetShowCursor(IntPtr window)
+        partial void OnSetShowCursor()
         {
             unsafe
             {
-                if (bShowCursor)
-                    SDL.SDL3.SDL_SetWindowRelativeMouseMode((SDL.SDL_Window*)window.ToPointer(), false);
-                else
-                    SDL.SDL3.SDL_SetWindowRelativeMouseMode((SDL.SDL_Window*)window.ToPointer(), true);
+                if (bShowCursor && !SDL.SDL3.SDL_CursorVisible())
+                {
+                    SDL.SDL3.SDL_ShowCursor();
+                }
+
+                if(!bShowCursor && SDL.SDL3.SDL_CursorVisible())
+                {
+                    SDL.SDL3.SDL_HideCursor();
+                }
             }
         }
-        partial void WarpMouseInWindow(IntPtr window, int x, int y)
+        partial void WarpMouseInWindow(int x, int y)
         {
             unsafe
             {
-                SDL.SDL3.SDL_WarpMouseInWindow((SDL.SDL_Window*)window.ToPointer(), x, y);
+                
+                SDL.SDL3.SDL_WarpMouseInWindow(null, x, y);
             }
         }
     }

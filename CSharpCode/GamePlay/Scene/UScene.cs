@@ -293,7 +293,9 @@ namespace EngineNS.GamePlay.Scene
             MacrossEditor.DefClass.ClassName = name.PureName;
             MacrossEditor.DefClass.Namespace = TtNamespaceDeclaration.GetNameSpaceFromRName(AssetName);
             MacrossEditor.DefClass.SupperClassNames.Clear();
-            MacrossEditor.DefClass.SupperClassNames.Add(typeof(TtSceneMacrossBase).FullName);
+            var baseClsName = typeof(TtSceneMacrossBase).FullName;
+            if(!MacrossEditor.DefClass.SupperClassNames.Contains(baseClsName))
+                MacrossEditor.DefClass.SupperClassNames.Add(baseClsName);
             MacrossEditor.SaveClassGraph(AssetName);
             MacrossEditor.GenerateCode();
             MacrossEditor.CompileCode();

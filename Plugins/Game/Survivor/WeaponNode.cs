@@ -58,35 +58,78 @@ namespace Survivor
             //hitcheck, some weapon dont need phy hit
         }
     }
+
+
     //躯干发出水平斜线，攻击直线方向有效距离内的全部怪物并造成伤害和击退效果。
     public class TtWeaponController_Line : TtWeaponController
     {
-        List<TtPrefabNode> WeaponPrefabs = new List<TtPrefabNode>();
+        public struct FSimpleElementController
+        {
+            public TtPrefabNode Element;
+            public Vector3 Direction;
+            public float Speed;
+            public Vector3 OriginalLocation;
+            public void Update(TtWorld world)
+            {
+                Element.Placement.Position += Direction * Speed * world.DeltaTimeSecond;
+            }
+        }
+        List<FSimpleElementController> WeaponPrefabs = new List<FSimpleElementController>();
         public override void Init()
         {
             
         }
-        List<TtPrefabNode> mBeRemoved = new List<TtPrefabNode>();
+        List<FSimpleElementController> mBeRemoved = new List<FSimpleElementController>();
         public override void Tick(TtWorld world)
         {
+            mCurrentTime += world.DeltaTimeSecond;
             if (mCurrentTime > WeaponData.CoolDown)
             {
                 Fire();
                 //fire prefab
                 mCurrentTime = 0;
             }
+            foreach (var weapon in WeaponPrefabs)
+            {
+                weapon.Update(world);
+                var distance = Vector3.Distance(weapon.OriginalLocation,
+                    weapon.Element.Placement.AbsTransform.Position.ToSingleVector3());
+                if (distance > WeaponData.AttackRange)
+                {
+                    mBeRemoved.Add(weapon);
+                }
+            }
+            foreach (var weapon in mBeRemoved)
+            {
+                weapon.Element.Parent = null;
+                WeaponPrefabs.Remove(weapon);
+                TtEngine.Instance.PrefabPoolManager.ReleasePrefab(weapon.Element);
+            }
+            mBeRemoved.Clear();
             base.Tick(world);
         }
         protected void Fire()
         {
-            //show prefab
-            var WeaponPrefab = EngineNS.TtEngine.Instance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape));
-            if (WeaponPrefab != null)
+            var weaponPrefabName = RName.ParseFrom(WeaponData.Shape);
+            if (weaponPrefabName != null)
             {
-                WeaponPrefab.Parent = WeaponNode.Parent;
-                WeaponPrefab.Placement.Position = DVector3.Zero;
-                WeaponPrefabs.Add(WeaponPrefab);
-                //WeaponPrefab.ParentScene.PxSceneMB.PxScene.mCoreObject.Raycast
+                var WeaponPrefab = EngineNS.TtEngine.Instance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape));
+                if (WeaponPrefab != null)
+                {
+                    WeaponPrefab.Parent = WeaponNode.Parent.Parent;
+                    if(WeaponPrefab.Placement is TtIdentityPlacement)
+                    {
+                        WeaponPrefab.NodeData.Placement = new TtPlacement();
+                        WeaponPrefab.NodeData.Placement.HostNode = WeaponPrefab;
+                    }
+                    var singleControll = new FSimpleElementController();
+                    singleControll.Element = WeaponPrefab;
+                    singleControll.Speed = WeaponNode.RoleData.ProjectileSpeed;
+                    singleControll.Direction = EngineNS.Quaternion.RotateVector3(WeaponNode.Parent.Placement.Quat, Vector3.Forward);
+                    singleControll.OriginalLocation = WeaponNode.Parent.Placement.AbsTransform.Position.ToSingleVector3();
+                    WeaponPrefab.Placement.Position = DVector3.Up + singleControll.OriginalLocation;
+                    WeaponPrefabs.Add(singleControll);
+                }
             }
         }
     }
@@ -101,6 +144,7 @@ namespace Survivor
         List<TtPrefabNode> mBeRemoved = new List<TtPrefabNode>();
         public override void Tick(TtWorld world)
         {
+            mCurrentTime += world.DeltaTimeSecond;
             if (mCurrentTime > WeaponData.CoolDown)
             {
                 Fire();
@@ -121,19 +165,24 @@ namespace Survivor
             {
                 weapon.Parent = null;
                 WeaponPrefabs.Remove(weapon);
+                TtEngine.Instance.PrefabPoolManager.ReleasePrefab(weapon);
             }
             mBeRemoved.Clear();
             base.Tick(world);
         }
         protected void Fire()
         {
-            var WeaponPrefab = EngineNS.TtEngine.Instance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape));
-            if (WeaponPrefab != null)
+            var weaponPrefabName = RName.ParseFrom(WeaponData.Shape);
+            if(weaponPrefabName != null)
             {
-                WeaponPrefab.Parent = WeaponNode.Parent;
-                WeaponPrefab.Placement.Position = DVector3.Zero;
-                WeaponPrefabs.Add(WeaponPrefab);
-            }
+                var WeaponPrefab = EngineNS.TtEngine.Instance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape));
+                if (WeaponPrefab != null)
+                {
+                    WeaponPrefab.Parent = WeaponNode.Parent;
+                    WeaponPrefab.Placement.Position = DVector3.Up;
+                    WeaponPrefabs.Add(WeaponPrefab);
+                }
+            }  
         }
     }
     //朝向玩家最后移动方向发射n枚飞行道具，碰到怪物造成伤害。根据击穿数量判断伤害数量
@@ -147,6 +196,7 @@ namespace Survivor
         List<TtPrefabNode> mBeRemoved = new List<TtPrefabNode>();
         public override void Tick(TtWorld world)
         {
+            mCurrentTime += world.DeltaTimeSecond;
             if (mCurrentTime > WeaponData.CoolDown)
             {
                 Fire();
@@ -167,18 +217,23 @@ namespace Survivor
             {
                 weapon.Parent = null;
                 WeaponPrefabs.Remove(weapon);
+                TtEngine.Instance.PrefabPoolManager.ReleasePrefab(weapon);
             }
             mBeRemoved.Clear();
             base.Tick(world);
         }
         protected void Fire()
         {
-            var WeaponPrefab = EngineNS.TtEngine.Instance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape));
-            if(WeaponPrefab!= null)
+            var weaponPrefabName = RName.ParseFrom(WeaponData.Shape);
+            if (weaponPrefabName != null)
             {
-                WeaponPrefab.Parent = WeaponNode.Parent;
-                WeaponPrefab.Placement.Position = DVector3.Zero;
-                WeaponPrefabs.Add(WeaponPrefab);
+                var WeaponPrefab = EngineNS.TtEngine.Instance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape));
+                if (WeaponPrefab != null)
+                {
+                    WeaponPrefab.Parent = WeaponNode.Parent;
+                    WeaponPrefab.Placement.Position = DVector3.Up;
+                    WeaponPrefabs.Add(WeaponPrefab);
+                }
             }
         }
     }
@@ -220,7 +275,8 @@ namespace Survivor
             }
             return true;
         }
-        public TtWeaponData WeaponData { get; set; }
+        public TtWeaponData WeaponData { get; set; } = null;
+        public TtRoleData RoleData { get; set; } = null;
         protected TtWeaponController mWeaponController = null;
 
         public override bool OnTickLogic(TtWorld world, TtRenderPolicy policy)

@@ -322,6 +322,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 }
                 data.CodeGen.PopSegment(ref sourceCode, in data);
                 data.Method.ResetRuntimeData();
+                data.Method = null;
             }
         }
 
@@ -331,6 +332,19 @@ namespace EngineNS.Bricks.CodeBuilder
             {
                 var classDec = obj as TtClassDeclaration;
                 var codeGen = data.CodeGen as UCSharpCodeGenerator;
+
+                string predefineMacrosCode = "";
+                if (classDec.PredefineMacros.Count > 0)
+                {
+                    foreach (var macros in classDec.PredefineMacros)
+                    {
+                        if (macros.NoDefine)
+                            predefineMacrosCode += "!" + macros.MacrosString;
+                        else
+                            predefineMacrosCode += macros.MacrosString;
+                    }
+                }
+
                 if(data.Namespace != null)
                 {
                     data.CodeGen.AddLine("namespace " + data.Namespace.Namespace, ref sourceCode);
@@ -360,15 +374,25 @@ namespace EngineNS.Bricks.CodeBuilder
                 if(classDec.SupperClassNames.Count > 0)
                 {
                     tempCode += " : ";
+                    HashSet<string> classNames = new HashSet<string>();
                     for (int i = 0; i < classDec.SupperClassNames.Count; i++)
                     {
-                        tempCode += classDec.SupperClassNames[i] + ",";
+                        classNames.Add(classDec.SupperClassNames[i]);
+                    }
+                    foreach(var name in classNames)
+                    {
+                        tempCode += name + ",";
                     }
                     tempCode = tempCode.TrimEnd(',');
                 }
                 data.CodeGen.AddLine(tempCode, ref sourceCode);
                 data.CodeGen.PushSegment(ref sourceCode, in data);
                 {
+                    if(!string.IsNullOrEmpty(predefineMacrosCode))
+                    {
+                        data.CodeGen.AddLine("#if " + predefineMacrosCode, ref sourceCode);
+                    }
+
                     for(int i=0; i<classDec.Properties.Count; i++)
                     {
                         var mem = classDec.Properties[i];
@@ -398,6 +422,11 @@ namespace EngineNS.Bricks.CodeBuilder
                     {
                         var methodDecGen = data.CodeGen.GetCodeObjectGen(classDec.Methods[i].GetType());
                         methodDecGen.GenCodes(classDec.Methods[i], ref sourceCode, ref data);
+                    }
+
+                    if(!string.IsNullOrEmpty(predefineMacrosCode))
+                    {
+                        data.CodeGen.AddLine("#endif", ref sourceCode);
                     }
                 }
                 data.CodeGen.PopSegment(ref sourceCode, in data);
@@ -1009,7 +1038,7 @@ namespace EngineNS.Bricks.CodeBuilder
                     retStr += ";";
                 }
                 data.CodeGen.AddLine(retStr, ref sourceCode);
-                if (data.Method.MethodSegmentDeep <= 1)
+                if (data.Method.MethodSegmentDeep <= 2)
                     data.Method.ReturnHasGenerated = true;
             }
         }

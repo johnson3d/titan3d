@@ -177,7 +177,7 @@ namespace EngineNS
                 obj.IsAlloc = false;
                 mPool.Push(obj);
                 AliveNumber--;
-                TotalReleaseTimes--;
+                TotalReleaseTimes++;
                 return true;
             }
         }

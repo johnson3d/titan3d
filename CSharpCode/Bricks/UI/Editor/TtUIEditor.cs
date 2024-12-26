@@ -263,8 +263,18 @@ namespace EngineNS.UI.Editor
             var drawList = ImGuiAPI.GetWindowDrawList();
             EGui.UIProxy.Toolbar.BeginToolbar(drawList);
             var btSize = Vector2.Zero;
+
+            var textColor = EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor;
+            if(UIAsset.MacrossEditor.LastCompileResult.IsInitialized)
+            {
+                if(UIAsset.MacrossEditor.LastCompileResult.Success)
+                    textColor = StyleConfig.Instance.PassStringColor;
+                else
+                    textColor = StyleConfig.Instance.ErrorStringColor;
+            }
+
             if(EGui.UIProxy.CustomButton.ToolButton("Show Graph", in btSize,
-                EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor,
+                textColor,
                 EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor_Press,
                 EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor_Hover,
                 EGui.UIProxy.StyleConfig.Instance.PGCreateButtonBGColor,

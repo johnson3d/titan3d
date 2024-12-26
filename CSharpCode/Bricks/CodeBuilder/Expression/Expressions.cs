@@ -489,7 +489,27 @@ namespace EngineNS.Bricks.CodeBuilder
             }
         }
     }
+    public class TtPredefinedMacros : TtCodeObject
+    {
+        [Rtti.Meta]
+        public string MacrosString { get; set; }
+        [Rtti.Meta]
+        public bool NoDefine { get; set; } = false;
 
+        public override bool Equals(object obj)
+        {
+            var item = obj as TtPredefinedMacros;
+            return (MacrosString == item.MacrosString) && (NoDefine == item.NoDefine);
+        }
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+        public override string ToString()
+        {
+            return MacrosString + NoDefine.ToString();
+        }
+    }
     public class TtIncludeDeclaration : TtStatementBase, IO.ISerializer
     {
         [Rtti.Meta]
@@ -1176,6 +1196,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public List<TtVariableDeclaration> PreDefineVariables = new List<TtVariableDeclaration>();
 
         public List<TtIncludeDeclaration> PreIncludeHeads = new List<TtIncludeDeclaration>();
+        public HashSet<TtPredefinedMacros> PredefineMacros = new HashSet<TtPredefinedMacros>();
         public void PushPreInclude(string file)
         {
             foreach (var i in PreIncludeHeads)

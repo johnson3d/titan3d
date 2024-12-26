@@ -22,6 +22,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossEditor@EngineCore", "EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossEditor" })]
     public partial class TtMacrossEditor : IO.ISerializer, Editor.IAssetEditor, IRootForm, NodeGraph.IGraphEditor, IMacrossMethodHolder
     {
+        TtPredefinedMacros mDisableMacros = new TtPredefinedMacros()
+        {
+            NoDefine = true
+        };
+
         public TtMacrossEditor()
         {
             mNewMethodMenuState.Reset();
@@ -168,6 +173,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as TtMacrossAMeta;
             if (ameta != null)
             {
+                DefClass.SupperClassNames = DefClass.SupperClassNames.Distinct().ToList();
                 if(DefClass.SupperClassNames.Count > 0)
                 {
                     var baseType = Rtti.TtTypeDesc.TypeOfFullName(DefClass.SupperClassNames[0]);
@@ -223,6 +229,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Methods.Clear();
             OpenFunctions.Clear();
             PGMember.Target = null;
+
+            var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as TtMacrossAMeta;
+            if (ameta != null)
+            {
+                mDisableMacros.MacrosString = ameta.GetDisablePredefineMacrosString();
+                DefClass.PredefineMacros.Add(mDisableMacros);
+            }
 
             //Rtti.UTypeDescManager.Instance.Services .InterateTypes 
 
@@ -595,6 +608,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
         public Action<TtMacrossEditor> AfterCompileCode;
         CompileResult mLastCompileResult;
+        public CompileResult LastCompileResult => mLastCompileResult;
+
         public void CompileCode()
         {
             TtEngine.Instance.MacrossManager.ClearGameProjectTemplateBuildFiles();
@@ -739,20 +754,21 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 DrawToolbarAction.Invoke(drawList);
                 return;
             }
+            var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as TtMacrossAMeta;
+            if (ameta == null)
+                return;
 
             int toolBarItemIdx = 0;
             var spacing = EGui.UIProxy.StyleConfig.Instance.ToolbarSeparatorThickness + EGui.UIProxy.StyleConfig.Instance.ItemSpacing.X * 2;
             EGui.UIProxy.Toolbar.BeginToolbar(in drawList);
+
             if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList, 
-                ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "Save"))
+                ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "  Save "))
             {
-                var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as TtMacrossAMeta;
-                if (ameta != null)
-                {
-                    TtMacross.UpdateAMetaReferences(this, ameta);
-                    ameta.Description = $"MacrossType:{ameta.BaseTypeStr}\n";
-                    ameta.SaveAMeta((IO.IAsset)null);
-                }
+                TtMacross.UpdateAMetaReferences(this, ameta);
+                ameta.Description = $"MacrossType:{ameta.BaseTypeStr}\n";
+                ameta.SaveAMeta((IO.IAsset)null);
+
                 SaveClassGraph(AssetName);
                 GenerateCode();
                 CompileCode();
@@ -763,6 +779,17 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 
             }
+            toolBarItemIdx++;
+            bool isDisable = ameta.IsDisable;
+            if (isDisable)
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.ErrorStringColor);
+            else
+                ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextColor);
+            if (EGui.UIProxy.ToolbarIconButtonProxy.DrawCheckBox(in drawList, null, "Disable", ref isDisable))
+            {
+                ameta.IsDisable = !ameta.IsDisable;
+            }
+            ImGuiAPI.PopStyleColor(1);
             toolBarItemIdx++;
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
@@ -812,6 +839,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     Macross.TtMacrossDebugger.Instance.Run();
                 }
             }
+
                 
             EGui.UIProxy.Toolbar.EndToolbar();
         }
@@ -1468,7 +1496,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             {
                                 if(mReporterShowSelfOnly)
                                 {
-                                    if (!mLastCompileResult.Diagnostics[i].Message.Contains(AssetName.Address))
+                                    if (!mLastCompileResult.Diagnostics[i].Message.Contains(AssetName.Address, StringComparison.OrdinalIgnoreCase))
                                         continue;
                                 }
                                 switch (mLastCompileResult.Diagnostics[i].Severity)

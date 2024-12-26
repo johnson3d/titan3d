@@ -59,14 +59,22 @@ namespace EngineNS.GamePlay
         public TtPrefabPool(RName prefabName)
         {
             mPrefabName = prefabName;
-            GrowStep = 3;
+            GrowStep = 10;
         }
         protected override bool IsAsyncCreate => true;
         protected override async Thread.Async.TtTask<TtPrefabNode> CreateObjectAsync()
         {
             if (mOriginPrefab == null)
             {
-                mOriginPrefab = (await TtEngine.Instance.PrefabManager.GetPrefab(mPrefabName)).Root;
+                var prefab = await TtEngine.Instance.PrefabManager.GetPrefab(mPrefabName);
+                if(prefab != null)
+                {
+                    mOriginPrefab = prefab.Root;
+                }
+                else
+                {
+                    System.Diagnostics.Debug.Assert(false);
+                }
             }
             return await mOriginPrefab.CloneNode(TtEngine.Instance.PrefabManager.PrefabWorld) as TtPrefabNode;
         }

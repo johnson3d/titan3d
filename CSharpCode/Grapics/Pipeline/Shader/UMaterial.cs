@@ -1353,6 +1353,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return result;
             return null;
         }
+        private Thread.TtAwaitSessionManager<RName, TtMaterial> mCreatingSession = new ();
         [Rtti.Meta]
         public async Thread.Async.TtTask<TtMaterial> GetMaterial(RName rn)
         {
@@ -1362,6 +1363,13 @@ namespace EngineNS.Graphics.Pipeline.Shader
             TtMaterial result;
             if (Materials.TryGetValue(rn, out result))
                 return result;
+
+            bool isNewSession;
+            var session = mCreatingSession.GetOrNewSession(rn, out isNewSession);
+            if (isNewSession == false)
+            {
+                return await session.Await();
+            }
 
             result = await TtEngine.Instance.EventPoster.Post((state) =>
             {
@@ -1389,7 +1397,8 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 {
                     Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Material({rn}): AssetName({result.AssetName})");
                 }
-                Materials[rn] = result;
+                Materials.Add(rn, result);
+                mCreatingSession.FinishSession(rn, session, result);
                 return result;
             }
 

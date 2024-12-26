@@ -1,4 +1,5 @@
-﻿using EngineNS.Bricks.CodeBuilder.MacrossNode;
+﻿using EngineNS.Bricks.CodeBuilder;
+using EngineNS.Bricks.CodeBuilder.MacrossNode;
 using EngineNS.UI.Controls.Containers;
 using System;
 using System.Collections.Generic;
@@ -99,8 +100,10 @@ namespace EngineNS.UI
 
             MacrossEditor.AssetName = name;
             MacrossEditor.DefClass.ClassName = name.PureName;
-            MacrossEditor.DefClass.Namespace = new Bricks.CodeBuilder.TtNamespaceDeclaration(IO.TtFileManager.GetParentPathName(AssetName.Name).TrimEnd('/').Replace('/', '.'));
-            MacrossEditor.DefClass.SupperClassNames.Add(typeof(TtUIMacrossBase).FullName);
+            MacrossEditor.DefClass.Namespace = TtNamespaceDeclaration.GetNameSpaceFromRName(AssetName); //new Bricks.CodeBuilder.TtNamespaceDeclaration(IO.TtFileManager.GetParentPathName(AssetName.Name).TrimEnd('/').Replace('/', '.'));
+            var baseClsName = typeof(TtUIMacrossBase).FullName;
+            if(!MacrossEditor.DefClass.SupperClassNames.Contains(baseClsName))
+                MacrossEditor.DefClass.SupperClassNames.Add(baseClsName);
             MacrossEditor.SaveClassGraph(AssetName);
             MacrossEditor.GenerateCode();
             MacrossEditor.CompileCode();

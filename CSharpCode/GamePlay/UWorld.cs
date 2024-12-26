@@ -1,4 +1,4 @@
-﻿using EngineNS.EGui.Slate;
+using EngineNS.EGui.Slate;
 using EngineNS.GamePlay.Scene;
 using System;
 using System.Collections.Generic;
@@ -70,12 +70,14 @@ namespace EngineNS.GamePlay
             }
         }
         Scene.TtScene mRoot;
+        [Rtti.Meta]
         public Scene.TtScene Root
         {
             get => mRoot;
             set => mRoot = value;
         }
         internal List<Scene.TtSunNode> mSuns = new List<Scene.TtSunNode>();
+        [Rtti.Meta]
         public Scene.TtSunNode GetSun(int index = 0)
         {
             if (index < 0 || index >= mSuns.Count)
@@ -84,6 +86,7 @@ namespace EngineNS.GamePlay
         }
         TtDirectionLight mDirectionLight;
         [Category("Option")]
+        [Rtti.Meta]
         public TtDirectionLight DirectionLight 
         {
             get
@@ -547,3 +550,29 @@ namespace EngineNS.GamePlay
         #endregion
     }
 }
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.GamePlay
+{
+	partial class TtWorld
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_GetSun_1880456938 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtWorld->Scene.TtSunNode GetSun(int index)");
+		public unsafe Scene.TtSunNode macross_GetSun (string nodeName, int index) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":index", index);
+				}
+			}
+			var _return_value = GetSun(index);
+			macross_break_GetSun_1880456938.TryBreak();
+			return _return_value;
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

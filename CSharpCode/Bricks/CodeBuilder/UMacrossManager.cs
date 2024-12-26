@@ -117,6 +117,16 @@ namespace EngineNS.Bricks.CodeBuilder
             projGroup.AppendChild(outPathElem);
             root.AppendChild(projGroup);
 
+            // foreach macross meta, add disable macros predefine here
+            //var rootDir = EngineNS.TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
+            //EngineNS.IO.TtFileManager.GetFiles(rootDir, "*" + TtMacrossAMeta.MetaExt)
+            //string defineConstants = "";
+            //projGroup = xml.CreateElement("PropertyGroup", nsUrl);
+            //var defineConstantsElem = xml.CreateElement("DefineConstants", nsUrl);
+            //defineConstantsElem.SetAttribute("DefineConstants", defineConstants);
+            //projGroup.AppendChild(defineConstantsElem);
+            //root.AppendChild(projGroup);
+
             var itemGroup = xml.CreateElement("ItemGroup", nsUrl);
             //var projRefElem = xml.CreateElement("ProjectReference", nsUrl);
             //projRefElem.SetAttribute("Include", @"..\Engine.Window\Engine.Window.csproj");
