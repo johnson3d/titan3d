@@ -50,6 +50,19 @@ namespace EngineNS.GamePlay
     [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoMacrossCreate)]
     public partial class TtGameInstance : TtModuleHost<TtGameInstance>, ITickable, IDisposable
     {
+        static int mNodeAliveNumber = 0;
+        public static int NodeAliveNumber
+        {
+            get => mNodeAliveNumber;
+        }
+        public TtGameInstance()
+        {
+            System.Threading.Interlocked.Increment(ref mNodeAliveNumber);
+        }
+        ~TtGameInstance()
+        {
+            System.Threading.Interlocked.Decrement(ref mNodeAliveNumber);
+        }
         public int GetTickOrder()
         {
             return -1;
@@ -109,13 +122,17 @@ namespace EngineNS.GamePlay
         {
             return this;
         }
+        public Thread.TtSemaphore GameSemaphore;
         public virtual async System.Threading.Tasks.Task<bool> BeginPlay()
         {
             if (McObject == null)
                 return false;
             if (McObject.Get() == null)
                 return false;
-            return await McObject.Get().BeginPlay(this);
+            GameSemaphore = Thread.TtSemaphore.CreateSemaphore(1);
+            var ret = await McObject.Get().BeginPlay(this);
+            GameSemaphore.Release();
+            return ret;
         }
         public virtual void Tick(float elapsedMillisecond)
         {
@@ -124,6 +141,7 @@ namespace EngineNS.GamePlay
         public virtual void BeginDestroy()
         {
             McObject?.Get()?.BeginDestroy(this);
+            PrefabPoolManager.Dispose();
         }
         [Rtti.Meta]
         public async System.Threading.Tasks.Task InitViewportSlate(

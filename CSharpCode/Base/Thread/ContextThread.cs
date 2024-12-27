@@ -9,21 +9,18 @@ namespace EngineNS.Thread
     public class TtContextThread
     {
         public static List<WeakReference<TtContextThread>> AllContexts = new List<WeakReference<TtContextThread>>();
-        public static int TotalThreadEvents
+        public static int GetTotalContinueEventNumber(TtContextThread thread)
         {
-            get 
-            { 
-                int count = 0;
-                foreach (var i in AllContexts)
+            int count = 0;
+            foreach (var i in AllContexts)
+            {
+                TtContextThread context;
+                if (i.TryGetTarget(out context))
                 {
-                    TtContextThread context;
-                    if (i.TryGetTarget(out context))
-                    {
-                        count += context.TotalEvents;
-                    }
+                    count += context.GetContinueEventNumber(thread);
                 }
-                return count;
             }
+            return count;
         }
         [ThreadStatic]
         public static TtContextThread CurrentContext;
@@ -124,10 +121,11 @@ namespace EngineNS.Thread
             }
             mThread = null;
         }
-        public virtual void FlushAllThreadEvents()
+        public void FlushAllThreadEvents(TtContextThread thread)
         {
+            System.Diagnostics.Debug.Assert(TtContextThread.CurrentContext.ThreadId != TtEngine.Instance.ThreadMain.ThreadId);
             var t1 = Support.TtTime.HighPrecision_GetTickCount();
-            while (TotalThreadEvents > 0)
+            while (TtContextThread.GetTotalContinueEventNumber(thread) + thread.ContinueNum > 0)
             {
                 FContextTickableManager.GetInstance().ThreadTick();
                 TickAwaitEvent();
@@ -136,11 +134,12 @@ namespace EngineNS.Thread
             var t2 = Support.TtTime.HighPrecision_GetTickCount();
             if (t2 - t1 > 20000)
             {
-                Profiler.Log.WriteLine<Profiler.TtThreadGategory>(Profiler.ELogTag.Warning, $"FlushAllThreadEvents Time = {(t2 - t1)/1000} ms");
+                Profiler.Log.WriteLine<Profiler.TtThreadGategory>(Profiler.ELogTag.Warning, $"FlushAllThreadEvents({thread.Name}) Time = {(t2 - t1)/1000} ms");
             }
         }
         public void FlushToSemephore(TtSemaphore smp)
         {
+            System.Diagnostics.Debug.Assert(TtContextThread.CurrentContext.ThreadId != TtEngine.Instance.ThreadMain.ThreadId);
             var t1 = Support.TtTime.HighPrecision_GetTickCount();
             while (true)
             {
@@ -243,6 +242,16 @@ namespace EngineNS.Thread
         public int ContinueNum
         {
             get { return ContinueEvents.Count; }
+        }
+        public int GetContinueEventNumber(TtContextThread thread)
+        {
+            int count = 0;
+            foreach (var i in AsyncEvents)
+            {
+                if (i.ContinueThread == thread)
+                    count++;
+            }
+            return count;
         }
         public int TotalEvents
         {

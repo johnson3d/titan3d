@@ -696,6 +696,9 @@ namespace EngineNS.Graphics.Mesh
             if (atomType == null)
                 atomType = Rtti.TtTypeDescGetter<TtAtom>.TypeDesc;
 
+            if (subMesh >= MaterialMesh.SubMeshes.Count)
+                return false;
+
             var sbMesh = MaterialMesh.SubMeshes[subMesh];
             sbMesh.Mesh = mesh;
             //if (sbMesh.Materials.Count > materials.Count)

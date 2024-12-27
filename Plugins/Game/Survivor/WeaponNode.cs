@@ -103,7 +103,7 @@ namespace Survivor
             {
                 weapon.Element.Parent = null;
                 WeaponPrefabs.Remove(weapon);
-                TtEngine.Instance.PrefabPoolManager.ReleasePrefab(weapon.Element);
+                TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(weapon.Element);
             }
             mBeRemoved.Clear();
             base.Tick(world);
@@ -113,7 +113,7 @@ namespace Survivor
             var weaponPrefabName = RName.ParseFrom(WeaponData.Shape);
             if (weaponPrefabName != null)
             {
-                var WeaponPrefab = EngineNS.TtEngine.Instance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape));
+                var WeaponPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape));
                 if (WeaponPrefab != null)
                 {
                     WeaponPrefab.Parent = WeaponNode.Parent.Parent;
@@ -165,7 +165,7 @@ namespace Survivor
             {
                 weapon.Parent = null;
                 WeaponPrefabs.Remove(weapon);
-                TtEngine.Instance.PrefabPoolManager.ReleasePrefab(weapon);
+                TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(weapon);
             }
             mBeRemoved.Clear();
             base.Tick(world);
@@ -175,7 +175,7 @@ namespace Survivor
             var weaponPrefabName = RName.ParseFrom(WeaponData.Shape);
             if(weaponPrefabName != null)
             {
-                var WeaponPrefab = EngineNS.TtEngine.Instance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape));
+                var WeaponPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape));
                 if (WeaponPrefab != null)
                 {
                     WeaponPrefab.Parent = WeaponNode.Parent;
@@ -217,7 +217,7 @@ namespace Survivor
             {
                 weapon.Parent = null;
                 WeaponPrefabs.Remove(weapon);
-                TtEngine.Instance.PrefabPoolManager.ReleasePrefab(weapon);
+                TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(weapon);
             }
             mBeRemoved.Clear();
             base.Tick(world);
@@ -227,7 +227,7 @@ namespace Survivor
             var weaponPrefabName = RName.ParseFrom(WeaponData.Shape);
             if (weaponPrefabName != null)
             {
-                var WeaponPrefab = EngineNS.TtEngine.Instance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape));
+                var WeaponPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape));
                 if (WeaponPrefab != null)
                 {
                     WeaponPrefab.Parent = WeaponNode.Parent;

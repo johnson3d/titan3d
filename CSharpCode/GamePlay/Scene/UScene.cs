@@ -107,6 +107,11 @@ namespace EngineNS.GamePlay.Scene
             ClearChildren();
             TtEngine.Instance?.SceneManager.UnloadScene(this.AssetName);
         }
+        protected override void UnsafeNullParent()
+        {
+            base.UnsafeNullParent();
+            World = null;
+        }
         public TtSceneData SceneData
         {
             get

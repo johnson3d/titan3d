@@ -6,9 +6,9 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
-	public class TtPrefabPoolManager
+	public class TtPrefabPoolManager : IDisposable
 	{
-		public Dictionary<RName, TtPrefabPool> Pools = new Dictionary<RName, TtPrefabPool>();
+        public Dictionary<RName, TtPrefabPool> Pools = new Dictionary<RName, TtPrefabPool>();
         public void RegPool(RName prefabName, TtPrefabPool pool)
         {
             lock (Pools)
@@ -16,18 +16,23 @@ namespace EngineNS.GamePlay
                 Pools.Add(prefabName, pool);
             }
         }
-        public void Cleanup()
+        private bool IsDisposed = false;
+        public void Dispose()
         {
+            IsDisposed = true;
             lock (Pools)
             {
                 foreach (var i in Pools)
                 {
                     i.Value.Cleanup();
                 }
+                Pools.Clear();
             }
         }
         public TtPrefabNode CreatePrefab(RName prefabName)
         {
+            if (IsDisposed)
+                return null;
             if (Pools.ContainsKey(prefabName))
             {
                 return Pools[prefabName].QueryObjectSync();
@@ -35,18 +40,24 @@ namespace EngineNS.GamePlay
             else
             {
                 var pool = RegPool(prefabName);
+                if (pool == null)
+                    return null;
                 return pool.QueryObjectSync();
             }   
         }
         public void ReleasePrefab(TtPrefabNode prefabNode)
         {
-            if(Pools.ContainsKey(prefabNode.PrefabName))
+            if (IsDisposed)
+                return;
+            if (Pools.ContainsKey(prefabNode.PrefabName))
             {
                 Pools[prefabNode.PrefabName].ReleaseObject(prefabNode);
             }
         }
         private TtPrefabPool RegPool(RName prefabName)
         {
+            if (IsDisposed)
+                return null;
             var pool = new TtPrefabPool(prefabName);
             RegPool(prefabName, pool);
             return pool;
@@ -96,7 +107,7 @@ namespace EngineNS.GamePlay
             TtScene scene)
         {
             EngineNS.GamePlay.Scene.TtNode root = scene;
-            var newPrefab = TtEngine.Instance.PrefabPoolManager.CreatePrefab(prefab);
+            var newPrefab = TtEngine.Instance.GameInstance?.PrefabPoolManager.CreatePrefab(prefab);
             newPrefab.Parent = root;
             return newPrefab;
         }
@@ -104,14 +115,14 @@ namespace EngineNS.GamePlay
         public static void DestroyPrefab(TtPrefabNode prefab)
         {
             prefab.Parent = null;
-            TtEngine.Instance.PrefabPoolManager.ReleasePrefab(prefab);
+            TtEngine.Instance.GameInstance?.PrefabPoolManager.ReleasePrefab(prefab);
         }
     }
 }
 
-namespace EngineNS
+namespace EngineNS.GamePlay
 {
-    partial class TtEngine
+    public partial class TtGameInstance
     {
         public GamePlay.TtPrefabPoolManager PrefabPoolManager { get; } = new GamePlay.TtPrefabPoolManager();
     }

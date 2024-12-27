@@ -55,6 +55,10 @@ namespace EngineNS.Thread
             Waiter = null;
             mCount = -1;
         }
+        public void Add()
+        {
+            System.Threading.Interlocked.Increment(ref mCount);
+        }
         public void Release()
         {
             System.Threading.Interlocked.Decrement(ref mCount);

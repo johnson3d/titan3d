@@ -40,6 +40,8 @@ namespace EngineNS.GamePlay.Scene
             }
             set
             {
+                if (PrefabName == value)
+                    return;
                 if (PrefabNodeData == null)
                     return;
                 var save = PrefabNodeData.PrefabName;

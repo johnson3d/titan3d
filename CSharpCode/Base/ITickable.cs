@@ -58,6 +58,7 @@ namespace EngineNS
             {
                 i.Cleanup(host);
             }
+            Members.Clear();
         }
         public void TickLogic(object host, float ellapse)
         {

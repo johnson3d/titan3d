@@ -32,7 +32,14 @@ namespace EngineNS.Editor.Forms
             {
                 if (ImGuiAPI.BeginTabBar("Memory", ImGuiTabBarFlags_.ImGuiTabBarFlags_None))
                 {
-                    if(ImGuiAPI.CollapsingHeader("Drawcall", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                    if (ImGuiAPI.CollapsingHeader("Object", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
+                    {
+                        ImGuiAPI.Text($"TtGameInstance Count = {GamePlay.TtGameInstance.NodeAliveNumber};");
+                        ImGuiAPI.Text($"TtMacrossGetter Count = {TtEngine.Instance.MacrossModule.mGetters.Count};");
+                        ImGuiAPI.Text($"TtWorld Count = {GamePlay.TtWorld.NodeAliveNumber};");
+                        ImGuiAPI.Text($"TtNode Count = {GamePlay.Scene.TtNode.NodeAliveNumber};");
+                    }
+                    if (ImGuiAPI.CollapsingHeader("Drawcall", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                     {
                         ImGuiAPI.Text($"GraphicsDrawcall = {TtStatistic.Instance.GraphicsDrawcall.Value} / {TtStatistic.Instance.NativeGraphicsDrawcall}");
                         ImGuiAPI.Text($"ComputeDrawcall = {TtStatistic.Instance.ComputeDrawcall.Value} / {TtStatistic.Instance.NativeComputeDrawcall}");
@@ -94,7 +101,6 @@ namespace EngineNS.Editor.Forms
 
                     if (ImGuiAPI.CollapsingHeader("Assembly", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_None))
                     {
-                        ImGuiAPI.Text($"TtMacrossGetter Count = {TtEngine.Instance.MacrossModule.mGetters.Count};");
                         ImGuiAPI.Text($"TtAssemblyDesc Count = {Rtti.TtAssemblyDesc.GetNumOfInstance()};");
                         foreach(var s in Rtti.TtTypeDescManager.Instance.Services)
                         {

@@ -20,7 +20,11 @@ namespace EngineNS.Editor
             PresentWindow?.UnregEventProcessor(this);
             RenderPolicy?.Dispose();
             RenderPolicy = null;
-            mVisParameter = null;
+            if (mVisParameter != null)
+            {
+                mVisParameter.Reset();
+                mVisParameter = null;
+            }
             base.Dispose();
         }
         new protected async System.Threading.Tasks.Task<bool> Initialize_Default(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)

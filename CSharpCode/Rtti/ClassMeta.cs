@@ -2,7 +2,6 @@
 using EngineNS.Support;
 using EngineNS.Thread.Async;
 using EngineNS.UI;
-using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -11,6 +10,10 @@ namespace EngineNS.Rtti
 {
     public class TtDummyAttribute : Attribute
     {
+    }
+    public class TtReflectionAttribute : Attribute
+    {
+        public bool DontSet = false;
     }
     public class MetaParameterAttribute : Attribute
     {

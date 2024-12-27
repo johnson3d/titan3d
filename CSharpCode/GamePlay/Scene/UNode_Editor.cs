@@ -7,10 +7,6 @@ namespace EngineNS.GamePlay.Scene
 {
     public partial class TtNode : Graphics.Pipeline.IProxiable
     {
-        ~TtNode()
-        {
-            TtEngine.Instance?.GfxDevice.HitproxyManager.UnmapProxy(this);
-        }
         public virtual void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
         {
             return;

@@ -8,7 +8,7 @@ namespace EngineNS.Bricks.PhysicsCore
 {
     [Macross.TtMacross]
     [TtMacrossNodeCustomCodeGen]
-    public partial class TtPhyEventMacrossBase : ISceneNodeMacross<object>
+    public partial class TtPhyEventMacrossBase : TtSceneNodeMacrossBase
     {
         [Rtti.Meta]
         public virtual void OnContact(TtNode selfNode, TtNode otherNode)

@@ -10,6 +10,11 @@ namespace EngineNS.GamePlay
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtWorld : IDisposable
     {
+        static int mNodeAliveNumber = 0;
+        public static int NodeAliveNumber
+        {
+            get => mNodeAliveNumber;
+        }
         public void Dispose()
         {
             //Root.ClearChildren();
@@ -26,6 +31,12 @@ namespace EngineNS.GamePlay
 
             mRoot = new Scene.TtScene();
             mRoot.World = this;
+            System.Threading.Interlocked.Increment(ref mNodeAliveNumber);
+        }
+        ~TtWorld()
+        {
+            Dispose();
+            System.Threading.Interlocked.Decrement(ref mNodeAliveNumber);
         }
         public bool IsGameWorld { get; set; } = false;
         TtMemberTickables mMemberTickables = new TtMemberTickables();
@@ -109,6 +120,10 @@ namespace EngineNS.GamePlay
         #region Culling
         public class TtVisParameter
         {
+            public TtVisParameter()
+            {
+
+            }
             public enum EVisCull
             {
                 Normal,
@@ -145,11 +160,20 @@ namespace EngineNS.GamePlay
             public delegate bool FOnVisitNode(Scene.TtNode node, TtVisParameter arg);
             public FOnVisitNode OnVisitNode = null;
             public FOnVisitNode IsGatherVisibleMeshes = null;
-            public void Reset()
+            public void ClearVisibles()
             {
                 AABB.InitEmptyBox();
                 VisibleMeshes?.Clear();
                 VisibleNodes?.Clear();
+            }
+            public void Reset()
+            {
+                ClearVisibles();
+                World = null;
+                OnVisitNode = null;
+                IsGatherVisibleMeshes = null;
+                TransientVB = null;
+                TransientIB = null;
             }
             public void MergeAABB(in DBoundingBox aabb)
             {
@@ -218,11 +242,9 @@ namespace EngineNS.GamePlay
         }
         public virtual void GatherVisibleMeshes(TtVisParameter rp)
         {
-            if (rp.CullCamera != null)
-                rp.CullCamera.VisParameter = rp;
             using (new Profiler.TimeScopeHelper(ScopeGatherVisibleMeshes))
             {
-                rp.Reset();
+                rp.ClearVisibles();
 
                 OnVisitNode_GatherVisibleMeshes(Root, rp);
             }   

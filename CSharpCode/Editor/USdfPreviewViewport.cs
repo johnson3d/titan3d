@@ -20,6 +20,11 @@ namespace EngineNS.Editor
             PresentWindow?.UnregEventProcessor(this);
             RenderPolicy?.Dispose();
             RenderPolicy = null;
+            if (mVisParameter != null)
+            {
+                mVisParameter.Reset();
+                mVisParameter = null;
+            }
             base.Dispose();
         }
         protected override void OnClientChanged(bool bSizeChanged)

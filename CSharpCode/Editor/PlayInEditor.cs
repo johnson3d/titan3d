@@ -196,36 +196,22 @@ namespace EngineNS
 
             return ret;
         }
-
         public void EndPlayInEditor()
         {
-            var wr =  EndPlayInEditor_Impl();
-            if (wr == null)
+            if (this.GameInstance == null)
                 return;
-            for (int i = 0; wr.IsAlive && (i < 10); i++)
-            {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-            }
-
-            if (wr.IsAlive)
-            {
-                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, "EndPIE: GameInstance is alive");
-            }
-            else
-            {
-                for (int i = 0; i < 10; i++)
-                {
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                }
-            }
-            TtEngine.Instance.PlayMode = EPlayMode.Editor;
+            TtEngine.Instance.TaskCollector.AddWaitTask(AwaitEndPlayInEditor());
         }
-        private WeakReference EndPlayInEditor_Impl()
+        public async Thread.Async.TtTask AwaitEndPlayInEditor()
+        {
+            await TtEngine.Instance.EventPoster.AwaitSemaphore(this.GameInstance.GameSemaphore);
+
+            EndPlayInEditorImpl();
+        }
+        private void EndPlayInEditorImpl()
         {
             if (this.GameInstance == null)
-                return null;
+                return;
 
             TtEngine.Instance?.TickableManager.RemoveTickable(this.GameInstance);
             this.GameInstance.BeginDestroy();
@@ -233,7 +219,13 @@ namespace EngineNS
             this.GameInstance.Dispose();
             this.GameInstance = null;
 
-            return wr;
+            for (int i = 0; i < 5; i++)
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+
+            TtEngine.Instance.PlayMode = EPlayMode.Editor;
         }
     }
 }

@@ -14,7 +14,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)GameMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Hero.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossSurvivorGame.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Monster.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Weapon.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MonsterNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WeaponNode.cs" />
   </ItemGroup>
 </Project>

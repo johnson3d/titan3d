@@ -2,6 +2,7 @@ using EngineNS.Bricks.GpuDriven;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace EngineNS.GamePlay.Scene
 {
@@ -78,6 +79,20 @@ namespace EngineNS.GamePlay.Scene
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtNode
     {
+        static int mNodeAliveNumber = 0;
+        public static int NodeAliveNumber
+        {
+            get => mNodeAliveNumber;
+        }
+        public TtNode()
+        {
+            System.Threading.Interlocked.Increment(ref mNodeAliveNumber);
+        }
+        ~TtNode()
+        {
+            TtEngine.Instance?.GfxDevice.HitproxyManager.UnmapProxy(this);
+            System.Threading.Interlocked.Decrement(ref mNodeAliveNumber);
+        }
         public struct FTreeCopyStat
         {
             public void Reset()
@@ -88,6 +103,10 @@ namespace EngineNS.GamePlay.Scene
             public int SuccessNode;
             public int FailureNode;
         }
+        protected virtual void OnNodeCopyTreeData(TtNode src, ref FTreeCopyStat stat)
+        {
+
+        }
         public static void NodeTreeCopyData(TtNode tar, TtNode src, ref FTreeCopyStat stat)
         {
             var type = src.GetType();
@@ -97,12 +116,36 @@ namespace EngineNS.GamePlay.Scene
                 return;
             }
             stat.SuccessNode++;
-            var props = type.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+            var props = type.GetProperties();
             foreach (var prop in props)
             {
                 if (prop.CanWrite == false)
                     continue;
+                var attr = prop.GetCustomAttribute<Rtti.TtReflectionAttribute>(true);
+                var needSet = attr != null;
+                if (needSet == false)
+                    continue;
+                if (attr != null && attr.DontSet)
+                    continue;
                 prop.SetValue(tar, prop.GetValue(src));
+            }
+
+            if (src.NodeData != null && tar.NodeData != null)
+            {
+                type = src.NodeData.GetType();
+                props = type.GetProperties();
+                foreach (var prop in props)
+                {
+                    if (prop.CanWrite == false)
+                        continue;
+                    var attr = prop.GetCustomAttribute<Rtti.TtReflectionAttribute>(true);
+                    var needSet = attr != null;
+                    if (needSet == false)
+                        continue;
+                    if (attr != null && attr.DontSet)
+                        continue;
+                    prop.SetValue(tar.NodeData, prop.GetValue(src.NodeData));
+                }
             }
 
             if (tar.Children.Count != src.Children.Count)
@@ -114,6 +157,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 NodeTreeCopyData(tar.Children[i], src.Children[i], ref stat);
             }
+            tar.OnNodeCopyTreeData(src, ref stat);
         }
         public virtual void Dispose()
         {
@@ -624,9 +668,12 @@ namespace EngineNS.GamePlay.Scene
         #endregion
 
         #region Link
-        private void UnsafeNullParent()
+        protected virtual void UnsafeNullParent()
         {
-            ParentScene?.FreeId(this);
+            if (ParentScene != null)
+            {
+                ParentScene.FreeId(this);
+            }
             mParent = null;
         }
         public void ClearChildren()

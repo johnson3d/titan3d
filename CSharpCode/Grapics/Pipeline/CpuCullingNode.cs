@@ -12,6 +12,11 @@ namespace EngineNS.Graphics.Pipeline
         {
             Name = "CpuCulling";
         }
+        ~TtCpuCullingNode()
+        {
+            mVisParameter.Reset();
+        }
+
         public override void InitNodePins()
         {
             VisiblesOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;

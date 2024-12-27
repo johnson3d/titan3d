@@ -71,21 +71,6 @@ namespace Survivor
 
     }
 
-    public class TtWeapon : EngineNS.GamePlay.Scene.TtSceneMacrossBase
-    {
-        public static TtWeapon CreateWeapon(TtWeaponData weaponData)
-        {
-            var weapon = new TtWeapon();
-            weapon.WeaponData = weaponData;
-            
-            return weapon;
-        }
-        protected TtWeaponData WeaponData = null;
-        public void Init()
-        {
-
-        }
-    }
     public class TtWeaponManager : EngineNS.Bricks.DataSet.TtDataManager<TtWeaponData>
     {
 

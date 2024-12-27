@@ -4,9 +4,7 @@ using EngineNS.Graphics.Pipeline.Common;
 using System.Threading.Tasks;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.GamePlay;
-using NPOI.HSSF.Record.AutoFilter;
 using System.Diagnostics;
-using NPOI.SS.Formula.Functions;
 
 namespace EngineNS.Bricks.GpuDriven
 {
@@ -265,8 +263,8 @@ namespace EngineNS.Bricks.GpuDriven
                 attachment.Uav = VisClusters.Uav;
                 attachment.Srv = VisClusters.Srv;
             }
-
         }
+        public GamePlay.TtWorld.TtVisParameter VisParameter = new();
         public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             if (CBCameraFrustum != null)
@@ -277,7 +275,9 @@ namespace EngineNS.Bricks.GpuDriven
             var cmd = BasePass.DrawCmdList;
             using (new NxRHI.TtCmdListScope(cmd))
             {
-                PrepareCullClusterInfos(cmd.mCoreObject, world, policy.DefaultCamera.VisParameter);
+                VisParameter.World = world;
+                VisParameter.ClearVisibles();
+                PrepareCullClusterInfos(cmd.mCoreObject, world, VisParameter);
 
                 NxRHI.FBufferWriter bfWriter = new NxRHI.FBufferWriter();
                 bfWriter.Buffer = VisClusters.GpuBuffer.mCoreObject;

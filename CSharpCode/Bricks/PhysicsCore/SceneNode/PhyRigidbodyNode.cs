@@ -125,6 +125,10 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
 
             return true;
         }
+        protected override void OnNodeCopyTreeData(TtNode src, ref FTreeCopyStat stat)
+        {
+            mMacrossGetter = null;
+        }
         public virtual void OnActorTypeChange(EPhyActorType newType)
         {
             PhyActor.RemoveFromScene(ParentScene.PxSceneMB.PxScene);
@@ -164,9 +168,12 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         {
             base.OnParentChanged(prev, cur);
             PhyActor.TagNode = Parent;
-            Parent.UpdateAbsTransform();
+            Parent?.UpdateAbsTransform();
             OnAbsTransformChanged();
-            PhyActor.AddToScene(ParentScene.PxSceneMB.PxScene);
+            if(ParentScene != null)
+            {
+                //PhyActor.AddToScene(ParentScene.PxSceneMB.PxScene);
+            }
         }
         protected override void OnAbsTransformChanged()
         {
@@ -185,7 +192,15 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         {
             base.OnParentSceneChanged(prev, cur);
             //TODO: Remove from Prev-Scene if exist
-            PhyActor.AddToScene(ParentScene.PxSceneMB.PxScene);
+            if (prev != null)
+            {
+                PhyActor.RemoveFromScene(prev.PxSceneMB.PxScene);
+            }
+
+            if (ParentScene != null)
+            {
+                PhyActor.AddToScene(ParentScene.PxSceneMB.PxScene);
+            }
         }
 
         public void OnContact(TtNode selfNode, TtNode otherNode)

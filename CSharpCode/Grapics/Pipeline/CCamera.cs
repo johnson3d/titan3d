@@ -12,7 +12,6 @@ namespace EngineNS.Graphics.Pipeline
             mCoreObject.SetReverseZ(TtEngine.Instance.Config.IsReverseZ);
         }
         public string Name { get; set; }
-        public GamePlay.TtWorld.TtVisParameter VisParameter;
         public TtGraphicsBuffers.TtTargetViewIdentifier TargetViewIdentifier = new TtGraphicsBuffers.TtTargetViewIdentifier();
         NxRHI.TtCbView mPerCameraCBuffer;
         public NxRHI.TtCbView PerCameraCBuffer
