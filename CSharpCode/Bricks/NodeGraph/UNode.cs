@@ -364,7 +364,7 @@ namespace EngineNS.Bricks.NodeGraph
                 OldValue = NewValue;
             }
         }
-        public static EngineNS.Vector2 CalcTextSize(string text)
+        public static EngineNS.Vector2 CalcTextSize(string text, bool withDPIScale = false)
         {
             unsafe
             {
@@ -379,8 +379,15 @@ namespace EngineNS.Bricks.NodeGraph
                     tmp.Y = 18;
                     return tmp;
                 }
+
+                var textSize = ImGuiAPI.CalcTextSize(text, false, -1.0f);
+                if(!withDPIScale)
+                {
+                    var dpiScale = ImGuiAPI.GetWindowDpiScale();
+                    textSize /= dpiScale;
+                }
+                return textSize;
             }            
-            return ImGuiAPI.CalcTextSize(text, false, -1.0f);
         }
         public virtual void OnPositionChanged()
         {

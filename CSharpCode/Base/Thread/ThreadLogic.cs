@@ -40,6 +40,7 @@ namespace EngineNS.Thread
         }= false;
         public override void Tick()
         {
+            //TtEngine.Instance.InputSystem.TickImpl(TtEngine.Instance);
             LogicBegin.WaitOne();
             LogicBegin.Reset();
             IsTicking = true;

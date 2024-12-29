@@ -314,7 +314,22 @@ namespace {namespaceName}
         public EngineNS.UI.Trigger.TtTriggerCollection Triggers => {triggerDicName};
         public string PropertyNameInHost;
         public UInt64 PropertyNameInHostHash;
-        public EngineNS.UI.Controls.TtUIElement HostElement;";
+        private System.WeakReference<EngineNS.UI.Controls.TtUIElement> mHostElementRef = new System.WeakReference<EngineNS.UI.Controls.TtUIElement>(null);
+        [System.ComponentModel.Browsable(false)]        
+        public EngineNS.UI.Controls.TtUIElement HostElement
+        {{
+            get
+            {{
+                EngineNS.UI.Controls.TtUIElement outValue;
+                if(mHostElementRef.TryGetTarget(out outValue))
+                    return outValue;
+                return null;
+            }}
+            set
+            {{
+                mHostElementRef.SetTarget(value);
+            }}
+        }}";
 
             }
             //Dictionary<ITypeSymbol, List<ISymbol>> symbolTypeDic = new Dictionary<ITypeSymbol, List<ISymbol>>();
@@ -836,9 +851,10 @@ namespace {namespaceName}
 
             if(HostElement != null && !string.IsNullOrEmpty(PropertyNameInHost))
             {{
-                var hostBP = HostElement.GetBindableProperty(PropertyNameInHostHash, PropertyNameInHost);
-                if(HostElement.HasBinded(hostBP))
-                    HostElement.SetValue(this, hostBP);
+                var hostElementTarget = HostElement;
+                var hostBP = hostElementTarget.GetBindableProperty(PropertyNameInHostHash, PropertyNameInHost);
+                if(hostElementTarget.HasBinded(hostBP))
+                    hostElementTarget.SetValue(this, hostBP);
             }}
         }}
 ";
@@ -1049,9 +1065,10 @@ namespace {namespaceName}
             }}
             if(HostElement != null && !string.IsNullOrEmpty(PropertyNameInHost))
             {{
-                var hostBP = HostElement.GetBindableProperty(PropertyNameInHostHash, PropertyNameInHost);
-                if(HostElement.HasBinded(hostBP))
-                    HostElement.SetValue(this, hostBP);
+                var hostElementTarget = HostElement;
+                var hostBP = hostElementTarget.GetBindableProperty(PropertyNameInHostHash, PropertyNameInHost);
+                if(hostElementTarget.HasBinded(hostBP))
+                    hostElementTarget.SetValue(this, hostBP);
             }}
         }}";
             }

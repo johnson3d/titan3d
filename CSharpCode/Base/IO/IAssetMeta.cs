@@ -570,8 +570,7 @@ namespace EngineNS.IO
         }
         public virtual unsafe void OnDraw(in ImDrawList cmdlist, in Vector2 offset, in Vector2 sz, EGui.Controls.TtContentBrowser ContentBrowser, float scale)
         {
-            var imViewPort = ImGuiAPI.GetWindowViewport();
-            var dpiScale = imViewPort->DpiScale;
+            var dpiScale = ImGuiAPI.GetWindowDpiScale();
             scale *= dpiScale;
 
             var snapSize = sz.X * 0.9f;

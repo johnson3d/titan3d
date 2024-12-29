@@ -9,7 +9,7 @@ using System.Text;
 namespace EngineNS.UI
 {
     [Rtti.Meta]
-    public class TtUIAssetAMeta : IO.IAssetMeta
+    public class TtUIAssetAMeta : IO.IAssetMeta, IMacrossMeta
     {
         [Rtti.Meta]
         public Vector2i DesignResolution
@@ -22,6 +22,14 @@ namespace EngineNS.UI
         {
             get => TtUIAsset.AssetExt;
         }
+
+        [Rtti.Meta]
+        public bool IsDisable
+        {
+            get;
+            set;
+        } = false;
+
         public override async System.Threading.Tasks.Task<IO.IAsset> LoadAsset()
         {
             //return await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(GetAssetName());
@@ -38,6 +46,11 @@ namespace EngineNS.UI
         public override void OnShowIconTimout(int time)
         {
             base.OnShowIconTimout(time);
+        }
+
+        public string GetDisablePredefineMacrosString()
+        {
+            return "disable_ui_" + AssetId.ToString().Replace("-", "_");
         }
     }
     [Rtti.Meta]
@@ -89,14 +102,14 @@ namespace EngineNS.UI
         }
         public void SaveAssetTo(RName name)
         {
-            var ameta = this.GetAMeta();
+            var ameta = this.GetAMeta() as TtUIAssetAMeta;
             if (ameta == null)
             {
                 var asset = TtEngine.Instance.AssetMetaManager.NewAsset<TtUIAsset>(name);
-                ameta = asset.GetAMeta();
+                ameta = asset.GetAMeta() as TtUIAssetAMeta;
             }
             UpdateAMetaReferences(ameta);
-            ameta.SaveAMeta(this);
+            TtMacross.UpdateAMetaReferences(MacrossEditor, ameta);
 
             MacrossEditor.AssetName = name;
             MacrossEditor.DefClass.ClassName = name.PureName;
@@ -107,6 +120,8 @@ namespace EngineNS.UI
             MacrossEditor.SaveClassGraph(AssetName);
             MacrossEditor.GenerateCode();
             MacrossEditor.CompileCode();
+
+            ameta.SaveAMeta(this);
 
             if(UIHost == null)
             {

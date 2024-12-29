@@ -21,6 +21,7 @@ namespace EngineNS.Thread
             mMaxActiveThreads = 0;
         }
         private static object mLocker = "lockObject";
+        public override bool IsTaskPoolThread() { return true; }
         public TtThreadPool()
         {
             Interval = 0;

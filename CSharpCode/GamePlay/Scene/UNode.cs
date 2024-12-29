@@ -1139,9 +1139,9 @@ namespace EngineNS.GamePlay.Scene
             meta.CopyObjectMetaField(data, NodeData);
             var node = Rtti.TtTypeDescManager.CreateInstance(this.GetType()) as TtNode;
             EBoundVolumeType bvType = EBoundVolumeType.None;
-            if (NodeData.BoundVolume != null)
+            if (data.BoundVolume != null)
             {
-                var t = NodeData.BoundVolume.GetType();
+                var t = data.BoundVolume.GetType();
                 if (t == typeof(UBoxBV))
                 {
                     bvType = EBoundVolumeType.Box;
@@ -1151,7 +1151,9 @@ namespace EngineNS.GamePlay.Scene
                     bvType = EBoundVolumeType.Sphere;
                 }
             }
-            await node.InitializeNode(world, data, bvType, this.Placement?.GetType());
+            data.BoundVolume.HostNode = node;
+            data.Placement.HostNode = node;
+            await node.InitializeNode(world, data, bvType, data.Placement?.GetType());
             node.Placement.Position = this.Placement.Position;
             node.Placement.Quat = this.Placement.Quat;
             node.Placement.Scale = this.Placement.Scale;

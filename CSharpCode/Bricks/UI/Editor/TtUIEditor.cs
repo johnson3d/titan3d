@@ -252,11 +252,12 @@ namespace EngineNS.UI.Editor
         bool mIsSimulateMode = false;
         void Save()
         {
+            //TtEngine.Instance.UIManager.Save(AssetName, mUIHost.Children[0]);
+            //UIAsset.MacrossEditor.SaveClassGraph(AssetName);
+            //UIAsset.MacrossEditor.GenerateCode();
+            //UIAsset.MacrossEditor.CompileCode();
+            UIAsset.UIHost = mUIHost;
             UIAsset.SaveAssetTo(UIAsset.AssetName);
-            TtEngine.Instance.UIManager.Save(AssetName, mUIHost.Children[0]);
-            UIAsset.MacrossEditor.SaveClassGraph(AssetName);
-            UIAsset.MacrossEditor.GenerateCode();
-            UIAsset.MacrossEditor.CompileCode();
         }
         protected unsafe void DrawToolBar()
         {

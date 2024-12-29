@@ -57,6 +57,7 @@ namespace EngineNS.GamePlay
         }
         public TtGameInstance()
         {
+            this.PrefabPoolManager.World = GameWorld;
             System.Threading.Interlocked.Increment(ref mNodeAliveNumber);
         }
         ~TtGameInstance()

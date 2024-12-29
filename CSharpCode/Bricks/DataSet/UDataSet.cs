@@ -405,6 +405,9 @@ namespace EngineNS.Bricks.DataSet
             [Rtti.MetaParameter(FilterType = typeof(TtDataProvider), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type type = null)
         {
+            if (MainTable == null)
+                return null;
+
             var Result = MainTable.FindByKey(propName, key, bSorted, type) as T;
             if (Result == null)
             {

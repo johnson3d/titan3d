@@ -85,6 +85,69 @@ namespace EngineNS.Rtti
     {
         public MetaAttribute MetaAttribute { get; private set; }
         private List<TtClassMeta> mSubClasses = null;
+        public static object CloneProperty(object src)
+        {
+            if (src == null)
+                return null;
+            var prop = src.GetType();
+            if (prop.IsValueType)
+                return src;
+            else if (prop.IsEnum)
+                return src;
+            else if (prop == typeof(string))
+                return src;
+            else if (prop == typeof(TtTypeDesc))
+                return src;
+            var meta = Rtti.TtClassMetaManager.Instance.TryGetMeta(TtTypeDesc.TypeStr(prop));
+            if (meta != null)
+            {
+                var result = Rtti.TtTypeDescManager.CreateInstance(prop);
+                meta.CopyObjectMetaField(result, src);
+                return result;
+            }
+            return src;
+        }
+        public static void CopyObject(object tar, object src)
+        {
+            if (tar is System.Collections.IList && src.GetType() == tar.GetType())
+            {
+                var Tarlst = tar as System.Collections.IList;
+                var Srclst = src as System.Collections.IList;
+                Tarlst.Clear();
+                for (int i = 0; i < Srclst.Count; i++)
+                {
+                    Tarlst.Add(CloneProperty(Srclst[i]));
+                }
+                return;
+            }
+            else if (tar is System.Collections.IDictionary && src.GetType() == tar.GetType())
+            {
+                var Tarlst = tar as System.Collections.IDictionary;
+                var Srclst = src as System.Collections.IDictionary;
+                Tarlst.Clear();
+                var i = Srclst.GetEnumerator();
+                while (i.MoveNext())
+                {
+                    Tarlst.Add(CloneProperty(i.Key), CloneProperty(i.Value));
+                }
+                return;
+            }
+
+            var tarType = tar.GetType();
+            var srcType = src.GetType();
+            foreach (var i in src.GetType().GetProperties())
+            {
+                var tarProp = tarType.GetProperty(i.Name);
+                if (tarProp == null)
+                    continue;
+                var srcProp = i;
+                if (tarProp.PropertyType == srcProp.PropertyType && tarProp.CanWrite)
+                {
+                    var v = CloneProperty(srcProp.GetValue(src));
+                    tarProp.SetValue(tar, v);
+                }
+            }
+        }
         public void CopyObjectMetaField(object tar, object src)
         {
             if(tar is System.Collections.IList && src.GetType() == tar.GetType())
@@ -94,7 +157,7 @@ namespace EngineNS.Rtti
                 Tarlst.Clear();
                 for (int i = 0; i < Srclst.Count; i++)
                 {
-                    Tarlst.Add(Srclst[i]);
+                    Tarlst.Add(CloneProperty(Srclst[i]));
                 }
                 return;
             }
@@ -106,7 +169,7 @@ namespace EngineNS.Rtti
                 var i = Srclst.GetEnumerator();
                 while(i.MoveNext())
                 {
-                    Tarlst.Add(i.Key, i.Value);
+                    Tarlst.Add(CloneProperty(i.Key), CloneProperty(i.Value));
                 }
                 return;
             }
@@ -123,7 +186,7 @@ namespace EngineNS.Rtti
                     continue;
                 if (tarProp.PropertyType == srcProp.PropertyType && tarProp.CanWrite)
                 {
-                    var v = srcProp.GetValue(src);
+                    var v = CloneProperty(srcProp.GetValue(src));
                     tarProp.SetValue(tar, v);
                 }
             }
@@ -1433,6 +1496,13 @@ namespace EngineNS.Rtti
             {
                 return dir + "/a0." + classMeta.MetaDirectoryName;
             }
+        }
+        public TtClassMeta TryGetMeta(string name)
+        {
+            TtClassMeta meta;
+            if (mMetas.TryGetValue(name, out meta))
+                return meta;
+            return null;
         }
         public TtClassMeta GetMeta(string name, bool bTryBuild = true)
         {

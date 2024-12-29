@@ -59,6 +59,22 @@ namespace EngineNS.Bricks.CodeBuilder
         public virtual void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
         {
         }
+
+        public virtual void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+        }
+        public static RName GetRNameFromMacrossType(Rtti.TtTypeDesc type)
+        {
+            if (type != null)
+            {
+                var att = type.GetCustomAttribute<Macross.TtMacrossSignAttribute>(false);
+                if (att != null)
+                {
+                    return RName.GetRName(att.RName_Name, att.RName_Type);
+                }
+            }
+            return null;
+        }
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UExpressionBase@EngineCore", "EngineNS.Bricks.CodeBuilder.UExpressionBase" })]
@@ -207,6 +223,18 @@ namespace EngineNS.Bricks.CodeBuilder
         public virtual void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
         {
         }
+
+        public virtual void GetReferenceMacrossRName(HashSet<RName> rNames)
+        {
+            if (mTypeDesc != null)
+            {
+                var rName = TtCodeObject.GetRNameFromMacrossType(mTypeDesc);
+                if (rName != null)
+                {
+                    rNames.Add(rName);
+                }
+            }
+        }
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UDebuggerSetWatchVariable@EngineCore", "EngineNS.Bricks.CodeBuilder.UDebuggerSetWatchVariable" })]
@@ -299,6 +327,10 @@ namespace EngineNS.Bricks.CodeBuilder
                 retVal += Arguments[i].ToString();
             }
             return retVal;
+        }
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            AttributeType?.GetReferenceMacrossRName(rNames);
         }
     }
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UVariableDeclaration@EngineCore", "EngineNS.Bricks.CodeBuilder.UVariableDeclaration" })]
@@ -486,6 +518,17 @@ namespace EngineNS.Bricks.CodeBuilder
             if(pe != null)
             {
                 pe.CalculateValueString(pe.Type, ev.Value);
+            }
+        }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            VariableType?.GetReferenceMacrossRName(rNames);
+            InitValue?.GetReferenceMacrossRNames(rNames);
+            Comment?.GetReferenceMacrossRNames(rNames);
+            for(int i=0; i<Attributes.Count; i++)
+            {
+                Attributes[i]?.GetReferenceMacrossRNames(rNames);
             }
         }
     }
@@ -827,6 +870,11 @@ namespace EngineNS.Bricks.CodeBuilder
                 pe.CalculateValueString(pe.Type, ev.Value);
             }
         }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            VariableType?.GetReferenceMacrossRName(rNames);
+        }
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMethodDeclaration@EngineCore", "EngineNS.Bricks.CodeBuilder.UMethodDeclaration" })]
@@ -1118,6 +1166,26 @@ namespace EngineNS.Bricks.CodeBuilder
             retStr = retStr.TrimEnd(',') + ")";
             return retStr;
         }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            ReturnValue?.GetReferenceMacrossRNames(rNames);
+            Host?.GetReferenceMacrossRNames(rNames);
+            for(int i=0; i<Arguments.Count; i++)
+            {
+                Arguments[i]?.GetReferenceMacrossRNames(rNames);
+            }
+            for(int i=0; i<LocalVariables.Count; i++)
+            {
+                LocalVariables[i]?.GetReferenceMacrossRNames(rNames);
+            }
+            Comment?.GetReferenceMacrossRNames(rNames);
+            for(int i=0; i<Attributes.Count; i++)
+            {
+                Attributes[i]?.GetReferenceMacrossRNames(rNames);
+            }
+            MethodBody?.GetReferenceMacrossRNames(rNames);
+        }
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UNamespaceDeclaration@EngineCore", "EngineNS.Bricks.CodeBuilder.UNamespaceDeclaration" })]
@@ -1168,6 +1236,14 @@ namespace EngineNS.Bricks.CodeBuilder
         public override string ToString()
         {
             return Namespace;
+        }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            for(int i=0; i<Classes.Count; i++)
+            {
+                Classes[i].GetReferenceMacrossRNames(rNames);
+            }
         }
     }
 
@@ -1333,6 +1409,59 @@ namespace EngineNS.Bricks.CodeBuilder
                 tourAction.Invoke(this, cls);
             }
         }
+        public string GetPredefineMacrosCode()
+        {
+            string predefineMacrosCode = "";
+            if (PredefineMacros.Count > 0)
+            {
+                int index = 0;
+                foreach (var macros in PredefineMacros)
+                {
+                    if (index != 0)
+                        predefineMacrosCode += " && ";
+                    if (macros.NoDefine)
+                        predefineMacrosCode += "!" + macros.MacrosString;
+                    else
+                        predefineMacrosCode += macros.MacrosString;
+                    index++;
+                }
+            }
+            return predefineMacrosCode;
+        }
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            for(int i=0; i<SupperClassNames.Count; i++)
+            {
+                var clsType = Rtti.TtTypeDesc.TypeOfFullName(SupperClassNames[i]);
+                if (clsType == null)
+                    continue;
+                var rName = TtCodeObject.GetRNameFromMacrossType(clsType);
+                if (rName == null)
+                    continue;
+                rNames.Add(rName);
+            }
+            for(int i=0; i<Properties.Count; i++)
+            {
+                Properties[i]?.GetReferenceMacrossRNames(rNames);
+            }
+            for(int i=0; i<Methods.Count; i++)
+            {
+                Methods[i]?.GetReferenceMacrossRNames(rNames);
+            }
+            Comment?.GetReferenceMacrossRNames(rNames);
+            for(int i=0; i<PreDefineVariables.Count; i++)
+            {
+                PreDefineVariables[i]?.GetReferenceMacrossRNames(rNames);
+            }
+            for(int i=0; i<PreIncludeHeads.Count; i++)
+            {
+                PreIncludeHeads[i]?.GetReferenceMacrossRNames(rNames);
+            }
+            foreach(var preDef in PredefineMacros)
+            {
+                preDef?.GetReferenceMacrossRNames(rNames);
+            }
+        }
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UClassReferenceExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UClassReferenceExpression" })]
@@ -1363,6 +1492,18 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return "ref(" + Class?.ToString() + ")";
         }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            if (Class != null)
+            {
+                var rName = TtCodeObject.GetRNameFromMacrossType(Class);
+                if (rName != null)
+                {
+                    rNames.Add(rName);
+                }
+            }
+        }
     }
 
     public class TtTypeDescGetterExpression : TtExpressionBase, IO.ISerializer
@@ -1390,6 +1531,11 @@ namespace EngineNS.Bricks.CodeBuilder
         public override string ToString()
         {
             return "TypeDescGetter" + GenericType.ToString();
+        }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            GenericType?.GetReferenceMacrossRName(rNames);
         }
     }
 
@@ -1448,6 +1594,20 @@ namespace EngineNS.Bricks.CodeBuilder
                 str += GenericTypes[i].ToString() + ",";
             }
             return str;
+        }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            Host?.GetReferenceMacrossRNames(rNames);
+            var rName = TtCodeObject.GetRNameFromMacrossType(PropertyDeclClass);
+            if (rName != null)
+            {
+                rNames.Add(rName);
+            }
+            for(int i=0; i<GenericTypes.Count; i++)
+            {
+                GenericTypes[i]?.GetReferenceMacrossRName(rNames);
+            }
         }
     }
 
@@ -1523,6 +1683,11 @@ namespace EngineNS.Bricks.CodeBuilder
         public override string ToString()
         {
             return "arg(" + Expression.ToString() + ")";
+        }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            Expression?.GetReferenceMacrossRNames(rNames);
         }
     }
 
@@ -1613,6 +1778,22 @@ namespace EngineNS.Bricks.CodeBuilder
             retStr = retStr.TrimEnd(',') + ")";
             return retStr;
         }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            Host?.GetReferenceMacrossRNames(rNames);
+            for(int i=0; i<Arguments.Count; i++)
+            {
+                Arguments[i]?.GetReferenceMacrossRNames(rNames);
+            }
+            ReturnValue?.GetReferenceMacrossRNames(rNames);
+            for(int i=0; i<GenericTypes.Count; i++)
+            {
+                var rName = TtCodeObject.GetRNameFromMacrossType(GenericTypes[i]);
+                if (rName != null)
+                    rNames.Add(rName);
+            }
+        }
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.ULambdaExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.ULambdaExpression" })]
@@ -1631,6 +1812,20 @@ namespace EngineNS.Bricks.CodeBuilder
         [Rtti.Meta]
         public bool IsAsync { get; set; } = false;
 
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            ReturnType?.GetReferenceMacrossRName(rNames);
+            for(int i=0; i<LambdaArguments.Count; i++)
+            {
+                LambdaArguments[i]?.GetReferenceMacrossRNames(rNames);
+            }
+            for(int i=0; i<Sequence.Count; i++)
+            {
+                Sequence[i]?.GetReferenceMacrossRNames(rNames);
+            }
+            MethodDesc?.GetReferenceMacrossRNames(rNames);
+            MethodInvoke?.GetReferenceMacrossRNames(rNames);
+        }
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UAssignOperatorStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UAssignOperatorStatement" })]
@@ -1657,6 +1852,12 @@ namespace EngineNS.Bricks.CodeBuilder
         public override string ToString()
         {
             return To.ToString() + "=" + From.ToString();
+        }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            To?.GetReferenceMacrossRNames(rNames);
+            From?.GetReferenceMacrossRNames(rNames);
         }
     }
 
@@ -1714,7 +1915,11 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return Left.ToString() + " " + Operation.ToString() + " " + Right.ToString();
         }
-
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            Left?.GetReferenceMacrossRNames(rNames);
+            Right?.GetReferenceMacrossRNames(rNames);
+        }
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UUnaryOperatorExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UUnaryOperatorExpression" })]
@@ -1747,7 +1952,10 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return Operation.ToString() + "(" + Value.ToString() + ")";
         }
-
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            Value?.GetReferenceMacrossRNames(rNames);
+        }
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UIndexerOperatorExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UIndexerOperatorExpression" })]
@@ -1783,6 +1991,15 @@ namespace EngineNS.Bricks.CodeBuilder
             for (int i = 0; i < Indices.Count; i++)
                 retVal += "[" + Indices[i] + "]";
             return retVal;
+        }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            Target?.GetReferenceMacrossRNames(rNames);
+            for(int i=0; i<Indices.Count; i++)
+            {
+                Indices[i]?.GetReferenceMacrossRNames(rNames);
+            }
         }
     }
 
@@ -2110,6 +2327,14 @@ namespace EngineNS.Bricks.CodeBuilder
             Type = Rtti.TtTypeDesc.TypeOf(typeof(string));
             ValueStr = value;
         }
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            var rName = TtCodeObject.GetRNameFromMacrossType(Type);
+            if(rName != null)
+            {
+                rNames.Add(rName);
+            }
+        }
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UCastExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UCastExpression" })]
@@ -2138,6 +2363,13 @@ namespace EngineNS.Bricks.CodeBuilder
         public override string ToString()
         {
             return "(" + TargetType.ToString() + ")" + Expression.ToString();
+        }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            TargetType?.GetReferenceMacrossRName(rNames);
+            SourceType?.GetReferenceMacrossRName(rNames);
+            Expression?.GetReferenceMacrossRNames(rNames);
         }
     }
 
@@ -2192,6 +2424,15 @@ namespace EngineNS.Bricks.CodeBuilder
                 retVal += Contents[i].ToString() + ",";
             return retVal;
         }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            Type?.GetReferenceMacrossRName(rNames);
+            for(int i=0; i<Contents.Count; i++)
+            {
+                Contents[i]?.GetReferenceMacrossRNames(rNames);
+            }
+        }
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UCreateObjectExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UCreateObjectExpression" })]
@@ -2237,6 +2478,21 @@ namespace EngineNS.Bricks.CodeBuilder
             retVal = retVal.TrimEnd(',') + ")";
             return retVal;
         }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            var typeDesc = Rtti.TtTypeDesc.TypeOfFullName(TypeName);
+            if(typeDesc != null)
+            {
+                var rName = TtCodeObject.GetRNameFromMacrossType(typeDesc);
+                if (rName != null)
+                    rNames.Add(rName);
+            }
+            for(int i=0; i<Parameters.Count; i++)
+            {
+                Parameters[i]?.GetReferenceMacrossRNames(rNames);
+            }
+        }
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UDefaultValueExpression@EngineCore", "EngineNS.Bricks.CodeBuilder.UDefaultValueExpression" })]
@@ -2273,6 +2529,11 @@ namespace EngineNS.Bricks.CodeBuilder
         public override string ToString()
         {
             return "default " + Type.ToString();
+        }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            Type?.GetReferenceMacrossRName(rNames);
         }
     }
 
@@ -2328,6 +2589,11 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return $"typeof({Variable.ToString()})";
         }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            Variable?.GetReferenceMacrossRName(rNames);
+        }
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UExecuteSequenceStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UExecuteSequenceStatement" })]
@@ -2380,6 +2646,14 @@ namespace EngineNS.Bricks.CodeBuilder
                     return Sequence[i];
             }
             return null;
+        }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            for(int i=0; i<Sequence.Count; i++)
+            {
+                Sequence[i]?.GetReferenceMacrossRNames(rNames);
+            }
         }
     }
 
@@ -2440,6 +2714,16 @@ namespace EngineNS.Bricks.CodeBuilder
             }
             return base.ToString();
         }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            Condition?.GetReferenceMacrossRNames(rNames);
+            foreach(var data in Statements)
+            {
+                data.Key.GetReferenceMacrossRNames(rNames);
+                data.Value?.GetReferenceMacrossRNames(rNames);
+            }
+        }
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UIfStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UIfStatement" })]
@@ -2485,6 +2769,16 @@ namespace EngineNS.Bricks.CodeBuilder
                 retVal += "else " + ElseIfs[i].ToString() + "; ";
             return retVal;
         }
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            Condition?.GetReferenceMacrossRNames(rNames);
+            TrueStatement?.GetReferenceMacrossRNames(rNames);
+            FalseStatement?.GetReferenceMacrossRNames(rNames);
+            for(int i=0; i<ElseIfs.Count; i++)
+            {
+                ElseIfs[i].GetReferenceMacrossRNames(rNames);
+            }
+        }
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UForLoopStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UForLoopStatement" })]
@@ -2528,6 +2822,14 @@ namespace EngineNS.Bricks.CodeBuilder
                 LoopIndexName + "+=" + StepExpression.ToString() + ")\r\n{" +
                 LoopBody.ToString() + "}";
         }
+
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            BeginExpression?.GetReferenceMacrossRNames(rNames);
+            EndExpression?.GetReferenceMacrossRNames(rNames);
+            StepExpression?.GetReferenceMacrossRNames(rNames);
+            LoopBody?.GetReferenceMacrossRNames(rNames);
+        }
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UWhileLoopStatement@EngineCore", "EngineNS.Bricks.CodeBuilder.UWhileLoopStatement" })]
@@ -2553,6 +2855,11 @@ namespace EngineNS.Bricks.CodeBuilder
         public override string ToString()
         {
             return "while(" + Condition.ToString() + "){" + LoopBody.ToString() + "}";
+        }
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            Condition?.GetReferenceMacrossRNames(rNames);
+            LoopBody?.GetReferenceMacrossRNames(rNames);
         }
     }
 
@@ -2649,6 +2956,11 @@ namespace EngineNS.Bricks.CodeBuilder
         public override string ToString()
         {
             return Expression.ToString() + ((NextStatement != null) ? NextStatement.ToString() : "");
+        }
+        public override void GetReferenceMacrossRNames(HashSet<RName> rNames)
+        {
+            Expression?.GetReferenceMacrossRNames(rNames);
+            NextStatement?.GetReferenceMacrossRNames(rNames);
         }
     }
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UTest_Expressions@EngineCore", "EngineNS.Bricks.CodeBuilder.UTest_Expressions" })]

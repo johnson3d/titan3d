@@ -136,7 +136,7 @@ namespace EngineNS.Bricks.NodeGraph
                 // draw grid
                 var styles = UNodeGraphStyles.DefaultStyles;
                 cmd.AddRectFilled(DrawOffset, DrawOffset + sz, styles.GridBackgroundColor, 0, ImDrawFlags_.ImDrawFlags_None);
-                var step = styles.GridStep / tempGraph.ScaleVP;
+                var step = styles.GridStep / tempGraph.ScaleVPWithDpiScale;
                 var hCount = (int)(sz.X / step);
                 var vCount = (int)(sz.Y / step);
                 var gridStart = CanvasToDraw(new Vector2(0, 0));// - DrawOffset;
@@ -339,7 +339,7 @@ namespace EngineNS.Bricks.NodeGraph
         {
             var style = ImGuiAPI.GetStyle();
             var framePaddingStore = style->FramePadding;
-            style->FramePadding = framePaddingStore / mGraph.ScaleVP;
+            style->FramePadding = framePaddingStore / mGraph.ScaleVPWithDpiScale;
 
             if(node.LayoutDirty)
             {
@@ -347,11 +347,12 @@ namespace EngineNS.Bricks.NodeGraph
                 node.LayoutDirty = false;
             }
             var styles = UNodeGraphStyles.DefaultStyles;
-            var nodeStart = CanvasToDraw(node.Position);
-            var nodeEnd = CanvasToDraw(node.Position + node.Size);
+            var nodePos = node.Position;// * ImGuiAPI.GetWindowViewport()->DpiScale;
+            var nodeStart = CanvasToDraw(nodePos);
+            var nodeEnd = CanvasToDraw(nodePos + node.Size);
 
             if (node.ParentGraph != null)
-                ImGuiAPI.SetWindowFontScale(1.0f / node.ParentGraph.ScaleVP);
+                ImGuiAPI.SetWindowFontScale(1.0f / node.ParentGraph.ScaleVPWithDpiScale);
 
             var font = ImGuiAPI.GetDrawListFont(cmdlist);
 
@@ -373,7 +374,7 @@ namespace EngineNS.Bricks.NodeGraph
             if(nodeBodyImg != null)
                 nodeBodyImg.OnDraw(cmdlist, nodeStart, nodeEnd);
 
-            var endTitle = mGraph.CanvasToViewport(node.Position + new Vector2(node.Size.X, node.TitleHeight)) + DrawOffset;
+            var endTitle = mGraph.CanvasToViewport(nodePos + new Vector2(node.Size.X, node.TitleHeight)) + DrawOffset;
             //cmdlist.AddRectFilled(in nodeStart, in endTitle, node.TitleColor, 0, 0);
             {//DrawTitle
                 var titleImg = TtEngine.Instance.UIProxyManager[styles.NodeTitleImg] as EGui.UIProxy.ImageProxy;
@@ -385,7 +386,7 @@ namespace EngineNS.Bricks.NodeGraph
                 var titleHighlightImg = TtEngine.Instance.UIProxyManager[styles.NodeTitleHighlightImg] as EGui.UIProxy.ImageProxy;
                 if (titleHighlightImg != null)
                     titleHighlightImg.OnDraw(cmdlist, nodeStart, endTitle);
-                //var curStart = node.Position;
+                //var curStart = nodePos;
                 //{//Draw Node Icon
 
                 //    curStart.X += styles.IconOffset.X;
@@ -397,7 +398,7 @@ namespace EngineNS.Bricks.NodeGraph
                 //}
 
                 //Draw Node Name
-                var drawStart = CanvasToDraw(node.Position + styles.TitlePadding);
+                var drawStart = CanvasToDraw(nodePos + styles.TitlePadding);
                 if (node.Name != node.Label && !string.IsNullOrEmpty(node.Label))
                 {
                     cmdlist.AddText(font, font.FontSize / mGraph.ScaleVP, &drawStart, styles.TitleTextDarkColor, node.Label, null, 0.0f, null);
@@ -412,8 +413,8 @@ namespace EngineNS.Bricks.NodeGraph
 
             {//Draw Preview
                 Vector2 prevStart = node.PrevPos;
-                //prevStart.X = node.Position.X + (node.Size.X - node.PrevSize.X) * 0.5f;
-                //prevStart.Y = node.Position.Y + node.TitleHeight;
+                //prevStart.X = nodePos.X + (node.Size.X - node.PrevSize.X) * 0.5f;
+                //prevStart.Y = nodePos.Y + node.TitleHeight;
                 var start1 = CanvasToDraw(in prevStart);
                 var end1 = CanvasToDraw(prevStart + node.PrevSize);
                 node.OnPreviewDraw(in start1, in end1, cmdlist);
@@ -426,7 +427,7 @@ namespace EngineNS.Bricks.NodeGraph
                 max = min + mGraph.LinkingOp.HoverPin.Size;
                 min = mGraph.CanvasToViewport(min) + DrawOffset;
                 max = mGraph.CanvasToViewport(max) + DrawOffset;
-                cmdlist.AddRect(in min, in max, styles.HighLightColor, 0, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 2 / mGraph.ScaleVP);
+                cmdlist.AddRect(in min, in max, styles.HighLightColor, 0, ImDrawFlags_.ImDrawFlags_RoundCornersAll, 2 / mGraph.ScaleVPWithDpiScale);
             }
 
             string lastGroup = null;
@@ -491,7 +492,7 @@ namespace EngineNS.Bricks.NodeGraph
                     var pos = CanvasToDraw(inPin.EditValuePosition) - ImGuiAPI.GetWindowPos();
                     pos.Y -= style->FramePadding.Y;
                     ImGuiAPI.SetCursorPos(pos);
-                    inPin.EditValue.OnDraw(node, inPin, styles, 1/mGraph.ScaleVP, false);
+                    inPin.EditValue.OnDraw(node, inPin, styles, 1/mGraph.ScaleVPWithDpiScale, false);
                 }
             }
             ImGuiAPI.PopID();
@@ -540,8 +541,8 @@ namespace EngineNS.Bricks.NodeGraph
                 int circleSegments = 36;
                 uint circleBG = 0xFF0000FF;
                 uint circleBorder = 0xFF000000;
-                float borderThickness = 2 / mGraph.ScaleVP;
-                float circleRadius = 12 / mGraph.ScaleVP;
+                float borderThickness = 2 / mGraph.ScaleVPWithDpiScale;
+                float circleRadius = 12 / mGraph.ScaleVPWithDpiScale;
                 switch(breakableNode.BreakerState)
                 {
                     case EBreakerState.Enable:
@@ -562,7 +563,7 @@ namespace EngineNS.Bricks.NodeGraph
                     var breakpointImg = TtEngine.Instance.UIProxyManager[styles.BreakpointNodeImg] as EGui.UIProxy.ImageProxy;
                     if (breakpointImg != null)
                     {
-                        var imgSize = new Vector2(50.0f, 50.0f) / mGraph.ScaleVP;
+                        var imgSize = new Vector2(50.0f, 50.0f) / mGraph.ScaleVPWithDpiScale;
                         var posStart = nodeStart + new Vector2((nodeEnd.X - nodeStart.X - imgSize.X) * 0.5f, -imgSize.Y);
                         var posEnd = posStart + imgSize;
                         breakpointImg.OnDraw(cmdlist, posStart, posEnd, 0xFFFFFFFF);

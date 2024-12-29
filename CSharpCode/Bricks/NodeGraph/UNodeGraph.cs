@@ -40,11 +40,12 @@ namespace EngineNS.Bricks.NodeGraph
     {
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
         public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
-        public virtual void Initialize()
+        public virtual unsafe void Initialize()
         {
             //UpdateCanvasMenus();
             //UpdateNodeMenus();
             //UpdatePinMenus();
+            SetScaleVP(1.0f / ImGuiAPI.GetWindowDpiScale());
         }
         public virtual void SetDefaultActionForNode(TtNodeBase node) { }
         public virtual TtGraphRenderer GetGraphRenderer() 
@@ -623,6 +624,16 @@ namespace EngineNS.Bricks.NodeGraph
 
         public Vector2 PhysicalSizeVP;
         public float ScaleVP = 1.0f;
+        public float ScaleVPWithDpiScale
+        {
+            get
+            {
+                unsafe
+                {
+                    return ScaleVP * ImGuiAPI.GetWindowDpiScale();
+                }
+            }
+        }
 
         protected bool IsZooming;
         protected Vector2 ZoomCenter;
@@ -929,16 +940,17 @@ namespace EngineNS.Bricks.NodeGraph
             PhysicalSizeVP = new Vector2(x, y);
             SizeVP = PhysicalSizeVP * ScaleVP;
         }
-        public void SetScaleVP(float scale)
+        public unsafe void SetScaleVP(float scale)
         {
+            var dpiScale = ImGuiAPI.GetWindowDpiScale();
             ScaleVP = scale;
-            if (ScaleVP > 2.0f)
+            if (ScaleVPWithDpiScale > 2.0f)
             {
-                ScaleVP = 2.0f;
+                ScaleVP = 2.0f / dpiScale;
             }
-            else if (ScaleVP < 0.2f)
+            else if (ScaleVPWithDpiScale < 0.2f)
             {
-                ScaleVP = 0.2f;
+                ScaleVP = 0.2f / dpiScale;
             }
             SizeVP = PhysicalSizeVP * ScaleVP;
         }

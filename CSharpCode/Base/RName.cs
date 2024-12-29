@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EngineNS
 {
@@ -157,6 +158,12 @@ namespace EngineNS
             Count,
         }
         ERNameType mRNameType = ERNameType.Game;
+
+        public static string GetRNameTypeCodeString(ERNameType type)
+        {
+            return $"{type.GetType().FullName.Replace("+", ".")}.{type.ToString()}";
+        }
+
         string mName;
         string mAddress;
         public WeakReference mTagReference = null;

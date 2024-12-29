@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.ComponentModel;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EngineNS.GamePlay.Scene
 {
@@ -338,6 +339,7 @@ namespace EngineNS.GamePlay.Scene
 
         private static async Thread.Async.TtTask<TtNode> ConcreateNode(TtWorld world, TtNode tarNode, TtNode node)
         {
+            System.Diagnostics.Debug.Assert(world != node.GetWorld());
             TtNode result = tarNode;
             if (result == null)
             {
@@ -350,6 +352,8 @@ namespace EngineNS.GamePlay.Scene
             var nd = Rtti.TtTypeDescManager.CreateInstance(node.NodeData.GetType()) as TtNodeData;
             var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDesc.TypeOf(node.NodeData.GetType()));
             meta.CopyObjectMetaField(nd, node.NodeData);
+            nd.Placement.HostNode = result;
+            nd.BoundVolume.HostNode = result;
             await result.InitializeNode(world, nd, node.BoundVolumeType, node.Placement.GetType());
             result.SetPrefabTemplate(node.NodeData);
             
@@ -387,6 +391,12 @@ namespace EngineNS.GamePlay.Scene
     {
         public override void Cleanup(TtEngine host)
         {
+            foreach(var i in Prefabs.Values)
+            {
+                i.Root.DisposeWithChildren();
+                i.Root.Dispose();
+                i.Root = null;
+            }
             Prefabs.Clear();
         }
         public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine host)

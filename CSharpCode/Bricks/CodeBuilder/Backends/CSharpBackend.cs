@@ -183,7 +183,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
                 // debugger code
                 var frameName = $"mFrame_{methodDec.UniqueMethodName}";
-                data.CodeGen.AddLine($"EngineNS.Macross.TtMacrossStackFrame {frameName} = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName(\"{data.AssetName.Name}\", {data.AssetName.RNameType.GetType().FullName.Replace("+", ".")}.{data.AssetName.RNameType.ToString()}));", ref sourceCode);
+                data.CodeGen.AddLine($"EngineNS.Macross.TtMacrossStackFrame {frameName} = new EngineNS.Macross.TtMacrossStackFrame(EngineNS.RName.GetRName(\"{data.AssetName.Name}\", {RName.GetRNameTypeCodeString(data.AssetName.RNameType)}));", ref sourceCode);
 
                 GenCommentCodes(methodDec.Comment, ref data, ref sourceCode);
                 data.Method = methodDec;
@@ -265,6 +265,12 @@ namespace EngineNS.Bricks.CodeBuilder
                     string awaitDummyPosCode = "@@@await@@@";
                     data.CodeGen.AddLine(awaitDummyPosCode, ref sourceCode);
 
+                    var predefineMacrosCode = data.Class.GetPredefineMacrosCode();
+                    if (!string.IsNullOrEmpty(predefineMacrosCode))
+                    {
+                        data.CodeGen.AddLine("#if " + predefineMacrosCode, ref sourceCode);
+                    }
+
                     data.CodeGen.AddLine($"using(var guard_{methodDec.MethodName} = new EngineNS.Macross.TtMacrossStackGuard({frameName}))", ref sourceCode);
                     data.CodeGen.PushSegment(ref sourceCode, in data);
                     {
@@ -319,6 +325,19 @@ namespace EngineNS.Bricks.CodeBuilder
                         sourceCode = sourceCode.Insert(awaitDummyIdx, $"await {typeof(EngineNS.Thread.TtAsyncDummyClass).FullName}.DummyFunc();");
                     else
                         sourceCode = sourceCode.Remove(awaitDummyIdx, data.CodeGen.CurIndentStr.Length + 1);
+
+                    if (!string.IsNullOrEmpty(predefineMacrosCode))
+                    {
+                        if(methodDec.ReturnValue != null)
+                        {
+                            data.CodeGen.AddLine("#elif !(" + predefineMacrosCode + ")", ref sourceCode);
+                            var retValGen = data.CodeGen.GetCodeObjectGen(methodDec.ReturnValue.GetType());
+                            retValGen.GenCodes(methodDec.ReturnValue, ref sourceCode, ref data);
+                            var retCode = "return " + methodDec.ReturnValue.VariableName + ";";
+                            data.CodeGen.AddLine(retCode, ref sourceCode);
+                        }
+                        data.CodeGen.AddLine("#endif //" + predefineMacrosCode, ref sourceCode);
+                    }
                 }
                 data.CodeGen.PopSegment(ref sourceCode, in data);
                 data.Method.ResetRuntimeData();
@@ -333,18 +352,6 @@ namespace EngineNS.Bricks.CodeBuilder
                 var classDec = obj as TtClassDeclaration;
                 var codeGen = data.CodeGen as UCSharpCodeGenerator;
 
-                string predefineMacrosCode = "";
-                if (classDec.PredefineMacros.Count > 0)
-                {
-                    foreach (var macros in classDec.PredefineMacros)
-                    {
-                        if (macros.NoDefine)
-                            predefineMacrosCode += "!" + macros.MacrosString;
-                        else
-                            predefineMacrosCode += macros.MacrosString;
-                    }
-                }
-
                 if(data.Namespace != null)
                 {
                     data.CodeGen.AddLine("namespace " + data.Namespace.Namespace, ref sourceCode);
@@ -352,6 +359,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 }
                 GenCommentCodes(classDec.Comment, ref data, ref sourceCode);
                 data.CodeGen.AddLine("[EngineNS.Macross.TtMacross]", ref sourceCode);
+                data.CodeGen.AddLine($"[EngineNS.Macross.TtMacrossSign(RName_Name = \"{data.AssetName.Name}\", RName_Type = {RName.GetRNameTypeCodeString(data.AssetName.RNameType)})]", ref sourceCode);
                 string tempCode = "";
                 switch(classDec.VisitMode)
                 {
@@ -388,11 +396,6 @@ namespace EngineNS.Bricks.CodeBuilder
                 data.CodeGen.AddLine(tempCode, ref sourceCode);
                 data.CodeGen.PushSegment(ref sourceCode, in data);
                 {
-                    if(!string.IsNullOrEmpty(predefineMacrosCode))
-                    {
-                        data.CodeGen.AddLine("#if " + predefineMacrosCode, ref sourceCode);
-                    }
-
                     for(int i=0; i<classDec.Properties.Count; i++)
                     {
                         var mem = classDec.Properties[i];
@@ -422,11 +425,6 @@ namespace EngineNS.Bricks.CodeBuilder
                     {
                         var methodDecGen = data.CodeGen.GetCodeObjectGen(classDec.Methods[i].GetType());
                         methodDecGen.GenCodes(classDec.Methods[i], ref sourceCode, ref data);
-                    }
-
-                    if(!string.IsNullOrEmpty(predefineMacrosCode))
-                    {
-                        data.CodeGen.AddLine("#endif", ref sourceCode);
                     }
                 }
                 data.CodeGen.PopSegment(ref sourceCode, in data);

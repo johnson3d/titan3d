@@ -8,6 +8,7 @@ namespace EngineNS.GamePlay
 {
 	public class TtPrefabPoolManager : IDisposable
 	{
+        public TtWorld World;
         public Dictionary<RName, TtPrefabPool> Pools = new Dictionary<RName, TtPrefabPool>();
         public void RegPool(RName prefabName, TtPrefabPool pool)
         {
@@ -19,6 +20,7 @@ namespace EngineNS.GamePlay
         private bool IsDisposed = false;
         public void Dispose()
         {
+            World = null;
             IsDisposed = true;
             lock (Pools)
             {
@@ -59,12 +61,14 @@ namespace EngineNS.GamePlay
             if (IsDisposed)
                 return null;
             var pool = new TtPrefabPool(prefabName);
+            pool.PoolManager = this;
             RegPool(prefabName, pool);
             return pool;
         }
     }
 	public class TtPrefabPool : TtObjectPool<TtPrefabNode>
 	{
+        public TtPrefabPoolManager PoolManager { get; set; }
         private RName mPrefabName;
         private TtPrefabNode mOriginPrefab = null;
         public TtPrefabPool(RName prefabName)
@@ -87,12 +91,13 @@ namespace EngineNS.GamePlay
                     System.Diagnostics.Debug.Assert(false);
                 }
             }
-            return await mOriginPrefab.CloneNode(TtEngine.Instance.PrefabManager.PrefabWorld) as TtPrefabNode;
+            return await mOriginPrefab.CloneNode(this.PoolManager.World) as TtPrefabNode;
         }
         protected override bool OnObjectRelease(TtPrefabNode obj)
         {
             EngineNS.GamePlay.Scene.TtNode.FTreeCopyStat TreeCopyStat = new (); ;
             TtNode.NodeTreeCopyData(obj, mOriginPrefab, ref TreeCopyStat);
+            obj.Parent = null;
             return true;
         }
     }

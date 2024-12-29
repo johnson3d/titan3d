@@ -19,7 +19,7 @@ namespace EngineNS.Bricks.CodeBuilder
         {
             return 10;
         }
-        bool mNeedRegenGameProject = false;
+        bool NeedRegenGameProject = false;
 
         public UMacrossConfig Config { get; set; }
 
@@ -90,10 +90,13 @@ namespace EngineNS.Bricks.CodeBuilder
 
         void GenerateGameProject()
         {
-            if (!mNeedRegenGameProject)
+            if (!NeedRegenGameProject)
                 return;
+            NeedRegenGameProject = false;
 
             var projFile = TtEngine.Instance.EditorInstance.Config.GameProject;
+            if(!System.IO.Path.IsPathRooted(projFile))
+                projFile = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.EngineSource) + projFile;
             var projFolder = IO.TtFileManager.GetParentPathName(projFile);
             var outputPath = IO.TtFileManager.GetRelativePath(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute), projFile);
             string nsUrl = null;// "http://schemas.microsoft.com/developer/msbuild/2003";
@@ -119,8 +122,25 @@ namespace EngineNS.Bricks.CodeBuilder
 
             // foreach macross meta, add disable macros predefine here
             //var rootDir = EngineNS.TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
-            //EngineNS.IO.TtFileManager.GetFiles(rootDir, "*" + TtMacrossAMeta.MetaExt)
+            //var files = EngineNS.IO.TtFileManager.GetFiles(rootDir, "*.cs");
             //string defineConstants = "";
+            //for (int i = 0; i < files.Length; i++)
+            //{
+            //    try
+            //    {
+            //        string firstLine = System.IO.File.ReadLines(files[i]).First();
+            //        if(firstLine.StartsWith(TtMacrossAMeta.DisablePreDefineKey))
+            //        {
+            //            var predefine = firstLine.Replace(TtMacrossAMeta.DisablePreDefineKey, "").Replace("\r\n", "");
+            //            defineConstants += " " + predefine;
+            //        }
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        Profiler.Log.WriteException(e);
+            //        continue;
+            //    }
+            //}
             //projGroup = xml.CreateElement("PropertyGroup", nsUrl);
             //var defineConstantsElem = xml.CreateElement("DefineConstants", nsUrl);
             //defineConstantsElem.SetAttribute("DefineConstants", defineConstants);

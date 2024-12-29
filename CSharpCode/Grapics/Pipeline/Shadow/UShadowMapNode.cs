@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.Graphics.Mesh;
-using NPOI.SS.Formula.Functions;
 using Microsoft.Toolkit.HighPerformance.Buffers;
 
 namespace EngineNS.Graphics.Pipeline.Shadow
@@ -574,6 +573,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 mShadowTransitionScaleVec.Z = 1000.0f;//mShadowTransitionScaleArray[2];
                 mShadowTransitionScaleVec.W = 1000.0f;//mShadowTransitionScaleArray[3];
 
+                mVisParameter.Reset();
             }   
         }
 
@@ -581,6 +581,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         {
             //base.SwapBuffer();
             //ShadowCamera.UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext);
+            base.TickSync(policy);
         }
     }
 }

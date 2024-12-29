@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -22,11 +23,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossEditor@EngineCore", "EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossEditor" })]
     public partial class TtMacrossEditor : IO.ISerializer, Editor.IAssetEditor, IRootForm, NodeGraph.IGraphEditor, IMacrossMethodHolder
     {
-        TtPredefinedMacros mDisableMacros = new TtPredefinedMacros()
-        {
-            NoDefine = true
-        };
-
         public TtMacrossEditor()
         {
             mNewMethodMenuState.Reset();
@@ -168,7 +164,23 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return $"{rn.Address + FolderExt}/{method.Name}_{Hash160.CreateHash160(declName)}.fn";
         }
         public string FolderExt = "";
-        public void SaveClassGraph(RName rn)
+        void Save()
+        {
+            UpdateMacrossAssetMeta(AssetName);
+
+            SaveClassGraph(AssetName);
+            GenerateCode();
+            CompileCode();
+
+            var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as TtMacrossAMeta;
+            if (ameta != null)
+            {
+                TtMacross.UpdateAMetaReferences(this, ameta);
+                ameta.Description = $"MacrossType:{ameta.BaseTypeStr}\n";
+                ameta.SaveAMeta((IO.IAsset)null);
+            }
+        }
+        void UpdateMacrossAssetMeta(RName rn)
         {
             var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as TtMacrossAMeta;
             if (ameta != null)
@@ -183,7 +195,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         tmp.AssetName = rn;
                         tmp.SelectedType = baseType;
                         tmp.UpdateAMetaReferences(ameta);
-                        ameta.SaveAMeta(tmp);
+                        //ameta.SaveAMeta(tmp);
                     }
                     else if(baseType == null && !string.IsNullOrEmpty(ameta.BaseTypeStr))
                     {
@@ -191,11 +203,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         tmp.AssetName = rn;
                         tmp.SelectedType = null;
                         tmp.UpdateAMetaReferences(ameta);
-                        ameta.SaveAMeta(tmp);
+                        //ameta.SaveAMeta(tmp);
                     }
                 }
             }
-
+        }
+        public void SaveClassGraph(RName rn)
+        {
             if (!IO.TtFileManager.DirectoryExists(rn.Address + FolderExt))
                 IO.TtFileManager.CreateDirectory(rn.Address + FolderExt);
             
@@ -229,13 +243,6 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             Methods.Clear();
             OpenFunctions.Clear();
             PGMember.Target = null;
-
-            var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as TtMacrossAMeta;
-            if (ameta != null)
-            {
-                mDisableMacros.MacrosString = ameta.GetDisablePredefineMacrosString();
-                DefClass.PredefineMacros.Add(mDisableMacros);
-            }
 
             //Rtti.UTypeDescManager.Instance.Services .InterateTypes 
 
@@ -391,6 +398,25 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public Action<TtClassDeclaration> BeforeGenerateCode;
 
+        static void GetRefPredefMacros(IMacrossMeta sourceMeta, IMacrossMeta ameta, HashSet<TtPredefinedMacros> predefineMacros)
+        {
+            if (ameta == null)
+                return;
+            var disableMacros = new TtPredefinedMacros()
+            {
+                NoDefine = true,
+                MacrosString = ameta.GetDisablePredefineMacrosString(),
+            };
+            predefineMacros.Add(disableMacros);
+            for (int i = 0; i < ameta.RefAssetRNames.Count; i++)
+            {
+                var refMeta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(ameta.RefAssetRNames[i]) as IMacrossMeta;
+                if (refMeta == sourceMeta)
+                    continue;
+                GetRefPredefMacros(sourceMeta, refMeta, predefineMacros);
+            }
+        }
+
         public string GenerateCode()
         {
             try
@@ -444,6 +470,23 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
                 else
                 {
+                    var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as IMacrossMeta;
+                    if (ameta != null)
+                    {
+                        // get ref macross RNames
+                        HashSet<RName> refRNames = new HashSet<RName>();
+                        DefClass.GetReferenceMacrossRNames(refRNames);
+                        foreach(var refName in refRNames)
+                        {
+                            ameta.AddReferenceAsset(refName);
+                        }
+                        GetRefPredefMacros(ameta, ameta, DefClass.PredefineMacros);
+                        if (ameta.IsDisable)
+                        {
+                            code += TtMacrossAMeta.DisablePreDefineKey + ameta.GetDisablePredefineMacrosString() + "\r\n";
+                        }
+                    }
+
                     var superClassNames = new List<string>(DefClass.SupperClassNames);
                     foreach(var clsName in superClassNames)
                     {
@@ -682,10 +725,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             MenuName = "Save",
                             Action = (item, data)=>
                             {
-                                //SaveClassGraph(RName.GetRName("UTest/class_graph.xml"));
-                                SaveClassGraph(AssetName);
-                                GenerateCode();
-                                CompileCode();
+                                Save();
                             },
                         },
                     },
@@ -765,13 +805,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if(EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList, 
                 ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "  Save "))
             {
-                TtMacross.UpdateAMetaReferences(this, ameta);
-                ameta.Description = $"MacrossType:{ameta.BaseTypeStr}\n";
-                ameta.SaveAMeta((IO.IAsset)null);
-
-                SaveClassGraph(AssetName);
-                GenerateCode();
-                CompileCode();
+                Save();
             }
             toolBarItemIdx++;
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
@@ -788,6 +822,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             if (EGui.UIProxy.ToolbarIconButtonProxy.DrawCheckBox(in drawList, null, "Disable", ref isDisable))
             {
                 ameta.IsDisable = !ameta.IsDisable;
+                //TtEngine.Instance.MacrossManager.NeedRegenGameProject = true;
             }
             ImGuiAPI.PopStyleColor(1);
             toolBarItemIdx++;
@@ -1752,7 +1787,15 @@ namespace EngineNS.Macross
             var csFiles = new List<string>(EngineNS.IO.TtFileManager.GetFiles(csFilesPath, "*.cs"));
             List<string> arguments = new List<string>();
             for (int i = 0; i < csFiles.Count; ++i)
+            {
                 arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.CSFile, csFiles[i]));
+                string firstLine = System.IO.File.ReadLines(csFiles[i]).First();
+                if (firstLine.StartsWith(Bricks.CodeBuilder.TtMacrossAMeta.DisablePreDefineKey))
+                {
+                    var predefine = firstLine.Replace(Bricks.CodeBuilder.TtMacrossAMeta.DisablePreDefineKey, "").Replace("\r\n", "");
+                    arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(EngineNS.CodeCompiler.CSharpCompiler.enCommandType.PreprocessorSymbol, predefine));
+                }
+            }
 
             var createInstanceCode = $@"
 namespace EngineNS.Rtti

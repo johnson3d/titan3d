@@ -289,14 +289,14 @@ namespace EngineNS.Thread.Async
         {
             if (num == 0)
                 return;
-            if (EnableMTForeach == false)
-            {
-                for (int i = 0; i < num; i++)
-                {
-                    action(i, userData1, userData2, null);
-                }
-            }
-            else
+            //if (EnableMTForeach == false)
+            //{
+            //    for (int i = 0; i < num; i++)
+            //    {
+            //        action(i, userData1, userData2, null);
+            //    }
+            //}
+            //else
             {
                 var smp = ParrallelForSmpAllocator.QueryObjectSync();
                 smp.Reset(num);
@@ -309,7 +309,7 @@ namespace EngineNS.Thread.Async
                 for (int i = 0; i < num; i++)
                 {
                     userArgs.Value0.X = (uint)i;
-                    TtEngine.Instance.EventPoster.RunParallel(static (state) =>
+                    this.RunParallel(static (state) =>
                     {
                         var action = (Delegate_ParrallelForAction)state.UserArguments.Obj0;
                         action((int)state.UserArguments.Value0.X, state.UserArguments.Obj2, state.UserArguments.Obj3, state);
@@ -389,7 +389,17 @@ namespace EngineNS.Thread.Async
             eh.UserArguments = userArgs;
             eh.CompletedEvent = completedEvent;
 
-            this.PushPoolEvent(eh);
+            if (EnableMTForeach == false || TtContextThread.CurrentContext.IsTaskPoolThread())
+            {
+                eh.ExecutePostEvent();
+                eh.TaskState = Async.EAsyncTaskState.Completed;
+                eh.CompletedEvent?.Set();
+                eh.Dispose();
+            }
+            else
+            {
+                this.PushPoolEvent(eh);
+            }
         }
         public void RunOn<T>(FPostEvent<T> evt, EAsyncTarget target = EAsyncTarget.AsyncIO, object userArgs = null, System.Threading.AutoResetEvent completedEvent = null)
         {

@@ -27,6 +27,7 @@ namespace EngineNS.Thread
         //这个Flag是解决主线程同时是:RHIContext，MainContext
         [ThreadStatic]
         public static int TickStage = 0;
+        public virtual bool IsTaskPoolThread() { return false; }
         public TtContextThread()
         {
             Interval = 20;
@@ -139,12 +140,17 @@ namespace EngineNS.Thread
         }
         public void FlushToSemephore(TtSemaphore smp)
         {
-            System.Diagnostics.Debug.Assert(TtContextThread.CurrentContext.ThreadId != TtEngine.Instance.ThreadMain.ThreadId);
+            //System.Diagnostics.Debug.Assert(TtContextThread.CurrentContext.ThreadId != TtEngine.Instance.ThreadMain.ThreadId);
+            var IsMainThread = TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadMain.ThreadId;
             var t1 = Support.TtTime.HighPrecision_GetTickCount();
             while (true)
             {
                 FContextTickableManager.GetInstance().ThreadTick();
                 TickAwaitEvent();
+                if (IsMainThread)
+                {
+                    TtEngine.Instance.ThreadLogic.TickAwaitEvent();
+                }
                 TtEngine.Instance.TaskCollector.Tick();
                 if (smp.GetCount() == 0)
                 {

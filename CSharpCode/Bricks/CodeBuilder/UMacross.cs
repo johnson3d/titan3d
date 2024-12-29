@@ -45,9 +45,19 @@ namespace EngineNS.Bricks.CodeBuilder
         public Vector2 PosMenu;
     }
 
-    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMacrossAMeta@EngineCore", "EngineNS.Bricks.CodeBuilder.UMacrossAMeta" })]
-    public partial class TtMacrossAMeta : IO.IAssetMeta
+    public interface IMacrossMeta
     {
+        bool IsDisable { get; set; }
+        string GetDisablePredefineMacrosString();
+        List<RName> RefAssetRNames { get; set; }
+        void AddReferenceAsset(RName rn);
+    }
+
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMacrossAMeta@EngineCore", "EngineNS.Bricks.CodeBuilder.UMacrossAMeta" })]
+    public partial class TtMacrossAMeta : IO.IAssetMeta, IMacrossMeta
+    {
+        public static readonly string DisablePreDefineKey = "// DisablePredefine:";
+
         public override string TypeExt
         {
             get => TtMacross.AssetExt;
@@ -107,7 +117,7 @@ namespace EngineNS.Bricks.CodeBuilder
 
         public string GetDisablePredefineMacrosString()
         {
-            return "disable_" + AssetId.ToString().Replace("-", "_");
+            return "disable_macross_" + AssetId.ToString().Replace("-", "_");
         }
     }
 
@@ -267,7 +277,7 @@ namespace EngineNS.Bricks.CodeBuilder
             return TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName);
         }
 
-        public static void UpdateAMetaReferences(MacrossNode.TtMacrossEditor graph, TtMacrossAMeta ameta)
+        public static void UpdateAMetaReferences(MacrossNode.TtMacrossEditor graph, IMacrossMeta ameta)
         {
             foreach (var i in graph.Methods)
             {

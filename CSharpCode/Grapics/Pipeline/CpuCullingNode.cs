@@ -74,5 +74,10 @@ namespace EngineNS.Graphics.Pipeline
                 world.GatherVisibleMeshes(mVisParameter);
             }   
         }
+        public override void TickSync(TtRenderPolicy policy)
+        {
+            mVisParameter.Reset();
+            base.TickSync(policy);
+        }
     }
 }

@@ -261,6 +261,20 @@ namespace EngineNS.UI.Editor
             }
             toolBarItemIdx++;
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
+            ImGuiAPI.SameLine(0, -1);
+            var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName) as IMacrossMeta;
+            bool isDisable = ameta.IsDisable;
+            var store = EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor_Press;
+            if (isDisable)
+                EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor_Press = EGui.UIProxy.StyleConfig.Instance.ErrorStringColor;
+            if (EGui.UIProxy.CustomButton.ToggleButton("Disable", in btSize, ref isDisable))
+            {
+                ameta.IsDisable = !ameta.IsDisable;
+                //TtEngine.Instance.MacrossManager.NeedRegenGameProject = true;
+            }
+            EGui.UIProxy.StyleConfig.Instance.ToolButtonTextColor_Press = store;
+            toolBarItemIdx++;
+            EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList, in Support.TtAnyPointer.Default);
             //if (EGui.UIProxy.ToolbarIconButtonProxy.DrawButton(in drawList,
             //    ref mToolBtnDatas[toolBarItemIdx].IsMouseDown, ref mToolBtnDatas[toolBarItemIdx].IsMouseHover, null, "GenCode", false, -1, 0, spacing))
             //{

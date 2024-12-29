@@ -176,10 +176,13 @@ namespace EngineNS.GamePlay
         private void UpdateData()
         {
             mIsIdentity = mTransformData.IsIdentity;
-            HostNode.UpdateAbsTransform();
-            HostNode.UpdateAABB();
-            if (HostNode.Parent != null)
-                HostNode.Parent.UpdateAABB();
+            if (HostNode != null)
+            {
+                HostNode.UpdateAbsTransform();
+                HostNode.UpdateAABB();
+                if (HostNode.Parent != null)
+                    HostNode.Parent.UpdateAABB();
+            }
         }
 
         public override void SetTransform(in DVector3 pos, in Vector3 scale, in Quaternion quat)

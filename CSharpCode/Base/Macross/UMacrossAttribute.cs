@@ -11,9 +11,14 @@ namespace EngineNS.Macross
         public virtual void GenCustomCode(TtClassDeclaration classDec, TtCodeGeneratorBase codeGen)
         {
 
-        }
+		}
+	}
+	public class TtMacrossSignAttribute : Attribute
+	{
+		public string RName_Name;
+		public RName.ERNameType RName_Type;
     }
-    public class TtMacrossAttribute : Attribute
+	public class TtMacrossAttribute : Attribute
     {
         public bool IsGenShader = false;
     }

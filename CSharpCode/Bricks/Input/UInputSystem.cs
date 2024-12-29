@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Build.Framework;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -64,8 +65,15 @@ namespace EngineNS.Bricks.Input
                 control.BeforeTick();
             }
         }
-
         public unsafe int Tick(TtEngine engine)
+        {
+            return TickImpl(engine);
+            //if (TickMsgResult == -1)
+            //    return -1;
+            //return 0;
+        }
+        private int TickMsgResult = 0;
+        internal unsafe int TickImpl(TtEngine engine)
         {
             if (mKeyboardStateDirty)
             {
@@ -80,6 +88,7 @@ namespace EngineNS.Bricks.Input
                 switch(evt.Type)
                 {
                     case EventType.QUIT:
+                        TickMsgResult = -1;
                         return - 1;
                     case EventType.DROPFILE:
                         {
