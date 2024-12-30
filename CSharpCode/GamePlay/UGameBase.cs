@@ -241,7 +241,7 @@ namespace EngineNS.GamePlay
             EngineNS.GamePlay.Scene.TtNode root = scene;
 
             var prefab = await TtPrefab.LoadPrefab(scene.World, prefabName);
-             prefab.Root.Parent = root;
+            prefab.Root.Parent = root;
             var actor = prefab.Root.FindFirstChild<TtActor>() as TtActor;
             if (playerStart == null)
             {

@@ -1,15 +1,7 @@
 ﻿using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
-using EngineNS.Graphics.Pipeline;
-using NPOI.POIFS.Properties;
-using NPOI.SS.Formula.Functions;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
-using System.Threading.Tasks;
-using static EngineNS.Bricks.PhysicsCore.SceneNode.TtCapsulePhyControllerNode;
-using static EngineNS.Bricks.PhysicsCore.SceneNode.TtPhyControllerNodeBase;
+using EngineNS.Bricks.PhysicsCore.SceneNode;
 
 namespace EngineNS.Bricks.PhysicsCore.SceneNode
 {
@@ -36,10 +28,14 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
                 newPosition = DVector3.Zero;
                 return false;
             }
-            var data = NodeData as TtCapsulePhyControllerNodeData;
+            var data = NodeData as TtPhyControllerNodeBase.TtPhyControllerNodeDataBase;
             var phyResult = PhyController.mCoreObject.Move(dist.ToSingleVector3(), 0.001f, deltaTimeSecond, data.QueryFilterData, data.PhyQueryFlags);
             newPosition = PhyController.mCoreObject.GetFootPosition().AsDVector();
             return true;
+        }
+        public void SetFootPosition(Vector3 footPosition)
+        {
+            PhyController.mCoreObject.SetPosition(footPosition);
         }
     }
     [Bricks.CodeBuilder.ContextMenu("PhyCapsuleController", "PhyCapsuleController", TtNode.EditorKeyword)]
@@ -70,27 +66,38 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             var baseResult = await base.InitializeNode(world, data, bvType, placementType);
             if (!baseResult)
                 return false;
+            
+            return true;
+        }
+        protected void CreateController()
+        {
             PhyControllerDesc = new Bricks.PhysicsCore.TtPhyCapsuleControllerDesc();
             PhyControllerDesc.mCoreObject.SetCapsuleHeight(CapsulePhyControllerNodeData.Height);
             PhyControllerDesc.mCoreObject.SetCapsuleRadius(CapsulePhyControllerNodeData.Radius);
-            
+
             Bricks.PhysicsCore.TtPhyMaterial mtl;
             if (CapsulePhyControllerNodeData.PxMaterial != null)
                 mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.GetMaterialSync(CapsulePhyControllerNodeData.PxMaterial);
             else
                 mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
             PhyControllerDesc.SetMaterial(mtl);
-            return true;
+            PhyController = ParentScene.PxSceneMB.PxScene.CreateCapsuleController(PhyControllerDesc.mCoreObject);
+            if (PhyController == null)
+            {
+                System.Diagnostics.Debug.Assert(false);
+            }
+            
         }
         protected override void OnParentChanged(TtNode prev, TtNode cur)
         {
             if(ParentScene != null)
             {
-                PhyController = ParentScene.PxSceneMB.PxScene.CreateCapsuleController(PhyControllerDesc.mCoreObject);
-                if (PhyController == null)
+                if(PhyController != null)
                 {
-                    System.Diagnostics.Debug.Assert(false);
+                    PhyController.TagNode = cur;
+                    return;
                 }
+                CreateController();
                 PhyController.TagNode = cur;
                 PhyController.mCoreObject.SetFootPosition(cur.Placement.AbsTransform.Position.ToSingleVector3());
                 PhyController.mCoreObject.SetQueryFilterData(CapsulePhyControllerNodeData.QueryFilterData);
@@ -104,13 +111,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             base.OnParentSceneChanged(prev, cur);
             if (cur != null)
             {
-                PhyController = cur.PxSceneMB.PxScene.CreateCapsuleController(PhyControllerDesc.mCoreObject);
-                if (PhyController == null)
-                {
-                    System.Diagnostics.Debug.Assert(false);
-                }
+                CreateController();
                 PhyController.TagNode = Parent;
-                PhyController.mCoreObject.SetFootPosition(cur.Placement.AbsTransform.Position.ToSingleVector3());
+                PhyController.mCoreObject.SetFootPosition(Parent.Placement.AbsTransform.Position.ToSingleVector3());
                 PhyController.mCoreObject.SetQueryFilterData(CapsulePhyControllerNodeData.QueryFilterData);
                 PhyController.mCoreObject.SetSimulationFilterData(CapsulePhyControllerNodeData.SimulationFilterData);
             }
@@ -132,11 +135,19 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             get => NodeData as TtBoxPhyControllerNodeData;
         }
         TtPhyBoxControllerDesc PhyControllerDesc = null;
+        [Category("Option")]
+        public Vector3 Extent { get => BoxPhyControllerNodeData.Extent; set => BoxPhyControllerNodeData.Extent = value; }
+        
         public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var baseResult = await base.InitializeNode(world, data, bvType, placementType);
             if (!baseResult)
                 return false;
+            
+            return true;
+        }
+        protected void CreateController()
+        {
             PhyControllerDesc = new Bricks.PhysicsCore.TtPhyBoxControllerDesc();
             PhyControllerDesc.mCoreObject.SetExtent(BoxPhyControllerNodeData.Extent);
             Bricks.PhysicsCore.TtPhyMaterial mtl;
@@ -145,20 +156,45 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             else
                 mtl = TtEngine.Instance.PhyModule.PhyContext.PhyMaterialManager.DefaultMaterial;
             PhyControllerDesc.SetMaterial(mtl);
-            return true;
-        }
-        protected override void OnParentChanged(TtNode prev, TtNode cur)
-        {
+
             PhyController = ParentScene.PxSceneMB.PxScene.CreateBoxController(PhyControllerDesc.mCoreObject);
             if (PhyController == null)
             {
                 System.Diagnostics.Debug.Assert(false);
             }
-            PhyController.TagNode = cur;
-            PhyController.mCoreObject.SetFootPosition(cur.Placement.AbsTransform.Position.ToSingleVector3());
-            PhyController.mCoreObject.SetQueryFilterData(BoxPhyControllerNodeData.QueryFilterData);
-            PhyController.mCoreObject.SetSimulationFilterData(BoxPhyControllerNodeData.SimulationFilterData);
+
+        }
+        protected override void OnParentChanged(TtNode prev, TtNode cur)
+        {
+            if (ParentScene != null)
+            {
+                if (PhyController != null)
+                {
+                    PhyController.TagNode = cur;
+                    return;
+                }
+                CreateController();
+
+                PhyController.TagNode = cur;
+                PhyController.mCoreObject.SetFootPosition(cur.Placement.AbsTransform.Position.ToSingleVector3());
+                PhyController.mCoreObject.SetQueryFilterData(BoxPhyControllerNodeData.QueryFilterData);
+                PhyController.mCoreObject.SetSimulationFilterData(BoxPhyControllerNodeData.SimulationFilterData);
+            }
+
             base.OnParentChanged(prev, cur);
+        }
+        protected override void OnParentSceneChanged(TtScene prev, TtScene cur)
+        {
+            base.OnParentSceneChanged(prev, cur);
+            if (cur != null)
+            {
+                CreateController();
+
+                PhyController.TagNode = Parent;
+                PhyController.mCoreObject.SetFootPosition(Parent.Placement.AbsTransform.Position.ToSingleVector3());
+                PhyController.mCoreObject.SetQueryFilterData(BoxPhyControllerNodeData.QueryFilterData);
+                PhyController.mCoreObject.SetSimulationFilterData(BoxPhyControllerNodeData.SimulationFilterData);
+            }
         }
     }
 }

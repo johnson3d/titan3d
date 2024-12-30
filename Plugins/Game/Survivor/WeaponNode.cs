@@ -6,6 +6,7 @@ using EngineNS.Thread.Async;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using static Survivor.TtWeaponController_Line;
 
 namespace Survivor
 {
@@ -56,6 +57,31 @@ namespace Survivor
             //Prefab move
 
             //hitcheck, some weapon dont need phy hit
+        }
+    }
+
+    public class TtWeaponController_Melee : TtWeaponController
+    {
+        public override void Init()
+        {
+
+        }
+
+        public override void Tick(TtWorld world)
+        {
+            mCurrentTime += world.DeltaTimeSecond;
+            if (mCurrentTime > WeaponData.CoolDown)
+            {
+                Fire();
+                //fire prefab
+                mCurrentTime = 0;
+            }
+            base.Tick(world);
+        }
+        protected void Fire()
+        {
+            var playerNode = (EngineNS.TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame).GameMode.Player;
+            WeaponNode.Attack(playerNode);
         }
     }
 
@@ -117,11 +143,9 @@ namespace Survivor
                 if (WeaponPrefab != null)
                 {
                     WeaponPrefab.Parent = WeaponNode.Parent.Parent;
-                    if(WeaponPrefab.Placement is TtIdentityPlacement)
-                    {
-                        WeaponPrefab.NodeData.Placement = new TtPlacement();
-                        WeaponPrefab.NodeData.Placement.HostNode = WeaponPrefab;
-                    }
+                    var proxyNode = WeaponPrefab.FindFirstChild<TtWeaponProxyNode>() as TtWeaponProxyNode;
+                    proxyNode.WeaponNode = WeaponNode;
+
                     var singleControll = new FSimpleElementController();
                     singleControll.Element = WeaponPrefab;
                     singleControll.Speed = WeaponNode.RoleData.ProjectileSpeed;
@@ -249,6 +273,15 @@ namespace Survivor
 
     }
 
+    [EngineNS.Bricks.CodeBuilder.ContextMenu("WeaponProxyNode", "WeaponProxyNode", TtNode.EditorKeyword)]
+    [TtNode(NodeDataType = typeof(TtNodeData), DefaultNamePrefix = "WeaponProxyNode")]
+    [EngineNS.EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    public class TtWeaponProxyNode : TtLightWeightNodeBase
+    {
+        [EngineNS.Rtti.Meta]
+        public TtWeaponNode WeaponNode { get; set; } = null;
+    }
+
     //无论角色的武器还是怪物的近远程攻击都算做武器攻击
     public class TtWeaponNode : EngineNS.GamePlay.Scene.TtSceneActorNode
     {
@@ -256,23 +289,37 @@ namespace Survivor
         {
             [EngineNS.Rtti.Meta]
             public int WeaponId = 0;
+            [EngineNS.Rtti.Meta]
+            public string WeaponType = "";
         }
         public TtWeaponNodeData WeaponNodeData { get => NodeData as TtWeaponNodeData; }
         public override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
             var macrossSurvivorGame = EngineNS.TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame;
-            WeaponData = macrossSurvivorGame.GameMode.WeaponManager.GetData("ItemId", WeaponNodeData.WeaponId);
-            if (WeaponData == null)
+            if(WeaponNodeData.WeaponId > 0)
             {
-                EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, $"Weapon({WeaponNodeData.WeaponId}) not found");
+                WeaponData = macrossSurvivorGame.GameMode.WeaponManager.GetData("ItemId", WeaponNodeData.WeaponId);
+                if (WeaponData == null)
+                {
+                    EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, $"Weapon({WeaponNodeData.WeaponId}) not found");
+                }
+                else
+                {
+                    mWeaponController = TtWeaponController.GetTtWeaponController(WeaponData.ItemId);
+                    mWeaponController.WeaponNode = this;
+                    mWeaponController.Init();
+                }
             }
-            else
+            else if(!string.IsNullOrEmpty(WeaponNodeData.WeaponType))
             {
-                mWeaponController = TtWeaponController.GetTtWeaponController(WeaponData.ItemId);
+                mWeaponController = TtWeaponController.GetTtWeaponController(WeaponNodeData.WeaponType);
                 mWeaponController.WeaponNode = this;
+                WeaponData = new TtWeaponData();
+                WeaponData.CoolDown = 1;
                 mWeaponController.Init();
             }
+ 
             return true;
         }
         public TtWeaponData WeaponData { get; set; } = null;
@@ -283,6 +330,11 @@ namespace Survivor
         {
             mWeaponController.Tick(world);
             return base.OnTickLogic(world, policy);
+        }
+        public void Attack(TtNode targetNode)
+        {
+            var stateNode = targetNode.FindFirstChild<TtStateNode>(null, true) as TtStateNode;
+            stateNode.BeAttacked(this);
         }
     }
 }

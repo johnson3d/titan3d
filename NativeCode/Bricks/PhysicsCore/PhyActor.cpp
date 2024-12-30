@@ -76,6 +76,7 @@ bool PhyActor::AddToScene(PhyScene* scene)
 bool PhyActor::RemoveFromScene(PhyScene* scene)
 {
 	auto current = mScene.GetPtr();
+	mScene.FromObject(nullptr);
 	if(current != scene)
 		return true;
 

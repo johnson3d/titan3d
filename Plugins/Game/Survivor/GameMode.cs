@@ -19,6 +19,7 @@ namespace Survivor
         public TtHeroManager HeroManager { get; } = new TtHeroManager();
         [EngineNS.Rtti.Meta]
         public TtMonsterManager MonsterManager { get; } = new TtMonsterManager();
+		public TtCharacter Player = null;
         [EngineNS.Rtti.Meta]
         public void LoadWeapons(
 			[RName.PGRName(FilterExts = EngineNS.Bricks.DataSet.TtDataSet.AssetExt)]
@@ -82,13 +83,17 @@ namespace Survivor
 		{
 			var roleData = HeroManager.GetData("RoleId", roleId);
 			var character = CurrentScene.FindFirstChild<TtCharacter>(null, true);
-			EngineNS.TtEngine.Instance.TaskCollector.AddWaitTask(InitCharacter(character, roleData));
+			Player = character as TtCharacter;
+            EngineNS.TtEngine.Instance.TaskCollector.AddWaitTask(InitCharacter(character, roleData));
         }
 
         private async TtTask InitCharacter(TtNode parent, TtRoleData roleData)
 		{
 			var stateNode = new TtCharacterStateNode();
 			var stateNodeData = new TtCharacterStateNode.TtCharacterStateNodeData();
+            stateNodeData.RoleData = roleData;
+            stateNodeData.CurrentHP = roleData.Health;
+
 			await stateNode.InitializeNode(parent.HostWorld, stateNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             stateNode.Parent = parent;
 

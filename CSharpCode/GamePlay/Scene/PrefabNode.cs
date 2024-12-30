@@ -205,6 +205,7 @@ namespace EngineNS.GamePlay.Scene
 
             xndHolder.SaveXnd(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
+            TtEngine.Instance.PrefabManager.UnloadPrefab(name);
         }
         internal static async Thread.Async.TtTask<TtPrefab> LoadPrefab(GamePlay.TtWorld world, RName name)
         {
@@ -398,6 +399,7 @@ namespace EngineNS.GamePlay.Scene
                 i.Root = null;
             }
             Prefabs.Clear();
+            CoreSDK.DisposeObject(ref PrefabWorld);
         }
         public override async System.Threading.Tasks.Task<bool> Initialize(TtEngine host)
         {

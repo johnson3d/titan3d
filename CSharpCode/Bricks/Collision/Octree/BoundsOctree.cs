@@ -275,7 +275,7 @@ namespace EngineNS.Bricks.Collision.Octree
         }
     }
 
-    public class TtSceneOctree : IMemberTickable
+    public class TtSceneOctree : IMemberTickable, IDisposable
     {
         Bricks.Collision.Octree.TtBoundsOctree<GamePlay.Scene.TtNode> mOctree;
         public NxRHI.TtTransientBuffer TransientVB = new();
@@ -287,10 +287,14 @@ namespace EngineNS.Bricks.Collision.Octree
             mOctree = new Bricks.Collision.Octree.TtBoundsOctree<GamePlay.Scene.TtNode>(0.5f, scene.Placement.AbsTransform.Position, 1, 1.25f);
             return true;
         }
-
+        public void Dispose()
+        {
+            CoreSDK.DisposeObject(ref TransientVB);
+            CoreSDK.DisposeObject(ref TransientIB);
+        }
         public void Cleanup(object host)
         {
-
+            Dispose();
         }
         public void TickLogic(object host, float ellapse)
         {
@@ -347,7 +351,12 @@ namespace EngineNS.GamePlay.Scene
 {
     public partial class TtScene
     {
-        public Bricks.Collision.Octree.TtSceneOctree SceneOctree { get; } = new Bricks.Collision.Octree.TtSceneOctree();
+        Bricks.Collision.Octree.TtSceneOctree mSceneOctree = new Bricks.Collision.Octree.TtSceneOctree();
+        public Bricks.Collision.Octree.TtSceneOctree SceneOctree { get => mSceneOctree; }
+        public override void Dispose()
+        {
+            CoreSDK.DisposeObject(ref mSceneOctree);
+        }
     }
 }
 

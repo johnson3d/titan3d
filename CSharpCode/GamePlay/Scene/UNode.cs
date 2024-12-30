@@ -1,4 +1,5 @@
 using EngineNS.Bricks.GpuDriven;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -490,6 +491,7 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         protected TtNode mParent;
+        [Rtti.Meta]
         public virtual TtNode Parent
         {
             get => mParent;
@@ -529,6 +531,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
+        [Rtti.Meta]
         public TtScene ParentScene
         {
             get
@@ -690,23 +693,37 @@ namespace EngineNS.GamePlay.Scene
             [Rtti.MetaParameter(FilterType = typeof(TtNode), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type type = null, bool bRecursive = false)
         {
-            foreach (var i in Children)
+            if(!string.IsNullOrEmpty(name))
             {
-                if (i.NodeName == null)
-                    continue;
-                if (i.NodeName.Contains(name))
+                foreach (var i in Children)
                 {
-                    if (type == null)
+                    if (i.NodeName == null)
+                        continue;
+                    if (i.NodeName.Contains(name))
                     {
-                        return i;
-                    }
-                    else
-                    {
-                        if (type == i.GetType())
+                        if (type == null)
+                        {
                             return i;
+                        }
+                        else
+                        {
+                            if (type == i.GetType())
+                                return i;
+                        }
                     }
                 }
             }
+            else
+            {
+                foreach (var i in Children)
+                {
+                    if (i.GetType() == type || i.GetType().IsSubclassOf(type))
+                    {
+                        return i;
+                    }
+                }
+            }
+            
             if (bRecursive)
             {
                 foreach (var i in Children)

@@ -104,6 +104,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameProject", "Module\GameP
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MainEditor", "Module\MainEditor\MainEditor.csproj", "{921E9FEA-31DA-4BA4-BD83-19C0C0EBFBD2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FE535F66-AAA6-4191-96DD-58669DB01DB3} = {FE535F66-AAA6-4191-96DD-58669DB01DB3}
+	EndProjectSection
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CSScripting", "CSharpCode\Bricks\CSScripting\CSScripting.shproj", "{575605B6-98E4-4C83-A845-88061A67AD6B}"
 EndProject
@@ -477,7 +480,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Game", "Game", "{893908DF-9
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Survivor", "Plugins\Game\Survivor\Survivor.shproj", "{AC72F5A9-3264-4BF8-866B-3ED629010DB4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Survivor.Window", "Plugins\Game\Survivor\Survivor.Window\Survivor.Window.csproj", "{FE535F66-AAA6-4191-96DD-58669DB01DB3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Survivor.Window", "Plugins\Game\Survivor\Survivor.Window\Survivor.Window.csproj", "{FE535F66-AAA6-4191-96DD-58669DB01DB3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
