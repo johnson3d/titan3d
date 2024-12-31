@@ -39,12 +39,17 @@ namespace EngineNS.Animation.SceneNode
             meshNode.RuntimePose = mAnimatedPose;
             Player.BindingPose(animatablePose);
         }
+        public override Profiler.TimeScope GetScopeTickLogic()
+        {
+            return TtOnTickLogicScope<TtSkeletonAnimPlayNode>.Scope;
+        }
         TtLocalSpaceRuntimePose mAnimatedPose = null;
-        public override void TickLogic(TtNodeTickParameters args)
+        public override bool OnTickLogic(TtNodeTickParameters args)
         {
             Player.Update(args.World.DeltaTimeSecond);
             Player.Evaluate();
             TtRuntimePoseUtility.CopyPose(ref mAnimatedPose, Player.OutPose);
+            return true;
         }
 
         public static async Thread.Async.TtTask<TtSkeletonAnimPlayNode> AddSkeletonAnimPlayNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, EBoundVolumeType bvType, Type placementType)
@@ -84,13 +89,18 @@ namespace EngineNS.Animation.SceneNode
             await Player.BindingPose(animatablePose);
         }
         TtLocalSpaceRuntimePose mAnimatedPose = null;
-        public override void TickLogic(TtNodeTickParameters args)
+        public override Profiler.TimeScope GetScopeTickLogic()
+        {
+            return TtOnTickLogicScope<TtAnimStateMachinePlayNode>.Scope;
+        }
+        public override bool OnTickLogic(TtNodeTickParameters args)
         {
             Player.Update(args.World.DeltaTimeSecond);
             Player.Evaluate();
             if (Player.OutPose == null)
-                return;
+                return true;
             TtRuntimePoseUtility.CopyPose(ref mAnimatedPose, Player.OutPose);
+            return true;
         }
 
         public static async System.Threading.Tasks.Task<TtAnimStateMachinePlayNode> Add(GamePlay.TtWorld world, TtNode parent, TtNodeData data, EBoundVolumeType bvType, Type placementType)

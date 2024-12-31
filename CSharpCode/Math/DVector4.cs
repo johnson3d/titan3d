@@ -62,7 +62,7 @@ namespace EngineNS
                         if (vFormat != null)
                             format = vFormat.Format;
                     }
-                    var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Double, (double*)&v, 4, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                    var changed = ImGuiAPI.DragScalarN2("##" + info.Name, ImGuiDataType_.ImGuiDataType_Double, (double*)&v, 4, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                     if (changed && !info.Readonly)
                     {
                         newValue = new DVector4(v.X, v.Y, v.Z, v.W);

@@ -41,11 +41,15 @@ namespace EngineNS.GamePlay.Player
         {
 
         }
-
-        public override void TickLogic(TtNodeTickParameters args)
+        public override Profiler.TimeScope GetScopeTickLogic()
         {
-            base.TickLogic(args);
+            return TtOnTickLogicScope<TtPlayer>.Scope;
+        }
+        public override bool OnTickLogic(TtNodeTickParameters args)
+        {
+            base.OnTickLogic(args);
             PlayerData.CharacterController?.TickLogic(args);
+            return true;
         }
 
         public unsafe bool OnEvent(in Bricks.Input.Event e)

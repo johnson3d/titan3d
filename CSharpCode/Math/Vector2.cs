@@ -35,7 +35,7 @@ namespace EngineNS
                 //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
                 var minValue = float.MinValue;
                 var maxValue = float.MaxValue;
-                var name = TName.FromString2("##", info.Name).ToString();
+                var name = "##" + info.Name;
                 var multiValue = info.Value as EGui.Controls.PropertyGrid.PropertyMultiValue;
                 bool retValue = false;
                 if (multiValue != null && multiValue.HasDifferentValue())
@@ -146,15 +146,20 @@ namespace EngineNS
 		    X = value;
 		    Y = value;
 	    }
-        public Vector2(Point2f point)
+        public Vector2(in Point2f point)
         {
             X = point.X;
             Y = point.Y;
         }
-        public Vector2(SizeF size)
+        public Vector2(in SizeF size)
         {
             X = size.Width;
             Y = size.Height;
+        }
+        public Vector2(in Vector2i vec2i)
+        {
+            X = vec2i.X;
+            Y = vec2i.Y;
         }
         /// <summary>
         /// 带参构造函数

@@ -1072,6 +1072,19 @@ namespace EngineNS.IO
                 }
             }
         }
+        public void TourAssetMetas<T, Tv>(Func<RName, T, Tv, bool> func, Tv userData) where T : IAssetMeta
+        {
+            if (func == null)
+                return;
+
+            foreach(var i in RNameAssets)
+            {
+                if (!(i.Value is T))
+                    continue;
+                if (func.Invoke(i.Key, (T)i.Value, userData))
+                    return;
+            }
+        }
     }
 
     public class TtAssetManager

@@ -20,17 +20,22 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
 
         }
         public Bricks.PhysicsCore.TtPhyController PhyController { get; set; } = null;
-
+        private class FnTryMove
+        {
+        }
         public bool TryMove(DVector3 dist, float deltaTimeSecond, out DVector3 newPosition)
         {
-            if (PhyController == null)
+            using (new Profiler.TimeScopeHelper(Profiler.TtTypeScope<TtPhyControllerNodeBase, FnTryMove>.Scope))
             {
-                newPosition = DVector3.Zero;
-                return false;
-            }
-            var data = NodeData as TtPhyControllerNodeBase.TtPhyControllerNodeDataBase;
-            var phyResult = PhyController.mCoreObject.Move(dist.ToSingleVector3(), 0.001f, deltaTimeSecond, data.QueryFilterData, data.PhyQueryFlags);
-            newPosition = PhyController.mCoreObject.GetFootPosition().AsDVector();
+                if (PhyController == null)
+                {
+                    newPosition = DVector3.Zero;
+                    return false;
+                }
+                var data = NodeData as TtPhyControllerNodeBase.TtPhyControllerNodeDataBase;
+                var phyResult = PhyController.mCoreObject.Move(dist.ToSingleVector3(), 0.01f, deltaTimeSecond, data.QueryFilterData, data.PhyQueryFlags);
+                newPosition = PhyController.mCoreObject.GetFootPosition().AsDVector();
+            }   
             return true;
         }
         public void SetFootPosition(Vector3 footPosition)

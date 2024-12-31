@@ -61,7 +61,7 @@ namespace EngineNS.EGui.UIProxy
             //    buffer.SetTextUtf8("Ch:中");
             //    ImGuiAPI.TextAsPointer((sbyte*)buffer.GetBuffer());
             //}
-            retValue = ImGuiAPI.InputText(TName.FromString2("##", "PropertyGridFilterString").ToString(), ref searchText);
+            retValue = ImGuiAPI.InputText("##PropertyGridFilterString", ref searchText);
 
             var itemMin = ImGuiAPI.GetItemRectMin();
             var itemMax = ImGuiAPI.GetItemRectMax();

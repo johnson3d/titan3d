@@ -448,7 +448,7 @@ namespace EngineNS.GamePlay.Scene
         #endregion
 
         TtMemberTickables mMemberTickables = new TtMemberTickables();
-        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public override bool OnTickLogic(TtNodeTickParameters args)
         {
             mMemberTickables.TickLogic(this, TtEngine.Instance.ElapseTickCountMS);
             return true;
@@ -464,27 +464,9 @@ namespace EngineNS.GamePlay.Scene
                 return mScopeTick;
             }
         }
-        public override void TickLogic(TtNodeTickParameters args)
+        public override Profiler.TimeScope GetScopeTickLogic()
         {
-            if (this.IsNoTick)
-                return;
-            using (new Profiler.TimeScopeHelper(ScopeTick))
-            {
-                if (OnTickLogic(args.World, args.Policy) == false)
-                    return;
-
-                if (args.IsTickChildren)
-                {
-                    {
-                        for (int i = 0; i < Children.Count; i++)
-                        {
-                            Children[i].TickLogic(args);
-                        }
-                    }
-                }
-            }
-
-            //base.TickLogic(args);
+            return TtOnTickLogicScope<TtScene>.Scope;
         }
         public override unsafe bool IsTreeContain(DVector3* localStart, DVector3* dir, DBoundingBox* pBox)
         {

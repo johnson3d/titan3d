@@ -209,7 +209,14 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         }
         public void OnBeginTrigger(TtNode selfNode, TtNode otherNode)
         {
-            MacrossGetter?.Get().OnBeginTrigger(selfNode, otherNode);
+            try
+            {
+                MacrossGetter?.Get().OnBeginTrigger(selfNode, otherNode);
+            }
+            catch(System.Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+            }
         }
         public void OnEndTrigger(TtNode selfNode, TtNode otherNode)
         {

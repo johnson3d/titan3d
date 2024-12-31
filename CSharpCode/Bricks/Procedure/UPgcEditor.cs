@@ -95,7 +95,7 @@ namespace EngineNS.Bricks.Procedure
 
             (viewport as Editor.TtPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
-            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
+            var gridNode = await GamePlay.Scene.TtGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
 
             PreviewRoot = await viewport.World.Root.NewNode(viewport.World, typeof(GamePlay.Scene.TtSubTreeRootNode), 

@@ -10,7 +10,7 @@ namespace EngineNS.GamePlay.Scene
     /// <summary>
     /// 包含Scene中该Level的node指针，用来
     /// </summary>
-    public partial class UScenePartitionLevel : TtNode
+    public partial class TtScenePartitionLevel : TtNode
     {
 
     }
@@ -22,17 +22,17 @@ namespace EngineNS.GamePlay.Scene
     /// 非partial的Node仍然在Scene的Children中
     /// </summary>
     //[DependencyNode(UTerrainNode)]
-    public partial class UScenePartitionNode : TtNode
+    public partial class TtScenePartitionNode : TtNode
     {
-        public class UScenePartitionNodeData : TtSceneData
+        public class TtScenePartitionNodeData : TtSceneData
         {
             [Rtti.Meta]
             public int NumOfLevelX { get; set; } = 100;
             [Rtti.Meta]
             public int NumOfLevelZ { get; set; } = 100;
         }
-        UScenePartitionLevel[,] Levels = null;
-        UScenePartitionLevel[,] ActiveLevels = null;
+        TtScenePartitionLevel[,] Levels = null;
+        TtScenePartitionLevel[,] ActiveLevels = null;
 
         public int NumOfLevelX;
         public int NumOfLevelZ;
@@ -106,15 +106,14 @@ namespace EngineNS.GamePlay.Scene
             //    i.UpdateBVH()
             //}
         }
-
-        public override void TickLogic(TtNodeTickParameters args)
+        public override Profiler.TimeScope GetScopeTickLogic()
+        {
+            return TtOnTickLogicScope<TtScenePartitionNode>.Scope;
+        }
+        public override bool OnTickLogic(TtNodeTickParameters args)
         {
             //可能不需要每帧都分割场景
             PartitioningScene();
-
-            if (OnTickLogic(args.World, args.Policy) == false)
-                return;
-
             foreach (var i in ActiveLevels)
             {
                 if (i == null)
@@ -122,26 +121,16 @@ namespace EngineNS.GamePlay.Scene
                 i.TickLogic(args);
             }
 
-            if (args.IsTickChildren)
-            {
-                for (int i = 0; i < Children.Count; i++)
-                {
-                    Children[i].TickLogic(args);
-                }
-            }
-        }
-        public override bool OnTickLogic(TtWorld world, TtRenderPolicy policy)
-        {
-            EyeCenter = policy.DefaultCamera.mCoreObject.GetPosition();
-            EyeLocalCenter = policy.DefaultCamera.mCoreObject.GetLocalPosition();
+            EyeCenter = args.Policy.DefaultCamera.mCoreObject.GetPosition();
+            EyeLocalCenter = args.Policy.DefaultCamera.mCoreObject.GetLocalPosition();
 
             if (SetActiveCenter(in EyeCenter))
             {
-                world.CameraOffset = EyeCenter;
-                policy.DefaultCamera.mCoreObject.SetMatrixStartPosition(in EyeCenter);
+                args.World.CameraOffset = EyeCenter;
+                args.Policy.DefaultCamera.mCoreObject.SetMatrixStartPosition(in EyeCenter);
             }
 
-            return base.OnTickLogic(world, policy);
+            return base.OnTickLogic(args);
         }
 
         public override void OnGatherVisibleMeshes(TtWorld.TtVisParameter rp)
@@ -163,7 +152,7 @@ namespace EngineNS.GamePlay.Scene
             result.Y = (int)(nsPos.Z / LevelSize);
             return result;
         }
-        public UScenePartitionLevel GetLevel(in DVector3 pos)
+        public TtScenePartitionLevel GetLevel(in DVector3 pos)
         {
             var idxLevel = GetLevelIndex(in pos);
             if (idxLevel.X < 0 || idxLevel.Y < 0 || idxLevel.X >= NumOfLevelX || idxLevel.Y >= NumOfLevelZ)

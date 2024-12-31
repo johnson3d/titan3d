@@ -1,4 +1,5 @@
-﻿using EngineNS.GamePlay;
+﻿using EngineNS.DesignMacross;
+using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.NxPhysics;
@@ -59,10 +60,14 @@ namespace EngineNS.NxPhysics
         public TtScene mScene;
         public NxReal mSumElapsedTime = NxReal.ByF32(0.0f);
         public NxReal mStepTime = NxReal.ByF32(0.01f);
-        public unsafe override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public override Profiler.TimeScope GetScopeTickLogic()
+        {
+            return TtOnTickLogicScope<NxSceneDebugger>.Scope;
+        }
+        public unsafe override bool OnTickLogic(TtNodeTickParameters args)
         {
             bool bSteped = false;
-            mSumElapsedTime = mSumElapsedTime + NxReal.ByF32(world.DeltaTimeSecond);
+            mSumElapsedTime = mSumElapsedTime + NxReal.ByF32(args.World.DeltaTimeSecond);
             while (mSumElapsedTime > mStepTime)
             {
                 mScene.Simulate(mStepTime);
@@ -96,7 +101,7 @@ namespace EngineNS.NxPhysics
                 }
             }
 
-            return base.OnTickLogic(world, policy);
+            return base.OnTickLogic(args);
         }
         public override void OnGatherVisibleMeshes(GamePlay.TtWorld.TtVisParameter rp)
         {

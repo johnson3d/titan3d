@@ -526,9 +526,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     tableBegin = ImGuiAPI.BeginTable("PGTable", 3, mTabFlags, in outerSize, 0.0f);
                     if(tableBegin)
                     {
-                        ImGuiAPI.TableSetupColumn(TName.FromString("Name").ToString(), ImGuiTableColumnFlags_.ImGuiTableColumnFlags_None, 0, 0);
-                        ImGuiAPI.TableSetupColumn(TName.FromString("Value").ToString(), ImGuiTableColumnFlags_.ImGuiTableColumnFlags_None, 0, 0);
-                        ImGuiAPI.TableSetupColumn(TName.FromString("Ext").ToString(), ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed, 20, 0);
+                        ImGuiAPI.TableSetupColumn("Name", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_None, 0, 0);
+                        ImGuiAPI.TableSetupColumn("Value", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_None, 0, 0);
+                        ImGuiAPI.TableSetupColumn("Ext", ImGuiTableColumnFlags_.ImGuiTableColumnFlags_WidthFixed, 20, 0);
                     }
                 }
                 if (tableBegin || isSubPropertyGrid)

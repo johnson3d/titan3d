@@ -146,7 +146,7 @@ namespace EngineNS.Editor.Forms
         EngineNS.GamePlay.Scene.TtMeshNode PlaneMeshNode;
         EngineNS.GamePlay.Scene.TtMeshNode mCurrentMeshNode;
         EngineNS.GamePlay.Scene.TtMeshNode mArrowMeshNode;
-        EngineNS.GamePlay.Scene.UGridNode GridNode;
+        EngineNS.GamePlay.Scene.TtGridNode GridNode;
         protected async System.Threading.Tasks.Task<bool> Initialize_PreviewMesh(Graphics.Pipeline.TtViewportSlate viewport, TtSlateApplication application, Graphics.Pipeline.TtRenderPolicy policy, float zMin, float zMax)
         {
             viewport.RenderPolicy = policy;
@@ -209,7 +209,7 @@ namespace EngineNS.Editor.Forms
                 PlaneMeshNode.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
             }
 
-            GridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
+            GridNode = await GamePlay.Scene.TtGridNode.AddGridNode(viewport.World, viewport.World.Root);
             GridNode.ViewportSlate = this.PreviewViewport;
             this.RenderPolicy.LookNodeName = "DirLightingNode";
 

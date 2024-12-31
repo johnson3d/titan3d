@@ -470,9 +470,13 @@ namespace EngineNS.Bricks.CodeBuilder
             MacrossGetter?.Get()?.OnNodeInited(this);
             return ret;
         }
-        public override bool OnTickLogic(TtWorld world, TtRenderPolicy policy)
+        public override Profiler.TimeScope GetScopeTickLogic()
         {
-            base.OnTickLogic(world, policy);
+            return TtOnTickLogicScope<TtMacrossSceneNode>.Scope;
+        }
+        public override bool OnTickLogic(TtNodeTickParameters args)
+        {
+            base.OnTickLogic(args);
             MacrossGetter?.Get()?.Tick(this);
             return true;
         }

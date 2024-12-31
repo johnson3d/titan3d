@@ -102,7 +102,7 @@ namespace EngineNS.Animation.SceneNode
                 return mScopeTick;
             }
         }
-        public override void TickLogic(TtNodeTickParameters args)
+        public override bool OnTickLogic(TtNodeTickParameters args)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -114,6 +114,7 @@ namespace EngineNS.Animation.SceneNode
                 Player.Update(args.World.DeltaTimeSecond);
                 Player.Evaluate();
             }
+            return true;
         }
 
         public static async System.Threading.Tasks.Task<TtBlendSpaceAnimPlayNode> AddBlendSpace2DAnimPlayNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, EBoundVolumeType bvType, Type placementType)

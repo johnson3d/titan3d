@@ -95,27 +95,17 @@ namespace EngineNS.GamePlay.Camera
             Placement.Quat = Quaternion.FromEuler(InitRotation);
             return result;
         }
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
+        public override Profiler.TimeScope GetScopeTickLogic()
         {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtCameraSpringArm), nameof(TickLogic));
-                return mScopeTick;
-            }
+            return TtOnTickLogicScope<TtCameraSpringArm>.Scope;
         }
-        public override bool OnTickLogic(TtWorld world, TtRenderPolicy policy)
+        public override bool OnTickLogic(TtNodeTickParameters args)
         {
-            using (new Profiler.TimeScopeHelper(ScopeTick))
-            {
-                var position = Placement.AbsTransform.Position + Placement.Quat * DVector3.Backward * ArmLength;
-                var lookAt = Placement.AbsTransform.Position + TargetOffset;
+            var position = Placement.AbsTransform.Position + Placement.Quat * DVector3.Backward * ArmLength;
+            var lookAt = Placement.AbsTransform.Position + TargetOffset;
 
-                Camera?.LookAtLH(position, lookAt, Vector3.Up);
-                return base.OnTickLogic(world, policy);
-            }   
+            Camera?.LookAtLH(position, lookAt, Vector3.Up);
+            return base.OnTickLogic(args);
         }
         #region ICameraControlNode
         public void AddDelta(in FRotator delta)

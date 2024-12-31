@@ -1,4 +1,5 @@
 using EngineNS.Bricks.GpuDriven;
+using EngineNS.Profiler;
 using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
@@ -1125,13 +1126,36 @@ namespace EngineNS.GamePlay.Scene
         {
             public GamePlay.TtWorld World;
             public Graphics.Pipeline.TtRenderPolicy Policy;
+            public object Tag;
             public bool IsTickChildren = true;
         }
-        public virtual void TickLogic(TtNodeTickParameters args)
+        public class TtOnTickLogicScope<T> : TtTypeScope<T, TtOnTickLogicScope<T>.OnTickLogic>
+        {
+            public class OnTickLogic
+            {
+            }
+        }
+        public virtual Profiler.TimeScope GetScopeTickLogic()
+        {
+            return TtOnTickLogicScope<TtNode>.Scope;
+        }
+        public delegate bool FVisitNode(TtNode node, object arg);
+        public bool IterateNodes(FVisitNode fn, object arg)
+        {
+            if (fn(this, arg) == false)
+                return false;
+            foreach (var i in Children)
+            {
+                if (i.IterateNodes(fn, arg) == false)
+                    return false;
+            }
+            return true;
+        }
+        public void TickLogic(TtNodeTickParameters args)
         {
             if (this.IsNoTick)
                 return;
-            if (OnTickLogic(args.World, args.Policy) == false)
+            if (OnTickLogic(args) == false)
                 return;
 
             //foreach(var i in Children)
@@ -1143,7 +1167,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        public virtual bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public virtual bool OnTickLogic(TtNodeTickParameters args)
         {
             return true;
         }

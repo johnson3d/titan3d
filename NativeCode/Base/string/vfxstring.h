@@ -120,7 +120,12 @@ struct VNameString_t
 struct VNameStringManager
 {
 private:	
-	std::vector<std::string>		mNameStrings;
+	struct FBucket
+	{
+		std::vector<std::string> Strings;
+	};
+	static const int NumOfBucket = 2048;
+	FBucket		mBuckets[NumOfBucket];
 public:
 	static VNameStringManager* Get();
 	int GetIndexFromString(const char* str);

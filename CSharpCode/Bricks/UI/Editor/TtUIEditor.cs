@@ -241,7 +241,7 @@ namespace EngineNS.UI.Editor
             DrawDetails();
             DrawHierachy();
             DrawControls();
-            if (!mIsDragDroping)
+            //if (!mIsDragDroping)
             {
                 mDragTips = mDragItemName;
                 mDragState = EDragState.None;
@@ -349,10 +349,17 @@ namespace EngineNS.UI.Editor
             public string Name;
             public string Description;
             public string Icon;
-            public TtTypeDesc UIControlType;
 
             public ControlItemData Parent;
             public List<ControlItemData> Children = new List<ControlItemData>();
+        }
+        protected class ControlItemData_Control : ControlItemData
+        {
+            public TtTypeDesc UIControlType;
+        }
+        protected class ControlItemData_UserControl : ControlItemData
+        {
+            public RName UIRName;
         }
         List<ControlItemData> mUIControls = new List<ControlItemData>();
         public bool IsUIControlsDirty = true;
@@ -371,6 +378,14 @@ namespace EngineNS.UI.Editor
                     InitControlItemData(null, mUIControls, pathSplit, 0, attr, type);
                 }
             }
+
+            // user controls
+            var userCreatedControls = new ControlItemData()
+            {
+                Name = "User Created"
+            };
+            mUIControls.Add(userCreatedControls);
+            TtEngine.Instance.AssetMetaManager.TourAssetMetas<TtUIAssetAMeta, ControlItemData>(TourAssetMetas, userCreatedControls);
         }
         void InitControlItemData(ControlItemData parent, List<ControlItemData> childList, string[] path, int pathStartIdx, Editor_UIControlAttribute att, Rtti.TtTypeDesc type)
         {
@@ -391,20 +406,69 @@ namespace EngineNS.UI.Editor
             }
             if(!find)
             {
-                var itemData = new ControlItemData()
-                {
-                    Name = curName,
-                    Parent = parent,
-                };
-                childList.Add(itemData);
                 if((path.Length - pathStartIdx) > 0)
                 {
+                    var itemData = new ControlItemData()
+                    {
+                        Name = curName,
+                        Parent = parent,
+                    };
+                    childList.Add(itemData);
                     InitControlItemData(itemData, itemData.Children, path, pathStartIdx, att, type);
                 }
                 else
                 {
-                    itemData.Description = att.Description;
-                    itemData.UIControlType = type;
+                    var itemData = new ControlItemData_Control()
+                    {
+                        Name = curName,
+                        Parent = parent,
+                        Description = att.Description,
+                        UIControlType = type,
+                    };
+                    childList.Add(itemData);
+                }
+            }
+        }
+        bool TourAssetMetas(RName rName, TtUIAssetAMeta meta, ControlItemData parent)
+        {
+            var pathSplit = rName.Name.Split('/');
+            InitControlItemData(parent, parent.Children, pathSplit, 0, rName);
+            return false;
+        }
+        void InitControlItemData(ControlItemData parent, List<ControlItemData> childList, string[] path, int pathStartIdx, RName rName)
+        {
+            var curName = path[pathStartIdx];
+            pathStartIdx++;
+            bool find = false;
+            for(int i=0; i<childList.Count; i++)
+            {
+                if(childList[i].Name == curName)
+                {
+                    InitControlItemData(childList[i], childList[i].Children, path, pathStartIdx, rName);
+                    find = true;
+                    break;
+                }
+            }
+            if(!find)
+            {
+                if((path.Length - pathStartIdx) > 0)
+                {
+                    var itemData = new ControlItemData()
+                    {
+                        Name = curName,
+                        Parent = parent,
+                    };
+                    childList.Add(itemData);
+                    InitControlItemData(itemData, itemData.Children, path, pathStartIdx, rName);
+                }
+                else
+                {
+                    var itemData = new ControlItemData_UserControl()
+                    {
+                        Name = curName,
+                        UIRName = rName,
+                    };
+                    childList.Add(itemData);
                 }
             }
         }
@@ -426,6 +490,10 @@ namespace EngineNS.UI.Editor
         protected struct ControlCreateDragData
         {
             public string TypeName;
+        }
+        protected struct UserControlCreateDragData
+        {
+            public string RNameString;
         }
         protected struct ControlMoveDragData
         {
@@ -450,17 +518,51 @@ namespace EngineNS.UI.Editor
             if (itemData.Children.Count == 0)
                 flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
             var treeNodeResult = ImGuiAPI.TreeNodeEx(itemData.Name, flags);
-            if(itemData.UIControlType != null)
+            if(itemData is ControlItemData_Control)
             {
+                var ctrlItemData = itemData as ControlItemData_Control;
                 if(ImGuiAPI.BeginDragDropSource(ImGuiDragDropFlags_.ImGuiDragDropFlags_SourceNoDisableHover))
                 {
                     var data = new ControlCreateDragData()
                     {
-                        TypeName = TtTypeDescManager.Instance.GetTypeStringFromType(itemData.UIControlType),
+                        TypeName = TtTypeDescManager.Instance.GetTypeStringFromType(ctrlItemData.UIControlType),
                     };
                     var handle = GCHandle.Alloc(data);
                     ImGuiAPI.SetDragDropPayload("UIControlCreateDragDrop", GCHandle.ToIntPtr(handle).ToPointer(), (uint)Marshal.SizeOf<ControlCreateDragData>(), ImGuiCond_.ImGuiCond_None);
-                    mDragItemName = itemData.Name;
+                    mDragItemName = ctrlItemData.Name;
+                    switch (mDragState)
+                    {
+                        case EDragState.Add:
+                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.PassStringColor);
+                            break;
+                        case EDragState.Failed:
+                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.ErrorStringColor);
+                            break;
+                        case EDragState.InsertAfter:
+                        case EDragState.InsertBefore:
+                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, 0xFF00FFFF);
+                            break;
+                        default:
+                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, StyleConfig.Instance.TextColor);
+                            break;
+                    }
+                    ImGuiAPI.Text(mDragTips);
+                    ImGuiAPI.PopStyleColor(1);
+                    ImGuiAPI.EndDragDropSource();
+                }
+            }
+            else if(itemData is ControlItemData_UserControl)
+            {
+                var ctrlItemData = itemData as ControlItemData_UserControl;
+                if (ImGuiAPI.BeginDragDropSource(ImGuiDragDropFlags_.ImGuiDragDropFlags_SourceNoDisableHover))
+                {
+                    var data = new UserControlCreateDragData()
+                    {
+                        RNameString = ctrlItemData.UIRName.ToString(),
+                    };
+                    var handle = GCHandle.Alloc(data);
+                    ImGuiAPI.SetDragDropPayload("UIUserControlCreateDragDrop", GCHandle.ToIntPtr(handle).ToPointer(), (uint)Marshal.SizeOf<UserControlCreateDragData>(), ImGuiCond_.ImGuiCond_None);
+                    mDragItemName = ctrlItemData.Name;
                     switch (mDragState)
                     {
                         case EDragState.Add:
@@ -561,6 +663,36 @@ namespace EngineNS.UI.Editor
                                 {
                                     //var curPos = ImGuiAPI.GetMousePos() - pos;
                                     DropToCreateUIControl(container, 0, mNewCreateUISize,
+                                        (container) =>
+                                        {
+                                            Vector2 offset;
+                                            container.GetElementPointAtPos(in curPos, out offset);
+                                            return offset;
+                                        });
+                                    ImGuiAPI.EndDragDropTarget();
+                                }
+                            }
+                            else
+                            {
+                                mDragTips = $"{name} can't add {mDragItemName}!";
+                                mDragState = EDragState.Failed;
+                            }
+                        }
+                        else if(handle.Target is UserControlCreateDragData)
+                        {
+                            mIsDragDroping = mIsDragDroping || true;
+                            var data = (UserControlCreateDragData)handle.Target;
+                            var name = GetElementShowName(container);
+                            var rName = RName.ParseFrom(data.RNameString);
+                            if (container.CanAddChild(TtTypeDesc.TypeOf<TtUserControl>()))
+                            {
+                                mDragTips = $"Add {mDragItemName} to {name}";
+                                mDragState = EDragState.Add;
+                                if (ImGuiAPI.BeginDragDropTarget())
+                                {
+                                    var uiMeta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(rName) as TtUIAssetAMeta;
+                                    var newUISize = new Vector2(uiMeta.DesignResolution);
+                                    DropToCreateUIControl(container, 0, newUISize,
                                         (container) =>
                                         {
                                             Vector2 offset;
@@ -775,44 +907,91 @@ namespace EngineNS.UI.Editor
             }
             if (parent == null)
                 return;
-            var payload = ImGuiAPI.AcceptDragDropPayload("UIControlCreateDragDrop", ImGuiDragDropFlags_.ImGuiDragDropFlags_None);
-            if (payload != null)
-            {
-                var handle = GCHandle.FromIntPtr((IntPtr)(payload->Data));
-                var data = (ControlCreateDragData)handle.Target;
+            var dragDropPayload = ImGuiAPI.GetDragDropPayload();
+            if (dragDropPayload == null)
+                return;
 
-                var ctrlType = TtTypeDesc.TypeOf(data.TypeName);
-                if (parent.CanAddChild(ctrlType))
+            if (dragDropPayload->IsDataType("UIControlCreateDragDrop"))
+            {
+                var payload = ImGuiAPI.AcceptDragDropPayload("UIControlCreateDragDrop", ImGuiDragDropFlags_.ImGuiDragDropFlags_None);
+                if (payload != null)
                 {
-                    var uiControl = TtTypeDescManager.CreateInstance(ctrlType) as TtUIElement;
-                    uiControl.Name = GetValidName(uiControl);
+                    var handle = GCHandle.FromIntPtr((IntPtr)(payload->Data));
+                    var data = (ControlCreateDragData)handle.Target;
+
+                    var ctrlType = TtTypeDesc.TypeOf(data.TypeName);
+                    if (parent.CanAddChild(ctrlType))
+                    {
+                        var uiControl = TtTypeDescManager.CreateInstance(ctrlType) as TtUIElement;
+                        uiControl.Name = GetValidName(uiControl);
+                        switch (type)
+                        {
+                            case -1:
+                                {
+                                    var idx = parent.Children.IndexOf(element);
+                                    parent.Children.Insert(idx, uiControl);
+                                }
+                                break;
+                            case 0:
+                                parent.Children.Add(uiControl);
+                                break;
+                            case 1:
+                                {
+                                    var idx = parent.Children.IndexOf(element);
+                                    if (idx + 1 >= parent.Children.Count)
+                                        parent.Children.Add(uiControl);
+                                    else
+                                        parent.Children.Insert(idx + 1, uiControl);
+                                }
+                                break;
+                        }
+                        Vector2 offset = getOffsetFunc.Invoke(parent);
+                        parent.ProcessNewAddChild(uiControl, offset, size);
+                        mNeedExpandElement.Add(parent);
+                    }
+
+                    //handle.Free();
+                }
+            }
+            if(dragDropPayload->IsDataType("UIUserControlCreateDragDrop"))
+            {
+                var playload = ImGuiAPI.AcceptDragDropPayload("UIUserControlCreateDragDrop", ImGuiDragDropFlags_.ImGuiDragDropFlags_None);
+                if(playload != null)
+                {
+                    var handle = GCHandle.FromIntPtr((IntPtr)(playload->Data));
+                    var data = (UserControlCreateDragData)handle.Target;
+                    var rName = RName.ParseFrom(data.RNameString);
+                    var userControl = new TtUserControl()
+                    {
+                        ChildRName = rName,
+                        Name = rName.PureName,
+                    };
+                    userControl.Name = GetValidName(userControl);
                     switch(type)
                     {
                         case -1:
                             {
                                 var idx = parent.Children.IndexOf(element);
-                                parent.Children.Insert(idx, uiControl);
+                                parent.Children.Insert(idx, userControl);
                             }
                             break;
                         case 0:
-                            parent.Children.Add(uiControl);
+                            parent.Children.Add(userControl);
                             break;
                         case 1:
                             {
                                 var idx = parent.Children.IndexOf(element);
                                 if (idx + 1 >= parent.Children.Count)
-                                    parent.Children.Add(uiControl);
+                                    parent.Children.Add(userControl);
                                 else
-                                    parent.Children.Insert(idx + 1, uiControl);
+                                    parent.Children.Insert(idx + 1, userControl);
                             }
                             break;
                     }
                     Vector2 offset = getOffsetFunc.Invoke(parent);
-                    parent.ProcessNewAddChild(uiControl, offset, size);
+                    parent.ProcessNewAddChild(userControl, offset, size);
                     mNeedExpandElement.Add(parent);
                 }
-
-                //handle.Free();
             }
         }
         unsafe bool CheckMoveDropValid(TtUIElement element, out sbyte type)
@@ -912,9 +1091,10 @@ namespace EngineNS.UI.Editor
             }
             //return false;
         }
-        unsafe bool CheckCreateDropValid(TtUIElement element, out sbyte type)
+        unsafe bool CheckCreateDropValid(TtUIElement element, out sbyte type, out Vector2 suggestSize)
         {
             type = 0;
+            suggestSize = mNewCreateUISize;
             var dragDropPayload = ImGuiAPI.GetDragDropPayload();
             if (dragDropPayload == null)
             {
@@ -922,7 +1102,8 @@ namespace EngineNS.UI.Editor
                 //mDragState = EDragState.None;
                 return false;
             }
-            if (!dragDropPayload->IsDataType("UIControlCreateDragDrop"))
+            if (!dragDropPayload->IsDataType("UIControlCreateDragDrop") &&
+                !dragDropPayload->IsDataType("UIUserControlCreateDragDrop"))
             {
                 //mDragTips = mDragItemName;
                 //mDragState = EDragState.None;
@@ -947,8 +1128,20 @@ namespace EngineNS.UI.Editor
                     return false;
                 }
                 var handle = GCHandle.FromIntPtr((IntPtr)(dragDropPayload->Data));
-                var data = (ControlCreateDragData)handle.Target;
-                var ctrlType = TtTypeDesc.TypeOf(data.TypeName);
+                TtTypeDesc ctrlType = null;
+                if (handle.Target is ControlCreateDragData)
+                {
+                    var data = (ControlCreateDragData)handle.Target;
+                    ctrlType = TtTypeDesc.TypeOf(data.TypeName);
+                }
+                else if (handle.Target is UserControlCreateDragData)
+                {
+                    ctrlType = TtTypeDesc.TypeOf<TtUserControl>();
+                    var userControlDragData = (UserControlCreateDragData)handle.Target;
+                    var rName = RName.ParseFrom(userControlDragData.RNameString);
+                    var uiMeta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(rName) as TtUIAssetAMeta;
+                    suggestSize = new Vector2(uiMeta.DesignResolution);
+                }
                 if (type != 0)
                     container = element.Parent;
                 if (container != null && container.CanAddChild(ctrlType))
@@ -1006,7 +1199,7 @@ namespace EngineNS.UI.Editor
             var container = element as TtContainer;
             Vector2 itemMin = Vector2.Zero, itemMax = Vector2.Zero;
             int childrenCount = 0;
-            if(container != null)
+            if(container != null && !(container is TtUserControl))
             {
                 if(mShowTemplateControls)
                 {
@@ -1034,26 +1227,14 @@ namespace EngineNS.UI.Editor
                 ProcessSelectElement(element, TtEngine.Instance.InputSystem.IsCtrlKeyDown());
             }
 
-            {
-                var buttonSize = new Vector2(16, 16);
-                float buttonOffset = 16;
-                ImGuiAPI.SameLine(region.X - buttonSize.X - buttonOffset, -1.0f);
-                if (EGui.UIProxy.CustomButton.ToolButton("V", in buttonSize, 0xFF00FF00, "func_V_" + name))
-                {
-                    if (element.Visibility == Visibility.Visible)
-                        element.Visibility = Visibility.Hidden;
-                    else
-                        element.Visibility = Visibility.Visible;
-                }
-            }
-
             if (ImGuiAPI.BeginDragDropTarget())
             {
                 mIsDragDroping = mIsDragDroping || true;
                 sbyte dropType = 0;
-                if(CheckCreateDropValid(element, out dropType))
+                Vector2 uiSize;
+                if(CheckCreateDropValid(element, out dropType, out uiSize))
                 {
-                    DropToCreateUIControl(element, dropType, mNewCreateUISize,
+                    DropToCreateUIControl(element, dropType, uiSize,
                         (container) =>
                         {
                             return new Vector2(0, 0);
@@ -1152,9 +1333,21 @@ namespace EngineNS.UI.Editor
                 ImGuiAPI.EndDragDropSource();
             }
             DrawHierachyContextMenu(element, name);
+            {
+                var buttonSize = new Vector2(16, 16);
+                float buttonOffset = 16;
+                ImGuiAPI.SameLine(region.X - buttonSize.X - buttonOffset, -1.0f);
+                if (EGui.UIProxy.CustomButton.ToolButton("V", in buttonSize, 0xFF00FF00, "func_V_" + name))
+                {
+                    if (element.Visibility == Visibility.Visible)
+                        element.Visibility = Visibility.Hidden;
+                    else
+                        element.Visibility = Visibility.Visible;
+                }
+            }
             if (treeNodeResult)
             {
-                if(container != null)
+                if(container != null && !(container is TtUserControl))
                 {
                     var data = new TourContentsPresenterContainersActionData()
                     {

@@ -96,7 +96,7 @@ namespace EngineNS
                                      ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings |
                                      ImGuiWindowFlags_.ImGuiWindowFlags_NoMove;
                 mComboBox.Width = ImGuiAPI.GetColumnWidth(index) - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X;
-                mComboBox.Name = TName.FromString2("##", info.Name != null ? info.Name : "").ToString();
+                mComboBox.Name = "##" + info.Name != null ? info.Name : "";
                 mComboBox.PreviewValue = preViewStr;
                 var contentBrowserSize = new Vector2(500, 600);
                 ImGuiAPI.SetNextWindowSize(in contentBrowserSize, ImGuiCond_.ImGuiCond_Appearing);

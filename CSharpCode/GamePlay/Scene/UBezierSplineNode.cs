@@ -6,8 +6,8 @@ using System.Text;
 namespace EngineNS.GamePlay.Scene
 {
     [Bricks.CodeBuilder.ContextMenu("Bezier", "BezierSpline", TtNode.EditorKeyword)]
-    [TtNode(NodeDataType = typeof(UBezierSplineNode.UBezierSplineNodeData), DefaultNamePrefix = "BzSpline")]
-    public class UBezierSplineNode : TtSceneActorNode
+    [TtNode(NodeDataType = typeof(TtBezierSplineNode.UBezierSplineNodeData), DefaultNamePrefix = "BzSpline")]
+    public class TtBezierSplineNode : TtSceneActorNode
     {
         public class UBezierSplineNodeData : TtNodeData
         {
@@ -55,7 +55,11 @@ namespace EngineNS.GamePlay.Scene
                 return mDebugPointMesh;
             }
         }
-        public override bool OnTickLogic(TtWorld world, TtRenderPolicy policy)
+        public override Profiler.TimeScope GetScopeTickLogic()
+        {
+            return TtOnTickLogicScope<TtBezierSplineNode>.Scope;
+        }
+        public override bool OnTickLogic(TtNodeTickParameters args)
         {
             //if (TtEngine.Instance.EditorInstance.Config.IsFilters(GamePlay.UWorld.UVisParameter.EVisCullFilter.UtilityDebug) == false)
             //    return true;
@@ -71,7 +75,7 @@ namespace EngineNS.GamePlay.Scene
                 UpdateSplineMesh();
                 tmp.IsDirty = false;
             }
-            return base.OnTickLogic(world, policy);
+            return base.OnTickLogic(args);
         }
         public class USplinePoint : Graphics.Pipeline.IProxiable
         {

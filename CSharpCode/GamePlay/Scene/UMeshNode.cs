@@ -420,7 +420,7 @@ namespace EngineNS.GamePlay.Scene
         }
 
         public Animation.SkeletonAnimation.Runtime.Pose.TtLocalSpaceRuntimePose RuntimePose { get; set; } = null;        
-        public unsafe override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public unsafe override bool OnTickLogic(TtNodeTickParameters args)
         {
             if (HasSkin && Mesh.MdfQueue is UMdfSkinMesh mdfSkin)
             {

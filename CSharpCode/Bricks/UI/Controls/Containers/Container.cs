@@ -722,7 +722,7 @@ namespace EngineNS.UI.Controls.Containers
                         continue;
 
                     var container = child as TtContainer;
-                    if (container != null)
+                    if (container != null && !(container is TtUserControl))
                     {
                         var retVal = container.GetPointAtElement(in pt, out pointOffset, onlyClipped);
                         if (retVal != null)
@@ -743,7 +743,7 @@ namespace EngineNS.UI.Controls.Containers
                     if (child.Is3D)
                         continue;
                     var container = child as TtContainer;
-                    if (container != null)
+                    if (container != null && !(container is TtUserControl))
                     {
                         var retVal = container.GetPointAtElement(in pt, out pointOffset, onlyClipped);
                         if (retVal != null)

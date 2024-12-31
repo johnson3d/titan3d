@@ -74,7 +74,7 @@ namespace EngineNS
                     angle.X = MathHelper.Radian_To_Angle(el.Yaw).X;
                     angle.Y = MathHelper.Radian_To_Angle(el.Pitch).X;
                     angle.Z = MathHelper.Radian_To_Angle(el.Roll).X;
-                    var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&angle, 3, speed, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                    var changed = ImGuiAPI.DragScalarN2("##" + info.Name, ImGuiDataType_.ImGuiDataType_Float, (float*)&angle, 3, speed, &minValue, &maxValue, "%0.6f", ImGuiSliderFlags_.ImGuiSliderFlags_None);
                     //ImGuiAPI.InputFloat3(TName.FromString2("##", info.Name).ToString(), (float*)&v, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_CharsDecimal);
                     //ImGuiAPI.PopStyleVar(1);
                     if (changed && !info.Readonly)//(v != saved)

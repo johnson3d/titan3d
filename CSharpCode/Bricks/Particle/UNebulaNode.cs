@@ -1,5 +1,6 @@
 ﻿using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
+using EngineNS.NxPhysics;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -78,14 +79,18 @@ namespace EngineNS.Bricks.Particle
                 i.Mesh.UpdateCameraOffset(world);
             }
         }
-        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public override Profiler.TimeScope GetScopeTickLogic()
+        {
+            return TtOnTickLogicScope<TtNebulaNode>.Scope;
+        }
+        public override bool OnTickLogic(TtNodeTickParameters args)
         {
             //var particleNode = policy.FindNode("ParticleNode") as UParticleGraphNode;
-            var particleNode = policy.FindFirstNode<UParticleGraphNode>();
+            var particleNode = args.Policy.FindFirstNode<UParticleGraphNode>();
             if (particleNode == null)
                 return true;
 
-            NebulaParticle.Update(policy, particleNode, TtEngine.Instance.ElapsedSecond);
+            NebulaParticle.Update(args.Policy, particleNode, TtEngine.Instance.ElapsedSecond);
 
             return true;
         }

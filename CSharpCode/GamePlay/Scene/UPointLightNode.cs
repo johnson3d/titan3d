@@ -177,13 +177,6 @@ namespace EngineNS.GamePlay.Scene
                 mDebugMesh.IsDrawHitproxy = false;
             }
         }
-        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
-        {
-            //test temp code 
-            //LightData.Intensity = 120 * (float)Math.Sin(TtEngine.Instance.TickCountSecond * 0.005f);
-
-            return true;
-        }
 
         public override bool IsAcceptShadow
         {

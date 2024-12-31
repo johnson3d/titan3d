@@ -391,7 +391,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 else
                     v = Vector3.FromObject(info.Value);
                 var saved = v;
-                ImGuiAPI.ColorPicker3(TName.FromString2("##colorpicker_", info.Name).ToString(), (float*)&v,
+                ImGuiAPI.ColorPicker3("##colorpicker_" + info.Name, (float*)&v,
                     misc_flags | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSmallPreview);
                 if (v != saved)
                 {
@@ -463,7 +463,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                     v = Vector4.FromObject(info.Value);
                 }
                 var saved = v;
-                ImGuiAPI.ColorPicker4(TName.FromString2("##colorpicker_", info.Name).ToString(), (float*)&v,
+                ImGuiAPI.ColorPicker4("##colorpicker_" + info.Name, (float*)&v,
                     misc_flags | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSmallPreview, (float*)0);
                 if (v != saved)
                 {
@@ -542,7 +542,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 else
                     v = new Color4f(srcValue);
                 var saved = v;
-                ImGuiAPI.ColorPicker4(TName.FromString2("##colorpicker_", info.Name).ToString(), (float*)&v,
+                ImGuiAPI.ColorPicker4("##colorpicker_" + info.Name, (float*)&v,
                     misc_flags | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_.ImGuiColorEditFlags_NoSmallPreview, (float*)0);
                 if (v != saved)
                 {

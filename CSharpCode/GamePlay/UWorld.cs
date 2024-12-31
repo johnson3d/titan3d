@@ -516,6 +516,17 @@ namespace EngineNS.GamePlay
             }
         }
         [ThreadStatic]
+        private static Profiler.TimeScope mScopeTick_Iterate;
+        private static Profiler.TimeScope ScopeTick_Iterate
+        {
+            get
+            {
+                if (mScopeTick_Iterate == null)
+                    mScopeTick_Iterate = new Profiler.TimeScope(typeof(TtWorld), nameof(TickLogic) + ".Iterate");
+                return mScopeTick_Iterate;
+            }
+        }
+        [ThreadStatic]
         private static Profiler.TimeScope mScopeTick_After;
         private static Profiler.TimeScope ScopeTick_After
         {
@@ -527,6 +538,7 @@ namespace EngineNS.GamePlay
             }
         } 
         private TtNode.TtNodeTickParameters NodeTickParameters = new TtNode.TtNodeTickParameters();
+        private List<TtNode> TickNodes = new List<TtNode>();
         public virtual void TickLogic(Graphics.Pipeline.TtRenderPolicy policy, float ellapse)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
@@ -539,7 +551,29 @@ namespace EngineNS.GamePlay
                 NodeTickParameters.World = this;
                 NodeTickParameters.Policy = policy;
                 NodeTickParameters.IsTickChildren = true;
-                Root.TickLogic(NodeTickParameters);
+                //Root.TickLogic(NodeTickParameters);
+
+                TickNodes.Clear();
+                using (new Profiler.TimeScopeHelper(ScopeTick_Iterate))
+                {
+                    Root.IterateNodes(static (nd, arg) =>
+                    {
+                        var tp = (List<TtNode>)arg;
+                        tp.Add(nd);return true;
+                    }, TickNodes);
+                }
+
+                foreach (var i in TickNodes)
+                {
+                    if (i.IsNoTick)
+                        continue;
+
+                    using (new Profiler.TimeScopeHelper(i.GetScopeTickLogic()))
+                    {
+                        i.OnTickLogic(NodeTickParameters);
+                    }
+                }
+                TickNodes.Clear();
 
                 //NodeTickParameters.IsTickChildren = false;
                 //TtEngine.Instance.EventPoster.ParrallelFor(ActiveNodes.Count, static (Index, obj1, obj2) =>
@@ -552,10 +586,10 @@ namespace EngineNS.GamePlay
                 //    i.TickLogic(NodeTickParameters);
                 //}
 
-                mMemberTickables.TickLogic(this, TtEngine.Instance.ElapseTickCountMS);
-
                 using (new Profiler.TimeScopeHelper(ScopeTick_After))
                 {
+                    mMemberTickables.TickLogic(this, TtEngine.Instance.ElapseTickCountMS);
+
                     foreach (var i in mAfterTicks)
                     {
                         i();

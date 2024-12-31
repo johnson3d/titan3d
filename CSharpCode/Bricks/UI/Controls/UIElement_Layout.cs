@@ -52,7 +52,7 @@ namespace EngineNS.UI.Controls
                     if (vFormat != null)
                         format = vFormat.Format;
                 }
-                var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 4, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                var changed = ImGuiAPI.DragScalarN2("##" + info.Name, ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 4, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                 if (changed && !info.Readonly)//(v != saved)
                 {
                     newValue = v;
@@ -111,7 +111,7 @@ namespace EngineNS.UI.Controls
                     if (vFormat != null)
                         format = vFormat.Format;
                 }
-                var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 4, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                var changed = ImGuiAPI.DragScalarN2("##" + info.Name, ImGuiDataType_.ImGuiDataType_Float, (float*)&v, 4, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                 if (changed && !info.Readonly)//(v != saved)
                 {
                     newValue = v;

@@ -346,7 +346,7 @@ namespace EngineNS.GamePlay.Scene
         public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
 */
         static Macross.TtMacrossBreak mTestBreak = new Macross.TtMacrossBreak("UMeshNode.OnTickLogic", false);
-        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public override bool OnTickLogic(TtNodeTickParameters args)
         {
             if (bNeedUpdateMeshMatrix == true)
             {

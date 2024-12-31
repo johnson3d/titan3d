@@ -10,6 +10,7 @@
 //-----------------------------------------------------------------------------
 #include "../BaseHead.h"
 #include "vfxstring.h"
+#include "../HashDefine.h"
 #include "../TextConverter/WordCodeHelper.h"
 #include "../thread/vfxcritical.h"
 
@@ -218,27 +219,39 @@ VStringA VStringA_Utf82Gbk(LPCSTR utf8)
 
 static VSLLock		gNameLocker;
 
+inline UINT GetStringHash(const char* str)
+{
+	return HashHelper::DefaultHash(str);
+}
+
 int VNameStringManager::GetIndexFromString(const char* str)
 {
 	VAutoVSLLock lk(gNameLocker);
-	for (int i = 0; i < (int)mNameStrings.size(); i++)
+	auto hash = GetStringHash(str);
+	auto bkt = hash % NumOfBucket;
+	int count = (int)mBuckets[bkt].Strings.size();
+	for (int i = 0; i < count; i++)
 	{
-		if (mNameStrings[i] == str)
-			return i;
+		if (mBuckets[bkt].Strings[i] == str)
+			return (bkt << 16) | i;
 	}
-	mNameStrings.push_back(str);
-	return (int)(mNameStrings.size() - 1);
+	if (count >= 0xffff)
+		return -1;
+	mBuckets[bkt].Strings.push_back(str);
+	return (bkt << 16) | count;
 }
 
 const std::string& VNameStringManager::GetString(int Index) const
 {
+	static std::string emptyStr;
 	VAutoVSLLock lk(gNameLocker);
-	if (Index < 0 || Index >= mNameStrings.size())
-	{
-		static std::string tmp;
-		return tmp;
-	}
-	return mNameStrings[Index];
+	auto bkt = (Index & 0xffff0000)>>16;
+	if (bkt >= NumOfBucket)
+		return emptyStr;
+	auto pos = Index & 0x0000ffff;
+	if (pos >= mBuckets[bkt].Strings.size())
+		return emptyStr;
+	return mBuckets[bkt].Strings[pos];
 }
 
 VNameStringManager* VNameStringManager::Get()

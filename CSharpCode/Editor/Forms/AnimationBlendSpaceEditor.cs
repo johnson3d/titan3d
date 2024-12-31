@@ -197,7 +197,7 @@ namespace EngineNS.Editor.Forms
                 PlaneMeshNode.IsCastShadow = false;
             }
 
-            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
+            var gridNode = await GamePlay.Scene.TtGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
 
             return true;
@@ -345,27 +345,18 @@ namespace EngineNS.Editor.Forms
                 Player.RuntimePose = meshNode.RuntimePose;
 
             }
-            [ThreadStatic]
-            private static Profiler.TimeScope mScopeTick;
-            private static Profiler.TimeScope ScopeTick
+            public override Profiler.TimeScope GetScopeTickLogic()
             {
-                get
-                {
-                    if (mScopeTick == null)
-                        mScopeTick = new Profiler.TimeScope(typeof(TtBlendSpaceAnimPreviewNode), nameof(TickLogic));
-                    return mScopeTick;
-                }
+                return TtOnTickLogicScope<TtBlendSpaceAnimPreviewNode>.Scope;
             }
-            public override void TickLogic(TtNodeTickParameters args)
+            public override bool OnTickLogic(TtNodeTickParameters args)
             {
-                using (new Profiler.TimeScopeHelper(ScopeTick))
-                {
-                    var animPlayNodeData = NodeData as TtBlendSpaceAnimPreviewNodeData;
-                    var previewInput = animPlayNodeData.Preview.PreviewInput;
-                    Player.Input = new Vector3(previewInput.X, previewInput.Y, 0);
-                    Player.Update(args.World.DeltaTimeSecond);
-                    Player.Evaluate();
-                }
+                var animPlayNodeData = NodeData as TtBlendSpaceAnimPreviewNodeData;
+                var previewInput = animPlayNodeData.Preview.PreviewInput;
+                Player.Input = new Vector3(previewInput.X, previewInput.Y, 0);
+                Player.Update(args.World.DeltaTimeSecond);
+                Player.Evaluate();
+                return true;
             }
 
             public static async System.Threading.Tasks.Task<TtBlendSpaceAnimPreviewNode> AddBlendSpace2DAnimPreviewNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, EBoundVolumeType bvType, Type placementType)

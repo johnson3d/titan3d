@@ -86,12 +86,16 @@ namespace EngineNS.GamePlay.Scene
                 //rp.VisibleMeshes.Add(SunMesh);
             }
         }
-        public override bool OnTickLogic(TtWorld world, TtRenderPolicy policy)
+        public override Profiler.TimeScope GetScopeTickLogic()
+        {
+            return TtOnTickLogicScope<TtSkyNode>.Scope;
+        }
+        public override bool OnTickLogic(TtNodeTickParameters args)
         {
             SunMesh.IsUnlit = true;
             this.Mesh.IsUnlit = true;
 
-            var camPos = policy.DefaultCamera.GetPosition();
+            var camPos = args.Policy.DefaultCamera.GetPosition();
             camPos = new DVector3(camPos.X, Placement.TransformRef.mPosition.Y, camPos.Z);
             if (Placement.Position != camPos)
             {
@@ -99,10 +103,10 @@ namespace EngineNS.GamePlay.Scene
             }
             //var transform = FTransform.CreateTransform(camPos + SunDirection * 800, new Vector3(80.0f), in Quaternion.Identity);
             //SunMesh.SetWorldTransform(in transform, world, false);
-            var matrix = policy.DefaultCamera.GetJitterViewProjectionInverse();
+            var matrix = args.Policy.DefaultCamera.GetJitterViewProjectionInverse();
             SunMesh.DirectSetWorldMatrix(in matrix);
 
-            return base.OnTickLogic(world, policy);
+            return base.OnTickLogic(args);
         }
     }
 }

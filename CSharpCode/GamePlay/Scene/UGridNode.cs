@@ -4,10 +4,12 @@ using System.Text;
 
 namespace EngineNS.GamePlay.Scene
 {
-    [TtNode(NodeDataType = typeof(UGridNode.UGridNodeData), DefaultNamePrefix = "Grid")]
-    public partial class UGridNode : TtMeshNode
+    [TtNode(NodeDataType = typeof(TtGridNode.TtGridNodeData), DefaultNamePrefix = "Grid")]
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UGridNode@EngineCore", "EngineNS.GamePlay.Scene.UGridNode" })]
+    public partial class TtGridNode : TtMeshNode
     {
-        public class UGridNodeData : TtNodeData
+        [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UGridNode.UGridNodeData@EngineCore", "EngineNS.GamePlay.Scene.UGridNode.UGridNodeData" })]
+        public class TtGridNodeData : TtNodeData
         {
         }
 
@@ -15,7 +17,7 @@ namespace EngineNS.GamePlay.Scene
         {
             if (data == null)
             {
-                data = new UGridNodeData();
+                data = new TtGridNodeData();
             }
             await base.InitializeNode(world, data, EBoundVolumeType.Box, placementType);
             SetStyle(ENodeStyles.DiscardAABB | ENodeStyles.VisibleFollowParent | ENodeStyles.Transient);
@@ -26,7 +28,7 @@ namespace EngineNS.GamePlay.Scene
         public Graphics.Pipeline.TtViewportSlate ViewportSlate;
         public Graphics.Pipeline.Shader.TtMaterialInstance mGridlineMaterial;
         public Graphics.Mesh.UMdfGridUVMesh GridUVModifier;
-        public static async Thread.Async.TtTask<UGridNode> AddGridNode(GamePlay.TtWorld world, TtNode parent)
+        public static async Thread.Async.TtTask<TtGridNode> AddGridNode(GamePlay.TtWorld world, TtNode parent)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             var material = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(RName.GetRName("material/gridline.material", RName.ERNameType.Engine));
@@ -70,9 +72,9 @@ namespace EngineNS.GamePlay.Scene
             if (ok == false)
                 return null;
 
-            var data = new UGridNodeData();
+            var data = new TtGridNodeData();
             var scene = parent.GetNearestParentScene();
-            var meshNode = await scene.NewNode(world, typeof(UGridNode), data, EBoundVolumeType.Box, typeof(TtPlacement)) as UGridNode;
+            var meshNode = await scene.NewNode(world, typeof(TtGridNode), data, EBoundVolumeType.Box, typeof(TtPlacement)) as TtGridNode;
             meshNode.NodeData.Name = "GridLine";
             meshNode.Mesh = gridMesh;
             meshNode.Parent = parent;
@@ -93,7 +95,11 @@ namespace EngineNS.GamePlay.Scene
         //private static RHI.FNameVarIndex ShaderIdx_UVMin = new RHI.FNameVarIndex("UVMin");
         //private static RHI.FNameVarIndex ShaderIdx_UVMax = new RHI.FNameVarIndex("UVMax");
         double WorldToUVScale = 0.0001f;
-        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public override Profiler.TimeScope GetScopeTickLogic()
+        {
+            return TtOnTickLogicScope<TtGridNode>.Scope;
+        }
+        public override bool OnTickLogic(TtNodeTickParameters args)
         {
             if (mGridlineMaterial == null || mGridlineMaterial.PerMaterialCBuffer == null)
                 return true;

@@ -415,17 +415,17 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
         }
         
-        public override bool OnTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        public override bool OnTickLogic(TtNodeTickParameters args)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                EyeCenter = policy.DefaultCamera.mCoreObject.GetPosition();
-                EyeLocalCenter = policy.DefaultCamera.mCoreObject.GetLocalPosition();
+                EyeCenter = args.Policy.DefaultCamera.mCoreObject.GetPosition();
+                EyeLocalCenter = args.Policy.DefaultCamera.mCoreObject.GetLocalPosition();
 
                 if (SetActiveCenter(in EyeCenter))
                 {
-                    world.CameraOffset = EyeCenter;
-                    policy.DefaultCamera.mCoreObject.SetMatrixStartPosition(in EyeCenter);
+                    args.World.CameraOffset = EyeCenter;
+                    args.Policy.DefaultCamera.mCoreObject.SetMatrixStartPosition(in EyeCenter);
                 }
 
                 //UpdateRangeLOD((NodeData as UTerrainData).LODRangeFloat, EyeCenter - this.Location);
@@ -434,7 +434,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                 {
                     if (i == null)
                         continue;
-                    i.LevelData?.Tick(world, policy);
+                    i.LevelData?.Tick(args.World, args.Policy);
                 }
 
                 LevelStreaming.Tick(TtEngine.Instance.ElapsedSecond);
@@ -448,7 +448,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                     }, this.Terrain);
                 }
 
-                return base.OnTickLogic(world, policy);
+                return base.OnTickLogic(args);
             }   
         }
         protected override void OnAbsTransformChanged()

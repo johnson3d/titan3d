@@ -184,7 +184,8 @@ namespace EngineNS.Editor.Forms
             {
                 var cmdlst = ImGuiAPI.GetWindowDrawList();
                 var stats = TtEngine.Instance.GfxDevice.RenderSwapQueue.GetStat();
-                ImGuiAPI.Text($"CmdList = {stats.NumOfCmdlist};Drawcall = {stats.NumOfDrawcall};Primitive = {stats.NumOfPrimitive}; WorkThreads = {Thread.TtThreadPool.MaxActiveThreads}");
+                var fps = string.Format("fps={0:F2}", TtEngine.Instance.FPS);
+                ImGuiAPI.Text($"Fps({fps}) CmdList = {stats.NumOfCmdlist};Drawcall = {stats.NumOfDrawcall};Primitive = {stats.NumOfPrimitive}; WorkThreads = {Thread.TtThreadPool.MaxActiveThreads}");
                 Thread.TtThreadPool.ResetMaxActiveThreads();
                 EGui.UIProxy.SearchBarProxy.OnDraw(ref mFilterFocusd, cmdlst, "filter", ref mFilter, ImGuiAPI.GetWindowContentRegionWidth());
                 DockId = ImGuiAPI.GetWindowDockID();

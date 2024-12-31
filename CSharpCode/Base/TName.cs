@@ -4,65 +4,58 @@ using System.Text;
 
 namespace EngineNS
 {   
-    public struct TName
+    public struct TtName
     {//这是用来减少因为string拼接导致的gc的辅助类
-        private UInt32 mNameIndex;
-        public TName(TName name)
+        UInt32 Index;
+        public TtName(TtName name)
         {
-            mNameIndex = name.mNameIndex;
+            Index = name.Index;
         }
-        private TName(UInt32 index)
+        private TtName(UInt32 index)
         {
-            mNameIndex = index;
+            Index = index;
         }
-        public TName(string name)
+        public TtName(string name)
         {
-            mNameIndex = GetNameIndex(name);
+            Index = GetNameIndex(name);
         }
         public override string ToString()
         {
-            return NameTable[(int)mNameIndex];
+            var bkt = (Index & 0xffff0000) >> 16;
+            if (bkt >= NumOfBucket)
+                return null;
+            var pos = Index & 0x0000ffff;
+            if (pos >= 0x0000ffff)
+                return null;
+            return NameTable[(int)bkt][(int)pos];
         }
-        public static TName FromString(string name)
+        public static TtName FromString(string name)
         {
-            return new TName(GetNameIndex(name));
-        }
-        public static TName FromString2(string name1, string name2)
-        {
-            return new TName(GetNameIndex2(name1, name2));
+            return new TtName(GetNameIndex(name));
         }
         #region Manger
-        static List<string> NameTable = new List<string>();
+        const int NumOfBucket = 2048;
+        static List<string>[] NameTable = new List<string>[NumOfBucket];
         private static UInt32 GetNameIndex(string name)
         {
             lock (NameTable)
             {
-                for (int i = 0; i < NameTable.Count; i++)
+                var hash = (UInt32)name.GetHashCode();
+                var bkt = hash % NumOfBucket;
+                if (NameTable[bkt] == null)
                 {
-                    if (NameTable[i] == name)
-                    {
-                        return (UInt16)i;
-                    }
+                    NameTable[bkt] = new List<string>();
                 }
-                NameTable.Add(name);
-                return (UInt32)NameTable.Count - 1;
-            }
-        }
-        private static UInt32 GetNameIndex2(string name1, string name2)
-        {
-            lock (NameTable)
-            {
-                for (int i = 0; i < NameTable.Count; i++)
+                var count = NameTable[bkt].Count;
+                for (int i = 0; i < count; i++)
                 {
-                    var name = NameTable[i];
-                    if (name.Length == name1.Length + name2.Length)
-                    {
-                        if (name.StartsWith(name1) && name.EndsWith(name2))
-                            return (UInt32)i;
-                    }
+                    if (NameTable[bkt][i] == name)
+                        return (bkt << 16) | (UInt32)i;
                 }
-                NameTable.Add(name1 + name2);
-                return (UInt32)NameTable.Count - 1;
+                if (count >= 0xffff)
+                    return 0xffffffff;
+                NameTable[bkt].Add(name);
+                return (bkt << 16) | (UInt32)count;
             }
         }
         #endregion

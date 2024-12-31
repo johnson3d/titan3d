@@ -34,14 +34,17 @@ namespace Survivor
 
             return true;
         }
-
-        public override bool OnTickLogic(TtWorld world, TtRenderPolicy policy)
+        public override EngineNS.Profiler.TimeScope GetScopeTickLogic()
+        {
+            return TtOnTickLogicScope<TtMonsterNode>.Scope;
+        }
+        public override bool OnTickLogic(TtNodeTickParameters args)
         {
             if(StateNode.IsDead)
             {
                 Parent = null;
             }
-            return base.OnTickLogic(world, policy);
+            return base.OnTickLogic(args);
         }
     }
     public enum EMonsterSpawnType
@@ -184,13 +187,13 @@ namespace Survivor
             SpawnStrategies.Add(strategy);
             return true;
         }
-        public override bool OnTickLogic(TtWorld world, TtRenderPolicy policy)
+        public override bool OnTickLogic(TtNodeTickParameters args)
         {
             foreach (var strategy in SpawnStrategies)
             {
-                strategy.Tick(world);
+                strategy.Tick(args.World);
             }
-            return base.OnTickLogic(world, policy);
+            return base.OnTickLogic(args);
         }
     }
 }

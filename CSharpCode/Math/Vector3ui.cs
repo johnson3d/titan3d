@@ -67,7 +67,7 @@ namespace EngineNS
                         if (vFormat != null)
                             format = vFormat.Format;
                     }
-                    var changed = ImGuiAPI.DragScalarN2(TName.FromString2("##", info.Name).ToString(), ImGuiDataType_.ImGuiDataType_Float, (uint*)&v, 3, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
+                    var changed = ImGuiAPI.DragScalarN2("##" + info.Name, ImGuiDataType_.ImGuiDataType_Float, (uint*)&v, 3, speed, &minValue, &maxValue, format, ImGuiSliderFlags_.ImGuiSliderFlags_None);
                     //ImGuiAPI.InputFloat3(TName.FromString2("##", info.Name).ToString(), (uint*)&v, "%.6f", ImGuiInputTextFlags_.ImGuiInputTextFlags_CharsDecimal);
                     //ImGuiAPI.PopStyleVar(1);
                     if (changed && !info.Readonly)//(v != saved)

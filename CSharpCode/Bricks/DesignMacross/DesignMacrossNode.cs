@@ -104,20 +104,19 @@ namespace EngineNS.DesignMacross
                 }
             }
         }
-        public override bool OnTickLogic(TtWorld world, TtRenderPolicy policy)
+        public override Profiler.TimeScope GetScopeTickLogic()
+        {
+            return TtOnTickLogicScope<TtDesignMacrossNode>.Scope;
+        }
+        public override bool OnTickLogic(TtNodeTickParameters args)
         {
             if (MacrossGetter != null && MacrossGetter.Get() != null && MacrossGetter.Get().IsInitialized)
             {
-                MacrossGetter.Get().PreTick(world.DeltaTimeSecond);
-                MacrossGetter.Get().Tick(world.DeltaTimeSecond);
-                MacrossGetter.Get().AfterTick(world.DeltaTimeSecond);
+                MacrossGetter.Get().PreTick(args.World.DeltaTimeSecond);
+                MacrossGetter.Get().Tick(args.World.DeltaTimeSecond);
+                MacrossGetter.Get().AfterTick(args.World.DeltaTimeSecond);
             }
-            return base.OnTickLogic(world, policy);
-        }
-        public override void TickLogic(TtNodeTickParameters args)
-        {
-            
-            base.TickLogic(args);
+            return base.OnTickLogic(args);
         }
     }
 }

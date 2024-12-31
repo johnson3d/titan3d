@@ -25,8 +25,11 @@ namespace Survivor
         {
             return base.InitializeNode(world, data, bvType, placementType);
         }
-        
-        public override bool OnTickLogic(TtWorld world, TtRenderPolicy policy)
+        public override EngineNS.Profiler.TimeScope GetScopeTickLogic()
+        {
+            return TtOnTickLogicScope<TtMonsterController>.Scope;
+        }
+        public override bool OnTickLogic(TtNodeTickParameters args)
         {
             if(Player != null && MonsterNode != null)
             {
@@ -39,7 +42,7 @@ namespace Survivor
                                                 MonsterNode.MonsterPrefab.Placement.AbsTransform.Position.ToSingleVector3();
                     dir.Normalize();
                     
-                    var pos = MonsterNode.MonsterPrefab.Placement.Position + dir * MonsterNode.MonsterData.Speed * world.DeltaTimeSecond;
+                    var pos = MonsterNode.MonsterPrefab.Placement.Position + dir * MonsterNode.MonsterData.Speed * args.World.DeltaTimeSecond;
                     var simpleMovement = MonsterNode.MonsterPrefab.FindFirstChild<TtSimpleMovement>(null, true) as TtSimpleMovement;
                     simpleMovement.SetDesiredPosition(pos.ToSingleVector3());
                     MonsterNode.MonsterPrefab.Placement.Quat = Quaternion.RotationFrowTwoVector(Vector3.Forward, -dir);
@@ -50,7 +53,7 @@ namespace Survivor
                 }
             }
             
-            return base.OnTickLogic(world, policy);
+            return base.OnTickLogic(args);
         }
 
     }

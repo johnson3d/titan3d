@@ -242,6 +242,21 @@ namespace EngineNS.Profiler
         }
     }
 
+    public class TtTypeScope<T, F>
+    {
+        [ThreadStatic]
+        private static Profiler.TimeScope mScope;
+        public static Profiler.TimeScope Scope
+        {
+            get
+            {
+                if (mScope == null)
+                    mScope = new Profiler.TimeScope(typeof(T), typeof(F).Name);
+                return mScope;
+            }
+        }
+    }
+
     [URpcClassAttribute(RunTarget = ERunTarget.None, Executer = EExecuter.Profiler, CallerInClass = true)]
     public partial class TtRpcProfiler : IRpcHost
     {

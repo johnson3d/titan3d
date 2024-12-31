@@ -35,7 +35,7 @@ namespace EngineNS
                 //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
                 var minValue = double.MinValue;
                 var maxValue = double.MaxValue;
-                var name = TName.FromString2("##", info.Name).ToString();
+                var name = "##" + info.Name;
                 var multiValue = info.Value as EGui.Controls.PropertyGrid.PropertyMultiValue;
                 bool retValue = false;
                 if (multiValue != null && multiValue.HasDifferentValue())

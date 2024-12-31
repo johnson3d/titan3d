@@ -76,53 +76,42 @@ namespace EngineNS.GamePlay.Controller
 
         float HInput = 0;
         float VInput = 0;
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
+        public override Profiler.TimeScope GetScopeTickLogic()
         {
-            get
+            return TtOnTickLogicScope<TtCharacterController>.Scope;
+        }
+        public override bool OnTickLogic(TtNodeTickParameters args)
+        {
+            base.OnTickLogic(args);
+
+            float PitchSpeed = 15, YawSpeed = 15;
+            float yawDelta = Math.Min(YawDelta, 100) * 0.01f;
+            float pitchDelta = Math.Min(PitchDelta, 100) * 0.01f;
+            CameraControlNode.AddDelta(new FRotator(yawDelta * YawSpeed * args.World.DeltaTimeSecond, -pitchDelta * PitchSpeed * args.World.DeltaTimeSecond, 0));
+
+            //MovementNode.AngularVelocity = new DVector3(0, YawDelta * 0.1f, 0);
+
+            PitchDelta = 0;
+            YawDelta = 0;
+
+            Vector3 control = Vector3.Forward * VInput + Vector3.Right * HInput;
+            if (OrientCameraRoation)
             {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtCharacterController), nameof(TickLogic));
-                return mScopeTick;
+                ControlledCharacter.Placement.Quat = Quaternion.GetQuaternion(Vector3.Forward, new DVector3(CameraControlNode.Camera.Direction.X, 0, CameraControlNode.Camera.Direction.Z).ToSingleVector3());
+                MovementNode.SetLinearVelocity(ControlledCharacter.Placement.Quat * control * MovementNode.Speed);
             }
-        } 
-        public override void TickLogic(TtNodeTickParameters args)
-        {
-            using (new Profiler.TimeScopeHelper(ScopeTick))
+            if (OrientToMovmement)
             {
-                base.TickLogic(args);
-
-                float PitchSpeed = 15, YawSpeed = 15;
-                float yawDelta = Math.Min(YawDelta, 100) * 0.01f;
-                float pitchDelta = Math.Min(PitchDelta, 100) * 0.01f;
-                CameraControlNode.AddDelta(new FRotator(yawDelta * YawSpeed * args.World.DeltaTimeSecond, -pitchDelta * PitchSpeed * args.World.DeltaTimeSecond, 0));
-
-                //MovementNode.AngularVelocity = new DVector3(0, YawDelta * 0.1f, 0);
-
-                
-                
-                PitchDelta = 0;
-                YawDelta = 0;
-
-                Vector3 control = Vector3.Forward * VInput + Vector3.Right * HInput;
-                if (OrientCameraRoation)
+                MovementNode.SetLinearVelocity(control * MovementNode.Speed);
+                var linearVelDir = MovementNode.LinearVelocity.NormalizeValue;
+                linearVelDir.y = 0;
+                if (linearVelDir.LengthSquared() == 0)
                 {
-                    ControlledCharacter.Placement.Quat = Quaternion.GetQuaternion(Vector3.Forward, new DVector3(CameraControlNode.Camera.Direction.X, 0, CameraControlNode.Camera.Direction.Z).ToSingleVector3());
-                    MovementNode.SetLinearVelocity(ControlledCharacter.Placement.Quat * control * MovementNode.Speed);
+                    linearVelDir = Quaternion.RotateVector3(ControlledCharacter.Placement.Quat, Vector3.Forward);
                 }
-                if (OrientToMovmement)
-                {
-                    MovementNode.SetLinearVelocity(control * MovementNode.Speed);
-                    var linearVelDir = MovementNode.LinearVelocity.NormalizeValue;
-                    linearVelDir.y = 0;
-                    if (linearVelDir.LengthSquared() == 0)
-                    {
-                        linearVelDir = Quaternion.RotateVector3(ControlledCharacter.Placement.Quat, Vector3.Forward);
-                    }
-                    ControlledCharacter.Placement.Quat = Quaternion.GetQuaternionUp(Vector3.Forward, linearVelDir);
-                }
-            }   
+                ControlledCharacter.Placement.Quat = Quaternion.GetQuaternionUp(Vector3.Forward, linearVelDir);
+            }
+            return true;
         }
     }
 }

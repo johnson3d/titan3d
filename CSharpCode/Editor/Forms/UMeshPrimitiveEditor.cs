@@ -308,7 +308,7 @@ namespace EngineNS.Editor.Forms
                 PlaneMeshNode.IsCastShadow = false;
             }
 
-            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(viewport.World, viewport.World.Root);
+            var gridNode = await GamePlay.Scene.TtGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
 
             await InitializeLightEnv(PreviewViewport, radius);

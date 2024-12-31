@@ -281,7 +281,6 @@ namespace Survivor
         [EngineNS.Rtti.Meta]
         public TtWeaponNode WeaponNode { get; set; } = null;
     }
-
     //无论角色的武器还是怪物的近远程攻击都算做武器攻击
     public class TtWeaponNode : EngineNS.GamePlay.Scene.TtSceneActorNode
     {
@@ -325,11 +324,14 @@ namespace Survivor
         public TtWeaponData WeaponData { get; set; } = null;
         public TtRoleData RoleData { get; set; } = null;
         protected TtWeaponController mWeaponController = null;
-
-        public override bool OnTickLogic(TtWorld world, TtRenderPolicy policy)
+        public override EngineNS.Profiler.TimeScope GetScopeTickLogic()
         {
-            mWeaponController.Tick(world);
-            return base.OnTickLogic(world, policy);
+            return TtOnTickLogicScope<TtWeaponNode>.Scope;
+        }
+        public override bool OnTickLogic(TtNodeTickParameters args)
+        {
+            mWeaponController.Tick(args.World);
+            return base.OnTickLogic(args);
         }
         public void Attack(TtNode targetNode)
         {

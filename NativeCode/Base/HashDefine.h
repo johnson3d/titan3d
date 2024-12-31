@@ -31,7 +31,11 @@ public:
 
 	static uint DefaultHash(const std::string& str)
 	{
-		return JSHash(str);
+		return JSHash(str.c_str(), (int)str.length());
+	}
+	static uint DefaultHash(const char* str)
+	{
+		return JSHash(str, (int)strlen(str));
 	}
 	static uint RSHash(const std::string& str)
 	{
@@ -47,11 +51,11 @@ public:
 
 		return hash;
 	}
-	static uint JSHash(const std::string& str)
+	static uint JSHash(const char* str, int len)
 	{
 		uint hash = 1315423911;
 
-		for (size_t i = 0; i < str.length(); i++)
+		for (size_t i = 0; i < len; i++)
 		{
 			hash ^= ((hash << 5) + str[i] + (hash >> 2));
 		}

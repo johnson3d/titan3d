@@ -65,7 +65,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             cursorPos.Y += offsetY;
             ImGuiAPI.SetCursorScreenPos(in cursorPos);
             //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGCheckboxFramePadding);
-            var name = TName.FromString2("##", info.Name).ToString();
+            var name = "##" + info.Name;
             var multiValue = info.Value as PropertyMultiValue;
             if(multiValue != null)
             {
@@ -124,7 +124,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
             var minValue = sbyte.MinValue;
             var maxValue = sbyte.MaxValue;
-            var name = TName.FromString2("##", info.Name).ToString();
+            var name = "##" + info.Name;
             var multiValue = info.Value as PropertyMultiValue;
             bool retValue = false;
             if(multiValue != null && multiValue.HasDifferentValue())
@@ -195,7 +195,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
             var minValue = Int16.MinValue;
             var maxValue = Int16.MaxValue;
-            var name = TName.FromString2("##", info.Name).ToString();
+            var name = "##" +info.Name;
             var multiValue = info.Value as PropertyMultiValue;
             bool retValue = false;
             if(multiValue != null && multiValue.HasDifferentValue())
@@ -264,7 +264,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
             var minValue = Int32.MinValue;
             var maxValue = Int32.MaxValue;
-            var name = TName.FromString2("##", info.Name).ToString();
+            var name = "##" + info.Name;
             var multiValue = info.Value as PropertyMultiValue;
             bool retValue = false;
             if(multiValue != null && multiValue.HasDifferentValue())
@@ -333,7 +333,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
             var minValue = Int64.MinValue;
             var maxValue = Int64.MaxValue;
-            var name = TName.FromString2("##", info.Name).ToString();
+            var name = "##" + info.Name;
             var multiValue = info.Value as PropertyMultiValue;
             bool retValue = false;
             if(multiValue != null && multiValue.HasDifferentValue())
@@ -404,7 +404,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
             var minValue = byte.MinValue;
             var maxValue = byte.MaxValue;
-            var name = TName.FromString2("##", info.Name).ToString();
+            var name = "##" + info.Name;
             var multiValue = info.Value as PropertyMultiValue;
             bool retValue = false;
             if (multiValue != null && multiValue.HasDifferentValue())
@@ -475,7 +475,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
             var minValue = UInt16.MinValue;
             var maxValue = UInt16.MaxValue;
-            var name = TName.FromString2("##", info.Name).ToString();
+            var name = "##" + info.Name;
             var multiValue = info.Value as PropertyMultiValue;
             bool retValue = false;
             if (multiValue != null && multiValue.HasDifferentValue())
@@ -547,7 +547,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             //ImGuiAPI.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, ref EGui.UIProxy.StyleConfig.Instance.PGInputFramePadding);
             var minValue = UInt32.MinValue;
             var maxValue = UInt32.MaxValue;
-            var name = TName.FromString2("##", info.Name).ToString();
+            var name = "##" + info.Name;
             var multiValue = info.Value as PropertyMultiValue;
             bool retValue = false;
             if (multiValue != null && multiValue.HasDifferentValue())
@@ -618,7 +618,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
             var minValue = UInt64.MinValue;
             var maxValue = UInt64.MaxValue;
-            var name = TName.FromString2("##", info.Name).ToString();
+            var name = "##" + info.Name;
             var multiValue = info.Value as PropertyMultiValue;
             bool retValue = false;
             if (multiValue != null && multiValue.HasDifferentValue())
@@ -689,7 +689,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
             var minValue = float.MinValue;
             var maxValue = float.MaxValue;
-            var name = TName.FromString2("##", info.Name).ToString();
+            var name = "##" + info.Name;
             var multiValue = info.Value as PropertyMultiValue;
             bool retValue = false;
             if (multiValue != null && multiValue.HasDifferentValue())
@@ -766,7 +766,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
             var minValue = double.MinValue;
             var maxValue = double.MaxValue;
-            var name = TName.FromString2("##", info.Name).ToString();
+            var name = "##" + info.Name;
             var multiValue = info.Value as PropertyMultiValue;
             bool retValue = false;
             if (multiValue != null && multiValue.HasDifferentValue())
@@ -843,7 +843,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var index = ImGuiAPI.TableGetColumnIndex();
             var width = ImGuiAPI.GetColumnWidth(index);
             ImGuiAPI.SetNextItemWidth(width - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X);
-            var name = TName.FromString2("##", info.Name).ToString();
+            var name = "##" + info.Name;
             var multiValue = info.Value as PropertyMultiValue;
             if(multiValue != null && multiValue.HasDifferentValue())
             {
@@ -1024,7 +1024,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             var index = ImGuiAPI.TableGetColumnIndex();
             mComboBox.Flags = ImGuiComboFlags_.ImGuiComboFlags_None | ImGuiComboFlags_.ImGuiComboFlags_NoArrowButton;
             mComboBox.Width = ImGuiAPI.GetColumnWidth(index) - EGui.UIProxy.StyleConfig.Instance.PGCellPadding.X;
-            mComboBox.Name = TName.FromString2("##", info.Name).ToString();
+            mComboBox.Name = "##" + info.Name;
             mComboBox.PreviewValue = info.Value.ToString();
 
             mDrawData.Type = info.Type;
@@ -1245,7 +1245,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 {
                     ImGuiAPI.Indent(5);
                     bool operated = false;
-                    ImGuiAPI.PushID(TName.FromString2("##ListDel_", i.ToString()).ToString());
+                    ImGuiAPI.PushID("##ListDel_" + i.ToString());
                     if (ImGuiAPI.Button("-", in sz))
                     {
                         //removeList.Add(i);
@@ -1264,7 +1264,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
 
                     operated = false;
                     ImGuiAPI.SameLine(0, -1);
-                    ImGuiAPI.PushID(TName.FromString2("##ListAdd_", i.ToString()).ToString());
+                    ImGuiAPI.PushID("##ListAdd_" + i.ToString());
                     if (ImGuiAPI.Button("+", in sz))
                     {
                         //addList.Add(new KeyValuePair<int, object>(i, obj));
@@ -1431,7 +1431,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 {
                     bool operated = false;
                     ImGuiAPI.Indent(5);
-                    ImGuiAPI.PushID(TName.FromString2("##ListDel_", name).ToString());
+                    ImGuiAPI.PushID("##ListDel_" + name);
                     if (ImGuiAPI.Button("-", in sz))
                     {
                         //removeList.Add(iter.Key);

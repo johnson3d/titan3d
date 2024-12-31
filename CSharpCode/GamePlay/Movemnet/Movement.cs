@@ -44,27 +44,17 @@ namespace EngineNS.GamePlay.Movemnet
         protected Vector3 GravityVelocity = Vector3.Zero;
         public float MaxGravitySpeed = 10;
 
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeTick;
-        private static Profiler.TimeScope ScopeTick
+        public override Profiler.TimeScope GetScopeTickLogic()
         {
-            get
-            {
-                if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(TtMovement), nameof(TickLogic));
-                return mScopeTick;
-            }
-        } 
-        public override void TickLogic(TtNodeTickParameters args)
+            return TtOnTickLogicScope<TtMovement>.Scope;
+        }
+        public override bool OnTickLogic(TtNodeTickParameters args)
         {
-            using (new Profiler.TimeScopeHelper(ScopeTick))
-            {
-                DVector3 posBeforeMove = Parent.Placement.AbsTransform.Position;
-                UpdatePlacement(args.World, args.Policy);
-                DVector3 posAfterMove = Parent.Placement.AbsTransform.Position;
-                LinearVelocity = (posAfterMove - posBeforeMove).ToSingleVector3() / args.World.DeltaTimeSecond;
-                base.TickLogic(args);
-            }   
+            DVector3 posBeforeMove = Parent.Placement.AbsTransform.Position;
+            UpdatePlacement(args.World, args.Policy);
+            DVector3 posAfterMove = Parent.Placement.AbsTransform.Position;
+            LinearVelocity = (posAfterMove - posBeforeMove).ToSingleVector3() / args.World.DeltaTimeSecond;
+            return base.OnTickLogic(args);
         }
 
         protected Vector3 ConsumeSettedLinearVelocity()

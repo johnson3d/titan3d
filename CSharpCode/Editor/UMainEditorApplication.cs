@@ -937,7 +937,7 @@ namespace EngineNS.Editor
                 terrainNode.SetActiveCenter(in DVector3.Zero);
             }
 
-            var gridNode = await GamePlay.Scene.UGridNode.AddGridNode(world, root);
+            var gridNode = await GamePlay.Scene.TtGridNode.AddGridNode(world, root);
             //gridNode.SetStyle(GamePlay.Scene.UNode.ENodeStyles.Invisible);
 
             gridNode.ViewportSlate = vpSlate;
