@@ -398,7 +398,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
 
         #region override for Material settings
-        public override ERenderFlags RenderFlags { get => mParentMaterial.RenderFlags; }
+        public override ERenderFlags RenderFlags 
+        { 
+            get
+            {
+                if (mParentMaterial == null)
+                    return ERenderFlags.None;
+                return mParentMaterial.RenderFlags;
+            }
+        }
         public override bool DisableEnvColor
         {
             get

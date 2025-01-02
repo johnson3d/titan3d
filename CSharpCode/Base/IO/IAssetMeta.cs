@@ -993,7 +993,8 @@ namespace EngineNS.IO
             if (attrs.Length > 0)
             {
                 var importer = attrs[0] as IAssetCreateAttribute;
-                _ = importer.DoCreate(dir, type, ext);
+                var task = importer.DoCreate(dir, type, ext);
+                TtEngine.Instance.TaskCollector.AddWaitTask(task);
                 return importer;
             }
             return null;

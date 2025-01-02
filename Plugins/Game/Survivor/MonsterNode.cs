@@ -26,6 +26,7 @@ namespace Survivor
         public TtMonsterStateNode StateNode { get; set; } = null;
         public TtMonsterController Controller { get; set; } = null;
         public TtPrefabNode MonsterPrefab { get; set; } = null;
+        public TtPlacementBase MonseterPlacement { get=>MonsterPrefab.Placement; }
         public TtMonsterData MonsterData { get; set; } = null;
 
         public override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
@@ -40,11 +41,26 @@ namespace Survivor
         }
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
-            if(StateNode.IsDead)
+            if(StateNode != null &&StateNode.IsDead)
             {
-                Parent = null;
+                OnDead();
             }
             return base.OnTickLogic(args);
+        }
+        public void OnDead()
+        {
+            RemoveFromWorld();
+
+            MonsterPrefab.Parent = null;
+            MonsterPrefab.IsCollide = false;
+            if (MonsterPrefab.OctreeNode != null)
+            {
+                MonsterPrefab.OctreeNode.Remove(MonsterPrefab);
+            }
+            EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(MonsterPrefab);
+            MonsterPrefab = null;
+            Controller.MonsterNode = null;
+            Controller.Player = null;
         }
     }
     public enum EMonsterSpawnType
@@ -56,7 +72,7 @@ namespace Survivor
     public class TtMonsterSpawnStrategy
     {
         public EMonsterSpawnType SpawnType { get; set; } = EMonsterSpawnType.Random;
-        public int MonsterId { get; set; } = 0;
+        public int MonsterId { get; set; } = 1;
         public int MonsterCount { get; set; } = 0;
 
         protected TtMonsterSpawnerNode SpawnerNode = null;
@@ -73,7 +89,7 @@ namespace Survivor
 
         public virtual void CreateMonster(int monsterId, FTransform transform, TtWorld world)
         {
-			var monsterData = new TtMonsterData();
+            var monsterData = (EngineNS.TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame).GameMode.MonsterManager.GetData("MonsterId", monsterId);
             EngineNS.TtEngine.Instance.TaskCollector.AddWaitTask(InitMonster(monsterData, transform, world));
 
         }
@@ -94,8 +110,9 @@ namespace Survivor
             stateNode.Parent = monsterNode;
             monsterNode.StateNode = stateNode;
 
-			RName monsterName = EngineNS.RName.GetRName("survivor/monsters/barghest/prefab_barghest.prefab", EngineNS.RName.ERNameType.Game);
+			RName monsterName = RName.ParseFrom(monsterData.Prefab);
             var monsterPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(monsterName);
+            monsterPrefab.IsCollide = true;
             var node = monsterPrefab.Placement.HostNode;
             monsterPrefab.Placement.SetTransform(transform);
             monsterPrefab.Placement.HostNode = monsterPrefab;
@@ -117,6 +134,8 @@ namespace Survivor
             var weaponNodeData = new TtWeaponNodeData();
             weaponNodeData.WeaponType = "Melee";
             await weaponNode.InitializeNode(world, weaponNodeData, EBoundVolumeType.None, typeof(TtPlacement));
+            weaponNode.WeaponData.Damage = monsterData.Damage;
+            weaponNode.WeaponData.AttackRange = monsterData.AttackRange;
             weaponNode.Parent = monsterNode;
         }
     }
@@ -152,13 +171,16 @@ namespace Survivor
         {
             if (mAccumulateTime > CoolDown)
             {
+                var macrossGame = EngineNS.TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame;
+                var playerLocation = macrossGame.GameMode.Player.Placement.AbsTransform.Position;
                 for (int i = 0; i < MonsterCount; i++) 
                 {
                     var random = new Random();
-                    
                     Vector3 location = Vector3.Zero;
-                    location.x = random.Next(-10, 10);
-                    location.z = random.Next(-10, 10);
+                    const int randomMin = -15;
+                    const int randomMax = 15;
+                    location.x = random.Next(randomMin + (int)playerLocation.X, randomMax + (int)playerLocation.X);
+                    location.z = random.Next(randomMin + (int)playerLocation.Z, randomMax + (int)playerLocation.Z);
                     location.y = 0;
                     FTransform transform = FTransform.Identity;
                     transform.Position = location.AsDVector();
@@ -183,8 +205,10 @@ namespace Survivor
         public override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
-            TtMonsterSpawnStrategy strategy = new TtMonsterSpawnStrategy_CoolDown(EMonsterSpawnType.Random, 1, 1, this, 2);
+            TtMonsterSpawnStrategy_CoolDown strategy = new(EMonsterSpawnType.Random, 20001, 2, this, 2);
             SpawnStrategies.Add(strategy);
+            TtMonsterSpawnStrategy_CoolDown strategy1 = new(EMonsterSpawnType.Random, 20002, 1, this, 30);
+            SpawnStrategies.Add(strategy1);
             return true;
         }
         public override bool OnTickLogic(TtNodeTickParameters args)

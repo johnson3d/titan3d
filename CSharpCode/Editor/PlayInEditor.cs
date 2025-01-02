@@ -200,7 +200,18 @@ namespace EngineNS
         {
             if (this.GameInstance == null)
                 return;
-            TtEngine.Instance.TaskCollector.AddWaitTask(AwaitEndPlayInEditor());
+            TtEngine.Instance.TaskCollector.AddWaitTask(AwaitEndPlayInEditor(),(task)=>
+            {
+                TtEngine.Instance.EventPoster.RunOn(static (state) =>
+                {
+                    for (int i = 0; i < 5; i++)
+                    {
+                        GC.Collect();
+                        GC.WaitForPendingFinalizers();
+                    }
+                    return true;
+                }, Thread.Async.EAsyncTarget.Main);
+            });
         }
         public async Thread.Async.TtTask AwaitEndPlayInEditor()
         {
@@ -218,12 +229,6 @@ namespace EngineNS
             var wr = new WeakReference(this.GameInstance);
             this.GameInstance.Dispose();
             this.GameInstance = null;
-
-            for (int i = 0; i < 5; i++)
-            {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-            }
 
             TtEngine.Instance.PlayMode = EPlayMode.Editor;
         }

@@ -115,7 +115,7 @@ namespace EngineNS.Bricks.Animation.Macross.StateMachine
         }
         public override void GenerateCodeInClass(TtClassDeclaration classDeclaration, ref FClassBuildContext classBuildContext)
         {
-            base.GenerateCodeInClass(classDeclaration, ref classBuildContext);
+            //base.GenerateCodeInClass(classDeclaration, ref classBuildContext);
 
             GenerateCodeInMainClassInitMethod(classDeclaration, ref classBuildContext);
 

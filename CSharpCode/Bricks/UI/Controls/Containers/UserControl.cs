@@ -1,4 +1,5 @@
 using EngineNS.IO;
+using EngineNS.Thread.Async;
 using EngineNS.UI.Bind;
 using EngineNS.UI.Canvas;
 using System;
@@ -22,13 +23,8 @@ namespace EngineNS.UI.Controls.Containers
             set
             {
                 mChildRName = value;
-                if(mChildElement != null)
-                {
-                    Children.Remove(mChildElement);
-                }
-                mChildElement = TtEngine.Instance.UIManager.Load(ChildRName);
-
-                Children.Add(mChildElement);
+                var task = OnSetChildRName();
+                TtEngine.Instance.TaskCollector.AddWaitTask(task);
             }
         }
         // check source is dirty
@@ -42,6 +38,17 @@ namespace EngineNS.UI.Controls.Containers
         public override string GetEditorShowName()
         {
             return "[" + ChildRName.PureName + "]" + Name;
+        }
+
+        async TtTask OnSetChildRName()
+        {
+            var tempElement = await TtEngine.Instance.UIManager.AsyncLoad(ChildRName);
+            if(mChildElement != null)
+            {
+                Children.Remove(mChildElement);
+            }
+            mChildElement = tempElement;
+            Children.Add(mChildElement);
         }
     }
 }

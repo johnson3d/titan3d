@@ -3,7 +3,7 @@
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
-    <SharedGUID>1b2fe329-a74a-47d5-87f6-a5cfdb30e6ad</SharedGUID>
+    <SharedGUID>060f6fbd-968c-4029-95d0-36aa746f36c2</SharedGUID>
   </PropertyGroup>
   <PropertyGroup DisplayName="Configuration">
     <Import_RootNamespace>MacrossGenCSharp</Import_RootNamespace>
@@ -14,6 +14,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/utest/test.scene/test.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/utest/test_game01.macross/test_game01.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/project_factory/belica/animdmc_belica.designmacross/animdmc_belica.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/survivor/ui/splash_screen.ui/splash_screen.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/survivor/ui/ui_battle.ui/ui_battle.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/survivor/ui/ui_item.ui/ui_item.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/survivor/ui/ui_start.ui/ui_start.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/character/charactertest.scene/charactertest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/character/charactertestgame.macross/charactertestgame.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/tutorials/helloword/hello.ui/hello.cs" />
@@ -32,6 +36,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/utest/pgc/testprog.macross/testprog.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/survivor/maps/firstlevel/mc_firstlevel.macross/mc_firstlevel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/survivor/maps/firstlevel/scene_firstlevel.scene/scene_firstlevel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/survivor/skills/singlebullet/dmc_skill_bullet.designmacross/dmc_skill_bullet.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/survivor/monsters/barghest/animdmc_barghest.designmacross/animdmc_barghest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/survivor/monsters/dragon1/animdmc_dragonthesouleater.designmacross/animdmc_dragonthesouleater.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)../../../../../content/survivor/skills/singlebullet/mc_phyevent_singlebullet.macross/mc_phyevent_singlebullet.cs" />
   </ItemGroup>
 </Project>

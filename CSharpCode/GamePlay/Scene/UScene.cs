@@ -88,7 +88,7 @@ namespace EngineNS.GamePlay.Scene
             if (await base.InitializeNode(world, data, bvType, placementType) == false)
                 return false;
 
-            World = world;
+            SetWorld(world);
             //ParentScene = GetNearestParentScene();
 
             var task = mMemberTickables.InitializeMembers(this);
@@ -110,7 +110,7 @@ namespace EngineNS.GamePlay.Scene
         protected override void UnsafeNullParent()
         {
             base.UnsafeNullParent();
-            World = null;
+            SetWorld(null);
         }
         public TtSceneData SceneData
         {
@@ -148,7 +148,27 @@ namespace EngineNS.GamePlay.Scene
             }
             return null;
         }
-        public TtWorld World;
+        WeakReference<TtWorld> mWorld;
+        public void SetWorld(TtWorld world)
+        {
+            if (world == null)
+            {
+                mWorld = null;
+                return;
+            }
+            mWorld = new WeakReference<TtWorld>(world);
+        }
+        public TtWorld World
+        {
+            get
+            {
+                if (mWorld == null)
+                    return null;
+                if (mWorld.TryGetTarget(out var result))
+                    return result;
+                return null;
+            }
+        }
         #region Allocator
         int PrevAllocId = 0;
         private TtNode[] ManagedNodes = new TtNode[UInt16.MaxValue];
@@ -448,6 +468,10 @@ namespace EngineNS.GamePlay.Scene
         #endregion
 
         TtMemberTickables mMemberTickables = new TtMemberTickables();
+        public TtMemberTickables MemberTickables
+        {
+            get => mMemberTickables;
+        }
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
             mMemberTickables.TickLogic(this, TtEngine.Instance.ElapseTickCountMS);

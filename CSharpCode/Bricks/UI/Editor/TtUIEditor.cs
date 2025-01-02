@@ -27,10 +27,14 @@ namespace EngineNS.UI.Editor
             return 0;
         }
         bool mVisible = true;
+        [Browsable(false)]
         public bool Visible { get => mVisible; set => mVisible = value; }
+        [Browsable(false)]
         public uint DockId { get; set; } = uint.MaxValue;
         ImGuiWindowClass mDockKeyClass;
+        [Browsable(false)]
         public ImGuiWindowClass DockKeyClass => mDockKeyClass;
+        [Browsable(false)]
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;        
         public EngineNS.Editor.TtPreviewViewport PreviewViewport = new EngineNS.Editor.TtPreviewViewport();
 

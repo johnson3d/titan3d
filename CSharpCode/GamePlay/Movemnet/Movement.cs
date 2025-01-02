@@ -20,9 +20,11 @@ namespace EngineNS.GamePlay.Movemnet
             public bool EnableGravity { get; set; } = false;
             [Rtti.Meta]
             public Vector3 GravityAcceleration { get; set; } = Vector3.Down * 9.8f;
+            [Rtti.Meta]
+            public float Speed { get; set; } = 5;
         }
         public TtMovementData MovementData { get=> NodeData as TtMovementData;}
-        public float Speed { get; set; } = 3;
+        public float Speed { get=>MovementData.Speed; }
         public Vector3 LinearVelocity { get; private set; }
         [Category("Option")]
         public Vector3 DesiredLinearVelocity { get; set; } = Vector3.Zero;

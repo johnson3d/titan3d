@@ -69,8 +69,11 @@ namespace Survivor
 
         public override void Tick(TtWorld world)
         {
+            var playerNode = (EngineNS.TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame).GameMode.Player;
             mCurrentTime += world.DeltaTimeSecond;
-            if (mCurrentTime > WeaponData.CoolDown)
+            var distance = Vector3.Distance(playerNode.Placement.AbsTransform.Position.ToSingleVector3(),
+                    WeaponNode.Placement.AbsTransform.Position.ToSingleVector3());
+            if (mCurrentTime > WeaponData.CoolDown && distance <= WeaponData.AttackRange)
             {
                 Fire();
                 //fire prefab
@@ -127,7 +130,7 @@ namespace Survivor
             }
             foreach (var weapon in mBeRemoved)
             {
-                weapon.Element.Parent = null;
+                weapon.Element.RemoveFromWorld();
                 WeaponPrefabs.Remove(weapon);
                 TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(weapon.Element);
             }
@@ -160,12 +163,27 @@ namespace Survivor
     //距离玩家最近的敌人依次发射n枚飞行道具，碰到怪物造成伤害，根据击穿数量判断伤害数量
     public class TtWeaponController_Nearest : TtWeaponController
     {
-        List<TtPrefabNode> WeaponPrefabs = new List<TtPrefabNode>();
+        public struct FNearestElementController
+        {
+            public TtPrefabNode Element;
+            public TtMonsterNode Target;
+            public float Speed;
+            public void Update(TtWorld world)
+            {
+                if (Target.StateNode.IsDead)
+                    return;
+                var dir = Target.MonseterPlacement.AbsTransform.Position - Element.Placement.AbsTransform.Position;
+                dir.Y = 0;
+                dir.Normalize();
+                Element.Placement.Position += dir * Speed * world.DeltaTimeSecond;
+            }
+        }
+        List<FNearestElementController> WeaponPrefabs = new List<FNearestElementController>();
         public override void Init()
         {
 
         }
-        List<TtPrefabNode> mBeRemoved = new List<TtPrefabNode>();
+        List<FNearestElementController> mBeRemoved = new List<FNearestElementController>();
         public override void Tick(TtWorld world)
         {
             mCurrentTime += world.DeltaTimeSecond;
@@ -177,36 +195,73 @@ namespace Survivor
             }
             foreach (var weapon in WeaponPrefabs)
             {
-                var dir = EngineNS.Quaternion.RotateVector3(WeaponNode.Parent.Placement.Quat, Vector3.Forward);
-                weapon.Placement.Position += dir * WeaponData.ProjectileSpeed * world.TimeSecond;
-                var distance = Vector3.Distance(Vector3.Zero, weapon.Placement.Position.ToSingleVector3());
-                if (distance > WeaponData.AttackRange)
+                weapon.Update(world);
+                var distance = Vector3.Distance(weapon.Target.Placement.AbsTransform.Position.ToSingleVector3(), weapon.Element.Placement.Position.ToSingleVector3());
+                if (distance <= 0.2f || weapon.Target.Parent == null || weapon.Target.ParentScene == null)
                 {
                     mBeRemoved.Add(weapon);
                 }
             }
             foreach (var weapon in mBeRemoved)
             {
-                weapon.Parent = null;
+                weapon.Element.RemoveFromWorld();
                 WeaponPrefabs.Remove(weapon);
-                TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(weapon);
+                TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(weapon.Element);
             }
             mBeRemoved.Clear();
             base.Tick(world);
         }
         protected void Fire()
         {
+            TtMonsterNode nearestNode = GetNearestMonster();
+            if(nearestNode == null) 
+                return;
+
+
             var weaponPrefabName = RName.ParseFrom(WeaponData.Shape);
             if(weaponPrefabName != null)
             {
                 var WeaponPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape));
                 if (WeaponPrefab != null)
                 {
-                    WeaponPrefab.Parent = WeaponNode.Parent;
-                    WeaponPrefab.Placement.Position = DVector3.Up;
-                    WeaponPrefabs.Add(WeaponPrefab);
+                    WeaponPrefab.Parent = WeaponNode.Parent.Parent;
+                    var proxyNode = WeaponPrefab.FindFirstChild<TtWeaponProxyNode>() as TtWeaponProxyNode;
+                    proxyNode.WeaponNode = WeaponNode;
+
+                    var controller = new FNearestElementController();
+                    controller.Element = WeaponPrefab;
+                    controller.Speed = WeaponNode.RoleData.ProjectileSpeed;
+                    controller.Target = nearestNode;
+                    WeaponPrefab.Placement.Position = DVector3.Up + WeaponNode.Parent.Placement.AbsTransform.Position.ToSingleVector3();
+                    WeaponPrefabs.Add(controller);
                 }
-            }  
+            }
+        }
+        protected TtMonsterNode GetNearestMonster()
+        {
+            List<TtMonsterNode> monsters = new List<TtMonsterNode>();
+            WeaponNode.ParentScene.IterateNodes(static (nd, arg) =>
+            {
+                if(nd is TtMonsterNode)
+                {
+                    var tp = (List<TtMonsterNode>)arg;
+                    tp.Add(nd as TtMonsterNode);
+                }
+                return true;
+            }, monsters);
+            TtMonsterNode nearestNode = null;
+            float distance = WeaponData.AttackRange;
+            foreach(var monster in monsters)
+            {
+                var candidateDis = Vector3.Distance(monster.MonseterPlacement.AbsTransform.Position.ToSingleVector3(),
+                                                    WeaponNode.Parent.Placement.AbsTransform.Position.ToSingleVector3());
+                if(distance >= candidateDis)
+                {
+                    distance = candidateDis;
+                    nearestNode = monster;
+                }
+            }
+            return nearestNode;
         }
     }
     //朝向玩家最后移动方向发射n枚飞行道具，碰到怪物造成伤害。根据击穿数量判断伤害数量

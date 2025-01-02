@@ -37,12 +37,14 @@ namespace Survivor
         }
         public override void BeAttacked(TtWeaponNode weaponNode)
         {
-            if (StateData.CurrentHP <= 0)
+            var hp = StateData.CurrentHP - weaponNode.WeaponData.Damage;
+            if (hp <= 0)
             {
                 IsDead = true;
-                return;
             }
-            StateData.CurrentHP -= weaponNode.WeaponData.Damage;
+
+            StateData.CurrentHP = MathF.Max(hp, 0);
+            return;
         }
     }
 
@@ -56,12 +58,14 @@ namespace Survivor
         public TtMonsterStateNodeData StateData { get => NodeData as TtMonsterStateNodeData; }
         public override void BeAttacked(TtWeaponNode weaponNode)
         {
-            if(StateData.CurrentHP <= 0)
+            var hp = StateData.CurrentHP - weaponNode.WeaponData.Damage;
+            if (hp <= 0)
             {
                 IsDead = true;
-                return;
             }
-            StateData.CurrentHP -= weaponNode.WeaponData.Damage;
+
+            StateData.CurrentHP = MathF.Max(hp, 0);
+            return;
         }
     }
 }

@@ -2,7 +2,7 @@
   "profiles": {
     "MainEditor": {
       "commandName": "Project",
-      "commandLineArgs": "config=$(SolutionDir)content\\EngineConfigDX12.jscfg",
+      "commandLineArgs": "config=$(SolutionDir)content\\EngineConfigDX12.jscfg NativeDLL=release",
       "workingDirectory": "$(SolutionDir)binaries",
       "environmentVariables": {
         "CORECLR_PROFILER_PATH_64": "$(SolutionDir)binaries\\Core.Window.dll",

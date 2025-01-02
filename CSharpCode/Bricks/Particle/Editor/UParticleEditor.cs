@@ -138,7 +138,8 @@ namespace EngineNS.Bricks.Particle.Editor
             ImGuiAPI.SameLine(0, -1);
             if (EGui.UIProxy.CustomButton.ToolButton("Compile", in btSize))
             {
-                _ = NebulaParticle.CreateEmitters(true);
+                var task = NebulaParticle.CreateEmitters(true);
+                TtEngine.Instance.TaskCollector.AddWaitTask(task);
             }
         }
 

@@ -61,5 +61,10 @@ namespace EngineNS.Bricks.PhysicsCore
                 return gchandle.Target as TtPhyController;
             }
         }
+        public void Cleanup()
+        {
+            mCoreObject.Cleanup();
+            TagNode = null;
+        }
     }
 }

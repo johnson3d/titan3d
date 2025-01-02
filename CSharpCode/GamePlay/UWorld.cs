@@ -30,7 +30,7 @@ namespace EngineNS.GamePlay
             mOnVisitNode_GatherBoundShapes = this.OnVisitNode_GatherBoundShapes;
 
             mRoot = new Scene.TtScene();
-            mRoot.World = this;
+            mRoot.SetWorld(this);
             System.Threading.Interlocked.Increment(ref mNodeAliveNumber);
         }
         ~TtWorld()
@@ -559,7 +559,8 @@ namespace EngineNS.GamePlay
                     Root.IterateNodes(static (nd, arg) =>
                     {
                         var tp = (List<TtNode>)arg;
-                        tp.Add(nd);return true;
+                        tp.Add(nd);
+                        return true;
                     }, TickNodes);
                 }
 

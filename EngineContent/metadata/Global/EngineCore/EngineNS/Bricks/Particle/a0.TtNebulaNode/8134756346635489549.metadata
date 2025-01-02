@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_8134756346635489549 Type="EngineNS.Bricks.Particle.TtNebulaNode@EngineCore">
+  <Mesh Type="EngineNS.Graphics.Mesh.TtMesh@EngineCore" Order="0" />
+  <NodeId Type="System.Guid@Unknown" Order="0" />
+  <Parent Type="EngineNS.GamePlay.Scene.TtNode@EngineCore" Order="0" />
+  <ParentScene Type="EngineNS.GamePlay.Scene.TtScene@EngineCore" Order="0" />
+</Hash_8134756346635489549>

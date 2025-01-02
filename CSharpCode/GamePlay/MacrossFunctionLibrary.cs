@@ -122,6 +122,15 @@ namespace EngineNS.GamePlay
             prefab.Parent = null;
             TtEngine.Instance.GameInstance?.PrefabPoolManager.ReleasePrefab(prefab);
         }
+        [Rtti.Meta]
+        public static void SetPropertyTarget(object obj)
+        {
+            var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as Editor.TtMainEditorApplication;
+            if (mainEditor != null)
+            {
+                mainEditor.mMainInspector.PropertyGrid.Target = obj;
+            }
+        }
     }
 }
 
@@ -169,6 +178,19 @@ namespace EngineNS.GamePlay
 			}
 			DestroyPrefab(prefab);
 			macross_break_DestroyPrefab_1775413286.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_SetPropertyTarget_889374708 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtMacrossFunctionLibrary->static void SetPropertyTarget(object obj)");
+		public static unsafe void macross_SetPropertyTarget (string nodeName, object obj) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":obj", obj);
+				}
+			}
+			SetPropertyTarget(obj);
+			macross_break_SetPropertyTarget_889374708.TryBreak();
 		}
 	}
 }

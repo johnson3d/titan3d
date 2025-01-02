@@ -116,11 +116,20 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             base.OnParentSceneChanged(prev, cur);
             if (cur != null)
             {
+                if(PhyController != null)
+                {
+                    //clean and remove from scene
+                    PhyController.Cleanup();
+                }
                 CreateController();
                 PhyController.TagNode = Parent;
                 PhyController.mCoreObject.SetFootPosition(Parent.Placement.AbsTransform.Position.ToSingleVector3());
                 PhyController.mCoreObject.SetQueryFilterData(CapsulePhyControllerNodeData.QueryFilterData);
                 PhyController.mCoreObject.SetSimulationFilterData(CapsulePhyControllerNodeData.SimulationFilterData);
+            }
+            else
+            {
+                PhyController.Cleanup();
             }
         }
     }

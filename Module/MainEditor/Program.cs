@@ -83,6 +83,13 @@ namespace MainEditor
             //        break;
             //}
 
+            var mBin = System.IO.Directory.GetCurrentDirectory();
+            var cfg = FindArgument(args, "NativeDLL=");
+            if (cfg != null && cfg == "debug")
+                EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/debug");
+            else
+                EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/release");
+
             {
                 var ev1 = Environment.GetEnvironmentVariable("CORECLR_ENABLE_PROFILING");
                 Console.WriteLine($"CORECLR_ENABLE_PROFILING:{ev1}");
@@ -119,20 +126,20 @@ namespace MainEditor
                 System.GC.WaitForPendingFinalizers();
             }
 
-            int GCTimes = 0;
-            while (EngineNS.NxRHI.TtSrView.NumOfInstance > 0)
-            {
-                if (GCTimes >= 20)
-                {
-                    Console.WriteLine($"CSV.NumOfInstance = {EngineNS.NxRHI.TtSrView.NumOfInstance}/{EngineNS.NxRHI.TtSrView.NumOfGCHandle}");
-                    System.Diagnostics.Trace.WriteLine($"CSV.NumOfInstance = {EngineNS.NxRHI.TtSrView.NumOfInstance}/{EngineNS.NxRHI.TtSrView.NumOfGCHandle}");
-                    //Thread.Sleep(1000 * 30);
-                    break;
-                }
-                System.GC.Collect();
-                System.GC.WaitForPendingFinalizers();
-                GCTimes++;
-            }
+            //int GCTimes = 0;
+            //while (EngineNS.NxRHI.TtSrView.NumOfInstance > 0)
+            //{
+            //    if (GCTimes >= 20)
+            //    {
+            //        Console.WriteLine($"CSV.NumOfInstance = {EngineNS.NxRHI.TtSrView.NumOfInstance}/{EngineNS.NxRHI.TtSrView.NumOfGCHandle}");
+            //        System.Diagnostics.Trace.WriteLine($"CSV.NumOfInstance = {EngineNS.NxRHI.TtSrView.NumOfInstance}/{EngineNS.NxRHI.TtSrView.NumOfGCHandle}");
+            //        //Thread.Sleep(1000 * 30);
+            //        break;
+            //    }
+            //    System.GC.Collect();
+            //    System.GC.WaitForPendingFinalizers();
+            //    GCTimes++;
+            //}
 
             if (consoleWriter != null)
             {

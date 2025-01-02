@@ -24,26 +24,28 @@ namespace EngineNS.DesignMacross
         {
             get
             {
-                if(mMacrossGetter != null)
-                {
-                    return mMacrossGetter;
-                }
-                else
-                {
-                    if (DesignMacross != null && !RName.IsEmpty(DesignMacross))
-                    {
-                        var macrossGetter = Macross.TtMacrossGetter<TtDesignMacrossBase>.NewInstance();
-                        macrossGetter.Name = DesignMacross;
-                        if (macrossGetter.Get() != null)
-                        {
-                            mMacrossGetter = macrossGetter;
-                            mMacrossGetter.Get().MacrossNode = this;
-                            _ = mMacrossGetter.Get().Initialize();
-                            return mMacrossGetter;
-                        }
-                    }
-                    return null;
-                }
+                return mMacrossGetter;
+                //if (mMacrossGetter != null)
+                //{
+                //    return mMacrossGetter;
+                //}
+                //else
+                //{
+                //    if (DesignMacross != null && !RName.IsEmpty(DesignMacross))
+                //    {
+                //        var macrossGetter = Macross.TtMacrossGetter<TtDesignMacrossBase>.NewInstance();
+                //        macrossGetter.Name = DesignMacross;
+                //        if (macrossGetter.Get() != null)
+                //        {
+                //            mMacrossGetter = macrossGetter;
+                //            mMacrossGetter.Get().MacrossNode = this;
+                //            var task = mMacrossGetter.Get().Initialize();
+                //            TtEngine.Instance.TaskCollector.AddWaitTask(task);
+                //            return mMacrossGetter;
+                //        }
+                //    }
+                //    return null;
+                //}
             }
         }
         public override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
@@ -51,20 +53,14 @@ namespace EngineNS.DesignMacross
             NodeData = data;
             return await base.InitializeNode(world, data, bvType, placementType);
         }
-
+        protected override void OnNodeCopyTreeData(TtNode src, ref FTreeCopyStat stat)
+        {
+            mMacrossGetter = null;
+        }
         public override async Thread.Async.TtTask OnNodeLoaded(TtNode parent)
         {
             await base.OnNodeLoaded(parent);
-            if (DesignMacross != null && !RName.IsEmpty(DesignMacross))
-            {
-                if(mMacrossGetter == null)
-                {
-                    mMacrossGetter = Macross.TtMacrossGetter<TtDesignMacrossBase>.NewInstance();
-                }
-                mMacrossGetter.Name = DesignMacross;
-                mMacrossGetter.Get().MacrossNode = this;
-                await mMacrossGetter.Get().Initialize();
-            }
+            DesignMacross = DesignMacross;
         }
         //[RName.PGRName(FilterExts = UDesignMacross.AssetExt)]
         [RName.PGMacrossRName<TtDesignMacrossBase>(FilterExts = UDesignMacross.AssetExt)]
@@ -81,26 +77,29 @@ namespace EngineNS.DesignMacross
             }
             set
             {
-                if (mMacrossGetter == null)
-                {
-                    mMacrossGetter = Macross.TtMacrossGetter<TtDesignMacrossBase>.NewInstance();
-                }
                 if (NodeData is TtDesignMacrossNodeData data)
                 {
                     data.DesignMacrossName = value;
-                    if (value == null)
-                    {
-                        mMacrossGetter.Name = null;
-                        return;
-                    }
                 }
-                
-                mMacrossGetter = Macross.TtMacrossGetter<TtDesignMacrossBase>.NewInstance();
-                mMacrossGetter.Name = value;
-                if(mMacrossGetter.Get() != null)
+
+                if (mMacrossGetter == null)
+                {
+                    mMacrossGetter = Macross.TtMacrossGetter<TtDesignMacrossBase>.NewInstance(value);
+                }
+                else
+                {
+                    mMacrossGetter.Name = value;
+                }
+
+                if (mMacrossGetter.Get() != null)
                 {
                     mMacrossGetter.Get().MacrossNode = this;
-                    _ = mMacrossGetter.Get().Initialize();
+                    var task = mMacrossGetter.Get().Initialize();
+                    TtEngine.Instance.TaskCollector.AddWaitTask(task);
+                }
+                else
+                {
+                    Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"Design Macross({value}) Get failed");
                 }
             }
         }
@@ -110,11 +109,12 @@ namespace EngineNS.DesignMacross
         }
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
-            if (MacrossGetter != null && MacrossGetter.Get() != null && MacrossGetter.Get().IsInitialized)
+            var mcrs = MacrossGetter?.Get();
+            if (mcrs != null && mcrs.IsInitialized)
             {
-                MacrossGetter.Get().PreTick(args.World.DeltaTimeSecond);
-                MacrossGetter.Get().Tick(args.World.DeltaTimeSecond);
-                MacrossGetter.Get().AfterTick(args.World.DeltaTimeSecond);
+                mcrs.PreTick(args.World.DeltaTimeSecond);
+                mcrs.Tick(args.World.DeltaTimeSecond);
+                mcrs.AfterTick(args.World.DeltaTimeSecond);
             }
             return base.OnTickLogic(args);
         }

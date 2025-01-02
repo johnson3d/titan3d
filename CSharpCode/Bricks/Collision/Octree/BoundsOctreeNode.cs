@@ -1,12 +1,15 @@
 ﻿using EngineNS.GamePlay;
-using NPOI.SS.Formula.Functions;
 using System.Collections.Generic;
 // A node in a BoundsOctree
 // Copyright 2014 Nition, BSD licence (see LICENCE file). www.momentstudio.co.nz
 
 namespace EngineNS.Bricks.Collision.Octree
 {
-    public class TtBoundsOctreeNode<T>
+    public interface IBoundsOctreeObject
+    {
+        object OctreeOwner { get; set; }
+    }
+    public class TtBoundsOctreeNode<T> where T : IBoundsOctreeObject
     {
         // Centre of this node
         public DVector3 Center { get; private set; }
@@ -42,7 +45,7 @@ namespace EngineNS.Bricks.Collision.Octree
         const int NUM_OBJECTS_ALLOWED = 8;
 
         // An object in the octree
-        struct OctreeObject
+        public struct OctreeObject
         {
             public T Obj;
             public Aabb BoundingBox;
@@ -58,6 +61,25 @@ namespace EngineNS.Bricks.Collision.Octree
         public TtBoundsOctreeNode(float baseLengthVal, float minSizeVal, float loosenessVal, DVector3 centerVal)
         {
             SetValues(baseLengthVal, minSizeVal, loosenessVal, centerVal);
+        }
+
+        public delegate bool FOnVisit(OctreeObject obj, object arg);
+        public bool IterateObject(FOnVisit fn, object arg)
+        {
+            foreach(var i in OctObjects)
+            {
+                if (fn(i, arg) == false)
+                    return false;
+            }
+            if (Children != null)
+            {
+                foreach(var i in Children)
+                {
+                    if (i.IterateObject(fn, arg) == false)
+                        return false;
+                }
+            }
+            return true;
         }
 
         // #### PUBLIC METHODS ####
@@ -91,6 +113,7 @@ namespace EngineNS.Bricks.Collision.Octree
             {
                 if (OctObjects[i].Obj.Equals(obj))
                 {
+                    OctObjects[i].Obj.OctreeOwner = null;
                     removed = OctObjects.Remove(OctObjects[i]);
                     break;
                 }
@@ -100,6 +123,7 @@ namespace EngineNS.Bricks.Collision.Octree
             {
                 for (int i = 0; i < 8; i++)
                 {
+                    obj.OctreeOwner = null;
                     removed = Children[i].Remove(in obj);
                     if (removed) break;
                 }
@@ -559,6 +583,7 @@ namespace EngineNS.Bricks.Collision.Octree
                 {
                     OctreeObject newObj = new OctreeObject { Obj = obj, BoundingBox = objBounds };
                     OctObjects.Add(newObj);
+                    obj.OctreeOwner = this;
                     return; // We're done. No children yet
                 }
 
@@ -602,6 +627,7 @@ namespace EngineNS.Bricks.Collision.Octree
                 // Didn't fit in a child. We'll have to it to this node instead
                 OctreeObject newObj = new OctreeObject { Obj = obj, BoundingBox = objBounds };
                 OctObjects.Add(newObj);
+                obj.OctreeOwner = this;
             }
         }
 
@@ -676,6 +702,7 @@ namespace EngineNS.Bricks.Collision.Octree
                 {
                     OctreeObject curObj = curChild.OctObjects[j];
                     OctObjects.Add(curObj);
+                    curObj.Obj.OctreeOwner = this;
                 }
             }
             // Remove the child nodes (and the objects in them - they've been added elsewhere now)

@@ -48,18 +48,26 @@ namespace EngineNS.Macross
     }
     public class TtMacrossGetter<T> : TtMacrossGetterBase where T : class
     {
+        static int mNumOfMacrossGetter = 0;
+        public static int NumOfMacrossGetter { get => mNumOfMacrossGetter; }
         private TtMacrossGetter()
         {
+            System.Threading.Interlocked.Increment(ref mNumOfMacrossGetter);
+        }
+        ~TtMacrossGetter()
+        {
+            System.Threading.Interlocked.Decrement(ref mNumOfMacrossGetter);
         }
         public override void Dispose()
         {
             Name = null;
             mInnerObject = null;
         }
-        public static TtMacrossGetter<T> NewInstance()
+        public static TtMacrossGetter<T> NewInstance(RName rn = null)
         {
             var result = new TtMacrossGetter<T>();
-            TtEngine.Instance.MacrossModule.AddGetter(result);
+            result.Name = rn;
+            //TtEngine.Instance.MacrossModule.AddGetter(result);
             return result;
         }
         //public static TtMacrossGetter<T> UnsafeNewInstance(uint ver, object innerObj, bool addGetter = false)
@@ -240,7 +248,6 @@ namespace EngineNS.Macross
                     GC.WaitForPendingFinalizers();
                 }
 
-                StartUpdateIndex = 0;
                 mAssembly = new WeakReference(newAssembly);
                 mAssemblyDesc = desc;
                 UpdateRefercences(int.MaxValue, true);
@@ -271,14 +278,13 @@ namespace EngineNS.Macross
                 mGetters.Add(new WeakReference<TtMacrossGetterBase>(getter));
             }
         }
-        int StartUpdateIndex = 0;
         public void UpdateRefercences(int limitTime, bool bReset = false)
         {
             var t1 = Support.TtTime.HighPrecision_GetTickCount();
             lock (mGetters)
             {
                 TtMacrossGetterBase tmp;
-                for (int i = StartUpdateIndex; i < mGetters.Count; i++)
+                for (int i = 0; i < mGetters.Count; i++)
                 {
                     var v = mGetters[i];
                     if (v.TryGetTarget(out tmp) == false)
@@ -294,7 +300,6 @@ namespace EngineNS.Macross
                     if ((int)(t2 - t1) > limitTime)
                         return;
                 }
-                StartUpdateIndex = 0;
             }
         }
         public override void TickModule(TtEngine host)

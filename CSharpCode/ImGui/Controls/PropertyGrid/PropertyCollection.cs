@@ -177,7 +177,9 @@ namespace EngineNS.EGui.Controls.PropertyGrid
                 {
                     var tAtt = att as PGCustomValueEditorAttribute;
                     if (!tAtt.Initialized)
+                    {
                         _ = tAtt.Initialize();
+                    }
                     IsBrowsable = IsBrowsable && !tAtt.HideInPG;
                     mIsReadonly = mIsReadonly || tAtt.ReadOnly;
                     CustomValueEditor = tAtt;

@@ -5,7 +5,7 @@ using EngineNS.DesignMacross.Base.Description;
 
 namespace Survivor
 {
-    [EngineNS.Bricks.DataSet.TtDataTable(SheetName = "TtWeaponData", HeadRow = 0, DataStartRow = 1)]
+    [EngineNS.Bricks.DataSet.TtDataTable(SheetName = "TtWeaponData", HeadRow = 0, DataStartRow = 3)]
     public class TtWeaponData : EngineNS.Bricks.DataSet.TtDataProvider
     {
         [EngineNS.Rtti.Meta]
@@ -61,7 +61,7 @@ namespace Survivor
         public string Description {get;set;}
         [EngineNS.Rtti.Meta]
         [EngineNS.Bricks.DataSet.TtDataColumn(HeadName = "Unlock")]
-        public int Unlock {get;set;}
+        public string Unlock {get;set;}
         [EngineNS.Rtti.Meta]
         [EngineNS.Bricks.DataSet.TtDataColumn(HeadName = "Rarity")]
         public int Rarity { get; set; }

@@ -48,6 +48,10 @@ namespace EngineNS
             Last
         }
 
+        [DllImport("kernel32.dll")]
+        public static extern int SetDllDirectoryA(string path);
+        [DllImport("user32.dll")]
+        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
         [DllImport("dwmapi.dll", PreserveSig = true)]
         public static extern int DwmSetWindowAttribute(IntPtr hwnd, DwmWindowAttribute attr, ref int attrValue, int attrSize);
         public static SDL.SDL_PropertiesID PropertiesID_WindowData;

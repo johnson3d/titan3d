@@ -182,6 +182,18 @@ namespace EngineNS.GamePlay
                 HostNode.UpdateAABB();
                 if (HostNode.Parent != null)
                     HostNode.Parent.UpdateAABB();
+
+                if (HostNode.IsCollide)
+                {
+                    var scene = HostNode.ParentScene;
+                    if (scene != null)
+                    {
+                        var notify = new FHostNotify();
+                        notify.Info = "OnActorMove";
+                        notify.Parameter = HostNode;
+                        scene.SceneOctree.OnHostNotify(scene, notify);
+                    }
+                }
             }
         }
 

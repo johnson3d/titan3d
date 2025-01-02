@@ -309,7 +309,8 @@ namespace EngineNS
         }
         public override void Execute(string argsText)
         {
-            _ = ExecuteImpl(argsText);
+            var task = ExecuteImpl(argsText);
+            TtEngine.Instance.TaskCollector.AddWaitTask(task);
         }
         private async Thread.Async.TtTask ExecuteImpl(string argsText)
         {

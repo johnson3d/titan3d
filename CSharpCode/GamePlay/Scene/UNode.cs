@@ -1,3 +1,5 @@
+using Assimp;
+using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.GpuDriven;
 using EngineNS.Profiler;
 using NPOI.SS.Formula.Functions;
@@ -163,7 +165,11 @@ namespace EngineNS.GamePlay.Scene
         }
         public virtual void Dispose()
         {
-            
+            if (OctreeNode != null)
+            {
+                OctreeNode.Remove(this);
+                OctreeOwner = null;
+            }
         }
         [Rtti.Meta]
         public void DisposeWithChildren()
@@ -266,6 +272,7 @@ namespace EngineNS.GamePlay.Scene
             ForceGatherNode = (1 << 15),
             BuildNavMesh = (1 << 16),
             EnableHitproxyInGame = (1 << 17),
+            IsCollide = (1 << 18),
             Invisible = SelfInvisible | ChildrenInvisible,
         }
         public ENodeStyles NodeStyles
@@ -440,6 +447,25 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
+        [Category("Option")]
+        public virtual bool IsCollide
+        {
+            get
+            {
+                return HasStyle(ENodeStyles.IsCollide);
+            }
+            set
+            {
+                if (value)
+                {
+                    SetStyle(ENodeStyles.IsCollide);
+                }
+                else
+                {
+                    UnsetStyle(ENodeStyles.IsCollide);
+                }
+            }
+        }
         #endregion
 
         #region BaseFields
@@ -491,29 +517,41 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        protected TtNode mParent;
+        WeakReference<TtNode> mParent;
+        //protected TtNode mParent;
         [Rtti.Meta]
         public virtual TtNode Parent
         {
-            get => mParent;
+            get
+            {
+                if (mParent == null)
+                    return null;
+                if (mParent.TryGetTarget(out var result))
+                    return result;
+                return null;
+            }
             set
             {
-                if (mParent == value)
+                var oldParent = Parent;
+                if (oldParent == value)
                     return;
                 var oldScene = GetNearestParentScene();
 
-                if (mParent != null)
+                if (oldParent != null)
                 {
-                    mParent.Children.Remove(this);
+                    oldParent.Children.Remove(this);
                 }
-                var oldParent = mParent;
-                mParent = value;
-                if (mParent != null)
+                if (value != null)
                 {
-                    if (mParent.Children.Contains(this) == false)
-                        mParent.Children.Add(this);
+                    mParent = new WeakReference<TtNode>(value);
+                    if (value.Children.Contains(this) == false)
+                        value.Children.Add(this);
                 }
-                ParentChanged(oldParent, mParent);
+                else
+                {
+                    mParent = null;
+                }
+                ParentChanged(oldParent, value);
 
                 var newScene = GetNearestParentScene();
                 if (oldScene != newScene)
@@ -526,7 +564,7 @@ namespace EngineNS.GamePlay.Scene
                     ParentSceneChanged(oldScene, newScene);
                 }
 
-                if (mParent !=null && Placement != null)
+                if (value != null && Placement != null)
                 {
                     Placement.Position = Placement.Position;
                 }
@@ -767,8 +805,8 @@ namespace EngineNS.GamePlay.Scene
         {
             if (GetType() == typeof(TtScene) || GetType().IsSubclassOf(typeof(TtScene)))
                 return this as TtScene;
-            if (mParent != null)
-                return mParent.GetNearestParentScene();
+            if (Parent != null)
+                return Parent.GetNearestParentScene();
             else
                 return null;
         }
@@ -1171,6 +1209,28 @@ namespace EngineNS.GamePlay.Scene
         {
             return true;
         }
+        [Rtti.Meta]
+        public void RemoveFromWorld()
+        {
+            Parent = null;
+            SetIsTickable(false, true);
+            this.IsCollide = false;
+            if(this.OctreeNode != null)
+            {
+                OctreeNode.Remove(this);
+            }
+        }
+        public void SetIsTickable(bool isTickable, bool isRecursive)
+        {
+            IsNoTick = !isTickable;
+            if(isRecursive)
+            {
+                foreach(var child in Children)
+                {
+                    child.SetIsTickable(isTickable, isRecursive);
+                }
+            }
+        }
         #endregion
 
         public async Thread.Async.TtTask<TtNode> CloneNode(TtWorld world)
@@ -1270,7 +1330,7 @@ namespace EngineNS.GamePlay.Scene
         {
             set
             {
-                if (mParent == value)
+                if (Parent == value)
                     return;
                 var newScene = value?.GetNearestParentScene();
                 if (newScene != null && ParentScene != null && newScene != ParentScene)
@@ -1320,6 +1380,18 @@ namespace EngineNS.GamePlay.Scene
 			var _return_value = FindFirstChild(name, type, bRecursive);
 			macross_break_FindFirstChild_26975848.TryBreak();
 			return _return_value;
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_RemoveFromWorld_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtNode->void RemoveFromWorld()");
+		public unsafe void macross_RemoveFromWorld (string nodeName) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+				}
+			}
+			RemoveFromWorld();
+			macross_break_RemoveFromWorld_2609910045.TryBreak();
 		}
 	}
 }

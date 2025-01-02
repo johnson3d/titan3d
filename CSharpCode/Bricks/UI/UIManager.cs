@@ -1,6 +1,7 @@
 using EngineNS;
 using EngineNS.EGui;
 using EngineNS.Macross;
+using EngineNS.Thread.Async;
 using EngineNS.UI.Controls;
 using NPOI.SS.Formula.Functions;
 using System;
@@ -101,6 +102,18 @@ namespace EngineNS.UI
         }
 
         Dictionary<UIKeyName, WeakReference<TtUIHost>> mUserUIs = new ();
+        public TtUIHost GetUI(in UIKeyName key)
+        {
+            WeakReference<TtUIHost> result;
+            if(mUserUIs.TryGetValue(key, out result))
+            {
+                TtUIHost host;
+                if (result.TryGetTarget(out host))
+                    return host;
+            }
+
+            return null;
+        }
         public void AddUI(RName fileName, string key, TtUIHost ui)
         {
             lock(mUserUIs)
@@ -271,6 +284,16 @@ namespace EngineNS.UI
                 xnd.SaveXnd(fileName);
                 TtEngine.Instance.SourceControlModule.AddFile(fileName);
             }
+        }
+        public async TtTask<TtUIElement> AsyncLoad(
+            [RName.PGRName(FilterExts = TtUIAsset.AssetExt)]
+            RName name)
+        {
+            var result = await TtEngine.Instance.EventPoster.Post((state) =>
+            {
+                return LoadWithSimulateMode(name);
+            });
+            return result;
         }
 
         public TtUIElement LoadWithSimulateMode(RName name, bool simulateMode = false)

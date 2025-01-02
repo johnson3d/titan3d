@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using EngineNS.GamePlay.Scene;
+using EngineNS.Profiler;
+using NPOI.SS.Formula.Functions;
+using System.Collections.Generic;
+using System.ComponentModel;
 
 // A Dynamic, Loose Octree for storing any objects that can be described with AABB bounds
 // See also: PointOctree, where objects are stored as single points and some code can be simplified
@@ -23,7 +27,7 @@
 
 namespace EngineNS.Bricks.Collision.Octree
 {
-    public class TtBoundsOctree<T>
+    public class TtBoundsOctree<T> where T : Bricks.Collision.Octree.IBoundsOctreeObject
     {
         // The total amount of objects currently in the tree
         public int Count { get; private set; }
@@ -33,6 +37,10 @@ namespace EngineNS.Bricks.Collision.Octree
         {
             get;
             set;
+        }
+        public TtBoundsOctreeNode<T> GetRoot()
+        {
+            return RootNode;
         }
 
         // Should be a value between 1 and 2. A multiplier for the base size of a node.
@@ -280,6 +288,7 @@ namespace EngineNS.Bricks.Collision.Octree
         Bricks.Collision.Octree.TtBoundsOctree<GamePlay.Scene.TtNode> mOctree;
         public NxRHI.TtTransientBuffer TransientVB = new();
         public NxRHI.TtTransientBuffer TransientIB = new();
+        [Category("Option")]
         public bool IsDrawBounds { get; set; } = false;
         public async System.Threading.Tasks.Task<bool> Initialize(object host)
         {
@@ -291,6 +300,11 @@ namespace EngineNS.Bricks.Collision.Octree
         {
             CoreSDK.DisposeObject(ref TransientVB);
             CoreSDK.DisposeObject(ref TransientIB);
+            mOctree.GetRoot().IterateObject(static (obj, arg) =>
+            {
+                obj.Obj.OctreeOwner = null;
+                return true;
+            }, null);
         }
         public void Cleanup(object host)
         {
@@ -301,6 +315,7 @@ namespace EngineNS.Bricks.Collision.Octree
             TransientVB.Reset();
             TransientIB.Reset();
         }
+        private struct FnOnActorMove { }
         public void OnHostNotify(object host, in FHostNotify notify)
         {
             switch (notify.Info)
@@ -319,7 +334,7 @@ namespace EngineNS.Bricks.Collision.Octree
                     {
                         var scene = host as GamePlay.Scene.TtScene;
                         var node = notify.Parameter as GamePlay.Scene.TtNode;
-                        var aabb = new Aabb(node.AABB);
+                        var aabb = new Aabb(node.AbsAABB);
                         mOctree.Add(node, aabb);
                     }
                     break;
@@ -327,6 +342,7 @@ namespace EngineNS.Bricks.Collision.Octree
                     {
                         var scene = host as GamePlay.Scene.TtScene;
                         var node = notify.Parameter as GamePlay.Scene.TtNode;
+                        mOctree.Remove(node);
                     }
                     break;
                 case "OnGatherVisibleMeshes":
@@ -342,16 +358,52 @@ namespace EngineNS.Bricks.Collision.Octree
                         }
                     }
                     break;
+                case "OnActorMove":
+                    {
+                        using (new Profiler.TimeScopeHelper(TtTypeScope<TtSceneOctree, FnOnActorMove>.Scope))
+                        {
+                            var scene = host as GamePlay.Scene.TtScene;
+                            var node = notify.Parameter as GamePlay.Scene.TtNode;
+                            if (node.OctreeNode != null)
+                            {
+                                node.OctreeNode.Remove(node);
+                            }
+                            var aabb = new Aabb(node.AbsAABB);
+                            if (mOctree != null)
+                            {
+                                mOctree.Add(node, aabb);
+                            }
+                        }
+                    }
+                    break;
             }
+        }
+        public void GetColliding(List<GamePlay.Scene.TtNode> nodes, in Aabb bound)
+        {
+            mOctree.GetColliding(nodes, in bound);
+        }
+        public bool IsColliding(in DRay checkRay, double maxDistance)
+        {
+            return mOctree.IsColliding(in checkRay, maxDistance);
+        }
+        public void GetColliding(List<GamePlay.Scene.TtNode> collidingWith, in DRay checkRay, double maxDistance = double.PositiveInfinity)
+        {
+            mOctree.GetColliding(collidingWith, in checkRay, maxDistance);
         }
     }
 }
 
 namespace EngineNS.GamePlay.Scene
 {
+    public partial class TtNode : Bricks.Collision.Octree.IBoundsOctreeObject
+    {
+        public object OctreeOwner { get; set; }
+        public Bricks.Collision.Octree.TtBoundsOctreeNode<TtNode> OctreeNode { get => OctreeOwner as Bricks.Collision.Octree.TtBoundsOctreeNode<TtNode>; }
+    }
     public partial class TtScene
     {
         Bricks.Collision.Octree.TtSceneOctree mSceneOctree = new Bricks.Collision.Octree.TtSceneOctree();
+        [Category("Option")]
         public Bricks.Collision.Octree.TtSceneOctree SceneOctree { get => mSceneOctree; }
         public override void Dispose()
         {

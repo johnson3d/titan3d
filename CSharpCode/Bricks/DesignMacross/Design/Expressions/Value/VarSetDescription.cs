@@ -83,7 +83,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
                 {
                     var right = (linkedDataPin.Parent as TtStatementDescription).BuildExpressionForOutPin(linkedDataPin);
                     var assign = TtASTBuildUtil.CreateAssignOperatorStatement(
-                                    new TtVariableReferenceExpression(mVariableDescription.VariableName, new TtVariableReferenceExpression("CenterData")), 
+                                    new TtVariableReferenceExpression(mVariableDescription.VariableName, new TtSelfReferenceExpression()), 
                                     right);
                     statementBuildContext.AddStatement(assign);
                 }

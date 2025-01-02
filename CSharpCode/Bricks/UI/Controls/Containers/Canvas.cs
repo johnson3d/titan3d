@@ -156,15 +156,29 @@ namespace EngineNS.UI.Controls.Containers
                 var anchorMaxY = availableSize.Height * anchorMax.Y;
 
                 float width, height;
-                if((anchorMax.X - anchorMin.X) <= MathHelper.Epsilon)
-                    width = anchorRectZ;
+                if (float.IsInfinity(availableSize.Width))
+                {
+                    width = float.PositiveInfinity;
+                }
                 else
-                    width = anchorMaxX - anchorMinX - anchorRectX - anchorRectZ;
+                {
+                    if ((anchorMax.X - anchorMin.X) <= MathHelper.Epsilon)
+                        width = anchorRectZ;
+                    else
+                        width = anchorMaxX - anchorMinX - anchorRectX - anchorRectZ;
+                }
 
-                if ((anchorMax.Y - anchorMin.Y) <= MathHelper.Epsilon)
-                    height = anchorRectW;
+                if (float.IsInfinity(availableSize.Height))
+                {
+                    height = float.PositiveInfinity;
+                }
                 else
-                    height = anchorMaxY - anchorMinY - anchorRectY - anchorRectW;
+                {
+                    if ((anchorMax.Y - anchorMin.Y) <= MathHelper.Epsilon)
+                        height = anchorRectW;
+                    else
+                        height = anchorMaxY - anchorMinY - anchorRectY - anchorRectW;
+                }
 
                 var childAvailableSize = new SizeF(width, height);
                 childUI.Measure(in childAvailableSize);

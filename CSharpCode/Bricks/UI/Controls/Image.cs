@@ -28,7 +28,8 @@ namespace EngineNS.UI.Controls
         {
             mUIBrush = new TtBrush();
             mUIBrush.HostElement = this;
-            _ = Initialize();
+            var task = Initialize();
+            TtEngine.Instance.TaskCollector.AddWaitTask(task);
         }
 
         async Thread.Async.TtTask Initialize()

@@ -57,12 +57,12 @@ namespace EngineNS.Bricks.PhysicsCore
                 for (int i = 0; i < count; i++)
                 {
                     mCoreObject.Simulate(StepTime, scratchMemBlock, scratchMemBlockSize, true);
-                    mCoreObject.FetchResults(false, &errorState);
+                    mCoreObject.FetchResults(true, &errorState);
                 }
                 if (fm > 0)
                 {
                     mCoreObject.Simulate(fm, scratchMemBlock, scratchMemBlockSize, true);
-                    mCoreObject.FetchResults(false, &errorState);
+                    mCoreObject.FetchResults(true, &errorState);
                 }
             }
 

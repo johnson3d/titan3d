@@ -287,6 +287,14 @@ namespace EngineNS.NxRHI
     [IO.AssetCreateMenu(MenuName = "Texture")]
     public partial class TtSrView : AuxPtrType<NxRHI.ISrView>, IO.IAsset, IO.IStreaming
     {
+        public TtSrView()
+        {
+            System.Threading.Interlocked.Increment(ref NumOfInstance);
+        }
+        ~TtSrView()
+        {
+            System.Threading.Interlocked.Decrement(ref NumOfInstance);
+        }
         public class TtPicDesc
         {
             public TtPicDesc()

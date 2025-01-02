@@ -2,7 +2,7 @@
   "IsReverseZ": true,
   "MultiRenderMode": 2,
   "UsePhysxMT": true,
-  "UseRenderDoc": false,
+  "UseRenderDoc": true,
   "Feature_UseRVT": true,
   "NumOfThreadPool": -1,
   "IsParrallelWorldGather": true,

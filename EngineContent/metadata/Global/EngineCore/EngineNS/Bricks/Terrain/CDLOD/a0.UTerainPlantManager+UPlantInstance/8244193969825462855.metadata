@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_8244193969825462855 Type="EngineNS.Bricks.Terrain.CDLOD.UTerainPlantManager.UPlantInstance@EngineCore">
+  <NodeId Type="System.Guid@Unknown" Order="0" />
+  <Parent Type="EngineNS.GamePlay.Scene.TtNode@EngineCore" Order="0" />
+  <ParentScene Type="EngineNS.GamePlay.Scene.TtScene@EngineCore" Order="0" />
+</Hash_8244193969825462855>
