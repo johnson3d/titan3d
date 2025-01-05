@@ -23,7 +23,7 @@ namespace EngineNS.UI.Editor
         TtPathStyle mEdgePathStyle = new TtPathStyle();
         TtCanvasBrush mDrawBrush = new TtCanvasBrush()
         {
-            Name = "@MatInst:ui/uimat_inst_default.uminst:Engine",
+            Name = "@MatInst:ui/uidecorator_white.uminst:Engine",
             Color = Color4b.White,
         };
         TtCanvasBrush mGridBrush = new TtCanvasBrush()
@@ -314,7 +314,7 @@ namespace EngineNS.UI.Editor
         TtPathStyle mEdgePathStyle = new TtPathStyle();
         TtCanvasBrush mDrawBrush = new TtCanvasBrush()
         {
-            Name = "@MatInst:ui/uimat_inst_default.uminst:Engine",
+            Name = "@MatInst:ui/uidecorator_green.uminst:Engine",
             Color = Color4b.White,
         };
         public TtCanvasBrush DrawBrush => mDrawBrush;

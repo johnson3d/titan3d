@@ -108,7 +108,7 @@ namespace EngineNS
         }
     }
 
-    public class UBezier3DSpline : IO.BaseSerializer
+    public class TtBezier3DSpline : IO.BaseSerializer
     {
         public bool IsDirty = true;
         public int Segments { get; set; } = 100;

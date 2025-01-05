@@ -3,6 +3,7 @@
 #include <windows.h>
 
 #include "ClrLogger.h"
+#include "ClrProfiler.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -11,8 +12,7 @@
 
 #define new VNEW
 
-VCritical			gClrLogLocker;
-bool ClrLogger::bMessageBox = false;
+bool CoreCLRManager::IsStart = false;
 
 ClrString::ClrString(const char* text)
 {
@@ -21,147 +21,173 @@ ClrString::ClrString(const char* text)
 
 ClrString::~ClrString()
 {
-	mSize = 0;
+	
 }
 
 void ClrString::SetText(const char* text)
 {
-	mSize = (int)strlen(text);
-	if (mSize > 1024)
-	{
-		mSize = 0;
-		mString[mSize] = '\0';
+	mText = text;
+}
+
+CoreCLRManager gClrLogger;
+
+CoreCLRManager* CoreCLRManager::GetInstance()
+{
+	return &gClrLogger;
+}
+
+void CoreCLRManager::Start()
+{
+	IsStart = true;
+}
+
+void CoreCLRManager::Stop()
+{
+	if (IsStart == false)
 		return;
-	}
-	mString[mSize] = '\0';
-	memcpy(mString, text, mSize);
+	GetInstance()->FinalCleanup();
 }
 
-void ClrString::Append(const char* text)
+void CoreCLRManager::FinalCleanup()
 {
-	auto len = (int)strlen(text);
-	if (mSize + len > 1024)
+	IsStart = false;
+	
+	while (!mStrings.empty())
 	{
+		auto p = mStrings.front();
+		p->Release();
+		mStrings.pop();
+	}
+
+	CachedClassesMap.clear();
+	for (auto& i : CachedClasses)
+	{
+		delete i;
+	}
+	CachedClasses.clear();
+}
+
+CoreCLRManager::CoreCLRManager()
+{
+}
+
+CoreCLRManager::~CoreCLRManager()
+{
+
+}
+
+ClrString* CoreCLRManager::PopLog()
+{
+	VAutoVSLLock lk(mLocker);
+	if (mStrings.empty())
+		return nullptr;
+	auto ret = mStrings.front();
+	mStrings.pop();
+	return ret;
+}
+
+void CoreCLRManager::PushLog(EClrLogStringType type, const char* info)
+{
+	if (IsStart == false)
 		return;
-	}
-	memcpy(&mString[mSize], text, len);
-	mSize += len;
-	mString[mSize] = '\0';
+	if ((Flags & (1 << type)) == 0 || PauseLog)
+		return;
+	VAutoVSLLock lk(mLocker);
+	auto tmp = new ClrString();
+	tmp->mType = type;
+	tmp->mText = info;
+	mStrings.push(tmp);
 }
 
-void ClrString::Append(int num)
-{
-
-}
-
-ClrLogger* gClrLogger = nullptr;
-void ClrLogger::StartClrLogger()
-{
-	if (gClrLogger == nullptr)
-	{
-		gClrLogger = new ClrLogger();
-	}
-}
-
-ClrLogger* ClrLogger::GetInstance()
-{
-	return gClrLogger;
-}
-
-void ClrLogger::StopClrLogger()
-{
-	delete gClrLogger;
-	gClrLogger = nullptr;
-}
-
-ClrLogger::ClrLogger()
-{
-	mBegin = 0;
-	mEnd = 0;
-}
-
-ClrLogger::~ClrLogger()
-{
-
-}
-
-bool ClrLogger::IsEmpty()
-{
-	return mEnd == mBegin;
-}
-
-bool ClrLogger::IsFull()
-{
-	if (mEnd < MaxLogInfo)
-	{
-		if (mEnd + 1 == mBegin)
-			return true;
-	}
-	else
-	{
-		if (mBegin == 0)
-			return true;
-	}
-	return false;
-}
-
-bool ClrLogger::PopLog(ClrString* clrStr)
-{
-	auto info = PopLog();
-	if (info == nullptr)
-		return false;
-
-	*clrStr = *info;
-	return true;
-}
-
-ClrString* ClrLogger::PopLog()
-{
-	VAutoVSLLock lk(gClrLogLocker);
-	if (mEnd == mBegin)
-		return nullptr;
-	auto result = &mStrings[mBegin];
-
-	if (mBegin < MaxLogInfo - 1)
-	{
-		mBegin++;
-	}
-	else
-	{
-		mBegin = 0;
-	}
-
-	return result;
-}
-
-const char* ClrLogger::PopLogText()
-{
-	auto clrStr = PopLog();
-	if (clrStr == nullptr)
-		return nullptr;
-	return clrStr->GetString();
-}
-
-void ClrLogger::PushLog(EClrLogStringType type, const char* info)
-{
-	VAutoVSLLock lk(gClrLogLocker);
-	if (IsFull())
-	{
-		PopLog();
-	}
-	if (mEnd < MaxLogInfo - 1)
-	{
-		mEnd++;
-	}
-	else
-	{
-		mEnd = 0;		
-	}
-	mStrings[mEnd].mType = type;
-	mStrings[mEnd].SetText(info);
-}
-
-void ClrLogger::ShowMessageBox(const char* info)
+void CoreCLRManager::ShowMessageBox(const char* info)
 {
 	MessageBoxA(NULL, info, "ClrLogger", MB_OK);
+}
+
+ClrClass* CoreCLRManager::GetCachedClasse(ClassID classId)
+{
+	if (IsStart == false)
+		return nullptr;
+	VAutoVSLLock lk(mLocker);
+	auto iter = CachedClassesMap.find(classId);
+	if (iter != CachedClassesMap.end())
+	{
+		return iter->second;
+	}
+
+	ModuleID module;
+	mdTypeDef type;
+	if (SUCCEEDED(CoreProfiler->GetCorProfilerInfo()->GetClassIDInfo(classId, &module, &type)))
+	{
+		auto name = CoreProfiler->GetTypeName(type, module);
+		auto kls = new ClrClass();
+		kls->Id = classId;
+		kls->Name = name;
+		CachedClasses.push_back(kls);
+		CachedClassesMap[classId] = kls;
+		return kls;
+	}
+	return nullptr;
+}
+
+void CoreCLRManager::ClassLoadFinished(ClassID classId, HRESULT hrStatus)
+{
+	if (IsStart == false)
+		return;
+	if (IsCacheClassLoadFinished == false)
+		return;
+	GetCachedClasse(classId);
+}
+
+void CoreCLRManager::ObjectAllocated(ObjectID objectId, ClassID classId)
+{
+	if (IsStart == false)
+		return;
+	auto kls = this->GetCachedClasse(classId);
+	if (kls != nullptr)
+	{
+		PushLog(EClrLogStringType::ObjectAlloc, kls->Name.c_str());
+	}
+}
+
+void CoreCLRManager::ObjectsAllocatedByClass(ULONG cClassCount, ClassID* classIds, ULONG* cObjects)
+{
+	if (IsStart == false)
+		return;
+	std::string info("");
+	for (ULONG i = 0; i < cClassCount; i++)
+	{
+		auto kls = this->GetCachedClasse(classIds[i]);
+		if (kls != nullptr)
+		{
+			info += kls->Name.c_str();
+			info += ",";
+		}
+	}
+	PushLog(EClrLogStringType::ObjectsAllocdByClass, info.c_str());
+}
+
+void CoreCLRManager::ObjectReferences(ObjectID objectId, ClassID classId, ULONG cObjectRefs, ObjectID* objectRefIds)
+{
+	if (IsStart == false)
+		return;
+	if (ProfileClass == 0)
+		return;
+	if (IsObjectRefercenses)
+	{
+		if (classId == ProfileClass)
+		{
+			std::string text = "(" + std::string(GetCachedClasse(classId)->Name.c_str()) + ")[";
+			for (ULONG i = 0; i < cObjectRefs; i++)
+			{
+				ClassID refClass;
+				if (CoreProfiler->GetCorProfilerInfo()->GetClassFromObject(objectRefIds[i], &refClass) == S_OK)
+				{
+					text += std::string(GetCachedClasse(refClass)->Name.c_str()) + ",";
+				}
+			}
+			text += "]";
+			this->PushLog(EClrLogStringType::ObjectReferences, text.c_str());
+		}
+	}
 }

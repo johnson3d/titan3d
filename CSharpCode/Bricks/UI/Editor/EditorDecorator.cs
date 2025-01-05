@@ -95,10 +95,10 @@ namespace EngineNS.UI.Editor
         internal void SetCurrentPointAtElement(TtUIElement element)
         {
             // debug //////////////////
-            //if (element != null)
-            //    TtEngine.Instance.UIManager.DebugPointatElement = element.Name + "(" + element.GetType().Name + ")";
-            //else
-            //    TtEngine.Instance.UIManager.DebugPointatElement = "";
+            if (element != null)
+                TtEngine.Instance.UIManager.DebugPointatElement = element.Name + "(" + element.GetType().Name + ")";
+            else
+                TtEngine.Instance.UIManager.DebugPointatElement = "";
             ///////////////////////////
 
             if (element != null)

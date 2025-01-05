@@ -17,7 +17,7 @@ try
     var projName = EngineNS.IO.TtFileManager.GetPureName(projectFile);
     var assemblyFile = enginesln + $"binaries\\{dotnet_ver}\\" + projName + ".dll";
 
-    EngineNS.TtEngine.OnlyInitTypes(new EngineNS.TtEngine(args), cfgFile);
+    EngineNS.TtEngine.OnlyInitTypes(new EngineNS.TtEngine(args), cfgFile, false);
 
     System.Console.WriteLine($"engine sln dir: {enginesln}");
     System.Console.WriteLine($"arg project file: {projectFile}");

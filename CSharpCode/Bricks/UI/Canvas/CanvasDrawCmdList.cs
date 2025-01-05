@@ -32,7 +32,7 @@ namespace EngineNS.UI.Canvas
         }
         public void PushMatrix(in Matrix matrix)
         {
-            mCoreObject.PushMatrix(matrix);
+            mCoreObject.PushMatrix(in matrix);
         }
         public void PopMatrix()
         {
@@ -64,7 +64,7 @@ namespace EngineNS.UI.Canvas
         }
         public void PushClip(in RectangleF rect)
         {
-            mCoreObject.PushClip(rect);
+            mCoreObject.PushClip(in rect);
         }
         public void PopClip()
         {
@@ -72,12 +72,22 @@ namespace EngineNS.UI.Canvas
         }
         public void PushTransformIndex(in UInt16 index)
         {
-            mCoreObject.PushTransformIndex(index);
+            mCoreObject.PushTransformIndex(in index);
         }
         public void PopTransformIndex()
         {
             mCoreObject.PopTransformIndex();
         }
+
+        public void PushZOffset(in float zOffset)
+        {
+            mCoreObject.PushZOffset(in zOffset);
+        }
+        public void PopZOffset()
+        {
+            mCoreObject.PopZOffset();
+        }
+
         public void AddLine(in EngineNS.Vector2 start, in EngineNS.Vector2 end, float width, in EngineNS.Color4b color, ref EngineNS.Canvas.FSubDrawCmd outCmd)
         {
             mCoreObject.AddLine(in start, in end, width, in color, ref outCmd);
@@ -119,13 +129,13 @@ namespace EngineNS.UI.Canvas
                 mCoreObject.AddRectFill(in start, in end, in color, ref outCmd);
             }
         }
-        public unsafe void AddText(string text, float x, float y, in EngineNS.Canvas.FDrawCmdInstanceData data)
+        public unsafe void AddText(string text, float x, float y, in EngineNS.Canvas.FDrawCmdInstanceData data, float scale = 1.0f)
         {
 #if PWindow
             fixed (char* p = text)
             fixed (EngineNS.Canvas.FDrawCmdInstanceData* pData = &data)
             {
-                mCoreObject.AddText((wchar_t*)p, text.Length, x, y, pData, new IBlobObject());
+                mCoreObject.AddText((wchar_t*)p, text.Length, x, y, pData, new IBlobObject(), scale);
             }
 #else
             fixed (char* p = text)
@@ -134,18 +144,18 @@ namespace EngineNS.UI.Canvas
                 using (var buffer = BigStackBuffer.CreateInstance(text.Length * sizeof(wchar_t)))
                 {
                     var numOfUtf32 = System.Text.Encoding.UTF32.GetBytes(p, text.Length, (byte*)buffer.GetBuffer(), text.Length * sizeof(wchar_t));
-                    mCoreObject.AddText((wchar_t*)buffer.GetBuffer(), numOfUtf32, x, y, pData, new IBlobObject());
+                    mCoreObject.AddText((wchar_t*)buffer.GetBuffer(), numOfUtf32, x, y, pData, new IBlobObject(), scale);
                 }
             }
 #endif
         }
-        public unsafe void AddText(string text, float x, float y, in EngineNS.Canvas.FDrawCmdInstanceData data, TtBlobObject outCmds)
+        public unsafe void AddText(string text, float x, float y, in EngineNS.Canvas.FDrawCmdInstanceData data, TtBlobObject outCmds, float scale = 1.0f)
         {
 #if PWindow
             fixed (char* p = text)
             fixed (EngineNS.Canvas.FDrawCmdInstanceData* pData = &data)
             {
-                mCoreObject.AddText((wchar_t*)p, text.Length, x, y, pData, outCmds.mCoreObject);
+                mCoreObject.AddText((wchar_t*)p, text.Length, x, y, pData, outCmds.mCoreObject, scale);
             }
 #else
             fixed (char* p = text)
@@ -154,7 +164,7 @@ namespace EngineNS.UI.Canvas
                 using (var buffer = BigStackBuffer.CreateInstance(text.Length * sizeof(wchar_t)))
                 {
                     var numOfUtf32 = System.Text.Encoding.UTF32.GetBytes(p, text.Length, (byte*)buffer.GetBuffer(), text.Length * sizeof(wchar_t));
-                    mCoreObject.AddText((wchar_t*)buffer.GetBuffer(), numOfUtf32, x, y, pData, outCmds.mCoreObject);
+                    mCoreObject.AddText((wchar_t*)buffer.GetBuffer(), numOfUtf32, x, y, pData, outCmds.mCoreObject, scale);
                 }
             }
 #endif

@@ -1,11 +1,44 @@
+#include <WinSock2.h>
+#include <mswsock.h>
+#include <windows.h>
 #include "ClrProfiler.h"
 #include <mscoree.h>  
 #include <assert.h>
 #include "ClrLogger.h"
 
 #include "../../base/debug/vfxnew.h"
+#include <string>
+#include <locale>
+#include <codecvt>
 
 #define new VNEW
+
+std::string WString2String(const std::wstring& wstr) {
+	setlocale(LC_ALL, "en_US.UTF-8");
+	const wchar_t* wchSrc = wstr.c_str();
+	size_t nWStr = wcstombs(NULL, wchSrc, 0) + 1;
+	char* chDest = new char[nWStr];
+	memset(chDest, 0, nWStr);
+	wcstombs(chDest, wchSrc, nWStr);
+	std::string strRes = chDest;
+	delete[] chDest;
+
+	return strRes;
+}
+
+std::wstring String2WString(const std::string& str)
+{
+	std::string strUtf8 = str;
+	setlocale(LC_ALL, "en_US.UTF-8");
+	const char* chSrc = strUtf8.c_str();
+	size_t nStr = mbstowcs(NULL, chSrc, 0) + 1;
+	wchar_t* wchDest = new wchar_t[nStr];
+	memset(wchDest, 0, nStr);
+	mbstowcs(wchDest, chSrc, nStr);
+	std::wstring wStrRes = wchDest;
+	delete[] wchDest;
+	return wStrRes;
+}
 
 #if defined(UseModule_ClrProfiler)
 
@@ -33,21 +66,17 @@ HRESULT __stdcall CoreProfilerFactory::QueryInterface(REFIID riid, void** ppvObj
 	return E_NOINTERFACE;
 }
 
-ULONG __stdcall CoreProfilerFactory::AddRef(void) {
-	return 2;
-}
-
-ULONG __stdcall CoreProfilerFactory::Release(void) {
-	return 1;
-}
+CoreProfiler gCoreProfiler;
 
 HRESULT __stdcall CoreProfilerFactory::CreateInstance(IUnknown* pUnkOuter, REFIID riid, void** ppvObject) {
-	auto profiler = new CoreProfiler();
+	/*auto profiler = new CoreProfiler();
 	if (profiler == nullptr)
-		return E_OUTOFMEMORY;
+		return E_OUTOFMEMORY;*/
 
-	auto hr = profiler->QueryInterface(riid, ppvObject);
-	profiler->Release();
+	auto hr = gCoreProfiler.QueryInterface(riid, ppvObject);
+	//profiler->Release();
+
+	CoreCLRManager::GetInstance()->CoreProfiler = &gCoreProfiler;
 
 	return hr;
 }
@@ -55,12 +84,12 @@ HRESULT __stdcall CoreProfilerFactory::CreateInstance(IUnknown* pUnkOuter, REFII
 ///==================
 CoreProfiler::CoreProfiler()
 {
-	ClrLogger::StartClrLogger();
+	CoreCLRManager::Start();
 }
 
 CoreProfiler::~CoreProfiler()
 {
-	ClrLogger::StopClrLogger();
+	CoreCLRManager::Stop();
 }
 
 HRESULT __stdcall CoreProfiler::QueryInterface(REFIID riid, void** ppvObject) {
@@ -188,12 +217,8 @@ HRESULT CoreProfiler::ClassLoadStarted(ClassID classId) {
 }
 
 HRESULT CoreProfiler::ClassLoadFinished(ClassID classId, HRESULT hrStatus) {
-	ModuleID module;
-	mdTypeDef type;
-	if (SUCCEEDED(_info->GetClassIDInfo(classId, &module, &type))) {
-		auto name = GetTypeName(type, module);
-	}
-
+	CoreCLRManager::GetInstance()->ClassLoadFinished(classId, hrStatus);
+	
 	return S_OK;
 }
 
@@ -322,41 +347,23 @@ HRESULT CoreProfiler::MovedReferences(ULONG cMovedObjectIDRanges, ObjectID* oldO
 	return S_OK;
 }
 
-HRESULT CoreProfiler::ObjectAllocated(ObjectID objectId, ClassID classId) {
-	ModuleID module;
-	mdTypeDef type;
-	if (SUCCEEDED(_info->GetClassIDInfo(classId, &module, &type))) {
-		auto name = GetTypeName(type, module);
-		if (ClrLogger::bMessageBox)
-		{
-			::MessageBox(NULL, "ObjectAllocated", name, MB_OK);
-		}
-		ClrString info(name);
-		ClrLogger::PushLogInfo(EClrLogStringType::ObjectAlloc, info);
-	}
+HRESULT CoreProfiler::ObjectAllocated(ObjectID objectId, ClassID classId) 
+{
+	CoreCLRManager::GetInstance()->ObjectAllocated(objectId, classId);
 	return S_OK;
 }
 
 HRESULT CoreProfiler::ObjectsAllocatedByClass(ULONG cClassCount, ClassID* classIds, ULONG* cObjects) 
 {
-	ClrString info("");
-	for (ULONG i = 0; i < cClassCount; i++)
-	{
-		ModuleID module;
-		mdTypeDef type;
-		if (SUCCEEDED(_info->GetClassIDInfo(classIds[i], &module, &type)))
-		{
-			auto name = GetTypeName(type, module);
-			info.Append(name);
-			info.Append(",");
-		}
-	}
-	ClrLogger::PushLogInfo(EClrLogStringType::ObjectsAllocdByClass, info);
+	CoreCLRManager::GetInstance()->ObjectsAllocatedByClass(cClassCount, classIds, cObjects);
 	
 	return S_OK;
 }
 
-HRESULT CoreProfiler::ObjectReferences(ObjectID objectId, ClassID classId, ULONG cObjectRefs, ObjectID* objectRefIds) {
+HRESULT CoreProfiler::ObjectReferences(ObjectID objectId, ClassID classId, ULONG cObjectRefs, ObjectID* objectRefIds) 
+{
+	CoreCLRManager::GetInstance()->ObjectReferences(objectId, classId, cObjectRefs, objectRefIds);
+	
 	return S_OK;
 }
 
@@ -458,22 +465,22 @@ HRESULT CoreProfiler::ThreadNameChanged(ThreadID threadId, ULONG cchName, WCHAR*
 HRESULT CoreProfiler::GarbageCollectionStarted(int cGenerations, BOOL* generationCollected, COR_PRF_GC_REASON reason) {
 	/*printf("GC started. Gen0=%s, Gen1=%s, Gen2=%s",
 		generationCollected[0] ? "Yes" : "No", generationCollected[1] ? "Yes" : "No", generationCollected[2] ? "Yes" : "No");*/
-	ClrString info("GC started.");
+	std::string info("GC started.");
 	if (generationCollected[0])
 	{
-		info.Append("Gen0 = Yes,");
+		info += "Gen0 = Yes,";
 	}
 	if (generationCollected[1])
 	{
-		info.Append("Gen1 = Yes,");
+		info += "Gen1 = Yes,";
 	}
 	if (generationCollected[2])
 	{
-		info.Append("Gen2 = Yes");
+		info += "Gen2 = Yes";
 	}
 	
-
-	ClrLogger::PushLogInfo(EClrLogStringType::GCStart, info);
+	//::MessageBox(nullptr, "", "", MB_OK);
+	CoreCLRManager::GetInstance()->PushLog(EClrLogStringType::GCStart, info.c_str());
 	return S_OK;
 }
 
@@ -483,7 +490,7 @@ HRESULT CoreProfiler::SurvivingReferences(ULONG cSurvivingObjectIDRanges, Object
 
 HRESULT CoreProfiler::GarbageCollectionFinished() 
 {
-	ClrLogger::PushLogInfo(EClrLogStringType::GCFinish, "GC finished");
+	CoreCLRManager::GetInstance()->PushLog(EClrLogStringType::GCFinish, "GC finished");
 
 	return S_OK;
 }
@@ -560,7 +567,21 @@ HRESULT CoreProfiler::DynamicMethodJITCompilationFinished(FunctionID functionId,
 	return S_OK;
 }
 
-const char* CoreProfiler::GetTypeName(mdTypeDef type, ModuleID module) const 
+HRESULT CoreProfiler::DynamicMethodUnloaded(FunctionID functionId) {
+	return S_OK;	
+}
+
+std::string CoreProfiler::GetTypeName(ClassID id) const
+{
+	ModuleID module;
+	mdTypeDef type;
+	if (SUCCEEDED(_info->GetClassIDInfo(id, &module, &type))) {
+		return GetTypeName(type, module);
+	}
+	return "";
+}
+
+std::string CoreProfiler::GetTypeName(mdTypeDef type, ModuleID module) const 
 {
 	CComPtr<IMetaDataImport> spMetadata;
 	if (SUCCEEDED(_info->GetModuleMetaData(module, ofRead, IID_IMetaDataImport, reinterpret_cast<IUnknown**>(&spMetadata)))) 
@@ -571,19 +592,13 @@ const char* CoreProfiler::GetTypeName(mdTypeDef type, ModuleID module) const
 		mdTypeDef baseType;
 		if (SUCCEEDED(spMetadata->GetTypeDefProps(type, name, 256, &nameSize, &flags, &baseType)))
 		{
-			static thread_local char ascii_name[256];
-			for (int i = 0; i < (int)nameSize; i++)
-			{
-				ascii_name[i] = (char)name[i];
-			}
-			ascii_name[nameSize] = '\0';
-			return ascii_name;
+			return WString2String(name);
 		}
 	}
 	return "";
 }
 
-const char* CoreProfiler::GetMethodName(FunctionID function) const 
+std::string CoreProfiler::GetMethodName(FunctionID function) const 
 {
 	ModuleID module;
 	mdToken token;
@@ -602,7 +617,6 @@ const char* CoreProfiler::GetMethodName(FunctionID function) const
 	ULONG codeRva;
 	if (FAILED(spMetadata->GetMethodProps(token, &type, name, 256, &size, &attributes, &sig, &blobSize, &codeRva, &flags)))
 		return "";
-
 	return GetTypeName(type, module);// + "::" + OS::UnicodeToAnsi(name);
 }
 

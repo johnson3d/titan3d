@@ -194,6 +194,7 @@ namespace Canvas
 			Rect.Y = uv0.Y;
 			Rect.Width = uv1.X - uv0.X;
 			Rect.Height = uv1.Y - uv0.Y;
+			IsDirty = true;
 		}
 		v3dxVector2 GetUV0() const {
 			return v3dxVector2(Rect.X, Rect.Y);

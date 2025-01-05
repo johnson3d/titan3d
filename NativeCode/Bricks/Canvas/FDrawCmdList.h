@@ -182,12 +182,16 @@ namespace Canvas
 		{
 			return mPathStyles.top();
 		}
+
+		void PushZOffset(const float* zOffset);
+		void PopZOffset();
+		const float* GetCurrentZOffset() const;
 		
 		void Reset();
 
 		static void TransformIndexToColor(const UInt16* index, FColor& color);
 
-		void AddText(const WCHAR * text, int charCount, float x, float y, const FDrawCmdInstanceData& insData, IBlobObject* pOutCmds = nullptr);
+		void AddText(const WCHAR * text, int charCount, float x, float y, const FDrawCmdInstanceData& insData, IBlobObject* pOutCmds = nullptr, float scale = 1.0f);
 		void AddLine(const v3dxVector2 & start, const v3dxVector2 & end, float width, const FColor & color, FSubDrawCmd* pOutCmd = nullptr);
 		void AddLineStrips(const v3dxVector2 * pPoints, UINT num, float width, const FColor & color, bool loop, FSubDrawCmd* pOutCmd = nullptr);
 		void AddImage(ICanvasBrush * image, float x, float y, float w, float h, const FColor & color, FSubDrawCmd* pOutCmd = nullptr);
@@ -215,6 +219,7 @@ namespace Canvas
 		std::stack<AutoRef<ICanvasBrush>>		mBrushes;
 		std::stack<AutoRef<Path::FPathStyle>>	mPathStyles;
 		std::stack<UInt16>				mTransformIndexes;
+		std::stack<float>						mZOffsets;
 	};
 
 	class TR_CLASS()

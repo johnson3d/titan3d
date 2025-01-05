@@ -62,6 +62,8 @@ namespace EngineNS.Editor
 #if (UseWindowTest)
             mWinTest.Cleanup();
 #endif
+            CoreCLRManager.Stop();
+            CoreSDK.DisposeObject(ref mClrProfiler);
             base.Cleanup();
         }
         public override async System.Threading.Tasks.Task<bool> InitializeApplication(NxRHI.TtGpuDevice rc, RName rpName)

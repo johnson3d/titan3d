@@ -6,21 +6,21 @@ using System.Text;
 namespace EngineNS.GamePlay.Scene
 {
     [Bricks.CodeBuilder.ContextMenu("Bezier", "BezierSpline", TtNode.EditorKeyword)]
-    [TtNode(NodeDataType = typeof(TtBezierSplineNode.UBezierSplineNodeData), DefaultNamePrefix = "BzSpline")]
+    [TtNode(NodeDataType = typeof(TtBezierSplineNode.TtBezierSplineNodeData), DefaultNamePrefix = "BzSpline")]
     public class TtBezierSplineNode : TtSceneActorNode
     {
-        public class UBezierSplineNodeData : TtNodeData
+        public class TtBezierSplineNodeData : TtNodeData
         {
             [Rtti.Meta]
-            public UBezier3DSpline Spline { get; set; }
+            public TtBezier3DSpline Spline { get; set; }
             [Rtti.Meta]
             public float PointRadius { get; set; } = 0.1f;
             [Rtti.Meta]
             public uint PointSmooth { get; set; } = 8;
-            public UBezierSplineNodeData()
+            public TtBezierSplineNodeData()
             {
                 //test code
-                Spline = new UBezier3DSpline();
+                Spline = new TtBezier3DSpline();
                 
                 Spline.AppendPoint(in Vector3.Zero, in Vector3.One);
                 
@@ -32,11 +32,11 @@ namespace EngineNS.GamePlay.Scene
             }
         }
 
-        public UBezier3DSpline Spline
+        public TtBezier3DSpline Spline
         {
             get
             {
-                return GetNodeData<UBezierSplineNodeData>()?.Spline;
+                return GetNodeData<TtBezierSplineNodeData>()?.Spline;
             }
         }
         Graphics.Mesh.TtMesh mDebugSplineMesh;
@@ -106,7 +106,7 @@ namespace EngineNS.GamePlay.Scene
 
             }
             public int CurveIndex { get; set; } = -1;
-            internal UBezier3DSpline Spline;
+            internal TtBezier3DSpline Spline;
             public Vector3 Position
             {
                 get
@@ -158,7 +158,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 var radius = 0.1f;
                 var pointSmooth = 4u;
-                var splineData = GetNodeData<UBezierSplineNodeData>();
+                var splineData = GetNodeData<TtBezierSplineNodeData>();
                 if (splineData != null)
                 {
                     radius = splineData.PointRadius;

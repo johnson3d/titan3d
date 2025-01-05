@@ -28,9 +28,12 @@ namespace EngineNS.Animation.BlendTree.Node
         public void SetExtractedPose(TtAnimatableSkeletonPose extractedPose)
         {
             BindedCurves.Clear();
-            mExtractedPose = extractedPose.Clone() as TtAnimatableSkeletonPose;
-            BindedCurves = TtBindedCurveUtil.BindingCurves(AnimationClip, mExtractedPose);
-            mOutPose = TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(extractedPose);
+            if (extractedPose != null)
+            {
+                mExtractedPose = extractedPose.Clone() as TtAnimatableSkeletonPose;
+                BindedCurves = TtBindedCurveUtil.BindingCurves(AnimationClip, mExtractedPose);
+                mOutPose = TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(extractedPose);
+            }
         }
 
         void CurveEvaluate(float time)

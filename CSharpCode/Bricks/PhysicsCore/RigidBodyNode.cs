@@ -9,7 +9,7 @@ namespace EngineNS.Bricks.PhysicsCore
 {
     [GamePlay.Scene.TtNode(NodeDataType = typeof(TtRigidBodyNode.TtRigidBodyNodeData), DefaultNamePrefix = "PxMesh")]
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    internal class TtRigidBodyNode : GamePlay.Scene.TtSceneActorNode
+    public class TtRigidBodyNode : GamePlay.Scene.TtSceneActorNode
     {
         public class TtRigidBodyNodeData : GamePlay.Scene.TtNodeData
         {

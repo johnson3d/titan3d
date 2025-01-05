@@ -80,7 +80,7 @@ namespace EngineNS.EGui
         Thread.Async.TtTask<NxRHI.TtSrView>? SnapTask;
     }
     //[Rtti.Meta(NameAlias = new string[] { "EngineNS.EGui.UUvAnim@EngineCore" })]
-    [Rtti.Meta]
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.EGui.UUvAnim@EngineCore", "EngineNS.EGui.UUvAnim" })]
     [TtUVAnim.Import]
     [Editor.UAssetEditor(EditorType = typeof(UUvAnimEditor))]
     [IO.AssetCreateMenu(MenuName = "UI/UVAnim")]

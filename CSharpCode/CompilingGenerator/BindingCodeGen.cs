@@ -20,6 +20,7 @@ namespace CompilingGenerator
         static readonly string mAttachedPropAttrName = "EngineNS.UI.Bind.AttachedPropertyAttribute";
         static readonly string mBindObjectAttrName = "EngineNS.UI.Bind.BindableObjectAttribute";
         static readonly string mMetaAttrName = "EngineNS.Rtti.Meta";
+        static readonly string mShowWithPropertyAttrName = "EngineNS.EGui.Controls.PropertyGrid.PGShowWithProperty";
         sealed class BindingSyntaxReceiver : ISyntaxContextReceiver
         {
             public List<FieldDeclarationSyntax> CandidateFields = new List<FieldDeclarationSyntax>();
@@ -1233,6 +1234,7 @@ namespace {namespaceName}
             if (!classSymbol.MemberNames.Any(name => "IsPropertyVisibleDirty" == name))
             {
                 source += $@"
+        System.Collections.Generic.HashSet<string> __getPropertiesExceptNames = new System.Collections.Generic.HashSet<string>();
         [System.ComponentModel.Browsable(false)]
         public{(baseHasBindObjectInterface ? " override" : " virtual")} bool IsPropertyVisibleDirty
         {{
@@ -1247,7 +1249,75 @@ namespace {namespaceName}
         {{
             var type = EngineNS.Rtti.TtTypeDesc.TypeOf(this.GetType());
             var pros = System.ComponentModel.TypeDescriptor.GetProperties(this);
-            collection.InitValue(this, type, pros, parentIsValueType);
+
+            __getPropertiesExceptNames.Clear();";
+
+                foreach (var valSymbol in symbols)
+                {
+                    if (valSymbol is IPropertySymbol)
+                    {
+                        var propertySymbol = valSymbol as IPropertySymbol;
+                        if (propertySymbol != null)
+                        {
+                            string conditionStr = "";
+                            int i = 0;
+                            foreach (var att in propertySymbol.GetAttributes())
+                            {
+                                if (att.AttributeClass == null)
+                                    continue;
+                                if (att.AttributeClass.ToDisplayString().Contains(BindingCodeGenerator.mShowWithPropertyAttrName))
+                                {
+                                    var proVal = att.NamedArguments.SingleOrDefault(kvp => kvp.Key == "PropertyValue").Value;
+                                    var proName = att.NamedArguments.SingleOrDefault(kvp => kvp.Key == "PropertyName").Value;
+                                    var valType = att.NamedArguments.SingleOrDefault(kvp => kvp.Key == "ValueType").Value;
+                                    var compareStr = "";
+                                    if(Equals(valType.Value, 1))
+                                    {
+                                        compareStr = "!=";
+                                    }
+                                    else if(Equals(valType.Value, 2))
+                                    {
+                                        compareStr = "<";
+                                    }
+                                    else if(Equals(valType.Value, 3))
+                                    {
+                                        compareStr = "<=";
+                                    }
+                                    else if(Equals(valType.Value, 4))
+                                    {
+                                        compareStr = ">";
+                                    }
+                                    else if(Equals(valType.Value, 5))
+                                    {
+                                        compareStr = ">=";
+                                    }
+                                    else
+                                    {
+                                        compareStr = "==";
+                                    }
+                                    if(i != 0)
+                                    {
+                                        conditionStr += " && ";
+                                    }
+                                    conditionStr += $@"
+                !({proName.Value} {compareStr} ({((proVal.Type == null) ? "" : (proVal.Type.ToDisplayString()))}){proVal.Value})";
+                                    i++;
+                                }
+                            }
+                            if (!string.IsNullOrEmpty(conditionStr))
+                            {
+                                source += $@"
+            if({conditionStr})
+            {{
+                __getPropertiesExceptNames.Add(""{valSymbol.Name}"");
+            }}";
+                            }
+                        }
+                    }
+                }
+                
+                source += $@"
+            collection.InitValue(this, type, pros, parentIsValueType, __getPropertiesExceptNames);
 
             // attached properties
             foreach(var bindData in {bindExprDicName})

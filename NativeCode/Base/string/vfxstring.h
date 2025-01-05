@@ -160,6 +160,10 @@ VNameString
 	{
 		return GetString().c_str();
 	}
+	inline const void* GetStrPtr() const
+	{
+		return GetString().c_str();
+	}
 	const std::string& GetString() const {
 		return VNameStringManager::Get()->GetString(Index);
 	}

@@ -2,10 +2,10 @@
   "profiles": {
     "MainEditor": {
       "commandName": "Project",
-      "commandLineArgs": "config=$(SolutionDir)content\\EngineConfigDX12.jscfg NativeDLL=release",
+      "commandLineArgs": "config=$(SolutionDir)content\\EngineConfigDX12.jscfg NativeDLL=debug",
       "workingDirectory": "$(SolutionDir)binaries",
       "environmentVariables": {
-        "CORECLR_PROFILER_PATH_64": "$(SolutionDir)binaries\\Core.Window.dll",
+        "CORECLR_PROFILER_PATH_64": "$(SolutionDir)binaries\\debug\\Core.Window.dll",
         "CORECLR_ENABLE_PROFILING": "0",
         "CORECLR_PROFILER": "{805A308B-061C-47F3-9B30-F785C3186E81}"
       },

@@ -38,7 +38,7 @@ namespace ProjectCooker
             var cfgFile = TtCookCommand.FindArgument(args, "CookCfg=");
             //var cfgFile = @"F:\titan3d\content\EngineConfigForCook.cfg";
             //EngineNS.UEngine.UGfxDeviceType = typeof(EngineNS.Graphics.Pipeline.UGfxDeviceConsole);
-            var task = EngineNS.TtEngine.StartEngine(new EngineNS.TtEngine(args), cfgFile);
+            var task = EngineNS.TtEngine.StartEngine(new EngineNS.TtEngine(args), cfgFile, false);
 
             var cmd = TtCookCommand.FindArgument(args, "ExeCmd=");
             Action action = async () =>

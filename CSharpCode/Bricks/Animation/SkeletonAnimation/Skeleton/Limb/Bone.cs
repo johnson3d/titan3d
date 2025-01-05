@@ -27,7 +27,7 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton.Limb
         [Rtti.Meta]
         public EngineNS.Quaternion InvQuat { get; set; }
     }
-    class TtBone : IO.BaseSerializer, ILimb
+    public class TtBone : IO.BaseSerializer, ILimb
     {
         public TtBone()
         {

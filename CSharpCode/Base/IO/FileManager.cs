@@ -40,6 +40,7 @@ namespace EngineNS.IO
             Plugin,
             Execute,
             EngineSource,
+            PluginSource,
             GameSource,
             Count,
         }

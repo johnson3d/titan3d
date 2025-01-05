@@ -107,49 +107,10 @@ namespace EngineNS.Rtti
             }
             return src;
         }
-        public static void CopyObject(object tar, object src)
-        {
-            if (tar is System.Collections.IList && src.GetType() == tar.GetType())
-            {
-                var Tarlst = tar as System.Collections.IList;
-                var Srclst = src as System.Collections.IList;
-                Tarlst.Clear();
-                for (int i = 0; i < Srclst.Count; i++)
-                {
-                    Tarlst.Add(CloneProperty(Srclst[i]));
-                }
-                return;
-            }
-            else if (tar is System.Collections.IDictionary && src.GetType() == tar.GetType())
-            {
-                var Tarlst = tar as System.Collections.IDictionary;
-                var Srclst = src as System.Collections.IDictionary;
-                Tarlst.Clear();
-                var i = Srclst.GetEnumerator();
-                while (i.MoveNext())
-                {
-                    Tarlst.Add(CloneProperty(i.Key), CloneProperty(i.Value));
-                }
-                return;
-            }
-
-            var tarType = tar.GetType();
-            var srcType = src.GetType();
-            foreach (var i in src.GetType().GetProperties())
-            {
-                var tarProp = tarType.GetProperty(i.Name);
-                if (tarProp == null)
-                    continue;
-                var srcProp = i;
-                if (tarProp.PropertyType == srcProp.PropertyType && tarProp.CanWrite)
-                {
-                    var v = CloneProperty(srcProp.GetValue(src));
-                    tarProp.SetValue(tar, v);
-                }
-            }
-        }
         public void CopyObjectMetaField(object tar, object src)
         {
+            if (TtEngine.Instance.DataCopyer.DataCopy(tar, src))
+                return;
             if(tar is System.Collections.IList && src.GetType() == tar.GetType())
             {
                 var Tarlst = tar as System.Collections.IList;
@@ -1266,6 +1227,10 @@ namespace EngineNS.Rtti
             get => mMetas;
         }
         Dictionary<Hash64, TtClassMeta> mHashMetas = new Dictionary<Hash64, TtClassMeta>();
+        public Dictionary<Hash64, TtClassMeta> HashMetas
+        {
+            get => mHashMetas;
+        }
 
         public TtTypeTreeManager TreeManager = new TtTypeTreeManager();
         public string MetaRoot;

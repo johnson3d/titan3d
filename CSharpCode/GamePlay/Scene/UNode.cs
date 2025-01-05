@@ -111,7 +111,7 @@ namespace EngineNS.GamePlay.Scene
         {
 
         }
-        public static void NodeTreeCopyData(TtNode tar, TtNode src, ref FTreeCopyStat stat)
+        public static void NodeTreeCopyData(TtWorld world, TtNode tar, TtNode src, ref FTreeCopyStat stat)
         {
             var type = src.GetType();
             if (tar.GetType() != type)
@@ -120,38 +120,15 @@ namespace EngineNS.GamePlay.Scene
                 return;
             }
             stat.SuccessNode++;
-            var props = type.GetProperties();
-            foreach (var prop in props)
-            {
-                if (prop.CanWrite == false)
-                    continue;
-                var attr = prop.GetCustomAttribute<Rtti.TtReflectionAttribute>(true);
-                var needSet = attr != null;
-                if (needSet == false)
-                    continue;
-                if (attr != null && attr.DontSet)
-                    continue;
-                prop.SetValue(tar, prop.GetValue(src));
-            }
-
-            if (src.NodeData != null && tar.NodeData != null)
-            {
-                type = src.NodeData.GetType();
-                props = type.GetProperties();
-                foreach (var prop in props)
-                {
-                    if (prop.CanWrite == false)
-                        continue;
-                    var attr = prop.GetCustomAttribute<Rtti.TtReflectionAttribute>(true);
-                    var needSet = attr != null;
-                    if (needSet == false)
-                        continue;
-                    if (attr != null && attr.DontSet)
-                        continue;
-                    prop.SetValue(tar.NodeData, prop.GetValue(src.NodeData));
-                }
-            }
-
+            TtEngine.Instance.DataCopyer.DataCopy(tar.NodeData, src.NodeData);
+            if (tar.NodeData.Placement != null)
+                tar.NodeData.Placement.HostNode = tar;
+            if (tar.NodeData.BoundVolume != null)
+                tar.NodeData.BoundVolume.HostNode = tar;
+            //TtEngine.Instance.TaskCollector.AddWaitTask(
+            //    tar.InitializeNode(world, tar.NodeData, tar.NodeData.BoundVolume.BVType, tar.Placement.GetType())
+            //    );
+            
             if (tar.Children.Count != src.Children.Count)
             {
                 stat.FailureNode++;
@@ -159,7 +136,7 @@ namespace EngineNS.GamePlay.Scene
             }
             for (int i = 0; i < src.Children.Count; i++)
             {
-                NodeTreeCopyData(tar.Children[i], src.Children[i], ref stat);
+                NodeTreeCopyData(world, tar.Children[i], src.Children[i], ref stat);
             }
             tar.OnNodeCopyTreeData(src, ref stat);
         }
@@ -226,10 +203,6 @@ namespace EngineNS.GamePlay.Scene
                 UpdateAbsTransform();
             }
 
-            if (this.HasStyle(ENodeStyles.NotRegActiveNode) == false)
-            {
-                world.RegActiveNode(this);
-            }
             return true;
         }
 
@@ -268,7 +241,7 @@ namespace EngineNS.GamePlay.Scene
             SceneManaged = (1 << 11),
             Transient = (1 << 12),
             NoTick = (1 << 13),
-            NotRegActiveNode = (1 << 14),
+            NoUsed0 = (1 << 14),
             ForceGatherNode = (1 << 15),
             BuildNavMesh = (1 << 16),
             EnableHitproxyInGame = (1 << 17),
@@ -1236,25 +1209,13 @@ namespace EngineNS.GamePlay.Scene
         public async Thread.Async.TtTask<TtNode> CloneNode(TtWorld world)
         {
             var data = Rtti.TtTypeDescManager.CreateInstance(this.NodeData.GetType()) as TtNodeData;
-            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDesc.TypeOf(this.NodeData.GetType()));
-            meta.CopyObjectMetaField(data, NodeData);
+            //var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDesc.TypeOf(this.NodeData.GetType()));
+            //meta.CopyObjectMetaField(data, NodeData);
+            TtEngine.Instance.DataCopyer.DataCopy(data, NodeData);
             var node = Rtti.TtTypeDescManager.CreateInstance(this.GetType()) as TtNode;
-            EBoundVolumeType bvType = EBoundVolumeType.None;
-            if (data.BoundVolume != null)
-            {
-                var t = data.BoundVolume.GetType();
-                if (t == typeof(UBoxBV))
-                {
-                    bvType = EBoundVolumeType.Box;
-                }
-                else if (t == typeof(USphereBV))
-                {
-                    bvType = EBoundVolumeType.Sphere;
-                }
-            }
             data.BoundVolume.HostNode = node;
             data.Placement.HostNode = node;
-            await node.InitializeNode(world, data, bvType, data.Placement?.GetType());
+            await node.InitializeNode(world, data, data.BoundVolume.BVType, data.Placement?.GetType());
             node.Placement.Position = this.Placement.Position;
             node.Placement.Quat = this.Placement.Quat;
             node.Placement.Scale = this.Placement.Scale;
@@ -1263,6 +1224,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 var cn = await i.CloneNode(world);
                 cn.Parent = node;
+                await cn.OnNodeLoaded(node);
             }
             return node;
         }

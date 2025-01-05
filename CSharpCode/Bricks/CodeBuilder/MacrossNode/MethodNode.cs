@@ -472,7 +472,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 AddPinIn(Self);
             }
 
-            if (!method.ReturnType.IsEqual(typeof(void)))
+            if (method.HasReturnValue())
             {
                 Result = new PinOut();
                 Result.LinkDesc = MacrossStyles.Instance.NewInOutPinDesc();

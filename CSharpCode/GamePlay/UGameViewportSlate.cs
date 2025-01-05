@@ -46,7 +46,7 @@ namespace EngineNS.GamePlay
                 ImGuiAPI.SetNextWindowSize(in GameViewportSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             }
             IsDrawing = false;
-            //ClrLogger.SetMessageBox(bMessageBox);
+            //ClrLogger.SetMessageBox(true);
             //CoreSDK.Print2Console2("aaa", true);
             bool bShow = EGui.UIProxy.DockProxy.BeginMainForm(Title, this, ImGuiWindowFlags_.ImGuiWindowFlags_NoBackground);
             if (bShow)

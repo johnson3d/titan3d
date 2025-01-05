@@ -1657,7 +1657,7 @@ namespace EngineNS.Graphics.Mesh
             return meshBuilder;
         }
 
-        public static unsafe TtMeshDataProvider MakeBezier3DSpline(UBezier3DSpline spline, uint color)
+        public static unsafe TtMeshDataProvider MakeBezier3DSpline(TtBezier3DSpline spline, uint color)
         {
             var meshBuilder = new Graphics.Mesh.TtMeshDataProvider();
             meshBuilder.AssetName = RName.GetRName("@MakeBezier3DSpline", RName.ERNameType.Transient);

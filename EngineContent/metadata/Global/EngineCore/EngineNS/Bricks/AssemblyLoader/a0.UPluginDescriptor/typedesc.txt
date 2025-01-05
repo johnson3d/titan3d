@@ -1,2 +1,0 @@
-EngineCore
-EngineNS.Bricks.AssemblyLoader.UPluginDescriptor@EngineCore

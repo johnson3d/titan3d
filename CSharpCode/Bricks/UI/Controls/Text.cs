@@ -62,7 +62,7 @@ namespace EngineNS.UI.Controls
             {
                 if(mFontAsset == null || mFontDirty)
                 {
-                    mFontAsset = TtEngine.Instance.FontModule.FontManager.GetFontSDF(mFont, mFontSize, mTextureSize.X, mTextureSize.Y);
+                    mFontAsset = TtEngine.Instance.FontModule.FontManager.GetFontSDF(mFont, mTextureSize.X, mTextureSize.Y);
                     mFontDirty = false;
                 }
                 return mFontAsset;
@@ -332,7 +332,7 @@ namespace EngineNS.UI.Controls
                     text += TrimmingText;
                 var drawCmdInsData = new FDrawCmdInstanceData();
                 drawCmdInsData.m_Color = Color;
-                batch.Middleground.AddText(text, x, y, in drawCmdInsData, blobObj);
+                batch.Middleground.AddText(text, x, y, in drawCmdInsData, blobObj, 1.0f);
                 unsafe
                 {
                     using(var reader = IO.TtMemReader.CreateInstance((byte*)blobObj.DataPointer, blobObj.Size))

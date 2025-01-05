@@ -191,12 +191,13 @@ namespace EngineNS.IO
                     }
                     try
                     {
-                        if (i.PropInfo.CanWrite && value != null)
+                        //if (i.PropInfo.CanWrite && value != null)
+                        if (i.PropInfo.CanWrite)
                         {
                             i.PropInfo.SetValue(obj, value);
                             obj.OnPropertyRead(ar.Tag, i.PropInfo, false);
                         }
-                        else if (i.PropInfo.CanWrite == false && value != null)
+                        else if (i.PropInfo.PropertyType.IsValueType == false && i.PropInfo.CanWrite == false && value != null)
                         {
                             var target = i.PropInfo.GetValue(obj, null);
                             if (target != null)

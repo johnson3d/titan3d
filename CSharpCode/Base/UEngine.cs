@@ -190,6 +190,12 @@ namespace EngineNS
         [Rtti.Meta]
         [Category("Option")]
         public RName EditorFont { get; set; }
+        [Rtti.Meta]
+        [Category("Option")]
+        public RName EditorSmallFont { get; set; }
+        [Rtti.Meta]
+        [Category("Option")]
+        public RName EditorEffectFont { get; set; }
         public string EditorLanguage { get; set; } = "English";
         [Rtti.Meta]
         [Category("Option")]
@@ -277,19 +283,19 @@ namespace EngineNS
         {
             get;
         } = new Profiler.TtNativeMemory();
-        public static void OnlyInitTypes(TtEngine engine, string cfgFile)
+        public static void OnlyInitTypes(TtEngine engine, string cfgFile, bool bNatvieMemory)
         {
             mInstance = engine;
             engine.Config = new TtEngineConfig();
-            engine.InitTypes(cfgFile);
+            engine.InitTypes(cfgFile, bNatvieMemory);
         }
-        public static async System.Threading.Tasks.Task<bool> StartEngine(TtEngine engine, string cfgFile)
+        public static async System.Threading.Tasks.Task<bool> StartEngine(TtEngine engine, string cfgFile, bool bNatvieMemory)
         {
             System.Threading.Thread.CurrentThread.Name = "Main";
             mInstance = engine;
             engine.Config = new TtEngineConfig();
 
-            return await mInstance.PreInitEngine(cfgFile);
+            return await mInstance.PreInitEngine(cfgFile, bNatvieMemory);
         }
         #region callback
         private static unsafe void NativeAssertEvent(void* arg0, void* arg1, int arg2)
@@ -310,8 +316,24 @@ namespace EngineNS
         }
         private static CoreSDK.FDelegate_FOnGpuDeviceRemoved OnGpuDeviceRemoved = NativeOnGpuDeviceRemoved;
         #endregion
-        public void InitTypes(string cfgFile)
+
+        public bool IsCLRProfiling = false;
+        public void InitTypes(string cfgFile, bool bNatvieMemory)
         {
+            var clrMgr = CoreCLRManager.GetInstance();
+            clrMgr.PauseLog = true;
+            clrMgr.Flags = 0xffffffff;//(uint)((1 << (int)EClrLogStringType.ObjectAlloc) | (1 << (int)EClrLogStringType.ObjectsAllocdByClass));
+            clrMgr.IsCacheClassLoadFinished = false;
+
+            IsCLRProfiling = false;
+            int IsProfiling = 0;
+            var ev1 = Environment.GetEnvironmentVariable("CORECLR_ENABLE_PROFILING");
+            if (ev1 != null)
+            {
+                IsProfiling = int.Parse(ev1);
+                IsCLRProfiling = IsProfiling == 1 ? true : false;
+            }
+
             var t1 = Support.TtTime.HighPrecision_GetTickCount();
             var byteorder = CoreSDK.IsLittleEndian() ? "Little" : "Big";
             Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info,
@@ -321,7 +343,10 @@ namespace EngineNS
 
             CoreSDK.SetAssertEvent(OnNativeAssertEvent);
             CoreSDK.InitF2MManager();
-            NativeMemory.BeginProfiler();
+            if (IsCLRProfiling == false && bNatvieMemory)
+            {
+                NativeMemory.BeginProfiler();
+            }
 
             //EngineNS.Rtti.TtTypeDescManager.Instance.InitTypes();
             EngineNS.Rtti.TtTypeDescManager.Instance.InitAssembly("System.Private.CoreLib");
@@ -340,7 +365,7 @@ namespace EngineNS
             var t4 = Support.TtTime.HighPrecision_GetTickCount();
 
             if (cfgFile == null)
-                cfgFile = FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) + "EngineConfig.cfg";
+                cfgFile = FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) + "EngineConfigDX11.jscfg";
             Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Load Application Config:{cfgFile}");
 
             if (IO.TtFileManager.GetExtName(cfgFile) == ".cfg")
@@ -362,10 +387,10 @@ namespace EngineNS
             }
         }
         
-        public async System.Threading.Tasks.Task<bool> PreInitEngine(string cfgFile)
+        public async System.Threading.Tasks.Task<bool> PreInitEngine(string cfgFile, bool bNatvieMemory)
         {
             var t1 = Support.TtTime.HighPrecision_GetTickCount();
-            InitTypes(cfgFile);
+            InitTypes(cfgFile, bNatvieMemory);
 
             EngineNS.UCs2CppBase.InitializeNativeCoreProvider();
 
@@ -450,9 +475,11 @@ namespace EngineNS
 
             this.PluginModuleManager.InitPlugins(this);
 
+            var ModuleStart = Support.TtTime.HighPrecision_GetTickCount();
             GatherModules();
-
             await base.InitializeModules();
+            var ModuleEnd = Support.TtTime.HighPrecision_GetTickCount();
+            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"InitModule:{(ModuleEnd - ModuleStart) / 1000} ms");
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             if (Config.DoUnitTest)
@@ -463,7 +490,10 @@ namespace EngineNS
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Unit Test:{(t3 - t2) / 1000} ms");
             }
 
+            var InitPreIntegratedDFStart = Support.TtTime.HighPrecision_GetTickCount();
             InitPreIntegratedDF();
+            var InitPreIntegratedEnd = Support.TtTime.HighPrecision_GetTickCount();
+            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"InitPreIntegrated:{(InitPreIntegratedEnd - InitPreIntegratedDFStart) / 1000} ms");
 
             var tEnd = Support.TtTime.HighPrecision_GetTickCount();
             Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Engine PreInit Time:{(tEnd - t1) / 1000} ms");

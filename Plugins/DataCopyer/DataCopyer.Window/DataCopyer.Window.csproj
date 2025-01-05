@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <BaseOutputPath>$(SolutionDir)\binaries\Plugins</BaseOutputPath>
+  </PropertyGroup>
+
+  <Import Project="..\DataCopyer\DataCopyer.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Module\Engine.Window\Engine.Window.csproj" />
+    <ProjectReference Include="..\..\Game\Survivor\Survivor.Window\Survivor.Window.csproj" />
+  </ItemGroup>
+
+</Project>

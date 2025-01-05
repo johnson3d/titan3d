@@ -52,21 +52,6 @@ namespace EngineNS.GamePlay
             await mMemberTickables.InitializeMembers(this);
             return true;
         }
-        public List<TtNode> ActiveNodes { get; } = new List<TtNode>();
-        public void RegActiveNode(TtNode node)
-        {
-            lock (ActiveNodes)
-            {
-                ActiveNodes.Add(node);
-            }
-        }
-        public void ResetActiveNodes()
-        {
-            lock (ActiveNodes)
-            {
-                ActiveNodes.Clear();
-            }
-        }
         internal DVector3 mCameraOffset = DVector3.Zero;
         internal uint CameralOffsetSerialId = 1;
         [Category("Option")]
@@ -575,17 +560,6 @@ namespace EngineNS.GamePlay
                     }
                 }
                 TickNodes.Clear();
-
-                //NodeTickParameters.IsTickChildren = false;
-                //TtEngine.Instance.EventPoster.ParrallelFor(ActiveNodes.Count, static (Index, obj1, obj2) =>
-                //{
-                //    var pThis = (UWorld)obj1;
-                //    pThis.ActiveNodes[Index].TickLogic(pThis.NodeTickParameters);
-                //}, this);
-                //foreach (var i in ActiveNodes)
-                //{
-                //    i.TickLogic(NodeTickParameters);
-                //}
 
                 using (new Profiler.TimeScopeHelper(ScopeTick_After))
                 {

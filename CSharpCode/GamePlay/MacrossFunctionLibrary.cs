@@ -91,12 +91,12 @@ namespace EngineNS.GamePlay
                     System.Diagnostics.Debug.Assert(false);
                 }
             }
-            return await mOriginPrefab.CloneNode(this.PoolManager.World) as TtPrefabNode;
+            return await mOriginPrefab.CloneNode(PoolManager.World) as TtPrefabNode;
         }
         protected override bool OnObjectRelease(TtPrefabNode obj)
         {
             EngineNS.GamePlay.Scene.TtNode.FTreeCopyStat TreeCopyStat = new (); ;
-            TtNode.NodeTreeCopyData(obj, mOriginPrefab, ref TreeCopyStat);
+            TtNode.NodeTreeCopyData(PoolManager.World, obj, mOriginPrefab, ref TreeCopyStat);
             obj.Parent = null;
             return true;
         }

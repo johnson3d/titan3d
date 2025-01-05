@@ -172,7 +172,24 @@ namespace Canvas
 		return mPathStyles.pop();
 	}
 
-	void FCanvasDrawCmdList::AddText(const WCHAR* text, int charCount, float x, float y, const FDrawCmdInstanceData& insData, IBlobObject* pOutCmds)
+	void FCanvasDrawCmdList::PushZOffset(const float* zOffset)
+	{
+		if (zOffset == nullptr)
+			return;
+		mZOffsets.push(*zOffset);
+	}
+	void FCanvasDrawCmdList::PopZOffset()
+	{
+		mZOffsets.pop();
+	}
+	const float* FCanvasDrawCmdList::GetCurrentZOffset() const
+	{
+		if (mZOffsets.empty())
+			return nullptr;
+		return &mZOffsets.top();
+	}
+
+	void FCanvasDrawCmdList::AddText(const WCHAR* text, int charCount, float x, float y, const FDrawCmdInstanceData& insData, IBlobObject* pOutCmds, float scale)
 	{
 		if (charCount == 0)
 		{
@@ -234,6 +251,14 @@ namespace Canvas
 			//ASSERT(word != nullptr);
 			if (word == nullptr)
 				continue;
+
+			if (scale != 1.0f)
+			{
+				vert[0].Pos *= scale;
+				vert[1].Pos *= scale;
+				vert[2].Pos *= scale;
+				vert[3].Pos *= scale;
+			}
 
 			v3dxVector3 vMin(FLT_MAX, FLT_MAX, FLT_MAX), vMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 			for (int vIdx = 0; vIdx < 4; vIdx++)
@@ -357,8 +382,8 @@ namespace Canvas
 				pCmd->PushQuad(vert);
 			}
 			
-			offset.X += word->Advance.X;
-			offset.Y += word->Advance.Y;
+			offset.X += word->Advance.X * scale;
+			offset.Y += word->Advance.Y * scale;
 			//v3dxVector3 advance(word->Advance.x, word->Advance.y, 0.0f);
 			//v3dxVec3TransformCoord(&advance, &advance, &matrix);
 			//offset.x += advance.x;
@@ -470,39 +495,44 @@ namespace Canvas
 		const auto& clip = GetCurrentClipRect();
 		auto matrix = GetCurrentMatrix();
 		auto index = GetCurrentTransformIndex();
+		auto& uvRect = image->Rect;
+		float zOffset = 0;
+		auto tempZOffset = GetCurrentZOffset();
+		if (tempZOffset != nullptr)
+			zOffset = *tempZOffset;
 
 		FColor rgba = color;
 		FCanvasVertex vert[4];
 		auto& v1 = vert[RCN_X0_Y0];
-		v1.Pos.setValue(x, y, 0);
+		v1.Pos.setValue(x, y, zOffset);
 		if (matrix != nullptr)
 			v3dxVec3TransformCoord(&v1.Pos, &v1.Pos, matrix);
 		v1.Color = rgba;
-		v1.UV = image->Rect.Get_X0_Y0();
+		v1.UV = uvRect.Get_X0_Y0();
 		TransformIndexToColor(index, v1.Index);
 
 		auto& v2 = (vert[RCN_X0_Y1]);
-		v2.Pos.setValue(x, y + h, 0);
+		v2.Pos.setValue(x, y + h, zOffset);
 		if (matrix != nullptr)
 			v3dxVec3TransformCoord(&v2.Pos, &v2.Pos, matrix);
 		v2.Color = rgba;
-		v2.UV = image->Rect.Get_X0_Y1();
+		v2.UV = uvRect.Get_X0_Y1();
 		TransformIndexToColor(index, v2.Index);
 
 		auto& v3 = (vert[RCN_X1_Y1]);
-		v3.Pos.setValue(x + w, y + h, 0);
+		v3.Pos.setValue(x + w, y + h, zOffset);
 		if (matrix != nullptr)
 			v3dxVec3TransformCoord(&v3.Pos, &v3.Pos, matrix);
 		v3.Color = rgba;
-		v3.UV = image->Rect.Get_X1_Y1();
+		v3.UV = uvRect.Get_X1_Y1();
 		TransformIndexToColor(index, v3.Index);
 
 		auto& v4 = (vert[RCN_X1_Y0]);
-		v4.Pos.setValue(x + w, y, 0);
+		v4.Pos.setValue(x + w, y, zOffset);
 		if (matrix != nullptr)
 			v3dxVec3TransformCoord(&v4.Pos, &v4.Pos, matrix);
 		v4.Color = rgba;
-		v4.UV = image->Rect.Get_X1_Y0();
+		v4.UV = uvRect.Get_X1_Y0();
 		TransformIndexToColor(index, v4.Index);
 
 		FRectanglef imgRect(x, y, w, h);

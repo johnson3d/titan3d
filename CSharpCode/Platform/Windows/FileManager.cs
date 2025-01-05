@@ -29,6 +29,7 @@ namespace EngineNS.IO
             SetRoot(ERootDir.Cache, root + "cache");
             SetRoot(ERootDir.Plugin, root + $"binaries/Plugins/");
             SetRoot(ERootDir.EngineSource, root);
+            SetRoot(ERootDir.PluginSource, root + "Plugins/");
             SetRoot(ERootDir.GameSource, root);
         }
     }

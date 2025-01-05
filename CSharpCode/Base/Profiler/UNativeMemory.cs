@@ -10,17 +10,14 @@ namespace EngineNS.Profiler
         {
             EndProfiler();
         }
-        public void BeginProfiler()
+        public unsafe void BeginProfiler()
         {
-            unsafe
-            {
-                OnNativeMemAlloc = this.OnNativeMemAllocImpl;
-                CoreSDK.SetMemAllocCallBack(OnNativeMemAlloc);
-                OnNativeMemFree = this.OnNativeMemFreeImpl;
-                CoreSDK.SetMemFreeCallBack(OnNativeMemFree);
-                OnNativeMemLeak = this.OnNativeMemLeakImpl;
-                CoreSDK.SetMemLeakCallBack(OnNativeMemLeak);
-            }
+            OnNativeMemAlloc = this.OnNativeMemAllocImpl;
+            CoreSDK.SetMemAllocCallBack(OnNativeMemAlloc);
+            OnNativeMemFree = this.OnNativeMemFreeImpl;
+            CoreSDK.SetMemFreeCallBack(OnNativeMemFree);
+            OnNativeMemLeak = this.OnNativeMemLeakImpl;
+            CoreSDK.SetMemLeakCallBack(OnNativeMemLeak);
         }
         public void EndProfiler()
         {

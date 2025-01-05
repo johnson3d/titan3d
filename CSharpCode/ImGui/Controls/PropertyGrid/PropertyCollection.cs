@@ -1055,7 +1055,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             }
         }
 
-        public void InitValue(object objIns, Rtti.TtTypeDesc ins, PropertyDescriptorCollection collection, bool parentIsValueType)
+        public void InitValue(object objIns, Rtti.TtTypeDesc ins, PropertyDescriptorCollection collection, bool parentIsValueType, HashSet<string> exceptProNames = null)
         {
             Cleanup();
 
@@ -1074,7 +1074,23 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             for (int i = 0; i < collection.Count; i++)
             {
                 var pro = collection[i];
-                if(notShowBaseTypeProperties)
+                if (exceptProNames != null)
+                {
+                    bool isExcept = false;
+                    foreach(var exceptName in exceptProNames)
+                    {
+                        if (pro.Name == exceptName)
+                        {
+                            isExcept = true;
+                            break;
+                        }
+                    }
+                    if (isExcept)
+                    {
+                        continue;
+                    }
+                }
+                if (notShowBaseTypeProperties)
                 {
                     if (pro.ComponentType != ins.SystemType)
                         continue;

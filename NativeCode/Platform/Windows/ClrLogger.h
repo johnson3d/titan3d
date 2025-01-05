@@ -1,80 +1,99 @@
 #pragma once
-#include "../../base/TypeUtility.h"
+#include "../../base/IUnknown.h"
+#include "../../base/string/vfxstring.h"
+#include "../../base/thread/vfxcritical.h"
+#include <cor.h>
+#include <corprof.h>
+#include <string>
 
+class CoreProfiler;
 enum TR_ENUM(SV_EnumNoFlags=true)
 	EClrLogStringType
 {
-	ObjectAlloc,
+	ObjectAlloc = 1,
 	ObjectsAllocdByClass,
 	GCStart,
 	GCFinish,
-};
-
-class TR_CLASS(SV_LayoutStruct = 8)
-ClrString
-{
-public:
-	char mString[1024];
-	int mSize;
-	EClrLogStringType mType;
-
-	ClrString(const char* text = "");
-	~ClrString();
-	void SetText(const char* text);
-	void Append(const char* text);
-	void Append(int num);
-	int GetSize() const{
-		return mSize;
-	}
-	const char* GetString() const{
-		return mString;
-	}
+	ObjectReferences,
 };
 
 class TR_CLASS()
-ClrLogger
+	ClrString : public EngineNS::VIUnknown
 {
-	static constexpr int MaxLogInfo = 1024;
-	ClrString		mStrings[MaxLogInfo];
-	int				mBegin;
-	int				mEnd;
 public:
-	ClrLogger();
-	~ClrLogger();
+	std::string mText;
+	EClrLogStringType mType;
+	
+	ClrString(const char* text = "");
+	~ClrString();
+	void SetText(const char* text);
 
-	static void StartClrLogger();
-	static ClrLogger* GetInstance();
-	static void PushLogInfo(EClrLogStringType type, const char* info) {
-		if (GetInstance() != nullptr) {
-			GetInstance()->PushLog(type, info);
-		}
+	const void* GetStringPtr() const{
+		return mText.c_str();
 	}
-	static void PushLogInfo(EClrLogStringType type, const ClrString& info) {
-		if (GetInstance() != nullptr) {
-			GetInstance()->PushLog(type, info.GetString());
-		}
-	}
-	static bool PopLogInfo(ClrString* clrStr) {
-		if (GetInstance() != nullptr) {
-			return GetInstance()->PopLog(clrStr);
-		}
-		return false;
-	}
-	static void StopClrLogger();
+};
 
-	static bool bMessageBox;
-	static void SetMessageBox(bool b) {
+struct TR_CLASS(SV_LayoutStruct = 8)
+	ClrClass
+{
+	ClassID Id;
+	VNameString Name;
+};
+
+class TR_CLASS()
+	CoreCLRManager
+{
+public:
+	static bool IsStart;
+	UINT Flags = 0;
+	bool PauseLog = false;
+	std::queue<ClrString*>		mStrings;
+	VCritical		mLocker;
+	CoreProfiler* CoreProfiler = nullptr;
+public:
+	CoreCLRManager();
+	~CoreCLRManager();
+	void FinalCleanup();
+
+	static void Start();
+	static void Stop();
+	static CoreCLRManager* GetInstance();
+
+	bool bMessageBox;
+	void SetMessageBox(bool b) {
 		bMessageBox = b;
 	}
-	static void ShowMessageBox(const char* info);
+	void ShowMessageBox(const char* info);
 
-	bool IsFull();
-	bool IsEmpty();
-	bool PopLog(ClrString* clrStr);
+	int GetLogNum() const {
+		return (int)mStrings.size();
+	}
 	ClrString* PopLog();
-	TR_FUNCTION(SV_NoStringConverter = true)
-	const char* PopLogText();
-	TR_DISCARD(SV_NoBind = true)
 	void PushLog(EClrLogStringType type, const char* info);
+
+	bool IsCacheClassLoadFinished = false;
+	bool IsObjectRefercenses = false;
+	ClassID ProfileClass = 0;
+	void SetProfileClass(UINT64 kls) {
+		ProfileClass = kls;
+	}
+	
+	std::vector<ClrClass*> CachedClasses;
+	std::map<ClassID, ClrClass*> CachedClassesMap;
+	ClrClass* GetCachedClasse(ClassID classId);
+	void ClassLoadFinished(ClassID classId, HRESULT hrStatus);
+	int GetCachedClassNum() {
+		return (int)CachedClasses.size();
+	}
+	ClrClass** GetCachedClassPtr() {
+		if (CachedClasses.size() == 0)
+			return nullptr;
+		return &CachedClasses[0];
+	}
+private:
+	friend class CoreProfiler;
+	void ObjectReferences(ObjectID objectId, ClassID classId, ULONG cObjectRefs, ObjectID* objectRefIds);
+	void ObjectAllocated(ObjectID objectId, ClassID classId);
+	void ObjectsAllocatedByClass(ULONG cClassCount, ClassID* classIds, ULONG* cObjects);
 };
 

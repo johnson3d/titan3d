@@ -1,6 +1,6 @@
 -  启动编辑器
 - - 调试运行MainEditor工程
-- - 修改启动配置，其中cfg文件可以修改引擎的各种启动参数
+- - 修改启动配置，其中jscfg文件可以修改引擎的各种启动参数
 - - Cache/DynConfigData.dcd文件是一些当前引擎编辑器配置保存文件
 - - - 程序设置配置示例：TtEngine.Instance.DynConfigData.SetConfig("LastPIEName", mCurrentName)
 - - - 程序读取配置示例：var cfgName = TtEngine.Instance.DynConfigData.GetConfig("LastPIEName") as RName;
@@ -9,6 +9,9 @@
 - - - [支持的配置](editor/DynConfig.md)
 - - VS调试配置
 ![启动配置](picture/run_config.png)
+	- 启动一个配置文件，是一个json文件:config=$(SolutionDir)content\EngineConfigDX12.jscfg
+	- 是否调试C++引擎代码:NativeDLL=debug
+	- 是否开启C++内存分析:NativeMem=1
 	- [引擎配置文件](engine/EngineConfig.md)
 -  编辑器总览
 ![总览图](picture/main_edtor.png)

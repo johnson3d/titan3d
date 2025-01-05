@@ -447,6 +447,18 @@ namespace EngineNS
             }
             return result;
         }
+        public static Hash160 Parse(string src)
+        {
+            Hash160 result = new Hash160();
+            var segs = src.Split('_');
+            if (segs.Length != 20)
+                return Hash160.Emtpy;
+            for (int i = 0; i < 20; i++)
+            {
+                result.Data[i] = System.Convert.ToByte(segs[i], 16);//System.Globalization.NumberStyles.HexNumber
+            }
+            return result;
+        }
     }
 
     public struct FHashText : IComparable<FHashText>

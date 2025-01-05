@@ -140,10 +140,13 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
         public static TtLocalSpaceRuntimePose CreateLocalSpaceRuntimePose(AnimatablePose.TtAnimatableSkeletonPose skeletonPose)
         {
             TtLocalSpaceRuntimePose pose = new TtLocalSpaceRuntimePose();
-            for (int i = 0; i < skeletonPose.LimbPoses.Count; ++i)
+            //if(skeletonPose != null)
             {
-                pose.Transforms.Add(skeletonPose.LimbPoses[i].Transtorm);
-                pose.Descs.Add(skeletonPose.LimbPoses[i].Desc);
+                for (int i = 0; i < skeletonPose.LimbPoses.Count; ++i)
+                {
+                    pose.Transforms.Add(skeletonPose.LimbPoses[i].Transtorm);
+                    pose.Descs.Add(skeletonPose.LimbPoses[i].Desc);
+                }
             }
             return pose;
         }
@@ -297,6 +300,8 @@ namespace EngineNS.Animation.SkeletonAnimation.Runtime.Pose
         }
         public static void CopyPose<T>(ref T descPose, T srcPose) where T : IRuntimePose
         {
+            if (srcPose == null)
+                return;
             if (descPose == null)
             {
                 descPose = (T)TtTypeDescManager.CreateInstance(TtTypeDesc.TypeOf<T>());

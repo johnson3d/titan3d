@@ -52,11 +52,14 @@
   "DefaultAuthority": 2,
   "GlobalConfigs": [],
   "EditorFont": "fonts/notosanssc-regular.otf:Engine",
+  "EditorSmallFont": "fonts/Roboto-Bold.ttf:Engine",
+  "EditorEffectFont": "fonts/fa-solid-900.ttf:Engine",
   "EditorLanguage": "English",
   "UIDefaultTexture": "texture/white.srv:Engine",
   "IsWriteShaderDebugFile": false,
   "Plugins": [
     "SourceGit",
+    "DataCopyer",
     "Survivor"
   ],
   "MeshPrimitiveEditorConfig": {

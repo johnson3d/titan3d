@@ -442,14 +442,13 @@ namespace EngineNS.Bricks.Font
         public struct FFontKey : IEquatable<FFontKey>
         {
             public RName Name;
-            public int FontSize;
             public override int GetHashCode()
             {
-                return Name.GetHashCode() + FontSize;
+                return Name.GetHashCode();
             }
             public bool Equals(FFontKey other)
             {
-                return (Name == other.Name) && (FontSize == other.FontSize);
+                return (Name == other.Name);
             }
         }
         public Dictionary<FFontKey, TtFontSDF> CachedFonts = new Dictionary<FFontKey, TtFontSDF>();
@@ -467,11 +466,10 @@ namespace EngineNS.Bricks.Font
             CachedFonts.Clear();
             base.Dispose();
         }
-        public TtFontSDF GetFontSDF(RName font, int fontSize, int texSizeX = -1, int texSizeY = -1)
+        public TtFontSDF GetFontSDF(RName font, int texSizeX = -1, int texSizeY = -1)
         {
             FFontKey key;
             key.Name = font;
-            key.FontSize = fontSize;
             TtFontSDF result;
             if (CachedFonts.TryGetValue(key, out result))
             {
@@ -482,7 +480,7 @@ namespace EngineNS.Bricks.Font
             if (texSizeY < 0)
                 texSizeY = 512;
             var xnd = IO.TtXndHolder.LoadXnd(font.Address);
-            result = new TtFontSDF(this, mCoreObject.CreateFontSDF(font.ToString(),TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, xnd.mCoreObject, fontSize, texSizeX, texSizeY));
+            result = new TtFontSDF(this, mCoreObject.CreateFontSDF(font.ToString(),TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, xnd.mCoreObject, texSizeX, texSizeY));
             result.AssetName = font;
             result.LoadFtFaceFromFile(IO.TtFileManager.GetBaseDirectory(font.Address) + result.mCoreObject.GetSourceFont());
             CachedFonts.Add(key, result);

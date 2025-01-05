@@ -158,41 +158,29 @@ namespace MainEditor
         }
         static WeakReference Main_Impl(string[] args)
         {
-            int IsProfiling = 0;
-            var ev1 = Environment.GetEnvironmentVariable("CORECLR_ENABLE_PROFILING");
-            if (ev1 != null)
-            {
-                IsProfiling = int.Parse(ev1);
-            }
             var cfg = FindArgument(args, "config=");
             Console.WriteLine($"Config={cfg}");
 
-            var task = EngineNS.TtEngine.StartEngine(new EngineNS.TtEngine(args), cfg);
+            bool bNativeMem = true;
+            var nativMem = FindArgument(args, "NativeMem=");
+            if (nativMem != null)
+            {
+                bNativeMem = int.Parse(nativMem) == 1 ? true : false;
+            }
+            Console.WriteLine($"Native Memory Profiler={bNativeMem}");
+
+            var task = EngineNS.TtEngine.StartEngine(new EngineNS.TtEngine(args), cfg, bNativeMem);
             
             while (true)
             {
+                var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.TtMainEditorApplication;
+                if (mainEditor != null)
+                {
+                    mainEditor.mClrProfiler.UpdateLogs();
+                }
                 if (EngineNS.TtEngine.Instance.Tick() == false)
                 {
                     break;
-                }
-                //System.GC.Collect();
-                if (IsProfiling == 1)
-                {
-                    ClrString clrStr = new ClrString();
-                    int num = 0;
-                    var ok = ClrLogger.PopLogInfo(ref clrStr);
-                    while (ok)
-                    {
-                        if (clrStr.mType == EClrLogStringType.ObjectAlloc)
-                        {
-                            num++;
-                            unsafe
-                            {
-                                EngineNS.CoreSDK.Print2Console((sbyte*)&clrStr.m_mString, true);
-                            }
-                        }
-                        ok = ClrLogger.PopLogInfo(ref clrStr);
-                    }
                 }
             }
             

@@ -17,6 +17,10 @@ namespace EngineNS.GamePlay.Scene
         {
             
         }
+        public virtual EBoundVolumeType BVType
+        {
+            get => EBoundVolumeType.None;
+        }
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
             HostNode = tagObject as TtNode;
@@ -63,7 +67,11 @@ namespace EngineNS.GamePlay.Scene
     }
     public class UBoxBV : TtBoundVolume
     {     
-        public Vector3 mExtent = new Vector3(1,1,1);        
+        public Vector3 mExtent = new Vector3(1,1,1);
+        public override EBoundVolumeType BVType
+        {
+            get => EBoundVolumeType.Box;
+        }
         protected override void OnVolumeChanged()
         {
             HostNode.UpdateAABB();
@@ -92,6 +100,10 @@ namespace EngineNS.GamePlay.Scene
                 mRadius = value;
                 OnVolumeChanged();
             }
+        }
+        public override EBoundVolumeType BVType
+        {
+            get => EBoundVolumeType.Sphere;
         }
         protected override void OnVolumeChanged()
         {

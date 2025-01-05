@@ -45,6 +45,22 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             BaseType = baseType;
         }
     }
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
+    public class PGShowWithProperty<T> : Attribute
+    {
+        public T PropertyValue;
+        public string PropertyName;
+        public enum EValueType
+        {
+            Equal           = 0,
+            NotEqual        = 1,
+            LessThan        = 2,
+            LessThanOrEqual = 3,
+            MoreThan        = 4,
+            MoreThanOrEqual = 5,
+        }
+        public EValueType ValueType = EValueType.Equal;
+    }
 
     // Operation when list add, remove or value changed
     public class PGListOperationCallbackAttribute : Attribute

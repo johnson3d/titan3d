@@ -105,6 +105,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameProject", "Module\GameP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MainEditor", "Module\MainEditor\MainEditor.csproj", "{921E9FEA-31DA-4BA4-BD83-19C0C0EBFBD2}"
 	ProjectSection(ProjectDependencies) = postProject
+		{0D705B28-80E5-4095-86FE-6CC5932F9F6C} = {0D705B28-80E5-4095-86FE-6CC5932F9F6C}
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090} = {EBE068CA-AEB6-472C-A671-9FCC99AA1090}
 		{FE535F66-AAA6-4191-96DD-58669DB01DB3} = {FE535F66-AAA6-4191-96DD-58669DB01DB3}
 	EndProjectSection
 EndProject
@@ -481,6 +483,17 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Survivor", "Plugins\Game\Survivor\Survivor.shproj", "{AC72F5A9-3264-4BF8-866B-3ED629010DB4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Survivor.Window", "Plugins\Game\Survivor\Survivor.Window\Survivor.Window.csproj", "{FE535F66-AAA6-4191-96DD-58669DB01DB3}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DataCopyer", "CSharpCode\Bricks\DataCopyer\DataCopyer.shproj", "{65846DA5-E717-450F-BE1A-9F23A017F144}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataCopyer", "DataCopyer", "{7D33F58F-FF5C-4BAD-885E-398DCD456824}"
+	ProjectSection(SolutionItems) = preProject
+		Plugins\DataCopyer\DataCopyer.plugin = Plugins\DataCopyer\DataCopyer.plugin
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataCopyer.Window", "Plugins\DataCopyer\DataCopyer.Window\DataCopyer.Window.csproj", "{EBE068CA-AEB6-472C-A671-9FCC99AA1090}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DataCopyer", "Plugins\DataCopyer\DataCopyer\DataCopyer.shproj", "{493CB882-5C13-4894-9E02-1E2B41A174DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -974,6 +987,24 @@ Global
 		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.Release|x64.Build.0 = Release|Any CPU
 		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.Release|x86.ActiveCfg = Release|Any CPU
 		{FE535F66-AAA6-4191-96DD-58669DB01DB3}.Release|x86.Build.0 = Release|Any CPU
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090}.Debug|x64.Build.0 = Debug|Any CPU
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090}.Debug|x86.Build.0 = Debug|Any CPU
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090}.DebugOnlyCS|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090}.DebugOnlyCS|Any CPU.Build.0 = Debug|Any CPU
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090}.DebugOnlyCS|x64.ActiveCfg = Debug|Any CPU
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090}.DebugOnlyCS|x64.Build.0 = Debug|Any CPU
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090}.DebugOnlyCS|x86.ActiveCfg = Debug|Any CPU
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090}.DebugOnlyCS|x86.Build.0 = Debug|Any CPU
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090}.Release|x64.ActiveCfg = Release|Any CPU
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090}.Release|x64.Build.0 = Release|Any CPU
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090}.Release|x86.ActiveCfg = Release|Any CPU
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1159,6 +1190,10 @@ Global
 		{893908DF-998A-4265-80F5-8899A5DDC813} = {E5CE3791-9C8E-4476-8528-B81DFB5FDDF5}
 		{AC72F5A9-3264-4BF8-866B-3ED629010DB4} = {893908DF-998A-4265-80F5-8899A5DDC813}
 		{FE535F66-AAA6-4191-96DD-58669DB01DB3} = {893908DF-998A-4265-80F5-8899A5DDC813}
+		{65846DA5-E717-450F-BE1A-9F23A017F144} = {B28E2174-4783-47F9-98B2-3C589DE43B04}
+		{7D33F58F-FF5C-4BAD-885E-398DCD456824} = {E5CE3791-9C8E-4476-8528-B81DFB5FDDF5}
+		{EBE068CA-AEB6-472C-A671-9FCC99AA1090} = {7D33F58F-FF5C-4BAD-885E-398DCD456824}
+		{493CB882-5C13-4894-9E02-1E2B41A174DB} = {7D33F58F-FF5C-4BAD-885E-398DCD456824}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}
@@ -1201,6 +1236,7 @@ Global
 		CSharpCode\Bricks\CodeCompiler\CodeCompiler.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\Collision\Collision.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\CSScripting\CSScripting.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
+		CSharpCode\Bricks\DataCopyer\DataCopyer.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\DataSet\DataSet.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\DesignMacross\DesignMacross.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
 		CSharpCode\Bricks\DestinyPX\NxMath\NxMath.projitems*{0d4fc498-20f3-445f-8f8a-43cbe8891938}*SharedItemsImports = 5
@@ -1273,6 +1309,7 @@ Global
 		CSharpCode\Bricks\CodeBuilder\CodeBuilder.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\CodeCompiler\CodeCompiler.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Collision\Collision.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
+		CSharpCode\Bricks\DataCopyer\DataCopyer.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\DataSet\DataSet.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\FBX\FBX.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
 		CSharpCode\Bricks\Font\Font.projitems*{2b57f697-2492-4d3b-859c-7d47e12e6819}*SharedItemsImports = 5
@@ -1325,6 +1362,7 @@ Global
 		NativeCode\Bricks\ImageDecoder\ImageDecoder.vcxitems*{414404d4-3771-482c-9f20-4b962de071b0}*SharedItemsImports = 9
 		NativeCode\Bricks\RecastBuilder\RecastBuilder.vcxitems*{4355e073-1750-445b-81c4-80d9566ea60c}*SharedItemsImports = 9
 		CSharpCode\Bricks\Recast\Recast.projitems*{462207b7-2926-4af3-8dcd-90feb7442b1c}*SharedItemsImports = 13
+		Plugins\DataCopyer\DataCopyer\DataCopyer.projitems*{493cb882-5c13-4894-9e02-1e2b41a174db}*SharedItemsImports = 13
 		NativeCode\Bricks\FBX\FBX.vcxitems*{4bc506a8-c148-4245-9870-dec0e6433aeb}*SharedItemsImports = 9
 		CSharpCode\Rtti\Rtti.projitems*{4d32ea41-561f-43f2-a2bb-d57b217fec2a}*SharedItemsImports = 13
 		NativeCode\Bricks\MeshSimplify\MeshSimplify.vcxitems*{4e5fbab6-aa0d-457f-85d0-636aad36a20e}*SharedItemsImports = 9
@@ -1341,6 +1379,7 @@ Global
 		Plugins\GameServer\Root\RootServer\RootServer.projitems*{5a2456d3-51f6-46ed-8eff-4c16f500f6b5}*SharedItemsImports = 13
 		NativeCode\Bricks\TcpServer\TcpServer.vcxitems*{5b10575b-b34e-4644-8a58-e6ca5b3dbe3f}*SharedItemsImports = 9
 		CSharpCode\Bricks\FX\Skin\Skin.projitems*{5cac7d56-5eb9-4eea-b197-b5f7563101ac}*SharedItemsImports = 13
+		CSharpCode\Bricks\DataCopyer\DataCopyer.projitems*{65846da5-e717-450f-be1a-9f23a017f144}*SharedItemsImports = 13
 		NativeCode\Bricks\DestinyPX\NxMath\NxMath.vcxitems*{66d1bb78-d377-4b8b-964a-b12f946205e6}*SharedItemsImports = 9
 		CSharpCode\Platform\Android\Android.projitems*{696256cb-8710-4790-805b-1f2424bf19cd}*SharedItemsImports = 13
 		CSharpCode\Bricks\Collision\Collision.projitems*{6d4b708f-a316-44e4-8a92-e4fae48c9a70}*SharedItemsImports = 13
@@ -1517,6 +1556,7 @@ Global
 		NativeCode\Bricks\RecastRuntime\RecastRuntime.vcxitems*{e79cfecf-e6c3-423f-8d63-bd4d9425a688}*SharedItemsImports = 9
 		NativeCode\NextRHI\Dx11\Dx11.vcxitems*{e97fbdb3-cc33-4498-b368-a27fd851289a}*SharedItemsImports = 9
 		CSharpCode\Bricks\WorldSimulator\WorldSimulator.projitems*{ebb45312-f4af-4999-8c7f-b73b2a4b09bb}*SharedItemsImports = 13
+		Plugins\DataCopyer\DataCopyer\DataCopyer.projitems*{ebe068ca-aeb6-472c-a671-9fcc99aa1090}*SharedItemsImports = 5
 		3rd\native\EtcLib\EtcLib.vcxitems*{ef01b997-e212-488d-83c0-9f250eb73429}*SharedItemsImports = 9
 		3rd\native\zlib\zlib.vcxitems*{f1dd2a4a-55d2-4799-8cb5-070049e33055}*SharedItemsImports = 9
 		3rd\native\Image.Shared\Image.Shared.vcxitems*{f5bfbfc3-132b-48f3-85e5-63a88a7fc5d0}*SharedItemsImports = 9

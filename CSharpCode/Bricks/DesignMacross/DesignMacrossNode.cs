@@ -51,11 +51,23 @@ namespace EngineNS.DesignMacross
         public override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             NodeData = data;
-            return await base.InitializeNode(world, data, bvType, placementType);
+            var ret = await base.InitializeNode(world, data, bvType, placementType);
+            DesignMacross = DesignMacross;
+            return ret;
         }
         protected override void OnNodeCopyTreeData(TtNode src, ref FTreeCopyStat stat)
         {
+            var g = MacrossGetter?.Get();
+            if (g != null)
+            {
+                g.MacrossNode = null;
+            }
             mMacrossGetter = null;
+        }
+        protected override void OnParentChanged(TtNode prev, TtNode cur)
+        {
+            base.OnParentChanged(prev, cur);
+            //DesignMacross = DesignMacross;
         }
         public override async Thread.Async.TtTask OnNodeLoaded(TtNode parent)
         {
@@ -94,8 +106,11 @@ namespace EngineNS.DesignMacross
                 if (mMacrossGetter.Get() != null)
                 {
                     mMacrossGetter.Get().MacrossNode = this;
-                    var task = mMacrossGetter.Get().Initialize();
-                    TtEngine.Instance.TaskCollector.AddWaitTask(task);
+                    if(Parent != null)
+                    {
+                        var task = mMacrossGetter.Get().Initialize();
+                        TtEngine.Instance.TaskCollector.AddWaitTask(task);
+                    }
                 }
                 else
                 {

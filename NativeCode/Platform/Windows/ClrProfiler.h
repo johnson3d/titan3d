@@ -11,19 +11,27 @@
 #include <atlsafe.h>
 #include <atlcom.h>
 
-class CoreProfilerFactory : public IClassFactory {
+class CoreProfilerFactory : public IClassFactory 
+{
+	std::atomic<unsigned> _refCount{ 1 };
 public:
+	ULONG __stdcall AddRef(void) override
+	{
+		return _refCount++;
+	}
+	ULONG __stdcall Release(void) override
+	{
+		return _refCount--;
+	}
 	// Inherited via IClassFactory
 	HRESULT __stdcall QueryInterface(REFIID riid, void** ppvObject) override;
-	ULONG __stdcall AddRef(void) override;
-	ULONG __stdcall Release(void) override;
 	HRESULT __stdcall CreateInstance(IUnknown* pUnkOuter, REFIID riid, void** ppvObject) override;
 	HRESULT __stdcall LockServer(BOOL fLock) override {
 		return E_NOTIMPL;
 	}
 };
 
-class CoreProfiler : public ICorProfilerCallback8
+class CoreProfiler : public ICorProfilerCallback9
 {
 	std::atomic<unsigned> _refCount{ 1 };
 public:
@@ -124,10 +132,15 @@ public:
 	HRESULT __stdcall ModuleInMemorySymbolsUpdated(ModuleID moduleId) override;
 	HRESULT __stdcall DynamicMethodJITCompilationStarted(FunctionID functionId, BOOL fIsSafeToBlock, LPCBYTE pILHeader, ULONG cbILHeader) override;
 	HRESULT __stdcall DynamicMethodJITCompilationFinished(FunctionID functionId, HRESULT hrStatus, BOOL fIsSafeToBlock) override;
+	HRESULT __stdcall DynamicMethodUnloaded(FunctionID functionId) override;
 
+	ICorProfilerInfo8* GetCorProfilerInfo() {
+		return _info;
+	}
+	std::string GetTypeName(ClassID id) const;
+	std::string GetTypeName(mdTypeDef type, ModuleID module) const;
+	std::string GetMethodName(FunctionID function) const;
 private:
-	const char* GetTypeName(mdTypeDef type, ModuleID module) const;
-	const char* GetMethodName(FunctionID function) const;
 	CComPtr<ICorProfilerInfo8> _info;
 };
 

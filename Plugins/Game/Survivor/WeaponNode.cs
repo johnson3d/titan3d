@@ -1,5 +1,6 @@
-﻿using EngineNS;
+using EngineNS;
 using EngineNS.GamePlay;
+using EngineNS.GamePlay.Character;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.Thread.Async;
@@ -58,6 +59,11 @@ namespace Survivor
 
             //hitcheck, some weapon dont need phy hit
         }
+
+        public virtual void OnBulletHit(TtNode bulletPrefab)
+        {
+
+        }
     }
 
     public class TtWeaponController_Melee : TtWeaponController
@@ -84,7 +90,7 @@ namespace Survivor
         protected void Fire()
         {
             var playerNode = (EngineNS.TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame).GameMode.Player;
-            WeaponNode.Attack(playerNode);
+            WeaponNode.Attack(playerNode, null);
         }
     }
 
@@ -103,7 +109,7 @@ namespace Survivor
                 Element.Placement.Position += Direction * Speed * world.DeltaTimeSecond;
             }
         }
-        List<FSimpleElementController> WeaponPrefabs = new List<FSimpleElementController>();
+        List<FSimpleElementController> BulletPrefabs = new List<FSimpleElementController>();
         public override void Init()
         {
             
@@ -118,20 +124,20 @@ namespace Survivor
                 //fire prefab
                 mCurrentTime = 0;
             }
-            foreach (var weapon in WeaponPrefabs)
+            foreach (var bullet in BulletPrefabs)
             {
-                weapon.Update(world);
-                var distance = Vector3.Distance(weapon.OriginalLocation,
-                    weapon.Element.Placement.AbsTransform.Position.ToSingleVector3());
+                bullet.Update(world);
+                var distance = Vector3.Distance(bullet.OriginalLocation,
+                    bullet.Element.Placement.AbsTransform.Position.ToSingleVector3());
                 if (distance > WeaponData.AttackRange)
                 {
-                    mBeRemoved.Add(weapon);
+                    mBeRemoved.Add(bullet);
                 }
             }
             foreach (var weapon in mBeRemoved)
             {
                 weapon.Element.RemoveFromWorld();
-                WeaponPrefabs.Remove(weapon);
+                BulletPrefabs.Remove(weapon);
                 TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(weapon.Element);
             }
             mBeRemoved.Clear();
@@ -155,7 +161,7 @@ namespace Survivor
                     singleControll.Direction = EngineNS.Quaternion.RotateVector3(WeaponNode.Parent.Placement.Quat, Vector3.Forward);
                     singleControll.OriginalLocation = WeaponNode.Parent.Placement.AbsTransform.Position.ToSingleVector3();
                     WeaponPrefab.Placement.Position = DVector3.Up + singleControll.OriginalLocation;
-                    WeaponPrefabs.Add(singleControll);
+                    BulletPrefabs.Add(singleControll);
                 }
             }
         }
@@ -178,7 +184,7 @@ namespace Survivor
                 Element.Placement.Position += dir * Speed * world.DeltaTimeSecond;
             }
         }
-        List<FNearestElementController> WeaponPrefabs = new List<FNearestElementController>();
+        List<FNearestElementController> BulletPrefabs = new List<FNearestElementController>();
         public override void Init()
         {
 
@@ -193,23 +199,25 @@ namespace Survivor
                 //fire prefab
                 mCurrentTime = 0;
             }
-            foreach (var weapon in WeaponPrefabs)
+            foreach (var bullet in BulletPrefabs)
             {
-                weapon.Update(world);
-                var distance = Vector3.Distance(weapon.Target.Placement.AbsTransform.Position.ToSingleVector3(), weapon.Element.Placement.Position.ToSingleVector3());
-                if (distance <= 0.2f || weapon.Target.Parent == null || weapon.Target.ParentScene == null)
-                {
-                    mBeRemoved.Add(weapon);
-                }
+                bullet.Update(world);
             }
-            foreach (var weapon in mBeRemoved)
-            {
-                weapon.Element.RemoveFromWorld();
-                WeaponPrefabs.Remove(weapon);
-                TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(weapon.Element);
-            }
-            mBeRemoved.Clear();
+            CleanupBullet();
             base.Tick(world);
+        }
+        private void CleanupBullet()
+        {
+            lock(mBeRemoved)
+            {
+                foreach (var weapon in mBeRemoved)
+                {
+                    weapon.Element.RemoveFromWorld();
+                    BulletPrefabs.Remove(weapon);
+                    TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(weapon.Element);
+                }
+                mBeRemoved.Clear();
+            }
         }
         protected void Fire()
         {
@@ -217,23 +225,36 @@ namespace Survivor
             if(nearestNode == null) 
                 return;
 
-
-            var weaponPrefabName = RName.ParseFrom(WeaponData.Shape);
-            if(weaponPrefabName != null)
+            var bulletPrefabName = RName.ParseFrom(WeaponData.Shape);
+            if(bulletPrefabName != null)
             {
-                var WeaponPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape));
-                if (WeaponPrefab != null)
+                var bulletPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape));
+                if (bulletPrefab != null)
                 {
-                    WeaponPrefab.Parent = WeaponNode.Parent.Parent;
-                    var proxyNode = WeaponPrefab.FindFirstChild<TtWeaponProxyNode>() as TtWeaponProxyNode;
+                    bulletPrefab.Parent = WeaponNode.Parent.Parent;
+                    var proxyNode = bulletPrefab.FindFirstChild<TtWeaponProxyNode>() as TtWeaponProxyNode;
                     proxyNode.WeaponNode = WeaponNode;
 
                     var controller = new FNearestElementController();
-                    controller.Element = WeaponPrefab;
+                    controller.Element = bulletPrefab;
                     controller.Speed = WeaponNode.RoleData.ProjectileSpeed;
                     controller.Target = nearestNode;
-                    WeaponPrefab.Placement.Position = DVector3.Up + WeaponNode.Parent.Placement.AbsTransform.Position.ToSingleVector3();
-                    WeaponPrefabs.Add(controller);
+                    var character = WeaponNode.Parent.FindFirstChild<TtCharacter>();
+                    if(character != null)
+                    {
+                        bulletPrefab.Placement.Position = DVector3.Up + character.Placement.AbsTransform.Position.ToSingleVector3();
+                        BulletPrefabs.Add(controller);
+                    }
+                }
+            }
+        }
+        public override void OnBulletHit(TtNode bulletPrefab)
+        {
+            foreach (var bullet in BulletPrefabs)
+            {
+                if (bullet.Element == bulletPrefab)
+                {
+                    mBeRemoved.Add(bullet);
                 }
             }
         }
@@ -267,54 +288,7 @@ namespace Survivor
     //朝向玩家最后移动方向发射n枚飞行道具，碰到怪物造成伤害。根据击穿数量判断伤害数量
     public class TtWeaponController_Back : TtWeaponController
     {
-        List<TtPrefabNode> WeaponPrefabs = new List<TtPrefabNode>();
-        public override void Init()
-        {
-
-        }
-        List<TtPrefabNode> mBeRemoved = new List<TtPrefabNode>();
-        public override void Tick(TtWorld world)
-        {
-            mCurrentTime += world.DeltaTimeSecond;
-            if (mCurrentTime > WeaponData.CoolDown)
-            {
-                Fire();
-                //fire prefab
-                mCurrentTime = 0;
-            }
-            foreach (var weapon in WeaponPrefabs)
-            {
-                var dir = EngineNS.Quaternion.RotateVector3(WeaponNode.Parent.Placement.Quat, Vector3.Forward);
-                weapon.Placement.Position += dir * WeaponData.ProjectileSpeed * world.TimeSecond;
-                var distance = Vector3.Distance(Vector3.Zero, weapon.Placement.Position.ToSingleVector3());
-                if (distance > WeaponData.AttackRange)
-                {
-                    mBeRemoved.Add(weapon);
-                }
-            }
-            foreach (var weapon in mBeRemoved)
-            {
-                weapon.Parent = null;
-                WeaponPrefabs.Remove(weapon);
-                TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(weapon);
-            }
-            mBeRemoved.Clear();
-            base.Tick(world);
-        }
-        protected void Fire()
-        {
-            var weaponPrefabName = RName.ParseFrom(WeaponData.Shape);
-            if (weaponPrefabName != null)
-            {
-                var WeaponPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape));
-                if (WeaponPrefab != null)
-                {
-                    WeaponPrefab.Parent = WeaponNode.Parent;
-                    WeaponPrefab.Placement.Position = DVector3.Up;
-                    WeaponPrefabs.Add(WeaponPrefab);
-                }
-            }
-        }
+        
     }
     //玩家周围形成不间断的保护结界，碰撞怪物后造成伤害
 
@@ -337,7 +311,7 @@ namespace Survivor
         public TtWeaponNode WeaponNode { get; set; } = null;
     }
     //无论角色的武器还是怪物的近远程攻击都算做武器攻击
-    public class TtWeaponNode : EngineNS.GamePlay.Scene.TtSceneActorNode
+    public partial class TtWeaponNode : EngineNS.GamePlay.Scene.TtSceneActorNode
     {
         public class TtWeaponNodeData : EngineNS.GamePlay.Scene.TtNodeData
         {
@@ -388,10 +362,41 @@ namespace Survivor
             mWeaponController.Tick(args.World);
             return base.OnTickLogic(args);
         }
-        public void Attack(TtNode targetNode)
+        [EngineNS.Rtti.Meta]
+        public void Attack(TtNode targetNode, TtNode bulletNode)
         {
+            if(targetNode == this.Parent)
+                return;
+
             var stateNode = targetNode.FindFirstChild<TtStateNode>(null, true) as TtStateNode;
             stateNode.BeAttacked(this);
+            mWeaponController.OnBulletHit(bulletNode);
         }
     }
 }
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace Survivor
+{
+	partial class TtWeaponNode
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_Attack_2680228188 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtWeaponNode->void Attack(TtNode targetNode, TtNode bulletNode)");
+		public unsafe void macross_Attack (string nodeName, TtNode targetNode, TtNode bulletNode) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":targetNode", targetNode);
+					stackframe.SetWatchVariable(nodeName + ":bulletNode", bulletNode);
+				}
+			}
+			Attack(targetNode, bulletNode);
+			macross_break_Attack_2680228188.TryBreak();
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

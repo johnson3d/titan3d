@@ -36,6 +36,11 @@ namespace EngineNS.Bricks.CodeBuilder
         protected string mSegmentStartStr = "";
         protected string mSegmentEndStr = "";
         protected string mIndentStr = "";
+        public byte IntentCount
+        {
+            get => mIndentCount;
+            set => mIndentCount = value;
+        }
         public string CurIndentStr
         {
             get

@@ -112,6 +112,7 @@
   <Import Project="..\..\3rd\csharp\Sprache\Sprache.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\FX\Hair\Hair.projitems" Label="Shared" />
   <Import Project="..\..\CSharpCode\Bricks\FX\Skin\Skin.projitems" Label="Shared" />
+  <Import Project="..\..\CSharpCode\Bricks\DataCopyer\DataCopyer.projitems" Label="Shared" />
   <ItemGroup>
     <Content Remove="C:\Users\johnsonsong\.nuget\packages\microsoft.codeanalysis.workspaces.msbuild\4.11.0\contentFiles\any\any\BuildHost-net472\cs\System.CommandLine.resources.dll" />
     <Content Remove="C:\Users\johnsonsong\.nuget\packages\microsoft.codeanalysis.workspaces.msbuild\4.11.0\contentFiles\any\any\BuildHost-net472\de\System.CommandLine.resources.dll" />

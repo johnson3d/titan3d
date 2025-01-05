@@ -76,14 +76,11 @@ namespace Canvas
 		return true;
 	}
 
-	bool FTFont::Init(const char* name, NxRHI::IGpuDevice* rc, FTFontManager* ftMgr, XndHolder* xnd, int fontSize, int texSizeX, int texSizeY)
+	bool FTFont::Init(const char* name, NxRHI::IGpuDevice* rc, FTFontManager* ftMgr, XndHolder* xnd, int texSizeX, int texSizeY)
 	{
 		mManager.FromObject(ftMgr);
 		mName = name;
-		mFontSize = fontSize;
-		mFTWordAllocator = MakeWeakRef(new FTPagedWordAllocator());
-		mFTWordAllocator->Creator.Initialize(rc, mFontSize, texSizeX, texSizeY);
-
+		
 		{
 			mSdfXnd = xnd;
 			auto attr = mSdfXnd->GetRootNode()->TryGetAttribute("SdfDesc");
@@ -97,6 +94,14 @@ namespace Canvas
 				attr->Read(mSdfPixelColored);
 				attr->EndRead();
 			}
+			else
+			{
+				return false;
+			}
+
+			mFTWordAllocator = MakeWeakRef(new FTPagedWordAllocator());
+			mFTWordAllocator->Creator.Initialize(rc, mFontSize, texSizeX, texSizeY);
+
 			attr = mSdfXnd->GetRootNode()->TryGetAttribute("UniCode");
 			if (attr == nullptr)
 			{
@@ -731,11 +736,11 @@ namespace Canvas
 		Cleanup();
 	}
 
-	FTFont* FTFontManager::CreateFontSDF(const char* name, NxRHI::IGpuDevice* device, XndHolder* xnd, int fontSize, int texSizeX, int texSizeY)
+	FTFont* FTFontManager::CreateFontSDF(const char* name, NxRHI::IGpuDevice* device, XndHolder* xnd, int texSizeX, int texSizeY)
 	{
 		auto font = new FTFont();
 
-		font->Init(name, device, this, xnd, fontSize, texSizeX, texSizeY);
+		font->Init(name, device, this, xnd, texSizeX, texSizeY);
 		//font->AddRef();
 		return font;
 	}

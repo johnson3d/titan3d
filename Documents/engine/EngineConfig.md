@@ -117,47 +117,74 @@
     }
 ```
 - 配置文件
-```XML
-<?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.TtEngineConfig@EngineCore">
-  <IsReverseZ Type="System.Boolean@Unknown" Value="True" />
-	<AdaperId Type="System.Int32@Unknown" Value="-1" />
-	<CompressAstc Type="System.Boolean@Unknown" Value="False" />
-	<CompressDxt Type="System.Boolean@Unknown" Value="True" />
-	<CompressEtc Type="System.Boolean@Unknown" Value="False" />
-	<CookDXBC Type="System.Boolean@Unknown" Value="True" />
-	<CookDXIL Type="System.Boolean@Unknown" Value="True" />
-	<CookGLSL Type="System.Boolean@Unknown" Value="False" />
-	<CookMETAL Type="System.Boolean@Unknown" Value="False" />
-	<CookSPIRV Type="System.Boolean@Unknown" Value="True" />
-	<DefaultAuthority Type="EngineNS.Bricks.Network.RPC.EAuthority@EngineCore" Value="Server" />
-	<DefaultMaterial Type="EngineNS.RName@EngineCore" Value="Engine,material/sysdft.material,8c2e9c64-ae7a-4172-9e64-114a3d36cc40" />
-	<DefaultMaterialInstance Type="EngineNS.RName@EngineCore" Value="Game,tutorials/common/materialinst01.uminst,8348db13-900a-40c8-962f-0a218f2fc8dd" />
-	<DefaultTexture Type="EngineNS.RName@EngineCore" Value="Engine,texture/checkboard.srv,88bb693e-9940-444e-b5c9-a1776d0b93da" />
-	<DoUnitTest Type="System.Boolean@Unknown" Value="True" />
-	<EditorFont Type="EngineNS.RName@EngineCore" Value="Engine,fonts/NotoSansSC-Regular.otf,00000000-0000-0000-0000-000000000000" />
-	<GlobalConfigs Type="System.Collections.Generic.List&lt;EngineNS.TtGlobalConfig@EngineCore,&gt;@Unknown" Count="0" />
-	<Interval Type="System.Int32@Unknown" Value="15" />
-	<MainRPolicyName Type="EngineNS.RName@EngineCore" Value="Engine,graphics/deferred.rpolicy,efdf8adb-02ca-43e6-b536-8c3f3fb0c9da" />
-  <SimpleRPolicyName Type="EngineNS.RName@EngineCore" Value="Engine,graphics/deferred_simple.rpolicy,d7035653-b8cb-456d-86f8-c230b33bbe96" />
-	<MainWindow Type="EngineNS.Vector4@EngineCore" Value="100,100,1280,720" />
-	<MainWindowType Type="System.String@Unknown" Value="EngineNS.Editor.UMainEditorApplication@EngineCore" />
-	<MeshPrimitiveEditorConfig Type="EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig@EngineCore" />
-	<MultiRenderMode Type="EngineNS.EMultiRenderMode@EngineCore" Value="QueueNextFrame" />
-	<NumOfThreadPool Type="System.Int32@Unknown" Value="-1" />
-	<PlayGameName Type="EngineNS.RName@EngineCore" Value="Game,utest/test_game01.macross,bc3c0fba-c5f7-4c79-ad88-7c09531cb90b" />
-	<RHIType Type="EngineNS.NxRHI.ERhiType@EngineCore" Value="RHI_D3D11" />
-	<RootServerURL Type="System.String@Unknown" Value="127.0.0.1:2333" />
-	<RpcRootType Type="System.String@Unknown" Value="EngineNS.UTest.UTest_Rpc@EngineCore" />
-	<SupportMultWindows Type="System.Boolean@Unknown" Value="True" />
-	<IsDebugShader Type="System.Boolean@Unknown" Value="True" />
-	<Feature_UseRVT Type="System.Boolean@Unknown" Value="True" />
-	<UseRenderDoc Type="System.Boolean@Unknown" Value="False" />
-	<IsGpuDump Type="System.Boolean@Unknown" Value="False" />
-	<IsGpuBaseValidation Type="System.Boolean@Unknown" Value="False" />
-	<HasDebugLayer Type="System.Boolean@Unknown" Value="False" />
-  <IsWriteShaderDebugFile Type="System.Boolean@Unknown" Value="False" />
-</Root>
+```Json
+{
+  "IsReverseZ": true,
+  "MultiRenderMode": 2,
+  "UsePhysxMT": true,
+  "UseRenderDoc": true,
+  "Feature_UseRVT": true,
+  "NumOfThreadPool": -1,
+  "IsParrallelWorldGather": true,
+  "Interval": 15,
+  "TargetFps": 66,
+  "DefaultTexture": "texture/checkboard.srv:Engine",
+  "AdaperId": -1,
+  "MainWindow": {
+    "Left": 100,
+    "Top": 100,
+    "Right": 1280,
+    "Bottom": 720,
+    "TopLeft": 100,
+    "TopRight": 100,
+    "BottomRight": 1280,
+    "BottomLeft": 720,
+    "R": 100,
+    "G": 100,
+    "B": 1280,
+    "A": 720
+  },
+  "SupportMultWindows": true,
+  "DoUnitTest": true,
+  "RHIType": "RHI_D3D12",
+  "HasDebugLayer": false,
+  "IsGpuBaseValidation": false,
+  "IsDebugShader": true,
+  "IsGpuDred": false,
+  "IsAftermath": false,
+  "MainWindowType": "EngineNS.Editor.TtMainEditorApplication@EngineCore",
+  "MainRPolicyName": "utest/deferred.rpolicy:Game",
+  "SimpleRPolicyName": "graphics/deferred_simple.rpolicy:Engine",
+  "RpcRootType": "EngineNS.UTest.UTest_Rpc@EngineCore",
+  "CookDXBC": true,
+  "CookDXIL": true,
+  "CookSPIRV": true,
+  "CookGLSL": false,
+  "CookMETAL": false,
+  "CompressDxt": true,
+  "CompressEtc": false,
+  "CompressAstc": false,
+  "DefaultVMS": "mesh/base/box.vms:Engine",
+  "DefaultMaterial": "material/sysdft.material:Engine",
+  "DefaultMaterialInstance": "tutorials/common/materialinst01.uminst:Game",
+  "PlayGameName": "utest/test_game01.macross:Game",
+  "RootServerURL": "127.0.0.1:2333",
+  "DefaultAuthority": 2,
+  "GlobalConfigs": [],
+  "EditorFont": "fonts/notosanssc-regular.otf:Engine",
+  "EditorLanguage": "English",
+  "UIDefaultTexture": "texture/white.srv:Engine",
+  "IsWriteShaderDebugFile": false,
+  "Plugins": [
+    "SourceGit",
+    "DataCopyer",
+    "Survivor"
+  ],
+  "MeshPrimitiveEditorConfig": {
+    "MaterialName": "material/sysdft.material:Engine",
+    "PlaneMaterialName": "material/whitecolor.uminst:Engine"
+  }
+}
 ```
 - - UseRenderDoc：打开RenderDoc
 - - HasDebugLayer：打开渲染Validation

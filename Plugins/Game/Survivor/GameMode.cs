@@ -41,30 +41,7 @@ namespace Survivor
         {
             MonsterManager.LoadDataSet(name);
         }
-        [EngineNS.Rtti.Meta]
-        public void CreateMonster(int monsterId)
-        {
-            var monsterData = new TtMonsterData();
-            EngineNS.TtEngine.Instance.TaskCollector.AddWaitTask(InitMonster(monsterData));
-
-        }
-        private async TtTask InitMonster(TtMonsterData monsterData)
-        {
-            var monsterNode = new TtMonsterNode();
-            var monsterNodeData = new TtMonsterNode.TtMonsterNodeData();
-            //monsterNodeData.MonsterId = monsterData.Weapon1;
-            await monsterNode.InitializeNode(CurrentScene.HostWorld, monsterNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
-            monsterNode.MonsterData = monsterData;
-            monsterNode.Parent = CurrentScene;
-
-            var stateNode = new TtMonsterStateNode();
-            var stateNodeData = new TtMonsterStateNode.TtMonsterStateNodeData();
-            await stateNode.InitializeNode(CurrentScene.HostWorld, stateNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
-            stateNode.Parent = monsterNode;
-            RName monsterName = EngineNS.RName.GetRName("survivor/monsters/barghest/prefab_barghest.prefab", EngineNS.RName.ERNameType.Game);
-            var monsterPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(monsterName);
-            monsterPrefab.Parent = monsterNode;
-        }
+ 
         [EngineNS.Rtti.Meta]
         public void CreateMonsterSpawner()
         {
@@ -93,7 +70,6 @@ namespace Survivor
             var stateNodeData = new TtCharacterStateNode.TtCharacterStateNodeData();
             stateNodeData.RoleData = roleData;
             stateNodeData.CurrentHP = roleData.Health;
-
             await stateNode.InitializeNode(parent.HostWorld, stateNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             stateNode.Parent = parent;
 
@@ -103,7 +79,7 @@ namespace Survivor
                 weaponNodeData.WeaponId = roleData.Weapon1;
                 await weaponNode.InitializeNode(parent.HostWorld, weaponNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
                 weaponNode.RoleData = roleData;
-                weaponNode.Parent = parent;
+                weaponNode.Parent = parent.Parent;
             }
 
             {
@@ -112,7 +88,7 @@ namespace Survivor
                 weaponNodeData.WeaponId = 1002;
                 await weaponNode.InitializeNode(parent.HostWorld, weaponNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
                 weaponNode.RoleData = roleData;
-                weaponNode.Parent = parent;
+                weaponNode.Parent = parent.Parent;
             }
         }
         [EngineNS.Rtti.Meta]
@@ -170,19 +146,6 @@ namespace Survivor
 			}
 			LoadMonsters(name);
 			macross_break_LoadMonsters_2037383663.TryBreak();
-		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_CreateMonster_3242739855 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtGameMode->void CreateMonster(int monsterId)");
-		public unsafe void macross_CreateMonster (string nodeName, int monsterId) 
-		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
-			{
-				if(stackframe != null)
-				{
-					stackframe.SetWatchVariable(nodeName + ":monsterId", monsterId);
-				}
-			}
-			CreateMonster(monsterId);
-			macross_break_CreateMonster_3242739855.TryBreak();
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_CreateMonsterSpawner_2609910045 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtGameMode->void CreateMonsterSpawner()");
 		public unsafe void macross_CreateMonsterSpawner (string nodeName) 

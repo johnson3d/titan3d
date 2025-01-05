@@ -1,4 +1,5 @@
-﻿using EngineNS.EGui.Controls.PropertyGrid;
+﻿using EngineNS.Bricks.Procedure.Node;
+using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.UI.Bind;
 using EngineNS.UI.Canvas;
@@ -132,6 +133,7 @@ namespace EngineNS.UI
             Image,
             Border,
             Rectangle,
+            Pie,
         }
         EBrushType mBrushType = EBrushType.Image;
         [Rtti.Meta, BindProperty]
@@ -248,6 +250,10 @@ namespace EngineNS.UI
         EngineNS.Canvas.FSubDrawCmd mDrawCmd = new EngineNS.Canvas.FSubDrawCmd();
         public void Draw(TtUIElement host, in RectangleF clipRect, in RectangleF drawRect, TtCanvasDrawBatch batch, in Vector4 cornerRadius, in Thickness borderThickness)
         {
+            Draw(host, clipRect, drawRect, batch, cornerRadius, borderThickness, Vector4.Zero);
+        }
+        public void Draw(TtUIElement host, in RectangleF clipRect, in RectangleF drawRect, TtCanvasDrawBatch batch, in Vector4 cornerRadius, in Thickness borderThickness, in Vector4 uv)
+        {
             if (!IsReadyToDraw())
                 return;
 
@@ -269,12 +275,25 @@ namespace EngineNS.UI
                 mDrawBrush.SetSrv(texture);
                 Vector2 uvMin, uvMax;
                 mUVAnimTask.Value.DirectResult.GetUV(0, out uvMin, out uvMax);
+                if (((uv.Z - uv.X) > MathHelper.Epsilon) &&
+                    ((uv.W - uv.Y) > MathHelper.Epsilon))
+                {
+                    uvMin.X += uv.X * (uvMax.X - uvMin.X);
+                    uvMin.Y += uv.Y * (uvMax.Y - uvMin.Y);
+                    uvMax.X -= (1.0f - uv.Z) * (uvMax.X - uvMin.X);
+                    uvMax.Y -= (1.0f - uv.W) * (uvMax.Y - uvMin.Y);
+                }
                 mDrawBrush.SetUV(in uvMin, in uvMax);
                 //mDrawBrush.Name = mUVAnimTask.Value.Result.
             }
             else
             {
                 // default texture
+                if (((uv.Z - uv.X) > MathHelper.Epsilon) &&
+                    ((uv.W - uv.Y) > MathHelper.Epsilon))
+                {
+                    mDrawBrush.SetUV(new Vector2(uv.X, uv.Y), new Vector2(uv.Z, uv.W));
+                }
                 mDrawBrush.SetSrv(mDefaultTextureTask.Value.DirectResult);
             }
             mDrawBrush.Color = Color;

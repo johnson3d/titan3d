@@ -33,7 +33,7 @@ namespace Canvas
 		FTFont();
 		~FTFont();
 		virtual void Cleanup() override;
-		bool Init(const char* name, NxRHI::IGpuDevice * rc, FTFontManager * ftMgr, XndHolder* xnd, int fontSize, int texSizeX, int texSizeY);
+		bool Init(const char* name, NxRHI::IGpuDevice * rc, FTFontManager * ftMgr, XndHolder* xnd, int texSizeX, int texSizeY);
 		bool LoadFtFaceFromFile(FTFontManager* manager, const char* font);
 		bool LoadFtFaceFromBlob(FTFontManager* manager, IBlobObject* blob);
 		bool InitForBuildFont(NxRHI::IGpuDevice* rc, FTFontManager* ftMgr, const char* name, int fontSize, 
@@ -127,7 +127,7 @@ namespace Canvas
 		bool Init();
 		virtual void Cleanup() override;
 
-		FTFont* CreateFontSDF(const char* name, NxRHI::IGpuDevice* device, XndHolder* xnd, int fontSize, int texSizeX, int texSizeY);
+		FTFont* CreateFontSDF(const char* name, NxRHI::IGpuDevice* device, XndHolder* xnd, int texSizeX, int texSizeY);
 	public:
 		FT_Library				mFtlib;
 	};

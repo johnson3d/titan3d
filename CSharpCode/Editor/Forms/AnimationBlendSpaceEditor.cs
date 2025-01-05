@@ -257,7 +257,7 @@ namespace EngineNS.Editor.Forms
                             EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtIdentityPlacement));
         }
         [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-        class TtAnimationBlendSpacePreview
+        public class TtAnimationBlendSpacePreview
         {
             [Browsable(false)]
             public TtAnimationBlendSpaceEditor Editor = null;
@@ -299,7 +299,7 @@ namespace EngineNS.Editor.Forms
             public Vector2 PreviewInput { get; set; } = Vector2.Zero;
         }
 
-        class TtBlendSpaceAnimPreviewNode : GamePlay.Scene.TtLightWeightNodeBase
+        public class TtBlendSpaceAnimPreviewNode : GamePlay.Scene.TtLightWeightNodeBase
         {
             public class TtBlendSpaceAnimPreviewNodeData : TtNodeData
             {

@@ -632,8 +632,8 @@ namespace EngineNS.UI.Editor
                 PreviewViewport.OnDraw();
 
                 var drawList = ImGuiAPI.GetForegroundDrawList();
-                /*/ debug ///////////////////
-                drawList.AddText(pos + new Vector2(0, 50), 0xffffffff, 
+                // debug ///////////////////
+                drawList.AddText(pos + new Vector2(0, 100), 0xffffffff, 
                     $"x:{TtEngine.Instance.UIManager.DebugMousePt.X}\r\n" +
                     $"y:{TtEngine.Instance.UIManager.DebugMousePt.Y}\r\n" +
                     $"px:{TtEngine.Instance.UIManager.DebugHitPt.X}\r\n" +
