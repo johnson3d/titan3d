@@ -29,7 +29,7 @@ namespace EngineNS.Animation.SceneNode
             public bool OverrideAsset { get; set; } = false;
             [Rtti.Meta]
             public List<TtBlendSpace_Axis> Axises { get; set; } = new List<TtBlendSpace_Axis>();
-            [Rtti.Meta]
+            [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
             public List<FBlendSpacePoint> Points { get; set; } = new List<FBlendSpacePoint>();
         }
         public Animation.Player.TtBlendSpace2DPlayer Player { get; set; }

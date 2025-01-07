@@ -300,8 +300,17 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Control
                         {
                             var opPin = data.NodeGraph.GetOppositePin(inPin);
                             var opNode = data.NodeGraph.GetOppositePinNode(inPin);
-                            opNode.BuildStatements(opPin, ref data);
-                            exp = data.NodeGraph.GetOppositePinExpression(inPin, ref data);
+                            if(opPin == null)
+                            {
+                                this.HasError = true;
+                                CodeExcept = new GraphException(this, opPin, "null");
+                                exp = GetNoneLinkedParameterExp(inPin, argIdx, ref data);
+                            }
+                            else
+                            {
+                                opNode.BuildStatements(opPin, ref data);
+                                exp = data.NodeGraph.GetOppositePinExpression(inPin, ref data);
+                            }
                         }
                         else
                             exp = GetNoneLinkedParameterExp(inPin, argIdx, ref data);

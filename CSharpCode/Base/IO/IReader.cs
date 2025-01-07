@@ -16,34 +16,28 @@ namespace EngineNS.IO
 
         All = byte.MaxValue,
     }
-    public interface IReader
-    {
-        object Tag { get; }
-        EIOType IOType
-        {
-            get;
-        }
-        ulong GetPosition();
-        void Seek(ulong pos);
-        unsafe void ReadPtr(void* p, int length);
-        void OnReadError();
-
-        void Read(out ISerializer v, object hostObject);
-        void Read(out string v);
-        void Read(out byte[] v);
-        void Read(out VNameString v);
-        void Read(out RName v);
-        void Read(ref Support.TtBitset v);
-        void Read<T>(out T v) where T : unmanaged;
-        T Read<T>() where T : unmanaged;
-    }
-
     public interface ICoreReader
     {
         EIOType IOType { get; }
         ulong GetPosition();
         void Seek(ulong pos);
         unsafe void ReadPtr(void* p, int length);
+    }
+    public interface IReader : ICoreReader
+    {
+        object Tag { get; }
+        void OnReadError();
+
+        void Read(out ISerializer v, object hostObject);
+        void Read(out string v);
+        void Read(out byte[] v);
+        void Read(out RName v);
+        void Read(out VNameString v);
+        void Read(out Rtti.TtTypeDesc v); 
+        void Read(ref Support.TtBitset v);
+        void Read(out TtMemWriter v);
+        void Read<T>(out T v) where T : unmanaged;
+        T Read<T>() where T : unmanaged;
     }
 
     public struct TtMemReader : IO.ICoreReader, IDisposable
@@ -241,7 +235,12 @@ namespace EngineNS.IO
             v.Seek(len);
             ReadPtr(v.Ptr, (int)len);
         }
-
+        public void Read(out Rtti.TtTypeDesc v)
+        {
+            string typeStr;
+            Read(out typeStr);
+            v = Rtti.TtTypeDesc.TypeOf(typeStr);
+        }
         public void ReadBigSize(out byte[] v)
         {
             unsafe

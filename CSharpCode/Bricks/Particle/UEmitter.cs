@@ -292,7 +292,7 @@ namespace EngineNS.Bricks.Particle
         public float TimerRemain { get; set; } = float.MaxValue;
         [Rtti.Meta]
         public float TimerInterval { get; set; } = float.MaxValue;
-        [Rtti.Meta(ShaderName = "EmitterDataRef[0]")]
+        [Rtti.Meta(ShaderName = "EmitterDataRef[0]", Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public ref FParticleEmitter EmitterDataRef
         {
             get

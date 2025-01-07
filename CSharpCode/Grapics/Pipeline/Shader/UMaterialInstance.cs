@@ -376,12 +376,16 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 if (AssetState == IO.EAssetState.Loading)
                     return;
                 AssetState = IO.EAssetState.Loading;
-                System.Action exec = async () =>
+                var task = TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(value);
+                TtEngine.Instance.TaskCollector.AddWaitTask(task, (tsk) =>
                 {
-                    ParentMaterial = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(value);
+                    ParentMaterial = task.DirectResult;
                     AssetState = IO.EAssetState.LoadFinished;
-                };
-                exec();
+                });
+                //task.WaitCompleted();
+                //ParentMaterial = task.DirectResult;
+                //task.Dispose();
+                //AssetState = IO.EAssetState.LoadFinished;
             }
         }
         TtMaterial mParentMaterial;

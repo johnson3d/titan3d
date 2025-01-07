@@ -10,6 +10,7 @@ namespace EngineNS.Thread.Async
     public interface ITask : IDisposable
     {
         bool IsCompleted { get; }
+        void WaitCompleted();
     }
     public class TtTaskCollector : IDisposable
     {
@@ -345,7 +346,10 @@ namespace EngineNS.Thread.Async
         {
             mTaskData = TtTaskData<T>.CreateInstance();
         }
-
+        public void WaitCompleted()
+        {
+            TtContextThread.CurrentContext.WaitTask(this);
+        }
         public T DirectResult
         {
             get
@@ -624,6 +628,10 @@ namespace EngineNS.Thread.Async
             private set => mTaskData.mException = value;
         }
         public bool IsCompleted => mTaskData.mStatus != ETtTaskStatus.Pending;
+        public void WaitCompleted()
+        {
+            TtContextThread.CurrentContext.WaitTask(this);
+        }
 
         public TtFiberAwaiter GetAwaiter()
         {

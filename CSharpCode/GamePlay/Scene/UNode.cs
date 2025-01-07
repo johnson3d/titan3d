@@ -199,6 +199,12 @@ namespace EngineNS.GamePlay.Scene
 
                     Placement.SetTransform(in FTransform.Identity);
                 }
+                else
+                {
+                    NodeData.Placement.HostNode = this;
+                    if (NodeData.BoundVolume != null)
+                        NodeData.BoundVolume.HostNode = this;
+                }
                 UpdateAABB();
                 UpdateAbsTransform();
             }

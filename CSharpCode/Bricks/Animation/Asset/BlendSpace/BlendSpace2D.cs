@@ -252,7 +252,7 @@ namespace EngineNS.Animation.Asset.BlendSpace
                     if (xnd != null)
                     {
                         var clip = TtBlendSpace2D.LoadXnd(this, xnd);
-                        clip.SaveAssetTo(name);
+                        //clip.SaveAssetTo(name);
                         if (clip == null)
                             return null;
 

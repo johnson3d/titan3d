@@ -231,8 +231,8 @@ namespace EngineNS.Animation.Asset
                 {
                     if (xnd != null)
                     {
-                        var clip = TtAnimationClip.LoadXnd(this, xnd);
-                        clip.SaveAssetTo(name);
+                        var clip = TtAnimationClip.LoadXnd(this, xnd);                            
+                        //clip.SaveAssetTo(name);
                         if (clip == null)
                             return null;
 

@@ -207,6 +207,10 @@ public:
 	}
 	static float         GetWindowDpiScale()
 	{
+		if (nullptr == ImGui::GetCurrentContext())
+		{
+			return 1.0f;
+		}
 		return ImGui::GetWindowDpiScale();
 	}
 	static ImGuiViewport* GetWindowViewport()

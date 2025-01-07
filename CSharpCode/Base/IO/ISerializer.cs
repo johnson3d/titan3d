@@ -150,24 +150,21 @@ namespace EngineNS.IO
                 return true;
             }
         }
+        const uint MemberMagic = 0xcdcdcdcd;
         public static void ReadMember(IReader ar, ISerializer obj, Rtti.TtMetaVersion metaVersion = null)
         {
-#if UseSerializerCodeGen
-            var srName = metaVersion.HostClass.ClassType.SystemType.FullName.Replace("+", "_CIC_") + "_Serializer";
-            //Type.GetType(utilityReader)
-            var utilityReader = Rtti.TtTypeDesc.TypeOfFullName(srName);
-            if(utilityReader!=null)
+            var pos = ar.GetPosition();
+            uint magic = 0;
+            ar.Read(out magic);
+            if (magic == MemberMagic)
             {
-                var call = utilityReader.SystemType.GetField($"mfn_Read_{metaVersion.MetaHash}", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                if (call != null)
-                {
-                    //call.Invoke(null, new object[] { ar, obj });
-                    var dlgt = call.GetValue(null) as EngineNS.IO.SerializerHelper.Delegate_ReadMetaVersion;
-                    dlgt(ar, obj);
-                    return;
-                }
+                Bricks.DataCopyer.TtDataCopyer.ReadMember(ar, obj, metaVersion);
+                return;
             }
-#endif
+            else
+            {
+                ar.Seek(pos);
+            }
             foreach (var i in metaVersion.Propertys)
             {
                 if (i.CustumSerializer != null)
@@ -270,21 +267,29 @@ namespace EngineNS.IO
         }
         public static void WriteMember(IWriter ar, ISerializer obj, Rtti.TtMetaVersion metaVersion)
         {
-            foreach (var i in metaVersion.Propertys)
+            if (true)
             {
-                if (i.PropInfo != null && i.PropInfo.CanRead)
+                ar.Write(MemberMagic);
+                Bricks.DataCopyer.TtDataCopyer.WriteMember(ar, obj, metaVersion);
+            }
+            else
+            {
+                foreach (var i in metaVersion.Propertys)
                 {
-                    if (i.CustumSerializer != null)
+                    if (i.PropInfo != null && i.PropInfo.CanRead)
                     {
-                        i.CustumSerializer.Save(ar, obj, i.PropertyName);
-                        continue;
-                    }
+                        if (i.CustumSerializer != null)
+                        {
+                            i.CustumSerializer.Save(ar, obj, i.PropertyName);
+                            continue;
+                        }
 
-                    var value = i.PropInfo.GetValue(obj, null);
-                    if (value != null)
-                        WriteObject(ar, value.GetType(), value);
-                    else
-                        WriteObject(ar, i.PropInfo.PropertyType, value);
+                        var value = i.PropInfo.GetValue(obj, null);
+                        if (value != null)
+                            WriteObject(ar, value.GetType(), value);
+                        else
+                            WriteObject(ar, i.PropInfo.PropertyType, value);
+                    }
                 }
             }
         }

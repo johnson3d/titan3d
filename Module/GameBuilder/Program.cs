@@ -1,12 +1,16 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using EngineNS;
+using Microsoft.Build.Logging;
 using System.CodeDom.Compiler;
 using System.Xml.Linq;
 using static Org.BouncyCastle.Math.EC.ECCurve;
 
 try
 {
+    var mBin = System.IO.Directory.GetCurrentDirectory();
+    EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/release");
+
     var enginesln = args[0];
     var projectFile = args[1];
     var csFilesPath = args[2];
@@ -17,7 +21,16 @@ try
     var projName = EngineNS.IO.TtFileManager.GetPureName(projectFile);
     var assemblyFile = enginesln + $"binaries\\{dotnet_ver}\\" + projName + ".dll";
 
-    EngineNS.TtEngine.OnlyInitTypes(new EngineNS.TtEngine(args), cfgFile, false);
+    try
+    {
+        EngineNS.TtEngine.OnlyInitTypes(new EngineNS.TtEngine(args), cfgFile, false);
+    }
+    catch (Exception ex)
+    {
+        System.Console.WriteLine($"try debug Core.Window.dll");
+        EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/debug");
+        EngineNS.TtEngine.OnlyInitTypes(new EngineNS.TtEngine(args), cfgFile, false);
+    }
 
     System.Console.WriteLine($"engine sln dir: {enginesln}");
     System.Console.WriteLine($"arg project file: {projectFile}");

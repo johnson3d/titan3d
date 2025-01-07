@@ -134,11 +134,12 @@ namespace ProjectCooker.Command
             for (var t = EngineNS.IO.TtFileManager.ERootDir.Game; t <= EngineNS.IO.TtFileManager.ERootDir.Editor; t++)
             {
                 var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(t);
-                var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + extType, true);
+                var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + extType + ".ameta", true);
                 int procNum = 0;
                 foreach (var i in files)
                 {
-                    var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                    var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i); 
+                    rp = rp.Substring(0, rp.Length - ".ameta".Length);
                     var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                     ameta = EngineNS.TtEngine.Instance.AssetMetaManager.GetAssetMeta(rn);
                     if (ameta == null)
@@ -501,11 +502,12 @@ namespace ProjectCooker.Command
         async System.Threading.Tasks.Task ProcScene()
         {
             var root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Game);
-            var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.GamePlay.Scene.TtScene.AssetExt, true);
+            var files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.GamePlay.Scene.TtScene.AssetExt + ".ameta", true);
             int procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                rp = rp.Substring(0, rp.Length - ".ameta".Length);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Game);
                 var world = new EngineNS.GamePlay.TtWorld(null);
                 await world.InitWorld();
@@ -523,11 +525,12 @@ namespace ProjectCooker.Command
             }
 
             root = EngineNS.TtEngine.Instance.FileManager.GetRoot(EngineNS.IO.TtFileManager.ERootDir.Engine);
-            files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.GamePlay.Scene.TtScene.AssetExt, true);
+            files = EngineNS.IO.TtFileManager.GetFiles(root, "*" + EngineNS.GamePlay.Scene.TtScene.AssetExt + ".ameta", true);
             procNum = 0;
             foreach (var i in files)
             {
                 var rp = EngineNS.IO.TtFileManager.GetRelativePath(root, i);
+                rp = rp.Substring(0, rp.Length - ".ameta".Length);
                 var rn = EngineNS.RName.GetRName(rp, EngineNS.RName.ERNameType.Engine);
                 var world = new EngineNS.GamePlay.TtWorld(null);
                 await world.InitWorld();

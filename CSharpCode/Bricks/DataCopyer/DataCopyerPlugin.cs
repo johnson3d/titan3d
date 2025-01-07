@@ -2,6 +2,8 @@
 using EngineNS.IO;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace EngineNS.Bricks.DataCopyer
@@ -17,21 +19,35 @@ namespace EngineNS.Bricks.DataCopyer
 
         }
         public delegate void FCopy(object tar, object src);
+        public delegate void FWrite(IO.IWriter ar, object obj);
+        public delegate void FReader(IO.IReader ar, object obj);
         public class TtClassCopyer
         {
             public FCopy CurrentVersion;
+            public FWrite Writer;
             public Dictionary<UInt64, FCopy> VersionCopyers = new Dictionary<UInt64, FCopy>();
+            public Dictionary<UInt64, FReader> VersionReaders = new Dictionary<UInt64, FReader>();
             public void RegVersion(UInt64 v, FCopy fn)
             {
                 VersionCopyers[v] = fn;
             }
-            public FCopy FindVersion(UInt64 hash)
+            public void RegVersion(UInt64 v, FReader fn)
+            {
+                VersionReaders[v] = fn;
+            }
+            public FCopy FindCopyerVersion(UInt64 hash)
             {
                 if (hash == 0)
                 {
                     return CurrentVersion;
                 }
                 if (VersionCopyers.TryGetValue(hash, out FCopy fn))
+                    return fn;
+                return null;
+            }
+            public FReader FindReaderVersion(UInt64 hash)
+            {
+                if (VersionReaders.TryGetValue(hash, out FReader fn))
                     return fn;
                 return null;
             }
@@ -50,9 +66,391 @@ namespace EngineNS.Bricks.DataCopyer
         {
             if (ClassCopyer.TryGetValue(typeStr, out var result))
             {
-                return result.FindVersion(version);
+                return result.FindCopyerVersion(version);
             }
             return null;
+        }
+        public FWrite FindWriter(string typeStr)
+        {
+            if (ClassCopyer.TryGetValue(typeStr, out var result))
+            {
+                return result.Writer;
+            }
+            return null;
+        }
+        public FReader FindReader(string typeStr, UInt64 version)
+        {
+            if (ClassCopyer.TryGetValue(typeStr, out var result))
+            {
+                return result.FindReaderVersion(version);
+            }
+            return null;
+        }
+        public static void WriteMember(IO.IWriter ar, object obj, Rtti.TtMetaVersion metaVersion)
+        {
+            foreach (var i in metaVersion.Propertys)
+            {
+                if (i.PropInfo.CanRead == false || i.PropInfo.GetGetMethod().IsStatic)
+                {
+                    continue;
+                }
+                if (i.PropInfo.GetCustomAttribute<Rtti.MetaAttribute>().IsNoSerializable)
+                {
+                    continue;
+                }
+                if (i.CustumSerializer != null)
+                {
+                    i.CustumSerializer.Save(ar, i.PropInfo.GetValue(obj), i.PropertyName);
+                    continue;
+                }
+                WriteObject(ar, i.PropInfo.PropertyType, i.PropInfo.GetValue(obj));
+            }
+        }
+        public static void ReadMember(IO.IReader ar, object obj, Rtti.TtMetaVersion metaVersion = null)
+        {
+            foreach (var i in metaVersion.Propertys)
+            {
+                if (i.PropInfo.CanRead == false || i.PropInfo.GetGetMethod().IsStatic)
+                {
+                    continue;
+                }
+                if (i.PropInfo.GetCustomAttribute<Rtti.MetaAttribute>().IsNoSerializable)
+                {
+                    continue;
+                }
+                if (i.CustumSerializer != null)
+                {
+                    var value = i.CustumSerializer.Load(ar, obj, i.PropertyName);
+                    if (i.PropInfo.CanWrite)
+                    {
+                        i.PropInfo.SetValue(obj, value);
+                        if (obj is IO.ISerializer sr)
+                            sr.OnPropertyRead(ar.Tag, i.PropInfo, false);
+                    }
+                }
+                else
+                {
+                    if (IsPrimitiveType(i.PropInfo.PropertyType))
+                    {
+                        var value = ReadObject(ar, i.PropInfo.PropertyType, obj, null);
+                        if (i.PropInfo.CanWrite)
+                        {
+                            i.PropInfo.SetValue(obj, value);
+                            if (obj is IO.ISerializer sr)
+                                sr.OnPropertyRead(ar.Tag, i.PropInfo, false);
+                        }
+                    }
+                    else
+                    {
+                        var value = i.PropInfo.GetValue(obj);
+                        if (value == null)
+                        {
+                            value = ReadObject(ar, i.PropInfo.PropertyType, obj, null);
+                            if (i.PropInfo.CanWrite)
+                            {
+                                i.PropInfo.SetValue(obj, value);
+                                if (obj is IO.ISerializer sr)
+                                    sr.OnPropertyRead(ar.Tag, i.PropInfo, false);
+                            }
+                        }
+                        else
+                        {
+                            ReadObject(ar, i.PropInfo.PropertyType, obj, value);
+                            if (i.PropInfo.CanWrite)
+                            {
+                                i.PropInfo.SetValue(obj, value);
+                                if (obj is IO.ISerializer sr)
+                                    sr.OnPropertyRead(ar.Tag, i.PropInfo, false);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        public static unsafe object ReadObject(IReader ar, Type t, object hostObject, object obj)
+        {
+            if (t.IsEnum)
+            {
+                int v;
+                ar.Read(out v);
+                return Enum.ToObject(t, v);
+            }
+            else if (IsUnmanagedType(t))
+            {
+                var size = System.Runtime.InteropServices.Marshal.SizeOf(t);
+                var pBuffer = stackalloc byte[size];
+                ar.ReadPtr(pBuffer, size);
+                return System.Runtime.InteropServices.Marshal.PtrToStructure((IntPtr)pBuffer, t);
+            }
+            else if (t == typeof(string))
+            {
+                string v;
+                ar.Read(out v);
+                return v;
+            }
+            else if (t == typeof(RName))
+            {
+                RName.ERNameType rt;
+                ar.Read(out rt);
+                if (rt == RName.ERNameType.Unkown)
+                    return null;
+                string name;
+                ar.Read(out name);
+                return RName.GetRName(name, rt);
+            }
+            else if (t == typeof(Rtti.TtTypeDesc))
+            {
+                Rtti.TtTypeDesc v;
+                ar.Read(out v);
+                return v;
+            }
+            else if (t == typeof(byte[]))
+            {
+                byte[] v;
+                ar.Read(out v);
+                return v;
+            }
+            else if (t == typeof(Support.TtBitset))
+            {
+                Support.TtBitset v = null;
+                ar.Read(ref v);
+                return v;
+            }
+            else if (t == typeof(TtMemWriter))
+            {
+                TtMemWriter v;
+                ar.Read(out v);
+                return v;
+            }
+            else if (IsMetaType(t))
+            {
+                bool isNull;
+                ar.Read(out isNull);
+                if (isNull)
+                    return null;
+                Hash64 hash;
+                ar.Read(out hash);
+                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(hash);
+                if (meta != null)
+                {
+                    object v;
+                    if (obj != null && obj.GetType() == meta.ClassType.SystemType)
+                        v = obj;
+                    else
+                        v = Rtti.TtTypeDescManager.CreateInstance(meta.ClassType);
+                    Hash64 version;
+                    ar.Read(out version);
+                    var ver = meta.GetMetaVersion(version.AllData);
+                    if (ver != null)
+                        ReadMember(ar, v, ver);
+                    else
+                        System.Diagnostics.Debug.Assert(false);
+                    return v;
+                }
+                return null;
+            }
+            else if (t.IsGenericType && t.GetInterface("IList") != null)
+            {
+                var gt = t.GetGenericArguments()[0];
+                System.Collections.IList v;
+                if (obj != null && obj.GetType() == t)
+                    v = obj as System.Collections.IList;
+                else
+                    v = Rtti.TtTypeDescManager.CreateInstance(t) as System.Collections.IList;
+                int count;
+                ar.Read(out count);
+                v.Clear();
+                for (int i = 0; i < count; i++)
+                {
+                    var m = ReadMetaObject(ar, gt, hostObject, null);
+                    v.Add(m);
+                }
+                return v;
+            }
+            else if (t.IsGenericType && t.GetInterface("IDictionary") != null)
+            {
+                var kt = t.GetGenericArguments()[0];
+                var vt = t.GetGenericArguments()[1];
+                System.Collections.IDictionary v;
+                if (obj != null && obj.GetType() == t)
+                    v = obj as System.Collections.IDictionary;
+                else
+                    v = Rtti.TtTypeDescManager.CreateInstance(t) as System.Collections.IDictionary;
+                int count;
+                ar.Read(out count);
+                v.Clear();
+                for (int i = 0; i < count; i++)
+                {
+                    var rk = ReadMetaObject(ar, kt, hostObject, null);
+                    var rv = ReadMetaObject(ar, vt, hostObject, null);
+                    v[rk] = rv;
+                }
+                return v;
+            }
+            return null;
+        }
+        public static unsafe void WriteObject(IWriter ar, Type t, object obj)
+        {
+            if (t.IsEnum)
+            {
+                var v = System.Convert.ToInt32(obj);
+                ar.Write(v);
+            }
+            else if (IsUnmanagedType(t))
+            {
+                var size = System.Runtime.InteropServices.Marshal.SizeOf(t);
+                var pBuffer = stackalloc byte[size];
+                System.Runtime.InteropServices.Marshal.StructureToPtr(obj, (IntPtr)pBuffer, false);
+                ar.WritePtr(pBuffer, size);
+            }
+            else if (t == typeof(string))
+            {
+                ar.Write((string)obj);
+            }
+            else if (t == typeof(RName))
+            {
+                if (obj == null)
+                {
+                    ar.Write(RName.ERNameType.Unkown);
+                }
+                else
+                {
+                    var rn = (RName)obj;
+                    ar.Write(rn.RNameType);
+                    ar.Write(rn.Name);
+                }
+                //ar.Write((RName)obj);
+            }
+            else if (t == typeof(Rtti.TtTypeDesc))
+            {
+                ar.Write((Rtti.TtTypeDesc)obj);
+            }
+            else if (t == typeof(byte[]))
+            {
+                ar.Write((byte[])obj);
+            }
+            else if (t == typeof(Support.TtBitset))
+            {
+                ar.Write((Support.TtBitset)obj);
+            }
+            else if (t == typeof(TtMemWriter))
+            {
+                ar.Write((TtMemWriter)obj);
+            }
+            else if (IsMetaType(t))
+            {
+                if (obj == null)
+                {
+                    ar.Write(true);
+                }
+                else
+                {
+                    ar.Write(false);
+                    var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDesc.TypeStr(obj.GetType()));
+                    if (meta != null)
+                    {
+                        ar.Write(meta.TypeHash);
+                        ar.Write(meta.CurrentVersion.MetaHash);
+                        WriteMember(ar, obj, meta.CurrentVersion);
+                    }
+                    else
+                    {
+                        ar.Write(Hash64.Empty);
+                    }
+                }
+            }
+            else if (t.IsGenericType && t.GetInterface("IList") != null)
+            {
+                var gt = t.GetGenericArguments()[0];
+                var v = obj as System.Collections.IList;
+                if (v == null)
+                {
+                    ar.Write((int)0);
+                }
+                else
+                {
+                    ar.Write(v.Count);
+                    for (int i = 0; i < v.Count; i++)
+                    {
+                        WriteMetaObject(ar, gt, v[i]);
+                    }
+                }
+            }
+            else if (t.IsGenericType && t.GetInterface("IDictionary") != null)
+            {
+                var kt = t.GetGenericArguments()[0];
+                var vt = t.GetGenericArguments()[1];
+                var v = obj as System.Collections.IDictionary;
+                if (v == null)
+                {
+                    ar.Write((int)0);
+                }
+                else
+                {
+                    ar.Write(v.Count);
+                    System.Collections.IDictionaryEnumerator j = v.GetEnumerator();
+                    while (j.MoveNext())
+                    {
+                        WriteMetaObject(ar, kt, j.Key);
+                        WriteMetaObject(ar, vt, j.Value);
+                    }
+                }
+            }
+            else
+            {
+                System.Diagnostics.Debug.Assert(false);
+            }
+        }
+        private static void WriteMetaObject(IWriter ar, Type kt, object obj)
+        {
+            if (IsPrimitiveType(kt))
+            {
+                WriteObject(ar, kt, obj);
+            }
+            else
+            {
+                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDesc.TypeStr(obj.GetType()));
+                if (meta != null)
+                {
+                    ar.Write(meta.TypeHash);
+                    ar.Write(meta.CurrentVersion.MetaHash);
+                    WriteMember(ar, obj, meta.CurrentVersion);
+                }
+                else
+                {
+                    ar.Write(Hash64.Empty);
+                }
+            }
+        }
+        private static object ReadMetaObject(IReader ar, Type gt, object hostObject, object obj)
+        {
+            if (IsPrimitiveType(gt))
+            {
+                return ReadObject(ar, gt, hostObject, null);
+            }
+            else
+            {
+                Hash64 mh;
+                ar.Read(out mh);
+                var meta = Rtti.TtClassMetaManager.Instance.GetMeta(mh);
+                if (meta != null)
+                {
+                    Hash64 version;
+                    ar.Read(out version);
+                    var ver = meta.GetMetaVersion(version.AllData);
+                    object v;
+                    if (obj != null)
+                        v = obj;
+                    else
+                        v = Rtti.TtTypeDescManager.CreateInstance(meta.ClassType);
+                    ReadMember(ar, v, ver);
+                    return v;
+                }
+                else
+                {
+                    return null;
+                }
+            }
         }
         public abstract Hash160 GetVersionHash();
         public Hash160 CalcVersionHash()
@@ -173,9 +571,11 @@ namespace EngineNS.Bricks.DataCopyer
                                 name = name.Replace('+', '_');
                                 klsCreator.AddLine($"var kls = this.GetClassCopyer(\"{met.ClassMetaName}\");", ref klsCode);
                                 klsCreator.AddLine($"kls.CurrentVersion = {name}.Copy_{met.CurrentVersion.MetaHash};", ref klsCode);
+                                klsCreator.AddLine($"kls.Writer = {name}.WriteCurrentVersion;", ref klsCode);
                                 foreach (var v in met.MetaVersions)
                                 {
                                     klsCreator.AddLine($"kls.RegVersion({v.Key}, {name}.Copy_{v.Key});", ref klsCode);
+                                    klsCreator.AddLine($"kls.RegVersion({v.Key}, {name}.Read_{v.Key});", ref klsCode);
                                 }
                             }
                             klsCreator.PopSegment(ref klsCode);
@@ -192,6 +592,38 @@ namespace EngineNS.Bricks.DataCopyer
 
             return code;
         }
+        private static bool IsUnmanagedType(Type type)
+        {
+            if (type.IsEnum)
+                return true;
+            if (type.IsValueType == false)
+                return false;
+            try
+            {
+                var size = System.Runtime.InteropServices.Marshal.SizeOf(type);
+                return size > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        private static bool IsPrimitiveType(Type type)
+        {
+            bool isValue = IsUnmanagedType(type)|| type == typeof(string) ||
+                type == typeof(RName) || type == typeof(Rtti.TtTypeDesc) ||
+                type == typeof(byte[]) ||
+                type == typeof(Support.TtBitset) ||
+                type == typeof(TtMemWriter);
+            return isValue;
+        }
+        private static bool IsMetaType(Type type)
+        {
+            bool value = type.IsGenericType || type.IsArray ||
+                            type.GetInterface("IList") != null ||
+                            type.GetInterface("IDictionary") != null;
+            return !value;
+        }
         public void GenCode(Rtti.TtClassMeta meta, TtCodeWriter creator, ref string code)
         {
             var vers = meta.MetaVersions.Values.ToList();
@@ -204,124 +636,263 @@ namespace EngineNS.Bricks.DataCopyer
             creator.AddLine($"static class {name}", ref code);
             creator.PushSegment(ref code);
             {
+                GenWriteCurrentVersion(meta, creator, ref code);
+
                 foreach (var i in vers)
                 {
-                    creator.AddLine($"internal static {typeof(FCopy).FullName.Replace('+', '.')} Copy_{i.MetaHash} = (object tar, object src)=>", ref code);
-                    creator.PushSegment(ref code);
-                    {
-                        creator.AddLine($"var tarObj = tar as {meta.ClassType.FullName.Replace('+', '.')};", ref code);
-                        creator.AddLine($"var srcObj = src as {meta.ClassType.FullName.Replace('+', '.')};", ref code);
-                        foreach (var j in i.Propertys)
-                        {
-                            if (j.PropInfo != null && j.PropInfo.CanWrite && j.PropInfo.GetSetMethod() != null && j.PropInfo.GetSetMethod().IsPublic)
-                            {
-                                if (j.PropInfo.PropertyType.IsValueType ||
-                                    j.PropInfo.PropertyType == typeof(string) || 
-                                    j.PropInfo.PropertyType == typeof(RName) ||
-                                    j.PropInfo.PropertyType == typeof(Rtti.TtTypeDesc))
-                                {
-                                    creator.AddLine($"tarObj.{j.PropertyName} = srcObj.{j.PropertyName};", ref code);
-                                }
-                                else
-                                {
-                                    if (j.PropInfo.PropertyType.IsClass &&
-                                        !j.PropInfo.PropertyType.IsGenericType &&
-                                        !j.PropInfo.PropertyType.IsArray &&
-                                        j.PropInfo.PropertyType.GetInterface("IList") == null &&
-                                        j.PropInfo.PropertyType.GetInterface("IDictionary") == null &&
-                                        j.PropInfo.GetGetMethod() != null)
-                                    {
-                                        creator.AddLine($"if (srcObj.{j.PropertyName} != null)", ref code);
-                                        creator.PushSegment(ref code);
-                                        {
-                                            if(j.PropInfo.GetSetMethod() != null)
-                                            {
-                                                if (j.PropInfo.PropertyType.GetConstructor(new Type[0]) != null)
-                                                {
-                                                    creator.AddLine($"if (tarObj.{j.PropertyName} == null || tarObj.{j.PropertyName}.GetType() != srcObj.{j.PropertyName}.GetType())", ref code);
-                                                    creator.PushSegment(ref code);
-                                                    {
-                                                        creator.AddLine($"tarObj.{j.PropertyName} = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.{j.PropertyName}.GetType()) as {j.PropInfo.PropertyType.FullName.Replace('+', '.')};", ref code);
-                                                    }
-                                                    creator.PopSegment(ref code);
-                                                }
-                                            }
-                                                
-                                            creator.AddLine($"if (tarObj.{j.PropertyName} != null)", ref code);
-                                            creator.PushSegment(ref code);
-                                            {
-                                                creator.AddLine($"var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<{j.PropInfo.PropertyType.FullName.Replace('+', '.')}>.TypeDesc.TypeString);", ref code);
-                                                creator.AddLine($"if (fn != null)", ref code);
-                                                creator.PushSegment(ref code);
-                                                {
-                                                    creator.AddLine($"fn(tarObj.{j.PropertyName}, srcObj.{j.PropertyName});", ref code);
-                                                }
-                                                creator.PopSegment(ref code);
-                                            }
-                                            creator.PopSegment(ref code);
-                                        }
-                                        creator.PopSegment(ref code);
-                                        creator.AddLine($"else if (srcObj.{j.PropertyName} == null)", ref code);
-                                        creator.PushSegment(ref code);
-                                        {
-                                            creator.AddLine($"tarObj.{j.PropertyName} = null;", ref code);
-                                        }
-                                        creator.PopSegment(ref code);
-                                    }
-                                    else if (j.PropInfo.PropertyType.IsGenericType && j.PropInfo.PropertyType.GetInterface("IList") != null)
-                                    {
-                                        creator.AddLine($"if (srcObj.{j.PropertyName} != null)", ref code);
-                                        creator.PushSegment(ref code);
-                                        {
-                                            if (j.PropInfo.GetSetMethod() != null)
-                                            {
-                                                if (j.PropInfo.PropertyType.GetConstructor(new Type[0]) != null)
-                                                {
-                                                    creator.AddLine($"if (tarObj.{j.PropertyName} == null)", ref code);
-                                                    creator.PushSegment(ref code);
-                                                    {
-                                                        creator.AddLine($"tarObj.{j.PropertyName} = new();", ref code);
-                                                    }
-                                                    creator.PopSegment(ref code);
-                                                }
-                                            }
+                    GenCopyVersion(meta, creator, ref code, i);
 
-                                            creator.AddLine($"if (tarObj.{j.PropertyName} != null)", ref code);
-                                            creator.PushSegment(ref code);
-                                            {
-                                                var type = j.PropInfo.PropertyType.GetGenericArguments()[0];
-                                                var typeName = type.FullName.Replace('+', '.');
-                                                creator.AddLine($"var Tarlst = tarObj.{j.PropertyName} as System.Collections.Generic.List<{typeName}>;", ref code);
-                                                creator.AddLine($"var Srclst = srcObj.{j.PropertyName} as System.Collections.Generic.List<{typeName}>;", ref code);
-                                                bool isValue = type.IsValueType || type == typeof(string) || type == typeof(RName) || type == typeof(Rtti.TtTypeDesc);
-                                                creator.AddLine($"Tarlst.Clear();", ref code);
-                                                creator.AddLine($"for (int i = 0; i < Srclst.Count; i++)", ref code);
-                                                creator.PushSegment(ref code);
-                                                {
-                                                    if (isValue)
-                                                    {
-                                                        creator.AddLine($"Tarlst.Add(Srclst[i]);", ref code);
-                                                    }
-                                                    else
-                                                    {
-                                                        creator.AddLine($"{typeName} tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as {typeName};", ref code);
-                                                        creator.AddLine($"Tarlst.Add(tmp);", ref code);
-                                                    }
-                                                }
-                                                creator.PopSegment(ref code);
-                                            }
-                                            creator.PopSegment(ref code);
-                                        }
-                                        creator.PopSegment(ref code);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    creator.PopSegment(ref code, true);
+                    GenReadVersion(meta, creator, ref code, i);
                 }
             }
             creator.PopSegment(ref code);
+        }
+
+        public void GenWriteCurrentVersion(Rtti.TtClassMeta meta, TtCodeWriter creator, ref string code)
+        {
+            creator.AddLine($"internal static {typeof(FWrite).FullName.Replace('+', '.')} WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>", ref code);
+            creator.PushSegment(ref code);
+            {
+                creator.AddLine($"var srcObj = obj as {meta.ClassType.FullName.Replace('+', '.')};", ref code);
+                foreach (var j in meta.CurrentVersion.Propertys)
+                {
+                    if (j.PropInfo != null && j.PropInfo.CanRead && j.PropInfo.GetGetMethod() != null && j.PropInfo.GetGetMethod().IsPublic)
+                    {
+                        var attr = j.PropInfo.GetCustomAttribute<Rtti.MetaAttribute>();
+                        if (j.PropInfo.CanRead == false ||
+                            attr.IsNoSerializable ||
+                            j.IsGetStatic)
+                        {
+                            continue;
+                        }
+                        if (IsPrimitiveType(j.PropInfo.PropertyType))
+                        {
+                            creator.AddLine($"ar.Write(srcObj.{j.PropertyName});", ref code);
+                        }
+                        else
+                        {
+                            if (IsMetaType(j.PropInfo.PropertyType))
+                            {
+                                creator.AddLine($"if (srcObj.{j.PropertyName} != null)", ref code);
+                                creator.PushSegment(ref code);
+                                {
+                                    creator.AddLine($"var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(srcObj.{j.PropertyName}.GetType());", ref code);
+                                    creator.AddLine($"var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);", ref code);
+                                    creator.AddLine($"var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);", ref code);
+                                    creator.AddLine($"if (fn != null && meta != null)", ref code);
+                                    creator.PushSegment(ref code);
+                                    {
+                                        creator.AddLine($"ar.Write(false);", ref code);
+                                        creator.AddLine($"ar.Write(EngineNS.Hash64.FromString(typeStr));", ref code);
+                                        creator.AddLine($"ar.Write(meta.CurrentVersion.MetaHash);", ref code);
+                                        creator.AddLine($"fn(ar, srcObj.{j.PropertyName});", ref code);
+                                    }
+                                    creator.PopSegment(ref code);
+                                    creator.AddLine($"else", ref code);
+                                    creator.PushSegment(ref code);
+                                    {
+                                        creator.AddLine($"ar.Write(true);", ref code);
+                                    }
+                                    creator.PopSegment(ref code);
+                                }
+                                creator.PopSegment(ref code);
+                                creator.AddLine($"else", ref code);
+                                creator.PushSegment(ref code);
+                                {
+                                    creator.AddLine($"ar.Write(true);", ref code);
+                                }
+                                creator.PopSegment(ref code);
+                            }
+                            else if (j.PropInfo.PropertyType.IsGenericType && j.PropInfo.PropertyType.GetInterface("IList") != null)
+                            {
+                                creator.AddLine($"if (srcObj.{j.PropertyName} != null)", ref code);
+                                creator.PushSegment(ref code);
+                                {
+                                    Type type = j.PropInfo.PropertyType.GetGenericArguments()[0];
+                                    var typeName = type.FullName.Replace('+', '.');
+                                    creator.AddLine($"var Srclst = srcObj.{j.PropertyName} as System.Collections.Generic.List<{typeName}>;", ref code);
+
+                                    creator.AddLine($"ar.Write(Srclst.Count);", ref code);
+                                    bool isValue = IsPrimitiveType(type);
+                                    creator.AddLine($"for (int i = 0; i < Srclst.Count; i++)", ref code);
+                                    creator.PushSegment(ref code);
+                                    {
+                                        if (isValue)
+                                        {
+                                            creator.AddLine($"ar.Write(Srclst[i]);", ref code);
+                                        }
+                                        else
+                                        {
+                                            creator.AddLine($"if (Srclst[i] != null)", ref code);
+                                            creator.PushSegment(ref code);
+                                            {
+                                                creator.AddLine($"var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());", ref code);
+                                                creator.AddLine($"var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);", ref code);
+                                                creator.AddLine($"var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);", ref code);
+                                                creator.AddLine($"if (fn != null && meta != null)", ref code);
+                                                creator.PushSegment(ref code);
+                                                {
+                                                    creator.AddLine($"ar.Write(EngineNS.Hash64.FromString(typeStr));", ref code);
+                                                    creator.AddLine($"ar.Write(meta.CurrentVersion.MetaHash);", ref code);
+                                                    creator.AddLine($"fn(ar, Srclst[i]);", ref code);
+                                                }
+                                                creator.PopSegment(ref code);
+                                                creator.AddLine($"else", ref code);
+                                                creator.PushSegment(ref code);
+                                                {
+                                                    creator.AddLine($"ar.Write(EngineNS.Hash64.Empty);", ref code);
+                                                }
+                                                creator.PopSegment(ref code);
+                                            }
+                                            creator.PopSegment(ref code);
+                                            creator.AddLine($"else", ref code);
+                                            creator.PushSegment(ref code);
+                                            {
+                                                creator.AddLine($"ar.Write(EngineNS.Hash64.Empty);", ref code);
+                                            }
+                                            creator.PopSegment(ref code);
+                                        }
+                                    }
+                                    creator.PopSegment(ref code);
+                                }
+                                creator.PopSegment(ref code);
+                                creator.AddLine($"else", ref code);
+                                creator.PushSegment(ref code);
+                                {
+                                    creator.AddLine($"ar.Write((int)0);", ref code);
+                                }
+                                creator.PopSegment(ref code);
+                            }
+                        }
+                    }
+                }
+            }
+            creator.PopSegment(ref code, true);
+        }
+        public void GenCopyVersion(Rtti.TtClassMeta meta, TtCodeWriter creator, ref string code, Rtti.TtMetaVersion i)
+        {
+            creator.AddLine($"internal static {typeof(FCopy).FullName.Replace('+', '.')} Copy_{i.MetaHash} = (object tar, object src)=>", ref code);
+            creator.PushSegment(ref code);
+            {
+                creator.AddLine($"var tarObj = tar as {meta.ClassType.FullName.Replace('+', '.')};", ref code);
+                creator.AddLine($"var srcObj = src as {meta.ClassType.FullName.Replace('+', '.')};", ref code);
+                foreach (var j in i.Propertys)
+                {
+                    if (j.PropInfo != null && j.PropInfo.CanWrite && j.PropInfo.GetSetMethod() != null && j.PropInfo.GetSetMethod().IsPublic)
+                    {
+                        if (j.PropInfo.PropertyType.IsValueType ||
+                            j.PropInfo.PropertyType == typeof(string) ||
+                            j.PropInfo.PropertyType == typeof(RName) ||
+                            j.PropInfo.PropertyType == typeof(Rtti.TtTypeDesc))
+                        {
+                            creator.AddLine($"tarObj.{j.PropertyName} = srcObj.{j.PropertyName};", ref code);
+                        }
+                        else
+                        {
+                            if (j.PropInfo.PropertyType.IsClass &&
+                                !j.PropInfo.PropertyType.IsGenericType &&
+                                !j.PropInfo.PropertyType.IsArray &&
+                                j.PropInfo.PropertyType.GetInterface("IList") == null &&
+                                j.PropInfo.PropertyType.GetInterface("IDictionary") == null &&
+                                j.PropInfo.GetGetMethod() != null)
+                            {
+                                creator.AddLine($"if (srcObj.{j.PropertyName} != null)", ref code);
+                                creator.PushSegment(ref code);
+                                {
+                                    if (j.PropInfo.GetSetMethod() != null)
+                                    {
+                                        if (j.PropInfo.PropertyType.GetConstructor(new Type[0]) != null)
+                                        {
+                                            creator.AddLine($"if (tarObj.{j.PropertyName} == null || tarObj.{j.PropertyName}.GetType() != srcObj.{j.PropertyName}.GetType())", ref code);
+                                            creator.PushSegment(ref code);
+                                            {
+                                                creator.AddLine($"tarObj.{j.PropertyName} = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.{j.PropertyName}.GetType()) as {j.PropInfo.PropertyType.FullName.Replace('+', '.')};", ref code);
+                                            }
+                                            creator.PopSegment(ref code);
+                                        }
+                                    }
+
+                                    creator.AddLine($"if (tarObj.{j.PropertyName} != null)", ref code);
+                                    creator.PushSegment(ref code);
+                                    {
+                                        creator.AddLine($"var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<{j.PropInfo.PropertyType.FullName.Replace('+', '.')}>.TypeDesc.TypeString);", ref code);
+                                        creator.AddLine($"if (fn != null)", ref code);
+                                        creator.PushSegment(ref code);
+                                        {
+                                            creator.AddLine($"fn(tarObj.{j.PropertyName}, srcObj.{j.PropertyName});", ref code);
+                                        }
+                                        creator.PopSegment(ref code);
+                                    }
+                                    creator.PopSegment(ref code);
+                                }
+                                creator.PopSegment(ref code);
+                                creator.AddLine($"else if (srcObj.{j.PropertyName} == null)", ref code);
+                                creator.PushSegment(ref code);
+                                {
+                                    creator.AddLine($"tarObj.{j.PropertyName} = null;", ref code);
+                                }
+                                creator.PopSegment(ref code);
+                            }
+                            else if (j.PropInfo.PropertyType.IsGenericType && j.PropInfo.PropertyType.GetInterface("IList") != null)
+                            {
+                                creator.AddLine($"if (srcObj.{j.PropertyName} != null)", ref code);
+                                creator.PushSegment(ref code);
+                                {
+                                    if (j.PropInfo.GetSetMethod() != null)
+                                    {
+                                        if (j.PropInfo.PropertyType.GetConstructor(new Type[0]) != null)
+                                        {
+                                            creator.AddLine($"if (tarObj.{j.PropertyName} == null)", ref code);
+                                            creator.PushSegment(ref code);
+                                            {
+                                                creator.AddLine($"tarObj.{j.PropertyName} = new();", ref code);
+                                            }
+                                            creator.PopSegment(ref code);
+                                        }
+                                    }
+
+                                    creator.AddLine($"if (tarObj.{j.PropertyName} != null)", ref code);
+                                    creator.PushSegment(ref code);
+                                    {
+                                        var type = j.PropInfo.PropertyType.GetGenericArguments()[0];
+                                        string typeName = type.FullName.Replace('+', '.');
+                                        creator.AddLine($"var Tarlst = tarObj.{j.PropertyName} as System.Collections.Generic.List<{typeName}>;", ref code);
+                                        creator.AddLine($"var Srclst = srcObj.{j.PropertyName} as System.Collections.Generic.List<{typeName}>;", ref code);
+                                        bool isValue = type.IsValueType || type == typeof(string) || type == typeof(RName) || type == typeof(Rtti.TtTypeDesc);
+                                        creator.AddLine($"Tarlst.Clear();", ref code);
+                                        creator.AddLine($"for (int i = 0; i < Srclst.Count; i++)", ref code);
+                                        creator.PushSegment(ref code);
+                                        {
+                                            if (isValue)
+                                            {
+                                                creator.AddLine($"Tarlst.Add(Srclst[i]);", ref code);
+                                            }
+                                            else
+                                            {
+                                                creator.AddLine($"{typeName} tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as {typeName};", ref code);
+                                                creator.AddLine($"Tarlst.Add(tmp);", ref code);
+                                            }
+                                        }
+                                        creator.PopSegment(ref code);
+                                    }
+                                    creator.PopSegment(ref code);
+                                }
+                                creator.PopSegment(ref code);
+                            }
+                        }
+                    }
+                }
+            }
+            creator.PopSegment(ref code, true);
+        }
+        public void GenReadVersion(Rtti.TtClassMeta meta, TtCodeWriter creator, ref string code, Rtti.TtMetaVersion i)
+        {
+            creator.AddLine($"internal static {typeof(FReader).FullName.Replace('+', '.')} Read_{i.MetaHash} = (EngineNS.IO.IReader ar, object obj)=>", ref code);
+            creator.PushSegment(ref code);
+            {
+
+            }
+            creator.PopSegment(ref code, true);
         }
     }
 }

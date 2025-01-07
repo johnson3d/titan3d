@@ -17,6 +17,17 @@ namespace ProjectCooker
         static bool IsRun = true;
         static void Main(string[] args)
         {
+            var mBin = System.IO.Directory.GetCurrentDirectory();
+#if DEBUG
+            var cfg = TtCookCommand.FindArgument(args, "NativeDLL=");
+            if (cfg != null && cfg == "debug")
+                EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/debug");
+            else
+                EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/release");
+#else
+            EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/release");
+#endif
+
             var handle = GetConsoleWindow();
             ShowWindow(handle, 1);
 
@@ -123,13 +134,6 @@ namespace ProjectCooker
                             }
                         }
                         return;
-                    case "BuildSerializer":
-                        {
-                            //ExeCmd=BuildSerializer DS_Port=5555 CookCfg=$(SolutionDir)content\EngineConfigForCook.cfg Serializer_Path=$(SolutionDir)codegen\Serializer\Engine 
-                            var exe = new Command.TtBuildSerializer();
-                            await exe.ExecuteCommand(args);
-                        }
-                        break;
                 }
                 EngineNS.TtEngine.Instance.PostQuitMessage();
                 IsRun = false;

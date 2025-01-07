@@ -163,6 +163,30 @@ namespace EngineNS.Thread
                 }
             }
         }
+        public void WaitTask(Thread.Async.ITask task)
+        {
+            var IsMainThread = TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadMain.ThreadId;
+            var t1 = Support.TtTime.HighPrecision_GetTickCount();
+            while (true)
+            {
+                FContextTickableManager.GetInstance().ThreadTick();
+                TickAwaitEvent();
+                if (IsMainThread)
+                {
+                    TtEngine.Instance.ThreadLogic.TickAwaitEvent();
+                }
+                TtEngine.Instance.TaskCollector.Tick();
+                if (task.IsCompleted)
+                {
+                    var t2 = Support.TtTime.HighPrecision_GetTickCount();
+                    if (t2 - t1 > 20000)
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtThreadGategory>(Profiler.ELogTag.Warning, $"WaitTask Time = {(t2 - t1) / 1000} ms");
+                    }
+                    return;
+                }
+            }
+        }
         protected int mThreadId = 0;
         public int ThreadId
         {

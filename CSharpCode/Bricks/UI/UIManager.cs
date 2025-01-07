@@ -17,7 +17,7 @@ namespace EngineNS.UI
     [Rtti.Meta]
     public partial class TtUIAssistFunctions
     {
-        [Rtti.Meta(MacrossDisplayPath = new string[] { "UI", "UIManager" })]
+        [Rtti.Meta(MacrossDisplayPath = new string[] { "UI", "UIManager" }, Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public static TtUIManager UIManager
         {
             get => TtEngine.Instance.UIManager;

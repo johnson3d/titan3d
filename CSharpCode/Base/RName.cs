@@ -156,6 +156,7 @@ namespace EngineNS
             Engine,
             Transient,
             Count,
+            Unkown = ushort.MaxValue,
         }
         ERNameType mRNameType = ERNameType.Game;
 

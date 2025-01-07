@@ -1,6 +1,7 @@
 ﻿using EngineNS;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -84,11 +85,15 @@ namespace MainEditor
             //}
 
             var mBin = System.IO.Directory.GetCurrentDirectory();
+#if DEBUG
             var cfg = FindArgument(args, "NativeDLL=");
             if (cfg != null && cfg == "debug")
                 EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/debug");
             else
                 EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/release");
+#else
+            EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/release");
+#endif
 
             {
                 var ev1 = Environment.GetEnvironmentVariable("CORECLR_ENABLE_PROFILING");

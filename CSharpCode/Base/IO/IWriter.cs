@@ -4,30 +4,6 @@ using System.Text;
 
 namespace EngineNS.IO
 {
-    public interface IWriter
-    {
-        EIOType IOType
-        {
-            get;
-        }
-        unsafe void* Ptr
-        {
-            get;
-        }
-        ulong GetPosition();
-        void Seek(ulong pos);
-        unsafe void WritePtr(void* p, int length);
-
-        void Write(ISerializer v);
-        void Write(string v);
-        void Write(byte[] v);
-        void Write(VNameString v);
-        void Write(RName v);
-        void Write(Support.TtBitset v);
-
-        void Write<T>(T v) where T : unmanaged;
-    }
-
     public interface ICoreWriter
     {
         EIOType IOType { get; }
@@ -35,6 +11,19 @@ namespace EngineNS.IO
         void Seek(ulong pos);
         unsafe void WritePtr(void* p, int length);
         unsafe void* Ptr { get; }
+    }
+
+    public interface IWriter : ICoreWriter
+    {
+        void Write(ISerializer v);
+        void Write(string v);
+        void Write(byte[] v);
+        void Write(VNameString v);
+        void Write(RName v);
+        void Write(Support.TtBitset v);
+        void Write(Rtti.TtTypeDesc v); 
+        void Write<T>(T v) where T : unmanaged;
+        void Write<T>(T v, bool dummy = true) where T : struct;
     }
 
     public partial struct TtMemWriter : IO.ICoreWriter, IDisposable
@@ -155,6 +144,18 @@ namespace EngineNS.IO
                 WritePtr(p, sizeof(T));
             }
         }
+        public void Write<T>(T v, bool dummy = true) where T : struct
+        {
+            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDescGetter<T>.TypeDesc.TypeString);
+            if (meta != null)
+            {
+                Write(meta.TypeHash);
+            }
+            else
+            {
+                Write(Hash64.Empty);
+            }
+        }
         public void Write(string v)
         {
             unsafe
@@ -226,6 +227,10 @@ namespace EngineNS.IO
         {
             Write((uint)v.GetPosition());
             WritePtr(v.Ptr, (int)v.GetPosition());
+        }
+        public void Write(Rtti.TtTypeDesc v)
+        {
+            this.Write(v.TypeString);
         }
     }
 

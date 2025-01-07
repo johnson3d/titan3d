@@ -83,6 +83,12 @@ namespace EngineNS.Rtti
     }
     public class TtClassMeta
     {
+        public Hash64 TypeHash {
+            get
+            {
+                return Hash64.FromString(this.ClassType.TypeString);
+            }
+        }
         public MetaAttribute MetaAttribute { get; private set; }
         private List<TtClassMeta> mSubClasses = null;
         public static object CloneProperty(object src)
