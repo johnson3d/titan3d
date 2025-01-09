@@ -20,7 +20,7 @@ namespace EngineNS.IO
     {
         void OnPreRead(object tagObject, object hostObject, bool fromXml);
         //第一个参数通常传入一个Root一类的对象，用于查找对象关系
-        void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml);
+        void OnPropertyRead(object tagObject, string prop, bool fromXml);
     }
     public partial class BaseSerializer : ISerializer
     {
@@ -28,7 +28,7 @@ namespace EngineNS.IO
         {
 
         }
-        public virtual void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml)
+        public virtual void OnPropertyRead(object tagObject, string prop, bool fromXml)
         {
 
         }
@@ -173,7 +173,7 @@ namespace EngineNS.IO
                     if (i.PropInfo.CanWrite)
                     {
                         i.PropInfo.SetValue(obj, t);
-                        obj.OnPropertyRead(ar.Tag, i.PropInfo, false);
+                        obj.OnPropertyRead(ar.Tag, i.PropInfo.Name, false);
                     }
                     continue;
                 }
@@ -192,7 +192,7 @@ namespace EngineNS.IO
                         if (i.PropInfo.CanWrite)
                         {
                             i.PropInfo.SetValue(obj, value);
-                            obj.OnPropertyRead(ar.Tag, i.PropInfo, false);
+                            obj.OnPropertyRead(ar.Tag, i.PropInfo.Name, false);
                         }
                         else if (i.PropInfo.PropertyType.IsValueType == false && i.PropInfo.CanWrite == false && value != null)
                         {
@@ -200,7 +200,7 @@ namespace EngineNS.IO
                             if (target != null)
                             {
                                 metaVersion.HostClass.CopyObjectMetaField(target, value);
-                                obj.OnPropertyRead(ar.Tag, i.PropInfo, false);
+                                obj.OnPropertyRead(ar.Tag, i.PropInfo.Name, false);
                             }
                         }
                     }
@@ -1173,7 +1173,7 @@ namespace EngineNS.IO
                     if (prop.CanWrite)
                         prop.SetValue(obj, subObject);
                 }
-                (obj as ISerializer)?.OnPropertyRead(paramObject, prop, true);
+                (obj as ISerializer)?.OnPropertyRead(paramObject, prop.Name, true);
             }
         }
 
@@ -1198,7 +1198,7 @@ namespace EngineNS.UTest
         public class TestSubClass : EngineNS.IO.ISerializer
         {
             public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
-            public void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
+            public void OnPropertyRead(object root, string prop, bool fromXml) { }
             [Rtti.Meta]
             public int A { get; set; }
             [Rtti.Meta]
@@ -1262,9 +1262,9 @@ namespace EngineNS.UTest
         public void OnPreRead(object tagObject, object hostObject, bool fromXml)
         {
         }
-        public void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml)
+        public void OnPropertyRead(object root, string prop, bool fromXml)
         {
-            if(prop.Name == nameof(ReadSignal))
+            if(prop == nameof(ReadSignal))
             {
                 return;
             }

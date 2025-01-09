@@ -9,7 +9,7 @@ namespace EngineNS
     public partial class BezierPointBase : EngineNS.IO.ISerializer
     {
         public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
-        public void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
+        public void OnPropertyRead(object root, string prop, bool fromXml) { }
         protected EngineNS.Vector2 mPosition = EngineNS.Vector2.Zero;
         [Rtti.Meta]
         public EngineNS.Vector2 Position

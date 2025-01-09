@@ -134,9 +134,9 @@ namespace EngineNS.Animation.SkeletonAnimation.Skeleton
             }
         }
 
-        public override void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        public override void OnPropertyRead(object tagObject, string prop, bool fromXml)
         {
-            if (prop.Name == "Limbs")
+            if (prop == "Limbs")
             {
                 ConstructHierarchy();
             }

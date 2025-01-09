@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
@@ -13,6 +14,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         TtRenderGraphNode mNode;
         public string mProxyNodeName = "";
         [Rtti.Meta]
+        [Category("Option")]
         public string ProxyNodeName
         {
             get => mProxyNodeName;

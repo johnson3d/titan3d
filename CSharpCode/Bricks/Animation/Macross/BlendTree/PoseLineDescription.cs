@@ -59,7 +59,7 @@ namespace EngineNS.Animation.Macross.BlendTree
             }
         }
 
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        public void OnPropertyRead(object tagObject, string prop, bool fromXml)
         {
 
         }

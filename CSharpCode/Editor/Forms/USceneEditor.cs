@@ -531,7 +531,7 @@ namespace EngineNS.Editor.Forms
             //PreviewViewport.PreviewAsset = name;
             PreviewViewport.Title = $"Scene:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewScene;
-            PreviewViewport.CameralWheelMoveWithLookAt = true;
+            PreviewViewport.CameralWheelMoveWithLookAt = false;
             await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, rpolicy, 0, 1);
             var camPos = new DVector3(10, 10, 10);
             PreviewViewport.CameraController.Camera?.mCoreObject.LookAtLH(in camPos, in DVector3.Zero, in Vector3.Up);
@@ -1122,7 +1122,7 @@ namespace EngineNS.Editor.Forms
             //PreviewViewport.PreviewAsset = name;
             PreviewViewport.Title = $"Prefab:{name}";
             PreviewViewport.OnInitialize = Initialize_PreviewScene;
-            PreviewViewport.CameralWheelMoveWithLookAt = true;
+            PreviewViewport.CameralWheelMoveWithLookAt = false;
             await PreviewViewport.Initialize(TtEngine.Instance.GfxDevice.SlateApplication, TtEngine.Instance.Config.SimpleRPolicyName, 0, 1);
 
             Prefab.Root.Parent = PreviewViewport.World.Root;

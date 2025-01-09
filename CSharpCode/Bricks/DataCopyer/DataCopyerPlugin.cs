@@ -1,5 +1,6 @@
 ﻿using EngineNS.Bricks.DataCopyer;
 using EngineNS.IO;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -23,27 +24,12 @@ namespace EngineNS.Bricks.DataCopyer
         public delegate void FReader(IO.IReader ar, object obj);
         public class TtClassCopyer
         {
-            public FCopy CurrentVersion;
             public FWrite Writer;
-            public Dictionary<UInt64, FCopy> VersionCopyers = new Dictionary<UInt64, FCopy>();
+            public FCopy Copy;
             public Dictionary<UInt64, FReader> VersionReaders = new Dictionary<UInt64, FReader>();
-            public void RegVersion(UInt64 v, FCopy fn)
-            {
-                VersionCopyers[v] = fn;
-            }
             public void RegVersion(UInt64 v, FReader fn)
             {
                 VersionReaders[v] = fn;
-            }
-            public FCopy FindCopyerVersion(UInt64 hash)
-            {
-                if (hash == 0)
-                {
-                    return CurrentVersion;
-                }
-                if (VersionCopyers.TryGetValue(hash, out FCopy fn))
-                    return fn;
-                return null;
             }
             public FReader FindReaderVersion(UInt64 hash)
             {
@@ -62,11 +48,11 @@ namespace EngineNS.Bricks.DataCopyer
             ClassCopyer.Add(typeStr, result);
             return result;
         }
-        public FCopy FindCopyer(string typeStr, UInt64 version = 0)
+        public FCopy FindCopyer(string typeStr)
         {
             if (ClassCopyer.TryGetValue(typeStr, out var result))
             {
-                return result.FindCopyerVersion(version);
+                return result.Copy;
             }
             return null;
         }
@@ -78,11 +64,11 @@ namespace EngineNS.Bricks.DataCopyer
             }
             return null;
         }
-        public FReader FindReader(string typeStr, UInt64 version)
+        public FReader FindReader(string typeStr, Hash64 version)
         {
             if (ClassCopyer.TryGetValue(typeStr, out var result))
             {
-                return result.FindReaderVersion(version);
+                return result.FindReaderVersion(version.AllData);
             }
             return null;
         }
@@ -125,7 +111,7 @@ namespace EngineNS.Bricks.DataCopyer
                     {
                         i.PropInfo.SetValue(obj, value);
                         if (obj is IO.ISerializer sr)
-                            sr.OnPropertyRead(ar.Tag, i.PropInfo, false);
+                            sr.OnPropertyRead(ar.Tag, i.PropInfo.Name, false);
                     }
                 }
                 else
@@ -137,7 +123,7 @@ namespace EngineNS.Bricks.DataCopyer
                         {
                             i.PropInfo.SetValue(obj, value);
                             if (obj is IO.ISerializer sr)
-                                sr.OnPropertyRead(ar.Tag, i.PropInfo, false);
+                                sr.OnPropertyRead(ar.Tag, i.PropInfo.Name, false);
                         }
                     }
                     else
@@ -150,7 +136,7 @@ namespace EngineNS.Bricks.DataCopyer
                             {
                                 i.PropInfo.SetValue(obj, value);
                                 if (obj is IO.ISerializer sr)
-                                    sr.OnPropertyRead(ar.Tag, i.PropInfo, false);
+                                    sr.OnPropertyRead(ar.Tag, i.PropInfo.Name, false);
                             }
                         }
                         else
@@ -160,7 +146,7 @@ namespace EngineNS.Bricks.DataCopyer
                             {
                                 i.PropInfo.SetValue(obj, value);
                                 if (obj is IO.ISerializer sr)
-                                    sr.OnPropertyRead(ar.Tag, i.PropInfo, false);
+                                    sr.OnPropertyRead(ar.Tag, i.PropInfo.Name, false);
                             }
                         }
                     }
@@ -476,12 +462,12 @@ namespace EngineNS.Bricks.DataCopyer
             }
             return Hash160.CreateHash160(hashStr);
         }
-        public bool DataCopy(object target, object src, UInt64 version = 0)
+        public bool DataCopy(object target, object src)
         {
             if (target.GetType().IsSubclassOf(src.GetType()) == false && target.GetType() != src.GetType())
                 return false;
             
-            var fn = FindCopyer(Rtti.TtTypeDesc.TypeStr(src.GetType()), version);
+            var fn = FindCopyer(Rtti.TtTypeDesc.TypeStr(src.GetType()));
             if (fn == null)
                 return false;
             fn(target, src);
@@ -570,11 +556,10 @@ namespace EngineNS.Bricks.DataCopyer
                                 var name = met.ClassType.FullName.Replace('.', '_');
                                 name = name.Replace('+', '_');
                                 klsCreator.AddLine($"var kls = this.GetClassCopyer(\"{met.ClassMetaName}\");", ref klsCode);
-                                klsCreator.AddLine($"kls.CurrentVersion = {name}.Copy_{met.CurrentVersion.MetaHash};", ref klsCode);
                                 klsCreator.AddLine($"kls.Writer = {name}.WriteCurrentVersion;", ref klsCode);
+                                klsCreator.AddLine($"kls.Copy = {name}.CopyCurrentVersion;", ref klsCode);
                                 foreach (var v in met.MetaVersions)
                                 {
-                                    klsCreator.AddLine($"kls.RegVersion({v.Key}, {name}.Copy_{v.Key});", ref klsCode);
                                     klsCreator.AddLine($"kls.RegVersion({v.Key}, {name}.Read_{v.Key});", ref klsCode);
                                 }
                             }
@@ -637,11 +622,11 @@ namespace EngineNS.Bricks.DataCopyer
             creator.PushSegment(ref code);
             {
                 GenWriteCurrentVersion(meta, creator, ref code);
+                GenCopyVersion(meta, creator, ref code, meta.CurrentVersion);
 
                 foreach (var i in vers)
                 {
-                    GenCopyVersion(meta, creator, ref code, i);
-
+                    //GenCopyVersion(meta, creator, ref code, i);
                     GenReadVersion(meta, creator, ref code, i);
                 }
             }
@@ -771,7 +756,7 @@ namespace EngineNS.Bricks.DataCopyer
         }
         public void GenCopyVersion(Rtti.TtClassMeta meta, TtCodeWriter creator, ref string code, Rtti.TtMetaVersion i)
         {
-            creator.AddLine($"internal static {typeof(FCopy).FullName.Replace('+', '.')} Copy_{i.MetaHash} = (object tar, object src)=>", ref code);
+            creator.AddLine($"internal static {typeof(FCopy).FullName.Replace('+', '.')} CopyCurrentVersion = (object tar, object src)=>", ref code);
             creator.PushSegment(ref code);
             {
                 creator.AddLine($"var tarObj = tar as {meta.ClassType.FullName.Replace('+', '.')};", ref code);
@@ -890,7 +875,159 @@ namespace EngineNS.Bricks.DataCopyer
             creator.AddLine($"internal static {typeof(FReader).FullName.Replace('+', '.')} Read_{i.MetaHash} = (EngineNS.IO.IReader ar, object obj)=>", ref code);
             creator.PushSegment(ref code);
             {
+                creator.AddLine($"var srcObj = obj as {meta.ClassType.FullName.Replace('+', '.')};", ref code);
+                foreach (var j in i.Propertys)
+                {
+                    if (j.PropInfo != null && j.PropInfo.GetCustomAttribute<Rtti.MetaAttribute>().IsNoSerializable)
+                    {
+                        continue;
+                    }
+                    if (j.CustumSerializer != null)
+                    {
+                        
+                    }
+                    else
+                    {
+                        var type = j.FieldType.FullName.Replace('+', '.');
+                        if (IsPrimitiveType(j.FieldType.SystemType))
+                        {
+                            creator.AddLine($"{type} t_{j.PropertyName};", ref code);
+                            creator.AddLine($"ar.Read(out t_{j.PropertyName});", ref code);
+                            if (j.PropInfo != null && j.PropInfo.CanWrite && j.PropInfo.GetSetMethod() != null && j.PropInfo.GetSetMethod().IsPublic)
+                            {
+                                creator.AddLine($"srcObj.{j.PropInfo.Name} = t_{j.PropertyName};", ref code);
+                                creator.PushSegment(ref code);
+                                {
+                                    creator.AddLine($"if (srcObj is IO.ISerializer sr)", ref code);
+                                    creator.PushSegment(ref code);
+                                    {
+                                        creator.AddLine($"sr.OnPropertyRead(ar.Tag, \"{j.PropInfo.Name}\", false);", ref code);
+                                    }
+                                    creator.PopSegment(ref code);
+                                }
+                                creator.PopSegment(ref code);
+                            }
+                        }
+                        else if (IsMetaType(j.FieldType.SystemType))
+                        {
+                            creator.AddLine($"EngineNS.Hash64 type_{j.PropertyName};", ref code);
+                            creator.AddLine($"ar.Read(out type_{j.PropertyName});", ref code);
+                            creator.AddLine($"var meta_{j.PropertyName} = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_{j.PropertyName});", ref code);
+                            creator.AddLine($"if(meta_{j.PropertyName} != null)", ref code);
+                            creator.PushSegment(ref code);
+                            {
+                                creator.AddLine($"EngineNS.Hash64 ver_{j.PropertyName};", ref code);
+                                creator.AddLine($"ar.Read(out ver_{j.PropertyName});", ref code);
+                                creator.AddLine($"var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_{j.PropertyName}.ClassType.TypeString, ver_{j.PropertyName} );", ref code);
+                                creator.AddLine($"if (fn != null)", ref code);
+                                creator.PushSegment(ref code);
+                                {
+                                    creator.AddLine($"{type} t_{j.PropertyName} = null;", ref code);
+                                    if (j.PropInfo != null && j.PropInfo.CanRead && j.PropInfo.GetGetMethod() != null && j.PropInfo.GetGetMethod().IsPublic)
+                                    {
+                                        creator.AddLine($"t_{j.PropertyName} = srcObj.{j.PropertyName};", ref code);
+                                    }
+                                    creator.AddLine($"if (t_{j.PropertyName} == null)", ref code);
+                                    creator.PushSegment(ref code);
+                                    {
+                                        creator.AddLine($"t_{j.PropertyName} = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_{j.PropertyName}.ClassType) as {type};", ref code);
+                                    }
+                                    creator.PopSegment(ref code);
+                                    creator.AddLine($"fn(ar, t_{j.PropertyName});", ref code);
+                                    if (j.PropInfo != null && j.PropInfo.CanWrite && j.PropInfo.GetSetMethod() != null && j.PropInfo.GetSetMethod().IsPublic)
+                                    {
+                                        creator.AddLine($"srcObj.{j.PropInfo.Name} = t_{j.PropertyName};", ref code);
+                                        creator.PushSegment(ref code);
+                                        {
+                                            creator.AddLine($"if (srcObj is IO.ISerializer sr)", ref code);
+                                            creator.PushSegment(ref code);
+                                            {
+                                                creator.AddLine($"sr.OnPropertyRead(ar.Tag, \"{j.PropInfo.Name}\", false);", ref code);
+                                            }
+                                            creator.PopSegment(ref code);
+                                        }
+                                        creator.PopSegment(ref code);
+                                    }
+                                }
+                                creator.PopSegment(ref code);
+                            }
+                            creator.PopSegment(ref code);
+                        }
+                        else if (j.FieldType.SystemType.IsGenericType && j.FieldType.SystemType.GetInterface("IList") != null)
+                        {
+                            var kt = j.FieldType.SystemType.GetGenericArguments()[0];
+                            var ktStr = kt.FullName.Replace('+', '.');
+                            type = $"System.Collections.Generic.List<{ktStr}>";
+                            creator.AddLine($"{type} t_{j.PropertyName} = null;", ref code);
+                            if (j.PropInfo != null && j.PropInfo.CanRead && j.PropInfo.GetGetMethod() != null && j.PropInfo.GetGetMethod().IsPublic)
+                            {
+                                creator.AddLine($"t_{j.PropertyName} = srcObj.{j.PropertyName};", ref code);
+                            }
+                            creator.AddLine($"if (t_{j.PropertyName} == null)", ref code);
+                            creator.PushSegment(ref code);
+                            {
+                                creator.AddLine($"t_{j.PropertyName} = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof({type})) as {type};", ref code);
+                            }
+                            creator.PopSegment(ref code);
 
+                            creator.AddLine($"int count_{j.PropertyName};", ref code);
+                            creator.AddLine($"ar.Read(out count_{j.PropertyName});", ref code);
+                            creator.AddLine($"for(int i = 0; i<count_{j.PropertyName}; i++)", ref code);
+                            creator.PushSegment(ref code);
+                            {
+                                if (IsPrimitiveType(kt))
+                                {
+                                    creator.AddLine($"{ktStr} t;", ref code);
+                                    creator.AddLine($"ar.Read(out t);", ref code);
+                                    creator.AddLine($"t_{j.PropertyName}.Add(t);", ref code);
+                                }
+                                else if (IsMetaType(kt))
+                                {
+                                    creator.AddLine($"{ktStr} t = null;", ref code);
+                                    creator.AddLine($"EngineNS.Hash64 typeHash;", ref code);
+                                    creator.AddLine($"ar.Read(out typeHash);", ref code);
+                                    creator.AddLine($"var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);", ref code);
+                                    creator.AddLine($"if (meta != null)", ref code);
+                                    creator.PushSegment(ref code);
+                                    {
+                                        creator.AddLine($"EngineNS.Hash64 verHash;", ref code);
+                                        creator.AddLine($"ar.Read(out verHash);", ref code);
+                                        creator.AddLine($"var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);", ref code);
+                                        creator.AddLine($"if (fn != null)", ref code);
+                                        creator.PushSegment(ref code);
+                                        {
+                                            creator.AddLine($"t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as {ktStr};", ref code);
+                                            creator.AddLine($"fn(ar, t);", ref code);
+                                        }
+                                        creator.PopSegment(ref code);
+                                    }
+                                    creator.PopSegment(ref code);
+
+                                    creator.AddLine($"t_{j.PropertyName}.Add(t);", ref code);
+                                    if (j.PropInfo != null && j.PropInfo.CanWrite && j.PropInfo.GetSetMethod() != null && j.PropInfo.GetSetMethod().IsPublic)
+                                    {
+                                        creator.AddLine($"srcObj.{j.PropInfo.Name} = t_{j.PropertyName};", ref code);
+                                        creator.PushSegment(ref code);
+                                        {
+                                            creator.AddLine($"if (srcObj is IO.ISerializer sr)", ref code);
+                                            creator.PushSegment(ref code);
+                                            {
+                                                creator.AddLine($"//sr.OnPropertyRead(ar.Tag, typeof({type}), false);", ref code);
+                                            }
+                                            creator.PopSegment(ref code);
+                                        }
+                                        creator.PopSegment(ref code);
+                                    }
+                                }
+                            }
+                            creator.PopSegment(ref code);
+                        }
+                        else if (j.FieldType.SystemType.IsGenericType && j.FieldType.SystemType.GetInterface("IDictionary") != null)
+                        {
+
+                        }
+                    }
+                }
             }
             creator.PopSegment(ref code, true);
         }
@@ -919,6 +1056,10 @@ namespace EngineNS
                             TtFileManager.WriteAllText(file, code);
 
                             Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Plugin DataCopyer need build");
+#if PWindow
+                            TtNativeWindow.MessageBoxA(IntPtr.Zero, "DataCopyer", "Plugin DataCopyer need build", 0);
+                            TtEngine.Instance.PostQuitMessage();
+#endif
                             //rebuild plugin
                         }
                     }

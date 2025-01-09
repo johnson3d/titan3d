@@ -41,7 +41,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             }
         }
 
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        public void OnPropertyRead(object tagObject, string name, bool fromXml)
         {
 
         }
@@ -94,7 +94,7 @@ namespace EngineNS.DesignMacross.Design.ConnectingLine
             }
         }
 
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        public void OnPropertyRead(object tagObject, string prop, bool fromXml)
         {
 
         }

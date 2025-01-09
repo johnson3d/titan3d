@@ -97,7 +97,7 @@ namespace EngineNS.DesignMacross.Design
             
         }
 
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        public void OnPropertyRead(object tagObject, string prop, bool fromXml)
         {
             
         }

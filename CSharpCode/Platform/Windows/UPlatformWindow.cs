@@ -1,4 +1,5 @@
 ﻿using EngineNS.Graphics.Pipeline;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -50,6 +51,8 @@ namespace EngineNS
 
         [DllImport("kernel32.dll")]
         public static extern int SetDllDirectoryA(string path);
+        [DllImport("user32.dll")]
+        public static extern int MessageBoxA(IntPtr hWnd, string lpText,string lpCaption, int uType);
         [DllImport("user32.dll")]
         static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
         [DllImport("dwmapi.dll", PreserveSig = true)]

@@ -30,7 +30,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             }
 
-            public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+            public void OnPropertyRead(object tagObject, string prop, bool fromXml)
             {
 
             }

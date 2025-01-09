@@ -367,7 +367,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
         }
 
-        public void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml)
+        public void OnPropertyRead(object tagObject, string prop, bool fromXml)
         {
         }
     }
@@ -844,7 +844,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             this.MacrossEditor = klsGraph;
         }
-        public override void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml)
+        public override void OnPropertyRead(object tagObject, string prop, bool fromXml)
         {
             var klsGraph = tagObject as TtMacrossEditor;
             if (klsGraph == null)

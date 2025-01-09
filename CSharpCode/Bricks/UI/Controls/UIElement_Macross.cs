@@ -85,7 +85,7 @@ namespace EngineNS.UI.Controls
             {
             }
 
-            public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+            public void OnPropertyRead(object tagObject, string prop, bool fromXml)
             {
             }
         }

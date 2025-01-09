@@ -58,7 +58,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.CompoundState
             }
         }
 
-        public void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        public void OnPropertyRead(object tagObject, string prop, bool fromXml)
         {
 
         }

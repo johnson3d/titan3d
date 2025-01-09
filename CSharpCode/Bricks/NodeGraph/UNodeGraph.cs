@@ -39,7 +39,7 @@ namespace EngineNS.Bricks.NodeGraph
     public partial class TtNodeGraph : IO.ISerializer
     {
         public virtual void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
-        public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
+        public virtual void OnPropertyRead(object root, string prop, bool fromXml) { }
         public virtual unsafe void Initialize()
         {
             //UpdateCanvasMenus();

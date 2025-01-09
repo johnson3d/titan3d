@@ -2313,7 +2313,7 @@ namespace {namespaceName}
                 if (!classSymbol.MemberNames.Any(name => "OnPropertyRead" == name))
                 {
                     source += $@"
-        public {(baseHasBindObjectInterface ? "override" : "virtual")} void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml) {{}}";
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void OnPropertyRead(object tagObject, string prop, bool fromXml) {{}}";
                 }
             }
             if (!classSymbol.MemberNames.Any(name => "InitialMethodDeclaration" == name))

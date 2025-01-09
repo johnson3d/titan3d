@@ -16,7 +16,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
         public TtRenderPolicyAsset PolicyGraph { get; private set; }
         public TtGraphRenderer GraphRenderer { get; } = new TtGraphRenderer();
-        public EGui.Controls.PropertyGrid.PropertyGrid NodePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        public EGui.Controls.PropertyGrid.PropertyGrid NodePropGrid { get; } = new EGui.Controls.PropertyGrid.PropertyGrid();
         public float LeftWidth = 0;
         public Vector2 WindowPos;
         public Vector2 WindowSize = new Vector2(800, 600);
@@ -46,7 +46,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         {
 
         }
-        public void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml)
+        public void OnPropertyRead(object tagObject, string prop, bool fromXml)
         {
 
         }

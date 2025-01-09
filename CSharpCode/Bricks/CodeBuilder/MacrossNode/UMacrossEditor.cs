@@ -113,7 +113,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return this;
         }
         public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
-        public void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
+        public void OnPropertyRead(object root, string prop, bool fromXml) { }
         [Rtti.Meta(Order = 0)]
         public TtClassDeclaration DefClass { get; } = new TtClassDeclaration();
         //public DefineClass DefClass { get; } = new DefineClass();

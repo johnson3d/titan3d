@@ -57,6 +57,7 @@
   "EditorLanguage": "English",
   "UIDefaultTexture": "texture/white.srv:Engine",
   "IsWriteShaderDebugFile": false,
+  "IsTryUnloadMacrossAssembly": true,
   "Plugins": [
     "SourceGit",
     "DataCopyer",

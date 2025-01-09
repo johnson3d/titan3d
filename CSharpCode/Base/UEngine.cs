@@ -205,6 +205,9 @@ namespace EngineNS
         public bool IsWriteShaderDebugFile { get; set; } = false;
         [Rtti.Meta]
         [Category("Option")]
+        public bool IsTryUnloadMacrossAssembly { get; set; } = true;
+        [Rtti.Meta]
+        [Category("Option")]
         public List<string> Plugins { get; set; } = new List<string>() { "SourceGit", "Survivor" };
         public TtEngineConfig()
         {
@@ -474,6 +477,8 @@ namespace EngineNS
             }
 
             this.PluginModuleManager.InitPlugins(this);
+
+            this.DataCopyer.FindCopyer(Rtti.TtTypeDesc.TypeStr(typeof(TtEngineConfig)));
 
             var ModuleStart = Support.TtTime.HighPrecision_GetTickCount();
             GatherModules();

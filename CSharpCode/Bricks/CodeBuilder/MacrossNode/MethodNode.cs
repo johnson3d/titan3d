@@ -164,14 +164,14 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 public Rtti.TtTypeDesc Type { get; set; }
 
                 public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
-                public void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml) { }
+                public void OnPropertyRead(object tagObject, string prop, bool fromXml) { }
             }
             [Rtti.Meta]
             public List<ExtPinData> ExtPinDatas { get; set; } = new List<ExtPinData>();
 
             public void OnPreRead(object tagObject, object hostObject, bool fromXml) { }
 
-            public void OnPropertyRead(object tagObject, System.Reflection.PropertyInfo prop, bool fromXml) { }
+            public void OnPropertyRead(object tagObject, string prop, bool fromXml) { }
         }
 
         [Rtti.Meta]

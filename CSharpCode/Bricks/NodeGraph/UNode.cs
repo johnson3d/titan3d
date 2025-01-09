@@ -236,7 +236,7 @@ namespace EngineNS.Bricks.NodeGraph
                 ParentGraph = graph;
             OnPreReadAction?.Invoke(this, tagObject, hostObject, fromXml);
         }
-        public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
+        public virtual void OnPropertyRead(object root, string prop, bool fromXml) { }
         string mName = "NoName";
         [Rtti.Meta]
         [Category("Option")]

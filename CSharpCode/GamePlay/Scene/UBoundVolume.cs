@@ -25,7 +25,7 @@ namespace EngineNS.GamePlay.Scene
         {
             HostNode = tagObject as TtNode;
         }
-        public virtual void OnPropertyRead(object root, System.Reflection.PropertyInfo prop, bool fromXml) { }
+        public virtual void OnPropertyRead(object root, string prop, bool fromXml) { }
         public TtNode HostNode { get; set; } = null;
         public BoundingBox mLocalAABB;
         public BoundingBox LocalAABB

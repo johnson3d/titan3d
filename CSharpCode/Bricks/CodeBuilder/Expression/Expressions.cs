@@ -56,7 +56,7 @@ namespace EngineNS.Bricks.CodeBuilder
         {
         }
 
-        public virtual void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        public virtual void OnPropertyRead(object tagObject, string prop, bool fromXml)
         {
         }
 
@@ -220,7 +220,7 @@ namespace EngineNS.Bricks.CodeBuilder
         {
         }
 
-        public virtual void OnPropertyRead(object tagObject, PropertyInfo prop, bool fromXml)
+        public virtual void OnPropertyRead(object tagObject, string prop, bool fromXml)
         {
         }
 

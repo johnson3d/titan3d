@@ -145,7 +145,7 @@ namespace EngineNS.Macross
         }
         public List<WeakReference<TtMacrossGetterBase>> mGetters = new List<WeakReference<TtMacrossGetterBase>>();
         partial void TryCompileCode(string assemblyFile, ref bool success);
-        public void ReloadAssembly(string assemblyPath)
+        public void ReloadAssembly(string assemblyPath, bool bUnloadDLL = true)
         {
             try
             {
@@ -158,7 +158,7 @@ namespace EngineNS.Macross
                 }
                 
                 Rtti.TtClassMetaManager.Instance.ResetSystemRef();
-                WeakReference oldWeakRef = this.ReloadAssemblyImpl(assemblyPath);
+                WeakReference oldWeakRef = this.ReloadAssemblyImpl(assemblyPath, bUnloadDLL);
 
                 if (oldWeakRef != null)
                 {
@@ -208,7 +208,7 @@ namespace EngineNS.Macross
             return NumOfStatic == 1;
         }
         int CurrentVersion = 0;
-        private WeakReference ReloadAssemblyImpl(string assemblyPath)
+        private WeakReference ReloadAssemblyImpl(string assemblyPath, bool bUnloadDLL = true)
         {
             TtMacrosAssemblyLoader loader = null;
             CreateAssemblyLoader(ref loader);
@@ -260,7 +260,8 @@ namespace EngineNS.Macross
             }
             Rtti.TtTypeDescManager.Instance.OnTypeChangedInvoke();
 
-            mAssemblyLoader?.TryUnload();
+            if (bUnloadDLL)
+                mAssemblyLoader?.TryUnload();
             mAssemblyLoader = loader;
             
             System.GC.Collect();

@@ -164,7 +164,7 @@ namespace EngineNS
                 return false;
 
             var root = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute);
-            TtEngine.Instance.MacrossModule.ReloadAssembly(root + $"/{DotNetVersion}/GameProject.dll");
+            TtEngine.Instance.MacrossModule.ReloadAssembly(root + $"/{DotNetVersion}/GameProject.dll", Config.IsTryUnloadMacrossAssembly);
 
             this.GameInstance = new GamePlay.TtGameInstance();
             this.GameInstance.WorldViewportSlate.Title = $"Game:{main.Name}";
