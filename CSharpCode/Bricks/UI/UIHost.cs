@@ -174,31 +174,31 @@ namespace EngineNS.UI
             return false;
         }
         // pt为鼠标位置
-        public override TtUIElement GetPointAtElement(in Vector2 mousePt, out Vector2 pointOffset, bool onlyClipped = true)
+        public override TtUIElement GetPointAtElement(ref PointAtProcessData data)
         {
-            var data = new RayIntersectData();
-            return GetPointAtElement(mousePt, ref data, out pointOffset, onlyClipped);
+            var rayData = new RayIntersectData();
+            return GetPointAtElement(ref data, ref rayData);
         }
-        public TtUIElement GetPointAtElement(in Vector2 mousePt, ref RayIntersectData data, out Vector2 pointOffset, bool onlyClipped = true)
+        public TtUIElement GetPointAtElement(ref PointAtProcessData data, ref RayIntersectData rayData)
         {
-            pointOffset = Vector2.Zero;
+            data.PointOffset = Vector2.Zero;
             if (NoHitTest)
             {
                 return null;
             }
             if (IsScreenSpace)
             {
-                if (!DesignRect.Contains(in mousePt))
+                if (!DesignRect.Contains(in data.Point))
                     return null;
-                data.Start = Vector3.Zero;
+                rayData.Start = Vector3.Zero;
                 var projInvMat = RenderCamera.GetProjectionInverse();
                 var vp = this.ViewportSlate;
                 var delta = vp.WindowPos - vp.ViewportPos;
                 Vector3 dir = Vector3.Zero;
-                var pt = new Vector2(mousePt.X - delta.X, mousePt.Y - delta.Y);
+                var pt = new Vector2(data.Point.X - delta.X, data.Point.Y - delta.Y);
                 RenderCamera.GetPickRay(ref dir, pt.X, pt.Y, vp.ClientSize.Width, vp.ClientSize.Height);
                 var viewMatrix = RenderCamera.GetViewMatrix();
-                data.Direction = Vector3.TransformNormal(in dir, viewMatrix);
+                rayData.Direction = Vector3.TransformNormal(in dir, viewMatrix);
             }
             else
             {
@@ -212,27 +212,29 @@ namespace EngineNS.UI
                 if (RenderCamera == null)
                     return null;
                 var delta = vp.WindowPos - vp.ViewportPos;
-                data.Start = RenderCamera.GetLocalPosition();
+                rayData.Start = RenderCamera.GetLocalPosition();
                 Vector3 dir = Vector3.Zero;
                 //var mousePt = new Vector2(178, 209) + delta;
-                RenderCamera.GetPickRay(ref dir, mousePt.X - delta.X, mousePt.Y - delta.Y, vp.ClientSize.Width, vp.ClientSize.Height);
+                RenderCamera.GetPickRay(ref dir, data.Point.X - delta.X, data.Point.Y - delta.Y, vp.ClientSize.Width, vp.ClientSize.Height);
                 if (dir == Vector3.Zero)
                     return null;
-                data.Direction = dir;
+                rayData.Direction = dir;
 
                 //TtEngine.Instance.UIManager.DebugMousePt = mousePt;// - delta;
-                var ray = new Ray(data.Start, data.Direction);
-                if (!Ray.Intersects(in ray, BoundingBox, out data.Distance))
+                var ray = new Ray(rayData.Start, rayData.Direction);
+                if (!Ray.Intersects(in ray, BoundingBox, out rayData.Distance))
                     return null;
             }
 
-            if (QueryElements(RayIntersect3DElements, ref data))
+            if (QueryElements(RayIntersect3DElements, ref rayData))
             {
-                return data.IntersectedElement.GetPointAtElement(in data.IntersectPos, out pointOffset, onlyClipped);
+                data.Point = rayData.IntersectPos;
+                return rayData.IntersectedElement.GetPointAtElement(ref data);
             }
-            if (!RayIntersect(ref data))
+            if (!RayIntersect(ref rayData))
                 return null;
-            return base.GetPointAtElement(in data.IntersectPos, out pointOffset, onlyClipped);
+            data.Point = rayData.IntersectPos;
+            return base.GetPointAtElement(ref data);
         }
 
         // white a c# method for line intersect triangle in 3d, and with intersect point out

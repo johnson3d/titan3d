@@ -194,8 +194,9 @@ namespace EngineNS.UI
         #pragma warning disable CS8500
         TtUIElement CheckHoveredElement(in Bricks.Input.Event e)
         {
-            Vector2 pt;
-            Vector2 offsetOfElement;
+            var pointAtData = new TtUIElement.PointAtProcessData();
+            pointAtData.Reset();
+
             long index;
             switch(e.Type)
             {
@@ -203,7 +204,7 @@ namespace EngineNS.UI
                 case EventType.MOUSEBUTTONUP:
                 case EventType.MOUSEMOTION:
                     {
-                        pt = new Vector2(e.MouseButton.X, e.MouseButton.Y);
+                        pointAtData.Point = new Vector2(e.MouseButton.X, e.MouseButton.Y);
                         index = TtInputSystem.MaxMultiTouchNumber;
                     }
                     break;
@@ -211,7 +212,7 @@ namespace EngineNS.UI
                 case EventType.CONTROLLERTOUCHPADUP:
                 case EventType.CONTROLLERTOUCHPADMOTION:
                     {
-                        pt = new Vector2(e.TouchFinger.X, e.TouchFinger.Y);
+                        pointAtData.Point = new Vector2(e.TouchFinger.X, e.TouchFinger.Y);
                         index = e.TouchFinger.FingerId;
                     }
                     break;
@@ -232,7 +233,7 @@ namespace EngineNS.UI
                 {
                     if (mPopupHosts[i].TryGetTarget(out var ui))
                     {
-                        var element = ui.GetPointAtElement(in pt, out offsetOfElement);
+                        var element = ui.GetPointAtElement(ref pointAtData);
                         if (element != null)
                         {
                             newStay = element;
@@ -251,7 +252,7 @@ namespace EngineNS.UI
                 var procWin = mDialogHosts.Peek();
                 if (procWin.TryGetTarget(out var ui))
                 {
-                    newStay = ui.GetPointAtElement(pt, out offsetOfElement);
+                    newStay = ui.GetPointAtElement(ref pointAtData);
                 }
             }
             else
@@ -263,7 +264,7 @@ namespace EngineNS.UI
                     var t = mUserUIList[i];
                     if(t.TryGetTarget(out var ui))
                     {
-                        var element = ui.GetPointAtElement(in pt, ref data, out offsetOfElement);
+                        var element = ui.GetPointAtElement(ref pointAtData, ref data);
                         if (element != null && minDistance > data.Distance)
                         {
                             minDistance = data.Distance;

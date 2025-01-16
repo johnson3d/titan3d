@@ -244,10 +244,11 @@ namespace EngineNS.Graphics.Mesh
                         var drawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateGraphicDraw();// (shading, Material.ParentMaterial, mesh.MdfQueue);
                         drawcall.SetSourceAtom(this);
                         drawcall.BindShaderEffect(effect);
-                        drawcall.BindGeomMesh(this.MeshPrimitives.mCoreObject.GetGeomtryMesh());
+                        drawcall.BindGeomMesh(MeshPrimitives.mCoreObject.GetGeomtryMesh());
                         drawcall.BindPipeline(Material.Pipeline);
                         drawcall.PermutationId = shading.mCurrentPermutationId;
 
+                        MeshPrimitives.Meshlets?.BuildDrawcall(drawcall);
 
                         #region Textures
                         for (int j = 0; j < Material.NumOfSRV; j++)
@@ -716,6 +717,7 @@ namespace EngineNS.Graphics.Mesh
             var sbMesh = MaterialMesh.SubMeshes[subMesh];
             var tarMesh = this.SubMeshes[subMesh];
             System.Diagnostics.Debug.Assert(tarMesh.MeshIndex == subMesh);
+            System.Diagnostics.Debug.Assert(sbMesh.Materials.Count > 0);
             if (tarMesh.Atoms == null || tarMesh.Atoms.Count != sbMesh.Materials.Count)
             {
                 tarMesh.Atoms.Resize(sbMesh.Materials.Count);

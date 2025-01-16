@@ -1348,6 +1348,8 @@ namespace {namespaceName}
                     proDesc.CustomValueEditor = new EngineNS.UI.Event.PGRoutedEventHandlerEditorAttribute();
                     tempCollection.Add(proDesc);
                 }}), true);
+
+            IsPropertyVisibleDirty = false;
         }}";
             }
             source += $@"

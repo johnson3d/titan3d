@@ -1,5 +1,6 @@
-﻿using Microsoft.VisualBasic;
-using NPOI.SS.Formula.Functions;
+﻿using EngineNS.Graphics.Pipeline;
+using EngineNS.Support;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -274,6 +275,107 @@ namespace EngineNS.Bricks.GpuDriven
             return null;
         }
     }
+
+    [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FMeshlet")]
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
+    public struct FMeshlet
+    {
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "VertexOffset")]
+        public uint VertexOffset;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "TriangleOffset")]
+        public uint TriangleOffset;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "VertexCount")]
+        public uint VertexCount;
+        [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "TriangleCount")]
+        public uint TriangleCount;
+    }
+    public class TtMeshlets : IDisposable
+    {
+        TtGpuBuffer<FMeshlet> MeshLetsBuffer;
+        TtGpuBuffer<uint> VerticesBuffer;
+        TtGpuBuffer<uint> TrianglesBuffer;
+        public void Dispose()
+        {
+            CoreSDK.DisposeObject(ref MeshLetsBuffer);
+            CoreSDK.DisposeObject(ref VerticesBuffer);
+            CoreSDK.DisposeObject(ref TrianglesBuffer);
+        }
+        public unsafe void BuildMeshlets(NxRHI.FMeshDataProvider mesh, uint max_vertices, uint max_triangles, float cone_weight)
+        {
+            using (var Meshlets = new Support.TtBlobObject())
+            using (var Materials = new Support.TtBlobObject())
+            using (var Vertices = new Support.TtBlobObject())
+            using (var Triangles = new Support.TtBlobObject())
+            {
+                var numOfMeshlets = IMeshOptimizer.BuildMeshlets(Meshlets.mCoreObject,
+                    Materials.mCoreObject,
+                    Vertices.mCoreObject,
+                    Triangles.mCoreObject,
+                    mesh, max_vertices, max_triangles, cone_weight);
+
+                var pPos = (Vector3*)mesh.GetVertexPtr(NxRHI.EVertexStreamType.VST_Position, 0);
+                FMeshlet* pMeshlets = (FMeshlet*)Meshlets.DataPointer;
+                uint* pVertices = (uint*)Vertices.DataPointer;
+                byte* pTriangles = (byte*)Triangles.DataPointer;
+                uint maxVertex = 0;
+                uint maxIndex = 0;
+                uint MaxTri = 0;
+                uint totalTri = 0;
+                for (uint i = 0; i < numOfMeshlets; i++)
+                {
+                    maxVertex = MathHelper.Max(maxVertex, pMeshlets[i].VertexOffset + pMeshlets[i].VertexCount);
+                    maxIndex = MathHelper.Max(maxIndex, pMeshlets[i].TriangleOffset + pMeshlets[i].TriangleCount);
+                    MaxTri = MathHelper.Max(MaxTri, pMeshlets[i].TriangleCount);
+                    totalTri += pMeshlets[i].TriangleCount;
+                    //System.Diagnostics.Debug.Assert(pMeshlets[i].TriangleCount % 3 == 0);
+                    for (uint j = 0; j < pMeshlets[i].TriangleCount; j++)
+                    {
+                        //这里可以用一个byte4作为一个triangle face，3个字节作为顶点索引，第四个作为材质id使用，一个mesh内部不超过256个材质是可以接受的 
+                        var a = pTriangles[pMeshlets[i].TriangleOffset + j * 3 + 0];
+                        var b = pTriangles[pMeshlets[i].TriangleOffset + j * 3 + 1];
+                        var c = pTriangles[pMeshlets[i].TriangleOffset + j * 3 + 2];
+
+                        var v_idx = pVertices[pMeshlets[i].VertexOffset + a];
+                        System.Diagnostics.Debug.Assert(v_idx < mesh.VertexNumber);
+                        var va = pPos[v_idx];
+
+                        v_idx = pVertices[pMeshlets[i].VertexOffset + b];
+                        System.Diagnostics.Debug.Assert(v_idx < mesh.VertexNumber);
+                        var vb = pPos[v_idx];
+
+                        v_idx = pVertices[pMeshlets[i].VertexOffset + c];
+                        System.Diagnostics.Debug.Assert(v_idx < mesh.VertexNumber);
+                        var vc = pPos[v_idx];
+                    }
+                }
+                uint variance = 0;
+                uint expect = totalTri / numOfMeshlets;
+                for (uint i = 0; i < numOfMeshlets; i++)
+                {
+                    variance += (pMeshlets[i].TriangleCount - expect) * (pMeshlets[i].TriangleCount - expect);
+                }
+                variance /= numOfMeshlets;
+                MeshLetsBuffer = new TtGpuBuffer<FMeshlet>();
+                MeshLetsBuffer.SetSize(numOfMeshlets, pMeshlets, NxRHI.EBufferType.BFT_SRV);
+                VerticesBuffer = new TtGpuBuffer<uint>();
+                VerticesBuffer.SetSize(maxVertex, pVertices, NxRHI.EBufferType.BFT_SRV);
+                TrianglesBuffer = new TtGpuBuffer<uint>();
+                TrianglesBuffer.SetSize(maxIndex / 4 + 1, pTriangles, NxRHI.EBufferType.BFT_SRV);
+            }
+        }
+        public void LoadXnd(XndNode node)
+        {
+
+        }
+        public void SaveXnd(XndNode node)
+        {
+
+        }
+        public void BuildDrawcall(NxRHI.TtGraphicDraw drawcall)
+        {
+
+        }
+    }
 }
 
 namespace EngineNS.Graphics.Mesh
@@ -307,6 +409,33 @@ namespace EngineNS.Graphics.Mesh
             
             return mClusteredMesh != null;
         }
+
+        #region Meshlets
+        bool HasMeshLets = false;
+        Bricks.GpuDriven.TtMeshlets mMeshlets;
+        public Bricks.GpuDriven.TtMeshlets Meshlets
+        {
+            get
+            {
+                return mMeshlets;
+            }
+        }
+        public void BuildMeshlets()
+        {
+            CoreSDK.DisposeObject(ref mMeshlets);
+            mMeshlets = new Bricks.GpuDriven.TtMeshlets();
+            var mesh = NxRHI.FMeshDataProvider.CreateInstance();
+            mesh.InitFromMesh(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, mCoreObject);
+            mesh.ConvertToIndex32();
+            mMeshlets.BuildMeshlets(mesh, 128, 256, 0);
+            CoreSDK.PtrType_Release(mesh);
+        }
+        public void LoadMeshlets(XndNode node)
+        {
+            mMeshlets = new Bricks.GpuDriven.TtMeshlets();
+            mMeshlets.LoadXnd(node);
+        }
+        #endregion
     }
 }
 

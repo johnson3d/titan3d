@@ -109,17 +109,16 @@ namespace EngineNS.Graphics.Mesh
             mesh.Initialize(ToMesh(), materials, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
             return mesh;
         }
-        public void ToMesh(TtMeshPrimitives mesh)
+        public bool ToMesh(TtMeshPrimitives mesh)
         {
-            unsafe
-            {
-                var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-                using (var cmd = new FTransientCmd(EQueueType.QU_Default, "ToMesh"))
-                {
-                    mCoreObject.ToMesh(cmd.CmdList, mesh.mCoreObject);
-                }   
+            using (var cmd = new FTransientCmd(EQueueType.QU_Default, "ToMesh"))
+            {
+                if (mCoreObject.ToMesh(cmd.CmdList, mesh.mCoreObject) == false)
+                    return false;
             }
+            return true;
         }
 
 

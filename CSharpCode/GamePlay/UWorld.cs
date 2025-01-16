@@ -225,15 +225,6 @@ namespace EngineNS.GamePlay
                 return mScopeGatherVisibleMeshes;
             }
         }
-        public virtual void GatherVisibleMeshes(TtVisParameter rp)
-        {
-            using (new Profiler.TimeScopeHelper(ScopeGatherVisibleMeshes))
-            {
-                rp.ClearVisibles();
-
-                OnVisitNode_GatherVisibleMeshes(Root, rp);
-            }   
-        }
         [ThreadStatic]
         private static Profiler.TimeScope mScopeGatherVisibleMeshes_Cull;
         private static Profiler.TimeScope ScopeGatherVisibleMeshes_Cull
@@ -267,154 +258,87 @@ namespace EngineNS.GamePlay
                 return mScopeOnGatherVisibleMeshes;
             }
         }
-        [ThreadStatic]
-        private static Profiler.TimeScope mScopeChildren;
-        private static Profiler.TimeScope ScopeChildren
+        public virtual void GatherVisibleMeshes(TtVisParameter rp)
         {
-            get
+            using (new Profiler.TimeScopeHelper(ScopeGatherVisibleMeshes))
             {
-                if (mScopeChildren == null)
-                    mScopeChildren = new Profiler.TimeScope(typeof(TtWorld), nameof(GatherVisibleMeshes) + ".Children");
-                return mScopeChildren;
-            }
-        }
-        //private static bool bUpdateAABB = false;
-        internal unsafe static bool OnVisitNode_GatherVisibleMeshes(Scene.TtNode node, TtVisParameter rp)
-        {
-            if (rp.OnVisitNode != null)
-            {
-                using (new Profiler.TimeScopeHelper(ScopeOnVisitNode))
+                rp.ClearVisibles();
+
+                Root.IterateNodesBFS(static (node, arg) =>
                 {
-                    if (rp.OnVisitNode(node, rp) == false)
+                    var rp = arg as TtVisParameter;
+                    if (rp.OnVisitNode != null)
+                    {
+                        using (new Profiler.TimeScopeHelper(ScopeOnVisitNode))
+                        {
+                            if (rp.OnVisitNode(node, rp) == false)
+                                return false;
+                        }
+                    }
+                    CONTAIN_TYPE type = CONTAIN_TYPE.CONTAIN_TEST_OUTER;
+                    if (node.HasStyle(Scene.TtNode.ENodeStyles.VisibleFollowParent))
+                    {
+                        type = CONTAIN_TYPE.CONTAIN_TEST_REFER;
+                    }
+                    else if (rp.CullCamera != null)
+                    {
+                        using (new Profiler.TimeScopeHelper(ScopeGatherVisibleMeshes_Cull))
+                        {
+                            type = rp.CullCamera.WhichContainTypeFast(rp.World, in node.AbsAABB, true);
+                        }
+                    }
+                    else
+                    {
+                        var ct = DBoundingBox.Contains(in rp.CullBox, in node.AbsAABB);
+                        switch (ct)
+                        {
+                            case ContainmentType.Contains:
+                                type = CONTAIN_TYPE.CONTAIN_TEST_INNER;
+                                break;
+                            case ContainmentType.Intersects:
+                                type = CONTAIN_TYPE.CONTAIN_TEST_REFER;
+                                break;
+                            case ContainmentType.Disjoint:
+                                type = CONTAIN_TYPE.CONTAIN_TEST_OUTER;
+                                break;
+                            default:
+                                type = CONTAIN_TYPE.CONTAIN_TEST_REFER;
+                                break;
+                        }
+                    }
+                    if (type == CONTAIN_TYPE.CONTAIN_TEST_OUTER)
+                    {
                         return false;
-                }   
-            }
-            
-            CONTAIN_TYPE type;
-
-            using (new Profiler.TimeScopeHelper(ScopeGatherVisibleMeshes_Cull))
-            {
-                if (node.HasStyle(Scene.TtNode.ENodeStyles.VisibleFollowParent))
-                {
-                    type = CONTAIN_TYPE.CONTAIN_TEST_REFER;
-                }
-                else if (rp.CullCamera != null)
-                {
-                    type = rp.CullCamera.WhichContainTypeFast(rp.World, in node.AbsAABB, true);
-                    //if (bUpdateAABB)
+                    }
+                    //else if (type == CONTAIN_TYPE.CONTAIN_TEST_INNER)
                     //{
-                    //    node.UpdateTreeAABB();
+                    //    node.IterateNodes(static (node, arg) =>
+                    //    {
+                    //        var rp = arg as TtVisParameter;
+                    //        using (new Profiler.TimeScopeHelper(ScopeOnGatherVisibleMeshes))
+                    //        {
+                    //            node.OnGatherVisibleMeshes(rp);
+                    //        }
+                    //        return true;
+                    //    }, rp);
+                    //    return false;
                     //}
-                    //node.OnAfterCheckContainType(type);
-
-                    //var absAABB = DBoundingBox.TransformNoScale(in node.AABB, in node.Placement.AbsTransform);
-                    //type = rp.CullCamera.WhichContainTypeFast(this, in absAABB, true);
-
-                    //这里还没想明白，把Frustum的6个平面变换到AABB所在坐标为啥不行
-                    //type = frustom->whichContainTypeFast(ref node.AABB, ref node.Placement.AbsTransformInv, 1);
-                }
-                else
-                {
-                    var ct = DBoundingBox.Contains(in rp.CullBox, in node.AbsAABB);
-                    switch(ct)
+                    else
                     {
-                        case ContainmentType.Contains:
-                            type = CONTAIN_TYPE.CONTAIN_TEST_INNER;
-                            break;
-                        case ContainmentType.Intersects:
-                            type = CONTAIN_TYPE.CONTAIN_TEST_REFER;
-                            break;
-                        case ContainmentType.Disjoint:
-                            type = CONTAIN_TYPE.CONTAIN_TEST_OUTER;
-                            break;
-                        default:
-                            type = CONTAIN_TYPE.CONTAIN_TEST_REFER;
-                            break;
-                    }
-                }
-            }
-
-            switch (type)
-            {
-                case CONTAIN_TYPE.CONTAIN_TEST_OUTER:
-                    break;
-                case CONTAIN_TYPE.CONTAIN_TEST_INNER:
-                    {
-                        if (node.TryTreeGatherVisibleMeshes(rp))
+                        using (new Profiler.TimeScopeHelper(ScopeOnGatherVisibleMeshes))
                         {
-                            node.DFS_VisitNodeTree(mOnVisitNode_GatherVisibleMeshesAll, rp);
+                            if (rp.IsGatherVisibleMeshes == null || rp.IsGatherVisibleMeshes(node, rp))
+                                node.OnGatherVisibleMeshes(rp);
                         }
                     }
-                    break;
-                case CONTAIN_TYPE.CONTAIN_TEST_REFER:
-                    {
-                        if (node.TryTreeGatherVisibleMeshes(rp))
-                        {
-                            if (!node.HasStyle(Scene.TtNode.ENodeStyles.SelfInvisible))
-                            {
-                                using (new Profiler.TimeScopeHelper(ScopeOnGatherVisibleMeshes))
-                                {
-                                    if (rp.IsGatherVisibleMeshes == null || rp.IsGatherVisibleMeshes(node, rp))
-                                    {
-                                        node.OnGatherVisibleMeshes(rp);
-                                    }
-                                }
-                            }
-                            if (!node.HasStyle(Scene.TtNode.ENodeStyles.ChildrenInvisible))
-                            {
-                                using (new Profiler.TimeScopeHelper(ScopeChildren))
-                                {
-                                    if (TtEngine.Instance.Config.IsParrallelWorldGather)
-                                    {
-                                        var numTask = TtEngine.Instance.EventPoster.NumOfPool;
-                                        numTask = Math.Min(node.Children.Count, numTask);
-                                        TtEngine.Instance.EventPoster.ParrallelFor(numTask, static (int index, object arg1, object arg2, Thread.Async.TtAsyncTaskStateBase state) =>
-                                        {
-                                            var node = arg1 as TtNode;
-                                            var rp = arg2 as TtVisParameter;
-                                            int stride = node.Children.Count / (int)state.UserArguments.NumOfParrallelFor + 1;
-                                            var start = index * stride;
-                                            for (int n = 0; n < stride; n++)
-                                            {
-                                                var nn = start + n;
-                                                if (nn >= node.Children.Count)
-                                                    break;
-                                                OnVisitNode_GatherVisibleMeshes(node.Children[nn], rp);
-                                            }
-                                        }, node, rp);
-                                    }
-                                    else
-                                    {
-                                        foreach (var i in node.Children)
-                                        {
-                                            OnVisitNode_GatherVisibleMeshes(i, rp);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    break;
+                    return true;
+                }, rp, 16);
             }
-            return false;
-        }
-        static Scene.TtNode.FOnVisitNode mOnVisitNode_GatherVisibleMeshesAll = OnVisitNode_GatherVisibleMeshesAll;
-        private unsafe static bool OnVisitNode_GatherVisibleMeshesAll(Scene.TtNode node, object arg)
-        {
-            var rp = arg as TtVisParameter;
-
-            using (new Profiler.TimeScopeHelper(ScopeOnGatherVisibleMeshes))
-            {
-                if (rp.IsGatherVisibleMeshes == null || rp.IsGatherVisibleMeshes(node, rp))
-                    node.OnGatherVisibleMeshes(rp);
-            }
-                
-            return false;
         }
         #endregion
 
         #region DebugAssist
-        
+
         public void GatherBoundShapes(List<Graphics.Pipeline.FVisibleMesh> boundVolumes, Scene.TtNode node = null)
         {
             if (node == null)

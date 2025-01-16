@@ -86,7 +86,7 @@ namespace EngineNS.Bricks.DataCopyer
                 }
                 if (i.CustumSerializer != null)
                 {
-                    i.CustumSerializer.Save(ar, i.PropInfo.GetValue(obj), i.PropertyName);
+                    i.CustumSerializer.Save(ar, obj, i.PropertyName);
                     continue;
                 }
                 WriteObject(ar, i.PropInfo.PropertyType, i.PropInfo.GetValue(obj));
@@ -1057,7 +1057,7 @@ namespace EngineNS
 
                             Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Plugin DataCopyer need build");
 #if PWindow
-                            TtNativeWindow.MessageBoxA(IntPtr.Zero, "DataCopyer", "Plugin DataCopyer need build", 0);
+                            TtNativeWindow.MessageBoxA(IntPtr.Zero, "Plugin DataCopyer need build", "DataCopyer", 0);
                             TtEngine.Instance.PostQuitMessage();
 #endif
                             //rebuild plugin

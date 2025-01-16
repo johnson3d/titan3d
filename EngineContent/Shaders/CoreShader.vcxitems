@@ -77,6 +77,7 @@
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\GridUVModifier.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\InstancingModifier.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Modifier\MeshletModifier.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Modifier\UIModifier.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Occlusion\GpuSceneCullCluster.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Occlusion\GpuSceneCullInstance.cginc" />

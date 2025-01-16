@@ -12,3 +12,5 @@
 	- ContentCurrentDir:EngineNS.RName@EngineCore=utest/:Game
 - 保存最新资产类型列表
 	- CookSaveNewestAssetType:System.String@Unknown=Scene+Mesh+Material+MaterialInst+AnimClip+MeshPrimitive+UI+Prefab+Macross+UVAnim+RPolicy+AnimationClip
+- 启动C++调式库 
+	- NativeDLL:System.String@Unknown=debug

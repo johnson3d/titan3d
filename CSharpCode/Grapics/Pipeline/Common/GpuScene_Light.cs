@@ -48,7 +48,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     var lightData = pointLight.NodeData as GamePlay.Scene.TtPointLightNode.TtLightNodeData;
 
                     Shader.FPointLight light;
-                    var pos = pointLight.Placement.Position;
+                    var pos = pointLight.Placement.AbsTransform.Position;
                     light.PositionAndRadius = new Vector4(pos.ToSingleVector3(), lightData.Radius);
                     light.ColorAndIntensity = new Vector4(lightData.Color.X, lightData.Color.Y, lightData.Color.Z, lightData.Intensity);
                     pointLight.IndexInGpuScene = PointLights.PushData(light);

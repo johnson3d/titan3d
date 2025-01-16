@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Editor.Forms
 {
-    public class ULightEnvironemnt : ITickable
+    public class TtLightEnvironemnt : ITickable
     {
         EngineNS.GamePlay.Scene.TtMeshNode mArrowMeshNode;
         public float mArrowRadius = 1.0f;

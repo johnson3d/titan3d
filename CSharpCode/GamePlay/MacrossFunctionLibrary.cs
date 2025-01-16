@@ -35,26 +35,34 @@ namespace EngineNS.GamePlay
         {
             if (IsDisposed)
                 return null;
-            if (Pools.ContainsKey(prefabName))
+            if (Pools.TryGetValue(prefabName, out var pool))
             {
-                return Pools[prefabName].QueryObjectSync();
+                var task = pool.CloneNode();
+                task.WaitCompleted();
+                return task.GetResultAndRelease();
+                //return pool.QueryObjectSync();
             }
             else
             {
-                var pool = RegPool(prefabName);
+                pool = RegPool(prefabName);
                 if (pool == null)
                     return null;
-                return pool.QueryObjectSync();
+
+                var task = pool.CloneNode();
+                task.WaitCompleted();
+                return task.GetResultAndRelease();
+                //return pool.QueryObjectSync();
             }   
         }
         public void ReleasePrefab(TtPrefabNode prefabNode)
         {
-            if (IsDisposed)
-                return;
-            if (Pools.ContainsKey(prefabNode.PrefabName))
-            {
-                Pools[prefabNode.PrefabName].ReleaseObject(prefabNode);
-            }
+            return;
+            //if (IsDisposed)
+            //    return;
+            //if (Pools.ContainsKey(prefabNode.PrefabName))
+            //{
+            //    Pools[prefabNode.PrefabName].ReleaseObject(prefabNode);
+            //}
         }
         private TtPrefabPool RegPool(RName prefabName)
         {
@@ -71,6 +79,23 @@ namespace EngineNS.GamePlay
         public TtPrefabPoolManager PoolManager { get; set; }
         private RName mPrefabName;
         private TtPrefabNode mOriginPrefab = null;
+        public async Thread.Async.TtTask<TtPrefabNode> CloneNode()
+        {
+            if (mOriginPrefab == null)
+            {
+                var prefab = await TtEngine.Instance.PrefabManager.GetPrefab(mPrefabName);
+                if (prefab != null)
+                {
+                    mOriginPrefab = prefab.Root;
+                }
+                else
+                {
+                    System.Diagnostics.Debug.Assert(false);
+                }
+            }
+            var ret = await mOriginPrefab.CloneNode(PoolManager.World) as TtPrefabNode;
+            return ret;
+        }
         public TtPrefabPool(RName prefabName)
         {
             mPrefabName = prefabName;
@@ -91,7 +116,7 @@ namespace EngineNS.GamePlay
                     System.Diagnostics.Debug.Assert(false);
                 }
             }
-            return await mOriginPrefab.CloneNode(PoolManager.World) as TtPrefabNode;
+            return await CloneNode();
         }
         protected override bool OnObjectRelease(TtPrefabNode obj)
         {

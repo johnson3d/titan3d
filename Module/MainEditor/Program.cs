@@ -85,15 +85,21 @@ namespace MainEditor
             //}
 
             var mBin = System.IO.Directory.GetCurrentDirectory();
-#if DEBUG
-            var cfg = FindArgument(args, "NativeDLL=");
-            if (cfg != null && cfg == "debug")
-                EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/debug");
+            var dynCfgData = new EngineNS.IO.TtDynConfigData();
+            dynCfgData.LoadConfigData(mBin + "/../cache/DynConfigData.dcd", true);
+            var NativeDLL = dynCfgData.TryGetConfig<string>("NativeDLL");
+            if (string.IsNullOrEmpty(NativeDLL) == false)
+            {
+                EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/{NativeDLL}");
+            }
             else
-                EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/release");
-#else
-            EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/release");
-#endif
+            {
+                var cfg = FindArgument(args, "NativeDLL=");
+                if (cfg != null && cfg == "debug")
+                    EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/debug");
+                else
+                    EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/release");
+            }
 
             {
                 var ev1 = Environment.GetEnvironmentVariable("CORECLR_ENABLE_PROFILING");

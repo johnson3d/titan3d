@@ -175,21 +175,6 @@ namespace EngineNS
         }
         //
         // Summary:
-        //     Gets or sets the width, in pixels, of the right side of the bounding rectangle.
-        //
-        // Returns:
-        //     A System.Double that represents the width, in pixels, of the right side of
-        //     the bounding rectangle for this instance of CSUtility.Support.Thickness. A pixel
-        //     is equal to 1/96 of an inch. The default is 0.
-        float mRight;
-        [Rtti.Meta]
-        public float Right
-        {
-            get { return mRight; }
-            set { mRight = value; }
-        }
-        //
-        // Summary:
         //     Gets or sets the width, in pixels, of the upper side of the bounding rectangle.
         //
         // Returns:
@@ -202,6 +187,21 @@ namespace EngineNS
         {
             get { return mTop; }
             set { mTop = value; }
+        }
+        //
+        // Summary:
+        //     Gets or sets the width, in pixels, of the right side of the bounding rectangle.
+        //
+        // Returns:
+        //     A System.Double that represents the width, in pixels, of the right side of
+        //     the bounding rectangle for this instance of CSUtility.Support.Thickness. A pixel
+        //     is equal to 1/96 of an inch. The default is 0.
+        float mRight;
+        [Rtti.Meta]
+        public float Right
+        {
+            get { return mRight; }
+            set { mRight = value; }
         }
         // Summary:
         //     Gets or sets the width, in pixels, of the lower side of the bounding rectangle.

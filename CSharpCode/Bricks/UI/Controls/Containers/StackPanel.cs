@@ -37,7 +37,7 @@ namespace EngineNS.UI.Controls.Containers
             if(ui != null)
             {
                 var canvas = VisualTreeHelper.GetParent(ui) as TtStackPanel;
-                canvas?.InvalidateArrange();
+                canvas?.InvalidateMeasure();
             }
         }
         [Bind.AttachedProperty(Name = "VerticalAlignment", Category = "Layout(StackPanel)")]
@@ -47,7 +47,7 @@ namespace EngineNS.UI.Controls.Containers
             if(ui != null)
             {
                 var canvas = VisualTreeHelper.GetParent(ui) as TtStackPanel;
-                canvas?.InvalidateArrange();
+                canvas?.InvalidateMeasure();
             }
         }
         ELayout_Orientation mOrientation = ELayout_Orientation.Horizontal;
@@ -62,7 +62,7 @@ namespace EngineNS.UI.Controls.Containers
                     return;
                 OnValueChange(value, mOrientation);
                 mOrientation = value;
-                InvalidateArrange();
+                UpdateLayout();
             }
         }
 
@@ -231,7 +231,7 @@ namespace EngineNS.UI.Controls.Containers
             for (int i = 0; i < count; i++)
             {
                 var child = VisualTreeHelper.GetChild(this, i);
-                child.Draw(canvas, batch);
+                child.DrawInternal(canvas, batch);
             }
         }
     }

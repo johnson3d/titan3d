@@ -425,7 +425,7 @@ namespace EngineNS
                 Config.SaveConfig(cfgFile);
             }
 
-            this.DynConfigData.LoadConfigData();
+            this.DynConfigData.LoadConfigData(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "DynConfigData.dcd");
 
             var Config_UseRenderDoc = this.DynConfigData.GetConfig("UseRenderDoc");
             if (Config_UseRenderDoc != null)

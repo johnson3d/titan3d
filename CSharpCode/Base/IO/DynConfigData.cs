@@ -50,11 +50,11 @@ namespace EngineNS.IO
             }
             TtFileManager.WriteAllText(file, stringBuilder.ToString());
         }
-        public void LoadConfigData()
+        public void LoadConfigData(string file, bool bAsText = false)
         {
             ConfigDatas.Clear();
             CommentLines.Clear();
-            var file = TtEngine.Instance.FileManager.GetRoot(TtFileManager.ERootDir.Cache) + "DynConfigData.dcd";
+            //var file = TtEngine.Instance.FileManager.GetRoot(TtFileManager.ERootDir.Cache) + "DynConfigData.dcd";
             var textAll = TtFileManager.ReadAllText(file);
             if (textAll == null)
                 return;
@@ -76,7 +76,10 @@ namespace EngineNS.IO
                 var typeStr = text.Substring(0, pos);
                 var valueStr = text.Substring(pos + 1);
 
-                ConfigDatas[key] = TConvert.ToObject(Rtti.TtTypeDesc.TypeOf(typeStr), valueStr);
+                if (bAsText == false)
+                    ConfigDatas[key] = TConvert.ToObject(Rtti.TtTypeDesc.TypeOf(typeStr), valueStr);
+                else
+                    ConfigDatas[key] = valueStr;
             }
         }
     }

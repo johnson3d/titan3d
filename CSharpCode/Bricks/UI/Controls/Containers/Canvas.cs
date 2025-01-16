@@ -18,7 +18,7 @@ namespace EngineNS.UI.Controls.Containers
             if(ui != null)
             {
                 var canvas = VisualTreeHelper.GetParent(ui) as TtCanvasControl;
-                canvas?.InvalidateArrange();
+                canvas?.InvalidateMeasure();
             }
         }
 
@@ -29,7 +29,7 @@ namespace EngineNS.UI.Controls.Containers
             if (ui != null)
             {
                 var canvas = VisualTreeHelper.GetParent(ui) as TtCanvasControl;
-                canvas?.InvalidateArrange();
+                canvas?.InvalidateMeasure();
             }
         }
 
@@ -53,7 +53,7 @@ namespace EngineNS.UI.Controls.Containers
             if (ui != null)
             {
                 var canvas = VisualTreeHelper.GetParent(ui) as TtCanvasControl;
-                canvas?.InvalidateArrange();
+                canvas?.InvalidateMeasure();
             }
         }
 
@@ -77,7 +77,7 @@ namespace EngineNS.UI.Controls.Containers
             if (ui != null)
             {
                 var canvas = VisualTreeHelper.GetParent(ui) as TtCanvasControl;
-                canvas?.InvalidateArrange();
+                canvas?.InvalidateMeasure();
             }
         }
         class AnchorRectZDisplayNameAttribute : BindPropertyDisplayNameAttribute
@@ -100,7 +100,7 @@ namespace EngineNS.UI.Controls.Containers
             if (ui != null)
             {
                 var canvas = VisualTreeHelper.GetParent(ui) as TtCanvasControl;
-                canvas?.InvalidateArrange();
+                canvas?.InvalidateMeasure();
             }
         }
         class AnchorRectWDisplayNameAttribute : BindPropertyDisplayNameAttribute
@@ -123,7 +123,7 @@ namespace EngineNS.UI.Controls.Containers
             if (ui != null)
             {
                 var canvas = VisualTreeHelper.GetParent(ui) as TtCanvasControl;
-                canvas?.InvalidateArrange();
+                canvas?.InvalidateMeasure();
             }
         }
 
@@ -134,7 +134,7 @@ namespace EngineNS.UI.Controls.Containers
             if (ui != null)
             {
                 var canvas = VisualTreeHelper.GetParent(ui) as TtCanvasControl;
-                canvas?.InvalidateArrange();
+                canvas?.InvalidateMeasure();
             }
         }
 
@@ -224,6 +224,24 @@ namespace EngineNS.UI.Controls.Containers
                 {
                     height = anchorMaxY - anchorMinY - anchorRectY - anchorRectW;
                     posY = arrangeSize.Y + anchorMinY + anchorRectY;
+                }
+
+                if(childUI is TtContainer)
+                {
+                    var container = childUI as TtContainer;
+                    switch(container.SizeToContent)
+                    {
+                        case ESizeToContent.Width:
+                            width = container.DesiredSize.Width;
+                            break;
+                        case ESizeToContent.Height:
+                            height = container.DesiredSize.Height;
+                            break;
+                        case ESizeToContent.WidthAndHeight:
+                            width = container.DesiredSize.Width;
+                            height = container.DesiredSize.Height;
+                            break;
+                    }
                 }
 
                 var childArrangeSize = new RectangleF(posX, posY, width, height);

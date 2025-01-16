@@ -140,7 +140,7 @@ namespace EngineNS.Bricks.Particle
         {
             base.OnDrawCall(cmd, drawcall, policy, atom);
 
-            if (Emitter != null)
+            if (Emitter != null && Emitter.CurrentQueue != null)
             {
                 drawcall.BindSRV(drawcall.FindBinder("sbParticleInstance"), Emitter.GpuResources.ParticlesBuffer.Srv);
                 drawcall.BindSRV(drawcall.FindBinder("sbAlives"), Emitter.GpuResources.CurAlivesBuffer.Srv);

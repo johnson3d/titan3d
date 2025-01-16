@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UMaterialInstanceEditor : ULightEnvironemnt, Editor.IAssetEditor, IRootForm
+    public class UMaterialInstanceEditor : TtLightEnvironemnt, Editor.IAssetEditor, IRootForm
     {
         public int GetTickOrder()
         {

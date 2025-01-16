@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -146,10 +147,15 @@ namespace EngineNS.Graphics.Mesh
             {
                 mCoreObject.Save2Xnd(rc.mCoreObject, xnd.RootNode.mCoreObject);
             }
-            var attr = xnd.RootNode.mCoreObject.GetOrAddAttribute("PartialSkeleton",0,0, true);
+            var attr = xnd.RootNode.GetOrAddAttribute("PartialSkeleton",0,0, true);
             using (var ar = attr.GetWriter(512))
             {
                 ar.Write(PartialSkeleton);
+            }
+            if (Meshlets != null)
+            {
+                var meshlets = xnd.RootNode.GetOrAddNode("Meshlets", 0, 0, true);
+                Meshlets.SaveXnd(meshlets);
             }
             xnd.SaveXnd(name.Address);
             TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
@@ -177,7 +183,7 @@ namespace EngineNS.Graphics.Mesh
                 var ret = result.mCoreObject.LoadXnd(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, "", xnd.mCoreObject, true);
                 if (ret == false)
                     return null;
-                var attr = xnd.RootNode.mCoreObject.TryGetAttribute("PartialSkeleton");
+                var attr = xnd.RootNode.TryGetAttribute("PartialSkeleton");
                 if (attr.IsValidPointer)
                 {
                     IO.ISerializer partialSkeleton = null;
@@ -196,6 +202,11 @@ namespace EngineNS.Graphics.Mesh
                     {
                         result.PartialSkeleton = partialSkeleton as Animation.SkeletonAnimation.Skeleton.TtSkinSkeleton;
                     }
+                }
+                var meshlets = xnd.RootNode.TryGetChildNode("Meshlets");
+                if (meshlets.IsValidPointer)
+                {
+                    result.LoadMeshlets(meshlets);
                 }
                 return result;
             }

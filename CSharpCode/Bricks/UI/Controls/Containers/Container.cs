@@ -701,30 +701,30 @@ namespace EngineNS.UI.Controls.Containers
             mBackground.HostElement = this;
         }
         // pt位置相对于linecheck到的element
-        public override TtUIElement GetPointAtElement(in Vector2 pt, out Vector2 pointOffset, bool onlyClipped = true)
+        public override TtUIElement GetPointAtElement(ref PointAtProcessData data)
         {
             // todo: inv transform
-            pointOffset = Vector2.Zero;
-            if(NoHitTest)
+            data.PointOffset = Vector2.Zero;
+            if(NoHitTest && !data.IgnoreNoHitTest)
                 return null;
-            if (onlyClipped)
+            if (data.OnlyClipped)
             {
-                if (!DesignRect.Contains(in pt))
+                if (!DesignRect.Contains(in data.Point))
                     return null;
                 for (int i = mChildren.Count - 1; i >= 0; i--)
                 {
                     var child = mChildren[i];
-                    if (child.NoHitTest)
+                    if (child.NoHitTest && !data.IgnoreNoHitTest)
                         continue;
                     if (child.Is3D)
                         continue;
-                    if (!child.DesignRect.Contains(in pt))
+                    if (!child.DesignRect.Contains(in data.Point))
                         continue;
 
                     var container = child as TtContainer;
                     if (container != null && !(container is TtUserControl))
                     {
-                        var retVal = container.GetPointAtElement(in pt, out pointOffset, onlyClipped);
+                        var retVal = container.GetPointAtElement(ref data);
                         if (retVal != null)
                             return retVal;
                     }
@@ -738,21 +738,21 @@ namespace EngineNS.UI.Controls.Containers
                 for (int i = mChildren.Count - 1; i >= 0; i--)
                 {
                     var child = mChildren[i];
-                    if (child.NoHitTest)
+                    if (child.NoHitTest && !data.IgnoreNoHitTest)
                         continue;
                     if (child.Is3D)
                         continue;
                     var container = child as TtContainer;
                     if (container != null && !(container is TtUserControl))
                     {
-                        var retVal = container.GetPointAtElement(in pt, out pointOffset, onlyClipped);
+                        var retVal = container.GetPointAtElement(ref data);
                         if (retVal != null)
                             return retVal;
                     }
-                    else if(child.DesignRect.Contains(in pt))
+                    else if(child.DesignRect.Contains(in data.Point))
                         return child;
                 }
-                if (DesignRect.Contains(in pt))
+                if (DesignRect.Contains(in data.Point))
                     return this;
                 return null;
             }
@@ -776,7 +776,7 @@ namespace EngineNS.UI.Controls.Containers
             for (int i = 0; i < count; i++)
             {
                 var child = VisualTreeHelper.GetChild(this, i);
-                child.Draw(canvas, batch);
+                child.DrawInternal(canvas, batch);
             }
         }
 

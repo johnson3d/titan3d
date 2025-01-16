@@ -126,11 +126,12 @@ namespace EngineNS.UI.Controls
             return ElementUpdateTransformIndex(parentTransformIdx);
         }
 
-        private bool IsRenderable()
+        protected bool IsRenderable()
         {
             if (NeverMeasured || NeverArranged)
                 return false;
-            if (Visibility == Visibility.Collapsed)
+            if ((Visibility == Visibility.Collapsed) ||
+                (Visibility == Visibility.Hidden))
                 return false;
             return IsMeasureValid && IsArrangeValid;
         }
@@ -140,6 +141,8 @@ namespace EngineNS.UI.Controls
             //var clip = DesignClipRect;
             //batch.SetPosition(clip.Left, clip.Top);
             //batch.SetClientClip(clip.Width, clip.Height);
+            if (!IsRenderable())
+                return;
 
             Draw(canvas, batch);
         }

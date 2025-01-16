@@ -3,6 +3,7 @@ using EngineNS.GamePlay.Scene;
 using EngineNS.NxPhysics;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -27,6 +28,7 @@ namespace EngineNS.Bricks.Particle
             [Rtti.Meta]
             public RName NebulaName { get; set; }
         }
+        [Category("Option")]
         [RName.PGRName(FilterExts = TtNebulaParticle.AssetExt)]
         public RName NebulaName 
         { 
@@ -87,10 +89,10 @@ namespace EngineNS.Bricks.Particle
         {
             //var particleNode = policy.FindNode("ParticleNode") as UParticleGraphNode;
             var particleNode = args.Policy.FindFirstNode<UParticleGraphNode>();
-            if (particleNode == null)
+            if (particleNode == null || NebulaParticle == null)
                 return true;
 
-            NebulaParticle.Update(args.Policy, particleNode, TtEngine.Instance.ElapsedSecond);
+            NebulaParticle.Update(args.Policy, particleNode, TtEngine.Instance.ElapsedSecond, new Vector3(this.Placement.AbsTransform.Position));
 
             return true;
         }

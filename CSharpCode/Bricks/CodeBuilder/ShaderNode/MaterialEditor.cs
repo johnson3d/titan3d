@@ -31,7 +31,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode
     }
 
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.ShaderNode.UShaderEditor@EngineCore" })]
-    public partial class TtMaterialEditor : EngineNS.Editor.Forms.ULightEnvironemnt, Editor.IAssetEditor, IRootForm
+    public partial class TtMaterialEditor : EngineNS.Editor.Forms.TtLightEnvironemnt, Editor.IAssetEditor, IRootForm
     {
         public int GetTickOrder()
         {

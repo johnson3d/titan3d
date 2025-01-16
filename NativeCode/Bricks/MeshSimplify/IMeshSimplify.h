@@ -4,6 +4,12 @@
 
 NS_BEGIN
 
+struct IBlobObject;
+namespace NxRHI
+{
+	class FMeshDataProvider;
+}
+
 struct TR_CLASS(SV_LayoutStruct = 8)
 	IMeshTriangle
 {
@@ -26,9 +32,13 @@ class TR_CLASS(SV_Dispose = delete self)
 	IMeshOptimizer
 {
 public:
-	void OptimizeVertexCache(unsigned int* destination, const unsigned int* indices, UINT index_count, UINT vertex_count);
-	void OptimizeVertexCacheStrip(unsigned int* destination, const unsigned int* indices, UINT index_count, UINT vertex_count);
-	void OptimizeMeshlet(unsigned int* meshlet_vertices, unsigned char* meshlet_triangles, UINT triangle_count, UINT vertex_count);
+	static void OptimizeVertexCache(unsigned int* destination, const unsigned int* indices, UINT index_count, UINT vertex_count);
+	static void OptimizeVertexCacheStrip(unsigned int* destination, const unsigned int* indices, UINT index_count, UINT vertex_count);
+	static void OptimizeMeshlet(unsigned int* meshlet_vertices, unsigned char* meshlet_triangles, UINT triangle_count, UINT vertex_count);
+
+	static UINT BuildMeshlets(IBlobObject* meshlets, IBlobObject* meshletMaterials, IBlobObject* meshlet_vertices, IBlobObject* meshlet_triangles,
+		NxRHI::FMeshDataProvider* mesh,
+		UINT max_vertices, UINT max_triangles, float cone_weight = 0);
 };
 
 NS_END

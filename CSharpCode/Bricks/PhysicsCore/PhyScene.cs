@@ -113,7 +113,7 @@ namespace EngineNS.Bricks.PhysicsCore
         }        
     }
 
-    public class UPhySceneMember : IMemberTickable
+    public class TtPhySceneMember : IMemberTickable
     {
         private GamePlay.Scene.TtScene HostScene;
         private TtPhyScene mPxScene;
@@ -176,37 +176,44 @@ namespace EngineNS.Bricks.PhysicsCore
         public unsafe void OnTrigger(void* arg0, EngineNS.PhyTriggerPair* arg1, uint arg2)
         {
             var triggerActor = TtPhyActor.GetActor(new EngineNS.PhyActor(arg1->triggerActor));
-            var otherActor = TtPhyActor.GetActor(new EngineNS.PhyActor(arg1->otherActor));
-            var otherController = TtPhyController.GetPhyController(new EngineNS.PhyController(arg1->otherActor));
-            if(otherActor != null)
-            {
-                if (PhyPairFlag.eNOTIFY_TOUCH_FOUND == (arg1->status & PhyPairFlag.eNOTIFY_TOUCH_FOUND))
-                {
-                    triggerActor.RigidBodyNode.OnBeginTrigger(triggerActor.TagNode, otherActor.TagNode);
-                    otherActor.RigidBodyNode.OnBeginTrigger(otherActor.TagNode, triggerActor.TagNode);
-                }
+            if (triggerActor == null)
+                return;
 
-                if (PhyPairFlag.eNOTIFY_TOUCH_LOST == (arg1->status & PhyPairFlag.eNOTIFY_TOUCH_LOST))
-                {
-                    triggerActor.RigidBodyNode.OnEndTrigger(triggerActor.TagNode, otherActor.TagNode);
-                    otherActor.RigidBodyNode.OnEndTrigger(otherActor.TagNode, triggerActor.TagNode);
-                }
-            }
-            if(otherController != null)
+            var otherController = TtPhyController.GetPhyController(new EngineNS.PhyController(arg1->otherActor));
+            if (otherController != null)
             {
                 if (PhyPairFlag.eNOTIFY_TOUCH_FOUND == (arg1->status & PhyPairFlag.eNOTIFY_TOUCH_FOUND))
                 {
                     triggerActor.RigidBodyNode.OnBeginTrigger(triggerActor.TagNode, otherController.TagNode);
                     //otherActor.RigidBodyNode.OnBeginTrigger(otherActor.TagNode, triggerActor.TagNode);
+                    return;
                 }
 
                 if (PhyPairFlag.eNOTIFY_TOUCH_LOST == (arg1->status & PhyPairFlag.eNOTIFY_TOUCH_LOST))
                 {
                     triggerActor.RigidBodyNode.OnEndTrigger(triggerActor.TagNode, otherController.TagNode);
                     //otherActor.RigidBodyNode.OnEndTrigger(otherActor.TagNode, triggerActor.TagNode);
+                    return;
                 }
             }
 
+            var otherActor = TtPhyActor.GetActor(new EngineNS.PhyActor(arg1->otherActor));
+            if (otherActor != null)
+            {
+                if (PhyPairFlag.eNOTIFY_TOUCH_FOUND == (arg1->status & PhyPairFlag.eNOTIFY_TOUCH_FOUND))
+                {
+                    triggerActor.RigidBodyNode.OnBeginTrigger(triggerActor.TagNode, otherActor.TagNode);
+                    otherActor.RigidBodyNode.OnBeginTrigger(otherActor.TagNode, triggerActor.TagNode);
+                    return;
+                }
+
+                if (PhyPairFlag.eNOTIFY_TOUCH_LOST == (arg1->status & PhyPairFlag.eNOTIFY_TOUCH_LOST))
+                {
+                    triggerActor.RigidBodyNode.OnEndTrigger(triggerActor.TagNode, otherActor.TagNode);
+                    otherActor.RigidBodyNode.OnEndTrigger(otherActor.TagNode, triggerActor.TagNode);
+                    return;
+                }
+            }
         }
         public void Cleanup(object host)
         {
@@ -220,7 +227,7 @@ namespace EngineNS.Bricks.PhysicsCore
             get
             {
                 if (mScopeTick == null)
-                    mScopeTick = new Profiler.TimeScope(typeof(UPhySceneMember), nameof(TickLogic));
+                    mScopeTick = new Profiler.TimeScope(typeof(TtPhySceneMember), nameof(TickLogic));
                 return mScopeTick;
             }
         }
@@ -231,7 +238,7 @@ namespace EngineNS.Bricks.PhysicsCore
             get
             {
                 if (mScopeWaitPx == null)
-                    mScopeWaitPx = new Profiler.TimeScope(typeof(UPhySceneMember), nameof(TickLogic) + ".WaitPX");
+                    mScopeWaitPx = new Profiler.TimeScope(typeof(TtPhySceneMember), nameof(TickLogic) + ".WaitPX");
                 return mScopeWaitPx;
             }
         }
@@ -247,7 +254,7 @@ namespace EngineNS.Bricks.PhysicsCore
                 TickLogic_ellapse = ellapse;
                 TtEngine.Instance.EventPoster.RunOn(static (state) =>
                 {
-                    var scene = state.UserArguments.Obj0 as UPhySceneMember;
+                    var scene = state.UserArguments.Obj0 as TtPhySceneMember;
                     scene.TickPxScene(scene.TickLogic_ellapse);
                     return true;
                 }, Thread.Async.EAsyncTarget.Physics, this, PxSceneTickEndEvent);
@@ -286,6 +293,6 @@ namespace EngineNS.GamePlay.Scene
 {
     public partial class TtScene
     {
-        public Bricks.PhysicsCore.UPhySceneMember PxSceneMB { get; } = new Bricks.PhysicsCore.UPhySceneMember();
+        public Bricks.PhysicsCore.TtPhySceneMember PxSceneMB { get; } = new Bricks.PhysicsCore.TtPhySceneMember();
     }
 }

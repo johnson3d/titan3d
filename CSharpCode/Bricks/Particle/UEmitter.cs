@@ -1,4 +1,5 @@
 using MathNet.Numerics.Statistics.Mcmc;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -439,10 +440,11 @@ namespace EngineNS.Bricks.Particle
 
         #region Update
         private float mParticleStartSecond;
-        public unsafe void Update(Graphics.Pipeline.TtRenderPolicy policy, UParticleGraphNode particleSystem, float elapsed)
+        public unsafe void Update(Graphics.Pipeline.TtRenderPolicy policy, UParticleGraphNode particleSystem, float elapsed, Vector3 Location)
         {
             if (Mesh == null)
                 return;
+            EmitterData.Location = Location;
             var quat = Quaternion.RotationMatrix(policy.DefaultCamera.GetViewMatrix());
             EmitterData.CameralEuler = quat.ToEuler();
             var coreBinder = Graphics.Pipeline.TtCoreShaderBinder.TtPerParticleCBufferVarIndexer.Instance;
@@ -506,7 +508,7 @@ namespace EngineNS.Bricks.Particle
         }
         public unsafe void UpdateGPU(UParticleGraphNode particleSystem, float elapsed)
         {
-            if (CurrentQueue.Shader == null || CurrentQueue.Shader.Particle_Update == null)
+            if (CurrentQueue ==null || CurrentQueue.Shader == null || CurrentQueue.Shader.Particle_Update == null)
                 return;
             CurrentQueue.UpdateComputeDrawcall(TtEngine.Instance.GfxDevice.RenderContext, this);
 

@@ -109,6 +109,7 @@ namespace EngineNS.GamePlay.Scene
         {
             var extent = new Vector3(Radius);
             mLocalAABB = new BoundingBox(mCenter - extent, mCenter + extent);
+            AABB.FromSingle(in mLocalAABB);
             HostNode.UpdateAABB();
         }
     }

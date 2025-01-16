@@ -645,8 +645,10 @@ namespace EngineNS.UI.Editor
                 if (dragDropPayload != null)
                 {
                     var curPos = new Vector2(TtEngine.Instance.InputSystem.Mouse.EventMouseX, TtEngine.Instance.InputSystem.Mouse.EventMouseY);
-                    Vector2 pointOffset;
-                    var element = mUIHost.GetPointAtElement(in curPos, out pointOffset);
+                    var pointAtData = new TtUIElement.PointAtProcessData();
+                    pointAtData.Reset();
+                    pointAtData.Point = curPos;
+                    var element = mUIHost.GetPointAtElement(ref pointAtData);
                     if(element != null)
                     {
                         var container = element as TtContainer;
@@ -969,7 +971,18 @@ namespace EngineNS.UI.Editor
                     {
                         ChildRName = rName,
                         Name = rName.PureName,
+                        Width = size.X,
+                        Height = size.Y,
                     };
+                    if(Math.Abs(size.X) > MathHelper.Epsilon)
+                    {
+                        userControl.WidthAuto = false;
+                    }
+                    if(Math.Abs(size.Y) > MathHelper.Epsilon)
+                    {
+                        userControl.HeightAuto = false;
+                    }
+
                     userControl.Name = GetValidName(userControl);
                     switch(type)
                     {
@@ -1667,8 +1680,11 @@ namespace EngineNS.UI.Editor
                     {
                         var pt = new Vector2(e.MouseButton.X, e.MouseButton.Y);
                         var data = new TtUIElement.RayIntersectData();
-                        Vector2 pointOffset;
-                        var element = mUIHost.GetPointAtElement(in pt, out pointOffset);
+                        var pointAtData = new TtUIElement.PointAtProcessData();
+                        pointAtData.Reset();
+                        pointAtData.Point = pt;
+                        pointAtData.IgnoreNoHitTest = true;
+                        var element = mUIHost.GetPointAtElement(ref pointAtData);
                         if(mCurrentPointAtElement != element && (CurrentDecorator == null || !CurrentDecorator.IsInDecoratorOperation()))
                         {
                             SetCurrentPointAtElement(element);

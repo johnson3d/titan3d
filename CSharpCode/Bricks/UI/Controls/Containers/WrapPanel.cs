@@ -191,7 +191,7 @@ namespace EngineNS.UI.Controls.Containers
             for (int i = 0; i < count; i++)
             {
                 var child = VisualTreeHelper.GetChild(this, i);
-                child.Draw(canvas, batch);
+                child.DrawInternal(canvas, batch);
             }
         }
     }

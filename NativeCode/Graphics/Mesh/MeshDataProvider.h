@@ -67,7 +67,7 @@ namespace NxRHI
 		bool MergeFromMesh(FMeshDataProvider* mesh, const v3dxMatrix4* matrix);
 		bool Init(DWORD streams, bool isIndex32, int atom);
 		bool Init();
-
+		void ConvertToIndex32();
 		bool BuildTangent();
 
 		bool LoadFromMeshPrimitive(XndNode* pNode, EVertexStreamType streams);

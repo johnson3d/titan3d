@@ -62,6 +62,8 @@ namespace EngineNS.Bricks.Particle
         }
         public void UpdateAMetaReferences(IO.IAssetMeta ameta)
         {
+            if (ParticleGraph == null)
+                return;
             ameta.RefAssetRNames.Clear();
             foreach (var i in ParticleGraph.Nodes)
             {
@@ -149,17 +151,21 @@ namespace EngineNS.Bricks.Particle
                         shapeNode = ParticleGraph.FindOutLinkerSingle(shapeNode.Right)?.InNode as Editor.TtEmitShapeNode;
                     }
 
-                    var effectorQueueNode = ParticleGraph.FindOutLinkerSingle(emtNode.Effectors).InNode as Editor.TtEffectorQueueNode;
-                    if (effectorQueueNode != null)
+                    var effetorLinker = ParticleGraph.FindOutLinkerSingle(emtNode.Effectors);
+                    if(effetorLinker != null)
                     {
-                        var effectorNode = ParticleGraph.FindOutLinkerSingle(effectorQueueNode.Right).InNode as Editor.TtEffectorNode;
-                        while (effectorNode != null)
+                        var effectorQueueNode = effetorLinker.InNode as Editor.TtEffectorQueueNode;
+                        if (effectorQueueNode != null)
                         {
-                            var effector = effectorNode.CreateEffector();
-                            if (bForEditor)
-                                effectorNode.EditingObject = effector;
-                            emt.AddEffector(effectorQueueNode.QueueName, effector);
-                            effectorNode = ParticleGraph.FindOutLinkerSingle(effectorNode.Right)?.InNode as Editor.TtEffectorNode;
+                            var effectorNode = ParticleGraph.FindOutLinkerSingle(effectorQueueNode.Right).InNode as Editor.TtEffectorNode;
+                            while (effectorNode != null)
+                            {
+                                var effector = effectorNode.CreateEffector();
+                                if (bForEditor)
+                                    effectorNode.EditingObject = effector;
+                                emt.AddEffector(effectorQueueNode.QueueName, effector);
+                                effectorNode = ParticleGraph.FindOutLinkerSingle(effectorNode.Right)?.InNode as Editor.TtEffectorNode;
+                            }
                         }
                     }
 
@@ -199,7 +205,7 @@ namespace EngineNS.Bricks.Particle
         {
             Emitter.Remove(name);
         }
-        public void Update(Graphics.Pipeline.TtRenderPolicy policy, UParticleGraphNode particleSystem, float elpased)
+        public void Update(Graphics.Pipeline.TtRenderPolicy policy, UParticleGraphNode particleSystem, float elpased, Vector3 Location)
         {
             mMcObject?.Get()?.OnUpdate(this, particleSystem, elpased);
 
@@ -208,7 +214,7 @@ namespace EngineNS.Bricks.Particle
             foreach (var i in Emitter.Values)
             {
                 mMcObject?.Get()?.OnUpdateEmitter(this, i, particleSystem, elpased);
-                i.Update(policy, particleSystem, elpased);                
+                i.Update(policy, particleSystem, elpased, Location);                
             }
             //cmdlist.EndCommand();
             //policy.CommitCommandList(cmdlist);

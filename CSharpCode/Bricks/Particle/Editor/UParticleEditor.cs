@@ -5,7 +5,7 @@ using EngineNS.Bricks.NodeGraph;
 
 namespace EngineNS.Bricks.Particle.Editor
 {
-    public partial class TtParticleEditor : EngineNS.Editor.Forms.ULightEnvironemnt, EngineNS.Editor.IAssetEditor, IO.ISerializer, IRootForm, IGraphEditor
+    public partial class TtParticleEditor : EngineNS.Editor.Forms.TtLightEnvironemnt, EngineNS.Editor.IAssetEditor, IO.ISerializer, IRootForm, IGraphEditor
     {
         public int GetTickOrder()
         {

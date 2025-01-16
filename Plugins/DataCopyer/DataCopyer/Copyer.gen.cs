@@ -83861,11 +83861,15 @@ namespace EngineNS.Plugins.DataCopyer
 				ar.Write((int)0);
 			}
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -83907,6 +83911,8 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -83988,11 +83994,15 @@ namespace EngineNS.Plugins.DataCopyer
 					}
 				}
 			}
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -84020,6 +84030,323 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9791590054358784555 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.UI.Controls.Containers.TtGrid;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition> t_ColumnDefinitions = null;
+			t_ColumnDefinitions = srcObj.ColumnDefinitions;
+			if (t_ColumnDefinitions == null)
+			{
+				t_ColumnDefinitions = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition>)) as System.Collections.Generic.List<EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition>;
+			}
+			int count_ColumnDefinitions;
+			ar.Read(out count_ColumnDefinitions);
+			for(int i = 0; i<count_ColumnDefinitions; i++)
+			{
+				EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition;
+						fn(ar, t);
+					}
+				}
+				t_ColumnDefinitions.Add(t);
+				srcObj.ColumnDefinitions = t_ColumnDefinitions;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition>), false);
+					}
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition> t_RowDefinitions = null;
+			t_RowDefinitions = srcObj.RowDefinitions;
+			if (t_RowDefinitions == null)
+			{
+				t_RowDefinitions = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition>)) as System.Collections.Generic.List<EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition>;
+			}
+			int count_RowDefinitions;
+			ar.Read(out count_RowDefinitions);
+			for(int i = 0; i<count_RowDefinitions; i++)
+			{
+				EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition;
+						fn(ar, t);
+					}
+				}
+				t_RowDefinitions.Add(t);
+				srcObj.RowDefinitions = t_RowDefinitions;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.UI.Controls.Containers.TtGridCellDefinition>), false);
+					}
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_12333875368230766275 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -112162,6 +112489,22 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Editor.Forms.TtAnimationBlendSpaceEditor.TtBlendSpaceAnimPreviewNode;
 		};
 	}
+	static class EngineNS_Editor_Forms_TtMeshPrimitiveEditorConfig
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig;
+			var srcObj = src as EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9524687136534877311 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig;
+		};
+	}
 	static class EngineNS_Editor_Forms_UAssetReferGraph
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -112460,22 +112803,6 @@ namespace EngineNS.Plugins.DataCopyer
 					}
 				}
 			}
-		};
-	}
-	static class EngineNS_Editor_Forms_UMeshPrimitiveEditorConfig
-	{
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
-		{
-			var tarObj = tar as EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig;
-			var srcObj = src as EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9524687136534877311 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig;
 		};
 	}
 	static class EngineNS_Editor_Forms_USkeletonShowNode_USkeletonShowNodeData
@@ -130336,11 +130663,11 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				if (tarObj.MeshPrimitiveEditorConfig == null || tarObj.MeshPrimitiveEditorConfig.GetType() != srcObj.MeshPrimitiveEditorConfig.GetType())
 				{
-					tarObj.MeshPrimitiveEditorConfig = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.MeshPrimitiveEditorConfig.GetType()) as EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig;
+					tarObj.MeshPrimitiveEditorConfig = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.MeshPrimitiveEditorConfig.GetType()) as EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig;
 				}
 				if (tarObj.MeshPrimitiveEditorConfig != null)
 				{
-					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig>.TypeDesc.TypeString);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig>.TypeDesc.TypeString);
 					if (fn != null)
 					{
 						fn(tarObj.MeshPrimitiveEditorConfig, srcObj.MeshPrimitiveEditorConfig);
@@ -130379,6 +130706,471 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.UIDefaultTexture = srcObj.UIDefaultTexture;
 			tarObj.UsePhysxMT = srcObj.UsePhysxMT;
 			tarObj.UseRenderDoc = srcObj.UseRenderDoc;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1132857467433741107 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.TtEngineConfig;
+			System.Int32 t_AdaperId;
+			ar.Read(out t_AdaperId);
+			srcObj.AdaperId = t_AdaperId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AdaperId", false);
+				}
+			}
+			System.Boolean t_CompressAstc;
+			ar.Read(out t_CompressAstc);
+			srcObj.CompressAstc = t_CompressAstc;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CompressAstc", false);
+				}
+			}
+			System.Boolean t_CompressDxt;
+			ar.Read(out t_CompressDxt);
+			srcObj.CompressDxt = t_CompressDxt;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CompressDxt", false);
+				}
+			}
+			System.Boolean t_CompressEtc;
+			ar.Read(out t_CompressEtc);
+			srcObj.CompressEtc = t_CompressEtc;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CompressEtc", false);
+				}
+			}
+			System.Boolean t_CookDXBC;
+			ar.Read(out t_CookDXBC);
+			srcObj.CookDXBC = t_CookDXBC;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CookDXBC", false);
+				}
+			}
+			System.Boolean t_CookDXIL;
+			ar.Read(out t_CookDXIL);
+			srcObj.CookDXIL = t_CookDXIL;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CookDXIL", false);
+				}
+			}
+			System.Boolean t_CookGLSL;
+			ar.Read(out t_CookGLSL);
+			srcObj.CookGLSL = t_CookGLSL;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CookGLSL", false);
+				}
+			}
+			System.Boolean t_CookMETAL;
+			ar.Read(out t_CookMETAL);
+			srcObj.CookMETAL = t_CookMETAL;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CookMETAL", false);
+				}
+			}
+			System.Boolean t_CookSPIRV;
+			ar.Read(out t_CookSPIRV);
+			srcObj.CookSPIRV = t_CookSPIRV;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CookSPIRV", false);
+				}
+			}
+			EngineNS.Bricks.Network.RPC.EAuthority t_DefaultAuthority;
+			ar.Read(out t_DefaultAuthority);
+			srcObj.DefaultAuthority = t_DefaultAuthority;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DefaultAuthority", false);
+				}
+			}
+			EngineNS.RName t_DefaultMaterial;
+			ar.Read(out t_DefaultMaterial);
+			srcObj.DefaultMaterial = t_DefaultMaterial;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DefaultMaterial", false);
+				}
+			}
+			EngineNS.RName t_DefaultMaterialInstance;
+			ar.Read(out t_DefaultMaterialInstance);
+			srcObj.DefaultMaterialInstance = t_DefaultMaterialInstance;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DefaultMaterialInstance", false);
+				}
+			}
+			EngineNS.RName t_DefaultTexture;
+			ar.Read(out t_DefaultTexture);
+			srcObj.DefaultTexture = t_DefaultTexture;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DefaultTexture", false);
+				}
+			}
+			EngineNS.RName t_DefaultVMS;
+			ar.Read(out t_DefaultVMS);
+			srcObj.DefaultVMS = t_DefaultVMS;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DefaultVMS", false);
+				}
+			}
+			System.Boolean t_DoUnitTest;
+			ar.Read(out t_DoUnitTest);
+			srcObj.DoUnitTest = t_DoUnitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DoUnitTest", false);
+				}
+			}
+			EngineNS.RName t_EditorEffectFont;
+			ar.Read(out t_EditorEffectFont);
+			srcObj.EditorEffectFont = t_EditorEffectFont;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EditorEffectFont", false);
+				}
+			}
+			EngineNS.RName t_EditorFont;
+			ar.Read(out t_EditorFont);
+			srcObj.EditorFont = t_EditorFont;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EditorFont", false);
+				}
+			}
+			EngineNS.RName t_EditorSmallFont;
+			ar.Read(out t_EditorSmallFont);
+			srcObj.EditorSmallFont = t_EditorSmallFont;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EditorSmallFont", false);
+				}
+			}
+			System.Boolean t_Feature_UseRVT;
+			ar.Read(out t_Feature_UseRVT);
+			srcObj.Feature_UseRVT = t_Feature_UseRVT;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Feature_UseRVT", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.TtGlobalConfig> t_GlobalConfigs = null;
+			t_GlobalConfigs = srcObj.GlobalConfigs;
+			if (t_GlobalConfigs == null)
+			{
+				t_GlobalConfigs = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.TtGlobalConfig>)) as System.Collections.Generic.List<EngineNS.TtGlobalConfig>;
+			}
+			int count_GlobalConfigs;
+			ar.Read(out count_GlobalConfigs);
+			for(int i = 0; i<count_GlobalConfigs; i++)
+			{
+				EngineNS.TtGlobalConfig t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.TtGlobalConfig;
+						fn(ar, t);
+					}
+				}
+				t_GlobalConfigs.Add(t);
+				srcObj.GlobalConfigs = t_GlobalConfigs;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.TtGlobalConfig>), false);
+					}
+				}
+			}
+			System.Boolean t_HasDebugLayer;
+			ar.Read(out t_HasDebugLayer);
+			srcObj.HasDebugLayer = t_HasDebugLayer;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HasDebugLayer", false);
+				}
+			}
+			System.Int32 t_Interval;
+			ar.Read(out t_Interval);
+			srcObj.Interval = t_Interval;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Interval", false);
+				}
+			}
+			System.Boolean t_IsAftermath;
+			ar.Read(out t_IsAftermath);
+			srcObj.IsAftermath = t_IsAftermath;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsAftermath", false);
+				}
+			}
+			System.Boolean t_IsDebugShader;
+			ar.Read(out t_IsDebugShader);
+			srcObj.IsDebugShader = t_IsDebugShader;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsDebugShader", false);
+				}
+			}
+			System.Boolean t_IsGpuBaseValidation;
+			ar.Read(out t_IsGpuBaseValidation);
+			srcObj.IsGpuBaseValidation = t_IsGpuBaseValidation;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsGpuBaseValidation", false);
+				}
+			}
+			System.Boolean t_IsGpuDred;
+			ar.Read(out t_IsGpuDred);
+			srcObj.IsGpuDred = t_IsGpuDred;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsGpuDred", false);
+				}
+			}
+			System.Boolean t_IsParrallelWorldGather;
+			ar.Read(out t_IsParrallelWorldGather);
+			srcObj.IsParrallelWorldGather = t_IsParrallelWorldGather;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsParrallelWorldGather", false);
+				}
+			}
+			System.Boolean t_IsReverseZ;
+			ar.Read(out t_IsReverseZ);
+			srcObj.IsReverseZ = t_IsReverseZ;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsReverseZ", false);
+				}
+			}
+			System.Boolean t_IsTryUnloadMacrossAssembly;
+			ar.Read(out t_IsTryUnloadMacrossAssembly);
+			srcObj.IsTryUnloadMacrossAssembly = t_IsTryUnloadMacrossAssembly;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsTryUnloadMacrossAssembly", false);
+				}
+			}
+			System.Boolean t_IsWriteShaderDebugFile;
+			ar.Read(out t_IsWriteShaderDebugFile);
+			srcObj.IsWriteShaderDebugFile = t_IsWriteShaderDebugFile;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsWriteShaderDebugFile", false);
+				}
+			}
+			EngineNS.RName t_MainRPolicyName;
+			ar.Read(out t_MainRPolicyName);
+			srcObj.MainRPolicyName = t_MainRPolicyName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MainRPolicyName", false);
+				}
+			}
+			EngineNS.Vector4 t_MainWindow;
+			ar.Read(out t_MainWindow);
+			srcObj.MainWindow = t_MainWindow;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MainWindow", false);
+				}
+			}
+			System.String t_MainWindowType;
+			ar.Read(out t_MainWindowType);
+			srcObj.MainWindowType = t_MainWindowType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MainWindowType", false);
+				}
+			}
+			EngineNS.Hash64 type_MeshPrimitiveEditorConfig;
+			ar.Read(out type_MeshPrimitiveEditorConfig);
+			var meta_MeshPrimitiveEditorConfig = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_MeshPrimitiveEditorConfig);
+			if(meta_MeshPrimitiveEditorConfig != null)
+			{
+				EngineNS.Hash64 ver_MeshPrimitiveEditorConfig;
+				ar.Read(out ver_MeshPrimitiveEditorConfig);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_MeshPrimitiveEditorConfig.ClassType.TypeString, ver_MeshPrimitiveEditorConfig );
+				if (fn != null)
+				{
+					EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig t_MeshPrimitiveEditorConfig = null;
+					t_MeshPrimitiveEditorConfig = srcObj.MeshPrimitiveEditorConfig;
+					if (t_MeshPrimitiveEditorConfig == null)
+					{
+						t_MeshPrimitiveEditorConfig = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_MeshPrimitiveEditorConfig.ClassType) as EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig;
+					}
+					fn(ar, t_MeshPrimitiveEditorConfig);
+					srcObj.MeshPrimitiveEditorConfig = t_MeshPrimitiveEditorConfig;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "MeshPrimitiveEditorConfig", false);
+						}
+					}
+				}
+			}
+			EngineNS.EMultiRenderMode t_MultiRenderMode;
+			ar.Read(out t_MultiRenderMode);
+			srcObj.MultiRenderMode = t_MultiRenderMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MultiRenderMode", false);
+				}
+			}
+			System.Int32 t_NumOfThreadPool;
+			ar.Read(out t_NumOfThreadPool);
+			srcObj.NumOfThreadPool = t_NumOfThreadPool;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NumOfThreadPool", false);
+				}
+			}
+			EngineNS.RName t_PlayGameName;
+			ar.Read(out t_PlayGameName);
+			srcObj.PlayGameName = t_PlayGameName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "PlayGameName", false);
+				}
+			}
+			System.Collections.Generic.List<System.String> t_Plugins = null;
+			t_Plugins = srcObj.Plugins;
+			if (t_Plugins == null)
+			{
+				t_Plugins = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<System.String>)) as System.Collections.Generic.List<System.String>;
+			}
+			int count_Plugins;
+			ar.Read(out count_Plugins);
+			for(int i = 0; i<count_Plugins; i++)
+			{
+				System.String t;
+				ar.Read(out t);
+				t_Plugins.Add(t);
+			}
+			EngineNS.NxRHI.ERhiType t_RHIType;
+			ar.Read(out t_RHIType);
+			srcObj.RHIType = t_RHIType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RHIType", false);
+				}
+			}
+			System.String t_RootServerURL;
+			ar.Read(out t_RootServerURL);
+			srcObj.RootServerURL = t_RootServerURL;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RootServerURL", false);
+				}
+			}
+			System.String t_RpcRootType;
+			ar.Read(out t_RpcRootType);
+			srcObj.RpcRootType = t_RpcRootType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RpcRootType", false);
+				}
+			}
+			EngineNS.RName t_SimpleRPolicyName;
+			ar.Read(out t_SimpleRPolicyName);
+			srcObj.SimpleRPolicyName = t_SimpleRPolicyName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SimpleRPolicyName", false);
+				}
+			}
+			System.Boolean t_SupportMultWindows;
+			ar.Read(out t_SupportMultWindows);
+			srcObj.SupportMultWindows = t_SupportMultWindows;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SupportMultWindows", false);
+				}
+			}
+			EngineNS.RName t_UIDefaultTexture;
+			ar.Read(out t_UIDefaultTexture);
+			srcObj.UIDefaultTexture = t_UIDefaultTexture;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "UIDefaultTexture", false);
+				}
+			}
+			System.Boolean t_UsePhysxMT;
+			ar.Read(out t_UsePhysxMT);
+			srcObj.UsePhysxMT = t_UsePhysxMT;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "UsePhysxMT", false);
+				}
+			}
+			System.Boolean t_UseRenderDoc;
+			ar.Read(out t_UseRenderDoc);
+			srcObj.UseRenderDoc = t_UseRenderDoc;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "UseRenderDoc", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9640772768219813670 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -130688,11 +131480,11 @@ namespace EngineNS.Plugins.DataCopyer
 				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_MeshPrimitiveEditorConfig.ClassType.TypeString, ver_MeshPrimitiveEditorConfig );
 				if (fn != null)
 				{
-					EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig t_MeshPrimitiveEditorConfig = null;
+					EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig t_MeshPrimitiveEditorConfig = null;
 					t_MeshPrimitiveEditorConfig = srcObj.MeshPrimitiveEditorConfig;
 					if (t_MeshPrimitiveEditorConfig == null)
 					{
-						t_MeshPrimitiveEditorConfig = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_MeshPrimitiveEditorConfig.ClassType) as EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig;
+						t_MeshPrimitiveEditorConfig = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_MeshPrimitiveEditorConfig.ClassType) as EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig;
 					}
 					fn(ar, t_MeshPrimitiveEditorConfig);
 					srcObj.MeshPrimitiveEditorConfig = t_MeshPrimitiveEditorConfig;
@@ -131139,11 +131931,11 @@ namespace EngineNS.Plugins.DataCopyer
 				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_MeshPrimitiveEditorConfig.ClassType.TypeString, ver_MeshPrimitiveEditorConfig );
 				if (fn != null)
 				{
-					EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig t_MeshPrimitiveEditorConfig = null;
+					EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig t_MeshPrimitiveEditorConfig = null;
 					t_MeshPrimitiveEditorConfig = srcObj.MeshPrimitiveEditorConfig;
 					if (t_MeshPrimitiveEditorConfig == null)
 					{
-						t_MeshPrimitiveEditorConfig = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_MeshPrimitiveEditorConfig.ClassType) as EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig;
+						t_MeshPrimitiveEditorConfig = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_MeshPrimitiveEditorConfig.ClassType) as EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig;
 					}
 					fn(ar, t_MeshPrimitiveEditorConfig);
 					srcObj.MeshPrimitiveEditorConfig = t_MeshPrimitiveEditorConfig;
@@ -131595,11 +132387,11 @@ namespace EngineNS.Plugins.DataCopyer
 				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_MeshPrimitiveEditorConfig.ClassType.TypeString, ver_MeshPrimitiveEditorConfig );
 				if (fn != null)
 				{
-					EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig t_MeshPrimitiveEditorConfig = null;
+					EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig t_MeshPrimitiveEditorConfig = null;
 					t_MeshPrimitiveEditorConfig = srcObj.MeshPrimitiveEditorConfig;
 					if (t_MeshPrimitiveEditorConfig == null)
 					{
-						t_MeshPrimitiveEditorConfig = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_MeshPrimitiveEditorConfig.ClassType) as EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig;
+						t_MeshPrimitiveEditorConfig = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_MeshPrimitiveEditorConfig.ClassType) as EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig;
 					}
 					fn(ar, t_MeshPrimitiveEditorConfig);
 					srcObj.MeshPrimitiveEditorConfig = t_MeshPrimitiveEditorConfig;
@@ -132033,11 +132825,11 @@ namespace EngineNS.Plugins.DataCopyer
 				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_MeshPrimitiveEditorConfig.ClassType.TypeString, ver_MeshPrimitiveEditorConfig );
 				if (fn != null)
 				{
-					EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig t_MeshPrimitiveEditorConfig = null;
+					EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig t_MeshPrimitiveEditorConfig = null;
 					t_MeshPrimitiveEditorConfig = srcObj.MeshPrimitiveEditorConfig;
 					if (t_MeshPrimitiveEditorConfig == null)
 					{
-						t_MeshPrimitiveEditorConfig = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_MeshPrimitiveEditorConfig.ClassType) as EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig;
+						t_MeshPrimitiveEditorConfig = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_MeshPrimitiveEditorConfig.ClassType) as EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig;
 					}
 					fn(ar, t_MeshPrimitiveEditorConfig);
 					srcObj.MeshPrimitiveEditorConfig = t_MeshPrimitiveEditorConfig;
@@ -132455,11 +133247,11 @@ namespace EngineNS.Plugins.DataCopyer
 				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_MeshPrimitiveEditorConfig.ClassType.TypeString, ver_MeshPrimitiveEditorConfig );
 				if (fn != null)
 				{
-					EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig t_MeshPrimitiveEditorConfig = null;
+					EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig t_MeshPrimitiveEditorConfig = null;
 					t_MeshPrimitiveEditorConfig = srcObj.MeshPrimitiveEditorConfig;
 					if (t_MeshPrimitiveEditorConfig == null)
 					{
-						t_MeshPrimitiveEditorConfig = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_MeshPrimitiveEditorConfig.ClassType) as EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig;
+						t_MeshPrimitiveEditorConfig = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_MeshPrimitiveEditorConfig.ClassType) as EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig;
 					}
 					fn(ar, t_MeshPrimitiveEditorConfig);
 					srcObj.MeshPrimitiveEditorConfig = t_MeshPrimitiveEditorConfig;
@@ -132805,11 +133597,15 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			ar.Write(srcObj.CornerRadius);
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -132819,6 +133615,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -132883,11 +133681,15 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
 			tarObj.CornerRadius = srcObj.CornerRadius;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -132897,6 +133699,8 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_303986152315571945 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -133293,6 +134097,262 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_6604609665555777274 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.Containers.TtBorder;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.Vector4 t_CornerRadius;
+			ar.Read(out t_CornerRadius);
+			srcObj.CornerRadius = t_CornerRadius;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CornerRadius", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
+				}
+			}
+		};
 	}
 	static class EngineNS_UI_Controls_Containers_TtCanvasControl
 	{
@@ -133385,11 +134445,15 @@ namespace EngineNS.Plugins.DataCopyer
 				ar.Write(true);
 			}
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -133399,6 +134463,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -133462,11 +134528,15 @@ namespace EngineNS.Plugins.DataCopyer
 				tarObj.BorderBrush = null;
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -133476,6 +134546,8 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3090284333976972985 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -133851,6 +134923,253 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15475570426190827360 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.Containers.TtCanvasControl;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
 				}
 			}
 		};
@@ -133946,11 +135265,15 @@ namespace EngineNS.Plugins.DataCopyer
 				ar.Write(true);
 			}
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -133960,6 +135283,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -134023,11 +135348,15 @@ namespace EngineNS.Plugins.DataCopyer
 				tarObj.BorderBrush = null;
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -134037,6 +135366,8 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3090284333976972985 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -134412,6 +135743,253 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15475570426190827360 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.Containers.TtContainer;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
 				}
 			}
 		};
@@ -134549,11 +136127,15 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				ar.Write(true);
 			}
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -134563,6 +136145,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -134664,11 +136248,15 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				tarObj.Header = null;
 			}
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -134678,6 +136266,8 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_4687431409436774890 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -134912,6 +136502,305 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_10188969127132107671 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.Containers.TtHeaderedContentsControl;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.Hash64 type_Content;
+			ar.Read(out type_Content);
+			var meta_Content = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Content);
+			if(meta_Content != null)
+			{
+				EngineNS.Hash64 ver_Content;
+				ar.Read(out ver_Content);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Content.ClassType.TypeString, ver_Content );
+				if (fn != null)
+				{
+					EngineNS.UI.Controls.Containers.TtTemplateContainer t_Content = null;
+					t_Content = srcObj.Content;
+					if (t_Content == null)
+					{
+						t_Content = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Content.ClassType) as EngineNS.UI.Controls.Containers.TtTemplateContainer;
+					}
+					fn(ar, t_Content);
+					srcObj.Content = t_Content;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Content", false);
+						}
+					}
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			EngineNS.Hash64 type_Header;
+			ar.Read(out type_Header);
+			var meta_Header = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Header);
+			if(meta_Header != null)
+			{
+				EngineNS.Hash64 ver_Header;
+				ar.Read(out ver_Header);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Header.ClassType.TypeString, ver_Header );
+				if (fn != null)
+				{
+					EngineNS.UI.Controls.Containers.TtTemplateContainer t_Header = null;
+					t_Header = srcObj.Header;
+					if (t_Header == null)
+					{
+						t_Header = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Header.ClassType) as EngineNS.UI.Controls.Containers.TtTemplateContainer;
+					}
+					fn(ar, t_Header);
+					srcObj.Header = t_Header;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Header", false);
+						}
+					}
+				}
+			}
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
 				}
 			}
 		};
@@ -135252,11 +137141,15 @@ namespace EngineNS.Plugins.DataCopyer
 				ar.Write(true);
 			}
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -135266,6 +137159,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -135329,11 +137224,15 @@ namespace EngineNS.Plugins.DataCopyer
 				tarObj.BorderBrush = null;
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -135343,6 +137242,8 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3090284333976972985 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -135718,6 +137619,253 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15475570426190827360 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.Containers.TtPopup;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
 				}
 			}
 		};
@@ -135813,11 +137961,15 @@ namespace EngineNS.Plugins.DataCopyer
 				ar.Write(true);
 			}
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -135828,6 +137980,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -135891,11 +138045,15 @@ namespace EngineNS.Plugins.DataCopyer
 				tarObj.BorderBrush = null;
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -135906,6 +138064,8 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3350073457381762883 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -136299,6 +138459,262 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_8648320451404019844 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.Containers.TtStackPanel;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.ELayout_Orientation t_Orientation;
+			ar.Read(out t_Orientation);
+			srcObj.Orientation = t_Orientation;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Orientation", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
 				}
 			}
 		};
@@ -136394,11 +138810,15 @@ namespace EngineNS.Plugins.DataCopyer
 				ar.Write(true);
 			}
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -136409,6 +138829,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -136472,11 +138894,15 @@ namespace EngineNS.Plugins.DataCopyer
 				tarObj.BorderBrush = null;
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -136487,6 +138913,8 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3350073457381762883 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -136883,6 +139311,262 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_8648320451404019844 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.Containers.TtTabControl;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.ELayout_Orientation t_Orientation;
+			ar.Read(out t_Orientation);
+			srcObj.Orientation = t_Orientation;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Orientation", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
+				}
+			}
+		};
 	}
 	static class EngineNS_UI_Controls_Containers_TtTabItem
 	{
@@ -136975,11 +139659,15 @@ namespace EngineNS.Plugins.DataCopyer
 				ar.Write(true);
 			}
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -136989,6 +139677,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -137052,11 +139742,15 @@ namespace EngineNS.Plugins.DataCopyer
 				tarObj.BorderBrush = null;
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -137066,6 +139760,8 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3090284333976972985 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -137441,6 +140137,253 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15475570426190827360 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.Containers.TtTabItem;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
 				}
 			}
 		};
@@ -137536,11 +140479,15 @@ namespace EngineNS.Plugins.DataCopyer
 				ar.Write(true);
 			}
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -137550,6 +140497,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -137613,11 +140562,15 @@ namespace EngineNS.Plugins.DataCopyer
 				tarObj.BorderBrush = null;
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -137627,6 +140580,8 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3090284333976972985 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -138002,6 +140957,253 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15475570426190827360 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.Containers.TtTemplateContainer;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
 				}
 			}
 		};
@@ -138098,11 +141300,15 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			ar.Write(srcObj.Columns);
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -138113,6 +141319,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.Rows);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -138177,11 +141385,15 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
 			tarObj.Columns = srcObj.Columns;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -138192,6 +141404,273 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Rows = srcObj.Rows;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1483866934722062196 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.Containers.TtUniformGridPanel;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			System.UInt32 t_Columns;
+			ar.Read(out t_Columns);
+			srcObj.Columns = t_Columns;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Columns", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			System.UInt32 t_Rows;
+			ar.Read(out t_Rows);
+			srcObj.Rows = t_Rows;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Rows", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_2858575779035661085 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -138699,11 +142178,15 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			ar.Write(srcObj.ChildRName);
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -138713,6 +142196,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -138777,11 +142262,15 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
 			tarObj.ChildRName = srcObj.ChildRName;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -138791,6 +142280,8 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_13736881544329807492 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -138994,6 +142485,262 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_14605796103545417675 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.Containers.TtUserControl;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.RName t_ChildRName;
+			ar.Read(out t_ChildRName);
+			srcObj.ChildRName = t_ChildRName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ChildRName", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
+				}
+			}
+		};
 	}
 	static class EngineNS_UI_Controls_Containers_TtWrapPanel
 	{
@@ -139086,11 +142833,15 @@ namespace EngineNS.Plugins.DataCopyer
 				ar.Write(true);
 			}
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -139101,6 +142852,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -139164,11 +142917,15 @@ namespace EngineNS.Plugins.DataCopyer
 				tarObj.BorderBrush = null;
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -139179,6 +142936,8 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3350073457381762883 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -139575,6 +143334,262 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_8648320451404019844 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.Containers.TtWrapPanel;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.ELayout_Orientation t_Orientation;
+			ar.Read(out t_Orientation);
+			srcObj.Orientation = t_Orientation;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Orientation", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
+				}
+			}
+		};
 	}
 	static class EngineNS_UI_Controls_TtButton
 	{
@@ -139668,11 +143683,15 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			ar.Write(srcObj.ClickType);
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -139682,6 +143701,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -139746,11 +143767,15 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
 			tarObj.ClickType = srcObj.ClickType;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -139760,6 +143785,264 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5209425623145371712 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.TtButton;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.UI.Controls.TtButtonBase.EClickType t_ClickType;
+			ar.Read(out t_ClickType);
+			srcObj.ClickType = t_ClickType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ClickType", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7669573498665141623 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -140249,11 +144532,15 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			ar.Write(srcObj.ClickType);
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -140263,6 +144550,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -140327,11 +144616,15 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
 			tarObj.ClickType = srcObj.ClickType;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -140341,6 +144634,264 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5209425623145371712 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.TtButtonBase;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.UI.Controls.TtButtonBase.EClickType t_ClickType;
+			ar.Read(out t_ClickType);
+			srcObj.ClickType = t_ClickType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ClickType", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7669573498665141623 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -140830,11 +145381,15 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			ar.Write(srcObj.ClickType);
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -140844,6 +145399,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -140908,11 +145465,15 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
 			tarObj.ClickType = srcObj.ClickType;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -140922,6 +145483,264 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5209425623145371712 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.TtCheckBox;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.UI.Controls.TtButtonBase.EClickType t_ClickType;
+			ar.Read(out t_ClickType);
+			srcObj.ClickType = t_ClickType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ClickType", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7669573498665141623 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -141411,11 +146230,15 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			ar.Write(srcObj.ContentSource);
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -141425,6 +146248,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -141489,11 +146314,15 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
 			tarObj.ContentSource = srcObj.ContentSource;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -141503,6 +146332,8 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5128288332627869840 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -141694,6 +146525,262 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5665572733890662615 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.TtContentsPresenter;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			System.String t_ContentSource;
+			ar.Read(out t_ContentSource);
+			srcObj.ContentSource = t_ContentSource;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ContentSource", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
 				}
 			}
 		};
@@ -141953,12 +147040,16 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.FlowDirection);
 			ar.Write(srcObj.Font);
 			ar.Write(srcObj.FontSize);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.LineSpacingScale);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -141990,6 +147081,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.Text);
 			ar.Write(srcObj.TrimmingText);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -142038,12 +147131,16 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.FlowDirection = srcObj.FlowDirection;
 			tarObj.Font = srcObj.Font;
 			tarObj.FontSize = srcObj.FontSize;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.LineSpacingScale = srcObj.LineSpacingScale;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -142073,6 +147170,311 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Text = srcObj.Text;
 			tarObj.TrimmingText = srcObj.TrimmingText;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7820562816795623858 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.TtEditableText;
+			EngineNS.Color4b t_Color;
+			ar.Read(out t_Color);
+			srcObj.Color = t_Color;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Color", false);
+				}
+			}
+			EngineNS.Hash64 type_CursorBrush;
+			ar.Read(out type_CursorBrush);
+			var meta_CursorBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_CursorBrush);
+			if(meta_CursorBrush != null)
+			{
+				EngineNS.Hash64 ver_CursorBrush;
+				ar.Read(out ver_CursorBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_CursorBrush.ClassType.TypeString, ver_CursorBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_CursorBrush = null;
+					t_CursorBrush = srcObj.CursorBrush;
+					if (t_CursorBrush == null)
+					{
+						t_CursorBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_CursorBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_CursorBrush);
+					srcObj.CursorBrush = t_CursorBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "CursorBrush", false);
+						}
+					}
+				}
+			}
+			System.Single t_CursorWidth;
+			ar.Read(out t_CursorWidth);
+			srcObj.CursorWidth = t_CursorWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "CursorWidth", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			EngineNS.UI.Controls.TtText.ETextDirection t_FlowDirection;
+			ar.Read(out t_FlowDirection);
+			srcObj.FlowDirection = t_FlowDirection;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FlowDirection", false);
+				}
+			}
+			EngineNS.RName t_Font;
+			ar.Read(out t_Font);
+			srcObj.Font = t_Font;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Font", false);
+				}
+			}
+			System.Int32 t_FontSize;
+			ar.Read(out t_FontSize);
+			srcObj.FontSize = t_FontSize;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FontSize", false);
+				}
+			}
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			System.Single t_LineSpacingScale;
+			ar.Read(out t_LineSpacingScale);
+			srcObj.LineSpacingScale = t_LineSpacingScale;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "LineSpacingScale", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			System.Boolean t_SelectAllWhenFocused;
+			ar.Read(out t_SelectAllWhenFocused);
+			srcObj.SelectAllWhenFocused = t_SelectAllWhenFocused;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SelectAllWhenFocused", false);
+				}
+			}
+			EngineNS.Hash64 type_SelectionBrush;
+			ar.Read(out type_SelectionBrush);
+			var meta_SelectionBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_SelectionBrush);
+			if(meta_SelectionBrush != null)
+			{
+				EngineNS.Hash64 ver_SelectionBrush;
+				ar.Read(out ver_SelectionBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_SelectionBrush.ClassType.TypeString, ver_SelectionBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_SelectionBrush = null;
+					t_SelectionBrush = srcObj.SelectionBrush;
+					if (t_SelectionBrush == null)
+					{
+						t_SelectionBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_SelectionBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_SelectionBrush);
+					srcObj.SelectionBrush = t_SelectionBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "SelectionBrush", false);
+						}
+					}
+				}
+			}
+			System.String t_Text;
+			ar.Read(out t_Text);
+			srcObj.Text = t_Text;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Text", false);
+				}
+			}
+			EngineNS.UI.Controls.TtText.ETextFlag t_TextFlag;
+			ar.Read(out t_TextFlag);
+			System.String t_TrimmingText;
+			ar.Read(out t_TrimmingText);
+			srcObj.TrimmingText = t_TrimmingText;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TrimmingText", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_16528302217836397931 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -142698,12 +148100,16 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				ar.Write(true);
 			}
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsExpanded);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -142713,6 +148119,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -142815,12 +148223,16 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				tarObj.Header = null;
 			}
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsExpanded = srcObj.IsExpanded;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -142830,6 +148242,8 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_2956439499757943724 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -143348,6 +148762,323 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_13976056634642118906 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.TtExpander;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.Hash64 type_Content;
+			ar.Read(out type_Content);
+			var meta_Content = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Content);
+			if(meta_Content != null)
+			{
+				EngineNS.Hash64 ver_Content;
+				ar.Read(out ver_Content);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Content.ClassType.TypeString, ver_Content );
+				if (fn != null)
+				{
+					EngineNS.UI.Controls.Containers.TtTemplateContainer t_Content = null;
+					t_Content = srcObj.Content;
+					if (t_Content == null)
+					{
+						t_Content = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Content.ClassType) as EngineNS.UI.Controls.Containers.TtTemplateContainer;
+					}
+					fn(ar, t_Content);
+					srcObj.Content = t_Content;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Content", false);
+						}
+					}
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			EngineNS.UI.Controls.EExpandDirection t_ExpandDirection;
+			ar.Read(out t_ExpandDirection);
+			srcObj.ExpandDirection = t_ExpandDirection;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ExpandDirection", false);
+				}
+			}
+			EngineNS.Hash64 type_Header;
+			ar.Read(out type_Header);
+			var meta_Header = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Header);
+			if(meta_Header != null)
+			{
+				EngineNS.Hash64 ver_Header;
+				ar.Read(out ver_Header);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Header.ClassType.TypeString, ver_Header );
+				if (fn != null)
+				{
+					EngineNS.UI.Controls.Containers.TtTemplateContainer t_Header = null;
+					t_Header = srcObj.Header;
+					if (t_Header == null)
+					{
+						t_Header = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Header.ClassType) as EngineNS.UI.Controls.Containers.TtTemplateContainer;
+					}
+					fn(ar, t_Header);
+					srcObj.Header = t_Header;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Header", false);
+						}
+					}
+				}
+			}
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsExpanded;
+			ar.Read(out t_IsExpanded);
+			srcObj.IsExpanded = t_IsExpanded;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsExpanded", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
+				}
+			}
+		};
 	}
 	static class EngineNS_UI_Controls_TtImage
 	{
@@ -143376,11 +149107,15 @@ namespace EngineNS.Plugins.DataCopyer
 				ar.Write(true);
 			}
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -143409,6 +149144,8 @@ namespace EngineNS.Plugins.DataCopyer
 				ar.Write(true);
 			}
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -143433,11 +149170,15 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				tarObj.AttachedPropertiesSaver = null;
 			}
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -143464,6 +149205,8 @@ namespace EngineNS.Plugins.DataCopyer
 				tarObj.UIBrush = null;
 			}
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_873670228818474309 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -143593,6 +149336,200 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5366996667353823694 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.TtImage;
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.Hash64 type_UIBrush;
+			ar.Read(out type_UIBrush);
+			var meta_UIBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_UIBrush);
+			if(meta_UIBrush != null)
+			{
+				EngineNS.Hash64 ver_UIBrush;
+				ar.Read(out ver_UIBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_UIBrush.ClassType.TypeString, ver_UIBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_UIBrush = null;
+					t_UIBrush = srcObj.UIBrush;
+					if (t_UIBrush == null)
+					{
+						t_UIBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_UIBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_UIBrush);
+					srcObj.UIBrush = t_UIBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "UIBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
 				}
 			}
 		};
@@ -143786,11 +149723,15 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			ar.Write(srcObj.DesignRect);
 			ar.Write(srcObj.FillType);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -143821,6 +149762,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransform);
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -143865,11 +149808,15 @@ namespace EngineNS.Plugins.DataCopyer
 				tarObj.BackgroundBrush = null;
 			}
 			tarObj.FillType = srcObj.FillType;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -143898,6 +149845,8 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransform = srcObj.RenderTransform;
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_2212287614508609268 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -144255,6 +150204,253 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3553481196874084027 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.TtProgress;
+			EngineNS.Hash64 type_BackgroundBrush;
+			ar.Read(out type_BackgroundBrush);
+			var meta_BackgroundBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BackgroundBrush);
+			if(meta_BackgroundBrush != null)
+			{
+				EngineNS.Hash64 ver_BackgroundBrush;
+				ar.Read(out ver_BackgroundBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BackgroundBrush.ClassType.TypeString, ver_BackgroundBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BackgroundBrush = null;
+					t_BackgroundBrush = srcObj.BackgroundBrush;
+					if (t_BackgroundBrush == null)
+					{
+						t_BackgroundBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BackgroundBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BackgroundBrush);
+					srcObj.BackgroundBrush = t_BackgroundBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BackgroundBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			EngineNS.UI.Controls.TtProgress.EFillType t_FillType;
+			ar.Read(out t_FillType);
+			srcObj.FillType = t_FillType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FillType", false);
+				}
+			}
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			System.Single t_Percent;
+			ar.Read(out t_Percent);
+			srcObj.Percent = t_Percent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Percent", false);
+				}
+			}
+			System.Single t_PieStartAngle;
+			ar.Read(out t_PieStartAngle);
+			srcObj.PieStartAngle = t_PieStartAngle;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "PieStartAngle", false);
+				}
+			}
+			EngineNS.Hash64 type_ProgressBrush;
+			ar.Read(out type_ProgressBrush);
+			var meta_ProgressBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_ProgressBrush);
+			if(meta_ProgressBrush != null)
+			{
+				EngineNS.Hash64 ver_ProgressBrush;
+				ar.Read(out ver_ProgressBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_ProgressBrush.ClassType.TypeString, ver_ProgressBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_ProgressBrush = null;
+					t_ProgressBrush = srcObj.ProgressBrush;
+					if (t_ProgressBrush == null)
+					{
+						t_ProgressBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_ProgressBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_ProgressBrush);
+					srcObj.ProgressBrush = t_ProgressBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "ProgressBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
 				}
 			}
 		};
@@ -144651,12 +150847,16 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.FlowDirection);
 			ar.Write(srcObj.Font);
 			ar.Write(srcObj.FontSize);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.LineSpacingScale);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -144666,6 +150866,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.Text);
 			ar.Write(srcObj.TrimmingText);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -144694,12 +150896,16 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.FlowDirection = srcObj.FlowDirection;
 			tarObj.Font = srcObj.Font;
 			tarObj.FontSize = srcObj.FontSize;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.LineSpacingScale = srcObj.LineSpacingScale;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -144709,6 +150915,241 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.Text = srcObj.Text;
 			tarObj.TrimmingText = srcObj.TrimmingText;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_713011390112872129 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.TtText;
+			EngineNS.Color4b t_Color;
+			ar.Read(out t_Color);
+			srcObj.Color = t_Color;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Color", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			EngineNS.UI.Controls.TtText.ETextDirection t_FlowDirection;
+			ar.Read(out t_FlowDirection);
+			srcObj.FlowDirection = t_FlowDirection;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FlowDirection", false);
+				}
+			}
+			EngineNS.RName t_Font;
+			ar.Read(out t_Font);
+			srcObj.Font = t_Font;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Font", false);
+				}
+			}
+			System.Int32 t_FontSize;
+			ar.Read(out t_FontSize);
+			srcObj.FontSize = t_FontSize;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "FontSize", false);
+				}
+			}
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			System.Single t_LineSpacingScale;
+			ar.Read(out t_LineSpacingScale);
+			srcObj.LineSpacingScale = t_LineSpacingScale;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "LineSpacingScale", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			System.String t_Text;
+			ar.Read(out t_Text);
+			srcObj.Text = t_Text;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Text", false);
+				}
+			}
+			EngineNS.UI.Controls.TtText.ETextFlag t_TextFlag;
+			ar.Read(out t_TextFlag);
+			System.String t_TrimmingText;
+			ar.Read(out t_TrimmingText);
+			srcObj.TrimmingText = t_TrimmingText;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TrimmingText", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_11207689003022669699 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -145152,11 +151593,15 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			ar.Write(srcObj.ClickType);
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -145166,6 +151611,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -145230,11 +151677,15 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
 			tarObj.ClickType = srcObj.ClickType;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -145244,6 +151695,264 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5209425623145371712 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.TtToggleButton;
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.UI.Controls.TtButtonBase.EClickType t_ClickType;
+			ar.Read(out t_ClickType);
+			srcObj.ClickType = t_ClickType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ClickType", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7669573498665141623 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -146181,11 +152890,15 @@ namespace EngineNS.Plugins.DataCopyer
 				ar.Write(true);
 			}
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -146193,6 +152906,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransform);
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -146217,11 +152932,15 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				tarObj.AttachedPropertiesSaver = null;
 			}
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -146229,6 +152948,8 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransform = srcObj.RenderTransform;
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9055423746621096286 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -146449,6 +153170,174 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 			}
 		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_11096006947367229220 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Controls.TtUIElement;
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
+				}
+			}
+		};
 	}
 	static class EngineNS_UI_Editor_EditorOnlyData
 	{
@@ -146558,11 +153447,15 @@ namespace EngineNS.Plugins.DataCopyer
 				ar.Write(true);
 			}
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -146572,6 +153465,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -146636,11 +153531,15 @@ namespace EngineNS.Plugins.DataCopyer
 				tarObj.BorderBrush = null;
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -146650,6 +153549,8 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1460247802161008708 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -147043,6 +153944,262 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_12363456890481729257 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Editor.EditorUIHost;
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			srcObj.AssetName = t_AssetName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
 				}
 			}
 		};
@@ -147139,11 +154296,15 @@ namespace EngineNS.Plugins.DataCopyer
 				ar.Write(true);
 			}
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -147153,6 +154314,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -147217,11 +154380,15 @@ namespace EngineNS.Plugins.DataCopyer
 				tarObj.BorderBrush = null;
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -147231,6 +154398,8 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1460247802161008708 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -147624,6 +154793,262 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_12363456890481729257 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.Editor.SelectedDecorator;
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			srcObj.AssetName = t_AssetName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
 				}
 			}
 		};
@@ -148296,11 +155721,15 @@ namespace EngineNS.Plugins.DataCopyer
 				ar.Write(true);
 			}
 			ar.Write(srcObj.DesignRect);
+			ar.Write(srcObj.Height);
+			ar.Write(srcObj.HeightAuto);
 			ar.Write(srcObj.Id);
 			ar.Write(srcObj.IsEnabled);
 			ar.Write(srcObj.IsFocusable);
 			ar.Write(srcObj.IsVariable);
 			ar.Write(srcObj.Margin);
+			ar.Write(srcObj.MaxHeight);
+			ar.Write(srcObj.MaxWidth);
 			ar.Write(srcObj.MinHeight);
 			ar.Write(srcObj.MinWidth);
 			ar.Write(srcObj.Name);
@@ -148310,6 +155739,8 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.SizeToContent);
 			ar.Write(srcObj.Visibility);
+			ar.Write(srcObj.Width);
+			ar.Write(srcObj.WidthAuto);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -148374,11 +155805,15 @@ namespace EngineNS.Plugins.DataCopyer
 				tarObj.BorderBrush = null;
 			}
 			tarObj.BorderThickness = srcObj.BorderThickness;
+			tarObj.Height = srcObj.Height;
+			tarObj.HeightAuto = srcObj.HeightAuto;
 			tarObj.Id = srcObj.Id;
 			tarObj.IsEnabled = srcObj.IsEnabled;
 			tarObj.IsFocusable = srcObj.IsFocusable;
 			tarObj.IsVariable = srcObj.IsVariable;
 			tarObj.Margin = srcObj.Margin;
+			tarObj.MaxHeight = srcObj.MaxHeight;
+			tarObj.MaxWidth = srcObj.MaxWidth;
 			tarObj.MinHeight = srcObj.MinHeight;
 			tarObj.MinWidth = srcObj.MinWidth;
 			tarObj.Name = srcObj.Name;
@@ -148388,6 +155823,8 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.SizeToContent = srcObj.SizeToContent;
 			tarObj.Visibility = srcObj.Visibility;
+			tarObj.Width = srcObj.Width;
+			tarObj.WidthAuto = srcObj.WidthAuto;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1460247802161008708 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -148781,6 +156218,262 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_12363456890481729257 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.TtUIHost;
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			srcObj.AssetName = t_AssetName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			EngineNS.Hash64 type_Background;
+			ar.Read(out type_Background);
+			var meta_Background = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Background);
+			if(meta_Background != null)
+			{
+				EngineNS.Hash64 ver_Background;
+				ar.Read(out ver_Background);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Background.ClassType.TypeString, ver_Background );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_Background = null;
+					t_Background = srcObj.Background;
+					if (t_Background == null)
+					{
+						t_Background = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Background.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_Background);
+					srcObj.Background = t_Background;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Background", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_BorderBrush;
+			ar.Read(out type_BorderBrush);
+			var meta_BorderBrush = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BorderBrush);
+			if(meta_BorderBrush != null)
+			{
+				EngineNS.Hash64 ver_BorderBrush;
+				ar.Read(out ver_BorderBrush);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BorderBrush.ClassType.TypeString, ver_BorderBrush );
+				if (fn != null)
+				{
+					EngineNS.UI.TtBrush t_BorderBrush = null;
+					t_BorderBrush = srcObj.BorderBrush;
+					if (t_BorderBrush == null)
+					{
+						t_BorderBrush = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BorderBrush.ClassType) as EngineNS.UI.TtBrush;
+					}
+					fn(ar, t_BorderBrush);
+					srcObj.BorderBrush = t_BorderBrush;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BorderBrush", false);
+						}
+					}
+				}
+			}
+			EngineNS.Thickness t_BorderThickness;
+			ar.Read(out t_BorderThickness);
+			srcObj.BorderThickness = t_BorderThickness;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BorderThickness", false);
+				}
+			}
+			EngineNS.RectangleF t_DesignRect;
+			ar.Read(out t_DesignRect);
+			System.Single t_Height;
+			ar.Read(out t_Height);
+			srcObj.Height = t_Height;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Height", false);
+				}
+			}
+			System.Boolean t_HeightAuto;
+			ar.Read(out t_HeightAuto);
+			srcObj.HeightAuto = t_HeightAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "HeightAuto", false);
+				}
+			}
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsEnabled;
+			ar.Read(out t_IsEnabled);
+			srcObj.IsEnabled = t_IsEnabled;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsEnabled", false);
+				}
+			}
+			System.Boolean t_IsFocusable;
+			ar.Read(out t_IsFocusable);
+			srcObj.IsFocusable = t_IsFocusable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsFocusable", false);
+				}
+			}
+			System.Boolean t_IsVariable;
+			ar.Read(out t_IsVariable);
+			srcObj.IsVariable = t_IsVariable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsVariable", false);
+				}
+			}
+			EngineNS.Thickness t_Margin;
+			ar.Read(out t_Margin);
+			srcObj.Margin = t_Margin;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Margin", false);
+				}
+			}
+			System.Single t_MaxHeight;
+			ar.Read(out t_MaxHeight);
+			srcObj.MaxHeight = t_MaxHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxHeight", false);
+				}
+			}
+			System.Single t_MaxWidth;
+			ar.Read(out t_MaxWidth);
+			srcObj.MaxWidth = t_MaxWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxWidth", false);
+				}
+			}
+			System.Single t_MinHeight;
+			ar.Read(out t_MinHeight);
+			srcObj.MinHeight = t_MinHeight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinHeight", false);
+				}
+			}
+			System.Single t_MinWidth;
+			ar.Read(out t_MinWidth);
+			srcObj.MinWidth = t_MinWidth;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MinWidth", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Boolean t_NoHitTest;
+			ar.Read(out t_NoHitTest);
+			srcObj.NoHitTest = t_NoHitTest;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NoHitTest", false);
+				}
+			}
+			EngineNS.Thickness t_Padding;
+			ar.Read(out t_Padding);
+			srcObj.Padding = t_Padding;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Padding", false);
+				}
+			}
+			EngineNS.FTransform t_RenderTransform;
+			ar.Read(out t_RenderTransform);
+			srcObj.RenderTransform = t_RenderTransform;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransform", false);
+				}
+			}
+			EngineNS.Vector2 t_RenderTransformCenter;
+			ar.Read(out t_RenderTransformCenter);
+			srcObj.RenderTransformCenter = t_RenderTransformCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RenderTransformCenter", false);
+				}
+			}
+			EngineNS.UI.Controls.Containers.TtContainer.ESizeToContent t_SizeToContent;
+			ar.Read(out t_SizeToContent);
+			srcObj.SizeToContent = t_SizeToContent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SizeToContent", false);
+				}
+			}
+			EngineNS.UI.Controls.Visibility t_Visibility;
+			ar.Read(out t_Visibility);
+			srcObj.Visibility = t_Visibility;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Visibility", false);
+				}
+			}
+			System.Single t_Width;
+			ar.Read(out t_Width);
+			srcObj.Width = t_Width;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Width", false);
+				}
+			}
+			System.Boolean t_WidthAuto;
+			ar.Read(out t_WidthAuto);
+			srcObj.WidthAuto = t_WidthAuto;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "WidthAuto", false);
 				}
 			}
 		};
@@ -156910,6 +164603,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = EngineNS_Bricks_UI_Controls_Containers_TtGrid.CopyCurrentVersion;
 				kls.RegVersion(12333875368230766275, EngineNS_Bricks_UI_Controls_Containers_TtGrid.Read_12333875368230766275);
 				kls.RegVersion(16627313829351386736, EngineNS_Bricks_UI_Controls_Containers_TtGrid.Read_16627313829351386736);
+				kls.RegVersion(9791590054358784555, EngineNS_Bricks_UI_Controls_Containers_TtGrid.Read_9791590054358784555);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.VXGI.UVoxelsNode@EngineCore");
@@ -157519,6 +165213,12 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(978974702571264856, EngineNS_Editor_Forms_TtAnimationBlendSpaceEditor_TtBlendSpaceAnimPreviewNode.Read_978974702571264856);
 			}
 			{
+				var kls = this.GetClassCopyer("EngineNS.Editor.Forms.TtMeshPrimitiveEditorConfig@EngineCore");
+				kls.Writer = EngineNS_Editor_Forms_TtMeshPrimitiveEditorConfig.WriteCurrentVersion;
+				kls.Copy = EngineNS_Editor_Forms_TtMeshPrimitiveEditorConfig.CopyCurrentVersion;
+				kls.RegVersion(9524687136534877311, EngineNS_Editor_Forms_TtMeshPrimitiveEditorConfig.Read_9524687136534877311);
+			}
+			{
 				var kls = this.GetClassCopyer("EngineNS.Editor.Forms.UAssetReferGraph@EngineCore");
 				kls.Writer = EngineNS_Editor_Forms_UAssetReferGraph.WriteCurrentVersion;
 				kls.Copy = EngineNS_Editor_Forms_UAssetReferGraph.CopyCurrentVersion;
@@ -157529,12 +165229,6 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Editor_Forms_UAssetReferNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Editor_Forms_UAssetReferNode.CopyCurrentVersion;
 				kls.RegVersion(4979597343114718993, EngineNS_Editor_Forms_UAssetReferNode.Read_4979597343114718993);
-			}
-			{
-				var kls = this.GetClassCopyer("EngineNS.Editor.Forms.UMeshPrimitiveEditorConfig@EngineCore");
-				kls.Writer = EngineNS_Editor_Forms_UMeshPrimitiveEditorConfig.WriteCurrentVersion;
-				kls.Copy = EngineNS_Editor_Forms_UMeshPrimitiveEditorConfig.CopyCurrentVersion;
-				kls.RegVersion(9524687136534877311, EngineNS_Editor_Forms_UMeshPrimitiveEditorConfig.Read_9524687136534877311);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Editor.Forms.USkeletonShowNode.USkeletonShowNodeData@EngineCore");
@@ -158581,6 +166275,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(17061926736410770868, EngineNS_TtEngineConfig.Read_17061926736410770868);
 				kls.RegVersion(18270359776439623110, EngineNS_TtEngineConfig.Read_18270359776439623110);
 				kls.RegVersion(9640772768219813670, EngineNS_TtEngineConfig.Read_9640772768219813670);
+				kls.RegVersion(1132857467433741107, EngineNS_TtEngineConfig.Read_1132857467433741107);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.TtGlobalConfig@EngineCore");
@@ -158612,12 +166307,14 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = EngineNS_UI_Controls_Containers_TtBorder.CopyCurrentVersion;
 				kls.RegVersion(303986152315571945, EngineNS_UI_Controls_Containers_TtBorder.Read_303986152315571945);
 				kls.RegVersion(5622424139964447609, EngineNS_UI_Controls_Containers_TtBorder.Read_5622424139964447609);
+				kls.RegVersion(6604609665555777274, EngineNS_UI_Controls_Containers_TtBorder.Read_6604609665555777274);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.Containers.TtCanvasControl@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_Containers_TtCanvasControl.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtCanvasControl.CopyCurrentVersion;
 				kls.RegVersion(10350112176202310724, EngineNS_UI_Controls_Containers_TtCanvasControl.Read_10350112176202310724);
+				kls.RegVersion(15475570426190827360, EngineNS_UI_Controls_Containers_TtCanvasControl.Read_15475570426190827360);
 				kls.RegVersion(3090284333976972985, EngineNS_UI_Controls_Containers_TtCanvasControl.Read_3090284333976972985);
 			}
 			{
@@ -158625,12 +166322,14 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_UI_Controls_Containers_TtContainer.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtContainer.CopyCurrentVersion;
 				kls.RegVersion(10350112176202310724, EngineNS_UI_Controls_Containers_TtContainer.Read_10350112176202310724);
+				kls.RegVersion(15475570426190827360, EngineNS_UI_Controls_Containers_TtContainer.Read_15475570426190827360);
 				kls.RegVersion(3090284333976972985, EngineNS_UI_Controls_Containers_TtContainer.Read_3090284333976972985);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.Containers.TtHeaderedContentsControl@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_Containers_TtHeaderedContentsControl.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtHeaderedContentsControl.CopyCurrentVersion;
+				kls.RegVersion(10188969127132107671, EngineNS_UI_Controls_Containers_TtHeaderedContentsControl.Read_10188969127132107671);
 				kls.RegVersion(14335659529695064911, EngineNS_UI_Controls_Containers_TtHeaderedContentsControl.Read_14335659529695064911);
 				kls.RegVersion(4687431409436774890, EngineNS_UI_Controls_Containers_TtHeaderedContentsControl.Read_4687431409436774890);
 			}
@@ -158639,6 +166338,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_UI_Controls_Containers_TtPopup.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtPopup.CopyCurrentVersion;
 				kls.RegVersion(10350112176202310724, EngineNS_UI_Controls_Containers_TtPopup.Read_10350112176202310724);
+				kls.RegVersion(15475570426190827360, EngineNS_UI_Controls_Containers_TtPopup.Read_15475570426190827360);
 				kls.RegVersion(3090284333976972985, EngineNS_UI_Controls_Containers_TtPopup.Read_3090284333976972985);
 			}
 			{
@@ -158647,6 +166347,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = EngineNS_UI_Controls_Containers_TtStackPanel.CopyCurrentVersion;
 				kls.RegVersion(3350073457381762883, EngineNS_UI_Controls_Containers_TtStackPanel.Read_3350073457381762883);
 				kls.RegVersion(7462745548624572048, EngineNS_UI_Controls_Containers_TtStackPanel.Read_7462745548624572048);
+				kls.RegVersion(8648320451404019844, EngineNS_UI_Controls_Containers_TtStackPanel.Read_8648320451404019844);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.Containers.TtTabControl@EngineCore");
@@ -158654,12 +166355,14 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = EngineNS_UI_Controls_Containers_TtTabControl.CopyCurrentVersion;
 				kls.RegVersion(3350073457381762883, EngineNS_UI_Controls_Containers_TtTabControl.Read_3350073457381762883);
 				kls.RegVersion(7462745548624572048, EngineNS_UI_Controls_Containers_TtTabControl.Read_7462745548624572048);
+				kls.RegVersion(8648320451404019844, EngineNS_UI_Controls_Containers_TtTabControl.Read_8648320451404019844);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.Containers.TtTabItem@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_Containers_TtTabItem.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtTabItem.CopyCurrentVersion;
 				kls.RegVersion(10350112176202310724, EngineNS_UI_Controls_Containers_TtTabItem.Read_10350112176202310724);
+				kls.RegVersion(15475570426190827360, EngineNS_UI_Controls_Containers_TtTabItem.Read_15475570426190827360);
 				kls.RegVersion(3090284333976972985, EngineNS_UI_Controls_Containers_TtTabItem.Read_3090284333976972985);
 			}
 			{
@@ -158667,12 +166370,14 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_UI_Controls_Containers_TtTemplateContainer.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtTemplateContainer.CopyCurrentVersion;
 				kls.RegVersion(10350112176202310724, EngineNS_UI_Controls_Containers_TtTemplateContainer.Read_10350112176202310724);
+				kls.RegVersion(15475570426190827360, EngineNS_UI_Controls_Containers_TtTemplateContainer.Read_15475570426190827360);
 				kls.RegVersion(3090284333976972985, EngineNS_UI_Controls_Containers_TtTemplateContainer.Read_3090284333976972985);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.Containers.TtUniformGridPanel@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_Containers_TtUniformGridPanel.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtUniformGridPanel.CopyCurrentVersion;
+				kls.RegVersion(1483866934722062196, EngineNS_UI_Controls_Containers_TtUniformGridPanel.Read_1483866934722062196);
 				kls.RegVersion(2858575779035661085, EngineNS_UI_Controls_Containers_TtUniformGridPanel.Read_2858575779035661085);
 				kls.RegVersion(7400168139909439019, EngineNS_UI_Controls_Containers_TtUniformGridPanel.Read_7400168139909439019);
 			}
@@ -158681,6 +166386,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_UI_Controls_Containers_TtUserControl.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_Containers_TtUserControl.CopyCurrentVersion;
 				kls.RegVersion(13736881544329807492, EngineNS_UI_Controls_Containers_TtUserControl.Read_13736881544329807492);
+				kls.RegVersion(14605796103545417675, EngineNS_UI_Controls_Containers_TtUserControl.Read_14605796103545417675);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.Containers.TtWrapPanel@EngineCore");
@@ -158688,12 +166394,14 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = EngineNS_UI_Controls_Containers_TtWrapPanel.CopyCurrentVersion;
 				kls.RegVersion(3350073457381762883, EngineNS_UI_Controls_Containers_TtWrapPanel.Read_3350073457381762883);
 				kls.RegVersion(7462745548624572048, EngineNS_UI_Controls_Containers_TtWrapPanel.Read_7462745548624572048);
+				kls.RegVersion(8648320451404019844, EngineNS_UI_Controls_Containers_TtWrapPanel.Read_8648320451404019844);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.TtButton@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_TtButton.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_TtButton.CopyCurrentVersion;
 				kls.RegVersion(12042030562006812122, EngineNS_UI_Controls_TtButton.Read_12042030562006812122);
+				kls.RegVersion(5209425623145371712, EngineNS_UI_Controls_TtButton.Read_5209425623145371712);
 				kls.RegVersion(7669573498665141623, EngineNS_UI_Controls_TtButton.Read_7669573498665141623);
 			}
 			{
@@ -158701,6 +166409,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_UI_Controls_TtButtonBase.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_TtButtonBase.CopyCurrentVersion;
 				kls.RegVersion(12042030562006812122, EngineNS_UI_Controls_TtButtonBase.Read_12042030562006812122);
+				kls.RegVersion(5209425623145371712, EngineNS_UI_Controls_TtButtonBase.Read_5209425623145371712);
 				kls.RegVersion(7669573498665141623, EngineNS_UI_Controls_TtButtonBase.Read_7669573498665141623);
 			}
 			{
@@ -158708,6 +166417,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_UI_Controls_TtCheckBox.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_TtCheckBox.CopyCurrentVersion;
 				kls.RegVersion(12042030562006812122, EngineNS_UI_Controls_TtCheckBox.Read_12042030562006812122);
+				kls.RegVersion(5209425623145371712, EngineNS_UI_Controls_TtCheckBox.Read_5209425623145371712);
 				kls.RegVersion(7669573498665141623, EngineNS_UI_Controls_TtCheckBox.Read_7669573498665141623);
 			}
 			{
@@ -158716,6 +166426,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = EngineNS_UI_Controls_TtContentsPresenter.CopyCurrentVersion;
 				kls.RegVersion(14649557626658780222, EngineNS_UI_Controls_TtContentsPresenter.Read_14649557626658780222);
 				kls.RegVersion(5128288332627869840, EngineNS_UI_Controls_TtContentsPresenter.Read_5128288332627869840);
+				kls.RegVersion(5665572733890662615, EngineNS_UI_Controls_TtContentsPresenter.Read_5665572733890662615);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.TtEditableText@EngineCore");
@@ -158723,12 +166434,14 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = EngineNS_UI_Controls_TtEditableText.CopyCurrentVersion;
 				kls.RegVersion(16528302217836397931, EngineNS_UI_Controls_TtEditableText.Read_16528302217836397931);
 				kls.RegVersion(17615070940917938309, EngineNS_UI_Controls_TtEditableText.Read_17615070940917938309);
+				kls.RegVersion(7820562816795623858, EngineNS_UI_Controls_TtEditableText.Read_7820562816795623858);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.TtExpander@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_TtExpander.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_TtExpander.CopyCurrentVersion;
 				kls.RegVersion(13588225833727196038, EngineNS_UI_Controls_TtExpander.Read_13588225833727196038);
+				kls.RegVersion(13976056634642118906, EngineNS_UI_Controls_TtExpander.Read_13976056634642118906);
 				kls.RegVersion(2956439499757943724, EngineNS_UI_Controls_TtExpander.Read_2956439499757943724);
 			}
 			{
@@ -158736,6 +166449,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_UI_Controls_TtImage.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_TtImage.CopyCurrentVersion;
 				kls.RegVersion(11829965881227520956, EngineNS_UI_Controls_TtImage.Read_11829965881227520956);
+				kls.RegVersion(5366996667353823694, EngineNS_UI_Controls_TtImage.Read_5366996667353823694);
 				kls.RegVersion(873670228818474309, EngineNS_UI_Controls_TtImage.Read_873670228818474309);
 			}
 			{
@@ -158745,6 +166459,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(13359118992701147562, EngineNS_UI_Controls_TtProgress.Read_13359118992701147562);
 				kls.RegVersion(2212287614508609268, EngineNS_UI_Controls_TtProgress.Read_2212287614508609268);
 				kls.RegVersion(3296364571060106474, EngineNS_UI_Controls_TtProgress.Read_3296364571060106474);
+				kls.RegVersion(3553481196874084027, EngineNS_UI_Controls_TtProgress.Read_3553481196874084027);
 				kls.RegVersion(4612746673569861905, EngineNS_UI_Controls_TtProgress.Read_4612746673569861905);
 			}
 			{
@@ -158753,12 +166468,14 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = EngineNS_UI_Controls_TtText.CopyCurrentVersion;
 				kls.RegVersion(11207689003022669699, EngineNS_UI_Controls_TtText.Read_11207689003022669699);
 				kls.RegVersion(17550201605669581129, EngineNS_UI_Controls_TtText.Read_17550201605669581129);
+				kls.RegVersion(713011390112872129, EngineNS_UI_Controls_TtText.Read_713011390112872129);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.UI.Controls.TtToggleButton@EngineCore");
 				kls.Writer = EngineNS_UI_Controls_TtToggleButton.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_TtToggleButton.CopyCurrentVersion;
 				kls.RegVersion(12042030562006812122, EngineNS_UI_Controls_TtToggleButton.Read_12042030562006812122);
+				kls.RegVersion(5209425623145371712, EngineNS_UI_Controls_TtToggleButton.Read_5209425623145371712);
 				kls.RegVersion(7669573498665141623, EngineNS_UI_Controls_TtToggleButton.Read_7669573498665141623);
 			}
 			{
@@ -158814,6 +166531,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_UI_Controls_TtUIElement.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Controls_TtUIElement.CopyCurrentVersion;
 				kls.RegVersion(10405153857802277856, EngineNS_UI_Controls_TtUIElement.Read_10405153857802277856);
+				kls.RegVersion(11096006947367229220, EngineNS_UI_Controls_TtUIElement.Read_11096006947367229220);
 				kls.RegVersion(9055423746621096286, EngineNS_UI_Controls_TtUIElement.Read_9055423746621096286);
 			}
 			{
@@ -158826,6 +166544,7 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.UI.Editor.EditorUIHost@EngineCore");
 				kls.Writer = EngineNS_UI_Editor_EditorUIHost.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Editor_EditorUIHost.CopyCurrentVersion;
+				kls.RegVersion(12363456890481729257, EngineNS_UI_Editor_EditorUIHost.Read_12363456890481729257);
 				kls.RegVersion(1460247802161008708, EngineNS_UI_Editor_EditorUIHost.Read_1460247802161008708);
 				kls.RegVersion(8456914764701220519, EngineNS_UI_Editor_EditorUIHost.Read_8456914764701220519);
 			}
@@ -158833,6 +166552,7 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.UI.Editor.SelectedDecorator@EngineCore");
 				kls.Writer = EngineNS_UI_Editor_SelectedDecorator.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_Editor_SelectedDecorator.CopyCurrentVersion;
+				kls.RegVersion(12363456890481729257, EngineNS_UI_Editor_SelectedDecorator.Read_12363456890481729257);
 				kls.RegVersion(1460247802161008708, EngineNS_UI_Editor_SelectedDecorator.Read_1460247802161008708);
 				kls.RegVersion(8456914764701220519, EngineNS_UI_Editor_SelectedDecorator.Read_8456914764701220519);
 			}
@@ -158869,6 +166589,7 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.UI.TtUIHost@EngineCore");
 				kls.Writer = EngineNS_UI_TtUIHost.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_TtUIHost.CopyCurrentVersion;
+				kls.RegVersion(12363456890481729257, EngineNS_UI_TtUIHost.Read_12363456890481729257);
 				kls.RegVersion(1460247802161008708, EngineNS_UI_TtUIHost.Read_1460247802161008708);
 				kls.RegVersion(8456914764701220519, EngineNS_UI_TtUIHost.Read_8456914764701220519);
 			}
@@ -159040,7 +166761,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(1308987714533235036, Survivor_TtWeaponProxyNode.Read_1308987714533235036);
 				kls.RegVersion(547543558045874187, Survivor_TtWeaponProxyNode.Read_547543558045874187);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("FC_FC_2E_59_4C_BC_80_85_E0_F2_DE_85_D0_05_BC_A7_F1_D1_10_CF");
+			this.VersionHash = EngineNS.Hash160.Parse("C0_14_AE_C3_83_95_22_82_6D_26_29_BD_AD_2C_B7_FD_59_3A_6B_B6");
 		}
 	}
 }

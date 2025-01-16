@@ -29,7 +29,23 @@ namespace NxRHI
 
 		mAtoms.clear();
 	}
+	void FMeshDataProvider::ConvertToIndex32()
+	{
+		if (IsIndex32)
+			return;
 
+		auto ib32 = MakeWeakRef(new IBlobObject());
+		auto count = IndexBuffer->GetSize() / sizeof(UINT16);
+		ib32->ReSize(count * sizeof(UINT));
+		auto src = IndexBuffer->GetDataPtr<UINT16>();
+		auto dst = ib32->GetDataPtr<UINT>();
+		for (int i = 0; i < count; i++)
+		{
+			dst[i] = src[i];
+		}
+		IndexBuffer = ib32;
+		IsIndex32 = true;
+	}
 	bool FMeshDataProvider::BuildTangent()
 	{
 		for (auto& i : mAtoms)
@@ -131,6 +147,8 @@ namespace NxRHI
 
 	bool FMeshDataProvider::ToMesh(ICommandList* cmd, FMeshPrimitives* mesh)
 	{
+		if (mAtoms.size() == 0)
+			return false;
 		mesh->Reset(false);
 		UINT resSize = 0;
 		for (int i = 0; i < VST_Number; i++)

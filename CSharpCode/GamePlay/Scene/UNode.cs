@@ -671,6 +671,8 @@ namespace EngineNS.GamePlay.Scene
             OnParentSceneChanged(prev, cur);
             foreach(var i in Children)
             {
+                if (i is TtScene)
+                    continue;
                 i.ParentSceneChanged(prev, cur);
             }
         }
@@ -992,7 +994,7 @@ namespace EngineNS.GamePlay.Scene
                 //Placement.AbsTransformInv = Matrix.Invert(in matrix);
                 OnAbsTransformChanged();
                 if (BoundVolume != null)
-                    DBoundingBox.TransformNoScale(in AABB, in Placement.AbsTransform, out AbsAABB);
+                    DBoundingBox.TransformNoScale(in BoundVolume.AABB, in Placement.AbsTransform, out AbsAABB);
             }
             UpdateChildrenAbsTransform();
         }
@@ -1156,17 +1158,102 @@ namespace EngineNS.GamePlay.Scene
         {
             return TtOnTickLogicScope<TtNode>.Scope;
         }
+        
         public delegate bool FVisitNode(TtNode node, object arg);
         public bool IterateNodes(FVisitNode fn, object arg)
         {
             if (fn(this, arg) == false)
                 return false;
-            foreach (var i in Children)
+            var tempChildren = Children;
+            foreach (var i in tempChildren)
             {
                 if (i.IterateNodes(fn, arg) == false)
                     return false;
             }
             return true;
+        }
+        private class TtNodeBFSParameters
+        {
+            public int TaskNum;
+            public List<TtNode> InputNodes = new();
+            public List<TtNode> OutputNodes = new();
+            public FVisitNode Callback;
+            public object Arg;
+            public void Reset()
+            {
+                InputNodes.Clear();
+                OutputNodes.Clear();
+                Callback = null;
+                Arg = null;
+                TaskNum = 0;
+            }
+        }
+        [ThreadStatic]
+        static TtNodeBFSParameters mNodeBFSParameters = null;
+        static TtNodeBFSParameters NodeBFSParameters
+        {
+            get
+            {
+                if (mNodeBFSParameters == null)
+                    mNodeBFSParameters = new TtNodeBFSParameters();
+                return mNodeBFSParameters;
+            }
+        }
+        public void IterateNodesBFS(FVisitNode fn, object arg, int NumOfParralelLimit = int.MaxValue)
+        {
+            if (fn(this, arg) == false) 
+                return;
+
+            NodeBFSParameters.Callback = fn;
+            NodeBFSParameters.Arg = arg;
+
+            NodeBFSParameters.InputNodes.Clear();
+            NodeBFSParameters.OutputNodes.Clear();
+            NodeBFSParameters.InputNodes.AddRange(Children);
+            
+            while (NodeBFSParameters.InputNodes.Count > 0)
+            {
+                if (NodeBFSParameters.InputNodes.Count > NumOfParralelLimit)
+                {
+                    var numTask = TtEngine.Instance.EventPoster.NumOfPool;
+                    numTask = Math.Min(NodeBFSParameters.InputNodes.Count, numTask);
+                    NodeBFSParameters.TaskNum = numTask;
+                    TtEngine.Instance.EventPoster.ParrallelFor(numTask, static (int index, object arg1, object arg2, Thread.Async.TtAsyncTaskStateBase state) =>
+                    {
+                        var parameters = arg1 as TtNodeBFSParameters;
+                        int stride = parameters.InputNodes.Count / (int)parameters.TaskNum + 1;
+                        var start = index * stride;
+                        for (int n = 0; n < stride; n++)
+                        {
+                            var nn = start + n;
+                            if (nn >= parameters.InputNodes.Count)
+                                break;
+                            var node = parameters.InputNodes[nn];
+                            var t = parameters.Callback(node, parameters.Arg);
+                            if (t == true && node.Children.Count > 0)
+                            {
+                                lock (parameters.OutputNodes)
+                                {
+                                    parameters.OutputNodes.AddRange(node.Children);
+                                }
+                            }
+                        }
+                    }, NodeBFSParameters);
+                }
+                else
+                {
+                    foreach(var i in NodeBFSParameters.InputNodes)
+                    {
+                        if (fn(i, arg) == false)
+                            continue;
+                        if (i.Children.Count > 0)
+                            NodeBFSParameters.OutputNodes.AddRange(i.Children);
+                    }
+                }
+                NodeBFSParameters.InputNodes.Clear();
+                CoreSDK.Swap(ref NodeBFSParameters.InputNodes, ref NodeBFSParameters.OutputNodes);
+            }
+            NodeBFSParameters.Reset();
         }
         public void TickLogic(TtNodeTickParameters args)
         {

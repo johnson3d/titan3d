@@ -158,10 +158,14 @@ namespace Survivor
                     var singleControll = new FSimpleElementController();
                     singleControll.Element = WeaponPrefab;
                     singleControll.Speed = WeaponNode.RoleData.ProjectileSpeed;
-                    singleControll.Direction = EngineNS.Quaternion.RotateVector3(WeaponNode.Parent.Placement.Quat, Vector3.Forward);
-                    singleControll.OriginalLocation = WeaponNode.Parent.Placement.AbsTransform.Position.ToSingleVector3();
-                    WeaponPrefab.Placement.Position = DVector3.Up + singleControll.OriginalLocation;
-                    BulletPrefabs.Add(singleControll);
+                    var character = WeaponNode.Parent.FindFirstChild<TtCharacter>();
+                    if (character != null)
+                    {
+                        singleControll.Direction = EngineNS.Quaternion.RotateVector3(character.Placement.Quat, Vector3.Forward);
+                        singleControll.OriginalLocation = character.Placement.AbsTransform.Position.ToSingleVector3();
+                        WeaponPrefab.Placement.Position = DVector3.Up + singleControll.OriginalLocation;
+                        BulletPrefabs.Add(singleControll);
+                    }
                 }
             }
         }

@@ -17,16 +17,16 @@ namespace EngineNS
     public partial class TtEngineConfig
     {
         [Rtti.Meta]
-        public Editor.Forms.UMeshPrimitiveEditorConfig MeshPrimitiveEditorConfig
+        public Editor.Forms.TtMeshPrimitiveEditorConfig MeshPrimitiveEditorConfig
         {
             get; set;
-        } = new Editor.Forms.UMeshPrimitiveEditorConfig();
+        } = new Editor.Forms.TtMeshPrimitiveEditorConfig();
     }
 }
 
 namespace EngineNS.Editor.Forms
 {
-    public class UDebugShowTool
+    public class TtDebugShowTool
     {
         bool mShowNormal = false;
         public bool ShowNormal
@@ -70,15 +70,6 @@ namespace EngineNS.Editor.Forms
             {
                 foreach( var Mesh in MeshPrimitivesList)
                 {
-
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-                    UMeshDataProvider meshProvider = new UMeshDataProvider();
-                    if (meshProvider.InitFrom(Mesh))
-在此之后:
-                    TtMeshDataProvider meshProvider = new UMeshDataProvider();
-                    if (meshProvider.InitFrom(Mesh))
-*/
                     TtMeshDataProvider meshProvider = new TtMeshDataProvider();
                     if (meshProvider.InitFrom(Mesh))
                     {
@@ -148,9 +139,9 @@ namespace EngineNS.Editor.Forms
         }
     }
 
-    public class UMeshPrimitiveEditorConfig : IO.BaseSerializer
+    public class TtMeshPrimitiveEditorConfig : IO.BaseSerializer
     {
-        public UMeshPrimitiveEditorConfig()
+        public TtMeshPrimitiveEditorConfig()
         {
             MaterialName = RName.GetRName("material/sysdft.material", RName.ERNameType.Engine);
             PlaneMaterialName = RName.GetRName("material/whitecolor.uminst", RName.ERNameType.Engine);
@@ -158,7 +149,7 @@ namespace EngineNS.Editor.Forms
         public RName MaterialName { get; set; }
         public RName PlaneMaterialName { get; set; }
     }
-    public class UMeshPrimitiveEditor : ULightEnvironemnt, Editor.IAssetEditor, IRootForm
+    public class TtMeshPrimitiveEditor : TtLightEnvironemnt, Editor.IAssetEditor, IRootForm
     {
         public int GetTickOrder()
         {
@@ -213,10 +204,10 @@ namespace EngineNS.Editor.Forms
                 mCurrentMeshNode.IsAcceptShadow = value;
             }
         }
-        UDebugShowTool DebugShowTool;
+        TtDebugShowTool DebugShowTool;
         bool mShowNormal = false;
         bool mShowTangent = false;
-        ~UMeshPrimitiveEditor()
+        ~TtMeshPrimitiveEditor()
         {
             Dispose();
         }
@@ -273,7 +264,7 @@ namespace EngineNS.Editor.Forms
 
             mCurrentMeshNode = meshNode;
 
-            DebugShowTool = new UDebugShowTool();
+            DebugShowTool = new TtDebugShowTool();
             List<Graphics.Mesh.TtMeshPrimitives> MeshPrimitivesList = new List<Graphics.Mesh.TtMeshPrimitives>();
             MeshPrimitivesList.Add(Mesh);
             await DebugShowTool.Initialize(MeshPrimitivesList, PreviewViewport.World);
@@ -583,6 +574,11 @@ namespace EngineNS.Editor.Forms
             {
                 DebugShowTool.ShowTangent = mShowTangent;
             }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("BuildMeshlets", in btSize))
+            {
+                Mesh.BuildMeshlets();
+            }
         }
 
         bool ShowEditorPropGrid = true;
@@ -723,7 +719,7 @@ namespace EngineNS.Editor.Forms
 
 namespace EngineNS.Graphics.Mesh
 {
-    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.UMeshPrimitiveEditor))]
+    [Editor.UAssetEditor(EditorType = typeof(Editor.Forms.TtMeshPrimitiveEditor))]
     public partial class TtMeshPrimitives
     {
     }

@@ -293,6 +293,8 @@ namespace EngineNS.UI
             mCanvas.PushBatch(mDrawBatch);
 
             mCanvas.BuildMesh(mMeshProvider);
+            if (mMeshProvider.NumAtom == 0)
+                return mDrawMesh;
             mMeshProvider.ToMesh(mMesh);
             mMesh.AssetName = RName.GetRName("@UI");
             var materials = ListExtra.CreateList<Graphics.Pipeline.Shader.TtMaterial>((int)mMesh.NumAtom);

@@ -5,7 +5,7 @@ using EngineNS.Graphics.Pipeline;
 
 namespace EngineNS.Editor.Forms
 {
-    public class TtMeshEditor : ULightEnvironemnt, Editor.IAssetEditor, IRootForm
+    public class TtMeshEditor : TtLightEnvironemnt, Editor.IAssetEditor, IRootForm
     {
         public int GetTickOrder()
         {
@@ -75,7 +75,7 @@ namespace EngineNS.Editor.Forms
             }
         }
 
-        UDebugShowTool DebugShowTool;
+        TtDebugShowTool DebugShowTool;
         bool mShowNormal = false;
         bool mShowTangent = false;
 
@@ -163,7 +163,7 @@ namespace EngineNS.Editor.Forms
                     continue;
                 MeshPrimitivesList.Add(j.Mesh);
             }
-            DebugShowTool = new UDebugShowTool();
+            DebugShowTool = new TtDebugShowTool();
             await DebugShowTool.Initialize(MeshPrimitivesList, PreviewViewport.World);
 
             var mesh = new Graphics.Mesh.TtMesh();

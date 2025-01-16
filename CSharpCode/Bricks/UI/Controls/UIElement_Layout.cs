@@ -250,6 +250,7 @@ namespace EngineNS.UI.Controls
             }
         }
         float mMaxWidth = float.MaxValue;
+        [Rtti.Meta]
         [BindProperty, Category("Layout")]
         public float MaxWidth
         {
@@ -262,6 +263,7 @@ namespace EngineNS.UI.Controls
             }
         }
         float mMaxHeight = float.MaxValue;
+        [Rtti.Meta]
         [BindProperty, Category("Layout")]
         public float MaxHeight
         {
@@ -270,6 +272,58 @@ namespace EngineNS.UI.Controls
             {
                 OnValueChange(value, mMaxHeight);
                 mMaxHeight = value;
+                UpdateLayout();
+            }
+        }
+        float mWidth = 100;
+        [Rtti.Meta]
+        [BindProperty, Category("Layout")]
+        public float Width
+        {
+            get => mWidth;
+            set
+            {
+                OnValueChange(value, mWidth);
+                mWidth = value;
+                UpdateLayout();
+            }
+        }
+        bool mWidthAuto = true;
+        [Rtti.Meta]
+        [BindProperty, Category("Layout")]
+        public bool WidthAuto
+        {
+            get => mWidthAuto;
+            set
+            {
+                OnValueChange(value, mWidthAuto);
+                mWidthAuto = value;
+                UpdateLayout();
+            }
+        }
+        float mHeight = 100;
+        [Rtti.Meta]
+        [BindProperty, Category("Layout")]
+        public float Height
+        {
+            get => mHeight;
+            set
+            {
+                OnValueChange(value, mHeight);
+                mHeight = value;
+                UpdateLayout();
+            }
+        }
+        bool mHeightAuto = true;
+        [Rtti.Meta]
+        [BindProperty, Category("Layout")]
+        public bool HeightAuto
+        {
+            get => mHeightAuto;
+            set
+            {
+                OnValueChange(value, mHeightAuto);
+                mHeightAuto = value;
                 UpdateLayout();
             }
         }
@@ -460,12 +514,25 @@ namespace EngineNS.UI.Controls
                 var finaleSize = new SizeF(
                     Math.Max(availableSize.Width - marginWidth, 0.0f),
                     Math.Max(availableSize.Height - marginHeight, 0.0f));
-                var minWidth = Math.Min(MinWidth, finaleSize.Width);
-                var minHeight = Math.Min(MinHeight, finaleSize.Height);
-                var maxWidth = Math.Max(MaxWidth, finaleSize.Width);
-                var maxHeight = Math.Max(MaxHeight, finaleSize.Height);
-                finaleSize.Width = Math.Max(minWidth, Math.Min(finaleSize.Width, maxWidth));
-                finaleSize.Height = Math.Max(minHeight, Math.Min(finaleSize.Height, maxHeight));
+
+                if (WidthAuto)
+                {
+                    var minWidth = Math.Min(MinWidth, finaleSize.Width);
+                    var maxWidth = Math.Max(MaxWidth, finaleSize.Width);
+                    finaleSize.Width = Math.Max(minWidth, Math.Min(finaleSize.Width, maxWidth));
+                }
+                else
+                    finaleSize.Width = Width;
+
+                if (HeightAuto)
+                {
+                    var minHeight = Math.Min(MinHeight, finaleSize.Height);
+                    var maxHeight = Math.Max(MaxHeight, finaleSize.Height);
+                    finaleSize.Height = Math.Max(minHeight, Math.Min(finaleSize.Height, maxHeight));
+                }
+                else
+                    finaleSize.Height = Height;
+
                 if (UseRounding)
                 {
                     finaleSize.Width = RoundValue(finaleSize.Width, dpiScale);
@@ -547,7 +614,7 @@ namespace EngineNS.UI.Controls
                     if (ArrangeRequest != null)
                         EngineNS.TtEngine.Instance.UILayoutManager.ArrangeQueue.Remove(this);
 
-                    if (firstArrange && IsRenderable())
+                    if (firstArrange)// && IsRenderable())
                     {
                         // render update
                         MeshDirty = true;
@@ -576,16 +643,29 @@ namespace EngineNS.UI.Controls
                 if (RootUIHost != null)
                     dpiScale = RootUIHost.DPIScale;
 
+                RectangleF final = RectangleF.Empty;
                 var margin = Margin;
                 var marginWidth = margin.Left + margin.Right;
                 var marginHeight = margin.Top + margin.Bottom;
-                var minWidth = Math.Min(MinWidth, finalRect.Width);
-                var minHeight = Math.Min(MinHeight, finalRect.Height);
-                var maxWidth = Math.Max(MaxWidth, finalRect.Width);
-                var maxHeight = Math.Max(MaxHeight, finalRect.Height);
-                RectangleF final = RectangleF.Empty;
-                final.Width = Math.Max(minWidth, Math.Min(finalRect.Width, maxWidth));
-                final.Height = Math.Max(minHeight, Math.Min(finalRect.Height, maxHeight));
+
+                if (WidthAuto)
+                {
+                    var minWidth = Math.Min(MinWidth, finalRect.Width);
+                    var maxWidth = Math.Max(MaxWidth, finalRect.Width);
+                    final.Width = Math.Max(minWidth, Math.Min(finalRect.Width, maxWidth));
+                }
+                else
+                    final.Width = Width;
+
+                if (HeightAuto)
+                {
+                    var minHeight = Math.Min(MinHeight, finalRect.Height);
+                    var maxHeight = Math.Max(MaxHeight, finalRect.Height);
+                    final.Height = Math.Max(minHeight, Math.Min(finalRect.Height, maxHeight));
+                }
+                else
+                    final.Height = Height;
+
                 final.X = finalRect.Left + margin.Left;
                 final.Y = finalRect.Top + margin.Top;
                 if (UseRounding)

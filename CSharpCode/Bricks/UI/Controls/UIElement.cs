@@ -361,14 +361,27 @@ namespace EngineNS.UI.Controls
         {
             return null;
         }
-        public virtual TtUIElement GetPointAtElement(in Vector2 pt, out Vector2 pointOffset, bool onlyClipped = true)
+        public struct PointAtProcessData
         {
-            pointOffset = Vector2.Zero;
+            public Vector2 Point;
+            public Vector2 PointOffset;
+            public bool OnlyClipped;
+            public bool IgnoreNoHitTest;
+
+            public void Reset()
+            {
+                OnlyClipped = true;
+                IgnoreNoHitTest = false;
+            }
+        }
+        public virtual TtUIElement GetPointAtElement(ref PointAtProcessData data)
+        {
+            data.PointOffset = Vector2.Zero;
             if (NoHitTest)
                 return null;
-            if(IsMousePointIn(in pt))
+            if(IsMousePointIn(in data.Point))
             {
-                pointOffset = new Vector2(pt.X - DesignRect.X, pt.Y - DesignRect.Y);
+                data.PointOffset = new Vector2(data.Point.X - DesignRect.X, data.Point.Y - DesignRect.Y);
                 return this;
             }
             return null;

@@ -437,6 +437,9 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\FX\Hair.cginc">
       <Filter>Bricks\FX</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Modifier\MeshletModifier.cginc">
+      <Filter>Modifier</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

@@ -48,6 +48,7 @@ namespace EngineNS.GamePlay.Scene
             
             var ret = await base.InitializeNode(world, data, bvType, placementType);
             GetNodeData<TtLightNodeData>().HostNode = this;
+            this.BoundVolume.LocalAABB = new BoundingBox(Vector3.Zero, 1.0f);
 
             this.IsForceGatherNode = true;
             return ret;
@@ -101,9 +102,7 @@ namespace EngineNS.GamePlay.Scene
                         mDebugMesh = mesh2;
 
                         mDebugMesh.HostNode = this;
-
-                        BoundVolume.LocalAABB = mDebugMesh.MaterialMesh.AABB;
-
+                        
                         this.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
 
                         UpdateAbsTransform();
@@ -119,6 +118,7 @@ namespace EngineNS.GamePlay.Scene
         public override async Thread.Async.TtTask OnNodeLoaded(TtNode parent)
         {
             await base.OnNodeLoaded(parent);
+            this.BoundVolume.LocalAABB = new BoundingBox(Vector3.Zero, 1.0f);
             UpdateAbsTransform();
         }
         public override void GetHitProxyDrawMesh(List<Graphics.Mesh.TtMesh> meshes)
