@@ -35,11 +35,11 @@ namespace NxRHI
 			return;
 
 		auto ib32 = MakeWeakRef(new IBlobObject());
-		auto count = IndexBuffer->GetSize() / sizeof(UINT16);
+		UINT count = (UINT)IndexBuffer->GetSize() / sizeof(UINT16);
 		ib32->ReSize(count * sizeof(UINT));
 		auto src = IndexBuffer->GetDataPtr<UINT16>();
 		auto dst = ib32->GetDataPtr<UINT>();
-		for (int i = 0; i < count; i++)
+		for (UINT i = 0; i < count; i++)
 		{
 			dst[i] = src[i];
 		}

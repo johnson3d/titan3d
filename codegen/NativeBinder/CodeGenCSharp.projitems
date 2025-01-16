@@ -9,9 +9,10 @@
     <Import_RootNamespace>CodeGenCSharp</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)ClrLogger_2863311530.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClrClass_2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClrString_2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CONTAIN_TYPE_2863311530.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CoreCLRManager_2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EClrLogStringType_2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ELevelTraceType_2863311530.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ENUM_FRUSTUM_CORNER_2863311530.cpp2cs.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/CsDictionaryImpl_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/CsQueue_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/CsValueList_2581692454.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EAreaType_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EigenUtility_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/EmbreeManager_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/ENodeStyle_2581692454.cpp2cs.cs" />
@@ -160,6 +162,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/PhyMaterial_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/PhyObstacleContext_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/PhyObstacle_2581692454.cpp2cs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EngineNS/PhyPairFlag_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/PhyQueryFilterData_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/PhyQueryFlag_2581692454.cpp2cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EngineNS/PhySceneDesc_2581692454.cpp2cs.cs" />

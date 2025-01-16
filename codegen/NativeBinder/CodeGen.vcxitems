@@ -14,8 +14,9 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)ClrLogger_2863311530.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)ClrClass_2863311530.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ClrString_2863311530.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)CoreCLRManager_2863311530.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)FNativeString_2863311530.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ImDrawCmd_2863311530.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)ImDrawData_2863311530.cpp2cs.cpp" />
