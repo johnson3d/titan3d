@@ -149,6 +149,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public string GetUniqueText();
         public void Initialize(Graphics.Mesh.TtMaterialMesh materialMesh);
         public void OnDrawCall(TtMdfQueueBase mdfQueue, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom);
+        public void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom);
     }
 
     public abstract class TtMdfQueueBase : AuxPtrType<IMdfQueue>, IShaderCodeProvider
@@ -325,6 +326,13 @@ namespace EngineNS.Graphics.Pipeline.Shader
             foreach(var i in Modifiers)
             {
                 i.OnDrawCall(this, cmd, drawcall, policy, atom);
+            }
+        }
+        public virtual void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom) 
+        {
+            foreach (var i in Modifiers)
+            {
+                i.OnBuildDrawCall(policy, drawcall, atom);
             }
         }
     }

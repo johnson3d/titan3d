@@ -1,12 +1,12 @@
 ﻿using EngineNS.Graphics.Pipeline.Shader;
-using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace EngineNS.Graphics.Mesh
 {
-    public class UMdfSkinMesh : Graphics.Pipeline.Shader.TtMdfQueue1<Mesh.Modifier.TtSkinModifier>
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Mesh.UMdfSkinMesh@EngineCore", "EngineNS.Graphics.Mesh.UMdfSkinMesh" })]
+    public class TtMdfSkinMesh : Graphics.Pipeline.Shader.TtMdfQueue1<Mesh.Modifier.TtSkinModifier>
     {
         public Mesh.Modifier.TtSkinModifier SkinModifier
         {
@@ -19,7 +19,7 @@ namespace EngineNS.Graphics.Mesh
         public override void CopyFrom(TtMdfQueueBase mdf)
         {
             base.CopyFrom(mdf);
-            if(mdf is UMdfSkinMesh mdfSkin)
+            if(mdf is TtMdfSkinMesh mdfSkin)
             {
                 PerSkinMeshCBuffer = mdfSkin.PerSkinMeshCBuffer;
             }

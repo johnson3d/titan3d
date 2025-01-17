@@ -1,4 +1,5 @@
 ﻿using EngineNS.Graphics.Pipeline;
+using EngineNS.NxRHI;
 using EngineNS.Support;
 using Microsoft.VisualBasic;
 using System;
@@ -291,9 +292,9 @@ namespace EngineNS.Bricks.GpuDriven
     }
     public class TtMeshlets : IDisposable
     {
-        TtGpuBuffer<FMeshlet> MeshLetsBuffer;
-        TtGpuBuffer<uint> VerticesBuffer;
-        TtGpuBuffer<uint> TrianglesBuffer;
+        public TtGpuBuffer<FMeshlet> MeshLetsBuffer;
+        public TtGpuBuffer<uint> VerticesBuffer;
+        public TtGpuBuffer<uint> TrianglesBuffer;
         public void Dispose()
         {
             CoreSDK.DisposeObject(ref MeshLetsBuffer);
@@ -363,17 +364,120 @@ namespace EngineNS.Bricks.GpuDriven
                 TrianglesBuffer.SetSize(maxIndex / 4 + 1, pTriangles, NxRHI.EBufferType.BFT_SRV);
             }
         }
-        public void LoadXnd(XndNode node)
+        public unsafe void LoadXnd(XndNode node)
         {
+            CoreSDK.DisposeObject(ref MeshLetsBuffer);
+            CoreSDK.DisposeObject(ref VerticesBuffer);
+            CoreSDK.DisposeObject(ref TrianglesBuffer);
 
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            var attr = node.TryGetAttribute("MeshLets");
+            if (attr.IsValidPointer)
+            {
+                using (var ar = attr.GetReader(null))
+                {
+                    var ptr = CoreSDK.Alloc((uint)attr.GetReaderLength(), null, 0);
+                    ar.ReadPtr(ptr, (int)attr.GetReaderLength());
+                    MeshLetsBuffer = new TtGpuBuffer<FMeshlet>();
+                    MeshLetsBuffer.SetSize((uint)((int)attr.GetReaderLength() / sizeof(FMeshlet)), ptr, NxRHI.EBufferType.BFT_SRV);
+                    CoreSDK.Free(ptr);
+                }
+            }
+            attr = node.TryGetAttribute("Vertices");
+            if (attr.IsValidPointer)
+            {
+                using (var ar = attr.GetReader(null))
+                {
+                    var ptr = CoreSDK.Alloc((uint)attr.GetReaderLength(), null, 0);
+                    ar.ReadPtr(ptr, (int)attr.GetReaderLength());
+                    VerticesBuffer = new TtGpuBuffer<uint>();
+                    VerticesBuffer.SetSize((uint)((int)attr.GetReaderLength() / sizeof(uint)), ptr, NxRHI.EBufferType.BFT_SRV);
+                    CoreSDK.Free(ptr);
+                }
+            }
+            attr = node.TryGetAttribute("Triangles");
+            if (attr.IsValidPointer)
+            {
+                using (var ar = attr.GetReader(null))
+                {
+                    var ptr = CoreSDK.Alloc((uint)attr.GetReaderLength(), null, 0);
+                    ar.ReadPtr(ptr, (int)attr.GetReaderLength());
+                    TrianglesBuffer = new TtGpuBuffer<uint>();
+                    TrianglesBuffer.SetSize((uint)((int)attr.GetReaderLength() / sizeof(uint)), ptr, NxRHI.EBufferType.BFT_SRV);
+                    CoreSDK.Free(ptr);
+                }
+            }
         }
-        public void SaveXnd(XndNode node)
+        public unsafe void SaveXnd(XndNode node)
         {
-
-        }
-        public void BuildDrawcall(NxRHI.TtGraphicDraw drawcall)
-        {
-
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            var attr = node.GetOrAddAttribute("MeshLets", 0, 0, true);
+            
+            using (var blob = new Support.TtBlobObject())
+            {   
+                var desc = MeshLetsBuffer.GpuBuffer.mCoreObject.Desc;
+                desc.CpuAccess = NxRHI.ECpuAccess.CAS_READ;
+                desc.Usage = NxRHI.EGpuUsage.USAGE_STAGING;
+                var cpBuffer = rc.CreateBuffer(in desc);
+                var cpDraw = rc.CreateCopyDraw();
+                cpDraw.Copy(cpBuffer, MeshLetsBuffer.GpuBuffer);
+                using (var cmd = new FTransientCmd(EQueueType.QU_Transfer, ""))
+                {
+                    cmd.CmdList.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                }
+                cpDraw.Dispose();
+                cpBuffer.FetchGpuData(0, blob.mCoreObject);
+                using (var ar = attr.GetWriter(blob.Size))
+                {
+                    var p = (FMeshlet*)((byte*)blob.DataPointer + 8);
+                    ar.WritePtr(p, (int)blob.Size - 8);
+                }
+                cpBuffer.Dispose();
+            }
+            attr = node.GetOrAddAttribute("Vertices", 0, 0, true);
+            using (var blob = new Support.TtBlobObject())
+            {
+                var desc = VerticesBuffer.GpuBuffer.mCoreObject.Desc;
+                desc.CpuAccess = NxRHI.ECpuAccess.CAS_READ;
+                desc.Usage = NxRHI.EGpuUsage.USAGE_STAGING;
+                var cpBuffer = rc.CreateBuffer(in desc);
+                var cpDraw = rc.CreateCopyDraw();
+                cpDraw.Copy(cpBuffer, VerticesBuffer.GpuBuffer);
+                using (var cmd = new FTransientCmd(EQueueType.QU_Transfer, ""))
+                {   
+                    cmd.CmdList.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                }
+                cpDraw.Dispose();
+                cpBuffer.FetchGpuData(0, blob.mCoreObject);
+                using (var ar = attr.GetWriter(blob.Size))
+                {
+                    var p = (uint*)((byte*)blob.DataPointer + 8);
+                    ar.WritePtr(p, (int)blob.Size - 8);
+                }
+                cpBuffer.Dispose();
+            }
+            attr = node.GetOrAddAttribute("Triangles", 0, 0, true);
+            using (var blob = new Support.TtBlobObject())
+            {
+                var desc = TrianglesBuffer.GpuBuffer.mCoreObject.Desc;
+                desc.CpuAccess = NxRHI.ECpuAccess.CAS_READ;
+                desc.Usage = NxRHI.EGpuUsage.USAGE_STAGING;
+                var cpBuffer = rc.CreateBuffer(in desc);
+                var cpDraw = rc.CreateCopyDraw();
+                cpDraw.Copy(cpBuffer, TrianglesBuffer.GpuBuffer);
+                using (var cmd = new FTransientCmd(EQueueType.QU_Transfer, ""))
+                {
+                    cmd.CmdList.PushGpuDraw(cpDraw.mCoreObject.NativeSuper);
+                }
+                cpDraw.Dispose();
+                cpBuffer.FetchGpuData(0, blob.mCoreObject);
+                using (var ar = attr.GetWriter(blob.Size))
+                {
+                    var p = (uint*)((byte*)blob.DataPointer + 8);
+                    ar.WritePtr(p, (int)blob.Size - 8);
+                }
+                cpBuffer.Dispose();
+            }
         }
     }
 }

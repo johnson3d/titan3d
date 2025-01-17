@@ -47,9 +47,51 @@ namespace EngineNS.Graphics.Mesh.Modifier
         {
 
         }
+        public void OnBuildDrawCall(Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
+        {
+            Meshlets = atom.MeshPrimitives.Meshlets;
+        }
         public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
+            if (Meshlets == null)
+                return;
+            var indexer = drawcall.Effect.GetTypedBindIndexer<TtMdfMeshletBinderIndexer>();
+            var binder = indexer.MeshletsBuffer;
+            if (binder != null)
+            {
+                drawcall.BindSRV(binder, Meshlets.MeshLetsBuffer.Srv);
+            }
+            binder = indexer.VerticesBuffer;
+            if (binder != null)
+            {
+                drawcall.BindSRV(binder, Meshlets.VerticesBuffer.Srv);
+            }
+            binder = indexer.TrianglesBuffer;
+            if (binder != null)
+            {
+                drawcall.BindSRV(binder, Meshlets.TrianglesBuffer.Srv);
+            }
+        }
+        public class TtMdfMeshletBinderIndexer : NxRHI.TtShader.AuxShaderBinderIndexer<TtMdfMeshletBinderIndexer>
+        {
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
+            public NxRHI.TtEffectBinder MeshletsBuffer;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
+            public NxRHI.TtEffectBinder VerticesBuffer;
+            [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
+            public NxRHI.TtEffectBinder TrianglesBuffer;
+        }
+        public Bricks.GpuDriven.TtMeshlets Meshlets;
+    }
 
+    public class TtMdfMeshlet : Graphics.Pipeline.Shader.TtMdfQueue1<TtMeshletModifier>
+    {
+        public TtMeshletModifier MeshletModifier
+        {
+            get
+            {
+                return this.Modifiers[0] as TtMeshletModifier;
+            }
         }
     }
 }

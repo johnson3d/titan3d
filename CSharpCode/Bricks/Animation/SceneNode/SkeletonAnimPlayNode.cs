@@ -34,7 +34,7 @@ namespace EngineNS.Animation.SceneNode
         {
             System.Diagnostics.Debug.Assert(meshNode != null);
             var animatablePose = meshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
-            var skinMDfQueue = meshNode.Mesh.MdfQueue as Graphics.Mesh.UMdfSkinMesh;
+            var skinMDfQueue = meshNode.Mesh.MdfQueue as Graphics.Mesh.TtMdfSkinMesh;
             mAnimatedPose = SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animatablePose);
             meshNode.RuntimePose = mAnimatedPose;
             Player.BindingPose(animatablePose);
@@ -83,7 +83,7 @@ namespace EngineNS.Animation.SceneNode
         {
             System.Diagnostics.Debug.Assert(meshNode != null);
             var animatablePose = meshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
-            var skinMDfQueue = meshNode.Mesh.MdfQueue as Graphics.Mesh.UMdfSkinMesh;
+            var skinMDfQueue = meshNode.Mesh.MdfQueue as Graphics.Mesh.TtMdfSkinMesh;
             mAnimatedPose = SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animatablePose);
             meshNode.RuntimePose = mAnimatedPose;
             await Player.BindingPose(animatablePose);

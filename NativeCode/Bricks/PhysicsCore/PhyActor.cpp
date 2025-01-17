@@ -23,17 +23,19 @@ void PhyActor::Cleanup()
 {
 	if (mActor != nullptr)
 	{
-		//unbind this from pxActor's user data
-		mActor->userData = nullptr;
-
-		//destroy pxActor
 		auto scene = mScene.GetPtr();
 		if (scene != nullptr)
 		{
 			physx::PxSceneWriteLock writeLock(*scene->mScene);
+			mActor->userData = nullptr;
 			scene->mScene->removeActor(*mActor);
+			mActor->release();
 		}
-		mActor->release();
+		else
+		{
+			mActor->userData = nullptr;
+			mActor->release();
+		}
 		mActor = nullptr;
 	}
 }

@@ -230,10 +230,10 @@ namespace EngineNS.Editor.Forms
 
             var meshData = new EngineNS.GamePlay.Scene.TtMeshNode.TtMeshNodeData();
             meshData.MeshName = materialMesh.AssetName;
-            meshData.MdfQueueType = EngineNS.Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh));
+            meshData.MdfQueueType = EngineNS.Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.TtMdfSkinMesh));
             meshData.AtomType = EngineNS.Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.TtMesh.TtAtom));
             var mesh = new Graphics.Mesh.TtMesh();
-            mesh.Initialize(materialMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfSkinMesh>.TypeDesc);
+            mesh.Initialize(materialMesh, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfSkinMesh>.TypeDesc);
 
             var meshNode = await GamePlay.Scene.TtMeshNode.AddMeshNode(PreviewViewport.World, PreviewViewport.World.Root, meshData, typeof(GamePlay.TtPlacement), mesh,
                         DVector3.Zero, Vector3.One, Quaternion.Identity);

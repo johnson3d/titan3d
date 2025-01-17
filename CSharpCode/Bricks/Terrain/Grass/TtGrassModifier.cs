@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assimp;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -346,6 +347,10 @@ namespace EngineNS.Bricks.Terrain.Grass
             public NxRHI.TtEffectBinder cbPerGrassType;
             [NxRHI.TtShader.TtShaderVar(VarType = typeof(NxRHI.TtBuffer))]
             public NxRHI.TtEffectBinder VSGrassDataArray;
+        }
+        public void OnBuildDrawCall(Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Graphics.Mesh.TtMesh.TtAtom atom)
+        {
+
         }
         public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {

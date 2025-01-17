@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Graphics.Mesh.TtMeshPrimitivesAMeta@EngineCore">
-  <AssetId Type="System.Guid@Unknown" Value="9AE889AE-6E85-455B-8161-E3D0B42F4DFB" />
-  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,project_factory/meshes/sm_airconditioningpipe_03.vms,13dffc87-ddd5-4abf-b878-40211e54f1c3" />
+  <AssetId Type="System.Guid@Unknown" Value="9ae889ae-6e85-455b-8161-e3d0b42f4dfb" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/mesh/sm_airconditioningpipe_03.vms,9ae889ae-6e85-455b-8161-e3d0b42f4dfb" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Graphics.Mesh.TtMeshPrimitives&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />

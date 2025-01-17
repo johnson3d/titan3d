@@ -246,8 +246,8 @@ namespace EngineNS.Editor.Forms
             var meshNodeData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
             if (Mesh.PartialSkeleton != null)
             {
-                mesh.Initialize(Mesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.UMdfSkinMesh>.TypeDesc);
-                meshNodeData.MdfQueueType = EngineNS.Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.UMdfSkinMesh));
+                mesh.Initialize(Mesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfSkinMesh>.TypeDesc);
+                meshNodeData.MdfQueueType = EngineNS.Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.Graphics.Mesh.TtMdfSkinMesh));
             }
             else
             {

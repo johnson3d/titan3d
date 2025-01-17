@@ -77,16 +77,6 @@ namespace EngineNS.Bricks.Particle
             }
         }
 
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-        static NxRHI.UShaderCode ParticleVarCode = new NxRHI.UShaderCode();
-        static NxRHI.UShaderCode ParticleEmitterCode = new NxRHI.UShaderCode();
-        static string UniqueText = null;
-在此之后:
-        static NxRHI.TtShaderCode ParticleVarCode = new NxRHI.UShaderCode();
-        static NxRHI.TtShaderCode ParticleEmitterCode = new NxRHI.UShaderCode();
-        static string UniqueText = null;
-*/
         static NxRHI.TtShaderCode ParticleVarCode = new NxRHI.TtShaderCode();
         static NxRHI.TtShaderCode ParticleEmitterCode = new NxRHI.TtShaderCode();
         static string UniqueText = null;
@@ -119,6 +109,10 @@ namespace EngineNS.Bricks.Particle
             };
         }
         public void Initialize(Graphics.Mesh.TtMaterialMesh materialMesh)
+        {
+
+        }
+        public void OnBuildDrawCall(Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Graphics.Mesh.TtMesh.TtAtom atom)
         {
 
         }

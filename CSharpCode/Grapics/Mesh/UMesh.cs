@@ -228,6 +228,7 @@ namespace EngineNS.Graphics.Mesh
             private async Thread.Async.TtTask BuildDrawCall(ViewDrawCalls vdc, Pipeline.TtRenderPolicy policy,
                 Pipeline.TtRenderGraphNode node)
             {
+                vdc.State = -1;
                 var device = TtEngine.Instance.GfxDevice;
                 Graphics.Pipeline.Shader.TtGraphicsShadingEnv shading = null;
                 try
@@ -247,8 +248,6 @@ namespace EngineNS.Graphics.Mesh
                         drawcall.BindGeomMesh(MeshPrimitives.mCoreObject.GetGeomtryMesh());
                         drawcall.BindPipeline(Material.Pipeline);
                         drawcall.PermutationId = shading.mCurrentPermutationId;
-
-                        MeshPrimitives.Meshlets?.BuildDrawcall(drawcall);
 
                         #region Textures
                         for (int j = 0; j < Material.NumOfSRV; j++)
@@ -312,6 +311,7 @@ namespace EngineNS.Graphics.Mesh
                         }
                         #endregion
 
+                        MdfQueue.OnBuildDrawCall(policy, drawcall, this);
                         shading.OnBuildDrawCall(policy, drawcall);
 
                         vdc.DrawCalls = drawcall;
@@ -434,10 +434,14 @@ namespace EngineNS.Graphics.Mesh
                         break;
                     case 0:
                         {
-                            drawCalls.State = -1;
                             var task = BuildDrawCall(drawCalls, policy, node);
-                            if (task.IsCompleted == false)
+                            if (task.IsCompleted)
                             {
+                                task.Dispose();
+                            }
+                            else
+                            {
+                                TtEngine.Instance.TaskCollector.AddWaitTask(task, null);
                                 return null;
                             }
                             break;

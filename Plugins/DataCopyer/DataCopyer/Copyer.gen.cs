@@ -124633,6 +124633,22 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Graphics.Mesh.TtMdfInstanceStaticMesh;
 		};
 	}
+	static class EngineNS_Graphics_Mesh_TtMdfSkinMesh
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.TtMdfSkinMesh;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Mesh.TtMdfSkinMesh;
+			var srcObj = src as EngineNS.Graphics.Mesh.TtMdfSkinMesh;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9524687136534877311 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Mesh.TtMdfSkinMesh;
+		};
+	}
 	static class EngineNS_Graphics_Mesh_TtMdfStaticMesh
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -165737,6 +165753,12 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(9524687136534877311, EngineNS_Graphics_Mesh_TtMdfInstanceStaticMesh.Read_9524687136534877311);
 			}
 			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Mesh.TtMdfSkinMesh@EngineCore");
+				kls.Writer = EngineNS_Graphics_Mesh_TtMdfSkinMesh.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Mesh_TtMdfSkinMesh.CopyCurrentVersion;
+				kls.RegVersion(9524687136534877311, EngineNS_Graphics_Mesh_TtMdfSkinMesh.Read_9524687136534877311);
+			}
+			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Mesh.TtMdfStaticMesh@EngineCore");
 				kls.Writer = EngineNS_Graphics_Mesh_TtMdfStaticMesh.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Mesh_TtMdfStaticMesh.CopyCurrentVersion;
@@ -166271,11 +166293,11 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_TtEngineConfig.WriteCurrentVersion;
 				kls.Copy = EngineNS_TtEngineConfig.CopyCurrentVersion;
 				kls.RegVersion(10782600015784000501, EngineNS_TtEngineConfig.Read_10782600015784000501);
+				kls.RegVersion(1132857467433741107, EngineNS_TtEngineConfig.Read_1132857467433741107);
 				kls.RegVersion(16733778414124841141, EngineNS_TtEngineConfig.Read_16733778414124841141);
 				kls.RegVersion(17061926736410770868, EngineNS_TtEngineConfig.Read_17061926736410770868);
 				kls.RegVersion(18270359776439623110, EngineNS_TtEngineConfig.Read_18270359776439623110);
 				kls.RegVersion(9640772768219813670, EngineNS_TtEngineConfig.Read_9640772768219813670);
-				kls.RegVersion(1132857467433741107, EngineNS_TtEngineConfig.Read_1132857467433741107);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.TtGlobalConfig@EngineCore");
@@ -166761,7 +166783,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(1308987714533235036, Survivor_TtWeaponProxyNode.Read_1308987714533235036);
 				kls.RegVersion(547543558045874187, Survivor_TtWeaponProxyNode.Read_547543558045874187);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("C0_14_AE_C3_83_95_22_82_6D_26_29_BD_AD_2C_B7_FD_59_3A_6B_B6");
+			this.VersionHash = EngineNS.Hash160.Parse("D5_50_1E_97_B0_E5_37_40_F2_E3_23_1C_56_30_4B_38_44_48_EF_A0");
 		}
 	}
 }

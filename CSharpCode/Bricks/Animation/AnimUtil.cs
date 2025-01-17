@@ -49,7 +49,7 @@ namespace EngineNS.Animation
             if (meshNode != null && meshNode.HasSkin)
             {
                 var animatablePose = meshNode?.Mesh?.MaterialMesh?.SubMeshes[0].Mesh?.PartialSkeleton?.CreatePose() as SkeletonAnimation.AnimatablePose.TtAnimatableSkeletonPose;
-                var skinMDfQueue = meshNode.Mesh.MdfQueue as Graphics.Mesh.UMdfSkinMesh;
+                var skinMDfQueue = meshNode.Mesh.MdfQueue as Graphics.Mesh.TtMdfSkinMesh;
                 var animatedPose = SkeletonAnimation.Runtime.Pose.TtRuntimePoseUtility.CreateLocalSpaceRuntimePose(animatablePose);
                 meshNode.RuntimePose = animatedPose;
                 return meshNode.RuntimePose;

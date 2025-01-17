@@ -1,4 +1,5 @@
-﻿using EngineNS.Graphics.Pipeline;
+﻿using Assimp;
+using EngineNS.Graphics.Pipeline;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -37,6 +38,10 @@ namespace EngineNS.Bricks.VXGI
             return null;
         }
         public void Initialize(Graphics.Mesh.TtMaterialMesh materialMesh)
+        {
+
+        }
+        public void OnBuildDrawCall(Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Graphics.Mesh.TtMesh.TtAtom atom)
         {
 
         }

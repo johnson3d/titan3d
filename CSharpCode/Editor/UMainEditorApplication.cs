@@ -807,7 +807,7 @@ namespace EngineNS.Editor
 
                 {
                     var mesh1 = new Graphics.Mesh.TtMesh();
-                    await mesh1.Initialize(RName.GetRName("utest/puppet/mesh/puppet.ums"), Rtti.TtTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfSkinMesh)));
+                    await mesh1.Initialize(RName.GetRName("utest/puppet/mesh/puppet.ums"), Rtti.TtTypeDesc.TypeOf(typeof(Graphics.Mesh.TtMdfSkinMesh)));
                     var meshData1 = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
                     var meshNode1 = new GamePlay.Scene.TtMeshNode();
                     await meshNode1.InitializeNode(world, meshData1, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
@@ -820,7 +820,7 @@ namespace EngineNS.Editor
                     meshNode1.IsCastShadow = true;
 
                     (meshNode1.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
-                    (meshNode1.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).MdfQueueType = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.UMdfSkinMesh));
+                    (meshNode1.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).MdfQueueType = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMdfSkinMesh));
                     (meshNode1.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).AtomType = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMesh.TtAtom));
 
                    }
