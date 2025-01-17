@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineNS.NxRHI;
+using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Text;
@@ -47,14 +48,10 @@ namespace EngineNS.Graphics.Mesh.Modifier
         {
 
         }
-        public void OnBuildDrawCall(Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
+        public unsafe void OnBuildDrawCall(Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall, Mesh.TtMesh.TtAtom atom)
         {
             Meshlets = atom.MeshPrimitives.Meshlets;
-        }
-        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
-        {
-            if (Meshlets == null)
-                return;
+
             var indexer = drawcall.Effect.GetTypedBindIndexer<TtMdfMeshletBinderIndexer>();
             var binder = indexer.MeshletsBuffer;
             if (binder != null)
@@ -71,6 +68,16 @@ namespace EngineNS.Graphics.Mesh.Modifier
             {
                 drawcall.BindSRV(binder, Meshlets.TrianglesBuffer.Srv);
             }
+
+            //yifeii
+            drawcall.BindGeomMesh(Meshlets.GeomMesh);
+            //drawcall.DrawInstance = 37;
+            //drawcall.BindIndirectDrawArgsBuffer()
+        }
+        public unsafe void OnDrawCall(Graphics.Pipeline.Shader.TtMdfQueueBase mdfQueue1, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, Graphics.Pipeline.TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        {
+            if (Meshlets == null)
+                return;
         }
         public class TtMdfMeshletBinderIndexer : NxRHI.TtShader.AuxShaderBinderIndexer<TtMdfMeshletBinderIndexer>
         {
