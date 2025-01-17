@@ -534,10 +534,20 @@ namespace EngineNS.Graphics.Mesh
             mMeshlets.BuildMeshlets(mesh, 128, 256, 0);
             CoreSDK.PtrType_Release(mesh);
         }
-        public void LoadMeshlets(XndNode node)
+        public unsafe void LoadMeshlets(XndNode node)
         {
             mMeshlets = new Bricks.GpuDriven.TtMeshlets();
             mMeshlets.LoadXnd(node);
+
+            var vb = mCoreObject.GetGeomtryMesh().GetVertexArray().GetVB(EVertexStreamType.VST_Position);
+            var desc = new FSrvDesc();
+            desc.SetBuffer(true);
+            desc.Format = EPixelFormat.PXF_R32_TYPELESS;
+            desc.Buffer.FirstElement = 0;
+            desc.Buffer.NumElements = (uint)(mCoreObject.GetVertexNumber() * 3);
+            var srv = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(vb.Buffer, in desc);
+            if (srv != null)
+                srv.Dispose();
         }
         #endregion
     }

@@ -212,6 +212,18 @@ namespace EngineNS.NxRHI
             ptr.NativeSuper.NativeSuper.Release();
             return result;
         }
+        public TtSrView CreateSRV(NxRHI.IBuffer buffer, in FSrvDesc desc)
+        {
+            if (desc.Type == ESrvType.ST_BufferSRV)
+            {
+                var result = new TtSrView();
+                result.mCoreObject = mCoreObject.CreateSRV(buffer.NativeSuper, in desc);
+                if (result.mCoreObject.IsValidPointer == false)
+                    return null;
+                return result;
+            }
+            return null;
+        }
         public TtSrView CreateSRV(TtBuffer buffer, in FSrvDesc desc)
         {
             if (buffer == null)

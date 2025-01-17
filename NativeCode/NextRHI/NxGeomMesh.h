@@ -208,6 +208,12 @@ namespace NxRHI
 		FGeomMesh* GetGeomtryMesh() const {
 			return mGeometryMesh;
 		}
+		UINT GetVertexNumber() const {
+			return mDesc.VertexNumber;
+		}
+		UINT GetPrimitiveNumber() const {
+			return mDesc.PolyNumber;
+		}
 
 		const char* GetName() const;
 		UINT GetAtomNumber() const;

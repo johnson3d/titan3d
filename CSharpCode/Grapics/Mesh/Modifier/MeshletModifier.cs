@@ -71,6 +71,8 @@ namespace EngineNS.Graphics.Mesh.Modifier
             {
                 drawcall.BindSRV(binder, Meshlets.TrianglesBuffer.Srv);
             }
+            //drawcall.DrawInstance = 37;
+            //drawcall.BindIndirectDrawArgsBuffer()
         }
         public class TtMdfMeshletBinderIndexer : NxRHI.TtShader.AuxShaderBinderIndexer<TtMdfMeshletBinderIndexer>
         {
