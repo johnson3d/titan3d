@@ -1,4 +1,5 @@
-﻿using EngineNS.Graphics.Pipeline;
+﻿using Assimp;
+using EngineNS.Graphics.Pipeline;
 using EngineNS.NxRHI;
 using EngineNS.Support;
 using Microsoft.VisualBasic;
@@ -295,14 +296,39 @@ namespace EngineNS.Bricks.GpuDriven
         public TtGpuBuffer<FMeshlet> MeshLetsBuffer;
         public TtGpuBuffer<uint> VerticesBuffer;
         public TtGpuBuffer<uint> TrianglesBuffer;
+        public TtGeomMesh GeomMesh = null;
         public void Dispose()
         {
             CoreSDK.DisposeObject(ref MeshLetsBuffer);
             CoreSDK.DisposeObject(ref VerticesBuffer);
             CoreSDK.DisposeObject(ref TrianglesBuffer);
         }
+        public unsafe void Init()
+        {
+            if (GeomMesh != null)
+                return;
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            GeomMesh = rc.CreateGeomMesh();
+
+            FIbvDesc ivd = new FIbvDesc();
+            ivd.SetDefault();
+            ivd.Stride = sizeof(ushort);
+            ivd.Size = sizeof(ushort) * 256 * 3;
+            var pIBData = (ushort*)CoreSDK.Alloc(sizeof(ushort) * 256 * 3, null, 0);
+            for (int i = 0; i < 256 * 3; i++)
+            {
+                pIBData[i] = (ushort)i;
+            }
+            ivd.InitData = pIBData;
+            var ib = rc.CreateIBV(null, in ivd);
+            CoreSDK.Free(pIBData);
+            GeomMesh.BindIndexBuffer(ib);
+           
+        }
         public unsafe void BuildMeshlets(NxRHI.FMeshDataProvider mesh, uint max_vertices, uint max_triangles, float cone_weight)
         {
+            Init();
+
             using (var Meshlets = new Support.TtBlobObject())
             using (var Materials = new Support.TtBlobObject())
             using (var Vertices = new Support.TtBlobObject())
@@ -366,6 +392,8 @@ namespace EngineNS.Bricks.GpuDriven
         }
         public unsafe void LoadXnd(XndNode node)
         {
+            Init();
+
             CoreSDK.DisposeObject(ref MeshLetsBuffer);
             CoreSDK.DisposeObject(ref VerticesBuffer);
             CoreSDK.DisposeObject(ref TrianglesBuffer);
