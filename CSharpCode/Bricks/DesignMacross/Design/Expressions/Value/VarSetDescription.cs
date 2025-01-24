@@ -70,13 +70,20 @@ namespace EngineNS.DesignMacross.Design.Expressions
             if (linkedDataPin != null)
             {
                 System.Diagnostics.Debug.Assert(linkedDataPin is TtDataOutPinDescription);
-                FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription };
+                FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                 if (linkedDataPin.Parent is TtExpressionDescription expressionDescription)
                 {
                     var right = (linkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
-                    var assign = TtASTBuildUtil.CreateAssignOperatorStatement(
-                                    new TtVariableReferenceExpression(mVariableDescription.VariableName, new TtVariableReferenceExpression("CenterData")),
-                                    right);
+                    TtVariableReferenceExpression left = null;
+                    if (statementBuildContext.ClassBuildContext.ClassDescription != statementBuildContext.ClassBuildContext.MainClassDescription)
+                    {
+                        left = new TtVariableReferenceExpression(mVariableDescription.VariableName, new TtVariableReferenceExpression("CenterData"));
+                    }
+                    else
+                    {
+                        left = new TtVariableReferenceExpression(mVariableDescription.VariableName);
+                    }
+                    var assign = TtASTBuildUtil.CreateAssignOperatorStatement(left, right);
                     statementBuildContext.AddStatement(assign);
                 }
                 if (linkedDataPin.Parent is TtStatementDescription statementDescription)
@@ -91,9 +98,16 @@ namespace EngineNS.DesignMacross.Design.Expressions
             else
             {
                 var right = new TtDefaultValueExpression() { Type = new TtTypeReference(linkedDataPin.TypeDesc) };
-                var assign = TtASTBuildUtil.CreateAssignOperatorStatement(
-                                new TtVariableReferenceExpression(mVariableDescription.VariableName, new TtVariableReferenceExpression("CenterData")),
-                                right);
+                TtVariableReferenceExpression left = null;
+                if (statementBuildContext.ClassBuildContext.ClassDescription != statementBuildContext.ClassBuildContext.MainClassDescription)
+                {
+                    left = new TtVariableReferenceExpression(mVariableDescription.VariableName, new TtVariableReferenceExpression("CenterData"));
+                }
+                else
+                {
+                    left = new TtVariableReferenceExpression(mVariableDescription.VariableName);
+                }
+                var assign = TtASTBuildUtil.CreateAssignOperatorStatement(left, right);
                 statementBuildContext.AddStatement(assign);
             }
 
@@ -101,7 +115,11 @@ namespace EngineNS.DesignMacross.Design.Expressions
             var linkedExecPin = statementBuildContext.MethodDescription.GetLinkedExecutionPin(executionOutPin);
             if (linkedExecPin != null)
             {
-                FStatementBuildContext buildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = statementBuildContext.MethodDescription };
+                FStatementBuildContext buildContext = new() {
+                    ExecuteSequenceStatement = new(), 
+                    MethodDescription = statementBuildContext.MethodDescription,
+                    ClassBuildContext = statementBuildContext.ClassBuildContext
+                };
                 (linkedExecPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);
                 statementBuildContext.AddStatement(buildContext.ExecuteSequenceStatement);
             }

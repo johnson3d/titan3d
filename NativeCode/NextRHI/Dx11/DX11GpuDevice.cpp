@@ -211,7 +211,7 @@ namespace NxRHI
 		
 		mFrameFence = MakeWeakRef(this->CreateFence(&fcDesc, "Dx11 Frame Fence"));
 
-		mCaps.IsSupoortBufferToTexture = false;
+		mCaps.IsSupportBufferToTexture = false;
 		mCaps.IsSupportSSBO_VS = true;
 		
 		/*mGpuResourceAlignment.CBufferAlignment = 256;

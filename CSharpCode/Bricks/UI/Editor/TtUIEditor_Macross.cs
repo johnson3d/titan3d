@@ -14,6 +14,8 @@ namespace EngineNS.UI.Editor
     public partial class TtUIEditor
     {
         //Macross.UMacrossGetter<TtUIMacrossBase> mMacrossGetter;
+        public static readonly string EventMethodCustomData = "EventMethod";
+        public static readonly string EventMethodAssistCustomData = "UI_Assist";
 
         public struct MacrossEditorRemoveMethodQueryData
         {
@@ -28,7 +30,9 @@ namespace EngineNS.UI.Editor
             for (int methodIdx = 0; methodIdx < method.MethodDatas.Count; methodIdx++)
             {
                 data.Desc = method.MethodDatas[methodIdx].MethodDec;
-                mUIHost.QueryElements(ElementOnRemoveMacrossMethod, ref data);
+                var pData = new TtUIElement.QueryProcessData();
+                pData.Reset();
+                mUIHost.QueryElements(ElementOnRemoveMacrossMethod, ref pData, ref data);
             }
 
             return data.RemoveSuccess;
@@ -85,7 +89,9 @@ namespace EngineNS.UI.Editor
         }
         bool OnMacrossEditorRemoveMember(Bricks.CodeBuilder.TtVariableDeclaration variable)
         {
-            mUIHost.QueryElements(ElementOnRemoveMacrossMember, ref variable);
+            var pData = new TtUIElement.QueryProcessData();
+            pData.Reset();
+            mUIHost.QueryElements(ElementOnRemoveMacrossMember, ref pData, ref variable);
             return true;
         }
         List<string> mNeedDeletes = new List<string>();
@@ -129,7 +135,9 @@ namespace EngineNS.UI.Editor
 
             //mMacrossGetter
             int temp = 0;
-            this.mUIHost.QueryElements(ElementBindMacross, ref temp);
+            var pData = new TtUIElement.QueryProcessData();
+            pData.Reset();
+            this.mUIHost.QueryElements(ElementBindMacross, ref pData, ref temp);
         }
         struct CheckValidQueryData
         {
@@ -146,15 +154,25 @@ namespace EngineNS.UI.Editor
 
             return false;
         }
-        MethodData.EErrorType CheckMacrossMethodDataValid(MethodData data)
+        MethodData.EErrorType CheckMacrossMethodDataValid(MethodData data, System.Reflection.MethodInfo[] methodInfos)
         {
+            var errorType = TtMacrossEditor.MethodErrorCheckProcess(data, methodInfos);
+            if (errorType != MethodData.EErrorType.None)
+                return errorType;
+
+            if (data.MethodDec.CustomData != EventMethodCustomData)
+                return MethodData.EErrorType.None;
+
             CheckValidQueryData queryTemp = new CheckValidQueryData()
             {
                 Result = MethodData.EErrorType.InvalidMethodName,
                 Data = data,
             };
-            this.mUIHost.QueryElements(ElementCheckMacrossMethodDataValid, ref queryTemp);
-            return queryTemp.Result;
+            var pData = new TtUIElement.QueryProcessData();
+            pData.Reset();
+            this.mUIHost.QueryElements(ElementCheckMacrossMethodDataValid, ref pData, ref queryTemp);
+            data.ErrorType = queryTemp.Result;
+            return data.ErrorType;
         }
         bool ElementBindMacross(TtUIElement element, ref int temp)
         {
@@ -323,6 +341,8 @@ namespace EngineNS.UI.Editor
             methodDesc.GetDisplayNameFunc = element.GetMethodDisplayName;
             methodDesc.MethodName = methodName;
             methodDesc.AsyncType = TtMethodDeclaration.EAsyncType.CustomTask;
+            methodDesc.CustomData = EventMethodCustomData;
+            methodDesc.Id = Guid.NewGuid();
             var pams = eventType.GetMethod("Invoke").GetParameters();
             for(int i=0; i<pams.Length; i++)
             {
@@ -477,7 +497,7 @@ namespace EngineNS.UI.Editor
                             VariableName = GetUIElementMacrossVariableName(element),
                             VariableType = new TtTypeReference(element.GetType()),
                         },
-                        new TtVariableReferenceExpression("HostObject"),
+                        new TtVariableReferenceExpression("HostElement"),
                         new TtMethodInvokeArgumentExpression(new TtPrimitiveExpression(element.Id)))
                 {
                     DeclarationReturnValue = false,
@@ -496,6 +516,7 @@ namespace EngineNS.UI.Editor
                 {
                     MethodName = "InitializeEvents",
                     IsOverride = true,
+                    CustomData = EventMethodAssistCustomData,
                 };
                 UIAsset.MacrossEditor.DefClass.AddMethod(initEvtMethod);
             }
@@ -508,6 +529,7 @@ namespace EngineNS.UI.Editor
                 {
                     MethodName = "InitializeBindings",
                     IsOverride = true,
+                    CustomData = EventMethodAssistCustomData,
                 };
                 UIAsset.MacrossEditor.DefClass.AddMethod(bindInitMethod);
             }
@@ -520,12 +542,16 @@ namespace EngineNS.UI.Editor
                 {
                     MethodName = "InitializeUIElementVariables",
                     IsOverride = true,
+                    CustomData = EventMethodAssistCustomData,
                 };
                 UIAsset.MacrossEditor.DefClass.AddMethod(initMethod);
             }
             initMethod.MethodBody.Sequence.Clear();
 
-            mUIHost.QueryElements(GenericElementVariableCode, ref cls);
+            var pData = new TtUIElement.QueryProcessData();
+            pData.Reset();
+            pData.IgnoreUserControl = true;
+            mUIHost.QueryElements(GenericElementVariableCode, ref pData, ref cls);
         }
         void OnAfterCompileCode(TtMacrossEditor editor)
         {

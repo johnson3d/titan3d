@@ -35,7 +35,7 @@ namespace EngineNS.UI.Controls
             Center              = 1 << 7,
         }
         [Rtti.Meta, Browsable(false)]
-        internal ETextFlag TextFlag
+        public ETextFlag TextFlag
         {
             get;
             set;

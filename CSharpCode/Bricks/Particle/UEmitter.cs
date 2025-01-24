@@ -1,5 +1,6 @@
 using MathNet.Numerics.Statistics.Mcmc;
 using Microsoft.CodeAnalysis;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -500,6 +501,8 @@ namespace EngineNS.Bricks.Particle
                     {
                         uint shapeIndex = GetParticleData(flags) % (uint)EmitterShapes.Count;
                         EmitterShapes[(int)shapeIndex].UpdateLocation(this, cur);
+
+                        cur->Location = Location + cur->Location;
                     }
                     OnInitParticle(ref pParticles[index]);
                 }

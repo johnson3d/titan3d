@@ -53,7 +53,14 @@ namespace EngineNS.DesignMacross.Design.Expressions
 
         public override TtExpressionBase BuildExpression(ref FExpressionBuildContext expressionBuildContext)
         {
-            return new TtVariableReferenceExpression(mVariableDescription.VariableName, new TtVariableReferenceExpression("CenterData"));
+            if(expressionBuildContext.ClassBuildContext.ClassDescription != expressionBuildContext.ClassBuildContext.MainClassDescription)
+            {
+                return new TtVariableReferenceExpression(mVariableDescription.VariableName, new TtVariableReferenceExpression("CenterData"));
+            }
+            else
+            {
+                return new TtVariableReferenceExpression(mVariableDescription.VariableName);
+            }
         }
     }
 }

@@ -153,11 +153,15 @@ namespace NxRHI
 	}
 	bool DX12GpuDrawState::BuildState(IGpuDevice* device)
 	{
-		if (((DX12GpuDevice*)device)->mDevice2 != nullptr)
+		if (((DX12GpuDevice*)device)->mLastDevice != nullptr)
 		{
 			if (RenderPass->Desc.ViewInstanceDesc.ViewInstanceCount != 0)
 			{
 				return BuildStateWithViewInstance((DX12GpuDevice*)device);
+			}
+			else if (this->ShaderEffect->GetMS() != nullptr && device->mCaps.IsSupportMeshShader)
+			{
+				return BuildMeshShaderState((DX12GpuDevice*)device);
 			}
 		}
 
@@ -252,7 +256,62 @@ namespace NxRHI
 		pState->Release();
 		return true;//can put -> pos
 	}
+	bool DX12GpuDrawState::BuildMeshShaderState(DX12GpuDevice* device)
+	{
+		auto pDx12 = this->Pipeline.UnsafeConvertTo<DX12GpuPipeline>();
+		auto pEffect = ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>();
 
+		struct PipelineStateStream
+		{
+			CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE pRootSignature;
+			CD3DX12_PIPELINE_STATE_STREAM_AS AS;
+			CD3DX12_PIPELINE_STATE_STREAM_MS MS;
+			CD3DX12_PIPELINE_STATE_STREAM_VS VS;
+			CD3DX12_PIPELINE_STATE_STREAM_PS PS;
+			CD3DX12_PIPELINE_STATE_STREAM_RASTERIZER Raster;
+			CD3DX12_PIPELINE_STATE_STREAM_BLEND_DESC Blend;
+			CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL DepthStencil;
+			CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL_FORMAT DSVFormat;
+			CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS RTVFormats;
+		} Stream;
+		Stream.pRootSignature = pEffect->mSignature;
+		Stream.MS = {
+			&ShaderEffect->mMeshShader->Desc->DxIL[0],
+			ShaderEffect->mMeshShader->Desc->DxIL.size()
+		};
+		Stream.PS = {
+			&ShaderEffect->mPixelShader->Desc->DxIL[0],
+			ShaderEffect->mPixelShader->Desc->DxIL.size()
+		};
+		Stream.Raster = CD3DX12_RASTERIZER_DESC(pDx12->mRasterState);
+		Stream.Blend = CD3DX12_BLEND_DESC(pDx12->mBlendState);
+		Stream.DepthStencil = CD3DX12_DEPTH_STENCIL_DESC(pDx12->mDepthStencilState);
+
+		D3D12_RT_FORMAT_ARRAY rtvFormats{};
+		rtvFormats.NumRenderTargets = RenderPass->Desc.NumOfMRT;
+		for (UINT i = 0; i < RenderPass->Desc.NumOfMRT; i++)
+		{
+			rtvFormats.RTFormats[i] = FormatToDX12Format(RenderPass->Desc.AttachmentMRTs[i].Format);
+			ASSERT(rtvFormats.RTFormats[i] != DXGI_FORMAT_UNKNOWN);
+		}
+		Stream.RTVFormats = D3D12_RT_FORMAT_ARRAY(rtvFormats);
+		Stream.DSVFormat = FormatToDX12Format(RenderPass->Desc.AttachmentDepthStencil.Format);
+
+		D3D12_PIPELINE_STATE_STREAM_DESC ssdesc = {
+		   sizeof(Stream),&Stream
+		};
+
+		ID3D12PipelineState* pState2;
+		if (S_OK != device->mLastDevice->CreatePipelineState(&ssdesc, IID_PPV_ARGS(&pState2)))
+		{
+			VFX_LTRACE(ELTT_Error, "CreatePSO failed: VS(%s) PS(%s)", ShaderEffect->mVertexShader->Desc->DebugName.c_str(),
+				ShaderEffect->mPixelShader->Desc->DebugName.c_str());
+			return false;
+		}
+		mDxState = pState2;
+		pState2->Release();
+		return true;
+	}
 	bool DX12GpuDrawState::BuildStateWithViewInstance(DX12GpuDevice* device)
 	{
 		auto pDx12 = this->Pipeline.UnsafeConvertTo<DX12GpuPipeline>();
@@ -322,7 +381,7 @@ namespace NxRHI
 		};
 
 		ID3D12PipelineState* pState2;
-		if (S_OK != device->mDevice2->CreatePipelineState(&ssdesc, IID_PPV_ARGS(&pState2)))
+		if (S_OK != device->mLastDevice->CreatePipelineState(&ssdesc, IID_PPV_ARGS(&pState2)))
 		{
 			VFX_LTRACE(ELTT_Error, "CreatePSO failed: VS(%s) PS(%s)", ShaderEffect->mVertexShader->Desc->DebugName.c_str(),
 				ShaderEffect->mPixelShader->Desc->DebugName.c_str());

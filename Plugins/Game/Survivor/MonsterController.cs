@@ -31,7 +31,7 @@ namespace Survivor
         }
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
-            if(Player != null && MonsterNode != null)
+            if(Player != null && MonsterNode != null && !MonsterNode.StateNode.IsDead)
             {
                 float distance = Vector3.Distance(Player.Placement.AbsTransform.Position.ToSingleVector3(),
                                             MonsterNode.MonseterPlacement.AbsTransform.Position.ToSingleVector3());

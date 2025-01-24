@@ -21,7 +21,11 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
                 Parent = this,
             };
         }
-
+        public override void UpdateData(ref FDescriptionUpdateContext updateContext)
+        {
+            base.UpdateData(ref updateContext);
+            CheckConditionMethodDescription.UpdateData(ref updateContext);
+        }
         public override List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
             SupperClassNames.Clear();
@@ -31,6 +35,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
             {
                 MainClassDescription = classBuildContext.MainClassDescription,
                 ClassDeclaration = thisClassDeclaration,
+                ClassDescription = this
             };
             thisClassDeclaration.AddMethod(BuildOverrideCheckConditionMethod(ref transitionClassBuildContext));
             return new List<TtClassDeclaration>() { thisClassDeclaration };

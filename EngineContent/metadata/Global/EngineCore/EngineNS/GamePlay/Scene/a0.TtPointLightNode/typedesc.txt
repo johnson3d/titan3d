@@ -1,0 +1,2 @@
+EngineCore
+EngineNS.GamePlay.Scene.TtPointLightNode@EngineCore

@@ -7,19 +7,22 @@ namespace EngineNS.DesignMacross.Base.Description
 {
     public struct FClassBuildContext
     {
-        public IClassDescription MainClassDescription { get; set; } 
-        public TtClassDeclaration ClassDeclaration { get; set; }
+        public IClassDescription MainClassDescription;
+        public IClassDescription ClassDescription;
+        public TtClassDeclaration ClassDeclaration;
     }
 
-    public struct FMethodBuildContext
-    {
-        public IMethodDescription MethodDescription { get; set; } 
-        public TtMethodDeclaration MethodDeclaration { get; set; }
-    }
+    //public struct FMethodBuildContext
+    //{
+    //    public FClassBuildContext ClassBuildContext;
+    //    public IMethodDescription MethodDescription { get; set; } 
+    //    public TtMethodDeclaration MethodDeclaration { get; set; }
+    //}
 
     public struct FStatementBuildContext
     {
-        public IMethodDescription MethodDescription { get; set; }
+        public FClassBuildContext ClassBuildContext;
+        public IMethodDescription MethodDescription;
         public TtExecuteSequenceStatement ExecuteSequenceStatement { get; set; }
         public void AddStatement(TtStatementBase statement)
         {
@@ -30,14 +33,15 @@ namespace EngineNS.DesignMacross.Base.Description
     }
     public struct FExpressionBuildContext
     {
-        public IMethodDescription MethodDescription { get; set; }
-        public TtExecuteSequenceStatement Sequence { get; set; }
-        public TtDataPinDescription SelfPin { get; set; }
-        public TtDataPinDescription TargetPin { get; set; }
+        public FClassBuildContext ClassBuildContext;
+        public IMethodDescription MethodDescription;
+        public TtExecuteSequenceStatement Sequence;
+        public TtDataPinDescription SelfPin;
+        public TtDataPinDescription TargetPin;
     }
     public struct FDescriptionUpdateContext
     {
-        public IClassDescription ClassDescription { get; set; }
+        public IClassDescription ClassDescription;
     }
     public interface IDescription  : IO.ISerializer
     {

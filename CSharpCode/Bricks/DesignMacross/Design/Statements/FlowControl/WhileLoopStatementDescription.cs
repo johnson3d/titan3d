@@ -38,7 +38,7 @@ namespace EngineNS.DesignMacross.Design.Statements
             else
             {
                 System.Diagnostics.Debug.Assert(linkedDataPin is TtDataOutPinDescription);
-                var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription };
+                var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                 var condition = (linkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
                 whileStatement.Condition = condition;
             }
@@ -56,6 +56,7 @@ namespace EngineNS.DesignMacross.Design.Statements
                 {
                     ExecuteSequenceStatement = new(),
                     MethodDescription = statementBuildContext.MethodDescription,
+                    ClassBuildContext = statementBuildContext.ClassBuildContext
                 };
                 whileStatement.LoopBody = (linkedLoopBodyExecPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);
             }

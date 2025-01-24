@@ -57,7 +57,7 @@ namespace NxRHI
 		if (FAILED(hr))
 			return false;
 
-		mContext->QueryInterface(IID_PPV_ARGS(mContext2.GetAddressOf()));
+		mContext->QueryInterface(IID_PPV_ARGS(mLastContext.GetAddressOf()));
 
 		auto pGpuSystem = device->mGpuSystem.GetPtr();
 		if (pGpuSystem->Desc.CreateDebugLayer && pGpuSystem->Desc.GpuBaseValidation)
@@ -510,8 +510,8 @@ namespace NxRHI
 	}
 	void DX12CommandList::SetViewInstanceMask(UINT Mask)
 	{
-		ASSERT(mContext2 != nullptr);
-		mContext2->SetViewInstanceMask(Mask);
+		ASSERT(mLastContext != nullptr);
+		mLastContext->SetViewInstanceMask(Mask);
 	}
 	static inline D3D12_PRIMITIVE_TOPOLOGY PrimitiveTypeToDX12(EPrimitiveType type, UINT NumPrimitives, UINT* pCount)
 	{
@@ -608,6 +608,28 @@ namespace NxRHI
 		mContext->Dispatch(x, y, z);
 	}
 	void DX12CommandList::IndirectDispatch(IBuffer* indirectArg, UINT indirectArgOffset)
+	{
+		ASSERT(mCmdListState = ECmdListState::Recording);
+		//mContext->ExecuteIndirect()
+		//mContext->DispatchIndirect(((DX12Buffer*)indirectArg)->mBuffer, indirectArgOffset);
+		auto device = mDevice.GetCastPtr<DX12GpuDevice>();
+		if (mCurrentCmdSig == nullptr)
+			return;
+		indirectArgOffset += mCurrentIndirectOffset;
+
+		auto dx12Buffer = (DX12Buffer*)indirectArg;
+		auto offset = (UINT)dx12Buffer->mGpuMemory->GpuMem->Offset + indirectArgOffset;
+		auto saved = dx12Buffer->GetGpuResourceState();
+		dx12Buffer->TransitionTo(this, EGpuResourceState::GRS_UavIndirect);
+		mContext->ExecuteIndirect(mCurrentCmdSig, 1, (ID3D12Resource*)dx12Buffer->GetHWBuffer(), offset, nullptr, 0);
+		dx12Buffer->TransitionTo(this, saved);
+	}
+	void DX12CommandList::DispatchMesh(UINT x, UINT y, UINT z)
+	{
+		ASSERT(mCmdListState = ECmdListState::Recording);
+		mLastContext->DispatchMesh(x, y, z);
+	}
+	void DX12CommandList::IndirectDispatchMesh(IBuffer* indirectArg, UINT indirectArgOffset)
 	{
 		ASSERT(mCmdListState = ECmdListState::Recording);
 		//mContext->ExecuteIndirect()
@@ -925,7 +947,7 @@ namespace NxRHI
 
 	void DX12CommandList::WriteBufferUINT32(UINT Count, FBufferWriter* BufferWriters)
 	{
-		if (mContext2 == nullptr)
+		if (mLastContext == nullptr)
 		{
 			ICommandList::WriteBufferUINT32(Count, BufferWriters);
 			return;
@@ -942,7 +964,7 @@ namespace NxRHI
 			writers[i].Value = BufferWriters[i].Value;
 			modes[i] = D3D12_WRITEBUFFERIMMEDIATE_MODE::D3D12_WRITEBUFFERIMMEDIATE_MODE_DEFAULT;
 		}
-		mContext2->WriteBufferImmediate(Count, writers, modes);
+		mLastContext->WriteBufferImmediate(Count, writers, modes);
 		for (UINT i = 0; i < Count; i++)
 		{
 			BufferWriters[i].Buffer->TransitionTo(this, saveStates[i]);

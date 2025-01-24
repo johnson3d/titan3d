@@ -156,6 +156,8 @@ namespace NxRHI
 		virtual void IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset = 0, IBuffer* countBuffer = nullptr) = 0;
 		virtual void Dispatch(UINT x, UINT y, UINT z) = 0;
 		virtual void IndirectDispatch(IBuffer* indirectArg, UINT indirectArgOffset = 0) = 0;
+		virtual void DispatchMesh(UINT x, UINT y, UINT z) = 0;
+		virtual void IndirectDispatchMesh (IBuffer* indirectArg, UINT indirectArgOffset = 0) = 0;
 		virtual void SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess) = 0;
 		virtual void SetBufferBarrier(IBuffer* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess) = 0;
 		virtual void SetTextureBarrier(ITexture* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess) = 0;

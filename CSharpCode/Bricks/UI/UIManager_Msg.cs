@@ -264,11 +264,14 @@ namespace EngineNS.UI
                     var t = mUserUIList[i];
                     if(t.TryGetTarget(out var ui))
                     {
-                        var element = ui.GetPointAtElement(ref pointAtData, ref data);
-                        if (element != null && minDistance > data.Distance)
+                        if (ui.IsReadyToDraw())
                         {
-                            minDistance = data.Distance;
-                            newStay = element;
+                            var element = ui.GetPointAtElement(ref pointAtData, ref data);
+                            if (element != null && minDistance > data.Distance)
+                            {
+                                minDistance = data.Distance;
+                                newStay = element;
+                            }
                         }
                     }
                 }

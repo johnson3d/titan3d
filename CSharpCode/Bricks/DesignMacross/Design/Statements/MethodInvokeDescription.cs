@@ -147,7 +147,7 @@ namespace EngineNS.DesignMacross.Design.Statement
                 if (hostPin != null)
                 {
                     var linkedHostPin = methodDesc.GetLinkedDataPin(hostPin);
-                    var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, Sequence = statementBuildContext.ExecuteSequenceStatement };
+                    var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, Sequence = statementBuildContext.ExecuteSequenceStatement, ClassBuildContext = statementBuildContext.ClassBuildContext };
                     var linkedDesc = linkedHostPin.Parent;
                     if (linkedDesc is TtExpressionDescription linkedExpressionDesc)
                     {
@@ -215,7 +215,7 @@ namespace EngineNS.DesignMacross.Design.Statement
                 else
                 {
                     System.Diagnostics.Debug.Assert(linkedDataPin is TtDataOutPinDescription);
-                    var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, Sequence = statementBuildContext.ExecuteSequenceStatement };
+                    var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, Sequence = statementBuildContext.ExecuteSequenceStatement, ClassBuildContext = statementBuildContext.ClassBuildContext };
                     var linkedDesc = linkedDataPin.Parent;
                     if (linkedDesc is TtExpressionDescription linkedExpressionDesc)
                     {

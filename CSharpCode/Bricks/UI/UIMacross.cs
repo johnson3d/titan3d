@@ -6,9 +6,9 @@ using System.Text;
 
 namespace EngineNS.UI
 {
+    [Bind.BindableObject]
     public partial class TtUIMacrossBase
     {
-        public TtUIElement HostElement;
         public bool SimulateMode = false;
         public virtual void Initialize()
         {

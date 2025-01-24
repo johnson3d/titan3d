@@ -738,6 +738,14 @@ namespace EngineNS
             }
         }
 
+        public Color4b(Byte r, Byte g, Byte b, Byte a)
+        {
+            R = r;
+            G = g;
+            B = b;
+            A = a;
+        }
+
         public static Color4b FromRgb(Int32 r, Int32 g, Int32 b)
         {
             var ret = new Color4b();

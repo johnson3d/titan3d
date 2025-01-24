@@ -46,11 +46,13 @@ namespace EngineNS.Animation.BlendTree.Node
     }
     public class TtAnimationClipCommandDesc : IAnimationCommandDesc
     {
-        public float Time { get; set; }
+        public float Time { get; set; } = 0;
+        public bool IsLoop { get; set; } = false;
     }
     public class TtBlendTree_AnimationClip<S> : TtBlendTree<S, TtLocalSpaceRuntimePose>
     {
         TtAnimationClip mClip = null;
+
         public TtAnimationClip Clip
         {
             get =>mClip;
@@ -59,6 +61,7 @@ namespace EngineNS.Animation.BlendTree.Node
                 mClip = value;
             }
         }
+        public bool IsLoop { get; set; } = false;
         public float Time { get; set; }
         //public ClipWarpMode WarpMode { get; set; } = ClipWarpMode.Loop;
         TtAnimationClipCommand<S> mAnimationCommand = null;
@@ -66,6 +69,7 @@ namespace EngineNS.Animation.BlendTree.Node
         {
             mAnimationCommand = new();
             mAnimationCommand.Desc = new();
+            mAnimationCommand.Desc.IsLoop = IsLoop;
             mAnimationCommand.AnimationClip = mClip;
             mAnimationCommand.SetExtractedPose(context.AnimatableSkeletonPose);
             await base.Initialize(context);
@@ -81,7 +85,21 @@ namespace EngineNS.Animation.BlendTree.Node
         {
             var lastTime = mAnimationCommand.Desc.Time;
             var currentTime = lastTime + elapseSecond;
-            mAnimationCommand.Desc.Time = currentTime % mAnimationCommand.AnimationClip.Duration;
+            if(IsLoop)
+            {
+                mAnimationCommand.Desc.Time = currentTime % mAnimationCommand.AnimationClip.Duration;
+            }
+            else
+            {
+                if (currentTime >= mAnimationCommand.AnimationClip.Duration)
+                {
+                    mAnimationCommand.Desc.Time = mAnimationCommand.AnimationClip.Duration;
+                }
+                else
+                {
+                    mAnimationCommand.Desc.Time = currentTime;
+                }
+            }
         }
     }
 }

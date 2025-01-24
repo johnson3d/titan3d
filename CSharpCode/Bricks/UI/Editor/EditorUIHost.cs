@@ -306,6 +306,12 @@ namespace EngineNS.UI.Editor
         {
             return mDesignWindowSize;
         }
+        public override TtUIElement GetPointAtElement(ref PointAtProcessData data, ref RayIntersectData rayData)
+        {
+            var mc = this.Children[0].MacrossGetter.Get();
+            data.IgnoreUserControlContent = mc.SimulateMode ? false : true;
+            return base.GetPointAtElement(ref data, ref rayData);
+        }
     }
 
     public partial class SelectedDecorator : TtUIHost

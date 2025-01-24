@@ -8,6 +8,7 @@ using static Survivor.TtCharacterStateNode;
 
 namespace Survivor
 {
+    [EngineNS.Rtti.Meta]
     public partial class TtStateNode : EngineNS.GamePlay.Scene.TtSceneActorNode
     {
         public class TtStateNodeData : TtNodeData
@@ -15,11 +16,14 @@ namespace Survivor
             [EngineNS.Rtti.Meta]
             public float CurrentHP { get; set; } = 0;
         }
+        public Action OnDead;
+        [EngineNS.Rtti.Meta]
         public bool IsDead { get; set; } = false;
         [EngineNS.Rtti.Meta]
         public virtual void BeAttacked(TtWeaponNode weaponNode)
         {
         }
+        
     }
     public partial class TtCharacterStateNode : TtStateNode
     {
@@ -38,9 +42,13 @@ namespace Survivor
         public override void BeAttacked(TtWeaponNode weaponNode)
         {
             var hp = StateData.CurrentHP - weaponNode.WeaponData.Damage;
-            if (hp <= 0)
+            if (hp <= 0 && !IsDead)
             {
                 IsDead = true;
+                if (OnDead != null)
+                {
+                    OnDead.Invoke();
+                }
             }
 
             StateData.CurrentHP = MathF.Max(hp, 0);
@@ -59,9 +67,13 @@ namespace Survivor
         public override void BeAttacked(TtWeaponNode weaponNode)
         {
             var hp = StateData.CurrentHP - weaponNode.WeaponData.Damage;
-            if (hp <= 0)
+            if (hp <= 0 && !IsDead)
             {
                 IsDead = true;
+                if(OnDead != null)
+                {
+                    OnDead.Invoke();
+                }
             }
 
             StateData.CurrentHP = MathF.Max(hp, 0);

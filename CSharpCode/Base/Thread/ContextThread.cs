@@ -122,14 +122,13 @@ namespace EngineNS.Thread
             }
             mThread = null;
         }
-        public void FlushAllThreadEvents(TtContextThread thread)
+        public static void FlushAllThreadEvents(TtContextThread thread)
         {
-            System.Diagnostics.Debug.Assert(TtContextThread.CurrentContext.ThreadId != TtEngine.Instance.ThreadMain.ThreadId);
             var t1 = Support.TtTime.HighPrecision_GetTickCount();
             while (TtContextThread.GetTotalContinueEventNumber(thread) + thread.ContinueNum > 0)
             {
                 FContextTickableManager.GetInstance().ThreadTick();
-                TickAwaitEvent();
+                thread.TickAwaitEvent();
                 TtEngine.Instance.TaskCollector.Tick();
             }
             var t2 = Support.TtTime.HighPrecision_GetTickCount();

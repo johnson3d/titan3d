@@ -91,8 +91,9 @@ namespace NxRHI
 			SDT_VertexShader = 1,
 			SDT_PixelShader = (1 << 1),
 			SDT_ComputeShader = (1 << 2),
+			SDT_MeshShader = (1 << 3),
 
-			SDT_AllStages = SDT_VertexShader | SDT_PixelShader | SDT_ComputeShader,
+			SDT_AllStages = SDT_VertexShader | SDT_PixelShader | SDT_ComputeShader | SDT_MeshShader,
 	};
 	class TR_CLASS()
 		IShader : public IWeakRefObject

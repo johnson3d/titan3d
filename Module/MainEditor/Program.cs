@@ -87,8 +87,7 @@ namespace MainEditor
             var mBin = System.IO.Directory.GetCurrentDirectory();
             var dynCfgData = new EngineNS.IO.TtDynConfigData();
             dynCfgData.LoadConfigData(mBin + "/../cache/DynConfigData.dcd", true);
-            var NativeDLL = dynCfgData.TryGetConfig<string>("NativeDLL");
-            if (string.IsNullOrEmpty(NativeDLL) == false)
+            if (dynCfgData.TryGetConfig<string>("NativeDLL", out var NativeDLL))
             {
                 EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/{NativeDLL}");
             }

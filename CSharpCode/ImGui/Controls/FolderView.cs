@@ -47,10 +47,9 @@ namespace EngineNS.EGui.Controls
 
             InitializeDirContextMenu();
 
-            var cfgContentCurrentDir = TtEngine.Instance.DynConfigData.GetConfig("ContentCurrentDir");
-            if (cfgContentCurrentDir != null)
+            if (TtEngine.Instance.DynConfigData.TryGetConfig<RName>("ContentCurrentDir", out var cfgContentCurrentDir))
             {
-                this.CurrentDir = cfgContentCurrentDir as RName;
+                this.CurrentDir = cfgContentCurrentDir;
                 if (IO.TtFileManager.DirectoryExists(this.CurrentDir.Address) == false)
                 {
                     this.CurrentDir = null;

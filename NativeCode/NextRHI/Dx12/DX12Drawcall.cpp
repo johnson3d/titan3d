@@ -58,6 +58,10 @@ namespace NxRHI
 				/*device->mDevice->CopyDescriptorsSimple(1, mSamplerHeap->Heap->GetCpuAddress(binder->PSBinder->DescriptorIndex),
 					handle->GetCpuAddress(0), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);*/
 			}
+			if (binder->MSBinder != nullptr)
+			{
+				handle->BindToHeap(device, mSamplerHeap->Heap, binder->MSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+			}
 		}
 		else
 		{
@@ -77,6 +81,10 @@ namespace NxRHI
 				handle->BindToHeap(device, mCbvSrvUavHeap->Heap, binder->PSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 				/*device->mDevice->CopyDescriptorsSimple(1, mCbvSrvUavHeap->Heap->GetCpuAddress(binder->PSBinder->DescriptorIndex),
 					handle->GetCpuAddress(0), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);*/
+			}
+			if (binder->MSBinder != nullptr)
+			{
+				handle->BindToHeap(device, mCbvSrvUavHeap->Heap, binder->MSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 			}
 		}
 	}
@@ -122,6 +130,8 @@ namespace NxRHI
 						handle->BindToHeap(device, mSamplerHeap->Heap, b.second->VSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 					if (b.second->PSBinder != nullptr)
 						handle->BindToHeap(device, mSamplerHeap->Heap, b.second->PSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+					if (b.second->MSBinder != nullptr)
+						handle->BindToHeap(device, mSamplerHeap->Heap, b.second->MSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 				}
 				break;
 				case EShaderBindType::SBT_CBuffer:
@@ -131,6 +141,8 @@ namespace NxRHI
 						handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b.second->VSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 					if (b.second->PSBinder != nullptr)
 						handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b.second->PSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+					if (b.second->MSBinder != nullptr)
+						handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b.second->MSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 				}
 				break;
 				case EShaderBindType::SBT_SRV:
@@ -140,6 +152,8 @@ namespace NxRHI
 						handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b.second->VSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 					if (b.second->PSBinder != nullptr)
 						handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b.second->PSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+					if (b.second->MSBinder != nullptr)
+						handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b.second->MSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 				}
 				break;
 				case EShaderBindType::SBT_UAV:
@@ -149,6 +163,8 @@ namespace NxRHI
 						handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b.second->VSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 					if (b.second->PSBinder != nullptr)
 						handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b.second->PSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+					if (b.second->MSBinder != nullptr)
+						handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b.second->MSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 				}
 				break;
 				default:
@@ -291,16 +307,27 @@ namespace NxRHI
 			if (IndirectDrawArgsBuffer)
 			{
 				IndirectDrawArgsBuffer->TransitionTo(cmdlist, GRS_UavIndirect);
-				auto effect = this->ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>();
-				dx12Cmd->mCurrentCmdSig = effect->GetIndirectDrawIndexCmdSig(device, dx12Cmd);
-				dx12Cmd->mCurrentIndirectOffset = effect->mIndirectOffset;
-				cmdlist->IndirectDrawIndexed(pDrawDesc->PrimitiveType, IndirectDrawArgsBuffer, IndirectDrawOffsetForArgs);
-				dx12Cmd->mCurrentCmdSig = nullptr;
-				dx12Cmd->mCurrentIndirectOffset = 0;
+				if (pDrawDesc->IsDispatchMesh())
+				{
+					ASSERT(false);
+				}
+				else if (pDrawDesc->IsIndexDraw())
+				{
+					auto effect = this->ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>();
+					dx12Cmd->mCurrentCmdSig = effect->GetIndirectDrawIndexCmdSig(device, dx12Cmd);
+					dx12Cmd->mCurrentIndirectOffset = effect->mIndirectOffset;
+					cmdlist->IndirectDrawIndexed(pDrawDesc->PrimitiveType, IndirectDrawArgsBuffer, IndirectDrawOffsetForArgs);
+					dx12Cmd->mCurrentCmdSig = nullptr;
+					dx12Cmd->mCurrentIndirectOffset = 0;
+				}
 			}
 			else
 			{
-				if (pDrawDesc->IsIndexDraw())
+				if (pDrawDesc->IsDispatchMesh())
+				{
+					cmdlist->DispatchMesh(pDrawDesc->DispatchMeshX, pDrawDesc->DispatchMeshY, pDrawDesc->DispatchMeshZ);
+				}
+				else if (pDrawDesc->IsIndexDraw())
 				{
 					cmdlist->DrawIndexed(pDrawDesc->PrimitiveType, pDrawDesc->BaseVertexIndex, pDrawDesc->StartIndex, pDrawDesc->NumPrimitives, DrawInstance);
 				}

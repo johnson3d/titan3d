@@ -41,6 +41,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateAttachment
             {
                 MainClassDescription = classBuildContext.MainClassDescription,
                 ClassDeclaration = thisClassDeclaration,
+                ClassDescription = this
             };
             thisClassDeclaration.AddMethod(TickMethodDescription.BuildMethodDeclaration(ref transitionClassBuildContext));
             return new List<TtClassDeclaration>() { thisClassDeclaration };

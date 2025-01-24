@@ -23364,7 +23364,7 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode;
-			ar.Write(srcObj.MethodDecKeyword);
+			ar.Write(srcObj.MethodId);
 			ar.Write(srcObj.Name);
 			ar.Write(srcObj.NodeId);
 			ar.Write(srcObj.Position);
@@ -23400,12 +23400,13 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				ar.Write((int)0);
 			}
+			ar.Write(srcObj.MethodDecKeyword);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
 			var tarObj = tar as EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode;
 			var srcObj = src as EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode;
-			tarObj.MethodDecKeyword = srcObj.MethodDecKeyword;
+			tarObj.MethodId = srcObj.MethodId;
 			tarObj.Name = srcObj.Name;
 			tarObj.NodeId = srcObj.NodeId;
 			tarObj.Position = srcObj.Position;
@@ -23427,6 +23428,7 @@ namespace EngineNS.Plugins.DataCopyer
 					}
 				}
 			}
+			tarObj.MethodDecKeyword = srcObj.MethodDecKeyword;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9599732323166548542 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -23499,6 +23501,89 @@ namespace EngineNS.Plugins.DataCopyer
 					{
 						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
 					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_11231156204878821807 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode;
+			System.Guid t_MethodId;
+			ar.Read(out t_MethodId);
+			srcObj.MethodId = t_MethodId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MethodId", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Vector2 t_Position;
+			ar.Read(out t_Position);
+			srcObj.Position = t_Position;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Position", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo> t_InputEditableValues = null;
+			t_InputEditableValues = srcObj.InputEditableValues;
+			if (t_InputEditableValues == null)
+			{
+				t_InputEditableValues = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>)) as System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>;
+			}
+			int count_InputEditableValues;
+			ar.Read(out count_InputEditableValues);
+			for(int i = 0; i<count_InputEditableValues; i++)
+			{
+				EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo;
+						fn(ar, t);
+					}
+				}
+				t_InputEditableValues.Add(t);
+				srcObj.InputEditableValues = t_InputEditableValues;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo>), false);
+					}
+				}
+			}
+			System.String t_MethodDecKeyword;
+			ar.Read(out t_MethodDecKeyword);
+			srcObj.MethodDecKeyword = t_MethodDecKeyword;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MethodDecKeyword", false);
 				}
 			}
 		};
@@ -37089,6 +37174,8 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				ar.Write(true);
 			}
+			ar.Write(srcObj.Id);
+			ar.Write(srcObj.IsManual);
 			ar.Write(srcObj.IsOverride);
 			if (srcObj.LocalVariables != null)
 			{
@@ -37202,6 +37289,8 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				tarObj.Comment = null;
 			}
+			tarObj.Id = srcObj.Id;
+			tarObj.IsManual = srcObj.IsManual;
 			tarObj.IsOverride = srcObj.IsOverride;
 			if (srcObj.LocalVariables != null)
 			{
@@ -37347,6 +37436,421 @@ namespace EngineNS.Plugins.DataCopyer
 							sr.OnPropertyRead(ar.Tag, "Comment", false);
 						}
 					}
+				}
+			}
+			System.Boolean t_IsOverride;
+			ar.Read(out t_IsOverride);
+			srcObj.IsOverride = t_IsOverride;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsOverride", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtVariableDeclaration> t_LocalVariables = null;
+			t_LocalVariables = srcObj.LocalVariables;
+			if (t_LocalVariables == null)
+			{
+				t_LocalVariables = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtVariableDeclaration>)) as System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtVariableDeclaration>;
+			}
+			int count_LocalVariables;
+			ar.Read(out count_LocalVariables);
+			for(int i = 0; i<count_LocalVariables; i++)
+			{
+				EngineNS.Bricks.CodeBuilder.TtVariableDeclaration t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.CodeBuilder.TtVariableDeclaration;
+						fn(ar, t);
+					}
+				}
+				t_LocalVariables.Add(t);
+				srcObj.LocalVariables = t_LocalVariables;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtVariableDeclaration>), false);
+					}
+				}
+			}
+			System.String t_MethodName;
+			ar.Read(out t_MethodName);
+			srcObj.MethodName = t_MethodName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MethodName", false);
+				}
+			}
+			EngineNS.Hash64 type_ReturnValue;
+			ar.Read(out type_ReturnValue);
+			var meta_ReturnValue = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_ReturnValue);
+			if(meta_ReturnValue != null)
+			{
+				EngineNS.Hash64 ver_ReturnValue;
+				ar.Read(out ver_ReturnValue);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_ReturnValue.ClassType.TypeString, ver_ReturnValue );
+				if (fn != null)
+				{
+					EngineNS.Bricks.CodeBuilder.TtVariableDeclaration t_ReturnValue = null;
+					t_ReturnValue = srcObj.ReturnValue;
+					if (t_ReturnValue == null)
+					{
+						t_ReturnValue = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_ReturnValue.ClassType) as EngineNS.Bricks.CodeBuilder.TtVariableDeclaration;
+					}
+					fn(ar, t_ReturnValue);
+					srcObj.ReturnValue = t_ReturnValue;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "ReturnValue", false);
+						}
+					}
+				}
+			}
+			EngineNS.Bricks.CodeBuilder.EVisisMode t_VisitMode;
+			ar.Read(out t_VisitMode);
+			srcObj.VisitMode = t_VisitMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "VisitMode", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7746548800985554809 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.TtMethodDeclaration;
+			System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration> t_Arguments = null;
+			t_Arguments = srcObj.Arguments;
+			if (t_Arguments == null)
+			{
+				t_Arguments = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration>)) as System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration>;
+			}
+			int count_Arguments;
+			ar.Read(out count_Arguments);
+			for(int i = 0; i<count_Arguments; i++)
+			{
+				EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration;
+						fn(ar, t);
+					}
+				}
+				t_Arguments.Add(t);
+				srcObj.Arguments = t_Arguments;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration>), false);
+					}
+				}
+			}
+			EngineNS.Bricks.CodeBuilder.TtMethodDeclaration.EAsyncType t_AsyncType;
+			ar.Read(out t_AsyncType);
+			srcObj.AsyncType = t_AsyncType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AsyncType", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtAttribute> t_Attributes = null;
+			t_Attributes = srcObj.Attributes;
+			if (t_Attributes == null)
+			{
+				t_Attributes = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtAttribute>)) as System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtAttribute>;
+			}
+			int count_Attributes;
+			ar.Read(out count_Attributes);
+			for(int i = 0; i<count_Attributes; i++)
+			{
+				EngineNS.Bricks.CodeBuilder.TtAttribute t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.CodeBuilder.TtAttribute;
+						fn(ar, t);
+					}
+				}
+				t_Attributes.Add(t);
+				srcObj.Attributes = t_Attributes;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtAttribute>), false);
+					}
+				}
+			}
+			EngineNS.Hash64 type_Comment;
+			ar.Read(out type_Comment);
+			var meta_Comment = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Comment);
+			if(meta_Comment != null)
+			{
+				EngineNS.Hash64 ver_Comment;
+				ar.Read(out ver_Comment);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Comment.ClassType.TypeString, ver_Comment );
+				if (fn != null)
+				{
+					EngineNS.Bricks.CodeBuilder.TtCommentStatement t_Comment = null;
+					t_Comment = srcObj.Comment;
+					if (t_Comment == null)
+					{
+						t_Comment = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Comment.ClassType) as EngineNS.Bricks.CodeBuilder.TtCommentStatement;
+					}
+					fn(ar, t_Comment);
+					srcObj.Comment = t_Comment;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Comment", false);
+						}
+					}
+				}
+			}
+			System.Guid t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			System.Boolean t_IsManual;
+			ar.Read(out t_IsManual);
+			srcObj.IsManual = t_IsManual;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsManual", false);
+				}
+			}
+			System.Boolean t_IsOverride;
+			ar.Read(out t_IsOverride);
+			srcObj.IsOverride = t_IsOverride;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsOverride", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtVariableDeclaration> t_LocalVariables = null;
+			t_LocalVariables = srcObj.LocalVariables;
+			if (t_LocalVariables == null)
+			{
+				t_LocalVariables = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtVariableDeclaration>)) as System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtVariableDeclaration>;
+			}
+			int count_LocalVariables;
+			ar.Read(out count_LocalVariables);
+			for(int i = 0; i<count_LocalVariables; i++)
+			{
+				EngineNS.Bricks.CodeBuilder.TtVariableDeclaration t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.CodeBuilder.TtVariableDeclaration;
+						fn(ar, t);
+					}
+				}
+				t_LocalVariables.Add(t);
+				srcObj.LocalVariables = t_LocalVariables;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtVariableDeclaration>), false);
+					}
+				}
+			}
+			System.String t_MethodName;
+			ar.Read(out t_MethodName);
+			srcObj.MethodName = t_MethodName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MethodName", false);
+				}
+			}
+			EngineNS.Hash64 type_ReturnValue;
+			ar.Read(out type_ReturnValue);
+			var meta_ReturnValue = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_ReturnValue);
+			if(meta_ReturnValue != null)
+			{
+				EngineNS.Hash64 ver_ReturnValue;
+				ar.Read(out ver_ReturnValue);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_ReturnValue.ClassType.TypeString, ver_ReturnValue );
+				if (fn != null)
+				{
+					EngineNS.Bricks.CodeBuilder.TtVariableDeclaration t_ReturnValue = null;
+					t_ReturnValue = srcObj.ReturnValue;
+					if (t_ReturnValue == null)
+					{
+						t_ReturnValue = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_ReturnValue.ClassType) as EngineNS.Bricks.CodeBuilder.TtVariableDeclaration;
+					}
+					fn(ar, t_ReturnValue);
+					srcObj.ReturnValue = t_ReturnValue;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "ReturnValue", false);
+						}
+					}
+				}
+			}
+			EngineNS.Bricks.CodeBuilder.EVisisMode t_VisitMode;
+			ar.Read(out t_VisitMode);
+			srcObj.VisitMode = t_VisitMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "VisitMode", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9621355045679567299 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.CodeBuilder.TtMethodDeclaration;
+			System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration> t_Arguments = null;
+			t_Arguments = srcObj.Arguments;
+			if (t_Arguments == null)
+			{
+				t_Arguments = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration>)) as System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration>;
+			}
+			int count_Arguments;
+			ar.Read(out count_Arguments);
+			for(int i = 0; i<count_Arguments; i++)
+			{
+				EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration;
+						fn(ar, t);
+					}
+				}
+				t_Arguments.Add(t);
+				srcObj.Arguments = t_Arguments;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtMethodArgumentDeclaration>), false);
+					}
+				}
+			}
+			EngineNS.Bricks.CodeBuilder.TtMethodDeclaration.EAsyncType t_AsyncType;
+			ar.Read(out t_AsyncType);
+			srcObj.AsyncType = t_AsyncType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AsyncType", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtAttribute> t_Attributes = null;
+			t_Attributes = srcObj.Attributes;
+			if (t_Attributes == null)
+			{
+				t_Attributes = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtAttribute>)) as System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtAttribute>;
+			}
+			int count_Attributes;
+			ar.Read(out count_Attributes);
+			for(int i = 0; i<count_Attributes; i++)
+			{
+				EngineNS.Bricks.CodeBuilder.TtAttribute t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.Bricks.CodeBuilder.TtAttribute;
+						fn(ar, t);
+					}
+				}
+				t_Attributes.Add(t);
+				srcObj.Attributes = t_Attributes;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.CodeBuilder.TtAttribute>), false);
+					}
+				}
+			}
+			EngineNS.Hash64 type_Comment;
+			ar.Read(out type_Comment);
+			var meta_Comment = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Comment);
+			if(meta_Comment != null)
+			{
+				EngineNS.Hash64 ver_Comment;
+				ar.Read(out ver_Comment);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Comment.ClassType.TypeString, ver_Comment );
+				if (fn != null)
+				{
+					EngineNS.Bricks.CodeBuilder.TtCommentStatement t_Comment = null;
+					t_Comment = srcObj.Comment;
+					if (t_Comment == null)
+					{
+						t_Comment = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Comment.ClassType) as EngineNS.Bricks.CodeBuilder.TtCommentStatement;
+					}
+					fn(ar, t_Comment);
+					srcObj.Comment = t_Comment;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Comment", false);
+						}
+					}
+				}
+			}
+			System.Boolean t_IsManual;
+			ar.Read(out t_IsManual);
+			srcObj.IsManual = t_IsManual;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsManual", false);
 				}
 			}
 			System.Boolean t_IsOverride;
@@ -39669,16 +40173,67 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Bricks.DataSet.TtTable;
+			if (srcObj.DataProviders != null)
+			{
+				var Srclst = srcObj.DataProviders as System.Collections.Generic.List<EngineNS.Bricks.DataSet.TtDataProvider>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
 			var tarObj = tar as EngineNS.Bricks.DataSet.TtTable;
 			var srcObj = src as EngineNS.Bricks.DataSet.TtTable;
+			if (srcObj.DataProviders != null)
+			{
+				if (tarObj.DataProviders == null)
+				{
+					tarObj.DataProviders = new();
+				}
+				if (tarObj.DataProviders != null)
+				{
+					var Tarlst = tarObj.DataProviders as System.Collections.Generic.List<EngineNS.Bricks.DataSet.TtDataProvider>;
+					var Srclst = srcObj.DataProviders as System.Collections.Generic.List<EngineNS.Bricks.DataSet.TtDataProvider>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						EngineNS.Bricks.DataSet.TtDataProvider tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.Bricks.DataSet.TtDataProvider;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_6593246537561761911 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Bricks.DataSet.TtTable;
 			System.Collections.Generic.List<EngineNS.Bricks.DataSet.TtDataProvider> t_DataProviders = null;
+			t_DataProviders = srcObj.DataProviders;
 			if (t_DataProviders == null)
 			{
 				t_DataProviders = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.Bricks.DataSet.TtDataProvider>)) as System.Collections.Generic.List<EngineNS.Bricks.DataSet.TtDataProvider>;
@@ -39703,6 +40258,13 @@ namespace EngineNS.Plugins.DataCopyer
 					}
 				}
 				t_DataProviders.Add(t);
+				srcObj.DataProviders = t_DataProviders;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.Bricks.DataSet.TtDataProvider>), false);
+					}
+				}
 			}
 		};
 	}
@@ -76551,6 +77113,7 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				ar.Write(true);
 			}
+			ar.Write(srcObj.IsLoop);
 			ar.Write(srcObj.IsStruct);
 			if (srcObj.Methods != null)
 			{
@@ -76753,6 +77316,7 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				tarObj.InitValue = null;
 			}
+			tarObj.IsLoop = srcObj.IsLoop;
 			tarObj.IsStruct = srcObj.IsStruct;
 			if (srcObj.Methods != null)
 			{
@@ -76981,6 +77545,319 @@ namespace EngineNS.Plugins.DataCopyer
 							sr.OnPropertyRead(ar.Tag, "InitValue", false);
 						}
 					}
+				}
+			}
+			System.Boolean t_IsStruct;
+			ar.Read(out t_IsStruct);
+			srcObj.IsStruct = t_IsStruct;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsStruct", false);
+				}
+			}
+			System.Collections.Generic.List<EngineNS.DesignMacross.Base.Description.IMethodDescription> t_Methods = null;
+			t_Methods = srcObj.Methods;
+			if (t_Methods == null)
+			{
+				t_Methods = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.DesignMacross.Base.Description.IMethodDescription>)) as System.Collections.Generic.List<EngineNS.DesignMacross.Base.Description.IMethodDescription>;
+			}
+			int count_Methods;
+			ar.Read(out count_Methods);
+			for(int i = 0; i<count_Methods; i++)
+			{
+				EngineNS.DesignMacross.Base.Description.IMethodDescription t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.DesignMacross.Base.Description.IMethodDescription;
+						fn(ar, t);
+					}
+				}
+				t_Methods.Add(t);
+				srcObj.Methods = t_Methods;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.DesignMacross.Base.Description.IMethodDescription>), false);
+					}
+				}
+			}
+			EngineNS.Hash64 type_Namespace;
+			ar.Read(out type_Namespace);
+			var meta_Namespace = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Namespace);
+			if(meta_Namespace != null)
+			{
+				EngineNS.Hash64 ver_Namespace;
+				ar.Read(out ver_Namespace);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Namespace.ClassType.TypeString, ver_Namespace );
+				if (fn != null)
+				{
+					EngineNS.Bricks.CodeBuilder.TtNamespaceDeclaration t_Namespace = null;
+					t_Namespace = srcObj.Namespace;
+					if (t_Namespace == null)
+					{
+						t_Namespace = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Namespace.ClassType) as EngineNS.Bricks.CodeBuilder.TtNamespaceDeclaration;
+					}
+					fn(ar, t_Namespace);
+					srcObj.Namespace = t_Namespace;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Namespace", false);
+						}
+					}
+				}
+			}
+			System.Collections.Generic.List<System.String> t_SupperClassNames = null;
+			t_SupperClassNames = srcObj.SupperClassNames;
+			if (t_SupperClassNames == null)
+			{
+				t_SupperClassNames = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<System.String>)) as System.Collections.Generic.List<System.String>;
+			}
+			int count_SupperClassNames;
+			ar.Read(out count_SupperClassNames);
+			for(int i = 0; i<count_SupperClassNames; i++)
+			{
+				System.String t;
+				ar.Read(out t);
+				t_SupperClassNames.Add(t);
+			}
+			EngineNS.Hash64 type_TickMethodDescription;
+			ar.Read(out type_TickMethodDescription);
+			var meta_TickMethodDescription = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_TickMethodDescription);
+			if(meta_TickMethodDescription != null)
+			{
+				EngineNS.Hash64 ver_TickMethodDescription;
+				ar.Read(out ver_TickMethodDescription);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_TickMethodDescription.ClassType.TypeString, ver_TickMethodDescription );
+				if (fn != null)
+				{
+					EngineNS.Bricks.StateMachine.Macross.StateAttachment.TtTimedStateScriptMethodDescription t_TickMethodDescription = null;
+					t_TickMethodDescription = srcObj.TickMethodDescription;
+					if (t_TickMethodDescription == null)
+					{
+						t_TickMethodDescription = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_TickMethodDescription.ClassType) as EngineNS.Bricks.StateMachine.Macross.StateAttachment.TtTimedStateScriptMethodDescription;
+					}
+					fn(ar, t_TickMethodDescription);
+					srcObj.TickMethodDescription = t_TickMethodDescription;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "TickMethodDescription", false);
+						}
+					}
+				}
+			}
+			System.Collections.Generic.List<EngineNS.DesignMacross.Base.Description.IVariableDescription> t_Variables = null;
+			t_Variables = srcObj.Variables;
+			if (t_Variables == null)
+			{
+				t_Variables = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.DesignMacross.Base.Description.IVariableDescription>)) as System.Collections.Generic.List<EngineNS.DesignMacross.Base.Description.IVariableDescription>;
+			}
+			int count_Variables;
+			ar.Read(out count_Variables);
+			for(int i = 0; i<count_Variables; i++)
+			{
+				EngineNS.DesignMacross.Base.Description.IVariableDescription t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.DesignMacross.Base.Description.IVariableDescription;
+						fn(ar, t);
+					}
+				}
+				t_Variables.Add(t);
+				srcObj.Variables = t_Variables;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.DesignMacross.Base.Description.IVariableDescription>), false);
+					}
+				}
+			}
+			EngineNS.Hash64 type_VariableType;
+			ar.Read(out type_VariableType);
+			var meta_VariableType = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_VariableType);
+			if(meta_VariableType != null)
+			{
+				EngineNS.Hash64 ver_VariableType;
+				ar.Read(out ver_VariableType);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_VariableType.ClassType.TypeString, ver_VariableType );
+				if (fn != null)
+				{
+					EngineNS.Bricks.CodeBuilder.TtTypeReference t_VariableType = null;
+					t_VariableType = srcObj.VariableType;
+					if (t_VariableType == null)
+					{
+						t_VariableType = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_VariableType.ClassType) as EngineNS.Bricks.CodeBuilder.TtTypeReference;
+					}
+					fn(ar, t_VariableType);
+					srcObj.VariableType = t_VariableType;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "VariableType", false);
+						}
+					}
+				}
+			}
+			EngineNS.Bricks.CodeBuilder.EVisisMode t_VisitMode;
+			ar.Read(out t_VisitMode);
+			srcObj.VisitMode = t_VisitMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "VisitMode", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_17112018508621619281 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.StateMachine.Macross.StateAttachment.TtClipPlayAttachmentClassDescription;
+			EngineNS.RName t_AnimationClip;
+			ar.Read(out t_AnimationClip);
+			srcObj.AnimationClip = t_AnimationClip;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AnimationClip", false);
+				}
+			}
+			EngineNS.Hash64 type_Comment;
+			ar.Read(out type_Comment);
+			var meta_Comment = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Comment);
+			if(meta_Comment != null)
+			{
+				EngineNS.Hash64 ver_Comment;
+				ar.Read(out ver_Comment);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Comment.ClassType.TypeString, ver_Comment );
+				if (fn != null)
+				{
+					EngineNS.Bricks.CodeBuilder.TtCommentStatement t_Comment = null;
+					t_Comment = srcObj.Comment;
+					if (t_Comment == null)
+					{
+						t_Comment = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Comment.ClassType) as EngineNS.Bricks.CodeBuilder.TtCommentStatement;
+					}
+					fn(ar, t_Comment);
+					srcObj.Comment = t_Comment;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Comment", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_DesignedClassDescription;
+			ar.Read(out type_DesignedClassDescription);
+			var meta_DesignedClassDescription = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_DesignedClassDescription);
+			if(meta_DesignedClassDescription != null)
+			{
+				EngineNS.Hash64 ver_DesignedClassDescription;
+				ar.Read(out ver_DesignedClassDescription);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_DesignedClassDescription.ClassType.TypeString, ver_DesignedClassDescription );
+				if (fn != null)
+				{
+					EngineNS.DesignMacross.Base.Description.IClassDescription t_DesignedClassDescription = null;
+					t_DesignedClassDescription = srcObj.DesignedClassDescription;
+					if (t_DesignedClassDescription == null)
+					{
+						t_DesignedClassDescription = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_DesignedClassDescription.ClassType) as EngineNS.DesignMacross.Base.Description.IClassDescription;
+					}
+					fn(ar, t_DesignedClassDescription);
+					srcObj.DesignedClassDescription = t_DesignedClassDescription;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "DesignedClassDescription", false);
+						}
+					}
+				}
+			}
+			System.Guid t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+			EngineNS.Hash64 type_InitMethodDescription;
+			ar.Read(out type_InitMethodDescription);
+			var meta_InitMethodDescription = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_InitMethodDescription);
+			if(meta_InitMethodDescription != null)
+			{
+				EngineNS.Hash64 ver_InitMethodDescription;
+				ar.Read(out ver_InitMethodDescription);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_InitMethodDescription.ClassType.TypeString, ver_InitMethodDescription );
+				if (fn != null)
+				{
+					EngineNS.Bricks.StateMachine.Macross.StateAttachment.TtTimedStateScriptMethodDescription t_InitMethodDescription = null;
+					t_InitMethodDescription = srcObj.InitMethodDescription;
+					if (t_InitMethodDescription == null)
+					{
+						t_InitMethodDescription = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_InitMethodDescription.ClassType) as EngineNS.Bricks.StateMachine.Macross.StateAttachment.TtTimedStateScriptMethodDescription;
+					}
+					fn(ar, t_InitMethodDescription);
+					srcObj.InitMethodDescription = t_InitMethodDescription;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "InitMethodDescription", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_InitValue;
+			ar.Read(out type_InitValue);
+			var meta_InitValue = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_InitValue);
+			if(meta_InitValue != null)
+			{
+				EngineNS.Hash64 ver_InitValue;
+				ar.Read(out ver_InitValue);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_InitValue.ClassType.TypeString, ver_InitValue );
+				if (fn != null)
+				{
+					EngineNS.Bricks.CodeBuilder.TtExpressionBase t_InitValue = null;
+					t_InitValue = srcObj.InitValue;
+					if (t_InitValue == null)
+					{
+						t_InitValue = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_InitValue.ClassType) as EngineNS.Bricks.CodeBuilder.TtExpressionBase;
+					}
+					fn(ar, t_InitValue);
+					srcObj.InitValue = t_InitValue;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "InitValue", false);
+						}
+					}
+				}
+			}
+			System.Boolean t_IsLoop;
+			ar.Read(out t_IsLoop);
+			srcObj.IsLoop = t_IsLoop;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsLoop", false);
 				}
 			}
 			System.Boolean t_IsStruct;
@@ -147095,6 +147972,7 @@ namespace EngineNS.Plugins.DataCopyer
 				ar.Write(true);
 			}
 			ar.Write(srcObj.Text);
+			ar.Write(srcObj.TextFlag);
 			ar.Write(srcObj.TrimmingText);
 			ar.Write(srcObj.Visibility);
 			ar.Write(srcObj.Width);
@@ -147184,6 +148062,7 @@ namespace EngineNS.Plugins.DataCopyer
 				tarObj.SelectionBrush = null;
 			}
 			tarObj.Text = srcObj.Text;
+			tarObj.TextFlag = srcObj.TextFlag;
 			tarObj.TrimmingText = srcObj.TrimmingText;
 			tarObj.Visibility = srcObj.Visibility;
 			tarObj.Width = srcObj.Width;
@@ -147455,6 +148334,13 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			EngineNS.UI.Controls.TtText.ETextFlag t_TextFlag;
 			ar.Read(out t_TextFlag);
+			srcObj.TextFlag = t_TextFlag;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TextFlag", false);
+				}
+			}
 			System.String t_TrimmingText;
 			ar.Read(out t_TrimmingText);
 			srcObj.TrimmingText = t_TrimmingText;
@@ -147722,6 +148608,13 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			EngineNS.UI.Controls.TtText.ETextFlag t_TextFlag;
 			ar.Read(out t_TextFlag);
+			srcObj.TextFlag = t_TextFlag;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TextFlag", false);
+				}
+			}
 			System.String t_TrimmingText;
 			ar.Read(out t_TrimmingText);
 			srcObj.TrimmingText = t_TrimmingText;
@@ -147962,6 +148855,13 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			EngineNS.UI.Controls.TtText.ETextFlag t_TextFlag;
 			ar.Read(out t_TextFlag);
+			srcObj.TextFlag = t_TextFlag;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TextFlag", false);
+				}
+			}
 			System.String t_TrimmingText;
 			ar.Read(out t_TrimmingText);
 			srcObj.TrimmingText = t_TrimmingText;
@@ -150880,6 +151780,7 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.RenderTransform);
 			ar.Write(srcObj.RenderTransformCenter);
 			ar.Write(srcObj.Text);
+			ar.Write(srcObj.TextFlag);
 			ar.Write(srcObj.TrimmingText);
 			ar.Write(srcObj.Visibility);
 			ar.Write(srcObj.Width);
@@ -150929,6 +151830,7 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.RenderTransform = srcObj.RenderTransform;
 			tarObj.RenderTransformCenter = srcObj.RenderTransformCenter;
 			tarObj.Text = srcObj.Text;
+			tarObj.TextFlag = srcObj.TextFlag;
 			tarObj.TrimmingText = srcObj.TrimmingText;
 			tarObj.Visibility = srcObj.Visibility;
 			tarObj.Width = srcObj.Width;
@@ -151130,6 +152032,13 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			EngineNS.UI.Controls.TtText.ETextFlag t_TextFlag;
 			ar.Read(out t_TextFlag);
+			srcObj.TextFlag = t_TextFlag;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TextFlag", false);
+				}
+			}
 			System.String t_TrimmingText;
 			ar.Read(out t_TrimmingText);
 			srcObj.TrimmingText = t_TrimmingText;
@@ -151318,6 +152227,13 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			EngineNS.UI.Controls.TtText.ETextFlag t_TextFlag;
 			ar.Read(out t_TextFlag);
+			srcObj.TextFlag = t_TextFlag;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TextFlag", false);
+				}
+			}
 			System.String t_TrimmingText;
 			ar.Read(out t_TrimmingText);
 			srcObj.TrimmingText = t_TrimmingText;
@@ -151497,6 +152413,13 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			EngineNS.UI.Controls.TtText.ETextFlag t_TextFlag;
 			ar.Read(out t_TextFlag);
+			srcObj.TextFlag = t_TextFlag;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TextFlag", false);
+				}
+			}
 			System.String t_TrimmingText;
 			ar.Read(out t_TrimmingText);
 			srcObj.TrimmingText = t_TrimmingText;
@@ -156494,6 +157417,33 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
+	static class EngineNS_UI_TtUIMacrossBase
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.TtUIMacrossBase;
+			ar.Write(srcObj.Id);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.UI.TtUIMacrossBase;
+			var srcObj = src as EngineNS.UI.TtUIMacrossBase;
+			tarObj.Id = srcObj.Id;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_799945902434131319 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.UI.TtUIMacrossBase;
+			System.UInt64 t_Id;
+			ar.Read(out t_Id);
+			srcObj.Id = t_Id;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Id", false);
+				}
+			}
+		};
+	}
 	static class EngineNS_UI_TtUINode_TtUINodeData
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -157524,6 +158474,7 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as Survivor.TtCharacterStateNode;
+			ar.Write(srcObj.IsDead);
 			ar.Write(srcObj.NodeId);
 			if (srcObj.Parent != null)
 			{
@@ -157572,6 +158523,7 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var tarObj = tar as Survivor.TtCharacterStateNode;
 			var srcObj = src as Survivor.TtCharacterStateNode;
+			tarObj.IsDead = srcObj.IsDead;
 			tarObj.NodeId = srcObj.NodeId;
 			if (srcObj.Parent != null)
 			{
@@ -157609,6 +158561,73 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_8244193969825462855 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as Survivor.TtCharacterStateNode;
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Hash64 type_Parent;
+			ar.Read(out type_Parent);
+			var meta_Parent = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Parent);
+			if(meta_Parent != null)
+			{
+				EngineNS.Hash64 ver_Parent;
+				ar.Read(out ver_Parent);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Parent.ClassType.TypeString, ver_Parent );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtNode t_Parent = null;
+					t_Parent = srcObj.Parent;
+					if (t_Parent == null)
+					{
+						t_Parent = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Parent.ClassType) as EngineNS.GamePlay.Scene.TtNode;
+					}
+					fn(ar, t_Parent);
+					srcObj.Parent = t_Parent;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Parent", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_ParentScene;
+			ar.Read(out type_ParentScene);
+			var meta_ParentScene = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_ParentScene);
+			if(meta_ParentScene != null)
+			{
+				EngineNS.Hash64 ver_ParentScene;
+				ar.Read(out ver_ParentScene);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_ParentScene.ClassType.TypeString, ver_ParentScene );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtScene t_ParentScene = null;
+					t_ParentScene = srcObj.ParentScene;
+					if (t_ParentScene == null)
+					{
+						t_ParentScene = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_ParentScene.ClassType) as EngineNS.GamePlay.Scene.TtScene;
+					}
+					fn(ar, t_ParentScene);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9740066219634036715 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtCharacterStateNode;
+			System.Boolean t_IsDead;
+			ar.Read(out t_IsDead);
+			srcObj.IsDead = t_IsDead;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsDead", false);
+				}
+			}
 			System.Guid t_NodeId;
 			ar.Read(out t_NodeId);
 			srcObj.NodeId = t_NodeId;
@@ -159411,6 +160430,7 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as Survivor.TtMonsterStateNode;
+			ar.Write(srcObj.IsDead);
 			ar.Write(srcObj.NodeId);
 			if (srcObj.Parent != null)
 			{
@@ -159459,6 +160479,7 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var tarObj = tar as Survivor.TtMonsterStateNode;
 			var srcObj = src as Survivor.TtMonsterStateNode;
+			tarObj.IsDead = srcObj.IsDead;
 			tarObj.NodeId = srcObj.NodeId;
 			if (srcObj.Parent != null)
 			{
@@ -159496,6 +160517,73 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_8244193969825462855 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as Survivor.TtMonsterStateNode;
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Hash64 type_Parent;
+			ar.Read(out type_Parent);
+			var meta_Parent = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Parent);
+			if(meta_Parent != null)
+			{
+				EngineNS.Hash64 ver_Parent;
+				ar.Read(out ver_Parent);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Parent.ClassType.TypeString, ver_Parent );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtNode t_Parent = null;
+					t_Parent = srcObj.Parent;
+					if (t_Parent == null)
+					{
+						t_Parent = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Parent.ClassType) as EngineNS.GamePlay.Scene.TtNode;
+					}
+					fn(ar, t_Parent);
+					srcObj.Parent = t_Parent;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Parent", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_ParentScene;
+			ar.Read(out type_ParentScene);
+			var meta_ParentScene = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_ParentScene);
+			if(meta_ParentScene != null)
+			{
+				EngineNS.Hash64 ver_ParentScene;
+				ar.Read(out ver_ParentScene);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_ParentScene.ClassType.TypeString, ver_ParentScene );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtScene t_ParentScene = null;
+					t_ParentScene = srcObj.ParentScene;
+					if (t_ParentScene == null)
+					{
+						t_ParentScene = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_ParentScene.ClassType) as EngineNS.GamePlay.Scene.TtScene;
+					}
+					fn(ar, t_ParentScene);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9740066219634036715 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtMonsterStateNode;
+			System.Boolean t_IsDead;
+			ar.Read(out t_IsDead);
+			srcObj.IsDead = t_IsDead;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsDead", false);
+				}
+			}
 			System.Guid t_NodeId;
 			ar.Read(out t_NodeId);
 			srcObj.NodeId = t_NodeId;
@@ -160201,6 +161289,7 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as Survivor.TtStateNode;
+			ar.Write(srcObj.IsDead);
 			ar.Write(srcObj.NodeId);
 			if (srcObj.Parent != null)
 			{
@@ -160249,6 +161338,7 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var tarObj = tar as Survivor.TtStateNode;
 			var srcObj = src as Survivor.TtStateNode;
+			tarObj.IsDead = srcObj.IsDead;
 			tarObj.NodeId = srcObj.NodeId;
 			if (srcObj.Parent != null)
 			{
@@ -160286,6 +161376,73 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_8244193969825462855 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as Survivor.TtStateNode;
+			System.Guid t_NodeId;
+			ar.Read(out t_NodeId);
+			srcObj.NodeId = t_NodeId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeId", false);
+				}
+			}
+			EngineNS.Hash64 type_Parent;
+			ar.Read(out type_Parent);
+			var meta_Parent = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Parent);
+			if(meta_Parent != null)
+			{
+				EngineNS.Hash64 ver_Parent;
+				ar.Read(out ver_Parent);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Parent.ClassType.TypeString, ver_Parent );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtNode t_Parent = null;
+					t_Parent = srcObj.Parent;
+					if (t_Parent == null)
+					{
+						t_Parent = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Parent.ClassType) as EngineNS.GamePlay.Scene.TtNode;
+					}
+					fn(ar, t_Parent);
+					srcObj.Parent = t_Parent;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Parent", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_ParentScene;
+			ar.Read(out type_ParentScene);
+			var meta_ParentScene = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_ParentScene);
+			if(meta_ParentScene != null)
+			{
+				EngineNS.Hash64 ver_ParentScene;
+				ar.Read(out ver_ParentScene);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_ParentScene.ClassType.TypeString, ver_ParentScene );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtScene t_ParentScene = null;
+					t_ParentScene = srcObj.ParentScene;
+					if (t_ParentScene == null)
+					{
+						t_ParentScene = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_ParentScene.ClassType) as EngineNS.GamePlay.Scene.TtScene;
+					}
+					fn(ar, t_ParentScene);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9740066219634036715 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtStateNode;
+			System.Boolean t_IsDead;
+			ar.Read(out t_IsDead);
+			srcObj.IsDead = t_IsDead;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsDead", false);
+				}
+			}
 			System.Guid t_NodeId;
 			ar.Read(out t_NodeId);
 			srcObj.NodeId = t_NodeId;
@@ -162610,6 +163767,7 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode@EngineCore");
 				kls.Writer = EngineNS_Bricks_CodeBuilder_MacrossNode_UMethodStartNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_CodeBuilder_MacrossNode_UMethodStartNode.CopyCurrentVersion;
+				kls.RegVersion(11231156204878821807, EngineNS_Bricks_CodeBuilder_MacrossNode_UMethodStartNode.Read_11231156204878821807);
 				kls.RegVersion(9599732323166548542, EngineNS_Bricks_CodeBuilder_MacrossNode_UMethodStartNode.Read_9599732323166548542);
 			}
 			{
@@ -163134,6 +164292,8 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Bricks_CodeBuilder_TtMethodDeclaration.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_CodeBuilder_TtMethodDeclaration.CopyCurrentVersion;
 				kls.RegVersion(7722995491973459949, EngineNS_Bricks_CodeBuilder_TtMethodDeclaration.Read_7722995491973459949);
+				kls.RegVersion(7746548800985554809, EngineNS_Bricks_CodeBuilder_TtMethodDeclaration.Read_7746548800985554809);
+				kls.RegVersion(9621355045679567299, EngineNS_Bricks_CodeBuilder_TtMethodDeclaration.Read_9621355045679567299);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.CodeBuilder.TtMethodInvokeArgumentExpression@EngineCore");
@@ -164512,6 +165672,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Bricks_StateMachine_Macross_StateAttachment_TtClipPlayAttachmentClassDescription.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_StateMachine_Macross_StateAttachment_TtClipPlayAttachmentClassDescription.CopyCurrentVersion;
 				kls.RegVersion(12416573259078036986, EngineNS_Bricks_StateMachine_Macross_StateAttachment_TtClipPlayAttachmentClassDescription.Read_12416573259078036986);
+				kls.RegVersion(17112018508621619281, EngineNS_Bricks_StateMachine_Macross_StateAttachment_TtClipPlayAttachmentClassDescription.Read_17112018508621619281);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.StateMachine.Macross.StateAttachment.TtTimedStateAttachmentClassDescription@EngineCore");
@@ -166616,6 +167777,12 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(8456914764701220519, EngineNS_UI_TtUIHost.Read_8456914764701220519);
 			}
 			{
+				var kls = this.GetClassCopyer("EngineNS.UI.TtUIMacrossBase@EngineCore");
+				kls.Writer = EngineNS_UI_TtUIMacrossBase.WriteCurrentVersion;
+				kls.Copy = EngineNS_UI_TtUIMacrossBase.CopyCurrentVersion;
+				kls.RegVersion(799945902434131319, EngineNS_UI_TtUIMacrossBase.Read_799945902434131319);
+			}
+			{
 				var kls = this.GetClassCopyer("EngineNS.UI.TtUINode.TtUINodeData@EngineCore");
 				kls.Writer = EngineNS_UI_TtUINode_TtUINodeData.WriteCurrentVersion;
 				kls.Copy = EngineNS_UI_TtUINode_TtUINodeData.CopyCurrentVersion;
@@ -166659,6 +167826,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = Survivor_TtCharacterStateNode.WriteCurrentVersion;
 				kls.Copy = Survivor_TtCharacterStateNode.CopyCurrentVersion;
 				kls.RegVersion(8244193969825462855, Survivor_TtCharacterStateNode.Read_8244193969825462855);
+				kls.RegVersion(9740066219634036715, Survivor_TtCharacterStateNode.Read_9740066219634036715);
 				kls.RegVersion(978974702571264856, Survivor_TtCharacterStateNode.Read_978974702571264856);
 			}
 			{
@@ -166729,6 +167897,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = Survivor_TtMonsterStateNode.WriteCurrentVersion;
 				kls.Copy = Survivor_TtMonsterStateNode.CopyCurrentVersion;
 				kls.RegVersion(8244193969825462855, Survivor_TtMonsterStateNode.Read_8244193969825462855);
+				kls.RegVersion(9740066219634036715, Survivor_TtMonsterStateNode.Read_9740066219634036715);
 				kls.RegVersion(978974702571264856, Survivor_TtMonsterStateNode.Read_978974702571264856);
 			}
 			{
@@ -166750,6 +167919,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = Survivor_TtStateNode.WriteCurrentVersion;
 				kls.Copy = Survivor_TtStateNode.CopyCurrentVersion;
 				kls.RegVersion(8244193969825462855, Survivor_TtStateNode.Read_8244193969825462855);
+				kls.RegVersion(9740066219634036715, Survivor_TtStateNode.Read_9740066219634036715);
 				kls.RegVersion(978974702571264856, Survivor_TtStateNode.Read_978974702571264856);
 			}
 			{
@@ -166783,7 +167953,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(1308987714533235036, Survivor_TtWeaponProxyNode.Read_1308987714533235036);
 				kls.RegVersion(547543558045874187, Survivor_TtWeaponProxyNode.Read_547543558045874187);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("D5_50_1E_97_B0_E5_37_40_F2_E3_23_1C_56_30_4B_38_44_48_EF_A0");
+			this.VersionHash = EngineNS.Hash160.Parse("17_96_3E_22_E4_9A_AC_F3_C8_C3_67_1E_D4_0F_1D_F5_E4_29_09_3D");
 		}
 	}
 }

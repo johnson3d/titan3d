@@ -33,7 +33,7 @@ namespace EngineNS.DesignMacross.Design.Statement
             else
             {
                 System.Diagnostics.Debug.Assert(linkedDataPin is TtDataOutPinDescription);
-                FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription };
+                FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                 var condition = (linkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
                 ifStatement.Condition = condition;
             }
@@ -50,7 +50,11 @@ namespace EngineNS.DesignMacross.Design.Statement
             else
             {
                 System.Diagnostics.Debug.Assert(linkedTrueExecPin is TtExecutionInPinDescription);
-                FStatementBuildContext buildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = statementBuildContext.MethodDescription };
+                FStatementBuildContext buildContext = new() {
+                    ExecuteSequenceStatement = new(),
+                    MethodDescription = statementBuildContext.MethodDescription,
+                    ClassBuildContext = statementBuildContext.ClassBuildContext
+                };
                 (linkedTrueExecPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);
                 ifStatement.TrueStatement = buildContext.ExecuteSequenceStatement;
             }
@@ -63,7 +67,11 @@ namespace EngineNS.DesignMacross.Design.Statement
             else
             {
                 System.Diagnostics.Debug.Assert(linkedFalseExecPin is TtExecutionInPinDescription);
-                FStatementBuildContext buildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = statementBuildContext.MethodDescription };
+                FStatementBuildContext buildContext = new() {
+                    ExecuteSequenceStatement = new(), 
+                    MethodDescription = statementBuildContext.MethodDescription,
+                    ClassBuildContext = statementBuildContext.ClassBuildContext
+                };
                 (linkedFalseExecPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);
                 ifStatement.FalseStatement = buildContext.ExecuteSequenceStatement;
             }

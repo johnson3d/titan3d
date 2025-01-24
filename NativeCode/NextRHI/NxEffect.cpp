@@ -16,9 +16,13 @@ namespace NxRHI
 		{
 			return VSBinder->FindField(name);
 		}
-		else if (PSBinder != nullptr)
+		if (PSBinder != nullptr)
 		{
 			return PSBinder->FindField(name);
+		}
+		if (MSBinder != nullptr)
+		{
+			return MSBinder->FindField(name);
 		}
 		return nullptr;
 	}
@@ -31,6 +35,10 @@ namespace NxRHI
 		else if (PSBinder != nullptr)
 		{
 			return PSBinder->Size;
+		}
+		else if (MSBinder != nullptr)
+		{
+			return MSBinder->Size;
 		}
 		return 0;
 	}
@@ -50,8 +58,12 @@ namespace NxRHI
 	{
 		mBinders.clear();
 
-		PushBinder(EShaderType::SDT_VertexShader, mVertexShader->Reflector);
-		PushBinder(EShaderType::SDT_PixelShader, mPixelShader->Reflector);
+		if (mMeshShader != nullptr)
+			PushBinder(EShaderType::SDT_MeshShader, mMeshShader->Reflector);
+		if (mVertexShader != nullptr)
+			PushBinder(EShaderType::SDT_VertexShader, mVertexShader->Reflector);
+		if (mPixelShader != nullptr)
+			PushBinder(EShaderType::SDT_PixelShader, mPixelShader->Reflector);
 	}
 	void IGraphicsEffect::PushBinder(EShaderType shaderType, IShaderReflector* pReflector)
 	{
@@ -101,6 +113,9 @@ namespace NxRHI
 				break;
 			case SDT_ComputeShader:
 				break;
+			case SDT_MeshShader:
+				eb->MSBinder = binder;
+				break;
 			default:
 				break;
 		}
@@ -115,6 +130,10 @@ namespace NxRHI
 		{
 			cmdlist->SetCBV(EShaderType::SDT_PixelShader, binder->PSBinder, buffer);
 		}
+		if (binder->MSBinder != nullptr)
+		{
+			cmdlist->SetCBV(EShaderType::SDT_MeshShader, binder->MSBinder, buffer);
+		}
 	}
 	void IGraphicsEffect::BindSrv(ICommandList* cmdlist, const FEffectBinder* binder, ISrView* srv)
 	{
@@ -125,6 +144,10 @@ namespace NxRHI
 		if (binder->PSBinder != nullptr)
 		{
 			cmdlist->SetSrv(EShaderType::SDT_PixelShader, binder->PSBinder, srv);
+		}
+		if (binder->MSBinder != nullptr)
+		{
+			cmdlist->SetSrv(EShaderType::SDT_MeshShader, binder->MSBinder, srv);
 		}
 	}
 	void IGraphicsEffect::BindUav(ICommandList* cmdlist, const FEffectBinder* binder, IUaView* uav)
@@ -137,6 +160,10 @@ namespace NxRHI
 		{
 			cmdlist->SetUav(EShaderType::SDT_PixelShader, binder->PSBinder, uav);
 		}
+		if (binder->MSBinder != nullptr)
+		{
+			cmdlist->SetUav(EShaderType::SDT_MeshShader, binder->MSBinder, uav);
+		}
 	}
 	void IGraphicsEffect::BindSampler(ICommandList* cmdlist, const FEffectBinder* binder, ISampler* sampler)
 	{
@@ -147,6 +174,10 @@ namespace NxRHI
 		if (binder->PSBinder != nullptr)
 		{
 			cmdlist->SetSampler(EShaderType::SDT_PixelShader, binder->PSBinder, sampler);
+		}
+		if (binder->MSBinder != nullptr)
+		{
+			cmdlist->SetSampler(EShaderType::SDT_MeshShader, binder->MSBinder, sampler);
 		}
 	}
 

@@ -285,6 +285,10 @@ namespace EngineNS.Support
             {
                 return Color4b.FromObject(obj);
             }
+            else if (type == typeof(RName) && obj.GetType() == typeof(string))
+            {
+                return RName.ParseFrom(obj as string);
+            }
             else
             {
                 System.Diagnostics.Debug.Assert(false);

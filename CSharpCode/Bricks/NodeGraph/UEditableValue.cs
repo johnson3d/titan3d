@@ -220,6 +220,15 @@ namespace EngineNS.Bricks.NodeGraph
                     result.Value = defaultValue;
                 return result;
             }
+            else if(type.IsEqual(typeof(Color4b)))
+            {
+                var result = CreateEditableValue_Internal(notify, type, tag);
+                if (defaultValue == null)
+                    result.Value = Color4b.White;
+                else
+                    result.Value = defaultValue;
+                return result;
+            }
             else if(type.IsEnum)
             {
                 var result = CreateEditableValue_Internal(notify, type, tag);
@@ -396,6 +405,19 @@ namespace EngineNS.Bricks.NodeGraph
                         mNotify?.OnValueChanged(this);
                     }
                     ImGuiAPI.PopItemWidth();
+                }
+            }
+            else if(ValueType.SystemType == typeof(Color4b))
+            {
+                EditorInfo info = new EditorInfo();
+                var v = Value;
+                info.Name = node.NodeId.ToString() + (string.IsNullOrEmpty(pin.Name) ? "" : pin.Name);
+                info.Value = Value;
+                info.Type = ValueType;
+                if(Color4PickerEditorAttribute.OnDrawStatic(in info, out v))
+                {
+                    Value = v;
+                    mNotify?.OnValueChanged(this);
                 }
             }
         }

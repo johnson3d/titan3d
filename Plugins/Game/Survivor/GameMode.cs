@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using EngineNS;
+using EngineNS.GamePlay;
 using EngineNS.GamePlay.Character;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Thread.Async;
+using EngineNS.UI;
 using NPOI.Util;
 
 namespace Survivor
@@ -20,6 +22,12 @@ namespace Survivor
         [EngineNS.Rtti.Meta]
         public TtMonsterManager MonsterManager { get; } = new TtMonsterManager();
         public TtCharacter Player = null;
+
+        public void Tick(TtGameInstance host, float elapsedMillisecond)
+        {
+            TtUIManager.UIKeyName keyName = new TtUIManager.UIKeyName();
+            TtEngine.Instance.UIManager.GetUI(keyName);
+        }
         [EngineNS.Rtti.Meta]
         public void LoadWeapons(
             [RName.PGRName(FilterExts = EngineNS.Bricks.DataSet.TtDataSet.AssetExt)]
@@ -72,6 +80,12 @@ namespace Survivor
             stateNodeData.CurrentHP = roleData.Health;
             await stateNode.InitializeNode(parent.HostWorld, stateNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             stateNode.Parent = parent;
+            stateNode.NodeName = "StateNode";
+            stateNode.OnDead = ()=>
+            {
+                var game = TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame;
+                game.CountToTriggerPlayerDead();
+            };
 
             {
                 var weaponNode = new TtWeaponNode();
@@ -90,6 +104,7 @@ namespace Survivor
                 weaponNode.RoleData = roleData;
                 weaponNode.Parent = parent.Parent;
             }
+            
         }
         [EngineNS.Rtti.Meta]
         public static TtGameMode GetSurvivorGameMode()

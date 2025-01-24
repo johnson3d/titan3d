@@ -429,6 +429,7 @@ namespace EngineNS.Bricks.Particle
             //cur.Location += Acceleration * elapsed * (1.0f + emitter.RandomUnit() * 2.5f);
             float scale = OpScaleMin + emitter.RandomUnit(ref *(FParticle*)particle) * OpScaleRange;
             cur.Scale += scale * elapsed;
+            cur.Scale = Math.Max(0.0f, cur.Scale);
         }
     }
 }

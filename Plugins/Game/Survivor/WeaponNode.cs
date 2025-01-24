@@ -7,6 +7,7 @@ using EngineNS.Thread.Async;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using static Survivor.TtWeaponController_Line;
 
 namespace Survivor
@@ -75,10 +76,19 @@ namespace Survivor
 
         public override void Tick(TtWorld world)
         {
-            var playerNode = (EngineNS.TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame).GameMode.Player;
+            var playerNode = TtGameMode.GetSurvivorGameMode().Player;
             mCurrentTime += world.DeltaTimeSecond;
+            Vector3 hostPosition = Vector3.Zero;
+            if(WeaponNode.Parent is TtMonsterNode monsterNode)
+            {
+                hostPosition = monsterNode.MonseterPlacement.Position.ToSingleVector3();
+            }
+            else
+            {
+                hostPosition = playerNode.Placement.AbsTransform.Position.ToSingleVector3();
+            }
             var distance = Vector3.Distance(playerNode.Placement.AbsTransform.Position.ToSingleVector3(),
-                    WeaponNode.Placement.AbsTransform.Position.ToSingleVector3());
+                    hostPosition);
             if (mCurrentTime > WeaponData.CoolDown && distance <= WeaponData.AttackRange)
             {
                 Fire();
@@ -89,7 +99,7 @@ namespace Survivor
         }
         protected void Fire()
         {
-            var playerNode = (EngineNS.TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame).GameMode.Player;
+            var playerNode = TtGameMode.GetSurvivorGameMode().Player;
             WeaponNode.Attack(playerNode, null);
         }
     }
@@ -138,7 +148,7 @@ namespace Survivor
             {
                 weapon.Element.RemoveFromWorld();
                 BulletPrefabs.Remove(weapon);
-                TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(weapon.Element);
+                //TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(weapon.Element);
             }
             mBeRemoved.Clear();
             base.Tick(world);
@@ -184,6 +194,10 @@ namespace Survivor
                     return;
                 var dir = Target.MonseterPlacement.AbsTransform.Position - Element.Placement.AbsTransform.Position;
                 dir.Y = 0;
+                if (dir.Length() < 0.1)
+                { 
+                
+                }
                 dir.Normalize();
                 Element.Placement.Position += dir * Speed * world.DeltaTimeSecond;
             }
@@ -218,7 +232,7 @@ namespace Survivor
                 {
                     weapon.Element.RemoveFromWorld();
                     BulletPrefabs.Remove(weapon);
-                    TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(weapon.Element);
+                    //TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(weapon.Element);
                 }
                 mBeRemoved.Clear();
             }
@@ -264,23 +278,31 @@ namespace Survivor
         }
         protected TtMonsterNode GetNearestMonster()
         {
+            List<TtNode> nearNodes = new List<TtNode>();
+            Aabb aabb = new Aabb();
+            aabb.Center = WeaponNode.Parent.Placement.AbsTransform.Position;
+            aabb.Extent = Vector3.One * WeaponData.AttackRange;
+            
+            WeaponNode.ParentScene.SceneOctree.GetColliding(nearNodes, aabb);
             List<TtMonsterNode> monsters = new List<TtMonsterNode>();
-            WeaponNode.ParentScene.IterateNodes(static (nd, arg) =>
+            foreach(var nd in nearNodes)
             {
-                if(nd is TtMonsterNode)
+                if(nd.Parent is TtMonsterNode monsterdd && monsterdd.StateNode.IsDead)
                 {
-                    var tp = (List<TtMonsterNode>)arg;
-                    tp.Add(nd as TtMonsterNode);
+
                 }
-                return true;
-            }, monsters);
+                if(nd.Parent is TtMonsterNode monsterNd && !monsterNd.StateNode.IsDead)
+                {
+                    monsters.Add(monsterNd);
+                }
+            }
             TtMonsterNode nearestNode = null;
             float distance = WeaponData.AttackRange;
             foreach(var monster in monsters)
             {
                 var candidateDis = Vector3.Distance(monster.MonseterPlacement.AbsTransform.Position.ToSingleVector3(),
                                                     WeaponNode.Parent.Placement.AbsTransform.Position.ToSingleVector3());
-                if(distance >= candidateDis)
+                if(candidateDis <= distance)
                 {
                     distance = candidateDis;
                     nearestNode = monster;
@@ -313,6 +335,11 @@ namespace Survivor
     {
         [EngineNS.Rtti.Meta]
         public TtWeaponNode WeaponNode { get; set; } = null;
+
+        public override bool OnTickLogic(TtNodeTickParameters args)
+        {
+            return base.OnTickLogic(args);
+        }
     }
     //无论角色的武器还是怪物的近远程攻击都算做武器攻击
     public partial class TtWeaponNode : EngineNS.GamePlay.Scene.TtSceneActorNode
@@ -328,10 +355,9 @@ namespace Survivor
         public override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
-            var macrossSurvivorGame = EngineNS.TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame;
             if(WeaponNodeData.WeaponId > 0)
             {
-                WeaponData = macrossSurvivorGame.GameMode.WeaponManager.GetData("ItemId", WeaponNodeData.WeaponId);
+                WeaponData = TtGameMode.GetSurvivorGameMode().WeaponManager.GetData("ItemId", WeaponNodeData.WeaponId);
                 if (WeaponData == null)
                 {
                     EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, $"Weapon({WeaponNodeData.WeaponId}) not found");

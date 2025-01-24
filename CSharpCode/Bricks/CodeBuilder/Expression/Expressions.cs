@@ -356,7 +356,7 @@ namespace EngineNS.Bricks.CodeBuilder
         public TtCommentStatement Comment { get; set; }
         [Rtti.Meta]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
-        [Rtti.Meta]
+        [Rtti.Meta, Browsable(false)]
         public List<TtAttribute> Attributes { get; set; } = new List<TtAttribute>();
 
         [Browsable(false)]
@@ -880,6 +880,15 @@ namespace EngineNS.Bricks.CodeBuilder
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.Bricks.CodeBuilder.UMethodDeclaration@EngineCore", "EngineNS.Bricks.CodeBuilder.UMethodDeclaration" })]
     public class TtMethodDeclaration : TtCodeObject, IO.ISerializer
     {
+        [Flags]
+        enum EFlag
+        {
+            None = 0,
+            IsOverride = 1 << 0,
+            IsManual = 1 << 1,
+        }
+        EFlag mFlags = EFlag.None;
+
         public Rtti.TtClassMeta.TtMethodMeta OverrideMethod = null;
         [Rtti.Meta]
         public EVisisMode VisitMode { get; set; } = EVisisMode.Public;
@@ -890,6 +899,9 @@ namespace EngineNS.Bricks.CodeBuilder
         [Rtti.Meta]
         public string MethodName { get; set; } = "Unknow";
         public Func<TtMethodDeclaration, string> GetDisplayNameFunc;
+
+        [Rtti.Meta]
+        public Guid Id { get; set; }
         public string UniqueMethodName
         {
             get
@@ -915,7 +927,31 @@ namespace EngineNS.Bricks.CodeBuilder
         [Rtti.Meta]
         public List<TtAttribute> Attributes { get; set; } = new List<TtAttribute>();
         [Rtti.Meta]
-        public bool IsOverride { get; set; } = false;
+        public bool IsOverride 
+        {
+            get { return ((mFlags & EFlag.IsOverride) == EFlag.IsOverride); }
+            set
+            {
+                if (value)
+                    mFlags |= EFlag.IsOverride;
+                else
+                    mFlags &= ~EFlag.IsOverride;
+            }
+        }
+        [Rtti.Meta]
+        public bool IsManual
+        {
+            get { return ((mFlags & EFlag.IsManual) == EFlag.IsManual); }
+            set
+            {
+                if (value)
+                    mFlags |= EFlag.IsManual;
+                else
+                    mFlags &= ~EFlag.IsManual;
+            }
+        }
+        [Rtti.Meta]
+        public string CustomData;
         public enum EAsyncType
         {
             None,
@@ -2239,6 +2275,10 @@ namespace EngineNS.Bricks.CodeBuilder
             else if(type == Rtti.TtTypeDescGetter<Color4f>.TypeDesc)
             {
                 retValue = $"new EngineNS.Color4f({value.ToString()})";
+            }
+            else if(type == Rtti.TtTypeDescGetter<Color4b>.TypeDesc)
+            {
+                retValue = $"new EngineNS.Color4b({value.ToString()})";
             }
             else if (type == Rtti.TtTypeDescGetter<Color3f>.TypeDesc)
             {

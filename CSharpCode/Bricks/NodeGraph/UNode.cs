@@ -880,6 +880,7 @@ namespace EngineNS.Bricks.NodeGraph
             meta.CopyObjectMetaField(target, this);
             if(!withId)
                 target.NodeId = id;
+
             return true;
         }
 

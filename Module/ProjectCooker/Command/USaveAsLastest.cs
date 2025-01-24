@@ -33,8 +33,7 @@ namespace ProjectCooker.Command
             System.Console.WriteLine("End AssetType");
 
             var assetTypes = GetArguments(args, Param_Types);
-            var cfg_CookSaveNewestAssetType = TtEngine.Instance.DynConfigData.GetConfig("CookSaveNewestAssetType");
-            if (cfg_CookSaveNewestAssetType != null)
+            if (TtEngine.Instance.DynConfigData.TryGetConfig<string>("CookSaveNewestAssetType", out var cfg_CookSaveNewestAssetType))
             {
                 assetTypes = ((string)cfg_CookSaveNewestAssetType).Split('+');
             }

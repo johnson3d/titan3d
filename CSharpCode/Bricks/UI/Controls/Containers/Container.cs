@@ -721,15 +721,32 @@ namespace EngineNS.UI.Controls.Containers
                     if (!child.DesignRect.Contains(in data.Point))
                         continue;
 
-                    var container = child as TtContainer;
-                    if (container != null && !(container is TtUserControl))
+                    if(child is TtUserControl)
                     {
-                        var retVal = container.GetPointAtElement(ref data);
-                        if (retVal != null)
-                            return retVal;
+                        if(data.IgnoreUserControlContent)
+                        {
+                            return child;
+                        }
+                        else
+                        {
+                            var userCtrl = child as TtUserControl;
+                            var retVal = userCtrl.GetPointAtElement(ref data);
+                            if (retVal != null)
+                                return retVal;
+                        }
                     }
                     else
-                        return child;
+                    {
+                        var container = child as TtContainer;
+                        if (container != null)
+                        {
+                            var retVal = container.GetPointAtElement(ref data);
+                            if (retVal != null)
+                                return retVal;
+                        }
+                        else
+                            return child;
+                    }
                 }
                 return this;
             }
@@ -742,15 +759,33 @@ namespace EngineNS.UI.Controls.Containers
                         continue;
                     if (child.Is3D)
                         continue;
-                    var container = child as TtContainer;
-                    if (container != null && !(container is TtUserControl))
+                    if (child is TtUserControl)
                     {
-                        var retVal = container.GetPointAtElement(ref data);
-                        if (retVal != null)
-                            return retVal;
+                        if(data.IgnoreUserControlContent)
+                        {
+                            if (child.DesignRect.Contains(in data.Point))
+                                return child;
+                        }
+                        else
+                        {
+                            var userCtrl = child as TtUserControl;
+                            var retVal = userCtrl.GetPointAtElement(ref data);
+                            if (retVal != null)
+                                return retVal;
+                        }
                     }
-                    else if(child.DesignRect.Contains(in data.Point))
-                        return child;
+                    else
+                    {
+                        var container = child as TtContainer;
+                        if (container != null && !(container is TtUserControl))
+                        {
+                            var retVal = container.GetPointAtElement(ref data);
+                            if (retVal != null)
+                                return retVal;
+                        }
+                        else if (child.DesignRect.Contains(in data.Point))
+                            return child;
+                    }
                 }
                 if (DesignRect.Contains(in data.Point))
                     return this;
@@ -829,15 +864,15 @@ namespace EngineNS.UI.Controls.Containers
             }
         }
 
-        public override bool QueryElements<T>(Delegate_QueryProcess<T> queryAction, ref T queryData)
+        public override bool QueryElements<T>(Delegate_QueryProcess<T> queryAction, ref QueryProcessData data, ref T queryData)
         {
-            for(int i=0; i<mChildren.Count; i++)
+            for (int i=0; i<mChildren.Count; i++)
             {
-                if (mChildren[i].QueryElements(queryAction, ref queryData))
+                if (mChildren[i].QueryElements(queryAction, ref data, ref queryData))
                     return true;
             }
 
-            return base.QueryElements(queryAction, ref queryData);
+            return base.QueryElements(queryAction, ref data, ref queryData);
         }
 
         public override bool IsReadyToDraw()

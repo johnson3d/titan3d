@@ -161,7 +161,9 @@ namespace EngineNS.UI
             if (!Ray.Intersects(in ray, BoundingBox, out data.Distance))
                 return false;
 
-            if(QueryElements(RayIntersect3DElements, ref data))
+            var pData = new QueryProcessData();
+            pData.Reset();
+            if (QueryElements(RayIntersect3DElements, ref pData, ref data))
             {
                 return true;
             }
@@ -179,7 +181,7 @@ namespace EngineNS.UI
             var rayData = new RayIntersectData();
             return GetPointAtElement(ref data, ref rayData);
         }
-        public TtUIElement GetPointAtElement(ref PointAtProcessData data, ref RayIntersectData rayData)
+        public virtual TtUIElement GetPointAtElement(ref PointAtProcessData data, ref RayIntersectData rayData)
         {
             data.PointOffset = Vector2.Zero;
             if (NoHitTest)
@@ -226,7 +228,9 @@ namespace EngineNS.UI
                     return null;
             }
 
-            if (QueryElements(RayIntersect3DElements, ref rayData))
+            var pData = new QueryProcessData();
+            pData.Reset();
+            if (QueryElements(RayIntersect3DElements, ref pData, ref rayData))
             {
                 data.Point = rayData.IntersectPos;
                 return rayData.IntersectedElement.GetPointAtElement(ref data);

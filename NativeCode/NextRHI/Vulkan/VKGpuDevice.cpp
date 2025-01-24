@@ -572,7 +572,7 @@ namespace NxRHI
 		mGpuResourceAlignment.RawSrvUavAlignment = (UINT)mDeviceProperties.limits.minStorageBufferOffsetAlignment;
 		mGpuResourceAlignment.UavCounterAlignment = (UINT)mDeviceProperties.limits.minStorageBufferOffsetAlignment;
 		
-		mCaps.IsSupoortBufferToTexture = true;
+		mCaps.IsSupportBufferToTexture = true;
 		mCaps.IsSupportSSBO_VS = true;
 
 		vkGetPhysicalDeviceMemoryProperties(mPhysicalDevice, &mMemProperties);

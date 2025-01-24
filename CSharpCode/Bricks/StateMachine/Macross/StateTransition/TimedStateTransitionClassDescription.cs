@@ -118,6 +118,7 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateTransition
             {
                 MainClassDescription = classBuildContext.MainClassDescription,
                 ClassDeclaration = thisClassDeclaration,
+                ClassDescription = this
             };
             thisClassDeclaration.AddMethod(BuildOverrideCheckConditionMethod(ref transitionClassBuildContext));
             return new List<TtClassDeclaration>() { thisClassDeclaration };

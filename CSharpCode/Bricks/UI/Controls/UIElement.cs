@@ -367,11 +367,13 @@ namespace EngineNS.UI.Controls
             public Vector2 PointOffset;
             public bool OnlyClipped;
             public bool IgnoreNoHitTest;
+            public bool IgnoreUserControlContent;
 
             public void Reset()
             {
                 OnlyClipped = true;
                 IgnoreNoHitTest = false;
+                IgnoreUserControlContent = false;
             }
         }
         public virtual TtUIElement GetPointAtElement(ref PointAtProcessData data)
@@ -520,8 +522,17 @@ namespace EngineNS.UI.Controls
             return new Vector2(pt.X - DesignRect.X, pt.Y - DesignRect.Y);
         }
 
+        public struct QueryProcessData
+        {
+            public bool IgnoreUserControl;
+
+            public void Reset()
+            {
+                IgnoreUserControl = false;
+            }
+        }
         public delegate bool Delegate_QueryProcess<T>(TtUIElement element, ref T data);
-        public virtual bool QueryElements<T>(Delegate_QueryProcess<T> queryAction, ref T queryData)
+        public virtual bool QueryElements<T>(Delegate_QueryProcess<T> queryAction, ref QueryProcessData data, ref T queryData)
         {
             return (queryAction?.Invoke(this, ref queryData) == true);
         }

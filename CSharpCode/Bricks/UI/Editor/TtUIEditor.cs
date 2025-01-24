@@ -1858,7 +1858,9 @@ namespace EngineNS.UI.Editor
             };
             for (uint i = 0; i < 512; i++)
                 mNameIndexBits.UnsetBit(i);
-            mUIHost.QueryElements(NameIndexBitsSets, ref data);
+            var pData = new TtUIElement.QueryProcessData();
+            pData.Reset();
+            mUIHost.QueryElements(NameIndexBitsSets, ref pData, ref data);
             if (!data.FindEqual)
                 return name;
             for(uint i=0; i<512; i++)

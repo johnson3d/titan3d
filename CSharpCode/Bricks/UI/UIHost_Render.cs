@@ -53,7 +53,9 @@ namespace EngineNS.UI
                     if (mMesh != null)
                         mBoundingBoxData.AABB = mMesh.mCoreObject.mAABB;
 
-                    QueryElements(CheckBoundingBox, ref mBoundingBoxData);
+                    var pData = new QueryProcessData();
+                    pData.Reset();
+                    QueryElements(CheckBoundingBox, ref pData, ref mBoundingBoxData);
                     BoundingBoxDirty = false;
                 }
 

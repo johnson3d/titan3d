@@ -427,28 +427,23 @@ namespace EngineNS
 
             this.DynConfigData.LoadConfigData(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "DynConfigData.dcd");
 
-            var Config_UseRenderDoc = this.DynConfigData.GetConfig("UseRenderDoc");
-            if (Config_UseRenderDoc != null)
+            if (this.DynConfigData.TryGetConfig<bool>("UseRenderDoc", out var Config_UseRenderDoc))
             {
-                Config.UseRenderDoc = (bool)Config_UseRenderDoc;
+                Config.UseRenderDoc = Config_UseRenderDoc;
             }
-            var Config_HasDebugLayer = this.DynConfigData.GetConfig("HasDebugLayer");
-            if (Config_HasDebugLayer != null)
+            if (this.DynConfigData.TryGetConfig<bool>("HasDebugLayer", out var Config_HasDebugLayer))
             {
                 Config.HasDebugLayer = (bool)Config_HasDebugLayer;
             }
-            var Config_HasGpuBaseValidation = this.DynConfigData.GetConfig("IsGpuBaseValidation");
-            if (Config_HasGpuBaseValidation != null)
+            if (this.DynConfigData.TryGetConfig<bool>("IsGpuBaseValidation", out var Config_HasGpuBaseValidation))
             {
                 Config.IsGpuBaseValidation = (bool)Config_HasGpuBaseValidation;
             }
-            var Config_IsGpuDred = this.DynConfigData.GetConfig("IsGpuDred");
-            if (Config_IsGpuDred != null)
+            if (this.DynConfigData.TryGetConfig<bool>("IsGpuDred", out var Config_IsGpuDred))
             {
                 Config.IsGpuDred = (bool)Config_IsGpuDred;
             }
-            var Config_IsAftermath = this.DynConfigData.GetConfig("IsAftermath");
-            if (Config_IsAftermath != null)
+            if (this.DynConfigData.TryGetConfig<bool>("IsAftermath", out var Config_IsAftermath))
             {
                 Config.IsAftermath = (bool)Config_IsAftermath;
             }

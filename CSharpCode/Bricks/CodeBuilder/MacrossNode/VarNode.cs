@@ -262,7 +262,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public override bool CopyTo(TtNodeBase target, bool withId = false)
         {
-            (target as MemberVar).mDefClass = mDefClass;
+            var tagMemberVar = target as MemberVar;
+            tagMemberVar.mDefClass = mDefClass;
+
+            tagMemberVar.Initialize(mDefClass, MemberName, IsGet);
+
             return base.CopyTo(target, withId);
         }
         public override void BuildStatements(NodePin pin, ref BuildCodeStatementsData data)
@@ -836,18 +840,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 }
                 assignSt.From = srcExp;
             }
+            else if (SetPin.EditValue != null)
+            {
+                assignSt.From = new TtPrimitiveExpression(SetPin.EditValue.ValueType, SetPin.EditValue.Value);
+            }
             else
             {
                 HasError = true;
                 CodeExcept = new GraphException(this, null, $"SetPin unlink");
-                //if (SetPin.EditValue != null)
-                //{
-                //    assignSt.From = new TtPrimitiveExpression(SetPin.EditValue.ValueType, SetPin.EditValue.Value);
-                //}
-                //else
-                //{
-                //    assignSt.From = new TtDefaultValueExpression(this.VarType);
-                //}   
+
+                assignSt.From = new TtDefaultValueExpression(this.VarType);
             }
 
             assignSt.To = new TtVariableReferenceExpression()

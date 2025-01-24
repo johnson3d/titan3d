@@ -127,6 +127,14 @@ namespace NxRHI
 	{
 		
 	}
+	void NullCommandList::DispatchMesh(UINT x, UINT y, UINT z)
+	{
+
+	}
+	void NullCommandList::IndirectDispatchMesh(IBuffer* indirectArg, UINT indirectArgOffset)
+	{
+
+	}
 	void NullCommandList::SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess)
 	{
 

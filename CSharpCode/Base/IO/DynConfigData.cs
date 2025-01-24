@@ -17,20 +17,36 @@ namespace EngineNS.IO
                 SaveConfigData();
             }
         }
-        public object GetConfig(string key)
+        private object GetConfig(string key)
         {
             if (ConfigDatas.TryGetValue(key, out object value))
                 return value;
             return null;
         }
-        public T TryGetConfig<T>(string key)
+        public bool TryGetConfig<T>(string key, out T result)
         {
             var obj = GetConfig(key);
             if (obj == null)
             {
-                return default(T);
+                result = default(T);
+                return false;
             }
-            return (T)obj;
+            if (obj.GetType() == typeof(string))
+            {
+                if (typeof(T) == typeof(string))
+                {
+                    result = (T)obj;
+                }
+                else
+                {
+                    result = (T)TConvert.ToObject(typeof(T), obj);
+                }
+            }
+            else
+            {
+                result = (T)obj;
+            }
+            return true;
         }
         public void SaveConfigData()
         {
@@ -68,15 +84,25 @@ namespace EngineNS.IO
                     CommentLines.Add(l);
                     continue;
                 }
-                var text = l;
-                var pos = text.IndexOf(":");
-                var key = text.Substring(0, pos);
-                text = text.Substring(pos + 1);
-                pos = text.IndexOf("=");
-                var typeStr = text.Substring(0, pos);
-                var valueStr = text.Substring(pos + 1);
 
-                if (bAsText == false)
+                var text = l;
+                var pos = text.IndexOf("=");
+                if (pos < 0)
+                {
+                    continue;
+                }
+                var valueStr = text.Substring(pos + 1);
+                var key = text.Substring(0, pos);
+                string typeStr = null;
+                pos = key.IndexOf(":");
+                if (pos >= 0)
+                {
+                    var t = key;
+                    key = t.Substring(0, pos);
+                    typeStr = t.Substring(pos + 1);
+                }
+
+                if (bAsText == false && typeStr != null)
                     ConfigDatas[key] = TConvert.ToObject(Rtti.TtTypeDesc.TypeOf(typeStr), valueStr);
                 else
                     ConfigDatas[key] = valueStr;

@@ -59,14 +59,26 @@ namespace NxRHI
 			StartIndex = 0;
 			NumPrimitives = 0;
 			NumInstances = 1;
+
+			DispatchMeshX = 0;
+			DispatchMeshY = 0;
+			DispatchMeshZ = 0;
 		}
 		EPrimitiveType PrimitiveType = EPT_TriangleList;
 		UINT BaseVertexIndex = 0;
 		UINT StartIndex = 0;
 		UINT NumPrimitives = 0;
 		UINT NumInstances = 1;
+
+		UINT DispatchMeshX = 0;
+		UINT DispatchMeshY = 0;
+		UINT DispatchMeshZ = 0;
 		bool IsIndexDraw() const {
 			return StartIndex != 0xFFFFFFFF;
+		}
+		bool IsDispatchMesh()
+		{
+			return DispatchMeshX + DispatchMeshY + DispatchMeshZ > 0;
 		}
 	};
 	class TR_CLASS()

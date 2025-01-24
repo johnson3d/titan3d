@@ -4,6 +4,7 @@ using EngineNS.Graphics.Pipeline;
 using EngineNS.Rtti;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,13 +20,24 @@ namespace EngineNS.Bricks.Particle.Simple
         {
             EmitterData.Flags = 0;
             base.InitEmitter(rc, mesh, maxParticle);
+
+            var spawnTimer = new Support.TtLogicTimer();
+            spawnTimer.Name = "spawn interval";
+            spawnTimer.Interval = 1.0f / 60.0f;
+            spawnTimer.SetOnTimer(spawnTimer =>
+            {
+                Spawn(10, SetParticleFlags(EParticleFlags.EmitShape, 0), 0.5f);
+                return true;
+            });
+            Timers.SetTimer(spawnTimer);
         }
         public override void DoUpdateSystem()
         {
             if (EmitterData.Flags == 0)
             {
-                Spawn(512, SetParticleFlags(EParticleFlags.EmitShape, 0), 3.0f);
-                EmitterData.Flags = 1;
+                //Spawn(1, SetParticleFlags(EParticleFlags.EmitShape, 0), 3.0f);
+                //Spawn(512, SetParticleFlags(EParticleFlags.EmitShape, 0), 3.0f);
+                //EmitterData.Flags = 1;
             }
         }
         public unsafe override void OnInitParticle(ref FParticle particle)
@@ -37,30 +49,30 @@ namespace EngineNS.Bricks.Particle.Simple
                 particle.mLocation.Y += 2.0f;
                 //particle.mLocation.Z = RandomUnit() * 10.0f;
             }
-            particle.Life += RandomUnit(ref particle) * 0.5f;
+            //particle.Life += RandomUnit(ref particle) * 0.5f;
             particle.Velocity = Velocity;
-            particle.Scale = 0.5f - RandomUnit(ref particle) * 0.2f;
+            particle.Scale = 1.0f;
             particle.Color = ((uint)RandomNext(ref particle) | 0xff000000);
         }
         public override unsafe void OnDeadParticle(uint index, ref FParticle particle)
         {
-            if (HasFlags(in particle, EParticleFlags.EmitShape) != 0)
-            {
-                uint shapeIndex = GetParticleData(particle.Flags);
-                if (shapeIndex == 0)
-                    Spawn(1, SetParticleFlags(EParticleFlags.EmitShape, 1), 5.0f);
-                else
-                    Spawn(1, SetParticleFlags(EParticleFlags.EmitShape, 0), 3.0f);
-            }
+            //if (HasFlags(in particle, EParticleFlags.EmitShape) != 0)
+            //{
+            //    uint shapeIndex = GetParticleData(particle.Flags);
+            //    if (shapeIndex == 0)
+            //        Spawn(1, SetParticleFlags(EParticleFlags.EmitShape, 1), 5.0f);
+            //    else
+            //        Spawn(1, SetParticleFlags(EParticleFlags.EmitShape, 0), 3.0f);
+            //}
 
             //mCoreObject.Spawn(1, SetParticleFlags(EParticleFlags.EmitIndex, index), 3.0f);
         }
         public override void OnParticleTick(TtEmitter emitter, float elapsed, ref FParticle particle)
         {
             //base.OnParticleTick(emitter, elapsed, ref particle);
-            var rf = particle.Rotatorf;
-            rf.Y += 1.14f * elapsed;
-            particle.Rotatorf = rf;
+            //var rf = particle.Rotatorf;
+            //rf.Y += 1.14f * elapsed;
+            //particle.Rotatorf = rf;
         }
     }
 

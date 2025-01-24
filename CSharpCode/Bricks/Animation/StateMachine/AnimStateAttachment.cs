@@ -18,11 +18,13 @@ namespace EngineNS.Animation.StateMachine
     }
     public class TtClipPlayStateAttachment<S> : TtAnimStateAttachment<S>
     {
-        public RName AnimationClipName;
+        public RName AnimationClipName { get; set; }
+        public bool IsLoop { get; set; } = false;
         public override async TtTask<bool> Initialize(TtAnimStateMachineContext context)
         {
             var animClipBlendTree = new TtBlendTree_AnimationClip<S>();
             animClipBlendTree.Clip = await TtEngine.Instance.AnimationModule.AnimationClipManager.GetAnimationClip(AnimationClipName);
+            animClipBlendTree.IsLoop = IsLoop;
             BlendTree = animClipBlendTree;
             await BlendTree.Initialize(context.BlendTreeContext);
             return await base.Initialize(context);

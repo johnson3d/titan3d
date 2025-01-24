@@ -69,7 +69,10 @@ namespace EngineNS.DesignMacross.Design
                 var statementDescription = linkedExecPin.Parent as TtStatementDescription;
                 if (statementDescription != null)
                 {
-                    FStatementBuildContext buildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = statementBuildContext.MethodDescription };
+                    FStatementBuildContext buildContext = new() {
+                        ExecuteSequenceStatement = new(), 
+                        MethodDescription = statementBuildContext.MethodDescription, 
+                        ClassBuildContext = statementBuildContext.ClassBuildContext };
                     var statement = statementDescription.BuildStatement(ref buildContext);
                     statementBuildContext.AddStatement(buildContext.ExecuteSequenceStatement);
                     return statement;
@@ -279,7 +282,7 @@ namespace EngineNS.DesignMacross.Design
             TtPinsCheckContext pinsCheckContext = new() { MethodDescription = this };
             if (Start.PinsChecking(pinsCheckContext))
             {
-                FStatementBuildContext buildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = this };
+                FStatementBuildContext buildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = this, ClassBuildContext = classBuildContext };
                 var declaration = TtASTBuildUtil.CreateMethodDeclaration(this, ref classBuildContext);
                 Start.BuildStatement(ref buildContext);
                 declaration.MethodBody.Sequence.Add(buildContext.ExecuteSequenceStatement);

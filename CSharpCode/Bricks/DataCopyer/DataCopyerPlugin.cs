@@ -76,7 +76,7 @@ namespace EngineNS.Bricks.DataCopyer
         {
             foreach (var i in metaVersion.Propertys)
             {
-                if (i.PropInfo.CanRead == false || i.PropInfo.GetGetMethod().IsStatic)
+                if (i.PropInfo.CanRead == false || (i.PropInfo.GetGetMethod() != null && i.PropInfo.GetGetMethod().IsStatic))
                 {
                     continue;
                 }
@@ -96,7 +96,7 @@ namespace EngineNS.Bricks.DataCopyer
         {
             foreach (var i in metaVersion.Propertys)
             {
-                if (i.PropInfo.CanRead == false || i.PropInfo.GetGetMethod().IsStatic)
+                if (i.PropInfo.CanRead == false || (i.PropInfo.GetGetMethod() != null && i.PropInfo.GetGetMethod().IsStatic))
                 {
                     continue;
                 }
@@ -228,7 +228,12 @@ namespace EngineNS.Bricks.DataCopyer
                     ar.Read(out version);
                     var ver = meta.GetMetaVersion(version.AllData);
                     if (ver != null)
+                    {
+                        var serial = v as ISerializer;
+                        if (serial != null)
+                            serial.OnPreRead(ar.Tag, hostObject, false);
                         ReadMember(ar, v, ver);
+                    }
                     else
                         System.Diagnostics.Debug.Assert(false);
                     return v;
@@ -429,6 +434,9 @@ namespace EngineNS.Bricks.DataCopyer
                         v = obj;
                     else
                         v = Rtti.TtTypeDescManager.CreateInstance(meta.ClassType);
+                    var serial = v as ISerializer;
+                    if (serial != null)
+                        serial.OnPreRead(ar.Tag, hostObject, false);
                     ReadMember(ar, v, ver);
                     return v;
                 }

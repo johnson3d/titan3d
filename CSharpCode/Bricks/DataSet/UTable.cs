@@ -10,7 +10,7 @@ namespace EngineNS.Bricks.DataSet
     {
         public TtDataProviderBinder Binder;
         [Rtti.Meta]
-        private List<TtDataProvider> DataProviders { get; set; } = new List<TtDataProvider>();
+        public List<TtDataProvider> DataProviders { get; set; } = new List<TtDataProvider>();
         private Dictionary<string, List<TtDataProvider>> SortedDataProviders { get; } = new Dictionary<string, List<TtDataProvider>>();
         public int Count
         {

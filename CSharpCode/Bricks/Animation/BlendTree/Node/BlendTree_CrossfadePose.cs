@@ -59,7 +59,6 @@ namespace EngineNS.Animation.BlendTree.Node
                 return null;
 
             base.ConstructAnimationCommandTree(parentNode, ref context);
-            mAnimationCommand.Desc = new();
             context.AddCommand(context.TreeDepth, mAnimationCommand);
 
             context.TreeDepth++;
@@ -80,6 +79,7 @@ namespace EngineNS.Animation.BlendTree.Node
         {
             mCurrentTime = 0.0f;
             BlendCompelete = false;
+            mAnimationCommand.Desc.Weight = 0;
         }
     }
 

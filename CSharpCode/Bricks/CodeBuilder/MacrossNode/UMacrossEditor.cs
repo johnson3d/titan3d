@@ -236,7 +236,33 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 
             //LoadClassGraph(rn);
         }
-        public void LoadClassGraph(RName rn, Func<MethodData, MethodData.EErrorType> checkMethodDataValid = null)
+        public static MethodData.EErrorType MethodErrorCheckProcess(MethodData data, System.Reflection.MethodInfo[] methodInfos)
+        {
+            if (!data.MethodDec.IsOverride)
+                return MethodData.EErrorType.None;
+
+            bool bFind = false;
+            MethodData.EErrorType lastErrorType = MethodData.EErrorType.None;
+            for (int mIIdx = 0; mIIdx < methodInfos.Length; mIIdx++)
+            {
+                if (data.GetMethodName() != methodInfos[mIIdx].Name)
+                    continue;
+                lastErrorType = TtMethodDeclaration.IsMatching(data.MethodDec, methodInfos[mIIdx]);
+                if (lastErrorType == MethodData.EErrorType.None)
+                {
+                    bFind = true;
+                    break;
+                }
+            }
+            if (!bFind)
+            {
+                data.ErrorType = (lastErrorType == MethodData.EErrorType.None) ? MethodData.EErrorType.InvalidMethodName : lastErrorType;
+                return data.ErrorType;
+            }
+
+            return MethodData.EErrorType.None;
+        }
+        public void LoadClassGraph(RName rn, Func<MethodData, System.Reflection.MethodInfo[], MethodData.EErrorType> checkMethodDataValid = null)
         {
             AssetName = rn;
             DefClass.Reset();
@@ -293,27 +319,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                             {
                                 if(checkMethodDataValid != null)
                                 {
-                                    funcGraph.MethodDatas[methodIdx].ErrorType = checkMethodDataValid.Invoke(funcGraph.MethodDatas[methodIdx]);
+                                    checkMethodDataValid.Invoke(funcGraph.MethodDatas[methodIdx], methodInfos);
                                 }
                                 else
                                 {
-                                    bool bFind = false;
-                                    MethodData.EErrorType lastErrorType = MethodData.EErrorType.None;
-                                    for (int mIIdx = 0; mIIdx < methodInfos.Length; mIIdx++)
-                                    {
-                                        if (funcGraph.MethodDatas[methodIdx].GetMethodName() != methodInfos[mIIdx].Name)
-                                            continue;
-                                        lastErrorType = TtMethodDeclaration.IsMatching(funcGraph.MethodDatas[methodIdx].MethodDec, methodInfos[mIIdx]);
-                                        if (lastErrorType == MethodData.EErrorType.None)
-                                        {
-                                            bFind = true;
-                                            break;
-                                        }
-                                    }
-                                    if(!bFind)
-                                    {
-                                        funcGraph.MethodDatas[methodIdx].ErrorType = (lastErrorType == MethodData.EErrorType.None) ? MethodData.EErrorType.InvalidMethodName : lastErrorType;
-                                    }
+                                    MethodErrorCheckProcess(funcGraph.MethodDatas[methodIdx], methodInfos);
                                 }
                             }
                         }
@@ -398,9 +408,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         }
         public Action<TtClassDeclaration> BeforeGenerateCode;
 
-        static void GetRefPredefMacros(IMacrossMeta sourceMeta, IMacrossMeta ameta, HashSet<TtPredefinedMacros> predefineMacros)
+        static void GetRefPredefMacros(IMacrossMeta sourceMeta, IMacrossMeta ameta, HashSet<TtPredefinedMacros> predefineMacros, HashSet<IMacrossMeta> processedMeta)
         {
             if (ameta == null)
+                return;
+            if (processedMeta.Contains(ameta))
                 return;
             var disableMacros = new TtPredefinedMacros()
             {
@@ -408,12 +420,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 MacrosString = ameta.GetDisablePredefineMacrosString(),
             };
             predefineMacros.Add(disableMacros);
+            processedMeta.Add(ameta);
             for (int i = 0; i < ameta.RefAssetRNames.Count; i++)
             {
                 var refMeta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(ameta.RefAssetRNames[i]) as IMacrossMeta;
                 if (refMeta == sourceMeta)
                     continue;
-                GetRefPredefMacros(sourceMeta, refMeta, predefineMacros);
+                GetRefPredefMacros(sourceMeta, refMeta, predefineMacros, processedMeta);
             }
         }
 
@@ -480,7 +493,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         {
                             ameta.AddReferenceAsset(refName);
                         }
-                        GetRefPredefMacros(ameta, ameta, DefClass.PredefineMacros);
+                        HashSet<IMacrossMeta> processedMeta = new HashSet<IMacrossMeta>();
+                        GetRefPredefMacros(ameta, ameta, DefClass.PredefineMacros, processedMeta);
                         if (ameta.IsDisable)
                         {
                             code += TtMacrossAMeta.DisablePreDefineKey + ameta.GetDisablePredefineMacrosString() + "\r\n";
@@ -1273,6 +1287,8 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         var f = new TtMethodDeclaration()
                         {
                             MethodName = $"Method_{num}",
+                            IsManual = true,
+                            Id = Guid.NewGuid()
                         };
                         AddMethod(f);
                     }

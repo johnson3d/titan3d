@@ -77,6 +77,9 @@ namespace EngineNS.DesignMacross
             declaration.Namespace = classBuildContext.MainClassDescription.Namespace;
             declaration.VisitMode = description.VisitMode;
             declaration.SupperClassNames = description.SupperClassNames;
+
+            classBuildContext.ClassDeclaration = declaration;
+            classBuildContext.ClassDescription = description;
             foreach (var variableDesc in description.Variables)
             {
                 var varDeclaration = variableDesc.BuildVariableDeclaration(ref classBuildContext);

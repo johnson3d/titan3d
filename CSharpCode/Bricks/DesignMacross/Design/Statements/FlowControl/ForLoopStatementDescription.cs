@@ -49,7 +49,7 @@ namespace EngineNS.DesignMacross.Design.Statements
             else
             {
                 System.Diagnostics.Debug.Assert(linkedDataPin is TtDataOutPinDescription);
-                var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription };
+                var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                 var linkedDesc = linkedDataPin.Parent;
                 if(linkedDesc is TtExpressionDescription linkedExpressionDesc)
                 {
@@ -72,7 +72,7 @@ namespace EngineNS.DesignMacross.Design.Statements
             else
             {
                 System.Diagnostics.Debug.Assert(linkedDataPin is TtDataOutPinDescription);
-                var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription };
+                var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                 var linkedDesc = linkedDataPin.Parent;
                 if (linkedDesc is TtExpressionDescription linkedExpressionDesc)
                 {
@@ -95,7 +95,7 @@ namespace EngineNS.DesignMacross.Design.Statements
             else
             {
                 System.Diagnostics.Debug.Assert(linkedDataPin is TtDataOutPinDescription);
-                var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription };
+                var buildContext = new FExpressionBuildContext() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                 var linkedDesc = linkedDataPin.Parent;
                 if (linkedDesc is TtExpressionDescription linkedExpressionDesc)
                 {
@@ -122,6 +122,7 @@ namespace EngineNS.DesignMacross.Design.Statements
                 {
                     ExecuteSequenceStatement = new(),
                     MethodDescription = statementBuildContext.MethodDescription,
+                    ClassBuildContext = statementBuildContext.ClassBuildContext
                 };
                 (linkedLoopBodyExecPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);
                 forStatement.LoopBody = buildContext.ExecuteSequenceStatement;

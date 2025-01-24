@@ -46,7 +46,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             if(leftLinkedDataPin != null)
             {
                 System.Diagnostics.Debug.Assert(leftLinkedDataPin is TtDataOutPinDescription);
-                FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription };
+                FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
                 if(leftLinkedDataPin.Parent is TtExpressionDescription expressionDescription)
                 {
                     expression.Left = (leftLinkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);
@@ -64,7 +64,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             if (rightLinkedDataPin != null)
             {
                 System.Diagnostics.Debug.Assert(rightLinkedDataPin is TtDataOutPinDescription);
-                FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription };
+                FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
                 if (rightLinkedDataPin.Parent is TtExpressionDescription expressionDescription)
                 {
                     expression.Right = (rightLinkedDataPin.Parent as TtExpressionDescription).BuildExpression(ref buildContext);

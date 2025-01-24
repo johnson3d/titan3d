@@ -157,6 +157,7 @@ namespace CompilingGenerator
                 classGeneric += ">";
             }
             bool baseHasBindObjectInterface = false;
+            //bool ignoreHostElementGen = false;
             var baseType = classSymbol.BaseType;
             bool baseFromUIElement = false;
             while ((baseType != null))
@@ -171,6 +172,11 @@ namespace CompilingGenerator
                     baseHasBindObjectInterface = true;
                     break;
                 }
+                //if (baseTypeDisplayString == "EngineNS.UI.TtUIMacrossBase")
+                //{
+                //    ignoreHostElementGen = true;
+                //    break;
+                //}
                 foreach (var ifac in baseType.AllInterfaces)
                 {
                     if (ifac.ToDisplayString() == "EngineNS.UI.Bind.IBindableObject")
@@ -314,7 +320,10 @@ namespace {namespaceName}
         [System.ComponentModel.Browsable(false)]        
         public EngineNS.UI.Trigger.TtTriggerCollection Triggers => {triggerDicName};
         public string PropertyNameInHost;
-        public UInt64 PropertyNameInHostHash;
+        public UInt64 PropertyNameInHostHash;";
+                //if (!ignoreHostElementGen)
+                {
+                    source += $@"
         private System.WeakReference<EngineNS.UI.Controls.TtUIElement> mHostElementRef = new System.WeakReference<EngineNS.UI.Controls.TtUIElement>(null);
         [System.ComponentModel.Browsable(false)]        
         public EngineNS.UI.Controls.TtUIElement HostElement
@@ -331,7 +340,7 @@ namespace {namespaceName}
                 mHostElementRef.SetTarget(value);
             }}
         }}";
-
+                }
             }
             //Dictionary<ITypeSymbol, List<ISymbol>> symbolTypeDic = new Dictionary<ITypeSymbol, List<ISymbol>>();
             foreach (var symbol in symbols)

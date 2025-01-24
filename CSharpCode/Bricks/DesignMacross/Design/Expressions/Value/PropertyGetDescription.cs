@@ -40,7 +40,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             {
                 if(linkedDataPin.Parent is TtExpressionDescription expressionDescription)
                 {
-                    FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription };
+                    FExpressionBuildContext buildContext = new() { MethodDescription = expressionBuildContext.MethodDescription, ClassBuildContext = expressionBuildContext.ClassBuildContext };
                     var hostExpression = expressionDescription.BuildExpression(ref buildContext);
                     return new TtVariableReferenceExpression(Name, hostExpression);
                 }

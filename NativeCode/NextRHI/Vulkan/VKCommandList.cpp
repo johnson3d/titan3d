@@ -603,6 +603,14 @@ namespace NxRHI
 
 		vkCmdDispatchIndirect(mCommandBuffer->RealObject, ((VKBuffer*)indirectArg)->mBuffer, indirectArgOffset + argOffset);
 	}
+	void VKCommandList::DispatchMesh(UINT x, UINT y, UINT z)
+	{
+		ASSERT(false);		
+	}
+	void VKCommandList::IndirectDispatchMesh(IBuffer* indirectArg, UINT indirectArgOffset)
+	{
+		ASSERT(false);
+	}
 	VkAccessFlags BarrierAccessToVK(EBarrierAccess flags)
 	{
 		VkAccessFlags result = VkAccessFlagBits::VK_ACCESS_NONE;

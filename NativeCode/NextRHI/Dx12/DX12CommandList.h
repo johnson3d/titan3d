@@ -53,6 +53,8 @@ namespace NxRHI
 		virtual void IndirectDrawIndexed(EPrimitiveType topology, IBuffer* indirectArg, UINT indirectArgOffset = 0, IBuffer* countBuffer = nullptr) override;
 		virtual void Dispatch(UINT x, UINT y, UINT z) override;
 		virtual void IndirectDispatch(IBuffer* indirectArg, UINT indirectArgOffset = 0) override;
+		virtual void DispatchMesh(UINT x, UINT y, UINT z) override;
+		virtual void IndirectDispatchMesh(IBuffer* indirectArg, UINT indirectArgOffset = 0) override;
 		virtual void SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess) override;
 		virtual void SetBufferBarrier(IBuffer* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess) override;
 		virtual void SetTextureBarrier(ITexture* pResource, EPipelineStage srcStage, EPipelineStage dstStage, EGpuResourceState srcAccess, EGpuResourceState dstAccess) override;
@@ -77,7 +79,7 @@ namespace NxRHI
 			return (DX12GpuDevice*)mDevice.GetNakedPtr();
 		}
 		AutoRef<ID3D12GraphicsCommandList>	mContext;
-		AutoRef<ID3D12GraphicsCommandList2> mContext2;
+		AutoRef<ID3D12GraphicsCommandList6> mLastContext;
 		AutoRef<ID3D12DebugCommandList1>	mDebugCommandList1;
 		
 		//AutoRef<ID3D12CommandSignature>	mCurrentIndirectDrawIndexSig;

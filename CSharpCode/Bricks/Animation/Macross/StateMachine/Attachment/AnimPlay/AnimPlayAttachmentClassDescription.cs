@@ -12,6 +12,7 @@ using EngineNS.DesignMacross.Base.Graph;
 using EngineNS.DesignMacross.Base.Outline;
 using EngineNS.DesignMacross.Design;
 using EngineNS.Rtti;
+using NPOI.XSSF.UserModel;
 using System.ComponentModel;
 using System.Net.Mail;
 
@@ -32,6 +33,9 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateAttachment
         [Category("Option")]
 
         public RName AnimationClip { get; set; }
+        [Category("Option")]
+        [Rtti.Meta]
+        public bool IsLoop { get; set; } = false;
         public override List<TtClassDeclaration> BuildClassDeclarations(ref FClassBuildContext classBuildContext)
         {
             SupperClassNames.Clear();
@@ -59,6 +63,9 @@ namespace EngineNS.Bricks.StateMachine.Macross.StateAttachment
                 new TtClassReferenceExpression(TtTypeDesc.TypeOf<RName>()),
                 new TtMethodInvokeArgumentExpression { Expression = new TtPrimitiveExpression(AnimationClip.ToString()) });
             methodDeclaration.MethodBody.Sequence.Add(getClipRName);
+
+            var isLoopAssign = TtASTBuildUtil.CreateAssignOperatorStatement(new TtVariableReferenceExpression("IsLoop"), new TtPrimitiveExpression(IsLoop));
+            methodDeclaration.MethodBody.Sequence.Add(isLoopAssign);
 
             TtAnimASTBuildUtil.CreateBaseInitInvokeStatement(methodDeclaration);
 

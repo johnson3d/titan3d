@@ -21,7 +21,6 @@ namespace EngineNS.DesignMacross.Design.Statement
             set
             {
                 base.Parent = value;
-                AddDataInPin(new() { TypeDesc = ReturnType });
             }
         }
         public bool ShowExecPin = true;
@@ -44,7 +43,7 @@ namespace EngineNS.DesignMacross.Design.Statement
                 TtExpressionBase rightSide = null;
                 if(linkedPin.Parent is TtExpressionDescription expressionDescription)
                 {
-                    FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription };
+                    FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                     rightSide = expressionDescription.BuildExpression(ref buildContext);
                 }
                 if(linkedPin.Parent is TtStatementDescription statementDescription)

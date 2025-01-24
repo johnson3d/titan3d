@@ -67,13 +67,13 @@ namespace EngineNS.DesignMacross.Design.Expressions
             {
                 if(linkedDataPin.Parent is TtExpressionDescription expressionDescription)
                 {
-                    FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription };
+                    FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                     var left = expressionDescription.BuildExpression(ref buildContext);
                     binaryOP.Left = left;
                 }
                 if (linkedDataPin.Parent is TtStatementDescription statementDescription)
                 {
-                    FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription };
+                    FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                     var left = statementDescription.BuildExpressionForOutPin(linkedDataPin);
                     binaryOP.Left = left;
                 }
@@ -111,17 +111,17 @@ namespace EngineNS.DesignMacross.Design.Expressions
                     castExpression.TargetType = new TtTypeReference(TargetType);
                     if (linkedDataPin.Parent is TtExpressionDescription expressionDescription)
                     {
-                        FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription };
+                        FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                         castExpression.Expression = expressionDescription.BuildExpression(ref buildContext);
                     }
                     if (linkedDataPin.Parent is TtStatementDescription statementDescription)
                     {
-                        FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription };
+                        FExpressionBuildContext buildContext = new() { MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                         castExpression.Expression = statementDescription.BuildExpressionForOutPin(linkedDataPin);
                     }
                     var assign = TtASTBuildUtil.CreateAssignOperatorStatement(new TtVariableReferenceExpression(castedVarName), castExpression);
                     trueExecuteSequenceStatement.Sequence.Add(assign);
-                    FStatementBuildContext trueStatementBuildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = statementBuildContext.MethodDescription };
+                    FStatementBuildContext trueStatementBuildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                     (linkedTrueExecPin.Parent as TtStatementDescription).BuildStatement(ref trueStatementBuildContext);
                     trueExecuteSequenceStatement.Sequence.Add(trueStatementBuildContext.ExecuteSequenceStatement);
                     ifStatement.TrueStatement = trueExecuteSequenceStatement;
@@ -136,7 +136,7 @@ namespace EngineNS.DesignMacross.Design.Expressions
             else
             {
                 System.Diagnostics.Debug.Assert(linkedFalseExecPin is TtExecutionInPinDescription);
-                FStatementBuildContext buildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = statementBuildContext.MethodDescription };
+                FStatementBuildContext buildContext = new() { ExecuteSequenceStatement = new(), MethodDescription = statementBuildContext.MethodDescription, ClassBuildContext = statementBuildContext.ClassBuildContext };
                 (linkedFalseExecPin.Parent as TtStatementDescription).BuildStatement(ref buildContext);
                 ifStatement.FalseStatement = buildContext.ExecuteSequenceStatement;
             }

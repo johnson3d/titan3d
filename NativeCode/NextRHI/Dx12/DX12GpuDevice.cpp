@@ -243,7 +243,7 @@ namespace NxRHI
 		if (FAILED(hr))
 			return false;
 		
-		mDevice->QueryInterface(IID_PPV_ARGS(mDevice2.GetAddressOf()));
+		mDevice->QueryInterface(IID_PPV_ARGS(mLastDevice.GetAddressOf()));
 
 		if (pGpuSystem->Desc.CreateDebugLayer && pGpuSystem->Desc.GpuBaseValidation)
 		{
@@ -416,7 +416,7 @@ namespace NxRHI
 		mGpuResourceAlignment.RawSrvUavAlignment = D3D12_RAW_UAV_SRV_BYTE_ALIGNMENT;
 		mGpuResourceAlignment.UavCounterAlignment = D3D12_UAV_COUNTER_PLACEMENT_ALIGNMENT;
 
-		mCaps.IsSupoortBufferToTexture = true;
+		mCaps.IsSupportBufferToTexture = true;
 		mCaps.IsSupportSSBO_VS = true;
 		
 		mDefaultBufferMemAllocator = MakeWeakRef(new DX12DefaultGpuMemAllocator());
@@ -589,6 +589,12 @@ namespace NxRHI
 		else
 		{
 			mCaps.MaxViewInstanceCount = D3D12_MAX_VIEW_INSTANCE_COUNT;
+		}
+		D3D12_FEATURE_DATA_D3D12_OPTIONS7 features = {};
+		mDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &features, sizeof(features));
+		if (features.MeshShaderTier != D3D12_MESH_SHADER_TIER_NOT_SUPPORTED)
+		{
+			mCaps.IsSupportMeshShader = true;
 		}
 		//ASSERT(op4.Native16BitShaderOpsSupported);
 	}

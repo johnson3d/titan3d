@@ -43,10 +43,10 @@ namespace EngineNS.Animation.StateMachine
             }
             else
             {
-                var cf = new TtBlendTree_CrossfadePose<S, TtLocalSpaceRuntimePose>();
-                cf.FromNode = BlendTree;
-                cf.ToNode = (CurrentState as TtAnimState<S>).BlendTree;
-                BlendTree = cf;
+                BlendTree.FromNode = (preState as TtAnimState<S>).BlendTree;
+                BlendTree.ToNode = (CurrentState as TtAnimState<S>).BlendTree;
+                BlendTree.ResetTime();
+                
             }
         }
         

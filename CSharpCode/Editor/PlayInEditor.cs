@@ -62,14 +62,13 @@ namespace EngineNS.Editor
             if (!await mRNameEditor.Initialize())
                 return false;
 
-            var cfgName = TtEngine.Instance.DynConfigData.GetConfig("LastPIEName") as RName;
-            if (cfgName == null)
+            if (TtEngine.Instance.DynConfigData.TryGetConfig<RName>("LastPIEName", out var cfgName))
             {
-                mCurrentName = TtEngine.Instance.Config.PlayGameName;
+                mCurrentName = cfgName;
             }
             else
             {
-                mCurrentName = cfgName;
+                mCurrentName = TtEngine.Instance.Config.PlayGameName;
             }
             mRNameEditor.FilterExts = Bricks.CodeBuilder.TtMacross.AssetExt;
             mRNameEditor.MacrossType = typeof(GamePlay.TtMacrossGame);
@@ -157,7 +156,7 @@ namespace EngineNS
 
         public Editor.TtPIEModule PIEModule { get; } = new Editor.TtPIEModule();
         public readonly static System.Version Version = System.Environment.Version;
-        public static string DotNetVersion { get; private set; } = "net7.0";
+        public static string DotNetVersion { get; private set; } = "?";
         public virtual async System.Threading.Tasks.Task<bool> StartPlayInEditor(TtSlateApplication application, RName main)
         {
             if (this.GameInstance != null)
@@ -200,6 +199,8 @@ namespace EngineNS
         {
             if (this.GameInstance == null)
                 return;
+
+            Thread.TtContextThread.FlushAllThreadEvents(TtEngine.Instance.ThreadLogic);
             TtEngine.Instance.TaskCollector.AddWaitTask(AwaitEndPlayInEditor(),(task)=>
             {
                 TtEngine.Instance.EventPoster.RunOn(static (state) =>

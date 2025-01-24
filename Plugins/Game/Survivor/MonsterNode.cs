@@ -15,6 +15,7 @@ using static Survivor.TtWeaponNode;
 namespace Survivor
 {
     //无论角色的武器还是怪物的近远程攻击都算做武器攻击
+    [EngineNS.Rtti.Meta]
     public class TtMonsterNode : EngineNS.GamePlay.Scene.TtSceneActorNode
     {
         public class TtMonsterNodeData : EngineNS.GamePlay.Scene.TtNodeData
@@ -26,7 +27,7 @@ namespace Survivor
         public TtMonsterStateNode StateNode { get; set; } = null;
         public TtMonsterController Controller { get; set; } = null;
         public TtPrefabNode MonsterPrefab { get; set; } = null;
-        public TtPlacementBase MonseterPlacement { get=>MonsterPrefab.Placement; }
+        public TtPlacementBase MonseterPlacement { get => MonsterPrefab.Placement; }
         public TtMonsterData MonsterData { get; set; } = null;
 
         public override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
@@ -39,11 +40,21 @@ namespace Survivor
         {
             return TtOnTickLogicScope<TtMonsterNode>.Scope;
         }
+        float TimeToRemove = 2;
+        float AccTimeToRemove = 0;
         public override bool OnTickLogic(TtNodeTickParameters args)
         {
-            if(StateNode != null &&StateNode.IsDead)
+            if (StateNode != null && StateNode.IsDead)
             {
-                OnDead();
+                if (AccTimeToRemove > TimeToRemove)
+                {
+                    OnDead();
+                    AccTimeToRemove = 0;
+                }
+                else
+                {
+                    AccTimeToRemove += args.World.DeltaTimeSecond;
+                }
             }
             return base.OnTickLogic(args);
         }
@@ -89,7 +100,7 @@ namespace Survivor
 
         public virtual void CreateMonster(int monsterId, FTransform transform, TtWorld world)
         {
-            var monsterData = (EngineNS.TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame).GameMode.MonsterManager.GetData("MonsterId", monsterId);
+            var monsterData = TtGameMode.GetSurvivorGameMode().MonsterManager.GetData("MonsterId", monsterId);
             EngineNS.TtEngine.Instance.TaskCollector.AddWaitTask(InitMonster(monsterData, transform, world));
 
         }
@@ -110,7 +121,7 @@ namespace Survivor
             stateNode.Parent = monsterNode;
             monsterNode.StateNode = stateNode;
 
-			RName monsterName = RName.ParseFrom(monsterData.Prefab);
+            RName monsterName = RName.ParseFrom(monsterData.Prefab);
             var monsterPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(monsterName);
             monsterPrefab.IsCollide = true;
             var node = monsterPrefab.Placement.HostNode;
@@ -124,8 +135,7 @@ namespace Survivor
             var monsterCtroller = new TtMonsterController();
             var monsterCtrollerData = new TtMonsterControllerData();
             await monsterCtroller.InitializeNode(world, monsterCtrollerData, EBoundVolumeType.Box, typeof(TtPlacement));
-            var macrossGame = EngineNS.TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame;
-            monsterCtroller.Player = macrossGame.GameMode.Player;
+            monsterCtroller.Player = TtGameMode.GetSurvivorGameMode().Player;
             monsterCtroller.MonsterNode = monsterNode;
             monsterCtroller.Parent = monsterNode;
             monsterNode.Controller = monsterCtroller;
@@ -150,7 +160,7 @@ namespace Survivor
         float mLastTime = 0;
         public override void Tick(TtWorld world)
         {
-            if(world.TimeSecond > SpawnTime && mLastTime < SpawnTime )
+            if (world.TimeSecond > SpawnTime && mLastTime < SpawnTime)
             {
                 FTransform transform = FTransform.Identity;
                 CreateMonster(1, transform, world);
@@ -171,9 +181,8 @@ namespace Survivor
         {
             if (mAccumulateTime > CoolDown)
             {
-                var macrossGame = EngineNS.TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame;
-                var playerLocation = macrossGame.GameMode.Player.Placement.AbsTransform.Position;
-                for (int i = 0; i < MonsterCount; i++) 
+                var playerLocation = TtGameMode.GetSurvivorGameMode().Player.Placement.AbsTransform.Position;
+                for (int i = 0; i < MonsterCount; i++)
                 {
                     var random = new Random();
                     Vector3 location = Vector3.Zero;
@@ -186,7 +195,7 @@ namespace Survivor
                     transform.Position = location.AsDVector();
                     CreateMonster(MonsterId, transform, world);
                 }
-                
+
                 mAccumulateTime = 0;
             }
             mAccumulateTime += world.DeltaTimeSecond;

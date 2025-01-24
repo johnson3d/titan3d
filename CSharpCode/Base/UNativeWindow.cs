@@ -52,8 +52,15 @@ namespace EngineNS
             
             for (int i = 0; i < Processors.Count; i++)
             {
-                if (Processors[i].OnEvent(in evt) == false)
-                    break;
+                try
+                {
+                    if (Processors[i].OnEvent(in evt) == false)
+                        break;
+                }
+                catch (Exception e)
+                {
+                    Profiler.Log.WriteException(e);
+                }
             }
             lock (this)
             {

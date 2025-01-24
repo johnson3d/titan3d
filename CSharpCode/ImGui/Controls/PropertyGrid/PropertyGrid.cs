@@ -414,6 +414,11 @@ namespace EngineNS.EGui.Controls.PropertyGrid
     public class Color4PickerEditorAttribute : ColorEditorBaseAttribute
     {
         bool mPopupOn = false;
+        static Color4PickerEditorAttribute GlobalPicker = new Color4PickerEditorAttribute();
+        public static unsafe bool OnDrawStatic(in EditorInfo info, out object newValue)
+        {
+            return GlobalPicker.OnDraw(in info, out newValue);
+        }
         public override unsafe bool OnDraw(in EditorInfo info, out object newValue)
         {
             bool valueChanged = false;

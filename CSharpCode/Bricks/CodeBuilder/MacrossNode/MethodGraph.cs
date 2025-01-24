@@ -47,9 +47,16 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             set => base.Label = value; 
         }
 
+        [Rtti.Meta(Order = 0)]
+        public Guid MethodId 
+        {
+            get;
+            set;
+        }
+
         public PinOut AfterExec { get; set; } = new PinOut();
         string mMethodDecKeyword;
-        [Rtti.Meta]
+        [Rtti.Meta(Order = 1)]
         public string MethodDecKeyword 
         {
             get => mMethodDecKeyword;
@@ -59,10 +66,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 TtMethodDeclaration method = null;
                 for (int i = 0; i < MethodGraph.MethodDatas.Count; i++)
                 {
-                    if (MethodGraph.MethodDatas[i].MethodDec.GetKeyword() == value)
+                    var methodDec = MethodGraph.MethodDatas[i].MethodDec;
+                    if ((methodDec.GetKeyword() == value) ||
+                        ((methodDec.Id != Guid.Empty) && (methodDec.Id == MethodId)))
                     {
                         MethodGraph.MethodDatas[i].StartNode = this;
-                        method = MethodGraph.MethodDatas[i].MethodDec;
+                        method = methodDec;
                         break;
                     }
                 }
@@ -97,6 +106,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         private void Initialize(UMacrossMethodGraph graph, TtMethodDeclaration methodDec)
         {
             MethodGraph = graph;
+            MethodId = methodDec.Id;
             mMethodDecKeyword = methodDec.GetKeyword();
 
             AddPinOut(AfterExec);
@@ -947,9 +957,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             {
                 if(MethodDatas.Count == 1)
                 {
-                    var methodDec = MethodDatas[0].MethodDec;
-                    if (!methodDec.IsOverride)
+                    var data = MethodDatas[0];
+                    var methodDec = data.MethodDec;
+                    if (methodDec.IsManual)
+                    {
                         methodDec.MethodName = value;
+                        data.StartNode.MethodDecKeyword = methodDec.GetKeyword();
+                    }
                 }
                 GraphName = value;
             }

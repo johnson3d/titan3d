@@ -435,6 +435,14 @@ namespace NxRHI
 	{
 		mContext->DispatchIndirect(((DX11Buffer*)indirectArg)->mBuffer, indirectArgOffset);
 	}
+	void DX11CommandList::DispatchMesh(UINT x, UINT y, UINT z)
+	{
+		ASSERT(false);
+	}
+	void DX11CommandList::IndirectDispatchMesh (IBuffer* indirectArg, UINT indirectArgOffset)
+	{
+		ASSERT(false);
+	}
 	void DX11CommandList::SetMemoryBarrier(EPipelineStage srcStage, EPipelineStage dstStage, EBarrierAccess srcAccess, EBarrierAccess dstAccess)
 	{
 

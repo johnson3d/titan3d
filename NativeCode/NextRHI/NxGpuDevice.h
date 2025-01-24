@@ -1101,8 +1101,8 @@ namespace NxRHI
 	{
 		bool	IsSupportFence = false;
 		bool	IsSupportSSBO_VS = true;
-		bool	IsSupoortBufferToTexture = false;
-		bool	Unused = false;
+		bool	IsSupportBufferToTexture = false;
+		bool	IsSupportMeshShader = false;
 		UINT			MaxViewInstanceCount = 0;
 		UINT			NumOfSwapchainFormats = 0;
 		EPixelFormat	SwapchainFormats[16] = {};
