@@ -105,10 +105,22 @@ namespace EngineNS.NxRHI
             mCoreObject = FShaderCompiler.CreateInstance();
             mCoreObject.SetCallback(fn);
         }
-        
-        public bool CompileShader(TtShaderDesc shaderDesc, string shader, string entry, EShaderType type, string sm, TtShaderDefinitions defines, EShaderLanguage sl, bool bDebugShader, string extHlslVersion, string dxcArgs)
+
+        public unsafe bool CompileShader(TtShaderDesc shaderDesc, string shader, string entry, EShaderType type, string sm, TtShaderDefinitions defines, EShaderLanguage sl, bool bDebugShader, string extHlslVersion, string dxcArgs)
         {
-            return mCoreObject.CompileShader(shaderDesc.mCoreObject, shader, entry, type, sm, defines.mCoreObject, sl, bDebugShader, extHlslVersion, dxcArgs);
+            using (var blob = new Support.TtBlobObject())
+            {
+                var ret = mCoreObject.CompileShader(shaderDesc.mCoreObject, shader, entry, type, sm, defines.mCoreObject, sl, bDebugShader, extHlslVersion, dxcArgs, blob.mCoreObject);
+                if (blob.Size > 0)
+                {
+                    var msg = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)blob.DataPointer, (int)blob.Size);
+                    if (msg.IndexOf("error ") >= 0)
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, msg);
+                    }
+                }
+                return ret;
+            }   
         }
     }
 }

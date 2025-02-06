@@ -76,7 +76,7 @@ namespace NxRHI
 		}
 	};
 
-	bool DX12Shader_CompileShader2(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader)
+	bool DX12Shader_CompileShader2(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, IBlobObject* output)
 	{
 		AutoRef<FShaderCode> ar = compiler->GetShaderCodeStream(shader, shader);
 		if (ar == nullptr)
@@ -138,12 +138,13 @@ namespace NxRHI
 		if (pError != NULL)
 		{
 			std::string pErrorStr = (char*)pError->GetBufferPointer();
+			output->PushData(pErrorStr.c_str(), (UINT)pErrorStr.length());
 
-			auto pos = pErrorStr.find("error X");
+			/*auto pos = pErrorStr.find("error X");
 			if (pos != std::string::npos)
 			{
 				VFX_LTRACE(ELTT_Graphics, pErrorStr.c_str());
-			}
+			}*/
 			pError->Release();
 		}
 		if (FAILED(hr))
@@ -167,7 +168,7 @@ namespace NxRHI
 		return true;
 	}
 
-	bool DX12Shader::CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion, const char* dxcArgs)
+	bool DX12Shader::CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion, const char* dxcArgs, IBlobObject* output)
 	{
 		desc->FunctionName = entry;
 		if (extHlslVersion == nullptr)
@@ -175,11 +176,11 @@ namespace NxRHI
 			//temp for renderdoc debug
 			((IShaderDefinitions*)defines)->AddDefine("CP_SM_major", "5");
 			((IShaderDefinitions*)defines)->AddDefine("CP_SM_minor", "0");
-			return DX12Shader_CompileShader2(compiler, desc, shader, entry, type, "5_0", defines, sl, bDebugShader);
+			return DX12Shader_CompileShader2(compiler, desc, shader, entry, type, "5_0", defines, sl, bDebugShader, output);
 		}
 		else
 		{
-			return IShaderConductor::GetInstance()->CompileShader(compiler, desc, shader, entry, type, sm, defines, bDebugShader, sl, bDebugShader, extHlslVersion, dxcArgs);
+			return IShaderConductor::GetInstance()->CompileShader(compiler, desc, shader, entry, type, sm, defines, bDebugShader, sl, bDebugShader, extHlslVersion, dxcArgs, output);
 		}
 	}
 	

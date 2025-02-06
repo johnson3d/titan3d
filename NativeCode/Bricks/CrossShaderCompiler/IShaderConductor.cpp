@@ -112,7 +112,7 @@ IShaderConductor* IShaderConductor::GetInstance()
 //}
 
 bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FShaderDesc* desc, const char* shader, const char* entry, NxRHI::EShaderType type, const char* sm,
-			const NxRHI::IShaderDefinitions* defines, bool bDebugShader, NxRHI::EShaderLanguage sl, bool debugShader, const char* extHlslVersion, const char* dxcArgs)
+			const NxRHI::IShaderDefinitions* defines, bool bDebugShader, NxRHI::EShaderLanguage sl, bool debugShader, const char* extHlslVersion, const char* dxcArgs, IBlobObject* output)
 {
 	if (sl == NxRHI::EShaderLanguage::SL_DXBC)
 	{
@@ -171,7 +171,9 @@ bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FS
 		auto hr = D3DCompile(ar->GetSourceCode(), ar->GetSize(), shader, pMacros, engineInc, entry, shaderTarget.c_str(), dwShaderFlags, 0, &pBlob, &pError);
 		if (pError != NULL)
 		{
-			VFX_LTRACE(ELTT_Graphics, (char*)pError->GetBufferPointer());
+			std::string pErrorStr = (char*)pError->GetBufferPointer();
+			output->PushData(pErrorStr.c_str(), (UINT)pErrorStr.length());
+			//VFX_LTRACE(ELTT_Graphics, (char*)pError->GetBufferPointer());
 			pError->Release();
 		}
 		if (FAILED(hr))
@@ -190,27 +192,20 @@ bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FS
 		sl == NxRHI::EShaderLanguage::SL_GLSL ||
 		sl == NxRHI::EShaderLanguage::SL_METAL)
 	{
-		auto ret = CompileHLSL(compiler, desc, shader, entry, type, sm, defines, sl, debugShader, extHlslVersion, dxcArgs);
+		auto ret = CompileHLSL(compiler, desc, shader, entry, type, sm, defines, sl, debugShader, extHlslVersion, dxcArgs, output);
 		if (sl == NxRHI::EShaderLanguage::SL_DXIL)
 			return ret;
 		//Spirv is not ready for all shaders
 		//ASSERT(ret);
 		//return ret;
-		if (ret == false)
-		{
-			VFX_LTRACE(ELTT_Error, "Shader(%s) compile failed on spirv\r\n", shader);
-		}
+		return ret;
 	}
 
-	if (sl == NxRHI::EShaderLanguage::SL_SPIRV)
-	{
-		
-	}
 	return true;
 }
 
 bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FShaderDesc* desc, const char* hlsl, const char* entry, NxRHI::EShaderType type, std::string sm,
-	const NxRHI::IShaderDefinitions* defines, NxRHI::EShaderLanguage sl, bool debugShader, const char* extHlslVersion, const char* dxcArgs)
+	const NxRHI::IShaderDefinitions* defines, NxRHI::EShaderLanguage sl, bool debugShader, const char* extHlslVersion, const char* dxcArgs, IBlobObject* output)
 {
 #if defined(PLATFORM_WIN)
 	auto ar = compiler->GetShaderCodeStream(hlsl, hlsl);
@@ -348,7 +343,7 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 		case NxRHI::EShaderLanguage::SL_GLSL:
 			if (opt.shaderModel.major_ver >= 6)
 			{
-				finalDxcArgs += "-fspv-target-env=vulkan1.2 ";
+				finalDxcArgs += "-fspv-target-env=vulkan1.2";
 			}
 			tmp.version = essl_version.c_str();
 			tmp.language = ShaderConductor::ShadingLanguage::Essl;
@@ -358,7 +353,7 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 		case NxRHI::EShaderLanguage::SL_SPIRV:
 			if (opt.shaderModel.major_ver >= 6)
 			{
-				finalDxcArgs += "-fspv-target-env=vulkan1.2 ";
+				finalDxcArgs += "-fspv-target-env=vulkan1.2";
 			}
 			tmp.language = ShaderConductor::ShadingLanguage::SpirV;
 			dest.push_back(tmp);
@@ -367,7 +362,7 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 		case NxRHI::EShaderLanguage::SL_METAL:
 			if (opt.shaderModel.major_ver >= 6)
 			{
-				finalDxcArgs += "-fspv-target-env=vulkan1.2 ";
+				finalDxcArgs += "-fspv-target-env=vulkan1.2";
 			}
 			tmp.language = ShaderConductor::ShadingLanguage::Msl_iOS;
 			dest.push_back(tmp);
@@ -383,29 +378,11 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 	for (size_t i = 0; i < result.size(); i++)
 	{
 		auto& tmp = result[i];
-		if (tmp.hasError == false && tmp.errorWarningMsg.Size() != 0)
+		if (tmp.errorWarningMsg.Size() != 0)
 		{
-			auto s0 = std::string((char*)tmp.errorWarningMsg.Data(), tmp.errorWarningMsg.Size());
-			//if (s0.find("Inc/FXAAMobile.cginc:") == std::string::npos)
-			{
-				VFX_LTRACE(ELTT_Graphics, "CrossPlatform Shader Warning:%s\r\n", s0.c_str());
-			}
-			/*if (s0 !=
-				"warning: macro 'MDFQUEUE_FUNCTION' contains embedded newline; text after the newline is ignored\n")
-			{
-				
-			}*/
+			output->PushData((char*)tmp.errorWarningMsg.Data(), tmp.errorWarningMsg.Size());
 		}
-		if (tmp.hasError)
-		{
-			if (tmp.errorWarningMsg.Size() != 0)
-			{
-				auto s0 = std::string((char*)tmp.errorWarningMsg.Data(), tmp.errorWarningMsg.Size());
-				VFX_LTRACE(ELTT_Graphics, "CrossPlatform Shader Error:%s\r\n", s0.c_str());
-			}
-			return false;
-		}
-		else
+		if (tmp.hasError == false)
 		{
 			if (dest[i].language == ShaderConductor::ShadingLanguage::Dxil)
 			{

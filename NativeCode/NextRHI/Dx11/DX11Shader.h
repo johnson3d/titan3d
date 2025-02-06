@@ -4,13 +4,14 @@
 
 NS_BEGIN
 
+struct IBlobObject;
 namespace NxRHI
 {
 	class DX11GpuDevice;
 	class DX11Shader : public IShader
 	{
 	public:
-		static bool CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader);
+		static bool CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, IBlobObject* output);
 
 		DX11Shader();
 		~DX11Shader();

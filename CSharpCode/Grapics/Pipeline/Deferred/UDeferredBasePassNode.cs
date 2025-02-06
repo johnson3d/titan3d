@@ -1,6 +1,5 @@
 ﻿using EngineNS.Bricks.VXGI;
 using EngineNS.Graphics.Pipeline.Shadow;
-using NPOI.HSSF.Record.AutoFilter;
 using System;
 using System.Collections.Generic;
 using EngineNS.Graphics.Pipeline.Shader;
@@ -22,6 +21,28 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 NxRHI.EVertexStreamType.VST_Tangent,
                 NxRHI.EVertexStreamType.VST_UV,
                 NxRHI.EVertexStreamType.VST_Color};
+        }
+        public override EPixelShaderInput[] GetPSNeedInputs()
+        {
+            return new EPixelShaderInput[] {
+                EPixelShaderInput.PST_Position,
+                EPixelShaderInput.PST_Normal,
+                EPixelShaderInput.PST_UV,
+                EPixelShaderInput.PST_Color,
+                EPixelShaderInput.PST_Custom1,
+                EPixelShaderInput.PST_Custom2,
+            };
+        }
+    }
+    public class TtDeferredOpaqueMeshlets : Shader.TtGraphicsShadingEnv
+    {
+        public TtDeferredOpaqueMeshlets()
+        {
+            CodeName = RName.GetRName("shaders/ShadingEnv/Deferred/DeferredOpaqueMeshlets.cginc", RName.ERNameType.Engine);
+        }
+        public override NxRHI.EVertexStreamType[] GetNeedStreams()
+        {
+            return new NxRHI.EVertexStreamType[] { NxRHI.EVertexStreamType.VST_Position,};
         }
         public override EPixelShaderInput[] GetPSNeedInputs()
         {
@@ -94,6 +115,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         
         public TtDeferredOpaque mOpaqueShading;
+        public TtDeferredOpaqueMeshlets mMeshletsOpaqueShading;
         public NxRHI.TtRenderPass RenderPass;
 
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
@@ -107,6 +129,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             CreateGBuffers(policy, Rt0PinOut.Attachement.Format);
             
             mOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDeferredOpaque>();
+            mMeshletsOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDeferredOpaqueMeshlets>();
 
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
@@ -171,7 +194,14 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom)
         {
-            return mOpaqueShading;
+            if (TtEngine.Instance.GfxDevice.RenderContext.DeviceCaps.IsSupportMeshShader && atom.MeshPrimitives.Meshlets != null)
+            {
+                return mMeshletsOpaqueShading;
+            }
+            else
+            {
+                return mOpaqueShading;
+            }
         }
         public override void BeforeTickLogic(TtRenderPolicy policy)
         {

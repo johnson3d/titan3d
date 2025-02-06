@@ -440,6 +440,9 @@
     <None Include="$(MSBuildThisFileDirectory)Modifier\MeshletModifier.cginc">
       <Filter>Modifier</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredOpaqueMeshlets.cginc">
+      <Filter>ShadingEnv\Deferred</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

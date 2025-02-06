@@ -80,11 +80,16 @@ namespace EngineNS.NxRHI
                 return mCoreObject.Desc.RhiType;
             }
         }
+        FGpuDeviceCaps? mCaps = null;
         public FGpuDeviceCaps DeviceCaps
         {
             get
             {
-                return mCoreObject.mCaps;
+                if (mCaps == null)
+                {
+                    mCaps = mCoreObject.mCaps;
+                }
+                return mCaps.Value;
             }
         }
         public TtShaderDefinitions GlobalEnvDefines { get; } = new TtShaderDefinitions();
@@ -325,11 +330,20 @@ namespace EngineNS.NxRHI
                 return null;
             return result;
         }
-        public TtShaderEffect CreateShaderEffect(TtShader vs, TtShader ps, string identifier)
+        public TtShaderEffect CreateShaderEffect(TtShader ms, TtShader vs, TtShader ps, string identifier)
         {
             var result = new TtShaderEffect();
+            if(TtEngine.Instance.GfxDevice.RenderContext.DeviceCaps.IsSupportMeshShader == false &&
+                ms!=null)
+            {
+                Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(ELogTag.Error, $"Mesh Shader is not supported");
+            }
             result.mCoreObject = mCoreObject.CreateShaderEffect();
-            result.mCoreObject.BindVS(vs.mCoreObject);
+            if (ms != null)
+                result.mCoreObject.BindMS(ms.mCoreObject);
+            if (vs != null)
+                result.mCoreObject.BindVS(vs.mCoreObject);
+            
             result.mCoreObject.BindPS(ps.mCoreObject);
             result.mCoreObject.LinkShaders();
             result.mCoreObject.BuildState(mCoreObject);

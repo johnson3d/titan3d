@@ -455,6 +455,9 @@ namespace EngineNS.Editor.ShaderCompiler
                 }
                 switch (type)
                 {
+                    case NxRHI.EShaderType.SDT_MeshShader:
+                        defPtr.AddDefine("ShaderStage", "0");//MSStage
+                        break;
                     case NxRHI.EShaderType.SDT_VertexShader:
                         defPtr.AddDefine("ShaderStage", "0");//VSStage
                         break;
@@ -474,6 +477,8 @@ namespace EngineNS.Editor.ShaderCompiler
                 var cfg = TtEngine.Instance.Config;
                 if (cfg.CookDXBC && ignoreDXBC == false)
                 {
+                    if (type == NxRHI.EShaderType.SDT_MeshShader)
+                        return null;
                     defPtr.AddDefine("RHI_TYPE", "RHI_DX11");
                     defPtr.AddDefine("CP_SM_major", "5");
                     defPtr.AddDefine("CP_SM_minor", "0");
@@ -556,8 +561,8 @@ namespace EngineNS.Editor.ShaderCompiler
                     {
                         compile_sm = "6_5";
                     }
-                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_SPIRV, bDebugShader, 
-                        extHlslVersion, "-fspv-extension=SPV_KHR_shader_draw_parameters");
+                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_SPIRV, bDebugShader,
+                        extHlslVersion, null);// "-fspv-extension=SPV_KHR_shader_draw_parameters");
                     if (ok == false)
                         return null;
                 }

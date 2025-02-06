@@ -5,6 +5,8 @@
 
 NS_BEGIN
 
+struct IBlobObject;
+
 namespace NxRHI
 {
 	enum TR_ENUM(SV_EnumNoFlags)
@@ -261,7 +263,7 @@ namespace NxRHI
 			GetShaderCodeStreamPtr = fn;
 		}
 		FShaderCode* GetShaderCodeStream(const char* name, const char* oriName);
-		bool CompileShader(FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion, const char* dxcArgs);
+		bool CompileShader(FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion, const char* dxcArgs, IBlobObject* output);
 	};
 }
 

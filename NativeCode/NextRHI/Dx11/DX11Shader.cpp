@@ -75,7 +75,7 @@ namespace NxRHI
 		}
 	};
 
-	bool DX11Shader::CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader)
+	bool DX11Shader::CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, IBlobObject* output)
 	{
 		desc->FunctionName = entry;
 		AutoRef<FShaderCode> ar = compiler->GetShaderCodeStream(shader, shader);
@@ -135,17 +135,18 @@ namespace NxRHI
 		if (pError != NULL)
 		{
 			std::string pErrorStr = (char*)pError->GetBufferPointer();
+			output->PushData(pErrorStr.c_str(), (UINT)pErrorStr.length());
 			
-			auto pos = pErrorStr.find(": error X");
+			/*auto pos = pErrorStr.find("error X");
 			if (pos != std::string::npos)
 			{
 				VFX_LTRACE(ELTT_Graphics, pErrorStr.c_str());
-			}
+			}*/
 			pError->Release();
 		}
 		if (FAILED(hr))
 		{
-			ASSERT(false);
+			//ASSERT(false);
 			return false;
 		}
 		desc->Dxbc.resize((UINT)pBlob->GetBufferSize());

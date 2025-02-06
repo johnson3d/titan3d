@@ -17,8 +17,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public void Dispose()
         {
-            DescVS.Dispose();
-            DescPS.Dispose();
+            DescMS?.Dispose();
+            DescVS?.Dispose();
+            DescPS?.Dispose();
             ShadingEnv = null;
             mBindIndexer = null;
             ShaderEffect = null;
@@ -60,6 +61,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public TtEffectDesc Desc { get; set; } = new TtEffectDesc();
         public NxRHI.TtShaderEffect ShaderEffect { get; private set; }
+        public NxRHI.TtShaderDesc DescMS { get; private set; }
         public NxRHI.TtShaderDesc DescVS { get; private set; }
         public NxRHI.TtShaderDesc DescPS { get; private set; }
         public TtShadingEnv ShadingEnv { get; internal set; }
@@ -68,6 +70,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             var result = new TtEffect();
             result.ShaderEffect = ShaderEffect;
+            result.DescMS = DescMS;
             result.DescVS = DescVS;
             result.DescPS = DescPS;
             result.ShadingEnv = ShadingEnv;
@@ -80,7 +83,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect);
             var file = path + hash.ToString() + TtEffect.AssetExt;
-            var xnd = new IO.TtXndHolder("UEffect", 0, 0);
+            var xnd = new IO.TtXndHolder("TtEffect", 0, 0);
 
             var descAttr = new XndAttribute(xnd.RootNode.mCoreObject.GetOrAddAttribute("Desc", 0, 0, true));
             using (var ar = descAttr.GetWriter(30))
@@ -88,15 +91,29 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 ar.Write(Desc);
             }
 
-            var vsNode = xnd.mCoreObject.NewNode("VSCode", 0, 0);
-            xnd.RootNode.mCoreObject.AddNode(vsNode);
-            DescVS.mCoreObject.SaveXnd(vsNode);
-            CoreSDK.PtrType_Release(vsNode);
+            if (DescMS != null)
+            {
+                var msNode = xnd.mCoreObject.NewNode("MSCode", 0, 0);
+                xnd.RootNode.mCoreObject.AddNode(msNode);
+                DescMS.mCoreObject.SaveXnd(msNode);
+                CoreSDK.PtrType_Release(msNode);
+            }
 
-            var psNode = xnd.mCoreObject.NewNode("PSCode", 0, 0);
-            xnd.RootNode.mCoreObject.AddNode(psNode);
-            DescPS.mCoreObject.SaveXnd(psNode);
-            CoreSDK.PtrType_Release(psNode);
+            if (DescVS != null)
+            {
+                var vsNode = xnd.mCoreObject.NewNode("VSCode", 0, 0);
+                xnd.RootNode.mCoreObject.AddNode(vsNode);
+                DescVS.mCoreObject.SaveXnd(vsNode);
+                CoreSDK.PtrType_Release(vsNode);
+            }
+
+            if (DescPS != null)
+            {
+                var psNode = xnd.mCoreObject.NewNode("PSCode", 0, 0);
+                xnd.RootNode.mCoreObject.AddNode(psNode);
+                DescPS.mCoreObject.SaveXnd(psNode);
+                CoreSDK.PtrType_Release(psNode);
+            }
 
             xnd.SaveXnd(file);
         }
@@ -131,6 +148,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     return null;
 
                 XndAttribute descAttr = new XndAttribute();
+                XndNode msNode = new XndNode();
                 XndNode vsNode = new XndNode();
                 XndNode psNode = new XndNode();
                 unsafe
@@ -138,9 +156,14 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     descAttr = xnd.RootNode.mCoreObject.TryGetAttribute("Desc");
                     if (descAttr.IsValidPointer == false)
                         return null;
-                    vsNode = xnd.RootNode.mCoreObject.TryGetChildNode("VSCode");
-                    if (vsNode.IsValidPointer == false)
-                        return null;
+                    msNode = xnd.RootNode.mCoreObject.TryGetChildNode("MSCode");
+                    if (msNode.IsValidPointer == false)
+                    {
+                        vsNode = xnd.RootNode.mCoreObject.TryGetChildNode("VSCode");
+                        if (vsNode.IsValidPointer == false)
+                            return null;
+                    }
+                    
                     psNode = xnd.RootNode.mCoreObject.TryGetChildNode("PSCode");
                     if (psNode.IsValidPointer == false)
                         return null;
@@ -174,9 +197,19 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
                     unsafe
                     {
-                        effect.DescVS = new NxRHI.TtShaderDesc(NxRHI.EShaderType.SDT_VertexShader);
-                        if (effect.DescVS.mCoreObject.LoadXnd(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, vsNode) == false)
-                            return null;
+                        if (msNode.IsValidPointer)
+                        {
+                            effect.DescMS = new NxRHI.TtShaderDesc(NxRHI.EShaderType.SDT_MeshShader);
+                            if (effect.DescMS.mCoreObject.LoadXnd(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, msNode) == false)
+                                return null;
+                        }
+                        else
+                        {
+                            effect.DescVS = new NxRHI.TtShaderDesc(NxRHI.EShaderType.SDT_VertexShader);
+                            if (effect.DescVS.mCoreObject.LoadXnd(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, vsNode) == false)
+                                return null;
+                        }
+                        
                         effect.DescPS = new NxRHI.TtShaderDesc(NxRHI.EShaderType.SDT_PixelShader);
                         if (effect.DescPS.mCoreObject.LoadXnd(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, psNode) == false)
                             return null;
@@ -190,6 +223,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     return null;
             }
 
+            NxRHI.TtShader MeshShader = null;
             NxRHI.TtShader VertexShader = null;
             NxRHI.TtShader PixelShader = null;
             if (TtEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_GL)
@@ -209,9 +243,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             else
             {
-                VertexShader = rc.CreateShader(result.DescVS);
-                if (VertexShader == null)
-                    return null;
+                if (result.DescMS != null)
+                {
+                    MeshShader = rc.CreateShader(result.DescMS);
+                }
+                else
+                {
+                    VertexShader = rc.CreateShader(result.DescVS);
+                    if (VertexShader == null)
+                        return null;
+                }
+                
                 PixelShader = rc.CreateShader(result.DescPS);
                 if (PixelShader == null)
                     return null;
@@ -228,12 +270,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     System.Diagnostics.Debug.Assert(false);
                 }
 
-                result.ShaderEffect = rc.CreateShaderEffect(VertexShader, PixelShader, hash.ToString());
+                result.ShaderEffect = rc.CreateShaderEffect(MeshShader, VertexShader, PixelShader, hash.ToString());
+                if (result.ShaderEffect == null)
+                    return null;
                 result.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
             }
 
             var dbg_name = $"{shading},{material.AssetName},{Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}";
-            VertexShader.SetDebugName($"VS:{dbg_name}");
+            MeshShader?.SetDebugName($"MS:{dbg_name}");
+            VertexShader?.SetDebugName($"VS:{dbg_name}");
             PixelShader.SetDebugName($"PS:{dbg_name}");
             result.ShaderEffect.DebugName = dbg_name;
             if (await LinkShaders(result) == false)
@@ -265,15 +310,26 @@ namespace EngineNS.Graphics.Pipeline.Shader
             shading.GetShaderDefines(in permutationId, defines);
 
             var cfg = TtEngine.Instance.Config;
-            result.DescVS = await TtEngine.Instance.EventPoster.Post((state) =>
+            result.DescMS = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 var compilier = new Editor.ShaderCompiler.TtHLSLCompiler();
                 compilier.MdfQueue = mdf;
-                return compilier.CompileShader(shading.CodeName.Address, "VS_Main", NxRHI.EShaderType.SDT_VertexShader,
+                return compilier.CompileShader(shading.CodeName.Address, "MS_Main", NxRHI.EShaderType.SDT_MeshShader,
                     shading, material, mdf.GetType(), defines, null, null, TtEngine.Instance.Config.IsDebugShader);
             }, Thread.Async.EAsyncTarget.AsyncIO);
-            if (result.DescVS == null)
-                return null;
+
+            if (result.DescMS == null)
+            {
+                result.DescVS = await TtEngine.Instance.EventPoster.Post((state) =>
+                {
+                    var compilier = new Editor.ShaderCompiler.TtHLSLCompiler();
+                    compilier.MdfQueue = mdf;
+                    return compilier.CompileShader(shading.CodeName.Address, "VS_Main", NxRHI.EShaderType.SDT_VertexShader,
+                        shading, material, mdf.GetType(), defines, null, null, TtEngine.Instance.Config.IsDebugShader);
+                }, Thread.Async.EAsyncTarget.AsyncIO);
+                if (result.DescVS == null)
+                    return null;
+            }
 
             result.DescPS = await TtEngine.Instance.EventPoster.Post((state) =>
             {
@@ -285,6 +341,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (result.DescPS == null)
                 return null;
 
+            NxRHI.TtShader MeshShader = null;
             NxRHI.TtShader VertexShader = null;
             NxRHI.TtShader PixelShader = null;
             if (TtEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_GL)
@@ -304,9 +361,17 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
             else
             {
-                VertexShader = rc.CreateShader(result.DescVS);
-                if (VertexShader == null)
-                    return null;
+                if (result.DescMS == null)
+                {
+                    VertexShader = rc.CreateShader(result.DescVS);
+                    if (VertexShader == null)
+                        return null;
+                }
+                else
+                {
+                    MeshShader = rc.CreateShader(result.DescMS);
+                }
+                
                 PixelShader = rc.CreateShader(result.DescPS);
                 if (PixelShader == null)
                     return null;
@@ -324,13 +389,16 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 result.Desc.InputStreams = inputStreams;
 
                 var hash = TtEffectManager.GetShaderHash(shading, material, mdf);
-                result.ShaderEffect = rc.CreateShaderEffect(VertexShader, PixelShader, hash.ToString());
+                result.ShaderEffect = rc.CreateShaderEffect(MeshShader, VertexShader, PixelShader, hash.ToString());
+                if (result.ShaderEffect == null)
+                    return null;
                 result.ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
             }
             if (await LinkShaders(result) == false)
                 return null;
 
-            VertexShader.SetDebugName($"VS:{shading},{material.AssetName},{Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}");
+            MeshShader?.SetDebugName($"MS:{shading},{material.AssetName},{Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}");
+            VertexShader?.SetDebugName($"VS:{shading},{material.AssetName},{Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}");
             PixelShader.SetDebugName($"PS:{shading},{material.AssetName},{Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}");
             result.ShaderEffect.DebugName = $"{shading},{material.AssetName},{Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}";
             return result;
@@ -366,15 +434,31 @@ namespace EngineNS.Graphics.Pipeline.Shader
             this.Desc.MaterialHash = material.GetHash();
             this.Desc.MdfQueueHash = mdf.GetHash();
 
-            var descVS = await TtEngine.Instance.EventPoster.Post((state) =>
+            NxRHI.TtShaderDesc descVS = null;
+            var descMS = await TtEngine.Instance.EventPoster.Post((state) =>
             {
                 var compilier = new Editor.ShaderCompiler.TtHLSLCompiler();
                 compilier.MdfQueue = mdf;
-                return compilier.CompileShader(shading.CodeName.Address, "VS_Main", NxRHI.EShaderType.SDT_VertexShader, 
+                return compilier.CompileShader(shading.CodeName.Address, "MS_Main", NxRHI.EShaderType.SDT_MeshShader,
                     shading, material, mdfType.SystemType, defines, null, null, TtEngine.Instance.Config.IsDebugShader);
             }, Thread.Async.EAsyncTarget.AsyncIO);
-            if (descVS == null)
-                return false;
+            if (descMS == null)
+            {
+                descVS = await TtEngine.Instance.EventPoster.Post((state) =>
+                {
+                    var compilier = new Editor.ShaderCompiler.TtHLSLCompiler();
+                    compilier.MdfQueue = mdf;
+                    return compilier.CompileShader(shading.CodeName.Address, "VS_Main", NxRHI.EShaderType.SDT_VertexShader,
+                        shading, material, mdfType.SystemType, defines, null, null, TtEngine.Instance.Config.IsDebugShader);
+                }, Thread.Async.EAsyncTarget.AsyncIO);
+                if (descVS == null)
+                    return false;
+                this.DescVS = descVS;
+            }
+            else
+            {
+                this.DescMS = descMS;
+            }
 
             var descPS = await TtEngine.Instance.EventPoster.Post((state) =>
             {
@@ -386,13 +470,20 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (descPS == null)
                 return false;
 
-
-            this.DescVS = descVS;
             this.DescPS = descPS;
-            
-            var VertexShader = rc.CreateShader(DescVS);
-            if (VertexShader == null)
-                return false;
+
+            NxRHI.TtShader MeshShader = null;
+            NxRHI.TtShader VertexShader = null;
+            if (DescMS != null)
+            {
+                MeshShader = rc.CreateShader(DescMS);
+            }
+            else
+            {
+                VertexShader = rc.CreateShader(DescVS);
+                if (VertexShader == null)
+                    return false;
+            }
             var PixelShader = rc.CreateShader(DescPS);
             if (PixelShader == null)
                 return false;
@@ -411,13 +502,16 @@ namespace EngineNS.Graphics.Pipeline.Shader
             }
 
             var hash = TtEffectManager.GetShaderHash(shading, material, mdf);
-            ShaderEffect = rc.CreateShaderEffect(VertexShader, PixelShader, hash.ToString());
+            ShaderEffect = rc.CreateShaderEffect(MeshShader, VertexShader, PixelShader, hash.ToString());
+            if (ShaderEffect == null)
+                return false;
             ShaderEffect.mCoreObject.BindInputLayout(InputLayout.mCoreObject);
             if (await LinkShaders(this) == false)
                 return false;
 
             var dbg_name = $"{shading},{material.AssetName},{Rtti.TtTypeDescManager.Instance.GetTypeStringFromType(mdf.GetType())}";
-            VertexShader.SetDebugName($"VS:{dbg_name}");
+            MeshShader?.SetDebugName($"MS:{dbg_name}");
+            VertexShader?.SetDebugName($"VS:{dbg_name}");
             PixelShader.SetDebugName($"PS:{dbg_name}");
             ShaderEffect.DebugName = dbg_name;
             return true;
@@ -589,6 +683,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 result = await TtEffect.LoadEffect(hash, shading, material, mdf);
                 if (result != null)
                 {
+                    if (result.DescMS != null && TtEngine.Instance.GfxDevice.RenderContext.DeviceCaps.IsSupportMeshShader == false)
+                    {
+                        return null;
+                    }
                     if (Effects.ContainsKey(hash) == false)
                     {
                         lock (Effects)
@@ -616,7 +714,12 @@ namespace EngineNS.Graphics.Pipeline.Shader
                             result.SaveTo(hash);
                             return true;
                         }, Thread.Async.EAsyncTarget.AsyncIO);
-                    }   
+                    }
+
+                    if (result.DescMS != null && TtEngine.Instance.GfxDevice.RenderContext.DeviceCaps.IsSupportMeshShader == false)
+                    {
+                        return null;
+                    }
 
                     if (Effects.ContainsKey(hash) == false)
                     {
@@ -643,7 +746,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 mCreatingSession.FinishSession(hash, session, result);
             }
         }
-        //需要逐渐被UComputeShadingEnv替换
+        //需要逐渐被Tt ComputeShadingEnv替换
         public async Thread.Async.TtTask<NxRHI.TtComputeEffect> GetComputeEffect(RName shaderName, string entry, NxRHI.EShaderType type,
             Graphics.Pipeline.Shader.TtShadingEnv shadingEnv, NxRHI.TtShaderDefinitions defines, 
             Editor.ShaderCompiler.TtHLSLInclude incProvider, string sm = null, bool bDebugShader = true)
