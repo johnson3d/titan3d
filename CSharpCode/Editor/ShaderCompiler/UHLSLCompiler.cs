@@ -455,6 +455,9 @@ namespace EngineNS.Editor.ShaderCompiler
                 }
                 switch (type)
                 {
+                    case NxRHI.EShaderType.SDT_AmplificationShader:
+                        defPtr.AddDefine("ShaderStage", "0");//ASStage
+                        break;
                     case NxRHI.EShaderType.SDT_MeshShader:
                         defPtr.AddDefine("ShaderStage", "0");//MSStage
                         break;
@@ -477,7 +480,7 @@ namespace EngineNS.Editor.ShaderCompiler
                 var cfg = TtEngine.Instance.Config;
                 if (cfg.CookDXBC && ignoreDXBC == false)
                 {
-                    if (type == NxRHI.EShaderType.SDT_MeshShader)
+                    if (type == NxRHI.EShaderType.SDT_MeshShader || type == NxRHI.EShaderType.SDT_AmplificationShader)
                         return null;
                     defPtr.AddDefine("RHI_TYPE", "RHI_DX11");
                     defPtr.AddDefine("CP_SM_major", "5");

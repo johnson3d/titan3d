@@ -274,6 +274,13 @@ namespace NxRHI
 			CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS RTVFormats;
 		} Stream;
 		Stream.pRootSignature = pEffect->mSignature;
+		if (ShaderEffect->mAmplificationShader != nullptr)
+		{
+			Stream.AS = {
+				&ShaderEffect->mAmplificationShader->Desc->DxIL[0],
+				ShaderEffect->mAmplificationShader->Desc->DxIL.size()
+			};
+		}
 		Stream.MS = {
 			&ShaderEffect->mMeshShader->Desc->DxIL[0],
 			ShaderEffect->mMeshShader->Desc->DxIL.size()

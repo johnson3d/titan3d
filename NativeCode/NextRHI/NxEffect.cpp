@@ -20,6 +20,10 @@ namespace NxRHI
 		{
 			return PSBinder->FindField(name);
 		}
+		if (ASBinder != nullptr)
+		{
+			return ASBinder->FindField(name);
+		}
 		if (MSBinder != nullptr)
 		{
 			return MSBinder->FindField(name);
@@ -35,6 +39,10 @@ namespace NxRHI
 		else if (PSBinder != nullptr)
 		{
 			return PSBinder->Size;
+		}
+		else if (ASBinder != nullptr)
+		{
+			return ASBinder->Size;
 		}
 		else if (MSBinder != nullptr)
 		{
@@ -58,6 +66,8 @@ namespace NxRHI
 	{
 		mBinders.clear();
 
+		if (mAmplificationShader != nullptr)
+			PushBinder(EShaderType::SDT_MeshShader, mAmplificationShader->Reflector);
 		if (mMeshShader != nullptr)
 			PushBinder(EShaderType::SDT_MeshShader, mMeshShader->Reflector);
 		if (mVertexShader != nullptr)
@@ -113,6 +123,9 @@ namespace NxRHI
 				break;
 			case SDT_ComputeShader:
 				break;
+			case SDT_AmplificationShader:
+				eb->ASBinder = binder;
+				break;
 			case SDT_MeshShader:
 				eb->MSBinder = binder;
 				break;
@@ -130,6 +143,10 @@ namespace NxRHI
 		{
 			cmdlist->SetCBV(EShaderType::SDT_PixelShader, binder->PSBinder, buffer);
 		}
+		if (binder->ASBinder != nullptr)
+		{
+			cmdlist->SetCBV(EShaderType::SDT_AmplificationShader, binder->ASBinder, buffer);
+		}
 		if (binder->MSBinder != nullptr)
 		{
 			cmdlist->SetCBV(EShaderType::SDT_MeshShader, binder->MSBinder, buffer);
@@ -144,6 +161,10 @@ namespace NxRHI
 		if (binder->PSBinder != nullptr)
 		{
 			cmdlist->SetSrv(EShaderType::SDT_PixelShader, binder->PSBinder, srv);
+		}
+		if (binder->ASBinder != nullptr)
+		{
+			cmdlist->SetSrv(EShaderType::SDT_AmplificationShader, binder->ASBinder, srv);
 		}
 		if (binder->MSBinder != nullptr)
 		{
@@ -160,6 +181,10 @@ namespace NxRHI
 		{
 			cmdlist->SetUav(EShaderType::SDT_PixelShader, binder->PSBinder, uav);
 		}
+		if (binder->ASBinder != nullptr)
+		{
+			cmdlist->SetUav(EShaderType::SDT_AmplificationShader, binder->ASBinder, uav);
+		}
 		if (binder->MSBinder != nullptr)
 		{
 			cmdlist->SetUav(EShaderType::SDT_MeshShader, binder->MSBinder, uav);
@@ -174,6 +199,10 @@ namespace NxRHI
 		if (binder->PSBinder != nullptr)
 		{
 			cmdlist->SetSampler(EShaderType::SDT_PixelShader, binder->PSBinder, sampler);
+		}
+		if (binder->ASBinder != nullptr)
+		{
+			cmdlist->SetSampler(EShaderType::SDT_AmplificationShader, binder->ASBinder, sampler);
 		}
 		if (binder->MSBinder != nullptr)
 		{

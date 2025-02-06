@@ -19,6 +19,7 @@ namespace NxRHI
 	public:
 		VNameString				Name;
 		EShaderBindType			BindType;
+		const FShaderBinder*	ASBinder = nullptr;
 		const FShaderBinder*	MSBinder = nullptr;
 		const FShaderBinder*	VSBinder = nullptr;
 		const FShaderBinder*	PSBinder = nullptr;
@@ -35,6 +36,8 @@ namespace NxRHI
 				return PSBinder;
 			case SDT_ComputeShader:
 				break;
+			case SDT_AmplificationShader:
+				return ASBinder;
 			case SDT_MeshShader:
 				return MSBinder;
 			default:
@@ -44,6 +47,8 @@ namespace NxRHI
 				return VSBinder;
 			else if (PSBinder != nullptr)
 				return PSBinder;
+			else if (ASBinder != nullptr)
+				return ASBinder;
 			else if (MSBinder != nullptr)
 				return MSBinder;
 			return nullptr;
@@ -79,6 +84,9 @@ namespace NxRHI
 
 		}
 		void BindInputLayout(IInputLayout * layout);
+		void BindAS(IShader* shader) {
+			mAmplificationShader = shader;
+		}
 		void BindMS(IShader* shader) {
 			mMeshShader = shader;
 		}
@@ -87,6 +95,9 @@ namespace NxRHI
 		}
 		void BindPS(IShader* shader) {
 			mPixelShader = shader;
+		}
+		IShader* GetAS() {
+			return mAmplificationShader;
 		}
 		IShader* GetMS() {
 			return mMeshShader;
@@ -119,6 +130,7 @@ namespace NxRHI
 	public:
 		std::string				Identifier;
 		AutoRef<IInputLayout>	mInputLayout;
+		AutoRef<IShader>		mAmplificationShader;
 		AutoRef<IShader>		mMeshShader;
 		AutoRef<IShader>		mVertexShader;
 		AutoRef<IShader>		mPixelShader;
