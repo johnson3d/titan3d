@@ -248,32 +248,59 @@ namespace EngineNS.Thread.Async
         }
 
         private Stack<TtAsyncTaskStateBase> mTPoolEvents = new Stack<TtAsyncTaskStateBase>();
-        internal System.Threading.ManualResetEvent mTPoolTrigger = new System.Threading.ManualResetEvent(false);
+        //internal bool IsPoolWaiting = true;
+        //internal System.Threading.ManualResetEventSlim mTPoolTrigger = new System.Threading.ManualResetEventSlim(false);
+        const int MaxSemaphore = 4;
+        internal System.Threading.SemaphoreSlim mTaskSemaphore = new SemaphoreSlim(0, MaxSemaphore);
+        //private TtAtomicLocker mPoolLocker = new TtAtomicLocker();
         internal void PushPoolEvent(TtAsyncTaskStateBase ev)
         {
+            //using(var lk = new FAtomLock(mPoolLocker))
             lock (mTPoolEvents)
             {
                 mTPoolEvents.Push(ev);
-                mTPoolTrigger.Set();
+                //放开最多4条线程获取任务
+                //避免使用ManualResetEventSlim一次将所有线程放开导致的资源争夺 
+                if (mTaskSemaphore.CurrentCount < MaxSemaphore)
+                {
+                    mTaskSemaphore.Release(MaxSemaphore - mTaskSemaphore.CurrentCount);
+                }
+                //if (IsPoolWaiting)
+                //{
+                //    IsPoolWaiting = false;
+                //    mTPoolTrigger.Set();
+                //}
             }
         }
         internal TtAsyncTaskStateBase PopPoolEvent()
         {
+            //using (var lk = new FAtomLock(mPoolLocker))
             lock (mTPoolEvents)
             {
                 if (mTPoolEvents.Count == 0)
                 {
-                    //mTPoolTrigger.Reset();
                     return null;
                 }
                 var result = mTPoolEvents.Pop();
-                if (mTPoolEvents.Count == 0)
+                if (mTPoolEvents.Count > 0)
                 {
-                    mTPoolTrigger.Reset();
+                    //任务队列非空，再放开一条线程获取任务 
+                    //任务队列如果很长，这个操作会逐渐放开线程池执行任务
+                    //从而避免使用ManualResetEventSlim一次将所有线程放开导致的资源争夺 
+                    if (mTaskSemaphore.CurrentCount < MaxSemaphore)
+                    {
+                        mTaskSemaphore.Release();
+                    }
                 }
+                //if (mTPoolEvents.Count == 0)
+                //{
+                //    IsPoolWaiting = true;
+                //    mTPoolTrigger.Reset();
+                //}
                 return result;
             }
         }
+        internal Support.TtBitset IdleThreads;
         internal TtThreadPool[] ContextPools;
         internal List<TtAsyncTaskStateBase> AsyncIOEmptys = new List<TtAsyncTaskStateBase>();
         public int PooledThreadNum
@@ -285,6 +312,17 @@ namespace EngineNS.Thread.Async
         public delegate void Delegate_ParrallelForAction(int index, object arg1, object arg2, TtAsyncTaskStateBase state);
         public bool EnableMTForeach = true;
         internal TtPooledSemaphoreAllocator ParrallelForSmpAllocator = new TtPooledSemaphoreAllocator();
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeParrallelForWait;
+        private static Profiler.TimeScope ScopeParrallelForWait
+        {
+            get
+            {
+                if (mScopeParrallelForWait == null)
+                    mScopeParrallelForWait = new Profiler.TimeScope(typeof(TtContextThreadManager), nameof(ParrallelFor) + ".Wait");
+                return mScopeParrallelForWait;
+            }
+        }
         public void ParrallelFor(int num, Delegate_ParrallelForAction action, object userData1 = null, object userData2 = null)
         {
             if (num == 0)
@@ -317,7 +355,10 @@ namespace EngineNS.Thread.Async
                         return true;
                     }, in userArgs/*, smp.WaitEvent*/);
                 }
-                smp.WaitEvent.WaitOne(int.MaxValue);
+                using (new Profiler.TimeScopeHelper(ScopeParrallelForWait))
+                {
+                    smp.WaitEvent.WaitOne(int.MaxValue);
+                }
                 ParrallelForSmpAllocator.ReleaseObject(smp);
             }
         }
@@ -339,10 +380,12 @@ namespace EngineNS.Thread.Async
                     count = 1;
                 }
             }
+            IdleThreads = new Support.TtBitset((uint)count);
+            IdleThreads.Clear();
             ContextPools = new TtThreadPool[count];
             for (int i = 0; i < count; i++)
             {
-                ContextPools[i] = new TtThreadPool();
+                ContextPools[i] = new TtThreadPool(i);
                 ContextPools[i].StartThread($"TPool{i}", null);
             }
         }
@@ -352,7 +395,7 @@ namespace EngineNS.Thread.Async
             {
                 i.StopThread(()=>
                 {
-                    this.mTPoolTrigger.Set();
+                    this.mTaskSemaphore.Release(4);
                 });
             }
         }
@@ -380,25 +423,39 @@ namespace EngineNS.Thread.Async
         }
 
         #region post event
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeRunParallel;
+        private static Profiler.TimeScope ScopeRunParallel
+        {
+            get
+            {
+                if (mScopeRunParallel == null)
+                    mScopeRunParallel = new Profiler.TimeScope(typeof(TtContextThreadManager), nameof(RunParallel));
+                return mScopeRunParallel;
+            }
+        }
         public void RunParallel<T>(FPostEvent<T> evt, in TtAsyncTaskStateBase.FUserArguments userArgs, System.Threading.AutoResetEvent completedEvent = null)
         {
-            var eh = TtAsyncTaskState<T>.CreateInstance();
-            eh.PostAction = evt;
-            eh.ContinueThread = null;
-            eh.AsyncType = EAsyncType.ParallelTasks;
-            eh.UserArguments = userArgs;
-            eh.CompletedEvent = completedEvent;
+            using (new Profiler.TimeScopeHelper(ScopeRunParallel))
+            {
+                var eh = TtAsyncTaskState<T>.CreateInstance();
+                eh.PostAction = evt;
+                eh.ContinueThread = null;
+                eh.AsyncType = EAsyncType.ParallelTasks;
+                eh.UserArguments = userArgs;
+                eh.CompletedEvent = completedEvent;
 
-            if (EnableMTForeach == false || TtContextThread.CurrentContext.IsTaskPoolThread())
-            {
-                eh.ExecutePostEvent();
-                eh.TaskState = Async.EAsyncTaskState.Completed;
-                eh.CompletedEvent?.Set();
-                eh.Dispose();
-            }
-            else
-            {
-                this.PushPoolEvent(eh);
+                if (EnableMTForeach == false || TtContextThread.CurrentContext.IsTaskPoolThread())
+                {
+                    eh.ExecutePostEvent();
+                    eh.TaskState = Async.EAsyncTaskState.Completed;
+                    eh.CompletedEvent?.Set();
+                    eh.Dispose();
+                }
+                else
+                {
+                    this.PushPoolEvent(eh);
+                }
             }
         }
         public void RunOn<T>(FPostEvent<T> evt, EAsyncTarget target = EAsyncTarget.AsyncIO, object userArgs = null, System.Threading.AutoResetEvent completedEvent = null)

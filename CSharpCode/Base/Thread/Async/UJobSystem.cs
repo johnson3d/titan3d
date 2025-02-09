@@ -118,7 +118,7 @@ namespace EngineNS.Thread.Async
             {
                 //TtEngine.Instance.ContextThreadManager.ContextPools[i].AddJobThread(JobThreads[i]);
             }
-            TtEngine.Instance.ContextThreadManager.mTPoolTrigger.Set();
+            TtEngine.Instance.ContextThreadManager.mTaskSemaphore.Release(4);
         }
         public void Wait()
         {

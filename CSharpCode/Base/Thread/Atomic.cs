@@ -40,4 +40,38 @@ namespace EngineNS.Thread
             return obj;
         }
     }
+
+    public class TtAtomicLocker
+    {
+        public TtAtomicLocker()
+        {
+            mLocker = 0;
+        }
+        int mLocker;
+        public void Lock()
+        {
+            while (System.Threading.Interlocked.Exchange(ref mLocker, 1) > 0)
+            {
+                ;
+            }
+        }
+        public void Unlock()
+        {
+            System.Threading.Interlocked.Exchange(ref mLocker, 0);
+        }
+    };
+
+    public struct FAtomLock : IDisposable
+    {
+        TtAtomicLocker mLocker;
+        public FAtomLock(TtAtomicLocker lk)
+        {
+            mLocker = lk;
+            mLocker.Lock();
+        }
+        public void Dispose()
+        {
+            mLocker.Unlock();
+        }
+    }
 }

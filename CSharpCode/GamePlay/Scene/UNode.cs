@@ -1215,8 +1215,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 if (NodeBFSParameters.InputNodes.Count > NumOfParralelLimit)
                 {
-                    var numTask = TtEngine.Instance.EventPoster.NumOfPool;
-                    numTask = Math.Min(NodeBFSParameters.InputNodes.Count, numTask);
+                    var numTask = Math.Max(1, NodeBFSParameters.InputNodes.Count / NumOfParralelLimit);
                     NodeBFSParameters.TaskNum = numTask;
                     TtEngine.Instance.EventPoster.ParrallelFor(numTask, static (int index, object arg1, object arg2, Thread.Async.TtAsyncTaskStateBase state) =>
                     {

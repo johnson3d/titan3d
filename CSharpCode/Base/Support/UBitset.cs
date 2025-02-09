@@ -55,6 +55,10 @@ namespace EngineNS.Support
         {
             mCoreObject.Clear();
         }
+        public bool IsAnySet()
+        {
+            return mCoreObject.IsAnySet();
+        }
     }
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit, Pack = 4)]
     public struct TtAnyValue : IDisposable

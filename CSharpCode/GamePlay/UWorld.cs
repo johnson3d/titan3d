@@ -332,7 +332,7 @@ namespace EngineNS.GamePlay
                         }
                     }
                     return true;
-                }, rp, 16);
+                }, rp, 8);
             }
         }
         #endregion

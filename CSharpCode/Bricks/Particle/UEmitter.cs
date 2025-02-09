@@ -441,7 +441,7 @@ namespace EngineNS.Bricks.Particle
 
         #region Update
         private float mParticleStartSecond;
-        public unsafe void Update(Graphics.Pipeline.TtRenderPolicy policy, UParticleGraphNode particleSystem, float elapsed, Vector3 Location)
+        public unsafe void Update(TtNebulaParticle nebula, Graphics.Pipeline.TtRenderPolicy policy, UParticleGraphNode particleSystem, float elapsed, Vector3 Location)
         {
             if (Mesh == null)
                 return;
@@ -469,11 +469,11 @@ namespace EngineNS.Bricks.Particle
             }
             else
             {
-                UpdateCPU(elapsed);
+                UpdateCPU(nebula, particleSystem, elapsed);
                 Flush2GPU(particleSystem.BasePass.DrawCmdList.mCoreObject);
             }
         }
-        public unsafe void UpdateCPU(float elapsed)
+        public unsafe void UpdateCPU(TtNebulaParticle nebula, UParticleGraphNode particleSystem, float elapsed)
         {
             Timers.UpdateTimer(elapsed);
 
@@ -483,7 +483,7 @@ namespace EngineNS.Bricks.Particle
 
             if (CurrentQueue != null)
             {
-                CurrentQueue.Update(this, elapsed);
+                CurrentQueue.Update(nebula, particleSystem, this, elapsed);
                 OnQueueExecuted(CurrentQueue);
             }
 

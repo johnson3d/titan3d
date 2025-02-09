@@ -44673,6 +44673,7 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				ar.Write(true);
 			}
+			ar.Write(srcObj.ParticleNumOfTask);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
@@ -44699,6 +44700,7 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				tarObj.ParticleGraph = null;
 			}
+			tarObj.ParticleNumOfTask = srcObj.ParticleNumOfTask;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_350344285461892549 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -44745,6 +44747,63 @@ namespace EngineNS.Plugins.DataCopyer
 							sr.OnPropertyRead(ar.Tag, "ParticleGraph", false);
 						}
 					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_570163798067381264 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.Particle.TtNebulaParticle;
+			EngineNS.RName t_AssetName;
+			ar.Read(out t_AssetName);
+			srcObj.AssetName = t_AssetName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AssetName", false);
+				}
+			}
+			EngineNS.RName t_McName;
+			ar.Read(out t_McName);
+			srcObj.McName = t_McName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "McName", false);
+				}
+			}
+			EngineNS.Hash64 type_ParticleGraph;
+			ar.Read(out type_ParticleGraph);
+			var meta_ParticleGraph = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_ParticleGraph);
+			if(meta_ParticleGraph != null)
+			{
+				EngineNS.Hash64 ver_ParticleGraph;
+				ar.Read(out ver_ParticleGraph);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_ParticleGraph.ClassType.TypeString, ver_ParticleGraph );
+				if (fn != null)
+				{
+					EngineNS.Bricks.Particle.Editor.TtParticleGraph t_ParticleGraph = null;
+					t_ParticleGraph = srcObj.ParticleGraph;
+					if (t_ParticleGraph == null)
+					{
+						t_ParticleGraph = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_ParticleGraph.ClassType) as EngineNS.Bricks.Particle.Editor.TtParticleGraph;
+					}
+					fn(ar, t_ParticleGraph);
+					srcObj.ParticleGraph = t_ParticleGraph;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "ParticleGraph", false);
+						}
+					}
+				}
+			}
+			System.Int32 t_ParticleNumOfTask;
+			ar.Read(out t_ParticleNumOfTask);
+			srcObj.ParticleNumOfTask = t_ParticleNumOfTask;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ParticleNumOfTask", false);
 				}
 			}
 		};
@@ -164703,6 +164762,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Bricks_Particle_TtNebulaParticle.WriteCurrentVersion;
 				kls.Copy = EngineNS_Bricks_Particle_TtNebulaParticle.CopyCurrentVersion;
 				kls.RegVersion(350344285461892549, EngineNS_Bricks_Particle_TtNebulaParticle.Read_350344285461892549);
+				kls.RegVersion(570163798067381264, EngineNS_Bricks_Particle_TtNebulaParticle.Read_570163798067381264);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.Particle.TtNebulaParticleAMeta@EngineCore");
@@ -167953,7 +168013,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(1308987714533235036, Survivor_TtWeaponProxyNode.Read_1308987714533235036);
 				kls.RegVersion(547543558045874187, Survivor_TtWeaponProxyNode.Read_547543558045874187);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("17_96_3E_22_E4_9A_AC_F3_C8_C3_67_1E_D4_0F_1D_F5_E4_29_09_3D");
+			this.VersionHash = EngineNS.Hash160.Parse("91_F7_81_7B_74_64_16_3D_4F_55_93_B4_2F_2F_97_17_7E_6D_FA_4B");
 		}
 	}
 }

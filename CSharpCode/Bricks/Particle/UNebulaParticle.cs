@@ -195,6 +195,8 @@ namespace EngineNS.Bricks.Particle
         public Editor.TtParticleGraph ParticleGraph { get; set; }
         public Dictionary<string, TtEmitter> Emitter { get; } = new Dictionary<string, TtEmitter>();
         [Rtti.Meta]
+        public int ParticleNumOfTask { get; set; } = 50;
+        [Rtti.Meta]
         public TtEmitter AddEmitter(System.Type type, string name)
         {
             var emitter = Rtti.TtTypeDescManager.CreateInstance(type) as TtEmitter;
@@ -214,7 +216,7 @@ namespace EngineNS.Bricks.Particle
             foreach (var i in Emitter.Values)
             {
                 mMcObject?.Get()?.OnUpdateEmitter(this, i, particleSystem, elpased);
-                i.Update(policy, particleSystem, elpased, Location);                
+                i.Update(this, policy, particleSystem, elpased, Location);                
             }
             //cmdlist.EndCommand();
             //policy.CommitCommandList(cmdlist);

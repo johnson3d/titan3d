@@ -129,7 +129,7 @@ namespace EngineNS.Bricks.Particle
             }
             return result;
         }
-        public unsafe void Update(TtEmitter emitter, float elapsed)
+        public unsafe void Update(TtNebulaParticle nebula, UParticleGraphNode particleSystem, TtEmitter emitter, float elapsed)
         {
             var pParticles = (FParticle*)emitter.mCoreObject.GetParticleAddress();
             var pAlives = emitter.mCoreObject.GetCurrentAliveAddress();
@@ -165,27 +165,30 @@ namespace EngineNS.Bricks.Particle
                 else
                 {
                     ForParameters.effector = e;
-                    var numTask = TtEngine.Instance.EventPoster.NumOfPool;
-                    TtEngine.Instance.EventPoster.ParrallelFor((int)numTask, static (i, arg1, arg2, state) =>
+                    if (ForParameters.aliveNum > 0)
                     {
-                        var ForParameters = (TtForParameters)arg1;
-                        int stride = (int)ForParameters.aliveNum / (int)state.UserArguments.NumOfParrallelFor + 1;
-                        var start = i * stride;
-                        for (int n = 0; n < stride; n++)
+                        var numTask = Math.Max(1, (int)ForParameters.aliveNum / nebula.ParticleNumOfTask);
+                        TtEngine.Instance.EventPoster.ParrallelFor((int)numTask, static (i, arg1, arg2, state) =>
                         {
-                            var nn = start + n;
-                            if (nn >= ForParameters.aliveNum)
-                                break;
-                            var index = ForParameters.pAlives[nn];
-                            var cur = (FParticle*)&ForParameters.pParticles[index];
-                            if (cur->Life <= 0)
+                            var ForParameters = (TtForParameters)arg1;
+                            int stride = (int)ForParameters.aliveNum / (int)state.UserArguments.NumOfParrallelFor + 1;
+                            var start = i * stride;
+                            for (int n = 0; n < stride; n++)
                             {
-                                ForParameters.emitter.OnDeadParticle(index, ref *cur);
-                                continue;
+                                var nn = start + n;
+                                if (nn >= ForParameters.aliveNum)
+                                    break;
+                                var index = ForParameters.pAlives[nn];
+                                var cur = (FParticle*)&ForParameters.pParticles[index];
+                                if (cur->Life <= 0)
+                                {
+                                    ForParameters.emitter.OnDeadParticle(index, ref *cur);
+                                    continue;
+                                }
+                                ForParameters.effector.DoEffect(ForParameters.emitter, ForParameters.elapsed, cur);
                             }
-                            ForParameters.effector.DoEffect(ForParameters.emitter, ForParameters.elapsed, cur);
-                        }
-                    }, ForParameters);
+                        }, ForParameters);
+                    }
                     ForParameters.effector = null;
                 }
             }
@@ -202,23 +205,27 @@ namespace EngineNS.Bricks.Particle
             }
             else
             {
-                var numTask = TtEngine.Instance.EventPoster.NumOfPool;
-                TtEngine.Instance.EventPoster.ParrallelFor(numTask, static (i, arg1, arg2, state) =>
+                if (ForParameters.aliveNum > 0)
                 {
-                    var ForParameters = (TtForParameters)arg1;
-                    int stride = (int)ForParameters.aliveNum / (int)state.UserArguments.NumOfParrallelFor + 1;
-                    var start = i * stride;
-                    for (int n = 0; n < stride; n++)
+                    //var numTask = Math.Min(TtEngine.Instance.EventPoster.NumOfPool, (int)ForParameters.aliveNum);
+                    var numTask = Math.Max(1, (int)ForParameters.aliveNum / nebula.ParticleNumOfTask);
+                    TtEngine.Instance.EventPoster.ParrallelFor(numTask, static (i, arg1, arg2, state) =>
                     {
-                        var nn = start + n;
-                        if (nn >= ForParameters.aliveNum)
-                            break;
-                        var index = ForParameters.pAlives[nn];
-                        var cur = (FParticle*)&ForParameters.pParticles[index];
-                        ForParameters.emitter.OnParticleTick(ForParameters.emitter, ForParameters.elapsed, ref *cur);
-                        cur->Location += cur->Velocity * ForParameters.elapsed;
-                    }   
-                }, ForParameters);
+                        var ForParameters = (TtForParameters)arg1;
+                        int stride = (int)ForParameters.aliveNum / (int)state.UserArguments.NumOfParrallelFor + 1;
+                        var start = i * stride;
+                        for (int n = 0; n < stride; n++)
+                        {
+                            var nn = start + n;
+                            if (nn >= ForParameters.aliveNum)
+                                break;
+                            var index = ForParameters.pAlives[nn];
+                            var cur = (FParticle*)&ForParameters.pParticles[index];
+                            ForParameters.emitter.OnParticleTick(ForParameters.emitter, ForParameters.elapsed, ref *cur);
+                            cur->Location += cur->Velocity * ForParameters.elapsed;
+                        }
+                    }, ForParameters);
+                }
             }
             ForParameters.Reset();
         }

@@ -22,8 +22,10 @@ namespace EngineNS.Thread
         }
         private static object mLocker = "lockObject";
         public override bool IsTaskPoolThread() { return true; }
-        public TtThreadPool()
+        public int PoolIndex { get; private set; } = -1;
+        public TtThreadPool(int index)
         {
+            PoolIndex = index;
             Interval = 0;
         }
         //Queue<Async.IJobThread> mJobThreads = new Queue<Async.IJobThread>();
@@ -49,11 +51,15 @@ namespace EngineNS.Thread
         private List<Async.TtAsyncTaskStateBase> Suspended = new List<Async.TtAsyncTaskStateBase>();
         public override void Tick()
         {
-            TtEngine.Instance.ContextThreadManager.mTPoolTrigger.WaitOne();
+            //TtEngine.Instance.ContextThreadManager.mTPoolTrigger.WaitOne();
             var e = TtEngine.Instance.ContextThreadManager.PopPoolEvent();
             if (e == null)
             {
-                return;
+                TtEngine.Instance.EventPoster.IdleThreads.SetBit((uint)PoolIndex);
+                //TtEngine.Instance.ContextThreadManager.mTPoolTrigger.Wait();
+                TtEngine.Instance.ContextThreadManager.mTaskSemaphore.Wait();
+                TtEngine.Instance.EventPoster.IdleThreads.UnsetBit((uint)PoolIndex);
+                //return;
             }
 
             System.Threading.Interlocked.Increment(ref mNumOfActiveThreads);

@@ -109,6 +109,15 @@ public:
 			mData[i] = 0;
 		}
 	}
+	bool IsAnySet()
+	{
+		for (int i = 0; i < mData.size(); i++)
+		{
+			if (mData[i] != 0)
+				return true;
+		}
+		return false;
+	}
 };
 
 NS_END
