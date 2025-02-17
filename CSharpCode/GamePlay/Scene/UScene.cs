@@ -2,6 +2,7 @@ using Assimp;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.Macross;
+using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -79,7 +80,7 @@ namespace EngineNS.GamePlay.Scene
                 PGAsset.Target = mAsset;
             }
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data == null)
             {
@@ -235,22 +236,16 @@ namespace EngineNS.GamePlay.Scene
                 node.SceneId = UInt32.MaxValue;
             }
         }
-        public async Thread.Async.TtTask<TtSceneActorNode> NewNode(GamePlay.TtWorld world, string nodeType, TtNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
+        public async Thread.Async.TtTask<T> SpawnSceneActor<T>(TtNode parent, TtNode.FPostSpawnNode postAction, TtNodeData data = null, EBoundVolumeType bvType = EBoundVolumeType.Box, Type placementType = null, TtWorld world = null, bool isSceneManaged = false)
+            where T : TtSceneActorNode
         {
-            var ntype = Rtti.TtTypeDesc.TypeOf(nodeType);
-            return await NewNode(world, ntype.SystemType, data, bvType, placementType, false);
+            return await SpawnSceneActor(parent, typeof(T), postAction, data, bvType, placementType, world, isSceneManaged) as T;
         }
-        public async Thread.Async.TtTask<TtSceneActorNode> NewNodeSimple(GamePlay.TtWorld world, Type nodeType, TtNodeData data, bool isSceneManaged = false)
+        public async Thread.Async.TtTask<TtSceneActorNode> SpawnSceneActor(TtNode parent, Type nodeType, TtNode.FPostSpawnNode postAction, TtNodeData data = null, EBoundVolumeType bvType = EBoundVolumeType.Box, Type placementType = null, TtWorld world = null, bool isSceneManaged = false)
         {
-            return await NewNode(world, nodeType, data, EBoundVolumeType.Box, typeof(GamePlay.TtPlacement), isSceneManaged);
-        }
-        public async Thread.Async.TtTask<TtSceneActorNode> NewNode(GamePlay.TtWorld world, Type nodeType, TtNodeData data, EBoundVolumeType bvType, Type placementType, bool isSceneManaged = false)
-        {
-            var node = Rtti.TtTypeDescManager.CreateInstance(nodeType) as TtSceneActorNode;
+            var node = await TtNode.SpawnNode(parent, nodeType, postAction, data, bvType, placementType, world) as TtSceneActorNode;
             if (node != null)
             {
-                if (await node.InitializeNode(world, data, bvType, placementType) == false)
-                    return null;
                 node.IsSceneManaged = isSceneManaged;
             }
             return node;

@@ -13,7 +13,7 @@ namespace EngineNS.GamePlay.Scene
         {
         }
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data == null)
             {
@@ -72,9 +72,8 @@ namespace EngineNS.GamePlay.Scene
             if (ok == false)
                 return null;
 
-            var data = new TtGridNodeData();
             var scene = parent.GetNearestParentScene();
-            var meshNode = await scene.NewNode(world, typeof(TtGridNode), data, EBoundVolumeType.Box, typeof(TtPlacement)) as TtGridNode;
+            var meshNode = await scene.SpawnSceneActor<TtGridNode>(parent, null, null, EBoundVolumeType.Box, typeof(TtPlacement)) as TtGridNode;
             meshNode.NodeData.Name = "GridLine";
             meshNode.Mesh = gridMesh;
             meshNode.Parent = parent;

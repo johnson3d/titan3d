@@ -73,7 +73,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         public PhyFilterData QueryFilterData { get => CollisionNodeData.QueryFilterData; set => CollisionNodeData.QueryFilterData = value; }
         [Category("Option")]
         public PhyFilterData SimulationFilterData { get => CollisionNodeData.SimulationFilterData; set => CollisionNodeData.SimulationFilterData = value; }
-        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var baseResult = await base.InitializeNode(world, data, bvType, placementType);
             if (!baseResult)

@@ -16,7 +16,7 @@ namespace EngineNS.Bricks.Collision.DDA
     [TtNode(NodeDataType = typeof(TtNodeData), DefaultNamePrefix = "HVX")]
     public class TtHierarchicalVoxelSpace3D : GamePlay.Scene.TtSceneActorNode
     {
-        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
             

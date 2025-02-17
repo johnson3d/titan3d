@@ -55,7 +55,7 @@ namespace EngineNS.Bricks.PhysicsCore
             }
             public List<TtPhyShape> PxShapes { get; set; } = new List<TtPhyShape>();
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, GamePlay.Scene.TtNodeData data, GamePlay.Scene.EBoundVolumeType bvType, Type placementType)
+        protected override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, GamePlay.Scene.TtNodeData data, GamePlay.Scene.EBoundVolumeType bvType, Type placementType)
         {
             if (data==null)
             {

@@ -451,7 +451,7 @@ namespace EngineNS.Editor.Forms
                     var gridNode = TtMeshDataProvider.MakeGridPlane(TtEngine.Instance.GfxDevice.RenderContext, new Vector2(-50, -50), new Vector2(50, 50), 1).ToMesh();
 
                     var meshNodeData = new TtMeshNode.TtMeshNodeData();
-                    var meshNode = await Scene.NewNode(Scene.World, typeof(TtMeshNode), meshNodeData, EBoundVolumeType.Box, typeof(TtPlacement)) as TtMeshNode;
+                    var meshNode = await Scene.SpawnSceneActor<TtMeshNode>(null, null, meshNodeData, EBoundVolumeType.Box, typeof(TtPlacement), Scene.World);
 
                 },
             };

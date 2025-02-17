@@ -1,8 +1,7 @@
-using Assimp;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.GpuDriven;
 using EngineNS.Profiler;
-using NPOI.SS.Formula.Functions;
+using EngineNS.Thread.Async;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,7 +15,7 @@ namespace EngineNS.GamePlay.Scene
         public string DefaultNamePrefix = "Node";
     }
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UNodeData@EngineCore" })]
-    public class TtNodeData : IO.BaseSerializer
+    public partial class TtNodeData : IO.BaseSerializer
     {
         public int GetStructSize()
         {
@@ -53,7 +52,6 @@ namespace EngineNS.GamePlay.Scene
                 mPlacement = value;
             }
         }
-
         public bool HasStyle(TtNode.ENodeStyles style)
         {
             return (NodeStyles & style) == style;
@@ -147,6 +145,7 @@ namespace EngineNS.GamePlay.Scene
                 OctreeNode.Remove(this);
                 OctreeOwner = null;
             }
+            this.Behavior?.DestroyNode(this);
         }
         [Rtti.Meta]
         public void DisposeWithChildren()
@@ -160,8 +159,38 @@ namespace EngineNS.GamePlay.Scene
             //this.UpdateAABB();
             this.Dispose();
         }
+        public static async Thread.Async.TtTask<TtNode> ConcreateNode(TtWorld world, TtNode tarNode, TtNode node)
+        {
+            TtNode result = tarNode;
+            if (result == null)
+            {
+                result = Rtti.TtTypeDescManager.CreateInstance(node.GetType()) as TtNode;
+            }
+            else
+            {
+                System.Diagnostics.Debug.Assert(tarNode.GetType() == node.GetType());
+            }
+            var nd = Rtti.TtTypeDescManager.CreateInstance(node.NodeData.GetType()) as TtNodeData;
+            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDesc.TypeOf(node.NodeData.GetType()));
+            meta.CopyObjectMetaField(nd, node.NodeData);
+            nd.Placement.HostNode = result;
+            nd.BoundVolume.HostNode = result;
+            await result.InitializeNode(world, nd, node.BoundVolumeType, node.Placement.GetType());
+            result.SetPrefabTemplate(node.NodeData);
+
+            foreach (var i in node.Children)
+            {
+                var cnodeTar = result.FindFirstChild(i.NodeName, i.GetType());
+                var cnode = await ConcreateNode(world, cnodeTar, i);
+                cnode.Parent = result;
+            }
+
+            await result.OnPostInitNode(result.Parent);
+
+            return result;
+        }
         public const string EditorKeyword = "UNode";
-        public virtual async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected virtual async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             NodeData = data;
 
@@ -211,7 +240,105 @@ namespace EngineNS.GamePlay.Scene
 
             return true;
         }
-
+        //Callback: Children ready!
+        protected virtual async Thread.Async.TtTask OnPostInitNode(TtNode parent)
+        {
+            if (NodeData.BehaviorName != null)
+            {
+                mBehaviorGetter = new TtBehaviorGetter();
+                Behavior?.BeginPlay(this);
+            }
+        }
+        public static TtNodeAttribute GetNodeAttribute(System.Type type)
+        {
+            return type.GetCustomAttribute(typeof(TtNodeAttribute)) as TtNodeAttribute;
+        }
+        public static TtNodeAttribute GetNodeAttribute<T>() where T : TtNode
+        {
+            return typeof(T).GetCustomAttribute(typeof(TtNodeAttribute)) as TtNodeAttribute;
+        }
+        public static TtNodeData CreateNodeData(System.Type nodeType)
+        {
+            var attr = nodeType.GetCustomAttribute(typeof(TtNodeAttribute)) as TtNodeAttribute;
+            if (attr == null || attr.NodeDataType == null)
+            {
+                return null;
+            }
+            return Rtti.TtTypeDescManager.CreateInstance(attr.NodeDataType) as TtNodeData;
+        }
+        public static TtNodeData CreateNodeData<T>() where T : TtNode
+        {
+            var attr = typeof(TtNode).GetCustomAttribute(typeof(TtNodeAttribute)) as TtNodeAttribute;
+            if (attr == null || attr.NodeDataType == null)
+            {
+                return null;
+            }
+            return Rtti.TtTypeDescManager.CreateInstance(attr.NodeDataType) as TtNodeData;
+        }
+        public delegate TtTask FPostSpawnNode<T>(T node);
+        public static async Thread.Async.TtTask<T> SpawnNode<T>(TtNode parent, FPostSpawnNode<T> postAction, TtNodeData data = null, EBoundVolumeType bvType = EBoundVolumeType.Box, Type placementType = null, TtWorld world = null)
+            where T : TtNode, new()
+        {
+            var result = new T();
+            if (data == null)
+            {
+                data = CreateNodeData<T>();
+                if (data == null)
+                {
+                    return null;
+                }
+            }
+            if (placementType == null)
+            {
+                placementType = typeof(TtPlacement);
+            }
+            if (world == null)
+            {
+                if (parent == null)
+                    return null;
+                world = parent.GetWorld();
+            }
+            await result.InitializeNode(world, data, bvType, placementType);
+            result.Parent = parent;
+            if (postAction != null)
+                await postAction(result);
+            await result.OnPostInitNode(parent);
+            return result;
+        }
+        public delegate TtTask FPostSpawnNode(TtNode node);
+        [Rtti.Meta]
+        public static async Thread.Async.TtTask<TtNode> SpawnNode(TtNode parent, System.Type nodeType, FPostSpawnNode postAction, TtNodeData data = null, EBoundVolumeType bvType = EBoundVolumeType.Box, Type placementType = null, TtWorld world = null)
+        {
+            if (nodeType.IsSubclassOf(typeof(TtNode)) == false)
+            {
+                return null;
+            }
+            var result = Rtti.TtTypeDescManager.CreateInstance(nodeType) as TtNode;
+            if (data == null)
+            {
+                data = CreateNodeData(nodeType);
+                if (data == null)
+                {
+                    return null;
+                }
+            }
+            if (placementType == null)
+            {
+                placementType = typeof(TtPlacement);
+            }
+            if (world == null)
+            {
+                if (parent == null)
+                    return null;
+                world = parent.GetWorld();
+            }
+            await result.InitializeNode(world, data, bvType, placementType);
+            result.Parent = parent;
+            if (postAction != null)
+                await postAction(result);
+            await result.OnPostInitNode(parent);
+            return result;
+        }
         public EBoundVolumeType BoundVolumeType
         {
             get
@@ -756,18 +883,18 @@ namespace EngineNS.GamePlay.Scene
             return null;
         }
 
-        public TtNode FindFirstChild<T>(string name = null, bool bRecursive = false)
+        public T FindFirstChild<T>(string name = null, bool bRecursive = false) where T : TtNode
         {
             foreach (var i in Children)
             {
                 if (i.GetType() == typeof(T) || i.GetType().IsSubclassOf(typeof(T)))
                 {
                     if (name == null)
-                        return i;
+                        return i as T;
                     else
                     {
                         if (i.NodeName.Contains(name))
-                            return i;
+                            return i as T;
                     }
                 }
             }
@@ -934,7 +1061,7 @@ namespace EngineNS.GamePlay.Scene
                     nd.Parent = this;
                     await nd.LoadChildNode(world, scene, cld, bTryFindNode);
                 }
-                await nd.OnNodeLoaded(this);
+                await nd.OnPostInitNode(this);
             }
             if (isNoAABB == false)
             {
@@ -942,10 +1069,6 @@ namespace EngineNS.GamePlay.Scene
                 this.UpdateAABB();
             }
             return true;
-        }
-        public virtual async Thread.Async.TtTask OnNodeLoaded(TtNode parent)
-        {
-            
         }
         public virtual void OnSceneLoaded()
         {
@@ -1272,6 +1395,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public virtual bool OnTickLogic(TtNodeTickParameters args)
         {
+            this.Behavior?.Tick(this);
             return true;
         }
         [Rtti.Meta]
@@ -1316,8 +1440,9 @@ namespace EngineNS.GamePlay.Scene
             {
                 var cn = await i.CloneNode(world);
                 cn.Parent = node;
-                await cn.OnNodeLoaded(node);
+                await cn.OnPostInitNode(node);
             }
+
             return node;
         }
     }
@@ -1376,7 +1501,7 @@ namespace EngineNS.GamePlay.Scene
         {
             return false;
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)            
+        protected override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)            
         {
             return await base.InitializeNode(world, data, bvType, placementType);
         }
@@ -1389,7 +1514,7 @@ namespace EngineNS.GamePlay.Scene
                 var newScene = value?.GetNearestParentScene();
                 if (newScene != null && ParentScene != null && newScene != ParentScene)
                 {
-                    Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, "UNode", $"{GetType().FullName}:{NodeName} cann't move to another UScene");
+                    Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, "TtNode", $"{GetType().FullName}:{NodeName} cann't move to another TtScene");
                     return;
                 }
                 base.Parent = value;
@@ -1418,6 +1543,26 @@ namespace EngineNS.GamePlay.Scene
 			}
 			DisposeWithChildren();
 			macross_break_DisposeWithChildren_2609910045.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_SpawnNode_4190300340 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtNode->static Thread.Async.TtTask<TtNode> SpawnNode(TtNode parent, System.Type nodeType, FPostSpawnNode postAction, TtNodeData data, EBoundVolumeType bvType, Type placementType, TtWorld world)");
+		public static async Thread.Async.TtTask<TtNode> macross_SpawnNode (string nodeName, TtNode parent, System.Type nodeType, FPostSpawnNode postAction, TtNodeData data, EBoundVolumeType bvType, Type placementType, TtWorld world) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":parent", parent);
+					stackframe.SetWatchVariable(nodeName + ":nodeType", nodeType);
+					stackframe.SetWatchVariable(nodeName + ":postAction", postAction);
+					stackframe.SetWatchVariable(nodeName + ":data", data);
+					stackframe.SetWatchVariable(nodeName + ":bvType", bvType);
+					stackframe.SetWatchVariable(nodeName + ":placementType", placementType);
+					stackframe.SetWatchVariable(nodeName + ":world", world);
+				}
+			}
+			var _return_value = await SpawnNode(parent, nodeType, postAction, data, bvType, placementType, world);
+			macross_break_SpawnNode_4190300340.TryBreak();
+			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_FindFirstChild_26975848 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtNode->TtNode FindFirstChild(string name, System.Type type, bool bRecursive)");
 		public unsafe TtNode macross_FindFirstChild (string nodeName, string name, System.Type type, bool bRecursive) 

@@ -48,7 +48,7 @@ namespace EngineNS.Bricks.Particle
         }
         TtNebulaParticle mNebulaParticle;
         public TtNebulaParticle NebulaParticle { get=> mNebulaParticle; }
-        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var ret = await base.InitializeNode(world, data, bvType, placementType);
             if (GetNodeData<TtNebulaNodeData>().NebulaParticle != null)

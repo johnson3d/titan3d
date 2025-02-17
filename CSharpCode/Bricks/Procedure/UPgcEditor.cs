@@ -98,10 +98,10 @@ namespace EngineNS.Bricks.Procedure
             var gridNode = await GamePlay.Scene.TtGridNode.AddGridNode(viewport.World, viewport.World.Root);
             gridNode.ViewportSlate = this.PreviewViewport;
 
-            PreviewRoot = await viewport.World.Root.NewNode(viewport.World, typeof(GamePlay.Scene.TtSubTreeRootNode), 
-                new GamePlay.Scene.TtNodeData() { Name = "PreviewRoot" }, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
+            PreviewRoot = await viewport.World.Root.SpawnSceneActor<GamePlay.Scene.TtSubTreeRootNode>(viewport.World.Root, null, 
+                new GamePlay.Scene.TtNodeData() { Name = "PreviewRoot" },
+                GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
             PreviewRoot.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
-            PreviewRoot.Parent = viewport.World.Root;
             return true;
         }
         public GamePlay.Scene.TtSceneActorNode PreviewRoot { get; private set; }

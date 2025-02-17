@@ -201,6 +201,8 @@ namespace EngineNS
                 return;
 
             Thread.TtContextThread.FlushAllThreadEvents(TtEngine.Instance.ThreadLogic);
+            Thread.TtContextThread.FlushAllThreadEvents(TtEngine.Instance.ThreadMain);
+            Thread.TtContextThread.FlushAllThreadEvents(TtEngine.Instance.ThreadRHI);
             TtEngine.Instance.TaskCollector.AddWaitTask(AwaitEndPlayInEditor(),(task)=>
             {
                 TtEngine.Instance.EventPoster.RunOn(static (state) =>

@@ -1,4 +1,5 @@
 ﻿using EngineNS.Rtti;
+using EngineNS.Thread.Async;
 using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
@@ -568,19 +569,99 @@ namespace EngineNS.Bricks.CodeBuilder
             {
                 var methodInvokeExp = obj as TtMethodInvokeStatement;
                 string invokeStr = "";
+                string variableName = "";
+                string taskVariableName = "";
                 if (methodInvokeExp.ReturnValue != null)
                 {
-                    if (methodInvokeExp.DeclarationReturnValue)
-                        invokeStr += data.CodeGen.GetTypeString(methodInvokeExp.ReturnValue.VariableType) + " ";
-                    invokeStr += methodInvokeExp.ReturnValue.VariableName + " = " + (methodInvokeExp.IsReturnRef ? "ref " : "");
-                    if (methodInvokeExp.ForceCastReturnType)
-                        invokeStr += "(" + data.CodeGen.GetTypeString(methodInvokeExp.ReturnValue.VariableType) + ")";
+                    variableName = methodInvokeExp.ReturnValue.VariableName;
+                    taskVariableName = methodInvokeExp.ReturnValue.VariableName + "_" + (uint)(Guid.NewGuid().GetHashCode());
+                    if(methodInvokeExp.GenGetTaskResult == TtMethodDeclaration.EAsyncType.SystemTask)
+                    {
+                        if(methodInvokeExp.IsTaskWaitComplate)
+                            invokeStr += "var " + taskVariableName + " = ";
+                        else
+                        {
+                            if (methodInvokeExp.DeclarationReturnValue)
+                                invokeStr += data.CodeGen.GetTypeString(methodInvokeExp.ReturnValue.VariableType) + " ";
+                            invokeStr += variableName + " = ";
+                        }
+                    }
+                    else if(methodInvokeExp.GenGetTaskResult == TtMethodDeclaration.EAsyncType.CustomTask)
+                    {
+                        if (methodInvokeExp.IsTaskWaitComplate)
+                        {
+                            invokeStr += "var " + taskVariableName + " = ";
+                        }
+                        else
+                        {
+                            if(methodInvokeExp.DeclarationReturnValue)
+                                invokeStr += data.CodeGen.GetTypeString(methodInvokeExp.ReturnValue.VariableType) + " ";
+                            invokeStr += variableName + " = ";
+                        }
+                    }
+                    else
+                    {
+                        if (methodInvokeExp.DeclarationReturnValue)
+                            invokeStr += data.CodeGen.GetTypeString(methodInvokeExp.ReturnValue.VariableType) + " ";
+                        invokeStr += variableName + " = " + (methodInvokeExp.IsReturnRef ? "ref " : "");
+                        if (methodInvokeExp.ForceCastReturnType)
+                            invokeStr += "(" + data.CodeGen.GetTypeString(methodInvokeExp.ReturnValue.VariableType) + ")";
+                    }
                 }
 
                 GenInvokeExpression(obj, ref invokeStr, ref data);
                 invokeStr += ";";
                 data.CodeGen.AddLine(invokeStr, ref sourceCode);
+                if((methodInvokeExp.ReturnValue != null))
+                {
+                    if (methodInvokeExp.GenGetTaskResult == TtMethodDeclaration.EAsyncType.SystemTask)
+                    {
+                        if (methodInvokeExp.IsTaskWaitComplate)
+                        {
+                            data.CodeGen.AddLine(taskVariableName + ".Wait();", ref sourceCode);
+                            if (!methodInvokeExp.IsVoidTask)
+                            {
+                                string getTaskStr = "";
+                                if (methodInvokeExp.DeclarationReturnValue)
+                                    getTaskStr += data.CodeGen.GetTypeString(methodInvokeExp.ReturnValue.VariableType) + " ";
+                                getTaskStr += variableName + " = ";
+                                if (methodInvokeExp.ForceCastReturnType)
+                                    getTaskStr += "(" + data.CodeGen.GetTypeString(methodInvokeExp.ReturnValue.VariableType) + ")";
+                                getTaskStr += taskVariableName + ".Result;";
+                                data.CodeGen.AddLine(getTaskStr, ref sourceCode);
+                            }
+                        }
+                        else
+                        {
 
+                        }
+                    }
+                    else if(methodInvokeExp.GenGetTaskResult == TtMethodDeclaration.EAsyncType.CustomTask)
+                    {
+                        string getTaskStr = "";
+                        if(methodInvokeExp.IsTaskWaitComplate)
+                        {
+                            if (!methodInvokeExp.IsVoidTask)
+                            {
+                                if (methodInvokeExp.DeclarationReturnValue)
+                                    getTaskStr += data.CodeGen.GetTypeString(methodInvokeExp.ReturnValue.VariableType) + " ";
+                                getTaskStr += variableName + " = ";
+                                if (methodInvokeExp.ForceCastReturnType)
+                                    getTaskStr += "(" + data.CodeGen.GetTypeString(methodInvokeExp.ReturnValue.VariableType) + ")";
+                                getTaskStr += taskVariableName + ".GetResultUntilCompleted();";
+                            }
+                            else
+                            { 
+                                getTaskStr += taskVariableName + ".WaitCompleted();";
+                            }
+                        }
+                        else
+                        {
+                            getTaskStr += $"EngineNS.TtEngine.Instance.TaskCollector.AddWaitTask({variableName});";
+                        }
+                        data.CodeGen.AddLine(getTaskStr, ref sourceCode);
+                    }
+                }
                 if (methodInvokeExp.IsUnsafe)
                     data.Method.HasUnsafeCode = true;
                 if (methodInvokeExp.IsAsync)

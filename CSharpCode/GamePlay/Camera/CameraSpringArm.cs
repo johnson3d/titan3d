@@ -89,7 +89,7 @@ namespace EngineNS.GamePlay.Camera
                 return Children[0] as TtGamePlayCamera;
             }
         }
-        public override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var result = await base.InitializeNode(world, data, bvType, placementType);
             Placement.Quat = Quaternion.FromEuler(InitRotation);

@@ -148,7 +148,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
             }
         }
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, GamePlay.Scene.TtNodeData data, GamePlay.Scene.EBoundVolumeType bvType, Type placementType)
+        protected override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, GamePlay.Scene.TtNodeData data, GamePlay.Scene.EBoundVolumeType bvType, Type placementType)
         {
             if (data as TtTerrainData == null)
             {

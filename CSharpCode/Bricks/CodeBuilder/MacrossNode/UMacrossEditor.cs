@@ -1829,6 +1829,9 @@ namespace EngineNS.Rtti
                 {{";
             foreach (var csFile in csFiles)
             {
+                var code = IO.TtFileManager.ReadAllText(csFile);
+                if (code.StartsWith("//This is a flag, Please keep it!"))
+                    continue;
                 var relativeFile = EngineNS.IO.TtFileManager.GetValidFileName(csFile).Replace(csFilesPath, "");
                 var name = EngineNS.IO.TtFileManager.GetBaseDirectory(relativeFile, 1).TrimEnd('/').ToLower();
                 var relativePath = EngineNS.IO.TtFileManager.GetBaseDirectory(relativeFile, 2).TrimEnd('/').ToLower();

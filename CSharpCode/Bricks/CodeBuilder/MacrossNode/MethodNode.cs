@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using EngineNS.Bricks.NodeGraph;
 using EngineNS.EGui.Controls;
+using EngineNS.Thread.Async;
 
 namespace EngineNS.Bricks.CodeBuilder.MacrossNode
 {
@@ -94,6 +95,13 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     return null;
                 return Rtti.TtClassMetaManager.Instance.GetMeta(segs[0]);
             }
+        }
+        bool mIsNodeAsync = false;
+        [Rtti.Meta]
+        public bool IsNodeAsync
+        {
+            get => mIsNodeAsync;
+            set => mIsNodeAsync = value;
         }
         public TtMethodDeclaration MethodDesc;
         public string mMethodMeta;
@@ -813,11 +821,20 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     var proDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
                     proDesc.Name = pinIn.Name;
                     proDesc.DisplayName = pinIn.Name;
+                    proDesc.Category = "Params";
                     proDesc.PropertyType = (Rtti.TtTypeDesc)pinIn.Tag;
                     proDesc.CustomValueEditor = pinIn.EditValue;
                     collection.Add(proDesc);
                 }
             }
+
+            // IsAsync
+            var isAsyncProDesc = EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+            isAsyncProDesc.Name = "IsAsync";
+            isAsyncProDesc.DisplayName = "IsAsync";
+            isAsyncProDesc.Category = "Node";
+            isAsyncProDesc.PropertyType = Rtti.TtTypeDesc.TypeOf<bool>();
+            collection.Add(isAsyncProDesc);
         }
         public object GetPropertyValue(string propertyName)
         {
@@ -830,6 +847,11 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                 {
                     return pinIn.EditValue.Value;
                 }
+            }
+            switch(propertyName)
+            {
+                case "IsAsync":
+                    return IsNodeAsync;
             }
             return null;
         }
@@ -846,6 +868,12 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     pinIn.EditValue.Value = value;
                     OnValueChanged(pinIn.EditValue);
                 }
+            }
+            switch(propertyName)
+            {
+                case "IsAsync":
+                    IsNodeAsync = (bool)value;
+                    break;
             }
         }
         public override void OnDoubleClickedPin(NodePin hitPin)
@@ -1522,14 +1550,32 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     methodInvokeExp.Host = new TtClassReferenceExpression() { Class = HostClass.ClassType };
             }
 
-            if(method.HasReturnValue())
+            var retValName = GetReturnValueName();
+            if (method.HasReturnValue())
             {
-                var retValName = GetReturnValueName();
                 var type = Result.Tag as Rtti.TtTypeDesc;
-                if(method.IsAsync())
+                if (method.IsAsync())
                 {
-                    type = Rtti.TtTypeDesc.TypeOf(type.GetGenericArguments()[0]);
-                    methodInvokeExp.IsAsync = true;
+                    if (data.MethodDec.AsyncType == TtMethodDeclaration.EAsyncType.None)
+                    {
+                        methodInvokeExp.IsAsync = false;
+                        if (method.IsSystemTask())
+                            methodInvokeExp.GenGetTaskResult = TtMethodDeclaration.EAsyncType.SystemTask;
+                        else if(method.IsTtTask())
+                            methodInvokeExp.GenGetTaskResult = TtMethodDeclaration.EAsyncType.CustomTask;
+                        if (IsNodeAsync && !Result.HasLinker())
+                        {
+                            methodInvokeExp.IsTaskWaitComplate = false;
+                        }
+                        else
+                        {
+                            type = Rtti.TtTypeDesc.TypeOf(type.GetGenericArguments()[0]);
+                        }
+                    }
+                    else
+                    {
+                        methodInvokeExp.IsAsync = true;
+                    }
                 }
                 if (type.IsPointer)
                     methodInvokeExp.IsUnsafe = true;
@@ -1540,11 +1586,37 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     VariableName = retValName,
                     InitValue = new TtDefaultValueExpression(type),
                 };
-                if(!data.MethodDec.HasLocalVariable(retValName))
+                if (!data.MethodDec.HasLocalVariable(retValName))
                     data.MethodDec.AddLocalVar(methodInvokeExp.ReturnValue);
             }
-            else if(method.IsAsync())
-                methodInvokeExp.IsAsync = true;
+            else if (method.IsAsync())
+            {
+                methodInvokeExp.IsVoidTask = true;
+                if (data.MethodDec.AsyncType == TtMethodDeclaration.EAsyncType.None)
+                {
+                    methodInvokeExp.IsAsync = false;
+                    var type = method.ReturnType;
+                    methodInvokeExp.DeclarationReturnValue = true;
+                    if (method.IsSystemTask())
+                        methodInvokeExp.GenGetTaskResult = TtMethodDeclaration.EAsyncType.SystemTask;
+                    else if (method.IsTtTask())
+                        methodInvokeExp.GenGetTaskResult = TtMethodDeclaration.EAsyncType.CustomTask;
+                    methodInvokeExp.ReturnValue = new TtVariableDeclaration()
+                    {
+                        VariableType = new TtTypeReference(type),
+                        VariableName = retValName,
+                        InitValue = new TtDefaultValueExpression(type)
+                    };
+                    if (IsNodeAsync)
+                    {
+                        methodInvokeExp.IsTaskWaitComplate = false;
+                    }
+                }
+                else
+                {
+                    methodInvokeExp.IsAsync = true;
+                }
+            }
 
             List<TtStatementBase> beforeSt = new List<TtStatementBase>();
             List<TtStatementBase> afterSt = new List<TtStatementBase>();

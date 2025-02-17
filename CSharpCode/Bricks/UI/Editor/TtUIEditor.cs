@@ -100,10 +100,9 @@ namespace EngineNS.UI.Editor
             (viewport as EngineNS.Editor.TtPreviewViewport).CameraController.ControlCamera(viewport.RenderPolicy.DefaultCamera);
 
             var scene = PreviewViewport.World.Root.GetNearestParentScene();
-            mUINode = await scene.NewNode(PreviewViewport.World, typeof(TtUINode), new TtUINode.TtUINodeData(),
-                EBoundVolumeType.Box, typeof(GamePlay.TtPlacement)) as TtUINode;
+            mUINode = await scene.SpawnSceneActor<TtUINode>(PreviewViewport.World.Root, null, new TtUINode.TtUINodeData(),
+                EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
             mUINode.NodeData.Name = "UI";
-            mUINode.Parent = PreviewViewport.World.Root;
             mUINode.Placement.SetTransform(DVector3.Zero, Vector3.One, Quaternion.Identity);
             mUINode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
             mUINode.IsAcceptShadow = false;
@@ -343,6 +342,13 @@ namespace EngineNS.UI.Editor
                 else
                 {
                     TtEngine.Instance.UIManager.RemoveUI(AssetName, "UIEditorSimulate");
+
+                    if (mUIHost.Children.Count > 0 && mUIHost.Children[0].MacrossGetter != null)
+                    {
+                        var mc = mUIHost.Children[0].MacrossGetter.Get();
+                        mc.HostElement = mUIHost.Children[0];
+                        mc.SimulateMode = mIsSimulateMode;
+                    }
                 }
             }
             EGui.UIProxy.Toolbar.EndToolbar();
@@ -1638,7 +1644,7 @@ namespace EngineNS.UI.Editor
         public async Thread.Async.TtTask<bool> OpenEditor(EngineNS.Editor.TtMainEditorApplication mainEditor, RName name, object arg)
         {
             AssetName = name;
-            mUIHost.Children.Add(TtEngine.Instance.UIManager.LoadWithSimulateMode(AssetName, true));
+            mUIHost.Children.Add(TtEngine.Instance.UIManager.LoadWithSimulateMode(AssetName));
             UIAsset = new TtUIAsset();
             UIAsset.AssetName = name;
             //UIAsset.Mesh = await UI.Canvas.TtCanvas.TestCreate();
@@ -1684,6 +1690,7 @@ namespace EngineNS.UI.Editor
                         pointAtData.Reset();
                         pointAtData.Point = pt;
                         pointAtData.IgnoreNoHitTest = true;
+                        pointAtData.IgnoreUserControlContent = true;
                         var element = mUIHost.GetPointAtElement(ref pointAtData);
                         if(mCurrentPointAtElement != element && (CurrentDecorator == null || !CurrentDecorator.IsInDecoratorOperation()))
                         {

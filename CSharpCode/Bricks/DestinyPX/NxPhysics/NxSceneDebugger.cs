@@ -13,7 +13,7 @@ namespace EngineNS.NxPhysics
     [TtNode(NodeDataType = typeof(GamePlay.Scene.TtNodeData), DefaultNamePrefix = "NxSceneDbg")]
     public class NxSceneDebugger : GamePlay.Scene.TtSceneActorNode
     {
-        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
 

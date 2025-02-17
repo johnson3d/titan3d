@@ -240,7 +240,7 @@ namespace EngineNS.GamePlay
             var playerStart = scene.FindFirstChild<TtPlayerStart>();
             EngineNS.GamePlay.Scene.TtNode root = scene;
 
-            var prefab = await TtPrefab.LoadPrefab(scene.World, prefabName);
+            var prefab = await TtPrefabNode.LoadPrefab(scene.World, prefabName);
             prefab.Root.Parent = root;
             var actor = prefab.Root.FindFirstChild<TtActor>() as TtActor;
             if (playerStart == null)
@@ -251,11 +251,10 @@ namespace EngineNS.GamePlay
             {
                 actor.Placement.SetTransform(playerStart.Placement.TransformData);
             }
-            CharacterController = new EngineNS.GamePlay.Controller.TtCharacterController();
-            await CharacterController.InitializeNode(scene.World, new TtCharacterController.TtCharacterControllerNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
+            CharacterController = await TtNode.SpawnNode<EngineNS.GamePlay.Controller.TtCharacterController>(root, null,
+                new TtCharacterController.TtCharacterControllerNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             CharacterController.OrientCameraRoation = orientCameraRoation;
             CharacterController.OrientToMovmement = OrientToMovmement;
-            CharacterController.Parent = root;
             CharacterController.ControlledCharacter = actor;
 
             CharacterController.CameraControlNode = actor.FindFirstChild<TtCameraSpringArm>(null, true) as ICameraControlNode;
@@ -270,8 +269,8 @@ namespace EngineNS.GamePlay
             var playerStart = scene.FindFirstChild<TtPlayerStart>();
             EngineNS.GamePlay.Scene.TtNode root = scene;
             var playerData = new EngineNS.GamePlay.Scene.Actor.TtActor.TtActorData();
-            var ChiefPlayer = new EngineNS.GamePlay.Scene.Actor.TtActor();
-            await ChiefPlayer.InitializeNode(scene.World, playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
+            var ChiefPlayer = await TtNode.SpawnNode<EngineNS.GamePlay.Scene.Actor.TtActor>(root, null,
+                playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             ChiefPlayer.Parent = root;
             ChiefPlayer.NodeData.Name = "UActor";
             ChiefPlayer.HitproxyType = EngineNS.Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
@@ -290,8 +289,8 @@ namespace EngineNS.GamePlay
             meshData1.MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
             meshData1.MdfQueueType = EngineNS.Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.Graphics.Mesh.TtMdfSkinMesh)).TypeString;
             meshData1.AtomType = EngineNS.Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.Graphics.Mesh.TtMesh.TtAtom)).TypeString;
-            var meshNode1 = new EngineNS.GamePlay.Scene.TtMeshNode();
-            await meshNode1.InitializeNode(scene.World, meshData1, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
+            var meshNode1 = await TtNode.SpawnNode<EngineNS.GamePlay.Scene.TtMeshNode>(ChiefPlayer, null,
+                meshData1, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             meshNode1.NodeData.Name = "Robot1";
             meshNode1.Parent = ChiefPlayer;
             meshNode1.Placement.SetTransform(new DVector3(0.0f), new Vector3(1.0f), Quaternion.Identity);
@@ -313,36 +312,32 @@ namespace EngineNS.GamePlay
             sapnd.Points.Add(new EngineNS.Animation.SceneNode.FBlendSpacePoint(RName.GetRName("utest/puppet/animation/w2_run_f_loop_ip.animclip"), new Vector3(3, 0, 0)));
             await EngineNS.Animation.SceneNode.TtBlendSpaceAnimPlayNode.AddBlendSpace2DAnimPlayNode(scene.World, meshNode1, sapnd, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtIdentityPlacement));
 
-            var characterController = new EngineNS.GamePlay.Controller.TtCharacterController();
-            await characterController.InitializeNode(scene.World, new TtCharacterController.TtCharacterControllerNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
+            var characterController = await TtNode.SpawnNode<EngineNS.GamePlay.Controller.TtCharacterController>(root, null,
+                new TtCharacterController.TtCharacterControllerNodeData(), 
+                EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             characterController.Parent = root;
             characterController.ControlledCharacter = ChiefPlayer;
 
-            var springArm = new EngineNS.GamePlay.Camera.TtCameraSpringArm();
             var springArmData = new EngineNS.GamePlay.Camera.TtCameraSpringArm.TtCameraSpringArmData();
             springArmData.TargetOffset = DVector3.Up * 1.0f;
             springArmData.ArmLength = 5;
-            await springArm.InitializeNode(scene.World, springArmData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
-
-            springArm.Parent = ChiefPlayer;
+            var springArm = await TtNode.SpawnNode<EngineNS.GamePlay.Camera.TtCameraSpringArm>(ChiefPlayer, null,
+                springArmData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
 
             characterController.CameraControlNode = springArm;
 
-            var camera = new EngineNS.GamePlay.Camera.TtGamePlayCamera();
-            await camera.InitializeNode(WorldViewportSlate.World, new EngineNS.GamePlay.Scene.TtNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
-            camera.Parent = springArm;
+            var camera = await TtNode.SpawnNode<EngineNS.GamePlay.Camera.TtGamePlayCamera>(springArm, null,
+                new EngineNS.GamePlay.Scene.TtNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             camera.Camera = WorldViewportSlate.RenderPolicy.DefaultCamera;
 
-            var phyControl = new TtCapsulePhyControllerNode();
             var phyNodeData = new TtCapsulePhyControllerNode.TtCapsulePhyControllerNodeData();
             phyNodeData.Height = 1.5f;
             phyNodeData.Radius = 0.5f;
-            await phyControl.InitializeNode(scene.World, phyNodeData, Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
+            var phyControl = await TtNode.SpawnNode<TtCapsulePhyControllerNode>(null, null, phyNodeData, Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement), scene.World);
             //phyControl.Parent = ChiefPlayer;
 
-            var movement = new EngineNS.GamePlay.Movemnet.TtCharacterMovement();
-            //movement.EnableGravity = true;
-            await movement.InitializeNode(scene.World, new EngineNS.GamePlay.Scene.TtNodeData() { Name = "Movement" }, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
+            var movement = await TtNode.SpawnNode<EngineNS.GamePlay.Movemnet.TtCharacterMovement>(ChiefPlayer, null, 
+                new EngineNS.GamePlay.Scene.TtNodeData() { Name = "Movement" }, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             movement.Parent = ChiefPlayer;
 
             characterController.MovementNode = movement;

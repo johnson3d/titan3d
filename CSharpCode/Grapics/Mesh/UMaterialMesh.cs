@@ -128,18 +128,19 @@ namespace EngineNS.Graphics.Mesh
                 var meshNodeData = new TtMeshNode.TtMeshNodeData();
                 meshNodeData.Name = mAssetName.PureName;
                 meshNodeData.MeshName = mAssetName;
-                var node = await worldViewport.World.Root.ParentScene.NewNode(worldViewport.World, typeof(TtMeshNode), meshNodeData, EBoundVolumeType.Box, typeof(TtPlacement));
-                node.Parent = worldViewport.World.Root;
-                node.Placement.Position = hitPos;
-                node.HitproxyType = Pipeline.TtHitProxy.EHitproxyType.Root;
-
+                var node = await worldViewport.World.Root.ParentScene.SpawnSceneActor<TtMeshNode>(worldViewport.World.Root, async (nd)=>
+                {
+                    nd.Parent = worldViewport.World.Root;
+                    nd.Placement.Position = hitPos;
+                    nd.HitproxyType = Pipeline.TtHitProxy.EHitproxyType.Root;
+                }, meshNodeData);
+                
                 if(mPreviewNode != null)
                 {
                     mPreviewNode.Parent = null;
                 }
             }
         }
-        Thread.Async.TtTask<TtSceneActorNode>? mPreviewNodeTask;
         TtMeshNode mPreviewNode;
         public override async Thread.Async.TtTask OnDragging(TtViewportSlate vpSlate)
         {
@@ -147,19 +148,16 @@ namespace EngineNS.Graphics.Mesh
             if (worldViewport == null)
                 return;
 
-            if (mPreviewNodeTask == null)
+            if (mPreviewNode == null)
             {
                 var meshNodeData = new TtMeshNode.TtMeshNodeData();
                 meshNodeData.Name = mAssetName.PureName;
                 meshNodeData.MeshName = mAssetName;
-                mPreviewNodeTask = worldViewport.World.Root.ParentScene.NewNode(worldViewport.World, typeof(TtMeshNode), meshNodeData, EBoundVolumeType.Box, typeof(TtPlacement));
-                return;
-            }
-            else if (mPreviewNodeTask.Value.IsCompleted == false)
-                return;
-            else
-            {
-                mPreviewNode = mPreviewNodeTask.Value.DirectResult as TtMeshNode;
+                var task = worldViewport.World.Root.ParentScene.SpawnSceneActor<TtMeshNode>(worldViewport.World.Root, async (nd)=>
+                {
+
+                }, meshNodeData, EBoundVolumeType.Box, typeof(TtPlacement));
+                mPreviewNode = task.GetResultUntilCompleted();
             }
 
             if (mPreviewNode.Parent != worldViewport.World.Root)

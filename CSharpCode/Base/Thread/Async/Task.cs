@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Text;
@@ -77,10 +78,12 @@ namespace EngineNS.Thread.Async
         private TtTask<T> mTask;
 
         #region mandatory methods for async state machine builder
+        [DebuggerNonUserCode]
         public AsyncFiberMethodBuilder()
         {
             mTask = new TtTask<T>();
         }
+        [DebuggerNonUserCode]
         public static AsyncFiberMethodBuilder<T> Create()
         {
             return new AsyncFiberMethodBuilder<T>();
@@ -110,7 +113,7 @@ namespace EngineNS.Thread.Async
         {
             awaiter.UnsafeOnCompleted(stateMachine.MoveNext);
         }
-
+        [DebuggerNonUserCode]
         public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine
         {
             Action move = stateMachine.MoveNext;
@@ -317,7 +320,7 @@ namespace EngineNS.Thread.Async
             }
         }
     }
-    
+    [DebuggerNonUserCode]
     [AsyncMethodBuilder(typeof(AsyncFiberMethodBuilder<>))]
     //public sealed class TtTask<T>
     public struct TtTask<T> : ITask, IDisposable
@@ -341,10 +344,15 @@ namespace EngineNS.Thread.Async
         {
             mTaskData = TtTaskData<T>.CreateInstance(exception);
         }
-
+        [DebuggerNonUserCode]
         public TtTask()
         {
             mTaskData = TtTaskData<T>.CreateInstance();
+        }
+        public T GetResultUntilCompleted()
+        {
+            WaitCompleted();
+            return this.GetResultAndRelease();
         }
         public void WaitCompleted()
         {
@@ -551,10 +559,12 @@ namespace EngineNS.Thread.Async
         private TtTask mTask;
 
         #region mandatory methods for async state machine builder
+        [DebuggerNonUserCode]
         public AsyncFiberMethodBuilder()
         {
             mTask = new TtTask();
         }
+        [DebuggerNonUserCode]
         public static AsyncFiberMethodBuilder Create()
         {
             return new AsyncFiberMethodBuilder();
@@ -585,7 +595,8 @@ namespace EngineNS.Thread.Async
         {
             awaiter.UnsafeOnCompleted(stateMachine.MoveNext);
         }
-
+        [DebuggerNonUserCode]
+        //[DebuggerStepThrough]
         public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine
         {
             Action move = stateMachine.MoveNext;
@@ -631,6 +642,16 @@ namespace EngineNS.Thread.Async
         public void WaitCompleted()
         {
             TtContextThread.CurrentContext.WaitTask(this);
+        }
+        public void WaitCompletedAndDispose()
+        {
+            WaitCompleted();
+            Dispose();
+        }
+
+        public void AddWaitTask(TtTaskCollector.FOnTaskFinished cb = null)
+        {
+            TtEngine.Instance.TaskCollector.AddWaitTask(this, cb);
         }
 
         public TtFiberAwaiter GetAwaiter()

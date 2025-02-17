@@ -40,7 +40,7 @@ namespace EngineNS.GamePlay.Scene
         public Editor.Controller.EditorCameraController CameraController = new Editor.Controller.EditorCameraController();
         public GamePlay.TtWorld CaptureWorld { get; set; }
         GamePlay.TtWorld.TtVisParameter mVisParameter = new GamePlay.TtWorld.TtVisParameter();
-        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
 

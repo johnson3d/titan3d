@@ -38,7 +38,7 @@ namespace EngineNS.GamePlay.Controller
         public bool OrientCameraRoation { get => CharacterControllerNodeData.OrientCameraRoation; set => CharacterControllerNodeData.OrientCameraRoation = value; }
         public bool OrientToMovmement { get => CharacterControllerNodeData.OrientToMovmement; set => CharacterControllerNodeData.OrientToMovmement = value; }
 
-        public override Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             UAxis2DAction axis2D = IAction.Create<UAxis2DAction>(new UAxis2DAction.UAxis2DActionData());
             var upControl = IControl.Create<UKey>(new UKey.UKeyData() { Keycode = Bricks.Input.Keycode.KEY_w });

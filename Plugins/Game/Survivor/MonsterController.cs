@@ -21,7 +21,7 @@ namespace Survivor
         public TtCharacter Player { get; set; } = null;
         public TtMonsterNode MonsterNode { get; set; } = null;
 
-        public override TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             return base.InitializeNode(world, data, bvType, placementType);
         }

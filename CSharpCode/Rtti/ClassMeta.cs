@@ -707,10 +707,17 @@ namespace EngineNS.Rtti
                     return false;
                 return true;
             }
+            public bool IsTtTask()
+            {
+                return ReturnType.GetInterface(nameof(ITask)) != null; //(ReturnType.IsEqual(typeof(Thread.Async.TtTask)) || ReturnType.IsSubclassOf(typeof(Thread.Async.TtTask)));
+            }
+            public bool IsSystemTask()
+            {
+                return (ReturnType.IsEqual(typeof(System.Threading.Tasks.Task)) || ReturnType.IsSubclassOf(typeof(System.Threading.Tasks.Task)));
+            }
             public bool IsAsync()
             {
-                return (ReturnType.IsEqual(typeof(System.Threading.Tasks.Task)) || ReturnType.IsSubclassOf(typeof(System.Threading.Tasks.Task)) ||
-                        ReturnType.IsEqual(typeof(Thread.Async.TtTask)) || ReturnType.IsSubclassOf(typeof(Thread.Async.TtTask)));
+                return (IsSystemTask() || IsTtTask());
             }
         }
         public static string GetNameByDeclstring(string declString)

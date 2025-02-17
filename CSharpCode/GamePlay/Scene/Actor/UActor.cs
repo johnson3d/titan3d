@@ -19,7 +19,7 @@ namespace EngineNS.GamePlay.Scene.Actor
         }
         public UCenterData CenterData { get; } = new UCenterData();
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (await base.InitializeNode(world, data, bvType, placementType) == false)
             {

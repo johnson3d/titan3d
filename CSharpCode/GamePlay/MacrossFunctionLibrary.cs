@@ -38,8 +38,7 @@ namespace EngineNS.GamePlay
             if (Pools.TryGetValue(prefabName, out var pool))
             {
                 var task = pool.CloneNode();
-                task.WaitCompleted();
-                return task.GetResultAndRelease();
+                return task.GetResultUntilCompleted();
                 //return pool.QueryObjectSync();
             }
             else
@@ -49,9 +48,7 @@ namespace EngineNS.GamePlay
                     return null;
 
                 var task = pool.CloneNode();
-                task.WaitCompleted();
-                return task.GetResultAndRelease();
-                //return pool.QueryObjectSync();
+                return task.GetResultUntilCompleted();
             }   
         }
         public void ReleasePrefab(TtPrefabNode prefabNode)

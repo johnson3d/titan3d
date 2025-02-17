@@ -668,6 +668,8 @@ namespace EngineNS.UI.Controls
 
                 final.X = finalRect.Left + margin.Left;
                 final.Y = finalRect.Top + margin.Top;
+                final.Width -= margin.Left + margin.Right;
+                final.Height -= margin.Top + margin.Bottom;
                 if (UseRounding)
                 {
                     final.X = RoundValue(final.X, dpiScale);

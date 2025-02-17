@@ -22,7 +22,7 @@
     <ProjectReference Include="..\..\..\..\Module\Engine.Window\Engine.Window.csproj" />
   </ItemGroup>
 
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="$(SolutionDir)CS_Engine.bat" />
   </Target>
 

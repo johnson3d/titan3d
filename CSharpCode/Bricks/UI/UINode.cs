@@ -75,7 +75,7 @@ namespace EngineNS.UI
             public RName UIName { get; set; }
         }
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data as TtUINodeData == null)
                 data = new TtUINodeData();
@@ -107,9 +107,9 @@ namespace EngineNS.UI
                 // todo: load ui
             }
         }
-        public override async Thread.Async.TtTask OnNodeLoaded(TtNode parent)
+        protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent)
         {
-            await base.OnNodeLoaded(parent);
+            await base.OnPostInitNode(parent);
 
             UpdateAbsTransform();
             var uiData = NodeData as TtUINodeData;
@@ -156,7 +156,7 @@ namespace EngineNS.UI
         public static async TtTask<TtUINode> AddUINode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, TtUIHost uiHost, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
-            var uiNode = await scene.NewNode(world, typeof(TtUINode), data, EBoundVolumeType.Box, placementType) as TtUINode;
+            var uiNode = await scene.SpawnSceneActor<TtUINode>(parent, null, data, EBoundVolumeType.Box, placementType);
             if (uiHost.AssetName != null)
                 uiNode.NodeData.Name = uiHost.AssetName.Name;
             else

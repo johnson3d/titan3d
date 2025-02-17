@@ -39,7 +39,7 @@ namespace EngineNS.GamePlay.Scene
             [Category("Option")]
             public float Radius { get; set; }
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data == null)
             {
@@ -63,8 +63,7 @@ namespace EngineNS.GamePlay.Scene
             var scene = parent.GetNearestParentScene();
             var scale = new Vector3(data.Radius);
 
-            var meshNode = await scene.NewNode(world, typeof(TtPointLightNode), data, EBoundVolumeType.Box, typeof(TtPlacement)) as TtPointLightNode;            
-            meshNode.Parent = parent;
+            var meshNode = await scene.SpawnSceneActor<TtPointLightNode>(parent, null, data, EBoundVolumeType.Box, typeof(TtPlacement)) as TtPointLightNode;            
             
             meshNode.Placement.SetTransform(in pos, in scale, in Quaternion.Identity);
 
@@ -115,9 +114,9 @@ namespace EngineNS.GamePlay.Scene
                 return mDebugMesh;
             }
         }
-        public override async Thread.Async.TtTask OnNodeLoaded(TtNode parent)
+        protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent)
         {
-            await base.OnNodeLoaded(parent);
+            await base.OnPostInitNode(parent);
             this.BoundVolume.LocalAABB = new BoundingBox(Vector3.Zero, 1.0f);
             UpdateAbsTransform();
         }

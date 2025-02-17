@@ -13,7 +13,6 @@ namespace EngineNS.GamePlay.Scene
 {
     [Bricks.CodeBuilder.ContextMenu("MeshNode", "MeshNode", TtNode.EditorKeyword)]
     [TtNode(NodeDataType = typeof(TtMeshNode.TtMeshNodeData), DefaultNamePrefix = "Mesh")]
-    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UMeshNode@EngineCore", "EngineNS.GamePlay.Scene.UMeshNode" })]
     public partial class TtMeshNode : TtGpuSceneNode
     {
@@ -67,7 +66,7 @@ namespace EngineNS.GamePlay.Scene
                 }
             }
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (data as TtMeshNodeData == null)
             {
@@ -161,13 +160,15 @@ namespace EngineNS.GamePlay.Scene
         public static async System.Threading.Tasks.Task<TtMeshNode> AddMeshNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, Graphics.Mesh.TtMesh mesh, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
-            var meshNode = await scene.NewNode(world, typeof(TtMeshNode), data, EBoundVolumeType.Box, placementType) as TtMeshNode;
+            var meshNode = await scene.SpawnSceneActor<TtMeshNode>(parent, async (nd)=>
+            {
+
+            }, data, EBoundVolumeType.Box, placementType) as TtMeshNode;
             if (mesh.MaterialMesh.AssetName != null)
                 meshNode.NodeData.Name = mesh.MaterialMesh.AssetName.Name;
             else
                 meshNode.NodeData.Name = meshNode.SceneId.ToString();
             meshNode.Mesh = mesh;
-            meshNode.Parent = parent;
             
             meshNode.Placement.SetTransform(in pos, in scale, in quat);
 
@@ -315,8 +316,7 @@ namespace EngineNS.GamePlay.Scene
                 if (NodeData is TtMeshNodeData meshNodeData)
                 {
                     meshNodeData.MdfQueue = value;
-                    var task = SetMdfQueue(value);
-                    task.WaitCompleted();
+                    SetMdfQueue(value).WaitCompletedAndDispose();
                 }
             }
         }
@@ -345,9 +345,9 @@ namespace EngineNS.GamePlay.Scene
             }
             OnHitProxyChanged();
         }
-        public override async Thread.Async.TtTask OnNodeLoaded(TtNode parent)
+        protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent)
         {
-            await base.OnNodeLoaded(parent);
+            await base.OnPostInitNode(parent);
 
             UpdateAbsTransform();
             var meshData = NodeData as TtMeshNodeData;

@@ -35,7 +35,7 @@ namespace Survivor
         }
         
         public TtCharacterStateNodeData StateData { get => NodeData as TtCharacterStateNodeData; }
-        public override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             return await base.InitializeNode(world, data, bvType, placementType);
         }

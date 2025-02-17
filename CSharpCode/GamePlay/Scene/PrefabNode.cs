@@ -46,7 +46,7 @@ namespace EngineNS.GamePlay.Scene
                 if (PrefabNodeData == null)
                     return;
                 var save = PrefabNodeData.PrefabName;
-                TtEngine.Instance.TaskCollector.AddWaitTask(UpdatePrefab(save, value));
+                UpdatePrefab(save, value).WaitCompletedAndDispose();
                 PrefabNodeData.PrefabName = value;
             }
         }
@@ -67,15 +67,118 @@ namespace EngineNS.GamePlay.Scene
             if (prefab != null)
                 await prefab.ConcreatePrefab(this.GetWorld(), this);
         }
-        public override async Thread.Async.TtTask OnNodeLoaded(TtNode parent)
+        protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent)
         {
-            await base.OnNodeLoaded(parent);
-            await UpdatePrefab(null, PrefabName);
+            await base.OnPostInitNode(parent);
+            if (PrefabName != null)
+                await UpdatePrefab(null, PrefabName);
         }
         protected override void OnParentChanged(TtNode prev, TtNode cur)
         {
             base.OnParentChanged(prev, cur);
         }
+
+        internal static async Thread.Async.TtTask<TtPrefab> LoadPrefab(GamePlay.TtWorld world, RName name)
+        {
+            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
+            {
+                if (xnd == null)
+                    return null;
+
+                var descAttr = xnd.RootNode.mCoreObject.FindFirstAttributeByFlags(PrefabDescAttributeFlags);
+                if (descAttr.NativePointer == IntPtr.Zero)
+                {
+                    return null;
+                }
+
+                var nodeData = Rtti.TtTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(descAttr.Name)) as TtNodeData;
+
+                var prefab = Rtti.TtTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(xnd.RootNode.Name)) as TtPrefab;
+                if (prefab == null)
+                    return null;
+                var node = await TtNode.SpawnNode<TtPrefabNode>(world.Root, null, new TtPrefabNode.TtPrefabNodeData(), EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
+                prefab.Root = node;
+                prefab.AssetName = name;
+
+                using (var ar = descAttr.GetReader(node))
+                {
+                    IO.ISerializer desc = nodeData;
+                    try
+                    {
+                        ar.ReadTo(desc, node);
+                        nodeData.IsDirty = true;
+                        if (await node.InitializeNode(world, nodeData, EBoundVolumeType.None, null) == false)
+                        {
+                            Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"InitializeNode failed: NodeDataType={descAttr.Name}, NodeData={xnd.RootNode.Name}");
+                            return null;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                        Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"Prefab({prefab.AssetName}): load failed");
+                    }
+                }
+
+                if (await node.LoadChildNode(world, node, xnd.RootNode.mCoreObject, false) == false)
+                    return null;
+
+                node.DFS_VisitNodeTree((TtNode inNode, object inArg) =>
+                {
+                    inNode.OnSceneLoaded();
+                    return false;
+                }, null);
+                return prefab;
+            }
+        }
+        public const uint PrefabDescAttributeFlags = 1;
+        internal static async System.Threading.Tasks.Task ReLoadPrefab(GamePlay.TtWorld world, TtPrefab prefab, RName name)
+        {
+            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
+            {
+                if (xnd == null)
+                    return;
+
+                var descAttr = xnd.RootNode.mCoreObject.FindFirstAttributeByFlags(PrefabDescAttributeFlags);
+                if (descAttr.NativePointer == IntPtr.Zero)
+                {
+                    return;
+                }
+
+                var nodeData = prefab.Root.NodeData;
+                var node = prefab.Root;
+
+                using (var ar = descAttr.GetReader(node))
+                {
+                    IO.ISerializer desc = nodeData;
+                    try
+                    {
+                        ar.ReadTo(desc, node);
+                        if (await node.InitializeNode(world, nodeData, EBoundVolumeType.None, null) == false)
+                        {
+                            Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"InitializeNode failed: NodeDataType={descAttr.Name}, NodeData={xnd.RootNode.Name}");
+                            return;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Profiler.Log.WriteException(ex);
+                        Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"Prefab({prefab.AssetName}): load failed");
+                    }
+                }
+
+                if (await node.LoadChildNode(world, node, xnd.RootNode.mCoreObject, true) == false)
+                    return;
+
+                node.DFS_VisitNodeTree((TtNode inNode, object inArg) =>
+                {
+                    inNode.OnSceneLoaded();
+                    return false;
+                }, null);
+                return;
+            }
+        }
+        
     }
     [Rtti.Meta]
     public class TtPrefabAMeta : IO.IAssetMeta
@@ -165,17 +268,15 @@ namespace EngineNS.GamePlay.Scene
                 mAsset = Rtti.TtTypeDescManager.CreateInstance(TypeSlt.SelectedType) as IO.IAsset;
                 
                 var prefab = mAsset as TtPrefab;
-                prefab.Root = new TtPrefabNode();
-                TtEngine.Instance.TaskCollector.AddWaitTask(
-                    prefab.Root.InitializeNode(world, new TtPrefabNode.TtPrefabNodeData() { PrefabName = dir, }, EBoundVolumeType.Box, typeof(GamePlay.TtPlacement))
-                );
+                prefab.Root = await TtNode.SpawnNode<TtPrefabNode>(null, null,
+                    new TtPrefabNode.TtPrefabNodeData() { PrefabName = dir, }
+                    , EBoundVolumeType.Box, typeof(GamePlay.TtPlacement), world);
             }
         }
         [Category("Option")]
         public RName AssetName { get; set; }
         public bool IsAlloc { get ; set ; }
 
-        public const uint PrefabDescAttributeFlags = 1;
         public void SaveAssetTo(RName name)
         {
             var ameta = this.GetAMeta();
@@ -192,7 +293,7 @@ namespace EngineNS.GamePlay.Scene
             if (Root != null)
             {
                 Root.PrefabNodeData.PrefabName = name;
-                using (var dataAttr = xnd.NewAttribute(Rtti.TtTypeDesc.TypeStr(Root.NodeData.GetType()), 1, PrefabDescAttributeFlags))
+                using (var dataAttr = xnd.NewAttribute(Rtti.TtTypeDesc.TypeStr(Root.NodeData.GetType()), 1, TtPrefabNode.PrefabDescAttributeFlags))
                 {
                     node.AddAttribute(dataAttr);
                     using (var ar = dataAttr.GetWriter((ulong)Root.NodeData.GetStructSize() * 2))
@@ -207,107 +308,7 @@ namespace EngineNS.GamePlay.Scene
             TtEngine.Instance.SourceControlModule.AddFile(name.Address, true);
             TtEngine.Instance.PrefabManager.UnloadPrefab(name);
         }
-        internal static async Thread.Async.TtTask<TtPrefab> LoadPrefab(GamePlay.TtWorld world, RName name)
-        {
-            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
-            {
-                if (xnd == null)
-                    return null;
-
-                var descAttr = xnd.RootNode.mCoreObject.FindFirstAttributeByFlags(PrefabDescAttributeFlags);
-                if (descAttr.NativePointer == IntPtr.Zero)
-                {
-                    return null;
-                }
-
-                var nodeData = Rtti.TtTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(descAttr.Name)) as TtNodeData;
-
-                var prefab = Rtti.TtTypeDescManager.CreateInstance(Rtti.TtTypeDesc.TypeOf(xnd.RootNode.Name)) as TtPrefab;
-                if (prefab == null)
-                    return null;
-                var node = new TtPrefabNode();
-                await node.InitializeNode(world, new TtPrefabNode.TtPrefabNodeData(), EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
-                prefab.Root = node;
-                prefab.AssetName = name;
-                node.Parent = world.Root;
-
-                using (var ar = descAttr.GetReader(node))
-                {
-                    IO.ISerializer desc = nodeData;
-                    try
-                    {
-                        ar.ReadTo(desc, node);
-                        nodeData.IsDirty = true;
-                        if (await node.InitializeNode(world, nodeData, EBoundVolumeType.None, null) == false)
-                        {
-                            Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"InitializeNode failed: NodeDataType={descAttr.Name}, NodeData={xnd.RootNode.Name}");
-                            return null;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Profiler.Log.WriteException(ex);
-                        Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"Prefab({prefab.AssetName}): load failed");
-                    }
-                }
-
-                if (await node.LoadChildNode(world, node, xnd.RootNode.mCoreObject, false) == false)
-                    return null;
-
-                node.DFS_VisitNodeTree((TtNode inNode, object inArg) =>
-                {
-                    inNode.OnSceneLoaded();
-                    return false;
-                }, null);
-                return prefab;
-            }
-        }
-        internal static async System.Threading.Tasks.Task ReLoadPrefab(GamePlay.TtWorld world, TtPrefab prefab, RName name)
-        {
-            using (var xnd = IO.TtXndHolder.LoadXnd(name.Address))
-            {
-                if (xnd == null)
-                    return;
-
-                var descAttr = xnd.RootNode.mCoreObject.FindFirstAttributeByFlags(PrefabDescAttributeFlags);
-                if (descAttr.NativePointer == IntPtr.Zero)
-                {
-                    return;
-                }
-
-                var nodeData = prefab.Root.NodeData;
-                var node = prefab.Root;
-
-                using (var ar = descAttr.GetReader(node))
-                {
-                    IO.ISerializer desc = nodeData;
-                    try
-                    {
-                        ar.ReadTo(desc, node);
-                        if (await node.InitializeNode(world, nodeData, EBoundVolumeType.None, null) == false)
-                        {
-                            Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"InitializeNode failed: NodeDataType={descAttr.Name}, NodeData={xnd.RootNode.Name}");
-                            return;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Profiler.Log.WriteException(ex);
-                        Profiler.Log.WriteLine<Profiler.TtGameplayGategory>(Profiler.ELogTag.Warning, $"Prefab({prefab.AssetName}): load failed");
-                    }
-                }
-
-                if (await node.LoadChildNode(world, node, xnd.RootNode.mCoreObject, true) == false)
-                    return;
-
-                node.DFS_VisitNodeTree((TtNode inNode, object inArg) =>
-                {
-                    inNode.OnSceneLoaded();
-                    return false;
-                }, null);
-                return;
-            }
-        }
+        
         public IO.IAssetMeta CreateAMeta()
         {
             var result = new TtPrefabAMeta();
@@ -338,39 +339,9 @@ namespace EngineNS.GamePlay.Scene
         }
         #endregion
 
-        private static async Thread.Async.TtTask<TtNode> ConcreateNode(TtWorld world, TtNode tarNode, TtNode node)
-        {
-            System.Diagnostics.Debug.Assert(world != node.GetWorld());
-            TtNode result = tarNode;
-            if (result == null)
-            {
-                result = Rtti.TtTypeDescManager.CreateInstance(node.GetType()) as TtNode;
-            }
-            else
-            {
-                System.Diagnostics.Debug.Assert(tarNode.GetType() == node.GetType());
-            }
-            var nd = Rtti.TtTypeDescManager.CreateInstance(node.NodeData.GetType()) as TtNodeData;
-            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(Rtti.TtTypeDesc.TypeOf(node.NodeData.GetType()));
-            meta.CopyObjectMetaField(nd, node.NodeData);
-            nd.Placement.HostNode = result;
-            nd.BoundVolume.HostNode = result;
-            await result.InitializeNode(world, nd, node.BoundVolumeType, node.Placement.GetType());
-            result.SetPrefabTemplate(node.NodeData);
-            
-            foreach (var i in node.Children)
-            {
-                var cnodeTar = result.FindFirstChild(i.NodeName, i.GetType());
-                var cnode = await ConcreateNode(world, cnodeTar, i);
-                cnode.Parent = result;
-            }
-
-            return result;
-        }
-
         public async Thread.Async.TtTask<TtNode> ConcreatePrefab(TtWorld world, TtNode tarNode)
         {
-            return await ConcreateNode(world, tarNode, Root);
+            return await TtNode.ConcreateNode(world, tarNode, Root);
         }
 
         private static void RemovePrefabChildren(TtNode tarNode, TtNode node)
@@ -424,7 +395,7 @@ namespace EngineNS.GamePlay.Scene
                 return await session.Await();
             }
 
-            result = await TtPrefab.LoadPrefab(PrefabWorld, name);
+            result = await TtPrefabNode.LoadPrefab(PrefabWorld, name);
             if (result == null)
                 return null;
 
@@ -439,10 +410,10 @@ namespace EngineNS.GamePlay.Scene
             TtPrefab result;
             if (Prefabs.TryGetValue(name, out result))
             {
-                await TtPrefab.ReLoadPrefab(PrefabWorld, result, name);
+                await TtPrefabNode.ReLoadPrefab(PrefabWorld, result, name);
                 return result;
             }
-            scene = await TtPrefab.LoadPrefab(PrefabWorld, name);
+            scene = await TtPrefabNode.LoadPrefab(PrefabWorld, name);
             if (scene == null)
                 return null;
 
@@ -455,7 +426,7 @@ namespace EngineNS.GamePlay.Scene
         }
         public async Thread.Async.TtTask<TtPrefab> CreatePrefab(RName name)
         {
-            var scene = await TtPrefab.LoadPrefab(PrefabWorld, name);
+            var scene = await TtPrefabNode.LoadPrefab(PrefabWorld, name);
             if (scene == null)
                 return null;
 

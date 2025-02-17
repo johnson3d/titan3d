@@ -149,19 +149,15 @@ namespace EngineNS.Editor.Forms
         {
             if (mAddToNode == null)
                 return null;
-            var ntype = Rtti.TtTypeDesc.TypeOf(i.ClassType.TypeString);
-            var newNode = Rtti.TtTypeDescManager.CreateInstance(ntype) as GamePlay.Scene.TtNode;
-            var attrs = newNode.GetType().GetCustomAttributes(typeof(GamePlay.Scene.TtNodeAttribute), false);
-            GamePlay.Scene.TtNodeData nodeData = null;
+            var ntype = i.ClassType;
+            var newNode = await GamePlay.Scene.TtNode.SpawnNode(mAddToNode, ntype.SystemType, null, null, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
             string prefix = "Node";
-            if (attrs.Length > 0)
+            var attr = GamePlay.Scene.TtNode.GetNodeAttribute(ntype.SystemType);
+            if (attr != null)
             {
-                nodeData = Rtti.TtTypeDescManager.CreateInstance((attrs[0] as GamePlay.Scene.TtNodeAttribute).NodeDataType) as GamePlay.Scene.TtNodeData;
-                prefix = (attrs[0] as GamePlay.Scene.TtNodeAttribute).DefaultNamePrefix;
+                prefix = attr.DefaultNamePrefix;
             }
-            await newNode.InitializeNode(World, nodeData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
             newNode.NodeData.Name = $"{prefix}_{newNode.SceneId}";
-            newNode.Parent = mAddToNode;
             return newNode;
         }
         public void UpdateAddNodeMenu()

@@ -44,7 +44,7 @@ namespace EngineNS.Animation.SceneNode
             }
         }
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             SetStyle(ENodeStyles.Invisible);
             if (!await base.InitializeNode(world, data, bvType, placementType))

@@ -163,6 +163,20 @@ namespace EngineNS.Bricks.CodeBuilder
                 return (mTypeDesc.IsEqual(typeof(System.Threading.Tasks.Task)) || mTypeDesc.IsSubclassOf(typeof(System.Threading.Tasks.Task))) || (mTypeDesc.GetInterface(nameof(ITask)) != null);
             }
         }
+        public bool IsSystemTask
+        {
+            get
+            {
+                return (mTypeDesc.IsEqual(typeof(System.Threading.Tasks.Task)) || mTypeDesc.IsSubclassOf(typeof(System.Threading.Tasks.Task)));
+            }
+        }
+        public bool IsTtTask
+        {
+            get
+            {
+                return (mTypeDesc.GetInterface(nameof(ITask)) != null);
+            }
+        }
 
         public TtTypeReference(string typeFullName, bool isEnum = false)
         {
@@ -234,6 +248,13 @@ namespace EngineNS.Bricks.CodeBuilder
                     rNames.Add(rName);
                 }
             }
+        }
+
+        public int GetGenericArgumentsCount()
+        {
+            if (mTypeDesc != null)
+                return mTypeDesc.GetGenericArguments().Length;
+            return 0;
         }
     }
 
@@ -1736,8 +1757,6 @@ namespace EngineNS.Bricks.CodeBuilder
         [Rtti.Meta]
         public string MethodName { get; set; } = "Unknow";
         [Rtti.Meta]
-        public bool IsReturnRef { get; set; } = false;
-        [Rtti.Meta]
         public List<TtMethodInvokeArgumentExpression> Arguments { get; set; } = new List<TtMethodInvokeArgumentExpression>();
         [Rtti.Meta]
         public TtVariableDeclaration ReturnValue { get; set; }
@@ -1746,9 +1765,17 @@ namespace EngineNS.Bricks.CodeBuilder
         [Rtti.Meta]
         public bool ForceCastReturnType { get; set; } = false;
         [Rtti.Meta]
+        public bool IsReturnRef { get; set; } = false;
+        [Rtti.Meta]
         public bool IsAsync { get; set; } = false;
         [Rtti.Meta]
         public bool IsUnsafe { get; set; } = false;
+        [Rtti.Meta]
+        public bool IsTaskWaitComplate { get; set; } = true;
+        [Rtti.Meta]
+        public bool IsVoidTask { get; set; } = false;
+        [Rtti.Meta]
+        public TtMethodDeclaration.EAsyncType GenGetTaskResult { get; set; } = TtMethodDeclaration.EAsyncType.None;
         public List<TtTypeDesc> GenericTypes { get; set; } = new List<TtTypeDesc>();
         
         public TtMethodInvokeStatement() { }

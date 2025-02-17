@@ -1091,7 +1091,7 @@ namespace EngineNS.Bricks.NodeGraph
                         }
                         else
                         {
-                            // 打开该pin关联的菜�?
+                            // 打开该pin关联的菜�?
                             PopMenuPosition = ViewportRateToCanvas(in screenPos);
                             if(PopMenuPressObject != null && PopMenuPressObject != this)
                             {

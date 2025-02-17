@@ -325,9 +325,9 @@ namespace EngineNS.Bricks.CodeBuilder
         public bool TestBool { get; set; } = true;
 
         [Rtti.Meta]
-        public virtual async System.Threading.Tasks.Task<bool> OnNodeInited(TtNode host)
+        public virtual async TtTask BeginPlay(TtNode host)
         {
-            return true;
+            
         }
         [Rtti.Meta]
         public virtual void Tick(TtNode host)
@@ -463,12 +463,22 @@ namespace EngineNS.Bricks.CodeBuilder
             ((ISceneNodeMacross<T>)inner).SetPropertyValue_Gen(nameHash, in value);
         }
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var ret = await base.InitializeNode(world, data, bvType, placementType);
-
-            MacrossGetter?.Get()?.OnNodeInited(this);
             return ret;
+        }
+        protected override async TtTask OnPostInitNode(TtNode parent)
+        {
+            await base.OnPostInitNode(parent);
+            if (MacrossGetter != null)
+            {
+                var mc = MacrossGetter.Get();
+                if (mc != null)
+                {
+                    await mc.BeginPlay(this);
+                }
+            }
         }
         public override Profiler.TimeScope GetScopeTickLogic()
         {
@@ -495,8 +505,8 @@ namespace EngineNS.Bricks.CodeBuilder
 {
 	partial class TtSceneNodeMacrossBase
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_OnNodeInited_2673848221 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.TtSceneNodeMacrossBase->System.Threading.Tasks.Task<bool> OnNodeInited(TtNode host)");
-		public async System.Threading.Tasks.Task<bool> macross_OnNodeInited (string nodeName, TtNode host) 
+		private static EngineNS.Macross.TtMacrossBreak macross_break_BeginPlay_2673848221 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.TtSceneNodeMacrossBase->TtTask BeginPlay(TtNode host)");
+		public async TtTask macross_BeginPlay (string nodeName, TtNode host) 
 		{
 			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
@@ -505,9 +515,8 @@ namespace EngineNS.Bricks.CodeBuilder
 					stackframe.SetWatchVariable(nodeName + ":host", host);
 				}
 			}
-			var _return_value = await OnNodeInited(host);
-			macross_break_OnNodeInited_2673848221.TryBreak();
-			return _return_value;
+			await BeginPlay(host);
+			macross_break_BeginPlay_2673848221.TryBreak();
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_Tick_2673848221 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Bricks.CodeBuilder.TtSceneNodeMacrossBase->void Tick(TtNode host)");
 		public unsafe void macross_Tick (string nodeName, TtNode host) 

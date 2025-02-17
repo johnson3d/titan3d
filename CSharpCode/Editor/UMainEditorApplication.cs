@@ -10,6 +10,7 @@ using NPOI.SS.Formula.Functions;
 using EngineNS.UI.Editor;
 using EngineNS.Macross;
 using System.Runtime.InteropServices;
+using EngineNS.GamePlay.Scene;
 //using SDL2;
 
 namespace EngineNS.Editor
@@ -781,140 +782,94 @@ namespace EngineNS.Editor
             {
                 var meshData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
                 meshData.MeshName = RName.GetRName("utest/mesh/skysphere001.ums");
-                var meshNode = new GamePlay.Scene.TtSkyNode();
-                await meshNode.InitializeNode(world, meshData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
-                meshNode.Parent = root;
-                meshNode.Placement.Scale = new Vector3(800.0f);
-                meshNode.Placement.Position = DVector3.Zero;
-                meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
-                meshNode.NodeData.Name = "SkySphere";
-                meshNode.IsAcceptShadow = false;
-                meshNode.IsCastShadow = false;
+                var meshNode = await TtNode.SpawnNode<GamePlay.Scene.TtSkyNode>(root, async (nd) =>
+                {
+                    nd.Parent = root;
+                    nd.Placement.Scale = new Vector3(800.0f);
+                    nd.Placement.Position = DVector3.Zero;
+                    nd.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
+                    nd.NodeData.Name = "SkySphere";
+                    nd.IsAcceptShadow = false;
+                    nd.IsCastShadow = false;
+                }, meshData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
             }
 
             {
                 var meshData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
                 meshData.MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
                 meshData.CollideName = RName.GetRName("utest/puppet/mesh/puppet.vms");
-                var meshNode = new GamePlay.Scene.TtMeshNode();
-                await meshNode.InitializeNode(world, meshData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
-                meshNode.Parent = root;
-                meshNode.Placement.SetTransform(new DVector3(0, 0, 0), new Vector3(0.01f), Quaternion.Identity);
-                meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
-                meshNode.NodeData.Name = "Robot0";
-                meshNode.IsAcceptShadow = false;
-                meshNode.IsCastShadow = true;
+                var meshNode = await TtNode.SpawnNode<GamePlay.Scene.TtMeshNode>(root, async (nd)=>
+                {
+                    nd.Placement.SetTransform(new DVector3(0, 0, 0), new Vector3(0.01f), Quaternion.Identity);
+                    nd.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
+                    nd.NodeData.Name = "Robot0";
+                    nd.IsAcceptShadow = false;
+                    nd.IsCastShadow = true;
+                }, meshData);
 
                 {
                     var mesh1 = new Graphics.Mesh.TtMesh();
                     await mesh1.Initialize(RName.GetRName("utest/puppet/mesh/puppet.ums"), Rtti.TtTypeDesc.TypeOf(typeof(Graphics.Mesh.TtMdfSkinMesh)));
                     var meshData1 = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
-                    var meshNode1 = new GamePlay.Scene.TtMeshNode();
-                    await meshNode1.InitializeNode(world, meshData1, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
-                    meshNode1.Mesh = mesh1;
-                    meshNode1.NodeData.Name = "Robot1";
-                    meshNode1.Parent = meshNode;
-                    meshNode1.Placement.SetTransform(new DVector3(3, 3, 3), new Vector3(0.01f), Quaternion.RotationAxis(Vector3.UnitY, (float)Math.PI / 4));
-                    meshNode1.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.FollowParent;
-                    meshNode1.IsAcceptShadow = false;
-                    meshNode1.IsCastShadow = true;
+                    var meshNode1 = await TtNode.SpawnNode<GamePlay.Scene.TtMeshNode>(meshNode, async (nd) =>
+                    {
+                        nd.Mesh = mesh1;
+                        nd.NodeData.Name = "Robot1";
+                        nd.Parent = meshNode;
+                        nd.Placement.SetTransform(new DVector3(3, 3, 3), new Vector3(0.01f), Quaternion.RotationAxis(Vector3.UnitY, (float)Math.PI / 4));
+                        nd.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.FollowParent;
+                        nd.IsAcceptShadow = false;
+                        nd.IsCastShadow = true;
 
-                    (meshNode1.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
-                    (meshNode1.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).MdfQueueType = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMdfSkinMesh));
-                    (meshNode1.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).AtomType = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMesh.TtAtom));
-
-                   }
+                        nd.MeshName = RName.GetRName("utest/puppet/mesh/puppet.ums");
+                        (nd.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).MdfQueueType = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMdfSkinMesh));
+                        (nd.NodeData as GamePlay.Scene.TtMeshNode.TtMeshNodeData).AtomType = Rtti.TtTypeDesc.TypeStr(typeof(Graphics.Mesh.TtMesh.TtAtom));
+                    }, meshData1);
+                }
             }
 
             {
                 var meshData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
                 meshData.MeshName = RName.GetRName("utest/brdf_test/chair2.ums");
                 //meshData.CollideName = RName.GetRName("utest/puppet/mesh/puppet.vms");
-                var meshNode = new GamePlay.Scene.TtMeshNode();
-                await meshNode.InitializeNode(world, meshData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
-                meshNode.Parent = root;
-                meshNode.Placement.SetTransform(new DVector3(0, 10, 0), new Vector3(1.0f), Quaternion.Identity);
-                meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
-                meshNode.NodeData.Name = "Robot_Chair";
-                meshNode.IsAcceptShadow = false;
-                meshNode.IsCastShadow = true;
+                var meshNode = await TtNode.SpawnNode<GamePlay.Scene.TtMeshNode>(root, async (nd)=>
+                {
+                    nd.Placement.SetTransform(new DVector3(0, 10, 0), new Vector3(1.0f), Quaternion.Identity);
+                    nd.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
+                    nd.NodeData.Name = "Robot_Chair";
+                    nd.IsAcceptShadow = false;
+                    nd.IsCastShadow = true;
+                }, meshData);
             }
 
             {
                 var meshData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
                 meshData.MeshName = RName.GetRName("utest/brdf_test/chair2.ums");
                 //meshData.CollideName = RName.GetRName("utest/puppet/mesh/puppet.vms");
-                var meshNode = new GamePlay.Scene.TtMeshNode();
-                await meshNode.InitializeNode(world, meshData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
-                meshNode.Parent = root;
-                meshNode.Placement.SetTransform(new DVector3(0, 10, 0), new Vector3(1.0f), Quaternion.Identity);
-                meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
-                meshNode.NodeData.Name = "Robot_Chair_Far";
-                meshNode.IsAcceptShadow = false;
-                meshNode.IsCastShadow = true;
+                var meshNode = await TtNode.SpawnNode<GamePlay.Scene.TtMeshNode>(root, async (nd)=>
+                {
+                    nd.Placement.SetTransform(new DVector3(0, 10, 0), new Vector3(1.0f), Quaternion.Identity);
+                    nd.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;
+                    nd.NodeData.Name = "Robot_Chair_Far";
+                    nd.IsAcceptShadow = false;
+                    nd.IsCastShadow = true;
 
-                meshNode.Placement.Position = new DVector3(1024 * 100, 0, 0);
+                    nd.Placement.Position = new DVector3(1024 * 100, 0, 0);
+                }, meshData);
             }
-
-            //var materials1 = new Graphics.Pipeline.Shader.UMaterialInstance[1];
-            //materials1[0] = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("utest/ddd.uminst"));
-
-            ////var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeBoxWireframe(0, 0, 0, 5, 5, 5).ToMesh();
-            ////var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeSphere(2.5f, 100, 100, 0xfffffff).ToMesh();
-            //var cookMeshProvider = Graphics.Mesh.UMeshDataProvider.MakeCylinder(2.0f, 0.5f, 3.0f, 100, 100, 0xfffffff);
-            //var cookedMesh = cookMeshProvider.ToMesh();
-            ////var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeTorus(2.0f, 3.0f, 100, 300, 0xfffffff).ToMesh(); 
-            ////var cookedMesh = Graphics.Mesh.UMeshDataProvider.MakeCapsule(1.0f, 4.0f, 100, 100, 100, Graphics.Mesh.UMeshDataProvider.ECapsuleUvProfile.Aspect, 0xfffffff).ToMesh();
-            //{
-            //    var mesh2 = new Graphics.Mesh.TtMesh();
-            //    var colorVar = materials1[0].FindVar("clr4_0");
-            //    if (colorVar != null)
-            //    {
-            //        colorVar.SetValue(new Vector4(1, 0, 1, 1));
-            //    }
-            //    var ok1 = mesh2.Initialize(cookedMesh, materials1, Rtti.TtTypeDesc.TypeOf(typeof(Graphics.Mesh.UMdfStaticMesh)));
-            //    if (ok1)
-            //    {
-            //        var boxNode = await GamePlay.Scene.UMeshNode.AddMeshNode(world, root, new GamePlay.Scene.UMeshNode.UMeshNodeData(), typeof(GamePlay.UPlacement), mesh2,
-            //            DVector3.Zero, Vector3.UnitXYZ, Quaternion.Identity);
-            //        boxNode.NodeData.Name = "MakeMeshNode";
-            //        boxNode.HitproxyType = Graphics.Pipeline.UHitProxy.EHitproxyType.Root;
-            //        boxNode.IsCastShadow = true;
-            //        boxNode.IsAcceptShadow = true;
-
-            //        //var pxNode = new Bricks.PhysicsCore.URigidBodyNode();
-            //        //var rgData = new Bricks.PhysicsCore.URigidBodyNode.URigidBodyNodeData();
-            //        //rgData.PxActorType = EPhyActorType.PAT_Static;
-            //        //var pc = TtEngine.Instance.PhyModue.PhyContext;
-
-            //        //var pxTriMesh = pc.CookTriMesh(cookMeshProvider, null, null, null);
-            //        //var pxMtls = new Bricks.PhysicsCore.UPhyMaterial[1];
-            //        //pxMtls[0] = pc.PhyMaterialManager.DefaultMaterial;
-            //        ////var pxShape = pc.CreateShapeTriMesh(pxMtls, pxTriMesh, Vector3.UnitXYZ, Quaternion.Identity);
-            //        //var pxShape = pc.CreateShapeBox(pxMtls[0], new Vector3(20,30,10));
-            //        //pxShape.mCoreObject.SetFlag(EPhysShapeFlag.eVISUALIZATION, true);
-            //        //pxShape.mCoreObject.SetFlag(EPhysShapeFlag.eSCENE_QUERY_SHAPE, true);
-            //        //pxShape.mCoreObject.SetFlag(EPhysShapeFlag.eSIMULATION_SHAPE, true);
-            //        //rgData.PxShapes.Add(pxShape);
-            //        //await pxNode.InitializeNode(world, rgData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.UPlacementBase));
-            //        //pxNode.Parent = boxNode;
-
-            //        boxNode.Placement.Position = new DVector3(0, 0, 0);
-            //    }
-            //}
 
             {
                 var nebulaData = new Bricks.Particle.TtNebulaNode.TtNebulaNodeData();
                 //nebulaData.MeshName = RName.GetRName("utest/mesh/unit_sphere.ums");
                 nebulaData.NebulaName = RName.GetRName("utest/particle001.nebula");
-                var meshNode = new Bricks.Particle.TtNebulaNode();
-                await meshNode.InitializeNode(world, nebulaData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
-                meshNode.Parent = root;
-                meshNode.Placement.Position = DVector3.Zero;
-                meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
-                meshNode.NodeData.Name = "NebulaParticle";
-                meshNode.IsAcceptShadow = false;
-                meshNode.IsCastShadow = false;
+                var meshNode = await TtNode.SpawnNode<Bricks.Particle.TtNebulaNode>(root, async (nd)=>
+                {
+                    nd.Placement.Position = DVector3.Zero;
+                    nd.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
+                    nd.NodeData.Name = "NebulaParticle";
+                    nd.IsAcceptShadow = false;
+                    nd.IsCastShadow = false;
+                }, nebulaData);
             }
 
             {
@@ -928,12 +883,10 @@ namespace EngineNS.Editor
 
             if (hideTerrain == false)
             {
-                var terrainNode = new Bricks.Terrain.CDLOD.TtTerrainNode();
                 var terrainData = new Bricks.Terrain.CDLOD.TtTerrainNode.TtTerrainData();
                 terrainData.Name = "TerrainGen";
                 terrainData.PgcName = RName.GetRName("UTest/terraingen.pgc");
-                await terrainNode.InitializeNode(world, terrainData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
-                terrainNode.Parent = root;
+                var terrainNode = await TtNode.SpawnNode<Bricks.Terrain.CDLOD.TtTerrainNode>(root, null, terrainData);
                 terrainNode.Placement.Position = DVector3.Zero;
                 terrainNode.IsAcceptShadow = true;
                 terrainNode.SetActiveCenter(in DVector3.Zero);
@@ -949,17 +902,13 @@ namespace EngineNS.Editor
         public static async System.Threading.Tasks.Task TestCreateCharacter(GamePlay.TtWorld world, GamePlay.Scene.TtNode root, bool hideTerrain = false)
         {
             var characterController = new GamePlay.Controller.TtCharacterController();
-            var player = new GamePlay.Player.TtPlayer();
             var playerData = new GamePlay.Player.TtPlayer.TtPlayerData() { CharacterController = characterController };
-            await player.InitializeNode(world, playerData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
-            player.Parent = root;
-
-            var character = new GamePlay.Character.TtCharacter();
-            await character.InitializeNode(world, new GamePlay.Character.TtCharacter.TtCharacterData(), GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
+            var player = await TtNode.SpawnNode<GamePlay.Player.TtPlayer>(root, null, playerData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
+            
+            var character = await TtNode.SpawnNode<GamePlay.Character.TtCharacter>(null, null, null, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement), world);
             characterController.ControlledCharacter = character;
             var movement = new GamePlay.Movemnet.TtMovement();
             movement.Parent = character;
-
         }
         #endregion
 

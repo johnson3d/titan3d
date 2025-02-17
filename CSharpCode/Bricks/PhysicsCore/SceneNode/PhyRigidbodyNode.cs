@@ -115,7 +115,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
                 }
             }
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var baseResult = await base.InitializeNode(world, data, bvType, placementType);
             if (!baseResult)
@@ -159,9 +159,9 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
             PhyActor.mCoreObject.SetMinCCDAdvanceCoefficient(0);       
         }
 
-        public override TtTask OnNodeLoaded(TtNode parent)
+        protected override TtTask OnPostInitNode(TtNode parent)
         {
-            return base.OnNodeLoaded(parent);
+            return base.OnPostInitNode(parent);
         }
 
         protected override void OnParentChanged(TtNode prev, TtNode cur)

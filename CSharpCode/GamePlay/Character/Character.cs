@@ -22,7 +22,7 @@ namespace EngineNS.GamePlay.Character
                 return NodeData as TtCharacterData;
             }
         }
-        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             if (await base.InitializeNode(world, data, bvType, placementType) == false)
             {

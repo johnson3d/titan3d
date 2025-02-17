@@ -352,7 +352,7 @@ namespace Survivor
             public string WeaponType = "";
         }
         public TtWeaponNodeData WeaponNodeData { get => NodeData as TtWeaponNodeData; }
-        public override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
             if(WeaponNodeData.WeaponId > 0)

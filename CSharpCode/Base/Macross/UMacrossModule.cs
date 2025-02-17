@@ -132,6 +132,12 @@ namespace EngineNS.Macross
     public partial class TtMacrossModule : TtModule<TtEngine>
     {
         WeakReference mAssembly;
+        public System.Reflection.Assembly TryGetAssembly()
+        {
+            if (mAssembly == null)
+                return null;
+            return mAssembly.Target as System.Reflection.Assembly;
+        }
         private TtMacrosAssemblyLoader mAssemblyLoader;
         private Rtti.TtAssemblyDesc mAssemblyDesc;
         public uint Version = 1;

@@ -319,7 +319,7 @@ namespace EngineNS.Editor.Forms
             }
             public Vector3 Input = Vector3.Zero;
 
-            public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+            protected override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
             {
                 SetStyle(ENodeStyles.Invisible);
                 if (!await base.InitializeNode(world, data, bvType, placementType))
@@ -362,10 +362,11 @@ namespace EngineNS.Editor.Forms
             public static async System.Threading.Tasks.Task<TtBlendSpaceAnimPreviewNode> AddBlendSpace2DAnimPreviewNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, EBoundVolumeType bvType, Type placementType)
             {
                 System.Diagnostics.Debug.Assert(parent is TtMeshNode);
-                var node = new TtBlendSpaceAnimPreviewNode();
-                await node.InitializeNode(world, data, bvType, placementType);
-                node.BindingTo(parent as TtMeshNode);
-                node.Parent = parent;
+                var node = await TtNode.SpawnNode<TtBlendSpaceAnimPreviewNode>(parent, async (nd)=>
+                {
+                    nd.BindingTo(parent as TtMeshNode);
+                }, data, bvType, placementType);
+                
                 return node;
             }
         }

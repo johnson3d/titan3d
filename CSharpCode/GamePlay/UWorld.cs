@@ -29,8 +29,8 @@ namespace EngineNS.GamePlay
 
             mOnVisitNode_GatherBoundShapes = this.OnVisitNode_GatherBoundShapes;
 
-            mRoot = new Scene.TtScene();
-            mRoot.SetWorld(this);
+            //mRoot = new Scene.TtScene();
+            //mRoot.SetWorld(this);
             System.Threading.Interlocked.Increment(ref mNodeAliveNumber);
         }
         ~TtWorld()
@@ -44,7 +44,7 @@ namespace EngineNS.GamePlay
         public async System.Threading.Tasks.Task<bool> InitWorld()
         {
             Scene.TtNodeData data = new Scene.TtNodeData();
-            await mRoot.InitializeNode(this, data, Scene.EBoundVolumeType.Box, typeof(TtPlacement));
+            mRoot = await TtNode.SpawnNode<Scene.TtScene>(null, null, data, Scene.EBoundVolumeType.Box, typeof(TtPlacement), this);
             mRoot.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
 
             mBoundingDebugMaterial = await TtEngine.Instance.GfxDevice.MaterialInstanceManager.GetMaterialInstance(RName.GetRName("material/redcolor.uminst", RName.ERNameType.Engine));

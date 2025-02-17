@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)MacrossSurvivorGame.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Monster.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MonsterController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MonsterSpawner.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Weapon.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MonsterNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WeaponNode.cs" />

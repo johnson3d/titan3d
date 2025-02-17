@@ -65,6 +65,7 @@ namespace EngineNS.Thread
             //}
             //mMonitorEnterObjects.Clear();
         }
+        public bool IsWaitingTask = false;
         protected bool mIsRun = false;
         private bool mIsFinished = false;
         public int Interval
@@ -139,6 +140,7 @@ namespace EngineNS.Thread
         }
         public void FlushToSemephore(TtSemaphore smp)
         {
+            IsWaitingTask = true;
             //System.Diagnostics.Debug.Assert(TtContextThread.CurrentContext.ThreadId != TtEngine.Instance.ThreadMain.ThreadId);
             var IsMainThread = TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadMain.ThreadId;
             var t1 = Support.TtTime.HighPrecision_GetTickCount();
@@ -158,12 +160,14 @@ namespace EngineNS.Thread
                     {
                         Profiler.Log.WriteLine<Profiler.TtThreadGategory>(Profiler.ELogTag.Warning, $"FlushToSemephore Time = {(t2 - t1) / 1000} ms");
                     }
+                    IsWaitingTask = false;
                     return;
                 }
             }
         }
         public void WaitTask(Thread.Async.ITask task)
         {
+            IsWaitingTask = true;
             var IsMainThread = TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadMain.ThreadId;
             var t1 = Support.TtTime.HighPrecision_GetTickCount();
             while (true)
@@ -182,6 +186,7 @@ namespace EngineNS.Thread
                     {
                         Profiler.Log.WriteLine<Profiler.TtThreadGategory>(Profiler.ELogTag.Warning, $"WaitTask Time = {(t2 - t1) / 1000} ms");
                     }
+                    IsWaitingTask = false;
                     return;
                 }
             }
@@ -275,10 +280,13 @@ namespace EngineNS.Thread
         public int GetContinueEventNumber(TtContextThread thread)
         {
             int count = 0;
-            foreach (var i in AsyncEvents)
+            lock (AsyncEvents)
             {
-                if (i.ContinueThread == thread)
-                    count++;
+                foreach (var i in AsyncEvents)
+                {
+                    if (i.ContinueThread == thread)
+                        count++;
+                }
             }
             return count;
         }
@@ -517,6 +525,14 @@ namespace EngineNS.Thread
 
         public bool IsThisThread()
         {
+            if (IsWaitingTask)
+            {
+                if (TtContextThread.CurrentContext.ThreadId == TtEngine.Instance.ThreadMain.ThreadId)
+                {
+                    if (this.ThreadId == TtEngine.Instance.ThreadLogic.ThreadId)
+                        return true;
+                }
+            }
             return (this.ThreadId == System.Threading.Thread.CurrentThread.ManagedThreadId);
         }
     }

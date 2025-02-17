@@ -49,37 +49,34 @@ namespace Survivor
         {
             MonsterManager.LoadDataSet(name);
         }
- 
         [EngineNS.Rtti.Meta]
-        public void CreateMonsterSpawner()
-        {
-            EngineNS.TtEngine.Instance.TaskCollector.AddWaitTask(InitMonsterSpawner());
-
-        }
-        private async TtTask InitMonsterSpawner()
-        {
-            var node = new TtMonsterSpawnerNode();
+        public async TtTask InitMonsterSpawner() 
+        { 
             var nodeData = new TtMonsterSpawnerNode.TtMonsterSpawnerNodeData();
-            await node.InitializeNode(CurrentScene.HostWorld, nodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
+            var node = await TtNode.SpawnNode<TtMonsterSpawnerNode>(CurrentScene, null,
+                nodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             node.Parent = CurrentScene;
         }
         [EngineNS.Rtti.Meta]
-        public void SelectRole(int roleId)
+        public async TtTask SelectRole(int roleId)
         {
             var roleData = HeroManager.GetData("RoleId", roleId);
+            if (roleData == null)
+                return;
             var character = CurrentScene.FindFirstChild<TtCharacter>(null, true);
             Player = character as TtCharacter;
-            EngineNS.TtEngine.Instance.TaskCollector.AddWaitTask(InitCharacter(character, roleData));
+            if (Player == null)
+                return;
+            await InitCharacter(character, roleData);
         }
 
         private async TtTask InitCharacter(TtNode parent, TtRoleData roleData)
         {
-            var stateNode = new TtCharacterStateNode();
             var stateNodeData = new TtCharacterStateNode.TtCharacterStateNodeData();
             stateNodeData.RoleData = roleData;
             stateNodeData.CurrentHP = roleData.Health;
-            await stateNode.InitializeNode(parent.HostWorld, stateNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
-            stateNode.Parent = parent;
+            var stateNode = await TtNode.SpawnNode<TtCharacterStateNode>(parent, null,
+                stateNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             stateNode.NodeName = "StateNode";
             stateNode.OnDead = ()=>
             {
@@ -88,21 +85,19 @@ namespace Survivor
             };
 
             {
-                var weaponNode = new TtWeaponNode();
                 var weaponNodeData = new TtWeaponNode.TtWeaponNodeData();
                 weaponNodeData.WeaponId = roleData.Weapon1;
-                await weaponNode.InitializeNode(parent.HostWorld, weaponNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
+                var weaponNode = await TtNode.SpawnNode<TtWeaponNode>(parent.Parent, null,
+                    weaponNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
                 weaponNode.RoleData = roleData;
-                weaponNode.Parent = parent.Parent;
             }
 
             {
-                var weaponNode = new TtWeaponNode();
                 var weaponNodeData = new TtWeaponNode.TtWeaponNodeData();
                 weaponNodeData.WeaponId = 1002;
-                await weaponNode.InitializeNode(parent.HostWorld, weaponNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
+                var weaponNode = await TtNode.SpawnNode<TtWeaponNode>(parent.Parent, null,
+                    weaponNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
                 weaponNode.RoleData = roleData;
-                weaponNode.Parent = parent.Parent;
             }
             
         }
@@ -162,8 +157,8 @@ namespace Survivor
 			LoadMonsters(name);
 			macross_break_LoadMonsters_2037383663.TryBreak();
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_CreateMonsterSpawner_2609910045 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtGameMode->void CreateMonsterSpawner()");
-		public unsafe void macross_CreateMonsterSpawner (string nodeName) 
+		private static EngineNS.Macross.TtMacrossBreak macross_break_InitMonsterSpawner_2609910045 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtGameMode->TtTask InitMonsterSpawner()");
+		public async TtTask macross_InitMonsterSpawner (string nodeName) 
 		{
 			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
@@ -171,11 +166,11 @@ namespace Survivor
 				{
 				}
 			}
-			CreateMonsterSpawner();
-			macross_break_CreateMonsterSpawner_2609910045.TryBreak();
+			await InitMonsterSpawner();
+			macross_break_InitMonsterSpawner_2609910045.TryBreak();
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_SelectRole_770898579 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtGameMode->void SelectRole(int roleId)");
-		public unsafe void macross_SelectRole (string nodeName, int roleId) 
+		private static EngineNS.Macross.TtMacrossBreak macross_break_SelectRole_770898579 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtGameMode->TtTask SelectRole(int roleId)");
+		public async TtTask macross_SelectRole (string nodeName, int roleId) 
 		{
 			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
@@ -184,7 +179,7 @@ namespace Survivor
 					stackframe.SetWatchVariable(nodeName + ":roleId", roleId);
 				}
 			}
-			SelectRole(roleId);
+			await SelectRole(roleId);
 			macross_break_SelectRole_770898579.TryBreak();
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_GetSurvivorGameMode_3323264318 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtGameMode->static TtGameMode GetSurvivorGameMode()");

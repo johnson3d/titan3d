@@ -48,7 +48,7 @@ namespace EngineNS.DesignMacross
                 //}
             }
         }
-        public override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             NodeData = data;
             var ret = await base.InitializeNode(world, data, bvType, placementType);
@@ -69,9 +69,9 @@ namespace EngineNS.DesignMacross
             base.OnParentChanged(prev, cur);
             //DesignMacross = DesignMacross;
         }
-        public override async Thread.Async.TtTask OnNodeLoaded(TtNode parent)
+        protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent)
         {
-            await base.OnNodeLoaded(parent);
+            await base.OnPostInitNode(parent);
             DesignMacross = DesignMacross;
         }
         //[RName.PGRName(FilterExts = UDesignMacross.AssetExt)]

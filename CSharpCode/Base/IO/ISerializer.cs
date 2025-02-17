@@ -150,15 +150,21 @@ namespace EngineNS.IO
                 return true;
             }
         }
-        const uint MemberMagic = 0xcdcdcdcd;
+        const uint MemberMagic_1 = 0xcdcdcdcd;
+        const uint MemberMagic_2 = 0xcdcdcdce;
         public static void ReadMember(IReader ar, ISerializer obj, Rtti.TtMetaVersion metaVersion = null)
         {
             var pos = ar.GetPosition();
             uint magic = 0;
             ar.Read(out magic);
-            if (magic == MemberMagic)
+            if (magic == MemberMagic_1)
             {
-                Bricks.DataCopyer.TtDataCopyer.ReadMember(ar, obj, metaVersion);
+                Bricks.DataCopyer.TtDataCopyer.ReadMember(ar, obj, metaVersion, false);
+                return;
+            }
+            else if (magic == MemberMagic_2)
+            {
+                Bricks.DataCopyer.TtDataCopyer.ReadMember(ar, obj, metaVersion, true);
                 return;
             }
             else
@@ -269,7 +275,7 @@ namespace EngineNS.IO
         {
             if (true)
             {
-                ar.Write(MemberMagic);
+                ar.Write(MemberMagic_2);
                 Bricks.DataCopyer.TtDataCopyer.WriteMember(ar, obj, metaVersion);
             }
             else

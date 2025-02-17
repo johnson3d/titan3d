@@ -1,6 +1,5 @@
 ﻿using EngineNS.Bricks.DataCopyer;
 using EngineNS.IO;
-using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -92,17 +91,20 @@ namespace EngineNS.Bricks.DataCopyer
                 WriteObject(ar, i.PropInfo.PropertyType, i.PropInfo.GetValue(obj));
             }
         }
-        public static void ReadMember(IO.IReader ar, object obj, Rtti.TtMetaVersion metaVersion = null)
+        public static void ReadMember(IO.IReader ar, object obj, Rtti.TtMetaVersion metaVersion, bool hasSkip)
         {
             foreach (var i in metaVersion.Propertys)
             {
-                if (i.PropInfo.CanRead == false || (i.PropInfo.GetGetMethod() != null && i.PropInfo.GetGetMethod().IsStatic))
+                if (i.PropInfo != null)
                 {
-                    continue;
-                }
-                if (i.PropInfo.GetCustomAttribute<Rtti.MetaAttribute>().IsNoSerializable)
-                {
-                    continue;
+                    if (i.PropInfo.CanRead == false || (i.PropInfo.GetGetMethod() != null && i.PropInfo.GetGetMethod().IsStatic))
+                    {
+                        continue;
+                    }
+                    if (i.PropInfo.GetCustomAttribute<Rtti.MetaAttribute>().IsNoSerializable)
+                    {
+                        continue;
+                    }
                 }
                 if (i.CustumSerializer != null)
                 {
@@ -116,9 +118,19 @@ namespace EngineNS.Bricks.DataCopyer
                 }
                 else
                 {
+                    if (i.PropInfo == null)
+                    {
+                        var type = Rtti.TtTypeDesc.TypeOf(i.FieldTypeStr);
+                        object discardObj = null;
+                        if (type != null)
+                        {
+                            discardObj = ReadObject(ar, type.SystemType, obj, null, hasSkip);
+                        }
+                        return;
+                    }
                     if (IsPrimitiveType(i.PropInfo.PropertyType))
                     {
-                        var value = ReadObject(ar, i.PropInfo.PropertyType, obj, null);
+                        var value = ReadObject(ar, i.PropInfo.PropertyType, obj, null, hasSkip);
                         if (i.PropInfo.CanWrite)
                         {
                             i.PropInfo.SetValue(obj, value);
@@ -131,7 +143,7 @@ namespace EngineNS.Bricks.DataCopyer
                         var value = i.PropInfo.GetValue(obj);
                         if (value == null)
                         {
-                            value = ReadObject(ar, i.PropInfo.PropertyType, obj, null);
+                            value = ReadObject(ar, i.PropInfo.PropertyType, obj, null, hasSkip);
                             if (i.PropInfo.CanWrite)
                             {
                                 i.PropInfo.SetValue(obj, value);
@@ -141,7 +153,7 @@ namespace EngineNS.Bricks.DataCopyer
                         }
                         else
                         {
-                            ReadObject(ar, i.PropInfo.PropertyType, obj, value);
+                            ReadObject(ar, i.PropInfo.PropertyType, obj, value, hasSkip);
                             if (i.PropInfo.CanWrite)
                             {
                                 i.PropInfo.SetValue(obj, value);
@@ -153,7 +165,7 @@ namespace EngineNS.Bricks.DataCopyer
                 }
             }
         }
-        public static unsafe object ReadObject(IReader ar, Type t, object hostObject, object obj)
+        public static unsafe object ReadObject(IReader ar, Type t, object hostObject, object obj, bool hasSkip)
         {
             if (t.IsEnum)
             {
@@ -216,6 +228,9 @@ namespace EngineNS.Bricks.DataCopyer
                     return null;
                 Hash64 hash;
                 ar.Read(out hash);
+                ulong skipPoint = 0;
+                if (hasSkip)
+                    skipPoint = SerializerHelper.GetSkipOffset(ar);
                 var meta = Rtti.TtClassMetaManager.Instance.GetMeta(hash);
                 if (meta != null)
                 {
@@ -232,11 +247,27 @@ namespace EngineNS.Bricks.DataCopyer
                         var serial = v as ISerializer;
                         if (serial != null)
                             serial.OnPreRead(ar.Tag, hostObject, false);
-                        ReadMember(ar, v, ver);
+                        ReadMember(ar, v, ver, hasSkip);
                     }
                     else
-                        System.Diagnostics.Debug.Assert(false);
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Meta({meta.ClassMetaName}:{version}) not found");
+                        if (hasSkip)
+                        {
+                            ar.Seek(skipPoint);
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.Assert(false);
+                        }
+                    }
                     return v;
+                }
+                else
+                {
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Meta({meta.ClassMetaName}) not found");
+                    if (hasSkip)
+                        ar.Seek(skipPoint);
                 }
                 return null;
             }
@@ -253,7 +284,7 @@ namespace EngineNS.Bricks.DataCopyer
                 v.Clear();
                 for (int i = 0; i < count; i++)
                 {
-                    var m = ReadMetaObject(ar, gt, hostObject, null);
+                    var m = ReadMetaObject(ar, gt, hostObject, null, hasSkip);
                     v.Add(m);
                 }
                 return v;
@@ -272,8 +303,8 @@ namespace EngineNS.Bricks.DataCopyer
                 v.Clear();
                 for (int i = 0; i < count; i++)
                 {
-                    var rk = ReadMetaObject(ar, kt, hostObject, null);
-                    var rv = ReadMetaObject(ar, vt, hostObject, null);
+                    var rk = ReadMetaObject(ar, kt, hostObject, null, hasSkip);
+                    var rv = ReadMetaObject(ar, vt, hostObject, null, hasSkip);
                     v[rk] = rv;
                 }
                 return v;
@@ -341,8 +372,10 @@ namespace EngineNS.Bricks.DataCopyer
                     if (meta != null)
                     {
                         ar.Write(meta.TypeHash);
+                        var offset = SerializerHelper.WriteSkippable(ar);
                         ar.Write(meta.CurrentVersion.MetaHash);
                         WriteMember(ar, obj, meta.CurrentVersion);
+                        SerializerHelper.SureSkippable(ar, offset);
                     }
                     else
                     {
@@ -404,8 +437,10 @@ namespace EngineNS.Bricks.DataCopyer
                 if (meta != null)
                 {
                     ar.Write(meta.TypeHash);
+                    var offset = SerializerHelper.WriteSkippable(ar);
                     ar.Write(meta.CurrentVersion.MetaHash);
                     WriteMember(ar, obj, meta.CurrentVersion);
+                    SerializerHelper.SureSkippable(ar, offset);
                 }
                 else
                 {
@@ -413,22 +448,32 @@ namespace EngineNS.Bricks.DataCopyer
                 }
             }
         }
-        private static object ReadMetaObject(IReader ar, Type gt, object hostObject, object obj)
+        private static object ReadMetaObject(IReader ar, Type gt, object hostObject, object obj, bool hasSkipPoint)
         {
             if (IsPrimitiveType(gt))
             {
-                return ReadObject(ar, gt, hostObject, null);
+                return ReadObject(ar, gt, hostObject, null, hasSkipPoint);
             }
             else
             {
                 Hash64 mh;
                 ar.Read(out mh);
+                ulong skipPoint = 0;
+                if (hasSkipPoint)
+                    skipPoint = SerializerHelper.GetSkipOffset(ar);
                 var meta = Rtti.TtClassMetaManager.Instance.GetMeta(mh);
                 if (meta != null)
                 {
                     Hash64 version;
                     ar.Read(out version);
                     var ver = meta.GetMetaVersion(version.AllData);
+                    if (ver == null)
+                    {
+                        Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Meta({meta.ClassMetaName}:{version}) not found");
+                        if (hasSkipPoint)
+                            ar.Seek(skipPoint);
+                        return null;
+                    }
                     object v;
                     if (obj != null)
                         v = obj;
@@ -437,11 +482,14 @@ namespace EngineNS.Bricks.DataCopyer
                     var serial = v as ISerializer;
                     if (serial != null)
                         serial.OnPreRead(ar.Tag, hostObject, false);
-                    ReadMember(ar, v, ver);
+                    ReadMember(ar, v, ver, hasSkipPoint);
                     return v;
                 }
                 else
                 {
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Meta({meta.ClassMetaName}) not found");
+                    if (hasSkipPoint)
+                        ar.Seek(skipPoint);
                     return null;
                 }
             }

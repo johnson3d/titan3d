@@ -1155,7 +1155,7 @@ namespace EngineNS.EGui.Controls.PropertyGrid
             {
                 var listOpAtt = info.HostProperty.GetAttribute<PGListOperationCallbackAttribute>();
                 var baseTypeAtt = info.HostProperty.GetAttribute<PGBaseType>();
-                if (info.Readonly == false)
+                //if (info.Readonly == false)
                 {
                     //ImGuiAPI.SameLine(0, -1);
                     //var sz = new Vector2(0, 0);

@@ -179,16 +179,16 @@ namespace EngineNS.GamePlay
 
         public class UAxisNode : Scene.TtSceneActorNode
         {
-            public override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, Scene.TtNodeData data, Scene.EBoundVolumeType bvType, Type placementType)                
+            protected override async Thread.Async.TtTask<bool> InitializeNode(GamePlay.TtWorld world, Scene.TtNodeData data, Scene.EBoundVolumeType bvType, Type placementType)                
             {
                 var result = await base.InitializeNode(world, data, bvType, placementType);
                 SetStyle(ENodeStyles.Transient);
                 return result;
             }
-            public override async Thread.Async.TtTask OnNodeLoaded(TtNode parent)
+            protected override async Thread.Async.TtTask OnPostInitNode(TtNode parent)
             {
                 SetStyle(ENodeStyles.Transient);
-                await base.OnNodeLoaded(parent);
+                await base.OnPostInitNode(parent);
             }
             public override bool DrawNode(EngineNS.Editor.TtTreeNodeDrawer tree, int index, int NumOfChild)
             {
@@ -674,7 +674,7 @@ namespace EngineNS.GamePlay
                     //case enAxisType.Edge_Z_MaxPlane:  break;
                 }
 
-                MeshNode = (Scene.TtMeshNode) await world.Root.NewNode(world, typeof(Scene.TtMeshNode), meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
+                MeshNode = (Scene.TtMeshNode) await world.Root.SpawnSceneActor<Scene.TtMeshNode>(null, null, meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement), world);
                 MeshNode.SetStyle(Scene.TtNode.ENodeStyles.HideBoundShape | Scene.TtNode.ENodeStyles.NoPickedDraw);
                 if(axisMesh != null)
                 {
@@ -971,7 +971,7 @@ namespace EngineNS.GamePlay
             }
             mAxisMeshDatas = tmpAxis;
 
-            mRootNode = (UAxisNode)await world.Root.NewNode(world, typeof(UAxisNode),
+            mRootNode = (UAxisNode)await world.Root.SpawnSceneActor<UAxisNode>(world.Root, null,
                 new GamePlay.Scene.TtNodeData()
                 {
                     Name = "AxisRootNode"
@@ -993,7 +993,7 @@ namespace EngineNS.GamePlay
                 var meshNodeData = new GamePlay.Scene.TtMeshNode.TtMeshNodeData();
                 meshNodeData.MeshName = mAxisMeshMoveX;
                 meshNodeData.Name = "RotArrowAsset";
-                mRotArrowAssetNode = (Scene.TtMeshNode)await world.Root.NewNode(world, typeof(Scene.TtMeshNode), meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
+                mRotArrowAssetNode = (Scene.TtMeshNode)await world.Root.SpawnSceneActor<Scene.TtMeshNode>(mHostWorld.Root, null, meshNodeData, Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
                 mRotArrowAssetNode.SetStyle(Scene.TtNode.ENodeStyles.HideBoundShape | Scene.TtNode.ENodeStyles.NoPickedDraw);
                 mRotArrowAssetNode.Mesh = rotArrowAssetMesh;
                 mRotArrowAssetNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.Root;

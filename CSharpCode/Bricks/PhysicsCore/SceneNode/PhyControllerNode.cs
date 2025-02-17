@@ -66,7 +66,7 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         [Category("Option")]
         public float Height { get=> CapsulePhyControllerNodeData.Height; set=> CapsulePhyControllerNodeData.Height = value; }
 
-        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var baseResult = await base.InitializeNode(world, data, bvType, placementType);
             if (!baseResult)
@@ -151,8 +151,8 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         TtPhyBoxControllerDesc PhyControllerDesc = null;
         [Category("Option")]
         public Vector3 Extent { get => BoxPhyControllerNodeData.Extent; set => BoxPhyControllerNodeData.Extent = value; }
-        
-        public override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+
+        protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var baseResult = await base.InitializeNode(world, data, bvType, placementType);
             if (!baseResult)

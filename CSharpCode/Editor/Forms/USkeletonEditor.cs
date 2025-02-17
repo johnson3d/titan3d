@@ -53,9 +53,8 @@ namespace EngineNS.Editor.Forms
         public static async System.Threading.Tasks.Task<USkeletonShowNode> AddNode(GamePlay.TtWorld world, TtNode parent, TtNodeData data, Type placementType, DVector3 pos, Vector3 scale, Quaternion quat)
         {
             var scene = parent.GetNearestParentScene();
-            var node = await scene.NewNode(world, typeof(USkeletonShowNode), data, EBoundVolumeType.Box, placementType) as USkeletonShowNode;
+            var node = await scene.SpawnSceneActor<USkeletonShowNode>(parent, null, data, EBoundVolumeType.Box, placementType);
             node.NodeData.Name = node.SceneId.ToString();
-            node.Parent = parent;
 
             node.Placement.SetTransform(in pos, in scale, in quat);
 
@@ -70,7 +69,7 @@ namespace EngineNS.Editor.Forms
         Dictionary<FBoneLine, TtMesh> BoneLineMeshes = new();
         public TtSkeletonAsset SkeletonAsset { get; set; } = null;
         public TtLocalSpaceRuntimePose CurrentPose = null;
-        public override Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
+        protected override Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             var nodeData = data as USkeletonShowNodeData;
             SkeletonAsset = nodeData.SkeletonAsset;

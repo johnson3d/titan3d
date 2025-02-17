@@ -339,7 +339,6 @@ namespace EngineNS.Bricks.Procedure.Node
 
                 graph.GraphEditor.PreviewRoot.ClearChildren();
 
-                var terrainNode = new Bricks.Terrain.CDLOD.TtTerrainNode();
                 var terrainData = new Bricks.Terrain.CDLOD.TtTerrainNode.TtTerrainData();
                 terrainData.NumOfLevelX = 1;
                 terrainData.NumOfLevelZ = 1;
@@ -348,8 +347,7 @@ namespace EngineNS.Bricks.Procedure.Node
                 terrainData.LODRangeFloat.Add(4096.0f);
                 terrainData.Name = "TerrainGen";
                 terrainData.PgcName = graph.GraphEditor.PreviewPGC;
-                await terrainNode.InitializeNode(viewport.World, terrainData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
-                terrainNode.Parent = graph.GraphEditor.PreviewRoot;
+                var terrainNode = await GamePlay.Scene.TtNode.SpawnNode<Bricks.Terrain.CDLOD.TtTerrainNode>(graph.GraphEditor.PreviewRoot, null);
                 terrainNode.Placement.Position = DVector3.Zero;
                 terrainNode.IsCastShadow = false;
                 terrainNode.IsAcceptShadow = false;

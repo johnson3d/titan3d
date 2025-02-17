@@ -2240,6 +2240,8 @@ namespace EngineNS.NxRHI
                 if (width == 0)
                     width = 1;
                 curImage = StbImageSharp.ImageProcessor.GetBoxDownSampler(curImage, width, height);
+                if (curImage == null)
+                    break;
                 if (desc.MipLevel > 0 && mipLevel == desc.MipLevel)
                     break;
             }

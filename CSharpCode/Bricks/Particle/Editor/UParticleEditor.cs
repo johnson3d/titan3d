@@ -244,14 +244,15 @@ namespace EngineNS.Bricks.Particle.Editor
             var nebulaData = new Bricks.Particle.TtNebulaNode.TtNebulaNodeData();
             nebulaData.NebulaName = AssetName;
             nebulaData.NebulaParticle = await TtEngine.Instance.NebulaTemplateManager.CreateParticle(AssetName);
-            var meshNode = new Bricks.Particle.TtNebulaNode();
-            await meshNode.InitializeNode(viewport.World, nebulaData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
-            meshNode.Parent = viewport.World.Root;
-            meshNode.Placement.Position = DVector3.Zero;
-            meshNode.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
-            meshNode.NodeData.Name = "NebulaParticle";
-            meshNode.IsAcceptShadow = false;
-            meshNode.IsCastShadow = false;
+            var meshNode = await GamePlay.Scene.TtNode.SpawnNode<Bricks.Particle.TtNebulaNode>(viewport.World.Root, async (nd) =>
+            {
+                nd.Placement.Position = DVector3.Zero;
+                nd.HitproxyType = Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
+                nd.NodeData.Name = "NebulaParticle";
+                nd.IsAcceptShadow = false;
+                nd.IsCastShadow = false;
+            }, nebulaData, GamePlay.Scene.EBoundVolumeType.Box, typeof(GamePlay.TtPlacement));
+            
 
             NebulaParticle = meshNode.NebulaParticle;
             NubulaNode = meshNode;
