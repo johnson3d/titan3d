@@ -28,4 +28,27 @@ namespace EngineNS.Rtti
         }
     }
 }
-    
+
+namespace Survivor
+{
+    [EngineNS.Bricks.AssemblyLoader.TtPlugin]
+    public class TtPluginLoader
+    {
+        public static TtSurvivorGamePlugin mPluginObject = new TtSurvivorGamePlugin();
+        public static EngineNS.Bricks.AssemblyLoader.IPlugin GetPluginObject()
+        {
+            return mPluginObject;
+        }
+    }
+    public partial class TtSurvivorGamePlugin : EngineNS.Bricks.AssemblyLoader.IPlugin
+    {
+        public void OnLoadedPlugin()
+        {
+
+        }
+        public void OnUnloadPlugin()
+        {
+
+        }
+    }
+}

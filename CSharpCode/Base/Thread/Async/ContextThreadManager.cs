@@ -395,7 +395,13 @@ namespace EngineNS.Thread.Async
             {
                 i.StopThread(()=>
                 {
-                    this.mTaskSemaphore.Release(4);
+                    lock (mTPoolEvents)
+                    {
+                        if (mTaskSemaphore.CurrentCount < MaxSemaphore)
+                        {
+                            mTaskSemaphore.Release(MaxSemaphore - mTaskSemaphore.CurrentCount);
+                        }
+                    }   
                 });
             }
         }

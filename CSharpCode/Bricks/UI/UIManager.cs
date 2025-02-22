@@ -314,6 +314,7 @@ namespace EngineNS.UI
                     {
                         ar.ReadObject(out element);
 
+                        element.AssetName = name;
                         element.MacrossGetter = TtMacrossGetter<TtUIMacrossBase>.NewInstance();
                         element.MacrossGetter.Name = name;
                         var mc = element.MacrossGetter.Get();

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_12864932322111504769 Type="EngineNS.Bricks.PhysicsCore.SceneNode.TtPhyCapsuleCollisionNode.TtPhyCapsuleCollisionNodeData@EngineCore">
+  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Center Type="EngineNS.Vector3@EngineCore" Order="0" />
+  <HalfHeight Type="System.Single@Unknown" Order="0" />
+  <IsTrigger Type="System.Boolean@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.TtNode.ENodeStyles@EngineCore" Order="0" />
+  <PxMaterial Type="EngineNS.RName@EngineCore" Order="0" />
+  <QueryFilterData Type="EngineNS.PhyFilterData@EngineCore" Order="0" />
+  <Radius Type="System.Single@Unknown" Order="0" />
+  <Rotator Type="EngineNS.FRotator@EngineCore" Order="0" />
+  <SimulationFilterData Type="EngineNS.PhyFilterData@EngineCore" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.TtBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.TtPlacementBase@EngineCore" Order="2" />
+</Hash_12864932322111504769>

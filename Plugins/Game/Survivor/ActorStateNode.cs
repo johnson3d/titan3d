@@ -1,3 +1,5 @@
+using BCnEncoder.Shared;
+using EngineNS;
 using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Thread.Async;
@@ -16,6 +18,14 @@ namespace Survivor
             [EngineNS.Rtti.Meta]
             public float CurrentHP { get; set; } = 0;
         }
+        public virtual float CurrentHP 
+        {
+            get => GetNodeData<TtStateNodeData>().CurrentHP;
+            set
+            {
+                GetNodeData<TtStateNodeData>().CurrentHP = value;
+            }
+        }
         public Action OnDead;
         [EngineNS.Rtti.Meta]
         public bool IsDead { get; set; } = false;
@@ -33,7 +43,23 @@ namespace Survivor
             public TtRoleData RoleData { get; set; } = null;
             
         }
-        
+        public override float CurrentHP
+        {
+            get => GetNodeData<TtStateNodeData>().CurrentHP;
+            set
+            {
+                var data = GetNodeData<TtStateNodeData>();
+                if (data.CurrentHP != value)
+                {
+                    data.CurrentHP = value;
+                    if (TtGameMode.GetSurvivorGameMode().HpProgressUI == null)
+                        return;
+                    var percent = (float)value / (float)StateData.RoleData.Health;
+                    percent = EngineNS.MathHelper.Clamp(percent, 0.0f, 1.0f);
+                    TtGameMode.GetSurvivorGameMode().HpProgressUI.Percent = percent;
+                }
+            }
+        }
         public TtCharacterStateNodeData StateData { get => NodeData as TtCharacterStateNodeData; }
         protected override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
@@ -41,7 +67,7 @@ namespace Survivor
         }
         public override void BeAttacked(TtWeaponNode weaponNode)
         {
-            var hp = StateData.CurrentHP - weaponNode.WeaponData.Damage;
+            var hp = this.CurrentHP - weaponNode.WeaponData.Damage;
             if (hp <= 0 && !IsDead)
             {
                 IsDead = true;
@@ -51,7 +77,7 @@ namespace Survivor
                 }
             }
 
-            StateData.CurrentHP = MathF.Max(hp, 0);
+            this.CurrentHP = MathF.Max(hp, 0);
             return;
         }
     }
@@ -66,7 +92,7 @@ namespace Survivor
         public TtMonsterStateNodeData StateData { get => NodeData as TtMonsterStateNodeData; }
         public override void BeAttacked(TtWeaponNode weaponNode)
         {
-            var hp = StateData.CurrentHP - weaponNode.WeaponData.Damage;
+            var hp = this.CurrentHP - weaponNode.WeaponData.Damage;
             if (hp <= 0 && !IsDead)
             {
                 IsDead = true;
@@ -76,7 +102,7 @@ namespace Survivor
                 }
             }
 
-            StateData.CurrentHP = MathF.Max(hp, 0);
+            this.CurrentHP = MathF.Max(hp, 0);
             return;
         }
     }

@@ -182,7 +182,7 @@ namespace EngineNS.DesignMacross.Editor
         {
             TtEngine.Instance.MacrossManager.ClearGameProjectTemplateBuildFiles();
             var assemblyFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameAssembly;
-            if (TtEngine.Instance.MacrossModule.CompileCode(assemblyFile))
+            if (TtEngine.Instance.MacrossModule.CompileCode(assemblyFile, TtEngine.Instance.CurrentPlatform))
             {
                 TtEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
                 foreach (var classDeclaration in ClassDeclarationsForGenerateCompileCode)

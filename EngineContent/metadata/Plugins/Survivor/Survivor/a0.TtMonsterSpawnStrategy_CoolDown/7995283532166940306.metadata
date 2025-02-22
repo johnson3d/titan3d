@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_7995283532166940306 Type="Survivor.TtMonsterSpawnStrategy_CoolDown@Survivor">
+  <CoolDown Type="System.Single@Unknown" Order="0" />
+  <MonsterCount Type="System.Int32@Unknown" Order="0" />
+  <MonsterId Type="System.Int32@Unknown" Order="0" />
+  <SpawnType Type="Survivor.EMonsterSpawnType@Survivor" Order="0" />
+</Hash_7995283532166940306>

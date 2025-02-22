@@ -150,7 +150,7 @@ namespace EngineNS.Macross
             return mAssemblyDesc.CreateInstance(name) as T;
         }
         public List<WeakReference<TtMacrossGetterBase>> mGetters = new List<WeakReference<TtMacrossGetterBase>>();
-        partial void TryCompileCode(string assemblyFile, ref bool success);
+        partial void TryCompileCode(string assemblyFile, ref bool success, EPlatformType platformType);
         public void ReloadAssembly(string assemblyPath, bool bUnloadDLL = true)
         {
             try
@@ -158,7 +158,7 @@ namespace EngineNS.Macross
                 if (!IO.TtFileManager.FileExists(assemblyPath))
                 {
                     bool success = false;
-                    TryCompileCode(assemblyPath, ref success);
+                    TryCompileCode(assemblyPath, ref success, TtEngine.Instance.CurrentPlatform);
                     if(!success)
                         return;
                 }

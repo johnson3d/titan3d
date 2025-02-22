@@ -24,6 +24,7 @@ try
     try
     {
         EngineNS.TtEngine.OnlyInitTypes(new EngineNS.TtEngine(args), cfgFile, false);
+        TtEngine.Instance.PluginModuleManager.InitPlugins(TtEngine.Instance, false);
     }
     catch (Exception ex)
     {
@@ -39,7 +40,7 @@ try
     System.Console.WriteLine($"config file: {cfgFile}");
     System.Console.WriteLine($"TitanEngine GameBuilder: {assemblyFile}");
 
-    EngineNS.Macross.TtMacrossModule.CompileGameProject(csFilesPath, projectFile, assemblyFile);
+    EngineNS.Macross.TtMacrossModule.CompileGameProject(csFilesPath, projectFile, assemblyFile, TtEngine.Instance.CurrentPlatform);
 }
 catch(System.Exception e)
 {

@@ -33,6 +33,7 @@ namespace EngineNS.Rtti
 
 namespace EngineNS.Plugins.LevelServer
 {
+    [EngineNS.Bricks.AssemblyLoader.TtPlugin]
     public class TtPluginLoader
     {
         public static ULevelServerPlugin mPluginObject = new ULevelServerPlugin();

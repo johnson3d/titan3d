@@ -92,14 +92,6 @@ namespace EngineNS.UI
         public RectangleF WindowRectangle = RectangleF.Empty;
         public bool Has3DElement = false;
 
-        [Rtti.Meta]
-        [RName.PGRName(FilterExts = TtUIAsset.AssetExt)]
-        public RName AssetName
-        {
-            get;
-            set;
-        }
-
         public TtUIHost()
         {
             WindowSize = TtEngine.Instance.UIManager.Config.DefaultDesignRect.Size;

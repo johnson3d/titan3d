@@ -12,10 +12,43 @@ using System.Text;
 
 namespace EngineNS.GamePlay
 {
+    public partial class TtGameModeBase : IDisposable
+    {
+        [Rtti.Meta]
+        public Scene.TtScene CurrentScene { get; set; }
+        public virtual void OnSetGameMode(TtGameModeBase prev)
+        {
+
+        }
+        public virtual void OnUnsetGameMode(TtGameModeBase next)
+        {
+
+        }
+        public virtual void Tick(TtGameInstance host, float elapsedMillisecond)
+        {
+
+        }
+        [Rtti.Meta]
+        public virtual void Dispose()
+        {
+
+        }
+    }
     [Macross.TtMacross]
     //[Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.UMacrossGame@EngineCore", "EngineNS.GamePlay.UMacrossGame" })]
     public partial class TtMacrossGame
     {
+        TtGameModeBase mGameMode;
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        public TtGameModeBase GameMode { get => mGameMode; }
+        [Rtti.Meta]
+        public void SetGameMode(TtGameModeBase mode)
+        {
+            mGameMode?.OnUnsetGameMode(mode);
+            var saved = mGameMode;
+            mGameMode = mode;
+            mGameMode?.OnSetGameMode(saved);
+        }
         [Rtti.Meta]
         public virtual async System.Threading.Tasks.Task<bool> BeginPlay(TtGameInstance host)
         {
@@ -26,7 +59,7 @@ namespace EngineNS.GamePlay
         [Rtti.Meta]
         public virtual void Tick(TtGameInstance host, float elapsedMillisecond)
         {
-
+            GameMode?.Tick(host, elapsedMillisecond);
         }
         [Rtti.Meta]
         public virtual void BeginDestroy(TtGameInstance host)
@@ -111,7 +144,7 @@ namespace EngineNS.GamePlay
                 return mMcObject;
             }
         }
-        [Rtti.Meta]
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public TtMacrossGame MacrossGame
         {
             get
@@ -222,27 +255,28 @@ namespace EngineNS.GamePlay
             world.Root.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
             scene.Parent = world.Root;
         }
-        public Controller.TtCharacterController CharacterController { get; set; } = null;
         [Rtti.Meta]
         public async System.Threading.Tasks.Task CreateCharacterFromPrefab(Scene.TtScene scene,
             [RName.PGRName(FilterExts = TtPrefab.AssetExt)]
             RName prefabName)
         {
-            await CreateCharacterFromPrefabDetial(scene, prefabName, true, false);
+            CharacterController = await CreateCharacterController(scene, prefabName, true, false);
         }
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        public Controller.TtCharacterController CharacterController { get; set; } = null;
         [Rtti.Meta]
-        public async System.Threading.Tasks.Task CreateCharacterFromPrefabDetial(Scene.TtScene scene,
+        public async Thread.Async.TtTask<TtCharacterController> CreateCharacterController(Scene.TtScene scene,
             [RName.PGRName(FilterExts = TtPrefab.AssetExt)]
             RName prefabName,
-            bool orientCameraRoation,
-            bool OrientToMovmement)
+            bool orientCameraRoation = true,
+            bool OrientToMovmement = false)
         {
             var playerStart = scene.FindFirstChild<TtPlayerStart>();
             EngineNS.GamePlay.Scene.TtNode root = scene;
 
-            var prefab = await TtPrefabNode.LoadPrefab(scene.World, prefabName);
-            prefab.Root.Parent = root;
-            var actor = prefab.Root.FindFirstChild<TtActor>() as TtActor;
+            var prefab = await TtEngine.Instance.PrefabManager.CreatePrefabNode(scene.World, prefabName);
+            prefab.Parent = root;
+            var actor = prefab.FindFirstChild<TtActor>() as TtActor;
             if (playerStart == null)
             {
                 actor.Placement.SetTransform(new DVector3(0, 0, 0), Vector3.One, Quaternion.Identity);
@@ -251,17 +285,18 @@ namespace EngineNS.GamePlay
             {
                 actor.Placement.SetTransform(playerStart.Placement.TransformData);
             }
-            CharacterController = await TtNode.SpawnNode<EngineNS.GamePlay.Controller.TtCharacterController>(root, null,
+            var result = await TtNode.SpawnNode<EngineNS.GamePlay.Controller.TtCharacterController>(root, null,
                 new TtCharacterController.TtCharacterControllerNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
-            CharacterController.OrientCameraRoation = orientCameraRoation;
-            CharacterController.OrientToMovmement = OrientToMovmement;
-            CharacterController.ControlledCharacter = actor;
+            result.OrientCameraRoation = orientCameraRoation;
+            result.OrientToMovmement = OrientToMovmement;
+            result.ControlledCharacter = actor;
 
-            CharacterController.CameraControlNode = actor.FindFirstChild<TtCameraSpringArm>(null, true) as ICameraControlNode;
+            result.CameraControlNode = actor.FindFirstChild<TtCameraSpringArm>(null, true) as ICameraControlNode;
             var camera = actor.FindFirstChild<TtGamePlayCamera>(null, true) as TtGamePlayCamera;
             camera.Camera = WorldViewportSlate.RenderPolicy.DefaultCamera;
 
-            CharacterController.MovementNode = actor.FindFirstChild<TtMovement>(null, true) as TtMovement;
+            result.MovementNode = actor.FindFirstChild<TtMovement>(null, true) as TtMovement;
+            return result;
         }
         [Rtti.Meta]
         public async System.Threading.Tasks.Task CreateCharacter(Scene.TtScene scene)
@@ -272,7 +307,7 @@ namespace EngineNS.GamePlay
             var ChiefPlayer = await TtNode.SpawnNode<EngineNS.GamePlay.Scene.Actor.TtActor>(root, null,
                 playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             ChiefPlayer.Parent = root;
-            ChiefPlayer.NodeData.Name = "UActor";
+            ChiefPlayer.NodeData.Name = "TtActor";
             ChiefPlayer.HitproxyType = EngineNS.Graphics.Pipeline.TtHitProxy.EHitproxyType.None;
             ChiefPlayer.IsCastShadow = true;
             ChiefPlayer.SetStyle(EngineNS.GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
@@ -379,8 +414,41 @@ namespace EngineNS
 
 namespace EngineNS.GamePlay
 {
+	partial class TtGameModeBase
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_Dispose_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameModeBase->void Dispose()");
+		public unsafe void macross_Dispose (string nodeName) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+				}
+			}
+			Dispose();
+			macross_break_Dispose_2609910045.TryBreak();
+		}
+	}
+}
+
+
+namespace EngineNS.GamePlay
+{
 	partial class TtMacrossGame
 	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_SetGameMode_2946483084 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtMacrossGame->void SetGameMode(TtGameModeBase mode)");
+		public unsafe void macross_SetGameMode (string nodeName, TtGameModeBase mode) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":mode", mode);
+				}
+			}
+			SetGameMode(mode);
+			macross_break_SetGameMode_2946483084.TryBreak();
+		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_BeginPlay_2026881306 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtMacrossGame->System.Threading.Tasks.Task<bool> BeginPlay(TtGameInstance host)");
 		public async System.Threading.Tasks.Task<bool> macross_BeginPlay (string nodeName, TtGameInstance host) 
 		{
@@ -543,8 +611,8 @@ namespace EngineNS.GamePlay
 			await CreateCharacterFromPrefab(scene, prefabName);
 			macross_break_CreateCharacterFromPrefab_401884465.TryBreak();
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_CreateCharacterFromPrefabDetial_2576849437 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->System.Threading.Tasks.Task CreateCharacterFromPrefabDetial(Scene.TtScene scene, RName prefabName, bool orientCameraRoation, bool OrientToMovmement)");
-		public async System.Threading.Tasks.Task macross_CreateCharacterFromPrefabDetial (string nodeName, Scene.TtScene scene, RName prefabName, bool orientCameraRoation, bool OrientToMovmement) 
+		private static EngineNS.Macross.TtMacrossBreak macross_break_CreateCharacterController_2576849437 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->Thread.Async.TtTask<TtCharacterController> CreateCharacterController(Scene.TtScene scene, RName prefabName, bool orientCameraRoation, bool OrientToMovmement)");
+		public async Thread.Async.TtTask<TtCharacterController> macross_CreateCharacterController (string nodeName, Scene.TtScene scene, RName prefabName, bool orientCameraRoation, bool OrientToMovmement) 
 		{
 			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
@@ -556,8 +624,9 @@ namespace EngineNS.GamePlay
 					stackframe.SetWatchVariable(nodeName + ":OrientToMovmement", OrientToMovmement);
 				}
 			}
-			await CreateCharacterFromPrefabDetial(scene, prefabName, orientCameraRoation, OrientToMovmement);
-			macross_break_CreateCharacterFromPrefabDetial_2576849437.TryBreak();
+			var _return_value = await CreateCharacterController(scene, prefabName, orientCameraRoation, OrientToMovmement);
+			macross_break_CreateCharacterController_2576849437.TryBreak();
+			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_CreateCharacter_3958660289 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->System.Threading.Tasks.Task CreateCharacter(Scene.TtScene scene)");
 		public async System.Threading.Tasks.Task macross_CreateCharacter (string nodeName, Scene.TtScene scene) 

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_9858877446976035455 Type="EngineNS.Animation.SceneNode.TtSkeletonAnimPlayNode.TtSkeletonAnimPlayNodeData@EngineCore">
+  <AnimatinName Type="EngineNS.RName@EngineCore" Order="0" />
+  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.TtNode.ENodeStyles@EngineCore" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.TtBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.TtPlacementBase@EngineCore" Order="2" />
+</Hash_9858877446976035455>

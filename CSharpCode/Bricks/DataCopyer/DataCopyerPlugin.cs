@@ -265,7 +265,7 @@ namespace EngineNS.Bricks.DataCopyer
                 }
                 else
                 {
-                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Meta({meta.ClassMetaName}) not found");
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Meta({hash}) not found");
                     if (hasSkip)
                         ar.Seek(skipPoint);
                 }
@@ -487,7 +487,7 @@ namespace EngineNS.Bricks.DataCopyer
                 }
                 else
                 {
-                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Meta({meta.ClassMetaName}) not found");
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"Meta({mh}) not found");
                     if (hasSkipPoint)
                         ar.Seek(skipPoint);
                     return null;

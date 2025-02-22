@@ -33,6 +33,7 @@ namespace EngineNS.Rtti
 
 namespace EngineNS.Plugins.SourceGit
 {
+    [EngineNS.Bricks.AssemblyLoader.TtPlugin]
     public class TtPluginLoader
     {
         public static TtSourceGitPlugin mPluginObject = new TtSourceGitPlugin();
@@ -92,6 +93,7 @@ namespace EngineNS.Plugins.SourceGit
                     catch (Exception actionEx) 
                     {
                         Profiler.Log.WriteException(actionEx);
+                        Profiler.Log.WriteLine<Profiler.TtIOCategory>(ELogTag.Warning, $"git add {file} failed:{actionEx.Message}");
                     }
                 };
                 action();
@@ -145,6 +147,7 @@ namespace EngineNS.Plugins.SourceGit
             catch (Exception ex)
             {
                 Profiler.Log.WriteException(ex);
+                Profiler.Log.WriteLine<Profiler.TtIOCategory>(ELogTag.Warning, $"git add {dir} failed:{ex.Message}");
                 return new Bricks.SourceControl.TtSourceOpResult(-1);
             }
         }

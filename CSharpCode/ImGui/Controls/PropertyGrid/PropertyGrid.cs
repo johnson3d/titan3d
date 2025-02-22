@@ -191,6 +191,23 @@ namespace EngineNS.EGui.Controls.PropertyGrid
         void SetPropertyValue(string propertyName, object? value);
 #nullable disable
     }
+    public class PropertyNotFindValueClass
+    {
+        private static readonly Object s_sync = new Object();
+        static PropertyNotFindValueClass mPropertyNotFindValue;
+        public static PropertyNotFindValueClass PropertyNotFindValue
+        {
+            get
+            {
+                lock(s_sync)
+                {
+                    if (mPropertyNotFindValue == null)
+                        mPropertyNotFindValue = new PropertyNotFindValueClass();
+                    return mPropertyNotFindValue;
+                }
+            }
+        }
+    }
 
     public class PropertyCustomizationHelper<T>
     {

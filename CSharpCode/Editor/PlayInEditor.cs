@@ -165,20 +165,17 @@ namespace EngineNS
             var root = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute);
             TtEngine.Instance.MacrossModule.ReloadAssembly(root + $"/{DotNetVersion}/GameProject.dll", Config.IsTryUnloadMacrossAssembly);
 
-            this.GameInstance = new GamePlay.TtGameInstance();
-            this.GameInstance.WorldViewportSlate.Title = $"Game:{main.Name}";
+            var gameInstance = new GamePlay.TtGameInstance();
+            gameInstance.WorldViewportSlate.Title = $"Game:{main.Name}";
 
-            this.GameInstance.McObject.Name = main;
-            var ret = await this.GameInstance.BeginPlay();
+            gameInstance.McObject.Name = main;
+            var ret = await gameInstance.BeginPlay();
             if (ret == false)
             {
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Error, $"{main} BeginPlay failed!");
-                this.GameInstance = null;
                 return false;
             }
             
-            TtEngine.Instance.TickableManager.AddTickable(this.GameInstance);
-
             TtEngine.Instance.InputSystem.Mouse.ShowCursor = true;
             var esc = IControl.Create<UKey>(new UKey.UKeyData() { Keycode = Bricks.Input.Keycode.KEY_ESCAPE });
             esc.TriggerPress += (ITriggerControl sender)=>
@@ -193,6 +190,8 @@ namespace EngineNS
                 TtEngine.Instance.InputSystem.Mouse.ShowCursor = !TtEngine.Instance.InputSystem.Mouse.ShowCursor;
             };
 
+            TtEngine.Instance.TickableManager.AddTickable(gameInstance);
+            this.GameInstance = gameInstance;
             return ret;
         }
         public void EndPlayInEditor()
@@ -227,13 +226,19 @@ namespace EngineNS
             if (this.GameInstance == null)
                 return;
 
-            TtEngine.Instance?.TickableManager.RemoveTickable(this.GameInstance);
-            this.GameInstance.BeginDestroy();
-            var wr = new WeakReference(this.GameInstance);
-            this.GameInstance.Dispose();
-            this.GameInstance = null;
+            try
+            {
+                TtEngine.Instance?.TickableManager.RemoveTickable(this.GameInstance);
+                this.GameInstance.BeginDestroy();
+                var wr = new WeakReference(this.GameInstance);
+                this.GameInstance.Dispose();
+            }
+            finally
+            {
+                this.GameInstance = null;
 
-            TtEngine.Instance.PlayMode = EPlayMode.Editor;
+                TtEngine.Instance.PlayMode = EPlayMode.Editor;
+            }
         }
     }
 }

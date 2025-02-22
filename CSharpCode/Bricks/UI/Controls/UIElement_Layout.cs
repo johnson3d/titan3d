@@ -283,6 +283,8 @@ namespace EngineNS.UI.Controls
             get => mWidth;
             set
             {
+                if (mWidth == value)
+                    return;
                 OnValueChange(value, mWidth);
                 mWidth = value;
                 UpdateLayout();
@@ -296,6 +298,8 @@ namespace EngineNS.UI.Controls
             get => mWidthAuto;
             set
             {
+                if (mWidthAuto == value)
+                    return;
                 OnValueChange(value, mWidthAuto);
                 mWidthAuto = value;
                 UpdateLayout();
@@ -309,6 +313,8 @@ namespace EngineNS.UI.Controls
             get => mHeight;
             set
             {
+                if (mHeight == value)
+                    return;
                 OnValueChange(value, mHeight);
                 mHeight = value;
                 UpdateLayout();
@@ -322,6 +328,8 @@ namespace EngineNS.UI.Controls
             get => mHeightAuto;
             set
             {
+                if (mHeightAuto == value)
+                    return;
                 OnValueChange(value, mHeightAuto);
                 mHeightAuto = value;
                 UpdateLayout();
@@ -443,6 +451,7 @@ namespace EngineNS.UI.Controls
                     }
                     return;
                 }
+                mPreviousAvailableSize = availableSize;
 
                 if (IsMeasureValid && !neverMeasured && isCloseToPreviousMeasure)
                     return;
@@ -538,7 +547,24 @@ namespace EngineNS.UI.Controls
                     finaleSize.Width = RoundValue(finaleSize.Width, dpiScale);
                     finaleSize.Height = RoundValue(finaleSize.Height, dpiScale);
                 }
-                return MeasureOverride(in finaleSize);
+                var retSize = MeasureOverride(in finaleSize);
+                if (WidthAuto)
+                {
+                    retSize.Width += marginWidth;
+                }
+                else
+                {
+                    retSize.Width = Width + marginWidth;
+                }
+                if (HeightAuto)
+                {
+                    retSize.Height += marginHeight;
+                }
+                else
+                {
+                    retSize.Height = Height + marginHeight;
+                }
+                return retSize;
             }
         }
 
@@ -653,23 +679,25 @@ namespace EngineNS.UI.Controls
                     var minWidth = Math.Min(MinWidth, finalRect.Width);
                     var maxWidth = Math.Max(MaxWidth, finalRect.Width);
                     final.Width = Math.Max(minWidth, Math.Min(finalRect.Width, maxWidth));
+                    Width = final.Width - marginWidth;
                 }
                 else
-                    final.Width = Width;
+                    final.Width = Width + marginWidth;
 
                 if (HeightAuto)
                 {
                     var minHeight = Math.Min(MinHeight, finalRect.Height);
                     var maxHeight = Math.Max(MaxHeight, finalRect.Height);
                     final.Height = Math.Max(minHeight, Math.Min(finalRect.Height, maxHeight));
+                    Height = final.Height - marginHeight;
                 }
                 else
-                    final.Height = Height;
+                    final.Height = Height + marginHeight;
 
                 final.X = finalRect.Left + margin.Left;
                 final.Y = finalRect.Top + margin.Top;
-                final.Width -= margin.Left + margin.Right;
-                final.Height -= margin.Top + margin.Bottom;
+                final.Width -= marginWidth;
+                final.Height -= marginHeight;
                 if (UseRounding)
                 {
                     final.X = RoundValue(final.X, dpiScale);

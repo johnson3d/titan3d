@@ -261,6 +261,7 @@ namespace EngineNS.UI.Editor
             //UIAsset.MacrossEditor.CompileCode();
             UIAsset.UIHost = mUIHost;
             UIAsset.SaveAssetTo(UIAsset.AssetName);
+            EngineNS.Editor.USnapshot.Save(AssetName, TtEngine.Instance.AssetMetaManager.GetAssetMeta(AssetName), PreviewViewport.RenderPolicy.GetFinalShowRSV());
         }
         protected unsafe void DrawToolBar()
         {
@@ -792,6 +793,7 @@ namespace EngineNS.UI.Editor
                                         GetDisplayNameFunc = element.GetVariableDisplayName,
                                         InitValue = new TtNullValueExpression(),
                                         VisitMode = EVisisMode.Public,
+                                        IsBrowsable = false,
                                     };
                                     if (UIAsset.MacrossEditor.DefClass.FindMember(varName) == null)
                                         UIAsset.MacrossEditor.DefClass.Properties.Add(elementVariable);
@@ -830,6 +832,7 @@ namespace EngineNS.UI.Editor
                                     GetDisplayNameFunc = element.GetVariableDisplayName,
                                     InitValue = new TtNullValueExpression(),
                                     VisitMode = EVisisMode.Public,
+                                    IsBrowsable = false,
                                 };
                                 if(UIAsset.MacrossEditor.DefClass.FindMember(varName) == null)
                                     UIAsset.MacrossEditor.DefClass.Properties.Add(elementVariable);

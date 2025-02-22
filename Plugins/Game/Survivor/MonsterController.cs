@@ -33,19 +33,19 @@ namespace Survivor
         {
             if(Player != null && MonsterNode != null && !MonsterNode.StateNode.IsDead)
             {
-                float distance = Vector3.Distance(Player.Placement.AbsTransform.Position.ToSingleVector3(),
-                                            MonsterNode.MonseterPlacement.AbsTransform.Position.ToSingleVector3());
+                float distance = (float)DVector3.Distance(Player.Placement.AbsTransform.Position,
+                                            MonsterNode.MonseterPlacement.AbsTransform.Position);
                 if (distance > MonsterNode.MonsterData.AttackRange)
                 {
                     //move
-                    var dir = Player.Placement.AbsTransform.Position.ToSingleVector3() -
-                                                MonsterNode.MonseterPlacement.AbsTransform.Position.ToSingleVector3();
+                    var dir = Player.Placement.AbsTransform.Position -
+                                                MonsterNode.MonseterPlacement.AbsTransform.Position;
                     dir.Normalize();
-                    dir.y = 0;
+                    dir.Y = 0;
                     var pos = MonsterNode.MonseterPlacement.Position + dir * MonsterNode.MonsterData.Speed * args.World.DeltaTimeSecond;
                     var simpleMovement = MonsterNode.MonsterPrefab.FindFirstChild<TtSimpleMovement>(null, true) as TtSimpleMovement;
                     simpleMovement.SetDesiredPosition(pos.ToSingleVector3());
-                    MonsterNode.MonseterPlacement.Quat = Quaternion.RotationFrowTwoVector(Vector3.Forward, -dir);
+                    MonsterNode.MonseterPlacement.Quat = Quaternion.RotationFrowTwoVector(Vector3.Forward, -dir.ToSingleVector3());
                 }
                 else
                 {

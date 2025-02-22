@@ -101,7 +101,7 @@ namespace EngineNS.UI.Layout
                         }
 
                         currentElement = MeasureQueue.GetTopMost();
-                        if (currentElement == null)
+                        if (currentElement == null || currentElement.RootUIHost == null)
                             break;
                         var measureSize = currentElement.PreviousAvailableSize;
                         if (currentElement.NeverMeasured)

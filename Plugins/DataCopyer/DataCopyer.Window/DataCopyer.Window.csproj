@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Module\Engine.Window\Engine.Window.csproj" />
-    <ProjectReference Include="..\..\Game\Survivor\Survivor.Window\Survivor.Window.csproj" />
+    <ProjectReference Include="..\..\Game\Survivor\Survivor.All\Survivor.All.csproj" />
   </ItemGroup>
 
 </Project>

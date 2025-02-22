@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_8074916851796825007 Type="Survivor.TtStateNode.TtStateNodeData@Survivor">
+  <CodeName Type="EngineNS.RName@EngineCore" Order="0" />
+  <CurrentHP Type="System.Single@Unknown" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.TtNode.ENodeStyles@EngineCore" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.TtBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.TtPlacementBase@EngineCore" Order="2" />
+</Hash_8074916851796825007>

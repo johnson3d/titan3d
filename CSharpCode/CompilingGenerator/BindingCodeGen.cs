@@ -1239,11 +1239,14 @@ namespace {namespaceName}
             {(baseHasBindObjectInterface? "base.SetAttachedPropertyValue(obj, bp, valueStore, value);" : "")}            
         }}";
             }
-
+            if( !classSymbol.MemberNames.Any(name => "__getPropertiesExceptNames" == name))
+            {
+                source += $@"
+        System.Collections.Generic.HashSet<string> __getPropertiesExceptNames = new System.Collections.Generic.HashSet<string>();";
+            }
             if (!classSymbol.MemberNames.Any(name => "IsPropertyVisibleDirty" == name))
             {
                 source += $@"
-        System.Collections.Generic.HashSet<string> __getPropertiesExceptNames = new System.Collections.Generic.HashSet<string>();
         [System.ComponentModel.Browsable(false)]
         public{(baseHasBindObjectInterface ? " override" : " virtual")} bool IsPropertyVisibleDirty
         {{
@@ -1251,15 +1254,56 @@ namespace {namespaceName}
             set;
         }} = false;";
             }
-            if (!classSymbol.MemberNames.Any(name => "GetProperties" == name))
+
+            // GetAttachedProperties
+            if (!classSymbol.MemberNames.Any(name => "GetAttachedProperties" == name))
             {
                 source += $@"
-        public{(baseHasBindObjectInterface ? " override" : " virtual")} void GetProperties(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        public void GetAttachedProperties(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {{
-            var type = EngineNS.Rtti.TtTypeDesc.TypeOf(this.GetType());
+            foreach(var bindData in {bindExprDicName})
+            {{
+                if(bindData.Value.Type == EngineNS.UI.Bind.TtBindablePropertyValueBase.EType.AttachedValue)
+                {{
+                    var proDesc = EngineNS.EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+                    proDesc.Name = bindData.Key.Name;
+                    if(bindData.Key.DisplayNameAtt != null)
+                        proDesc.DisplayName = bindData.Key.DisplayNameAtt.GetDisplayName(this);
+                    proDesc.PropertyType = bindData.Key.PropertyType;
+                    proDesc.Category = bindData.Key.Category;
+                    proDesc.CustomValueEditor = bindData.Key.CustomValueEditor;
+                    collection.Add(proDesc);
+                }}
+            }}
+        }}";
+            }
+            // GetEvents
+            if (!classSymbol.MemberNames.Any(name => "GetEvents" == name))
+            {
+                source += $@"
+        public void GetEvents(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType, EngineNS.Rtti.TtTypeDesc type)
+        {{
+            var tempCollection = collection;
+            EngineNS.UI.Event.TtEventManager.QueryEvents(type, 
+                ((curType, name, e)=>
+                {{
+                    var proDesc = EngineNS.EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+                    proDesc.Name = name;
+                    proDesc.CanCreateNew = false;
+                    proDesc.PropertyType = EngineNS.Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.UI.Event.TtRoutedEventHandler));
+                    proDesc.Category = ""Events"";
+                    proDesc.CustomValueEditor = new EngineNS.UI.Event.PGRoutedEventHandlerEditorAttribute();
+                    tempCollection.Add(proDesc);
+                }}), true);
+        }}";
+            }
+            if (!classSymbol.MemberNames.Any(name => "GetSelfProperties" == name))
+            {
+                source += $@"
+        public void GetSelfProperties(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType, EngineNS.Rtti.TtTypeDesc type)
+        {{
             var pros = System.ComponentModel.TypeDescriptor.GetProperties(this);
-
-            __getPropertiesExceptNames.Clear();";
+            __getPropertiesExceptNames.Clear(); ";
 
                 foreach (var valSymbol in symbols)
                 {
@@ -1280,23 +1324,23 @@ namespace {namespaceName}
                                     var proName = att.NamedArguments.SingleOrDefault(kvp => kvp.Key == "PropertyName").Value;
                                     var valType = att.NamedArguments.SingleOrDefault(kvp => kvp.Key == "ValueType").Value;
                                     var compareStr = "";
-                                    if(Equals(valType.Value, 1))
+                                    if (Equals(valType.Value, 1))
                                     {
                                         compareStr = "!=";
                                     }
-                                    else if(Equals(valType.Value, 2))
+                                    else if (Equals(valType.Value, 2))
                                     {
                                         compareStr = "<";
                                     }
-                                    else if(Equals(valType.Value, 3))
+                                    else if (Equals(valType.Value, 3))
                                     {
                                         compareStr = "<=";
                                     }
-                                    else if(Equals(valType.Value, 4))
+                                    else if (Equals(valType.Value, 4))
                                     {
                                         compareStr = ">";
                                     }
-                                    else if(Equals(valType.Value, 5))
+                                    else if (Equals(valType.Value, 5))
                                     {
                                         compareStr = ">=";
                                     }
@@ -1304,7 +1348,7 @@ namespace {namespaceName}
                                     {
                                         compareStr = "==";
                                     }
-                                    if(i != 0)
+                                    if (i != 0)
                                     {
                                         conditionStr += " && ";
                                     }
@@ -1324,40 +1368,23 @@ namespace {namespaceName}
                         }
                     }
                 }
-                
+
                 source += $@"
             collection.InitValue(this, type, pros, parentIsValueType, __getPropertiesExceptNames);
-
+        }}";
+            }
+            if (!classSymbol.MemberNames.Any(name => "GetProperties" == name))
+            {
+                source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void GetProperties(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        {{
+            var type = EngineNS.Rtti.TtTypeDesc.TypeOf(this.GetType());
+            // self properties
+            GetSelfProperties(ref collection, parentIsValueType, type);
             // attached properties
-            foreach(var bindData in {bindExprDicName})
-            {{
-                if(bindData.Value.Type == EngineNS.UI.Bind.TtBindablePropertyValueBase.EType.AttachedValue)
-                {{
-                    var proDesc = EngineNS.EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
-                    proDesc.Name = bindData.Key.Name;
-                    if(bindData.Key.DisplayNameAtt != null)
-                        proDesc.DisplayName = bindData.Key.DisplayNameAtt.GetDisplayName(this);
-                    proDesc.PropertyType = bindData.Key.PropertyType;
-                    proDesc.Category = bindData.Key.Category;
-                    proDesc.CustomValueEditor = bindData.Key.CustomValueEditor;
-                    collection.Add(proDesc);
-                }}
-            }}
-
+            GetAttachedProperties(ref collection, parentIsValueType);
             // events
-            var tempCollection = collection;
-            EngineNS.UI.Event.TtEventManager.QueryEvents(type, 
-                ((curType, name, e)=>
-                {{
-                    var proDesc = EngineNS.EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
-                    proDesc.Name = name;
-                    proDesc.CanCreateNew = false;
-                    proDesc.PropertyType = EngineNS.Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.UI.Event.TtRoutedEventHandler));
-                    proDesc.Category = ""Events"";
-                    proDesc.CustomValueEditor = new EngineNS.UI.Event.PGRoutedEventHandlerEditorAttribute();
-                    tempCollection.Add(proDesc);
-                }}), true);
-
+            GetEvents(ref collection, parentIsValueType, type);
             IsPropertyVisibleDirty = false;
         }}";
             }
@@ -1444,10 +1471,9 @@ namespace {namespaceName}
                 source += $@"
         }}";
             }
-            if (!classSymbol.MemberNames.Any(name => "GetPropertyValue" == name))
-            {
-                source += $@"
-        public{(baseHasBindObjectInterface ? " override" : " virtual")} object GetPropertyValue(string propertyName)
+
+            source += $@"
+        object _GetPropertyValue(string propertyName)
         {{
             if(string.IsNullOrEmpty(propertyName))
                 return null;
@@ -1480,7 +1506,15 @@ namespace {namespaceName}
             //    }}
             //}}
 
-            return null;
+            return EngineNS.EGui.Controls.PropertyGrid.PropertyNotFindValueClass.PropertyNotFindValue;            
+        }}";
+
+            if (!classSymbol.MemberNames.Any(name => "GetPropertyValue" == name))
+            {
+                source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} object GetPropertyValue(string propertyName)
+        {{
+            return _GetPropertyValue(propertyName);
         }}";
             }
             source += $@"
@@ -1506,11 +1540,9 @@ namespace {namespaceName}
             }
             source += $@"
         }}";
-            if (!classSymbol.MemberNames.Any(name => "SetPropertyValue" == name))
-            {
-                // todo: 这里可以生成代码来设置属性，不需要通过反射，另外可以生成泛型的 SetPropertyValue(string propertyName, {genericTypeName} value) 来对应设置不同类型的属性，减少GC
-                source += $@"
-        public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetPropertyValue(string propertyName, object value)
+
+            source += $@"
+        void _SetPropertyValue(string propertyName, object value)
         {{
             if(string.IsNullOrEmpty(propertyName))
                 return;
@@ -1546,7 +1578,16 @@ namespace {namespaceName}
             //            break;
             //        }}
             //    }}
-            //}}
+            //}}            
+        }}";
+
+            if (!classSymbol.MemberNames.Any(name => "SetPropertyValue" == name))
+            {
+                // todo: 这里可以生成代码来设置属性，不需要通过反射，另外可以生成泛型的 SetPropertyValue(string propertyName, {genericTypeName} value) 来对应设置不同类型的属性，减少GC
+                source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetPropertyValue(string propertyName, object value)
+        {{
+            _SetPropertyValue(propertyName, value);
         }}
 ";
             }

@@ -55,10 +55,10 @@ namespace Survivor
                 monsterNode.MonsterData = monsterData;
 
                 var stateNodeData = new TtMonsterStateNode.TtMonsterStateNodeData();
-                stateNodeData.CurrentHP = monsterData.Health;
                 stateNodeData.MonsterData = monsterData;
                 var stateNode = await TtNode.SpawnNode<TtMonsterStateNode>(monsterNode, null,
                     stateNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
+                stateNode.CurrentHP = monsterData.Health;
                 monsterNode.StateNode = stateNode;
 
                 RName monsterName = RName.ParseFrom(monsterData.Prefab);

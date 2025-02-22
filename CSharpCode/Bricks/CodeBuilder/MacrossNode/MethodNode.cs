@@ -1575,6 +1575,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                     else
                     {
                         methodInvokeExp.IsAsync = true;
+                        type = Rtti.TtTypeDesc.TypeOf(type.GetGenericArguments()[0]);
                     }
                 }
                 if (type.IsPointer)

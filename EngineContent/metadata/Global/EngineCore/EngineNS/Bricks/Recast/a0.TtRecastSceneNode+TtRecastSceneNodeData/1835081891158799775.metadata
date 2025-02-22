@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_1835081891158799775 Type="EngineNS.Bricks.Recast.TtRecastSceneNode.TtRecastSceneNodeData@EngineCore">
+  <CodeName Type="EngineNS.RName@EngineCore" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeId Type="System.Guid@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.TtNode.ENodeStyles@EngineCore" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.TtBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.TtPlacementBase@EngineCore" Order="2" />
+</Hash_1835081891158799775>

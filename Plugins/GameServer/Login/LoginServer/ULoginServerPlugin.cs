@@ -31,6 +31,7 @@ namespace EngineNS.Rtti
 
 namespace EngineNS.Plugins.LoginServer
 {
+    [EngineNS.Bricks.AssemblyLoader.TtPlugin]
     public class TtPluginLoader
     {
         public static ULoginServerPlugin mPluginObject = new ULoginServerPlugin();

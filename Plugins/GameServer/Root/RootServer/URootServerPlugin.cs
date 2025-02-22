@@ -33,6 +33,7 @@ namespace EngineNS.Rtti
 
 namespace EngineNS.Plugins.RootServer
 {
+    [EngineNS.Bricks.AssemblyLoader.TtPlugin]
     public class TtPluginLoader
     {
         public static URootServerPlugin mPluginObject = new URootServerPlugin();

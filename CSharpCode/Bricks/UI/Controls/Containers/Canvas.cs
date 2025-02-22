@@ -1,8 +1,9 @@
 ﻿using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.UI.Bind;
-using NPOI.OpenXmlFormats.Dml;
+using NPOI.POIFS.Properties;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.UI.Controls.Containers
@@ -138,12 +139,24 @@ namespace EngineNS.UI.Controls.Containers
             }
         }
 
+        [Bind.AttachedProperty(Name = "SizeToContent", Category = "Layout(Canvas)")]
+        static void OnChildSizeToContentChanged(IBindableObject element, TtBindableProperty property, ESizeToContent value)
+        {
+            var ui = element as TtUIElement;
+            if(ui != null)
+            {
+                var canvas = VisualTreeHelper.GetParent(ui) as TtCanvasControl;
+                canvas?.InvalidateMeasure();
+            }
+        }
+
         protected override SizeF MeasureOverride(in SizeF availableSize)
         {
             var count = VisualTreeHelper.GetChildrenCount(this);
             for(int i=0; i<count; i++)
             {
                 var childUI = VisualTreeHelper.GetChild(this, i);
+                var sizeToContent = TtCanvasControl.GetSizeToContent(childUI);
                 var anchorMin = TtCanvasControl.GetAnchorMin(childUI);
                 var anchorMax = TtCanvasControl.GetAnchorMax(childUI);
                 var anchorRectX = TtCanvasControl.GetAnchorRectX(childUI);
@@ -191,6 +204,7 @@ namespace EngineNS.UI.Controls.Containers
             for (int i=0; i<count; i++)
             {
                 var childUI = VisualTreeHelper.GetChild(this, i);
+                var sizeToContent = TtCanvasControl.GetSizeToContent(childUI);
                 var anchorMin = TtCanvasControl.GetAnchorMin(childUI);
                 var anchorMax = TtCanvasControl.GetAnchorMax(childUI);
                 var anchorRectX = TtCanvasControl.GetAnchorRectX(childUI);
@@ -207,6 +221,13 @@ namespace EngineNS.UI.Controls.Containers
                 if ((anchorMax.X - anchorMin.X) <= MathHelper.Epsilon)
                 {
                     width = anchorRectZ;
+                    switch(sizeToContent)
+                    {
+                        case ESizeToContent.Width:
+                        case ESizeToContent.WidthAndHeight:
+                            width = childUI.DesiredSize.Width;
+                            break;
+                    }
                     posX = arrangeSize.X + anchorMinX + anchorRectX - width * anchorCenter.X;
                 }
                 else
@@ -218,6 +239,13 @@ namespace EngineNS.UI.Controls.Containers
                 if ((anchorMax.Y - anchorMin.Y) <= MathHelper.Epsilon)
                 {
                     height = anchorRectW;
+                    switch(sizeToContent)
+                    {
+                        case ESizeToContent.Height:
+                        case ESizeToContent.WidthAndHeight:
+                            height = childUI.DesiredSize.Height;
+                            break;
+                    }
                     posY = arrangeSize.Y + anchorMinY + anchorRectY - height * anchorCenter.Y;
                 }
                 else
@@ -259,7 +287,11 @@ namespace EngineNS.UI.Controls.Containers
 
         public override bool NeedUpdateLayoutWhenChildDesiredSizeChanged(TtUIElement child)
         {
-            return false;
+            var sizeToContent = TtCanvasControl.GetSizeToContent(child);
+            if(sizeToContent == ESizeToContent.None)
+                return false;
+            else
+                return true;
         }
     }
 }

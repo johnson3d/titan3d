@@ -18,7 +18,7 @@ namespace EngineNS.GamePlay
         public void Dispose()
         {
             //Root.ClearChildren();
-            Root.DisposeWithChildren();
+            Root?.DisposeWithChildren();
             mBoundingDebugMaterial = null;
 
             mMemberTickables.CleanupMembers(this);

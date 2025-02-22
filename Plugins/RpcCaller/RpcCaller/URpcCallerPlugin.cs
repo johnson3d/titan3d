@@ -33,6 +33,7 @@ namespace EngineNS.Rtti
 
 namespace EngineNS.Plugins.RpcCaller
 {
+    [EngineNS.Bricks.AssemblyLoader.TtPlugin]
     public class TtPluginLoader
     {
         public static URpcCallerPlugin mPluginObject = new URpcCallerPlugin();

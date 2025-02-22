@@ -6,25 +6,46 @@ using EngineNS.GamePlay.Character;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Thread.Async;
 using EngineNS.UI;
+using EngineNS.UI.Controls;
 using NPOI.Util;
 
 namespace Survivor
 {
     [EngineNS.Rtti.Meta]
-    public partial class TtGameMode
+    public partial class TtGameMode : TtGameModeBase
     {
-        [EngineNS.Rtti.Meta]
-        public EngineNS.GamePlay.Scene.TtScene CurrentScene { get; set; }
         [EngineNS.Rtti.Meta]
         public TtWeaponManager WeaponManager { get; } = new TtWeaponManager();
         [EngineNS.Rtti.Meta]
         public TtHeroManager HeroManager { get; } = new TtHeroManager();
         [EngineNS.Rtti.Meta]
         public TtMonsterManager MonsterManager { get; } = new TtMonsterManager();
+        [EngineNS.Rtti.Meta]
+        public EngineNS.UI.Controls.TtUIElement BattleUI { get; set; } = null;
         public TtCharacter Player = null;
-
-        public void Tick(TtGameInstance host, float elapsedMillisecond)
+        public TtProgress mHpProgressUI = null;
+        public TtProgress HpProgressUI
         {
+            get
+            {
+                if (mHpProgressUI == null)
+                {
+                    if (BattleUI != null)
+                    {
+                        var mo = BattleUI.MacrossObject;
+                        if (mo != null)
+                        {
+                            mHpProgressUI = EngineNS.Rtti.TtTypeDescManager.GetPropertyMember(mo, "ElementVar_4728652819903166736") as TtProgress;
+                        }
+                    }
+                }
+                return mHpProgressUI;
+            }
+        }
+
+        public override void Tick(TtGameInstance host, float elapsedMillisecond)
+        {
+            base.Tick(host, elapsedMillisecond);
             TtUIManager.UIKeyName keyName = new TtUIManager.UIKeyName();
             TtEngine.Instance.UIManager.GetUI(keyName);
         }
@@ -74,10 +95,10 @@ namespace Survivor
         {
             var stateNodeData = new TtCharacterStateNode.TtCharacterStateNodeData();
             stateNodeData.RoleData = roleData;
-            stateNodeData.CurrentHP = roleData.Health;
             var stateNode = await TtNode.SpawnNode<TtCharacterStateNode>(parent, null,
                 stateNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             stateNode.NodeName = "StateNode";
+            stateNode.CurrentHP = roleData.Health;
             stateNode.OnDead = ()=>
             {
                 var game = TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame;
@@ -105,7 +126,7 @@ namespace Survivor
         public static TtGameMode GetSurvivorGameMode()
         {
             var game = TtEngine.Instance.GameInstance.MacrossGame as TtMacrossSurvivorGame;
-            return game.GameMode;
+            return game.SurvivorGameMode;
         }
     }
 }

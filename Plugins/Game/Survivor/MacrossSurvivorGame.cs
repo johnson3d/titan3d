@@ -1,4 +1,5 @@
 using EngineNS.GamePlay;
+using EngineNS;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,13 +9,16 @@ namespace Survivor
     [EngineNS.Macross.TtMacross]
     public partial class TtMacrossSurvivorGame : EngineNS.GamePlay.TtMacrossGame
     {
-        [EngineNS.Rtti.Meta]
-        public TtGameMode GameMode { get; } = new TtGameMode();
+        public TtMacrossSurvivorGame()
+		{
+			this.SetGameMode(new TtGameMode());
+		}
+        [EngineNS.Rtti.Meta(Flags = EngineNS.Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        public TtGameMode SurvivorGameMode { get => GameMode as TtGameMode; }
 
         public override void Tick(TtGameInstance host, float elapsedMillisecond)
         {
             base.Tick(host, elapsedMillisecond);
-			GameMode.Tick(host, elapsedMillisecond);
 			if(IsNeedTriggerPlayerDead)
 			{
 				if (AccTimeToTriggerPlayerDead >= TimeToTriggerPlayerDead)

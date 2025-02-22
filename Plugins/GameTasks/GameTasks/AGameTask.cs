@@ -31,6 +31,7 @@ namespace EngineNS.Rtti
 
 namespace EngineNS.Plugins.GameTasks
 {
+    [EngineNS.Bricks.AssemblyLoader.TtPlugin]
     public class TtPluginLoader
     {
         public static Plugins.GameTasks.UGameTaskPlugin mPluginObject = new Plugins.GameTasks.UGameTaskPlugin();

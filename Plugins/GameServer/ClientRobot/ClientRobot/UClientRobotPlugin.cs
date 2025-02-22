@@ -32,6 +32,7 @@ namespace EngineNS.Rtti
 
 namespace EngineNS.Plugins.ClientRobot
 {
+    [EngineNS.Bricks.AssemblyLoader.TtPlugin]
     public class TtPluginLoader
     {
         public static ULevelServerPlugin mPluginObject = new ULevelServerPlugin();

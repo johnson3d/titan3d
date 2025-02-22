@@ -3,6 +3,7 @@ using EngineNS.Thread.Async;
 using NPOI.SS.Formula.Functions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reflection;
 using System.Text;
 
@@ -75,6 +76,7 @@ namespace EngineNS.Bricks.CodeBuilder
                 data.CodeGen.AddLine(codeStr, ref sourceCode);
             }
         }
+        [Category]
         class UVariableDeclarationCodeGen : ICodeObjectGen
         {
             public bool IsClassMember = false;
@@ -107,6 +109,19 @@ namespace EngineNS.Bricks.CodeBuilder
                 }
                 if (varDec.IsAutoSaveLoad && (IsProperty || varDec.IsBindable))
                     data.CodeGen.AddLine("[EngineNS.Rtti.Meta]", ref sourceCode);
+                if (IsProperty && !string.IsNullOrEmpty(varDec.Category))
+                {
+                    data.CodeGen.AddLine($"[System.ComponentModel.Category(\"{varDec.Category}\")]", ref sourceCode);
+                }
+                var displayName = varDec.DisplayName;
+                if (IsProperty && !string.IsNullOrEmpty(displayName))
+                {
+                    data.CodeGen.AddLine($"[System.ComponentModel.DisplayName(\"{displayName}\")]", ref sourceCode);
+                }
+                if (IsProperty && !varDec.IsBrowsable)
+                {
+                    data.CodeGen.AddLine($"[System.ComponentModel.Browsable(false)]", ref sourceCode);
+                }
                 string codeStr = "";
                 if(IsClassMember)
                 {

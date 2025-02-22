@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_6689559053820606358 Type="Survivor.TtMonsterStateNode.TtMonsterStateNodeData@Survivor">
+  <CodeName Type="EngineNS.RName@EngineCore" Order="0" />
+  <CurrentHP Type="System.Single@Unknown" Order="0" />
+  <MonsterData Type="Survivor.TtMonsterData@Survivor" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.TtNode.ENodeStyles@EngineCore" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.TtBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.TtPlacementBase@EngineCore" Order="2" />
+</Hash_6689559053820606358>

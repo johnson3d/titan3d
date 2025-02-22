@@ -377,6 +377,10 @@ namespace EngineNS.UI.Editor
             // 5 --- 6 --- 7
             var rootRect = element.RootUIHost.DesignRect;
             var elementRect = element.DesignRect;
+            elementRect.X -= element.Margin.Left;
+            elementRect.Y -= element.Margin.Top;
+            elementRect.Width += element.Margin.Left + element.Margin.Right;
+            elementRect.Height += element.Margin.Top + element.Margin.Bottom;
             var transMat = mEditor.mUIHost.TransformedElements[element.TransformIndex].Matrix;
             mOperatorNodes[(int)EDecoratorType.Size_Left_Top].Parent = mEditor.mUINode;
             mOperatorNodes[(int)EDecoratorType.Size_Left_Top].Placement.Position = mEditor.mUINode.GetWorld().CameraOffset + Vector3.TransformCoordinate(new Vector3(elementRect.Left, rootRect.Height - elementRect.Top, 0.0f), in transMat);

@@ -261,6 +261,7 @@ enum TR_ENUM()
 	PLTF_Windows = (1 << 0),
 	PLTF_Android = (1 << 1),
 	PLTF_AppleIOS = (1 << 2),
+	PLTF_ALL = 0xffffffff,
 };
 
 TR_CALLBACK(SV_CallConvention = System.Runtime.InteropServices.CallingConvention.Cdecl)

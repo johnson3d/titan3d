@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_5002831212470921661 Type="EngineNS.GamePlay.Scene.TtSunNode.TtSunNodeData@EngineCore">
+  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
+  <DirectionLight Type="EngineNS.GamePlay.TtDirectionLight@EngineCore" Order="0" />
+  <Name Type="System.String@Unknown" Order="0" />
+  <NodeStyles Type="EngineNS.GamePlay.Scene.TtNode.ENodeStyles@EngineCore" Order="0" />
+  <SunMaterialName Type="EngineNS.RName@EngineCore" Order="0" />
+  <BoundVolume Type="EngineNS.GamePlay.Scene.TtBoundVolume@EngineCore" Order="1" />
+  <Placement Type="EngineNS.GamePlay.TtPlacementBase@EngineCore" Order="2" />
+</Hash_5002831212470921661>

@@ -471,7 +471,7 @@ namespace EngineNS
                 i.SetToGlobalConfig();
             }
 
-            this.PluginModuleManager.InitPlugins(this);
+            this.PluginModuleManager.InitPlugins(this, true);
 
             this.DataCopyer.FindCopyer(Rtti.TtTypeDesc.TypeStr(typeof(TtEngineConfig)));
 

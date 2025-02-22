@@ -15,10 +15,10 @@ namespace EngineNS.UI
             try
             {
                 InitializeUIElementVariables();
+                InitializeBindings();
                 if (!SimulateMode)
                 {
                     InitializeEvents();
-                    InitializeBindings();
                 }
             }
             catch(System.Exception ex)

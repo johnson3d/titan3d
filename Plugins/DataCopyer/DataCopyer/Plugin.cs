@@ -31,18 +31,19 @@ namespace EngineNS.Rtti
 
 namespace EngineNS.Plugins.DataCopyer
 {
+    [EngineNS.Bricks.AssemblyLoader.TtPlugin]
     public class TtPluginLoader
     {
         public static TtDataCopyerPlugin mPluginObject = new TtDataCopyerPlugin();
-        public static Bricks.AssemblyLoader.IPlugin GetPluginObject()
+        public static EngineNS.Bricks.AssemblyLoader.IPlugin GetPluginObject()
         {
             return mPluginObject;
         }
     }
-    public partial class TtDataCopyerPlugin : Bricks.DataCopyer.TtDataCopyer
+    public partial class TtDataCopyerPlugin : EngineNS.Bricks.DataCopyer.TtDataCopyer
     {
-        internal Hash160 VersionHash = Hash160.Emtpy;
-        public override Hash160 GetVersionHash()
+        internal EngineNS.Hash160 VersionHash = EngineNS.Hash160.Emtpy;
+        public override EngineNS.Hash160 GetVersionHash()
         {
             return VersionHash;
         }

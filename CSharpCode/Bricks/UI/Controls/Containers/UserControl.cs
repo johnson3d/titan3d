@@ -1,8 +1,10 @@
+using EngineNS.EGui.Controls.PropertyGrid;
 using EngineNS.IO;
 using EngineNS.Macross;
 using EngineNS.Thread.Async;
 using EngineNS.UI.Bind;
 using EngineNS.UI.Canvas;
+using NPOI.OpenXmlFormats.Dml;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,11 +15,13 @@ using System.Threading.Tasks;
 
 namespace EngineNS.UI.Controls.Containers
 {
-    public partial class TtUserControl : TtContainer, EGui.Controls.PropertyGrid.IPropertyCustomization
+    [PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    public partial class TtUserControl : TtContainer, IPropertyCustomization
     {
         TtUIElement mChildElement = null;
         RName mChildRName;
         [Rtti.Meta]
+        [Browsable(false)]
         public RName ChildRName 
         {
             get => mChildRName;
@@ -87,17 +91,44 @@ namespace EngineNS.UI.Controls.Containers
             {
                 mc.GetProperties(ref collection, parentIsValueType);
             }
+
+            GetAttachedProperties(ref collection, parentIsValueType);
+            GetEvents(ref collection, parentIsValueType, Rtti.TtTypeDesc.TypeOf<TtUserControl>());
+
+            //if (Children.Count > 0)
+            //{
+            //    var tempProperties = PropertyCollection.PropertyDescCollectionPool.QueryObjectSync();
+
+            //    Children[0].GetSelfProperties(ref tempProperties, parentIsValueType, Rtti.TtTypeDesc.TypeOf(Children[0].GetType()));
+            //    collection.Add(tempProperties);
+
+            //    tempProperties.Cleanup();
+            //    PropertyCollection.PropertyDescCollectionPool.ReleaseObject(tempProperties);
+            //}
+            {
+                var tempProperties = PropertyCollection.PropertyDescCollectionPool.QueryObjectSync();
+
+                GetSelfProperties(ref tempProperties, parentIsValueType, Rtti.TtTypeDesc.TypeOf<TtUserControl>());
+                collection.Add(tempProperties);
+
+                tempProperties.Cleanup();
+                PropertyCollection.PropertyDescCollectionPool.ReleaseObject(tempProperties);
+            }
         }
         public override object GetPropertyValue(string propertyName)
         {
             if (MacrossGetter == null)
                 return null;
+            object retVal = null;
             var mc = MacrossGetter.Get();
             if (mc != null)
             {
-                return mc.GetPropertyValue(propertyName);
+                retVal = mc.GetPropertyValue(propertyName);
+                if(retVal != PropertyNotFindValueClass.PropertyNotFindValue)
+                    return retVal;
             }
-            return null;
+
+            return _GetPropertyValue(propertyName);
         }
         public override void SetPropertyValue(string propertyName, object value)
         {
@@ -108,6 +139,8 @@ namespace EngineNS.UI.Controls.Containers
             {
                 mc.SetPropertyValue(propertyName, value);
             }
+
+            _SetPropertyValue(propertyName, value);
         }
         public override bool QueryElements<T>(Delegate_QueryProcess<T> queryAction, ref QueryProcessData data, ref T queryData)
         {

@@ -15,6 +15,17 @@ namespace EngineNS.UI.Controls
     {
         public virtual Macross.TtMacrossGetter<TtUIMacrossBase> MacrossGetter { get; set; }
 
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        public TtUIMacrossBase MacrossObject
+        {
+            get
+            {
+                if(MacrossGetter==null)
+                    return null;
+                return MacrossGetter.Get();
+            }
+        }
+
         #region Property bind
 
         public class UIBindingData_Element : IO.ISerializer
@@ -274,7 +285,7 @@ namespace EngineNS.UI.Controls
                     {
                         Left = targetVariableExp,
                         Right = new TtNullValueExpression(),
-                        Operation = TtBinaryOperatorExpression.EBinaryOperation.Equality,
+                        Operation = TtBinaryOperatorExpression.EBinaryOperation.NotEquality,
                     },
                     TrueStatement = bindCall,
                 };

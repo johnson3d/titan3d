@@ -45,7 +45,7 @@ namespace EngineNS.BehaviorTree.Macross
             {
                 EngineNS.TtEngine.Instance.MacrossManager.GenerateProjects();
                 var assemblyFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameAssembly;
-                if (TtEngine.Instance.MacrossModule.CompileCode(assemblyFile))
+                if (TtEngine.Instance.MacrossModule.CompileCode(assemblyFile, TtEngine.Instance.CurrentPlatform))
                 {
                     TtEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
                 }

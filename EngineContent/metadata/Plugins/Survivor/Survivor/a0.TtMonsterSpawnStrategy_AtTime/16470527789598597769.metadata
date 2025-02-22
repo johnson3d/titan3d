@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_16470527789598597769 Type="Survivor.TtMonsterSpawnStrategy_AtTime@Survivor">
+  <MonsterCount Type="System.Int32@Unknown" Order="0" />
+  <MonsterId Type="System.Int32@Unknown" Order="0" />
+  <SpawnTime Type="System.Single@Unknown" Order="0" />
+  <SpawnType Type="Survivor.EMonsterSpawnType@Survivor" Order="0" />
+</Hash_16470527789598597769>

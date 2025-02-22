@@ -34,6 +34,7 @@ namespace EngineNS.Rtti
 
 namespace EngineNS.Plugins.GameItems
 {
+    [EngineNS.Bricks.AssemblyLoader.TtPlugin]
     public class TtPluginLoader
     {
         public static UGameItemPlugin? mPluginObject = new UGameItemPlugin();

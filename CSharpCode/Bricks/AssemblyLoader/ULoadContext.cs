@@ -179,6 +179,10 @@ namespace EngineNS.Bricks.AssemblyLoader
             IO.TtFileManager.WriteAllText(FilePath, jsCode);
         }
     }
+    public class TtPluginAttribute : Attribute
+    {
+
+    }
     public class TtPluginModule
     {
         public TtPluginModuleManager Manager;
@@ -291,7 +295,16 @@ namespace EngineNS.Bricks.AssemblyLoader
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): ModuleAssembly is not alive");
                 return false;
             }
-            var type = assembly.GetType($"EngineNS.Plugins.{this.Name}.TtPluginLoader");
+            Type type = null;
+            foreach (var i in assembly.GetTypes())
+            {
+                var attr = i.GetCustomAttribute<TtPluginAttribute>();
+                if (attr != null)
+                {
+                    type = i;
+                    break;
+                }
+            }
             if (type == null)
             {
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"PluginModule({AssemblyPath}): EngineNS.Plugin.TtPluginLoader is not found");
@@ -398,7 +411,7 @@ namespace EngineNS.Bricks.AssemblyLoader
             }
         }
         private string PlatformSuffix;
-        public void InitPlugins(TtEngine engine)
+        public void InitPlugins(TtEngine engine, bool bTryLoad)
         {
             CoreBinDirectory = engine.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute);
             var path = engine.FileManager.GetRoot(IO.TtFileManager.ERootDir.Plugin);
@@ -445,8 +458,16 @@ namespace EngineNS.Bricks.AssemblyLoader
                     continue;
                 descriptor.FilePath = i;
 
-                if (descriptor.Platforms.Contains(engine.CurrentPlatform) == false)
-                    continue;
+                bool bUsePlatformSuffix = true;
+                if (!descriptor.Platforms.Contains(EPlatformType.PLTF_ALL))
+                {
+                    if (descriptor.Platforms.Contains(engine.CurrentPlatform) == false)
+                        continue;
+                }
+                else
+                {
+                    bUsePlatformSuffix = false;
+                }
 
                 var name = IO.TtFileManager.GetPureName(i);
                 if (TtEngine.Instance.Config.Plugins.Contains(name) == false)
@@ -457,23 +478,26 @@ namespace EngineNS.Bricks.AssemblyLoader
                 module.Manager = this;
                 module.Name = name;
                 var dir = IO.TtFileManager.GetBaseDirectory(i);
-                module.AssemblyPath = dir + name + "/" + name + PlatformSuffix;
+                module.AssemblyPath = dir + name + "/" + name + (bUsePlatformSuffix ? PlatformSuffix : ".All.dll");
                 PluginModules.Add(name, module);
             }
 
-            foreach (var i in PluginModules)
+            if (bTryLoad)
             {
-                if (i.Value.PluginDescriptor.LoadOnInit == false)
-                    continue;
-                i.Value.SureLoad();
+                foreach (var i in PluginModules)
+                {
+                    if (i.Value.PluginDescriptor.LoadOnInit == false)
+                        continue;
+                    i.Value.SureLoad();
+                }
             }
 
-            var taskModule = this.GetPluginModule("GameTasks");
-            if (taskModule != null)
-            {
-                //test code
-                //taskModule.UnloadPlugin(true);
-            }
+            //var taskModule = this.GetPluginModule("GameTasks");
+            //if (taskModule != null)
+            //{
+            //    //test code
+            //    //taskModule.UnloadPlugin(true);
+            //}
         }
     }
 }

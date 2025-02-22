@@ -404,6 +404,13 @@ namespace EngineNS.GamePlay.Scene
 
             return result;
         }
+        public async Thread.Async.TtTask<TtPrefabNode> CreatePrefabNode(TtWorld world, RName name)
+        {
+            var prefab = await GetPrefab(name);
+            if (prefab == null)
+                return null;
+            return await prefab.Root.CloneNode(world) as TtPrefabNode;
+        }
         public async Thread.Async.TtTask<TtPrefab> ReloadPrefab(RName name)
         {
             TtPrefab scene;

@@ -476,6 +476,12 @@ namespace EngineNS.Graphics.Pipeline
         //}
         protected Stack<UI.TtUIHost> mHUDStack = new Stack<UI.TtUIHost>();
         [Rtti.Meta]
+        public void SetHUD(UI.Controls.TtUIElement hud)
+        {
+            ClearHUDs();
+            PushHUD(hud);
+        }
+        [Rtti.Meta]
         public void PushHUD(UI.Controls.TtUIElement hud)
         {
             TtUIHost tempHost = null;
@@ -744,6 +750,19 @@ namespace EngineNS.Graphics.Pipeline
 			var _return_value = await Initialize(application, policyName, zMin, zMax);
 			macross_break_Initialize_3328281008.TryBreak();
 			return _return_value;
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_SetHUD_3408856308 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.TtViewportSlate->void SetHUD(UI.Controls.TtUIElement hud)");
+		public unsafe void macross_SetHUD (string nodeName, UI.Controls.TtUIElement hud) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":hud", hud);
+				}
+			}
+			SetHUD(hud);
+			macross_break_SetHUD_3408856308.TryBreak();
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_PushHUD_3408856308 = new EngineNS.Macross.TtMacrossBreak("EngineNS.Graphics.Pipeline.TtViewportSlate->void PushHUD(UI.Controls.TtUIElement hud)");
 		public unsafe void macross_PushHUD (string nodeName, UI.Controls.TtUIElement hud) 

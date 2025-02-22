@@ -30,8 +30,11 @@ namespace EngineNS.GamePlay.Controller
             [Rtti.Meta]
             public bool OrientToMovmement = false;
         }
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public Scene.Actor.TtActor ControlledCharacter { get; set; }
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public Camera.ICameraControlNode CameraControlNode { get; set; }
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public TtMovement MovementNode { get; set; }
         public TtCharacterControllerNodeData CharacterControllerNodeData { get => NodeData as TtCharacterControllerNodeData; }
 

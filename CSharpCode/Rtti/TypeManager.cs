@@ -596,6 +596,13 @@ namespace EngineNS.Rtti
             }
             return RuntimeHelpers.GetUninitializedObject(t);
         }
+        public static object GetPropertyMember(object host, string propName)
+        {
+            var prop = host.GetType().GetProperty(propName);
+            if (prop == null)
+                return null;
+            return prop.GetValue(host);
+        }
         public static TtTypeDescManager Instance { get; } = new TtTypeDescManager();
         public Dictionary<string, ServiceManager> Services { get; } = new Dictionary<string, ServiceManager>();
         public Dictionary<string, TtTypeDesc> NameAliasTypes { get; } = new Dictionary<string, TtTypeDesc>();

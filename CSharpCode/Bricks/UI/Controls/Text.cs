@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
+using static EngineNS.UI.Controls.TtText;
 
 namespace EngineNS.UI.Controls
 {
@@ -50,6 +51,19 @@ namespace EngineNS.UI.Controls
                 TextFlag |= flag;
             else
                 TextFlag &= ~flag;
+        }
+
+        ClipType mClipType = ClipType.Inherit;
+        [Rtti.Meta, Category("Clip")]
+        public ClipType ClipType
+        {
+            get => mClipType;
+            set
+            {
+                OnValueChange(value, mClipType);
+                mClipType = value;
+                UpdateLayout();
+            }
         }
 
         Vector2i mTextureSize = new Vector2i(1024, 1024);
@@ -298,7 +312,16 @@ namespace EngineNS.UI.Controls
             batch.Middleground.PushTransformIndex(TransformIndex);
             batch.Middleground.PushFont(FontAsset);
             batch.Middleground.PushMatrix(mat);
-            batch.Middleground.PushClip(in mCurFinalRect);
+            bool pushedClip = false;
+            switch(ClipType)
+            {
+                case ClipType.Inherit:
+                    break;
+                case ClipType.ClipToBound:
+                    batch.Middleground.PushClip(in mCurFinalRect);
+                    pushedClip = true;
+                    break;
+            }
             Support.TtBlobObject blobObj = new TtBlobObject();
             blobObj.PushValue((int)0);
             blobObj.PushValue((int)0);
@@ -325,8 +348,8 @@ namespace EngineNS.UI.Controls
             // ptr 1
             for (int i=0;i<mTextInLines.Count; i++)
             {
-                var x = mCurFinalRect.Left + mTextInLines[i].Rect.Left;
-                var y = mCurFinalRect.Top + mTextInLines[i].Rect.Top;
+                var x = mCurFinalRect.Left + mTextInLines[i].Rect.Left + Margin.Left;
+                var y = mCurFinalRect.Top + mTextInLines[i].Rect.Top + Margin.Top;
                 var text = mText.Substring(mTextInLines[i].StartIndex, mTextInLines[i].Count); //mTextInLines[i].EndIndex - mTextInLines[i].StartIndex);
                 if(mTextInLines[i].IsTrimming)
                     text += TrimmingText;
@@ -378,7 +401,8 @@ namespace EngineNS.UI.Controls
                 }
             }
             //batch.Middleground.AddText(mText, mCurFinalRect.Left, mCurFinalRect.Top, Color4f.FromABGR(Color.LightPink));
-            batch.Middleground.PopClip();
+            if(pushedClip)
+                batch.Middleground.PopClip();
             batch.Middleground.PopMatrix();
             batch.Middleground.PopFont();
             batch.Middleground.PopTransformIndex();

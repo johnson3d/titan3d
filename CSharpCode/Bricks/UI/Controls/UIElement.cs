@@ -33,6 +33,11 @@ namespace EngineNS.UI.Controls
         Hidden,
         Collapsed,
     }
+    public enum ClipType : sbyte
+    {
+        Inherit = 0,
+        ClipToBound = 1,
+    }
     [Bind.BindableObject]
     public partial class TtUIElement : IO.ISerializer
     {
@@ -40,6 +45,15 @@ namespace EngineNS.UI.Controls
         static TtUIElement()
         {
             TtUIELement_Template();
+        }
+
+        [Rtti.Meta]
+        [Browsable(false)]
+        [RName.PGRName(FilterExts = TtUIAsset.AssetExt)]
+        public RName AssetName
+        {
+            get;
+            set;
         }
 
         [Flags]

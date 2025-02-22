@@ -33,6 +33,7 @@ namespace EngineNS.Rtti
 
 namespace EngineNS.Plugins.GateServer
 {
+    [EngineNS.Bricks.AssemblyLoader.TtPlugin]
     public class TtPluginLoader
     {
         public static UGateServerPlugin mPluginObject = new UGateServerPlugin();

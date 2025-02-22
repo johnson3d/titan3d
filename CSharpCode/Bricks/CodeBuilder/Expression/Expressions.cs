@@ -372,6 +372,8 @@ namespace EngineNS.Bricks.CodeBuilder
             }
         }
         [Rtti.Meta]
+        public string Category { get; set; } = "Macross";
+        [Rtti.Meta]
         public TtExpressionBase InitValue { get; set; }
         [Rtti.Meta]
         public TtCommentStatement Comment { get; set; }
@@ -387,6 +389,8 @@ namespace EngineNS.Bricks.CodeBuilder
         public bool IsAutoSaveLoad { get; set; } = true;
         [Browsable(false)]
         public bool IsPropertyVisibleDirty { get; set; } = false;
+        [Rtti.Meta]
+        public bool IsBrowsable { get; set; } = true;
 
         public TtVariableDeclaration()
         {

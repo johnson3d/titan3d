@@ -671,7 +671,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
         {
             TtEngine.Instance.MacrossManager.ClearGameProjectTemplateBuildFiles();
             var assemblyFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameAssembly;
-            if (TtEngine.Instance.MacrossModule.CompileCode(assemblyFile))
+            if (TtEngine.Instance.MacrossModule.CompileCode(assemblyFile, TtEngine.Instance.CurrentPlatform))
             {
                 TtEngine.Instance.MacrossModule.ReloadAssembly(assemblyFile);
                 var typeDesc = DefClass.TryGetTypeDesc();
@@ -1168,6 +1168,7 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
             return true;
         }
 
+        HashSet<string> mPropertyCategories = new HashSet<string>();
         protected unsafe void DrawClassView()
         {
             ImGuiTreeNodeFlags_ flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap;
@@ -1225,31 +1226,56 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
                         IsDraggingMember = true;
                     }
                     var memRegionSize = ImGuiAPI.GetContentRegionAvail();
-                    for(int i=0; i<DefClass.Properties.Count; i++)
+                    mPropertyCategories.Clear();
+                    for (int i = 0; i < DefClass.Properties.Count; i++)
                     {
-                        var mem = DefClass.Properties[i];
-                        var memberTreeNodeResult = ImGuiAPI.TreeNodeEx(mem.DisplayName, flags);
-                        var memberTreeNodeClicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
-                        ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
-                        if(EGui.UIProxy.CustomButton.ToolButton("x", in buttonSize, 0xFF0000FF, "mem_X_" + i))
+                        mPropertyCategories.Add(DefClass.Properties[i].Category);
+                    }
+                    foreach (var categoryName in mPropertyCategories)
+                    {
+                        bool categoryTreeNodeResult = true;
+                        bool hasCategory = !string.IsNullOrEmpty(categoryName);
+                        if (hasCategory)
                         {
-                            // todo: 引用删除警告
-                            bool result = true;
-                            if (OnRemoveMember != null)
-                                result = OnRemoveMember.Invoke(mem);
-                            if(result)
-                                DefClass.Properties.Remove(mem);
-                            break;
+                            ImGuiAPI.PushStyleColor(ImGuiCol_.ImGuiCol_Text, EGui.UIProxy.StyleConfig.Instance.TextDisableColor);
+                            categoryTreeNodeResult = ImGuiAPI.TreeNodeEx(categoryName, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowItemOverlap);
+                            ImGuiAPI.PopStyleColor(1);
                         }
-                        if (memberTreeNodeResult)
+                        if (categoryTreeNodeResult)
                         {
-                            if (memberTreeNodeClicked)
+                            for (int i = 0; i < DefClass.Properties.Count; i++)
                             {
-                                PGMember.Target = mem;
-                                DraggingMember = MemberVar.NewMemberVar(DefClass, mem.VariableName,
-                                    TtEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_LCTRL) ? false : true);
-                                DraggingMember.UserData = this;
-                                IsDraggingMember = false;
+                                var mem = DefClass.Properties[i];
+                                if (mem.Category != categoryName)
+                                    continue;
+                                var memberTreeNodeResult = ImGuiAPI.TreeNodeEx(mem.DisplayName, flags);
+                                var memberTreeNodeClicked = ImGuiAPI.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Left);
+                                ImGuiAPI.SameLine(regionSize.X - buttonSize.X - buttonOffset, -1.0f);
+                                if (EGui.UIProxy.CustomButton.ToolButton("x", in buttonSize, 0xFF0000FF, "mem_X_" + i))
+                                {
+                                    // todo: 引用删除警告
+                                    bool result = true;
+                                    if (OnRemoveMember != null)
+                                        result = OnRemoveMember.Invoke(mem);
+                                    if (result)
+                                        DefClass.Properties.Remove(mem);
+                                    break;
+                                }
+                                if (memberTreeNodeResult)
+                                {
+                                    if (memberTreeNodeClicked)
+                                    {
+                                        PGMember.Target = mem;
+                                        DraggingMember = MemberVar.NewMemberVar(DefClass, mem.VariableName,
+                                            TtEngine.Instance.InputSystem.IsKeyDown(Input.Keycode.KEY_LCTRL) ? false : true);
+                                        DraggingMember.UserData = this;
+                                        IsDraggingMember = false;
+                                    }
+                                }
+                            }
+                            if (hasCategory)
+                            {
+                                ImGuiAPI.TreePop();
                             }
                         }
                     }
@@ -1783,21 +1809,19 @@ namespace EngineNS.Macross
             }
         }
 
-        public bool CompileCode(string assemblyFile)
+        public bool CompileCode(string assemblyFile, EPlatformType platformType)
         {
             bool success = false;
-            TryCompileCode(assemblyFile, ref success);
+            TryCompileCode(assemblyFile, ref success, platformType);
             return success;
         }
-        partial void TryCompileCode(string assemblyFile, ref bool success)
+        partial void TryCompileCode(string assemblyFile, ref bool success, EPlatformType platformType)
         {
             var csFilesPath = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Game);
             var projectFile = TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.EngineSource) + TtEngine.Instance.EditorInstance.Config.GameProject;
-            success = CompileGameProject(csFilesPath, projectFile, assemblyFile);
-
-
+            success = CompileGameProject(csFilesPath, projectFile, assemblyFile, platformType);
         }
-        public static bool CompileGameProject(string csFilesPath, string projectFile, string assemblyFile)
+        public static bool CompileGameProject(string csFilesPath, string projectFile, string assemblyFile, EPlatformType platformType)
         {
             csFilesPath = EngineNS.IO.TtFileManager.GetValidDirectory(csFilesPath);
             var csFiles = new List<string>(EngineNS.IO.TtFileManager.GetFiles(csFilesPath, "*.cs"));
@@ -1882,9 +1906,34 @@ namespace EngineNS.Rtti
             var pluginDir = TtEngine.Instance.FileManager.BinariesDir + "/plugins/";
             foreach (var i in TtEngine.Instance.Config.Plugins)
             {
+                var plugin = TtEngine.Instance.PluginModuleManager.GetPluginModule(i);
+                if (plugin == null)
+                {
+                    continue;
+                }
+                string platform = "";
+                if (plugin.PluginDescriptor.Platforms.Contains(EPlatformType.PLTF_ALL))
+                {
+                    platform = "All";
+                }
+                else
+                {
+                    switch (platformType)
+                    {
+                        case EPlatformType.PLTF_Windows:
+                            platform = "Window";
+                            break;
+                        case EPlatformType.PLTF_Android:
+                            platform = "Android";
+                            break;
+                        case EPlatformType.PLTF_AppleIOS:
+                            platform = "iOS";
+                            break;
+                    }
+                }
                 arguments.Add(EngineNS.CodeCompiler.CSharpCompiler.GetCommandArguments(
-                    EngineNS.CodeCompiler.CSharpCompiler.enCommandType.RefAssemblyFile,
-                    pluginDir + $"{i}/{i}.Window.dll"));
+                        EngineNS.CodeCompiler.CSharpCompiler.enCommandType.RefAssemblyFile,
+                        pluginDir + $"{i}/{i}.{platform}.dll"));
             }
 
             //var references = projDef.Element(projDef.n) 
