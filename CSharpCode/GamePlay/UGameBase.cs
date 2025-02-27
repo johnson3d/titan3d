@@ -14,8 +14,10 @@ namespace EngineNS.GamePlay
 {
     public partial class TtGameModeBase : IDisposable
     {
-        [Rtti.Meta]
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public Scene.TtScene CurrentScene { get; set; }
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        public Controller.TtCharacterController CharacterController { get; set; } = null;
         public virtual void OnSetGameMode(TtGameModeBase prev)
         {
 
@@ -260,10 +262,8 @@ namespace EngineNS.GamePlay
             [RName.PGRName(FilterExts = TtPrefab.AssetExt)]
             RName prefabName)
         {
-            CharacterController = await CreateCharacterController(scene, prefabName, true, false);
+            this.MacrossGame.GameMode.CharacterController = await CreateCharacterController(scene, prefabName, true, false);
         }
-        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
-        public Controller.TtCharacterController CharacterController { get; set; } = null;
         [Rtti.Meta]
         public async Thread.Async.TtTask<TtCharacterController> CreateCharacterController(Scene.TtScene scene,
             [RName.PGRName(FilterExts = TtPrefab.AssetExt)]
@@ -272,11 +272,10 @@ namespace EngineNS.GamePlay
             bool OrientToMovmement = false)
         {
             var playerStart = scene.FindFirstChild<TtPlayerStart>();
-            EngineNS.GamePlay.Scene.TtNode root = scene;
-
+            
             var prefab = await TtEngine.Instance.PrefabManager.CreatePrefabNode(scene.World, prefabName);
-            prefab.Parent = root;
-            var actor = prefab.FindFirstChild<TtActor>() as TtActor;
+            prefab.Parent = scene;
+            var actor = prefab.FindFirstChild<Character.TtCharacter>();
             if (playerStart == null)
             {
                 actor.Placement.SetTransform(new DVector3(0, 0, 0), Vector3.One, Quaternion.Identity);
@@ -285,17 +284,17 @@ namespace EngineNS.GamePlay
             {
                 actor.Placement.SetTransform(playerStart.Placement.TransformData);
             }
-            var result = await TtNode.SpawnNode<EngineNS.GamePlay.Controller.TtCharacterController>(root, null,
+            var result = await TtNode.SpawnNode<EngineNS.GamePlay.Controller.TtCharacterController>(scene, null,
                 new TtCharacterController.TtCharacterControllerNodeData(), EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             result.OrientCameraRoation = orientCameraRoation;
             result.OrientToMovmement = OrientToMovmement;
             result.ControlledCharacter = actor;
 
-            result.CameraControlNode = actor.FindFirstChild<TtCameraSpringArm>(null, true) as ICameraControlNode;
-            var camera = actor.FindFirstChild<TtGamePlayCamera>(null, true) as TtGamePlayCamera;
+            result.CameraControlNode = actor.FindFirstChild<TtCameraSpringArm>(null, true);
+            var camera = actor.FindFirstChild<TtGamePlayCamera>(null, true);
             camera.Camera = WorldViewportSlate.RenderPolicy.DefaultCamera;
 
-            result.MovementNode = actor.FindFirstChild<TtMovement>(null, true) as TtMovement;
+            result.MovementNode = actor.FindFirstChild<TtMovement>(null, true);
             return result;
         }
         [Rtti.Meta]
@@ -304,7 +303,7 @@ namespace EngineNS.GamePlay
             var playerStart = scene.FindFirstChild<TtPlayerStart>();
             EngineNS.GamePlay.Scene.TtNode root = scene;
             var playerData = new EngineNS.GamePlay.Scene.Actor.TtActor.TtActorData();
-            var ChiefPlayer = await TtNode.SpawnNode<EngineNS.GamePlay.Scene.Actor.TtActor>(root, null,
+            var ChiefPlayer = await TtNode.SpawnNode<Character.TtCharacter>(root, null,
                 playerData, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             ChiefPlayer.Parent = root;
             ChiefPlayer.NodeData.Name = "TtActor";

@@ -667,6 +667,10 @@ namespace EngineNS.Bricks.DataCopyer
         }
         public void GenCode(Rtti.TtClassMeta meta, TtCodeWriter creator, ref string code)
         {
+            if (meta.CurrentVersion == null)
+            {
+                return;
+            }
             var vers = meta.MetaVersions.Values.ToList();
             vers.Sort((x, y) =>
             {

@@ -340,9 +340,15 @@ namespace EngineNS.Rtti
                     var filename = EngineNS.IO.TtFileManager.GetPureName(i);
                     var myXmlDoc = new System.Xml.XmlDocument();
                     myXmlDoc.Load(i);
-                    var ver = new TtMetaVersion(this);
-                    ver.LoadVersion(System.Convert.ToUInt64(filename), myXmlDoc.LastChild);
-                    MetaVersions[ver.MetaHash] = ver;
+                    //var ver = new TtMetaVersion(this);
+                    TtMetaVersion ver = null;
+                    var key = System.Convert.ToUInt64(filename);
+                    if (MetaVersions.TryGetValue(key, out ver) == false)
+                    {
+                        ver = new TtMetaVersion(this);
+                        MetaVersions[key] = ver;
+                    }
+                    ver.LoadVersion(key, myXmlDoc.LastChild);
                 }
             }
             catch (System.Exception)
@@ -354,25 +360,17 @@ namespace EngineNS.Rtti
         }
         public void SaveClass()
         {
-            //var typeStr = ClassType.TypeString;
-            //var typeDesc = UTypeDescManager.Instance.GetTypeDescFromString(typeStr);
-            //var typeDesc = ClassType;
-            //var rootDir = IO.FileManager.ERootDir.Engine;
-            //if (typeDesc.Assembly.IsGameModule)
-            //{
-            //    rootDir = IO.FileManager.ERootDir.Game;
-            //}
-            //var metaRoot = TtEngine.Instance.FileManager.GetPath(rootDir, IO.FileManager.ESystemDir.MetaData);
-            //var path = EngineNS.IO.FileManager.CombinePath(metaRoot, typeDesc.Assembly.Service);
-            //path = EngineNS.IO.FileManager.CombinePath(path, typeDesc.Assembly.Name);
-            var tmpPath = Path;// EngineNS.IO.FileManager.CombinePath(Path, $"{MetaDirectoryName}");
-            if (!EngineNS.IO.TtFileManager.DirectoryExists(tmpPath))
+            if (MetaAttribute != null || this.ClassType.GetInterface(nameof(IO.ISerializer)) != null)
             {
-                EngineNS.IO.TtFileManager.CreateDirectory(tmpPath);
-            }
-            var txtFilepath = EngineNS.IO.TtFileManager.CombinePath(tmpPath, $"typedesc.txt");
-            EngineNS.IO.TtFileManager.WriteAllText(txtFilepath, TypeDescText(ClassType.Assembly.Name, ClassType.TypeString));
-            TtEngine.Instance.SourceControlModule.AddFile(txtFilepath, true);
+                var tmpPath = Path;// EngineNS.IO.FileManager.CombinePath(Path, $"{MetaDirectoryName}");
+                if (!EngineNS.IO.TtFileManager.DirectoryExists(tmpPath))
+                {
+                    EngineNS.IO.TtFileManager.CreateDirectory(tmpPath);
+                }
+                var txtFilepath = EngineNS.IO.TtFileManager.CombinePath(tmpPath, $"typedesc.txt");
+                EngineNS.IO.TtFileManager.WriteAllText(txtFilepath, TypeDescText(ClassType.Assembly.Name, ClassType.TypeString));
+                TtEngine.Instance.SourceControlModule.AddFile(txtFilepath, true);
+            }   
         }
         public static string TypeDescText(string assembly, string typeStr)
         {
@@ -1277,13 +1275,16 @@ namespace EngineNS.Rtti
                                 var type = TtTypeDesc.TypeOf(strName);// EngineNS.Rtti.UTypeDescManager.Instance.GetTypeDescFromString(strName);
                                 if (type != null)
                                 {
-                                    var meta = new TtClassMeta(type);
+                                    TtClassMeta meta = null;
+                                    var key = TtTypeDesc.TypeStr(type);
+                                    if (mMetas.TryGetValue(key, out meta) == false)
+                                    {
+                                        meta = new TtClassMeta(type);
+                                        mMetas[key] = meta;
+                                    }
                                     meta.LoadClass(k);
-
-                                    //mMetas.Add(meta.ClassMetaName, meta);
-                                    mMetas[meta.ClassMetaName] = meta;
                                 }
-                            }   
+                            }
                         }
                     }
                 }
@@ -1507,6 +1508,9 @@ namespace EngineNS.Rtti
                     result.BuildFields();
                     result.BuildCurrentVersion();
                     TypeMetas.Add(type, result);
+                    HashMetas.Add(result.TypeHash, result);
+                    
+                    result.SaveClass();
                     return result;
                 }
             }

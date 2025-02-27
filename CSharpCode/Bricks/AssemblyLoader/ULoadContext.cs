@@ -411,7 +411,7 @@ namespace EngineNS.Bricks.AssemblyLoader
             }
         }
         private string PlatformSuffix;
-        public void InitPlugins(TtEngine engine, bool bTryLoad)
+        internal void InitPlugins(TtEngine engine, bool bTryLoad)
         {
             CoreBinDirectory = engine.FileManager.GetRoot(IO.TtFileManager.ERootDir.Execute);
             var path = engine.FileManager.GetRoot(IO.TtFileManager.ERootDir.Plugin);

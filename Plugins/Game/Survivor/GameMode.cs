@@ -14,31 +14,50 @@ namespace Survivor
     [EngineNS.Rtti.Meta]
     public partial class TtGameMode : TtGameModeBase
     {
-        [EngineNS.Rtti.Meta]
+        [EngineNS.Rtti.Meta(Flags = EngineNS.Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public TtWeaponManager WeaponManager { get; } = new TtWeaponManager();
-        [EngineNS.Rtti.Meta]
+        [EngineNS.Rtti.Meta(Flags = EngineNS.Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public TtHeroManager HeroManager { get; } = new TtHeroManager();
-        [EngineNS.Rtti.Meta]
+        [EngineNS.Rtti.Meta(Flags = EngineNS.Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public TtMonsterManager MonsterManager { get; } = new TtMonsterManager();
-        [EngineNS.Rtti.Meta]
-        public EngineNS.UI.Controls.TtUIElement BattleUI { get; set; } = null;
+        [EngineNS.Rtti.Meta(Flags = EngineNS.Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        public TtItemManager ItemManager { get; } = new TtItemManager();
+        EngineNS.UI.Controls.TtUIElement mBattleUI;
+        [EngineNS.Rtti.Meta(Flags = EngineNS.Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        public EngineNS.UI.Controls.TtUIElement BattleUI
+        {
+            get => mBattleUI;
+            set
+            {
+                mBattleUI = value;
+                if (value != null)
+                {
+                    var mo = value.MacrossObject;
+                    if (mo != null)
+                    {
+                        mHpProgressUI = EngineNS.Rtti.TtTypeDescManager.GetPropertyMember(mo, "ElementVar_4728652819903166736") as TtProgress;
+                    }
+                }
+                else
+                {
+                    mHpProgressUI = null;
+                }
+            }
+        }
+        [EngineNS.Rtti.Meta(Flags = EngineNS.Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        public TtCharacterStateNode CharStateNode
+        {
+            get
+            {
+                return CharacterController?.ControlledCharacter?.FindFirstChild<TtCharacterStateNode>();
+            }
+        }
         public TtCharacter Player = null;
         public TtProgress mHpProgressUI = null;
         public TtProgress HpProgressUI
         {
             get
             {
-                if (mHpProgressUI == null)
-                {
-                    if (BattleUI != null)
-                    {
-                        var mo = BattleUI.MacrossObject;
-                        if (mo != null)
-                        {
-                            mHpProgressUI = EngineNS.Rtti.TtTypeDescManager.GetPropertyMember(mo, "ElementVar_4728652819903166736") as TtProgress;
-                        }
-                    }
-                }
                 return mHpProgressUI;
             }
         }
@@ -48,6 +67,10 @@ namespace Survivor
             base.Tick(host, elapsedMillisecond);
             TtUIManager.UIKeyName keyName = new TtUIManager.UIKeyName();
             TtEngine.Instance.UIManager.GetUI(keyName);
+            if (CharStateNode?.CurrentHP == 0)
+            {
+
+            }
         }
         [EngineNS.Rtti.Meta]
         public void LoadWeapons(
@@ -70,6 +93,12 @@ namespace Survivor
         {
             MonsterManager.LoadDataSet(name);
         }
+        public void LoadItems(
+        [RName.PGRName(FilterExts = EngineNS.Bricks.DataSet.TtDataSet.AssetExt)]
+            RName name)
+        {
+            ItemManager.LoadDataSet(name);
+        }
         [EngineNS.Rtti.Meta]
         public async TtTask InitMonsterSpawner() 
         { 
@@ -79,23 +108,23 @@ namespace Survivor
             node.Parent = CurrentScene;
         }
         [EngineNS.Rtti.Meta]
-        public async TtTask SelectRole(int roleId)
+        public async TtTask<bool> InitControlledCharacter(EngineNS.GamePlay.Controller.TtCharacterController cc, int roleId)
         {
             var roleData = HeroManager.GetData("RoleId", roleId);
             if (roleData == null)
-                return;
-            var character = CurrentScene.FindFirstChild<TtCharacter>(null, true);
-            Player = character as TtCharacter;
+                return false;
+            Player = cc.ControlledCharacter;
             if (Player == null)
-                return;
-            await InitCharacter(character, roleData);
+                return false;
+            await InitCharacter(cc, Player, roleData);
+            return true;
         }
 
-        private async TtTask InitCharacter(TtNode parent, TtRoleData roleData)
+        private async TtTask InitCharacter(EngineNS.GamePlay.Controller.TtCharacterController cc, TtCharacter player, TtRoleData roleData)
         {
             var stateNodeData = new TtCharacterStateNode.TtCharacterStateNodeData();
             stateNodeData.RoleData = roleData;
-            var stateNode = await TtNode.SpawnNode<TtCharacterStateNode>(parent, null,
+            var stateNode = await TtNode.SpawnNode<TtCharacterStateNode>(player, null,
                 stateNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             stateNode.NodeName = "StateNode";
             stateNode.CurrentHP = roleData.Health;
@@ -105,10 +134,11 @@ namespace Survivor
                 game.CountToTriggerPlayerDead();
             };
 
+            var prefabNode = player.Parent;
             {
                 var weaponNodeData = new TtWeaponNode.TtWeaponNodeData();
                 weaponNodeData.WeaponId = roleData.Weapon1;
-                var weaponNode = await TtNode.SpawnNode<TtWeaponNode>(parent.Parent, null,
+                var weaponNode = await TtNode.SpawnNode<TtWeaponNode>(prefabNode, null,
                     weaponNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
                 weaponNode.RoleData = roleData;
             }
@@ -116,7 +146,7 @@ namespace Survivor
             {
                 var weaponNodeData = new TtWeaponNode.TtWeaponNodeData();
                 weaponNodeData.WeaponId = 1002;
-                var weaponNode = await TtNode.SpawnNode<TtWeaponNode>(parent.Parent, null,
+                var weaponNode = await TtNode.SpawnNode<TtWeaponNode>(prefabNode, null,
                     weaponNodeData, EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
                 weaponNode.RoleData = roleData;
             }
@@ -190,18 +220,20 @@ namespace Survivor
 			await InitMonsterSpawner();
 			macross_break_InitMonsterSpawner_2609910045.TryBreak();
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_SelectRole_770898579 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtGameMode->TtTask SelectRole(int roleId)");
-		public async TtTask macross_SelectRole (string nodeName, int roleId) 
+		private static EngineNS.Macross.TtMacrossBreak macross_break_InitControlledCharacter_1038341169 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtGameMode->TtTask<bool> InitControlledCharacter(EngineNS.GamePlay.Controller.TtCharacterController cc, int roleId)");
+		public async TtTask<bool> macross_InitControlledCharacter (string nodeName, EngineNS.GamePlay.Controller.TtCharacterController cc, int roleId) 
 		{
 			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
+					stackframe.SetWatchVariable(nodeName + ":cc", cc);
 					stackframe.SetWatchVariable(nodeName + ":roleId", roleId);
 				}
 			}
-			await SelectRole(roleId);
-			macross_break_SelectRole_770898579.TryBreak();
+			var _return_value = await InitControlledCharacter(cc, roleId);
+			macross_break_InitControlledCharacter_1038341169.TryBreak();
+			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_GetSurvivorGameMode_3323264318 = new EngineNS.Macross.TtMacrossBreak("Survivor.TtGameMode->static TtGameMode GetSurvivorGameMode()");
 		public static unsafe TtGameMode macross_GetSurvivorGameMode (string nodeName) 

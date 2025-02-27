@@ -229,41 +229,49 @@ namespace EngineNS.Macross
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Error, $"{assemblyPath} contain static fields");
             }
 
-            Rtti.TtTypeDescManager.ServiceManager manager;
-            Rtti.TtAssemblyDesc desc;
-            var isReplace = Rtti.TtTypeDescManager.Instance.RegAssembly(newAssembly, out manager, out desc);
-            desc.Version = CurrentVersion++;
-            if (isReplace)
-            {
-                List<Type> removed = new List<Type>();
-                List<Type> changed = new List<Type>();
-                List<Type> added = new List<Type>();
-                var oldAssembly = mAssembly.Target as System.Reflection.Assembly;
-                if (oldAssembly != null)
-                {
-                    oldWeakRef = new WeakReference(oldAssembly);
-                    Rtti.TtAssemblyDesc.GetChangedLists(removed, changed, added, newAssembly, oldAssembly);
-                }
+            var oldAssembly = mAssembly?.Target as System.Reflection.Assembly;
+            var desc = EngineNS.Rtti.TtAssemblyDesc.UpdateRtti("GameProject", newAssembly, oldAssembly);
+            mAssembly = new WeakReference(newAssembly);
+            mAssemblyDesc = desc;
+            UpdateRefercences(int.MaxValue, true);
+            mAssemblyDesc.Version = CurrentVersion++;
 
-                Rtti.TtAssemblyDesc.UpdateTypeManager(manager, desc, removed, changed, added);
-                desc.ModuleAssembly = new WeakReference<System.Reflection.Assembly>(newAssembly);
+            //Rtti.TtTypeDescManager.ServiceManager manager;
+            //Rtti.TtAssemblyDesc desc;
+            //var isReplace = Rtti.TtTypeDescManager.Instance.RegAssembly(newAssembly, out manager, out desc);
+            //desc.Version = CurrentVersion++;
+            //if (isReplace)
+            //{
+            //    List<Type> removed = new List<Type>();
+            //    List<Type> changed = new List<Type>();
+            //    List<Type> added = new List<Type>();
 
-                for (int i = 0; i < 10; i++)
-                {
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                }
+            //    if (oldAssembly != null)
+            //    {
+            //        oldWeakRef = new WeakReference(oldAssembly);
+            //        Rtti.TtAssemblyDesc.GetChangedLists(removed, changed, added, newAssembly, oldAssembly);
+            //    }
 
-                mAssembly = new WeakReference(newAssembly);
-                mAssemblyDesc = desc;
-                UpdateRefercences(int.MaxValue, true);
-            }
-            else
-            {
-                manager.RegAssemblyTypes(desc);
-                mAssembly = new WeakReference(newAssembly);
-                mAssemblyDesc = desc;
-            }
+            //    Rtti.TtAssemblyDesc.UpdateTypeManager(manager, desc, removed, changed, added);
+            //    desc.ModuleAssembly = new WeakReference<System.Reflection.Assembly>(newAssembly);
+
+            //    for (int i = 0; i < 10; i++)
+            //    {
+            //        GC.Collect();
+            //        GC.WaitForPendingFinalizers();
+            //    }
+            //    manager.RegAssemblyTypes(desc);
+
+            //    mAssembly = new WeakReference(newAssembly);
+            //    mAssemblyDesc = desc;
+            //    UpdateRefercences(int.MaxValue, true);
+            //}
+            //else
+            //{
+            //    manager.RegAssemblyTypes(desc);
+            //    mAssembly = new WeakReference(newAssembly);
+            //    mAssemblyDesc = desc;
+            //}
             Rtti.TtTypeDescManager.Instance.OnTypeChangedInvoke();
 
             if (bUnloadDLL)

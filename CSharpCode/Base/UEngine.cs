@@ -286,11 +286,11 @@ namespace EngineNS
         {
             get;
         } = new Profiler.TtNativeMemory();
-        public static void OnlyInitTypes(TtEngine engine, string cfgFile, bool bNatvieMemory)
+        public static void InitForGameBuilder(TtEngine engine, string cfgFile, bool bNatvieMemory)
         {
             mInstance = engine;
             engine.Config = new TtEngineConfig();
-            engine.InitTypes(cfgFile, bNatvieMemory);
+            engine.InitTypes(cfgFile, bNatvieMemory, false);
         }
         public static async System.Threading.Tasks.Task<bool> StartEngine(TtEngine engine, string cfgFile, bool bNatvieMemory)
         {
@@ -321,8 +321,27 @@ namespace EngineNS
         #endregion
 
         public bool IsCLRProfiling = false;
-        public void InitTypes(string cfgFile, bool bNatvieMemory)
+        public void InitTypes(string cfgFile, bool bNatvieMemory, bool bLoadPluginModuel)
         {
+            if (cfgFile == null)
+                cfgFile = FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) + "EngineConfigDX11.jscfg";
+            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Load Application Config:{cfgFile}");
+
+            if (IO.TtFileManager.GetExtName(cfgFile) == ".cfg")
+            {
+                Config = IO.TtFileManager.LoadXmlToObject<TtEngineConfig>(cfgFile);
+                System.Diagnostics.Debug.Assert(false);
+            }
+            else if (IO.TtFileManager.GetExtName(cfgFile) == ".jscfg")
+            {
+                var jsCode = IO.TtFileManager.ReadAllText(cfgFile);
+                Config = IO.TtFileManager.LoadObjectFromJson<TtEngineConfig>(jsCode);
+            }
+            else
+            {
+                System.Diagnostics.Debug.Assert(false);
+            }
+
             var clrMgr = CoreCLRManager.GetInstance();
             clrMgr.PauseLog = true;
             clrMgr.Flags = 0xffffffff;//(uint)((1 << (int)EClrLogStringType.ObjectAlloc) | (1 << (int)EClrLogStringType.ObjectsAllocdByClass));
@@ -358,6 +377,8 @@ namespace EngineNS
 
             var t2 = Support.TtTime.HighPrecision_GetTickCount();
 
+            this.PluginModuleManager.InitPlugins(this, bLoadPluginModuel);
+
             EngineNS.Rtti.TtClassMetaManager.Instance.LoadMetas("EngineCore");
             var t3 = Support.TtTime.HighPrecision_GetTickCount();
 
@@ -367,19 +388,7 @@ namespace EngineNS
             TtEngine.Instance.AssetMetaManager.LoadMetas();
             var t4 = Support.TtTime.HighPrecision_GetTickCount();
 
-            if (cfgFile == null)
-                cfgFile = FileManager.GetRoot(IO.TtFileManager.ERootDir.Game) + "EngineConfigDX11.jscfg";
-            Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Load Application Config:{cfgFile}");
-
-            if (IO.TtFileManager.GetExtName(cfgFile) == ".cfg")
-            {
-                Config = IO.TtFileManager.LoadXmlToObject<TtEngineConfig>(cfgFile);
-            }
-            else if (IO.TtFileManager.GetExtName(cfgFile) == ".jscfg")
-            {
-                var jsCode = IO.TtFileManager.ReadAllText(cfgFile);
-                Config = IO.TtFileManager.LoadObjectFromJson<TtEngineConfig>(jsCode);
-            }
+            
 
             {
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Collect Type Info:{(t2 - t1) / 1000} ms");
@@ -393,7 +402,7 @@ namespace EngineNS
         public async System.Threading.Tasks.Task<bool> PreInitEngine(string cfgFile, bool bNatvieMemory)
         {
             var t1 = Support.TtTime.HighPrecision_GetTickCount();
-            InitTypes(cfgFile, bNatvieMemory);
+            InitTypes(cfgFile, bNatvieMemory, true);
 
             EngineNS.UCs2CppBase.InitializeNativeCoreProvider();
 
@@ -470,8 +479,6 @@ namespace EngineNS
             {
                 i.SetToGlobalConfig();
             }
-
-            this.PluginModuleManager.InitPlugins(this, true);
 
             this.DataCopyer.FindCopyer(Rtti.TtTypeDesc.TypeStr(typeof(TtEngineConfig)));
 

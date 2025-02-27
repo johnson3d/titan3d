@@ -28,7 +28,8 @@ namespace EngineNS.GamePlay.Scene
     }
     [TtBehavior.Import]
     [IO.AssetCreateMenu(MenuName = "Script/Behavior")]
-    public class TtBehavior : IO.IAsset
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
+    public class TtBehavior : IO.BaseSerializer, IO.IAsset
     {
         public const string AssetExt = ".cs";
         public string TypeExt { get => AssetExt; }
@@ -248,6 +249,7 @@ namespace EngineNS.GamePlay.Scene
             {
                 if (TtEngine.Instance.MacrossModule.Version != Version || BehaviorName != node.BehaviorName)
                 {
+                    var save = mBehavior;
                     mBehavior = null;
                     var ameta = TtEngine.Instance.AssetMetaManager.GetAssetMeta(node.BehaviorName);
                     if (ameta == null)
@@ -264,6 +266,15 @@ namespace EngineNS.GamePlay.Scene
                             if (i.Namespace == ns && i.Name == n)
                             {
                                 mBehavior = Rtti.TtTypeDescManager.CreateInstance(i) as TtBehavior;
+                                if (save != null)
+                                {
+                                    var typeStr = Rtti.TtTypeDesc.TypeStr(mBehavior.GetType());
+                                    var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+                                    if (meta != null)
+                                    {
+                                        meta.CopyObjectMetaField(mBehavior, save);
+                                    }
+                                }
                                 BehaviorName = node.BehaviorName;
                                 Version = TtEngine.Instance.MacrossModule.Version;
                                 break;
@@ -275,6 +286,8 @@ namespace EngineNS.GamePlay.Scene
             }
         }
         protected TtBehaviorGetter mBehaviorGetter;
+        [Category("User")]
+        [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public TtBehavior Behavior
         {
             get

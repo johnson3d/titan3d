@@ -14,7 +14,7 @@ using MathNet.Numerics.LinearAlgebra.Solvers;
 
 namespace EngineNS.Editor.Forms
 {
-    public class TtSceneEditorOutliner : UWorldOutliner
+    public class TtSceneEditorOutliner : TtWorldOutliner
     {
         public TtSceneEditorOutliner(EGui.Slate.TtWorldViewportSlate viewport, bool regRoot)
             : base(viewport, regRoot)
@@ -219,7 +219,7 @@ namespace EngineNS.Editor.Forms
         }
         public GamePlay.Scene.TtScene Scene;
         public USceneEditorViewport PreviewViewport = new USceneEditorViewport();
-        public UWorldOutliner mWorldOutliner;
+        public TtWorldOutliner mWorldOutliner;
         EGui.Controls.TtContentBrowser mContentBrowser = new EGui.Controls.TtContentBrowser();
 
         public EGui.Controls.PropertyGrid.PropertyGrid NodeInspector = new EGui.Controls.PropertyGrid.PropertyGrid();
@@ -1081,7 +1081,7 @@ namespace EngineNS.Editor.Forms
         #endregion
     }
 
-    public class TtPrefabEditorOutliner : UWorldOutliner
+    public class TtPrefabEditorOutliner : TtWorldOutliner
     {
         public TtPrefabEditorOutliner(EGui.Slate.TtWorldViewportSlate viewport, bool regRoot)
             : base(viewport, regRoot)

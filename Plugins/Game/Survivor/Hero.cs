@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Survivor
 {
-    [EngineNS.Bricks.DataSet.TtDataTable(SheetName = "TtRoleData", HeadRow = 0, DataStartRow = 3)]
+    [EngineNS.Bricks.DataSet.TtDataTable(SheetName = "TtRoleData", KeyName = "RoleId", HeadRow = 0, DataStartRow = 3)]
     public class TtRoleData : EngineNS.Bricks.DataSet.TtDataProvider
     {
         [EngineNS.Rtti.Meta]

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EngineNS.Editor.Forms
 {
-    public class UWorldOutliner : TtTreeNodeDrawer, IRootForm
+    public class TtWorldOutliner : TtTreeNodeDrawer, IRootForm
     {
         public GamePlay.TtWorld World
         {
@@ -17,7 +17,7 @@ namespace EngineNS.Editor.Forms
         }
         public EGui.Slate.TtWorldViewportSlate WorldViewportState { get; set; }
 
-        public UWorldOutliner(EGui.Slate.TtWorldViewportSlate viewport, bool regRoot = true)
+        public TtWorldOutliner(EGui.Slate.TtWorldViewportSlate viewport, bool regRoot = true)
         {
             WorldViewportState = viewport;
             if (regRoot)

@@ -81,19 +81,28 @@ namespace EngineNS.Bricks.DataSet
             CheckSheetLinks();
             return true;
         }
-        internal void SaveDataSetToExcel(string filepath)
+        partial void SaveToExcel(ref bool isOk, string filepath)
         {
-            var workbook = new XSSFWorkbook();
-            foreach (var i in Tables)
+            isOk = false;
+            try
             {
-                var sheet = GetSheetSure(workbook, i.Value.Binder.SheetName);
-                i.Value.SaveTableToExcel(this, sheet);
-            }
+                var workbook = new XSSFWorkbook();
+                foreach (var i in Tables)
+                {
+                    var sheet = GetSheetSure(workbook, i.Value.Binder.SheetName);
+                    i.Value.SaveTableToExcel(this, sheet);
+                }
 
-            var file = new System.IO.FileStream(filepath, System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.Write);
-            workbook.Write(file);
-            file.Close();
-            workbook.Close();
+                var file = new System.IO.FileStream(filepath, System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.Write);
+                workbook.Write(file);
+                file.Close();
+                workbook.Close();
+                isOk = true;
+            }
+            catch (Exception e)
+            {
+                Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Error, $"DataSet SaveToExcel Error:{e.Message}");
+            }
         }
         protected NPOI.XSSF.UserModel.XSSFSheet GetSheetSure(XSSFWorkbook workbook, string name)
         {

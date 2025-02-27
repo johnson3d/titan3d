@@ -23,14 +23,13 @@ try
 
     try
     {
-        EngineNS.TtEngine.OnlyInitTypes(new EngineNS.TtEngine(args), cfgFile, false);
-        TtEngine.Instance.PluginModuleManager.InitPlugins(TtEngine.Instance, false);
+        EngineNS.TtEngine.InitForGameBuilder(new EngineNS.TtEngine(args), cfgFile, false);
     }
     catch (Exception ex)
     {
         System.Console.WriteLine($"try debug Core.Window.dll");
         EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/debug");
-        EngineNS.TtEngine.OnlyInitTypes(new EngineNS.TtEngine(args), cfgFile, false);
+        EngineNS.TtEngine.InitForGameBuilder(new EngineNS.TtEngine(args), cfgFile, false);
     }
 
     System.Console.WriteLine($"engine sln dir: {enginesln}");

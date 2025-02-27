@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.Bricks.DataSet
 {
     public class TtDataProvider : IO.BaseSerializer
     {
+        [Category("Excel")]
+        [Rtti.Meta]
         public int RowInSheet { get; set; }
     }
     public class TtDataTableAttribute : Attribute
     {
         public string SheetName;
+        public string KeyName;
         public int HeadRow = -1;
         public int DataStartRow = 0;
     }
@@ -38,6 +42,15 @@ namespace EngineNS.Bricks.DataSet
         public int HeadRow = -1;
         public int DataStartRow = 0;
         public List<TtDataField> Fields = new List<TtDataField>();
+        public TtDataField FindFiled(string name)
+        {
+            foreach (var fld in Fields)
+            {
+                if (fld.HeadName == name)
+                    return fld;
+            }
+            return null;
+        }
         public bool BuildBinder(Type type)
         {
             var attrs = type.GetCustomAttributes(typeof(TtDataTableAttribute), false);

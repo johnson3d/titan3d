@@ -5,7 +5,7 @@ using EngineNS.DesignMacross.Base.Description;
 
 namespace Survivor
 {
-    [EngineNS.Bricks.DataSet.TtDataTable(SheetName = "TtMonsterData", HeadRow = 0, DataStartRow = 3)]
+    [EngineNS.Bricks.DataSet.TtDataTable(SheetName = "TtMonsterData", KeyName = "MonsterId", HeadRow = 0, DataStartRow = 3)]
     public class TtMonsterData : EngineNS.Bricks.DataSet.TtDataProvider
     {
         [EngineNS.Rtti.Meta]

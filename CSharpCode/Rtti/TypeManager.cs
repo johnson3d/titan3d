@@ -54,7 +54,7 @@ namespace EngineNS.Rtti
         }
 
         #region Rtti Reload
-        public static void UpdateRtti(string moduleName, Assembly newAssembly, Assembly oldAssembly)
+        public static Rtti.TtAssemblyDesc UpdateRtti(string moduleName, Assembly newAssembly, Assembly oldAssembly)
         {
             Rtti.TtTypeDescManager.ServiceManager manager;
             Rtti.TtAssemblyDesc desc;
@@ -87,6 +87,8 @@ namespace EngineNS.Rtti
             Rtti.TtTypeDescManager.Instance.OnTypeChangedInvoke();
 
             EngineNS.Rtti.TtClassMetaManager.Instance.LoadMetas(moduleName);
+
+            return desc;
         }
         public static void GetChangedLists(List<Type> removed, List<Type> changed, List<Type> added, System.Reflection.Assembly newAssembly, System.Reflection.Assembly oldAssembly)
         {

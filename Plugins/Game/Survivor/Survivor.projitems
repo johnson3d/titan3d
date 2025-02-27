@@ -13,6 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ActorStateNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GameMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Hero.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Item.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossSurvivorGame.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Monster.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MonsterController.cs" />

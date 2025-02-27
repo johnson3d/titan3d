@@ -238,16 +238,16 @@ namespace EngineNS.GamePlay.Scene
                 UpdateAbsTransform();
             }
 
+            if (NodeData.BehaviorName != null)
+            {
+                mBehaviorGetter = new TtBehaviorGetter();
+            }
             return true;
         }
         //Callback: Children ready!
         protected virtual async Thread.Async.TtTask OnPostInitNode(TtNode parent)
         {
-            if (NodeData.BehaviorName != null)
-            {
-                mBehaviorGetter = new TtBehaviorGetter();
-                Behavior?.BeginPlay(this);
-            }
+            Behavior?.BeginPlay(this);
         }
         public static TtNodeAttribute GetNodeAttribute(System.Type type)
         {
@@ -945,6 +945,7 @@ namespace EngineNS.GamePlay.Scene
         {
             IsNodeDesc = 1,
             IgnoreNodeDesc = (1 << 1),
+            IsBehaviorData = (1 << 2),
         }
         public unsafe void SaveChildNode(TtNode scene, EngineNS.XndHolder xnd, EngineNS.XndNode node)
         {
@@ -965,17 +966,22 @@ namespace EngineNS.GamePlay.Scene
                         {
                             nodeFlags |= (uint)ENodeFlags.IgnoreNodeDesc;
                         }
-                        using (var dataAttr = xnd.NewAttribute(Rtti.TtTypeDesc.TypeStr(i.NodeData.GetType()), 1, nodeFlags))
+                        var dataAttr = nd.GetOrAddAttribute(Rtti.TtTypeDesc.TypeStr(i.NodeData.GetType()), 1, nodeFlags, true);
+
+                        //using (var dataAttr = xnd.NewAttribute(Rtti.TtTypeDesc.TypeStr(i.NodeData.GetType()), 1, nodeFlags))
+                        using (var ar = dataAttr.GetWriter((ulong)NodeData.GetStructSize() * 2))
                         {
-                            var attrProxy = new EngineNS.IO.TtXndAttributeWriter(dataAttr);
-
-                            var ar = new EngineNS.IO.AuxWriter<EngineNS.IO.TtXndAttributeWriter>(attrProxy);
-                            dataAttr.BeginWrite((ulong)NodeData.GetStructSize() * 2);
                             ar.Write(i.NodeData);
-                            dataAttr.EndWrite();
+                        }
 
-                            nd.AddAttribute(dataAttr);
-                        }   
+                        if (i.Behavior != null)
+                        {
+                            dataAttr = nd.GetOrAddAttribute(Rtti.TtTypeDesc.TypeStr(i.Behavior.GetType()), 1, (uint)ENodeFlags.IsBehaviorData, true);
+                            using (var ar = dataAttr.GetWriter((ulong)NodeData.GetStructSize() * 2))
+                            {
+                                ar.Write(i.Behavior);
+                            }
+                        }
                     }
                     i.SaveChildNode(scene, xnd, nd);
                 }   
@@ -1056,6 +1062,36 @@ namespace EngineNS.GamePlay.Scene
                         Profiler.Log.WriteLine<Profiler.TtNetCategory>(Profiler.ELogTag.Warning, $"Scene({scene}): Node({nd.NodeData?.Name}) load failed");
                     }
                 }
+
+                if (nd.Behavior != null)
+                {
+                    attr = cld.FindFirstAttributeByFlags((uint)ENodeFlags.IsBehaviorData);
+                    if (attr.NativePointer != IntPtr.Zero)
+                    {
+                        var bhvType = Rtti.TtTypeDesc.TypeOf(attr.Name);
+                        var bhv = Rtti.TtTypeDescManager.CreateInstance(bhvType) as TtBehavior;
+                        try
+                        {
+                            using (var ar = attr.GetReader(nd))
+                            {
+                                IO.ISerializer ro = bhv;
+                                ar.ReadTo(ro);
+                            }
+
+                            var typeStr = Rtti.TtTypeDesc.TypeStr(nd.Behavior.GetType());
+                            var meta = Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+                            if (meta != null)
+                            {
+                                meta.CopyObjectMetaField(nd.Behavior, bhv);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Profiler.Log.WriteException(ex);
+                        }
+                    }
+                }
+                    
                 if (nd.Placement != null)
                 {
                     nd.Parent = this;
