@@ -231,6 +231,18 @@ namespace EngineNS.GamePlay.Scene
         {
 
         }
+        public virtual void OnContact(TtNode selfNode, TtNode otherNode)
+        {
+
+        }
+        public virtual void OnBeginTrigger(TtNode selfNode, TtNode otherNode)
+        {
+
+        }
+        public virtual void OnEndTrigger(TtNode selfNode, TtNode otherNode)
+        {
+
+        }
     }
 
     partial class TtNodeData

@@ -140,7 +140,13 @@ namespace EngineNS.Macross
         }
         private TtMacrosAssemblyLoader mAssemblyLoader;
         private Rtti.TtAssemblyDesc mAssemblyDesc;
-        public uint Version = 1;
+        public uint Version
+        {
+            get
+            {
+                return (uint)mAssemblyDesc.Version;
+            }
+        }
         public T NewInnerObject<T>(RName name) where T : class
         {//不要保存返回值!!
             if (mAssemblyDesc == null)

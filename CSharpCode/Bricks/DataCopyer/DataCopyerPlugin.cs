@@ -88,7 +88,26 @@ namespace EngineNS.Bricks.DataCopyer
                     i.CustumSerializer.Save(ar, obj, i.PropertyName);
                     continue;
                 }
-                WriteObject(ar, i.PropInfo.PropertyType, i.PropInfo.GetValue(obj));
+
+                object value;
+                try
+                {
+                    value = i.PropInfo.GetValue(obj);
+                }
+                catch
+                {
+                    var prop = obj.GetType().GetProperty(i.PropertyName);
+                    if (prop != null)
+                    {
+                        value = prop.GetValue(obj);
+                    }
+                    else
+                    {
+                        value = Rtti.TtTypeDescManager.CreateInstance(i.PropInfo.PropertyType);
+                    }
+                }
+                
+                WriteObject(ar, i.PropInfo.PropertyType, value);
             }
         }
         public static void ReadMember(IO.IReader ar, object obj, Rtti.TtMetaVersion metaVersion, bool hasSkip)

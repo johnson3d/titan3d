@@ -205,12 +205,21 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
 
         public void OnContact(TtNode selfNode, TtNode otherNode)
         {
-            MacrossGetter?.Get().OnContact(selfNode, otherNode);
+            try
+            {
+                this.Behavior?.OnContact(selfNode, otherNode);
+                MacrossGetter?.Get().OnContact(selfNode, otherNode);
+            }
+            catch (System.Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+            }
         }
         public void OnBeginTrigger(TtNode selfNode, TtNode otherNode)
         {
             try
             {
+                this.Behavior?.OnBeginTrigger(selfNode, otherNode);
                 MacrossGetter?.Get().OnBeginTrigger(selfNode, otherNode);
             }
             catch(System.Exception ex)
@@ -220,7 +229,15 @@ namespace EngineNS.Bricks.PhysicsCore.SceneNode
         }
         public void OnEndTrigger(TtNode selfNode, TtNode otherNode)
         {
-            MacrossGetter?.Get().OnEndTrigger(selfNode, otherNode);
+            try
+            {
+                this.Behavior?.OnEndTrigger(selfNode, otherNode);
+                MacrossGetter?.Get().OnEndTrigger(selfNode, otherNode);
+            }
+            catch (System.Exception ex)
+            {
+                Profiler.Log.WriteException(ex);
+            }
         }
 
     }

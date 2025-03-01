@@ -987,7 +987,7 @@ namespace EngineNS.GamePlay.Scene
                 }   
             }
         }
-        public async System.Threading.Tasks.Task<bool> LoadChildNode(GamePlay.TtWorld world, TtNode scene, EngineNS.XndNode node, bool bTryFindNode)
+        public async Thread.Async.TtTask<bool> LoadChildNode(GamePlay.TtWorld world, TtNode scene, EngineNS.XndNode node, bool bTryFindNode)
         {
             var isNoAABB = this.HasStyle(ENodeStyles.DiscardAABB);
             this.SetStyle(ENodeStyles.DiscardAABB);
