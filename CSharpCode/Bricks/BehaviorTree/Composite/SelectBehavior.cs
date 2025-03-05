@@ -30,7 +30,7 @@ namespace EngineNS.BehaviorTree.Composite
             }
             return false;
         }
-        public override BehaviorStatus Update(long timeElapse, GamePlay.UCenterData context)
+        public override BehaviorStatus Update(long timeElapse, GamePlay.TtCenterData context)
         {
             if (mRunningChild != null)
             {

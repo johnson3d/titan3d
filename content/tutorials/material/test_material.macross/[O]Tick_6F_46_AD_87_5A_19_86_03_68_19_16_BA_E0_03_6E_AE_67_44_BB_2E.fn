@@ -2,6 +2,7 @@
 <Root Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMacrossMethodGraph@EngineCore">
   <AssetName Type="EngineNS.RName@EngineCore" Value="Game,tutorials/material/test_material.macross,9f463216-c26b-45b3-8f1a-30939daabeec" />
   <GraphName Type="System.String@Unknown" Value="Tick" />
+  <IsAsync Type="System.Boolean@Unknown" Value="False" />
   <IsUseCustumCode Type="System.Boolean@Unknown" Value="False" />
   <LocalVars Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="0" />
   <MethodDatas Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.MacrossNode.MethodData@EngineCore,&gt;@Unknown" Count="1">
@@ -59,10 +60,13 @@
             </AttributeType>
           </e_0>
         </Attributes>
+        <Id Type="System.Guid@Unknown" Value="00000000-0000-0000-0000-000000000000" />
+        <IsManual Type="System.Boolean@Unknown" Value="False" />
         <IsOverride Type="System.Boolean@Unknown" Value="True" />
         <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="4">
           <e_0 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
             <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+            <Category Type="System.String@Unknown" Value="Macross" />
             <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
               <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                 <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -72,6 +76,7 @@
             </InitValue>
             <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
             <IsBindable Type="System.Boolean@Unknown" Value="False" />
+            <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="tmp_r_GetMaterial_1597294926" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -82,6 +87,7 @@
           </e_0>
           <e_1 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
             <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+            <Category Type="System.String@Unknown" Value="Macross" />
             <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
               <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                 <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -91,6 +97,7 @@
             </InitValue>
             <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
             <IsBindable Type="System.Boolean@Unknown" Value="False" />
+            <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="tmp_r_Sin_1732946206" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -101,6 +108,7 @@
           </e_1>
           <e_2 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
             <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+            <Category Type="System.String@Unknown" Value="Macross" />
             <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
               <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                 <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -110,6 +118,7 @@
             </InitValue>
             <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
             <IsBindable Type="System.Boolean@Unknown" Value="False" />
+            <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="tmp_r_CreateColor3f_919645327" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -120,6 +129,7 @@
           </e_2>
           <e_3 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
             <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+            <Category Type="System.String@Unknown" Value="Macross" />
             <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
               <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                 <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -129,6 +139,7 @@
             </InitValue>
             <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
             <IsBindable Type="System.Boolean@Unknown" Value="False" />
+            <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="tmp_r_SetColor3_516167510" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -145,11 +156,12 @@
   </MethodDatas>
   <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="12">
     <e_0 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.UMethodStartNode@EngineCore">
-      <MethodDecKeyword Type="System.String@Unknown" Value=" Tick(EngineNS.GamePlay.TtGameInstance,System.Single)" />
+      <MethodId Type="System.Guid@Unknown" Value="00000000-0000-0000-0000-000000000000" />
       <Name Type="System.String@Unknown" Value="Tick" />
       <NodeId Type="System.Guid@Unknown" Value="fa22859b-acc6-41fc-a1de-9e597a646ce7" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="128,344.00003" />
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+      <MethodDecKeyword Type="System.String@Unknown" Value=" Tick(EngineNS.GamePlay.TtGameInstance,System.Single)" />
     </e_0>
     <e_1 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.ClassPropertyVar@EngineCore">
       <IsGet Type="System.Boolean@Unknown" Value="True" />
@@ -179,6 +191,7 @@
     </e_3>
     <e_4 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
       <InputControlWidth Type="System.Single@Unknown" Value="60" />
+      <IsNodeAsync Type="System.Boolean@Unknown" Value="False" />
       <Label Type="System.String@Unknown" Value="Sin" />
       <MethodMeta Type="System.String@Unknown" Value="EngineNS.MathHelper@EngineCore#System.Single Sin(System.Single)" />
       <Name Type="System.String@Unknown" Value="Sin" />
@@ -203,6 +216,7 @@
     </e_4>
     <e_5 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
       <InputControlWidth Type="System.Single@Unknown" Value="60" />
+      <IsNodeAsync Type="System.Boolean@Unknown" Value="False" />
       <Label Type="System.String@Unknown" Value="CreateColor3f" />
       <MethodMeta Type="System.String@Unknown" Value="EngineNS.MathHelper@EngineCore#EngineNS.Color3f CreateColor3f(System.Single,System.Single,System.Single)" />
       <Name Type="System.String@Unknown" Value="CreateColor3f" />
@@ -243,6 +257,7 @@
     </e_5>
     <e_6 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
       <InputControlWidth Type="System.Single@Unknown" Value="60" />
+      <IsNodeAsync Type="System.Boolean@Unknown" Value="False" />
       <Label Type="System.String@Unknown" Value="GetMaterial" />
       <MethodMeta Type="System.String@Unknown" Value="EngineNS.Graphics.Mesh.TtMesh@EngineCore#EngineNS.Graphics.Pipeline.Shader.TtMaterial GetMaterial(System.UInt32,System.UInt32)" />
       <Name Type="System.String@Unknown" Value="GetMaterial" />
@@ -302,6 +317,7 @@
     </e_9>
     <e_10 Type="EngineNS.Bricks.CodeBuilder.MacrossNode.MethodNode@EngineCore">
       <InputControlWidth Type="System.Single@Unknown" Value="60" />
+      <IsNodeAsync Type="System.Boolean@Unknown" Value="False" />
       <Label Type="System.String@Unknown" Value="SetColor3" />
       <MethodMeta Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Shader.TtMaterial@EngineCore#System.Boolean SetColor3(System.String,EngineNS.Color3f&amp;)" />
       <Name Type="System.String@Unknown" Value="SetColor3" />

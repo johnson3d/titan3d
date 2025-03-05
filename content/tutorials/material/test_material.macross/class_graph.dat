@@ -38,10 +38,13 @@
             </AttributeType>
           </e_0>
         </Attributes>
+        <Id Type="System.Guid@Unknown" Value="00000000-0000-0000-0000-000000000000" />
+        <IsManual Type="System.Boolean@Unknown" Value="False" />
         <IsOverride Type="System.Boolean@Unknown" Value="True" />
         <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="2">
           <e_0 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
             <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+            <Category Type="System.String@Unknown" Value="Macross" />
             <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
               <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                 <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -51,6 +54,7 @@
             </InitValue>
             <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
             <IsBindable Type="System.Boolean@Unknown" Value="False" />
+            <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="tmp_r_InitViewportSlateWithScene_1796944968" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -61,6 +65,7 @@
           </e_0>
           <e_1 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
             <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+            <Category Type="System.String@Unknown" Value="Macross" />
             <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
               <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                 <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -70,6 +75,7 @@
             </InitValue>
             <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
             <IsBindable Type="System.Boolean@Unknown" Value="False" />
+            <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="tmp_r_FindFirstChild_2034756304" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -82,6 +88,7 @@
         <MethodName Type="System.String@Unknown" Value="BeginPlay" />
         <ReturnValue Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
           <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+          <Category Type="System.String@Unknown" Value="Macross" />
           <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
             <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -91,6 +98,7 @@
           </InitValue>
           <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
           <IsBindable Type="System.Boolean@Unknown" Value="False" />
+          <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
           <VariableName Type="System.String@Unknown" Value="ret_3983877425" />
           <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
             <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -153,10 +161,13 @@
             </AttributeType>
           </e_0>
         </Attributes>
+        <Id Type="System.Guid@Unknown" Value="00000000-0000-0000-0000-000000000000" />
+        <IsManual Type="System.Boolean@Unknown" Value="False" />
         <IsOverride Type="System.Boolean@Unknown" Value="True" />
         <LocalVariables Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="4">
           <e_0 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
             <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+            <Category Type="System.String@Unknown" Value="Macross" />
             <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
               <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                 <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -166,6 +177,7 @@
             </InitValue>
             <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
             <IsBindable Type="System.Boolean@Unknown" Value="False" />
+            <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="tmp_r_GetMaterial_1597294926" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -176,6 +188,7 @@
           </e_0>
           <e_1 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
             <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+            <Category Type="System.String@Unknown" Value="Macross" />
             <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
               <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                 <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -185,6 +198,7 @@
             </InitValue>
             <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
             <IsBindable Type="System.Boolean@Unknown" Value="False" />
+            <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="tmp_r_Sin_1732946206" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -195,6 +209,7 @@
           </e_1>
           <e_2 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
             <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+            <Category Type="System.String@Unknown" Value="Macross" />
             <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
               <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                 <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -204,6 +219,7 @@
             </InitValue>
             <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
             <IsBindable Type="System.Boolean@Unknown" Value="False" />
+            <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="tmp_r_CreateColor3f_919645327" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -214,6 +230,7 @@
           </e_2>
           <e_3 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
             <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
+            <Category Type="System.String@Unknown" Value="Macross" />
             <InitValue Type="EngineNS.Bricks.CodeBuilder.TtDefaultValueExpression@EngineCore">
               <Type Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
                 <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -223,6 +240,7 @@
             </InitValue>
             <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
             <IsBindable Type="System.Boolean@Unknown" Value="False" />
+            <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
             <VariableName Type="System.String@Unknown" Value="tmp_r_SetColor3_516167510" />
             <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
               <IsEnum Type="System.Boolean@Unknown" Value="False" />
@@ -239,9 +257,8 @@
     <Properties Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore,&gt;@Unknown" Count="1">
       <e_0 Type="EngineNS.Bricks.CodeBuilder.TtVariableDeclaration@EngineCore">
         <Attributes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.CodeBuilder.TtAttribute@EngineCore,&gt;@Unknown" Count="0" />
-        <Comment Type="EngineNS.Bricks.CodeBuilder.TtCommentStatement@EngineCore">
-          <CommentString Type="System.String@Unknown" Value="" />
-        </Comment>
+        <Category Type="System.String@Unknown" Value="Macross" />
+        <Comment Type="EngineNS.Bricks.CodeBuilder.TtCommentStatement@EngineCore" />
         <InitValue Type="EngineNS.Bricks.CodeBuilder.TtPrimitiveExpression@EngineCore">
           <Type Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.GamePlay.Scene.TtMeshNode@EngineCore" />
           <TypeIsTypeof Type="System.Boolean@Unknown" Value="True" />
@@ -249,6 +266,7 @@
         </InitValue>
         <IsAutoSaveLoad Type="System.Boolean@Unknown" Value="True" />
         <IsBindable Type="System.Boolean@Unknown" Value="False" />
+        <IsBrowsable Type="System.Boolean@Unknown" Value="True" />
         <VariableName Type="System.String@Unknown" Value="Member_0" />
         <VariableType Type="EngineNS.Bricks.CodeBuilder.TtTypeReference@EngineCore">
           <IsEnum Type="System.Boolean@Unknown" Value="False" />

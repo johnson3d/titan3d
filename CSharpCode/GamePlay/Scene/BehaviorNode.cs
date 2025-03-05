@@ -152,6 +152,8 @@ namespace EngineNS.GamePlay.Scene
                 creator.AddLine($"//This is a flag, Please keep it!", ref code);
                 creator.AddLine($"using System;", ref code);
                 creator.AddLine($"System.Collections.Generic;", ref code);
+                creator.AddLine($"using EngineNS;", ref code);
+                creator.AddLine($"using EngineNS.GamePlay;", ref code);
                 creator.AddLine($"using EngineNS.GamePlay.Scene;", ref code);
                 creator.AddLine($"using EngineNS.Thread.Async;", ref code);
 

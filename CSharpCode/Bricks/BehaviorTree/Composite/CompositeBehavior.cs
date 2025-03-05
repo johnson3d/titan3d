@@ -66,6 +66,6 @@ namespace EngineNS.BehaviorTree.Composite
             }
         }
 
-        public override BehaviorStatus Update(long timeElapse, GamePlay.UCenterData context) { return BehaviorStatus.Running; }
+        public override BehaviorStatus Update(long timeElapse, GamePlay.TtCenterData context) { return BehaviorStatus.Running; }
     }
 }

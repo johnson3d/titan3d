@@ -11,7 +11,7 @@ namespace EngineNS.BehaviorTree.Decorator
         public BehaviorEvent BehaviorEvent { get; set; } = null;
         public Behavior Child { get; set; } = null;
         public FlowControlType FlowControl { get; set; } = FlowControlType.None;
-        public override BehaviorStatus Update(long timeElapse, UCenterData context)
+        public override BehaviorStatus Update(long timeElapse, TtCenterData context)
         {
             return BehaviorStatus.Success;
         }
@@ -48,7 +48,7 @@ namespace EngineNS.BehaviorTree.Decorator
             mStatus = BehaviorStatus.Invalid;
             Child.Reset();
         }
-        public virtual bool EventEvaluate(long timeElapse, GamePlay.UCenterData context)
+        public virtual bool EventEvaluate(long timeElapse, GamePlay.TtCenterData context)
         {
             return false;
         }

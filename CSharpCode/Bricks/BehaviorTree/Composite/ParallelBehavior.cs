@@ -14,7 +14,7 @@ namespace EngineNS.BehaviorTree.Composite
     {
         public Policy mSuccessPolicy;
         public Policy mFailurePolicy;
-        public override BehaviorStatus Update(long timeElapse, GamePlay.UCenterData context)        {
+        public override BehaviorStatus Update(long timeElapse, GamePlay.TtCenterData context)        {
             int iSuccessCount = 0, iFailureCount = 0;
             for (int i = 0; i < mChildrenList.Count; ++i)
             {

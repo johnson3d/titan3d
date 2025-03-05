@@ -40,7 +40,7 @@ namespace EngineNS.GamePlay
     //[Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.UMacrossGame@EngineCore", "EngineNS.GamePlay.UMacrossGame" })]
     public partial class TtMacrossGame
     {
-        TtGameModeBase mGameMode;
+        TtGameModeBase mGameMode = new TtGameModeBase();
         [Rtti.Meta(Flags = Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public TtGameModeBase GameMode { get => mGameMode; }
         [Rtti.Meta]
@@ -180,7 +180,7 @@ namespace EngineNS.GamePlay
             PrefabPoolManager.Dispose();
         }
         [Rtti.Meta]
-        public async System.Threading.Tasks.Task InitViewportSlate(
+        public async Thread.Async.TtTask InitViewportSlate(
             [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]
             RName rPolicy, 
             float zMin = 0, float zMax = 1)
@@ -203,25 +203,35 @@ namespace EngineNS.GamePlay
         }
 
         [Rtti.Meta]
-        public async System.Threading.Tasks.Task<GamePlay.Scene.TtScene> LoadScene(
+        public async Thread.Async.TtTask<GamePlay.Scene.TtScene> LoadScene(
             [RName.PGRName(FilterExts = GamePlay.Scene.TtScene.AssetExt)]
-            RName mapName)
+            RName mapName, bool bSetToWorld = true)
         {
             var viewport = this.WorldViewportSlate;
             var world = viewport.World;
 
             var scene = await GamePlay.Scene.TtScene.LoadScene(world, mapName);
-            if (scene != null)
+            if (scene != null && bSetToWorld)
             {
                 world.Root.ClearChildren();
                 world.Root.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
                 scene.Parent = world.Root;
                 return scene;
             }
-            return null;
+            return scene;
         }
         [Rtti.Meta]
-        public async System.Threading.Tasks.Task<TtScene> InitViewportSlateWithScene(
+        public void SetSceneToWorld(TtScene scene)
+        {
+            var viewport = this.WorldViewportSlate;
+            var world = viewport.World;
+
+            //world.Root.ClearChildren();
+            world.Root.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
+            scene.Parent = world.Root;
+        }
+        [Rtti.Meta]
+        public async Thread.Async.TtTask<TtScene> InitViewportSlateWithScene(
             [RName.PGRName(FilterExts = GamePlay.Scene.TtScene.AssetExt)]
             RName mapName,
             float zMin = 0, float zMax = 1, bool bSetToWorld = true)
@@ -247,18 +257,9 @@ namespace EngineNS.GamePlay
 
             return scene;
         }
+        
         [Rtti.Meta]
-        public void SetSceneToWorld(TtScene scene)
-        {
-            var viewport = this.WorldViewportSlate;
-            var world = viewport.World;
-
-            world.Root.ClearChildren();
-            world.Root.SetStyle(GamePlay.Scene.TtNode.ENodeStyles.VisibleFollowParent);
-            scene.Parent = world.Root;
-        }
-        [Rtti.Meta]
-        public async System.Threading.Tasks.Task CreateCharacterFromPrefab(Scene.TtScene scene,
+        public async Thread.Async.TtTask CreateCharacterFromPrefab(Scene.TtScene scene,
             [RName.PGRName(FilterExts = TtPrefab.AssetExt)]
             RName prefabName)
         {
@@ -298,7 +299,7 @@ namespace EngineNS.GamePlay
             return result;
         }
         [Rtti.Meta]
-        public async System.Threading.Tasks.Task CreateCharacter(Scene.TtScene scene)
+        public async Thread.Async.TtTask CreateCharacter(Scene.TtScene scene)
         {
             var playerStart = scene.FindFirstChild<TtPlayerStart>();
             EngineNS.GamePlay.Scene.TtNode root = scene;
@@ -388,21 +389,6 @@ namespace EngineNS
         {
             get;
             set;
-        }
-        [Rtti.Meta()]
-        public static object RunMacross(out bool isOk,
-            //[Rtti.MetaParameter(FilterType = typeof(object), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
-            //System.Type type, 
-            Macross.TtMacrossGetterBase getter, string func, params object[] parameters)
-        {
-            isOk = false;
-            if (getter.InnerObject == null)
-                return null;
-            var mtd = getter.InnerObject.GetType().GetMethod(func);
-            if (mtd == null)
-                return null;
-            isOk = true;
-            return mtd.Invoke(getter.InnerObject, parameters);
         }
     }
 }
@@ -525,8 +511,8 @@ namespace EngineNS.GamePlay
 {
 	partial class TtGameInstance
 	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_InitViewportSlate_3191153360 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->System.Threading.Tasks.Task InitViewportSlate(RName rPolicy, float zMin, float zMax)");
-		public async System.Threading.Tasks.Task macross_InitViewportSlate (string nodeName, RName rPolicy, float zMin, float zMax) 
+		private static EngineNS.Macross.TtMacrossBreak macross_break_InitViewportSlate_3191153360 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->Thread.Async.TtTask InitViewportSlate(RName rPolicy, float zMin, float zMax)");
+		public async Thread.Async.TtTask macross_InitViewportSlate (string nodeName, RName rPolicy, float zMin, float zMax) 
 		{
 			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
@@ -552,35 +538,19 @@ namespace EngineNS.GamePlay
 			FinalViewportSlate();
 			macross_break_FinalViewportSlate_2609910045.TryBreak();
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_LoadScene_1006455375 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->System.Threading.Tasks.Task<GamePlay.Scene.TtScene> LoadScene(RName mapName)");
-		public async System.Threading.Tasks.Task<GamePlay.Scene.TtScene> macross_LoadScene (string nodeName, RName mapName) 
+		private static EngineNS.Macross.TtMacrossBreak macross_break_LoadScene_1735659054 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->Thread.Async.TtTask<GamePlay.Scene.TtScene> LoadScene(RName mapName, bool bSetToWorld)");
+		public async Thread.Async.TtTask<GamePlay.Scene.TtScene> macross_LoadScene (string nodeName, RName mapName, bool bSetToWorld) 
 		{
 			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
 				if(stackframe != null)
 				{
 					stackframe.SetWatchVariable(nodeName + ":mapName", mapName);
-				}
-			}
-			var _return_value = await LoadScene(mapName);
-			macross_break_LoadScene_1006455375.TryBreak();
-			return _return_value;
-		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_InitViewportSlateWithScene_2315274476 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->System.Threading.Tasks.Task<TtScene> InitViewportSlateWithScene(RName mapName, float zMin, float zMax, bool bSetToWorld)");
-		public async System.Threading.Tasks.Task<TtScene> macross_InitViewportSlateWithScene (string nodeName, RName mapName, float zMin, float zMax, bool bSetToWorld) 
-		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
-			{
-				if(stackframe != null)
-				{
-					stackframe.SetWatchVariable(nodeName + ":mapName", mapName);
-					stackframe.SetWatchVariable(nodeName + ":zMin", zMin);
-					stackframe.SetWatchVariable(nodeName + ":zMax", zMax);
 					stackframe.SetWatchVariable(nodeName + ":bSetToWorld", bSetToWorld);
 				}
 			}
-			var _return_value = await InitViewportSlateWithScene(mapName, zMin, zMax, bSetToWorld);
-			macross_break_InitViewportSlateWithScene_2315274476.TryBreak();
+			var _return_value = await LoadScene(mapName, bSetToWorld);
+			macross_break_LoadScene_1735659054.TryBreak();
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_SetSceneToWorld_2687476761 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->void SetSceneToWorld(TtScene scene)");
@@ -596,8 +566,25 @@ namespace EngineNS.GamePlay
 			SetSceneToWorld(scene);
 			macross_break_SetSceneToWorld_2687476761.TryBreak();
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_CreateCharacterFromPrefab_401884465 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->System.Threading.Tasks.Task CreateCharacterFromPrefab(Scene.TtScene scene, RName prefabName)");
-		public async System.Threading.Tasks.Task macross_CreateCharacterFromPrefab (string nodeName, Scene.TtScene scene, RName prefabName) 
+		private static EngineNS.Macross.TtMacrossBreak macross_break_InitViewportSlateWithScene_2315274476 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->Thread.Async.TtTask<TtScene> InitViewportSlateWithScene(RName mapName, float zMin, float zMax, bool bSetToWorld)");
+		public async Thread.Async.TtTask<TtScene> macross_InitViewportSlateWithScene (string nodeName, RName mapName, float zMin, float zMax, bool bSetToWorld) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":mapName", mapName);
+					stackframe.SetWatchVariable(nodeName + ":zMin", zMin);
+					stackframe.SetWatchVariable(nodeName + ":zMax", zMax);
+					stackframe.SetWatchVariable(nodeName + ":bSetToWorld", bSetToWorld);
+				}
+			}
+			var _return_value = await InitViewportSlateWithScene(mapName, zMin, zMax, bSetToWorld);
+			macross_break_InitViewportSlateWithScene_2315274476.TryBreak();
+			return _return_value;
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_CreateCharacterFromPrefab_401884465 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->Thread.Async.TtTask CreateCharacterFromPrefab(Scene.TtScene scene, RName prefabName)");
+		public async Thread.Async.TtTask macross_CreateCharacterFromPrefab (string nodeName, Scene.TtScene scene, RName prefabName) 
 		{
 			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
@@ -627,8 +614,8 @@ namespace EngineNS.GamePlay
 			macross_break_CreateCharacterController_2576849437.TryBreak();
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_CreateCharacter_3958660289 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->System.Threading.Tasks.Task CreateCharacter(Scene.TtScene scene)");
-		public async System.Threading.Tasks.Task macross_CreateCharacter (string nodeName, Scene.TtScene scene) 
+		private static EngineNS.Macross.TtMacrossBreak macross_break_CreateCharacter_3958660289 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.TtGameInstance->Thread.Async.TtTask CreateCharacter(Scene.TtScene scene)");
+		public async Thread.Async.TtTask macross_CreateCharacter (string nodeName, Scene.TtScene scene) 
 		{
 			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
@@ -639,37 +626,6 @@ namespace EngineNS.GamePlay
 			}
 			await CreateCharacter(scene);
 			macross_break_CreateCharacter_3958660289.TryBreak();
-		}
-	}
-}
-
-
-namespace EngineNS
-{
-	partial class TtEngine
-	{
-		private static EngineNS.Macross.TtMacrossBreak macross_break_RunMacross_3676773373 = new EngineNS.Macross.TtMacrossBreak("EngineNS.TtEngine->static object RunMacross(out bool isOk, Macross.TtMacrossGetterBase getter, string func, object[] parameters)");
-		public static unsafe object macross_RunMacross (string nodeName, out bool isOk, Macross.TtMacrossGetterBase getter, string func, object[] parameters) 
-		{
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
-			{
-				if(stackframe != null)
-				{
-					stackframe.SetWatchVariable(nodeName + ":getter", getter);
-					stackframe.SetWatchVariable(nodeName + ":func", func);
-					stackframe.SetWatchVariable(nodeName + ":parameters", parameters);
-				}
-			}
-			var _return_value = RunMacross(out isOk, getter, func, parameters);
-			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
-			{
-				if(stackframe != null)
-				{
-					stackframe.SetWatchVariable(nodeName + ":isOk", isOk);
-				}
-			}
-			macross_break_RunMacross_3676773373.TryBreak();
-			return _return_value;
 		}
 	}
 }

@@ -41,7 +41,7 @@ namespace EngineNS.BehaviorTree
         {
             BehaviorEvents.Add(behaviorEvent);
         }
-        void EvaluateBehaviorEvents(long timeElapse, GamePlay.UCenterData context)
+        void EvaluateBehaviorEvents(long timeElapse, GamePlay.TtCenterData context)
         {
             for (int i = 0; i < BehaviorEvents.Count; ++i)
             {
@@ -101,7 +101,7 @@ namespace EngineNS.BehaviorTree
                 }
             }
         }
-        public BehaviorStatus Tick(long timeElapse, GamePlay.UCenterData context)
+        public BehaviorStatus Tick(long timeElapse, GamePlay.TtCenterData context)
         {
             if (Root == null)
                 return BehaviorStatus.Failure;

@@ -12,6 +12,7 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
+  <IsDisable Type="System.Boolean@Unknown" Value="False" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Value="Game,tutorials/character/charactertest.scene,4b577a35-2f02-4df2-b588-f95e21d92c60" />
     <e_1 Value="Game,project_factory/belica/prefab_belica.prefab,fc1594fc-eaf9-4f45-99c5-a88b2aa0b893" />

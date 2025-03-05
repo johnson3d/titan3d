@@ -10,7 +10,7 @@ namespace EngineNS.BehaviorTree.Leaf.Condition
         public ConditionBehavior()
         {
         }
-        public override BehaviorStatus Update(long timeElapse, GamePlay.UCenterData context)
+        public override BehaviorStatus Update(long timeElapse, GamePlay.TtCenterData context)
         {            return BehaviorStatus.Failure;
         }
     }

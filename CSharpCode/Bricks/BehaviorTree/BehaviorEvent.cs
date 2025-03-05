@@ -16,7 +16,7 @@ namespace EngineNS.BehaviorTree
     {
         public BehaviorTree BehaviorTree { get; set; }
         public DecoratorBehavior Behavior { get; set; } = null;
-        public virtual bool Checking(long timeElapse, GamePlay.UCenterData context)
+        public virtual bool Checking(long timeElapse, GamePlay.TtCenterData context)
         {
             return false;
         }

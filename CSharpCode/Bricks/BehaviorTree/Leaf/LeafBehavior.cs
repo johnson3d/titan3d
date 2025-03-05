@@ -6,6 +6,6 @@ namespace EngineNS.BehaviorTree.Leaf
 {
     public abstract class LeafBehavior : Behavior
     {
-        public override BehaviorStatus Update(long timeElapse, GamePlay.UCenterData context) { return BehaviorStatus.Running; }
+        public override BehaviorStatus Update(long timeElapse, GamePlay.TtCenterData context) { return BehaviorStatus.Running; }
     }
 }

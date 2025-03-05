@@ -8,7 +8,7 @@ namespace EngineNS.BehaviorTree.Leaf.Action
     public class FinishWithResultBehavior :LeafBehavior
     {
         public BehaviorStatus Result { get; set; } = BehaviorStatus.Success;
-        public override BehaviorStatus Update(long timeElapse, UCenterData context)
+        public override BehaviorStatus Update(long timeElapse, TtCenterData context)
         {
             return Result;
         }

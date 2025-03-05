@@ -38,7 +38,7 @@ namespace EngineNS.BehaviorTree.Service
                 return mCurrentInterval;
             }
         }
-        public void Tick(long timeElapse, GamePlay.UCenterData context)
+        public void Tick(long timeElapse, GamePlay.TtCenterData context)
         {
             mCurrentTick += timeElapse;
             
@@ -56,7 +56,7 @@ namespace EngineNS.BehaviorTree.Service
                 start = 1;
             return MathHelper.RandomRange(start, (int)(Interval + RandomDeviation));
         }
-        public virtual BehaviorStatus Update(long timeElapse, UCenterData context)
+        public virtual BehaviorStatus Update(long timeElapse, TtCenterData context)
         {
             return BehaviorStatus.Success;
         }

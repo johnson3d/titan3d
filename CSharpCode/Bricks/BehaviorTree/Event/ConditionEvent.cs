@@ -7,7 +7,7 @@ namespace EngineNS.BehaviorTree.Event
     public class ConditionEvent : BehaviorEvent
     {
         public bool ConditionValue = false;
-        public override bool Checking(long timeElapse, GamePlay.UCenterData context)
+        public override bool Checking(long timeElapse, GamePlay.TtCenterData context)
         {
             var result = Behavior.EventEvaluate(timeElapse, context);
             if (result != ConditionValue)

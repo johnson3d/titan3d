@@ -12,6 +12,7 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
+  <IsDisable Type="System.Boolean@Unknown" Value="False" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="2">
     <e_0 Value="Game,tutorials/helloword/hello.ui,e1520501-a052-4abe-a7d6-e9cfdf41e8e0" />
     <e_1 Value="Game,tutorials/helloword/map01.scene,40c22bd4-a6ad-4599-b3e9-dbfe79f1a7d7" />

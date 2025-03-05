@@ -17,7 +17,7 @@ namespace EngineNS.GamePlay.Scene.Actor
                 return NodeData as TtActorData;
             }
         }
-        public UCenterData CenterData { get; } = new UCenterData();
+        public TtCenterData CenterData { get; } = new TtCenterData();
 
         protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {

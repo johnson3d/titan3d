@@ -1508,7 +1508,7 @@ namespace EngineNS.Rtti
                     result.BuildFields();
                     result.BuildCurrentVersion();
                     TypeMetas.Add(type, result);
-                    HashMetas.Add(result.TypeHash, result);
+                    //HashMetas.Add(result.TypeHash, result);
                     
                     result.SaveClass();
                     return result;

@@ -14,7 +14,7 @@ namespace EngineNS.BehaviorTree.Leaf.Action
         public Func<long> WaitTimeEvaluateFunc { get; set; } = null;
         private long mLastTime = 0;
 
-        public override BehaviorStatus Update(long timeElapse, GamePlay.UCenterData context)
+        public override BehaviorStatus Update(long timeElapse, GamePlay.TtCenterData context)
         {
             if (WaitTimeEvaluateFunc != null)
                 WaitTime = WaitTimeEvaluateFunc.Invoke();

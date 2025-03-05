@@ -237,7 +237,7 @@ namespace EngineNS.EGui.Controls
                                 if (ameta1 == null)
                                     continue;
 
-                                if (ameta1.BaseTypeStr != MacrossBase.TypeString)
+                                if (ameta1.BaseType != MacrossBase && ameta1.BaseType.IsSubclassOf(MacrossBase.SystemType) == false)
                                 {
                                     continue;
                                 }

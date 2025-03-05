@@ -23,9 +23,9 @@ namespace EngineNS.BehaviorTree
         public BehaviorStatus Status { get => mStatus; }
         protected Action<Behavior> mInitFunc;
         protected Action<Behavior> mExitFunc;
-        protected Func<long, GamePlay.UCenterData, BehaviorStatus> mTickFunc;
+        protected Func<long, GamePlay.TtCenterData, BehaviorStatus> mTickFunc;
 
-        public static Leaf.Action.ActionBehavior NewActionBehavior(Action<Behavior> init, Action<Behavior> exit, Func<long, GamePlay.UCenterData, BehaviorStatus> tick)
+        public static Leaf.Action.ActionBehavior NewActionBehavior(Action<Behavior> init, Action<Behavior> exit, Func<long, GamePlay.TtCenterData, BehaviorStatus> tick)
         {
             var bhv = new Leaf.Action.ActionBehavior();
             bhv.mInitFunc = init;
@@ -57,7 +57,7 @@ namespace EngineNS.BehaviorTree
                 return this;
             return null;
         }
-        public BehaviorStatus Tick(long timeElapse, GamePlay.UCenterData context)
+        public BehaviorStatus Tick(long timeElapse, GamePlay.TtCenterData context)
         {
             if (mStatus == BehaviorStatus.Invalid)
             {
@@ -85,7 +85,7 @@ namespace EngineNS.BehaviorTree
             return mStatus;
         }
         ////[Editor.MacrossMemberAttribute(Editor.MacrossMemberAttribute.enMacrossType.Overrideable)]
-        public abstract BehaviorStatus Update(long timeElapse, GamePlay.UCenterData context);
+        public abstract BehaviorStatus Update(long timeElapse, GamePlay.TtCenterData context);
         public virtual void Reset()
         {
             mStatus = BehaviorStatus.Invalid;

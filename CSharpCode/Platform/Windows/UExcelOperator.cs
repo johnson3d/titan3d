@@ -229,7 +229,7 @@ namespace EngineNS.Bricks.DataSet
                 var result = Support.TConvert.ToObject(type, cell.ToString(), out hasError);
                 if (hasError)
                 {
-                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"");
+                    Profiler.Log.WriteLine<Profiler.TtIOCategory>(Profiler.ELogTag.Warning, $"XLSX Cell({type.FullName}) convert failed: {cell.ToString()}");
                 }
                 return result;
             }

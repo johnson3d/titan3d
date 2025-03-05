@@ -12,6 +12,7 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
+  <IsDisable Type="System.Boolean@Unknown" Value="False" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="1">
     <e_0 Value="Game,tutorials/material/test01.scene,b11365f9-d415-4a8c-a906-8e8da59cdda6" />
   </RefAssetRNames>

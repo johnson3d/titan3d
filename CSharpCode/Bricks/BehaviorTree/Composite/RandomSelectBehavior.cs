@@ -7,7 +7,7 @@ namespace EngineNS.BehaviorTree.Composite
     //[Editor.Editor_MacrossClassAttribute(ECSType.Common, Editor.Editor_MacrossClassAttribute.enMacrossType.Createable | Editor.Editor_MacrossClassAttribute.enMacrossType.Useable)]
     public class RandomSelectBehavior : SelectBehavior
     {
-        public override BehaviorStatus Update(long timeElapse, GamePlay.UCenterData context)
+        public override BehaviorStatus Update(long timeElapse, GamePlay.TtCenterData context)
         {
             if (mRunningChild != null)
             {
