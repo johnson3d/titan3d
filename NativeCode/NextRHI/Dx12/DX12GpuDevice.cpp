@@ -579,22 +579,34 @@ namespace NxRHI
 			mDevice->CheckFeatureSupport(D3D12_FEATURE::D3D12_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT, &feature, sizeof(feature));
 			VFX_LTRACE(ELTT_Warning, "MaxGPUVirtualAddressBitsPerResource = %d\r\n", feature.MaxGPUVirtualAddressBitsPerResource);
 		}
-		D3D12_FEATURE_DATA_D3D12_OPTIONS3 opt3 = {};
-		mDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &opt3, sizeof(D3D12_FEATURE_DATA_D3D12_OPTIONS3));
-		if (opt3.ViewInstancingTier == D3D12_VIEW_INSTANCING_TIER_NOT_SUPPORTED) 
 		{
-			VFX_LTRACE(ELTT_Warning, "ERROR: D3D12: Device does not support D3D12_VIEW_INSTANCING\r\n");
-			mCaps.MaxViewInstanceCount = 0;
+			D3D12_FEATURE_DATA_D3D12_OPTIONS3 opt3 = {};
+			mDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &opt3, sizeof(D3D12_FEATURE_DATA_D3D12_OPTIONS3));
+			if (opt3.ViewInstancingTier == D3D12_VIEW_INSTANCING_TIER_NOT_SUPPORTED)
+			{
+				VFX_LTRACE(ELTT_Warning, "ERROR: D3D12: Device does not support D3D12_VIEW_INSTANCING\r\n");
+				mCaps.MaxViewInstanceCount = 0;
+			}
+			else
+			{
+				mCaps.MaxViewInstanceCount = D3D12_MAX_VIEW_INSTANCE_COUNT;
+			}
 		}
-		else
 		{
-			mCaps.MaxViewInstanceCount = D3D12_MAX_VIEW_INSTANCE_COUNT;
+			D3D12_FEATURE_DATA_D3D12_OPTIONS7 features = {};
+			mDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &features, sizeof(features));
+			if (features.MeshShaderTier != D3D12_MESH_SHADER_TIER_NOT_SUPPORTED)
+			{
+				mCaps.IsSupportMeshShader = true;
+			}
 		}
-		D3D12_FEATURE_DATA_D3D12_OPTIONS7 features = {};
-		mDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &features, sizeof(features));
-		if (features.MeshShaderTier != D3D12_MESH_SHADER_TIER_NOT_SUPPORTED)
 		{
-			mCaps.IsSupportMeshShader = true;
+			D3D12_FEATURE_DATA_D3D12_OPTIONS5 features = {};
+			mDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &features, sizeof(features));
+			if (features.RaytracingTier != D3D12_RAYTRACING_TIER_NOT_SUPPORTED)
+			{
+				mCaps.IsSupportRayTracing = true;
+			}
 		}
 		//ASSERT(op4.Native16BitShaderOpsSupported);
 	}
@@ -773,6 +785,10 @@ namespace NxRHI
 	{
 		return new DX12ComputeEffect();
 	}
+	IRayTracingEffect* DX12GpuDevice::CreateRayTracingEffect()
+	{
+		return new DX12RayTracingEffect();
+	}
 	IFence* DX12GpuDevice::CreateFence(const FFenceDesc* desc, const char* name)
 	{
 		auto result = new DX12Fence();
@@ -803,6 +819,12 @@ namespace NxRHI
 	{
 		auto result = new DX12ComputeDraw();
 		result->mDeviceRef.FromObject(this);
+		return result;
+	}
+	IRayTracingDraw* DX12GpuDevice::CreateRayTracingDraw() 
+	{
+		auto result = new DX12RayTracingDraw();
+		//result->mDeviceRef.FromObject(this);
 		return result;
 	}
 	IGpuScope* DX12GpuDevice::CreateGpuScope()

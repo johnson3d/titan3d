@@ -63,6 +63,15 @@ namespace NxRHI
 		AutoRef<DX12HeapHolder>					mSamplerHeap;
 		UINT									FingerPrient = 0xffffffff;
 	};
+
+	class DX12RayTracingDraw : public IRayTracingDraw
+	{
+	public:
+		AutoRef<ID3D12StateObject>		mDxrStateObject;
+		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
+
+	
+	};
 }
 
 NS_END

@@ -434,6 +434,7 @@ namespace EngineNS
                 Config.SaveConfig(cfgFile);
             }
 
+            #region DynConfigData
             this.DynConfigData.LoadConfigData(TtEngine.Instance.FileManager.GetRoot(IO.TtFileManager.ERootDir.Cache) + "DynConfigData.dcd");
 
             if (this.DynConfigData.TryGetConfig<bool>("UseRenderDoc", out var Config_UseRenderDoc))
@@ -471,6 +472,7 @@ namespace EngineNS
                 }
             }
             Config.ConfigName = $"Titan3D.{TtEngineConfig.MajorVersion}.{TtEngineConfig.MiniVersion} [{IO.TtFileManager.GetPureName(cfgFile)}]";
+            #endregion
 
             CoreSDK.SetOnGpuDeviceRemovedCallBack(OnGpuDeviceRemoved);
             
@@ -505,6 +507,11 @@ namespace EngineNS
             var tEnd = Support.TtTime.HighPrecision_GetTickCount();
             Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Engine PreInit Time:{(tEnd - t1) / 1000} ms");
             Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, "PreInitEngine OK");
+
+            //var compilier = new EngineNS.Editor.ShaderCompiler.TtHLSLCompiler();
+            //compilier.CompileShader(RName.GetRName("Shaders/ShadingEnv/RayTracing/Raytracing.hlsl", RName.ERNameType.Engine).Address,
+            //    "MyRaygenShader", EngineNS.NxRHI.EShaderType.SDT_RayTracing,
+            //    null, null, null, null, null, null, true, "2021", true);
 
             return true;
         }

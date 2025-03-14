@@ -95,8 +95,9 @@ namespace NxRHI
 			SDT_ComputeShader = (1 << 2),
 			SDT_AmplificationShader = (1 << 3),
 			SDT_MeshShader = (1 << 4),
+			SDT_RayTracing = (1 << 5),
 
-			SDT_AllStages = SDT_VertexShader | SDT_PixelShader | SDT_ComputeShader | SDT_AmplificationShader | SDT_MeshShader,
+			SDT_AllStages = SDT_VertexShader | SDT_PixelShader | SDT_ComputeShader | SDT_AmplificationShader | SDT_MeshShader | SDT_RayTracing,
 	};
 	class TR_CLASS()
 		IShader : public IWeakRefObject
@@ -264,7 +265,7 @@ namespace NxRHI
 			GetShaderCodeStreamPtr = fn;
 		}
 		FShaderCode* GetShaderCodeStream(const char* name, const char* oriName);
-		bool CompileShader(FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion, const char* dxcArgs, IBlobObject* output);
+		bool CompileShader(FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion, const char* dxcArgs, IBlobObject* output, bool asModule);
 	};
 }
 

@@ -164,6 +164,76 @@ namespace NxRHI
 	public:
 		AutoRef<IShader>		mComputeShader;
 	};
+
+	class TR_CLASS()
+		FHitGroup : public VIUnknown
+	{
+	public:
+		VNameString			Name;
+		VNameString			AnyHit;
+		VNameString			ClosestHit;
+		VNameString			Intersection;
+		std::vector<VNameString> LocalSignatures;
+		UINT				ShaderRecordSize = 0;	
+		AutoRef<IBuffer>	ShaderRecord;
+	};
+
+	class TR_CLASS()
+		IRayTracingEffect : public IGpuEffect
+	{
+	public:
+		AutoRef<FShaderDesc>	mShaderLibDesc;
+
+		std::vector<VNameString> mFunctions;
+		std::vector<VNameString> mGlobalSignatures;		
+		std::map<VNameString, AutoRef<FHitGroup>> mHitGroups;
+
+		VNameString				mRayGenName;
+		VNameString				mMissName;
+
+		void SetRayGenShader(VNameString name) {
+			mRayGenName = name;
+		}
+		void SetMissShader(VNameString name) {
+			mMissName = name;
+		}
+		void AddFunctions(VNameString name) {
+			mFunctions.push_back(name);
+		}
+		void AddGlobalSignature(VNameString name) {
+			mGlobalSignatures.push_back(name);
+		}
+
+		FHitGroup* FindHitGroup(VNameString name) {
+			auto iter = mHitGroups.find(name);
+			if (iter == mHitGroups.end())
+			{
+				return nullptr;
+			}
+			return iter->second;
+		}
+		bool AddHitGroup(VNameString name, VNameString anyHit, VNameString closestHit, VNameString intersection, VNameString* sigs, int count);
+
+		void SaveGlobalAndHitGroups(XndAttribute* attr);
+		void LoadGlobalAndHitGroups(XndAttribute* attr);
+
+		std::wstring			mShaderConfigName = L"MyShaderConfig";
+		std::wstring			mPipelineConfigName = L"MyPipelineConfig";
+		FShaderDesc* GetShaderLibDesc() {
+			return mShaderLibDesc;
+		}
+		void SetShaderLibDesc(FShaderDesc* desc) {
+			mShaderLibDesc = desc;
+		}
+		virtual void BuildState(IGpuDevice* device)
+		{
+		}
+		virtual bool BuildHitGroup(FHitGroup* group)
+		{
+			return false;
+		}
+		virtual FHitGroup* CreateHitGroup();
+	};
 }
 
 NS_END

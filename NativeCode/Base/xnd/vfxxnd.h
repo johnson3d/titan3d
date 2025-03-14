@@ -101,8 +101,10 @@ public:
 	}
 	void Read(std::string& text)
 	{
-		int len;
+		int len = 0;
 		mMemReader->Read(len);
+		if (len == 0)
+			return;
 		text.resize(len);
 		mMemReader->Read(&text[0], (UINT)len);
 	}

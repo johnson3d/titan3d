@@ -226,6 +226,8 @@ inline UINT GetStringHash(const char* str)
 
 int VNameStringManager::GetIndexFromString(const char* str)
 {
+	if (str == nullptr)
+		return -1;
 	VAutoVSLLock lk(gNameLocker);
 	auto hash = GetStringHash(str);
 	auto bkt = hash % NumOfBucket;

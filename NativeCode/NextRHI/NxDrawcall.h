@@ -14,6 +14,7 @@ namespace NxRHI
 	class FGeomMesh;
 	class IGpuPipeline;
 	class IGraphicsEffect;
+	class IRayTracingEffect;
 	class FEffectBinder;
 	class IGpuResource;
 	class ICommandList;
@@ -176,6 +177,37 @@ namespace NxRHI
 		std::map<const FShaderBinder*, AutoRef<IGpuResource>>	BindResources;
 	protected:
 		virtual void OnBindResource(const FShaderBinder* binder, IGpuResource* resource) {}
+	};
+
+	class TR_CLASS()
+		IRayTracingDraw : public IGpuDraw
+	{
+	public:
+		AutoRef<IRayTracingEffect>	ShaderEffect;
+		AutoRef<IGpuPipeline>		Pipeline;
+		virtual UINT GetPrimitiveNum() override
+		{
+			return 1;
+		}
+		virtual void ResetResources() override {
+			
+		}
+
+		void BindShaderEffect(IRayTracingEffect* effect) {
+			ShaderEffect = effect;
+		}
+		IRayTracingEffect* GetShaderEffect() {
+			return ShaderEffect;
+		}
+		void SetRayGenDispatch(UINT w, UINT h, UINT d)
+		{
+			Width = w;
+			Height = h;
+			Depth = w;
+		}
+		UINT Width;
+		UINT Height;
+		UINT Depth;
 	};
 	enum TR_ENUM()
 		ECopyDrawMode

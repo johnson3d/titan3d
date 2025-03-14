@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using EngineNS.IO;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -83,7 +84,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
         public unsafe void SaveTo(Hash160 hash)
         {
-            var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect);
+            var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.GraphicEffect);
             var file = path + hash.ToString() + TtEffect.AssetExt;
             var xnd = new IO.TtXndHolder("TtEffect", 0, 0);
 
@@ -148,7 +149,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public static async Thread.Async.TtTask<TtEffect> LoadEffect(Hash160 hash, TtShadingEnv shading, TtMaterial material, TtMdfQueueBase mdf)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect);
+            var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.GraphicEffect);
             var file = path + hash.ToString() + TtEffect.AssetExt;
 
             TtEffect result = null;
@@ -443,7 +444,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public async Thread.Async.TtTask<bool> RefreshEffect(TtMaterial material)
         {
             {
-                var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect);
+                var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.GraphicEffect);
                 var file = path + this.Desc.EffectHash.ToString() + TtEffect.AssetExt;
                 if (IO.TtFileManager.FileExists(file))
                     IO.TtFileManager.DeleteFile(file);
@@ -603,7 +604,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public async System.Threading.Tasks.Task<bool> Initialize(TtGfxDevice device)
         {
             var shading = TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDummyShading>();
-            DummyEffect = await this.GetEffect(await shading, device.MaterialManager.ScreenMaterial, new Mesh.TtMdfStaticMesh());
+            DummyEffect = await this.GetGraphicEffect(await shading, device.MaterialManager.ScreenMaterial, new Mesh.TtMdfStaticMesh());
 
             if (DummyEffect == null)
             {
@@ -630,9 +631,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
         private Thread.TtAwaitSessionManager<Hash160, TtEffect> mCreatingSession = new Thread.TtAwaitSessionManager<Hash160, TtEffect>();
         public Dictionary<Hash160, TtEffect> Effects { get; } = new Dictionary<Hash160, TtEffect>();
         public Dictionary<Hash160, NxRHI.TtComputeEffect> ComputeEffects { get; } = new Dictionary<Hash160, NxRHI.TtComputeEffect>();
+        public Dictionary<Hash160, NxRHI.TtRayTracingEffect> RayTracingEffects { get; } = new Dictionary<Hash160, NxRHI.TtRayTracingEffect>();
         public NxRHI.TtComputeEffect TryGetComputeEffect(Hash160 hash)
         {
-            lock (Effects)
+            lock (ComputeEffects)
             {
                 NxRHI.TtComputeEffect result;
                 if (ComputeEffects.TryGetValue(hash, out result))
@@ -641,7 +643,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 return null;
             }
         }
-        public TtEffect TryGetEffect(Hash160 hash)
+        public TtEffect TryGetGraiphicEffect(Hash160 hash)
         {
             lock (Effects)
             {
@@ -660,7 +662,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             return Hash160.CreateHash160($"{TtEngine.Instance.GfxDevice.RenderContext.GlobalEnvHash},{shading},{material.AssetName},{mdf}");
         }
         public Dictionary<Hash160, TtEffect> MaterialEditingEffects { get; } = new Dictionary<Hash160, TtEffect>();
-        public async Thread.Async.TtTask<TtEffect> GetEffect(TtShadingEnv shading, TtMaterial material, TtMdfQueueBase mdf)
+        public async Thread.Async.TtTask<TtEffect> GetGraphicEffect(TtShadingEnv shading, TtMaterial material, TtMdfQueueBase mdf)
         {
             TtEffect result = null;
             Hash160 hash = new Hash160();
@@ -676,7 +678,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                     return result;
                 }
             }
-            result = await GetEffectImpl(shading, material, mdf);
+            result = await GetGraphicEffectImpl(shading, material, mdf);
             if (material.IsEditingMaterial)
             {
                 TtEffect nr = null;
@@ -705,7 +707,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 MaterialEditingEffects.Remove(i);
             }
         }
-        private async Thread.Async.TtTask<TtEffect> GetEffectImpl(TtShadingEnv shading, TtMaterial material, TtMdfQueueBase mdf)
+        private async Thread.Async.TtTask<TtEffect> GetGraphicEffectImpl(TtShadingEnv shading, TtMaterial material, TtMdfQueueBase mdf)
         {
             TtEffect result = null;
             //if (material.IsEditingMaterial)
@@ -715,7 +717,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
             //}
 
             var hash = GetShaderHash(shading, material, mdf);
-            result = TryGetEffect(hash);
+            result = TryGetGraiphicEffect(hash);
             if (result != null)
             {
                 if (result.Desc.MaterialHash != material.MaterialHash)
@@ -813,10 +815,10 @@ namespace EngineNS.Graphics.Pipeline.Shader
             if (defines != null)
                 hashStr += defines.ToString();
             hashStr += TtEngine.Instance.GfxDevice.RenderContext.GlobalEnvHash.ToString();
+            hashStr += Editor.ShaderCompiler.TtShaderCodeManager.Instance.GetShaderCode(shaderName).CodeHash;
             var hash = Hash160.CreateHash160(hashStr);
-            var shadingCode = Editor.ShaderCompiler.TtShaderCodeManager.Instance.GetShaderCode(shaderName);
             NxRHI.TtComputeEffect result;
-            lock (Effects)
+            lock (ComputeEffects)
             {
                 if (ComputeEffects.TryGetValue(hash, out result))
                     return result;
@@ -857,11 +859,95 @@ namespace EngineNS.Graphics.Pipeline.Shader
 
             result = TtEngine.Instance.GfxDevice.RenderContext.CreateComputeEffect(csShader);
 
-            lock (Effects)
+            lock (ComputeEffects)
             {
                 if (ComputeEffects.TryGetValue(hash, out var nt))
                     return nt;
                 ComputeEffects.Add(hash, result);
+            }
+
+            TtEngine.Instance.EventPoster.RunOn((state) =>
+            {
+                result.SaveTo(shaderName, hash);
+                return true;
+            }, Thread.Async.EAsyncTarget.AsyncIO);
+
+            return result;
+        }
+        public async Thread.Async.TtTask<NxRHI.TtRayTracingEffect> GetRayTracingEffect(RName shaderName, string entry, 
+            Graphics.Pipeline.Shader.TtRayTracingShadingEnv shadingEnv, NxRHI.TtShaderDefinitions defines,
+            Editor.ShaderCompiler.TtHLSLInclude incProvider, string sm = null, bool bDebugShader = true)
+        {
+            var shader = shaderName.Address;
+            var hashStr = shaderName.Address;
+            hashStr += entry;
+            if (shadingEnv != null)
+                hashStr += shadingEnv.ToString();
+            if (defines != null)
+                hashStr += defines.ToString();
+            hashStr += TtEngine.Instance.GfxDevice.RenderContext.GlobalEnvHash.ToString();
+            hashStr += Editor.ShaderCompiler.TtShaderCodeManager.Instance.GetShaderCode(shaderName).CodeHash;
+            var hash = Hash160.CreateHash160(hashStr);
+            
+            NxRHI.TtRayTracingEffect result;
+            lock (RayTracingEffects)
+            {
+                if (RayTracingEffects.TryGetValue(hash, out result))
+                    return result;
+            }
+            result = await TtEngine.Instance.EventPoster.Post((state) =>
+            {
+                return NxRHI.TtRayTracingEffect.Load(hash); ;
+            }, Thread.Async.EAsyncTarget.AsyncIO);
+            //result = NxRHI.UComputeEffect.Load(hash);
+            if (result != null)
+            {
+                lock (RayTracingEffects)
+                {
+                    if (RayTracingEffects.TryGetValue(hash, out var nt))
+                        return nt;
+                    RayTracingEffects.Add(hash, result);
+                }
+                return result;
+            }
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            var compiler = new Editor.ShaderCompiler.TtHLSLCompiler();
+            compiler.MdfQueue = null;
+            if (defines == null)
+            {
+                defines = new NxRHI.TtShaderDefinitions();
+            }
+            if (shadingEnv != null)
+                shadingEnv.GetShaderDefines(shadingEnv.CurrentPermutationId, defines);
+            var shaderDesc = await TtEngine.Instance.EventPoster.Post((state) =>
+            {
+                return compiler.CompileShader(shader, entry, NxRHI.EShaderType.SDT_RayTracing, shadingEnv, null, null, defines, incProvider, sm, bDebugShader, "2021", true);
+            }, Thread.Async.EAsyncTarget.AsyncIO);
+            if (shaderDesc == null)
+                return null;
+
+            NxRHI.TtRayTracingEffect.TtRTShaderLibDesc shaderLibDesc = null;
+            var code = Editor.ShaderCompiler.TtShaderCodeManager.Instance.GetShaderCode(shaderName).SourceCode.TextCode;
+            var start = code.IndexOf("/*<RTShaderLibDesc>");
+            if (start >= 0)
+            {
+                start += "/*<RTShaderLibDesc>".Length;
+                var end = code.IndexOf("<RTShaderLibDesc>*/", start);
+                if (end >= 0)
+                {
+                    var descText = code.Substring(start, end - start);
+                    shaderLibDesc = TtFileManager.LoadObjectFromJson<NxRHI.TtRayTracingEffect.TtRTShaderLibDesc>(descText);
+                }
+            }
+            if (shaderLibDesc == null)
+                return null;
+            result = TtEngine.Instance.GfxDevice.RenderContext.CreateRayTracingEffect(shaderDesc, shaderLibDesc);
+
+            lock (RayTracingEffects)
+            {
+                if (RayTracingEffects.TryGetValue(hash, out var nt))
+                    return nt;
+                RayTracingEffects.Add(hash, result);
             }
 
             TtEngine.Instance.EventPoster.RunOn((state) =>

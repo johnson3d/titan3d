@@ -155,9 +155,11 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\AvgBrightness.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\ScreenSpace\Tiling.compute" />
     <FxCompile Include="$(MSBuildThisFileDirectory)Inc\BaseStructure\Box3.cginc" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)ShadingEnv\RayTracing\Raytracing.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\FSR1\ffx_a.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\FSR1\ffx_fsr1.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\RayTracing\RayTracingHlslCompat.h" />
   </ItemGroup>
 </Project>

@@ -168,7 +168,7 @@ namespace NxRHI
 		return true;
 	}
 
-	bool DX12Shader::CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion, const char* dxcArgs, IBlobObject* output)
+	bool DX12Shader::CompileShader(FShaderCompiler* compiler, FShaderDesc* desc, const char* shader, const char* entry, EShaderType type, const char* sm, const IShaderDefinitions* defines, EShaderLanguage sl, bool bDebugShader, const char* extHlslVersion, const char* dxcArgs, IBlobObject* output, bool asModule)
 	{
 		desc->FunctionName = entry;
 		if (extHlslVersion == nullptr)
@@ -180,7 +180,7 @@ namespace NxRHI
 		}
 		else
 		{
-			return IShaderConductor::GetInstance()->CompileShader(compiler, desc, shader, entry, type, sm, defines, bDebugShader, sl, bDebugShader, extHlslVersion, dxcArgs, output);
+			return IShaderConductor::GetInstance()->CompileShader(compiler, desc, shader, entry, type, sm, defines, bDebugShader, sl, extHlslVersion, dxcArgs, output, asModule);
 		}
 	}
 	
@@ -305,6 +305,36 @@ namespace NxRHI
 		return VST_Number;
 	}
 
+	bool DX12Shader::Reflect(FShaderDesc* desc, ID3D12LibraryReflection* pReflection)
+	{
+		desc->DxILReflector = MakeWeakRef(new IShaderReflector());
+		auto dxilReflector = desc->DxILReflector;
+		D3D12_LIBRARY_DESC libDesc{};
+		pReflection->GetDesc(&libDesc);
+		for (UINT i = 0; i < libDesc.FunctionCount; i++)
+		{
+			ID3D12FunctionReflection* func;
+			func = pReflection->GetFunctionByIndex(i);
+			D3D12_FUNCTION_DESC funDesc;
+			func->GetDesc(&funDesc);
+			for (UINT j = 0; j < funDesc.BoundResources; j++)
+			{
+				D3D12_SHADER_INPUT_BIND_DESC bindDesc;
+				func->GetResourceBindingDesc(j, &bindDesc);
+				if (bindDesc.Type == D3D_SIT_CBUFFER)
+				{
+					auto pCBuffer = func->GetConstantBufferByName(bindDesc.Name);
+					CreateBinder(pCBuffer, desc, bindDesc);
+				}
+				else
+				{
+					CreateBinder(nullptr, desc, bindDesc);
+				}
+			}
+		}
+		return true;
+	}
+
 	bool DX12Shader::Reflect(FShaderDesc* desc, ID3D12ShaderReflection* pReflection)
 	{
 		desc->DxILReflector = MakeWeakRef(new IShaderReflector());
@@ -339,47 +369,42 @@ namespace NxRHI
 					continue;
 				}
 			}
-			auto binder = MakeWeakRef(new FShaderBinder());
-			binder->Space = desc->Type;
-			switch (csibDesc.Type)
-			{
-			case D3D_SIT_CBUFFER:
+			if (csibDesc.Type == D3D_SIT_CBUFFER)
 			{
 				auto pCBuffer = pReflection->GetConstantBufferByName(csibDesc.Name);
-				D3D12_SHADER_BUFFER_DESC cDesc;
-				hr = pCBuffer->GetDesc(&cDesc);
+				CreateBinder(pCBuffer, desc, csibDesc);
+			}
+			else 
+			{
+				CreateBinder(nullptr, desc, csibDesc);
+			}
+		}
+		return true;
+	}
 
+	void DX12Shader::CreateBinder(ID3D12ShaderReflectionConstantBuffer* pCBuffer, FShaderDesc* desc, D3D12_SHADER_INPUT_BIND_DESC& csibDesc)
+	{
+		HRESULT hr = S_OK;
+		auto Reflector = desc->DxILReflector;
+		auto binder = MakeWeakRef(new FShaderBinder());
+		binder->Space = desc->Type;
+		switch (csibDesc.Type)
+		{
+			case D3D_SIT_CBUFFER:
+			{
+				if (Reflector->FindBinder(EShaderBindType::SBT_CBuffer, csibDesc.Name))
+				{
+					return;
+				}
 				binder->Type = EShaderBindType::SBT_CBuffer;
 				binder->Name = csibDesc.Name;
 				binder->Slot = csibDesc.BindPoint;
 				binder->BindCount = csibDesc.BindCount;
-				binder->Size = cDesc.Size;
 				binder->Space = csibDesc.Space;
 
-				for (UINT j = 0; j < cDesc.Variables; j++)
-				{
-					auto pVari2 = pCBuffer->GetVariableByIndex(j);
-					D3D12_SHADER_VARIABLE_DESC varDesc2;
-					pVari2->GetDesc(&varDesc2);
-
-					D3D12_SHADER_TYPE_DESC stDesc;
-					pVari2->GetType()->GetDesc(&stDesc);
-
-					auto tcvDesc = MakeWeakRef(new FShaderVarDesc());
-					tcvDesc->Name = varDesc2.Name;
-					tcvDesc->Size = varDesc2.Size;
-					
-					tcvDesc->Type = DxShaderVarType2VarType(stDesc.Type);
-					tcvDesc->Columns = (USHORT)stDesc.Columns;
-					tcvDesc->Offset = varDesc2.StartOffset;
-					if (stDesc.Elements == 0)
-						tcvDesc->Elements = 1;
-					else
-						tcvDesc->Elements = (USHORT)stDesc.Elements;
-
-					binder->Fields.push_back(tcvDesc);
-				}
-
+				CreateCBufferFields(pCBuffer, binder);
+			
+				
 				Reflector->CBuffers.push_back(binder);
 			}
 			break;
@@ -390,6 +415,10 @@ namespace NxRHI
 			case D3D_SIT_UAV_CONSUME_STRUCTURED:
 			case D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
 			{
+				if (Reflector->FindBinder(EShaderBindType::SBT_UAV, csibDesc.Name))
+				{
+					return;
+				}
 				binder->Type = EShaderBindType::SBT_UAV;
 				binder->Name = csibDesc.Name;
 				binder->Slot = csibDesc.BindPoint;
@@ -402,36 +431,26 @@ namespace NxRHI
 			break;
 			case D3D_SIT_TBUFFER:
 			{
+				if (Reflector->FindBinder(EShaderBindType::SBT_SRV, csibDesc.Name))
+				{
+					return;
+				}
 				binder->Type = EShaderBindType::SBT_SRV;
 				binder->Name = csibDesc.Name;
 				binder->Slot = csibDesc.BindPoint;
 				binder->BindCount = csibDesc.BindCount;
 				binder->Space = csibDesc.Space;
-				
+
 				Reflector->Srvs.push_back(binder);
-				/*if (desc->ShaderType == EShaderType::EST_ComputeShader)
-				{
-					TBufferBindInfo tmp;
-					tmp.Name = csibDesc.Name;
-					DescSetBindPoint(desc->ShaderType, tmp, csibDesc);
-
-					mTBufferBindArray.push_back(tmp);
-				}
-				else*/
-				{
-					//ASSERT(false);
-					/*ShaderRViewBindInfo tmp;
-					tmp.Name = csibDesc.Name;
-					tmp.BufferType = EGpuBufferType::GBT_TBufferBuffer;
-					DescSetBindPoint(desc->ShaderType, tmp, csibDesc);
-
-					mSrvBindArray.push_back(tmp);*/
-				}
 			}
 			break;
 			case D3D_SIT_BYTEADDRESS:
 			case D3D_SIT_STRUCTURED:
 			{
+				if (Reflector->FindBinder(EShaderBindType::SBT_SRV, csibDesc.Name))
+				{
+					return;
+				}
 				binder->Type = EShaderBindType::SBT_SRV;
 				binder->Name = csibDesc.Name;
 				binder->Slot = csibDesc.BindPoint;
@@ -444,6 +463,10 @@ namespace NxRHI
 			break;
 			case D3D_SIT_TEXTURE:
 			{
+				if (Reflector->FindBinder(EShaderBindType::SBT_SRV, csibDesc.Name))
+				{
+					return;
+				}
 				binder->Type = EShaderBindType::SBT_SRV;
 				binder->Name = csibDesc.Name;
 				binder->Slot = csibDesc.BindPoint;
@@ -455,6 +478,10 @@ namespace NxRHI
 			break;
 			case D3D_SIT_SAMPLER:
 			{
+				if (Reflector->FindBinder(EShaderBindType::SBT_Sampler, csibDesc.Name))
+				{
+					return;
+				}
 				binder->Type = EShaderBindType::SBT_Sampler;
 				binder->Name = csibDesc.Name;
 				binder->Slot = csibDesc.BindPoint;
@@ -466,9 +493,38 @@ namespace NxRHI
 			break;
 			default:
 				break;
-			}
 		}
-		return true;
+	}
+
+	void DX12Shader::CreateCBufferFields(ID3D12ShaderReflectionConstantBuffer* pCBuffer, FShaderBinder* binder)
+	{
+		D3D12_SHADER_BUFFER_DESC cDesc;
+		auto hr = pCBuffer->GetDesc(&cDesc);
+		binder->Size = cDesc.Size;
+
+		for (UINT j = 0; j < cDesc.Variables; j++)
+		{
+			auto pVari2 = pCBuffer->GetVariableByIndex(j);
+			D3D12_SHADER_VARIABLE_DESC varDesc2;
+			pVari2->GetDesc(&varDesc2);
+
+			D3D12_SHADER_TYPE_DESC stDesc;
+			pVari2->GetType()->GetDesc(&stDesc);
+
+			auto tcvDesc = MakeWeakRef(new FShaderVarDesc());
+			tcvDesc->Name = varDesc2.Name;
+			tcvDesc->Size = varDesc2.Size;
+
+			tcvDesc->Type = DxShaderVarType2VarType(stDesc.Type);
+			tcvDesc->Columns = (USHORT)stDesc.Columns;
+			tcvDesc->Offset = varDesc2.StartOffset;
+			if (stDesc.Elements == 0)
+				tcvDesc->Elements = 1;
+			else
+				tcvDesc->Elements = (USHORT)stDesc.Elements;
+
+			binder->Fields.push_back(tcvDesc);
+		}
 	}
 }
 NS_END

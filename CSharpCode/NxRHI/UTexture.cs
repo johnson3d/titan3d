@@ -167,7 +167,7 @@ namespace EngineNS.NxRHI
                 shading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureCubeViewerShading>();
             else
                 shading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<EngineNS.Editor.Forms.USlateTextureViewerShading>();
-            var effect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(shading,
+            var effect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(shading,
                 TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial,
                 new Graphics.Mesh.TtMdfStaticMesh());
 

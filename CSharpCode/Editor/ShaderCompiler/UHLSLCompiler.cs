@@ -3,6 +3,7 @@ using NPOI.HPSF;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace EngineNS.Editor.ShaderCompiler
@@ -299,7 +300,7 @@ namespace EngineNS.Editor.ShaderCompiler
         }
         public unsafe NxRHI.TtShaderDesc CompileShader(string shader, string entry, NxRHI.EShaderType type,
             Graphics.Pipeline.Shader.TtShadingEnv shadingEnvshadingEnv, Graphics.Pipeline.Shader.TtMaterial mtl, Type mdfType,
-            NxRHI.TtShaderDefinitions defines, TtHLSLInclude incProvider, string sm = null, bool bDebugShader = true, string extHlslVersion = null)
+            NxRHI.TtShaderDefinitions defines, TtHLSLInclude incProvider, string sm = null, bool bDebugShader = true, string extHlslVersion = null, bool asModule = false)
         {
             bool ignoreDXBC = false;
             bool ignoreDXIR = false;
@@ -470,6 +471,13 @@ namespace EngineNS.Editor.ShaderCompiler
                     case NxRHI.EShaderType.SDT_ComputeShader:
                         defPtr.AddDefine("ShaderStage", "0");//CSStage
                         break;
+                    case NxRHI.EShaderType.SDT_RayTracing:
+                        defPtr.AddDefine("ShaderStage", "0");//CSStage
+                        extHlslVersion = "2021";
+                        asModule = true;
+                        ignoreDXBC = true;
+                        ignoreSpirv = true;//dxc 2021 does not support dxr shader to spirv
+                        break;
                     default:
                         System.Diagnostics.Debugger.Break();
                         break;
@@ -490,12 +498,14 @@ namespace EngineNS.Editor.ShaderCompiler
                     {
                         compile_sm = "5_0";
                     }
-                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion, null);
+                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion, null, asModule);
                     if (ok == false)
                         return null;
                 }
                 if (cfg.CookDXIL && ignoreDXIR == false)
                 {
+                    if (extHlslVersion == null)
+                        extHlslVersion = "2021";
                     defPtr.AddDefine("RHI_TYPE", "RHI_DX12");
                     defPtr.AddDefine("CP_SM_major", "6");
                     defPtr.AddDefine("CP_SM_minor", "5");
@@ -508,12 +518,14 @@ namespace EngineNS.Editor.ShaderCompiler
                     {
                         compile_sm = "6_5";
                     }
-                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXIL, bDebugShader, extHlslVersion, null);
+                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXIL, bDebugShader, extHlslVersion, null, asModule);
                     if (ok == false)
                         return null;
                 }
                 if (cfg.CookGLSL && ignoreSpirv == false)
                 {
+                    if (extHlslVersion == null)
+                        extHlslVersion = "2021";
                     defPtr.AddDefine("RHI_TYPE", "RHI_GL");
                     defPtr.AddDefine("CP_SM_major", "6");
                     defPtr.AddDefine("CP_SM_minor", "5");
@@ -526,12 +538,14 @@ namespace EngineNS.Editor.ShaderCompiler
                     {
                         compile_sm = "6_5";
                     }
-                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion, null);
+                    var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion, null, asModule);
                     if (ok == false)
                         return null;
                 }
                 if (cfg.CookMETAL && ignoreSpirv == false)
                 {
+                    if (extHlslVersion == null)
+                        extHlslVersion = "2021";
                     defPtr.AddDefine("RHI_TYPE", "RHI_MTL");
                     defPtr.AddDefine("CP_SM_major", "6");
                     defPtr.AddDefine("CP_SM_minor", "5");
@@ -545,13 +559,14 @@ namespace EngineNS.Editor.ShaderCompiler
                         compile_sm = "6_5";
                     }
                     var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, 
-                        extHlslVersion, null);
+                        extHlslVersion, null, asModule);
                     if (ok == false)
                         return null;
                 }
                 if (cfg.CookSPIRV && ignoreSpirv == false)
                 {
-                    //extHlslVersion = "2021";
+                    if (extHlslVersion == null)
+                        extHlslVersion = "2021";
                     defPtr.AddDefine("RHI_TYPE", "RHI_VK");
                     defPtr.AddDefine("CP_SM_major", "6");
                     defPtr.AddDefine("CP_SM_minor", "5");
@@ -565,7 +580,7 @@ namespace EngineNS.Editor.ShaderCompiler
                         compile_sm = "6_5";
                     }
                     var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_SPIRV, bDebugShader,
-                        extHlslVersion, null);// "-fspv-extension=SPV_KHR_shader_draw_parameters");
+                        extHlslVersion, null, asModule);// "-fspv-extension=SPV_KHR_shader_draw_parameters");
                     if (ok == false)
                         return null;
                 }

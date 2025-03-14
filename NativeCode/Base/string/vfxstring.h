@@ -148,6 +148,9 @@ VNameString
 	{
 		Index = VNameStringManager::Get()->GetIndexFromString(str);
 	}
+	bool IsValidString() const{
+		return Index != -1;
+	}
 	static int GetIndexFromString(const char* str)
 	{
 		return VNameStringManager::Get()->GetIndexFromString(str);
@@ -165,6 +168,11 @@ VNameString
 		return GetString().c_str();
 	}
 	const std::string& GetString() const {
+		if (IsValidString() == false)
+		{
+			static std::string Empty;
+			return Empty;
+		}
 		return VNameStringManager::Get()->GetString(Index);
 	}
 	inline void SetString(const char* str)

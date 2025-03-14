@@ -112,13 +112,13 @@ namespace EngineNS.Editor.Forms
             {
                 ImageSize.X = ImageSize.X*4;
                 ImageSize.Y = ImageSize.Y*3;
-                SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
+                SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
                      await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<USlateTextureCubeViewerShading>(),
                      TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
             }
             else
             {
-                SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
+                SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
                     await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<USlateTextureViewerShading>(),
                     TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
             }

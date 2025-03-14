@@ -10,6 +10,7 @@ namespace NxRHI
 	class DX12Shader;
 	class DX12GraphicsEffect;
 	class DX12ComputeEffect;
+	class DX12Buffer;
 
 	struct FRootParameter
 	{
@@ -127,6 +128,21 @@ namespace NxRHI
 		FRootParameter					mRootParameters[FRootParameter::GraphicsNumber];
 	};
 
+	class DX12GlobalRootSignature
+	{
+	public:
+		AutoRef<ID3D12RootSignature>	mSignature;
+		UINT							mCbvSrvUavNumber = 0;
+		UINT							mSamplerNumber = 0;
+		FRootParameter					mRootParameters[FRootParameter::ComputeNumber];
+
+		void BuildState(IGpuDevice* device, IShaderReflector* pReflector, std::vector<VNameString>* pFilters = nullptr);
+
+		void Push2Root(FShaderBinder* binder);
+
+		void Dispose();
+	};
+
 	class DX12ComputeEffect : public IComputeEffect
 	{
 	public:
@@ -138,14 +154,37 @@ namespace NxRHI
 		AutoRef<ID3D12CommandSignature> GetIndirectDispatchCmdSig(DX12GpuDevice* device, ICommandList* cmdlist);
 	public:
 		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
-		AutoRef<ID3D12RootSignature>	mSignature;
+		DX12GlobalRootSignature			mRootSignature;
+		AutoRef<ID3D12PipelineState>	mPipelineState;
+		
 		UINT							mIndirectOffset = 0;
 		AutoRef<ID3D12CommandSignature>	mCmdSignature;
-		AutoRef<ID3D12PipelineState>	mPipelineState;
+	};
 
-		UINT							mCbvSrvUavNumber = 0;
-		UINT							mSamplerNumber = 0;
-		FRootParameter					mRootParameters[FRootParameter::ComputeNumber];
+	class DX12RayTracingEffect : public IRayTracingEffect
+	{
+	public:
+		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
+		DX12GlobalRootSignature			mGlobalSignature;
+
+		AutoRef<ID3D12StateObject>		mStateObject;
+		AutoRef<ID3D12StateObjectProperties> mStateObjectProperties;
+		AutoRef<IBuffer>				mRayGenShaderTable;
+		AutoRef<IBuffer>				mMissShaderTable;
+		AutoRef<IBuffer>				mHitGroupAssociationTable;
+	public:
+		class DX12HitGroup : public FHitGroup
+		{
+		public:
+			DX12GlobalRootSignature			Signature;
+		};
+		virtual void BuildState(IGpuDevice* device) override;
+		virtual FHitGroup* CreateHitGroup() override
+		{
+			return new DX12HitGroup();
+		}
+		virtual bool BuildHitGroup(FHitGroup* group) override;
+		AutoRef<ID3D12StateObject> CreateDxrStateObject(DX12GpuDevice* device, DX12RayTracingEffect* effect);
 	};
 }
 

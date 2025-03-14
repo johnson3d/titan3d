@@ -361,6 +361,43 @@ namespace EngineNS.NxRHI
             result.mCoreObject.BuildState(mCoreObject);
             return result;
         }
+        public unsafe TtRayTracingEffect CreateRayTracingEffect(TtShaderDesc shader, TtRayTracingEffect.TtRTShaderLibDesc desc)
+        {
+            var result = new TtRayTracingEffect();
+            result.ShaderDesc = shader;
+            result.ShaderLibDesc = desc;
+            result.mCoreObject = mCoreObject.CreateRayTracingEffect();
+            result.mCoreObject.SetShaderLibDesc(shader.mCoreObject);
+            if (desc != null)
+            {
+                foreach (var i in desc.Functions)
+                {
+                    result.mCoreObject.AddFunctions(VNameString.FromString(i));
+                }
+                result.mCoreObject.SetRayGenShader(VNameString.FromString(desc.RayGenShader));
+                result.mCoreObject.SetMissShader(VNameString.FromString(desc.MissShader));
+
+                foreach (var i in desc.GlobalSignatures)
+                {
+                    result.mCoreObject.AddGlobalSignature(VNameString.FromString(i));
+                }
+                VNameString* localSignatures = stackalloc VNameString[64];
+                foreach (var i in desc.HitGroups)
+                {   
+                    for (int j = 0; j < i.LocalSignatures.Count; ++j)
+                    {
+                        localSignatures[j] = VNameString.FromString(i.LocalSignatures[j]);
+                    }
+
+                    result.mCoreObject.AddHitGroup(VNameString.FromString(i.Name),
+                        VNameString.FromString(i.AnyHitShader),
+                        VNameString.FromString(i.ClosestHitShader),
+                        VNameString.FromString(i.IntersectionShader), localSignatures, i.LocalSignatures.Count);
+                }
+            }
+            result.mCoreObject.BuildState(mCoreObject);
+            return result;
+        }
         public TtGpuPipeline CreatePipeline(in FGpuPipelineDesc desc, string identifier)
         {
             var result = new TtGpuPipeline();
@@ -399,6 +436,15 @@ namespace EngineNS.NxRHI
             if (result.mCoreObject.IsValidPointer == false)
                 return null;
             TtStatistic.Instance.ComputeDrawcall++;
+            return result;
+        }
+        public TtRayTracingDraw CreateRayTracingDraw()
+        {
+            var result = new TtRayTracingDraw();
+            result.mCoreObject = mCoreObject.CreateRayTracingDraw();
+            if (result.mCoreObject.IsValidPointer == false)
+                return null;
+            TtStatistic.Instance.RayTracingDrawcall++;
             return result;
         }
         public TtCopyDraw CreateCopyDraw()

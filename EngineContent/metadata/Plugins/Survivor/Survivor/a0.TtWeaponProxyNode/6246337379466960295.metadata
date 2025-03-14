@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_6246337379466960295 Type="Survivor.TtWeaponProxyNode@Survivor">
+  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
+  <NodeId Type="System.Guid@Unknown" Order="0" />
+  <ParentScene Type="EngineNS.GamePlay.Scene.TtScene@EngineCore" Order="0" />
+  <WeaponNode Type="Survivor.TtWeaponNode@Survivor" Order="0" />
+  <BehaviorSaver Type="EngineNS.GamePlay.Scene.TtBehavior@EngineCore" Order="1" />
+</Hash_6246337379466960295>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_15912763114305432690 Type="Survivor.TtMonsterController@Survivor">
+  <Behavior Type="EngineNS.GamePlay.Scene.TtBehavior@EngineCore" Order="0" />
+  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
+  <NodeId Type="System.Guid@Unknown" Order="0" />
+  <ParentScene Type="EngineNS.GamePlay.Scene.TtScene@EngineCore" Order="0" />
+</Hash_15912763114305432690>

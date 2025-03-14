@@ -1,6 +1,7 @@
 #include "DX12Effect.h"
 #include "DX12GpuDevice.h"
 #include "DX12CommandList.h"
+#include "DX12Buffer.h"
 #include "../NxDrawcall.h"
 
 #define new VNEW
@@ -214,62 +215,52 @@ namespace NxRHI
 		
 	}
 
-	/// Comput Effect
-	void DX12ComputeEffect::Push2Root(FShaderBinder* binder)
+	inline bool IsInludeBinder(std::vector<VNameString>* pFilters, FShaderBinder* pBinder)
 	{
-		switch (binder->Type)
+		if(pFilters == nullptr)
+			return true;
+		for (auto& i : *pFilters)
 		{
-			case EShaderBindType::SBT_CBuffer:
-			{
-				mRootParameters[FRootParameter::CS_Cbv].PushShaderBinder(binder, D3D12_DESCRIPTOR_RANGE_TYPE_CBV);
-			}
-			break;
-			case EShaderBindType::SBT_SRV:
-			{
-				mRootParameters[FRootParameter::CS_Srv].PushShaderBinder(binder, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
-			}
-			break;
-			case EShaderBindType::SBT_UAV:
-			{
-				mRootParameters[FRootParameter::CS_Uav].PushShaderBinder(binder, D3D12_DESCRIPTOR_RANGE_TYPE_UAV);
-			}
-			break;
-			case EShaderBindType::SBT_Sampler:
-			{
-				mRootParameters[FRootParameter::CS_Sampler].PushShaderBinder(binder, D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
-			}
-			break;
+			if (i == pBinder->Name)
+				return true;
 		}
+		return false;
 	}
-	DX12ComputeEffect::~DX12ComputeEffect()
+	void DX12GlobalRootSignature::BuildState(IGpuDevice* device1, IShaderReflector* pReflector, std::vector<VNameString>* pFilters)
 	{
-		auto device = mDeviceRef.GetPtr();
-		if (device == nullptr)
-			return;
-
-		mSignature = nullptr;
-		mCmdSignature = nullptr;
-	}
-	void DX12ComputeEffect::BuildState(IGpuDevice* device1)
-	{
-		mDeviceRef.FromObject(device1);
 		auto device = ((DX12GpuDevice*)device1);
 
 		std::vector<D3D12_ROOT_PARAMETER>	dxRootParameters;
-		for (auto& i : mComputeShader->Reflector->CBuffers)
+		for (auto& i : pReflector->CBuffers)
 		{
+			if (IsInludeBinder(pFilters, i) == false)
+			{
+				continue;
+			}
 			mRootParameters[FRootParameter::CS_Cbv].PushShaderBinder(i, D3D12_DESCRIPTOR_RANGE_TYPE_CBV);
 		}
-		for (auto& i : mComputeShader->Reflector->Srvs)
+		for (auto& i : pReflector->Srvs)
 		{
+			if (IsInludeBinder(pFilters, i) == false)
+			{
+				continue;
+			}
 			mRootParameters[FRootParameter::CS_Srv].PushShaderBinder(i, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
 		}
-		for (auto& i : mComputeShader->Reflector->Uavs)
+		for (auto& i : pReflector->Uavs)
 		{
+			if (IsInludeBinder(pFilters, i) == false)
+			{
+				continue;
+			}
 			mRootParameters[FRootParameter::CS_Uav].PushShaderBinder(i, D3D12_DESCRIPTOR_RANGE_TYPE_UAV);
 		}
-		for (auto& i : mComputeShader->Reflector->Samplers)
+		for (auto& i : pReflector->Samplers)
 		{
+			if (IsInludeBinder(pFilters, i) == false)
+			{
+				continue;
+			}
 			mRootParameters[FRootParameter::CS_Sampler].PushShaderBinder(i, D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
 		}
 
@@ -330,16 +321,66 @@ namespace NxRHI
 			bfSize,
 			IID_PPV_ARGS(&pRootSig));
 		mSignature = pRootSig;
+	}
+
+	void DX12GlobalRootSignature::Push2Root(FShaderBinder* binder)
+	{
+		switch (binder->Type)
+		{
+			case EShaderBindType::SBT_CBuffer:
+			{
+				mRootParameters[FRootParameter::CS_Cbv].PushShaderBinder(binder, D3D12_DESCRIPTOR_RANGE_TYPE_CBV);
+			}
+			break;
+			case EShaderBindType::SBT_SRV:
+			{
+				mRootParameters[FRootParameter::CS_Srv].PushShaderBinder(binder, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
+			}
+			break;
+			case EShaderBindType::SBT_UAV:
+			{
+				mRootParameters[FRootParameter::CS_Uav].PushShaderBinder(binder, D3D12_DESCRIPTOR_RANGE_TYPE_UAV);
+			}
+			break;
+			case EShaderBindType::SBT_Sampler:
+			{
+				mRootParameters[FRootParameter::CS_Sampler].PushShaderBinder(binder, D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
+			}
+			break;
+		}
+	}
+
+	void DX12GlobalRootSignature::Dispose()
+	{
+		mSignature = nullptr;
+		
+	}
+	/// Compute Effect
+	DX12ComputeEffect::~DX12ComputeEffect()
+	{
+		auto device = mDeviceRef.GetPtr();
+		if (device == nullptr)
+			return;
+
+		mRootSignature.Dispose();
+		mCmdSignature = nullptr;
+	}
+	void DX12ComputeEffect::BuildState(IGpuDevice* device1)
+	{
+		auto device = ((DX12GpuDevice*)device1);
+
+		mDeviceRef.FromObject(device1);
+		mRootSignature.BuildState(device1, mComputeShader->Reflector);
 
 		D3D12_COMPUTE_PIPELINE_STATE_DESC pipeDesc{};
-		pipeDesc.pRootSignature = mSignature;
+		pipeDesc.pRootSignature = mRootSignature.mSignature;
 		pipeDesc.CS =
 		{
 			reinterpret_cast<BYTE*>(&mComputeShader->Desc->DxIL[0]),
 			mComputeShader->Desc->DxIL.size()
 		};
 		pipeDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
-		hr = device->mDevice->CreateComputePipelineState(&pipeDesc, IID_PPV_ARGS(mPipelineState.GetAddressOf()));
+		auto hr = device->mDevice->CreateComputePipelineState(&pipeDesc, IID_PPV_ARGS(mPipelineState.GetAddressOf()));
 		ASSERT(hr == S_OK);
 	}
 	
@@ -416,6 +457,134 @@ namespace NxRHI
 			mIndirectOffset = 0;
 		}*/
 		return mCmdSignature;
+	}
+
+
+	void DX12RayTracingEffect::BuildState(IGpuDevice* device1)
+	{
+		DX12GpuDevice* device = (DX12GpuDevice*)device1;
+		if (mStateObject != nullptr)
+			return;
+		mStateObject = CreateDxrStateObject(device, this);
+		if (mStateObject == nullptr)
+			return;
+		ASSERT(mStateObject);
+		mStateObject->QueryInterface(IID_PPV_ARGS(mStateObjectProperties.GetAddressOf()));
+		ASSERT(mStateObjectProperties);
+
+		auto rayGenShaderIdentifier = mStateObjectProperties->GetShaderIdentifier(StringHelper::strtowstr(mRayGenName).c_str());
+		auto missShaderIdentifier = mStateObjectProperties->GetShaderIdentifier(StringHelper::strtowstr(mMissName).c_str());
+		//auto hitGroupShaderIdentifier = mStateObjectProperties->GetShaderIdentifier(mHitName.c_str());
+
+		UINT shaderIdentifierSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+
+		{
+			FBufferDesc rayGenDesc{};
+			rayGenDesc.SetDefault(false);
+			rayGenDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+			rayGenDesc.Usage = EGpuUsage::USAGE_STAGING;
+			rayGenDesc.Size = shaderIdentifierSize;
+			rayGenDesc.InitData = rayGenShaderIdentifier;
+			mRayGenShaderTable = MakeWeakRef(device->CreateBuffer(&rayGenDesc));
+		}
+		{
+			FBufferDesc missDesc{};
+			missDesc.SetDefault(false);
+			missDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+			missDesc.Usage = EGpuUsage::USAGE_STAGING;
+			missDesc.Size = shaderIdentifierSize;
+			missDesc.InitData = missShaderIdentifier;
+			mMissShaderTable = MakeWeakRef(device->CreateBuffer(&missDesc));
+		}
+		{
+			//FBufferDesc hitGroupDesc{};
+			//hitGroupDesc.SetDefault(false);
+			//hitGroupDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+			//hitGroupDesc.Usage = EGpuUsage::USAGE_STAGING;
+			//hitGroupDesc.Size = shaderIdentifierSize;
+			//IBlobObject blob;
+			//blob.PushData(hitGroupShaderIdentifier, shaderIdentifierSize);
+			////blob.PushData();push CBuffer for hitgroup
+			//hitGroupDesc.InitData = hitGroupShaderIdentifier;
+			//mHitGroupAssociationTable = MakeWeakRef(device->CreateBuffer(&hitGroupDesc));
+		}
+	}
+
+	AutoRef<ID3D12StateObject> DX12RayTracingEffect::CreateDxrStateObject(DX12GpuDevice* device, DX12RayTracingEffect* effect)
+	{
+		CD3DX12_STATE_OBJECT_DESC raytracingPipeline{ D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE };
+		auto lib = raytracingPipeline.CreateSubobject<CD3DX12_DXIL_LIBRARY_SUBOBJECT>();
+		D3D12_SHADER_BYTECODE libdxil = CD3DX12_SHADER_BYTECODE(&effect->mShaderLibDesc->DxIL[0], effect->mShaderLibDesc->DxIL.size());
+		lib->SetDXILLibrary(&libdxil);
+		for (auto& i : this->mFunctions)
+		{
+			lib->DefineExport(StringHelper::strtowstr(i).c_str());
+		}
+		lib->DefineExport(mShaderConfigName.c_str());
+		lib->DefineExport(mPipelineConfigName.c_str());
+
+		// Define which subobjects exports to use from the library.
+		// If no exports are defined all subobjects are used. 
+		if (false)
+		{
+			//lib->DefineExport(mGlobalRootSignatureName.c_str());
+			//lib->DefineExport(mLocalRootSignatureName.c_str());
+			//lib->DefineExport(mLocalRootSignatureAssociationName.c_str());
+			//lib->DefineExport(mShaderConfigName.c_str());
+			//lib->DefineExport(mPipelineConfigName.c_str());
+			//lib->DefineExport(mHitGroupName.c_str());
+		}
+
+		if (true)
+		{
+			auto reflector = effect->GetShaderLibDesc()->DxILReflector;
+			mGlobalSignature.BuildState(device, reflector, &mGlobalSignatures);
+			auto globalRootSignature = raytracingPipeline.CreateSubobject<CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();
+			globalRootSignature->SetRootSignature(mGlobalSignature.mSignature);
+
+			// Triangle hit group
+			for (auto& i : mHitGroups)
+			{
+				auto group = i.second.UnsafeConvertTo<DX12HitGroup>();
+				auto hitGroup = raytracingPipeline.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
+				if (group->AnyHit.AsStdString() != "")
+					hitGroup->SetAnyHitShaderImport(StringHelper::strtowstr(group->AnyHit.GetString()).c_str());
+				if (group->ClosestHit.AsStdString() != "")
+					hitGroup->SetClosestHitShaderImport(StringHelper::strtowstr(group->ClosestHit.GetString()).c_str());
+				if (group->Intersection.AsStdString() != "")
+					hitGroup->SetIntersectionShaderImport(StringHelper::strtowstr(group->Intersection.GetString()).c_str());
+				hitGroup->SetHitGroupExport(StringHelper::strtowstr(group->Name).c_str());
+				hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);
+
+				for (auto& j : group->LocalSignatures)
+				{	
+					auto binder = reflector->FindBinder(EShaderBindType::SBT_CBuffer, j);
+				}
+				auto localRootSignature = raytracingPipeline.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
+				localRootSignature->SetRootSignature(group->Signature.mSignature);
+			}
+			
+			//// Shader config
+			//// Defines the maximum sizes in bytes for the ray payload and attribute structure.
+			//auto shaderConfig = raytracingPipeline.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
+			//UINT payloadSize = 4 * sizeof(float);   // float4 color
+			//UINT attributeSize = 2 * sizeof(float); // float2 barycentrics
+			//shaderConfig->Config(payloadSize, attributeSize);
+
+			//auto pipelineConfig = raytracingPipeline.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();
+
+			//UINT maxRecursionDepth = 1; // ~ primary rays only. 
+			//pipelineConfig->Config(maxRecursionDepth);
+		}
+
+		AutoRef<ID3D12StateObject> result;
+		device->mLastDevice->CreateStateObject(raytracingPipeline, IID_PPV_ARGS(result.GetAddressOf()));
+		return result;
+	}
+
+	bool DX12RayTracingEffect::BuildHitGroup(FHitGroup* group)
+	{
+		return true;
 	}
 }
 

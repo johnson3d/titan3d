@@ -39,6 +39,7 @@ namespace NxRHI
 	class IEvent;
 	class IGraphicDraw;
 	class IComputeDraw;
+	class IRayTracingDraw;
 	class ICopyDraw;
 	class IActionDraw;
 	struct FTextureDesc;
@@ -58,6 +59,7 @@ namespace NxRHI
 	class FGpuPipelineManager;
 	class ICmdQueue;
 	class IComputeEffect;
+	class IRayTracingEffect;
 	class IGpuBufferData;
 	class IGpuScope;
 	class FVertexArray;
@@ -1103,6 +1105,7 @@ namespace NxRHI
 		bool	IsSupportSSBO_VS = true;
 		bool	IsSupportBufferToTexture = false;
 		bool	IsSupportMeshShader = false;
+		bool	IsSupportRayTracing = false;
 		UINT			MaxViewInstanceCount = 0;
 		UINT			NumOfSwapchainFormats = 0;
 		EPixelFormat	SwapchainFormats[16] = {};
@@ -1184,12 +1187,14 @@ namespace NxRHI
 		virtual IShader* CreateShader(FShaderDesc* desc) = 0;
 		virtual IGraphicsEffect* CreateShaderEffect() = 0;
 		virtual IComputeEffect* CreateComputeEffect() = 0;
+		virtual IRayTracingEffect* CreateRayTracingEffect() { return nullptr; }
 		virtual IFence* CreateFence(const FFenceDesc* desc, const char* name) = 0;
 		virtual IEvent* CreateGpuEvent(const FEventDesc * desc, const char* name) = 0;
 		virtual ICmdQueue* GetCmdQueue() = 0;
 
 		virtual IGraphicDraw* CreateGraphicDraw();
 		virtual IComputeDraw* CreateComputeDraw();
+		virtual IRayTracingDraw* CreateRayTracingDraw();
 		virtual ICopyDraw* CreateCopyDraw();
 		virtual IActionDraw* CreateActionDraw();
 

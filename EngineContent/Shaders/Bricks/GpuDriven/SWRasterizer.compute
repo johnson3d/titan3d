@@ -186,7 +186,7 @@ void RasterizeTri_Scanline_Inner(FRasterTri Tri) //FRaster Raster, uint PixelVal
 
 	float3 Edge012 = { Tri.Edge12.y, Tri.Edge20.y, Tri.Edge01.y };
 	bool3 bOpenEdge = Edge012 < 0;
-	float3 InvEdge012 = Edge012 == 0 ? 1e8 : rcp(Edge012);
+    float3 InvEdge012 = V_Select(Edge012 == 0, 1e8 , rcp(Edge012));
 
 	int y = Tri.MinPixel.y;
 	while (true)
@@ -204,8 +204,8 @@ void RasterizeTri_Scanline_Inner(FRasterTri Tri) //FRaster Raster, uint PixelVal
 		// No longer fixed point
 		float3 CrossX = float3(CY0, CY1, CY2) * InvEdge012;
 
-		float3 MinX = bOpenEdge ? CrossX : 0;
-		float3 MaxX = bOpenEdge ? Tri.MaxPixel.x - Tri.MinPixel.x : CrossX;
+        float3 MinX = V_Select(bOpenEdge, CrossX, 0);
+        float3 MaxX = V_Select(bOpenEdge, Tri.MaxPixel.x - Tri.MinPixel.x, CrossX);
 
 		float x0 = ceil(max3(MinX.x, MinX.y, MinX.z));
 		float x1 = min3(MaxX.x, MaxX.y, MaxX.z);

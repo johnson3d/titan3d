@@ -50,6 +50,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\UForwordNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GpuBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mobile\UFinalCopyNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RayTracing\RayTracing.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RenderGraph.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RenderGraphNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Shader\MaterialFunction.cs" />

@@ -361,7 +361,63 @@ namespace EngineNS.Graphics.Pipeline.Shader
             defines.AddDefine("DispatchZ", (int)DispatchArg.Z);
         }
     }
-    
+
+    public abstract class TtRayTracingShadingEnv : TtShadingEnv
+    {
+        public virtual string MainName { get; set; }
+        private NxRHI.TtRayTracingEffect mCurrentEffect;
+        public NxRHI.TtRayTracingEffect CurrentEffect
+        {
+            get => mCurrentEffect;
+        }
+
+        public bool IsReady
+        {
+            get => CurrentEffect != null;
+        }
+        public override string ToString()
+        {
+            return base.ToString();
+        }
+        public override void UpdatePermutation()
+        {
+            base.UpdatePermutation();
+        }
+        internal override async Thread.Async.TtTask<bool> OnCreateEffect()
+        {
+            mCurrentEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetRayTracingEffect(CodeName,
+                MainName, this, null, null);
+            System.Diagnostics.Debug.Assert(this.mCurrentPermutationId == CurrentEffect.PermutationId);
+
+            return true;
+        }
+        public virtual void OnDrawCall(NxRHI.TtRayTracingDraw drawcall, TtRenderPolicy policy)
+        {
+
+        }
+        public void SetDispatchRay(object tagObject, TtRenderPolicy policy, NxRHI.TtRayTracingDraw drawcall, uint w, uint h, uint d)
+        {
+            drawcall.TagObject = tagObject;
+
+            drawcall.BindShaderEffect(CurrentEffect);
+            drawcall.SetDispatchRay(w, h, d);
+
+            this.OnDrawCall(drawcall, policy);
+        }
+        //public void SetDrawcallIndirectDispatch(object tagObject, TtRenderPolicy policy, NxRHI.TtRayTracingDraw drawcall, NxRHI.TtBuffer indirectBuffer)
+        //{
+        //    drawcall.TagObject = tagObject;
+        //    //drawcall.SetComputeEffect(CurrentEffect);
+        //    drawcall.BindIndirectDispatchArgsBuffer(indirectBuffer);
+
+        //    this.OnDrawCall(drawcall, policy);
+        //}
+        protected override void EnvShadingDefines(in FPermutationId id, TtShaderDefinitions defines)
+        {
+            
+        }
+    }
+
     public class TtDummyShading : Shader.TtGraphicsShadingEnv
     {
         public TtDummyShading()

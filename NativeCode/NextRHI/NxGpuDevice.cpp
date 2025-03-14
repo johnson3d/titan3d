@@ -139,6 +139,10 @@ namespace NxRHI
 		auto result = new IComputeDraw();
 		return result;
 	}
+	IRayTracingDraw* IGpuDevice::CreateRayTracingDraw()
+	{
+		return nullptr;
+	}
 	ICopyDraw* IGpuDevice::CreateCopyDraw()
 	{
 		auto result = new ICopyDraw();

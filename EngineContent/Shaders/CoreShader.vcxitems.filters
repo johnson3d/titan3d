@@ -103,6 +103,9 @@
     <Filter Include="Bricks\FX">
       <UniqueIdentifier>{dd2412f0-dc3c-4980-99ff-42063394cf9e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ShadingEnv\RayTracing">
+      <UniqueIdentifier>{8145f663-9a92-4822-8ab8-2f6f85c45104}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -514,6 +517,9 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\MacrossComputShading.shader">
       <Filter>Compute</Filter>
     </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)ShadingEnv\RayTracing\Raytracing.hlsl">
+      <Filter>ShadingEnv\RayTracing</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\FSR1\ffx_a.h">
@@ -521,6 +527,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\FSR1\ffx_fsr1.h">
       <Filter>ShadingEnv\Post\FSR1</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\RayTracing\RayTracingHlslCompat.h">
+      <Filter>ShadingEnv\RayTracing</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

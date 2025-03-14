@@ -142228,6 +142228,22 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileTranslucentNode;
 		};
 	}
+	static class EngineNS_Graphics_Pipeline_RayTracing_TtRayTracingNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.RayTracing.TtRayTracingNode;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Pipeline.RayTracing.TtRayTracingNode;
+			var srcObj = src as EngineNS.Graphics.Pipeline.RayTracing.TtRayTracingNode;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9524687136534877311 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.RayTracing.TtRayTracingNode;
+		};
+	}
 	static class EngineNS_Graphics_Pipeline_Shader_CommanShading_UBasePassPolicy
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -200561,6 +200577,12 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(9524687136534877311, EngineNS_Graphics_Pipeline_Mobile_TtMobileTranslucentNode.Read_9524687136534877311);
 			}
 			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.RayTracing.TtRayTracingNode@EngineCore");
+				kls.Writer = EngineNS_Graphics_Pipeline_RayTracing_TtRayTracingNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Pipeline_RayTracing_TtRayTracingNode.CopyCurrentVersion;
+				kls.RegVersion(9524687136534877311, EngineNS_Graphics_Pipeline_RayTracing_TtRayTracingNode.Read_9524687136534877311);
+			}
+			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Shader.CommanShading.UBasePassPolicy@EngineCore");
 				kls.Writer = EngineNS_Graphics_Pipeline_Shader_CommanShading_UBasePassPolicy.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Shader_CommanShading_UBasePassPolicy.CopyCurrentVersion;
@@ -201452,7 +201474,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(547543558045874187, Survivor_TtWeaponProxyNode.Read_547543558045874187);
 				kls.RegVersion(6246337379466960295, Survivor_TtWeaponProxyNode.Read_6246337379466960295);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("F9_CA_D9_13_AE_0C_97_EF_93_4D_88_C7_D0_BA_C8_AE_DB_81_31_65");
+			this.VersionHash = EngineNS.Hash160.Parse("FC_EF_C0_59_26_BF_AB_A2_3A_4C_4F_F3_99_EA_C9_56_16_A6_69_9B");
 		}
 	}
 }

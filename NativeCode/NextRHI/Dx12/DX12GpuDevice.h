@@ -60,12 +60,14 @@ namespace NxRHI
 		virtual IShader* CreateShader(FShaderDesc* desc) override;
 		virtual IGraphicsEffect* CreateShaderEffect() override;
 		virtual IComputeEffect* CreateComputeEffect() override;
+		virtual IRayTracingEffect* CreateRayTracingEffect() override;
 		virtual IFence* CreateFence(const FFenceDesc* desc, const char* name) override;
 		virtual IEvent* CreateGpuEvent(const FEventDesc* desc, const char* name) override;
 		virtual ICmdQueue* GetCmdQueue() override;
 
 		virtual IGraphicDraw* CreateGraphicDraw() override;
 		virtual IComputeDraw* CreateComputeDraw() override;
+		virtual IRayTracingDraw* CreateRayTracingDraw() override;
 		virtual IGpuScope* CreateGpuScope() override;
 		virtual FVertexArray* CreateVertexArray() override;
 
@@ -111,7 +113,7 @@ namespace NxRHI
 	public:
 		TWeakRefHandle<DX12GpuSystem>	mGpuSystem;
 		AutoRef<ID3D12Device>			mDevice;
-		AutoRef<ID3D12Device2>			mLastDevice;
+		AutoRef<ID3D12Device5>			mLastDevice;
 		AutoRef<ID3D12DebugDevice>		mDebugDevice;
 		AutoRef<ID3D12DebugDevice1>		mDebugDevice1;
 		D3D_FEATURE_LEVEL               mFeatureLevel;

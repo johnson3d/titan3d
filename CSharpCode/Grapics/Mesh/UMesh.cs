@@ -236,7 +236,7 @@ namespace EngineNS.Graphics.Mesh
                     shading = node.GetPassShading(this);
                     if (shading != null)
                     {
-                        var effect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(shading, Material.ParentMaterial, this.MdfQueue);
+                        var effect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(shading, Material.ParentMaterial, this.MdfQueue);
                         if (effect == null)
                         {
                             Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Error, $"GetEffect({shading},{Material.ParentMaterial},{this.MdfQueue}) failed");

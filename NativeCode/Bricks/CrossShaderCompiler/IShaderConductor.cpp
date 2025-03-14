@@ -112,7 +112,7 @@ IShaderConductor* IShaderConductor::GetInstance()
 //}
 
 bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FShaderDesc* desc, const char* shader, const char* entry, NxRHI::EShaderType type, const char* sm,
-			const NxRHI::IShaderDefinitions* defines, bool bDebugShader, NxRHI::EShaderLanguage sl, bool debugShader, const char* extHlslVersion, const char* dxcArgs, IBlobObject* output)
+			const NxRHI::IShaderDefinitions* defines, bool bDebugShader, NxRHI::EShaderLanguage sl, const char* extHlslVersion, const char* dxcArgs, IBlobObject* output, bool asModule)
 {
 	if (sl == NxRHI::EShaderLanguage::SL_DXBC)
 	{
@@ -192,7 +192,7 @@ bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FS
 		sl == NxRHI::EShaderLanguage::SL_GLSL ||
 		sl == NxRHI::EShaderLanguage::SL_METAL)
 	{
-		auto ret = CompileHLSL(compiler, desc, shader, entry, type, sm, defines, sl, debugShader, extHlslVersion, dxcArgs, output);
+		auto ret = CompileHLSL(compiler, desc, shader, entry, type, sm, defines, sl, bDebugShader, extHlslVersion, dxcArgs, output, asModule);
 		if (sl == NxRHI::EShaderLanguage::SL_DXIL)
 			return ret;
 		//Spirv is not ready for all shaders
@@ -205,7 +205,7 @@ bool IShaderConductor::CompileShader(NxRHI::FShaderCompiler* compiler, NxRHI::FS
 }
 
 bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FShaderDesc* desc, const char* hlsl, const char* entry, NxRHI::EShaderType type, std::string sm,
-	const NxRHI::IShaderDefinitions* defines, NxRHI::EShaderLanguage sl, bool debugShader, const char* extHlslVersion, const char* dxcArgs, IBlobObject* output)
+	const NxRHI::IShaderDefinitions* defines, NxRHI::EShaderLanguage sl, bool debugShader, const char* extHlslVersion, const char* dxcArgs, IBlobObject* output, bool asModule)
 {
 #if defined(PLATFORM_WIN)
 	auto ar = compiler->GetShaderCodeStream(hlsl, hlsl);
@@ -222,6 +222,15 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 		break;
 	case NxRHI::EShaderType::SDT_ComputeShader:
 		stage = ShaderConductor::ShaderStage::ComputeShader;
+		break;
+	case NxRHI::EShaderType::SDT_AmplificationShader:
+		stage = ShaderConductor::ShaderStage::AmplificationShader;
+		break;
+	case NxRHI::EShaderType::SDT_MeshShader:
+		stage = ShaderConductor::ShaderStage::MeshShader;
+		break;
+	case NxRHI::EShaderType::SDT_RayTracing:
+		//stage = ShaderConductor::ShaderStage:;
 		break;
 	default:
 		break;
@@ -308,14 +317,6 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 	auto f2 = sm.substr(_pos + 1);
 	opt.shaderModel.major_ver = atoi(f1.c_str());
 	opt.shaderModel.minor_ver = atoi(f2.c_str());
-	/*if (sm == "6_2")
-		opt.shaderModel = { 6,2 };
-	else if (sm == "6_6")
-		opt.shaderModel = { 6,6 };
-	else if (sm == "6_5")
-		opt.shaderModel = { 6,5 };
-	else
-		opt.shaderModel = { 6,6 };*/
 	opt.shiftAllTexturesBindings = 0;
 	opt.shiftAllSamplersBindings = 0;
 	opt.shiftAllCBuffersBindings = 0;
@@ -328,7 +329,7 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 	ShaderConductor::Compiler::TargetDesc tmp{};
 	ShaderConductor::Compiler::ResultDesc tmp2{};
 
-	tmp.asModule = false;
+	tmp.asModule = asModule;
 	
 	switch (sl)
 	{
@@ -391,13 +392,25 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 				desc->DxIL.resize(sz);
 				memcpy(&desc->DxIL[0], (char*)finalResult.target.Data(), finalResult.target.Size());			
 
-				auto pDx12Reflection = (ID3D12ShaderReflection*)finalResult.reflection.GetD3D12ShaderReflection();
-				if (pDx12Reflection != nullptr)
-				{
 #if defined(HasModule_Dx12)
-					DX12Shader::Reflect(desc, pDx12Reflection);
-#endif
+				if (asModule)
+				{
+					auto pDx12Reflection = (ID3D12LibraryReflection*)finalResult.reflection.GetD3D12LibraryReflection();
+					if (pDx12Reflection != nullptr)
+					{
+						DX12Shader::Reflect(desc, pDx12Reflection);
+					}
 				}
+				else 
+				{
+					auto pDx12Reflection = (ID3D12ShaderReflection*)finalResult.reflection.GetD3D12ShaderReflection();
+					if (pDx12Reflection != nullptr)
+					{
+						DX12Shader::Reflect(desc, pDx12Reflection);
+					}
+				}
+				
+#endif
 			}
 			else if(dest[i].language == ShaderConductor::ShadingLanguage::Essl)
 			{
@@ -421,6 +434,10 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 #endif
 			}
 		}
+		else
+		{
+			return false;
+		}
 	}
 
 	if (CoreSDK::OnShaderTranslated != nullptr)
@@ -432,6 +449,62 @@ bool IShaderConductor::CompileHLSL(NxRHI::FShaderCompiler* compiler, NxRHI::FSha
 #else
 	return false;
 #endif
+}
+
+//bool CompileRayTracingLibrary(IDxcBlob** ppDXILBlob) 
+//{
+//	try {
+//		// 初始化DXC
+//		CComPtr<IDxcUtils> pUtils;
+//		CComPtr<IDxcCompiler3> pCompiler;
+//		DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&pUtils));
+//		DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&pCompiler));
+//
+//		// 加载HLSL源码
+//		CComPtr<IDxcBlobEncoding> pSource;
+//		pUtils->LoadFile(L"RayTracing.hlsl", nullptr, &pSource);
+//
+//		// 配置编译参数
+//		std::vector<LPCWSTR> args = {
+//			L"-T", L"lib_6_6",
+//			L"-E", L"RayGen",
+//			L"-Zi", L"-Qembed_debug",
+//			DXC_ARG_WARNINGS_ARE_ERRORS
+//		};
+//
+//		// 执行编译
+//		DxcBuffer sourceBuffer = {
+//			pSource->GetBufferPointer(),
+//			pSource->GetBufferSize(),
+//			DXC_CP_UTF8
+//		};
+//
+//		CComPtr<IDxcResult> pResult;
+//		pCompiler->Compile(&sourceBuffer, args.data(), (UINT)args.size(),
+//			nullptr, IID_PPV_ARGS(&pResult));
+//
+//		// 错误处理
+//		CComPtr<IDxcBlobUtf8> pErrors;
+//		pResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr);
+//		if (pErrors && pErrors->GetStringLength() > 0) {
+//			OutputDebugStringA(pErrors->GetStringPointer());
+//		}
+//
+//		HRESULT status;
+//		pResult->GetStatus(&status);
+//		if (FAILED(status)) return false;
+//
+//		// 提取DXIL
+//		return SUCCEEDED(pResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(ppDXILBlob), nullptr));
+//	}
+//	catch (...) {
+//		return false;
+//	}
+//}
+
+bool IShaderConductor::CompileDXR(NxRHI::FShaderCompiler* compiler, IBlobObject* lib, const char* sm, const NxRHI::IShaderDefinitions* defines, bool bDebugShader, NxRHI::EShaderLanguage sl)
+{
+	return false;
 }
 
 NS_END

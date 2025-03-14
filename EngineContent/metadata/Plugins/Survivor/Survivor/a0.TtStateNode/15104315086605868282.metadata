@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_15104315086605868282 Type="Survivor.TtStateNode@Survivor">
+  <BehaviorName Type="EngineNS.RName@EngineCore" Order="0" />
+  <BehaviorSaver Type="EngineNS.GamePlay.Scene.TtBehavior@EngineCore" Order="0" />
+  <IsDead Type="System.Boolean@Unknown" Order="0" />
+  <NodeId Type="System.Guid@Unknown" Order="0" />
+  <Parent Type="EngineNS.GamePlay.Scene.TtNode@EngineCore" Order="0" />
+  <ParentScene Type="EngineNS.GamePlay.Scene.TtScene@EngineCore" Order="0" />
+</Hash_15104315086605868282>

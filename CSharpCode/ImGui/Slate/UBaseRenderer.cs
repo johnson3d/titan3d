@@ -18,7 +18,7 @@ namespace EngineNS.EGui.Slate
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-            SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetEffect(
+            SlateEffect = await TtEngine.Instance.GfxDevice.EffectManager.GetGraphicEffect(
                 await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Shader.CommanShading.USlateGUIShading>(),
                 TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial, new Graphics.Mesh.TtMdfStaticMesh());
 

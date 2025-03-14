@@ -314,7 +314,12 @@ namespace NxRHI
 		}
 	};
 	
-	class IGpuDrawState : public VIUnknown
+	class IGpuState : public VIUnknown
+	{
+
+	};
+	
+	class IGpuDrawState : public IGpuState
 	{
 	public:
 		EPrimitiveType			TopologyType = EPrimitiveType::EPT_TriangleList;

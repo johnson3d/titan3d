@@ -16,14 +16,15 @@ namespace EngineNS.IO
         {
             InitDirectory(args);
             SetSysDir(ESystemDir.MetaData, "metadata");
-            SetSysDir(ESystemDir.Effect, "effect");
-            SetSysDir(ESystemDir.Shader, "shader");
+            SetSysDir(ESystemDir.GraphicEffect, "effect/graphic");
+            SetSysDir(ESystemDir.ComputeEffect, "effect/compute");
+            SetSysDir(ESystemDir.RayTracingEffect, "effect/raytracing");
             SetSysDir(ESystemDir.PSO, "pso");
             SetSysDir(ESystemDir.RenderDoc, "renderdoc");
             SetSysDir(ESystemDir.DebugUtility, "debugutility");
             SureDirectory(GetPath(ERootDir.Engine, ESystemDir.MetaData));
-            SureDirectory(GetPath(ERootDir.Cache, ESystemDir.Effect));
-            SureDirectory(GetPath(ERootDir.Cache, ESystemDir.Shader));
+            SureDirectory(GetPath(ERootDir.Cache, ESystemDir.GraphicEffect));
+            SureDirectory(GetPath(ERootDir.Cache, ESystemDir.ComputeEffect));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.PSO));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.RenderDoc));
             SureDirectory(GetPath(ERootDir.Cache, ESystemDir.DebugUtility));
@@ -47,8 +48,9 @@ namespace EngineNS.IO
         public enum ESystemDir
         {
             MetaData,
-            Effect,
-            Shader,
+            GraphicEffect,
+            ComputeEffect,
+            RayTracingEffect,
             PSO,
             RenderDoc,
             DebugUtility,
@@ -83,7 +85,7 @@ namespace EngineNS.IO
         }
         public string GetPath(ERootDir root, ESystemDir type)
         {
-            return Roots[(int)root] + SysDirs[(int)type] + "/";
+            return SureAsDirectory(CombinePath(Roots[(int)root], SysDirs[(int)type]));
         }
         public ERootDir GetRootDirType(string path)
         {
@@ -329,6 +331,12 @@ namespace EngineNS.IO
             if (pos < 0)
                 return str;
             return str.Substring(0, pos);
+        }
+        public static string SureAsDirectory(string str)
+        {
+            if (str.EndsWith("/") == false && str.EndsWith("\\") == false)
+                str += "/";
+            return str;
         }
         public static string CombinePath(string path1, string path2)
         {

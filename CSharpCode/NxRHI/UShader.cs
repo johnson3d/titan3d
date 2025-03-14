@@ -259,9 +259,11 @@ namespace EngineNS.NxRHI
         public Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId PermutationId { get; set; }
         public const string AssetExt = ".shader";
         public string TypeExt { get => AssetExt; }
-        public unsafe void SaveTo(RName shader, in Hash160 hash)
+        public unsafe void SaveTo(RName shader, in Hash160 hash, EShaderType eShader)
         {
-            var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Shader);
+            if (eShader != EShaderType.SDT_ComputeShader)
+                return;
+            var path = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.ComputeEffect);
             var file = path + hash.ToString() + TtShader.AssetExt;
             var xnd = new IO.TtXndHolder("UShader", 0, 0);
 
@@ -284,24 +286,31 @@ namespace EngineNS.NxRHI
 
             xnd.SaveXnd(file);
         }
-        public unsafe static TtShader Load(IO.TtXndHolder xnd)
+        public unsafe static TtShader Load(IO.TtXndHolder xnd, out Hash160 hash)
         {
+            Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId permutationId;
+            var desc = LoadDesc(xnd, out hash, out permutationId);
+
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+            var result = rc.CreateShader(desc);
+            result.PermutationId = permutationId;
+            return result;
+        }
+        public static unsafe TtShaderDesc LoadDesc(IO.TtXndHolder xnd, out Hash160 hash, out Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId permutationId)
+        {
+            hash = Hash160.Emtpy;
+            permutationId = new Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId();
             var descAttr = xnd.RootNode.mCoreObject.TryGetAttribute("Desc");
             if (descAttr.IsValidPointer == false)
                 return null;
-            Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId permutationId = new Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId();
             using (var ar = descAttr.GetReader(null))
             {
                 RName shader;
                 ar.Read(out shader);
                 ar.Read(out permutationId);
-                Hash160 hash;
                 ar.Read(out hash);
-                var shadingCode = Editor.ShaderCompiler.TtShaderCodeManager.Instance.GetShaderCode(shader);
-                if (shadingCode.CodeHash != hash)
-                    return null;
             }
-            
+
             var vsNode = xnd.RootNode.mCoreObject.TryGetChildNode("ShaderDesc");
             if (vsNode.IsValidPointer == false)
                 return null;
@@ -310,10 +319,24 @@ namespace EngineNS.NxRHI
             if (desc.mCoreObject.LoadXnd(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, vsNode) == false)
                 return null;
 
-            var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            var result = rc.CreateShader(desc);
-            result.PermutationId = permutationId;
-            return result;
+            return desc;
+        }
+        public static unsafe bool SaveDesc(IO.TtXndHolder xnd, RName shader, in Hash160 hash, TtShaderDesc desc, Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId permutationId)
+        {
+            permutationId = new Graphics.Pipeline.Shader.TtShadingEnv.FPermutationId();
+            var descAttr = xnd.RootNode.mCoreObject.GetOrAddAttribute("Desc", 0, 0, true);
+            using (var ar = descAttr.GetWriter(256))
+            {
+                ar.Write(shader);
+                ar.Write(permutationId);
+                var shadingCode = Editor.ShaderCompiler.TtShaderCodeManager.Instance.GetShaderCode(shader);
+                //System.Diagnostics.Debug.Assert(hash == shadingCode.CodeHash);
+                ar.Write(hash);
+            }
+
+            var vsNode = xnd.RootNode.mCoreObject.GetOrAddNode("ShaderDesc", 0, 0, true);
+            desc.mCoreObject.SaveXnd(vsNode);
+            return true;
         }
         public void SetDebugName(string name)
         {

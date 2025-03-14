@@ -106,15 +106,15 @@ namespace EngineNS.NxRHI
             mCoreObject.SetCallback(fn);
         }
 
-        public unsafe bool CompileShader(TtShaderDesc shaderDesc, string shader, string entry, EShaderType type, string sm, TtShaderDefinitions defines, EShaderLanguage sl, bool bDebugShader, string extHlslVersion, string dxcArgs)
+        public unsafe bool CompileShader(TtShaderDesc shaderDesc, string shader, string entry, EShaderType type, string sm, TtShaderDefinitions defines, EShaderLanguage sl, bool bDebugShader, string extHlslVersion, string dxcArgs, bool asModule)
         {
             using (var blob = new Support.TtBlobObject())
             {
-                var ret = mCoreObject.CompileShader(shaderDesc.mCoreObject, shader, entry, type, sm, defines.mCoreObject, sl, bDebugShader, extHlslVersion, dxcArgs, blob.mCoreObject);
+                var ret = mCoreObject.CompileShader(shaderDesc.mCoreObject, shader, entry, type, sm, defines.mCoreObject, sl, bDebugShader, extHlslVersion, dxcArgs, blob.mCoreObject, asModule);
                 if (blob.Size > 0)
                 {
                     var msg = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)blob.DataPointer, (int)blob.Size);
-                    if (msg.IndexOf("error ") >= 0)
+                    if (ret == false || msg.IndexOf("error ") >= 0)
                     {
                         Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, msg);
                     }

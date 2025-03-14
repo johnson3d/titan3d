@@ -252,6 +252,95 @@ namespace NxRHI
 	{
 		cmdlist->SetSampler(EShaderType::SDT_ComputeShader, binder, sampler);
 	}
+
+	FHitGroup* IRayTracingEffect::CreateHitGroup()
+	{
+		return new FHitGroup();
+	}
+	bool IRayTracingEffect::AddHitGroup(VNameString name, VNameString anyHit, VNameString closestHit, VNameString intersection, VNameString* sigs, int count)
+	{
+		if (FindHitGroup(name) != nullptr)
+			return false;
+		auto group = MakeWeakRef(CreateHitGroup());
+		group->Name = name;
+		group->AnyHit = anyHit;
+		group->ClosestHit = closestHit;
+		group->Intersection = intersection;
+		for(int i=0; i<count; i++)
+		{
+			group->LocalSignatures.push_back(sigs[i]);
+		}
+		/*if (this->BuildHitGroup(group) == false)
+			return false;*/
+		mHitGroups.insert(std::make_pair(name, group));
+		return true;
+	}
+	void IRayTracingEffect::SaveGlobalAndHitGroups(XndAttribute* attr)
+	{
+		attr->mVersion = 0;
+		attr->BeginWrite();
+		UINT count = (UINT)mGlobalSignatures.size();
+		attr->Write(count);
+		for (UINT i = 0; i < count; i++)
+		{
+			attr->Write(mGlobalSignatures[i]);
+		}
+
+		count = (UINT)mHitGroups.size();
+		attr->Write(count);
+		for (auto& i : mHitGroups)
+		{
+			attr->Write(i.second->Name);
+			attr->Write(i.second->AnyHit);
+			attr->Write(i.second->ClosestHit);
+			attr->Write(i.second->Intersection);
+			count = (UINT)i.second->LocalSignatures.size();
+			attr->Write(count);
+			for (UINT j = 0; j < count; j++)
+			{
+				attr->Write(i.second->LocalSignatures[j]);
+			}
+		}
+		attr->EndWrite();
+	}
+	void IRayTracingEffect::LoadGlobalAndHitGroups(XndAttribute* attr)
+	{
+		attr->BeginRead();
+		mGlobalSignatures.clear();
+		UINT count;
+		attr->Read(count);
+		for (UINT i = 0; i < count; i++)
+		{
+			VNameString t;
+			attr->Read(t);
+			mGlobalSignatures.push_back(t);
+		}
+
+		mHitGroups.clear();
+		attr->Read(count);
+		for (UINT i = 0; i < count; i++)
+		{
+			VNameString t;
+			auto e = MakeWeakRef(this->CreateHitGroup());
+			attr->Read(t);
+			e->Name = t;
+			attr->Read(t);
+			e->AnyHit = t;
+			attr->Read(t);
+			e->ClosestHit = t;
+			attr->Read(t);
+			e->Intersection = t;
+			UINT count1;
+			attr->Read(count1);
+			for (UINT j = 0; j < count1; j++)
+			{
+				e->AnyHit = t;
+				e->LocalSignatures.push_back(t);
+			}
+			this->mHitGroups.insert(std::make_pair(e->Name, e));
+		}
+		attr->EndRead();
+	}
 }
 
 NS_END

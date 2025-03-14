@@ -320,7 +320,7 @@ namespace EngineNS
             var mtl = await TtEngine.Instance.GfxDevice.MaterialManager.GetMaterial(mtlName);
             if (mtl == null)
                 return;
-            var files = IO.TtFileManager.GetFiles(TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.Effect), "*.effect", true);
+            var files = IO.TtFileManager.GetFiles(TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.GraphicEffect), "*.effect", true);
             foreach (var i in files)
             {
                 var desc = Graphics.Pipeline.Shader.TtEffect.LoadEffectDesc(i);

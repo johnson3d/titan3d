@@ -391,22 +391,24 @@ namespace NxRHI
 			descriptorHeaps[NumOfHeaps++] = mSamplerHeap->Heap->RealObject;
 		}
 
-		dx12Cmd->mContext->SetComputeRootSignature(effect->mSignature);
+		dx12Cmd->mContext->SetComputeRootSignature(effect->mRootSignature.mSignature);
 		dx12Cmd->mContext->SetDescriptorHeaps(NumOfHeaps, descriptorHeaps);
 
 		for (int i = 0; i < FRootParameter::ComputeNumber; i++)
 		{
-			if (effect->mRootParameters[i].IsValidRoot())
+			if (effect->mRootSignature.mRootParameters[i].IsValidRoot())
 			{
-				if (effect->mRootParameters[i].IsSamplers)
+				if (effect->mRootSignature.mRootParameters[i].IsSamplers)
 				{
 					ASSERT(mSamplerHeap);
-					dx12Cmd->mContext->SetComputeRootDescriptorTable(effect->mRootParameters[i].RootIndex, mSamplerHeap->Heap->GetGpuAddress(effect->mRootParameters[i].HeapStartIndex));
+					dx12Cmd->mContext->SetComputeRootDescriptorTable(effect->mRootSignature.mRootParameters[i].RootIndex,
+						mSamplerHeap->Heap->GetGpuAddress(effect->mRootSignature.mRootParameters[i].HeapStartIndex));
 				}
 				else
 				{
 					ASSERT(mCbvSrvUavHeap);
-					dx12Cmd->mContext->SetComputeRootDescriptorTable(effect->mRootParameters[i].RootIndex, mCbvSrvUavHeap->Heap->GetGpuAddress(effect->mRootParameters[i].HeapStartIndex));
+					dx12Cmd->mContext->SetComputeRootDescriptorTable(effect->mRootSignature.mRootParameters[i].RootIndex,
+						mCbvSrvUavHeap->Heap->GetGpuAddress(effect->mRootSignature.mRootParameters[i].HeapStartIndex));
 				}
 			}
 		}
@@ -459,15 +461,15 @@ namespace NxRHI
 			FingerPrient = finger;
 		}
 
-		if (effect->mCbvSrvUavNumber > 0)
+		if (effect->mRootSignature.mCbvSrvUavNumber > 0)
 		{
 			if (IsDirty || mCbvSrvUavHeap == nullptr)
-				mCbvSrvUavHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+				mCbvSrvUavHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mRootSignature.mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 		}
-		if (effect->mSamplerNumber > 0)
+		if (effect->mRootSignature.mSamplerNumber > 0)
 		{
 			if (IsDirty || mSamplerHeap == nullptr)
-				mSamplerHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
+				mSamplerHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mRootSignature.mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
 		}
 		
 		IsDirty = false;
@@ -495,7 +497,7 @@ namespace NxRHI
 		}
 
 		dx12Cmd->mContext->SetPipelineState(effect->mPipelineState);
-		dx12Cmd->mContext->SetComputeRootSignature(effect->mSignature);
+		dx12Cmd->mContext->SetComputeRootSignature(effect->mRootSignature.mSignature);
 		//effect->Commit(cmdlist, this);
 		{
 			BindDescriptorHeaps(device, dx12Cmd);
@@ -560,6 +562,32 @@ namespace NxRHI
 		{
 			cmdlist->EndEvent();
 		}
+	}
+
+	void DX12RayTracingDraw::Commit(ICommandList* cmdlist, bool bRefResource)
+	{
+		auto dx12Cmd = (DX12CommandList*)cmdlist;
+		if (dx12Cmd->mLastContext == nullptr)
+			return;
+
+		auto effect = this->ShaderEffect.UnsafeConvertTo<DX12RayTracingEffect>();
+		//effect->BuildState(dx12Cmd->GetDX12Device());
+
+		//dx12Cmd->mContext->SetPipelineState(effect->mPipelineState);
+		dx12Cmd->mContext->SetComputeRootSignature(effect->mGlobalSignature.mSignature);
+		//effect->Commit(cmdlist, this);
+		{
+			//BindDescriptorHeaps(device, dx12Cmd);
+		}
+
+		D3D12_DISPATCH_RAYS_DESC dispatchDesc = {};
+		dispatchDesc.Width = this->Width;
+		dispatchDesc.Height = this->Height;
+		dispatchDesc.Depth = this->Depth;
+		//dispatchDesc.RayGenerationShaderRecord = 
+
+		dx12Cmd->mLastContext->SetPipelineState1(mDxrStateObject);
+		dx12Cmd->mLastContext->DispatchRays(&dispatchDesc);
 	}
 }
 
