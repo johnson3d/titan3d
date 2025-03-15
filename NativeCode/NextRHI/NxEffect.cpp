@@ -253,6 +253,18 @@ namespace NxRHI
 		cmdlist->SetSampler(EShaderType::SDT_ComputeShader, binder, sampler);
 	}
 
+	void FHitGroup::CountShaderBufferSize(IShaderReflector * pReflector)
+	{
+		ShaderBufferSize = 0;
+		for (auto& i : LocalSignatures)
+		{
+			auto binder = pReflector->FindBinder(EShaderBindType::SBT_CBuffer, i);
+			if (binder != nullptr)
+			{
+				ShaderBufferSize += binder->Size;
+			}
+		}
+	}
 	FHitGroup* IRayTracingEffect::CreateHitGroup()
 	{
 		return new FHitGroup();
@@ -262,6 +274,7 @@ namespace NxRHI
 		if (FindHitGroup(name) != nullptr)
 			return false;
 		auto group = MakeWeakRef(CreateHitGroup());
+		group->HitGroupIndex = (int)mHitGroups.size();
 		group->Name = name;
 		group->AnyHit = anyHit;
 		group->ClosestHit = closestHit;
@@ -272,7 +285,7 @@ namespace NxRHI
 		}
 		/*if (this->BuildHitGroup(group) == false)
 			return false;*/
-		mHitGroups.insert(std::make_pair(name, group));
+		mHitGroups.push_back(group);
 		return true;
 	}
 	void IRayTracingEffect::SaveGlobalAndHitGroups(XndAttribute* attr)
@@ -290,15 +303,15 @@ namespace NxRHI
 		attr->Write(count);
 		for (auto& i : mHitGroups)
 		{
-			attr->Write(i.second->Name);
-			attr->Write(i.second->AnyHit);
-			attr->Write(i.second->ClosestHit);
-			attr->Write(i.second->Intersection);
-			count = (UINT)i.second->LocalSignatures.size();
+			attr->Write(i->Name);
+			attr->Write(i->AnyHit);
+			attr->Write(i->ClosestHit);
+			attr->Write(i->Intersection);
+			count = (UINT)i->LocalSignatures.size();
 			attr->Write(count);
 			for (UINT j = 0; j < count; j++)
 			{
-				attr->Write(i.second->LocalSignatures[j]);
+				attr->Write(i->LocalSignatures[j]);
 			}
 		}
 		attr->EndWrite();
@@ -337,7 +350,7 @@ namespace NxRHI
 				e->AnyHit = t;
 				e->LocalSignatures.push_back(t);
 			}
-			this->mHitGroups.insert(std::make_pair(e->Name, e));
+			this->mHitGroups.push_back(e);
 		}
 		attr->EndRead();
 	}

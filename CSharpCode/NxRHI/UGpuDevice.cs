@@ -370,6 +370,9 @@ namespace EngineNS.NxRHI
             result.mCoreObject.SetShaderLibDesc(shader.mCoreObject);
             if (desc != null)
             {
+                result.mCoreObject.mMaxRecursionDepth = desc.MaxRecursionDepth;
+                result.mCoreObject.mPayloadSize = desc.PayloadSize;
+                result.mCoreObject.mAttributeSize = desc.AttributeSize;
                 foreach (var i in desc.Functions)
                 {
                     result.mCoreObject.AddFunctions(VNameString.FromString(i));

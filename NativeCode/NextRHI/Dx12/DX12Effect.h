@@ -136,7 +136,7 @@ namespace NxRHI
 		UINT							mSamplerNumber = 0;
 		FRootParameter					mRootParameters[FRootParameter::ComputeNumber];
 
-		void BuildState(IGpuDevice* device, IShaderReflector* pReflector, std::vector<VNameString>* pFilters = nullptr);
+		void BuildState(IGpuDevice* device, IShaderReflector* pReflector, D3D12_ROOT_SIGNATURE_FLAGS flags, std::vector<VNameString>* pFilters = nullptr);
 
 		void Push2Root(FShaderBinder* binder);
 
@@ -169,9 +169,10 @@ namespace NxRHI
 
 		AutoRef<ID3D12StateObject>		mStateObject;
 		AutoRef<ID3D12StateObjectProperties> mStateObjectProperties;
-		AutoRef<IBuffer>				mRayGenShaderTable;
-		AutoRef<IBuffer>				mMissShaderTable;
-		AutoRef<IBuffer>				mHitGroupAssociationTable;
+
+		AutoRef<FUploadBuffer>			mRayGenShaderTable;
+		AutoRef<FUploadBuffer>			mMissShaderTable;
+		AutoRef<FUploadBuffer>			mHitGroupAssociationTable;
 	public:
 		class DX12HitGroup : public FHitGroup
 		{

@@ -625,6 +625,16 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 i.Value.Dispose();
             }
             Effects.Clear();
+            foreach (var i in ComputeEffects)
+            {
+                i.Value.Dispose();
+            }
+            ComputeEffects.Clear();
+            foreach (var i in RayTracingEffects)
+            {
+                i.Value.Dispose();
+            }
+            RayTracingEffects.Clear();
             DummyEffect = null;
             TtCoreShaderBinder.FinalCleanup();
         }

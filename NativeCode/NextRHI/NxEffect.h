@@ -169,13 +169,16 @@ namespace NxRHI
 		FHitGroup : public VIUnknown
 	{
 	public:
+		int					HitGroupIndex = -1;
 		VNameString			Name;
 		VNameString			AnyHit;
 		VNameString			ClosestHit;
 		VNameString			Intersection;
 		std::vector<VNameString> LocalSignatures;
-		UINT				ShaderRecordSize = 0;	
+		UINT				ShaderBufferSize = 0;	
 		AutoRef<IBuffer>	ShaderRecord;
+
+		void CountShaderBufferSize(IShaderReflector* pReflector);
 	};
 
 	class TR_CLASS()
@@ -186,10 +189,14 @@ namespace NxRHI
 
 		std::vector<VNameString> mFunctions;
 		std::vector<VNameString> mGlobalSignatures;		
-		std::map<VNameString, AutoRef<FHitGroup>> mHitGroups;
+		std::vector<AutoRef<FHitGroup>> mHitGroups;
 
 		VNameString				mRayGenName;
 		VNameString				mMissName;
+
+		UINT					mMaxRecursionDepth = 1;
+		UINT					mPayloadSize = 4 * sizeof(float);
+		UINT					mAttributeSize = 2 * sizeof(float);
 
 		void SetRayGenShader(VNameString name) {
 			mRayGenName = name;
@@ -205,12 +212,14 @@ namespace NxRHI
 		}
 
 		FHitGroup* FindHitGroup(VNameString name) {
-			auto iter = mHitGroups.find(name);
-			if (iter == mHitGroups.end())
+			for (auto& i : mHitGroups)
 			{
-				return nullptr;
+				if (i->Name == name)
+				{
+					return i;
+				}
 			}
-			return iter->second;
+			return nullptr;
 		}
 		bool AddHitGroup(VNameString name, VNameString anyHit, VNameString closestHit, VNameString intersection, VNameString* sigs, int count);
 

@@ -446,6 +446,7 @@ namespace NxRHI
 			break;
 			case D3D_SIT_BYTEADDRESS:
 			case D3D_SIT_STRUCTURED:
+			case D3D_SIT_RTACCELERATIONSTRUCTURE:
 			{
 				if (Reflector->FindBinder(EShaderBindType::SBT_SRV, csibDesc.Name))
 				{

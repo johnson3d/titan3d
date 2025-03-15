@@ -354,6 +354,40 @@ namespace NxRHI
 		EDirtyState			DirtyState = EDirtyState::Dirty;
 	};
 
+	class TR_CLASS()
+		FUploadBuffer : public VIUnknown
+	{
+		AutoRef<IBuffer> Buffer;
+		void* Ptr;
+		UINT Size;
+	public:
+		FUploadBuffer(IBuffer* buffer)
+		{
+			Buffer = buffer;
+			FMappedSubResource mapped{};
+			if (Buffer->Map(0, &mapped, false))
+			{
+				Ptr = mapped.pData;
+				Size = mapped.DepthPitch;
+			}
+		}
+		~FUploadBuffer()
+		{
+			Dispose();
+		}
+		void Dispose() 
+		{
+			if (Ptr != nullptr)
+			{
+				Ptr = nullptr;
+				Buffer->Unmap(0);
+			}
+		}
+		IBuffer* GetBuffer() { return Buffer; }
+		void* GetPtr() { return Ptr; }
+		UINT GetSize() { return Size; }
+	};
+
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FSamplerMode
 	{

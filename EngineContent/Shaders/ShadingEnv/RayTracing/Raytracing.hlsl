@@ -14,6 +14,9 @@
 
 /*<RTShaderLibDesc>
 {
+  "MaxRecursionDepth": 1,
+  "PayloadSize": 16,
+  "AttributeSize": 8,
   "Functions": [
     "MyRaygenShader",
     "MyClosestHitShader",
@@ -44,18 +47,6 @@
 
 #define HLSL
 #include "RaytracingHlslCompat.h"
-
-RaytracingShaderConfig  MyShaderConfig =
-{
-    16, // max payload size
-    8   // max attribute size
-};
-
-RaytracingPipelineConfig MyPipelineConfig =
-{
-    1 // max trace recursion depth
-};
-
 
 RaytracingAccelerationStructure Scene : register(t0, space0);
 RWTexture2D<float4> RenderTarget : register(u0);

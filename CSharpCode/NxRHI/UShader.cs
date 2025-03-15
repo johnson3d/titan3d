@@ -272,8 +272,7 @@ namespace EngineNS.NxRHI
             {
                 ar.Write(shader);
                 ar.Write(this.PermutationId);
-                var shadingCode = Editor.ShaderCompiler.TtShaderCodeManager.Instance.GetShaderCode(shader);
-                ar.Write(shadingCode.CodeHash);
+                ar.Write(hash);
 
                 ar.Write(mCoreObject.GetDesc().Type);
             }

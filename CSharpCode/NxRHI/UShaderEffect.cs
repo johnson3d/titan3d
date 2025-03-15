@@ -119,6 +119,12 @@ namespace EngineNS.NxRHI
                 public List<string> LocalSignatures { get; set; }
             }
             [Rtti.Meta]
+            public uint MaxRecursionDepth { get; set; } = 1;
+            [Rtti.Meta]
+            public uint PayloadSize { get; set; }
+            [Rtti.Meta]
+            public uint AttributeSize { get; set; }
+            [Rtti.Meta]
             public List<string> Functions { get; set; }
             [Rtti.Meta]
             public List<string> GlobalSignatures { get; set; }

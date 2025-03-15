@@ -573,10 +573,10 @@ namespace NxRHI
 		auto effect = this->ShaderEffect.UnsafeConvertTo<DX12RayTracingEffect>();
 		//effect->BuildState(dx12Cmd->GetDX12Device());
 
-		//dx12Cmd->mContext->SetPipelineState(effect->mPipelineState);
 		dx12Cmd->mContext->SetComputeRootSignature(effect->mGlobalSignature.mSignature);
 		//effect->Commit(cmdlist, this);
 		{
+			//Bind Global Descriptors
 			//BindDescriptorHeaps(device, dx12Cmd);
 		}
 
@@ -584,7 +584,17 @@ namespace NxRHI
 		dispatchDesc.Width = this->Width;
 		dispatchDesc.Height = this->Height;
 		dispatchDesc.Depth = this->Depth;
-		//dispatchDesc.RayGenerationShaderRecord = 
+		auto dxBuffer = (DX12Buffer*)effect->mRayGenShaderTable->GetBuffer();
+		dispatchDesc.RayGenerationShaderRecord.StartAddress = dxBuffer->GetGPUVirtualAddress();
+		dispatchDesc.RayGenerationShaderRecord.SizeInBytes = dxBuffer->Desc.Size;
+		dxBuffer = (DX12Buffer*)effect->mMissShaderTable->GetBuffer();
+		dispatchDesc.MissShaderTable.StartAddress = dxBuffer->GetGPUVirtualAddress();
+		dispatchDesc.MissShaderTable.SizeInBytes = dxBuffer->Desc.Size;
+		dispatchDesc.MissShaderTable.StrideInBytes = dxBuffer->Desc.Size;
+		dxBuffer = (DX12Buffer*)effect->mHitGroupAssociationTable->GetBuffer();
+		dispatchDesc.HitGroupTable.StartAddress = dxBuffer->GetGPUVirtualAddress();
+		dispatchDesc.HitGroupTable.SizeInBytes = dxBuffer->Desc.Size;
+		dispatchDesc.HitGroupTable.StrideInBytes = dxBuffer->Desc.Size;
 
 		dx12Cmd->mLastContext->SetPipelineState1(mDxrStateObject);
 		dx12Cmd->mLastContext->DispatchRays(&dispatchDesc);
