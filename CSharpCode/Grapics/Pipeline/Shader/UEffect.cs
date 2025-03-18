@@ -696,8 +696,9 @@ namespace EngineNS.Graphics.Pipeline.Shader
                 {
                     return nr;
                 }
-                result = result.UnsafeCloneForEditor();
-                MaterialEditingEffects.Add(hash, result);
+                result = result?.UnsafeCloneForEditor();
+                if (result != null)
+                    MaterialEditingEffects.Add(hash, result);
                 return result;
             }
             return result;

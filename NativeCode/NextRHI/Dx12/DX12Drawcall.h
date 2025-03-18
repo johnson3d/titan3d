@@ -53,9 +53,7 @@ namespace NxRHI
 
 		void BindDescriptorHeaps(DX12GpuDevice* device, DX12CommandList* dx12Cmd);
 	private:
-		void ResetHeap(DX12GpuDevice* device, DX12ComputeEffect* effect);
 		void BindResourceToHeap(DX12GpuDevice* device, const FShaderBinder* binder, IGpuResource* resource);
-		void BindDescriptors(DX12GpuDevice* device, DX12CommandList* dx12Cmd, DX12ComputeEffect* effect);
 	public:
 		TWeakRefHandle<DX12GpuDevice>			mDeviceRef;
 		bool									IsDirty = false;
@@ -68,9 +66,20 @@ namespace NxRHI
 	{
 	public:
 		AutoRef<ID3D12StateObject>		mDxrStateObject;
-		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
+		AutoRef<FUploadBuffer>			mHitGroupShaderBindTable;
+		AutoRef<DX12HeapHolder>			mCbvSrvUavHeap;
+		AutoRef<DX12HeapHolder>			mSamplerHeap;
+		struct FHitGroupShaderBindTable
+		{
+			AutoRef<DX12RayTracingEffect::DX12HitGroup>		HitGroup;
+		};
+		std::vector<FHitGroupShaderBindTable>	ShaderBindTables;
 
-	
+		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
+	protected:
+		bool							IsDirty = false;
+		virtual void OnBindResource(const FShaderBinder* binder, IGpuResource* resource) override;
+		void BindDescriptors(DX12GpuDevice* device, DX12CommandList* dx12Cmd, DX12RayTracingEffect* effect);
 	};
 }
 

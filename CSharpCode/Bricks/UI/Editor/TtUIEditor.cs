@@ -1788,8 +1788,10 @@ namespace EngineNS.UI.Editor
             }
             else
             {
-                TtEngine.Instance.TaskCollector.AddWaitTask(UpdateDecorator());
-                TtEngine.Instance.TaskCollector.AddWaitTask(BuildMesh());
+                UpdateDecorator().WaitCompletedAndDispose();
+                BuildMesh().WaitCompletedAndDispose();
+                //TtEngine.Instance.TaskCollector.AddWaitTask(UpdateDecorator());
+                //TtEngine.Instance.TaskCollector.AddWaitTask(BuildMesh());
             }
         }
         public void TickRender(float ellapse)

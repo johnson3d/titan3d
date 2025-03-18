@@ -70,8 +70,74 @@ static void buildTriangleAdjacency(TriangleAdjacency2& adjacency, const unsigned
 	for (size_t i = 0; i < vertex_count; ++i)
 	{
 		assert(adjacency.offsets[i] >= adjacency.counts[i]);
-
 		adjacency.offsets[i] -= adjacency.counts[i];
+	}
+}
+
+static void buildTriangleAdjacencySparse(TriangleAdjacency2& adjacency, const unsigned int* indices, size_t index_count, size_t vertex_count, meshopt_Allocator& allocator)
+{
+	size_t face_count = index_count / 3;
+
+	// sparse mode can build adjacency more quickly by ignoring unused vertices, using a bit to mark visited vertices
+	const unsigned int sparse_seen = 1u << 31;
+	assert(index_count < sparse_seen);
+
+	// allocate arrays
+	adjacency.counts = allocator.allocate<unsigned int>(vertex_count);
+	adjacency.offsets = allocator.allocate<unsigned int>(vertex_count);
+	adjacency.data = allocator.allocate<unsigned int>(index_count);
+
+	// fill triangle counts
+	for (size_t i = 0; i < index_count; ++i)
+		assert(indices[i] < vertex_count);
+
+	for (size_t i = 0; i < index_count; ++i)
+		adjacency.counts[indices[i]] = 0;
+
+	for (size_t i = 0; i < index_count; ++i)
+		adjacency.counts[indices[i]]++;
+
+	// fill offset table
+	unsigned int offset = 0;
+
+	// when using sparse mode this pass uses sparse_seen bit to tag visited vertices
+	for (size_t i = 0; i < index_count; ++i)
+	{
+		unsigned int v = indices[i];
+
+		if ((adjacency.counts[v] & sparse_seen) == 0)
+		{
+			adjacency.offsets[v] = offset;
+			offset += adjacency.counts[v];
+			adjacency.counts[v] |= sparse_seen;
+		}
+	}
+
+	assert(offset == index_count);
+
+	// fill triangle data
+	for (size_t i = 0; i < face_count; ++i)
+	{
+		unsigned int a = indices[i * 3 + 0], b = indices[i * 3 + 1], c = indices[i * 3 + 2];
+
+		adjacency.data[adjacency.offsets[a]++] = unsigned(i);
+		adjacency.data[adjacency.offsets[b]++] = unsigned(i);
+		adjacency.data[adjacency.offsets[c]++] = unsigned(i);
+	}
+
+	// fix offsets that have been disturbed by the previous pass
+	// when using sparse mode this pass also fixes counts (that were marked with sparse_seen)
+	for (size_t i = 0; i < index_count; ++i)
+	{
+		unsigned int v = indices[i];
+
+		if (adjacency.counts[v] & sparse_seen)
+		{
+			adjacency.counts[v] &= ~sparse_seen;
+
+			assert(adjacency.offsets[v] >= adjacency.counts[v]);
+			adjacency.offsets[v] -= adjacency.counts[v];
+		}
 	}
 }
 
@@ -238,7 +304,7 @@ static bool appendMeshlet(meshopt_Meshlet& meshlet, unsigned int a, unsigned int
 
 	bool result = false;
 
-	unsigned int used_extra = (av == 0xff) + (bv == 0xff) + (cv == 0xff);
+	int used_extra = (av == 0xff) + (bv == 0xff) + (cv == 0xff);
 
 	if (meshlet.vertex_count + used_extra > max_vertices || meshlet.triangle_count >= max_triangles)
 	{
@@ -283,10 +349,10 @@ static bool appendMeshlet(meshopt_Meshlet& meshlet, unsigned int a, unsigned int
 	return result;
 }
 
-static unsigned int getNeighborTriangle(const meshopt_Meshlet& meshlet, const Cone* meshlet_cone, unsigned int* meshlet_vertices, const unsigned int* indices, const TriangleAdjacency2& adjacency, const Cone* triangles, const unsigned int* live_triangles, const unsigned char* used, float meshlet_expected_radius, float cone_weight, unsigned int* out_extra)
+static unsigned int getNeighborTriangle(const meshopt_Meshlet& meshlet, const Cone* meshlet_cone, unsigned int* meshlet_vertices, const unsigned int* indices, const TriangleAdjacency2& adjacency, const Cone* triangles, const unsigned int* live_triangles, const unsigned char* used, float meshlet_expected_radius, float cone_weight)
 {
 	unsigned int best_triangle = ~0u;
-	unsigned int best_extra = 5;
+	int best_priority = 5;
 	float best_score = FLT_MAX;
 
 	for (size_t i = 0; i < meshlet.vertex_count; ++i)
@@ -301,20 +367,26 @@ static unsigned int getNeighborTriangle(const meshopt_Meshlet& meshlet, const Co
 			unsigned int triangle = neighbors[j];
 			unsigned int a = indices[triangle * 3 + 0], b = indices[triangle * 3 + 1], c = indices[triangle * 3 + 2];
 
-			unsigned int extra = (used[a] == 0xff) + (used[b] == 0xff) + (used[c] == 0xff);
+			int extra = (used[a] == 0xff) + (used[b] == 0xff) + (used[c] == 0xff);
+			assert(extra <= 2);
+
+			int priority = -1;
 
 			// triangles that don't add new vertices to meshlets are max. priority
-			if (extra != 0)
-			{
-				// artificially increase the priority of dangling triangles as they're expensive to add to new meshlets
-				if (live_triangles[a] == 1 || live_triangles[b] == 1 || live_triangles[c] == 1)
-					extra = 0;
-
-				extra++;
-			}
+			if (extra == 0)
+				priority = 0;
+			// artificially increase the priority of dangling triangles as they're expensive to add to new meshlets
+			else if (live_triangles[a] == 1 || live_triangles[b] == 1 || live_triangles[c] == 1)
+				priority = 1;
+			// if two vertices have live count of 2, removing this triangle will make another triangle dangling which is good for overall flow
+			else if ((live_triangles[a] == 2) + (live_triangles[b] == 2) + (live_triangles[c] == 2) >= 2)
+				priority = 1 + extra;
+			// otherwise adjust priority to be after the above cases, 3 or 4 based on used[] count
+			else
+				priority = 2 + extra;
 
 			// since topology-based priority is always more important than the score, we can skip scoring in some cases
-			if (extra > best_extra)
+			if (priority > best_priority)
 				continue;
 
 			float score = 0;
@@ -341,17 +413,14 @@ static unsigned int getNeighborTriangle(const meshopt_Meshlet& meshlet, const Co
 
 			// note that topology-based priority is always more important than the score
 			// this helps maintain reasonable effectiveness of meshlet data and reduces scoring cost
-			if (extra < best_extra || score < best_score)
+			if (priority < best_priority || score < best_score)
 			{
 				best_triangle = triangle;
-				best_extra = extra;
+				best_priority = priority;
 				best_score = score;
 			}
 		}
 	}
-
-	if (out_extra)
-		*out_extra = best_extra;
 
 	return best_triangle;
 }
@@ -549,10 +618,13 @@ size_t meshopt_buildMeshlets(meshopt_Meshlet* meshlets, unsigned int* meshlet_ve
 	meshopt_Allocator allocator;
 
 	TriangleAdjacency2 adjacency = {};
-	buildTriangleAdjacency(adjacency, indices, index_count, vertex_count, allocator);
+	if (vertex_count > index_count && index_count < (1u << 31))
+		buildTriangleAdjacencySparse(adjacency, indices, index_count, vertex_count, allocator);
+	else
+		buildTriangleAdjacency(adjacency, indices, index_count, vertex_count, allocator);
 
-	unsigned int* live_triangles = allocator.allocate<unsigned int>(vertex_count);
-	memcpy(live_triangles, adjacency.counts, vertex_count * sizeof(unsigned int));
+	// live triangle counts; note, we alias adjacency.counts as we remove triangles after emitting them so the counts always match
+	unsigned int* live_triangles = adjacency.counts;
 
 	size_t face_count = index_count / 3;
 
@@ -588,13 +660,13 @@ size_t meshopt_buildMeshlets(meshopt_Meshlet* meshlets, unsigned int* meshlet_ve
 	{
 		Cone meshlet_cone = getMeshletCone(meshlet_cone_acc, meshlet.triangle_count);
 
-		unsigned int best_extra = 0;
-		unsigned int best_triangle = getNeighborTriangle(meshlet, &meshlet_cone, meshlet_vertices, indices, adjacency, triangles, live_triangles, used, meshlet_expected_radius, cone_weight, &best_extra);
+		unsigned int best_triangle = getNeighborTriangle(meshlet, &meshlet_cone, meshlet_vertices, indices, adjacency, triangles, live_triangles, used, meshlet_expected_radius, cone_weight);
+		int best_extra = best_triangle == ~0u ? -1 : (used[indices[best_triangle * 3 + 0]] == 0xff) + (used[indices[best_triangle * 3 + 1]] == 0xff) + (used[indices[best_triangle * 3 + 2]] == 0xff);
 
 		// if the best triangle doesn't fit into current meshlet, the spatial scoring we've used is not very meaningful, so we re-select using topological scoring
 		if (best_triangle != ~0u && (meshlet.vertex_count + best_extra > max_vertices || meshlet.triangle_count >= max_triangles))
 		{
-			best_triangle = getNeighborTriangle(meshlet, NULL, meshlet_vertices, indices, adjacency, triangles, live_triangles, used, meshlet_expected_radius, 0.f, NULL);
+			best_triangle = getNeighborTriangle(meshlet, NULL, meshlet_vertices, indices, adjacency, triangles, live_triangles, used, meshlet_expected_radius, 0.f);
 		}
 
 		// when we run out of neighboring triangles we need to switch to spatial search; we currently just pick the closest triangle irrespective of connectivity
@@ -622,12 +694,9 @@ size_t meshopt_buildMeshlets(meshopt_Meshlet* meshlets, unsigned int* meshlet_ve
 			memset(&meshlet_cone_acc, 0, sizeof(meshlet_cone_acc));
 		}
 
-		live_triangles[a]--;
-		live_triangles[b]--;
-		live_triangles[c]--;
-
 		// remove emitted triangle from adjacency data
 		// this makes sure that we spend less time traversing these lists on subsequent iterations
+		// live triangle counts are updated as a byproduct of these adjustments
 		for (size_t k = 0; k < 3; ++k)
 		{
 			unsigned int index = indices[best_triangle * 3 + k];

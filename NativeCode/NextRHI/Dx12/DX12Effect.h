@@ -128,19 +128,39 @@ namespace NxRHI
 		FRootParameter					mRootParameters[FRootParameter::GraphicsNumber];
 	};
 
-	class DX12GlobalRootSignature
+	class DX12SignatureBuilder
 	{
 	public:
-		AutoRef<ID3D12RootSignature>	mSignature;
-		UINT							mCbvSrvUavNumber = 0;
-		UINT							mSamplerNumber = 0;
-		FRootParameter					mRootParameters[FRootParameter::ComputeNumber];
+		int			mCbvSrvUavNumber = 0;
+		int			mSamplerNumber = 0;
+		std::vector<AutoRef<FShaderBinder>>	mCbvSrvUavBinders;
+		std::vector<AutoRef<FShaderBinder>>	mSamplerBinders;
+		const FShaderBinder* FindBinder(VNameString name) const
+		{
+			for (auto& i : mCbvSrvUavBinders)
+			{
+				if (i->Name == name)
+					return i;
+			}
+			for (auto& i : mSamplerBinders)
+			{
+				if (i->Name == name)
+					return i;
+			}
+			return nullptr;
+		}
+		void Build(IShaderReflector* reflector);
+		void CreateHeap(DX12GpuDevice* device, AutoRef<DX12HeapHolder>& OutCbvSrvUavHeap, AutoRef<DX12HeapHolder>& OutSamplerHeap);
 
-		void BuildState(IGpuDevice* device, IShaderReflector* pReflector, D3D12_ROOT_SIGNATURE_FLAGS flags, std::vector<VNameString>* pFilters = nullptr);
-
-		void Push2Root(FShaderBinder* binder);
-
-		void Dispose();
+		struct FSignatureBinder
+		{
+			AutoRef<FShaderBinder>		Binder;
+			int							RootIndex;
+		};
+		AutoRef<ID3D12RootSignature> CreateSignature(DX12GpuDevice* device, D3D12_ROOT_SIGNATURE_FLAGS flags, 
+			const std::vector<VNameString>& roots, 
+			IShaderReflector* pOutReflector,
+			std::vector<FSignatureBinder>& OutCbvSrvUav, std::vector<FSignatureBinder>& OutSampler);
 	};
 
 	class DX12ComputeEffect : public IComputeEffect
@@ -150,11 +170,14 @@ namespace NxRHI
 		virtual void BuildState(IGpuDevice* device) override;
 		virtual void Commit(ICommandList* cmdlist) override;
 
-		void Push2Root(FShaderBinder* binder);
 		AutoRef<ID3D12CommandSignature> GetIndirectDispatchCmdSig(DX12GpuDevice* device, ICommandList* cmdlist);
 	public:
 		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
-		DX12GlobalRootSignature			mRootSignature;
+		DX12SignatureBuilder			mSignatureBuilder;
+		AutoRef<ID3D12RootSignature>	mSignature;
+		std::vector<DX12SignatureBuilder::FSignatureBinder> mCbvSrvUavBinders;
+		std::vector<DX12SignatureBuilder::FSignatureBinder> mSamplerBinders;
+
 		AutoRef<ID3D12PipelineState>	mPipelineState;
 		
 		UINT							mIndirectOffset = 0;
@@ -165,19 +188,25 @@ namespace NxRHI
 	{
 	public:
 		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
-		DX12GlobalRootSignature			mGlobalSignature;
+		DX12SignatureBuilder			mSignatureBuilder;
+
+		AutoRef<ID3D12RootSignature>	mGlobalSignature;
+		AutoRef<IShaderReflector>		mGlobalReflector;
+		std::vector<DX12SignatureBuilder::FSignatureBinder> mGlobalCbvSrvUavBinders;
+		std::vector<DX12SignatureBuilder::FSignatureBinder> mGlobalSamplerBinders;
 
 		AutoRef<ID3D12StateObject>		mStateObject;
 		AutoRef<ID3D12StateObjectProperties> mStateObjectProperties;
 
 		AutoRef<FUploadBuffer>			mRayGenShaderTable;
 		AutoRef<FUploadBuffer>			mMissShaderTable;
-		AutoRef<FUploadBuffer>			mHitGroupAssociationTable;
 	public:
 		class DX12HitGroup : public FHitGroup
 		{
 		public:
-			DX12GlobalRootSignature			Signature;
+			AutoRef<ID3D12RootSignature>	Dx12Signature;
+			std::vector<DX12SignatureBuilder::FSignatureBinder>	CbvSrvUavBinders;
+			std::vector<DX12SignatureBuilder::FSignatureBinder> SamplerBinders;
 		};
 		virtual void BuildState(IGpuDevice* device) override;
 		virtual FHitGroup* CreateHitGroup() override
@@ -185,6 +214,9 @@ namespace NxRHI
 			return new DX12HitGroup();
 		}
 		virtual bool BuildHitGroup(FHitGroup* group) override;
+		virtual const IShaderReflector* GetReflector() const { 
+			return mShaderLibDesc->DxILReflector;
+		}
 		AutoRef<ID3D12StateObject> CreateDxrStateObject(DX12GpuDevice* device, DX12RayTracingEffect* effect);
 	};
 }

@@ -205,9 +205,16 @@ namespace NxRHI
 			Height = h;
 			Depth = w;
 		}
+		const FShaderBinder* FindBinder(EShaderBindType type, const char* name) const;
+		bool BindResource(EShaderBindType type, VNameString name, IGpuResource* resource);
+		void BindResource(const FShaderBinder* binder, IGpuResource* resource);
+	protected:
+		virtual void OnBindResource(const FShaderBinder* binder, IGpuResource* resource) {}
+	public:
 		UINT Width;
 		UINT Height;
 		UINT Depth;
+		std::map<const FShaderBinder*, AutoRef<IGpuResource>>	BindResources;
 	};
 	enum TR_ENUM()
 		ECopyDrawMode

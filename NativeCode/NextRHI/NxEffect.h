@@ -174,9 +174,19 @@ namespace NxRHI
 		VNameString			AnyHit;
 		VNameString			ClosestHit;
 		VNameString			Intersection;
-		std::vector<VNameString> LocalSignatures;
+		
 		UINT				ShaderBufferSize = 0;	
 		AutoRef<IBuffer>	ShaderRecord;
+
+		std::vector<VNameString> LocalSignatures;
+		AutoRef<IShaderReflector> LocalReflector;
+
+		bool IsLocalShaderBinder(const FShaderBinder* binder) const{
+			auto r = LocalReflector->FindBinder(binder->Type, binder->Name);
+			if (r == nullptr)
+				return false;
+			return true;
+		}
 
 		void CountShaderBufferSize(IShaderReflector* pReflector);
 	};
@@ -188,8 +198,9 @@ namespace NxRHI
 		AutoRef<FShaderDesc>	mShaderLibDesc;
 
 		std::vector<VNameString> mFunctions;
-		std::vector<VNameString> mGlobalSignatures;		
+		std::vector<VNameString> mGlobalSignatures;
 		std::vector<AutoRef<FHitGroup>> mHitGroups;
+		AutoRef<IShaderReflector> mGlobalReflector;
 
 		VNameString				mRayGenName;
 		VNameString				mMissName;
@@ -197,6 +208,13 @@ namespace NxRHI
 		UINT					mMaxRecursionDepth = 1;
 		UINT					mPayloadSize = 4 * sizeof(float);
 		UINT					mAttributeSize = 2 * sizeof(float);
+
+		bool IsGlobalShaderBinder(const FShaderBinder* binder) const {
+			auto r = mGlobalReflector->FindBinder(binder->Type, binder->Name);
+			if (r == nullptr)
+				return false;
+			return true;
+		}
 
 		void SetRayGenShader(VNameString name) {
 			mRayGenName = name;
@@ -226,8 +244,6 @@ namespace NxRHI
 		void SaveGlobalAndHitGroups(XndAttribute* attr);
 		void LoadGlobalAndHitGroups(XndAttribute* attr);
 
-		std::wstring			mShaderConfigName = L"MyShaderConfig";
-		std::wstring			mPipelineConfigName = L"MyPipelineConfig";
 		FShaderDesc* GetShaderLibDesc() {
 			return mShaderLibDesc;
 		}
@@ -242,6 +258,14 @@ namespace NxRHI
 			return false;
 		}
 		virtual FHitGroup* CreateHitGroup();
+
+		virtual const IShaderReflector* GetReflector() const { return nullptr; }
+		
+		const FShaderBinder* FindBinder(const char* name) const {
+			return FindBinder(VNameString(name));
+		}
+		const FShaderBinder* FindBinder(VNameString name) const;
+		const FShaderBinder* FindBinder(EShaderBindType type, VNameString name) const;
 	};
 }
 

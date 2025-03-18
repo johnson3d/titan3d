@@ -354,6 +354,28 @@ namespace NxRHI
 		}
 		attr->EndRead();
 	}
+	const FShaderBinder* IRayTracingEffect::FindBinder(VNameString name) const
+	{
+		auto pReflector = GetReflector();
+		auto pBinder = pReflector->FindBinder(EShaderBindType::SBT_CBuffer, name);
+		if (pBinder != nullptr)
+			return pBinder;
+		pBinder = pReflector->FindBinder(EShaderBindType::SBT_SRV, name);
+		if (pBinder != nullptr)
+			return pBinder;
+		pBinder = pReflector->FindBinder(EShaderBindType::SBT_UAV, name);
+		if (pBinder != nullptr)
+			return pBinder;
+		pBinder = pReflector->FindBinder(EShaderBindType::SBT_Sampler, name);
+		if (pBinder != nullptr)
+			return pBinder;
+		return nullptr;
+	}
+	const FShaderBinder* IRayTracingEffect::FindBinder(EShaderBindType type, VNameString name) const
+	{
+		auto pReflector = GetReflector();
+		return pReflector->FindBinder(type, name);
+	}
 }
 
 NS_END

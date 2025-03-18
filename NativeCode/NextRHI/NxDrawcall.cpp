@@ -394,6 +394,42 @@ namespace NxRHI
 		/*mDest->TransitionTo(cmdlist, saveDst);
 		mSrc->TransitionTo(cmdlist, saveSrc);*/
 	}
+
+	const FShaderBinder* IRayTracingDraw::FindBinder(EShaderBindType type, const char* name) const
+	{
+		return ShaderEffect->FindBinder(type, name);
+	}
+	bool IRayTracingDraw::BindResource(EShaderBindType type, VNameString name, IGpuResource* resource)
+	{
+		auto binder = ShaderEffect->FindBinder(type, name);
+		if (binder == nullptr)
+			return false;
+
+		BindResource(binder, resource);
+		return true;
+	}
+	void IRayTracingDraw::BindResource(const FShaderBinder* binder, IGpuResource* resource)
+	{
+		AutoRef<IGpuResource> tmp(resource);
+		auto iter = BindResources.find(binder);
+		if (iter != BindResources.end())
+		{
+			if (iter->second == resource)
+			{
+				return;
+			}
+			else
+			{
+				BindResources[binder] = tmp;
+				OnBindResource(binder, resource);
+			}
+		}
+		else
+		{
+			BindResources[binder] = tmp;
+			OnBindResource(binder, resource);
+		}
+	}
 }
 
 NS_END

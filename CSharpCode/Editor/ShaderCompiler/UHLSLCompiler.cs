@@ -61,6 +61,7 @@ namespace EngineNS.Editor.ShaderCompiler
         }
         private static string FixRootPath(string file)
         {
+            file = file.Replace("\\", "/");
             string result = file;
             var repPos = file.IndexOf("@Engine/");
             if (repPos >= 0)
@@ -81,7 +82,8 @@ namespace EngineNS.Editor.ShaderCompiler
                     
                 }
             }
-            return result = result.Replace('\\','/');
+            return result;
+            //return result = result.Replace('\\','/');
         }
         public static NxRHI.FShaderCode GetIncludeCode(string file)
         {

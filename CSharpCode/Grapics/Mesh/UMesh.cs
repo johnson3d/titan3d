@@ -194,6 +194,14 @@ namespace EngineNS.Graphics.Mesh
                     return MaterialMesh.SubMeshes[(int)SubMesh.MeshIndex].Mesh;
                 }
             }
+            public unsafe uint DrawPrimitiveNum
+            {
+                get
+                {
+                    var atom = MeshPrimitives.mCoreObject.GetAtom((uint)AtomIndex, 0);
+                    return atom->NumPrimitives;
+                }
+            }
             public unsafe NxRHI.FMeshAtomDesc* GetMeshAtomDesc(uint lod)
             {
                 return MeshPrimitives.mCoreObject.GetAtom((uint)AtomIndex, lod);
@@ -441,7 +449,7 @@ namespace EngineNS.Graphics.Mesh
                             }
                             else
                             {
-                                TtEngine.Instance.TaskCollector.AddWaitTask(task, null);
+                                task.AddWaitTask(null);
                                 return null;
                             }
                             break;
