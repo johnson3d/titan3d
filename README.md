@@ -1,43 +1,69 @@
-# ±àÒëÔËĞĞ»·¾³
-- Titan3D Æô¶¯£¡
-- ![×ÜÀÀÍ¼](Documents/picture/main_edtor.png)
-- 1.°²×°2022
-- 2.°²×°C#¿ª·¢»·¾³
-- 3.½¨Òé°²×°C#ÒÆ¶¯¿ª·¢»·¾³
-# ±àÒë¹¹½¨
-## Windows±àÒëÒıÇæ
-1. **µÚÒ»´Î±àÒëÒıÇæ£¬ºÜ¶àÊ±ºòĞèÒªµ¥¶Àµ÷ÊÔÔËĞĞCppWeavingToolsºÍCSharpCodeToolsÁ½¸ö¹¤³ÌÒ»´Î£¬È·±£codegenÏÂÃæNativeBinderºÍCs2CppÄ¿Â¼²úÉúÁË±ØÒªµÄÁÙÊ±cpp,csÎÄ¼ş** 
-2. Èç¹ûµÚÒ»´Î²úÉúNativeBinderÊ§°Ü£¬ÓĞ¿ÉÄÜĞèÒª°²×°llvm
-3. ±àÒëCore.Window¹¤³Ì£¨C++£©
-4. ±àÒëEngine.Window¹¤³Ì£¨C#£©
-5. ±àÒëMainEditor¹¤³Ì£¨C#£©
-6. **ÒòÎªgithubµÄLFSÏŞÖÆ£¬¿ÉÄÜĞèÒªÔËĞĞÒ»ÏÂSetup.bat×öÒ»Ğ©ÔËĞĞ»·¾³ÅäÖÃ**
-## Windows±àÒëAndroid APK
-1. ±àÒëCore.Android¹¤³Ì£¨C++£©
-2. ±àÒëEngine.Android³Ì£¨C#£©
-# µ÷ÊÔÓëÔËĞĞ
-1. ÉèÖÃMainEditorÎªµ±Ç°ÏîÄ¿
-2. µ÷ÊÔÃüÁîĞĞ²ÎÊıÎªconfig=\$(SolutionDir)content\EngineConfig.cfg use_renderdoc=false
-3. µ÷ÊÔ¹¤×÷Ä¿Â¼Îª$(SolutionDir)binaries\
-4. ÔËĞĞÓëµ÷ÊÔ£¬ÇëÔÄ¶Á[**ÒıÇæÅäÖÃÓë±à¼­Æ÷Ê¹ÓÃÎÄµµ**](Documents/Index.md)¡£
-5. Óöµ½Ò»Ğ©Ææ¹ÖIOÏà¹ØCrash»òÕßÒì³££¬¿ÉÒÔ³¢ÊÔÉ¾³ı±¾µØcacheÄ¿Â¼
-# ¿ª·¢Õß×¢ÒâÊÂÏî
-1. ²»ÒªÌá½»´óÎÄ¼ş(20MÒÔÉÏ)£¬±ÜÃâlfsÊ¹ÓÃ
-2. [³£ÓÃ´úÂë](CodeLib.md)
-3. **ĞÂÔö¼ÓÁËC++µÄBricksÒ»¶¨Òª¼ÇµÃÌí¼Ó¶ÔÓ¦ºê**£¬·ñÔò»áC#ÕÒ²»µ½C++º¯Êı£¬·½·¨²ÎÔÄ×¢ÒâÊÂÏî2
-# ¿ØÖÆÌ¨³ÌĞò
-## ÌØÊâ²ÎÊı
-- 1.ExeCmd=¾ö¶¨Ö´ĞĞµÄÃüÁî
-- 2.ExtraCmd={n}Õâ¸önÊÇÈ·¶¨Æô¶¯ºó£¬¿ØÖÆÌ¨¿ÉÒÔÊäÈëµÄ²ÎÊı¸öÊı
-## ±£´æ×Ê²úµ½×îĞÂ
-- ±£´æÖ¸¶¨×Ê²úµ½×îĞÂ°æ±¾£¬½â¾öMetaVersion±¬Õ¨ÎÊÌâ
+ï»¿# ç¼–è¯‘è¿è¡Œç¯å¢ƒ
+- Titan3D å¯åŠ¨ï¼
+- ![æ€»è§ˆå›¾](Documents/picture/main_edtor.png)
+- 1.å®‰è£…2022
+- 2.å®‰è£…C#å¼€å‘ç¯å¢ƒ
+- 3.å»ºè®®å®‰è£…C#ç§»åŠ¨å¼€å‘ç¯å¢ƒ
+# å¼•æ“ç‰¹è‰²
+- 1.C++/C#æ··åˆç¼–ç¨‹ï¼ŒC++ä½œä¸ºåº•å±‚ï¼ŒC#ä½œä¸ºä¸Šå±‚ï¼Œé€šè¿‡è‡ªåŠ¨èƒ¶æ°´ä»£ç æ®‹ç”Ÿï¼ŒC#å¯ä»¥å®Œæˆå®Œæ•´è°ƒç”¨C++åŠŸèƒ½
+- 2.åŸºäºåç¨‹(Coroutines)çš„å¤šçº¿ç¨‹æ„æ¶ï¼Œå‘Šåˆ«Callback Hell
+- 3.åŸºäºå®å›¾çš„å›¾å½¢åŒ–è„šæœ¬æ„æ¶ï¼Œç”¨æˆ·å¯ä»¥0ä»£ç å®ç°è¶…å¤æ‚æ¸¸æˆé€»è¾‘
+- 4.å®Œå…¨ç”¨æˆ·è‡ªå®šä¹‰æ¸²æŸ“ç®¡çº¿ï¼Œé€šè¿‡ç¼–è¾‘å™¨ç¼–è¾‘RenderGraphï¼Œé€šè¿‡C#æ‰©å±•RenderGraphNodeï¼ŒçœŸæ­£åšåˆ°ç”¨æˆ·éœ€è¦çš„ä¸€åˆ‡æ•ˆæœéƒ½è‡ªå®šåˆ¶
+- 5.è‡ªå¸¦å¤šè¿›ç¨‹æœåŠ¡å™¨é›†ç¾¤æ„æ¶ï¼Œå¤§å‹MMOé¡¹ç›®å¯ç”¨
+- 6.åŸºäºHLSLçš„Shadingå¼€å‘ï¼Œå…¨å¹³å°Shaderåå°„åç»Ÿä¸€äº†æ¸²æŸ“èµ„æºç»‘å®šï¼Œæ˜¯æœ€æ¥è¿‘åŸç”ŸDXå¼€å‘ç”¨æˆ·ä¹ æƒ¯çš„æ¨¡å¼
+# æ”¯æŒç‰¹æ€§
+- 1.æ”¯æŒDX11,DX12,Vulkan,OpenGLES(åºŸå¼ƒ)
+- 2.æ”¯æŒWindows,Androidå¹³å°
+- 3.Amplification Shader,Mesh Shader,RayTracing Shader
+- 4.å›¾å½¢åŒ–ç¼–è¾‘å™¨é…ç½®RenderGraphèµ„äº§ï¼Œå¼•æ“è‡ªå¸¦DeferredShadingå’ŒMobileShadingé…ç½®RenderGraphèµ„äº§
+- 5.å›¾å½¢åŒ–Material Shaderç¼–è¾‘å™¨
+- 6.InGame UIç¼–è¾‘å™¨æ”¯æŒ2D,3Dæ¸¸æˆUIç¼–è¾‘
+- 7.GpuScene+IndirectDrawæ„æˆGpuDrivenç»“æ„
+- 8.ç²’å­ç³»ç»Ÿï¼Œé‡‡ç”¨å›¾å½¢åŒ–é€»è¾‘ç¼–è¾‘ï¼Œæ”¯æŒCPU,GPUç²’å­åˆ‡æ¢
+- 9.SDFå­—ä½“ï¼Œæ”¾ç¼©å‹å¥½
+- 10.åŸºäºNodeçš„åœºæ™¯ç¼–è¾‘å™¨ï¼Œä¸–ç•Œå¤§çº²å¯ä»¥ä¸ºä»»ä½•Nodeè®¾ç½®csharpè„šæœ¬
+- 11.å›¾å½¢åŒ–åŠ¨ä½œçŠ¶æ€æœºï¼Œå’Œå®å›¾é…åˆå®Œæˆæ¸¸æˆé€»è¾‘
+- 12.å›¾å½¢åŒ–è„šæœ¬ç¼–è¾‘å™¨ï¼Œå®å›¾(Macross)ç³»ç»Ÿå‡ ä¹å¯ä»¥å…¨åŠŸèƒ½å®ç°å¼•æ“é¡¹ç›®åŠŸèƒ½
+- 13.å†…åµŒRenderDocï¼Œå¯ä»¥configé…ç½®
+- 14.åŸºäºTCP/IPçš„RPCç½‘ç»œé€šè®¯ï¼Œè‡ªå¸¦è¶…å¤§å‹æœåŠ¡å™¨é›†ç¾¤æ„æ¶
+- 15.é‡‡ç”¨åŒç²¾åº¦åæ ‡ï¼Œæ”¯æŒCDLODåœ°å½¢ï¼Œå…ˆå¤©æ— é™ä¸–ç•Œåœ£ä½“
+- 16.Excelæ•°æ®è‡ªåŠ¨æ˜ å°„æ•°æ®ç»“æ„ï¼Œè‡ªåŠ¨è¯»å†™
+- 17.æ’ä»¶åŠ¨æ€åŠ è½½å¸è½½ï¼Œæ¸¸æˆï¼Œå¼•æ“åŠŸèƒ½éƒ½å¯é€šè¿‡æ’ä»¶æ‰©å±•
+- 18.ä¸“ç”¨çš„prefabç¼–è¾‘å™¨
+# ç¼–è¯‘æ„å»º
+## Windowsç¼–è¯‘å¼•æ“
+1. **ç¬¬ä¸€æ¬¡ç¼–è¯‘å¼•æ“ï¼Œå¾ˆå¤šæ—¶å€™éœ€è¦å•ç‹¬è°ƒè¯•è¿è¡ŒCppWeavingToolså’ŒCSharpCodeToolsä¸¤ä¸ªå·¥ç¨‹ä¸€æ¬¡ï¼Œç¡®ä¿codegenä¸‹é¢NativeBinderå’ŒCs2Cppç›®å½•äº§ç”Ÿäº†å¿…è¦çš„ä¸´æ—¶cpp,csæ–‡ä»¶** 
+2. å¦‚æœç¬¬ä¸€æ¬¡äº§ç”ŸNativeBinderå¤±è´¥ï¼Œæœ‰å¯èƒ½éœ€è¦å®‰è£…llvm
+3. ç¼–è¯‘Core.Windowå·¥ç¨‹ï¼ˆC++ï¼‰
+4. ç¼–è¯‘Engine.Windowå·¥ç¨‹ï¼ˆC#ï¼‰
+5. ç¼–è¯‘MainEditorå·¥ç¨‹ï¼ˆC#ï¼‰
+6. **å› ä¸ºgithubçš„LFSé™åˆ¶ï¼Œå¯èƒ½éœ€è¦è¿è¡Œä¸€ä¸‹Setup.batåšä¸€äº›è¿è¡Œç¯å¢ƒé…ç½®**
+## Windowsç¼–è¯‘Android APK
+1. ç¼–è¯‘Core.Androidå·¥ç¨‹ï¼ˆC++ï¼‰
+2. ç¼–è¯‘Engine.Androidç¨‹ï¼ˆC#ï¼‰
+# è°ƒè¯•ä¸è¿è¡Œ
+1. è®¾ç½®MainEditorä¸ºå½“å‰é¡¹ç›®
+2. è°ƒè¯•å‘½ä»¤è¡Œå‚æ•°ä¸ºconfig=\$(SolutionDir)content\EngineConfig.cfg use_renderdoc=false
+3. è°ƒè¯•å·¥ä½œç›®å½•ä¸º$(SolutionDir)binaries\
+4. è¿è¡Œä¸è°ƒè¯•ï¼Œè¯·é˜…è¯»[**å¼•æ“é…ç½®ä¸ç¼–è¾‘å™¨ä½¿ç”¨æ–‡æ¡£**](Documents/Index.md)ã€‚
+5. é‡åˆ°ä¸€äº›å¥‡æ€ªIOç›¸å…³Crashæˆ–è€…å¼‚å¸¸ï¼Œå¯ä»¥å°è¯•åˆ é™¤æœ¬åœ°cacheç›®å½•
+# å¼€å‘è€…æ³¨æ„äº‹é¡¹
+1. ä¸è¦æäº¤å¤§æ–‡ä»¶(20Mä»¥ä¸Š)ï¼Œé¿å…lfsä½¿ç”¨
+2. [å¸¸ç”¨ä»£ç ](CodeLib.md)
+3. **æ–°å¢åŠ äº†C++çš„Bricksä¸€å®šè¦è®°å¾—æ·»åŠ å¯¹åº”å®**ï¼Œå¦åˆ™ä¼šC#æ‰¾ä¸åˆ°C++å‡½æ•°ï¼Œæ–¹æ³•å‚é˜…æ³¨æ„äº‹é¡¹2
+# æ§åˆ¶å°ç¨‹åº
+## ç‰¹æ®Šå‚æ•°
+- 1.ExeCmd=å†³å®šæ‰§è¡Œçš„å‘½ä»¤
+- 2.ExtraCmd={n}è¿™ä¸ªnæ˜¯ç¡®å®šå¯åŠ¨åï¼Œæ§åˆ¶å°å¯ä»¥è¾“å…¥çš„å‚æ•°ä¸ªæ•°
+## ä¿å­˜èµ„äº§åˆ°æœ€æ–°
+- ä¿å­˜æŒ‡å®šèµ„äº§åˆ°æœ€æ–°ç‰ˆæœ¬ï¼Œè§£å†³MetaVersionçˆ†ç‚¸é—®é¢˜
 ExeCmd=SaveAsLastest AssetType=Scene+Mesh+Material+MaterialInst+Texture CookCfg=\$(SolutionDir)content\EngineConfigForCook.cfg 
-## Æô¶¯Root·şÎñÆ÷
-- ·½·¨1£ºExeCmd=StartRootServer CookCfg=\$(SolutionDir)content\EngineConfigForRootServer.cfg 
-- ·½·¨2£ºExtraCmd=1 CookCfg=$(SolutionDir)content\EngineConfigForRootServer.cfg ÔÚ¿ØÖÆÌ¨ÊäÈëExeCmd=StartRootServer
-## Æô¶¯Login·şÎñÆ÷
-- ·½·¨1£ºExeCmd=StartLoginServer CookCfg=\$(SolutionDir)content\EngineConfigForRootServer.cfg 
-- ·½·¨2£ºExtraCmd=1 CookCfg=$(SolutionDir)content\EngineConfigForRootServer.cfg ÔÚ¿ØÖÆÌ¨ÊäÈëExeCmd=StartLoginServer
-## Éı¼¶CppWeavingTools
-- Éı¼¶NugetµÄlibclang£¬±¾»ú²éÕÒMicrosoft Visual Studio\2022\Enterprise\VC\Tools\Llvm\x64\bin¿½±´µ½binaries\Tools\¶ÔÓ¦.net°æ±¾
-- ÓÒ¼ülibClangSharp²é¿´nugetÎÄ¼şÎ»ÖÃ
+## å¯åŠ¨RootæœåŠ¡å™¨
+- æ–¹æ³•1ï¼šExeCmd=StartRootServer CookCfg=\$(SolutionDir)content\EngineConfigForRootServer.cfg 
+- æ–¹æ³•2ï¼šExtraCmd=1 CookCfg=$(SolutionDir)content\EngineConfigForRootServer.cfg åœ¨æ§åˆ¶å°è¾“å…¥ExeCmd=StartRootServer
+## å¯åŠ¨LoginæœåŠ¡å™¨
+- æ–¹æ³•1ï¼šExeCmd=StartLoginServer CookCfg=\$(SolutionDir)content\EngineConfigForRootServer.cfg 
+- æ–¹æ³•2ï¼šExtraCmd=1 CookCfg=$(SolutionDir)content\EngineConfigForRootServer.cfg åœ¨æ§åˆ¶å°è¾“å…¥ExeCmd=StartLoginServer
+## å‡çº§CppWeavingTools
+- å‡çº§Nugetçš„libclangï¼Œæœ¬æœºæŸ¥æ‰¾Microsoft Visual Studio\2022\Enterprise\VC\Tools\Llvm\x64\binæ‹·è´åˆ°binaries\Tools\å¯¹åº”.netç‰ˆæœ¬
+- å³é”®libClangSharpæŸ¥çœ‹nugetæ–‡ä»¶ä½ç½®
