@@ -65,7 +65,6 @@ namespace NxRHI
 	class DX12RayTracingDraw : public IRayTracingDraw
 	{
 	public:
-		AutoRef<ID3D12StateObject>		mDxrStateObject;
 		AutoRef<FUploadBuffer>			mHitGroupShaderBindTable;
 		AutoRef<DX12HeapHolder>			mCbvSrvUavHeap;
 		AutoRef<DX12HeapHolder>			mSamplerHeap;

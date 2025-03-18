@@ -672,7 +672,7 @@ namespace NxRHI
 		dispatchDesc.HitGroupTable.SizeInBytes = dxBuffer->Desc.Size;
 		dispatchDesc.HitGroupTable.StrideInBytes = dxBuffer->Desc.Size;
 
-		dx12Cmd->mLastContext->SetPipelineState1(mDxrStateObject);
+		dx12Cmd->mLastContext->SetPipelineState1(effect->mStateObject);
 		dx12Cmd->mLastContext->DispatchRays(&dispatchDesc);
 	}
 }

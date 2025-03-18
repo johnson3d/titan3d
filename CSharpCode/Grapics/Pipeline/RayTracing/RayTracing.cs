@@ -1,4 +1,6 @@
-﻿using EngineNS.Graphics.Pipeline.Shader;
+﻿using EngineNS.GamePlay;
+using EngineNS.Graphics.Pipeline.Shader;
+using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,7 +9,6 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
 {
     public class TtRayTracingEnv : TtRayTracingShadingEnv
     {
-        Vector3ui mDispatchArg = Vector3ui.One;
         public TtRayTracingEnv() 
         {
             CodeName = RName.GetRName("Shaders/ShadingEnv/RayTracing/Raytracing.hlsl", RName.ERNameType.Engine);
@@ -36,18 +37,33 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
             base.Dispose();
         }
         public TtRayTracingEnv mBasePassShading;
+        public TtRayTracingDraw mRayTracingDraw;
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
+            BasePass.Initialize(rc, debugName + ".BasePass");
+
             mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtRayTracingEnv>();
 
-            //mCopyColorDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
-            //mCopyDepthDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
-
-            //CopyPass.Initialize(rc, debugName + ".CopyPrev");
+            //mRayTracingDraw = TtEngine.Instance.GfxDevice.RenderContext.CreateRayTracingDraw();
+            //mBasePassShading.SetDispatchRay(this, policy, mRayTracingDraw, 1, 1, 1);
+        }
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
+        {
+            if (mRayTracingDraw == null)
+            {
+                return;
+            }
+            var cmdlist = BasePass.DrawCmdList;
+            using (new NxRHI.TtCmdListScope(cmdlist))
+            {
+                cmdlist.PushGpuDraw(mRayTracingDraw);
+                cmdlist.FlushDraws();
+            }
+            policy.CommitCommandList(cmdlist);
         }
     }
 }

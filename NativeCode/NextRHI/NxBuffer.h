@@ -8,6 +8,7 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	class FMeshPrimitives;
 	enum TR_ENUM(SV_EnumNoFlags)
 		EGpuUsage
 	{
@@ -1148,6 +1149,58 @@ namespace NxRHI
 	public:
 		FDsvDesc					Desc;
 		AutoRef<ITexture>			GpuResource;
+	};
+
+	struct TR_CLASS(SV_LayoutStruct = 8)
+		FAccelerationStructureDesc
+	{
+		UINT 					GeometryCount;
+		FMeshPrimitives*		GeometryList;
+	};
+
+	class TR_CLASS()
+		IAccelerationStructure : public IGpuResource
+	{
+	public:
+		ENGINE_RTTI(IAccelerationStructure);
+	public:
+		AutoRef<IBuffer>		mGpuBuffer;
+		UINT					mScratchSize = 0;
+	};
+
+	struct TR_CLASS(SV_LayoutStruct = 8)
+		FAStructureInstance
+	{
+		void SetDefault()
+		{
+			HitGroupIndex = 0;
+			InstanceID = 0;
+			InstanceMask = 0;
+			Flags = 0;
+			Matrix = Matrix.IDENTITY;
+		}
+		UINT								HitGroupIndex = 0;
+		UINT								InstanceID = 0;
+		UINT								InstanceMask = 0;
+		UINT								Flags = 0;
+		v3dxMatrix4							Matrix = Matrix.IDENTITY;
+	};
+
+	class TR_CLASS()
+		IAccelerationStructureInstance : public IGpuResource
+	{
+	public:
+		FAStructureInstance					mDesc{};
+		AutoRef<IAccelerationStructure>		mAStructure;
+	};
+
+	class TR_CLASS()
+		ITopAccelerationStructure : public IGpuResource
+	{
+	public:
+		ENGINE_RTTI(ITopAccelerationStructure);
+	public:
+		std::vector<AutoRef<IAccelerationStructureInstance>>	mBottomASInstances;
 	};
 }
 

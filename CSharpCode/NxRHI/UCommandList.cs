@@ -16,6 +16,10 @@ namespace EngineNS.NxRHI
         {
             PushGpuDraw(draw.mCoreObject.NativeSuper);
         }
+        public void PushGpuDraw(TtRayTracingDraw draw)
+        {
+            PushGpuDraw(draw.mCoreObject.NativeSuper);
+        }
         public void PushGpuDraw(TtCopyDraw draw)
         {
             PushGpuDraw(draw.mCoreObject.NativeSuper);
@@ -234,6 +238,10 @@ namespace EngineNS.NxRHI
             mCoreObject.GetCmdRecorder().PushGpuDraw(draw);
         }
         public void PushGpuDraw(TtComputeDraw draw)
+        {
+            mCoreObject.GetCmdRecorder().PushGpuDraw(draw);
+        }
+        public void PushGpuDraw(TtRayTracingDraw draw)
         {
             mCoreObject.GetCmdRecorder().PushGpuDraw(draw);
         }
