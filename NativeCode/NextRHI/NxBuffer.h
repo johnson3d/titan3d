@@ -1151,11 +1151,26 @@ namespace NxRHI
 		AutoRef<ITexture>			GpuResource;
 	};
 
+	enum ERayTracingGeomFlags
+	{
+		RTG_NONE = 0,
+		RTG_OPAQUE = 0x1,
+		RTG_NO_DUPLICATE_ANYHIT_INVOCATION = 0x2
+	};
+
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FAccelerationStructureDesc
 	{
-		UINT 					GeometryCount;
-		FMeshPrimitives*		GeometryList;
+		void SetDefault()
+		{
+			GeometryCount = 0;
+			Geometries = nullptr;
+			GeomFlags = nullptr;
+		}
+		//normally, we only need one geometry,other wise, we need to build a complex SBT and manage the InstanceContributionToHitGroupIndex
+		UINT 					GeometryCount = 0;
+		FMeshPrimitives**		Geometries = nullptr;
+		ERayTracingGeomFlags*	GeomFlags = nullptr;
 	};
 
 	class TR_CLASS()
@@ -1169,38 +1184,66 @@ namespace NxRHI
 	};
 
 	struct TR_CLASS(SV_LayoutStruct = 8)
-		FAStructureInstance
+		FAStructureInstanceDesc
 	{
 		void SetDefault()
 		{
-			HitGroupIndex = 0;
+			InstanceContributionToHitGroupIndex = 0;
 			InstanceID = 0;
 			InstanceMask = 0;
-			Flags = 0;
+			Flags = 0xFFFFFFFF;
 			Matrix = Matrix.IDENTITY;
 		}
-		UINT								HitGroupIndex = 0;
+		UINT								InstanceContributionToHitGroupIndex = 0;
 		UINT								InstanceID = 0;
 		UINT								InstanceMask = 0;
-		UINT								Flags = 0;
+		UINT								Flags = 0xFFFFFFFF;
 		v3dxMatrix4							Matrix = Matrix.IDENTITY;
 	};
 
 	class TR_CLASS()
-		IAccelerationStructureInstance : public IGpuResource
+		IAStructureInstance : public IGpuResource
 	{
 	public:
-		FAStructureInstance					mDesc{};
+		FAStructureInstanceDesc				mDesc{};
 		AutoRef<IAccelerationStructure>		mAStructure;
+		FAStructureInstanceDesc* GetDescPtr() {
+			return &mDesc;
+		}
 	};
 
+	struct TR_CLASS(SV_LayoutStruct = 8)
+		FTopAccelerationStructureDesc
+	{
+		void SetDefault()
+		{
+			
+		}
+	};
 	class TR_CLASS()
 		ITopAccelerationStructure : public IGpuResource
 	{
 	public:
 		ENGINE_RTTI(ITopAccelerationStructure);
 	public:
-		std::vector<AutoRef<IAccelerationStructureInstance>>	mBottomASInstances;
+		AutoRef<IBuffer>		mGpuScratchBuffer;
+		AutoRef<IBuffer>		mGpuBuffer;
+		AutoRef<IBuffer>		mInstanceGpuBuffer;
+		UINT					mScratchSize = 0;
+		std::vector<AutoRef<IAStructureInstance>>	mBottomASInstances;
+		UINT GetBLASInstanceCount() const
+		{
+			return (UINT)mBottomASInstances.size();
+		}
+		IAStructureInstance* GetBLASInstance(UINT index)
+		{
+			return mBottomASInstances[index];
+		}
+		void AddBLASInstance(IAStructureInstance* instance)
+		{
+			mBottomASInstances.push_back(instance);
+		}
+		virtual bool BuildAcclerationStruture() = 0;
 	};
 }
 

@@ -106,10 +106,10 @@ namespace EngineNS.Bricks.VXGI
             {
                 var node = drawcall.TagObject as UVoxelsNode;
 
-                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbGBufferDesc");///???
+                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbGBufferDesc");///???
                 if (srvIdx.IsValidPointer)
                 {
-                    drawcall.BindCBuffer(srvIdx, node.CBuffer);
+                    drawcall.BindCBV(srvIdx, node.CBuffer);
                 }
                 srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxIndirectDebugDraws");
                 if (srvIdx.IsValidPointer)
@@ -157,10 +157,10 @@ namespace EngineNS.Bricks.VXGI
                     drawcall.BindUav(srvIdx, node.VxIndirectDebugDraws.Uav);
                 }
 
-                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbGBufferDesc");
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbGBufferDesc");
                 if (srvIdx.IsValidPointer)
                 {
-                    drawcall.BindCBuffer(srvIdx, node.CBuffer);
+                    drawcall.BindCBV(srvIdx, node.CBuffer);
                 }
                 srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VoxelGroupDebugger");
                 if (srvIdx.IsValidPointer)

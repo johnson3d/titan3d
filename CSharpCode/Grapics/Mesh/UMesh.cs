@@ -298,11 +298,11 @@ namespace EngineNS.Graphics.Mesh
                         {
                             if (TtEngine.Instance.GfxDevice.PerFrameCBuffer != null)
                             {
-                                drawcall.BindCBuffer(effect.BindIndexer.cbPerFrame, TtEngine.Instance.GfxDevice.PerFrameCBuffer);
+                                drawcall.BindCBV(effect.BindIndexer.cbPerFrame, TtEngine.Instance.GfxDevice.PerFrameCBuffer);
                             }
                             if (this.SubMesh.Mesh.PerMeshCBuffer != null)
                             {
-                                drawcall.BindCBuffer(effect.BindIndexer.cbPerMesh, this.SubMesh.Mesh.PerMeshCBuffer);
+                                drawcall.BindCBV(effect.BindIndexer.cbPerMesh, this.SubMesh.Mesh.PerMeshCBuffer);
                             }
                             if (Material != null)
                             {
@@ -313,7 +313,7 @@ namespace EngineNS.Graphics.Mesh
                                 }
                                 if (Material.PerMaterialCBuffer != null)
                                 {
-                                    drawcall.BindCBuffer(effect.BindIndexer.cbPerMaterial, Material.PerMaterialCBuffer);
+                                    drawcall.BindCBV(effect.BindIndexer.cbPerMaterial, Material.PerMaterialCBuffer);
                                 }
                             }
                         }

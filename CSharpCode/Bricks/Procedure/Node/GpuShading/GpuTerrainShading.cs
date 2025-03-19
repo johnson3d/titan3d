@@ -38,10 +38,10 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             {
                 drawcall.BindSrv(binder, node.mRainTexture);
             }
-            binder = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPgc");
+            binder = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbPgc");
             if (binder.IsValidPointer)
             {
-                drawcall.BindCBuffer(binder, node.GetCBuffer(binder));
+                drawcall.BindCBV(binder, node.GetCBuffer(binder));
             }
         }
     }

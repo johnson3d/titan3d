@@ -97,6 +97,9 @@ namespace NxRHI
 		virtual ISwapChain* CreateSwapChain(const FSwapChainDesc* desc) override;
 		virtual IRenderPass* CreateRenderPass(const FRenderPassDesc* desc) override;
 		virtual IFrameBuffers* CreateFrameBuffers(IRenderPass* rpass) override;
+		virtual IAccelerationStructure* CreateAccelerationStructure(const FAccelerationStructureDesc* rpass) override;
+		virtual IAStructureInstance* CreateAccelerationStructureInstance(const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure) override;
+		virtual ITopAccelerationStructure* CreateTopAccelerationStructure(const FTopAccelerationStructureDesc* desc) override;
 
 		virtual IGpuPipeline* CreatePipeline(const FGpuPipelineDesc* desc) override;
 		virtual IGpuDrawState* CreateGpuDrawState() override;

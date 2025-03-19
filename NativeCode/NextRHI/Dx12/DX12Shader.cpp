@@ -392,11 +392,11 @@ namespace NxRHI
 		{
 			case D3D_SIT_CBUFFER:
 			{
-				if (Reflector->FindBinder(EShaderBindType::SBT_CBuffer, csibDesc.Name))
+				if (Reflector->FindBinder(EShaderBindType::SBT_CBV, csibDesc.Name))
 				{
 					return;
 				}
-				binder->Type = EShaderBindType::SBT_CBuffer;
+				binder->Type = EShaderBindType::SBT_CBV;
 				binder->Name = csibDesc.Name;
 				binder->Slot = csibDesc.BindPoint;
 				binder->BindCount = csibDesc.BindCount;

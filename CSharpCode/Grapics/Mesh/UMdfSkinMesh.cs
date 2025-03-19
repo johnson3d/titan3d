@@ -38,7 +38,7 @@ namespace EngineNS.Graphics.Mesh
             {
                 return;
             }
-            drawcall.BindCBuffer(binder, PerSkinMeshCBuffer);
+            drawcall.BindCBV(binder, PerSkinMeshCBuffer);
         }
     }
 }

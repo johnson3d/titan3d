@@ -181,7 +181,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
 
             int NumOfIndirectDraw = DrawArgsOffsetDict.Count;
             GpuCullSetupShading.SetDrawcallDispatch(this, policy, GpuCullSetupDrawcall, 1, 1, 1, true);
-            GpuCullSetupDrawcall.BindCBuffer("cbGPUCulling", ref GPUCullingCBV);
+            GpuCullSetupDrawcall.BindCBV("cbGPUCulling", ref GPUCullingCBV);
             {
                 GPUCullingCBV.SetValue("BoundCenter", mdf.MeshAABB.GetCenter());
                 GPUCullingCBV.SetValue("BoundExtent", mdf.MeshAABB.GetSize() * 0.5f);
@@ -195,8 +195,8 @@ namespace EngineNS.Graphics.Mesh.Modifier
             cmd.PushGpuDraw(GpuCullSetupDrawcall.mCoreObject.NativeSuper);
 
             GpuCullShading.SetDrawcallDispatch(this, policy, GpuCullDrawcall, (uint)mdf.InstanceBuffers.InstanceBuffer.DataArray.Count, 1, 1, true);
-            GpuCullDrawcall.BindCBuffer("cbGPUCulling", ref GPUCullingCBV);
-            GpuCullDrawcall.BindCBuffer("cbPerCamera", policy.DefaultCamera.PerCameraCBuffer);
+            GpuCullDrawcall.BindCBV("cbGPUCulling", ref GPUCullingCBV);
+            GpuCullDrawcall.BindCBV("cbPerCamera", policy.DefaultCamera.PerCameraCBuffer);
             GpuCullDrawcall.BindSrv("InstanceDataArray", mdf.InstanceBuffers.InstanceBuffer.Srv);
             if (mdf.InstanceBuffers.InstanceBoundingBuffer != null)
             {
@@ -208,7 +208,7 @@ namespace EngineNS.Graphics.Mesh.Modifier
             cmd.PushGpuDraw(GpuCullDrawcall.mCoreObject.NativeSuper);
 
             GpuCullFlushShading.SetDrawcallDispatch(this, policy, GpuCullFlushDrawcall, (uint)(NumOfIndirectDraw - 1), 1, 1, true);
-            GpuCullFlushDrawcall.BindCBuffer("cbGPUCulling", ref GPUCullingCBV);
+            GpuCullFlushDrawcall.BindCBV("cbGPUCulling", ref GPUCullingCBV);
             GpuCullFlushDrawcall.BindUav("IndirectArgsBuffer", DrawArgsBuffer.Uav);
             //GpuCullFlushDrawcall.SetDebugName("InstanceCulling.Flush");
             cmd.PushGpuDraw(GpuCullFlushDrawcall.mCoreObject.NativeSuper);

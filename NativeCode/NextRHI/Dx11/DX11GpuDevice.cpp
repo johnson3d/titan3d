@@ -374,6 +374,18 @@ namespace NxRHI
 		result->mRenderPass = rpass;
 		return result;
 	}
+	IAccelerationStructure* DX11GpuDevice::CreateAccelerationStructure(const FAccelerationStructureDesc* rpass)
+	{
+		return nullptr;
+	}
+	IAStructureInstance* DX11GpuDevice::CreateAccelerationStructureInstance(const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure)
+	{
+		return nullptr;
+	}
+	ITopAccelerationStructure* DX11GpuDevice::CreateTopAccelerationStructure(const FTopAccelerationStructureDesc* desc)
+	{
+		return nullptr;
+	}
 	IGpuPipeline* DX11GpuDevice::CreatePipeline(const FGpuPipelineDesc* desc)
 	{
 		auto result = new DX11GpuPipeline();

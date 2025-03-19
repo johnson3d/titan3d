@@ -111,7 +111,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                         var jitterUV = deferredPolicy.DefaultCamera.mCoreObject.GetJitterUV();
                         aaNode.CBShadingEnv.SetValue("JitterUV", in jitterUV);
                     }
-                    drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
+                    drawcall.BindCBV(index, aaNode.CBShadingEnv);
                 }
             }
             else

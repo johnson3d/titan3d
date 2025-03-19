@@ -134,7 +134,7 @@ namespace NxRHI
 						handle->BindToHeap(device, mSamplerHeap->Heap, b.second->MSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 				}
 				break;
-				case EShaderBindType::SBT_CBuffer:
+				case EShaderBindType::SBT_CBV:
 				{
 					auto handle = device->mNullCBV->mView;
 					if (b.second->VSBinder != nullptr)
@@ -260,7 +260,7 @@ namespace NxRHI
 					continue;
 				switch (i.first->BindType)
 				{
-					case SBT_CBuffer:
+					case SBT_CBV:
 					{
 						IGpuResource* t = i.second;
 						effect->BindCBV(cmdlist, i.first, (ICbView*)t);
@@ -489,7 +489,7 @@ namespace NxRHI
 		{
 			switch (i.first->Type)
 			{
-				case SBT_CBuffer:
+				case SBT_CBV:
 				{
 					IGpuResource* t = i.second;
 					cmdlist->SetCBV(EShaderType::SDT_ComputeShader, i.first, (ICbView*)t);

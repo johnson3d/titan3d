@@ -59,21 +59,21 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.BindPipeline(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, pipeline.mCoreObject);
         }
-        public bool BindCBuffer(VNameString name, TtCbView buffer)
+        public bool BindCBV(VNameString name, TtCbView buffer)
         {
             return mCoreObject.BindResource(name, buffer.mCoreObject.NativeSuper);
         }
-        public void BindCBuffer(FEffectBinder binder, TtCbView buffer)
+        public void BindCBV(FEffectBinder binder, TtCbView buffer)
         {
-            if (binder.IsValidPointer == false || buffer == null || binder.BindType != EShaderBindType.SBT_CBuffer)
+            if (binder.IsValidPointer == false || buffer == null || binder.BindType != EShaderBindType.SBT_CBV)
                 return;
             mCoreObject.BindResource(binder, buffer.mCoreObject.NativeSuper);
         }
-        public void BindCBuffer(TtEffectBinder binder, TtCbView buffer)
+        public void BindCBV(TtEffectBinder binder, TtCbView buffer)
         {
             if (binder == null || buffer == null)
                 return;
-            BindCBuffer(binder.mCoreObject, buffer);
+            BindCBV(binder.mCoreObject, buffer);
         }
         public bool BindSRV(string name, TtSrView srv)
         {
@@ -199,21 +199,21 @@ namespace EngineNS.NxRHI
         {
             return mCoreObject.FindBinder(type, name);
         }
-        public void BindCBuffer(FShaderBinder binder, TtCbView resource)
+        public void BindCBV(FShaderBinder binder, TtCbView resource)
         {
             if (resource == null || binder.IsValidPointer == false)
                 return;
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }
-        public void BindCBuffer(string name, TtCbView resource)
+        public void BindCBV(string name, TtCbView resource)
         {
-            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_CBuffer, name);
+            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_CBV, name);
             if (binder.IsValidPointer)
-                BindCBuffer(binder, resource);
+                BindCBV(binder, resource);
         }
-        public void BindCBuffer(string name, ref TtCbView resource)
+        public void BindCBV(string name, ref TtCbView resource)
         {
-            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_CBuffer, name);
+            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_CBV, name);
             if (binder.IsValidPointer == false)
                 return;
             if (resource == null)
@@ -300,69 +300,69 @@ namespace EngineNS.NxRHI
                 //mCoreObject.BindIndirectDispatchArgsBuffer(buffer.mCoreObject);
             }
         }
-        //public FShaderBinder FindBinder(EShaderBindType type, string name)
-        //{
-        //    return mCoreObject.FindBinder(type, name);
-        //}
-        //public void BindCBuffer(FShaderBinder binder, TtCbView resource)
-        //{
-        //    if (resource == null || binder.IsValidPointer == false)
-        //        return;
-        //    mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
-        //}
-        //public void BindCBuffer(string name, TtCbView resource)
-        //{
-        //    var binder = mCoreObject.FindBinder(EShaderBindType.SBT_CBuffer, name);
-        //    if (binder.IsValidPointer)
-        //        BindCBuffer(binder, resource);
-        //}
-        //public void BindCBuffer(string name, ref TtCbView resource)
-        //{
-        //    var binder = mCoreObject.FindBinder(EShaderBindType.SBT_CBuffer, name);
-        //    if (binder.IsValidPointer == false)
-        //        return;
-        //    if (resource == null)
-        //    {
-        //        resource = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
-        //    }
-        //    mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
-        //}
-        //public void BindSrv(FShaderBinder binder, TtSrView resource)
-        //{
-        //    if (resource == null || binder.IsValidPointer == false)
-        //        return;
-        //    mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
-        //}
-        //public void BindSrv(string name, TtSrView resource)
-        //{
-        //    var binder = mCoreObject.FindBinder(EShaderBindType.SBT_SRV, name);
-        //    if (binder.IsValidPointer)
-        //        BindSrv(binder, resource);
-        //}
-        //public void BindUav(FShaderBinder binder, TtUaView resource)
-        //{
-        //    if (resource == null || binder.IsValidPointer == false)
-        //        return;
-        //    mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
-        //}
-        //public void BindUav(string name, TtUaView resource)
-        //{
-        //    var binder = mCoreObject.FindBinder(EShaderBindType.SBT_UAV, name);
-        //    if (binder.IsValidPointer)
-        //        BindUav(binder, resource);
-        //}
-        //public void BindSampler(FShaderBinder binder, TtSampler resource)
-        //{
-        //    if (resource == null || binder.IsValidPointer == false)
-        //        return;
-        //    mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
-        //}
-        //public void BindSampler(string name, TtSampler resource)
-        //{
-        //    var binder = mCoreObject.FindBinder(EShaderBindType.SBT_Sampler, name);
-        //    if (binder.IsValidPointer)
-        //        BindSampler(binder, resource);
-        //}
+        public FShaderBinder FindBinder(EShaderBindType type, string name)
+        {
+            return mCoreObject.FindBinder(type, name);
+        }
+        public void BindCBV(FShaderBinder binder, TtCbView resource)
+        {
+            if (resource == null || binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+        }
+        public void BindCBV(string name, TtCbView resource)
+        {
+            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_CBV, name);
+            if (binder.IsValidPointer)
+                BindCBV(binder, resource);
+        }
+        public void BindCBV(string name, ref TtCbView resource)
+        {
+            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_CBV, name);
+            if (binder.IsValidPointer == false)
+                return;
+            if (resource == null)
+            {
+                resource = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
+            }
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+        }
+        public void BindSrv(FShaderBinder binder, TtSrView resource)
+        {
+            if (resource == null || binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+        }
+        public void BindSrv(string name, TtSrView resource)
+        {
+            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_SRV, name);
+            if (binder.IsValidPointer)
+                BindSrv(binder, resource);
+        }
+        public void BindUav(FShaderBinder binder, TtUaView resource)
+        {
+            if (resource == null || binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+        }
+        public void BindUav(string name, TtUaView resource)
+        {
+            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_UAV, name);
+            if (binder.IsValidPointer)
+                BindUav(binder, resource);
+        }
+        public void BindSampler(FShaderBinder binder, TtSampler resource)
+        {
+            if (resource == null || binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+        }
+        public void BindSampler(string name, TtSampler resource)
+        {
+            var binder = mCoreObject.FindBinder(EShaderBindType.SBT_Sampler, name);
+            if (binder.IsValidPointer)
+                BindSampler(binder, resource);
+        }
         public void SetDebugName(string name)
         {
             mCoreObject.NativeSuper.SetDebugName(name);

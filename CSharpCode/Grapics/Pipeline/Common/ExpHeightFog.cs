@@ -44,7 +44,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     {
                         aaNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                     }
-                    drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
+                    drawcall.BindCBV(index, aaNode.CBShadingEnv);
                 }
             }
             else

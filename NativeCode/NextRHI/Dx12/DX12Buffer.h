@@ -150,6 +150,38 @@ namespace NxRHI
 		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
 		AutoRef<DX12HeapHolder>		mView;
 	};
+
+	class DX12AccelerationStructure : public IAccelerationStructure
+	{
+	public:
+		bool Init(DX12GpuDevice* device, const FAccelerationStructureDesc* desc);
+
+		std::vector<AutoRef<FMeshPrimitives>>		mMeshes;
+		std::vector<D3D12_RAYTRACING_GEOMETRY_DESC>	mGeometryDesc;
+
+		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC mBuildDesc{};
+	};
+
+	class DX12AStructureInstance : public IAStructureInstance
+	{
+	public:
+		bool Init(DX12GpuDevice* device, const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure);
+	};
+
+	class DX12TopAccelerationStructure : public ITopAccelerationStructure
+	{
+	public:
+		bool Init(DX12GpuDevice* device, const FTopAccelerationStructureDesc* desc);
+		virtual bool BuildAcclerationStruture() override;
+
+		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
+		Hash128							mInstanceHash;
+		std::vector<D3D12_RAYTRACING_INSTANCE_DESC>		mInstDescs;
+		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC mBuildDesc{};
+		AutoRef<IBuffer>				mSourceGpuBuffer;
+	private:
+		bool IsBuild(DX12GpuDevice* device);
+	};
 }
 
 NS_END

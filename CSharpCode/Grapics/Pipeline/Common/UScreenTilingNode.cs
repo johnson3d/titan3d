@@ -84,13 +84,13 @@ namespace EngineNS.Graphics.Pipeline.Common
                 var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCbv;
                 var node = drawcall.TagObject as TtScreenTilingNode;
 
-                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
-                drawcall.BindCBuffer(srvIdx, ConfigCBuffer);
-                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerCamera");
+                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbPerGpuScene");
+                drawcall.BindCBV(srvIdx, ConfigCBuffer);
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbPerCamera");
                 if (srvIdx.IsValidPointer)
                 {
                     var camera = policy.DefaultCamera;
-                    drawcall.BindCBuffer(srvIdx, camera.PerCameraCBuffer);
+                    drawcall.BindCBV(srvIdx, camera.PerCameraCBuffer);
                 }
                 srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "DstBuffer");
                 if (srvIdx.IsValidPointer)
@@ -130,10 +130,10 @@ namespace EngineNS.Graphics.Pipeline.Common
                 var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCbv;
                 var node = drawcall.TagObject as TtScreenTilingNode;
 
-                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
+                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbPerGpuScene");
                 if (srvIdx.IsValidPointer)
                 {
-                    drawcall.BindCBuffer(srvIdx, ConfigCBuffer);
+                    drawcall.BindCBV(srvIdx, ConfigCBuffer);
                 }
                 srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "DstBuffer");
                 if (srvIdx.IsValidPointer)

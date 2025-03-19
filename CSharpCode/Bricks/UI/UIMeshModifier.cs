@@ -102,7 +102,7 @@ namespace EngineNS.UI
                 var binder = drawcall.FindBinder("cbUIMesh");
                 if (binder.IsValidPointer == false)
                     return;
-                drawcall.BindCBuffer(binder, PerUIMeshCBuffer);
+                drawcall.BindCBV(binder, PerUIMeshCBuffer);
 
                 EngineNS.Canvas.FDrawCmd cmd = new EngineNS.Canvas.FDrawCmd();
                 cmd.NativePointer = atom.MaterialMesh.SubMeshes[0].Mesh.mCoreObject.GetAtomExtData((uint)atom.AtomIndex).NativePointer;

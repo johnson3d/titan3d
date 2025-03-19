@@ -70,14 +70,14 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 var attachBuffer = aaNode.GetAttachBuffer(aaNode.UpSamplePinOut);
                 drawcall.BindUav(index, attachBuffer.Uav);
             }
-            index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbShadingEnv");
+            index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbShadingEnv");
             if (index.IsValidPointer)
             {
                 if (aaNode.CBShadingEnv == null)
                 {
                     aaNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
-                drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
+                drawcall.BindCBV(index, aaNode.CBShadingEnv);
             }
         }
     }
@@ -119,14 +119,14 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 var attachBuffer = aaNode.GetAttachBuffer(aaNode.RcasPinOut);
                 drawcall.BindUav(index, attachBuffer.Uav);
             }
-            index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbShadingEnv");
+            index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbShadingEnv");
             if (index.IsValidPointer)
             {
                 if (aaNode.CBShadingEnv == null)
                 {
                     aaNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
-                drawcall.BindCBuffer(index, aaNode.CBShadingEnv);
+                drawcall.BindCBV(index, aaNode.CBShadingEnv);
             }
         }
     }

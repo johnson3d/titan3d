@@ -41,7 +41,7 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             index = drawcall.FindBinder("cbPerGpuScene");
             if (index.IsValidPointer)
-                drawcall.BindCBuffer(index, policy.GetGpuSceneNode().PerGpuSceneCbv);
+                drawcall.BindCBV(index, policy.GetGpuSceneNode().PerGpuSceneCbv);
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Hdr", "Post\\Hdr", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]

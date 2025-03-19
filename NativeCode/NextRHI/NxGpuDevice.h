@@ -64,6 +64,12 @@ namespace NxRHI
 	class IGpuScope;
 	class FVertexArray;
 	class FGeomMesh;
+	struct FAccelerationStructureDesc;
+	class IAccelerationStructure;
+	struct FAStructureInstanceDesc;
+	class IAStructureInstance;
+	struct FTopAccelerationStructureDesc;
+	class ITopAccelerationStructure;
 
 	enum TR_ENUM(SV_EnumNoFlags)
 		ERhiType
@@ -1179,6 +1185,9 @@ namespace NxRHI
 		virtual ISwapChain* CreateSwapChain(const FSwapChainDesc * desc) = 0;
 		virtual IRenderPass* CreateRenderPass(const FRenderPassDesc * desc) = 0;
 		virtual IFrameBuffers* CreateFrameBuffers(IRenderPass* rpass) = 0;
+		virtual IAccelerationStructure* CreateAccelerationStructure(const FAccelerationStructureDesc* desc) = 0;
+		virtual IAStructureInstance* CreateAccelerationStructureInstance(const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure) = 0;
+		virtual ITopAccelerationStructure* CreateTopAccelerationStructure(const FTopAccelerationStructureDesc* desc) = 0;
 		
 		virtual IGpuPipeline* CreatePipeline(const FGpuPipelineDesc * desc) = 0;
 		virtual IGpuDrawState* CreateGpuDrawState() = 0;

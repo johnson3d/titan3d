@@ -242,14 +242,14 @@ namespace EngineNS.Bricks.GpuDriven
 
             drawcall.BindUav("IndirectArgBuffer", node.IndirectArgBuffer.Uav);
 
-            var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbShadingEnv");
+            var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbShadingEnv");
             if (index.IsValidPointer)
             {
                 if (node.CBShadingStruct == null)
                 {
                     node.CBShadingStruct = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
-                drawcall.BindCBuffer(index, node.CBShadingStruct);
+                drawcall.BindCBV(index, node.CBShadingStruct);
             }
         }
     }
@@ -277,14 +277,14 @@ namespace EngineNS.Bricks.GpuDriven
 
             drawcall.BindUav("OutputQuarkTexture", node.GetAttachBuffer(node.QuarkRTPinOut).Uav);
 
-            var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbShadingEnv");
+            var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbShadingEnv");
             if (index.IsValidPointer)
             {
                 if (node.CBShadingStruct == null)
                 {
                     node.CBShadingStruct = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
-                drawcall.BindCBuffer(index, node.CBShadingStruct);
+                drawcall.BindCBV(index, node.CBShadingStruct);
             }
         }
     }
@@ -324,14 +324,14 @@ namespace EngineNS.Bricks.GpuDriven
             
             drawcall.BindUav("OutputQuarkTexture", node.GetAttachBuffer(node.QuarkRTPinOut).Uav);
 
-            var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbShadingEnv");
+            var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbShadingEnv");
             if (index.IsValidPointer)
             {
                 if (node.CBShadingStruct == null)
                 {
                     node.CBShadingStruct = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
-                drawcall.BindCBuffer(index, node.CBShadingStruct);
+                drawcall.BindCBV(index, node.CBShadingStruct);
             }
         }
     }

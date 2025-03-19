@@ -67,7 +67,7 @@ namespace NxRHI
 
 			switch (binder->BindType)
 			{
-				case EShaderBindType::SBT_CBuffer:
+				case EShaderBindType::SBT_CBV:
 				{
 					auto pBuffer = ((VKCbView*)resource)->Buffer.UnsafeConvertTo<VKBuffer>();
 					tmpStructureBufferVS.buffer = pBuffer->mBuffer;
@@ -146,7 +146,7 @@ namespace NxRHI
 
 			switch (binder->BindType)
 			{
-				case EShaderBindType::SBT_CBuffer:
+				case EShaderBindType::SBT_CBV:
 				{
 					auto pBuffer = ((VKCbView*)resource)->Buffer.UnsafeConvertTo<VKBuffer>();
 					tmpStructureBufferPS.buffer = pBuffer->mBuffer;
@@ -296,7 +296,7 @@ namespace NxRHI
 		{
 			switch (i.first->BindType)
 			{
-				case SBT_CBuffer:
+				case SBT_CBV:
 				{
 					IGpuResource* t = i.second;
 					effect->BindCBV(cmdlist, i.first, (ICbView*)t);
@@ -374,7 +374,7 @@ namespace NxRHI
 
 			switch (binder->Type)
 			{
-				case EShaderBindType::SBT_CBuffer:
+				case EShaderBindType::SBT_CBV:
 				{
 					auto pBuffer = ((VKCbView*)resource)->Buffer.UnsafeConvertTo<VKBuffer>();
 					tmpStructureBufferVS.buffer = pBuffer->mBuffer;
@@ -495,7 +495,7 @@ namespace NxRHI
 		{
 			switch (i.first->Type)
 			{
-				case SBT_CBuffer:
+				case SBT_CBV:
 				{
 					IGpuResource* t = i.second;
 					cmdlist->SetCBV(EShaderType::SDT_ComputeShader, i.first, (ICbView*)t);

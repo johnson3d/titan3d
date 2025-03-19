@@ -141,8 +141,8 @@ namespace EngineNS.Graphics.Pipeline.Common
                                 if (drawcall == null)
                                     continue;
                                 drawcall.TagObject = this;
-                                drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerViewport, GBuffers.PerViewportCBuffer);
-                                drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
+                                drawcall.BindCBV(drawcall.Effect.BindIndexer.cbPerViewport, GBuffers.PerViewportCBuffer);
+                                drawcall.BindCBV(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
                                 cmdlist.PushGpuDraw(drawcall);
                             }
                         }

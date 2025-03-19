@@ -138,7 +138,7 @@ namespace EngineNS.Bricks.Terrain.CDLOD
                         TerrainNode.TerrainCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(coreBinder.Binder.mCoreObject);
                     }
 
-                    drawcall.BindCBuffer(effectBinder.cbPerTerrain, TerrainNode.TerrainCBuffer);
+                    drawcall.BindCBV(effectBinder.cbPerTerrain, TerrainNode.TerrainCBuffer);
                 }
                 else
                 {
@@ -174,9 +174,9 @@ namespace EngineNS.Bricks.Terrain.CDLOD
 
                         pat.PatchCBuffer.SetValue(coreBinder.TexUVOffset, in pat.TexUVOffset);
 
-                        drawcall.BindCBuffer(effectBinder.cbPerPatch, pat.PatchCBuffer);
+                        drawcall.BindCBV(effectBinder.cbPerPatch, pat.PatchCBuffer);
                     }
-                    drawcall.BindCBuffer(effectBinder.cbPerTerrain, TerrainNode.TerrainCBuffer);
+                    drawcall.BindCBV(effectBinder.cbPerTerrain, TerrainNode.TerrainCBuffer);
                 }
                 
                 drawcall.BindSampler(effectBinder.Samp_HeightMapTexture, policy.ClampState);// TtEngine.Instance.GfxDevice.SamplerStateManager.DefaultState.mCoreObject);                

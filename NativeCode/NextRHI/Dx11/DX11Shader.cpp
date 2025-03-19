@@ -366,7 +366,7 @@ namespace NxRHI
 				D3D11_SHADER_BUFFER_DESC cDesc;
 				hr = pCBuffer->GetDesc(&cDesc);
 
-				binder->Type = EShaderBindType::SBT_CBuffer;
+				binder->Type = EShaderBindType::SBT_CBV;
 				binder->Name = csibDesc.Name;
 				binder->Slot = csibDesc.BindPoint;
 				binder->BindCount = csibDesc.BindCount;

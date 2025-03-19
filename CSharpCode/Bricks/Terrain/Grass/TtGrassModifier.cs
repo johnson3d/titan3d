@@ -379,7 +379,7 @@ namespace EngineNS.Bricks.Terrain.Grass
 
             //index = drawcall.FindBinder("cbPerTerrain");
             if (effectBinder.cbPerTerrain != null)
-                drawcall.BindCBuffer(effectBinder.cbPerTerrain.mCoreObject, pat.Level.Level.Node.TerrainCBuffer);
+                drawcall.BindCBV(effectBinder.cbPerTerrain.mCoreObject, pat.Level.Level.Node.TerrainCBuffer);
             //var cbIndex = drawcall.FindBinder("cbPerPatch");
             if (effectBinder.cbPerPatch != null)
             {
@@ -393,7 +393,7 @@ namespace EngineNS.Bricks.Terrain.Grass
 
                 pat.PatchCBuffer.SetValue(coreBinder.TexUVOffset, in pat.TexUVOffset);
 
-                drawcall.BindCBuffer(effectBinder.cbPerPatch.mCoreObject, pat.PatchCBuffer);
+                drawcall.BindCBV(effectBinder.cbPerPatch.mCoreObject, pat.PatchCBuffer);
             }
 
             uint instCount = 0;
@@ -425,7 +425,7 @@ namespace EngineNS.Bricks.Terrain.Grass
                 GrassType.GrassCBuffer.SetValue(coreBinder.PatchIdxX, pat.IndexX);
                 GrassType.GrassCBuffer.SetValue(coreBinder.PatchIdxZ, pat.IndexZ);
                 GrassType.GrassCBuffer.SetValue(coreBinder.MaxGrassInstanceNum, instCount);
-                drawcall.BindCBuffer(effectBinder.cbPerGrassType, GrassType.GrassCBuffer);
+                drawcall.BindCBV(effectBinder.cbPerGrassType, GrassType.GrassCBuffer);
             }
         }
     }

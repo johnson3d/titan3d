@@ -139,7 +139,7 @@ namespace EngineNS.Editor.Forms
             var cbBinder = SlateEffect.ShaderEffect.FindBinder("ProjectionMatrixBuffer");
             cmdParams.CBuffer = rc.CreateCBV(cbBinder);
             cmdParams.Drawcall.BindShaderEffect(SlateEffect);
-            cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
+            cmdParams.Drawcall.BindCBV(cbBinder.mCoreObject, cmdParams.CBuffer);
             cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, TextureSRV);
             cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 

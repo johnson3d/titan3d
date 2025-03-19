@@ -164,6 +164,18 @@ namespace NxRHI
 		result->mRenderPass = rpass;
 		return result;
 	}
+	IAccelerationStructure* NullGpuDevice::CreateAccelerationStructure(const FAccelerationStructureDesc* rpass)
+	{
+		return nullptr;
+	}
+	IAStructureInstance* NullGpuDevice::CreateAccelerationStructureInstance(const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure)
+	{
+		return nullptr;
+	}
+	ITopAccelerationStructure* NullGpuDevice::CreateTopAccelerationStructure(const FTopAccelerationStructureDesc* desc)
+	{
+		return nullptr;
+	}
 	IGpuPipeline* NullGpuDevice::CreatePipeline(const FGpuPipelineDesc* desc)
 	{
 		auto result = new NullGpuPipeline();

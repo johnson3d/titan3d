@@ -184,5 +184,10 @@ namespace EngineNS.NxRHI
                 xnd.SaveXnd(file);
             }
         }
+
+        public FShaderBinder FindBinder(EShaderBindType type, string name)
+        {
+            return mCoreObject.FindBinder(type, VNameString.FromString(name));
+        }
     }
 }

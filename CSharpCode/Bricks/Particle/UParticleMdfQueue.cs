@@ -138,7 +138,7 @@ namespace EngineNS.Bricks.Particle
             {
                 drawcall.BindSRV(drawcall.FindBinder("sbParticleInstance"), Emitter.GpuResources.ParticlesBuffer.Srv);
                 drawcall.BindSRV(drawcall.FindBinder("sbAlives"), Emitter.GpuResources.CurAlivesBuffer.Srv);
-                drawcall.BindCBuffer(drawcall.FindBinder("cbParticleDesc"), Emitter.CurrentQueue.CBuffer);
+                drawcall.BindCBV(drawcall.FindBinder("cbParticleDesc"), Emitter.CurrentQueue.CBuffer);
 
                 if (Emitter.IsGpuDriven)
                 {

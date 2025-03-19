@@ -59,7 +59,7 @@ namespace EngineNS.Graphics.Mesh
             {
                 mdfQueue.PerGridUVMeshCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
             }
-            drawcall.BindCBuffer(binder, mdfQueue.PerGridUVMeshCBuffer);
+            drawcall.BindCBV(binder, mdfQueue.PerGridUVMeshCBuffer);
         }
     }
 

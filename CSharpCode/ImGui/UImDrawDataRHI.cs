@@ -89,7 +89,7 @@ namespace EngineNS.EGui
                 var result = rc.CreateGraphicDraw();
                 result.BindShaderEffect(renderer.SlateEffect);
                 result.BindGeomMesh(GeomMesh);
-                result.BindCBuffer(SlateCBufferBindInfo, SlateCBuffer);
+                result.BindCBV(SlateCBufferBindInfo, SlateCBuffer);
                 result.BindSampler(SlateSamplerBindInfo, renderer.SamplerState);
                 result.BindPipeline(Pipeline);
 

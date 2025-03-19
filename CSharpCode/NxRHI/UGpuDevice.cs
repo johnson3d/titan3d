@@ -321,6 +321,27 @@ namespace EngineNS.NxRHI
                 return null;
             return result;
         }
+        public TtAccelerationStructure CreateAccelerationStructure(in FAccelerationStructureDesc desc)
+        {
+            var ptr = mCoreObject.CreateAccelerationStructure(in desc);
+            if (ptr.IsValidPointer == false)
+                return null;
+            return new TtAccelerationStructure(ptr);
+        }
+        public TtAStructureInstance CreateAccelerationStructureInstance(in FAStructureInstanceDesc desc, TtAccelerationStructure pAStructrure)
+        {
+            var ptr = mCoreObject.CreateAccelerationStructureInstance(in desc, pAStructrure.mCoreObject);
+            if (ptr.IsValidPointer == false)
+                return null;
+            return new TtAStructureInstance(ptr);
+        }
+        public TtTopAccelerationStructure CreateTopAccelerationStructure(in FTopAccelerationStructureDesc desc)
+        {
+            var ptr = mCoreObject.CreateTopAccelerationStructure(in desc);
+            if (ptr.IsValidPointer == false)
+                return null;
+            return new TtTopAccelerationStructure(ptr);
+        }
         public TtShader CreateShader(TtShaderDesc desc)
         {
             var result = new TtShader();

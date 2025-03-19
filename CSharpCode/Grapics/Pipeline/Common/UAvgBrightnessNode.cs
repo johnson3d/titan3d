@@ -51,15 +51,15 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 var gpuScene = policy.GetGpuSceneNode();
                 var node = drawcall.TagObject as TtAvgBrightnessNode;
-                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerFrame");
+                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbPerFrame");
                 if (srvIdx.IsValidPointer)
                 {
-                    drawcall.BindCBuffer(srvIdx, TtEngine.Instance.GfxDevice.PerFrameCBuffer);
+                    drawcall.BindCBV(srvIdx, TtEngine.Instance.GfxDevice.PerFrameCBuffer);
                 }
-                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerGpuScene");
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbPerGpuScene");
                 if (srvIdx.IsValidPointer)
                 {
-                    drawcall.BindCBuffer(srvIdx, gpuScene.PerGpuSceneCbv);
+                    drawcall.BindCBV(srvIdx, gpuScene.PerGpuSceneCbv);
                 }
                 srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "GpuSceneDesc");
                 if (srvIdx.IsValidPointer)

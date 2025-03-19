@@ -201,7 +201,7 @@ namespace EngineNS.NxRHI
             {
                 if (mBinder != null)
                     return true;
-                var binder = shader.Reflector.FindBinder(EShaderBindType.SBT_CBuffer, name);
+                var binder = shader.Reflector.FindBinder(EShaderBindType.SBT_CBV, name);
                 if (binder.IsValidPointer == false)
                     return false;
                 UpdateFieldVar(new TtShaderBinder(binder));

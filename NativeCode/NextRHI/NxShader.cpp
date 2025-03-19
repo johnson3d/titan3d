@@ -149,7 +149,7 @@ namespace NxRHI
 	{
 		switch (type)
 		{
-		case EShaderBindType::SBT_CBuffer:
+		case EShaderBindType::SBT_CBV:
 		{
 			for (const auto& i : CBuffers)
 			{

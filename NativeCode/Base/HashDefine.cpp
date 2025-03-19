@@ -4,6 +4,12 @@
 #define new VNEW
 
 Hash64 Hash64::Empty;
+Hash128 Hash128::GetHash128(const char* s, UINT len)
+{
+	Hash128 result;
+	result.Value = CityHash128(s, len);
+	return result;
+}
 
 Hash64 HashHelper::MurmurHash64B(const void * key, int len, unsigned int seed)
 {

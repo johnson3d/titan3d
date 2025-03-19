@@ -217,7 +217,7 @@ namespace NxRHI
 	const FShaderBinder* IComputeEffect::FindBinder(VNameString name) const 
 	{
 		auto pReflector = mComputeShader->GetReflector();
-		auto pBinder = pReflector->FindBinder(EShaderBindType::SBT_CBuffer, name);
+		auto pBinder = pReflector->FindBinder(EShaderBindType::SBT_CBV, name);
 		if (pBinder != nullptr)
 			return pBinder;
 		pBinder = pReflector->FindBinder(EShaderBindType::SBT_SRV, name);
@@ -258,7 +258,7 @@ namespace NxRHI
 		ShaderBufferSize = 0;
 		for (auto& i : LocalSignatures)
 		{
-			auto binder = pReflector->FindBinder(EShaderBindType::SBT_CBuffer, i);
+			auto binder = pReflector->FindBinder(EShaderBindType::SBT_CBV, i);
 			if (binder != nullptr)
 			{
 				ShaderBufferSize += binder->Size;
@@ -357,7 +357,7 @@ namespace NxRHI
 	const FShaderBinder* IRayTracingEffect::FindBinder(VNameString name) const
 	{
 		auto pReflector = GetReflector();
-		auto pBinder = pReflector->FindBinder(EShaderBindType::SBT_CBuffer, name);
+		auto pBinder = pReflector->FindBinder(EShaderBindType::SBT_CBV, name);
 		if (pBinder != nullptr)
 			return pBinder;
 		pBinder = pReflector->FindBinder(EShaderBindType::SBT_SRV, name);

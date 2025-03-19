@@ -188,7 +188,7 @@ namespace EngineNS.NxRHI
             var cbBinder = effect.ShaderEffect.FindBinder("ProjectionMatrixBuffer");
             cmdParams.CBuffer = rc.CreateCBV(cbBinder);
             cmdParams.Drawcall.BindShaderEffect(effect);
-            cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
+            cmdParams.Drawcall.BindCBV(cbBinder.mCoreObject, cmdParams.CBuffer);
             cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, Srv);
             cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 

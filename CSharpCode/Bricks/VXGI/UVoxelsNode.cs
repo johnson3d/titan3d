@@ -168,16 +168,16 @@ namespace EngineNS.Bricks.VXGI
                     node.CBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(cbIndex);
                 }
 
-                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbGBufferDesc");
+                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbGBufferDesc");
                 if (srvIdx.IsValidPointer)
                 {
-                    drawcall.BindCBuffer(srvIdx, node.CBuffer);
+                    drawcall.BindCBV(srvIdx, node.CBuffer);
                 }
-                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerCamera");
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbPerCamera");
                 if (srvIdx.IsValidPointer)
                 {
                     var camera = policy.DefaultCamera;
-                    drawcall.BindCBuffer(srvIdx, camera.PerCameraCBuffer);
+                    drawcall.BindCBV(srvIdx, camera.PerCameraCBuffer);
                 }
                 srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxGroupPool");
                 if (srvIdx.IsValidPointer)
@@ -232,16 +232,16 @@ namespace EngineNS.Bricks.VXGI
             {
                 var node = drawcall.TagObject as UVoxelsNode;
 
-                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbGBufferDesc");
+                var srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbGBufferDesc");
                 if (srvIdx.IsValidPointer)
                 {
-                    drawcall.BindCBuffer(srvIdx, node.CBuffer);
+                    drawcall.BindCBV(srvIdx, node.CBuffer);
                 }
-                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbPerCamera");
+                srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbPerCamera");
                 if (srvIdx.IsValidPointer)
                 {
                     var camera = policy.DefaultCamera;
-                    drawcall.BindCBuffer(srvIdx, camera.PerCameraCBuffer);
+                    drawcall.BindCBV(srvIdx, camera.PerCameraCBuffer);
                 }
                 srvIdx = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_UAV, "VxGroupPool");
                 if (srvIdx.IsValidPointer)

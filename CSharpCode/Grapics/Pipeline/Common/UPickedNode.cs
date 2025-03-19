@@ -144,9 +144,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                                 if (drawcall != null)
                                 {
                                     if (PickedBuffer.PerViewportCBuffer != null)
-                                        drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerViewport, PickedBuffer.PerViewportCBuffer);
+                                        drawcall.BindCBV(drawcall.Effect.BindIndexer.cbPerViewport, PickedBuffer.PerViewportCBuffer);
                                     if (policy.DefaultCamera.PerCameraCBuffer != null)
-                                        drawcall.BindCBuffer(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
+                                        drawcall.BindCBV(drawcall.Effect.BindIndexer.cbPerCamera, policy.DefaultCamera.PerCameraCBuffer);
 
                                     cmdlist.PushGpuDraw(drawcall);
                                 }

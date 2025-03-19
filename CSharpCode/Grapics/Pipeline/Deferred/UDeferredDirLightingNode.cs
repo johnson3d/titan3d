@@ -149,7 +149,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             {
                 //drawcall.mCoreObject.BindShaderCBuffer(index, Manager.GetGpuSceneNode().PerGpuSceneCBuffer.mCoreObject);
                 var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.GpuScenePinIn);
-                drawcall.BindCBuffer(index, attachBuffer.Cbv);
+                drawcall.BindCBV(index, attachBuffer.Cbv);
             }
 
             #region MRT
@@ -269,7 +269,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             index = drawcall.FindBinder("cbPerCamera");
             if (index.IsValidPointer)
             {
-                drawcall.BindCBuffer(index, policy.DefaultCamera.PerCameraCBuffer);
+                drawcall.BindCBV(index, policy.DefaultCamera.PerCameraCBuffer);
             }
             index = drawcall.FindBinder("cbShadingEnv");
             if (index.IsValidPointer)
@@ -280,7 +280,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 }
                 dirLightingNode.CBShadingEnv.SetValue("RimPower", dirLightingNode.RimPower);
                 dirLightingNode.CBShadingEnv.SetValue("RimIntensity", dirLightingNode.RimIntensity);
-                drawcall.BindCBuffer(index, dirLightingNode.CBShadingEnv);
+                drawcall.BindCBV(index, dirLightingNode.CBShadingEnv);
             }
         }
         public void SetDisableShadow(bool value)

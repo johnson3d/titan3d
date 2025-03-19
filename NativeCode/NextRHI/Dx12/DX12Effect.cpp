@@ -147,7 +147,7 @@ namespace NxRHI
 		auto pPSBinder = (FShaderBinder*)binder->PSBinder;
 		switch (binder->BindType)
 		{
-			case EShaderBindType::SBT_CBuffer:
+			case EShaderBindType::SBT_CBV:
 			{
 				mRootParameters[FRootParameter::VS_Cbv].PushShaderBinder(pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_CBV);
 				mRootParameters[FRootParameter::PS_Cbv].PushShaderBinder(pPSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_CBV);
@@ -480,7 +480,7 @@ namespace NxRHI
 						pOutReflector->Samplers.push_back((FShaderBinder*)binder);
 				}
 				break;
-				case EShaderBindType::SBT_CBuffer:
+				case EShaderBindType::SBT_CBV:
 				{
 					CbvSrvUavBinders.push_back(binder);
 					D3D12_DESCRIPTOR_RANGE rg{};

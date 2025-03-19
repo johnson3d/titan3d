@@ -35,14 +35,14 @@ namespace EngineNS.Bricks.GpuDriven
             drawcall.BindSrv("SrcClusterBuffer", node.SrcClusters.Srv);
             drawcall.BindUav("VisClusterBuffer", node.VisClusters.Uav);
             
-            var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBuffer, "cbCameraFrustum");
+            var index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_CBV, "cbCameraFrustum");
             if (index.IsValidPointer)
             {
                 if (node.CBCameraFrustum == null)
                 {
                     node.CBCameraFrustum = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
                 }
-                drawcall.BindCBuffer(index, node.CBCameraFrustum);
+                drawcall.BindCBV(index, node.CBCameraFrustum);
             }
 
             index = drawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "HZBTexture");

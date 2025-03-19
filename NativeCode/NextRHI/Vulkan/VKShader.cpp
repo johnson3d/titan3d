@@ -470,7 +470,7 @@ namespace NxRHI
 			binder->Space = descriptorSet;
 			binder->Size = (UINT)sz;
 			binder->Slot = binding;
-			binder->Type = EShaderBindType::SBT_CBuffer;
+			binder->Type = EShaderBindType::SBT_CBV;
 			
 			UINT NumOfMember = spvc_type_get_num_member_types(spv_type);
 			for (UINT idx = 0; idx < NumOfMember; ++idx)

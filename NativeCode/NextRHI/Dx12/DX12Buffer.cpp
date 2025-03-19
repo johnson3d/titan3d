@@ -1715,5 +1715,209 @@ namespace NxRHI
 
 		return true;
 	}
+
+	bool DX12AccelerationStructure::Init(DX12GpuDevice* device, const FAccelerationStructureDesc* desc)
+	{
+		mMeshes.resize(desc->GeometryCount);
+		mGeometryDesc.resize(desc->GeometryCount);
+		for (UINT i = 0; i < desc->GeometryCount; i++)
+		{
+			mMeshes[i] = desc->Geometries[i];
+
+			auto mesh = mMeshes[i].GetPtr();
+			auto& geomDesc = mGeometryDesc[i];
+			geomDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
+			if (desc->GeomFlags != nullptr)
+				geomDesc.Flags = (D3D12_RAYTRACING_GEOMETRY_FLAGS)desc->GeomFlags[i];
+			else
+				geomDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_NONE;
+
+			auto ib = mesh->GetGeomtryMesh()->IndexBuffer->Buffer.UnsafeConvertTo<DX12Buffer>();
+			auto vb = mesh->GetGeomtryMesh()->VertexArray->GetVB(EVertexStreamType::VST_Position)->Buffer.UnsafeConvertTo<DX12Buffer>();
+			bool isIndex32 = mesh->GetGeomtryMesh()->IsIndex32;
+			auto indexCount = (UINT)(ib->Desc.Size / (isIndex32 ? sizeof(UINT) : sizeof(USHORT)));
+			auto vertexCount = (UINT)(vb->Desc.Size / sizeof(v3dxVector3));
+			geomDesc.Triangles.IndexBuffer = ib->GetGPUVirtualAddress();
+			geomDesc.Triangles.IndexCount = static_cast<UINT>(indexCount);
+			geomDesc.Triangles.IndexFormat = isIndex32 ? DXGI_FORMAT_R32_UINT : DXGI_FORMAT_R16_UINT;
+			geomDesc.Triangles.Transform3x4 = 0;
+			geomDesc.Triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
+			geomDesc.Triangles.VertexCount = vertexCount;
+			geomDesc.Triangles.VertexBuffer.StartAddress = vb->GetGPUVirtualAddress();
+			geomDesc.Triangles.VertexBuffer.StrideInBytes = sizeof(v3dxVector3);
+		}
+		
+		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS buildFlags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE;
+		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS& bottomLevelInputs = mBuildDesc.Inputs;
+		bottomLevelInputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
+		bottomLevelInputs.Flags = buildFlags;
+		bottomLevelInputs.NumDescs = (UINT)mGeometryDesc.size();
+		bottomLevelInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
+		bottomLevelInputs.pGeometryDescs = &mGeometryDesc[0];
+
+		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO bottomLevelPrebuildInfo = {};
+		device->mLastDevice->GetRaytracingAccelerationStructurePrebuildInfo(&bottomLevelInputs, &bottomLevelPrebuildInfo);
+		mScratchSize = (UINT)bottomLevelPrebuildInfo.ScratchDataSizeInBytes;
+		
+		FBufferDesc bfDesc{};
+		bfDesc.SetDefault(false, BFT_UAV);
+		bfDesc.Size = (UINT)bottomLevelPrebuildInfo.ResultDataMaxSizeInBytes;
+		bfDesc.RowPitch = bfDesc.Size;
+		bfDesc.DepthPitch = bfDesc.Size;
+		mGpuBuffer = MakeWeakRef(device->CreateBuffer(& bfDesc));
+
+		bfDesc.Size = mScratchSize;
+		bfDesc.RowPitch = bfDesc.Size;
+		bfDesc.DepthPitch = bfDesc.Size;
+		auto pScratchBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+		
+		mBuildDesc.ScratchAccelerationStructureData = pScratchBuffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
+		mBuildDesc.DestAccelerationStructureData = mGpuBuffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
+		{
+			FTransientCmd cmd(device, EQueueType::QU_Default, "BuildBLAStructure");
+			auto cmdlist = (DX12CommandList*)cmd.GetCmdList();
+			pScratchBuffer->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_Uav);
+			mGpuBuffer->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_Uav);
+			cmdlist->GetCmdRecorder()->UseResource(this);
+			cmdlist->mLastContext->BuildRaytracingAccelerationStructure(&mBuildDesc, 0, nullptr);
+		}
+		return true;
+	}
+	bool DX12AStructureInstance::Init(DX12GpuDevice* device, const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure)
+	{
+		mDesc = *desc;
+		mAStructure = pAStructrure;
+
+		return true;
+	}
+	bool DX12TopAccelerationStructure::Init(DX12GpuDevice* device, const FTopAccelerationStructureDesc* desc)
+	{
+		mDeviceRef.FromObject(device);
+		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS buildFlags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE;
+		D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS& topLevelInputs = mBuildDesc.Inputs;
+		topLevelInputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
+		topLevelInputs.Flags = buildFlags;
+		topLevelInputs.NumDescs = 1;
+		topLevelInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
+		topLevelInputs.pGeometryDescs = nullptr;
+		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO topLevelPrebuildInfo = {};
+		device->mLastDevice->GetRaytracingAccelerationStructurePrebuildInfo(&topLevelInputs, &topLevelPrebuildInfo);
+		mScratchSize = (UINT)topLevelPrebuildInfo.ScratchDataSizeInBytes;
+
+		FBufferDesc bfDesc{};
+		bfDesc.SetDefault(false, BFT_UAV);
+		bfDesc.Size = (UINT)topLevelPrebuildInfo.ResultDataMaxSizeInBytes;
+		bfDesc.RowPitch = bfDesc.Size;
+		bfDesc.DepthPitch = bfDesc.Size;
+		mGpuBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+
+		bfDesc.Size = mScratchSize;
+		bfDesc.RowPitch = bfDesc.Size;
+		bfDesc.DepthPitch = bfDesc.Size;
+		mGpuScratchBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+
+		return true;
+	}
+	bool DX12TopAccelerationStructure::IsBuild(DX12GpuDevice* device)
+	{
+		if (mInstDescs.size() != mBottomASInstances.size())
+		{
+			mInstDescs.clear();
+			std::vector<D3D12_RAYTRACING_INSTANCE_DESC> instDescs;
+			for (auto& i : mBottomASInstances)
+			{
+				D3D12_RAYTRACING_INSTANCE_DESC instDesc;
+				instDesc.AccelerationStructure = i->mAStructure->mGpuBuffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
+				instDesc.Flags = i->mDesc.Flags;
+				instDesc.InstanceContributionToHitGroupIndex = i->mDesc.InstanceContributionToHitGroupIndex;
+				instDesc.InstanceID = i->mDesc.InstanceID;
+				instDesc.InstanceMask = i->mDesc.InstanceMask;
+				v3dxMatrix4 tMat;
+				v3dxMatrix4Transpose(&tMat, &i->mDesc.Matrix);
+				memcpy(&instDesc.Transform[0], &tMat.m11, sizeof(float) * 4);
+				memcpy(&instDesc.Transform[1], &tMat.m21, sizeof(float) * 4);
+				memcpy(&instDesc.Transform[2], &tMat.m31, sizeof(float) * 4);
+
+				instDescs.push_back(instDesc);
+			}
+			mInstanceHash = Hash128::GetHash128((const char*)mInstDescs.data(), (UINT)(sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * mInstDescs.size()));
+			
+			FBufferDesc bfDesc{};
+			bfDesc.SetDefault(false, BFT_UAV);
+			bfDesc.Size = (UINT)(sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * mBottomASInstances.size());
+			bfDesc.RowPitch = bfDesc.Size;
+			bfDesc.DepthPitch = bfDesc.Size;
+			mInstanceGpuBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			return true;
+		}
+		else
+		{
+			auto saved = mInstanceHash;
+			mInstDescs.clear();
+			std::vector<D3D12_RAYTRACING_INSTANCE_DESC> instDescs;
+			for (auto& i : mBottomASInstances)
+			{
+				D3D12_RAYTRACING_INSTANCE_DESC instDesc;
+				instDesc.AccelerationStructure = i->mAStructure->mGpuBuffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
+				instDesc.Flags = i->mDesc.Flags;
+				instDesc.InstanceContributionToHitGroupIndex = i->mDesc.InstanceContributionToHitGroupIndex;
+				instDesc.InstanceID = i->mDesc.InstanceID;
+				instDesc.InstanceMask = i->mDesc.InstanceMask;
+				v3dxMatrix4 tMat;
+				v3dxMatrix4Transpose(&tMat, &i->mDesc.Matrix);
+				memcpy(&instDesc.Transform[0], &tMat.m11, sizeof(float) * 4);
+				memcpy(&instDesc.Transform[1], &tMat.m21, sizeof(float) * 4);
+				memcpy(&instDesc.Transform[2], &tMat.m31, sizeof(float) * 4);
+
+				instDescs.push_back(instDesc);
+			}
+			mInstanceHash = Hash128::GetHash128((const char*)mInstDescs.data(), (UINT)(sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * mInstDescs.size()));
+			auto result = saved != mInstanceHash;
+			if (result)
+			{
+				FBufferDesc bfDesc{};
+				bfDesc.SetDefault(false, BFT_UAV);
+				bfDesc.Size = (UINT)(sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * mBottomASInstances.size());
+				bfDesc.RowPitch = bfDesc.Size;
+				bfDesc.DepthPitch = bfDesc.Size;
+				mInstanceGpuBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			}
+			return result;
+		}
+	}
+	bool DX12TopAccelerationStructure::BuildAcclerationStruture()
+	{	
+		auto device = mDeviceRef.GetPtr();
+		if (IsBuild(device) == false)
+			return true;
+
+		mBuildDesc.Inputs.InstanceDescs = mInstanceGpuBuffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
+		mBuildDesc.ScratchAccelerationStructureData = mGpuScratchBuffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
+		mBuildDesc.DestAccelerationStructureData = mGpuBuffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
+		if (mSourceGpuBuffer != nullptr)
+			mBuildDesc.SourceAccelerationStructureData = mSourceGpuBuffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
+		else
+			mBuildDesc.SourceAccelerationStructureData = 0;
+
+		{
+			FTransientCmd cmd(device, EQueueType::QU_Default, "BuildTLAStructure");
+			auto cmdlist = ((DX12CommandList*)cmd.GetCmdList());
+			mGpuScratchBuffer->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_Uav);
+			mGpuBuffer->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_Uav);
+			mInstanceGpuBuffer->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_GenericRead);
+			cmdlist->mLastContext->BuildRaytracingAccelerationStructure(&mBuildDesc, 0, nullptr);
+
+			if (mSourceGpuBuffer == nullptr)
+			{
+				mSourceGpuBuffer = device->CreateBuffer(&mGpuBuffer->Desc);
+			}
+			cmdlist->GetCmdRecorder()->UseResource(this);
+			cmdlist->GetCmdRecorder()->UseResource(mInstanceGpuBuffer);
+
+			cmdlist->CopyBufferRegion(mSourceGpuBuffer, 0, mGpuBuffer, 0, mGpuBuffer->Desc.Size);
+		}
+		
+		return true;
+	}
 }
 NS_END

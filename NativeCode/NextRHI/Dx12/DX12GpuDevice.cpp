@@ -733,6 +733,36 @@ namespace NxRHI
 		result->mRenderPass = rpass;
 		return result;
 	}
+	IAccelerationStructure* DX12GpuDevice::CreateAccelerationStructure(const FAccelerationStructureDesc* desc)
+	{
+		auto result = new DX12AccelerationStructure();
+		if (result->Init(this, desc) == false)
+		{
+			result->Release();
+			return nullptr;
+		}
+		return result;
+	}
+	IAStructureInstance* DX12GpuDevice::CreateAccelerationStructureInstance(const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure)
+	{
+		auto result = new DX12AStructureInstance();
+		if (result->Init(this, desc, pAStructrure) == false)
+		{
+			result->Release();
+			return nullptr;
+		}
+		return result;
+	}
+	ITopAccelerationStructure* DX12GpuDevice::CreateTopAccelerationStructure(const FTopAccelerationStructureDesc* desc)
+	{
+		auto result = new DX12TopAccelerationStructure();
+		if (result->Init(this, desc) == false)
+		{
+			result->Release();
+			return nullptr;
+		}
+		return result;
+	}
 	IGpuPipeline* DX12GpuDevice::CreatePipeline(const FGpuPipelineDesc* desc)
 	{
 		auto result = new DX12GpuPipeline();

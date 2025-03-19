@@ -45,7 +45,7 @@ namespace EngineNS.Bricks.Particle
 
                 mParticleUpdateDrawcall.SetComputeEffect(Shader.Particle_Update);
 
-                mParticleUpdateDrawcall.BindCBuffer("cbParticleDesc", CBuffer);
+                mParticleUpdateDrawcall.BindCBV("cbParticleDesc", CBuffer);
                 mParticleUpdateDrawcall.BindSrv("bfRandomPool", TtEngine.Instance.NebulaTemplateManager.RandomPoolSrv);
 
                 mParticleUpdateDrawcall.BindUav("bfParticles", gpuResources.ParticlesBuffer.Uav);

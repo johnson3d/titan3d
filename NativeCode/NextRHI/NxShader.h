@@ -12,12 +12,12 @@ namespace NxRHI
 	enum TR_ENUM(SV_EnumNoFlags)
 		EShaderBindType
 	{
-		SBT_CBuffer,
+		SBT_CBV,
 			SBT_SRV,
 			SBT_UAV,
 			SBT_Sampler,
-			SBT_Vertex,
-			SBT_Index,
+			SBT_VBV,
+			SBT_IBV,
 	};
 	
 	struct TR_CLASS()

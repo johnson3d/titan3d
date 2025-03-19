@@ -93,7 +93,7 @@ namespace EngineNS.Bricks.CodeBuilder.ShaderNode.Var
                 var cbBinder = mSlateEffect.ShaderEffect.FindBinder("ProjectionMatrixBuffer");
                 cmdParams.CBuffer = rc.CreateCBV(cbBinder);
                 cmdParams.Drawcall.BindShaderEffect(mSlateEffect);
-                cmdParams.Drawcall.BindCBuffer(cbBinder.mCoreObject, cmdParams.CBuffer);
+                cmdParams.Drawcall.BindCBV(cbBinder.mCoreObject, cmdParams.CBuffer);
                 cmdParams.Drawcall.BindSRV(TtNameTable.FontTexture, TextureSRV);
                 cmdParams.Drawcall.BindSampler(TtNameTable.Samp_FontTexture, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
 

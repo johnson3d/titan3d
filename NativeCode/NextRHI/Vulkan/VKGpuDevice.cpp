@@ -836,6 +836,18 @@ namespace NxRHI
 		result->mDeviceRef.FromObject(this);
 		return result;
 	}
+	IAccelerationStructure* VKGpuDevice::CreateAccelerationStructure(const FAccelerationStructureDesc* rpass)
+	{
+		return nullptr;
+	}
+	IAStructureInstance* VKGpuDevice::CreateAccelerationStructureInstance(const FAStructureInstanceDesc* desc, IAccelerationStructure* pAStructrure)
+	{
+		return nullptr;
+	}
+	ITopAccelerationStructure* VKGpuDevice::CreateTopAccelerationStructure(const FTopAccelerationStructureDesc* desc)
+	{
+		return nullptr;
+	}
 	IGpuPipeline* VKGpuDevice::CreatePipeline(const FGpuPipelineDesc* desc)
 	{
 		auto result = new VKGpuPipeline();

@@ -72,7 +72,7 @@ namespace NxRHI
 					continue;
 				switch (i.first->BindType)
 				{
-					case SBT_CBuffer:
+					case SBT_CBV:
 					{
 						IGpuResource* t = i.second;
 						effect->BindCBV(cmdlist, i.first, (ICbView*)t);
