@@ -1,4 +1,5 @@
-﻿using EngineNS.GamePlay;
+﻿using Assimp;
+using EngineNS.GamePlay;
 using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
 using System;
@@ -22,6 +23,12 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
             {    
                 drawcall.BindCBV(binder, node.SceneCBV);
             }
+            binder = drawcall.FindBinder(EShaderBindType.SBT_SRV, "Scene");
+            if (binder.IsValidPointer)
+            {
+                drawcall.BindSrv(binder, node.mTopAccelerationStructure.mCoreObject.GetGpuBufferSRV());
+            }
+            
             base.OnDrawCall(drawcall, policy);
         }
     }

@@ -213,6 +213,11 @@ namespace NxRHI
 			resState |= D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
 			GpuState = EGpuResourceState::GRS_UavIndirect;
 		}
+		if (desc.Type & EBufferType::BFT_RTAS)
+		{
+			resState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE;
+			GpuState = EGpuResourceState::GRS_GenericRead;
+		}
 		if (desc.CpuAccess == ECpuAccess::CAS_READ)
 		{
 			resDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
@@ -1760,12 +1765,13 @@ namespace NxRHI
 		mScratchSize = (UINT)bottomLevelPrebuildInfo.ScratchDataSizeInBytes;
 		
 		FBufferDesc bfDesc{};
-		bfDesc.SetDefault(false, BFT_UAV);
+		bfDesc.SetDefault(false, (EBufferType)(EBufferType::BFT_RTAS | EBufferType::BFT_UAV));
 		bfDesc.Size = (UINT)bottomLevelPrebuildInfo.ResultDataMaxSizeInBytes;
 		bfDesc.RowPitch = bfDesc.Size;
 		bfDesc.DepthPitch = bfDesc.Size;
 		mGpuBuffer = MakeWeakRef(device->CreateBuffer(& bfDesc));
 
+		bfDesc.SetDefault(false, EBufferType::BFT_UAV);
 		bfDesc.Size = mScratchSize;
 		bfDesc.RowPitch = bfDesc.Size;
 		bfDesc.DepthPitch = bfDesc.Size;
@@ -1776,9 +1782,10 @@ namespace NxRHI
 		{
 			FTransientCmd cmd(device, EQueueType::QU_Default, "BuildBLAStructure");
 			auto cmdlist = (DX12CommandList*)cmd.GetCmdList();
-			pScratchBuffer->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_Uav);
-			mGpuBuffer->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_Uav);
+			//pScratchBuffer->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_Uav);
+			//mGpuBuffer->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_RTAS);
 			cmdlist->GetCmdRecorder()->UseResource(this);
+			cmdlist->GetCmdRecorder()->UseResource(pScratchBuffer);
 			cmdlist->mLastContext->BuildRaytracingAccelerationStructure(&mBuildDesc, 0, nullptr);
 		}
 		return true;
@@ -1805,12 +1812,24 @@ namespace NxRHI
 		mScratchSize = (UINT)topLevelPrebuildInfo.ScratchDataSizeInBytes;
 
 		FBufferDesc bfDesc{};
-		bfDesc.SetDefault(false, BFT_UAV);
+		bfDesc.SetDefault(true, (EBufferType)(EBufferType::BFT_UAV | EBufferType::BFT_SRV | EBufferType::BFT_RTAS));
 		bfDesc.Size = (UINT)topLevelPrebuildInfo.ResultDataMaxSizeInBytes;
+		bfDesc.Size = ((bfDesc.Size + (sizeof(UINT) - 1)) / sizeof(UINT)) * sizeof(UINT);
 		bfDesc.RowPitch = bfDesc.Size;
 		bfDesc.DepthPitch = bfDesc.Size;
 		mGpuBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
 
+		FSrvDesc srvDesc{};
+		srvDesc.SetBuffer(true);
+		srvDesc.Buffer.NumElements = bfDesc.Size / sizeof(UINT);
+		mGpuBufferSRV = MakeWeakRef(device->CreateSRV(mGpuBuffer, &srvDesc));
+
+		FUavDesc uavDesc{};
+		uavDesc.SetBuffer(true);
+		uavDesc.Buffer.NumElements = bfDesc.Size / sizeof(UINT);
+		mGpuBufferUAV = MakeWeakRef(device->CreateUAV(mGpuBuffer, &uavDesc));
+
+		bfDesc.SetDefault(false, (EBufferType)(EBufferType::BFT_UAV));
 		bfDesc.Size = mScratchSize;
 		bfDesc.RowPitch = bfDesc.Size;
 		bfDesc.DepthPitch = bfDesc.Size;
@@ -1843,11 +1862,15 @@ namespace NxRHI
 			mInstanceHash = Hash128::GetHash128((const char*)mInstDescs.data(), (UINT)(sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * mInstDescs.size()));
 			
 			FBufferDesc bfDesc{};
-			bfDesc.SetDefault(false, BFT_UAV);
+			bfDesc.SetDefault(false, BFT_SRV);
+			bfDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+			bfDesc.Usage = EGpuUsage::USAGE_STAGING;
 			bfDesc.Size = (UINT)(sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * mBottomASInstances.size());
 			bfDesc.RowPitch = bfDesc.Size;
 			bfDesc.DepthPitch = bfDesc.Size;
-			mInstanceGpuBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			bfDesc.InitData = mInstDescs.data();
+			auto buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+			mInstanceGpuBuffer = MakeWeakRef(new FUploadBuffer(buffer));
 			return true;
 		}
 		else
@@ -1875,12 +1898,17 @@ namespace NxRHI
 			auto result = saved != mInstanceHash;
 			if (result)
 			{
-				FBufferDesc bfDesc{};
-				bfDesc.SetDefault(false, BFT_UAV);
+				UINT size = (UINT)(sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * mBottomASInstances.size());
+				memcpy(mInstanceGpuBuffer->GetPtr(), mInstDescs.data(), size);
+				/*FBufferDesc bfDesc{};
+				bfDesc.SetDefault(false, BFT_SRV);
+				bfDesc.CpuAccess = ECpuAccess::CAS_WRITE;
+				bfDesc.Usage = EGpuUsage::USAGE_STAGING;
 				bfDesc.Size = (UINT)(sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * mBottomASInstances.size());
 				bfDesc.RowPitch = bfDesc.Size;
 				bfDesc.DepthPitch = bfDesc.Size;
-				mInstanceGpuBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+				auto buffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
+				mInstanceGpuBuffer = MakeWeakRef(new FUploadBuffer(buffer));*/
 			}
 			return result;
 		}
@@ -1891,7 +1919,7 @@ namespace NxRHI
 		if (IsBuild(device) == false)
 			return true;
 
-		mBuildDesc.Inputs.InstanceDescs = mInstanceGpuBuffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
+		mBuildDesc.Inputs.InstanceDescs = ((DX12Buffer*)mInstanceGpuBuffer->GetBuffer())->GetGPUVirtualAddress();
 		mBuildDesc.ScratchAccelerationStructureData = mGpuScratchBuffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
 		mBuildDesc.DestAccelerationStructureData = mGpuBuffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress();
 		if (mSourceGpuBuffer != nullptr)
@@ -1902,19 +1930,17 @@ namespace NxRHI
 		{
 			FTransientCmd cmd(device, EQueueType::QU_Default, "BuildTLAStructure");
 			auto cmdlist = ((DX12CommandList*)cmd.GetCmdList());
-			mGpuScratchBuffer->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_Uav);
-			mGpuBuffer->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_Uav);
-			mInstanceGpuBuffer->TransitionTo(cmd.GetCmdList(), EGpuResourceState::GRS_GenericRead);
+			cmdlist->GetCmdRecorder()->UseResource(this);
+			cmdlist->GetCmdRecorder()->UseResource(mInstanceGpuBuffer->GetBuffer());
 			cmdlist->mLastContext->BuildRaytracingAccelerationStructure(&mBuildDesc, 0, nullptr);
 
 			if (mSourceGpuBuffer == nullptr)
 			{
-				mSourceGpuBuffer = device->CreateBuffer(&mGpuBuffer->Desc);
+				mSourceGpuBuffer = MakeWeakRef(device->CreateBuffer(&mGpuBuffer->Desc));
 			}
-			cmdlist->GetCmdRecorder()->UseResource(this);
-			cmdlist->GetCmdRecorder()->UseResource(mInstanceGpuBuffer);
-
-			cmdlist->CopyBufferRegion(mSourceGpuBuffer, 0, mGpuBuffer, 0, mGpuBuffer->Desc.Size);
+			cmdlist->mLastContext->CopyRaytracingAccelerationStructure(mSourceGpuBuffer.UnsafeConvertTo<DX12Buffer>()->GetGPUVirtualAddress(), 
+				mBuildDesc.DestAccelerationStructureData,
+				D3D12_RAYTRACING_ACCELERATION_STRUCTURE_COPY_MODE_CLONE);
 		}
 		
 		return true;

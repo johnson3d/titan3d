@@ -80,6 +80,7 @@ namespace NxRHI
 			BFT_RTV = (1 << 6),
 			BFT_DSV = (1 << 7),
 			BFT_RAW = (1 << 8),
+			BFT_RTAS = (1 << 9),
 	};
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FBufferDesc
@@ -133,6 +134,7 @@ namespace NxRHI
 			GRS_CopySrc,
 			GRS_CopyDst,
 			GRS_Present,
+			//GRS_RTAS,
 	};
 
 	struct TR_CLASS(SV_LayoutStruct = 8)
@@ -1228,8 +1230,22 @@ namespace NxRHI
 	public:
 		AutoRef<IBuffer>		mGpuScratchBuffer;
 		AutoRef<IBuffer>		mGpuBuffer;
-		AutoRef<IBuffer>		mInstanceGpuBuffer;
+		AutoRef<ISrView>		mGpuBufferSRV;
+		AutoRef<IUaView>		mGpuBufferUAV;
+		AutoRef<FUploadBuffer>	mInstanceGpuBuffer;
 		UINT					mScratchSize = 0;
+		IBuffer* GetGpuBuffer() {
+			return mGpuBuffer;
+		}
+		ISrView* GetGpuBufferSRV() {
+			return mGpuBufferSRV;
+		}
+		IUaView* GetGpuBufferUAV() {
+			return mGpuBufferUAV;
+		}
+		FUploadBuffer* GetInstanceGpuBuffer() {
+			return mInstanceGpuBuffer;
+		}
 		std::vector<AutoRef<IAStructureInstance>>	mBottomASInstances;
 		UINT GetBLASInstanceCount() const
 		{

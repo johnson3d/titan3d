@@ -43,9 +43,11 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.AddBLASInstance(instance.mCoreObject);
         }
+        public TtSrView mGpuBufferSRV = null;
         public bool BuildAcclerationStruture()
         {
-            return mCoreObject.BuildAcclerationStruture();
+            var ret = mCoreObject.BuildAcclerationStruture();
+            return ret;
         }
     }
 }

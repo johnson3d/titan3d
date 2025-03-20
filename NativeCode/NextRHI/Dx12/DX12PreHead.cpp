@@ -156,6 +156,10 @@ namespace NxRHI
 		{
 			((DX12GpuDevice*)device)->OnDeviceRemoved();
 		}
+		if (hr != S_OK)
+		{
+			return nullptr;
+		}
 
 		if (name != nullptr)
 		{

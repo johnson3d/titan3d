@@ -310,6 +310,12 @@ namespace EngineNS.NxRHI
                 return;
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }
+        public void BindCBV(FShaderBinder binder, ICbView resource)
+        {
+            if (binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.NativeSuper);
+        }
         public void BindCBV(string name, TtCbView resource)
         {
             var binder = mCoreObject.FindBinder(EShaderBindType.SBT_CBV, name);
@@ -333,6 +339,12 @@ namespace EngineNS.NxRHI
                 return;
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
         }
+        public void BindSrv(FShaderBinder binder, ISrView resource)
+        {
+            if (binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.NativeSuper);
+        }
         public void BindSrv(string name, TtSrView resource)
         {
             var binder = mCoreObject.FindBinder(EShaderBindType.SBT_SRV, name);
@@ -344,6 +356,12 @@ namespace EngineNS.NxRHI
             if (resource == null || binder.IsValidPointer == false)
                 return;
             mCoreObject.BindResource(binder, resource.mCoreObject.NativeSuper);
+        }
+        public void BindUav(FShaderBinder binder, IUaView resource)
+        {
+            if (binder.IsValidPointer == false)
+                return;
+            mCoreObject.BindResource(binder, resource.NativeSuper);
         }
         public void BindUav(string name, TtUaView resource)
         {
