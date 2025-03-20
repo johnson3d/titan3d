@@ -17,18 +17,33 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
         }
         public override void OnDrawCall(TtRayTracingDraw drawcall, TtRenderPolicy policy)
         {
-            var node = policy.TagObject as TtRayTracingNode;
+            var node = drawcall.TagObject as TtRayTracingNode;
             var binder = drawcall.FindBinder(EShaderBindType.SBT_CBV, "g_sceneCB");
             if (binder.IsValidPointer)
             {    
                 drawcall.BindCBV(binder, node.SceneCBV);
+            }
+            binder = drawcall.FindBinder(EShaderBindType.SBT_CBV, "g_cubeCB");
+            if (binder.IsValidPointer)
+            {
+                drawcall.BindCBV(binder, node.CubeCBV);
             }
             binder = drawcall.FindBinder(EShaderBindType.SBT_SRV, "Scene");
             if (binder.IsValidPointer)
             {
                 drawcall.BindSrv(binder, node.mTopAccelerationStructure.mCoreObject.GetGpuBufferSRV());
             }
-            
+            binder = drawcall.FindBinder(EShaderBindType.SBT_SRV, "Indices");
+            if (binder.IsValidPointer)
+            {
+                drawcall.BindSrv(binder, node.IBV);
+            }
+            binder = drawcall.FindBinder(EShaderBindType.SBT_SRV, "Vertices");
+            if (binder.IsValidPointer)
+            {
+                drawcall.BindSrv(binder, node.VBV);
+            }
+
             base.OnDrawCall(drawcall, policy);
         }
     }
@@ -60,6 +75,9 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
         public NxRHI.TtAStructureInstance mASInst0;
 
         public NxRHI.TtCbView SceneCBV;
+        public NxRHI.TtCbView CubeCBV;
+        public NxRHI.TtSrView VBV;
+        public NxRHI.TtSrView IBV;
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
@@ -74,6 +92,11 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
             {
                 SceneCBV = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
             }
+            binder = mBasePassShading.CurrentEffect.FindBinder(EShaderBindType.SBT_CBV, "g_cubeCB");
+            if (binder.IsValidPointer)
+            {
+                CubeCBV = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(binder);
+            }
 
             FTopAccelerationStructureDesc topAccelerationStructureDesc = new FTopAccelerationStructureDesc();
             topAccelerationStructureDesc.SetDefault();
@@ -83,6 +106,23 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
             asDesc.m_GeometryCount = 1;
             var mesh = await TtEngine.Instance.GfxDevice.MeshPrimitiveManager.GetMeshPrimitive(RName.GetRName("mesh/base/box.vms", RName.ERNameType.Engine));
             var meshPtr = mesh.mCoreObject;
+            var ib = meshPtr.GetGeomtryMesh().IndexBuffer.Buffer;
+            var vb = meshPtr.GetGeomtryMesh().GetVertexArray().GetVB(EVertexStreamType.VST_Position).Buffer;
+            {
+                var ibvDesc = new NxRHI.FSrvDesc();
+                ibvDesc.SetBuffer(true);
+                ibvDesc.Buffer.NumElements = ib.Desc.Size / sizeof(uint);
+                IBV = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(ib, in ibvDesc);
+            }
+            unsafe
+            {
+                var vbvDesc = new NxRHI.FSrvDesc();
+                vbvDesc.SetBuffer(false);
+                vbvDesc.Buffer.ElementWidth = (uint)sizeof(Vector3);
+                vbvDesc.Buffer.StructureByteStride = (uint)sizeof(Vector3);
+                vbvDesc.Buffer.NumElements = meshPtr.GetVertexNumber();
+                VBV = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(vb, in vbvDesc);
+            }
             unsafe
             {
                 EngineNS.NxRHI.FMeshPrimitives** pGeometries = stackalloc EngineNS.NxRHI.FMeshPrimitives*[1];
@@ -96,8 +136,9 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
 
             mTopAccelerationStructure.AddBLASInstance(mASInst0);
             mTopAccelerationStructure.BuildAcclerationStruture();
-            //mRayTracingDraw = TtEngine.Instance.GfxDevice.RenderContext.CreateRayTracingDraw();
-            //mBasePassShading.SetDispatchRay(this, policy, mRayTracingDraw, 1, 1, 1);
+            mRayTracingDraw = TtEngine.Instance.GfxDevice.RenderContext.CreateRayTracingDraw();
+            mRayTracingDraw.TagObject = this;
+            mBasePassShading.SetDispatchRay(this, policy, mRayTracingDraw, 1, 1, 1);
         }
         public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
         {
@@ -105,6 +146,10 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
             {
                 return;
             }
+            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
+            //TtEngine.Instance.GfxDevice.RenderSwapQueue.CaptureRenderDocFrame = true;
+            //TtEngine.Instance.GfxDevice.RenderSwapQueue.BeginFrameCapture();
+
             var cmdlist = BasePass.DrawCmdList;
             using (new NxRHI.TtCmdListScope(cmdlist))
             {
@@ -112,6 +157,9 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
                 cmdlist.FlushDraws();
             }
             policy.CommitCommandList(cmdlist);
+            TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
+
+            //TtEngine.Instance.GfxDevice.RenderSwapQueue.EndFrameCapture(this.Name);
         }
     }
 }

@@ -1,6 +1,8 @@
 #pragma once
-#include "renderdoc_app.h"
+
 #include "../../../NativeCode/Base/IUnknown.h"
+
+struct RENDERDOC_API_1_6_0;
 
 NS_BEGIN
 
@@ -12,7 +14,7 @@ class IRenderContext;
 class TR_CLASS()
 	IRenderDocTool : public IWeakRefObject
 {
-	RENDERDOC_API_1_4_0* mApi;
+	RENDERDOC_API_1_6_0*				mApi;
 	NxRHI::IGpuDevice*					mRenderContext = nullptr;
 	void*								mHWDevice = nullptr;
 	char								mTempLogFile[512];

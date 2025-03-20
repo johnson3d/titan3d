@@ -376,6 +376,22 @@ namespace NxRHI
 		auto pReflector = GetReflector();
 		return pReflector->FindBinder(type, name);
 	}
+	void IRayTracingEffect::BindCBV(ICommandList* cmdlist, const FShaderBinder* binder, ICbView* buffer)
+	{
+		cmdlist->SetCBV(EShaderType::SDT_RayTracing, binder, buffer);
+	}
+	void IRayTracingEffect::BindSrv(ICommandList* cmdlist, const FShaderBinder* binder, ISrView* srv)
+	{
+		cmdlist->SetSrv(EShaderType::SDT_RayTracing, binder, srv);
+	}
+	void IRayTracingEffect::BindUav(ICommandList* cmdlist, const FShaderBinder* binder, IUaView* uav)
+	{
+		cmdlist->SetUav(EShaderType::SDT_RayTracing, binder, uav);
+	}
+	void IRayTracingEffect::BindSampler(ICommandList* cmdlist, const FShaderBinder* binder, ISampler* sampler)
+	{
+		cmdlist->SetSampler(EShaderType::SDT_RayTracing, binder, sampler);
+	}
 }
 
 NS_END

@@ -15,7 +15,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)IRenderDocTool.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)renderdoc_app.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)IRenderDocTool.cpp" />

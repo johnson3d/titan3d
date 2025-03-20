@@ -3,6 +3,7 @@
 #include "../../../NativeCode/NextRHI/Dx12/DX12GpuDevice.h"
 #include "../../../NativeCode/NextRHI/Vulkan/VKGpuDevice.h"
 #include "../../../NativeCode/Base/csharp/CsBinder.h"
+#include "../../../3rd/native/renderdoc/renderdoc_app.h"
 
 #define new VNEW
 
@@ -28,7 +29,7 @@ void IRenderDocTool::InitRenderDoc(const char* path)
 	{
 		pRENDERDOC_GetAPI RENDERDOC_GetAPI =
 			(pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
-		int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_4_0, (void**)&mApi);
+		int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_6_0, (void**)&mApi);
 		assert(ret == 1);
 		mApi->SetCaptureOptionU32(RENDERDOC_CaptureOption::eRENDERDOC_Option_CaptureAllCmdLists, 1);
 
@@ -37,6 +38,10 @@ void IRenderDocTool::InitRenderDoc(const char* path)
 
 		opt = FGlobalConfig::GetInstance()->GetConfigValueI32("RenderDocSaveAllInitials");
 		mApi->SetCaptureOptionU32(RENDERDOC_CaptureOption::eRENDERDOC_Option_SaveAllInitials, opt);
+		
+		mApi->SetCaptureOptionU32(RENDERDOC_CaptureOption::eRENDERDOC_Option_AllowUnsupportedVendorExtensions, 1);
+		mApi->SetCaptureOptionU32(RENDERDOC_CaptureOption::eRENDERDOC_Option_AllowVSync, 0); // 禁用垂直同步
+
 
 		mApi->MaskOverlayBits(RENDERDOC_OverlayBits::eRENDERDOC_Overlay_None, RENDERDOC_OverlayBits::eRENDERDOC_Overlay_None);
 	}

@@ -589,6 +589,7 @@ namespace NxRHI
 		{
 			FBufferDesc hitGroupDesc{};
 			hitGroupDesc.SetDefault(false);
+			hitGroupDesc.Type = EBufferType::BFT_NONE;
 			hitGroupDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 			hitGroupDesc.Usage = EGpuUsage::USAGE_STAGING;
 			IBlobObject blob;
@@ -615,7 +616,7 @@ namespace NxRHI
 					blob.PushData(&value, sizeof(D3D12_GPU_DESCRIPTOR_HANDLE));
 					PushSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
 				}
-				auto alignSize = ((PushSize + (D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT - 1)) / D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT) * D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+				auto alignSize = Align(PushSize, D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT);
 				if (alignSize - PushSize)
 				{
 					blob.PushData(nullptr, alignSize - PushSize);
@@ -655,6 +656,41 @@ namespace NxRHI
 		}
 
 		BindDescriptors(device, dx12Cmd, effect);
+
+		for (auto& i : BindResources)
+		{
+			if (i.second == nullptr)
+				continue;
+			switch (i.first->Type)
+			{
+			case SBT_CBV:
+			{
+				IGpuResource* t = i.second;
+				effect->BindCBV(cmdlist, i.first, (ICbView*)t);
+			}
+			break;
+			case SBT_SRV:
+			{
+				auto t = (DX12SrView*)i.second;
+				effect->BindSrv(cmdlist, i.first, t);
+			}
+			break;
+			case SBT_UAV:
+			{
+				IGpuResource* t = i.second;
+				effect->BindUav(cmdlist, i.first, (IUaView*)t);
+			}
+			break;
+			case SBT_Sampler:
+			{
+				IGpuResource* t = i.second;
+				effect->BindSampler(cmdlist, i.first, (ISampler*)t);
+			}
+			break;
+			default:
+				break;
+			}
+		}
 
 		D3D12_DISPATCH_RAYS_DESC dispatchDesc = {};
 		dispatchDesc.Width = this->Width;

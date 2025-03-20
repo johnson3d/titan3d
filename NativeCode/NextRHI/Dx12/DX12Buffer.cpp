@@ -1214,7 +1214,7 @@ namespace NxRHI
 		if (pBuffer == nullptr)
 		{
 			FBufferDesc bfDesc{};
-			bfDesc.SetDefault();
+			bfDesc.SetDefault(true);
 			bfDesc.Size = desc->Size;
 			bfDesc.StructureStride = desc->Stride;
 			bfDesc.InitData = desc->InitData;
@@ -1251,7 +1251,7 @@ namespace NxRHI
 		if (pBuffer == nullptr)
 		{
 			FBufferDesc bfDesc{};
-			bfDesc.SetDefault();
+			bfDesc.SetDefault(true);
 			bfDesc.Size = desc->Size;
 			bfDesc.StructureStride = desc->Stride;
 			bfDesc.InitData = desc->InitData;
@@ -1372,6 +1372,12 @@ namespace NxRHI
 				ASSERT(false);
 			}
 			break;
+			case ST_RTAS:
+			{
+				tar->ViewDimension = D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_RAYTRACING_ACCELERATION_STRUCTURE;
+				tar->Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			}
+			break;
 			default:
 				ASSERT(false);
 				break;
@@ -1409,8 +1415,12 @@ namespace NxRHI
 		D3D12_SHADER_RESOURCE_VIEW_DESC d3dDesc{};
 		SrvDesc2DX(&d3dDesc, &desc);
 		d3dDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		
-		if (desc.Type == ST_BufferSRV)
+		if (desc.Type == ESrvType::ST_RTAS)
+		{
+			d3dDesc.RaytracingAccelerationStructure.Location = ((DX12Buffer*)pBuffer)->GetGPUVirtualAddress();
+			Desc.RTASLocation = d3dDesc.RaytracingAccelerationStructure.Location;
+		}
+		else if (desc.Type == ST_BufferSRV)
 		{
 			d3dDesc.Format = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
 			//d3dDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32_TYPELESS;
@@ -1421,6 +1431,10 @@ namespace NxRHI
 			d3dDesc.Buffer.StructureByteStride = 0;
 		}
 		auto pD3DRes = (ID3D12Resource*)pBuffer->GetHWBuffer();
+		if (Desc.Type == ESrvType::ST_RTAS)
+		{
+			pD3DRes = nullptr;
+		}
 		device->mDevice->CreateShaderResourceView(pD3DRes, &d3dDesc, mView->GetCpuAddress(0));
 		//mView->Heap->RefResources[0] = Buffer;
 		
@@ -1820,8 +1834,7 @@ namespace NxRHI
 		mGpuBuffer = MakeWeakRef(device->CreateBuffer(&bfDesc));
 
 		FSrvDesc srvDesc{};
-		srvDesc.SetBuffer(true);
-		srvDesc.Buffer.NumElements = bfDesc.Size / sizeof(UINT);
+		srvDesc.SetRTAS();
 		mGpuBufferSRV = MakeWeakRef(device->CreateSRV(mGpuBuffer, &srvDesc));
 
 		FUavDesc uavDesc{};

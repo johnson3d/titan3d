@@ -29,7 +29,7 @@ struct CubeConstantBuffer
 struct Vertex
 {
     float3 position;
-    float3 normal;
+    //float3 normal;
 };
 
 #endif // RAYTRACINGHLSLCOMPAT_H

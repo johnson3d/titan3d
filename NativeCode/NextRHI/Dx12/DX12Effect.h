@@ -208,7 +208,7 @@ namespace NxRHI
 			std::vector<DX12SignatureBuilder::FSignatureBinder>	CbvSrvUavBinders;
 			std::vector<DX12SignatureBuilder::FSignatureBinder> SamplerBinders;
 		};
-		virtual void BuildState(IGpuDevice* device) override;
+		virtual bool BuildEffect(IGpuDevice* device) override;
 		virtual FHitGroup* CreateHitGroup() override
 		{
 			return new DX12HitGroup();

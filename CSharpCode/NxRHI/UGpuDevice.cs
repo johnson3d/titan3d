@@ -419,7 +419,8 @@ namespace EngineNS.NxRHI
                         VNameString.FromString(i.IntersectionShader), localSignatures, i.LocalSignatures.Count);
                 }
             }
-            result.mCoreObject.BuildState(mCoreObject);
+            if (false == result.mCoreObject.BuildEffect(mCoreObject))
+                return null;
             return result;
         }
         public TtGpuPipeline CreatePipeline(in FGpuPipelineDesc desc, string identifier)

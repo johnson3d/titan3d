@@ -797,6 +797,7 @@ namespace NxRHI
 		ST_Texture3D,
 		ST_TextureCube,
 		ST_TextureCubeArray,
+		ST_RTAS,
 	};
 
 	struct TR_CLASS(SV_LayoutStruct = 8)
@@ -837,6 +838,12 @@ namespace NxRHI
 				Buffer.Flags = 0;
 			}
 		}
+		void SetRTAS()
+		{
+			memset(this, 0, sizeof(FSrvDesc));
+			Type = ST_RTAS;
+			RTASLocation = 0;
+		}
 		ESrvType Type;
 		EPixelFormat Format;
 		union
@@ -851,6 +858,7 @@ namespace NxRHI
 			FTex3D_SRV Texture3D;
 			FTexCube_SRV TextureCube;
 			FTexCube_Array_SRV TextureCubeArray;
+			UINT64 RTASLocation;
 		};
 	};
 	class TR_CLASS()

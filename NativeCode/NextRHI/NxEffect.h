@@ -250,8 +250,9 @@ namespace NxRHI
 		void SetShaderLibDesc(FShaderDesc* desc) {
 			mShaderLibDesc = desc;
 		}
-		virtual void BuildState(IGpuDevice* device)
+		virtual bool BuildEffect(IGpuDevice* device)
 		{
+			return false;
 		}
 		virtual bool BuildHitGroup(FHitGroup* group)
 		{
@@ -266,6 +267,11 @@ namespace NxRHI
 		}
 		const FShaderBinder* FindBinder(VNameString name) const;
 		const FShaderBinder* FindBinder(EShaderBindType type, VNameString name) const;
+	public:
+		void BindCBV(ICommandList* cmdlist, const FShaderBinder* binder, ICbView* buffer);
+		void BindSrv(ICommandList* cmdlist, const FShaderBinder* binder, ISrView* srv);
+		void BindUav(ICommandList* cmdlist, const FShaderBinder* binder, IUaView* uav);
+		void BindSampler(ICommandList* cmdlist, const FShaderBinder* binder, ISampler* sampler);
 	};
 }
 

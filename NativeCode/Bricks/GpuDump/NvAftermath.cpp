@@ -342,8 +342,8 @@ namespace GpuDump
 	}
 	void DX12_OnDredDump(ID3D12Device* mDevice, ID3D12DeviceRemovedExtendedDataSettings1* mDredSettings, const char* GDredDir)
 	{
-		ASSERT(false);
-		auto hr = mDevice->GetDeviceRemovedReason();
+		//ASSERT(false);
+		//auto hr = mDevice->GetDeviceRemovedReason();
 		if (mDredSettings != nullptr)
 		{
 			AutoRef<ID3D12DeviceRemovedExtendedData1> pDred;
@@ -351,7 +351,7 @@ namespace GpuDump
 
 			D3D12_DRED_AUTO_BREADCRUMBS_OUTPUT1 DredAutoBreadcrumbsOutput;
 			D3D12_DRED_PAGE_FAULT_OUTPUT1 DredPageFaultOutput;
-			hr = pDred->GetAutoBreadcrumbsOutput1(&DredAutoBreadcrumbsOutput);
+			auto hr = pDred->GetAutoBreadcrumbsOutput1(&DredAutoBreadcrumbsOutput);
 			ASSERT(hr == S_OK);
 			hr = pDred->GetPageFaultAllocationOutput1(&DredPageFaultOutput);
 			ASSERT(hr == S_OK);

@@ -349,16 +349,16 @@ namespace NxRHI
 	}
 
 
-	void DX12RayTracingEffect::BuildState(IGpuDevice* device1)
+	bool DX12RayTracingEffect::BuildEffect(IGpuDevice* device1)
 	{
 		DX12GpuDevice* device = (DX12GpuDevice*)device1;
 		if (mStateObject != nullptr)
-			return;
+			return false;
 		mStateObject = CreateDxrStateObject(device, this);
 		
 		ASSERT(mStateObject);
 		if (mStateObject == nullptr)
-			return;
+			return false;
 		mStateObject->QueryInterface(IID_PPV_ARGS(mStateObjectProperties.GetAddressOf()));
 		ASSERT(mStateObjectProperties);
 
@@ -370,6 +370,7 @@ namespace NxRHI
 		{
 			FBufferDesc rayGenDesc{};
 			rayGenDesc.SetDefault(false);
+			rayGenDesc.Type = EBufferType::BFT_NONE;
 			rayGenDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 			rayGenDesc.Usage = EGpuUsage::USAGE_STAGING;
 			rayGenDesc.Size = shaderIdentifierSize;
@@ -381,6 +382,7 @@ namespace NxRHI
 		{
 			FBufferDesc missDesc{};
 			missDesc.SetDefault(false);
+			missDesc.Type = EBufferType::BFT_NONE;
 			missDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 			missDesc.Usage = EGpuUsage::USAGE_STAGING;
 			missDesc.Size = shaderIdentifierSize;
@@ -389,6 +391,8 @@ namespace NxRHI
 			missDesc.InitData = missShaderIdentifier;
 			mMissShaderTable = MakeWeakRef(new FUploadBuffer(MakeWeakRef(device->CreateBuffer(&missDesc))));
 		}
+
+		return true;
 	}
 
 	void DX12SignatureBuilder::Build(IShaderReflector* reflector)
@@ -607,6 +611,8 @@ namespace NxRHI
 			
 			mGlobalSignature = mSignatureBuilder.CreateSignature(device, D3D12_ROOT_SIGNATURE_FLAG_NONE, mGlobalSignatures,
 				mGlobalReflector, mGlobalCbvSrvUavBinders, mGlobalSamplerBinders);
+			if (mGlobalSignature == nullptr)
+				return nullptr;
 			auto globalRootSignature = raytracingPipeline.CreateSubobject<CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();
 			globalRootSignature->SetRootSignature(mGlobalSignature);
 
@@ -628,6 +634,8 @@ namespace NxRHI
 				group->Dx12Signature = mSignatureBuilder.CreateSignature(device, D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE, 
 					group->LocalSignatures, group->LocalReflector,
 					group->CbvSrvUavBinders, group->SamplerBinders);
+				if (group->Dx12Signature == nullptr)
+					return nullptr;
 				
 				auto localRootSignature = raytracingPipeline.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
 				localRootSignature->SetRootSignature(group->Dx12Signature);

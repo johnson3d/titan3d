@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
+using EngineNS.EGui.UIProxy;
 
 namespace MainEditor
 {
@@ -77,6 +78,7 @@ namespace MainEditor
         [STAThreadAttribute]
         static void Main(string[] args)
         {
+            //TtNativeWindow.MessageBoxA(0, "Hello", "Hello", 0);
             //SampleA.Test();
             //var it = FnOnTest(true);
             //var itt = it.GetAsyncEnumerator();
@@ -172,6 +174,10 @@ namespace MainEditor
         static WeakReference Main_Impl(string[] args)
         {
             var cfg = FindArgument(args, "config=");
+            if (cfg == null)
+            {
+                TtNativeWindow.MessageBoxA(0, "config is null", "Titan3D", 0);
+            }
             Console.WriteLine($"Config={cfg}");
 
             bool bNativeMem = true;

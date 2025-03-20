@@ -11,6 +11,11 @@
 
 #ifndef RAYTRACING_HLSL
 #define RAYTRACING_HLSL
+//"Scene",
+//"RenderTarget",
+//"Indices",
+//"Vertices",
+//"g_cubeCB"
 
 /*<RTShaderLibDesc>
 {
@@ -27,7 +32,6 @@
   "MissShader": "MyMissShader",
   "GlobalSignatures": [
     "Scene",
-    "RenderTarget",
     "Indices",
     "Vertices",
     "g_sceneCB"
@@ -139,11 +143,11 @@ float4 CalculateDiffuseLighting(float3 hitPosition, float3 normal)
 [shader("raygeneration")]
 void MyRaygenShader()
 {
-    float3 rayDir;
-    float3 origin;
+    float3 rayDir = float3(0,0,0);
+    float3 origin = float3(1,0,0);
     
     // Generate a ray for a camera pixel corresponding to an index from the dispatched 2D grid.
-    GenerateCameraRay(DispatchRaysIndex().xy, origin, rayDir);
+    //GenerateCameraRay(DispatchRaysIndex().xy, origin, rayDir);
 
     // Trace the ray.
     // Set the ray's extents.
@@ -154,11 +158,12 @@ void MyRaygenShader()
     // TMin should be kept small to prevent missing geometry at close contact areas.
     ray.TMin = 0.001;
     ray.TMax = 10000.0;
+    ray.TMax = 1.0;
     RayPayload payload = { float4(0, 0, 0, 0) };
     TraceRay(Scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, ~0, 0, 1, 0, ray, payload);
 
     // Write the raytraced color to the output texture.
-    RenderTarget[DispatchRaysIndex().xy] = payload.color;
+    //RenderTarget[DispatchRaysIndex().xy] = payload.color;
 }
 
 [shader("closesthit")]
@@ -177,9 +182,9 @@ void MyClosestHitShader(inout RayPayload payload, in MyAttributes attr)
 
     // Retrieve corresponding vertex normals for the triangle vertices.
     float3 vertexNormals[3] = { 
-        Vertices[indices[0]].normal, 
-        Vertices[indices[1]].normal, 
-        Vertices[indices[2]].normal 
+        Vertices[indices[0]].position,
+        Vertices[indices[1]].position,
+        Vertices[indices[2]].position
     };
 
     // Compute the triangle's normal.

@@ -20,6 +20,10 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	inline UINT Align(UINT size, UINT alignment)
+	{
+		return (size + (alignment - 1)) & ~(alignment - 1);
+	}
 	class DX12GpuDevice;
 	class DX12CmdRecorder;
 	class DX12CommandList;
