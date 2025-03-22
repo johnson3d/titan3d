@@ -1193,6 +1193,16 @@ namespace NxRHI
 		UINT					mScratchSize = 0;
 	};
 
+	enum TR_ENUM()
+		ERayTracingInstanceFlags : uint32
+	{
+		RTI_FLAG_NONE = 0,
+		RTI_FLAG_TRIANGLE_CULL_DISABLE = 0x1,
+		RTI_FLAG_TRIANGLE_FRONT_COUNTERCLOCKWISE = 0x2,
+		RTI_FLAG_FORCE_OPAQUE = 0x4,
+		RTI_FLAG_FORCE_NON_OPAQUE = 0x8
+	};
+
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FAStructureInstanceDesc
 	{
@@ -1201,13 +1211,13 @@ namespace NxRHI
 			InstanceContributionToHitGroupIndex = 0;
 			InstanceID = 0;
 			InstanceMask = 0;
-			Flags = 0xFFFFFFFF;
+			Flags = ERayTracingInstanceFlags::RTI_FLAG_NONE;
 			Matrix = Matrix.IDENTITY;
 		}
 		UINT								InstanceContributionToHitGroupIndex = 0;
 		UINT								InstanceID = 0;
-		UINT								InstanceMask = 0;
-		UINT								Flags = 0xFFFFFFFF;
+		UINT								InstanceMask = 0;//Bit and with HLSL TraceRay(,,Mask,,,,)
+		ERayTracingInstanceFlags			Flags = ERayTracingInstanceFlags::RTI_FLAG_NONE;
 		v3dxMatrix4							Matrix = Matrix.IDENTITY;
 	};
 
@@ -1219,6 +1229,9 @@ namespace NxRHI
 		AutoRef<IAccelerationStructure>		mAStructure;
 		FAStructureInstanceDesc* GetDescPtr() {
 			return &mDesc;
+		}
+		void SetMatrix(const v3dxMatrix4* pMatrix) {
+			mDesc.Matrix = *pMatrix;
 		}
 	};
 

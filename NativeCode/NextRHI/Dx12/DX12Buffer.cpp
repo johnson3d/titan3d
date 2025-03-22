@@ -1855,7 +1855,6 @@ namespace NxRHI
 		if (mInstDescs.size() != mBottomASInstances.size())
 		{
 			mInstDescs.clear();
-			std::vector<D3D12_RAYTRACING_INSTANCE_DESC> instDescs;
 			for (auto& i : mBottomASInstances)
 			{
 				D3D12_RAYTRACING_INSTANCE_DESC instDesc;
@@ -1869,8 +1868,7 @@ namespace NxRHI
 				memcpy(&instDesc.Transform[0], &tMat.m11, sizeof(float) * 4);
 				memcpy(&instDesc.Transform[1], &tMat.m21, sizeof(float) * 4);
 				memcpy(&instDesc.Transform[2], &tMat.m31, sizeof(float) * 4);
-
-				instDescs.push_back(instDesc);
+				mInstDescs.push_back(instDesc);
 			}
 			mInstanceHash = Hash128::GetHash128((const char*)mInstDescs.data(), (UINT)(sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * mInstDescs.size()));
 			
@@ -1890,7 +1888,6 @@ namespace NxRHI
 		{
 			auto saved = mInstanceHash;
 			mInstDescs.clear();
-			std::vector<D3D12_RAYTRACING_INSTANCE_DESC> instDescs;
 			for (auto& i : mBottomASInstances)
 			{
 				D3D12_RAYTRACING_INSTANCE_DESC instDesc;
@@ -1905,7 +1902,7 @@ namespace NxRHI
 				memcpy(&instDesc.Transform[1], &tMat.m21, sizeof(float) * 4);
 				memcpy(&instDesc.Transform[2], &tMat.m31, sizeof(float) * 4);
 
-				instDescs.push_back(instDesc);
+				mInstDescs.push_back(instDesc);
 			}
 			mInstanceHash = Hash128::GetHash128((const char*)mInstDescs.data(), (UINT)(sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * mInstDescs.size()));
 			auto result = saved != mInstanceHash;

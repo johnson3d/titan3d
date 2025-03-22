@@ -432,8 +432,11 @@ namespace NxRHI
 	{
 		if (mCbvSrvUavNumber > 0)
 		{
-			OutCbvSrvUavHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device,
-				mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+			if (OutCbvSrvUavHeap == nullptr || OutCbvSrvUavHeap->NumOfDescriptor != mCbvSrvUavNumber)
+			{
+				OutCbvSrvUavHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device,
+					mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+			}
 		}
 		else
 		{
@@ -441,8 +444,11 @@ namespace NxRHI
 		}
 		if (mSamplerNumber > 0)
 		{
-			OutSamplerHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device,
-				mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
+			if (OutSamplerHeap == nullptr || OutSamplerHeap->NumOfDescriptor != mSamplerNumber)
+			{
+				OutSamplerHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device,
+					mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
+			}
 		}
 		else
 		{
@@ -466,7 +472,11 @@ namespace NxRHI
 		{
 			auto binder = FindBinder(i);
 			if (binder == nullptr)
-				return nullptr;
+			{
+				//return nullptr;
+				VFX_LTRACE(ELTT_Warning, "CreateSignature: Root[%s] not found\r\n", i.c_str());
+				continue;
+			}
 			switch (binder->Type)
 			{
 				case EShaderBindType::SBT_Sampler:

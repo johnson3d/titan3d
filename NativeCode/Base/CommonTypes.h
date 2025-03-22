@@ -289,6 +289,7 @@ inline unsigned int GetPixelByteWidth(EPixelFormat fmt)
 		return 4;
 	case PXF_D32_FLOAT:
 		return 4;
+	case PXF_R11G11B10_FLOAT:
 	case PXF_B10G10R10A2_TYPELESS:
 	case PXF_R10G10B10A2_SINT:
 	case PXF_R10G10B10A2_UINT:

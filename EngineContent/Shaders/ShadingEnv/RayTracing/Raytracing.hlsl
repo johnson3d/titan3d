@@ -31,6 +31,7 @@
   "RayGenShader": "MyRaygenShader",
   "MissShader": "MyMissShader",
   "GlobalSignatures": [
+    "RenderTarget",
     "Scene",
     "Indices",
     "Vertices",
@@ -50,15 +51,36 @@
 <RTShaderLibDesc>*/
 
 #define HLSL
-#include "RaytracingHlslCompat.h"
+//#include "RaytracingHlslCompat.h"
+struct Vertex
+{
+    //float3 position;
+    float3 normal;
+};
+
+cbuffer g_sceneCB : register(b0, space0)
+{
+    float4x4 projectionToWorld;
+    float4 cameraPosition;
+    float4 lightPosition;
+    float4 lightAmbientColor;
+    float4 lightDiffuseColor;
+    float3 lightDirection;
+    float padding;
+};
+
+cbuffer g_cubeCB : register(b1, space0)
+{
+    float4 albedo;
+};
 
 RaytracingAccelerationStructure Scene : register(t0, space0);
 RWTexture2D<float4> RenderTarget : register(u0);
 ByteAddressBuffer Indices : register(t1, space0);
 StructuredBuffer<Vertex> Vertices : register(t2, space0);
 
-ConstantBuffer<SceneConstantBuffer> g_sceneCB : register(b0);
-ConstantBuffer<CubeConstantBuffer> g_cubeCB : register(b1);
+//ConstantBuffer<SceneConstantBuffer> g_sceneCB : register(b0);
+//ConstantBuffer<CubeConstantBuffer> g_cubeCB : register(b1);
 
 // Load three 16 bit indices from a byte addressed buffer.
 uint3 Load3x16BitIndices(uint offsetBytes)
@@ -122,22 +144,32 @@ inline void GenerateCameraRay(uint2 index, out float3 origin, out float3 directi
     screenPos.y = -screenPos.y;
 
     // Unproject the pixel coordinate into a ray.
-    float4 world = mul(float4(screenPos, 0, 1), g_sceneCB.projectionToWorld);
+    float4 world = mul(float4(screenPos, 0, 1), projectionToWorld);
 
     world.xyz /= world.w;
-    origin = g_sceneCB.cameraPosition.xyz;
+    origin = cameraPosition.xyz;
     direction = normalize(world.xyz - origin);
 }
 
 // Diffuse lighting calculation.
 float4 CalculateDiffuseLighting(float3 hitPosition, float3 normal)
 {
-    float3 pixelToLight = normalize(g_sceneCB.lightPosition.xyz - hitPosition);
+    float3 pixelToLight = normalize(lightPosition.xyz - hitPosition);
 
     // Diffuse contribution.
     float fNDotL = max(0.0f, dot(pixelToLight, normal));
 
-    return g_cubeCB.albedo * g_sceneCB.lightDiffuseColor * fNDotL;
+    return albedo * lightDiffuseColor * fNDotL;
+}
+
+float4 CalculateDiffuseLighting2(float3 lightDir, float3 normal)
+{
+    //float3 pixelToLight = normalize(lightPosition.xyz - hitPosition);
+
+    // Diffuse contribution.
+    float fNDotL = max(0.0f, dot(lightDir, normal));
+
+    return albedo * lightDiffuseColor * fNDotL;
 }
 
 [shader("raygeneration")]
@@ -147,8 +179,8 @@ void MyRaygenShader()
     float3 origin = float3(1,0,0);
     
     // Generate a ray for a camera pixel corresponding to an index from the dispatched 2D grid.
-    //GenerateCameraRay(DispatchRaysIndex().xy, origin, rayDir);
-
+    GenerateCameraRay(DispatchRaysIndex().xy, origin, rayDir);
+    
     // Trace the ray.
     // Set the ray's extents.
     RayDesc ray;
@@ -158,12 +190,11 @@ void MyRaygenShader()
     // TMin should be kept small to prevent missing geometry at close contact areas.
     ray.TMin = 0.001;
     ray.TMax = 10000.0;
-    ray.TMax = 1.0;
     RayPayload payload = { float4(0, 0, 0, 0) };
     TraceRay(Scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, ~0, 0, 1, 0, ray, payload);
 
     // Write the raytraced color to the output texture.
-    //RenderTarget[DispatchRaysIndex().xy] = payload.color;
+    RenderTarget[DispatchRaysIndex().xy] = payload.color;
 }
 
 [shader("closesthit")]
@@ -182,9 +213,9 @@ void MyClosestHitShader(inout RayPayload payload, in MyAttributes attr)
 
     // Retrieve corresponding vertex normals for the triangle vertices.
     float3 vertexNormals[3] = { 
-        Vertices[indices[0]].position,
-        Vertices[indices[1]].position,
-        Vertices[indices[2]].position
+        Vertices[indices[0]].normal,
+        Vertices[indices[1]].normal,
+        Vertices[indices[2]].normal
     };
 
     // Compute the triangle's normal.
@@ -193,15 +224,18 @@ void MyClosestHitShader(inout RayPayload payload, in MyAttributes attr)
     float3 triangleNormal = HitAttribute(vertexNormals, attr);
 
     float4 diffuseColor = CalculateDiffuseLighting(hitPosition, triangleNormal);
-    float4 color = g_sceneCB.lightAmbientColor + diffuseColor;
+    //float4 diffuseColor = CalculateDiffuseLighting2(lightDirection.xyz, triangleNormal);
+    float4 color = lightAmbientColor + diffuseColor;
 
     payload.color = color;
+
+    //payload.color = lightAmbientColor;
 }
 
 [shader("miss")]
 void MyMissShader(inout RayPayload payload)
 {
-    float4 background = float4(0.0f, 0.2f, 0.4f, 1.0f);
+    float4 background = float4(0.0f, 0.f, 0.f, 1.0f);
     payload.color = background;
 }
 

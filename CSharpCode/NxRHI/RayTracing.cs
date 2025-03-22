@@ -21,6 +21,10 @@ namespace EngineNS.NxRHI
         {
             return ref *mCoreObject.GetDescPtr();
         }
+        public void SetMatrix(in Matrix matrix)
+        {
+            mCoreObject.SetMatrix(in matrix);
+        }
     }
     public class TtTopAccelerationStructure : AuxPtrType<NxRHI.ITopAccelerationStructure>
     {

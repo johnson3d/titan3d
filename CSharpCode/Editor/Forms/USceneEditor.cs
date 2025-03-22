@@ -552,7 +552,7 @@ namespace EngineNS.Editor.Forms
             InitializeMacrossEditor();
 
             CpuCullNode = PreviewViewport.RenderPolicy.FindNode<Graphics.Pipeline.TtCpuCullingNode>("CpuCulling");
-            System.Diagnostics.Debug.Assert(CpuCullNode != null);
+            //System.Diagnostics.Debug.Assert(CpuCullNode != null);
             return true;
         }
         public virtual void OnCloseEditor()
@@ -737,28 +737,35 @@ namespace EngineNS.Editor.Forms
             //}
             EGui.UIProxy.ToolbarSeparator.DrawSeparator(in drawList);
             //ImGuiAPI.BeginGroup();
-            
-            for (int i = 0; i < (int)GamePlay.TtWorld.TtVisParameter.EVisCullFilter.FilterTypeCount; i++)
+
+            if (CpuCullNode != null)
             {
-                var type = (GamePlay.TtWorld.TtVisParameter.EVisCullFilter)(1 << i);
-                ImGuiAPI.SameLine(0, -1);
-                bool checkValue = (CullFilters & type) != 0;
-                var name = type.ToString();
-                if (name == "FilterTypeCount")
+                for (int i = 0; i < (int)GamePlay.TtWorld.TtVisParameter.EVisCullFilter.FilterTypeCount; i++)
                 {
-                    name = GamePlay.TtWorld.TtVisParameter.FilterTypeCountAs;
-                }
-                if(EGui.UIProxy.CustomButton.ToggleButton(name, in btSize, ref checkValue))
-                {
-                    if (checkValue)
+                    var type = (GamePlay.TtWorld.TtVisParameter.EVisCullFilter)(1 << i);
+                    ImGuiAPI.SameLine(0, -1);
+                    bool checkValue = (CullFilters & type) != 0;
+                    var name = type.ToString();
+                    if (name == "FilterTypeCount")
                     {
-                        CullFilters |= type;
+                        name = GamePlay.TtWorld.TtVisParameter.FilterTypeCountAs;
                     }
-                    else
+                    if (EGui.UIProxy.CustomButton.ToggleButton(name, in btSize, ref checkValue))
                     {
-                        CullFilters &= (~type);
+                        if (checkValue)
+                        {
+                            CullFilters |= type;
+                        }
+                        else
+                        {
+                            CullFilters &= (~type);
+                        }
                     }
                 }
+            }
+            else
+            {
+                ImGuiAPI.Text("No CpuCullingNode!");
             }
             //ImGuiAPI.EndGroup();
             EGui.UIProxy.Toolbar.EndToolbar();
@@ -1136,7 +1143,7 @@ namespace EngineNS.Editor.Forms
             TtEngine.Instance.TickableManager.AddTickable(this);
 
             CpuCullNode = PreviewViewport.RenderPolicy.FindNode<Graphics.Pipeline.TtCpuCullingNode>("CpuCulling");
-            System.Diagnostics.Debug.Assert(CpuCullNode != null);
+            //System.Diagnostics.Debug.Assert(CpuCullNode != null);
             return true;
         }
 

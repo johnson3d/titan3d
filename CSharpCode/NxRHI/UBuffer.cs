@@ -353,6 +353,12 @@ namespace EngineNS.NxRHI
         {
             return ref *((T*)mCoreObject.GetVarPtrToWrite(binder, (uint)sizeof(T)) + elem);
         }
+        public void SetMatrix(string name, int elem, in Matrix value, bool transpose = true, EUpdateMode mode = EUpdateMode.Auto)
+        {
+            var binder = ShaderBinder.FindField(name);
+            if (binder.IsValidPointer)
+                SetMatrix(binder, elem, value, transpose, mode);
+        }
         public void SetMatrix(FShaderVarDesc binder, int elem, in Matrix value, bool transpose = true, EUpdateMode mode = EUpdateMode.Auto)
         {
             if (transpose == false)

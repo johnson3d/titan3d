@@ -89,6 +89,28 @@ namespace EngineNS.Graphics.Mesh
         {
             return mCoreObject.Init(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, name, atom);
         }
+        public uint PrimitiveNumber
+        {
+            get
+            {
+                return mCoreObject.GetPrimitiveNumber();
+            }
+        }
+        public uint VertexNumber
+        {
+            get
+            {
+                return mCoreObject.GetVertexNumber();
+            }
+        }
+        public NxRHI.IBuffer GetIndexBuffer()
+        {
+            return mCoreObject.GetGeomtryMesh().IndexBuffer.Buffer;
+        }
+        public NxRHI.IBuffer GetVertexBuffer(NxRHI.EVertexStreamType type)
+        {
+            return mCoreObject.GetGeomtryMesh().GetVertexArray().GetVB(type).Buffer;
+        }
         public void SetTransientVertexBuffer(NxRHI.TtTransientBuffer buffer)
         {
             mCoreObject.SetTransientVertexBuffer(buffer.mCoreObject);

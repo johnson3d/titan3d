@@ -158,6 +158,10 @@ namespace EngineNS
         {
             return new Vector3((float)X, (float)Y, (float)Z);
         }
+        public Vector3 ToLocalPosition(in DVector3 offset)
+        {
+            return new Vector3((float)(X - offset.X), (float)(Y - offset.Y), (float)(Z - offset.Z));
+        }
         public DVector3 AbsVector()
         {
             return new DVector3(Math.Abs(X), Math.Abs(Y), Math.Abs(Z));

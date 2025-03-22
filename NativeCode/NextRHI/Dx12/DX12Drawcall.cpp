@@ -630,10 +630,12 @@ namespace NxRHI
 			mHitGroupShaderBindTable = MakeWeakRef(new FUploadBuffer(MakeWeakRef(device->CreateBuffer(&hitGroupDesc))));
 		}
 
+		BindDescriptors(device, dx12Cmd, effect);
+
 		if (IsDirty)
 		{
 			ResetHeapToNull(device, effect->GetShaderLibDesc()->DxILReflector, mCbvSrvUavHeap, mSamplerHeap);
-			
+
 			for (auto& i : this->BindResources)
 			{
 				if (i.second == nullptr)
@@ -654,8 +656,6 @@ namespace NxRHI
 			}
 			IsDirty = false;
 		}
-
-		BindDescriptors(device, dx12Cmd, effect);
 
 		for (auto& i : BindResources)
 		{
