@@ -520,9 +520,9 @@ namespace EngineNS.IO
     }
 }
 
-namespace EngineNS.UTest
+namespace EngineNS.UnitTest
 {
-    [UTest]
+    [TtTest]
     public class UTest_FileManager
     {
         public void UnitTestEntrance()

@@ -20,7 +20,7 @@ namespace EngineNS.Bricks.CSScripting
     }
 }
 
-namespace EngineNS.UTest
+namespace EngineNS.UnitTest
 {
     public struct StructTTT
     {
@@ -28,7 +28,7 @@ namespace EngineNS.UTest
         public int f0;
         public float f1;
     }
-    [UTest.UTest]
+    [UnitTest.TtTest]
     public class UTest_XndTester
     {
         public struct MemberStruct

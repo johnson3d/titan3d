@@ -1714,9 +1714,9 @@ namespace EngineNS.Bricks.CodeBuilder.MacrossNode
     }
 }
 
-namespace EngineNS.UTest
+namespace EngineNS.UnitTest
 {
-    [UTest]
+    [TtTest]
     public class UTest_ClassGraph
     {
         public static UTest_ClassGraph Instance = new UTest_ClassGraph();

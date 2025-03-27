@@ -115,7 +115,7 @@ namespace EngineNS.Bricks.Collision.DDA
                 {//y
                     for (int x = 0; x < Voxels.GetLength(2); x++)
                     {
-                        if (MathHelper.RandomDouble() < rate)
+                        if (MathHelper.RandomFloat() < rate)
                         {
                             Voxels[x, y, z].SetPayload(new TtVoxelPayload());
                         }

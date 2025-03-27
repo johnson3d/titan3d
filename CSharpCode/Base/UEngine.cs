@@ -140,7 +140,7 @@ namespace EngineNS
         public RName SimpleRPolicyName { get; set; }
         [Rtti.Meta]
         [Category("Option")]
-        public string RpcRootType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.UTest.UTest_Rpc));
+        public string RpcRootType { get; set; } = Rtti.TtTypeDesc.TypeStr(typeof(EngineNS.UnitTest.UTest_Rpc));
         [Rtti.Meta]
         [Category("Option")]
         public bool CookDXBC { get; set; } = true;
@@ -494,7 +494,7 @@ namespace EngineNS
             if (Config.DoUnitTest)
             {
                 var t2 = Support.TtTime.HighPrecision_GetTickCount();
-                EngineNS.UTest.UnitTestManager.DoUnitTests();
+                EngineNS.UnitTest.TtUnitTestManager.DoUnitTests();
                 var t3 = Support.TtTime.HighPrecision_GetTickCount();
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Info, $"Unit Test:{(t3 - t2) / 1000} ms");
             }

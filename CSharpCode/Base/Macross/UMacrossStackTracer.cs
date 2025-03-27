@@ -189,9 +189,9 @@ namespace EngineNS.Macross
     }
 }
 
-namespace EngineNS.UTest
+namespace EngineNS.UnitTest
 {
-    [UTest.UTest]
+    [UnitTest.TtTest]
     class UTest_UMacrossStackTracer
     {
 

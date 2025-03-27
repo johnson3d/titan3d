@@ -131,7 +131,7 @@ namespace EngineNS.Thread.Async
     }
 }
 
-namespace EngineNS.UTest
+namespace EngineNS.UnitTest
 {
     public struct TtTestJob : Thread.Async.IJob
     {
@@ -143,7 +143,7 @@ namespace EngineNS.UTest
             System.Threading.Interlocked.Increment(ref Data.NumSum);
         }
     }
-    [UTest.UTest]
+    [UnitTest.TtTest]
     public class TtTest_UJobSystem
     {
         public static bool IsFinal = false;

@@ -93,7 +93,7 @@ namespace EngineNS.IO
         }
     }
 
-    [UTest.UTest]
+    [UnitTest.TtTest]
     public class UTest_XndTester
     {
         public unsafe void UnitTestEntrance()

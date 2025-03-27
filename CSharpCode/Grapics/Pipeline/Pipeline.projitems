@@ -43,6 +43,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)CpuCullingNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\MultiViewID\BasePassNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\USdfForwordNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GI\BLAS.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GI\SHCoefficient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GI\TLAS.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GpuCullingNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\UDeferredBasePassNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Deferred\UDeferredDirLightingNode.cs" />

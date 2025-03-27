@@ -188,6 +188,81 @@ float4 CosineSampleHemisphere( float2 E, float3 N )
 	return float4( H, PDF );
 }
 
+// 球谐基函数（前3阶，共9个系数）
+void SHEval(float3 dir, out float4 shBasis[9])
+{
+    // 归一化方向
+    float3 d = normalize(dir);
+    float x = d.x, y = d.y, z = d.z;
+    
+    // 第0阶 (l=0)
+    shBasis[0] = 0.2820947918; // Y00: 1/(2*sqrt(π))
+    
+    // 第1阶 (l=1)
+    shBasis[1] = -0.4886025119 * y; // Y1-1
+    shBasis[2] = 0.4886025119 * z; // Y10
+    shBasis[3] = -0.4886025119 * x; // Y11
+    
+    // 第2阶 (l=2)
+    shBasis[4] = 1.0925484306 * x * y; // Y2-2
+    shBasis[5] = -1.0925484306 * y * z; // Y2-1
+    shBasis[6] = 0.3153915652 * (3.0 * z * z - 1.0); // Y20
+    shBasis[7] = -1.0925484306 * x * z; // Y21
+    shBasis[8] = 0.5462742153 * (x * x - y * y); // Y22
+    
+    // 第3阶 (l=3) 可根据需要扩展
+}
+
+float3 TransformToWorld(float3 localDir, float3 probeNormal)
+{
+    // 构造正交基
+    float3 N = probeNormal;
+    float3 up = abs(N.y) > 0.999 ? float3(0, 0, 1) : float3(0, 1, 0);
+    float3 T = normalize(cross(N, up));
+    float3 B = cross(N, T);
+    
+    // 变换到世界空间
+    return T * localDir.x + B * localDir.y + N * localDir.z;
+}
+
+// 球谐投影核心算法
+float4x3 ProjectToSH(float3 probePos, float3 probeNormal)
+{
+    const uint numSamples = 256; // 建议128-1024
+    const float weight = 4.0 * PI / numSamples;
+    
+    // 初始化SH系数
+    float4x3 shCoeffs = (float4x3) 0;
+    
+    // 使用Hammersley序列低差异采样
+    for (uint i = 0; i < numSamples; ++i)
+    {
+        // 生成余弦加权的半球采样方向
+        float2 u = Hammersley2d(i, numSamples);
+        float3 dir = CosineSampleHemisphere(u);
+        dir = TransformToWorld(dir, probeNormal); // 对齐探针法线
+        
+        float visibility = 1.0f; //...
+        float3 irradiance = (float3) 0;
+        // 计算入射辐照度（需实现光线追踪或采样环境）
+        //float3 irradiance = TraceIncidentLight(probePos, dir);		
+        
+        // 计算当前方向的SH基函数值
+        float4 shBasis[9];
+        SHEval(dir, shBasis);
+        
+        // 累加贡献（考虑余弦项和PDF）
+        float3 contribution = irradiance * visibility * dot(dir, probeNormal);
+        for (uint j = 0; j < 9; ++j)
+        {
+            shCoeffs[j] += contribution * shBasis[j] * weight;
+        }
+    }
+    
+    return shCoeffs;
+}
+
+
 float4 UniformSampleCone( float2 E, float CosThetaMax )
 {
 	float Phi = 2 * PI * E.x;

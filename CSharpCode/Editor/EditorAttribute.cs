@@ -10,9 +10,9 @@ namespace EngineNS.Editor
     }
 }
 
-namespace EngineNS.UTest
+namespace EngineNS.UnitTest
 {
-    [UTest.UTest]
+    [UnitTest.TtTest]
     [Editor.UCs2Cpp]
     public partial class UTestCs2CppBuilder
     {

@@ -1,0 +1,157 @@
+﻿using NPOI.SS.Formula.Functions;
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
+
+namespace EngineNS.Graphics.Pipeline.GI
+{
+    public class TtSHCoefficient
+    {
+        public static Vector2 Hammersley(uint idx, uint num)
+        {
+            uint bits = idx;
+            bits = (bits << 16) | (bits >> 16);
+            bits = ((bits & 0x55555555u) << 1) | ((bits & 0xAAAAAAAAu) >> 1);
+            bits = ((bits & 0x33333333u) << 2) | ((bits & 0xCCCCCCCCu) >> 2);
+            bits = ((bits & 0x0F0F0F0Fu) << 4) | ((bits & 0xF0F0F0F0u) >> 4);
+            bits = ((bits & 0x00FF00FFu) << 8) | ((bits & 0xFF00FF00u) >> 8);
+            float radicalInverse_VdC = (float)(((double)bits) * 2.3283064365386963e-10); // / 0x100000000
+
+            return new Vector2((float)(idx) / (float)(num), radicalInverse_VdC);
+        }
+        public static Vector3 UniformSampleSphere(Vector2 u)
+        {
+            float theta = 2.0f * MathF.PI * u.X;
+
+            // 计算极角 φ ∈ [0, π]
+            // 关键步骤：通过反余弦确保均匀分布
+            float phi = MathF.Acos(2.0f * u.Y - 1.0f);
+
+            // 转换为笛卡尔坐标
+            float sinPhi = MathF.Sin(phi);
+            float x = sinPhi * MathF.Cos(theta);
+            float y = sinPhi * MathF.Sin(theta);
+            float z = MathF.Cos(phi);
+
+            return new Vector3(x, y, z);
+        }
+        public static Vector4 CosineSampleHemisphere(Vector2 E)
+        {
+            float Phi = 2 * MathF.PI * E.X;
+            float CosTheta = MathF.Sqrt(E.Y);
+            float SinTheta = MathF.Sqrt(1 - CosTheta * CosTheta);
+
+            Vector4 H;
+            H.X = SinTheta * MathF.Cos(Phi);
+            H.Y = SinTheta * MathF.Sin(Phi);
+            H.Z = CosTheta;
+
+            H.W = CosTheta * (1.0f / MathF.PI);
+
+            return H;
+        }
+        public static float[] EvaluateSHBasis(Vector3 normal)
+        {
+            Vector3 n = Vector3.Normalize(normal);
+            float x = n.X;
+            float y = n.Y;
+            float z = n.Z;
+            float[] basis = new float[9];
+
+            // l=0
+            basis[0] = 0.5f * MathF.Sqrt(1.0f / MathF.PI);
+
+            // l=1
+            float sqrt3Over4Pi = MathF.Sqrt(3.0f / (4.0f * MathF.PI));
+            basis[1] = sqrt3Over4Pi * y;  // m=-1
+            basis[2] = sqrt3Over4Pi * z;  // m=0
+            basis[3] = sqrt3Over4Pi * x;  // m=+1
+
+            // l=2
+            float sqrt15OverPi = MathF.Sqrt(15.0f / MathF.PI);
+            float sqrt5Over16Pi = MathF.Sqrt(5.0f / (16.0f * MathF.PI));
+            float sqrt15Over16Pi = MathF.Sqrt(15.0f / (16.0f * MathF.PI));
+
+            basis[4] = 0.5f * sqrt15OverPi * x * y;      // m=-2
+            basis[5] = 0.5f * sqrt15OverPi * y * z;      // m=-1
+            basis[6] = sqrt5Over16Pi * (3.0f * z * z - 1.0f); // m=0
+            basis[7] = 0.5f * sqrt15OverPi * x * z;      // m=+1
+            basis[8] = sqrt15Over16Pi * (x * x - y * y); // m=+2
+
+            return basis;
+        }
+        public static float[] SHEval3(Vector3 dir)
+        {
+            // 归一化方向
+            Vector3 d = dir;
+            d.Normalize();
+            float x = d.x, y = d.y, z = d.z;
+            var shBasis = new float[9];
+
+            // 第0阶 (l=0)
+            shBasis[0] = 0.2820947918f; // Y00: 1/(2*sqrt(π))
+
+            // 第1阶 (l=1)
+            shBasis[1] = -0.4886025119f * y; // Y1-1
+            shBasis[2] = 0.4886025119f * z; // Y10
+            shBasis[3] = -0.4886025119f * x; // Y11
+
+            // 第2阶 (l=2)
+            shBasis[4] = 1.0925484306f * x * y; // Y2-2
+            shBasis[5] = -1.0925484306f * y * z; // Y2-1
+            shBasis[6] = 0.3153915652f * (3.0f * z * z - 1.0f); // Y20
+            shBasis[7] = -1.0925484306f * x * z; // Y21
+            shBasis[8] = 0.5462742153f * (x * x - y * y); // Y22
+
+            // 第3阶 (l=3) 可根据需要扩展
+
+            return shBasis;
+        }
+        public static float[] PrecomputeSHCoefficients(Func<Vector3, float> sampleEnvironment, uint sampleCount = 100000)
+        {
+            float[] coefficients = new float[0];
+
+            for (uint i = 0; i < sampleCount; i++)
+            {
+                // 生成均匀分布的随机方向（蒙特卡洛采样）
+                Vector3 dir = CosineSampleHemisphere(Hammersley(i, sampleCount));
+
+                // 采样环境光照颜色（返回值为float，范围[0,1]）
+                float radiance = sampleEnvironment(dir);
+
+                // 计算球谐基函数值
+                float[] basis = SHEval3(dir);
+
+                // 累加到系数
+                for (int j = 0; j < 9; j++)
+                {
+                    coefficients[j] += radiance * basis[j];
+                }
+            }
+
+            // 应用蒙特卡洛积分权重（4π / sampleCount）
+            float weight = 4.0f * MathF.PI / sampleCount;
+            for (int j = 0; j < 9; j++)
+            {
+                coefficients[j] *= weight;
+            }
+            return coefficients;
+        }
+        public static float EvaluateSH(float[] coefficients, Vector3 normal)
+        {
+            if (coefficients.Length != 9)
+                throw new ArgumentException("Coefficients must have 9 elements for 3rd-order SH.");
+
+            float[] basis = SHEval3(normal);
+            float result = 0.0f;
+
+            for (int i = 0; i < 9; i++)
+            {
+                result += coefficients[i] * basis[i];
+            }
+
+            return result;
+        }
+    }
+}

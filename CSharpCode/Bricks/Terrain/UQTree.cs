@@ -39,9 +39,9 @@ namespace EngineNS.Bricks.Terrain
     }
 }
 
-namespace EngineNS.UTest
+namespace EngineNS.UnitTest
 {
-    [UTest.UTest]
+    [UnitTest.TtTest]
     public class UTest_UQTree
     {
         public unsafe void UnitTestEntrance()

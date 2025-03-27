@@ -254,9 +254,9 @@ namespace EngineNS.Bricks.Collision.DDA
     }
 }
 
-namespace EngineNS.UTest
+namespace EngineNS.UnitTest
 {
-    [UTest.UTest(Enable = false)]
+    [UnitTest.TtTest(Enable = false)]
     public partial class UTest_VoxelSpace3D
     {
         public void UnitTestEntrance()

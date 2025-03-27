@@ -223,7 +223,7 @@ namespace EngineNS
     }
 }
 
-namespace EngineNS.UTest
+namespace EngineNS.UnitTest
 {
     public class TtTestAsyncObject : IPooledObject
     {
@@ -243,7 +243,7 @@ namespace EngineNS.UTest
             return new TtTestAsyncObject();
         }
     }
-    [UTest.UTest]
+    [UnitTest.TtTest]
     public partial class UTest_TestAsyncObjectPool
     {
         TtTestAsyncObjectPool Pool = new TtTestAsyncObjectPool();

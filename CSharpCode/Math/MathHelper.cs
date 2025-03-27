@@ -741,10 +741,10 @@ namespace EngineNS
         }
         public static float RandomRange(float start, float end)
         {
-            return RandomDouble() * (end - start);
+            return RandomFloat() * (end - start);
         }
         [Rtti.Meta]
-        public static float RandomDouble()
+        public static float RandomFloat()
         {
             return (float)sRandom.NextDouble();
         }
@@ -752,9 +752,9 @@ namespace EngineNS
         public static Vector3 RandomDirection(bool bNormalize = true)
         {
             Vector3 result;
-            result.X = RandomDouble();
-            result.Y = RandomDouble();
-            result.Z = RandomDouble();
+            result.X = RandomFloat();
+            result.Y = RandomFloat();
+            result.Z = RandomFloat();
             if (bNormalize)
                 result.Normalize();
             return result;
@@ -2798,8 +2798,8 @@ namespace EngineNS
 			macross_break_RandomRange_3495035793.TryBreak();
 			return _return_value;
 		}
-		private static EngineNS.Macross.TtMacrossBreak macross_break_RandomDouble_3323264318 = new EngineNS.Macross.TtMacrossBreak("EngineNS.MathHelper->static float RandomDouble()");
-		public static unsafe float macross_RandomDouble (string nodeName) 
+		private static EngineNS.Macross.TtMacrossBreak macross_break_RandomFloat_3323264318 = new EngineNS.Macross.TtMacrossBreak("EngineNS.MathHelper->static float RandomFloat()");
+		public static unsafe float macross_RandomFloat (string nodeName) 
 		{
 			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
 			{
@@ -2807,8 +2807,8 @@ namespace EngineNS
 				{
 				}
 			}
-			var _return_value = RandomDouble();
-			macross_break_RandomDouble_3323264318.TryBreak();
+			var _return_value = RandomFloat();
+			macross_break_RandomFloat_3323264318.TryBreak();
 			return _return_value;
 		}
 		private static EngineNS.Macross.TtMacrossBreak macross_break_RandomDirection_845820099 = new EngineNS.Macross.TtMacrossBreak("EngineNS.MathHelper->static Vector3 RandomDirection(bool bNormalize)");

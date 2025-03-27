@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace EngineNS.UTest
+namespace EngineNS.UnitTest
 {
     public class TtTestCategory : Profiler.TtLogCategory
     {
@@ -12,11 +12,11 @@ namespace EngineNS.UTest
         }
     }
 
-    public class UTestAttribute : Attribute
+    public class TtTestAttribute : Attribute
     {
         public bool Enable = true;
     }
-    public class UnitTestManager
+    public class TtUnitTestManager
     {
         public static void TMessage(string message, [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
             [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
@@ -44,10 +44,10 @@ namespace EngineNS.UTest
                     var types = i.GetTypes();
                     foreach (var j in types)
                     {
-                        var attrs = j.GetCustomAttributes(typeof(UTestAttribute), false);
+                        var attrs = j.GetCustomAttributes(typeof(TtTestAttribute), false);
                         if (attrs.Length == 0)
                             continue;
-                        var ut = attrs[0] as UTestAttribute;
+                        var ut = attrs[0] as TtTestAttribute;
                         if (ut.Enable == false)
                             continue;
                         var obj = Rtti.TtTypeDescManager.CreateInstance(j);

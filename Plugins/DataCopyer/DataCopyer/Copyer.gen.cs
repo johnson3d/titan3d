@@ -186632,26 +186632,26 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as EngineNS.UI.TtUINode;
 		};
 	}
-	static class EngineNS_UTest_UTest_MetaObject_TestSubClass
+	static class EngineNS_UnitTest_UTest_MetaObject_TestSubClass
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
-			var srcObj = obj as EngineNS.UTest.UTest_MetaObject.TestSubClass;
+			var srcObj = obj as EngineNS.UnitTest.UTest_MetaObject.TestSubClass;
 			ar.Write(srcObj.A);
 			ar.Write(srcObj.B);
 			ar.Write(srcObj.C);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
-			var tarObj = tar as EngineNS.UTest.UTest_MetaObject.TestSubClass;
-			var srcObj = src as EngineNS.UTest.UTest_MetaObject.TestSubClass;
+			var tarObj = tar as EngineNS.UnitTest.UTest_MetaObject.TestSubClass;
+			var srcObj = src as EngineNS.UnitTest.UTest_MetaObject.TestSubClass;
 			tarObj.A = srcObj.A;
 			tarObj.B = srcObj.B;
 			tarObj.C = srcObj.C;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_13968253849739016292 = (EngineNS.IO.IReader ar, object obj)=>
 		{
-			var srcObj = obj as EngineNS.UTest.UTest_MetaObject.TestSubClass;
+			var srcObj = obj as EngineNS.UnitTest.UTest_MetaObject.TestSubClass;
 			System.Int32 t_A;
 			ar.Read(out t_A);
 			srcObj.A = t_A;
@@ -186681,11 +186681,11 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
-	static class EngineNS_UTest_UTest_MetaObject
+	static class EngineNS_UnitTest_UTest_MetaObject
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
-			var srcObj = obj as EngineNS.UTest.UTest_MetaObject;
+			var srcObj = obj as EngineNS.UnitTest.UTest_MetaObject;
 			ar.Write(srcObj.A);
 			ar.Write(srcObj.B);
 			ar.Write(srcObj.C);
@@ -186747,7 +186747,7 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			if (srcObj.H != null)
 			{
-				var Srclst = srcObj.H as System.Collections.Generic.List<EngineNS.UTest.UTest_MetaObject.TestSubClass>;
+				var Srclst = srcObj.H as System.Collections.Generic.List<EngineNS.UnitTest.UTest_MetaObject.TestSubClass>;
 				ar.Write(Srclst.Count);
 				for (int i = 0; i < Srclst.Count; i++)
 				{
@@ -186781,8 +186781,8 @@ namespace EngineNS.Plugins.DataCopyer
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
-			var tarObj = tar as EngineNS.UTest.UTest_MetaObject;
-			var srcObj = src as EngineNS.UTest.UTest_MetaObject;
+			var tarObj = tar as EngineNS.UnitTest.UTest_MetaObject;
+			var srcObj = src as EngineNS.UnitTest.UTest_MetaObject;
 			tarObj.A = srcObj.A;
 			tarObj.B = srcObj.B;
 			tarObj.C = srcObj.C;
@@ -186790,11 +186790,11 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				if (tarObj.E == null || tarObj.E.GetType() != srcObj.E.GetType())
 				{
-					tarObj.E = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.E.GetType()) as EngineNS.UTest.UTest_MetaObject.TestSubClass;
+					tarObj.E = EngineNS.Rtti.TtTypeDescManager.CreateInstance(srcObj.E.GetType()) as EngineNS.UnitTest.UTest_MetaObject.TestSubClass;
 				}
 				if (tarObj.E != null)
 				{
-					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.UTest.UTest_MetaObject.TestSubClass>.TypeDesc.TypeString);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindCopyer(Rtti.TtTypeDescGetter<EngineNS.UnitTest.UTest_MetaObject.TestSubClass>.TypeDesc.TypeString);
 					if (fn != null)
 					{
 						fn(tarObj.E, srcObj.E);
@@ -186831,20 +186831,20 @@ namespace EngineNS.Plugins.DataCopyer
 				}
 				if (tarObj.H != null)
 				{
-					var Tarlst = tarObj.H as System.Collections.Generic.List<EngineNS.UTest.UTest_MetaObject.TestSubClass>;
-					var Srclst = srcObj.H as System.Collections.Generic.List<EngineNS.UTest.UTest_MetaObject.TestSubClass>;
+					var Tarlst = tarObj.H as System.Collections.Generic.List<EngineNS.UnitTest.UTest_MetaObject.TestSubClass>;
+					var Srclst = srcObj.H as System.Collections.Generic.List<EngineNS.UnitTest.UTest_MetaObject.TestSubClass>;
 					Tarlst.Clear();
 					for (int i = 0; i < Srclst.Count; i++)
 					{
-						EngineNS.UTest.UTest_MetaObject.TestSubClass tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.UTest.UTest_MetaObject.TestSubClass;
+						EngineNS.UnitTest.UTest_MetaObject.TestSubClass tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as EngineNS.UnitTest.UTest_MetaObject.TestSubClass;
 						Tarlst.Add(tmp);
 					}
 				}
 			}
 		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_4709753961727995544 = (EngineNS.IO.IReader ar, object obj)=>
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15281224780803379497 = (EngineNS.IO.IReader ar, object obj)=>
 		{
-			var srcObj = obj as EngineNS.UTest.UTest_MetaObject;
+			var srcObj = obj as EngineNS.UnitTest.UTest_MetaObject;
 			System.Int32 t_A;
 			ar.Read(out t_A);
 			srcObj.A = t_A;
@@ -186882,11 +186882,11 @@ namespace EngineNS.Plugins.DataCopyer
 				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_D.ClassType.TypeString, ver_D );
 				if (fn != null)
 				{
-					EngineNS.UTest.UTest_MetaObject.TestSubClass t_D = null;
+					EngineNS.UnitTest.UTest_MetaObject.TestSubClass t_D = null;
 					t_D = srcObj.D;
 					if (t_D == null)
 					{
-						t_D = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_D.ClassType) as EngineNS.UTest.UTest_MetaObject.TestSubClass;
+						t_D = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_D.ClassType) as EngineNS.UnitTest.UTest_MetaObject.TestSubClass;
 					}
 					fn(ar, t_D);
 				}
@@ -186901,11 +186901,11 @@ namespace EngineNS.Plugins.DataCopyer
 				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_E.ClassType.TypeString, ver_E );
 				if (fn != null)
 				{
-					EngineNS.UTest.UTest_MetaObject.TestSubClass t_E = null;
+					EngineNS.UnitTest.UTest_MetaObject.TestSubClass t_E = null;
 					t_E = srcObj.E;
 					if (t_E == null)
 					{
-						t_E = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_E.ClassType) as EngineNS.UTest.UTest_MetaObject.TestSubClass;
+						t_E = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_E.ClassType) as EngineNS.UnitTest.UTest_MetaObject.TestSubClass;
 					}
 					fn(ar, t_E);
 					srcObj.E = t_E;
@@ -186940,17 +186940,17 @@ namespace EngineNS.Plugins.DataCopyer
 				ar.Read(out t);
 				t_G.Add(t);
 			}
-			System.Collections.Generic.List<EngineNS.UTest.UTest_MetaObject.TestSubClass> t_H = null;
+			System.Collections.Generic.List<EngineNS.UnitTest.UTest_MetaObject.TestSubClass> t_H = null;
 			t_H = srcObj.H;
 			if (t_H == null)
 			{
-				t_H = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.UTest.UTest_MetaObject.TestSubClass>)) as System.Collections.Generic.List<EngineNS.UTest.UTest_MetaObject.TestSubClass>;
+				t_H = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<EngineNS.UnitTest.UTest_MetaObject.TestSubClass>)) as System.Collections.Generic.List<EngineNS.UnitTest.UTest_MetaObject.TestSubClass>;
 			}
 			int count_H;
 			ar.Read(out count_H);
 			for(int i = 0; i<count_H; i++)
 			{
-				EngineNS.UTest.UTest_MetaObject.TestSubClass t = null;
+				EngineNS.UnitTest.UTest_MetaObject.TestSubClass t = null;
 				EngineNS.Hash64 typeHash;
 				ar.Read(out typeHash);
 				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
@@ -186961,7 +186961,7 @@ namespace EngineNS.Plugins.DataCopyer
 					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
 					if (fn != null)
 					{
-						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.UTest.UTest_MetaObject.TestSubClass;
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as EngineNS.UnitTest.UTest_MetaObject.TestSubClass;
 						fn(ar, t);
 					}
 				}
@@ -186970,7 +186970,7 @@ namespace EngineNS.Plugins.DataCopyer
 				{
 					if (srcObj is IO.ISerializer sr)
 					{
-						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.UTest.UTest_MetaObject.TestSubClass>), false);
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<EngineNS.UnitTest.UTest_MetaObject.TestSubClass>), false);
 					}
 				}
 			}
@@ -186978,22 +186978,22 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Read(out t_ReadSignal);
 		};
 	}
-	static class EngineNS_UTest_UTest_Rpc_TestRPCArgument
+	static class EngineNS_UnitTest_UTest_Rpc_TestRPCArgument
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
-			var srcObj = obj as EngineNS.UTest.UTest_Rpc.TestRPCArgument;
+			var srcObj = obj as EngineNS.UnitTest.UTest_Rpc.TestRPCArgument;
 			ar.Write(srcObj.AA);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
-			var tarObj = tar as EngineNS.UTest.UTest_Rpc.TestRPCArgument;
-			var srcObj = src as EngineNS.UTest.UTest_Rpc.TestRPCArgument;
+			var tarObj = tar as EngineNS.UnitTest.UTest_Rpc.TestRPCArgument;
+			var srcObj = src as EngineNS.UnitTest.UTest_Rpc.TestRPCArgument;
 			tarObj.AA = srcObj.AA;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9200644497602073477 = (EngineNS.IO.IReader ar, object obj)=>
 		{
-			var srcObj = obj as EngineNS.UTest.UTest_Rpc.TestRPCArgument;
+			var srcObj = obj as EngineNS.UnitTest.UTest_Rpc.TestRPCArgument;
 			System.Int32 t_AA;
 			ar.Read(out t_AA);
 			srcObj.AA = t_AA;
@@ -201227,22 +201227,22 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(978974702571264856, EngineNS_UI_TtUINode.Read_978974702571264856);
 			}
 			{
-				var kls = this.GetClassCopyer("EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore");
-				kls.Writer = EngineNS_UTest_UTest_MetaObject_TestSubClass.WriteCurrentVersion;
-				kls.Copy = EngineNS_UTest_UTest_MetaObject_TestSubClass.CopyCurrentVersion;
-				kls.RegVersion(13968253849739016292, EngineNS_UTest_UTest_MetaObject_TestSubClass.Read_13968253849739016292);
+				var kls = this.GetClassCopyer("EngineNS.UnitTest.UTest_MetaObject.TestSubClass@EngineCore");
+				kls.Writer = EngineNS_UnitTest_UTest_MetaObject_TestSubClass.WriteCurrentVersion;
+				kls.Copy = EngineNS_UnitTest_UTest_MetaObject_TestSubClass.CopyCurrentVersion;
+				kls.RegVersion(13968253849739016292, EngineNS_UnitTest_UTest_MetaObject_TestSubClass.Read_13968253849739016292);
 			}
 			{
-				var kls = this.GetClassCopyer("EngineNS.UTest.UTest_MetaObject@EngineCore");
-				kls.Writer = EngineNS_UTest_UTest_MetaObject.WriteCurrentVersion;
-				kls.Copy = EngineNS_UTest_UTest_MetaObject.CopyCurrentVersion;
-				kls.RegVersion(4709753961727995544, EngineNS_UTest_UTest_MetaObject.Read_4709753961727995544);
+				var kls = this.GetClassCopyer("EngineNS.UnitTest.UTest_MetaObject@EngineCore");
+				kls.Writer = EngineNS_UnitTest_UTest_MetaObject.WriteCurrentVersion;
+				kls.Copy = EngineNS_UnitTest_UTest_MetaObject.CopyCurrentVersion;
+				kls.RegVersion(15281224780803379497, EngineNS_UnitTest_UTest_MetaObject.Read_15281224780803379497);
 			}
 			{
-				var kls = this.GetClassCopyer("EngineNS.UTest.UTest_Rpc.TestRPCArgument@EngineCore");
-				kls.Writer = EngineNS_UTest_UTest_Rpc_TestRPCArgument.WriteCurrentVersion;
-				kls.Copy = EngineNS_UTest_UTest_Rpc_TestRPCArgument.CopyCurrentVersion;
-				kls.RegVersion(9200644497602073477, EngineNS_UTest_UTest_Rpc_TestRPCArgument.Read_9200644497602073477);
+				var kls = this.GetClassCopyer("EngineNS.UnitTest.UTest_Rpc.TestRPCArgument@EngineCore");
+				kls.Writer = EngineNS_UnitTest_UTest_Rpc_TestRPCArgument.WriteCurrentVersion;
+				kls.Copy = EngineNS_UnitTest_UTest_Rpc_TestRPCArgument.CopyCurrentVersion;
+				kls.RegVersion(9200644497602073477, EngineNS_UnitTest_UTest_Rpc_TestRPCArgument.Read_9200644497602073477);
 			}
 			{
 				var kls = this.GetClassCopyer("Survivor.TtCharacterStateNode.TtCharacterStateNodeData@Survivor");
@@ -201474,7 +201474,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(547543558045874187, Survivor_TtWeaponProxyNode.Read_547543558045874187);
 				kls.RegVersion(6246337379466960295, Survivor_TtWeaponProxyNode.Read_6246337379466960295);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("FC_EF_C0_59_26_BF_AB_A2_3A_4C_4F_F3_99_EA_C9_56_16_A6_69_9B");
+			this.VersionHash = EngineNS.Hash160.Parse("96_C4_2A_E5_42_75_0B_20_61_D1_5F_AB_5B_D2_2D_70_BC_4A_66_C6");
 		}
 	}
 }

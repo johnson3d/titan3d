@@ -35,10 +35,10 @@ namespace EngineNS.Bricks.Procedure.Algorithm
 
         private unsafe static void mpd_init_corner(float* map, int size)
         {
-            map[0] = MathHelper.RandomDouble();
-            map[size - 1] = MathHelper.RandomDouble();
-            map[size * size - size] = MathHelper.RandomDouble();
-            map[size * size - 1] = MathHelper.RandomDouble();
+            map[0] = MathHelper.RandomFloat();
+            map[size - 1] = MathHelper.RandomFloat();
+            map[size * size - size] = MathHelper.RandomFloat();
+            map[size * size - 1] = MathHelper.RandomFloat();
         }
 
         private unsafe static void mpd_displace(float* map, int size, int lx, int rx, int by, int ty, float spread)
@@ -61,7 +61,7 @@ namespace EngineNS.Bricks.Procedure.Algorithm
             map[mx + my * size] = jitter(center, spread);
         }
 
-        private static float jitter(float value, float spread) {return value + (MathHelper.RandomDouble() * 2 - 1) * spread;}
+        private static float jitter(float value, float spread) {return value + (MathHelper.RandomFloat() * 2 - 1) * spread;}
         private static float average2(float a, float b) {return (a + b) / 2;}
         private static float average4(float a, float b, float c, float d) {return (a + b + c + d) / 4;}
         private static int midpoint(int a, int b) {return (a + b) / 2;}

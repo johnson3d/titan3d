@@ -614,9 +614,9 @@ namespace EngineNS.Bricks.GpuDriven
         }
     }
 }
-namespace EngineNS.UTest
+namespace EngineNS.UnitTest
 {
-    [UTest]
+    [TtTest]
     public class UTest_TtSoftRaster
     {
         bool IgnorTest = true;

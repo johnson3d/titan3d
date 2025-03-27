@@ -1154,9 +1154,9 @@ namespace EngineNS
     }
 }
 
-namespace EngineNS.UTest
+namespace EngineNS.UnitTest
 {
-    [UTest.UTest]
+    [UnitTest.TtTest]
     public class UTest_AssetMeta
     {
         public void UnitTestEntrance()
