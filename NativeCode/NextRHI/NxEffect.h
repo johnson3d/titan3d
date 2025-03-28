@@ -23,6 +23,8 @@ namespace NxRHI
 		const FShaderBinder*	MSBinder = nullptr;
 		const FShaderBinder*	VSBinder = nullptr;
 		const FShaderBinder*	PSBinder = nullptr;
+
+		UINT					DescriptorIndex = -1;
 		const FShaderVarDesc* FindField(const char* name) const;
 		UINT GetBindResourceSize() const;
 		const FShaderBinder* GetShaderBinder(EShaderType type = EShaderType::SDT_Unknown) const{

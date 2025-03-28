@@ -54,12 +54,19 @@ struct PS_OUTPUT
 	float4 RT0 : SV_Target0;
 };
 
+#if RHI_TYPE == RHI_DX12
+Texture2D<float4> BindlessTextures[] DX_AUTOBIND;
+SamplerState samplerState DX_AUTOBIND;
+#endif
+
 PS_OUTPUT PS_Main(PS_INPUT input)
 {
 	PS_OUTPUT output = (PS_OUTPUT)0;
 
     float result = GetReferValue();
-    
+#if RHI_TYPE == RHI_DX12
+    result += BindlessTextures[0].Sample(samplerState, float2(0, 0)).r;
+#endif    
 	//todo: use other cbuffer
 
 	output.RT0 = float4(result, result, result, result);

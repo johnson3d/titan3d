@@ -550,20 +550,20 @@ namespace EngineNS.Editor.Forms
             {
                 
             }
-            ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("BuildCluster", in btSize))
-            {
-                var meshMeta = Mesh.GetAMeta() as EngineNS.Graphics.Mesh.TtMeshPrimitivesAMeta;
-                meshMeta.IsClustered = true;
-                meshMeta.AddReferenceAsset(RName.GetRName(Mesh.AssetName + ".clusteremesh", Mesh.AssetName.RNameType));
-                meshMeta.SaveAMeta((IO.IAsset)null);
-                Mesh.BuildClusteredMesh();
-            }
-            ImGuiAPI.SameLine(0, -1);
-            if (EGui.UIProxy.CustomButton.ToolButton("LoadCluster", in btSize))
-            {
-                Mesh.LoadClusterMesh();
-            }
+            //ImGuiAPI.SameLine(0, -1);
+            //if (EGui.UIProxy.CustomButton.ToolButton("BuildCluster", in btSize))
+            //{
+            //    var meshMeta = Mesh.GetAMeta() as EngineNS.Graphics.Mesh.TtMeshPrimitivesAMeta;
+            //    meshMeta.IsClustered = true;
+            //    meshMeta.AddReferenceAsset(RName.GetRName(Mesh.AssetName + ".clusteremesh", Mesh.AssetName.RNameType));
+            //    meshMeta.SaveAMeta((IO.IAsset)null);
+            //    Mesh.BuildClusteredMesh();
+            //}
+            //ImGuiAPI.SameLine(0, -1);
+            //if (EGui.UIProxy.CustomButton.ToolButton("LoadCluster", in btSize))
+            //{
+            //    Mesh.LoadClusterMesh();
+            //}
             ImGuiAPI.SameLine(0, -1);
             if (ImGuiAPI.ToggleButton("N", ref mShowNormal, in btSize, 0))
             {
@@ -578,6 +578,22 @@ namespace EngineNS.Editor.Forms
             if (EGui.UIProxy.CustomButton.ToolButton("BuildMeshlets", in btSize))
             {
                 Mesh.BuildMeshlets();
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("BuildTangent", in btSize))
+            {
+                var mdp = new TtMeshDataProvider();
+                mdp.InitFrom(Mesh);
+                mdp.mCoreObject.BuildTangent();
+                mdp.ToMesh(Mesh);
+            }
+            ImGuiAPI.SameLine(0, -1);
+            if (EGui.UIProxy.CustomButton.ToolButton("BuildLightMap", in btSize))
+            {
+                var mdp = new TtMeshDataProvider();
+                mdp.InitFrom(Mesh);
+                mdp.mCoreObject.BuildLightMap();
+                mdp.ToMesh(Mesh);
             }
         }
 

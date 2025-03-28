@@ -19,6 +19,7 @@ namespace NxRHI
 	class IGpuResource;
 	class ICommandList;
 	class IGpuDrawState;
+	class IBindless;
 
 	class TR_CLASS()
 		IGpuDraw : public VIUnknown
@@ -40,6 +41,12 @@ namespace NxRHI
 		const char* GetDebugName() {
 			return DebugName.c_str();
 		}
+		virtual IBindless* CreateBindless(const char* name) const {
+			return nullptr;
+		}
+		virtual IBindless* FindBindless(const char* name) const {
+			return nullptr;
+		}
 	};
 	class TR_CLASS()
 		IGraphicDraw : public IGpuDraw
@@ -55,6 +62,7 @@ namespace NxRHI
 			BindResources.clear();
 		}
 		const FEffectBinder* FindBinder(const char* name) const;
+		
 		bool BindResource(VNameString name, IGpuResource* resource);
 		void BindResource(const FEffectBinder* binder, IGpuResource * resource);
 		IGpuResource* FindGpuResource(VNameString name);
@@ -95,6 +103,17 @@ namespace NxRHI
 				if (fun(i.first->BindType, i.second) == false)
 					return;
 			}
+		}
+		virtual IBindless* FindBindless(const char* name) const override{
+			auto binder = FindBinder(name);
+			if (binder == nullptr || binder->GetShaderBinder()->IsBindless() == false)
+				return nullptr;
+			auto iter = BindResources.find(binder);
+			if (iter != BindResources.end())
+			{
+				return (IBindless*)iter->second;
+			}
+			return nullptr;
 		}
 	public:
 		static std::atomic<int>		NumOfInstance;
@@ -149,6 +168,7 @@ namespace NxRHI
 			IndirectDispatchArgsBuffer = buffer;
 		}
 		const FShaderBinder* FindBinder(EShaderBindType type, const char* name) const;
+		const FShaderBinder* FindBinder(const char* name) const;
 		bool BindResource(EShaderBindType type, VNameString name, IGpuResource* resource);
 		void BindResource(const FShaderBinder* binder, IGpuResource* resource);
 		IGpuResource* FindGpuResource(EShaderBindType type, VNameString name);
@@ -163,6 +183,17 @@ namespace NxRHI
 				if (fun(i.first->Type, i.second) == false)
 					return;
 			}
+		}
+		virtual IBindless* FindBindless(const char* name) const override {
+			auto binder = FindBinder(name);
+			if (binder == nullptr || binder->IsBindless() == false)
+				return nullptr;
+			auto iter = BindResources.find(binder);
+			if (iter != BindResources.end())
+			{
+				return (IBindless*)iter->second;
+			}
+			return nullptr;
 		}
 	public:
 		static int GetNumOfInstance() {
@@ -206,8 +237,20 @@ namespace NxRHI
 			Depth = w;
 		}
 		const FShaderBinder* FindBinder(EShaderBindType type, const char* name) const;
+		const FShaderBinder* FindBinder(const char* name) const;
 		bool BindResource(EShaderBindType type, VNameString name, IGpuResource* resource);
 		void BindResource(const FShaderBinder* binder, IGpuResource* resource);
+		virtual IBindless* FindBindless(const char* name) const override {
+			auto binder = FindBinder(name);
+			if (binder == nullptr || binder->IsBindless() == false)
+				return nullptr;
+			auto iter = BindResources.find(binder);
+			if (iter != BindResources.end())
+			{
+				return (IBindless*)iter->second;
+			}
+			return nullptr;
+		}
 	protected:
 		virtual void OnBindResource(const FShaderBinder* binder, IGpuResource* resource) {}
 	public:

@@ -15,7 +15,134 @@ NS_BEGIN
 
 namespace NxRHI
 {
+	static void ResetHeapToNullByReflector(DX12GpuDevice* device, const IShaderReflector* pReflector,
+		AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder> mSamplerHeap)
+	{
+		if (mCbvSrvUavHeap)
+		{
+			for (auto& b : pReflector->CBuffers)
+			{
+				auto handle = device->mNullCBV->mView;
+				handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			}
+			for (auto& b : pReflector->Srvs)
+			{
+				auto handle = device->mNullSRV->mView;
+				handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			}
+			for (auto& b : pReflector->Uavs)
+			{
+				auto handle = device->mNullUAV->mView;
+				handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			}
+		}
+		if (mSamplerHeap)
+		{
+			for (auto& b : pReflector->Samplers)
+			{
+				auto handle = device->mNullSampler->mView;
+				handle->BindToHeap(device, mSamplerHeap->Heap, b->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+			}
+		}
+	}
+
+	static void ResetHeapToNullByEffect(DX12GpuDevice* device, DX12GraphicsEffect* effect,
+		AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder> mSamplerHeap)
+	{
+		auto SetBinder = [&](const FShaderBinder* binder)
+		{
+			switch (binder->Type)
+			{
+				case EShaderBindType::SBT_Sampler:
+				{
+					auto handle = device->mNullSampler->mView;
+					handle->BindToHeap(device, mSamplerHeap->Heap, binder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+				}
+				break;
+				case EShaderBindType::SBT_CBV:
+				{
+					auto handle = device->mNullCBV->mView;
+					handle->BindToHeap(device, mCbvSrvUavHeap->Heap, binder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				}
+				break;
+				case EShaderBindType::SBT_SRV:
+				{
+					auto handle = device->mNullSRV->mView;
+					handle->BindToHeap(device, mCbvSrvUavHeap->Heap, binder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				}
+				break;
+				case EShaderBindType::SBT_UAV:
+				{
+					auto handle = device->mNullUAV->mView;
+					handle->BindToHeap(device, mCbvSrvUavHeap->Heap, binder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				}
+				break;
+				default:
+					break;
+			}
+		};
+		for (auto& b : effect->mBinders)
+		{
+			auto binder = b.second;
+			if (binder->ASBinder) 
+			{
+				SetBinder(binder->ASBinder);
+			}
+			if (binder->MSBinder)
+			{
+				SetBinder(binder->MSBinder);
+			}
+			if (binder->VSBinder)
+			{
+				SetBinder(binder->VSBinder);
+			}
+			if (binder->PSBinder)
+			{
+				SetBinder(binder->PSBinder);
+			}
+		}
+	}
 	
+	static void Bind2Heap(DX12GpuDevice* device, const FShaderBinder* binder, IGpuResource* resource,
+		AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap)
+	{
+		if (resource == nullptr)
+			return;
+		if (binder->IsBindless())
+		{
+			if (binder->Type == EShaderBindType::SBT_Sampler)
+			{
+
+			}
+			else
+			{
+				/*auto bd = (IBindlessBase*)resource;
+				//device->mDevice->CopyDescriptors()
+				for (size_t i = 0; i < bd->mResources.size(); i++)
+				{
+					if (bd->mResources[i] == nullptr)
+						continue;
+					auto handle = (DX12PagedHeap*)bd->mResources[i]->GetHWBuffer();
+					handle->BindToHeap(device, mCbvSrvUavHeap->Heap, binder->DescriptorIndex + i, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+				}*/
+			}
+		}
+		else
+		{
+			auto handle = (DX12PagedHeap*)resource->GetHWBuffer();
+			if (binder->Type == EShaderBindType::SBT_Sampler)
+			{
+				ASSERT(mSamplerHeap != nullptr);
+				handle->BindToHeap(device, mSamplerHeap->Heap, binder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+			}
+			else
+			{
+				ASSERT(mCbvSrvUavHeap != nullptr);
+				handle->BindToHeap(device, mCbvSrvUavHeap->Heap, binder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			}
+		}
+	}
+
 	DX12GraphicDraw::DX12GraphicDraw()
 	{
 
@@ -34,69 +161,28 @@ namespace NxRHI
 	{
 		IsDirty = true;
 	}
-	void DX12GraphicDraw::BindResourceToHeap(DX12GpuDevice* device, const FEffectBinder* binder, IGpuResource* resource)
+	void DX12GraphicDraw::BindDescriptorHeaps(DX12GpuDevice* device, DX12CommandList* dx12Cmd)
 	{
-		DX12PagedHeap* handle = nullptr;
-		if (resource != nullptr)
-			handle = (DX12PagedHeap*)resource->GetHWBuffer();
-
-		if (handle == nullptr)
-			return;
-
-		if (binder->BindType == EShaderBindType::SBT_Sampler)
+		auto effect = this->ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>();
+		if (effect->mSignatureBuilder.mCbvSrvUavNumber > 0)
 		{
-			ASSERT(mSamplerHeap != nullptr);
-			if (binder->VSBinder != nullptr)
-			{
-				handle->BindToHeap(device, mSamplerHeap->Heap, binder->VSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-				/*device->mDevice->CopyDescriptorsSimple(1, mSamplerHeap->Heap->GetCpuAddress(binder->VSBinder->DescriptorIndex),
-					handle->GetCpuAddress(0), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);*/
-			}
-			if (binder->PSBinder != nullptr)
-			{
-				handle->BindToHeap(device, mSamplerHeap->Heap, binder->PSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-				/*device->mDevice->CopyDescriptorsSimple(1, mSamplerHeap->Heap->GetCpuAddress(binder->PSBinder->DescriptorIndex),
-					handle->GetCpuAddress(0), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);*/
-			}
-			if (binder->MSBinder != nullptr)
-			{
-				handle->BindToHeap(device, mSamplerHeap->Heap, binder->MSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-			}
+			if (mCbvSrvUavHeap == nullptr)
+				mCbvSrvUavHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mSignatureBuilder.mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 		}
-		else
+		if (effect->mSignatureBuilder.mSamplerNumber > 0)
 		{
-			ASSERT(mCbvSrvUavHeap != nullptr);
-			if (binder->VSBinder != nullptr)
-			{
-				/*device->mDevice->CopyDescriptorsSimple(1, mSrvTable->GetCpuAddress(binder->VSBinder->DescriptorIndex),
-					device->mNullCBV_SRV_UAV->GetCpuAddress(0), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);*/
-				
-				handle->BindToHeap(device, mCbvSrvUavHeap->Heap, binder->VSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-				/*device->mDevice->CopyDescriptorsSimple(1, mCbvSrvUavHeap->Heap->GetCpuAddress(binder->VSBinder->DescriptorIndex),
-					handle->GetCpuAddress(0), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);*/
-			}
-			if (binder->PSBinder != nullptr)
-			{
-				handle->BindToHeap(device, mCbvSrvUavHeap->Heap, binder->PSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-				/*device->mDevice->CopyDescriptorsSimple(1, mCbvSrvUavHeap->Heap->GetCpuAddress(binder->PSBinder->DescriptorIndex),
-					handle->GetCpuAddress(0), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);*/
-			}
-			if (binder->MSBinder != nullptr)
-			{
-				handle->BindToHeap(device, mCbvSrvUavHeap->Heap, binder->MSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-			}
+			if (mSamplerHeap == nullptr)
+				mSamplerHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mSignatureBuilder.mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
 		}
-	}
-	void DX12GraphicDraw::BindDescriptors(DX12GpuDevice* device, DX12CommandList* dx12Cmd, DX12GraphicsEffect* effect)
-	{
+
 		ID3D12DescriptorHeap* descriptorHeaps[4] = {};
 		int NumOfHeaps = 0;
 		if (mCbvSrvUavHeap != nullptr)
 		{
 			dx12Cmd->GetCmdRecorder()->UseResource(mCbvSrvUavHeap);
 			descriptorHeaps[NumOfHeaps++] = mCbvSrvUavHeap->Heap->RealObject;
-		}	
+		}
+
 		if (mSamplerHeap != nullptr)
 		{
 			dx12Cmd->GetCmdRecorder()->UseResource(mSamplerHeap);
@@ -106,119 +192,79 @@ namespace NxRHI
 		dx12Cmd->mContext->SetGraphicsRootSignature(effect->mSignature);
 		dx12Cmd->mContext->SetDescriptorHeaps(NumOfHeaps, descriptorHeaps);
 
-		for (int i = 0; i < FRootParameter::GraphicsNumber; i++)
+		for (auto& i : effect->mCbvSrvUavBinders)
 		{
-			if (effect->mRootParameters[i].IsValidRoot())
-			{
-				if(effect->mRootParameters[i].IsSamplers)
-					dx12Cmd->mContext->SetGraphicsRootDescriptorTable(effect->mRootParameters[i].RootIndex, mSamplerHeap->Heap->GetGpuAddress(effect->mRootParameters[i].HeapStartIndex));
-				else
-					dx12Cmd->mContext->SetGraphicsRootDescriptorTable(effect->mRootParameters[i].RootIndex, mCbvSrvUavHeap->Heap->GetGpuAddress(effect->mRootParameters[i].HeapStartIndex));
-			}
+			dx12Cmd->mContext->SetGraphicsRootDescriptorTable(i.RootIndex,
+				mCbvSrvUavHeap->Heap->GetGpuAddress(i.DescriptorStart));
 		}
-	}
-	void DX12GraphicDraw::ResetHeap(DX12GpuDevice* device, DX12GraphicsEffect* effect)
-	{
-		for (auto& b : effect->mBinders)
+		for (auto& i : effect->mSamplerBinders)
 		{
-			switch (b.second->BindType)
-			{
-				case EShaderBindType::SBT_Sampler:
-				{
-					auto handle = device->mNullSampler->mView;
-					if (b.second->VSBinder != nullptr)
-						handle->BindToHeap(device, mSamplerHeap->Heap, b.second->VSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-					if (b.second->PSBinder != nullptr)
-						handle->BindToHeap(device, mSamplerHeap->Heap, b.second->PSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-					if (b.second->MSBinder != nullptr)
-						handle->BindToHeap(device, mSamplerHeap->Heap, b.second->MSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-				}
-				break;
-				case EShaderBindType::SBT_CBV:
-				{
-					auto handle = device->mNullCBV->mView;
-					if (b.second->VSBinder != nullptr)
-						handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b.second->VSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-					if (b.second->PSBinder != nullptr)
-						handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b.second->PSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-					if (b.second->MSBinder != nullptr)
-						handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b.second->MSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-				}
-				break;
-				case EShaderBindType::SBT_SRV:
-				{
-					auto handle = device->mNullSRV->mView;
-					if (b.second->VSBinder != nullptr)
-						handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b.second->VSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-					if (b.second->PSBinder != nullptr)
-						handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b.second->PSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-					if (b.second->MSBinder != nullptr)
-						handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b.second->MSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-				}
-				break;
-				case EShaderBindType::SBT_UAV:
-				{
-					auto handle = device->mNullUAV->mView;
-					if (b.second->VSBinder != nullptr)
-						handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b.second->VSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-					if (b.second->PSBinder != nullptr)
-						handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b.second->PSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-					if (b.second->MSBinder != nullptr)
-						handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b.second->MSBinder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-				}
-				break;
-				default:
-					break;
-			}
-		}
-	}
-	void DX12GraphicDraw::BindDescriptorHeaps(DX12GpuDevice* device, DX12CommandList* dx12Cmd)
-	{
-		auto effect = this->ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>();
-		if (IsDirty == false)
-		{
-			UINT finger = 0;
-			for (auto& i : BindResources)
-			{
-				if (i.second != nullptr)
-					finger += i.second->GetFingerPrint();
-			}
-			if (finger == FingerPrient)
-			{
-				BindDescriptors(device, dx12Cmd, effect);
-
-				/*for (auto& i : BindResources)
-				{
-					BindResourceToDescriptSets(device, i.first, i.second);
-				}*/
-
-				return;
-			}
-
-			FingerPrient = finger;
+			dx12Cmd->mContext->SetGraphicsRootDescriptorTable(i.RootIndex,
+				mSamplerHeap->Heap->GetGpuAddress(i.DescriptorStart));
 		}
 
-		if (effect->mCbvSrvUavNumber > 0 )
-		{
-			if (IsDirty || mCbvSrvUavHeap == nullptr)
-				mCbvSrvUavHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-		}
-
-		if (effect->mSamplerNumber > 0 )
-		{
-			if (IsDirty || mSamplerHeap == nullptr)
-				mSamplerHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device, effect->mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
-		}
-
-		IsDirty = false;
-		ResetHeap(device, effect);
-		
+		UINT finger = 0;
 		for (auto& i : BindResources)
 		{
-			BindResourceToHeap(device, i.first, i.second);
+			if (i.second != nullptr)
+				finger += i.second->GetFingerPrint();
+		}
+		if (finger != FingerPrient)
+		{
+			FingerPrient = finger;
+			IsDirty = true;
 		}
 
-		BindDescriptors(device, dx12Cmd, effect);
+		if (IsDirty)
+		{
+			ResetHeapToNullByEffect(device, effect, mCbvSrvUavHeap, mSamplerHeap);
+			for (auto& i : BindResources)
+			{
+				BindResourceToHeap(device, i.first, i.second);
+			}
+			IsDirty = false;
+		}
+	}
+	void DX12GraphicDraw::BindResourceToHeap(DX12GpuDevice* device, const FEffectBinder* binder, IGpuResource* resource)
+	{
+		if (resource == nullptr)
+			return;
+		auto handle = (DX12PagedHeap*)resource->GetHWBuffer();
+		if (binder->ASBinder)
+		{
+			Bind2Heap(device, binder->ASBinder, resource, mCbvSrvUavHeap, mSamplerHeap);
+		}
+		if (binder->MSBinder)
+		{
+			Bind2Heap(device, binder->MSBinder, resource, mCbvSrvUavHeap, mSamplerHeap);
+		}
+		if (binder->VSBinder)
+		{
+			Bind2Heap(device, binder->VSBinder, resource, mCbvSrvUavHeap, mSamplerHeap);
+		}
+		if (binder->PSBinder)
+		{
+			Bind2Heap(device, binder->PSBinder, resource, mCbvSrvUavHeap, mSamplerHeap);
+		}
+	}
+	IBindless* DX12GraphicDraw::CreateBindless(const char* name) const
+	{
+		auto binder = this->FindBinder(name);
+		if (binder == nullptr)
+			return nullptr;
+		auto result = new DX12Bindless();
+		result->mDeviceRef.FromObject(mDeviceRef.GetPtr());
+		result->mHeap = binder->BindType == EShaderBindType::SBT_Sampler ? mSamplerHeap : mCbvSrvUavHeap;
+		if (result->mHeap == nullptr)
+		{
+			result->Release();
+			return nullptr;
+		}
+		result->mResources.resize(IBindless::MaxBindless);
+		result->mBindType = binder->BindType;
+		result->mStartIndex = binder->DescriptorIndex;
+		((DX12GraphicDraw*)this)->BindResource(binder, result);
+		return result;
 	}
 	void DX12GraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
@@ -352,6 +398,25 @@ namespace NxRHI
 		mCbvSrvUavHeap = nullptr;
 		mSamplerHeap = nullptr;
 	}
+	IBindless* DX12ComputeDraw::CreateBindless(const char* name) const
+	{
+		auto binder = this->FindBinder(name);
+		if (binder == nullptr)
+			return nullptr;
+		auto result = new DX12Bindless();
+		result->mDeviceRef.FromObject(mDeviceRef.GetPtr());
+		result->mHeap = binder->Type == EShaderBindType::SBT_Sampler ? mSamplerHeap : mCbvSrvUavHeap;
+		if (result->mHeap == nullptr)
+		{
+			result->Release();
+			return nullptr;
+		}
+		result->mResources.resize(IBindless::MaxBindless);
+		result->mBindType = binder->Type;
+		result->mStartIndex = binder->DescriptorIndex;
+		((DX12ComputeDraw*)this)->BindResource(binder, result);
+		return result;
+	}
 	void DX12ComputeDraw::OnBindResource(const FShaderBinder* binder, IGpuResource* resource)
 	{
 		IsDirty = true;
@@ -359,47 +424,7 @@ namespace NxRHI
 	
 	void DX12ComputeDraw::BindResourceToHeap(DX12GpuDevice* device, const FShaderBinder* binder, IGpuResource* resource)
 	{
-		auto handle = (DX12PagedHeap*)resource->GetHWBuffer();
-		if (binder->Type == EShaderBindType::SBT_Sampler)
-		{
-			ASSERT(mSamplerHeap != nullptr);
-			handle->BindToHeap(device, mSamplerHeap->Heap, binder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-		}
-		else
-		{
-			ASSERT(mCbvSrvUavHeap != nullptr);
-			handle->BindToHeap(device, mCbvSrvUavHeap->Heap, binder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		}
-	}
-	static void ResetHeapToNull(DX12GpuDevice* device, IShaderReflector* pReflector, 
-		AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder> mSamplerHeap)
-	{
-		if (mCbvSrvUavHeap)
-		{
-			for (auto& b : pReflector->CBuffers)
-			{
-				auto handle = device->mNullCBV->mView;
-				handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-			}
-			for (auto& b : pReflector->Srvs)
-			{
-				auto handle = device->mNullSRV->mView;
-				handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-			}
-			for (auto& b : pReflector->Uavs)
-			{
-				auto handle = device->mNullUAV->mView;
-				handle->BindToHeap(device, mCbvSrvUavHeap->Heap, b->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-			}
-		}
-		if (mSamplerHeap)
-		{
-			for (auto& b : pReflector->Samplers)
-			{
-				auto handle = device->mNullSampler->mView;
-				handle->BindToHeap(device, mSamplerHeap->Heap, b->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-			}
-		}
+		Bind2Heap(device, binder, resource, mCbvSrvUavHeap, mSamplerHeap);
 	}
 	void DX12ComputeDraw::BindDescriptorHeaps(DX12GpuDevice* device, DX12CommandList* dx12Cmd)
 	{
@@ -435,12 +460,12 @@ namespace NxRHI
 		for (auto& i : effect->mCbvSrvUavBinders)
 		{
 			dx12Cmd->mContext->SetComputeRootDescriptorTable(i.RootIndex,
-				mCbvSrvUavHeap->Heap->GetGpuAddress(i.Binder->DescriptorIndex));
+				mCbvSrvUavHeap->Heap->GetGpuAddress(i.DescriptorStart));
 		}
 		for (auto& i : effect->mSamplerBinders)
 		{
 			dx12Cmd->mContext->SetComputeRootDescriptorTable(i.RootIndex,
-				mSamplerHeap->Heap->GetGpuAddress(i.Binder->DescriptorIndex));
+				mSamplerHeap->Heap->GetGpuAddress(i.DescriptorStart));
 		}
 
 		UINT finger = 0;
@@ -457,7 +482,7 @@ namespace NxRHI
 
 		if (IsDirty)
 		{
-			ResetHeapToNull(device, effect->mComputeShader->Reflector, mCbvSrvUavHeap, mSamplerHeap);
+			ResetHeapToNullByReflector(device, effect->mComputeShader->Reflector, mCbvSrvUavHeap, mSamplerHeap);
 			for (auto& i : BindResources)
 			{
 				BindResourceToHeap(device, i.first, i.second);
@@ -565,13 +590,33 @@ namespace NxRHI
 		for (auto& i : effect->mGlobalCbvSrvUavBinders)
 		{
 			dx12Cmd->mContext->SetComputeRootDescriptorTable(i.RootIndex,
-				mCbvSrvUavHeap->Heap->GetGpuAddress(i.Binder->DescriptorIndex));
+				mCbvSrvUavHeap->Heap->GetGpuAddress(i.DescriptorStart));
 		}
 		for (auto& i : effect->mGlobalSamplerBinders)
 		{
 			dx12Cmd->mContext->SetComputeRootDescriptorTable(i.RootIndex,
-				mSamplerHeap->Heap->GetGpuAddress(i.Binder->DescriptorIndex));
+				mSamplerHeap->Heap->GetGpuAddress(i.DescriptorStart));
 		}
+	}
+	IBindless* DX12RayTracingDraw::CreateBindless(const char* name) const
+	{
+		auto binder = this->FindBinder(name);
+		if (binder == nullptr)
+			return nullptr;
+		auto result = new DX12Bindless();
+		result->mDeviceRef.FromObject(mDeviceRef.GetPtr());
+		result->mHeap = binder->Type == EShaderBindType::SBT_Sampler ? mSamplerHeap : mCbvSrvUavHeap;
+		if (result->mHeap == nullptr)
+		{
+			result->Release();
+			return nullptr;
+		}
+		result->mResources.resize(IBindless::MaxBindless);
+		result->mBindType = binder->Type;
+		result->mStartIndex = binder->DescriptorIndex;
+
+		((DX12RayTracingDraw*)this)->BindResource(binder, result);
+		return result;
 	}
 	void DX12RayTracingDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
@@ -606,13 +651,13 @@ namespace NxRHI
 				PushSize += shaderIdentifierSize;
 				for (auto& i : group->CbvSrvUavBinders)
 				{
-					D3D12_GPU_DESCRIPTOR_HANDLE value = mCbvSrvUavHeap->GetGpuAddress(i.Binder->DescriptorIndex);
+					D3D12_GPU_DESCRIPTOR_HANDLE value = mCbvSrvUavHeap->GetGpuAddress(i.DescriptorStart);
 					blob.PushData(&value, sizeof(D3D12_GPU_DESCRIPTOR_HANDLE));
 					PushSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
 				}
 				for (auto& i : group->SamplerBinders)
 				{
-					D3D12_GPU_DESCRIPTOR_HANDLE value = mSamplerHeap->GetGpuAddress(i.Binder->DescriptorIndex);
+					D3D12_GPU_DESCRIPTOR_HANDLE value = mSamplerHeap->GetGpuAddress(i.DescriptorStart);
 					blob.PushData(&value, sizeof(D3D12_GPU_DESCRIPTOR_HANDLE));
 					PushSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
 				}
@@ -634,7 +679,7 @@ namespace NxRHI
 
 		if (IsDirty)
 		{
-			ResetHeapToNull(device, effect->GetShaderLibDesc()->DxILReflector, mCbvSrvUavHeap, mSamplerHeap);
+			ResetHeapToNullByReflector(device, effect->GetShaderLibDesc()->DxILReflector, mCbvSrvUavHeap, mSamplerHeap);
 
 			for (auto& i : this->BindResources)
 			{
@@ -642,17 +687,7 @@ namespace NxRHI
 					continue;
 				auto binder = i.first;
 
-				DX12PagedHeap* handle = handle = (DX12PagedHeap*)i.second->GetHWBuffer();
-				if (binder->Type == EShaderBindType::SBT_Sampler)
-				{
-					ASSERT(mSamplerHeap != nullptr);
-					handle->BindToHeap(device, mSamplerHeap->Heap, binder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-				}
-				else
-				{
-					ASSERT(mCbvSrvUavHeap != nullptr);
-					handle->BindToHeap(device, mCbvSrvUavHeap->Heap, binder->DescriptorIndex, 0, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-				}
+				Bind2Heap(device, binder, i.second, mCbvSrvUavHeap, mSamplerHeap);
 			}
 			IsDirty = false;
 		}

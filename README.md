@@ -18,7 +18,7 @@
 - 4.图形化编辑器配置RenderGraph资产，引擎自带DeferredShading和MobileShading配置RenderGraph资产
 - 5.图形化Material Shader编辑器
 - 6.InGame UI编辑器支持2D,3D游戏UI编辑
-- 7.GpuScene+IndirectDraw构成GpuDriven结构
+- 7.GpuScene+IndirectDraw+Bindless为基础的GpuDriven框架
 - 8.粒子系统，采用图形化逻辑编辑，支持CPU,GPU粒子切换
 - 9.SDF字体，放缩友好
 - 10.基于Node的场景编辑器，世界大纲可以为任何Node设置csharp脚本

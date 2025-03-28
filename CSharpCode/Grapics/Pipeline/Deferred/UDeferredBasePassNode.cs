@@ -78,6 +78,13 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get;
             set;
         } = true;
+        [Category("Option")]
+        [Rtti.Meta]
+        public bool EnableMeshlets
+        {
+            get;
+            set;
+        } = false;
         public TtDeferredBasePassNode()
         {
             Name = "UDeferredBasePassNode";
@@ -194,7 +201,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         }
         public override Shader.TtGraphicsShadingEnv GetPassShading(Mesh.TtMesh.TtAtom atom)
         {
-            if (TtEngine.Instance.GfxDevice.RenderContext.DeviceCaps.IsSupportMeshShader && atom.MeshPrimitives.Meshlets != null)
+            if (EnableMeshlets && TtEngine.Instance.GfxDevice.RenderContext.DeviceCaps.IsSupportMeshShader && atom.MeshPrimitives.Meshlets != null)
             {
                 return mMeshletsOpaqueShading;
             }

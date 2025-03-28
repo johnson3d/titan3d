@@ -141882,12 +141882,14 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Deferred.TtDeferredBasePassNode;
 			ar.Write(srcObj.ClearMRT);
+			ar.Write(srcObj.EnableMeshlets);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
 			var tarObj = tar as EngineNS.Graphics.Pipeline.Deferred.TtDeferredBasePassNode;
 			var srcObj = src as EngineNS.Graphics.Pipeline.Deferred.TtDeferredBasePassNode;
 			tarObj.ClearMRT = srcObj.ClearMRT;
+			tarObj.EnableMeshlets = srcObj.EnableMeshlets;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_2153512819393179099 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -141899,6 +141901,28 @@ namespace EngineNS.Plugins.DataCopyer
 				if (srcObj is IO.ISerializer sr)
 				{
 					sr.OnPropertyRead(ar.Tag, "ClearMRT", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_14727858256829636008 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Deferred.TtDeferredBasePassNode;
+			System.Boolean t_ClearMRT;
+			ar.Read(out t_ClearMRT);
+			srcObj.ClearMRT = t_ClearMRT;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ClearMRT", false);
+				}
+			}
+			System.Boolean t_EnableMeshlets;
+			ar.Read(out t_EnableMeshlets);
+			srcObj.EnableMeshlets = t_EnableMeshlets;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "EnableMeshlets", false);
 				}
 			}
 		};
@@ -200515,6 +200539,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Graphics_Pipeline_Deferred_TtDeferredBasePassNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Deferred_TtDeferredBasePassNode.CopyCurrentVersion;
 				kls.RegVersion(2153512819393179099, EngineNS_Graphics_Pipeline_Deferred_TtDeferredBasePassNode.Read_2153512819393179099);
+				kls.RegVersion(14727858256829636008, EngineNS_Graphics_Pipeline_Deferred_TtDeferredBasePassNode.Read_14727858256829636008);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Deferred.TtDeferredDirLightingNode@EngineCore");
@@ -201474,7 +201499,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(547543558045874187, Survivor_TtWeaponProxyNode.Read_547543558045874187);
 				kls.RegVersion(6246337379466960295, Survivor_TtWeaponProxyNode.Read_6246337379466960295);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("96_C4_2A_E5_42_75_0B_20_61_D1_5F_AB_5B_D2_2D_70_BC_4A_66_C6");
+			this.VersionHash = EngineNS.Hash160.Parse("1C_5A_5F_59_8B_67_80_06_70_E6_0A_58_7F_91_26_00_D5_8A_2C_C2");
 		}
 	}
 }

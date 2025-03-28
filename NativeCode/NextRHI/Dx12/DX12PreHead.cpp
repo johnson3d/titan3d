@@ -238,6 +238,7 @@ namespace NxRHI
 	{
 		auto pManager = (DX12HeapAllocator*)GetAllocator();
 		ASSERT(pManager);
+		//ASSERT(index < pManager->Creator.GetPageSize());
 		D3D12_GPU_DESCRIPTOR_HANDLE result = RealObject->GetGPUDescriptorHandleForHeapStart();
 		result.ptr += this->OffsetInPage + pManager->mDescriptorStride * index;
 		ASSERT(result.ptr != 0);

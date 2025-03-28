@@ -207,6 +207,10 @@ namespace NxRHI
 	{
 		return mEffect->FindBinder(type, name);
 	}
+	const FShaderBinder* IComputeDraw::FindBinder(const char* name) const
+	{
+		return mEffect->FindBinder(name);
+	}
 	bool IComputeDraw::BindResource(EShaderBindType type, VNameString name, IGpuResource* resource)
 	{
 		auto binder = mEffect->FindBinder(type, name);
@@ -398,6 +402,10 @@ namespace NxRHI
 	const FShaderBinder* IRayTracingDraw::FindBinder(EShaderBindType type, const char* name) const
 	{
 		return ShaderEffect->FindBinder(type, name);
+	}
+	const FShaderBinder* IRayTracingDraw::FindBinder(const char* name) const
+	{
+		return ShaderEffect->FindBinder(name);
 	}
 	bool IRayTracingDraw::BindResource(EShaderBindType type, VNameString name, IGpuResource* resource)
 	{

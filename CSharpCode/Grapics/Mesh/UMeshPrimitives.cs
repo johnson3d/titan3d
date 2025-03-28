@@ -196,7 +196,7 @@ namespace EngineNS.Graphics.Mesh
             get;
             set;
         }
-        public unsafe static TtMeshPrimitives LoadXnd(TtMeshPrimitiveManager manager, IO.TtXndHolder xnd)
+        public unsafe static TtMeshPrimitives LoadXnd(TtMeshPrimitiveManager manager, IO.TtXndHolder xnd, bool bTryLoadMeshlets)
         {
             var result = new TtMeshPrimitives();
             
@@ -225,10 +225,13 @@ namespace EngineNS.Graphics.Mesh
                         result.PartialSkeleton = partialSkeleton as Animation.SkeletonAnimation.Skeleton.TtSkinSkeleton;
                     }
                 }
-                var meshlets = xnd.RootNode.TryGetChildNode("Meshlets");
-                if (meshlets.IsValidPointer)
+                if (bTryLoadMeshlets)
                 {
-                    result.LoadMeshlets(meshlets);
+                    var meshlets = xnd.RootNode.TryGetChildNode("Meshlets");
+                    if (meshlets.IsValidPointer)
+                    {
+                        result.LoadMeshlets(meshlets);
+                    }
                 }
                 return result;
             }
@@ -365,7 +368,7 @@ namespace EngineNS.Graphics.Mesh
             }
         }
         //public async System.Threading.Tasks.Task<UMeshPrimitives> GetMeshPrimitive(RName name)
-        public async Thread.Async.TtTask<TtMeshPrimitives> GetMeshPrimitive(RName name)
+        public async Thread.Async.TtTask<TtMeshPrimitives> GetMeshPrimitive(RName name, bool bTryLoadMeshlets = true)
         {
             if (name == null)
                 return null;
@@ -373,7 +376,7 @@ namespace EngineNS.Graphics.Mesh
             if (Meshes.TryGetValue(name, out result))
                 return result;
 
-            result = await CreateMeshPrimitive(name);
+            result = await CreateMeshPrimitive(name, bTryLoadMeshlets);
 
             if (result != null)
             {
@@ -383,7 +386,7 @@ namespace EngineNS.Graphics.Mesh
 
             return null;
         }
-        public async Thread.Async.TtTask<TtMeshPrimitives> CreateMeshPrimitive(RName name)
+        public async Thread.Async.TtTask<TtMeshPrimitives> CreateMeshPrimitive(RName name, bool bTryLoadMeshlets = true)
         {
             TtMeshPrimitives result;
             result = await TtEngine.Instance.EventPoster.Post((state) =>
@@ -392,7 +395,7 @@ namespace EngineNS.Graphics.Mesh
                 {
                     if (xnd != null)
                     {
-                        var mesh = TtMeshPrimitives.LoadXnd(this, xnd);
+                        var mesh = TtMeshPrimitives.LoadXnd(this, xnd, bTryLoadMeshlets);
                         if (mesh == null)
                             return null;
 

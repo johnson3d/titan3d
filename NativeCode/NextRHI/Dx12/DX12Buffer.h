@@ -182,6 +182,16 @@ namespace NxRHI
 	private:
 		bool IsBuild(DX12GpuDevice* device);
 	};
+
+	class DX12Bindless : public IBindless
+	{
+	public:
+		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
+		AutoRef<DX12HeapHolder>		mHeap;
+		UINT						mStartIndex;
+		EShaderBindType				mBindType;
+		virtual void OnBind(UINT index, IGpuResource* resource) override;
+	};
 }
 
 NS_END

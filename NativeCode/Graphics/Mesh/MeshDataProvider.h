@@ -69,6 +69,7 @@ namespace NxRHI
 		bool Init();
 		void ConvertToIndex32();
 		bool BuildTangent();
+		bool BuildLightMap();
 
 		bool LoadFromMeshPrimitive(XndNode* pNode, EVertexStreamType streams);
 

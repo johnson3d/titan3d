@@ -35,6 +35,364 @@ namespace NxRHI
 		}
 	};
 
+	void DX12ShaderSignatureBuilder::Build(std::map<VNameString, AutoRef<FEffectBinder>>& binders)
+	{
+		mCbvSrvUavNumber = 0;
+		mSamplerNumber = 0;
+
+		mCbvSrvUavBinders.clear();
+		mSamplerBinders.clear();
+
+		auto SetBinder = [&](FShaderBinder* binder)
+			{
+				if (binder->Type == EShaderBindType::SBT_Sampler)
+				{
+					mSamplerBinders.push_back(binder);
+				}
+				else
+				{
+					mCbvSrvUavBinders.push_back(binder);
+				}
+			};
+
+		for (auto& i : binders)
+		{
+			auto binder = (FShaderBinder*)i.second->GetShaderBinder();
+			if (i.second->BindType == EShaderBindType::SBT_Sampler)
+			{
+				i.second->DescriptorIndex = mSamplerNumber;
+				if (binder->IsBindless())
+					mSamplerNumber += IBindless::MaxBindless;
+				else
+					mSamplerNumber += binder->BindCount;
+			}
+			else
+			{
+				i.second->DescriptorIndex = mCbvSrvUavNumber;
+				if (binder->IsBindless())
+					mCbvSrvUavNumber += IBindless::MaxBindless;
+				else
+					mCbvSrvUavNumber += binder->BindCount;
+			}
+
+			binder = (FShaderBinder*)i.second->ASBinder;
+			if (binder)
+			{
+				SetBinder(binder);
+				binder->DescriptorIndex = i.second->DescriptorIndex;
+			}
+			binder = (FShaderBinder*)i.second->MSBinder;
+			if (binder)
+			{
+				SetBinder(binder);
+				binder->DescriptorIndex = i.second->DescriptorIndex;
+			}
+			binder = (FShaderBinder*)i.second->VSBinder;
+			if (binder)
+			{
+				SetBinder(binder);
+				binder->DescriptorIndex = i.second->DescriptorIndex;
+			}
+			binder = (FShaderBinder*)i.second->PSBinder;
+			if (binder)
+			{
+				SetBinder(binder);
+				binder->DescriptorIndex = i.second->DescriptorIndex;
+			}
+		}
+
+		//mCbvSrvUavNumber = (UINT)mCbvSrvUavBinders.size();
+		//mSamplerNumber = (UINT)mSamplerBinders.size();
+	}
+	void DX12ShaderSignatureBuilder::Build(IShaderReflector* reflector)
+	{
+		//mCbvSrvUavNumber = (int)(reflector->CBuffers.size() + reflector->Srvs.size() + reflector->Uavs.size());
+		//mSamplerNumber = (int)reflector->Samplers.size();
+
+		mCbvSrvUavBinders.clear();
+		mSamplerBinders.clear();
+
+		mCbvSrvUavNumber = 0;
+		mSamplerNumber = 0;
+		for (auto& i : reflector->CBuffers)
+		{
+			auto binder = i.UnsafeConvertTo<FShaderBinder>();
+			binder->DescriptorIndex = mCbvSrvUavNumber;
+			if (binder->IsBindless())
+				mCbvSrvUavNumber += IBindless::MaxBindless;
+			else
+				mCbvSrvUavNumber += binder->BindCount;
+			mCbvSrvUavBinders.push_back(i);
+		}
+		for (auto& i : reflector->Srvs)
+		{
+			auto binder = i.UnsafeConvertTo<FShaderBinder>();
+			binder->DescriptorIndex = mCbvSrvUavNumber;
+			if (binder->IsBindless())
+				mCbvSrvUavNumber += IBindless::MaxBindless;
+			else
+				mCbvSrvUavNumber += binder->BindCount;
+			mCbvSrvUavBinders.push_back(i);
+		}
+		for (auto& i : reflector->Uavs)
+		{
+			auto binder = i.UnsafeConvertTo<FShaderBinder>();
+			binder->DescriptorIndex = mCbvSrvUavNumber;
+			if (binder->IsBindless())
+				mCbvSrvUavNumber += IBindless::MaxBindless;
+			else
+				mCbvSrvUavNumber += binder->BindCount;
+			mCbvSrvUavBinders.push_back(i);
+		}
+		for (auto& i : reflector->Samplers)
+		{
+			auto binder = i.UnsafeConvertTo<FShaderBinder>();
+			binder->DescriptorIndex = mSamplerNumber;
+			if (binder->IsBindless())
+				mSamplerNumber += IBindless::MaxBindless;
+			else
+				mSamplerNumber += binder->BindCount;
+			mSamplerBinders.push_back(i);
+		}
+
+		//mCbvSrvUavNumber = (UINT)mCbvSrvUavBinders.size();
+		//mSamplerNumber = (UINT)mSamplerBinders.size();
+	}
+	void DX12ShaderSignatureBuilder::CreateHeap(DX12GpuDevice* device, AutoRef<DX12HeapHolder>& OutCbvSrvUavHeap, AutoRef<DX12HeapHolder>& OutSamplerHeap)
+	{
+		if (mCbvSrvUavNumber > 0)
+		{
+			if (OutCbvSrvUavHeap == nullptr || OutCbvSrvUavHeap->NumOfDescriptor != mCbvSrvUavNumber)
+			{
+				OutCbvSrvUavHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device,
+					mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+			}
+		}
+		else
+		{
+			OutCbvSrvUavHeap = nullptr;
+		}
+		if (mSamplerNumber > 0)
+		{
+			if (OutSamplerHeap == nullptr || OutSamplerHeap->NumOfDescriptor != mSamplerNumber)
+			{
+				OutSamplerHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device,
+					mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
+			}
+		}
+		else
+		{
+			OutSamplerHeap = nullptr;
+		}
+	}
+	AutoRef<ID3D12RootSignature> DX12ShaderSignatureBuilder::CreateSignature(DX12GpuDevice* device, D3D12_ROOT_SIGNATURE_FLAGS flags,
+		const std::vector<VNameString>* roots, IShaderReflector* pOutReflector,
+		std::vector<FSignatureBinder>& OutCbvSrvUav, std::vector<FSignatureBinder>& OutSampler)
+	{
+		typedef D3D12_ROOT_PARAMETER1 RootParameterType;
+		typedef D3D12_DESCRIPTOR_RANGE1 DiscriptorRangeType;
+
+		std::vector<RootParameterType>	dxRootParameters;
+		std::vector<DiscriptorRangeType> dxCbvSrvUavRanges;
+		std::vector<DiscriptorRangeType> dxSamplerRanges;
+
+		std::vector<const FShaderBinder*>	CbvSrvUavBinders;
+		std::vector<const FShaderBinder*>	SamplerBinders;
+
+		OutCbvSrvUav.clear();
+		OutSampler.clear();
+
+		auto SetBinder = [&](FShaderBinder* binder)->void
+			{
+				switch (binder->Type)
+				{
+				case EShaderBindType::SBT_Sampler:
+				{
+					SamplerBinders.push_back(binder);
+					DiscriptorRangeType rg{};
+					rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
+					rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
+					rg.NumDescriptors = 1;
+					rg.BaseShaderRegister = binder->Slot;
+					rg.RegisterSpace = binder->Space;
+					rg.OffsetInDescriptorsFromTableStart = 0;
+					dxSamplerRanges.push_back(rg);
+
+					if (pOutReflector)
+						pOutReflector->Samplers.push_back(binder);
+				}
+				break;
+				case EShaderBindType::SBT_CBV:
+				{
+					CbvSrvUavBinders.push_back(binder);
+					DiscriptorRangeType rg{};
+					rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
+					rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+					rg.NumDescriptors = 1;
+					rg.BaseShaderRegister = binder->Slot;
+					rg.RegisterSpace = binder->Space;
+					rg.OffsetInDescriptorsFromTableStart = 0;
+					dxCbvSrvUavRanges.push_back(rg);
+
+					if (pOutReflector)
+						pOutReflector->CBuffers.push_back(binder);
+				}
+				break;
+				case EShaderBindType::SBT_SRV:
+				{
+					CbvSrvUavBinders.push_back(binder);
+					DiscriptorRangeType rg{};
+					rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
+					rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+					rg.NumDescriptors = 1;
+					rg.BaseShaderRegister = binder->Slot;
+					rg.RegisterSpace = binder->Space;
+					rg.OffsetInDescriptorsFromTableStart = 0;
+					dxCbvSrvUavRanges.push_back(rg);
+
+					if (pOutReflector)
+						pOutReflector->Srvs.push_back(binder);
+				}
+				break;
+				case EShaderBindType::SBT_UAV:
+				{
+					CbvSrvUavBinders.push_back(binder);
+					DiscriptorRangeType rg{};
+					rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
+					rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+					rg.NumDescriptors = 1;
+					rg.BaseShaderRegister = binder->Slot;
+					rg.RegisterSpace = binder->Space;
+					rg.OffsetInDescriptorsFromTableStart = 0;
+					dxCbvSrvUavRanges.push_back(rg);
+
+					if (pOutReflector)
+						pOutReflector->Uavs.push_back(binder);
+				}
+				break;
+				default:
+					break;
+				}
+			};
+		if (roots)
+		{
+			for (auto& i : *roots)
+			{
+				auto binder = (FShaderBinder*)FindBinder(i);
+				if (binder == nullptr)
+				{
+					VFX_LTRACE(ELTT_Warning, "CreateSignature: Root[%s] not found\r\n", i.c_str());
+					continue;
+				}
+				SetBinder(binder);
+			}
+		}
+		else
+		{
+			for (auto& i : mCbvSrvUavBinders)
+			{
+				auto binder = i.UnsafeConvertTo<FShaderBinder>();
+				SetBinder(binder);
+			}
+			for (auto& i : mSamplerBinders)
+			{
+				auto binder = i.UnsafeConvertTo<FShaderBinder>();
+				SetBinder(binder);
+			}
+		}
+
+		for (size_t i = 0; i < dxCbvSrvUavRanges.size(); i++)
+		{
+			RootParameterType rp{};
+			rp.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+			rp.DescriptorTable.NumDescriptorRanges = 1;
+			rp.DescriptorTable.pDescriptorRanges = &dxCbvSrvUavRanges[i];
+
+			FSignatureBinder sb{};
+			sb.Binder = (FShaderBinder*)CbvSrvUavBinders[i];
+			sb.RootIndex = (int)dxRootParameters.size();
+			sb.DescriptorStart = sb.Binder->DescriptorIndex;
+			sb.DescriptorNum = sb.Binder->BindCount;
+			OutCbvSrvUav.push_back(sb);
+			dxRootParameters.push_back(rp);
+		}
+		for (size_t i = 0; i < dxSamplerRanges.size(); i++)
+		{
+			RootParameterType rp{};
+			rp.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+			rp.DescriptorTable.NumDescriptorRanges = 1;
+			rp.DescriptorTable.pDescriptorRanges = &dxSamplerRanges[i];
+
+			FSignatureBinder sb{};
+			sb.Binder = (FShaderBinder*)SamplerBinders[i];
+			sb.RootIndex = (int)dxRootParameters.size();
+			sb.DescriptorStart = sb.Binder->DescriptorIndex;
+			sb.DescriptorNum = sb.Binder->BindCount;
+			OutSampler.push_back(sb);
+			dxRootParameters.push_back(rp);
+		}
+
+		if (true)
+		{
+			D3D12_VERSIONED_ROOT_SIGNATURE_DESC sigDesc{};
+			sigDesc.Version = D3D_ROOT_SIGNATURE_VERSION_1_1;
+			sigDesc.Desc_1_1.NumParameters = (UINT)dxRootParameters.size();
+			if (sigDesc.Desc_1_1.NumParameters > 0)
+				sigDesc.Desc_1_1.pParameters = &dxRootParameters[0];
+			sigDesc.Desc_1_1.NumStaticSamplers = 0;
+			sigDesc.Desc_1_1.pStaticSamplers = nullptr;
+			sigDesc.Desc_1_1.Flags = flags;// D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+			ID3DBlob* serializedRootSig = nullptr;
+			ID3DBlob* errorBlob = nullptr;
+			HRESULT hr = D3D12SerializeVersionedRootSignature(&sigDesc, &serializedRootSig, &errorBlob);
+			if (errorBlob != nullptr)
+			{
+				auto pError = (char*)errorBlob->GetBufferPointer();
+				VFX_LTRACE(ELTT_Graphics, pError);
+				ASSERT(false);
+			}
+
+			auto bfSize = serializedRootSig->GetBufferSize();
+			ID3D12RootSignature* pRootSig = nullptr;
+			device->mDevice->CreateRootSignature(0,
+				serializedRootSig->GetBufferPointer(),
+				bfSize,
+				IID_PPV_ARGS(&pRootSig));
+			return MakeWeakRef(pRootSig);
+		}
+		else
+		{
+			D3D12_ROOT_SIGNATURE_DESC sigDesc{};
+			sigDesc.NumParameters = (UINT)dxRootParameters.size();
+			/*if (sigDesc.NumParameters > 0)
+				sigDesc.pParameters = &dxRootParameters[0];*/
+			sigDesc.NumStaticSamplers = 0;
+			sigDesc.pStaticSamplers = nullptr;
+			sigDesc.Flags = flags;// D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+			ID3DBlob* serializedRootSig = nullptr;
+			ID3DBlob* errorBlob = nullptr;
+			HRESULT hr = D3D12SerializeRootSignature(&sigDesc, D3D_ROOT_SIGNATURE_VERSION_1, &serializedRootSig, &errorBlob);
+			if (errorBlob != nullptr)
+			{
+				auto pError = (char*)errorBlob->GetBufferPointer();
+				VFX_LTRACE(ELTT_Graphics, pError);
+				ASSERT(false);
+			}
+
+			auto bfSize = serializedRootSig->GetBufferSize();
+			ID3D12RootSignature* pRootSig = nullptr;
+			device->mDevice->CreateRootSignature(0,
+				serializedRootSig->GetBufferPointer(),
+				bfSize,
+				IID_PPV_ARGS(&pRootSig));
+			return MakeWeakRef(pRootSig);
+		}
+	}
+
 	DX12GraphicsEffect::~DX12GraphicsEffect()
 	{
 		auto device = mDeviceRef.GetPtr();
@@ -49,129 +407,12 @@ namespace NxRHI
 		mDeviceRef.FromObject(device1);
 		auto device = ((DX12GpuDevice*)device1);
 
-		for (int i = 0; i < FRootParameter::GraphicsNumber; i++)
-		{
-			mRootParameters[i].Reset();
-		}
+		mSignatureBuilder.Build(mBinders);
+
+		//D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
+		mSignature = mSignatureBuilder.CreateSignature(mDeviceRef.GetPtr(), D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT, nullptr, nullptr, mCbvSrvUavBinders, mSamplerBinders);
 		
-		for (auto& i : mBinders)
-		{
-			Push2RootParamters(i.second);
-		}
-
-		std::vector<D3D12_ROOT_PARAMETER>	dxRootParameters;
-		
-		{
-			int HeapStartIndex = 0;
-			{
-				auto& rp = mRootParameters[FRootParameter::VS_Cbv];
-				rp.BuildDX12RootParameters(HeapStartIndex, D3D12_SHADER_VISIBILITY_VERTEX, dxRootParameters);
-			}
-
-			{
-				auto& rp = mRootParameters[FRootParameter::VS_Srv];
-				rp.BuildDX12RootParameters(HeapStartIndex, D3D12_SHADER_VISIBILITY_VERTEX, dxRootParameters);
-			}
-
-			{
-				auto& rp = mRootParameters[FRootParameter::VS_Uav];
-				rp.BuildDX12RootParameters(HeapStartIndex, D3D12_SHADER_VISIBILITY_VERTEX, dxRootParameters);
-			}
-			//////////////////////////////////////////////////////////////////////////
-			{
-				auto& rp = mRootParameters[FRootParameter::PS_Cbv];
-				rp.BuildDX12RootParameters(HeapStartIndex, D3D12_SHADER_VISIBILITY_PIXEL, dxRootParameters);
-			}
-
-			{
-				auto& rp = mRootParameters[FRootParameter::PS_Srv];
-				rp.BuildDX12RootParameters(HeapStartIndex, D3D12_SHADER_VISIBILITY_PIXEL, dxRootParameters);
-			}
-
-			{
-				auto& rp = mRootParameters[FRootParameter::PS_Uav];
-				rp.BuildDX12RootParameters(HeapStartIndex, D3D12_SHADER_VISIBILITY_PIXEL, dxRootParameters);
-			}
-
-			mCbvSrvUavNumber = HeapStartIndex;
-		}
-
-		{
-			int HeapStartIndex = 0;
-			mRootParameters[FRootParameter::VS_Sampler].IsSamplers = true;
-			mRootParameters[FRootParameter::PS_Sampler].IsSamplers = true;
-
-			{
-				auto& rp = mRootParameters[FRootParameter::VS_Sampler];
-				rp.BuildDX12RootParameters(HeapStartIndex, D3D12_SHADER_VISIBILITY_VERTEX, dxRootParameters);
-			}
-
-			{	
-				auto& rp = mRootParameters[FRootParameter::PS_Sampler];
-				rp.BuildDX12RootParameters(HeapStartIndex, D3D12_SHADER_VISIBILITY_PIXEL, dxRootParameters);
-			}
-
-			mSamplerNumber = HeapStartIndex;
-		}
-
-		D3D12_ROOT_SIGNATURE_DESC sigDesc{};
-		sigDesc.NumParameters = (UINT)dxRootParameters.size();
-		if (sigDesc.NumParameters > 0)
-			sigDesc.pParameters = &dxRootParameters[0];
-		sigDesc.NumStaticSamplers = 0;
-		sigDesc.pStaticSamplers = nullptr;
-		sigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-
-		ID3DBlob* serializedRootSig = nullptr;
-		ID3DBlob* errorBlob = nullptr;
-		HRESULT hr = D3D12SerializeRootSignature(&sigDesc, D3D_ROOT_SIGNATURE_VERSION_1, &serializedRootSig, &errorBlob);
-		if (errorBlob != nullptr)
-		{
-			auto pError = (char*)errorBlob->GetBufferPointer();
-			VFX_LTRACE(ELTT_Graphics, pError);
-			ASSERT(false);
-		}
-
-		auto bfSize = serializedRootSig->GetBufferSize();
-		ID3D12RootSignature* pRootSig = nullptr;
-		hr = device->mDevice->CreateRootSignature(0,
-			serializedRootSig->GetBufferPointer(),
-			bfSize,
-			IID_PPV_ARGS(mSignature.GetAddressOf()));
-
-		ASSERT(hr == S_OK);
-	}
-	void DX12GraphicsEffect::Push2RootParamters(FEffectBinder* binder)
-	{
-		auto pVSBinder = (FShaderBinder*)binder->VSBinder;
-		auto pPSBinder = (FShaderBinder*)binder->PSBinder;
-		switch (binder->BindType)
-		{
-			case EShaderBindType::SBT_CBV:
-			{
-				mRootParameters[FRootParameter::VS_Cbv].PushShaderBinder(pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_CBV);
-				mRootParameters[FRootParameter::PS_Cbv].PushShaderBinder(pPSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_CBV);
-			}
-			break;
-			case EShaderBindType::SBT_SRV:
-			{
-				mRootParameters[FRootParameter::VS_Srv].PushShaderBinder(pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
-				mRootParameters[FRootParameter::PS_Srv].PushShaderBinder(pPSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_SRV);
-			}
-			break;
-			case EShaderBindType::SBT_UAV:
-			{
-				mRootParameters[FRootParameter::VS_Uav].PushShaderBinder(pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_UAV);
-				mRootParameters[FRootParameter::PS_Uav].PushShaderBinder(pPSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_UAV);
-			}
-			break;
-			case EShaderBindType::SBT_Sampler:
-			{
-				mRootParameters[FRootParameter::VS_Sampler].PushShaderBinder(pVSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
-				mRootParameters[FRootParameter::PS_Sampler].PushShaderBinder(pPSBinder, D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
-			}
-			break;
-		}
+		ASSERT(mSignature);
 	}
 	AutoRef<ID3D12CommandSignature> DX12GraphicsEffect::GetIndirectDrawCmdSig(DX12GpuDevice* device, ICommandList* cmdlist)
 	{
@@ -242,24 +483,7 @@ namespace NxRHI
 
 		mDeviceRef.FromObject(device1);
 		mSignatureBuilder.Build(mComputeShader->Reflector);
-		std::vector<VNameString> roots;
-		for (auto& i : mComputeShader->Reflector->CBuffers)
-		{
-			roots.push_back(i->Name);
-		}
-		for (auto& i : mComputeShader->Reflector->Srvs)
-		{
-			roots.push_back(i->Name);
-		}
-		for (auto& i : mComputeShader->Reflector->Uavs)
-		{
-			roots.push_back(i->Name);
-		}
-		for (auto& i : mComputeShader->Reflector->Samplers)
-		{
-			roots.push_back(i->Name);
-		}
-		mSignature = mSignatureBuilder.CreateSignature(device, D3D12_ROOT_SIGNATURE_FLAG_NONE, roots, nullptr, mCbvSrvUavBinders, mSamplerBinders);//D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
+		mSignature = mSignatureBuilder.CreateSignature(device, D3D12_ROOT_SIGNATURE_FLAG_NONE, nullptr, nullptr, mCbvSrvUavBinders, mSamplerBinders);//D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
 
 		D3D12_COMPUTE_PIPELINE_STATE_DESC pipeDesc{};
 		pipeDesc.pRootSignature = mSignature;
@@ -395,210 +619,6 @@ namespace NxRHI
 		return true;
 	}
 
-	void DX12SignatureBuilder::Build(IShaderReflector* reflector)
-	{
-		mCbvSrvUavNumber = (int)(reflector->CBuffers.size() + reflector->Srvs.size() + reflector->Uavs.size());
-		mSamplerNumber = (int)reflector->Samplers.size();
-		
-		mCbvSrvUavBinders.clear();
-		mSamplerBinders.clear();
-
-		for (auto& i : reflector->CBuffers)
-		{
-			auto binder = i.UnsafeConvertTo<FShaderBinder>();
-			binder->DescriptorIndex = (UINT)mCbvSrvUavBinders.size();
-			mCbvSrvUavBinders.push_back(i);
-		}
-		for (auto& i : reflector->Srvs)
-		{
-			auto binder = i.UnsafeConvertTo<FShaderBinder>();
-			binder->DescriptorIndex = (UINT)mCbvSrvUavBinders.size();
-			mCbvSrvUavBinders.push_back(i);
-		}
-		for (auto& i : reflector->Uavs)
-		{
-			auto binder = i.UnsafeConvertTo<FShaderBinder>();
-			binder->DescriptorIndex = (UINT)mCbvSrvUavBinders.size();
-			mCbvSrvUavBinders.push_back(i);
-		}
-		for (auto& i : reflector->Samplers)
-		{
-			auto binder = i.UnsafeConvertTo<FShaderBinder>();
-			binder->DescriptorIndex = (UINT)mSamplerBinders.size();
-			mSamplerBinders.push_back(i);
-		}
-	}
-	void DX12SignatureBuilder::CreateHeap(DX12GpuDevice* device,  AutoRef<DX12HeapHolder>& OutCbvSrvUavHeap, AutoRef<DX12HeapHolder>& OutSamplerHeap)
-	{
-		if (mCbvSrvUavNumber > 0)
-		{
-			if (OutCbvSrvUavHeap == nullptr || OutCbvSrvUavHeap->NumOfDescriptor != mCbvSrvUavNumber)
-			{
-				OutCbvSrvUavHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device,
-					mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-			}
-		}
-		else
-		{
-			OutCbvSrvUavHeap = nullptr;
-		}
-		if (mSamplerNumber > 0)
-		{
-			if (OutSamplerHeap == nullptr || OutSamplerHeap->NumOfDescriptor != mSamplerNumber)
-			{
-				OutSamplerHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device,
-					mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
-			}
-		}
-		else
-		{
-			OutSamplerHeap = nullptr;
-		}
-	}
-	AutoRef<ID3D12RootSignature> DX12SignatureBuilder::CreateSignature(DX12GpuDevice* device, D3D12_ROOT_SIGNATURE_FLAGS flags, 
-		const std::vector<VNameString>& roots, IShaderReflector* pOutReflector, 
-		std::vector<FSignatureBinder>& OutCbvSrvUav, std::vector<FSignatureBinder>& OutSampler)
-	{
-		std::vector<D3D12_ROOT_PARAMETER>	dxRootParameters;
-		std::vector<D3D12_DESCRIPTOR_RANGE> dxCbvSrvUavRanges;
-		std::vector<D3D12_DESCRIPTOR_RANGE> dxSamplerRanges;
-
-		std::vector<const FShaderBinder*>	CbvSrvUavBinders;
-		std::vector<const FShaderBinder*>	SamplerBinders;
-
-		OutCbvSrvUav.clear();
-		OutSampler.clear();
-		for (auto& i : roots)
-		{
-			auto binder = FindBinder(i);
-			if (binder == nullptr)
-			{
-				//return nullptr;
-				VFX_LTRACE(ELTT_Warning, "CreateSignature: Root[%s] not found\r\n", i.c_str());
-				continue;
-			}
-			switch (binder->Type)
-			{
-				case EShaderBindType::SBT_Sampler:
-				{
-					SamplerBinders.push_back(binder);
-					D3D12_DESCRIPTOR_RANGE rg{};
-					rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
-					rg.NumDescriptors = 1;
-					rg.BaseShaderRegister = binder->Slot;
-					rg.RegisterSpace = binder->Space;
-					rg.OffsetInDescriptorsFromTableStart = 0;
-					dxSamplerRanges.push_back(rg);
-
-					if (pOutReflector)
-						pOutReflector->Samplers.push_back((FShaderBinder*)binder);
-				}
-				break;
-				case EShaderBindType::SBT_CBV:
-				{
-					CbvSrvUavBinders.push_back(binder);
-					D3D12_DESCRIPTOR_RANGE rg{};
-					rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
-					rg.NumDescriptors = 1;
-					rg.BaseShaderRegister = binder->Slot;
-					rg.RegisterSpace = binder->Space;
-					rg.OffsetInDescriptorsFromTableStart = 0;
-					dxCbvSrvUavRanges.push_back(rg);
-
-					if (pOutReflector)
-						pOutReflector->CBuffers.push_back((FShaderBinder*)binder);
-				}
-				break;
-				case EShaderBindType::SBT_SRV:
-				{
-					CbvSrvUavBinders.push_back(binder);
-					D3D12_DESCRIPTOR_RANGE rg{};
-					rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-					rg.NumDescriptors = 1;
-					rg.BaseShaderRegister = binder->Slot;
-					rg.RegisterSpace = binder->Space;
-					rg.OffsetInDescriptorsFromTableStart = 0;
-					dxCbvSrvUavRanges.push_back(rg);
-
-					if (pOutReflector)
-						pOutReflector->Srvs.push_back((FShaderBinder*)binder);
-				}
-				break;
-				case EShaderBindType::SBT_UAV:
-				{
-					CbvSrvUavBinders.push_back(binder);
-					D3D12_DESCRIPTOR_RANGE rg{};
-					rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
-					rg.NumDescriptors = 1;
-					rg.BaseShaderRegister = binder->Slot;
-					rg.RegisterSpace = binder->Space;
-					rg.OffsetInDescriptorsFromTableStart = 0;
-					dxCbvSrvUavRanges.push_back(rg);
-
-					if (pOutReflector)
-						pOutReflector->Uavs.push_back((FShaderBinder*)binder);
-				}
-				break;
-				default:
-					break;
-			}
-		}
-		for (size_t i = 0; i < dxCbvSrvUavRanges.size(); i++)
-		{
-			D3D12_ROOT_PARAMETER rp{};
-			rp.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-			rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-			rp.DescriptorTable.NumDescriptorRanges = 1;
-			rp.DescriptorTable.pDescriptorRanges = &dxCbvSrvUavRanges[i];
-			
-			FSignatureBinder sb{};
-			sb.Binder = (FShaderBinder*)CbvSrvUavBinders[i];
-			sb.RootIndex = (int)dxRootParameters.size();
-			OutCbvSrvUav.push_back(sb);
-			dxRootParameters.push_back(rp);
-		}
-		for (size_t i = 0; i < dxSamplerRanges.size(); i++)
-		{
-			D3D12_ROOT_PARAMETER rp{};
-			rp.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-			rp.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-			rp.DescriptorTable.NumDescriptorRanges = 1;
-			rp.DescriptorTable.pDescriptorRanges = &dxSamplerRanges[i];
-
-			FSignatureBinder sb{};
-			sb.Binder = (FShaderBinder*)SamplerBinders[i];
-			sb.RootIndex = (int)dxRootParameters.size();
-			OutSampler.push_back(sb);
-			dxRootParameters.push_back(rp);
-		}
-
-		D3D12_ROOT_SIGNATURE_DESC sigDesc{};
-		sigDesc.NumParameters = (UINT)dxRootParameters.size();
-		if (sigDesc.NumParameters > 0)
-			sigDesc.pParameters = &dxRootParameters[0];
-		sigDesc.NumStaticSamplers = 0;
-		sigDesc.pStaticSamplers = nullptr;
-		sigDesc.Flags = flags;// D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-
-		ID3DBlob* serializedRootSig = nullptr;
-		ID3DBlob* errorBlob = nullptr;
-		HRESULT hr = D3D12SerializeRootSignature(&sigDesc, D3D_ROOT_SIGNATURE_VERSION_1, &serializedRootSig, &errorBlob);
-		if (errorBlob != nullptr)
-		{
-			auto pError = (char*)errorBlob->GetBufferPointer();
-			VFX_LTRACE(ELTT_Graphics, pError);
-			ASSERT(false);
-		}
-
-		auto bfSize = serializedRootSig->GetBufferSize();
-		ID3D12RootSignature* pRootSig = nullptr;
-		device->mDevice->CreateRootSignature(0,
-			serializedRootSig->GetBufferPointer(),
-			bfSize,
-			IID_PPV_ARGS(&pRootSig));
-		return MakeWeakRef(pRootSig);
-	}
-
 	AutoRef<ID3D12StateObject> DX12RayTracingEffect::CreateDxrStateObject(DX12GpuDevice* device, DX12RayTracingEffect* effect)
 	{
 		CD3DX12_STATE_OBJECT_DESC raytracingPipeline{ D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE };
@@ -619,7 +639,7 @@ namespace NxRHI
 
 			mSignatureBuilder.Build(reflector);
 			
-			mGlobalSignature = mSignatureBuilder.CreateSignature(device, D3D12_ROOT_SIGNATURE_FLAG_NONE, mGlobalSignatures,
+			mGlobalSignature = mSignatureBuilder.CreateSignature(device, D3D12_ROOT_SIGNATURE_FLAG_NONE, &mGlobalSignatures,
 				mGlobalReflector, mGlobalCbvSrvUavBinders, mGlobalSamplerBinders);
 			if (mGlobalSignature == nullptr)
 				return nullptr;
@@ -642,7 +662,7 @@ namespace NxRHI
 
 				group->LocalReflector = MakeWeakRef(new IShaderReflector());
 				group->Dx12Signature = mSignatureBuilder.CreateSignature(device, D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE, 
-					group->LocalSignatures, group->LocalReflector,
+					&group->LocalSignatures, group->LocalReflector,
 					group->CbvSrvUavBinders, group->SamplerBinders);
 				if (group->Dx12Signature == nullptr)
 					return nullptr;

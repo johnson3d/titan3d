@@ -1282,6 +1282,35 @@ namespace NxRHI
 		}
 		virtual bool BuildAcclerationStruture() = 0;
 	};
+
+	class TR_CLASS()
+		IBindless : public IGpuResource
+	{
+	public:
+		static const UINT MaxBindless = 4096;
+		static UINT GetMaxBindless() {
+			return IBindless::MaxBindless;
+		}
+		EShaderBindType mBindType;
+		UINT GetResourceCount() const {
+			return (UINT)mResources.size();
+		}
+		bool SetResource(UINT index, IGpuResource* resource) {
+			if (index >= GetResourceCount())
+				return false;
+
+			auto saved = mResources[index];
+			if (resource == saved)
+				return true;
+			mResources[index] = resource;
+			OnBind(index, resource);
+			return true;
+		}
+
+		virtual void OnBind(UINT index, IGpuResource* resource) = 0;
+
+		std::vector<AutoRef<IGpuResource>>	mResources;
+	};
 }
 
 NS_END

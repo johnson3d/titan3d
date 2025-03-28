@@ -42,6 +42,13 @@ namespace EngineNS.NxRHI
                 return mCoreObject.GetGraphicsEffect();
             }
         }
+        public TtBindless CreateBindless(string name)
+        {
+            var ptr = mCoreObject.NativeSuper.CreateBindless(name);
+            if (ptr.IsValidPointer == false)
+                return null;
+            return new TtBindless(ptr);
+        }
         public void Commit(ICommandList cmdlist)
         {
             mCoreObject.NativeSuper.Commit(cmdlist, false);
@@ -172,6 +179,13 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.ResetResources();
         }
+        public TtBindless CreateBindless(string name)
+        {
+            var ptr = mCoreObject.NativeSuper.CreateBindless(name);
+            if (ptr.IsValidPointer == false)
+                return null;
+            return new TtBindless(ptr);
+        }
         public void Commit(ICommandList cmdlist)
         {
             mCoreObject.NativeSuper.Commit(cmdlist, false);
@@ -272,6 +286,13 @@ namespace EngineNS.NxRHI
             if (IsDisposed == false)
                 TtStatistic.Instance.RayTracingDrawcall--;
             base.Dispose();
+        }
+        public TtBindless CreateBindless(string name)
+        {
+            var ptr = mCoreObject.NativeSuper.CreateBindless(name);
+            if (ptr.IsValidPointer == false)
+                return null;
+            return new TtBindless(ptr);
         }
         public void Commit(ICommandList cmdlist)
         {

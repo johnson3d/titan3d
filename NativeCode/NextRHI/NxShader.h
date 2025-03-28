@@ -65,6 +65,9 @@ namespace NxRHI
 		UINT				Size = 0;
 		vBOOL				IsStructuredBuffer = FALSE;
 		int					DescriptorIndex = -1;
+		bool IsBindless() const { 
+			return BindCount == 0;
+		}
 		std::vector<AutoRef<FShaderVarDesc>>		Fields;
 		const FShaderVarDesc* FindField(const char* name) const;
 
@@ -78,6 +81,23 @@ namespace NxRHI
 		ENGINE_RTTI(IShaderReflector);
 		const FShaderBinder* FindBinder(EShaderBindType type, const char* name) const;
 		const FShaderBinder* FindBinder(EShaderBindType type, VNameString name) const;
+		const FShaderBinder* FindBinder(const char* name) const
+		{
+			auto result = FindBinder(EShaderBindType::SBT_CBV, name);
+			if (result)
+				return result;
+			result = FindBinder(EShaderBindType::SBT_SRV, name);
+			if (result)
+				return result;
+			result = FindBinder(EShaderBindType::SBT_UAV, name);
+			if (result)
+				return result;
+			result = FindBinder(EShaderBindType::SBT_Sampler, name);
+			if (result)
+				return result;
+
+			return nullptr;
+		}
 
 		std::vector<AutoRef<FShaderBinder>>		CBuffers;
 		std::vector<AutoRef<FShaderBinder>>		Uavs;

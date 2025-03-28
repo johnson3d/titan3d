@@ -2,6 +2,7 @@
 #include "../../NextRHI/NxCommandList.h"
 #include "../../Math/v3dxRayCast.h"
 #include "TanGen/tgen.h"
+#include "../../../3rd/native/xatlas/xatlas.h"
 
 NS_BEGIN
 
@@ -137,6 +138,59 @@ namespace NxRHI
 			else
 				pTarTan[i].W = 1;
 		}
+		return true;
+	}
+
+	static int Print(const char* format, ...)
+	{
+		va_list arg;
+		va_start(arg, format);
+		printf("\r"); // Clear progress text.
+		const int result = vprintf(format, arg);
+		va_end(arg);
+		return result;
+	}
+	bool FMeshDataProvider::BuildLightMap()
+	{
+		mVertexBuffers[VST_LightMap] = CreateStream(EVertexStreamType::VST_LightMap);
+		xatlas::SetPrint(Print, false);
+		xatlas::Atlas* atlas = xatlas::Create();
+		xatlas::MeshDecl meshDecl;
+		meshDecl.vertexPositionData = mVertexBuffers[VST_Position]->GetData();
+		meshDecl.vertexPositionStride = sizeof(v3dxVector3);
+		if (mVertexBuffers[VST_Normal])
+		{
+			meshDecl.vertexNormalData = mVertexBuffers[VST_Normal]->GetData();
+			meshDecl.vertexNormalStride = sizeof(v3dxVector3);
+		}
+		if (mVertexBuffers[VST_UV])
+		{
+			meshDecl.vertexUvData = mVertexBuffers[VST_UV]->GetData();
+			meshDecl.vertexUvStride = sizeof(v3dxVector2);
+		}
+		meshDecl.indexData = IndexBuffer->GetData();
+		meshDecl.vertexCount = VertexNumber;
+		meshDecl.indexCount = PrimitiveNumber * 3;
+		meshDecl.indexFormat = IsIndex32 ? xatlas::IndexFormat::UInt32 : xatlas::IndexFormat::UInt16;
+		xatlas::AddMeshError error = xatlas::AddMesh(atlas, meshDecl);
+		xatlas::AddMeshJoin(atlas); // Not necessary. Only called here so geometry totals are printed after the AddMesh progress indicator.
+		xatlas::Generate(atlas);
+		uint32_t firstVertex = 0;
+		auto pUV = mVertexBuffers[VST_LightMap]->GetDataPtr<v3dVector4_t>();
+		ASSERT(atlas->meshCount == 1);
+		for (uint32_t i = 0; i < atlas->meshCount; i++) 
+		{
+			const xatlas::Mesh& mesh = atlas->meshes[i];
+			for (uint32_t v = 0; v < mesh.vertexCount; v++) 
+			{
+				const xatlas::Vertex& vertex = mesh.vertexArray[v];
+			
+				pUV[v].X = vertex.uv[0] / atlas->width;
+				pUV[v].Y = vertex.uv[1] / atlas->height;
+			}
+			firstVertex += mesh.vertexCount;
+		}
+		xatlas::Destroy(atlas);
 		return true;
 	}
 

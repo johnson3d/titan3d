@@ -1955,5 +1955,17 @@ namespace NxRHI
 		
 		return true;
 	}
+
+	void DX12Bindless::OnBind(UINT index, IGpuResource* resource)
+	{
+		if (resource == nullptr)
+		{
+			//copy null
+			return;
+		}
+		auto handle = (DX12PagedHeap*)resource->GetHWBuffer();
+		handle->BindToHeap(mDeviceRef.GetPtr(), mHeap->Heap, mStartIndex, 0, 
+			mBindType == EShaderBindType::SBT_Sampler ? D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER : D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	}
 }
 NS_END

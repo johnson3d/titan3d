@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SDL;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -111,6 +112,10 @@ namespace EngineNS.NxRHI
             using (var blob = new Support.TtBlobObject())
             {
                 var ret = mCoreObject.CompileShader(shaderDesc.mCoreObject, shader, entry, type, sm, defines.mCoreObject, sl, bDebugShader, extHlslVersion, dxcArgs, blob.mCoreObject, asModule);
+                if (ret == false)
+                {
+                    Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, $"{shader}({entry}) compile failed");
+                }
                 if (blob.Size > 0)
                 {
                     var msg = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)blob.DataPointer, (int)blob.Size);

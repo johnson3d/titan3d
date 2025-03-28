@@ -495,6 +495,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DataCopyer", "Plugins\DataC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Survivor.All", "Plugins\Game\Survivor\Survivor.All\Survivor.All.csproj", "{35DA3CE4-2FB0-4F4D-A5E5-A81EBAA0A503}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xatlas", "3rd\native\xatlas\xatlas.vcxitems", "{04682CF8-0EB3-4B02-A1BC-8C769FCA3A91}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1194,6 +1196,7 @@ Global
 		{EBE068CA-AEB6-472C-A671-9FCC99AA1090} = {7D33F58F-FF5C-4BAD-885E-398DCD456824}
 		{493CB882-5C13-4894-9E02-1E2B41A174DB} = {7D33F58F-FF5C-4BAD-885E-398DCD456824}
 		{35DA3CE4-2FB0-4F4D-A5E5-A81EBAA0A503} = {893908DF-998A-4265-80F5-8899A5DDC813}
+		{04682CF8-0EB3-4B02-A1BC-8C769FCA3A91} = {4A69F69C-6D09-4798-838A-BCE0C8C785F9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F7EC7EF6-F92D-464A-93A0-66C2A8E15609}
@@ -1201,6 +1204,7 @@ Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		EngineConfig.vcxitems*{009d7483-131d-43de-bcbe-56f21fecadcf}*SharedItemsImports = 9
 		CSharpCode\CompilingGenerator\CompilingGenerator.projitems*{015286df-5ed8-4fa9-9b45-0e73ed25d3a7}*SharedItemsImports = 5
+		3rd\native\xatlas\xatlas.vcxitems*{04682cf8-0eb3-4b02-a1bc-8c769fca3a91}*SharedItemsImports = 9
 		Plugins\GameTasks\GameTasks\GameTasks.projitems*{059e7030-ebfa-4923-b7c0-8acfdbc347a9}*SharedItemsImports = 5
 		Plugins\GameItems\GameItems\GameItem.projitems*{06a7e536-e6de-4033-afca-27030a7ff2a3}*SharedItemsImports = 13
 		3rd\csharp\xxHash\xxHash.projitems*{06df8867-c29e-4424-95a8-3592453e3fee}*SharedItemsImports = 13
@@ -1476,6 +1480,7 @@ Global
 		3rd\native\Recast\Detour\Detour.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		3rd\native\Recast\Recast\Recast.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		3rd\native\spirv-cross\spirv-cross.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
+		3rd\native\xatlas\xatlas.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		3rd\native\zlib\zlib.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		3rd\native\zstd\zstd.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4
 		codegen\Cs2Cpp\cpp\Cs2Cpp.vcxitems*{ad0e23e3-eca5-4e52-b69d-bb6e669c48c6}*SharedItemsImports = 4

@@ -608,6 +608,14 @@ namespace NxRHI
 				mCaps.IsSupportRayTracing = true;
 			}
 		}
+		{
+			D3D12_FEATURE_DATA_D3D12_OPTIONS features = {};
+			mDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &features, sizeof(features));
+			if (features.ResourceBindingTier >= D3D12_RESOURCE_BINDING_TIER_3)
+			{
+				mCaps.IsSuppprtBindless = true;
+			}
+		}
 		//ASSERT(op4.Native16BitShaderOpsSupported);
 	}
 	IBuffer* DX12GpuDevice::CreateBuffer(const FBufferDesc* desc)
@@ -854,7 +862,7 @@ namespace NxRHI
 	IRayTracingDraw* DX12GpuDevice::CreateRayTracingDraw() 
 	{
 		auto result = new DX12RayTracingDraw();
-		//result->mDeviceRef.FromObject(this);
+		result->mDeviceRef.FromObject(this);
 		return result;
 	}
 	IGpuScope* DX12GpuDevice::CreateGpuScope()

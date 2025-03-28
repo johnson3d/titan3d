@@ -19,6 +19,7 @@ namespace NxRHI
 			IGraphicDraw::ResetResources();
 			IsDirty = true;
 		}
+		virtual IBindless* CreateBindless(const char* name) const override;
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 
 		virtual void OnGpuDrawStateUpdated() override;
@@ -26,14 +27,11 @@ namespace NxRHI
 
 		void BindDescriptorHeaps(DX12GpuDevice* device, DX12CommandList* dx12Cmd);
 	private:
-		void ResetHeap(DX12GpuDevice* device, DX12GraphicsEffect* effect);
 		void BindResourceToHeap(DX12GpuDevice* device, const FEffectBinder* binder, IGpuResource* resource);
-		void BindDescriptors(DX12GpuDevice* device, DX12CommandList* dx12Cmd, DX12GraphicsEffect* effect);
 	public:
 		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
 		bool							IsDirty = false;
 
-		
 		AutoRef<DX12HeapHolder>			mCbvSrvUavHeap;
 		AutoRef<DX12HeapHolder>			mSamplerHeap;
 		UINT							FingerPrient = 0;
@@ -48,6 +46,7 @@ namespace NxRHI
 			IComputeDraw::ResetResources();
 			IsDirty = true;
 		}
+		virtual IBindless* CreateBindless(const char* name) const override;
 		virtual void OnBindResource(const FShaderBinder* binder, IGpuResource* resource) override;
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 
@@ -74,8 +73,10 @@ namespace NxRHI
 		};
 		std::vector<FHitGroupShaderBindTable>	ShaderBindTables;
 
+		virtual IBindless* CreateBindless(const char* name) const override;
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
-	protected:
+	public:
+		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
 		bool							IsDirty = false;
 		virtual void OnBindResource(const FShaderBinder* binder, IGpuResource* resource) override;
 		void BindDescriptors(DX12GpuDevice* device, DX12CommandList* dx12Cmd, DX12RayTracingEffect* effect);

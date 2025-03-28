@@ -1,5 +1,5 @@
 #include "CsBinder.h"
-#include "../../../codegen/Cs2Cpp/cpp/EngineNS.UTest.UTestCs2CppBuilder.cs2cpp.h"
+#include "../../../codegen/Cs2Cpp/cpp/EngineNS.UnitTest.UTestCs2CppBuilder.cs2cpp.h"
 #include "../../../codegen/Cs2Cpp/cpp/EngineNS.Rtti.TtNativeCoreProvider.cs2cpp.h"
 
 #define new VNEW
@@ -175,10 +175,10 @@ float FGlobalConfig::GetConfigValueF32(UINT handle)
 void UCs2CppBase::UnitTest()
 {
 	///test code
-	EngineNS::UTest::UTestCs2CppBuilder mCs2CppBuilder;
+	EngineNS::UnitTest::UTestCs2CppBuilder mCs2CppBuilder;
 	//EngineNS::Rtti::TtNativeCoreProvider mNativeCoreProvider;
 
-	mCs2CppBuilder.mCSFullName = "EngineNS.UTest.UTestCs2CppBuilder@EngineCore";
+	mCs2CppBuilder.mCSFullName = "EngineNS.UnitTest.UTestCs2CppBuilder@EngineCore";
 	mCs2CppBuilder.CreateManagedObject();
 	if (mCs2CppBuilder.mCSharpHandle != nullptr)
 	{

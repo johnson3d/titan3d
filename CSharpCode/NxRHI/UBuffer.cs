@@ -450,4 +450,24 @@ namespace EngineNS.NxRHI
     public class TtUaView : AuxPtrType<NxRHI.IUaView>
     {
     }
+
+    public class TtBindless : AuxPtrType<NxRHI.IBindless>
+    {
+        public TtBindless(NxRHI.IBindless ptr)
+        {
+            mCoreObject = ptr;
+        }
+        public bool SetSrv(uint index, TtSrView res)
+        {
+            return mCoreObject.SetResource(index, res.mCoreObject.NativeSuper);
+        }
+        public bool SetCbv(uint index, TtCbView res)
+        {
+            return mCoreObject.SetResource(index, res.mCoreObject.NativeSuper);
+        }
+        public bool SetUav(uint index, TtUaView res)
+        {
+            return mCoreObject.SetResource(index, res.mCoreObject.NativeSuper);
+        }
+    }
 }
