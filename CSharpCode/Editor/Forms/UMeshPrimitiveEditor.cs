@@ -592,7 +592,8 @@ namespace EngineNS.Editor.Forms
             {
                 var mdp = new TtMeshDataProvider();
                 mdp.InitFrom(Mesh);
-                mdp.mCoreObject.BuildLightMap();
+                float aspect = 1.0f;
+                mdp.mCoreObject.BuildLightMap(ref aspect);
                 mdp.ToMesh(Mesh);
             }
         }

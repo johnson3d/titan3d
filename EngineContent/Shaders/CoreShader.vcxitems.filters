@@ -528,8 +528,5 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\FSR1\ffx_fsr1.h">
       <Filter>ShadingEnv\Post\FSR1</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\RayTracing\RayTracingHlslCompat.h">
-      <Filter>ShadingEnv\RayTracing</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

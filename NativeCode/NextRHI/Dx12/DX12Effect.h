@@ -35,7 +35,7 @@ namespace NxRHI
 		}
 		void Build(IShaderReflector* reflector);
 		void Build(std::map<VNameString, AutoRef<FEffectBinder>>& binders);
-		void CreateHeap(DX12GpuDevice* device, AutoRef<DX12HeapHolder>& OutCbvSrvUavHeap, AutoRef<DX12HeapHolder>& OutSamplerHeap);
+		bool CreateHeap(DX12GpuDevice* device, AutoRef<DX12HeapHolder>& OutCbvSrvUavHeap, AutoRef<DX12HeapHolder>& OutSamplerHeap);
 
 		struct FSignatureBinder
 		{

@@ -1,6 +1,8 @@
 #include "DX12PreHead.h"
 #include "DX12Event.h"
 #include "DX12GpuDevice.h"
+#include "DX12Buffer.h"
+#include "DX12GpuState.h"
 #include "DX12CommandList.h"
 #include "DX12Drawcall.h"
 
@@ -421,6 +423,22 @@ namespace NxRHI
 	{
 		static DX12ResourceDebugMapper obj;
 		return &obj;
+	}
+	DX12PagedHeap* DX12PagedHeap::GetNullHeap(DX12GpuDevice* device, EShaderBindType type)
+	{
+		switch (type)
+		{
+		case EngineNS::NxRHI::SBT_CBV:
+			return device->mNullCBV->mView->Heap;
+		case EngineNS::NxRHI::SBT_SRV:
+			return device->mNullSRV->mView->Heap;
+		case EngineNS::NxRHI::SBT_UAV:
+			return device->mNullUAV->mView->Heap;
+		case EngineNS::NxRHI::SBT_Sampler:
+			return device->mNullSampler->mView;
+		default:
+			return nullptr;
+		}
 	}
 }
 

@@ -189,7 +189,6 @@ namespace NxRHI
 		TWeakRefHandle<DX12GpuDevice> mDeviceRef;
 		AutoRef<DX12HeapHolder>		mHeap;
 		UINT						mStartIndex;
-		EShaderBindType				mBindType;
 		virtual void OnBind(UINT index, IGpuResource* resource) override;
 	};
 }

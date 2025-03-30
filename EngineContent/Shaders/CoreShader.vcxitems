@@ -160,6 +160,5 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\FSR1\ffx_a.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\Post\FSR1\ffx_fsr1.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)ShadingEnv\RayTracing\RayTracingHlslCompat.h" />
   </ItemGroup>
 </Project>

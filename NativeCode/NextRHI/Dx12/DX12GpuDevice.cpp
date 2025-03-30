@@ -1058,14 +1058,14 @@ namespace NxRHI
 	}
 	void DX12GpuDevice::OnDeviceRemoved()
 	{
-		AutoRef<ID3D12DeviceRemovedExtendedData1> pDred;
+		/*AutoRef<ID3D12DeviceRemovedExtendedData1> pDred;
 		mDevice->QueryInterface(IID_PPV_ARGS(pDred.GetAddressOf()));
 
 		D3D12_DRED_AUTO_BREADCRUMBS_OUTPUT1 DredAutoBreadcrumbsOutput;
 		D3D12_DRED_PAGE_FAULT_OUTPUT1 DredPageFaultOutput;
 		auto hr = pDred->GetAutoBreadcrumbsOutput1(&DredAutoBreadcrumbsOutput);
 
-		ASSERT(false);
+		ASSERT(false);*/
 		VAutoVSLLock locker(mDredLocker);
 
 		if (mDeviceRemovedCallback != nullptr)

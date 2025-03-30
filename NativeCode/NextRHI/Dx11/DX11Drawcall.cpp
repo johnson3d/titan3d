@@ -68,32 +68,32 @@ namespace NxRHI
 			AUTO_SAMP("NxRHI.GraphicDraw.Commit.BindResouces");
 			for (auto& i : BindResources)
 			{
-				if (i.second == nullptr)
+				if (i.second.Resource == nullptr)
 					continue;
 				switch (i.first->BindType)
 				{
 					case SBT_CBV:
 					{
-						IGpuResource* t = i.second;
+						IGpuResource* t = i.second.Resource;
 						effect->BindCBV(cmdlist, i.first, (ICbView*)t);
 					}
 					break;
 					case SBT_SRV:
 					{
-						auto t = (ISrView*)i.second;
+						auto t = (ISrView*)i.second.Resource;
 						effect->BindSrv(cmdlist, i.first, (ISrView*)t);
 						cmdlist->mCmdRecorder->UseResource(t->Buffer);
 					}
 					break;
 					case SBT_UAV:
 					{
-						IGpuResource* t = i.second;
+						IGpuResource* t = i.second.Resource;
 						effect->BindUav(cmdlist, i.first, (IUaView*)t);
 					}
 					break;
 					case SBT_Sampler:
 					{
-						IGpuResource* t = i.second;
+						IGpuResource* t = i.second.Resource;
 						effect->BindSampler(cmdlist, i.first, (ISampler*)t);
 					}
 					break;

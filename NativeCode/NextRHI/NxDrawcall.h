@@ -100,7 +100,7 @@ namespace NxRHI
 		{
 			for (auto& i : BindResources)
 			{
-				if (fun(i.first->BindType, i.second) == false)
+				if (fun(i.first->BindType, i.second.Resource) == false)
 					return;
 			}
 		}
@@ -111,13 +111,13 @@ namespace NxRHI
 			auto iter = BindResources.find(binder);
 			if (iter != BindResources.end())
 			{
-				return (IBindless*)iter->second;
+				return (IBindless*)iter->second.Resource;
 			}
 			return nullptr;
 		}
 	public:
 		static std::atomic<int>		NumOfInstance;
-		std::map<const FEffectBinder*, AutoRef<IGpuResource>>	BindResources;
+		std::map<const FEffectBinder*, FBindResource>	BindResources;
 		AutoRef<IGraphicsEffect>	ShaderEffect;
 		AutoRef<IGpuPipeline>		Pipeline;
 		AutoRef<FGeomMesh>			Mesh;
@@ -134,7 +134,7 @@ namespace NxRHI
 	protected:
 		void UpdateGpuDrawState(IGpuDevice* device, ICommandList* cmdlist, IRenderPass* rpass);
 		virtual void OnGpuDrawStateUpdated() {}
-		virtual void OnBindResource(const FEffectBinder* binder, IGpuResource* resource) {}
+		virtual void OnBindResource(const FEffectBinder* binder, FBindResource& resource) {}
 	};
 	class TR_CLASS()
 		IComputeDraw : public IGpuDraw
@@ -180,7 +180,7 @@ namespace NxRHI
 		{
 			for (auto& i : BindResources)
 			{
-				if (fun(i.first->Type, i.second) == false)
+				if (fun(i.first->Type, i.second.Resource) == false)
 					return;
 			}
 		}
@@ -191,7 +191,7 @@ namespace NxRHI
 			auto iter = BindResources.find(binder);
 			if (iter != BindResources.end())
 			{
-				return (IBindless*)iter->second;
+				return (IBindless*)iter->second.Resource;
 			}
 			return nullptr;
 		}
@@ -205,9 +205,9 @@ namespace NxRHI
 		UINT					mDispatchZ = 0;
 		AutoRef<IComputeEffect>	mEffect;
 		AutoRef<IBuffer>		IndirectDispatchArgsBuffer;
-		std::map<const FShaderBinder*, AutoRef<IGpuResource>>	BindResources;
+		std::map<const FShaderBinder*, FBindResource>	BindResources;
 	protected:
-		virtual void OnBindResource(const FShaderBinder* binder, IGpuResource* resource) {}
+		virtual void OnBindResource(const FShaderBinder* binder, FBindResource& resource) {}
 	};
 
 	class TR_CLASS()
@@ -247,17 +247,17 @@ namespace NxRHI
 			auto iter = BindResources.find(binder);
 			if (iter != BindResources.end())
 			{
-				return (IBindless*)iter->second;
+				return (IBindless*)iter->second.Resource;
 			}
 			return nullptr;
 		}
 	protected:
-		virtual void OnBindResource(const FShaderBinder* binder, IGpuResource* resource) {}
+		virtual void OnBindResource(const FShaderBinder* binder, FBindResource& resource) {}
 	public:
 		UINT Width;
 		UINT Height;
 		UINT Depth;
-		std::map<const FShaderBinder*, AutoRef<IGpuResource>>	BindResources;
+		std::map<const FShaderBinder*, FBindResource>	BindResources;
 	};
 	enum TR_ENUM()
 		ECopyDrawMode

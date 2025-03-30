@@ -78,7 +78,7 @@ namespace NxRHI
 		auto iter = BindResources.find(binder);
 		if (iter != BindResources.end())
 		{
-			return iter->second;
+			return iter->second.Resource;
 		}
 		return nullptr;
 	}
@@ -98,31 +98,36 @@ namespace NxRHI
 	}
 	void IGraphicDraw::BindResource(const FEffectBinder* binder, IGpuResource* resource)
 	{
-		AutoRef<IGpuResource> tmp(resource);
 		auto iter = BindResources.find(binder);
 		if (iter != BindResources.end())
 		{
-			if (iter->second == resource)
+			if (iter->second.Resource == resource)
 			{
 				return;
 			}
 			else
 			{
-				BindResources[binder] = tmp;
-				OnBindResource(binder, resource);
+				auto& bs = BindResources[binder];
+				bs.SetResource(resource);
+				OnBindResource(binder, bs);
 			}
 		}
 		else
 		{
-			BindResources[binder] = tmp;
-			OnBindResource(binder, resource);
+			FBindResource bs{};
+			bs.Resource = resource;
+			bs.FingerPrint = resource->GetFingerPrint();
+			BindResources.insert(std::make_pair(binder, bs));
+			OnBindResource(binder, bs);
 		}
 	}
 	void IGraphicDraw::BindIndirectDrawArgsBuffer(IBuffer* buffer, UINT offset)
 	{
 		IndirectDrawArgsBuffer = buffer;
 		IndirectDrawOffsetForArgs = offset;
-		OnBindResource(nullptr, buffer);
+		FBindResource bs{};
+		bs.SetResource(buffer);
+		OnBindResource(nullptr, bs);
 	}
 	void IGraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
 	{
@@ -157,25 +162,25 @@ namespace NxRHI
 			{
 				case SBT_CBV:
 				{
-					IGpuResource* t = i.second;
+					IGpuResource* t = i.second.Resource;
 					effect->BindCBV(cmdlist, i.first, (ICbView*)t);
 				}
 				break;
 				case SBT_SRV:
 				{
-					IGpuResource* t = i.second;
+					IGpuResource* t = i.second.Resource;
 					effect->BindSrv(cmdlist, i.first, (ISrView*)t);
 				}
 				break;
 				case SBT_UAV:
 				{
-					IGpuResource* t = i.second;
+					IGpuResource* t = i.second.Resource;
 					effect->BindUav(cmdlist, i.first, (IUaView*)t);
 				}
 				break;
 				case SBT_Sampler:
 				{
-					IGpuResource* t = i.second;
+					IGpuResource* t = i.second.Resource;
 					effect->BindSampler(cmdlist, i.first, (ISampler*)t);
 				}
 				break;
@@ -222,24 +227,27 @@ namespace NxRHI
 	}
 	void IComputeDraw::BindResource(const FShaderBinder* binder, IGpuResource* resource)
 	{
-		AutoRef<IGpuResource> tmp(resource);
 		auto iter = BindResources.find(binder);
 		if (iter != BindResources.end())
 		{
-			if (iter->second == resource)
+			if (iter->second.Resource == resource)
 			{
 				return;
 			}
 			else
 			{
-				BindResources[binder] = tmp;
-				OnBindResource(binder, resource);
+				auto& bs = BindResources[binder];
+				bs.SetResource(resource);
+				OnBindResource(binder, bs);
 			}
 		}
 		else
 		{
-			BindResources[binder] = tmp;
-			OnBindResource(binder, resource);
+			FBindResource bs{};
+			bs.Resource = resource;
+			bs.FingerPrint = resource->GetFingerPrint();
+			BindResources.insert(std::make_pair(binder, bs));
+			OnBindResource(binder, bs);
 		}
 	}
 	IGpuResource* IComputeDraw::FindGpuResource(EShaderBindType type, VNameString name)
@@ -251,7 +259,7 @@ namespace NxRHI
 		auto iter = BindResources.find(binder);
 		if (iter != BindResources.end())
 		{
-			return iter->second;
+			return iter->second.Resource;
 		}
 		return nullptr;
 	}
@@ -271,25 +279,25 @@ namespace NxRHI
 			{
 				case SBT_CBV:
 				{
-					IGpuResource* t = i.second;
+					IGpuResource* t = i.second.Resource;
 					cmdlist->SetCBV(EShaderType::SDT_ComputeShader, i.first, (ICbView*)t);
 				}
 				break;
 				case SBT_SRV:
 				{
-					IGpuResource* t = i.second;
+					IGpuResource* t = i.second.Resource;
 					cmdlist->SetSrv(EShaderType::SDT_ComputeShader, i.first, (ISrView*)t);
 				}
 				break;
 				case SBT_UAV:
 				{
-					IGpuResource* t = i.second;
+					IGpuResource* t = i.second.Resource;
 					cmdlist->SetUav(EShaderType::SDT_ComputeShader, i.first, (IUaView*)t);
 				}
 				break;
 				case SBT_Sampler:
 				{
-					IGpuResource* t = i.second;
+					IGpuResource* t = i.second.Resource;
 					cmdlist->SetSampler(EShaderType::SDT_ComputeShader, i.first, (ISampler*)t);
 				}
 				break;
@@ -313,7 +321,7 @@ namespace NxRHI
 			{
 				case SBT_UAV:
 				{
-					IGpuResource* t = i.second;
+					IGpuResource* t = i.second.Resource;
 					cmdlist->SetUav(EShaderType::SDT_ComputeShader, i.first, nullptr);
 				}
 				break;
@@ -418,24 +426,27 @@ namespace NxRHI
 	}
 	void IRayTracingDraw::BindResource(const FShaderBinder* binder, IGpuResource* resource)
 	{
-		AutoRef<IGpuResource> tmp(resource);
 		auto iter = BindResources.find(binder);
 		if (iter != BindResources.end())
 		{
-			if (iter->second == resource)
+			if (iter->second.Resource == resource)
 			{
 				return;
 			}
 			else
 			{
-				BindResources[binder] = tmp;
-				OnBindResource(binder, resource);
+				auto& bs = BindResources[binder];
+				bs.SetResource(resource);
+				OnBindResource(binder, bs);
 			}
 		}
 		else
 		{
-			BindResources[binder] = tmp;
-			OnBindResource(binder, resource);
+			FBindResource bs{};
+			bs.Resource = resource;
+			bs.FingerPrint = resource->GetFingerPrint();
+			BindResources.insert(std::make_pair(binder, bs));
+			OnBindResource(binder, bs);
 		}
 	}
 }

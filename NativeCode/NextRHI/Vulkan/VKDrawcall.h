@@ -13,7 +13,7 @@ namespace NxRHI
 		~VKGraphicDraw();
 	protected:
 		virtual void OnGpuDrawStateUpdated() override;
-		virtual void OnBindResource(const FEffectBinder* binder, IGpuResource* resource) override;
+		virtual void OnBindResource(const FEffectBinder* binder, FBindResource& resource) override;
 
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 
@@ -32,7 +32,7 @@ namespace NxRHI
 	class VKComputeDraw : public IComputeDraw
 	{
 	public:
-		virtual void OnBindResource(const FShaderBinder* binder, IGpuResource* resource) override;
+		virtual void OnBindResource(const FShaderBinder* binder, FBindResource& resource) override;
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 
 		void RebuildDescriptorSets();

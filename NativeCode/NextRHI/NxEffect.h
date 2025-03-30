@@ -24,6 +24,7 @@ namespace NxRHI
 		const FShaderBinder*	VSBinder = nullptr;
 		const FShaderBinder*	PSBinder = nullptr;
 
+		const FShaderBinder*	ValidShaderBinder = nullptr;
 		UINT					DescriptorIndex = -1;
 		const FShaderVarDesc* FindField(const char* name) const;
 		UINT GetBindResourceSize() const;
@@ -54,6 +55,15 @@ namespace NxRHI
 			else if (MSBinder != nullptr)
 				return MSBinder;
 			return nullptr;
+		}
+
+		const FShaderBinder* GetValidShaderBinder() const {
+			if (ValidShaderBinder == nullptr)
+				((FEffectBinder*)this)->ValidShaderBinder = GetShaderBinder();
+			return ValidShaderBinder;
+		}
+		bool IsBindless() const {
+			return GetValidShaderBinder()->IsBindless();
 		}
 	};
 

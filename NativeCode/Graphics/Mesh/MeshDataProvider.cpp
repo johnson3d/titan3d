@@ -150,7 +150,7 @@ namespace NxRHI
 		va_end(arg);
 		return result;
 	}
-	bool FMeshDataProvider::BuildLightMap()
+	bool FMeshDataProvider::BuildLightMap(float& aspect)
 	{
 		mVertexBuffers[VST_LightMap] = CreateStream(EVertexStreamType::VST_LightMap);
 		xatlas::SetPrint(Print, false);
@@ -178,6 +178,37 @@ namespace NxRHI
 		uint32_t firstVertex = 0;
 		auto pUV = mVertexBuffers[VST_LightMap]->GetDataPtr<v3dVector4_t>();
 		ASSERT(atlas->meshCount == 1);
+		float width = (float)atlas->width;
+		float height = (float)atlas->height;
+		if (aspect == 0)
+		{
+			aspect = (float)atlas->width / (float)atlas->height;
+		}
+		else
+		{
+			if (atlas->width > atlas->height)
+			{
+				if (aspect > 1)
+				{
+					height = width / aspect;
+				}
+				else
+				{
+					width = height * aspect;
+				}
+			}
+			else
+			{
+				if (aspect > 1)
+				{
+					width = height * aspect; 
+				}
+				else
+				{
+					height = width / aspect;
+				}
+			}
+		}
 		for (uint32_t i = 0; i < atlas->meshCount; i++) 
 		{
 			const xatlas::Mesh& mesh = atlas->meshes[i];
@@ -185,8 +216,8 @@ namespace NxRHI
 			{
 				const xatlas::Vertex& vertex = mesh.vertexArray[v];
 			
-				pUV[v].X = vertex.uv[0] / atlas->width;
-				pUV[v].Y = vertex.uv[1] / atlas->height;
+				pUV[v].X = vertex.uv[0] / width;
+				pUV[v].Y = vertex.uv[1] / height;
 			}
 			firstVertex += mesh.vertexCount;
 		}

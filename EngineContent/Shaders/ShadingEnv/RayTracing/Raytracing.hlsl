@@ -35,6 +35,8 @@
     "Scene",
     "Indices",
     "Vertices",
+    "DiffuseTextures",
+    "Samp_DiffuseTextures",
     "g_sceneCB"
   ],
   "HitGroups": [
@@ -51,7 +53,7 @@
 <RTShaderLibDesc>*/
 
 #define HLSL
-//#include "RaytracingHlslCompat.h"
+
 struct Vertex
 {
     //float3 position;
@@ -79,6 +81,8 @@ RWTexture2D<float4> RenderTarget : register(u0);
 ByteAddressBuffer Indices : register(t1, space0);
 StructuredBuffer<Vertex> Vertices : register(t2, space0);
 
+Texture2D<float4> DiffuseTextures[] : register(t3, space0);
+SamplerState Samp_DiffuseTextures : register(s1, space0);;
 //ConstantBuffer<SceneConstantBuffer> g_sceneCB : register(b0);
 //ConstantBuffer<CubeConstantBuffer> g_cubeCB : register(b1);
 
@@ -226,6 +230,8 @@ void MyClosestHitShader(inout RayPayload payload, in MyAttributes attr)
     float4 diffuseColor = CalculateDiffuseLighting(hitPosition, triangleNormal);
     //float4 diffuseColor = CalculateDiffuseLighting2(lightDirection.xyz, triangleNormal);
     float4 color = lightAmbientColor + diffuseColor;
+    float4 diffColor = DiffuseTextures[0].SampleLevel(Samp_DiffuseTextures, attr.barycentrics.xy, 0);// 
+    color += diffColor;
 
     payload.color = color;
 

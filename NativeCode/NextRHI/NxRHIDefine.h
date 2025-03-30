@@ -405,6 +405,20 @@ namespace NxRHI
 		std::atomic<int>			CmdRefCount;
 	};
 
+	struct FBindResource
+	{
+		UINT FingerPrint;
+		AutoRef<IGpuResource> Resource;
+		void SetResource(IGpuResource* res)
+		{
+			Resource = res;
+			if (res != nullptr)
+				FingerPrint = res->GetFingerPrint();
+			else
+				FingerPrint = 0;
+		}
+	};
+
 	class IGpuDevice;
 	struct FGpuHeapSizedPool;
 	struct IPagedGpuMemAllocator;

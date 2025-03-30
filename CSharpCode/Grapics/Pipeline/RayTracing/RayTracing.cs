@@ -47,6 +47,16 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
             {
                 drawcall.BindUav(binder, node.GetAttachBuffer(node.LightingPinOut).Uav);
             }
+            if (node.DiffuseTextures == null)
+            {
+                node.DiffuseTextures = drawcall.CreateBindless("DiffuseTextures");
+                if (node.DiffuseTextures != null && node.DiffuseTextures.BindType == EShaderBindType.SBT_SRV)
+                {
+                    node.DiffuseTextures.SetSrv(0, TtEngine.Instance.GfxDevice.TextureManager.DefaultTexture);
+                    node.DiffuseTextures.SetSrv(1, TtEngine.Instance.GfxDevice.TextureManager.DefaultTexture);
+                    node.DiffuseTextures.SetSrv(2, TtEngine.Instance.GfxDevice.TextureManager.DefaultTexture);
+                }
+            }
             base.OnDrawCall(drawcall, policy);
         }
     }
@@ -81,6 +91,7 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
         public NxRHI.TtCbView CubeCBV;
         public NxRHI.TtSrView VBV_Normal;
         public NxRHI.TtSrView IBV;
+        public NxRHI.TtBindless DiffuseTextures;
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);

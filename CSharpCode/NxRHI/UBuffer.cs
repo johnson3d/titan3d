@@ -457,6 +457,11 @@ namespace EngineNS.NxRHI
         {
             mCoreObject = ptr;
         }
+        public EShaderBindType BindType
+        {
+            get => mCoreObject.mBindType;
+        }
+
         public bool SetSrv(uint index, TtSrView res)
         {
             return mCoreObject.SetResource(index, res.mCoreObject.NativeSuper);

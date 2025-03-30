@@ -158,14 +158,17 @@ namespace NxRHI
 		//mCbvSrvUavNumber = (UINT)mCbvSrvUavBinders.size();
 		//mSamplerNumber = (UINT)mSamplerBinders.size();
 	}
-	void DX12ShaderSignatureBuilder::CreateHeap(DX12GpuDevice* device, AutoRef<DX12HeapHolder>& OutCbvSrvUavHeap, AutoRef<DX12HeapHolder>& OutSamplerHeap)
+	bool DX12ShaderSignatureBuilder::CreateHeap(DX12GpuDevice* device, AutoRef<DX12HeapHolder>& OutCbvSrvUavHeap, AutoRef<DX12HeapHolder>& OutSamplerHeap)
 	{
+		bool created = false;
 		if (mCbvSrvUavNumber > 0)
 		{
 			if (OutCbvSrvUavHeap == nullptr || OutCbvSrvUavHeap->NumOfDescriptor != mCbvSrvUavNumber)
 			{
 				OutCbvSrvUavHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device,
 					mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+
+				created = true;
 			}
 		}
 		else
@@ -178,12 +181,14 @@ namespace NxRHI
 			{
 				OutSamplerHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device,
 					mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
+				created = true;
 			}
 		}
 		else
 		{
 			OutSamplerHeap = nullptr;
 		}
+		return created;
 	}
 	AutoRef<ID3D12RootSignature> DX12ShaderSignatureBuilder::CreateSignature(DX12GpuDevice* device, D3D12_ROOT_SIGNATURE_FLAGS flags,
 		const std::vector<VNameString>* roots, IShaderReflector* pOutReflector,
@@ -206,72 +211,72 @@ namespace NxRHI
 			{
 				switch (binder->Type)
 				{
-				case EShaderBindType::SBT_Sampler:
-				{
-					SamplerBinders.push_back(binder);
-					DiscriptorRangeType rg{};
-					rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
-					rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
-					rg.NumDescriptors = 1;
-					rg.BaseShaderRegister = binder->Slot;
-					rg.RegisterSpace = binder->Space;
-					rg.OffsetInDescriptorsFromTableStart = 0;
-					dxSamplerRanges.push_back(rg);
+					case EShaderBindType::SBT_Sampler:
+					{
+						SamplerBinders.push_back(binder);
+						DiscriptorRangeType rg{};
+						rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
+						rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
+						rg.NumDescriptors = binder->IsBindless() ? IBindless::MaxBindless : 1;
+						rg.BaseShaderRegister = binder->Slot;
+						rg.RegisterSpace = binder->Space;
+						rg.OffsetInDescriptorsFromTableStart = 0;
+						dxSamplerRanges.push_back(rg);
 
-					if (pOutReflector)
-						pOutReflector->Samplers.push_back(binder);
-				}
-				break;
-				case EShaderBindType::SBT_CBV:
-				{
-					CbvSrvUavBinders.push_back(binder);
-					DiscriptorRangeType rg{};
-					rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
-					rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
-					rg.NumDescriptors = 1;
-					rg.BaseShaderRegister = binder->Slot;
-					rg.RegisterSpace = binder->Space;
-					rg.OffsetInDescriptorsFromTableStart = 0;
-					dxCbvSrvUavRanges.push_back(rg);
-
-					if (pOutReflector)
-						pOutReflector->CBuffers.push_back(binder);
-				}
-				break;
-				case EShaderBindType::SBT_SRV:
-				{
-					CbvSrvUavBinders.push_back(binder);
-					DiscriptorRangeType rg{};
-					rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
-					rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-					rg.NumDescriptors = 1;
-					rg.BaseShaderRegister = binder->Slot;
-					rg.RegisterSpace = binder->Space;
-					rg.OffsetInDescriptorsFromTableStart = 0;
-					dxCbvSrvUavRanges.push_back(rg);
-
-					if (pOutReflector)
-						pOutReflector->Srvs.push_back(binder);
-				}
-				break;
-				case EShaderBindType::SBT_UAV:
-				{
-					CbvSrvUavBinders.push_back(binder);
-					DiscriptorRangeType rg{};
-					rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
-					rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
-					rg.NumDescriptors = 1;
-					rg.BaseShaderRegister = binder->Slot;
-					rg.RegisterSpace = binder->Space;
-					rg.OffsetInDescriptorsFromTableStart = 0;
-					dxCbvSrvUavRanges.push_back(rg);
-
-					if (pOutReflector)
-						pOutReflector->Uavs.push_back(binder);
-				}
-				break;
-				default:
+						if (pOutReflector)
+							pOutReflector->Samplers.push_back(binder);
+					}
 					break;
+					case EShaderBindType::SBT_CBV:
+					{
+						CbvSrvUavBinders.push_back(binder);
+						DiscriptorRangeType rg{};
+						rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
+						rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+						rg.NumDescriptors = binder->IsBindless() ? IBindless::MaxBindless : 1;
+						rg.BaseShaderRegister = binder->Slot;
+						rg.RegisterSpace = binder->Space;
+						rg.OffsetInDescriptorsFromTableStart = 0;
+						dxCbvSrvUavRanges.push_back(rg);
+
+						if (pOutReflector)
+							pOutReflector->CBuffers.push_back(binder);
+					}
+					break;
+					case EShaderBindType::SBT_SRV:
+					{
+						CbvSrvUavBinders.push_back(binder);
+						DiscriptorRangeType rg{};
+						rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
+						rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+						rg.NumDescriptors = binder->IsBindless() ? IBindless::MaxBindless : 1;
+						rg.BaseShaderRegister = binder->Slot;
+						rg.RegisterSpace = binder->Space;
+						rg.OffsetInDescriptorsFromTableStart = 0;
+						dxCbvSrvUavRanges.push_back(rg);
+
+						if (pOutReflector)
+							pOutReflector->Srvs.push_back(binder);
+					}
+					break;
+					case EShaderBindType::SBT_UAV:
+					{
+						CbvSrvUavBinders.push_back(binder);
+						DiscriptorRangeType rg{};
+						rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
+						rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+						rg.NumDescriptors = binder->IsBindless() ? IBindless::MaxBindless : 1;
+						rg.BaseShaderRegister = binder->Slot;
+						rg.RegisterSpace = binder->Space;
+						rg.OffsetInDescriptorsFromTableStart = 0;
+						dxCbvSrvUavRanges.push_back(rg);
+
+						if (pOutReflector)
+							pOutReflector->Uavs.push_back(binder);
+					}
+					break;
+					default:
+						break;
 				}
 			};
 		if (roots)

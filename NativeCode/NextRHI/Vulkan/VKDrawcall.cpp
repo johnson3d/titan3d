@@ -41,7 +41,7 @@ namespace NxRHI
 		}*/
 		IsDirty = true;
 	}
-	void VKGraphicDraw::OnBindResource(const FEffectBinder* binder, IGpuResource* resource)
+	void VKGraphicDraw::OnBindResource(const FEffectBinder* binder, FBindResource& resource)
 	{
 		IsDirty = true;
 	}
@@ -222,7 +222,7 @@ namespace NxRHI
 			UINT finger = 0;
 			for (auto& i : BindResources)
 			{
-				finger += i.second->GetFingerPrint();
+				finger += i.second.Resource->GetFingerPrint();
 			}
 			if (finger == FingerPrient)
 				return;
@@ -247,7 +247,7 @@ namespace NxRHI
 
 		for (auto& i : BindResources)
 		{
-			BindResourceToDescriptSets(device, mDescriptorSetVS, mDescriptorSetPS, i.first, i.second);
+			BindResourceToDescriptSets(device, mDescriptorSetVS, mDescriptorSetPS, i.first, i.second.Resource);
 		}
 	}
 	void VKGraphicDraw::Commit(ICommandList* cmdlist, bool bRefResource)
@@ -298,25 +298,25 @@ namespace NxRHI
 			{
 				case SBT_CBV:
 				{
-					IGpuResource* t = i.second;
+					IGpuResource* t = i.second.Resource;
 					effect->BindCBV(cmdlist, i.first, (ICbView*)t);
 				}
 				break;
 				case SBT_SRV:
 				{
-					IGpuResource* t = i.second;
+					IGpuResource* t = i.second.Resource;
 					effect->BindSrv(cmdlist, i.first, (ISrView*)t);
 				}
 				break;
 				case SBT_UAV:
 				{
-					IGpuResource* t = i.second;
+					IGpuResource* t = i.second.Resource;
 					effect->BindUav(cmdlist, i.first, (IUaView*)t);
 				}
 				break;
 				case SBT_Sampler:
 				{
-					IGpuResource* t = i.second;
+					IGpuResource* t = i.second.Resource;
 					effect->BindSampler(cmdlist, i.first, (ISampler*)t);
 				}
 				break;
@@ -351,7 +351,7 @@ namespace NxRHI
 	}
 
 	////////////////////////////////////////////////////////
-	void VKComputeDraw::OnBindResource(const FShaderBinder* binder, IGpuResource* resource)
+	void VKComputeDraw::OnBindResource(const FShaderBinder* binder, FBindResource& resource)
 	{
 		IsDirty = true;
 	}
@@ -460,7 +460,7 @@ namespace NxRHI
 			UINT finger = 0;
 			for (auto& i : BindResources)
 			{
-				finger += i.second->GetFingerPrint();
+				finger += i.second.Resource->GetFingerPrint();
 			}
 			if (finger == FingerPrient)
 				return;
@@ -473,7 +473,7 @@ namespace NxRHI
 
 		for (auto& i : BindResources)
 		{
-			CSBindResourceToDescriptSets(device, cs, i.first, i.second);
+			CSBindResourceToDescriptSets(device, cs, i.first, i.second.Resource);
 		}
 		if (mDescriptorSetCS != nullptr)
 		{
@@ -497,25 +497,25 @@ namespace NxRHI
 			{
 				case SBT_CBV:
 				{
-					IGpuResource* t = i.second;
+					IGpuResource* t = i.second.Resource;
 					cmdlist->SetCBV(EShaderType::SDT_ComputeShader, i.first, (ICbView*)t);
 				}
 				break;
 				case SBT_SRV:
 				{
-					IGpuResource* t = i.second;
+					IGpuResource* t = i.second.Resource;
 					cmdlist->SetSrv(EShaderType::SDT_ComputeShader, i.first, (ISrView*)t);
 				}
 				break;
 				case SBT_UAV:
 				{
-					IGpuResource* t = i.second;
+					IGpuResource* t = i.second.Resource;
 					cmdlist->SetUav(EShaderType::SDT_ComputeShader, i.first, (IUaView*)t);
 				}
 				break;
 				case SBT_Sampler:
 				{
-					IGpuResource* t = i.second;
+					IGpuResource* t = i.second.Resource;
 					cmdlist->SetSampler(EShaderType::SDT_ComputeShader, i.first, (ISampler*)t);
 				}
 				break;

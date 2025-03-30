@@ -299,6 +299,9 @@ namespace NxRHI
 
 	void DX12Buffer::TransitionTo(ICommandList* cmd, EGpuResourceState state)
 	{
+		/*if (state == GpuState)
+			return;*/
+
 		if (Desc.Usage == EGpuUsage::USAGE_DYNAMIC)
 		{
 			ASSERT(GpuState == EGpuResourceState::GRS_GenericRead);
@@ -309,29 +312,10 @@ namespace NxRHI
 			ASSERT(GpuState == EGpuResourceState::GRS_CopyDst || GpuState == EGpuResourceState::GRS_CopySrc);
 			return;
 		}
-		
-		/*if (state != 0)
-		{
-			if ((state & GpuState) == state)
-				return;
-		}
-		else
-		{
-			if (state == GpuState)
-				return;
-		}*/
 
+		cmd->GetCmdRecorder()->UseResource(this);
 		cmd->SetBufferBarrier(this, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, GpuState, state);
 
-		/*D3D12_RESOURCE_BARRIER tmp{};
-		tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		tmp.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		auto pTarGpuResource = ((DX12GpuHeap*)mGpuMemory->GpuHeap)->mGpuResource;
-		tmp.Transition.pResource = pTarGpuResource;
-		tmp.Transition.StateBefore = GpuStateToDX12(GpuState);
-		tmp.Transition.StateAfter = GpuStateToDX12(state);
-		tmp.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		((DX12CommandList*)cmd)->mContext->ResourceBarrier(1, &tmp);*/
 		GpuState = state;
 	}
 
@@ -1083,29 +1067,11 @@ namespace NxRHI
 
 	void DX12Texture::TransitionTo(ICommandList* cmd, EGpuResourceState state)
 	{
+		/*if (state == GpuState)
+			return;*/
 		cmd->GetCmdRecorder()->UseResource(this);
-		/*if (state != 0)
-		{
-			if ((state & GpuState) == state)
-				return;
-		}
-		else
-		{
-			if (state == GpuState)
-				return;
-		}*/
+		
 		cmd->SetTextureBarrier(this, EPipelineStage::PPLS_ALL_COMMANDS, EPipelineStage::PPLS_ALL_COMMANDS, GpuState, state);
-
-		/*D3D12_RESOURCE_BARRIER tmp{};
-		tmp.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		tmp.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		tmp.Transition.pResource = mGpuResource;
-		tmp.Transition.StateBefore = GpuStateToDX12(GpuState);
-		tmp.Transition.StateAfter = GpuStateToDX12(state);
-		if (tmp.Transition.StateBefore == tmp.Transition.StateAfter)
-			return;
-		tmp.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		((DX12CommandList*)cmd)->mContext->ResourceBarrier(1, &tmp);*/
 
 		GpuState = state;
 	}
@@ -1442,10 +1408,11 @@ namespace NxRHI
 	}
 	bool DX12SrView::UpdateBuffer(IGpuDevice* device, IGpuBufferData* pBuffer)
 	{
-		/*if (Buffer != nullptr)
-			Buffer->AddRef();*/
+		ASSERT(Buffer);
+		device->DelayDestroy(Buffer);
 		Buffer = pBuffer;
 		mFingerPrint++;
+
 		D3D12_SHADER_RESOURCE_VIEW_DESC d3dDesc{};
 		d3dDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		switch (Desc.Type)
@@ -1476,7 +1443,10 @@ namespace NxRHI
 		}
 		SrvDesc2DX(&d3dDesc, &Desc);
 
-		mView = MakeWeakRef(((DX12GpuDevice*)device)->mCbvSrvUavAllocator->AllocDX12Heap());
+		if (mView == nullptr)
+		{
+			mView = MakeWeakRef(((DX12GpuDevice*)device)->mCbvSrvUavAllocator->AllocDX12Heap());
+		}
 
 		auto pD3DRes = (ID3D12Resource*)pBuffer->GetHWBuffer();
 		((DX12GpuDevice*)device)->mDevice->CreateShaderResourceView(pD3DRes, &d3dDesc, mView->GetCpuAddress(0));
@@ -1958,14 +1928,18 @@ namespace NxRHI
 
 	void DX12Bindless::OnBind(UINT index, IGpuResource* resource)
 	{
-		if (resource == nullptr)
+		auto device = mDeviceRef.GetPtr();
+		DX12PagedHeap* handle;
+		if (resource)
 		{
-			//copy null
-			return;
+			handle = (DX12PagedHeap*)resource->GetHWBuffer();
 		}
-		auto handle = (DX12PagedHeap*)resource->GetHWBuffer();
-		handle->BindToHeap(mDeviceRef.GetPtr(), mHeap->Heap, mStartIndex, 0, 
-			mBindType == EShaderBindType::SBT_Sampler ? D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER : D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		else
+		{
+			handle = DX12PagedHeap::GetNullHeap(device, mBindType);
+		}
+		auto Flags = mBindType == EShaderBindType::SBT_Sampler ? D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER : D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		handle->BindToHeap(device, mHeap->Heap, mStartIndex + index, 0, Flags);
 	}
 }
 NS_END

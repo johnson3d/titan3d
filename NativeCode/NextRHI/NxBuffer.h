@@ -1299,17 +1299,31 @@ namespace NxRHI
 			if (index >= GetResourceCount())
 				return false;
 
-			auto saved = mResources[index];
-			if (resource == saved)
+			auto& saved = mResources[index];
+			if (resource == saved.Resource)
 				return true;
-			mResources[index] = resource;
+			saved.SetResource(resource);
 			OnBind(index, resource);
 			return true;
 		}
 
 		virtual void OnBind(UINT index, IGpuResource* resource) = 0;
 
-		std::vector<AutoRef<IGpuResource>>	mResources;
+		void CheckResourceFingerPrint() {
+			for (size_t i = 0; i < mResources.size(); i++)
+			{
+				if (mResources[i].Resource == nullptr)
+				{
+					continue;
+				}
+				if (mResources[i].FingerPrint != mResources[i].Resource->GetFingerPrint())
+				{
+					OnBind((UINT)i, mResources[i].Resource);
+					mResources[i].FingerPrint = mResources[i].Resource->GetFingerPrint();
+				}
+			}
+		}
+		std::vector<FBindResource>	mResources;
 	};
 }
 

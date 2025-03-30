@@ -98,14 +98,6 @@ namespace EngineNS.EGui
 
             return Drawcalls[UsedDrawcall++];
         }
-        public void FreeDrawcalls()
-        {
-            foreach (var i in Drawcalls)
-            {
-                i.BindSRV(SlateTextureBindInfo, null);
-            }
-            UsedDrawcall = 0;
-        }
         #region TriangleData
         public NxRHI.TtVbView VertexBuffer;
         public NxRHI.TtIbView IndexBuffer;
@@ -415,8 +407,6 @@ namespace EngineNS.EGui
                 drawCmd.EndCommand();
 
                 rc.GpuQueue.ExecuteCommandList(drawCmd);
-
-                rhiData.FreeDrawcalls();
             }
             
             presentWindow.EndFrame();

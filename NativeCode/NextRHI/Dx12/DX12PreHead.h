@@ -141,6 +141,7 @@ namespace NxRHI
 	///DX12DescriptorSetPagedObject
 	struct DX12PagedHeap : public MemAlloc::FPagedObject<AutoRef<ID3D12DescriptorHeap>>
 	{
+		static DX12PagedHeap* GetNullHeap(DX12GpuDevice* device, EShaderBindType type);
 		//DX12ShaderEffect*		ShaderEffect = nullptr;
 		D3D12_GPU_DESCRIPTOR_HANDLE	GetGpuAddress(int index = 0);
 		D3D12_CPU_DESCRIPTOR_HANDLE	GetCpuAddress(int index);

@@ -487,6 +487,8 @@ namespace EngineNS.Editor.ShaderCompiler
 
                 defPtr.MergeDefinitions(TtEngine.Instance.GfxDevice.RenderContext.GlobalEnvDefines);
 
+                int CP_SM_major = 6;
+                int CP_SM_minor = 5;
                 var cfg = TtEngine.Instance.Config;
                 if (cfg.CookDXBC && ignoreDXBC == false)
                 {
@@ -509,8 +511,8 @@ namespace EngineNS.Editor.ShaderCompiler
                     if (extHlslVersion == null)
                         extHlslVersion = "2021";
                     defPtr.AddDefine("RHI_TYPE", "RHI_DX12");
-                    defPtr.AddDefine("CP_SM_major", "6");
-                    defPtr.AddDefine("CP_SM_minor", "5");
+                    defPtr.AddDefine("CP_SM_major", CP_SM_major.ToString());
+                    defPtr.AddDefine("CP_SM_minor", CP_SM_minor.ToString());
                     if (extHlslVersion != null)
                     {
                         defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
@@ -518,7 +520,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     var compile_sm = sm;
                     if (sm == null)
                     {
-                        compile_sm = "6_5";
+                        compile_sm = $"{CP_SM_major}_{CP_SM_minor}";
                     }
                     var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXIL, bDebugShader, extHlslVersion, null, asModule);
                     if (ok == false)
@@ -529,8 +531,8 @@ namespace EngineNS.Editor.ShaderCompiler
                     if (extHlslVersion == null)
                         extHlslVersion = "2021";
                     defPtr.AddDefine("RHI_TYPE", "RHI_GL");
-                    defPtr.AddDefine("CP_SM_major", "6");
-                    defPtr.AddDefine("CP_SM_minor", "5");
+                    defPtr.AddDefine("CP_SM_major", CP_SM_major.ToString());
+                    defPtr.AddDefine("CP_SM_minor", CP_SM_minor.ToString());
                     if (extHlslVersion != null)
                     {
                         defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
@@ -538,7 +540,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     var compile_sm = sm;
                     if (sm == null)
                     {
-                        compile_sm = "6_5";
+                        compile_sm = $"{CP_SM_major}_{CP_SM_minor}";
                     }
                     var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, extHlslVersion, null, asModule);
                     if (ok == false)
@@ -549,8 +551,8 @@ namespace EngineNS.Editor.ShaderCompiler
                     if (extHlslVersion == null)
                         extHlslVersion = "2021";
                     defPtr.AddDefine("RHI_TYPE", "RHI_MTL");
-                    defPtr.AddDefine("CP_SM_major", "6");
-                    defPtr.AddDefine("CP_SM_minor", "5");
+                    defPtr.AddDefine("CP_SM_major", CP_SM_major.ToString());
+                    defPtr.AddDefine("CP_SM_minor", CP_SM_minor.ToString());
                     if (extHlslVersion != null)
                     {
                         defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
@@ -558,7 +560,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     var compile_sm = sm;
                     if (sm == null)
                     {
-                        compile_sm = "6_5";
+                        compile_sm = $"{CP_SM_major}_{CP_SM_minor}";
                     }
                     var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_DXBC, bDebugShader, 
                         extHlslVersion, null, asModule);
@@ -570,8 +572,8 @@ namespace EngineNS.Editor.ShaderCompiler
                     if (extHlslVersion == null)
                         extHlslVersion = "2021";
                     defPtr.AddDefine("RHI_TYPE", "RHI_VK");
-                    defPtr.AddDefine("CP_SM_major", "6");
-                    defPtr.AddDefine("CP_SM_minor", "5");
+                    defPtr.AddDefine("CP_SM_major", CP_SM_major.ToString());
+                    defPtr.AddDefine("CP_SM_minor", CP_SM_minor.ToString());
                     if (extHlslVersion != null)
                     {
                         defPtr.AddDefine("HLSL_VERSION", extHlslVersion);
@@ -579,7 +581,7 @@ namespace EngineNS.Editor.ShaderCompiler
                     var compile_sm = sm;
                     if (sm == null)
                     {
-                        compile_sm = "6_5";
+                        compile_sm = $"{CP_SM_major}_{CP_SM_minor}";
                     }
                     var ok = mShaderCompiler.CompileShader(desc, shader, entry, type, compile_sm, defPtr, NxRHI.EShaderLanguage.SL_SPIRV, bDebugShader,
                         extHlslVersion, null, asModule);// "-fspv-extension=SPV_KHR_shader_draw_parameters");
