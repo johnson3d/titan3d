@@ -305,9 +305,12 @@ namespace NxRHI
 					bl->CheckResourceFingerPrint();
 				continue;
 			}	
-			if (i.second.Resource->GetFingerPrint() != i.second.FingerPrint)
+			if (i.second.Resource)
 			{
-				BindResourceToHeap(device, i.first, i.second);
+				if (i.second.Resource->GetFingerPrint() != i.second.FingerPrint)
+				{
+					BindResourceToHeap(device, i.first, i.second);
+				}
 			}
 		}
 	}
@@ -548,9 +551,12 @@ namespace NxRHI
 					bl->CheckResourceFingerPrint();
 				continue;
 			}
-			if (i.second.Resource->GetFingerPrint() != i.second.FingerPrint)
+			if (i.second.Resource)
 			{
-				BindResourceToHeap(device, i.first, i.second);
+				if (i.second.Resource->GetFingerPrint() != i.second.FingerPrint)
+				{
+					BindResourceToHeap(device, i.first, i.second);
+				}
 			}
 		}
 	}
@@ -662,9 +668,13 @@ namespace NxRHI
 					bl->CheckResourceFingerPrint();
 				continue;
 			}
-			if (i.second.Resource->GetFingerPrint() != i.second.FingerPrint)
+
+			if (i.second.Resource)
 			{
-				BindResourceToHeap(device, i.first, i.second);
+				if (i.second.Resource->GetFingerPrint() != i.second.FingerPrint)
+				{
+					BindResourceToHeap(device, i.first, i.second);
+				}
 			}
 		}
 	}

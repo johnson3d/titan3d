@@ -104,6 +104,7 @@ namespace EngineNS.Graphics.Pipeline.GI
             }
             HbvNodes = new FBVHNode[totalTreeNode];
             uint leafStart = totalTreeNode - leafTreeNode;
+            //目前是从左到右给Leaf，这样导致右边的子树AABB分布得不均匀，应该让leaf均匀分布对于bvh结构更友好
             for (uint i = 0; i < HbvNodes.Length; i++)
             {
                 HbvNodes[i].AABB.InitEmptyBox();

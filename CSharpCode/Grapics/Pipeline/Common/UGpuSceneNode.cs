@@ -155,7 +155,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             PerGpuSceneCbv = rc.CreateCBV(TtCoreShaderBinder.TtPerGpuSceneCBufferVarIndexer.Instance.Binder.mCoreObject);
 
             Initialize_Light(policy, debugName);
-            await Initialize_Instance(policy, debugName);
+            Initialize_Instance(policy, debugName);
 
             HdrMiddleGrey = 0.6f;
             HdrMinLuminance = 0.01f;
