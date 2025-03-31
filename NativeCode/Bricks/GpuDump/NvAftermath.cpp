@@ -342,6 +342,7 @@ namespace GpuDump
 	}
 	void DX12_OnDredDump(ID3D12Device* mDevice, ID3D12DeviceRemovedExtendedDataSettings1* mDredSettings, const char* GDredDir)
 	{
+		auto err = ::GetLastError();
 		//ASSERT(false);
 		//auto hr = mDevice->GetDeviceRemovedReason();
 		if (mDredSettings != nullptr)
@@ -349,8 +350,8 @@ namespace GpuDump
 			AutoRef<ID3D12DeviceRemovedExtendedData1> pDred;
 			mDevice->QueryInterface(IID_PPV_ARGS(pDred.GetAddressOf()));
 
-			D3D12_DRED_AUTO_BREADCRUMBS_OUTPUT1 DredAutoBreadcrumbsOutput;
-			D3D12_DRED_PAGE_FAULT_OUTPUT1 DredPageFaultOutput;
+			D3D12_DRED_AUTO_BREADCRUMBS_OUTPUT1 DredAutoBreadcrumbsOutput{};
+			D3D12_DRED_PAGE_FAULT_OUTPUT1 DredPageFaultOutput{};
 			auto hr = pDred->GetAutoBreadcrumbsOutput1(&DredAutoBreadcrumbsOutput);
 			ASSERT(hr == S_OK);
 			hr = pDred->GetPageFaultAllocationOutput1(&DredPageFaultOutput);
@@ -514,7 +515,7 @@ namespace GpuDump
 					AddCodeLine("Dred RecentFree {%s} = %s\r\n", n.c_str(), opStr.c_str());
 					curNode = curNode->pNext;
 				}
-				auto file = GDredDir + VStringA_FormatV("RecentFreedAllocationNode.rfa");
+				auto file = std::string(GDredDir) + VStringA_FormatV("RecentFreedAllocationNode.rfa");
 				VFile io;
 				if (io.Open(file.c_str(), VFile::modeWrite | VFile::modeCreate))
 				{

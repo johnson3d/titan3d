@@ -96,7 +96,12 @@ namespace EngineNS.EGui
                 Drawcalls.Add(result);
             }
 
-            return Drawcalls[UsedDrawcall++];
+            var dc = Drawcalls[UsedDrawcall++];
+            return dc;
+        }
+        public void ResetGraphicDraw()
+        {
+            UsedDrawcall = 0;
         }
         #region TriangleData
         public NxRHI.TtVbView VertexBuffer;
@@ -303,6 +308,7 @@ namespace EngineNS.EGui
                 var fb_scale = io.DisplayFramebufferScale;
                 draw_data.ScaleClipRects(in fb_scale);
 
+                rhiData.ResetGraphicDraw();
                 drawCmd.BeginCommand();
                 {
                     var passClears = new NxRHI.FRenderPassClears();
@@ -356,6 +362,7 @@ namespace EngineNS.EGui
                                             else
                                             {
                                                 drawcall = rhiData.CreateGraphicDraw();
+                                                drawcall.BindSRV(rhiData.SlateTextureBindInfo.mCoreObject, null);
                                             }
                                         }
                                     }

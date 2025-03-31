@@ -297,13 +297,12 @@ namespace NxRHI
 		}
 		for (auto& i : BindResources)
 		{
-			if (i.second.Resource == nullptr)
-				continue;
 			auto binder = i.first->GetShaderBinder();
 			if (binder->IsBindless())
 			{
 				auto bl = (IBindless*)i.second.Resource;
-				bl->CheckResourceFingerPrint();
+				if (bl)
+					bl->CheckResourceFingerPrint();
 				continue;
 			}	
 			if (i.second.Resource->GetFingerPrint() != i.second.FingerPrint)
@@ -541,13 +540,12 @@ namespace NxRHI
 
 		for (auto& i : BindResources)
 		{
-			if (i.second.Resource == nullptr)
-				continue;
 			auto binder = i.first;
 			if (binder->IsBindless())
 			{
 				auto bl = (IBindless*)i.second.Resource;
-				bl->CheckResourceFingerPrint();
+				if (bl)
+					bl->CheckResourceFingerPrint();
 				continue;
 			}
 			if (i.second.Resource->GetFingerPrint() != i.second.FingerPrint)
@@ -656,13 +654,12 @@ namespace NxRHI
 
 		for (auto& i : BindResources)
 		{
-			if (i.second.Resource == nullptr)
-				continue;
 			auto binder = i.first;
 			if (binder->IsBindless())
 			{
 				auto bl = (IBindless*)i.second.Resource;
-				bl->CheckResourceFingerPrint();
+				if (bl)
+					bl->CheckResourceFingerPrint();
 				continue;
 			}
 			if (i.second.Resource->GetFingerPrint() != i.second.FingerPrint)

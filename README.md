@@ -5,7 +5,7 @@
 - 2.安装C#开发环境
 - 3.建议安装C#移动开发环境
 # 引擎特色
-- 1.C++/C#混合编程，C++作为底层，C#作为上层，通过自动胶水代码残生，C#可以完成完整调用C++功能
+- 1.C++/C#混合编程，C++作为底层，C#作为上层，通过自动胶水代码产生，C#可以完成完整调用C++功能
 - 2.基于协程(Coroutines)的多线程构架，告别Callback Hell
 - 3.基于宏图的图形化脚本构架，用户可以0代码实现超复杂游戏逻辑
 - 4.完全用户自定义渲染管线，通过编辑器编辑RenderGraph，通过C#扩展RenderGraphNode，真正做到用户需要的一切效果都自定制
@@ -17,11 +17,11 @@
 - 3.Amplification Shader,Mesh Shader,RayTracing Shader
 - 4.图形化编辑器配置RenderGraph资产，引擎自带DeferredShading和MobileShading配置RenderGraph资产
 - 5.图形化Material Shader编辑器
-- 6.InGame UI编辑器支持2D,3D游戏UI编辑
+- 6.InGame UI编辑器支持2D，3D游戏UI编辑
 - 7.GpuScene+IndirectDraw+Bindless为基础的GpuDriven框架
-- 8.粒子系统，采用图形化逻辑编辑，支持CPU,GPU粒子切换
+- 8.粒子系统，采用图形化逻辑编辑，支持CPU，GPU粒子切换
 - 9.SDF字体，放缩友好
-- 10.基于Node的场景编辑器，世界大纲可以为任何Node设置csharp脚本
+- 10.基于Node的场景编辑器，世界大纲可以为任何Node设置C#脚本
 - 11.图形化动作状态机，和宏图配合完成游戏逻辑
 - 12.图形化脚本编辑器，宏图(Macross)系统几乎可以全功能实现引擎项目功能
 - 13.内嵌RenderDoc，可以config配置
