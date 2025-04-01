@@ -61,7 +61,16 @@ namespace Survivor
             }
         }
         public TtCharacterStateNodeData StateData { get => NodeData as TtCharacterStateNodeData; }
-        public TtItemInventory Bag0;
+        //物品背包
+        public TtGoodsInventory GoodsInventory = new TtGoodsInventory();
+        //只读物品背包
+        public TtGoodsUnlimitInventory ReadOnlyInventory = new TtGoodsUnlimitInventory();
+        //技能背包
+        public TtSkillInventory SkillInventory = new TtSkillInventory();
+        //技能物品快捷图标背包
+        public TtProxyInventory ProxyInventory = new TtProxyInventory();
+        //任务背包
+        public TtMissionInventory MissionInventory = new TtMissionInventory();
         protected override async TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             return await base.InitializeNode(world, data, bvType, placementType);

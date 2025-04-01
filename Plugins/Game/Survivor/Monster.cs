@@ -5,6 +5,12 @@ using EngineNS.DesignMacross.Base.Description;
 
 namespace Survivor
 {
+    public enum EMonsterType
+    {
+        Enemy,
+        Merchant,
+        Civilian
+    }
     [EngineNS.Bricks.DataSet.TtDataTable(SheetName = "TtMonsterData", KeyName = "MonsterId", HeadRow = 0, DataStartRow = 3)]
     public class TtMonsterData : EngineNS.Bricks.DataSet.TtDataProvider
     {
@@ -31,6 +37,18 @@ namespace Survivor
         [EngineNS.Rtti.Meta]
         [EngineNS.Bricks.DataSet.TtDataColumn(HeadName = "Prefab")]
         public string Prefab { get; set; } = "";
+        [EngineNS.Rtti.Meta]
+        [EngineNS.Bricks.DataSet.TtDataColumn(HeadName = "MonsterType")]
+        public EMonsterType MonsterType { get; set; } = EMonsterType.Enemy;
+        [EngineNS.Rtti.Meta]
+        [EngineNS.Bricks.DataSet.TtDataColumn(HeadName = "Missions")]
+        public List<int> Missions { get; set; } = new List<int>();// 可接任务
+        [EngineNS.Rtti.Meta]
+        [EngineNS.Bricks.DataSet.TtDataColumn(HeadName = "SellGoods")]
+        public List<int> SellGoods { get; set; } = new List<int>();//售卖物品 
+        [EngineNS.Rtti.Meta]
+        [EngineNS.Bricks.DataSet.TtDataColumn(HeadName = "DropGroup")]
+        public int DropGroupId { get; set; } = -1;
     }
 
     public class TtMonsterManager : EngineNS.Bricks.DataSet.TtDataManager<TtMonsterData>

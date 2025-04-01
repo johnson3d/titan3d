@@ -11,13 +11,16 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Assembly.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ActorStateNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DropGroup.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GameMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Hero.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Item.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossSurvivorGame.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Mission.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Monster.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MonsterController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MonsterSpawner.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Skill.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Weapon.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MonsterNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WeaponNode.cs" />

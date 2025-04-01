@@ -188138,6 +188138,215 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
+	static class Survivor_TtDropGroup_TtDropItem
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtDropGroup.TtDropItem;
+			ar.Write(srcObj.Count);
+			ar.Write(srcObj.DropProbability);
+			ar.Write(srcObj.ItemId);
+			ar.Write(srcObj.RowInSheet);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as Survivor.TtDropGroup.TtDropItem;
+			var srcObj = src as Survivor.TtDropGroup.TtDropItem;
+			tarObj.Count = srcObj.Count;
+			tarObj.DropProbability = srcObj.DropProbability;
+			tarObj.ItemId = srcObj.ItemId;
+			tarObj.RowInSheet = srcObj.RowInSheet;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5449994043428327899 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtDropGroup.TtDropItem;
+			System.Int32 t_Count;
+			ar.Read(out t_Count);
+			srcObj.Count = t_Count;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Count", false);
+				}
+			}
+			System.Single t_DropProbability;
+			ar.Read(out t_DropProbability);
+			srcObj.DropProbability = t_DropProbability;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DropProbability", false);
+				}
+			}
+			System.Int32 t_ItemId;
+			ar.Read(out t_ItemId);
+			srcObj.ItemId = t_ItemId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ItemId", false);
+				}
+			}
+			System.Int32 t_RowInSheet;
+			ar.Read(out t_RowInSheet);
+			srcObj.RowInSheet = t_RowInSheet;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RowInSheet", false);
+				}
+			}
+		};
+	}
+	static class Survivor_TtDropGroup
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtDropGroup;
+			ar.Write(srcObj.DropGroupId);
+			ar.Write(srcObj.DropGroupName);
+			if (srcObj.DropItems != null)
+			{
+				var Srclst = srcObj.DropItems as System.Collections.Generic.List<Survivor.TtDropGroup.TtDropItem>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+			ar.Write(srcObj.RowInSheet);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as Survivor.TtDropGroup;
+			var srcObj = src as Survivor.TtDropGroup;
+			tarObj.DropGroupId = srcObj.DropGroupId;
+			tarObj.DropGroupName = srcObj.DropGroupName;
+			if (srcObj.DropItems != null)
+			{
+				if (tarObj.DropItems == null)
+				{
+					tarObj.DropItems = new();
+				}
+				if (tarObj.DropItems != null)
+				{
+					var Tarlst = tarObj.DropItems as System.Collections.Generic.List<Survivor.TtDropGroup.TtDropItem>;
+					var Srclst = srcObj.DropItems as System.Collections.Generic.List<Survivor.TtDropGroup.TtDropItem>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						Survivor.TtDropGroup.TtDropItem tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as Survivor.TtDropGroup.TtDropItem;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+			tarObj.RowInSheet = srcObj.RowInSheet;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_6650132346642742279 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtDropGroup;
+			System.Int32 t_DropGroupId;
+			ar.Read(out t_DropGroupId);
+			srcObj.DropGroupId = t_DropGroupId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DropGroupId", false);
+				}
+			}
+			System.String t_DropGroupName;
+			ar.Read(out t_DropGroupName);
+			srcObj.DropGroupName = t_DropGroupName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DropGroupName", false);
+				}
+			}
+			System.Collections.Generic.List<Survivor.TtDropGroup.TtDropItem> t_DropItems = null;
+			t_DropItems = srcObj.DropItems;
+			if (t_DropItems == null)
+			{
+				t_DropItems = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<Survivor.TtDropGroup.TtDropItem>)) as System.Collections.Generic.List<Survivor.TtDropGroup.TtDropItem>;
+			}
+			int count_DropItems;
+			ar.Read(out count_DropItems);
+			for(int i = 0; i<count_DropItems; i++)
+			{
+				Survivor.TtDropGroup.TtDropItem t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as Survivor.TtDropGroup.TtDropItem;
+						fn(ar, t);
+					}
+				}
+				t_DropItems.Add(t);
+				srcObj.DropItems = t_DropItems;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<Survivor.TtDropGroup.TtDropItem>), false);
+					}
+				}
+			}
+			System.Int32 t_RowInSheet;
+			ar.Read(out t_RowInSheet);
+			srcObj.RowInSheet = t_RowInSheet;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RowInSheet", false);
+				}
+			}
+		};
+	}
+	static class Survivor_TtDrugItem
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtDrugItem;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as Survivor.TtDrugItem;
+			var srcObj = src as Survivor.TtDrugItem;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9524687136534877311 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtDrugItem;
+		};
+	}
 	static class Survivor_TtGameMode
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -188182,6 +188391,306 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as Survivor.TtGameMode;
 		};
 	}
+	static class Survivor_TtGoodsInventory
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtGoodsInventory;
+			if (srcObj.Items != null)
+			{
+				var Srclst = srcObj.Items as System.Collections.Generic.List<Survivor.TtItem>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as Survivor.TtGoodsInventory;
+			var srcObj = src as Survivor.TtGoodsInventory;
+			if (srcObj.Items != null)
+			{
+				if (tarObj.Items == null)
+				{
+					tarObj.Items = new();
+				}
+				if (tarObj.Items != null)
+				{
+					var Tarlst = tarObj.Items as System.Collections.Generic.List<Survivor.TtItem>;
+					var Srclst = srcObj.Items as System.Collections.Generic.List<Survivor.TtItem>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						Survivor.TtItem tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as Survivor.TtItem;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15846926105591754355 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtGoodsInventory;
+			System.Collections.Generic.List<Survivor.TtItem> t_Items = null;
+			t_Items = srcObj.Items;
+			if (t_Items == null)
+			{
+				t_Items = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<Survivor.TtItem>)) as System.Collections.Generic.List<Survivor.TtItem>;
+			}
+			int count_Items;
+			ar.Read(out count_Items);
+			for(int i = 0; i<count_Items; i++)
+			{
+				Survivor.TtItem t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as Survivor.TtItem;
+						fn(ar, t);
+					}
+				}
+				t_Items.Add(t);
+				srcObj.Items = t_Items;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<Survivor.TtItem>), false);
+					}
+				}
+			}
+		};
+	}
+	static class Survivor_TtGoodsUnlimitInventory
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtGoodsUnlimitInventory;
+			if (srcObj.Items != null)
+			{
+				var Srclst = srcObj.Items as System.Collections.Generic.List<Survivor.TtItem>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as Survivor.TtGoodsUnlimitInventory;
+			var srcObj = src as Survivor.TtGoodsUnlimitInventory;
+			if (srcObj.Items != null)
+			{
+				if (tarObj.Items == null)
+				{
+					tarObj.Items = new();
+				}
+				if (tarObj.Items != null)
+				{
+					var Tarlst = tarObj.Items as System.Collections.Generic.List<Survivor.TtItem>;
+					var Srclst = srcObj.Items as System.Collections.Generic.List<Survivor.TtItem>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						Survivor.TtItem tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as Survivor.TtItem;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15846926105591754355 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtGoodsUnlimitInventory;
+			System.Collections.Generic.List<Survivor.TtItem> t_Items = null;
+			t_Items = srcObj.Items;
+			if (t_Items == null)
+			{
+				t_Items = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<Survivor.TtItem>)) as System.Collections.Generic.List<Survivor.TtItem>;
+			}
+			int count_Items;
+			ar.Read(out count_Items);
+			for(int i = 0; i<count_Items; i++)
+			{
+				Survivor.TtItem t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as Survivor.TtItem;
+						fn(ar, t);
+					}
+				}
+				t_Items.Add(t);
+				srcObj.Items = t_Items;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<Survivor.TtItem>), false);
+					}
+				}
+			}
+		};
+	}
+	static class Survivor_TtInventory
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtInventory;
+			if (srcObj.Items != null)
+			{
+				var Srclst = srcObj.Items as System.Collections.Generic.List<Survivor.TtItem>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as Survivor.TtInventory;
+			var srcObj = src as Survivor.TtInventory;
+			if (srcObj.Items != null)
+			{
+				if (tarObj.Items == null)
+				{
+					tarObj.Items = new();
+				}
+				if (tarObj.Items != null)
+				{
+					var Tarlst = tarObj.Items as System.Collections.Generic.List<Survivor.TtItem>;
+					var Srclst = srcObj.Items as System.Collections.Generic.List<Survivor.TtItem>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						Survivor.TtItem tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as Survivor.TtItem;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15846926105591754355 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtInventory;
+			System.Collections.Generic.List<Survivor.TtItem> t_Items = null;
+			t_Items = srcObj.Items;
+			if (t_Items == null)
+			{
+				t_Items = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<Survivor.TtItem>)) as System.Collections.Generic.List<Survivor.TtItem>;
+			}
+			int count_Items;
+			ar.Read(out count_Items);
+			for(int i = 0; i<count_Items; i++)
+			{
+				Survivor.TtItem t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as Survivor.TtItem;
+						fn(ar, t);
+					}
+				}
+				t_Items.Add(t);
+				srcObj.Items = t_Items;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<Survivor.TtItem>), false);
+					}
+				}
+			}
+		};
+	}
 	static class Survivor_TtItem
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -188203,17 +188712,81 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as Survivor.TtItemData;
+			ar.Write(srcObj.Duration);
 			ar.Write(srcObj.ItemId);
 			ar.Write(srcObj.ItemName);
+			ar.Write(srcObj.ItemType);
 			ar.Write(srcObj.RowInSheet);
+			ar.Write(srcObj.SkillId);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
 			var tarObj = tar as Survivor.TtItemData;
 			var srcObj = src as Survivor.TtItemData;
+			tarObj.Duration = srcObj.Duration;
 			tarObj.ItemId = srcObj.ItemId;
 			tarObj.ItemName = srcObj.ItemName;
+			tarObj.ItemType = srcObj.ItemType;
 			tarObj.RowInSheet = srcObj.RowInSheet;
+			tarObj.SkillId = srcObj.SkillId;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1393286606268094719 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtItemData;
+			System.Int32 t_Duration;
+			ar.Read(out t_Duration);
+			srcObj.Duration = t_Duration;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Duration", false);
+				}
+			}
+			System.Int32 t_ItemId;
+			ar.Read(out t_ItemId);
+			srcObj.ItemId = t_ItemId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ItemId", false);
+				}
+			}
+			System.String t_ItemName;
+			ar.Read(out t_ItemName);
+			srcObj.ItemName = t_ItemName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ItemName", false);
+				}
+			}
+			System.String t_ItemType;
+			ar.Read(out t_ItemType);
+			srcObj.ItemType = t_ItemType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ItemType", false);
+				}
+			}
+			System.Int32 t_RowInSheet;
+			ar.Read(out t_RowInSheet);
+			srcObj.RowInSheet = t_RowInSheet;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RowInSheet", false);
+				}
+			}
+			System.Int32 t_SkillId;
+			ar.Read(out t_SkillId);
+			srcObj.SkillId = t_SkillId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SkillId", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3474344388219468716 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -188269,14 +188842,63 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
-	static class Survivor_TtItemInventory
+	static class Survivor_TtMissionData_TtGoodsCondition
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
-			var srcObj = obj as Survivor.TtItemInventory;
-			if (srcObj.Items != null)
+			var srcObj = obj as Survivor.TtMissionData.TtGoodsCondition;
+			ar.Write(srcObj.Count);
+			ar.Write(srcObj.ItemId);
+			ar.Write(srcObj.RowInSheet);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as Survivor.TtMissionData.TtGoodsCondition;
+			var srcObj = src as Survivor.TtMissionData.TtGoodsCondition;
+			tarObj.Count = srcObj.Count;
+			tarObj.ItemId = srcObj.ItemId;
+			tarObj.RowInSheet = srcObj.RowInSheet;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9463590279381850673 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtMissionData.TtGoodsCondition;
+			System.Int32 t_Count;
+			ar.Read(out t_Count);
+			srcObj.Count = t_Count;
 			{
-				var Srclst = srcObj.Items as System.Collections.Generic.List<Survivor.TtItem>;
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Count", false);
+				}
+			}
+			System.Int32 t_ItemId;
+			ar.Read(out t_ItemId);
+			srcObj.ItemId = t_ItemId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ItemId", false);
+				}
+			}
+			System.Int32 t_RowInSheet;
+			ar.Read(out t_RowInSheet);
+			srcObj.RowInSheet = t_RowInSheet;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RowInSheet", false);
+				}
+			}
+		};
+	}
+	static class Survivor_TtMissionData
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtMissionData;
+			if (srcObj.AwardGoods != null)
+			{
+				var Srclst = srcObj.AwardGoods as System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition>;
 				ar.Write(Srclst.Count);
 				for (int i = 0; i < Srclst.Count; i++)
 				{
@@ -188306,44 +188928,182 @@ namespace EngineNS.Plugins.DataCopyer
 			{
 				ar.Write((int)0);
 			}
+			if (srcObj.GoodsAcceptConditions != null)
+			{
+				var Srclst = srcObj.GoodsAcceptConditions as System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+			if (srcObj.GoodsFinishConditions != null)
+			{
+				var Srclst = srcObj.GoodsFinishConditions as System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+			if (srcObj.MissionConditions != null)
+			{
+				var Srclst = srcObj.MissionConditions as System.Collections.Generic.List<System.Int32>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					ar.Write(Srclst[i]);
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+			ar.Write(srcObj.MissionId);
+			ar.Write(srcObj.MissionName);
+			ar.Write(srcObj.MissionType);
+			ar.Write(srcObj.RowInSheet);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
 		{
-			var tarObj = tar as Survivor.TtItemInventory;
-			var srcObj = src as Survivor.TtItemInventory;
-			if (srcObj.Items != null)
+			var tarObj = tar as Survivor.TtMissionData;
+			var srcObj = src as Survivor.TtMissionData;
+			if (srcObj.AwardGoods != null)
 			{
-				if (tarObj.Items == null)
+				if (tarObj.AwardGoods == null)
 				{
-					tarObj.Items = new();
+					tarObj.AwardGoods = new();
 				}
-				if (tarObj.Items != null)
+				if (tarObj.AwardGoods != null)
 				{
-					var Tarlst = tarObj.Items as System.Collections.Generic.List<Survivor.TtItem>;
-					var Srclst = srcObj.Items as System.Collections.Generic.List<Survivor.TtItem>;
+					var Tarlst = tarObj.AwardGoods as System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition>;
+					var Srclst = srcObj.AwardGoods as System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition>;
 					Tarlst.Clear();
 					for (int i = 0; i < Srclst.Count; i++)
 					{
-						Survivor.TtItem tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as Survivor.TtItem;
+						Survivor.TtMissionData.TtGoodsCondition tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as Survivor.TtMissionData.TtGoodsCondition;
 						Tarlst.Add(tmp);
 					}
 				}
 			}
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15846926105591754355 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as Survivor.TtItemInventory;
-			System.Collections.Generic.List<Survivor.TtItem> t_Items = null;
-			t_Items = srcObj.Items;
-			if (t_Items == null)
+			if (srcObj.GoodsAcceptConditions != null)
 			{
-				t_Items = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<Survivor.TtItem>)) as System.Collections.Generic.List<Survivor.TtItem>;
+				if (tarObj.GoodsAcceptConditions == null)
+				{
+					tarObj.GoodsAcceptConditions = new();
+				}
+				if (tarObj.GoodsAcceptConditions != null)
+				{
+					var Tarlst = tarObj.GoodsAcceptConditions as System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition>;
+					var Srclst = srcObj.GoodsAcceptConditions as System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						Survivor.TtMissionData.TtGoodsCondition tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as Survivor.TtMissionData.TtGoodsCondition;
+						Tarlst.Add(tmp);
+					}
+				}
 			}
-			int count_Items;
-			ar.Read(out count_Items);
-			for(int i = 0; i<count_Items; i++)
+			if (srcObj.GoodsFinishConditions != null)
 			{
-				Survivor.TtItem t = null;
+				if (tarObj.GoodsFinishConditions == null)
+				{
+					tarObj.GoodsFinishConditions = new();
+				}
+				if (tarObj.GoodsFinishConditions != null)
+				{
+					var Tarlst = tarObj.GoodsFinishConditions as System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition>;
+					var Srclst = srcObj.GoodsFinishConditions as System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						Survivor.TtMissionData.TtGoodsCondition tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as Survivor.TtMissionData.TtGoodsCondition;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+			if (srcObj.MissionConditions != null)
+			{
+				if (tarObj.MissionConditions == null)
+				{
+					tarObj.MissionConditions = new();
+				}
+				if (tarObj.MissionConditions != null)
+				{
+					var Tarlst = tarObj.MissionConditions as System.Collections.Generic.List<System.Int32>;
+					var Srclst = srcObj.MissionConditions as System.Collections.Generic.List<System.Int32>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						Tarlst.Add(Srclst[i]);
+					}
+				}
+			}
+			tarObj.MissionId = srcObj.MissionId;
+			tarObj.MissionName = srcObj.MissionName;
+			tarObj.MissionType = srcObj.MissionType;
+			tarObj.RowInSheet = srcObj.RowInSheet;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_253638097348170353 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtMissionData;
+			System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition> t_AwardGoods = null;
+			t_AwardGoods = srcObj.AwardGoods;
+			if (t_AwardGoods == null)
+			{
+				t_AwardGoods = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition>)) as System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition>;
+			}
+			int count_AwardGoods;
+			ar.Read(out count_AwardGoods);
+			for(int i = 0; i<count_AwardGoods; i++)
+			{
+				Survivor.TtMissionData.TtGoodsCondition t = null;
 				EngineNS.Hash64 typeHash;
 				ar.Read(out typeHash);
 				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
@@ -188354,17 +189114,135 @@ namespace EngineNS.Plugins.DataCopyer
 					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
 					if (fn != null)
 					{
-						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as Survivor.TtItem;
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as Survivor.TtMissionData.TtGoodsCondition;
 						fn(ar, t);
 					}
 				}
-				t_Items.Add(t);
-				srcObj.Items = t_Items;
+				t_AwardGoods.Add(t);
+				srcObj.AwardGoods = t_AwardGoods;
 				{
 					if (srcObj is IO.ISerializer sr)
 					{
-						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<Survivor.TtItem>), false);
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition>), false);
 					}
+				}
+			}
+			System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition> t_GoodsAcceptConditions = null;
+			t_GoodsAcceptConditions = srcObj.GoodsAcceptConditions;
+			if (t_GoodsAcceptConditions == null)
+			{
+				t_GoodsAcceptConditions = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition>)) as System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition>;
+			}
+			int count_GoodsAcceptConditions;
+			ar.Read(out count_GoodsAcceptConditions);
+			for(int i = 0; i<count_GoodsAcceptConditions; i++)
+			{
+				Survivor.TtMissionData.TtGoodsCondition t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as Survivor.TtMissionData.TtGoodsCondition;
+						fn(ar, t);
+					}
+				}
+				t_GoodsAcceptConditions.Add(t);
+				srcObj.GoodsAcceptConditions = t_GoodsAcceptConditions;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition>), false);
+					}
+				}
+			}
+			System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition> t_GoodsFinishConditions = null;
+			t_GoodsFinishConditions = srcObj.GoodsFinishConditions;
+			if (t_GoodsFinishConditions == null)
+			{
+				t_GoodsFinishConditions = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition>)) as System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition>;
+			}
+			int count_GoodsFinishConditions;
+			ar.Read(out count_GoodsFinishConditions);
+			for(int i = 0; i<count_GoodsFinishConditions; i++)
+			{
+				Survivor.TtMissionData.TtGoodsCondition t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as Survivor.TtMissionData.TtGoodsCondition;
+						fn(ar, t);
+					}
+				}
+				t_GoodsFinishConditions.Add(t);
+				srcObj.GoodsFinishConditions = t_GoodsFinishConditions;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<Survivor.TtMissionData.TtGoodsCondition>), false);
+					}
+				}
+			}
+			System.Collections.Generic.List<System.Int32> t_MissionConditions = null;
+			t_MissionConditions = srcObj.MissionConditions;
+			if (t_MissionConditions == null)
+			{
+				t_MissionConditions = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<System.Int32>)) as System.Collections.Generic.List<System.Int32>;
+			}
+			int count_MissionConditions;
+			ar.Read(out count_MissionConditions);
+			for(int i = 0; i<count_MissionConditions; i++)
+			{
+				System.Int32 t;
+				ar.Read(out t);
+				t_MissionConditions.Add(t);
+			}
+			System.Int32 t_MissionId;
+			ar.Read(out t_MissionId);
+			srcObj.MissionId = t_MissionId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MissionId", false);
+				}
+			}
+			System.String t_MissionName;
+			ar.Read(out t_MissionName);
+			srcObj.MissionName = t_MissionName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MissionName", false);
+				}
+			}
+			System.String t_MissionType;
+			ar.Read(out t_MissionType);
+			srcObj.MissionType = t_MissionType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MissionType", false);
+				}
+			}
+			System.Int32 t_RowInSheet;
+			ar.Read(out t_RowInSheet);
+			srcObj.RowInSheet = t_RowInSheet;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RowInSheet", false);
 				}
 			}
 		};
@@ -188989,11 +189867,39 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = obj as Survivor.TtMonsterData;
 			ar.Write(srcObj.AttackRange);
 			ar.Write(srcObj.Damage);
+			ar.Write(srcObj.DropGroupId);
 			ar.Write(srcObj.Health);
 			ar.Write(srcObj.Level);
+			if (srcObj.Missions != null)
+			{
+				var Srclst = srcObj.Missions as System.Collections.Generic.List<System.Int32>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					ar.Write(Srclst[i]);
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
 			ar.Write(srcObj.MonsterId);
+			ar.Write(srcObj.MonsterType);
 			ar.Write(srcObj.Prefab);
 			ar.Write(srcObj.RowInSheet);
+			if (srcObj.SellGoods != null)
+			{
+				var Srclst = srcObj.SellGoods as System.Collections.Generic.List<System.Int32>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					ar.Write(Srclst[i]);
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
 			ar.Write(srcObj.Speed);
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
@@ -189002,11 +189908,47 @@ namespace EngineNS.Plugins.DataCopyer
 			var srcObj = src as Survivor.TtMonsterData;
 			tarObj.AttackRange = srcObj.AttackRange;
 			tarObj.Damage = srcObj.Damage;
+			tarObj.DropGroupId = srcObj.DropGroupId;
 			tarObj.Health = srcObj.Health;
 			tarObj.Level = srcObj.Level;
+			if (srcObj.Missions != null)
+			{
+				if (tarObj.Missions == null)
+				{
+					tarObj.Missions = new();
+				}
+				if (tarObj.Missions != null)
+				{
+					var Tarlst = tarObj.Missions as System.Collections.Generic.List<System.Int32>;
+					var Srclst = srcObj.Missions as System.Collections.Generic.List<System.Int32>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						Tarlst.Add(Srclst[i]);
+					}
+				}
+			}
 			tarObj.MonsterId = srcObj.MonsterId;
+			tarObj.MonsterType = srcObj.MonsterType;
 			tarObj.Prefab = srcObj.Prefab;
 			tarObj.RowInSheet = srcObj.RowInSheet;
+			if (srcObj.SellGoods != null)
+			{
+				if (tarObj.SellGoods == null)
+				{
+					tarObj.SellGoods = new();
+				}
+				if (tarObj.SellGoods != null)
+				{
+					var Tarlst = tarObj.SellGoods as System.Collections.Generic.List<System.Int32>;
+					var Srclst = srcObj.SellGoods as System.Collections.Generic.List<System.Int32>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						Tarlst.Add(Srclst[i]);
+					}
+				}
+			}
 			tarObj.Speed = srcObj.Speed;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3347050134322367863 = (EngineNS.IO.IReader ar, object obj)=>
@@ -189101,6 +190043,128 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9524687136534877311 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as Survivor.TtMonsterData;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_12402845150383453284 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtMonsterData;
+			System.Single t_AttackRange;
+			ar.Read(out t_AttackRange);
+			srcObj.AttackRange = t_AttackRange;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "AttackRange", false);
+				}
+			}
+			System.Single t_Damage;
+			ar.Read(out t_Damage);
+			srcObj.Damage = t_Damage;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Damage", false);
+				}
+			}
+			System.Int32 t_DropGroupId;
+			ar.Read(out t_DropGroupId);
+			srcObj.DropGroupId = t_DropGroupId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DropGroupId", false);
+				}
+			}
+			System.Single t_Health;
+			ar.Read(out t_Health);
+			srcObj.Health = t_Health;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Health", false);
+				}
+			}
+			System.Int32 t_Level;
+			ar.Read(out t_Level);
+			srcObj.Level = t_Level;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Level", false);
+				}
+			}
+			System.Collections.Generic.List<System.Int32> t_Missions = null;
+			t_Missions = srcObj.Missions;
+			if (t_Missions == null)
+			{
+				t_Missions = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<System.Int32>)) as System.Collections.Generic.List<System.Int32>;
+			}
+			int count_Missions;
+			ar.Read(out count_Missions);
+			for(int i = 0; i<count_Missions; i++)
+			{
+				System.Int32 t;
+				ar.Read(out t);
+				t_Missions.Add(t);
+			}
+			System.Int32 t_MonsterId;
+			ar.Read(out t_MonsterId);
+			srcObj.MonsterId = t_MonsterId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MonsterId", false);
+				}
+			}
+			Survivor.EMonsterType t_MonsterType;
+			ar.Read(out t_MonsterType);
+			srcObj.MonsterType = t_MonsterType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MonsterType", false);
+				}
+			}
+			System.String t_Prefab;
+			ar.Read(out t_Prefab);
+			srcObj.Prefab = t_Prefab;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Prefab", false);
+				}
+			}
+			System.Int32 t_RowInSheet;
+			ar.Read(out t_RowInSheet);
+			srcObj.RowInSheet = t_RowInSheet;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RowInSheet", false);
+				}
+			}
+			System.Collections.Generic.List<System.Int32> t_SellGoods = null;
+			t_SellGoods = srcObj.SellGoods;
+			if (t_SellGoods == null)
+			{
+				t_SellGoods = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<System.Int32>)) as System.Collections.Generic.List<System.Int32>;
+			}
+			int count_SellGoods;
+			ar.Read(out count_SellGoods);
+			for(int i = 0; i<count_SellGoods; i++)
+			{
+				System.Int32 t;
+				ar.Read(out t);
+				t_SellGoods.Add(t);
+			}
+			System.Single t_Speed;
+			ar.Read(out t_Speed);
+			srcObj.Speed = t_Speed;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Speed", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15040530247837978602 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -192062,6 +193126,122 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
+	static class Survivor_TtProxyInventory
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtProxyInventory;
+			if (srcObj.Items != null)
+			{
+				var Srclst = srcObj.Items as System.Collections.Generic.List<Survivor.TtItem>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as Survivor.TtProxyInventory;
+			var srcObj = src as Survivor.TtProxyInventory;
+			if (srcObj.Items != null)
+			{
+				if (tarObj.Items == null)
+				{
+					tarObj.Items = new();
+				}
+				if (tarObj.Items != null)
+				{
+					var Tarlst = tarObj.Items as System.Collections.Generic.List<Survivor.TtItem>;
+					var Srclst = srcObj.Items as System.Collections.Generic.List<Survivor.TtItem>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						Survivor.TtItem tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as Survivor.TtItem;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15846926105591754355 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtProxyInventory;
+			System.Collections.Generic.List<Survivor.TtItem> t_Items = null;
+			t_Items = srcObj.Items;
+			if (t_Items == null)
+			{
+				t_Items = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<Survivor.TtItem>)) as System.Collections.Generic.List<Survivor.TtItem>;
+			}
+			int count_Items;
+			ar.Read(out count_Items);
+			for(int i = 0; i<count_Items; i++)
+			{
+				Survivor.TtItem t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as Survivor.TtItem;
+						fn(ar, t);
+					}
+				}
+				t_Items.Add(t);
+				srcObj.Items = t_Items;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<Survivor.TtItem>), false);
+					}
+				}
+			}
+		};
+	}
+	static class Survivor_TtProxyItem
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtProxyItem;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as Survivor.TtProxyItem;
+			var srcObj = src as Survivor.TtProxyItem;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9524687136534877311 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtProxyItem;
+		};
+	}
 	static class Survivor_TtRoleData
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -192761,6 +193941,166 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Read(out t_Name);
 			System.String t_Weapon;
 			ar.Read(out t_Weapon);
+		};
+	}
+	static class Survivor_TtSkillData
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtSkillData;
+			ar.Write(srcObj.ItemId);
+			ar.Write(srcObj.ItemName);
+			ar.Write(srcObj.RowInSheet);
+			ar.Write(srcObj.SkillType);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as Survivor.TtSkillData;
+			var srcObj = src as Survivor.TtSkillData;
+			tarObj.ItemId = srcObj.ItemId;
+			tarObj.ItemName = srcObj.ItemName;
+			tarObj.RowInSheet = srcObj.RowInSheet;
+			tarObj.SkillType = srcObj.SkillType;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_2730475140785306733 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtSkillData;
+			System.Int32 t_ItemId;
+			ar.Read(out t_ItemId);
+			srcObj.ItemId = t_ItemId;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ItemId", false);
+				}
+			}
+			System.String t_ItemName;
+			ar.Read(out t_ItemName);
+			srcObj.ItemName = t_ItemName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ItemName", false);
+				}
+			}
+			System.Int32 t_RowInSheet;
+			ar.Read(out t_RowInSheet);
+			srcObj.RowInSheet = t_RowInSheet;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "RowInSheet", false);
+				}
+			}
+			System.String t_SkillType;
+			ar.Read(out t_SkillType);
+			srcObj.SkillType = t_SkillType;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "SkillType", false);
+				}
+			}
+		};
+	}
+	static class Survivor_TtSkillInventory
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtSkillInventory;
+			if (srcObj.Items != null)
+			{
+				var Srclst = srcObj.Items as System.Collections.Generic.List<Survivor.TtItem>;
+				ar.Write(Srclst.Count);
+				for (int i = 0; i < Srclst.Count; i++)
+				{
+					if (Srclst[i] != null)
+					{
+						var typeStr = EngineNS.Rtti.TtTypeDesc.TypeStr(Srclst[i].GetType());
+						var fn = EngineNS.TtEngine.Instance.DataCopyer.FindWriter(typeStr);
+						var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeStr);
+						if (fn != null && meta != null)
+						{
+							ar.Write(EngineNS.Hash64.FromString(typeStr));
+							ar.Write(meta.CurrentVersion.MetaHash);
+							fn(ar, Srclst[i]);
+						}
+						else
+						{
+							ar.Write(EngineNS.Hash64.Empty);
+						}
+					}
+					else
+					{
+						ar.Write(EngineNS.Hash64.Empty);
+					}
+				}
+			}
+			else
+			{
+				ar.Write((int)0);
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as Survivor.TtSkillInventory;
+			var srcObj = src as Survivor.TtSkillInventory;
+			if (srcObj.Items != null)
+			{
+				if (tarObj.Items == null)
+				{
+					tarObj.Items = new();
+				}
+				if (tarObj.Items != null)
+				{
+					var Tarlst = tarObj.Items as System.Collections.Generic.List<Survivor.TtItem>;
+					var Srclst = srcObj.Items as System.Collections.Generic.List<Survivor.TtItem>;
+					Tarlst.Clear();
+					for (int i = 0; i < Srclst.Count; i++)
+					{
+						Survivor.TtItem tmp = Rtti.TtClassMeta.CloneProperty(Srclst[i]) as Survivor.TtItem;
+						Tarlst.Add(tmp);
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15846926105591754355 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as Survivor.TtSkillInventory;
+			System.Collections.Generic.List<Survivor.TtItem> t_Items = null;
+			t_Items = srcObj.Items;
+			if (t_Items == null)
+			{
+				t_Items = EngineNS.Rtti.TtTypeDescManager.CreateInstance(typeof(System.Collections.Generic.List<Survivor.TtItem>)) as System.Collections.Generic.List<Survivor.TtItem>;
+			}
+			int count_Items;
+			ar.Read(out count_Items);
+			for(int i = 0; i<count_Items; i++)
+			{
+				Survivor.TtItem t = null;
+				EngineNS.Hash64 typeHash;
+				ar.Read(out typeHash);
+				var meta = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(typeHash);
+				if (meta != null)
+				{
+					EngineNS.Hash64 verHash;
+					ar.Read(out verHash);
+					var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta.ClassType.TypeString, verHash);
+					if (fn != null)
+					{
+						t = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta.ClassType) as Survivor.TtItem;
+						fn(ar, t);
+					}
+				}
+				t_Items.Add(t);
+				srcObj.Items = t_Items;
+				{
+					if (srcObj is IO.ISerializer sr)
+					{
+						//sr.OnPropertyRead(ar.Tag, typeof(System.Collections.Generic.List<Survivor.TtItem>), false);
+					}
+				}
+			}
 		};
 	}
 	static class Survivor_TtStateNode_TtStateNodeData
@@ -200538,8 +201878,8 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Deferred.TtDeferredBasePassNode@EngineCore");
 				kls.Writer = EngineNS_Graphics_Pipeline_Deferred_TtDeferredBasePassNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Deferred_TtDeferredBasePassNode.CopyCurrentVersion;
-				kls.RegVersion(2153512819393179099, EngineNS_Graphics_Pipeline_Deferred_TtDeferredBasePassNode.Read_2153512819393179099);
 				kls.RegVersion(14727858256829636008, EngineNS_Graphics_Pipeline_Deferred_TtDeferredBasePassNode.Read_14727858256829636008);
+				kls.RegVersion(2153512819393179099, EngineNS_Graphics_Pipeline_Deferred_TtDeferredBasePassNode.Read_2153512819393179099);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Deferred.TtDeferredDirLightingNode@EngineCore");
@@ -201291,6 +202631,24 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(978974702571264856, Survivor_TtCharacterStateNode.Read_978974702571264856);
 			}
 			{
+				var kls = this.GetClassCopyer("Survivor.TtDropGroup.TtDropItem@Survivor");
+				kls.Writer = Survivor_TtDropGroup_TtDropItem.WriteCurrentVersion;
+				kls.Copy = Survivor_TtDropGroup_TtDropItem.CopyCurrentVersion;
+				kls.RegVersion(5449994043428327899, Survivor_TtDropGroup_TtDropItem.Read_5449994043428327899);
+			}
+			{
+				var kls = this.GetClassCopyer("Survivor.TtDropGroup@Survivor");
+				kls.Writer = Survivor_TtDropGroup.WriteCurrentVersion;
+				kls.Copy = Survivor_TtDropGroup.CopyCurrentVersion;
+				kls.RegVersion(6650132346642742279, Survivor_TtDropGroup.Read_6650132346642742279);
+			}
+			{
+				var kls = this.GetClassCopyer("Survivor.TtDrugItem@Survivor");
+				kls.Writer = Survivor_TtDrugItem.WriteCurrentVersion;
+				kls.Copy = Survivor_TtDrugItem.CopyCurrentVersion;
+				kls.RegVersion(9524687136534877311, Survivor_TtDrugItem.Read_9524687136534877311);
+			}
+			{
 				var kls = this.GetClassCopyer("Survivor.TtGameMode@Survivor");
 				kls.Writer = Survivor_TtGameMode.WriteCurrentVersion;
 				kls.Copy = Survivor_TtGameMode.CopyCurrentVersion;
@@ -201304,6 +202662,24 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(9953486775730054143, Survivor_TtGameMode.Read_9953486775730054143);
 			}
 			{
+				var kls = this.GetClassCopyer("Survivor.TtGoodsInventory@Survivor");
+				kls.Writer = Survivor_TtGoodsInventory.WriteCurrentVersion;
+				kls.Copy = Survivor_TtGoodsInventory.CopyCurrentVersion;
+				kls.RegVersion(15846926105591754355, Survivor_TtGoodsInventory.Read_15846926105591754355);
+			}
+			{
+				var kls = this.GetClassCopyer("Survivor.TtGoodsUnlimitInventory@Survivor");
+				kls.Writer = Survivor_TtGoodsUnlimitInventory.WriteCurrentVersion;
+				kls.Copy = Survivor_TtGoodsUnlimitInventory.CopyCurrentVersion;
+				kls.RegVersion(15846926105591754355, Survivor_TtGoodsUnlimitInventory.Read_15846926105591754355);
+			}
+			{
+				var kls = this.GetClassCopyer("Survivor.TtInventory@Survivor");
+				kls.Writer = Survivor_TtInventory.WriteCurrentVersion;
+				kls.Copy = Survivor_TtInventory.CopyCurrentVersion;
+				kls.RegVersion(15846926105591754355, Survivor_TtInventory.Read_15846926105591754355);
+			}
+			{
 				var kls = this.GetClassCopyer("Survivor.TtItem@Survivor");
 				kls.Writer = Survivor_TtItem.WriteCurrentVersion;
 				kls.Copy = Survivor_TtItem.CopyCurrentVersion;
@@ -201315,12 +202691,19 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = Survivor_TtItemData.CopyCurrentVersion;
 				kls.RegVersion(13928133981341389541, Survivor_TtItemData.Read_13928133981341389541);
 				kls.RegVersion(3474344388219468716, Survivor_TtItemData.Read_3474344388219468716);
+				kls.RegVersion(1393286606268094719, Survivor_TtItemData.Read_1393286606268094719);
 			}
 			{
-				var kls = this.GetClassCopyer("Survivor.TtItemInventory@Survivor");
-				kls.Writer = Survivor_TtItemInventory.WriteCurrentVersion;
-				kls.Copy = Survivor_TtItemInventory.CopyCurrentVersion;
-				kls.RegVersion(15846926105591754355, Survivor_TtItemInventory.Read_15846926105591754355);
+				var kls = this.GetClassCopyer("Survivor.TtMissionData.TtGoodsCondition@Survivor");
+				kls.Writer = Survivor_TtMissionData_TtGoodsCondition.WriteCurrentVersion;
+				kls.Copy = Survivor_TtMissionData_TtGoodsCondition.CopyCurrentVersion;
+				kls.RegVersion(9463590279381850673, Survivor_TtMissionData_TtGoodsCondition.Read_9463590279381850673);
+			}
+			{
+				var kls = this.GetClassCopyer("Survivor.TtMissionData@Survivor");
+				kls.Writer = Survivor_TtMissionData.WriteCurrentVersion;
+				kls.Copy = Survivor_TtMissionData.CopyCurrentVersion;
+				kls.RegVersion(253638097348170353, Survivor_TtMissionData.Read_253638097348170353);
 			}
 			{
 				var kls = this.GetClassCopyer("Survivor.TtMonsterController.TtMonsterControllerData@Survivor");
@@ -201349,6 +202732,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(3347050134322367863, Survivor_TtMonsterData.Read_3347050134322367863);
 				kls.RegVersion(6641584102061257269, Survivor_TtMonsterData.Read_6641584102061257269);
 				kls.RegVersion(9524687136534877311, Survivor_TtMonsterData.Read_9524687136534877311);
+				kls.RegVersion(12402845150383453284, Survivor_TtMonsterData.Read_12402845150383453284);
 			}
 			{
 				var kls = this.GetClassCopyer("Survivor.TtMonsterNode.TtMonsterNodeData@Survivor");
@@ -201429,12 +202813,36 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(978974702571264856, Survivor_TtMonsterStateNode.Read_978974702571264856);
 			}
 			{
+				var kls = this.GetClassCopyer("Survivor.TtProxyInventory@Survivor");
+				kls.Writer = Survivor_TtProxyInventory.WriteCurrentVersion;
+				kls.Copy = Survivor_TtProxyInventory.CopyCurrentVersion;
+				kls.RegVersion(15846926105591754355, Survivor_TtProxyInventory.Read_15846926105591754355);
+			}
+			{
+				var kls = this.GetClassCopyer("Survivor.TtProxyItem@Survivor");
+				kls.Writer = Survivor_TtProxyItem.WriteCurrentVersion;
+				kls.Copy = Survivor_TtProxyItem.CopyCurrentVersion;
+				kls.RegVersion(9524687136534877311, Survivor_TtProxyItem.Read_9524687136534877311);
+			}
+			{
 				var kls = this.GetClassCopyer("Survivor.TtRoleData@Survivor");
 				kls.Writer = Survivor_TtRoleData.WriteCurrentVersion;
 				kls.Copy = Survivor_TtRoleData.CopyCurrentVersion;
 				kls.RegVersion(14107488789544751383, Survivor_TtRoleData.Read_14107488789544751383);
 				kls.RegVersion(5073821464980488826, Survivor_TtRoleData.Read_5073821464980488826);
 				kls.RegVersion(7342457282564939627, Survivor_TtRoleData.Read_7342457282564939627);
+			}
+			{
+				var kls = this.GetClassCopyer("Survivor.TtSkillData@Survivor");
+				kls.Writer = Survivor_TtSkillData.WriteCurrentVersion;
+				kls.Copy = Survivor_TtSkillData.CopyCurrentVersion;
+				kls.RegVersion(2730475140785306733, Survivor_TtSkillData.Read_2730475140785306733);
+			}
+			{
+				var kls = this.GetClassCopyer("Survivor.TtSkillInventory@Survivor");
+				kls.Writer = Survivor_TtSkillInventory.WriteCurrentVersion;
+				kls.Copy = Survivor_TtSkillInventory.CopyCurrentVersion;
+				kls.RegVersion(15846926105591754355, Survivor_TtSkillInventory.Read_15846926105591754355);
 			}
 			{
 				var kls = this.GetClassCopyer("Survivor.TtStateNode.TtStateNodeData@Survivor");
@@ -201499,7 +202907,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(547543558045874187, Survivor_TtWeaponProxyNode.Read_547543558045874187);
 				kls.RegVersion(6246337379466960295, Survivor_TtWeaponProxyNode.Read_6246337379466960295);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("1C_5A_5F_59_8B_67_80_06_70_E6_0A_58_7F_91_26_00_D5_8A_2C_C2");
+			this.VersionHash = EngineNS.Hash160.Parse("B4_62_2D_54_01_5C_57_5E_94_25_1B_EB_93_68_B5_23_E0_64_AB_64");
 		}
 	}
 }

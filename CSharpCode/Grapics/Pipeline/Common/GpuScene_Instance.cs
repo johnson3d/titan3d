@@ -16,8 +16,8 @@ namespace EngineNS.Graphics.Pipeline.Common
             public uint DataStart;
             public uint DataSize;
         }
-        public TtCpu2GpuBuffer<FGpuSceneInstance> mSceneInstances;
-        public TtCpu2GpuBuffer<uint> mSceneInstanceData;
+        public TtCpu2GpuBuffer<FGpuSceneInstance> mSceneInstances = new TtCpu2GpuBuffer<FGpuSceneInstance>();
+        public TtCpu2GpuBuffer<uint> mSceneInstanceData = new TtCpu2GpuBuffer<uint>();
         private Stack<uint> IdAllocator = new Stack<uint>();
         public List<uint> AliveInstances = new List<uint>();
         public uint AllocInstance()

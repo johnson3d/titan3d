@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Root Type="EngineNS.UTest.UTest_MetaObject@EngineCore">
+<Root Type="EngineNS.UnitTest.UTest_MetaObject@EngineCore">
   <A Type="System.Int32@Unknown" Value="2" />
   <B Type="System.Single@Unknown" Value="3" />
   <C Type="System.String@Unknown" Value="4" />
-  <D Type="EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore">
+  <D Type="EngineNS.UnitTest.UTest_MetaObject.TestSubClass@EngineCore">
     <A Type="System.Int32@Unknown" Value="30" />
     <B Type="System.Single@Unknown" Value="0" />
   </D>
-  <E Type="EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore">
+  <E Type="EngineNS.UnitTest.UTest_MetaObject.TestSubClass@EngineCore">
     <A Type="System.Int32@Unknown" Value="10" />
     <B Type="System.Single@Unknown" Value="0" />
   </E>
@@ -17,16 +17,16 @@
     <e_1 Value="2" />
     <e_2 Value="15" />
   </G>
-  <H Type="System.Collections.Generic.List&lt;EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore,&gt;@Unknown" Count="3">
-    <e_0 Type="EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore">
+  <H Type="System.Collections.Generic.List&lt;EngineNS.UnitTest.UTest_MetaObject.TestSubClass@EngineCore,&gt;@Unknown" Count="3">
+    <e_0 Type="EngineNS.UnitTest.UTest_MetaObject.TestSubClass@EngineCore">
       <A Type="System.Int32@Unknown" Value="5" />
       <B Type="System.Single@Unknown" Value="0" />
     </e_0>
-    <e_1 Type="EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore">
+    <e_1 Type="EngineNS.UnitTest.UTest_MetaObject.TestSubClass@EngineCore">
       <A Type="System.Int32@Unknown" Value="9" />
       <B Type="System.Single@Unknown" Value="0" />
     </e_1>
-    <e_2 Type="EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore">
+    <e_2 Type="EngineNS.UnitTest.UTest_MetaObject.TestSubClass@EngineCore">
       <A Type="System.Int32@Unknown" Value="10" />
       <B Type="System.Single@Unknown" Value="0" />
     </e_2>
@@ -41,17 +41,17 @@
       <Value Value="b" />
     </e_1>
   </I>
-  <J Type="System.Collections.Generic.Dictionary&lt;System.Int32@Unknown,EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore,&gt;@Unknown" Count="2">
+  <J Type="System.Collections.Generic.Dictionary&lt;System.Int32@Unknown,EngineNS.UnitTest.UTest_MetaObject.TestSubClass@EngineCore,&gt;@Unknown" Count="2">
     <e_0>
       <Key Value="1" />
-      <Value Type="EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore">
+      <Value Type="EngineNS.UnitTest.UTest_MetaObject.TestSubClass@EngineCore">
         <A Type="System.Int32@Unknown" Value="5" />
         <B Type="System.Single@Unknown" Value="0" />
       </Value>
     </e_0>
     <e_1>
       <Key Value="2" />
-      <Value Type="EngineNS.UTest.UTest_MetaObject.TestSubClass@EngineCore">
+      <Value Type="EngineNS.UnitTest.UTest_MetaObject.TestSubClass@EngineCore">
         <A Type="System.Int32@Unknown" Value="9" />
         <B Type="System.Single@Unknown" Value="0" />
       </Value>

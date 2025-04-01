@@ -22,6 +22,8 @@ namespace Survivor
         public TtMonsterManager MonsterManager { get; } = new TtMonsterManager();
         [EngineNS.Rtti.Meta(Flags = EngineNS.Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public TtItemManager ItemManager { get; } = new TtItemManager();
+        [EngineNS.Rtti.Meta(Flags = EngineNS.Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
+        public TtSkillManager SkillManager { get; } = new TtSkillManager();
         EngineNS.UI.Controls.TtUIElement mBattleUI;
         [EngineNS.Rtti.Meta(Flags = EngineNS.Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public EngineNS.UI.Controls.TtUIElement BattleUI
@@ -60,6 +62,12 @@ namespace Survivor
             {
                 return mHpProgressUI;
             }
+        }
+        //需要存盘，避免物品丢失
+        public TtItem SwapItem = null;
+        public void ClickItem(TtInventory targetInventory, short index)
+        {
+            SwapItem = targetInventory.SwapItem(SwapItem, index);
         }
 
         public override void Tick(TtGameInstance host, float elapsedMillisecond)
