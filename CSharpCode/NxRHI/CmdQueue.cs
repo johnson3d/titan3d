@@ -49,6 +49,7 @@ namespace EngineNS.NxRHI
             info.Cmd = static (NxRHI.ICommandList im_cmd, ref FRCmdInfo info) =>
             {
                 TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.ExecuteCommandList(info.Tag as TtCommandList, info.QueueType);
+                //TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.mCoreObject.Flush(info.QueueType);
             };
             Cmds.Enqueue(info);
 

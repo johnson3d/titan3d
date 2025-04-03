@@ -332,7 +332,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         {
             drawcall.TagObject = tagObject;
             
-            drawcall.SetComputeEffect(CurrentEffect);
+            drawcall.BindShaderEffect(CurrentEffect);
             if (bRoundupXYZ)
             {
                 drawcall.SetDispatch(MathHelper.Roundup(x, DispatchArg.X),
@@ -349,7 +349,7 @@ namespace EngineNS.Graphics.Pipeline.Shader
         public void SetDrawcallIndirectDispatch(object tagObject, TtRenderPolicy policy, NxRHI.TtComputeDraw drawcall, NxRHI.TtBuffer indirectBuffer)
         {
             drawcall.TagObject = tagObject;
-            drawcall.SetComputeEffect(CurrentEffect);
+            drawcall.BindShaderEffect(CurrentEffect);
             drawcall.BindIndirectDispatchArgsBuffer(indirectBuffer);
 
             this.OnDrawCall(drawcall, policy);

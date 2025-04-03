@@ -160,10 +160,12 @@ namespace NxRHI
 	}
 	bool DX12ShaderSignatureBuilder::CreateHeap(DX12GpuDevice* device, AutoRef<DX12HeapHolder>& OutCbvSrvUavHeap, AutoRef<DX12HeapHolder>& OutSamplerHeap)
 	{
+		//we must allocate a new heap for every frame
+		//When gpu execute commandlist, CopyDescriptorHeap will parrallel set view to heap
 		bool created = false;
 		if (mCbvSrvUavNumber > 0)
 		{
-			if (OutCbvSrvUavHeap == nullptr || OutCbvSrvUavHeap->NumOfDescriptor != mCbvSrvUavNumber)
+			//if (OutCbvSrvUavHeap == nullptr || OutCbvSrvUavHeap->NumOfDescriptor != mCbvSrvUavNumber)
 			{
 				OutCbvSrvUavHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device,
 					mCbvSrvUavNumber, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
@@ -177,7 +179,7 @@ namespace NxRHI
 		}
 		if (mSamplerNumber > 0)
 		{
-			if (OutSamplerHeap == nullptr || OutSamplerHeap->NumOfDescriptor != mSamplerNumber)
+			//if (OutSamplerHeap == nullptr || OutSamplerHeap->NumOfDescriptor != mSamplerNumber)
 			{
 				OutSamplerHeap = MakeWeakRef(device->mDescriptorSetAllocator->AllocDX12Heap(device,
 					mSamplerNumber, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
@@ -215,7 +217,7 @@ namespace NxRHI
 					{
 						SamplerBinders.push_back(binder);
 						DiscriptorRangeType rg{};
-						rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
+						rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
 						rg.NumDescriptors = binder->IsBindless() ? IBindless::MaxBindless : 1;
 						rg.BaseShaderRegister = binder->Slot;
@@ -231,7 +233,7 @@ namespace NxRHI
 					{
 						CbvSrvUavBinders.push_back(binder);
 						DiscriptorRangeType rg{};
-						rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
+						rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
 						rg.NumDescriptors = binder->IsBindless() ? IBindless::MaxBindless : 1;
 						rg.BaseShaderRegister = binder->Slot;
@@ -247,7 +249,7 @@ namespace NxRHI
 					{
 						CbvSrvUavBinders.push_back(binder);
 						DiscriptorRangeType rg{};
-						rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
+						rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 						rg.NumDescriptors = binder->IsBindless() ? IBindless::MaxBindless : 1;
 						rg.BaseShaderRegister = binder->Slot;
@@ -263,7 +265,7 @@ namespace NxRHI
 					{
 						CbvSrvUavBinders.push_back(binder);
 						DiscriptorRangeType rg{};
-						rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE;
+						rg.Flags = D3D12_DESCRIPTOR_RANGE_FLAGS::D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						rg.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
 						rg.NumDescriptors = binder->IsBindless() ? IBindless::MaxBindless : 1;
 						rg.BaseShaderRegister = binder->Slot;

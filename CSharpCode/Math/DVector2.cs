@@ -669,7 +669,7 @@ namespace EngineNS
         /// <param name="value2">坐标点</param>
         /// <returns>返回两点间的距离</returns>
         [Rtti.Meta]
-        public static double Distance( DVector2 value1, DVector2 value2 )
+        public static double Distance(in DVector2 value1, in DVector2 value2 )
 	    {
 		    double x = value1.X - value2.X;
 		    double y = value1.Y - value2.Y;

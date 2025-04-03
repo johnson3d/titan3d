@@ -11,5 +11,6 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AdvShadowMapNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DepthTile.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QTileTree.cs" />
   </ItemGroup>
 </Project>

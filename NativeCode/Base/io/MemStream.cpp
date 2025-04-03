@@ -71,7 +71,34 @@ void MemStreamWriter::Write(const void* pSrc, UINT t)
 		mDataStream = nBuffer;
 		mBufferSize = sz;
 	}
-	memcpy(&mDataStream[mPosition], pSrc, (size_t)t);
+	if (pSrc != nullptr)
+	{
+		memcpy(&mDataStream[mPosition], pSrc, (size_t)t);
+	}
+	mPosition += t;
+}
+
+bool ProxyMemStreamWriter::Seek(UINT64 offset)
+{
+	if (mBufferSize < offset)
+	{
+		return false;
+	}
+	mPosition = offset;
+	return true;
+}
+
+void ProxyMemStreamWriter::Write(const void* pSrc, UINT t)
+{
+	if (mBufferSize < mPosition + t)
+	{
+		ASSERT(false);
+		return;
+	}
+	if (pSrc != nullptr)
+	{
+		memcpy(&mDataStream[mPosition], pSrc, (size_t)t);
+	}
 	mPosition += t;
 }
 

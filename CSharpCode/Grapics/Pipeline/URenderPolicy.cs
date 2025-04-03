@@ -154,6 +154,14 @@ namespace EngineNS.Graphics.Pipeline
         }
 
         #region Turn On/Off
+        [Category("Option")]
+        public TtCpuCullingNode CpuCullingNode
+        {
+            get
+            {
+                return this.FindFirstNode<TtCpuCullingNode>();
+            }
+        }
         public string mLookNodeName;
         [Category("Option")]
         public string LookNodeName

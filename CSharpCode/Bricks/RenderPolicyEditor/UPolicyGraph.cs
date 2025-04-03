@@ -17,6 +17,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
         }
         Graphics.Pipeline.TtRenderGraphNode mGraphNode;
         [Rtti.Meta(Order = 1)]
+        [Category("Option")]
         public Graphics.Pipeline.TtRenderGraphNode GraphNode 
         {
             get => mGraphNode;

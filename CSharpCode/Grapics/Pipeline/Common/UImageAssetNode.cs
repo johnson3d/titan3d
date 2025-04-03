@@ -47,7 +47,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public NxRHI.TtSrView ImageSrv;
         [Rtti.Meta]
-        [Category("Image")]
+        [Category("Option")]
         public RName ImageName
         {
             get

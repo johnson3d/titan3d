@@ -89,7 +89,7 @@ namespace EngineNS.Bricks.Particle
         {
             //var particleNode = policy.FindNode("ParticleNode") as UParticleGraphNode;
             var particleNode = args.Policy.FindFirstNode<UParticleGraphNode>();
-            if (particleNode == null || NebulaParticle == null)
+            if (particleNode == null || particleNode.IsUsed == false || NebulaParticle == null)
                 return true;
 
             NebulaParticle.Update(args.Policy, particleNode, TtEngine.Instance.ElapsedSecond, new Vector3(this.Placement.AbsTransform.Position));

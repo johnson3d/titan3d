@@ -1291,6 +1291,7 @@ namespace NxRHI
 		static UINT GetMaxBindless() {
 			return IBindless::MaxBindless;
 		}
+		bool mIsCopyNull = false;
 		EShaderBindType mBindType;
 		UINT GetResourceCount() const {
 			return (UINT)mResources.size();
@@ -1309,6 +1310,15 @@ namespace NxRHI
 
 		virtual void OnBind(UINT index, IGpuResource* resource) = 0;
 
+		void BindResources() {
+			for (size_t i = 0; i < mResources.size(); i++)
+			{
+				if (mIsCopyNull == false && mResources[i].Resource == nullptr)
+					continue;
+				OnBind((UINT)i, mResources[i].Resource);
+			}
+		}
+		//dont call it
 		void CheckResourceFingerPrint() {
 			for (size_t i = 0; i < mResources.size(); i++)
 			{

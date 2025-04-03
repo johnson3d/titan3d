@@ -1928,6 +1928,8 @@ namespace NxRHI
 
 	void DX12Bindless::OnBind(UINT index, IGpuResource* resource)
 	{
+		if (mHeap == nullptr)
+			return;
 		auto device = mDeviceRef.GetPtr();
 		DX12PagedHeap* handle;
 		if (resource)

@@ -43,7 +43,7 @@ namespace EngineNS.Bricks.Particle
                 CBuffer.SetValue(cbvIndexer.BackendAliveCapacity, emitter.MaxParticle);
                 CBuffer.SetValue(cbvIndexer.ParticleCapacity, emitter.MaxParticle);
 
-                mParticleUpdateDrawcall.SetComputeEffect(Shader.Particle_Update);
+                mParticleUpdateDrawcall.BindShaderEffect(Shader.Particle_Update);
 
                 mParticleUpdateDrawcall.BindCBV("cbParticleDesc", CBuffer);
                 mParticleUpdateDrawcall.BindSrv("bfRandomPool", TtEngine.Instance.NebulaTemplateManager.RandomPoolSrv);

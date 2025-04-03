@@ -24,12 +24,10 @@ namespace NxRHI
 
 		void BindDescriptorHeaps(DX12GpuDevice* device, DX12CommandList* dx12Cmd);
 	private:
-		void BindResourceToHeap(DX12GpuDevice* device, const FEffectBinder* binder, FBindResource& resource);
+		void BindResourceToHeap(DX12GpuDevice* device, const FEffectBinder* binder, FBindResource& resource, 
+			AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap);
 	public:
 		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
-
-		AutoRef<DX12HeapHolder>			mCbvSrvUavHeap;
-		AutoRef<DX12HeapHolder>			mSamplerHeap;
 	};
 
 	class DX12ComputeDraw : public IComputeDraw
@@ -44,19 +42,16 @@ namespace NxRHI
 
 		void BindDescriptorHeaps(DX12GpuDevice* device, DX12CommandList* dx12Cmd);
 	private:
-		void BindResourceToHeap(DX12GpuDevice* device, const FShaderBinder* binder, FBindResource& resource);
+		void BindResourceToHeap(DX12GpuDevice* device, const FShaderBinder* binder, FBindResource& resource,
+			AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap);
 	public:
 		TWeakRefHandle<DX12GpuDevice>			mDeviceRef;
-		AutoRef<DX12HeapHolder>					mCbvSrvUavHeap;
-		AutoRef<DX12HeapHolder>					mSamplerHeap;
 	};
 
 	class DX12RayTracingDraw : public IRayTracingDraw
 	{
 	public:
 		AutoRef<FUploadBuffer>			mHitGroupShaderBindTable;
-		AutoRef<DX12HeapHolder>			mCbvSrvUavHeap;
-		AutoRef<DX12HeapHolder>			mSamplerHeap;
 		struct FHitGroupShaderBindTable
 		{
 			AutoRef<DX12RayTracingEffect::DX12HitGroup>		HitGroup;
@@ -66,11 +61,13 @@ namespace NxRHI
 		virtual IBindless* CreateBindless(const char* name) const override;
 		virtual void Commit(ICommandList* cmdlist, bool bRefResource) override;
 	private:
-		void BindResourceToHeap(DX12GpuDevice* device, const FShaderBinder* binder, FBindResource& resource);
+		void BindResourceToHeap(DX12GpuDevice* device, const FShaderBinder* binder, FBindResource& resource,
+			AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap);
 	public:
 		TWeakRefHandle<DX12GpuDevice>	mDeviceRef;
 		virtual void OnBindResource(const FShaderBinder* binder, FBindResource& resource) override;
-		void BindDescriptorHeaps(DX12GpuDevice* device, DX12CommandList* dx12Cmd, DX12RayTracingEffect* effect);
+		void BindDescriptorHeaps(DX12GpuDevice* device, DX12CommandList* dx12Cmd, DX12RayTracingEffect* effect, 
+			AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap);
 	};
 }
 

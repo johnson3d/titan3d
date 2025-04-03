@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace EngineNS.Graphics.Pipeline
@@ -22,11 +23,35 @@ namespace EngineNS.Graphics.Pipeline
             VisiblesOut.LifeMode = TtAttachBuffer.ELifeMode.Imported;
             AddOutput(VisiblesOut);
         }
+        TtCamera CullCameral = null;
+        TtCamera FrozenCullCameral = null;
+        [Category("Option")]
+        public bool IsFrozenCullCameral
+        {
+            get
+            {
+                return FrozenCullCameral != null;
+            }
+            set
+            {
+                if (value)
+                {
+                    if (FrozenCullCameral == null)
+                        FrozenCullCameral = new TtCamera();
+                    if (CullCameral != null)
+                        CullCameral.mCoreObject.CopyDataTo(FrozenCullCameral.mCoreObject);
+                }
+                else
+                {
+                    FrozenCullCameral = null;
+                }
+            }
+        }
         public async override System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
 
-            mVisParameter.CullCamera = policy.DefaultCamera;
+            CullCameral = policy.DefaultCamera;
 
             mPolicy = policy;
         }
@@ -68,6 +93,14 @@ namespace EngineNS.Graphics.Pipeline
             //{
 
             //}
+            if (FrozenCullCameral != null)
+            {
+                mVisParameter.CullCamera = FrozenCullCameral;
+            }
+            else
+            {
+                mVisParameter.CullCamera = CullCameral;
+            }
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
                 mVisParameter.World = world;

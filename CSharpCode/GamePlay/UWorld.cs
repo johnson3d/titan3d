@@ -1,5 +1,6 @@
 using EngineNS.EGui.Slate;
 using EngineNS.GamePlay.Scene;
+using EngineNS.Graphics.Pipeline;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

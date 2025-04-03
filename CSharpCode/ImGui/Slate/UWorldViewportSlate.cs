@@ -285,6 +285,15 @@ namespace EngineNS.EGui.Slate
                 {
                     ImGuiAPI.OpenPopup("ViewPortCameraOP", ImGuiPopupFlags_.ImGuiPopupFlags_None);
                 }
+                bool mRPolicyOPToggled = false;
+                if (EGui.UIProxy.CustomButton.ToggleButton("RPolicy", in Vector2.Zero, ref mRPolicyOPToggled))
+                {
+                    var mainEditor = TtEngine.Instance.GfxDevice.SlateApplication as EngineNS.Editor.TtMainEditorApplication;
+                    if (mainEditor != null)
+                    {
+                        mainEditor.mMainInspector.PropertyGrid.Target = this.RenderPolicy;
+                    }
+                }
             }
 
             if (ShowWorldAxis)

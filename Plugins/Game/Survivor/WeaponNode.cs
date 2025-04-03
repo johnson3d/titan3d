@@ -148,7 +148,7 @@ namespace Survivor
             {
                 weapon.Element.RemoveFromWorld();
                 BulletPrefabs.Remove(weapon);
-                //TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(weapon.Element);
+                TtEngine.Instance.GameInstance.PrefabPoolManager.ReleasePrefab(weapon.Element);
             }
             mBeRemoved.Clear();
             base.Tick(world);
@@ -158,7 +158,7 @@ namespace Survivor
             var weaponPrefabName = RName.ParseFrom(WeaponData.Shape);
             if (weaponPrefabName != null)
             {
-                var WeaponPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape));
+                var WeaponPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape), false);
                 if (WeaponPrefab != null)
                 {
                     WeaponPrefab.Parent = WeaponNode.Parent.Parent;
@@ -246,11 +246,11 @@ namespace Survivor
             var bulletPrefabName = RName.ParseFrom(WeaponData.Shape);
             if(bulletPrefabName != null)
             {
-                var bulletPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape));
+                var bulletPrefab = EngineNS.TtEngine.Instance.GameInstance.PrefabPoolManager.CreatePrefab(RName.ParseFrom(WeaponData.Shape), false);
                 if (bulletPrefab != null)
                 {
                     bulletPrefab.Parent = WeaponNode.Parent.Parent;
-                    var proxyNode = bulletPrefab.FindFirstChild<TtWeaponProxyNode>() as TtWeaponProxyNode;
+                    var proxyNode = bulletPrefab.FindFirstChild<TtWeaponProxyNode>();
                     proxyNode.WeaponNode = WeaponNode;
 
                     var controller = new FNearestElementController();

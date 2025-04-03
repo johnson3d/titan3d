@@ -91,6 +91,39 @@ public:
 };
 
 class TR_CLASS(SV_Dispose = self->Release())
+	ProxyMemStreamWriter : public IStreamWriter
+{
+	BYTE *					mDataStream;
+	UINT64					mBufferSize;
+	UINT64					mPosition;
+public:
+	ProxyMemStreamWriter(void* pMem, UINT64 size)
+	{
+		mDataStream = (BYTE*)pMem;
+		mBufferSize = size;
+		mPosition = 0;
+	}
+
+	inline void* GetPointer() {
+		return mDataStream;
+	}
+	virtual UINT64 GetLength() const {
+		return mBufferSize;
+	}
+	virtual UINT64 Tell() const {
+		return mPosition;
+	}
+	virtual bool Seek(UINT64 offset);
+	virtual void Write(const void* pSrc, UINT t);
+
+	template<typename _Type>
+	void Write(const _Type& v)
+	{
+		return Write(&v, sizeof(_Type));
+	}
+};
+
+class TR_CLASS(SV_Dispose = self->Release())
 	MemStreamReader : public IStreamReader
 {
 	BYTE*					mProxyPointer;

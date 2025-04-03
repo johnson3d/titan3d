@@ -194,9 +194,9 @@ namespace EngineNS.NxRHI
         {
             mCoreObject.NativeSuper.Commit(cmdlist.mCoreObject, false);
         }
-        public void SetComputeEffect(TtComputeEffect effect)
+        public void BindShaderEffect(TtComputeEffect effect)
         {
-            mCoreObject.SetComputeEffect(effect.mCoreObject);
+            mCoreObject.BindShaderEffect(effect.mCoreObject);
         }
         public void SetDispatch(uint x, uint y, uint z)
         {

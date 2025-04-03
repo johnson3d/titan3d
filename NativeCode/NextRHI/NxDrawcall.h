@@ -153,9 +153,7 @@ namespace NxRHI
 			BindResources.clear();
 		}
 		virtual void Commit(ICommandList * cmdlist, bool bRefResource) override;
-		void SetComputeEffect(IComputeEffect * effect) {
-			mEffect = effect;
-		}
+		void BindShaderEffect(IComputeEffect* effect);
 		IComputeEffect* GetComputeEffect() {
 			return mEffect;
 		}
@@ -224,9 +222,7 @@ namespace NxRHI
 			
 		}
 
-		void BindShaderEffect(IRayTracingEffect* effect) {
-			ShaderEffect = effect;
-		}
+		void BindShaderEffect(IRayTracingEffect* effect);
 		IRayTracingEffect* GetShaderEffect() {
 			return ShaderEffect;
 		}

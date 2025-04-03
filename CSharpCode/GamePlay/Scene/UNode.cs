@@ -1,5 +1,6 @@
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.Bricks.GpuDriven;
+using EngineNS.Graphics.Pipeline;
 using EngineNS.Profiler;
 using EngineNS.Thread.Async;
 using System;

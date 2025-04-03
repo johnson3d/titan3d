@@ -47,7 +47,16 @@ namespace NxRHI
 	}
 	void IGraphicDraw::BindShaderEffect(IGpuDevice* device, IGraphicsEffect* effect)
 	{
+		if (ShaderEffect == effect)
+			return;
 		ShaderEffect = effect;
+		BindResources.clear();
+		for (auto& i : effect->mBinders)
+		{
+			FBindResource temp;
+			temp.SetResource(nullptr);
+			BindResources[i.second] = temp;
+		}
 	}
 	void IGraphicDraw::BindGeomMesh(IGpuDevice* device, FGeomMesh* pMesh)
 	{
@@ -208,6 +217,38 @@ namespace NxRHI
 		}
 	}
 
+	void IComputeDraw::BindShaderEffect(IComputeEffect* effect)
+	{
+		if (mEffect == effect)
+			return;
+		mEffect = effect;
+		BindResources.clear();
+		auto reflector = effect->mComputeShader->Reflector;
+		for (auto& i : reflector->CBuffers)
+		{
+			FBindResource temp;
+			temp.SetResource(nullptr);
+			BindResources[i] = temp;
+		}
+		for (auto& i : reflector->Srvs)
+		{
+			FBindResource temp;
+			temp.SetResource(nullptr);
+			BindResources[i] = temp;
+		}
+		for (auto& i : reflector->Uavs)
+		{
+			FBindResource temp;
+			temp.SetResource(nullptr);
+			BindResources[i] = temp;
+		}
+		for (auto& i : reflector->Samplers)
+		{
+			FBindResource temp;
+			temp.SetResource(nullptr);
+			BindResources[i] = temp;
+		}
+	}
 	const FShaderBinder* IComputeDraw::FindBinder(EShaderBindType type, const char* name) const
 	{
 		return mEffect->FindBinder(type, name);
@@ -407,6 +448,38 @@ namespace NxRHI
 		mSrc->TransitionTo(cmdlist, saveSrc);*/
 	}
 
+	void IRayTracingDraw::BindShaderEffect(IRayTracingEffect* effect) 
+	{
+		if (ShaderEffect == effect)
+			return;
+		ShaderEffect = effect;
+		BindResources.clear();
+		auto reflector = effect->GetReflector();
+		for (auto& i : reflector->CBuffers)
+		{
+			FBindResource temp;
+			temp.SetResource(nullptr);
+			BindResources[i] = temp;
+		}
+		for (auto& i : reflector->Srvs)
+		{
+			FBindResource temp;
+			temp.SetResource(nullptr);
+			BindResources[i] = temp;
+		}
+		for (auto& i : reflector->Uavs)
+		{
+			FBindResource temp;
+			temp.SetResource(nullptr);
+			BindResources[i] = temp;
+		}
+		for (auto& i : reflector->Samplers)
+		{
+			FBindResource temp;
+			temp.SetResource(nullptr);
+			BindResources[i] = temp;
+		}
+	}
 	const FShaderBinder* IRayTracingDraw::FindBinder(EShaderBindType type, const char* name) const
 	{
 		return ShaderEffect->FindBinder(type, name);

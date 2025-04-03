@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_6650132346642742279 Type="Survivor.TtDropGroup@Survivor">
+  <DropGroupId Type="System.Int32@Unknown" Order="0" />
+  <DropGroupName Type="System.String@Unknown" Order="0" />
+  <DropItems Type="System.Collections.Generic.List&lt;Survivor.TtDropGroup.TtDropItem@Survivor,&gt;@Unknown" Order="0" />
+  <RowInSheet Type="System.Int32@Unknown" Order="0" />
+</Hash_6650132346642742279>

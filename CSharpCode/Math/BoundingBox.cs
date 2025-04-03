@@ -116,6 +116,38 @@ namespace EngineNS
             SetVector3Value(ref results[6], Maximum.X, Minimum.Y, Minimum.Z);
             SetVector3Value(ref results[7], Minimum.X, Minimum.Y, Minimum.Z);
         }
+        public Vector3 GetCorner(int index)
+        {
+            Vector3 result = new Vector3();
+            switch (index)
+            {
+                case 0:
+                    SetVector3Value(ref result, Minimum.X, Maximum.Y, Maximum.Z);
+                    break;
+                case 1:
+                    SetVector3Value(ref result, Maximum.X, Maximum.Y, Maximum.Z);
+                    break;
+                case 2:
+                    SetVector3Value(ref result, Maximum.X, Minimum.Y, Maximum.Z);
+                    break;
+                case 3:
+                    SetVector3Value(ref result, Minimum.X, Minimum.Y, Maximum.Z);
+                    break;
+                case 4:
+                    SetVector3Value(ref result, Minimum.X, Maximum.Y, Minimum.Z);
+                    break;
+                case 5:
+                    SetVector3Value(ref result, Maximum.X, Maximum.Y, Minimum.Z);
+                    break;
+                case 6:
+                    SetVector3Value(ref result, Maximum.X, Minimum.Y, Minimum.Z);
+                    break;
+                case 7:
+                    SetVector3Value(ref result, Minimum.X, Minimum.Y, Minimum.Z);
+                    break;
+            }
+            return result;
+        }
         public static void CalculateClosestPointInBox(in Vector3 point, in BoundingBox AABB, out Vector3 outPoint, out float outSqrDistance)
         {
             // compute coordinates of point in box coordinate system

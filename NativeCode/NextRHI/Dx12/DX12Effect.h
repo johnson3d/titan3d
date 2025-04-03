@@ -114,8 +114,9 @@ namespace NxRHI
 		{
 		public:
 			AutoRef<ID3D12RootSignature>	Dx12Signature;
-			std::vector<DX12ShaderSignatureBuilder::FSignatureBinder>	CbvSrvUavBinders;
+			std::vector<DX12ShaderSignatureBuilder::FSignatureBinder> CbvSrvUavBinders;
 			std::vector<DX12ShaderSignatureBuilder::FSignatureBinder> SamplerBinders;
+			void* HitGroupShaderIdentifier;
 		};
 		virtual bool BuildEffect(IGpuDevice* device) override;
 		virtual FHitGroup* CreateHitGroup() override

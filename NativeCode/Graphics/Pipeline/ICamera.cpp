@@ -7,6 +7,24 @@ NS_BEGIN
 
 ENGINE_RTTI_IMPL(EngineNS::ICamera);
 
+void ICamera::CopyDataTo(ICamera* target)
+{
+	target->mIsReverseZ = mIsReverseZ;
+	target->mFov = mFov;
+	target->mZNear = mZNear;
+	target->mZFar = mZFar;
+	target->mAspect = mAspect;
+
+	target->mFrustum = mFrustum;
+	target->mIsOrtho = mIsOrtho;
+	target->mWidth = mWidth;
+	target->mHeight = mHeight;
+
+	target->mJitterOffset = mJitterOffset;
+	*target->mLogicData = *mLogicData;
+	*target->mRenderData = *mRenderData;
+}
+
 ICamera::ICamera()
 {
 	mIsOrtho = false;

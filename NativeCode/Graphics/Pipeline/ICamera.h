@@ -150,6 +150,8 @@ public:
 		return mIsReverseZ;
 	}
 	void SetReverseZ(bool bReverseZ);
+
+	void CopyDataTo(ICamera* target);
 protected:
 	void UpdateFrustum();
 	void UpdateFrustumOrtho();

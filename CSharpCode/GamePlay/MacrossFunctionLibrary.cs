@@ -31,35 +31,38 @@ namespace EngineNS.GamePlay
                 Pools.Clear();
             }
         }
-        public TtPrefabNode CreatePrefab(RName prefabName)
+        public TtPrefabNode CreatePrefab(RName prefabName, bool bPooled)
         {
             if (IsDisposed)
                 return null;
-            if (Pools.TryGetValue(prefabName, out var pool))
-            {
-                var task = pool.CloneNode();
-                return task.GetResultUntilCompleted();
-                //return pool.QueryObjectSync();
-            }
-            else
+            if (Pools.TryGetValue(prefabName, out var pool) == false)
             {
                 pool = RegPool(prefabName);
                 if (pool == null)
                     return null;
-
+            }
+            if (bPooled)
+            {
+                return pool.QueryObjectSync();
+            }
+            else
+            {
                 var task = pool.CloneNode();
                 return task.GetResultUntilCompleted();
-            }   
+            }
         }
         public void ReleasePrefab(TtPrefabNode prefabNode)
         {
+            if (IsDisposed)
+                return;
+            if (prefabNode.IsAlloc)
+            {
+                if (Pools.ContainsKey(prefabNode.PrefabName))
+                {
+                    Pools[prefabNode.PrefabName].ReleaseObject(prefabNode);
+                }
+            }
             return;
-            //if (IsDisposed)
-            //    return;
-            //if (Pools.ContainsKey(prefabNode.PrefabName))
-            //{
-            //    Pools[prefabNode.PrefabName].ReleaseObject(prefabNode);
-            //}
         }
         private TtPrefabPool RegPool(RName prefabName)
         {
@@ -117,7 +120,7 @@ namespace EngineNS.GamePlay
         }
         protected override bool OnObjectRelease(TtPrefabNode obj)
         {
-            EngineNS.GamePlay.Scene.TtNode.FTreeCopyStat TreeCopyStat = new (); ;
+            EngineNS.GamePlay.Scene.TtNode.FTreeCopyStat TreeCopyStat = new ();
             TtNode.NodeTreeCopyData(PoolManager.World, obj, mOriginPrefab, ref TreeCopyStat);
             obj.Parent = null;
             return true;
@@ -134,7 +137,7 @@ namespace EngineNS.GamePlay
             TtScene scene)
         {
             EngineNS.GamePlay.Scene.TtNode root = scene;
-            var newPrefab = TtEngine.Instance.GameInstance?.PrefabPoolManager.CreatePrefab(prefab);
+            var newPrefab = TtEngine.Instance.GameInstance?.PrefabPoolManager.CreatePrefab(prefab, false);
             newPrefab.Parent = root;
             return newPrefab;
         }

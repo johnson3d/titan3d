@@ -224,14 +224,13 @@ namespace NxRHI
 		}
 	}
 
+	static bool GDX12ForceCopyDiscriptor = true;
 	DX12GraphicDraw::DX12GraphicDraw()
 	{
 
 	}
 	DX12GraphicDraw::~DX12GraphicDraw()
 	{
-		mCbvSrvUavHeap = nullptr;
-		mSamplerHeap = nullptr;
 	}
 	void DX12GraphicDraw::OnGpuDrawStateUpdated()
 	{
@@ -240,33 +239,23 @@ namespace NxRHI
 	void DX12GraphicDraw::ResetResources()
 	{
 		IGraphicDraw::ResetResources();
-
-		auto device = mDeviceRef.GetPtr();
-		auto effect = this->ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>();
-		if (effect->mSignatureBuilder.CreateHeap(device, mCbvSrvUavHeap, mSamplerHeap))
-		{
-			ResetHeapToNullByEffect(device, effect, mCbvSrvUavHeap, mSamplerHeap);
-		}
 	}
 	void DX12GraphicDraw::OnBindResource(const FEffectBinder* binder, FBindResource& resource)
 	{
 		if (binder->IsBindless())
 			return;
 		
-		auto device = mDeviceRef.GetPtr();
-		auto effect = this->ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>();
-		if (effect->mSignatureBuilder.CreateHeap(device, mCbvSrvUavHeap, mSamplerHeap))
-		{
-			ResetHeapToNullByEffect(device, effect, mCbvSrvUavHeap, mSamplerHeap);
-		}
-
-		BindResourceToHeap(device, binder, resource);
-		//IsDirty = true;
+		//BindResourceToHeap(device, binder, resource);
+		resource.FingerPrint = -1;
 	}
 	void DX12GraphicDraw::BindDescriptorHeaps(DX12GpuDevice* device, DX12CommandList* dx12Cmd)
 	{
 		auto effect = this->ShaderEffect.UnsafeConvertTo<DX12GraphicsEffect>();
+
+		AutoRef<DX12HeapHolder>			mCbvSrvUavHeap;
+		AutoRef<DX12HeapHolder>			mSamplerHeap;
 		effect->mSignatureBuilder.CreateHeap(device, mCbvSrvUavHeap, mSamplerHeap);
+		//ResetHeapToNullByEffect(device, effect, mCbvSrvUavHeap, mSamplerHeap);
 
 		ID3D12DescriptorHeap* descriptorHeaps[4] = {};
 		int NumOfHeaps = 0;
@@ -300,21 +289,29 @@ namespace NxRHI
 			auto binder = i.first->GetShaderBinder();
 			if (binder->IsBindless())
 			{
-				auto bl = (IBindless*)i.second.Resource;
+				auto bl = (DX12Bindless*)i.second.Resource;
 				if (bl)
-					bl->CheckResourceFingerPrint();
-				continue;
+				{
+					bl->mHeap = bl->mBindType == EShaderBindType::SBT_Sampler ? mSamplerHeap : mCbvSrvUavHeap;
+					bl->BindResources();
+					bl->mHeap = nullptr;
+				}
 			}	
-			if (i.second.Resource)
+			else
 			{
-				if (i.second.Resource->GetFingerPrint() != i.second.FingerPrint)
+				BindResourceToHeap(device, i.first, i.second, mCbvSrvUavHeap, mSamplerHeap);
+			}
+			/*if (i.second.Resource)
+			{
+				if (GDX12ForceCopyDiscriptor || i.second.Resource->GetFingerPrint() != i.second.FingerPrint)
 				{
 					BindResourceToHeap(device, i.first, i.second);
 				}
-			}
+			}*/
 		}
 	}
-	void DX12GraphicDraw::BindResourceToHeap(DX12GpuDevice* device, const FEffectBinder* binder, FBindResource& resource)
+	void DX12GraphicDraw::BindResourceToHeap(DX12GpuDevice* device, const FEffectBinder* binder, FBindResource& resource,
+		AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap)
 	{
 		if (binder->ASBinder)
 		{
@@ -344,12 +341,6 @@ namespace NxRHI
 			return nullptr;
 		auto result = new DX12Bindless();
 		result->mDeviceRef.FromObject(mDeviceRef.GetPtr());
-		result->mHeap = binder->BindType == EShaderBindType::SBT_Sampler ? mSamplerHeap : mCbvSrvUavHeap;
-		if (result->mHeap == nullptr)
-		{
-			result->Release();
-			return nullptr;
-		}
 		result->mResources.resize(IBindless::MaxBindless);
 		result->mBindType = binder->BindType;
 		result->mStartIndex = binder->DescriptorIndex;
@@ -392,7 +383,7 @@ namespace NxRHI
 		
 			for (auto& i : BindResources)
 			{
-				CommitResource((DX12CommandList*)cmdlist, EShaderType::SDT_Unknown, i.first->GetShaderBinder(), i.second.Resource);
+				CommitResource((DX12CommandList*)cmdlist, EShaderType::SDT_Unknown, i.first->GetValidShaderBinder(), i.second.Resource);
 			}
 		}
 		
@@ -450,8 +441,7 @@ namespace NxRHI
 	}
 	DX12ComputeDraw::~DX12ComputeDraw()
 	{
-		mCbvSrvUavHeap = nullptr;
-		mSamplerHeap = nullptr;
+		
 	}
 	IBindless* DX12ComputeDraw::CreateBindless(const char* name) const
 	{
@@ -460,12 +450,6 @@ namespace NxRHI
 			return nullptr;
 		auto result = new DX12Bindless();
 		result->mDeviceRef.FromObject(mDeviceRef.GetPtr());
-		result->mHeap = binder->Type == EShaderBindType::SBT_Sampler ? mSamplerHeap : mCbvSrvUavHeap;
-		if (result->mHeap == nullptr)
-		{
-			result->Release();
-			return nullptr;
-		}
 		result->mResources.resize(IBindless::MaxBindless);
 		result->mBindType = binder->Type;
 		result->mStartIndex = binder->DescriptorIndex;
@@ -475,29 +459,17 @@ namespace NxRHI
 	void DX12ComputeDraw::ResetResources() 
 	{
 		IComputeDraw::ResetResources();
-		auto device = mDeviceRef.GetPtr();
-		auto effect = this->mEffect.UnsafeConvertTo<DX12ComputeEffect>();
-		if (effect->mSignatureBuilder.CreateHeap(device, mCbvSrvUavHeap, mSamplerHeap))
-		{
-			ResetHeapToNullByReflector(device, effect->mComputeShader->GetReflector(), mCbvSrvUavHeap, mSamplerHeap);
-		}
 	}
 	void DX12ComputeDraw::OnBindResource(const FShaderBinder* binder, FBindResource& resource)
 	{
 		if (binder->IsBindless())
 			return;
 
-		auto device = mDeviceRef.GetPtr();
-		auto effect = this->mEffect.UnsafeConvertTo<DX12ComputeEffect>();
-		if (effect->mSignatureBuilder.CreateHeap(device, mCbvSrvUavHeap, mSamplerHeap))
-		{
-			ResetHeapToNullByReflector(device, effect->mComputeShader->GetReflector(), mCbvSrvUavHeap, mSamplerHeap);
-		}
-
-		BindResourceToHeap(device, binder, resource);
+		resource.FingerPrint = -1;
 		//IsDirty = true;
 	}
-	void DX12ComputeDraw::BindResourceToHeap(DX12GpuDevice* device, const FShaderBinder* binder, FBindResource& resource)
+	void DX12ComputeDraw::BindResourceToHeap(DX12GpuDevice* device, const FShaderBinder* binder, FBindResource& resource,
+		AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap)
 	{
 		Bind2Heap(device, binder, resource.Resource, mCbvSrvUavHeap, mSamplerHeap);
 		if (resource.Resource)
@@ -507,11 +479,10 @@ namespace NxRHI
 	}
 	void DX12ComputeDraw::BindDescriptorHeaps(DX12GpuDevice* device, DX12CommandList* dx12Cmd)
 	{
+		AutoRef<DX12HeapHolder>			mCbvSrvUavHeap;
+		AutoRef<DX12HeapHolder>			mSamplerHeap;
 		auto effect = this->mEffect.UnsafeConvertTo<DX12ComputeEffect>();
-		if (effect->mSignatureBuilder.CreateHeap(device, mCbvSrvUavHeap, mSamplerHeap))
-		{
-			ResetHeapToNullByReflector(device, effect->mComputeShader->GetReflector(), mCbvSrvUavHeap, mSamplerHeap);
-		}
+		effect->mSignatureBuilder.CreateHeap(device, mCbvSrvUavHeap, mSamplerHeap);
 		
 		ID3D12DescriptorHeap* descriptorHeaps[4] = {};
 		int NumOfHeaps = 0;
@@ -546,18 +517,25 @@ namespace NxRHI
 			auto binder = i.first;
 			if (binder->IsBindless())
 			{
-				auto bl = (IBindless*)i.second.Resource;
+				auto bl = (DX12Bindless*)i.second.Resource;
 				if (bl)
-					bl->CheckResourceFingerPrint();
-				continue;
+				{
+					bl->mHeap = bl->mBindType == EShaderBindType::SBT_Sampler ? mSamplerHeap : mCbvSrvUavHeap;
+					bl->BindResources();
+					bl->mHeap = nullptr;
+				}
 			}
-			if (i.second.Resource)
+			else
 			{
-				if (i.second.Resource->GetFingerPrint() != i.second.FingerPrint)
+				BindResourceToHeap(device, i.first, i.second, mCbvSrvUavHeap, mSamplerHeap);
+			}
+			/*if (i.second.Resource)
+			{
+				if (GDX12ForceCopyDiscriptor || i.second.Resource->GetFingerPrint() != i.second.FingerPrint)
 				{
 					BindResourceToHeap(device, i.first, i.second);
 				}
-			}
+			}*/
 		}
 	}
 	void DX12ComputeDraw::Commit(ICommandList* cmdlist, bool bRefResource)
@@ -608,19 +586,13 @@ namespace NxRHI
 
 	void DX12RayTracingDraw::OnBindResource(const FShaderBinder* binder, FBindResource& resource)
 	{
-		if (binder->IsBindless())
-			return;
+		/*if (binder->IsBindless())
+			return;*/
 
-		auto device = mDeviceRef.GetPtr();
-		auto effect = this->ShaderEffect.UnsafeConvertTo<DX12RayTracingEffect>();
-		if (effect->mSignatureBuilder.CreateHeap(device, mCbvSrvUavHeap, mSamplerHeap))
-		{
-			ResetHeapToNullByReflector(device, effect->GetReflector(), mCbvSrvUavHeap, mSamplerHeap);
-		}
-
-		BindResourceToHeap(device, binder, resource);
+		resource.FingerPrint = -1;
 	}
-	void DX12RayTracingDraw::BindResourceToHeap(DX12GpuDevice* device, const FShaderBinder* binder, FBindResource& resource)
+	void DX12RayTracingDraw::BindResourceToHeap(DX12GpuDevice* device, const FShaderBinder* binder, FBindResource& resource,
+		AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap)
 	{
 		Bind2Heap(device, binder, resource.Resource, mCbvSrvUavHeap, mSamplerHeap);
 		if (resource.Resource)
@@ -628,7 +600,8 @@ namespace NxRHI
 		else
 			resource.FingerPrint = 0;
 	}
-	void DX12RayTracingDraw::BindDescriptorHeaps(DX12GpuDevice* device, DX12CommandList* dx12Cmd, DX12RayTracingEffect* effect)
+	void DX12RayTracingDraw::BindDescriptorHeaps(DX12GpuDevice* device, DX12CommandList* dx12Cmd, DX12RayTracingEffect* effect,
+		AutoRef<DX12HeapHolder>& mCbvSrvUavHeap, AutoRef<DX12HeapHolder>& mSamplerHeap)
 	{
 		ID3D12DescriptorHeap* descriptorHeaps[4] = {};
 		int NumOfHeaps = 0;
@@ -663,19 +636,25 @@ namespace NxRHI
 			auto binder = i.first;
 			if (binder->IsBindless())
 			{
-				auto bl = (IBindless*)i.second.Resource;
+				auto bl = (DX12Bindless*)i.second.Resource;
 				if (bl)
-					bl->CheckResourceFingerPrint();
-				continue;
-			}
-
-			if (i.second.Resource)
-			{
-				if (i.second.Resource->GetFingerPrint() != i.second.FingerPrint)
 				{
-					BindResourceToHeap(device, i.first, i.second);
+					bl->mHeap = bl->mBindType == EShaderBindType::SBT_Sampler ? mSamplerHeap : mCbvSrvUavHeap;
+					bl->BindResources();
+					bl->mHeap = nullptr;
 				}
 			}
+			else
+			{
+				BindResourceToHeap(device, i.first, i.second, mCbvSrvUavHeap, mSamplerHeap);
+			}
+			/*if (i.second.Resource)
+			{
+				if (GDX12ForceCopyDiscriptor || i.second.Resource->GetFingerPrint() != i.second.FingerPrint)
+				{
+					BindResourceToHeap(device, i.first, i.second, mCbvSrvUavHeap, mSamplerHeap);
+				}
+			}*/
 		}
 	}
 	IBindless* DX12RayTracingDraw::CreateBindless(const char* name) const
@@ -685,12 +664,6 @@ namespace NxRHI
 			return nullptr;
 		auto result = new DX12Bindless();
 		result->mDeviceRef.FromObject(mDeviceRef.GetPtr());
-		result->mHeap = binder->Type == EShaderBindType::SBT_Sampler ? mSamplerHeap : mCbvSrvUavHeap;
-		if (result->mHeap == nullptr)
-		{
-			result->Release();
-			return nullptr;
-		}
 		result->mResources.resize(IBindless::MaxBindless);
 		result->mBindType = binder->Type;
 		result->mStartIndex = binder->DescriptorIndex;
@@ -708,11 +681,11 @@ namespace NxRHI
 		auto effect = this->ShaderEffect.UnsafeConvertTo<DX12RayTracingEffect>();
 		//effect->BuildState(dx12Cmd->GetDX12Device());
 
-		if (effect->mSignatureBuilder.CreateHeap(device, mCbvSrvUavHeap, mSamplerHeap))
-		{
-			ResetHeapToNullByReflector(device, effect->GetReflector(), mCbvSrvUavHeap, mSamplerHeap);
-		}
+		AutoRef<DX12HeapHolder>			mCbvSrvUavHeap;
+		AutoRef<DX12HeapHolder>			mSamplerHeap;
+		effect->mSignatureBuilder.CreateHeap(device, mCbvSrvUavHeap, mSamplerHeap);
 
+		const UINT shaderIdentifierSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 		if (mHitGroupShaderBindTable == nullptr)
 		{
 			FBufferDesc hitGroupDesc{};
@@ -721,7 +694,6 @@ namespace NxRHI
 			hitGroupDesc.CpuAccess = ECpuAccess::CAS_WRITE;
 			hitGroupDesc.Usage = EGpuUsage::USAGE_STAGING;
 			IBlobObject blob;
-			const UINT shaderIdentifierSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 			ShaderBindTables.clear();
 			for (auto& i : effect->mHitGroups)
 			{
@@ -730,6 +702,8 @@ namespace NxRHI
 				auto group = i.UnsafeConvertTo<DX12RayTracingEffect::DX12HitGroup>();
 				sbt.HitGroup = group;
 				auto hitGroupShaderIdentifier = effect->mStateObjectProperties->GetShaderIdentifier(StringHelper::strtowstr(group->Name).c_str());
+				sbt.HitGroup->HitGroupShaderIdentifier = hitGroupShaderIdentifier;
+
 				blob.PushData(hitGroupShaderIdentifier, shaderIdentifierSize);
 				PushSize += shaderIdentifierSize;
 				for (auto& i : group->CbvSrvUavBinders)
@@ -757,8 +731,37 @@ namespace NxRHI
 			hitGroupDesc.InitData = blob.GetData();
 			mHitGroupShaderBindTable = MakeWeakRef(new FUploadBuffer(MakeWeakRef(device->CreateBuffer(&hitGroupDesc))));
 		}
+		else
+		{
+			auto pData = (BYTE*)mHitGroupShaderBindTable->GetPtr();
+			ProxyMemStreamWriter blob(pData, mHitGroupShaderBindTable->GetSize());
+			
+			for (auto& sbt : ShaderBindTables)
+			{	
+				int PushSize = 0;
+				blob.Write(sbt.HitGroup->HitGroupShaderIdentifier, shaderIdentifierSize);
+				PushSize += shaderIdentifierSize;
+				for (auto& i : sbt.HitGroup->CbvSrvUavBinders)
+				{
+					D3D12_GPU_DESCRIPTOR_HANDLE value = mCbvSrvUavHeap->GetGpuAddress(i.DescriptorStart);
+					blob.Write(&value, sizeof(D3D12_GPU_DESCRIPTOR_HANDLE));
+					PushSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
+				}
+				for (auto& i : sbt.HitGroup->SamplerBinders)
+				{
+					D3D12_GPU_DESCRIPTOR_HANDLE value = mSamplerHeap->GetGpuAddress(i.DescriptorStart);
+					blob.Write(&value, sizeof(D3D12_GPU_DESCRIPTOR_HANDLE));
+					PushSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
+				}
+				auto alignSize = Align(PushSize, D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT);
+				if (alignSize - PushSize)
+				{
+					blob.Write(nullptr, alignSize - PushSize);
+				}
+			}
+		}
 
-		BindDescriptorHeaps(device, dx12Cmd, effect);
+		BindDescriptorHeaps(device, dx12Cmd, effect, mCbvSrvUavHeap, mSamplerHeap);
 
 		for (auto& i : BindResources)
 		{
