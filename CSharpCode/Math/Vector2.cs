@@ -110,6 +110,10 @@ namespace EngineNS
                 return new Vector2();
             }
         }
+        public DVector2 AsDVector()
+        {
+            return new DVector2(X, Y);
+        }
         public void SetValue(float x, float y)
         {
             X = x;
