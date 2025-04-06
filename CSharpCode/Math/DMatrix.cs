@@ -780,5 +780,58 @@ namespace EngineNS
 
             MakeViewMatrix(out result, in eye, in vDir, in vUp, in vRight);
         }
+
+        public static DMatrix MakeShadow(DVector3 lightDir, DPlane plane)
+        {
+            DMatrix result;
+            plane.Normalize();
+            double dot = ((plane.Normal.X * lightDir.X) + (plane.Normal.Y * lightDir.Y)) + (plane.Normal.Z * lightDir.Z);
+            double x = -plane.Normal.X;
+            double y = -plane.Normal.Y;
+            double z = -plane.Normal.Z;
+            double d = -plane.D;
+            result.M11 = (x * lightDir.X) + dot;
+            result.M21 = y * lightDir.X;
+            result.M31 = z * lightDir.X;
+            result.M41 = d * lightDir.X;
+            result.M12 = x * lightDir.Y;
+            result.M22 = (y * lightDir.Y) + dot;
+            result.M32 = z * lightDir.Y;
+            result.M42 = d * lightDir.Y;
+            result.M13 = x * lightDir.Z;
+            result.M23 = y * lightDir.Z;
+            result.M33 = (z * lightDir.Z) + dot;
+            result.M43 = d * lightDir.Z;
+            result.M14 = 0.0f;
+            result.M24 = 0.0f;
+            result.M34 = 0.0f;
+            result.M44 = dot;
+            return result;
+        }
+        public static void MakeShadow(in DVector3 light, in DPlane plane, out DMatrix result)
+        {
+            plane.Normalize();
+            double dot = ((plane.Normal.X * light.X) + (plane.Normal.Y * light.Y)) + (plane.Normal.Z * light.Z);
+            double x = -plane.Normal.X;
+            double y = -plane.Normal.Y;
+            double z = -plane.Normal.Z;
+            double d = -plane.D;
+            result.M11 = (x * light.X) + dot;
+            result.M21 = y * light.X;
+            result.M31 = z * light.X;
+            result.M41 = d * light.X;
+            result.M12 = x * light.Y;
+            result.M22 = (y * light.Y) + dot;
+            result.M32 = z * light.Y;
+            result.M42 = d * light.Y;
+            result.M13 = x * light.Z;
+            result.M23 = y * light.Z;
+            result.M33 = (z * light.Z) + dot;
+            result.M43 = d * light.Z;
+            result.M14 = 0.0f;
+            result.M24 = 0.0f;
+            result.M34 = 0.0f;
+            result.M44 = dot;
+        }
     }
 }

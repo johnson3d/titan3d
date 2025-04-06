@@ -106,7 +106,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="normal">平面法向量</param>
         /// <param name="d">偏移值D</param>
-        public DPlane(DVector3 normal, double d)
+        public DPlane(in DVector3 normal, double d)
         {
             Normal = normal;
             D = d;

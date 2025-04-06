@@ -2384,7 +2384,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="plane">面对象</param>
         /// <param name="result">反射矩阵</param>
-        public static void Reflection(ref Plane plane, out Matrix result)
+        public static void Reflection(in Plane plane, out Matrix result)
         {
             plane.Normalize();
             float x = plane.Normal.X;
@@ -2416,27 +2416,27 @@ namespace EngineNS
         /// <param name="light">光源坐标</param>
         /// <param name="plane">面对象</param>
         /// <returns>返回阴影矩阵</returns>
-        public static Matrix Shadow(Vector4 light, Plane plane)
+        public static Matrix MakeShadow(in Vector3 lightDir, in Plane plane)
         {
             Matrix result;
             plane.Normalize();
-            float dot = ((plane.Normal.X * light.X) + (plane.Normal.Y * light.Y)) + (plane.Normal.Z * light.Z);
+            float dot = ((plane.Normal.X * lightDir.X) + (plane.Normal.Y * lightDir.Y)) + (plane.Normal.Z * lightDir.Z);
             float x = -plane.Normal.X;
             float y = -plane.Normal.Y;
             float z = -plane.Normal.Z;
             float d = -plane.D;
-            result.M11 = (x * light.X) + dot;
-            result.M21 = y * light.X;
-            result.M31 = z * light.X;
-            result.M41 = d * light.X;
-            result.M12 = x * light.Y;
-            result.M22 = (y * light.Y) + dot;
-            result.M32 = z * light.Y;
-            result.M42 = d * light.Y;
-            result.M13 = x * light.Z;
-            result.M23 = y * light.Z;
-            result.M33 = (z * light.Z) + dot;
-            result.M43 = d * light.Z;
+            result.M11 = (x * lightDir.X) + dot;
+            result.M21 = y * lightDir.X;
+            result.M31 = z * lightDir.X;
+            result.M41 = d * lightDir.X;
+            result.M12 = x * lightDir.Y;
+            result.M22 = (y * lightDir.Y) + dot;
+            result.M32 = z * lightDir.Y;
+            result.M42 = d * lightDir.Y;
+            result.M13 = x * lightDir.Z;
+            result.M23 = y * lightDir.Z;
+            result.M33 = (z * lightDir.Z) + dot;
+            result.M43 = d * lightDir.Z;
             result.M14 = 0.0f;
             result.M24 = 0.0f;
             result.M34 = 0.0f;
@@ -2449,7 +2449,7 @@ namespace EngineNS
         /// <param name="light">光源坐标</param>
         /// <param name="plane">面对象</param>
         /// <param name="result">阴影矩阵</param>
-        public static void Shadow(ref Vector4 light, ref Plane plane, out Matrix result)
+        public static void MakeShadow(in Vector3 light, in Plane plane, out Matrix result)
         {
             plane.Normalize();
             float dot = ((plane.Normal.X * light.X) + (plane.Normal.Y * light.Y)) + (plane.Normal.Z * light.Z);

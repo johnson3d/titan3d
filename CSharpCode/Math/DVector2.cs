@@ -598,7 +598,7 @@ namespace EngineNS
         /// <param name="factor">插值因子</param>
         /// <returns>返回计算后的向量</returns>
         [Rtti.Meta]
-        public static DVector2 Lerp(DVector2 start, DVector2 end, double factor)
+        public static DVector2 Lerp(in DVector2 start, in DVector2 end, double factor)
         {
             DVector2 vector;
 
@@ -615,7 +615,7 @@ namespace EngineNS
         /// <param name="factor">插值因子</param>
         /// <param name="result">计算后的向量</param>
         [Rtti.Meta]
-        public static void Lerp( ref DVector2 start, ref DVector2 end, double factor, out DVector2 result )
+        public static void Lerp(in DVector2 start, in DVector2 end, double factor, out DVector2 result )
 	    {
 		    DVector2 r;
 		    r.X = start.X + ((end.X - start.X) * factor);

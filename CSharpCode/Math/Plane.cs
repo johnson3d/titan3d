@@ -107,7 +107,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="normal">平面法向量</param>
         /// <param name="d">偏移值D</param>
-        public Plane(Vector3 normal, float d)
+        public Plane(in Vector3 normal, float d)
         {
             Normal = normal;
             D = d;
