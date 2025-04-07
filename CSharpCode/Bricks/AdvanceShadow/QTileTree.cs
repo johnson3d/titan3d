@@ -5,9 +5,8 @@ using EngineNS.GamePlay.Scene;
 using EngineNS.Thread.Async;
 using EngineNS.GamePlay;
 using System.ComponentModel;
-using static EngineNS.Bricks.AdvanceShadow.TtQTree;
-using System.Security.Cryptography.Xml;
 using static EngineNS.Bricks.AdvanceShadow.TtQNode;
+using Assimp;
 
 namespace EngineNS.Bricks.AdvanceShadow
 {
@@ -50,10 +49,26 @@ namespace EngineNS.Bricks.AdvanceShadow
             public TtNode SceneNode;
             public DBoundingBox2D AABB;
         }
-        public List<FShadowObject> ShadowObjects = new List<FShadowObject>();
-        internal void PushObject(in FShadowObject shadowObj)
+        public Dictionary<TtNode, FShadowObject> ShadowObjects = new Dictionary<TtNode, FShadowObject>();
+        internal bool PushObject(in FShadowObject shadowObj)
         {
-            ShadowObjects.Add(shadowObj);
+            if (DBoundingBox2D.Contains(in shadowObj.AABB, in AABB) == ContainmentType.Disjoint)
+            {
+                return false;
+            }
+            ShadowObjects.Add(shadowObj.SceneNode, shadowObj);
+            return true;
+        }
+        public void RemoveShadowNode(TtNode node)
+        {
+            ShadowObjects.Remove(node);
+            if (Child00 != null)
+            {
+                Child00.RemoveShadowNode(node);
+                Child01.RemoveShadowNode(node);
+                Child10.RemoveShadowNode(node);
+                Child11.RemoveShadowNode(node);
+            }
         }
         public ref FQNode GetNodeData(TtQTree tree)
         {
@@ -66,11 +81,58 @@ namespace EngineNS.Bricks.AdvanceShadow
             //todo 增加检测是否空node
             GetNodeData(tree).Tile = tree.AllocTile();
         }
-        public void PushShadowObjects(TtQTree tree, List<FShadowObject> nodes)
+        public void PushShadowObjects(TtQTree tree, Dictionary<TtNode,FShadowObject> nodes)
         {
             foreach (var i in nodes)
             {
-                this.PushObject(in i);
+                if (ShadowObjects.ContainsKey(i.Key))
+                    continue;
+                this.PushObject(i.Value);
+            }
+        }
+
+        public void GatherLeafs(List<TtQNode> leafs)
+        {
+            if (Child00 == null)
+            {
+                leafs.Add(this);
+                return;
+            }
+            Child00.GatherLeafs(leafs);
+            Child01.GatherLeafs(leafs);
+            Child10.GatherLeafs(leafs);
+            Child11.GatherLeafs(leafs);
+        }
+        public int ShadowObjectCount
+        {
+            get => CountShadowObjects(true);
+        }
+        public int CountShadowObjects(bool bExludeSame = true)
+        {
+            List<TtQNode> leafs = new List<TtQNode>();
+            GatherLeafs(leafs);
+            if (bExludeSame)
+            {
+                Dictionary<TtNode, FShadowObject> objs = new Dictionary<TtNode, FShadowObject>();
+                foreach (var i in leafs)
+                {
+                    foreach(var j in i.ShadowObjects)
+                    {
+                        if (objs.ContainsKey(j.Key))
+                            continue;
+                        objs.Add(j.Key, j.Value);
+                    }
+                }
+                return objs.Count;
+            }
+            else
+            {
+                int result = 0;
+                foreach (var i in leafs)
+                {
+                    result += i.ShadowObjects.Count;
+                }
+                return result;
             }
         }
     }
@@ -149,21 +211,47 @@ namespace EngineNS.Bricks.AdvanceShadow
         {
             TileAllocator.Push(index);
         }
+        [ThreadStatic]
+        static Profiler.TimeScope mScopeUpdateQTree;
+        static Profiler.TimeScope ScopeUpdateQTree
+        {
+            get
+            {
+                if (mScopeUpdateQTree == null)
+                    mScopeUpdateQTree = new Profiler.TimeScope(typeof(TtQTree), nameof(UpdateQTree));
+                return mScopeUpdateQTree;
+            }
+        }
         public void UpdateQTree(TtCamera cameral)
         {
-            UpdateQTree(cameral, Root);
+            using (new Profiler.TimeScopeHelper(ScopeUpdateQTree))
+            {
+                UpdateQTree(cameral, Root);
+                //var count = Root.ShadowObjectCount;
+                //if (count > 0)
+                //{
+                //}
+            }   
         }
         public void FreeNodeTree(TtQNode node)
         {
             if (node.Child00 != null)
             {
                 FreeNodeTree(node.Child00);
+                node.PushShadowObjects(this, node.Child00.ShadowObjects);
+                node.Child00.ShadowObjects.Clear();
                 node.Child00 = null;
                 FreeNodeTree(node.Child01);
+                node.PushShadowObjects(this, node.Child01.ShadowObjects);
+                node.Child01.ShadowObjects.Clear();
                 node.Child01 = null;
                 FreeNodeTree(node.Child10);
+                node.PushShadowObjects(this, node.Child10.ShadowObjects);
                 node.Child10 = null;
+                node.Child10.ShadowObjects.Clear();
                 FreeNodeTree(node.Child11);
+                node.PushShadowObjects(this, node.Child11.ShadowObjects);
+                node.Child11.ShadowObjects.Clear();
                 node.Child11 = null;
             }
             if (QNodes[node.NodeIndex].Tile >= 0)
@@ -173,7 +261,6 @@ namespace EngineNS.Bricks.AdvanceShadow
             }
             FreeNode(node.NodeIndex);
             node.NodeIndex = -1;
-            node.ShadowObjects.Clear();
         }
         protected void UpdateQTree(TtCamera cameral, TtQNode node)
         {
@@ -183,12 +270,16 @@ namespace EngineNS.Bricks.AdvanceShadow
                 if (node.Child00 != null)
                 {
                     FreeNodeTree(node.Child00);
+                    node.PushShadowObjects(this, node.Child00.ShadowObjects);
                     node.Child00 = null;
                     FreeNodeTree(node.Child01);
+                    node.PushShadowObjects(this, node.Child01.ShadowObjects);
                     node.Child01 = null;
                     FreeNodeTree(node.Child10);
+                    node.PushShadowObjects(this, node.Child10.ShadowObjects);
                     node.Child10 = null;
                     FreeNodeTree(node.Child11);
+                    node.PushShadowObjects(this, node.Child11.ShadowObjects);
                     node.Child11 = null;
                 }
                 return;
@@ -208,28 +299,33 @@ namespace EngineNS.Bricks.AdvanceShadow
                 var min = new DVector2(node.AABB.Minimum.X, node.AABB.Minimum.Y);
                 var max = new DVector2(center.X, center.Y);
                 node.Child00.Initialize(this, in min, in max);
-                node.Child00.PushShadowObjects(this, node.ShadowObjects);
-
+                
                 data.Child01 = AllocNode();
                 node.Child01 = new TtQNode(data.Child01, node.DeepLevel + 1);
                 min = new DVector2(center.X, node.AABB.Minimum.Y);
                 max = new DVector2(node.AABB.Maximum.X, center.Y);
                 node.Child01.Initialize(this, in min, in max);
-                node.Child01.PushShadowObjects(this, node.ShadowObjects);
-
+                
                 data.Child10 = AllocNode();
                 node.Child10 = new TtQNode(data.Child10, node.DeepLevel + 1);
                 min = new DVector2(node.AABB.Minimum.X, center.Y);
                 max = new DVector2(center.X, node.AABB.Maximum.Y);
                 node.Child10.Initialize(this, in min, in max);
-                node.Child10.PushShadowObjects(this, node.ShadowObjects);
-
+                
                 data.Child11 = AllocNode();
                 node.Child11 = new TtQNode(data.Child11, node.DeepLevel + 1);
                 min = new DVector2(center.X, center.Y);
                 max = new DVector2(node.AABB.Maximum.X, node.AABB.Maximum.Y); ;
                 node.Child11.Initialize(this, in min, in max);
+            }
+
+            if (node.ShadowObjects.Count > 0)
+            {
+                node.Child00.PushShadowObjects(this, node.ShadowObjects);
+                node.Child01.PushShadowObjects(this, node.ShadowObjects);
+                node.Child10.PushShadowObjects(this, node.ShadowObjects);
                 node.Child11.PushShadowObjects(this, node.ShadowObjects);
+                node.ShadowObjects.Clear();
             }
 
             UpdateQTree(cameral, node.Child00);
@@ -323,17 +419,20 @@ namespace EngineNS.Bricks.AdvanceShadow
         }
         private void PushShadowObject(TtQNode node, in FShadowObject shadowObject)
         {
-            if (node.AABB.Contains(shadowObject.AABB) == ContainmentType.Disjoint)
+            if (DBoundingBox2D.Contains(in shadowObject.AABB, in node.AABB) == ContainmentType.Disjoint)
             {
                 return;
             }
-            node.PushObject(shadowObject);
             if (node.Child00 != null)
             {
                 PushShadowObject(node.Child00, in shadowObject);
                 PushShadowObject(node.Child01, in shadowObject);
                 PushShadowObject(node.Child10, in shadowObject);
                 PushShadowObject(node.Child11, in shadowObject);
+            }
+            else
+            {
+                node.PushObject(shadowObject);
             }
         }
     }
@@ -415,6 +514,24 @@ namespace EngineNS.Bricks.AdvanceShadow
                     }
                 }
             }
+        }
+
+        public void PushShadowNodes(TtNode parent)
+        {
+            var world = parent.GetWorld();
+            var dir = world.GetSun(0).DirectionLight.Direction;
+            parent.IterateNodes((node, arg) =>
+            {
+                if (node.IsCastShadow)
+                {
+                    this.mShadowMapTree.PushShadowNode(node, dir);
+                }
+                return true;
+            }, null);
+        }
+        public void RemoveShadowNode(TtNode parent)
+        {
+            this.mShadowMapTree.Root.RemoveShadowNode(parent);
         }
     }
 
