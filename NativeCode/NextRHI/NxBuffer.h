@@ -1123,6 +1123,19 @@ namespace NxRHI
 		AutoRef<ITexture>			GpuResource;
 	};
 
+	enum TR_ENUM()
+		EDsvType
+	{
+		DSV_Buffer,
+			DSV_Texture1D,
+			DSV_Texture1DArray,
+			DSV_Texture2D,
+			DSV_Texture2DArray,
+			DSV_Texture2DMS,
+			DSV_Texture2DMSArray,
+			DSV_Texture3D,
+	};
+
 	struct TR_CLASS(SV_LayoutStruct = 8)
 		FDsvDesc
 	{
@@ -1132,18 +1145,21 @@ namespace NxRHI
 		}
 		void SetDefault()
 		{
+			Type = DSV_Texture2D;
 			Width = 0;
 			Height = 0;
 			Format = PXF_D24_UNORM_S8_UINT;
 			CPUAccess = 0;
 			GpuBuffer = nullptr;
+			ArrayIndex = 0xFFFFFFFF;
 			MipLevel = 1;
 		}
-
+		EDsvType				Type = DSV_Texture2D;
 		UINT					Width;
 		UINT					Height;
 		EPixelFormat			Format;
 		UINT					CPUAccess;
+		UINT					ArrayIndex;	
 		UINT					MipLevel;
 		IGpuResource*			GpuBuffer;
 	};

@@ -1,5 +1,4 @@
-﻿using NPOI.POIFS.Properties;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -37,8 +36,22 @@ namespace EngineNS.NxRHI
     {
 
     }
+
+    public enum ECommandListState
+    {
+        None,
+        Recording,
+        FinishRecord,
+        Committed,
+    }
     public class TtCommandList : AuxPtrType<NxRHI.ICommandList>
     {
+        ECommandListState mCommandListState = ECommandListState.None;
+        public ECommandListState CommandListState
+        {
+            get => mCommandListState;
+            internal set => mCommandListState = value;
+        }
         public override void Dispose()
         {
             CurrentGpuScope = null;
@@ -58,11 +71,13 @@ namespace EngineNS.NxRHI
         }
         public ICmdRecorder BeginCommand()
         {
+            mCommandListState = ECommandListState.Recording;
             return mCoreObject.BeginCommand();
         }
 		public void EndCommand()
         {
             mCoreObject.EndCommand();
+            mCommandListState = ECommandListState.FinishRecord;
         }
         private NxRHI.TtGpuScope CurrentGpuScope;
         public unsafe bool BeginPass(TtFrameBuffers fb, in FRenderPassClears passClears, string name)
@@ -419,5 +434,58 @@ namespace EngineNS.NxRHI
             }, IntPtr.Zero.ToPointer());
             mCmdList = null;
         }
+    }
+
+    public class TtCmdListManager : IDisposable
+    {
+        public void Dispose()
+        {
+            while (mUsingCmdlists.Count > 0)
+            {
+                Tick();
+            }
+            foreach (var i in mIdleCmdlists)
+            {
+                i.Dispose();
+            }
+            mIdleCmdlists.Clear();
+        }
+        public Stack<TtCommandList> mIdleCmdlists = new Stack<TtCommandList>();
+        public List<TtCommandList> mUsingCmdlists = new List<TtCommandList>();
+        public TtCommandList GetCmdList()
+        {
+            lock (this)
+            {
+                if (mIdleCmdlists.Count == 0)
+                {
+                    var t = TtEngine.Instance.GfxDevice.RenderContext.CreateCommandList();
+                    mIdleCmdlists.Push(t);
+                }
+                var result = mIdleCmdlists.Pop();
+                mUsingCmdlists.Add(result);
+                return result;
+            }
+        }
+        public void Tick()
+        {
+            lock (this)
+            {
+                for (int i = mUsingCmdlists.Count - 1; i >= 0; i--)
+                {
+                    var fence = mUsingCmdlists[i].mCoreObject.GetCommitFence();
+                    if (mUsingCmdlists[i].CommandListState == ECommandListState.Committed && fence.GetExpectValue() <= fence.GetCompletedValue())
+                    {
+                        mUsingCmdlists[i].CommandListState = ECommandListState.None;
+                        mIdleCmdlists.Push(mUsingCmdlists[i]);
+                        mUsingCmdlists.RemoveAt(i);
+                    }
+                }
+            }
+        }
+    }
+
+    partial class TtGpuDevice
+    {
+        public TtCmdListManager CmdListManager { get; } = new TtCmdListManager();
     }
 }

@@ -94,8 +94,6 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-            BasePass.Initialize(rc, debugName);
-
             var defines = new NxRHI.TtShaderDefinitions();
             defines.mCoreObject.AddDefine("DispatchX", $"{Dispatch_SetupDimArray2.X}");
             defines.mCoreObject.AddDefine("DispatchY", $"{Dispatch_SetupDimArray2.Y}");
@@ -271,7 +269,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 if (Setup == null)
                     return;
-                var cmd = BasePass.DrawCmdList;
+                var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
                 using (new NxRHI.TtCmdListScope(cmd))
                 {
                     var srvIdx = SetupDrawcall.FindBinder(NxRHI.EShaderBindType.SBT_SRV, "DepthBuffer");

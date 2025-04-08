@@ -103,7 +103,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual void Dispose()
         {
-            CoreSDK.DisposeObject(ref BasePass);
+            
         }
         internal int mMaxLeafDistance = 0;
         public int MaxLeafDistance
@@ -130,7 +130,6 @@ namespace EngineNS.Graphics.Pipeline
         {
             return Color4b.FromRgb(255, 0, 255);
         }
-        public TtDrawBuffers BasePass = new TtDrawBuffers();
         public TtRenderGraph RenderGraph { get; internal set; }
         protected List<TtRenderGraphPin> InputGraphPins { get; } = new List<TtRenderGraphPin>();
         protected List<TtRenderGraphPin> OutputGraphPins { get; } = new List<TtRenderGraphPin>();
@@ -291,7 +290,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual void TickSync(TtRenderPolicy policy)
         {
-            BasePass.SwapBuffer();
+            
         }
 
         public void TryReleaseBufers(List<TtRenderGraphLinker> linkers, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)

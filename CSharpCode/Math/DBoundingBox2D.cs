@@ -316,6 +316,21 @@ namespace EngineNS
             DVector2.Minimize(in Minimum, in pos, out Minimum);
             DVector2.Maximize(in Maximum, in pos, out Maximum);
         }
+        public void Merge(in DBoundingBox2D box)
+        {
+            if (IsEmpty())
+            {
+                Minimum = box.Minimum;
+                Maximum = box.Maximum;
+            }
+            else if (box.IsEmpty())
+                return;
+            else
+            {
+                Minimum = DVector2.Minimize(in Minimum, in box.Minimum);
+                Maximum = DVector2.Maximize(in Maximum, in box.Maximum);
+            }
+        }
         [Rtti.Meta]
         public static DBoundingBox2D Merge(in DBoundingBox2D box1, in DBoundingBox2D box2)
         {

@@ -470,7 +470,7 @@ namespace EngineNS.Bricks.Particle
             else
             {
                 UpdateCPU(nebula, particleSystem, elapsed);
-                Flush2GPU(particleSystem.BasePass.DrawCmdList.mCoreObject);
+                Flush2GPU(particleSystem.mCmdList.mCoreObject);
             }
         }
         public unsafe void UpdateCPU(TtNebulaParticle nebula, UParticleGraphNode particleSystem, float elapsed)
@@ -515,7 +515,7 @@ namespace EngineNS.Bricks.Particle
                 return;
             CurrentQueue.UpdateComputeDrawcall(TtEngine.Instance.GfxDevice.RenderContext, this);
 
-            var cmdlist = particleSystem.BasePass.DrawCmdList;
+            var cmdlist = particleSystem.mCmdList;
 
             cmdlist.PushGpuDraw(CurrentQueue.mParticleUpdateDrawcall);
             //CurrentQueue.mParticleUpdateDrawcall.Commit(cmdlist);

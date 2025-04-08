@@ -55,7 +55,6 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             CreateGBuffers(policy, ColorPinInOut.Attachement.Format);
 
-            BasePass.Initialize(rc, debugName + ".BasePass");
             DebugName = debugName;
 
             mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtScreenSpaceUIShading>();
@@ -108,7 +107,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                var cmdlist = BasePass.DrawCmdList;
+                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
                 using (new NxRHI.TtCmdListScope(cmdlist))
                 {
                     var hud = policy.ViewportSlate?.HUD;

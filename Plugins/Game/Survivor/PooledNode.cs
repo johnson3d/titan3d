@@ -101,7 +101,7 @@ namespace Survivor
                     var rd = MathHelper.RandomDirection(false).AsDVector();
                     mesh.Placement.Position = rd * size;
                     mesh.IsCastShadow = true;
-                    AdvShadowNode?.PushShadowNodes(mesh);
+                    AdvShadowNode?.PushShadowNodes(mesh, false);
                     mMeshes.Add(mesh);
                 }
             }

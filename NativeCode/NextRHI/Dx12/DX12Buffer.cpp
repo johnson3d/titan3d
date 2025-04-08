@@ -1698,7 +1698,28 @@ namespace NxRHI
 			DSVDesc.Format = DXGI_FORMAT_D32_FLOAT;
 			break;
 		}
-		DSVDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		switch (Desc.Type)
+		{
+			case DSV_Texture2D:
+			{
+				DSVDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+				DSVDesc.Texture2D.MipSlice = Desc.MipLevel;
+			}
+			break;
+			case DSV_Texture2DArray:
+			{
+				DSVDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
+				DSVDesc.Texture2DArray.MipSlice = Desc.MipLevel;
+				DSVDesc.Texture2DArray.FirstArraySlice = Desc.ArrayIndex;
+				DSVDesc.Texture2DArray.ArraySize = pBuffer->Desc.ArraySize;
+			}
+			break;
+			default:
+			{
+				ASSERT(false);
+			}
+			break;
+		}
 		
 		device->mDevice->CreateDepthStencilView((ID3D12Resource*)pBuffer->GetHWBuffer(), &DSVDesc, mView->GetCpuAddress(0));
 

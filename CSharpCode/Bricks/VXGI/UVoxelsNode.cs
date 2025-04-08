@@ -298,8 +298,6 @@ namespace EngineNS.Bricks.VXGI
                 await InitVxDebugger(material);
             }
 
-            BasePass.Initialize(rc, debugName + ".BasePass");
-
             mCurStep = EStep.Setup;
 
             //ResetComputeDrawcall(policy);
@@ -415,7 +413,7 @@ namespace EngineNS.Bricks.VXGI
                         {
                             if (SetupVoxelGroupAllocator != null)
                             {
-                                var cmd = BasePass.DrawCmdList;
+                                var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
 
                                 using (new NxRHI.TtCmdListScope(cmd))
                                 {
@@ -435,7 +433,7 @@ namespace EngineNS.Bricks.VXGI
                         {
                             if (InjectVoxels != null)
                             {
-                                var cmd = BasePass.DrawCmdList;
+                                var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
 
                                 using (new NxRHI.TtCmdListScope(cmd))
                                 {
@@ -464,7 +462,7 @@ namespace EngineNS.Bricks.VXGI
                                     }
                                     #endregion
 
-                                    TickVxDebugger(world, policy);
+                                    TickVxDebugger(cmd, world, policy);
 
                                     cmd.FlushDraws();
                                 }

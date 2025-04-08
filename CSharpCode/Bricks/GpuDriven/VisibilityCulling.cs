@@ -128,8 +128,7 @@ namespace EngineNS.Bricks.GpuDriven
         {
             await base.Initialize(policy, debugName);
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Initialize(rc, debugName);
-
+            
             CoreSDK.DisposeObject(ref CullClusterShadingDrawcall);
             CullClusterShadingDrawcall = rc.CreateComputeDraw();
             CullClusterShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtCullClusterShading>();
@@ -272,7 +271,7 @@ namespace EngineNS.Bricks.GpuDriven
                 CBCameraFrustum.SetValue("FrustumInfo", in mFrustumCullingData);
             }
 
-            var cmd = BasePass.DrawCmdList;
+            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmd))
             {
                 VisParameter.World = world;

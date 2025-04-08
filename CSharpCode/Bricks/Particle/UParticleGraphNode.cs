@@ -24,9 +24,6 @@ namespace EngineNS.Bricks.Particle
                     string debugName)
         {
             await Thread.TtAsyncDummyClass.DummyFunc();
-
-            var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Initialize(rc, debugName + ".BasePass");
         }
         public List<GamePlay.Scene.TtMeshNode> ParticleNodes = new List<GamePlay.Scene.TtMeshNode>();
         [ThreadStatic]
@@ -40,13 +37,14 @@ namespace EngineNS.Bricks.Particle
                 return mScopeBeginTickLogic;
             }
         }
+        public NxRHI.TtCommandList mCmdList;
         public override unsafe void BeginTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeBeginTickLogic))
             {
-                var cmd = BasePass.DrawCmdList;
-                cmd.BeginCommand();
-                cmd.BeginEvent("NebulaUpdate");
+                mCmdList = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+                mCmdList.BeginCommand();
+                mCmdList.BeginEvent("NebulaUpdate");
             }   
         }
         [ThreadStatic]
@@ -64,11 +62,11 @@ namespace EngineNS.Bricks.Particle
         {
             using (new Profiler.TimeScopeHelper(ScopeEndTickLogic))
             {
-                var cmd = BasePass.DrawCmdList;
-                cmd.FlushDraws();
-                cmd.EndEvent();
-                cmd.EndCommand();
-                policy.CommitCommandList(cmd);
+                mCmdList.FlushDraws();
+                mCmdList.EndEvent();
+                mCmdList.EndCommand();
+                policy.CommitCommandList(mCmdList);
+                mCmdList = null;
             }   
         }
         public override void FrameBuild(TtRenderPolicy policy)

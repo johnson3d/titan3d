@@ -70,7 +70,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
         public TtCpuCullingNode CpuCullNode = null;
         public TtGpuCullingNode GpuCullNode = null;
-        public TtDrawBuffers BackgroundPass = new TtDrawBuffers();
         [Category("Option")]
         [Rtti.Meta]
         public bool ClearMRT
@@ -130,9 +129,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             await Thread.TtAsyncDummyClass.DummyFunc();
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Initialize(rc, debugName + ".BasePass");
-            BackgroundPass.Initialize(rc, debugName + ".Background");
-
+            
             CreateGBuffers(policy, Rt0PinOut.Attachement.Format);
             
             mOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDeferredOpaque>();
@@ -273,14 +270,17 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                using (new NxRHI.TtCmdListScope(BasePass.DrawCmdList))
-                using (new NxRHI.TtCmdListScope(BackgroundPass.DrawCmdList))
+                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();//BasePass.DrawCmdList
+                var bgCmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();//BackgroundPass.DrawCmdList
+
+                using (new NxRHI.TtCmdListScope(cmdlist))
+                using (new NxRHI.TtCmdListScope(bgCmdlist))
                 {
                     using (new Profiler.TimeScopeHelper(ScopePushGpuDraw))
                     {
                         if (GpuCullNode != null)
                         {
-                            GpuCullNode.Commit(policy, BasePass.DrawCmdList, GBuffers);
+                            GpuCullNode.Commit(policy, cmdlist, GBuffers);
                         }
 
                         var visibleMeshes = CpuCullNode.VisParameter.VisibleMeshes;
@@ -300,7 +300,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                     var layer = k.Material.RenderLayer;
                                     if (layer == ERenderLayer.RL_Background)
                                     {
-                                        var cmd = BackgroundPass.DrawCmdList;
+                                        var cmd = bgCmdlist;
                                         var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, this);
                                         if (drawcall != null)
                                         {
@@ -313,7 +313,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                                         if (i.DrawMode == FVisibleMesh.EDrawMode.Instance)
                                             continue;
 
-                                        var cmd = BasePass.DrawCmdList;
+                                        var cmd = cmdlist;
                                         var drawcall = k.GetDrawCall(cmd.mCoreObject, GBuffers, policy, this);
                                         if (drawcall != null)
                                         {
@@ -326,8 +326,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                         }
                     }
 
-                    var bgCmdlist = BackgroundPass.DrawCmdList;
-                    var cmdlist = BasePass.DrawCmdList;
                     var passClears = new NxRHI.FRenderPassClears();
                     passClears.SetDefault();
                     passClears.SetClearColor(0, new Color4f(1, 0, 0, 0));
@@ -362,13 +360,12 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                     }
                 }
 
-                policy.CommitCommandList(BackgroundPass.DrawCmdList, "DSNodeBackground");
-                policy.CommitCommandList(BasePass.DrawCmdList, "DSNodeBase");
+                policy.CommitCommandList(bgCmdlist, "DSNodeBackground");
+                policy.CommitCommandList(cmdlist, "DSNodeBase");
             }
         }
         public override void TickSync(TtRenderPolicy policy)
         {
-            BackgroundPass.SwapBuffer();
             base.TickSync(policy);
 
             foreach (var i in CpuCullNode.VisParameter.VisibleMeshes)

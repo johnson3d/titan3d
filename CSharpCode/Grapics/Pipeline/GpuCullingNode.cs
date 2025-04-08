@@ -139,8 +139,7 @@ namespace EngineNS.Graphics.Pipeline
 
             mOpaqueShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<Graphics.Pipeline.Deferred.TtDeferredOpaque>();
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Initialize(rc, debugName);
-
+            
             var linker = VisiblesPinIn.FindInLinker();
             if (linker != null)
             {
@@ -154,7 +153,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public override unsafe void TickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
         {
-            var cmd = BasePass.DrawCmdList;
+            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmd))
             {
                 Culling(policy, cmd);

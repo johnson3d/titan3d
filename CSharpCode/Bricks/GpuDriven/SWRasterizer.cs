@@ -411,8 +411,7 @@ namespace EngineNS.Bricks.GpuDriven
         {
             await base.Initialize(policy, debugName);
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Initialize(rc, debugName);
-
+            
             mShadingStruct.SetDefault();
             CoreSDK.DisposeObject(ref SWRasterizerDrawcall);
             SWRasterizerDrawcall = rc.CreateComputeDraw();
@@ -463,7 +462,7 @@ namespace EngineNS.Bricks.GpuDriven
                 CBShadingStruct.SetValue("ShadingStruct", in mShadingStruct);
             }
             
-            var cmd = BasePass.DrawCmdList;
+            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmd))
             {
                 // get total dispatch param

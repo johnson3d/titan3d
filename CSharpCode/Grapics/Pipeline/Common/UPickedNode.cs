@@ -65,9 +65,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             PickedShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<UPickSetupShading>();
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Initialize(rc, debugName + ".BasePass");
-            BasePass.SetDebugName("UPickedProxiableManager");
-
+            
             var PassDesc = new NxRHI.FRenderPassDesc();
             unsafe
             {
@@ -125,7 +123,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 {
                     return;
                 }
-                var cmdlist = BasePass.DrawCmdList;
+                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
                 using (new NxRHI.TtCmdListScope(cmdlist))
                 {
                     foreach (var i in PickedManager.PickedProxies)

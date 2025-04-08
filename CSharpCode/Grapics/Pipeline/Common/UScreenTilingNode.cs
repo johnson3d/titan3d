@@ -159,8 +159,6 @@ namespace EngineNS.Graphics.Pipeline.Common
             await Thread.TtAsyncDummyClass.DummyFunc();
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-            BasePass.Initialize(rc, debugName + ".BasePass");
-
             SetupTileData = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupTileDataShading>();
             PushLightToTileData = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<PushLightToTileDataShading>();
         }
@@ -247,7 +245,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     return;
                 var gpuScene = policy.GetGpuSceneNode();// .FindNode("GpuSceneNode") as Common.UGpuSceneNode;
 
-                var cmd = BasePass.DrawCmdList;
+                var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
                 using (new NxRHI.TtCmdListScope(cmd))
                 {
                     var ConfigCBuffer = policy.GetGpuSceneNode().PerGpuSceneCbv;

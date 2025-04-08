@@ -40,7 +40,6 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             CreateGBuffers(policy, ResultPinOut.Attachement.Format);
 
-            BasePass.Initialize(rc, debugName + ".BasePass");
             DebugName = debugName;
 
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
@@ -97,7 +96,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public unsafe void ClearGBuffer(TtRenderPolicy policy)
         {
-            var cmdlist = BasePass.DrawCmdList;
+            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist))
             {
                 var passClears = new NxRHI.FRenderPassClears();
@@ -108,6 +107,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 cmdlist.FlushDraws();
                 cmdlist.EndPass();
             }
+            policy.CommitCommandList(cmdlist);
         }
         public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
@@ -128,7 +128,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
-                var cmdlist = BasePass.DrawCmdList;
+                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
                 using (new NxRHI.TtCmdListScope(cmdlist))
                 {
                     if (ScreenMesh != null)

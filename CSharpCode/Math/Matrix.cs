@@ -2474,6 +2474,46 @@ namespace EngineNS
             result.M34 = 0.0f;
             result.M44 = dot;
         }
+        public static Matrix MakeOrtho2UV(NxRHI.ERhiType type)
+        {
+            Matrix mOrtho2UVMtx = Matrix.Identity;
+            if (type == NxRHI.ERhiType.RHI_GL)
+            {
+                //gles;
+                mOrtho2UVMtx.M11 = 0.5f;
+                mOrtho2UVMtx.M22 = 0.5f;
+                mOrtho2UVMtx.M33 = 0.5f;
+                mOrtho2UVMtx.M44 = 1.0f;
+                mOrtho2UVMtx.M41 = 0.5f;
+                mOrtho2UVMtx.M42 = 0.5f;
+                mOrtho2UVMtx.M43 = 0.5f;
+            }
+            else if (type == NxRHI.ERhiType.RHI_VK)
+            {
+                //Vulkan;
+                mOrtho2UVMtx.M11 = 0.5f;
+                mOrtho2UVMtx.M22 = -0.5f;
+                mOrtho2UVMtx.M33 = 1.0f;
+                mOrtho2UVMtx.M44 = 1.0f;
+                mOrtho2UVMtx.M14 = 0.5f;
+                mOrtho2UVMtx.M24 = 0.5f;
+                mOrtho2UVMtx.M34 = 0.0f;
+            }
+            else
+            {
+                // D3D 
+                mOrtho2UVMtx.M11 = 0.5f;
+                mOrtho2UVMtx.M22 = -0.5f;
+                mOrtho2UVMtx.M33 = 1.0f;
+                mOrtho2UVMtx.M44 = 1.0f;
+                mOrtho2UVMtx.M14 = 0.5f;
+                mOrtho2UVMtx.M24 = 0.5f;
+                mOrtho2UVMtx.M34 = 0.0f;
+            }
+
+            mOrtho2UVMtx = Matrix.Transpose(in mOrtho2UVMtx);
+            return mOrtho2UVMtx;
+        }
         /// <summary>
         /// 逆矩阵
         /// </summary>

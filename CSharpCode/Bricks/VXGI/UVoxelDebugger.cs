@@ -1,5 +1,6 @@
 ﻿using Assimp;
 using EngineNS.Graphics.Pipeline;
+using EngineNS.NxRHI;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -280,14 +281,12 @@ namespace EngineNS.Bricks.VXGI
             }
         }
 
-        private unsafe void TickVxDebugger(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
+        private unsafe void TickVxDebugger(TtCommandList cmd, GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy)
         {
             if (DebugVoxels == false)
             {
                 return;
             }
-            
-            var cmd = BasePass.DrawCmdList;
 
             SetupVxDebugger.SetDrawcallDispatch(this, policy, SetupVxDebuggerDrawcall, 
                                         1, 1, 1, true);

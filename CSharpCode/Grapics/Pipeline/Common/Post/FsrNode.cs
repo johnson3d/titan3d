@@ -180,8 +180,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         {
             await base.Initialize(policy, debugName);
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Initialize(rc, debugName);
-
+            
             CoreSDK.DisposeObject(ref UpSampleDrawcall);
             UpSampleDrawcall = rc.CreateComputeDraw();
             UpSampleShadingEnv = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtFsrUpSampleShading>();
@@ -227,7 +226,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             var dispatchX = MathHelper.Roundup(UpSamplePinOut.Attachement.Width, threadGroupWorkRegionDim);
             var dispatchY = MathHelper.Roundup(UpSamplePinOut.Attachement.Height, threadGroupWorkRegionDim);
 
-            var cmd = BasePass.DrawCmdList;
+            var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmd))
             {
                 UpSampleShadingEnv.SetDrawcallDispatch(this, policy, UpSampleDrawcall, dispatchX,

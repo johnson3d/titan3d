@@ -145,8 +145,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             await Thread.TtAsyncDummyClass.DummyFunc();
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Initialize(rc, debugName + ".BasePass");
-
+            
             GpuSceneDescBuffer = new TtGpuBuffer<Shader.FGpuSceneDesc>();
             unsafe
             {
@@ -192,7 +191,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 if (CpuCullNode.VisParameter.VisibleNodes == null)
                     return;
 
-                var cmd = BasePass.DrawCmdList;
+                var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
                 using (new NxRHI.TtCmdListScope(cmd))
                 {
                     TickLogic_Light(world, policy, cmd);
@@ -204,7 +203,6 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public unsafe override void TickSync(Graphics.Pipeline.TtRenderPolicy policy)
         {
-            BasePass.SwapBuffer();
         }
     }
 }

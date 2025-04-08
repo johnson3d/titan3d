@@ -58,8 +58,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             await base.Initialize(policy, debugName);
-            BasePass.Initialize(rc, debugName + ".BasePass");
-
+            
             mCopyDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
         }
         public override void Dispose()
@@ -103,7 +102,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             if (mCopyDrawcall == null)
                 return;
-            var cmdlist = BasePass.DrawCmdList;
+            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist))
             {
                 var srcPin = GetAttachBuffer(ColorPinIn);

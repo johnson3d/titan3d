@@ -113,8 +113,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             await Thread.TtAsyncDummyClass.DummyFunc();
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Initialize(rc, debugName + ".BasePass");
-
+            
             CountAvgBrightness = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<CountAvgBrightnessShading>();
             SetupAvgBrightness = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<SetupAvgBrightnessShading>();
 
@@ -158,7 +157,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             {
                 var gpuScene = policy.GetGpuSceneNode();
 
-                var cmd = BasePass.DrawCmdList;
+                var cmd = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
 
                 using (new NxRHI.TtCmdListScope(cmd))
                 {

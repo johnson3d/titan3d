@@ -221,40 +221,41 @@ namespace EngineNS.Graphics.Pipeline.Shadow
             DepthPinOut.Attachement.Width = mWholeReslutionX;
             DepthPinOut.Attachement.Height = mWholeReslutionY;
 
-            if (TtEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_GL)
-            {
-                //gles;
-                mOrtho2UVMtx.M11 = 0.5f;
-                mOrtho2UVMtx.M22 = 0.5f;
-                mOrtho2UVMtx.M33 = 0.5f;
-                mOrtho2UVMtx.M44 = 1.0f;
-                mOrtho2UVMtx.M41 = 0.5f;
-                mOrtho2UVMtx.M42 = 0.5f;
-                mOrtho2UVMtx.M43 = 0.5f;
-            }
-            else if (TtEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_VK)
-            {
-                //Vulkan;
-                mOrtho2UVMtx.M11 = 0.5f;
-                mOrtho2UVMtx.M22 = -0.5f;
-                mOrtho2UVMtx.M33 = 1.0f;
-                mOrtho2UVMtx.M44 = 1.0f;
-                mOrtho2UVMtx.M14 = 0.5f;
-                mOrtho2UVMtx.M24 = 0.5f;
-                mOrtho2UVMtx.M34 = 0.0f;
-            }
-            else
-            {
-                // D3D 
-                mOrtho2UVMtx.M11 = 0.5f;
-                mOrtho2UVMtx.M22 = -0.5f;
-                mOrtho2UVMtx.M33 = 1.0f;
-                mOrtho2UVMtx.M44 = 1.0f;
-                mOrtho2UVMtx.M14 = 0.5f;
-                mOrtho2UVMtx.M24 = 0.5f;
-                mOrtho2UVMtx.M34 = 0.0f;
-            }
-            mOrtho2UVMtx = Matrix.Transpose(in mOrtho2UVMtx);
+            mOrtho2UVMtx = Matrix.MakeOrtho2UV(TtEngine.Instance.GfxDevice.RenderContext.RhiType);
+            //if (TtEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_GL)
+            //{
+            //    //gles;
+            //    mOrtho2UVMtx.M11 = 0.5f;
+            //    mOrtho2UVMtx.M22 = 0.5f;
+            //    mOrtho2UVMtx.M33 = 0.5f;
+            //    mOrtho2UVMtx.M44 = 1.0f;
+            //    mOrtho2UVMtx.M41 = 0.5f;
+            //    mOrtho2UVMtx.M42 = 0.5f;
+            //    mOrtho2UVMtx.M43 = 0.5f;
+            //}
+            //else if (TtEngine.Instance.GfxDevice.RenderContext.RhiType == NxRHI.ERhiType.RHI_VK)
+            //{
+            //    //Vulkan;
+            //    mOrtho2UVMtx.M11 = 0.5f;
+            //    mOrtho2UVMtx.M22 = -0.5f;
+            //    mOrtho2UVMtx.M33 = 1.0f;
+            //    mOrtho2UVMtx.M44 = 1.0f;
+            //    mOrtho2UVMtx.M14 = 0.5f;
+            //    mOrtho2UVMtx.M24 = 0.5f;
+            //    mOrtho2UVMtx.M34 = 0.0f;
+            //}
+            //else
+            //{
+            //    // D3D 
+            //    mOrtho2UVMtx.M11 = 0.5f;
+            //    mOrtho2UVMtx.M22 = -0.5f;
+            //    mOrtho2UVMtx.M33 = 1.0f;
+            //    mOrtho2UVMtx.M44 = 1.0f;
+            //    mOrtho2UVMtx.M14 = 0.5f;
+            //    mOrtho2UVMtx.M24 = 0.5f;
+            //    mOrtho2UVMtx.M34 = 0.0f;
+            //}
+            //mOrtho2UVMtx = Matrix.Transpose(in mOrtho2UVMtx);
 
             var dpRastDesc = new NxRHI.FGpuPipelineDesc();
             dpRastDesc.SetDefault();

@@ -57,10 +57,11 @@ namespace EngineNS.NxRHI
             return result;
         }
     }
-    public class TtGpuDevice : AuxPtrType<NxRHI.IGpuDevice>
+    public partial class TtGpuDevice : AuxPtrType<NxRHI.IGpuDevice>
     {
         public override void Dispose()
         {
+            this.CmdListManager.Dispose();
             this.GpuQueue.Dispose();
             base.Dispose();
         }
@@ -537,6 +538,7 @@ namespace EngineNS.NxRHI
         public void TickPostEvents()
         {
             mCoreObject.TickPostEvents();
+            CmdListManager.Tick();
         }
     }
     public class TtGpuQueue : AuxPtrType<NxRHI.ICmdQueue>
@@ -560,12 +562,22 @@ namespace EngineNS.NxRHI
         public void ExecuteCommandList(TtCommandList Cmdlist, EngineNS.NxRHI.EQueueType type = EQueueType.QU_Default)
         {
             ExecuteCommandList(Cmdlist.mCoreObject, type);
+            Cmdlist.CommandListState = ECommandListState.Committed;
         }
         public void ExecuteCommandList(ICommandList Cmdlist, EngineNS.NxRHI.EQueueType type = EQueueType.QU_Default)
         {
             if (Cmdlist.IsValidPointer == false)
                 return;
             mCoreObject.ExecuteCommandListSingle(Cmdlist, type);
+        }
+        public UInt64 ExecuteCommandList(ICommandList Cmdlist, NxRHI.TtFence fence, EngineNS.NxRHI.EQueueType type = EQueueType.QU_Default)
+        {
+            if (Cmdlist.IsValidPointer == false)
+                return 0;
+            Cmdlist.GetCommitFence();
+            mCoreObject.ExecuteCommandListSingle(Cmdlist, type);
+            fence.IncreaseExpect(mCoreObject, 1, type);
+            return fence.ExpectValue;
         }
         public ulong IncreaseSignal(TtFence fence, EngineNS.NxRHI.EQueueType type = EQueueType.QU_Default)
         {

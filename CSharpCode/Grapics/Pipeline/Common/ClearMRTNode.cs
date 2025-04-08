@@ -59,8 +59,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             await Thread.TtAsyncDummyClass.DummyFunc();
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            BasePass.Initialize(rc, debugName + ".BasePass");
-
+            
             ClearFlags[0] = NxRHI.ERenderPassClearFlags.CLEAR_RT0;
             ClearFlags[1] = ClearFlags[0] | NxRHI.ERenderPassClearFlags.CLEAR_RT1;
             ClearFlags[2] = ClearFlags[2] | NxRHI.ERenderPassClearFlags.CLEAR_RT2;
@@ -138,7 +137,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             bool clearDS = OutputDS || DepthStencilPinOut.FindInLinker() != null;
 
-            var cmdlist = BasePass.DrawCmdList;
+            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             {
                 using (new NxRHI.TtCmdListScope(cmdlist))
                 {
@@ -170,7 +169,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                     }
                 }
 
-                policy.CommitCommandList(BasePass.DrawCmdList, "ClearRT");
+                policy.CommitCommandList(cmdlist, "ClearRT");
             }
         }
         public override void TickSync(TtRenderPolicy policy)

@@ -98,8 +98,6 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
 
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
 
-            BasePass.Initialize(rc, debugName + ".BasePass");
-
             mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtRayTracingEnv>();
             var binder = mBasePassShading.CurrentEffect.FindBinder(EShaderBindType.SBT_CBV, "g_sceneCB");
             if (binder.IsValidPointer)
@@ -176,7 +174,7 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
             mBasePassShading.SetDispatchRay(this, policy, mRayTracingDraw, LightingPinOut.Attachement.Width, LightingPinOut.Attachement.Height, 1);
             //TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.Flush();
 
-            var cmdlist = BasePass.DrawCmdList;
+            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist))
             {
                 cmdlist.PushGpuDraw(mRayTracingDraw);
