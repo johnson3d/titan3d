@@ -177,10 +177,10 @@ namespace EngineNS.Bricks.AdvanceShadow
                     srvDesc1.Format = desc.Format;
                     srvDesc1.Texture2DArray.MostDetailedMip = 0;
                     srvDesc1.Texture2DArray.MipLevels = 1;
-                    srvDesc1.Texture2DArray.FirstArraySlice = 0;
+                    srvDesc1.Texture2DArray.FirstArraySlice = (uint)i;
                     srvDesc1.Texture2DArray.ArraySize = 1;
 
-                    mDebuggerSRViews[i] = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(DepthTextureArray, in srvDesc);
+                    mDebuggerSRViews[i] = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(DepthTextureArray, in srvDesc1);
                 }
 
                 if (mDSViews != null)
