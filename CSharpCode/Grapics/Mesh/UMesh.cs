@@ -390,7 +390,7 @@ namespace EngineNS.Graphics.Mesh
                 }
             } 
             public unsafe virtual NxRHI.TtGraphicDraw GetDrawCall(NxRHI.ICommandList cmd, Pipeline.TtGraphicsBuffers targetView, Pipeline.TtRenderPolicy policy,
-                Pipeline.TtRenderGraphNode node)
+                Pipeline.TtRenderGraphNode node, bool bForce = false)
             {
                 if (Material == null)
                     return null;
@@ -443,6 +443,10 @@ namespace EngineNS.Graphics.Mesh
                     case 0:
                         {
                             var task = BuildDrawCall(drawCalls, policy, node);
+                            if (bForce)
+                            {
+                                task.WaitCompleted();
+                            }
                             if (task.IsCompleted)
                             {
                                 task.Dispose();
@@ -452,13 +456,11 @@ namespace EngineNS.Graphics.Mesh
                                 task.AddWaitTask(null);
                                 return null;
                             }
-                            break;
                         }
+                        break;
                     case -1:
                     default:
-                        {
-                            return null;
-                        }
+                        return null;
                 }
 
                 result = drawCalls.DrawCalls;

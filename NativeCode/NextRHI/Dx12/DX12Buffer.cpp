@@ -1711,7 +1711,8 @@ namespace NxRHI
 				DSVDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
 				DSVDesc.Texture2DArray.MipSlice = Desc.MipLevel;
 				DSVDesc.Texture2DArray.FirstArraySlice = Desc.ArrayIndex;
-				DSVDesc.Texture2DArray.ArraySize = pBuffer->Desc.ArraySize;
+				DSVDesc.Texture2DArray.ArraySize = 1;
+				//DSVDesc.Texture2DArray.ArraySize = -1;
 			}
 			break;
 			default:

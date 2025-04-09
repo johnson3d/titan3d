@@ -6,7 +6,6 @@ using EngineNS.Graphics.Pipeline;
 using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
 using Microsoft.Toolkit.HighPerformance.Buffers;
-using Org.BouncyCastle.Tsp;
 
 namespace EngineNS.Bricks.AdvanceShadow
 {
@@ -35,7 +34,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             drawcall.mCoreObject.BindPipeline(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, shadowMapNode.DepthRaster.mCoreObject);
         }
     }
-    [Bricks.CodeBuilder.ContextMenu("AdvShadow", "Shadow\\AdvShadow", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    [Bricks.CodeBuilder.ContextMenu("AdvanceShadow", "Shadow\\AdvanceShadow", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
     public class TtAdvanceShadowMapNode : TtRenderGraphNode
     {
         public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D16_UNORM, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);//or D32
@@ -53,13 +52,17 @@ namespace EngineNS.Bricks.AdvanceShadow
         [Rtti.Meta]
         public int PageResolution { get; set; } = 128;
         public NxRHI.TtTexture DepthTextureArray;
+        public NxRHI.TtSrView DepthTextureArraySRV;
+        public TtAdvanceShadowShading mShadowShading;
+        public NxRHI.TtGpuPipeline DepthRaster;
+        public TtGraphicsBuffers mGBuffer;
+        public TtDepthStencilView[] mDSViews;
+        public TtSrView[] mDebuggerSRViews;
+        public TtAttachBuffer DepthAttachment = new TtAttachBuffer();
+
         public TtAdvanceShadowMapNode()
         {
             Name = "AdvShadowMap";
-        }
-        public override void InitNodePins()
-        {
-            AddOutput(DepthPinOut);
         }
         public override void Dispose()
         {
@@ -74,11 +77,10 @@ namespace EngineNS.Bricks.AdvanceShadow
             CoreSDK.DisposeObject(ref DepthTextureArray);
             base.Dispose();
         }
-        public TtAdvanceShadowShading mShadowShading;
-        public NxRHI.TtGpuPipeline DepthRaster;
-        public TtGraphicsBuffers mGBuffer;
-        public TtDepthStencilView[] mDSViews;
-        public TtAttachBuffer DepthAttachment = new TtAttachBuffer();
+        public override void InitNodePins()
+        {
+            AddOutput(DepthPinOut);
+        }
         public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
             return mShadowShading;
@@ -89,8 +91,26 @@ namespace EngineNS.Bricks.AdvanceShadow
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             mShadowShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtAdvanceShadowShading>();
 
+            BuildGBuffer(policy);
+
+            var dpRastDesc = new NxRHI.FGpuPipelineDesc();
+            dpRastDesc.SetDefault();
+            dpRastDesc.m_Rasterizer.m_DepthBias = 1;
+            dpRastDesc.m_Rasterizer.m_SlopeScaledDepthBias = 2.0f;
+            DepthRaster = TtEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(rc, in dpRastDesc);
+        }
+        public unsafe void BuildGBuffer(TtRenderPolicy policy)
+        {
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+
             var PassDesc = new NxRHI.FRenderPassDesc();
+            //PassDesc.NumOfMRT = 1;
+            //PassDesc.AttachmentMRTs[0].Format = EPixelFormat.PXF_R10G10B10A2_UNORM;
+            //PassDesc.AttachmentMRTs[0].Samples = 1;
+            //PassDesc.AttachmentMRTs[0].LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
+            //PassDesc.AttachmentMRTs[0].StoreAction = NxRHI.EFrameBufferStoreAction.StoreActionStore;
             PassDesc.NumOfMRT = 0;
+
             PassDesc.m_AttachmentDepthStencil.Format = DepthPinOut.Attachement.Format;
             PassDesc.m_AttachmentDepthStencil.Samples = 1;
             PassDesc.m_AttachmentDepthStencil.LoadAction = NxRHI.EFrameBufferLoadAction.LoadActionClear;
@@ -101,33 +121,67 @@ namespace EngineNS.Bricks.AdvanceShadow
 
             mGBuffer = new TtGraphicsBuffers();
             mGBuffer.Initialize(policy, RenderPass);
-            //mGBuffer.SetDepthStencil(policy, DepthPinOut);
             mGBuffer.TargetViewIdentifier = new TtGraphicsBuffers.TtTargetViewIdentifier();
             mGBuffer.SetSize(PageResolution, PageResolution);
-
-            var dpRastDesc = new NxRHI.FGpuPipelineDesc();
-            dpRastDesc.SetDefault();
-            dpRastDesc.m_Rasterizer.m_DepthBias = 1;
-            dpRastDesc.m_Rasterizer.m_SlopeScaledDepthBias = 2.0f;
-            DepthRaster = TtEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(rc, in dpRastDesc);
         }
         public GamePlay.TtWorld.TtVisParameter mVisParameter = new GamePlay.TtWorld.TtVisParameter();
         public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
         {
-            if(mShadowQTree==null)
+            if (mShadowQTree == null)
+            {
+                var node = world.Root.FindFirstChild<TtAdvanceShadowNode>();
+                if (node != null) 
+                {
+                    node.mRenderGraphNode = this;
+                    mShadowQTree = node.mShadowMapTree;
+                }
+                
                 return;
+            }
 
             if (DepthTextureArray == null)
             {
                 FTextureDesc desc = new FTextureDesc();
                 desc.SetDefault();
+                desc.BindFlags = EBufferType.BFT_SRV | EBufferType.BFT_DSV;
                 desc.Width = (uint)PageResolution;
                 desc.Height = (uint)PageResolution;
+                desc.MipLevels = 1;
                 desc.ArraySize = (uint)mShadowQTree.ShadowPages.Length;
                 desc.Format = DepthPinOut.Attachement.Format;
                 DepthPinOut.Attachement.Width = desc.Width;
                 DepthPinOut.Attachement.Height = desc.Height;
                 DepthTextureArray = TtEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
+
+                FSrvDesc srvDesc = new FSrvDesc();
+                srvDesc.SetTexture2DArray();
+                srvDesc.Format = desc.Format;
+                srvDesc.Texture2DArray.MipLevels = desc.MipLevels;
+                srvDesc.Texture2DArray.ArraySize = desc.ArraySize;
+                srvDesc.Texture2DArray.FirstArraySlice = 0;
+                srvDesc.Texture2DArray.MostDetailedMip = 0;
+                DepthTextureArraySRV = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(DepthTextureArray, in srvDesc);
+
+                if (mDebuggerSRViews != null)
+                {
+                    foreach (var view in mDebuggerSRViews)
+                    {
+                        view.Dispose();
+                    }
+                }
+                mDebuggerSRViews = new TtSrView[mShadowQTree.ShadowPages.Length];
+                for (int i = 0; i < mDebuggerSRViews.Length; i++)
+                {
+                    var srvDesc1 = new FSrvDesc();
+                    srvDesc1.SetTexture2DArray();
+                    srvDesc1.Format = desc.Format;
+                    srvDesc1.Texture2DArray.MostDetailedMip = 0;
+                    srvDesc1.Texture2DArray.MipLevels = 1;
+                    srvDesc1.Texture2DArray.FirstArraySlice = 0;
+                    srvDesc1.Texture2DArray.ArraySize = 1;
+
+                    mDebuggerSRViews[i] = TtEngine.Instance.GfxDevice.RenderContext.CreateSRV(DepthTextureArray, in srvDesc);
+                }
 
                 if (mDSViews != null)
                 {
@@ -135,21 +189,21 @@ namespace EngineNS.Bricks.AdvanceShadow
                     {
                         view.Dispose();
                     }
-                    mDSViews = new TtDepthStencilView[mShadowQTree.ShadowPages.Length];
+                }
+                mDSViews = new TtDepthStencilView[mShadowQTree.ShadowPages.Length];
 
-                    for (int i = 0; i < mDSViews.Length; i++)
-                    {
-                        var dsDesc = new FDsvDesc();
-                        dsDesc.SetDefault();
-                        dsDesc.Type = NxRHI.EDsvType.DSV_Texture2DArray;
-                        dsDesc.Format = desc.Format;
-                        dsDesc.Width = desc.Width;
-                        dsDesc.Height = desc.Height;
-                        dsDesc.MipLevel = (uint)0;
-                        dsDesc.ArrayIndex = (uint)i;
+                for (int i = 0; i < mDSViews.Length; i++)
+                {
+                    var dsDesc = new FDsvDesc();
+                    dsDesc.SetDefault();
+                    dsDesc.Type = NxRHI.EDsvType.DSV_Texture2DArray;
+                    dsDesc.Format = desc.Format;
+                    dsDesc.Width = desc.Width;
+                    dsDesc.Height = desc.Height;
+                    dsDesc.MipLevel = 0;
+                    dsDesc.ArrayIndex = (uint)i;
 
-                        mDSViews[i] = TtEngine.Instance.GfxDevice.RenderContext.CreateDSV(DepthTextureArray, in dsDesc);
-                    }
+                    mDSViews[i] = TtEngine.Instance.GfxDevice.RenderContext.CreateDSV(DepthTextureArray, in dsDesc);
                 }
             }
 
@@ -175,6 +229,8 @@ namespace EngineNS.Bricks.AdvanceShadow
                     using (new NxRHI.TtCmdListScope(cmdlist))
                     {
                         mGBuffer.SetDepthStencil(mDSViews[i.Leaf.PageIndex]);
+                        //mGBuffer.SetDepthStencil(Dsv);
+                        mGBuffer.FlushModify();
                         DrawDepth(cmdlist, world, policy);
                     }
                     policy.CommitCommandList(cmdlist);
@@ -206,10 +262,26 @@ namespace EngineNS.Bricks.AdvanceShadow
                 }
             }
 
+            FViewPort Viewport = new FViewPort();
+            Viewport.MinDepth = mGBuffer.Viewport.MinDepth;
+            Viewport.MaxDepth = mGBuffer.Viewport.MaxDepth;
+            Viewport.TopLeftX = 0;
+            Viewport.TopLeftY = 0;
+            Viewport.Width = (mGBuffer.Viewport.Width);// GBuffers.Viewport.Width;
+            Viewport.Height = mGBuffer.Viewport.Height;
+
+            cmdlist.SetViewport(in Viewport);
+            var scissor = new NxRHI.FScissorRect();
+            scissor.MinX = 0;
+            scissor.MinY = 0;
+            scissor.MaxX = (int)Viewport.Width;
+            scissor.MaxY = (int)Viewport.Height;
+            cmdlist.SetScissor(in scissor);
+
             var passClear = new NxRHI.FRenderPassClears();
             {
                 passClear.SetDefault();
-                passClear.SetClearColor(0, new Color4f(1, 0, 0, 0));
+                passClear.SetClearColor(0, new Color4f(1, 1, 0, 0));
             }
             cmdlist.BeginPass(mGBuffer.FrameBuffers, in passClear, "AdvShadowDepth");
             cmdlist.FlushDraws();

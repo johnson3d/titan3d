@@ -67,7 +67,6 @@ namespace EngineNS.EGui
 
     public class TtImDrawDataRHI : IDisposable
     {
-        public NxRHI.TtCommandList CmdList;
         public NxRHI.TtEffectBinder SlateCBufferBindInfo;
         public NxRHI.TtEffectBinder SlateTextureBindInfo;
         public NxRHI.TtEffectBinder SlateSamplerBindInfo;
@@ -112,8 +111,7 @@ namespace EngineNS.EGui
         public unsafe bool InitializeGraphics(EPixelFormat format, EPixelFormat dsFormat)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            CmdList = rc.CreateCommandList();
-
+            
             var renderer = TtEngine.Instance.GfxDevice.SlateRenderer;
 
             GeomMesh = rc.CreateGeomMesh();
@@ -168,7 +166,6 @@ namespace EngineNS.EGui
             DataIB.Dispose();
 
             CoreSDK.DisposeObject(ref SlateCBuffer);
-            CoreSDK.DisposeObject(ref CmdList);
             CoreSDK.DisposeObject(ref VertexBuffer);
             CoreSDK.DisposeObject(ref IndexBuffer);
             CoreSDK.DisposeObject(ref GeomMesh);
@@ -218,7 +215,7 @@ namespace EngineNS.EGui
         private unsafe static void RenderImDrawDataImpl(ref ImDrawData draw_data, Graphics.Pipeline.TtPresentWindow presentWindow, TtImDrawDataRHI rhiData)
         {
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
-            var drawCmd = rhiData.CmdList;
+            var drawCmd = rc.CmdListManager.GetCmdList();
             uint vertexOffsetInVertices = 0;
             uint indexOffsetInElements = 0;
 

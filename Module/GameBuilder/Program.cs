@@ -9,7 +9,16 @@ using static Org.BouncyCastle.Math.EC.ECCurve;
 try
 {
     var mBin = System.IO.Directory.GetCurrentDirectory();
-    EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/release");
+    EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/debug");
+    if (IntPtr.Zero == EngineNS.TtNativeWindow.LoadLibraryA("Core.Window.dll"))
+    {
+        EngineNS.TtNativeWindow.SetDllDirectoryA($"{mBin}/release");
+        if (IntPtr.Zero == EngineNS.TtNativeWindow.LoadLibraryA("Core.Window.dll"))
+        {
+            EngineNS.TtNativeWindow.MessageBoxA(IntPtr.Zero, "Core.Window.dll load failed", "InitEngine", 0);
+            return;
+        }
+    }
 
     var enginesln = args[0];
     var projectFile = args[1];

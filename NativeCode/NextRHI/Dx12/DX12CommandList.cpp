@@ -117,13 +117,13 @@ namespace NxRHI
 		mCmdListState = ECmdListState::Recording;
 		GetDX12CmdRecorder()->mIsRecording = true;
 
-		this->BeginEvent(mDebugName.c_str());
+		//this->BeginEvent(mDebugName.c_str());
 
 		return mCmdRecorder;
 	}
 	void DX12CommandList::EndCommand()
 	{
-		this->EndEvent();
+		//this->EndEvent();
 		ICommandList::EndCommand();
 		if (mCmdListState == ECmdListState::Recording)
 		{

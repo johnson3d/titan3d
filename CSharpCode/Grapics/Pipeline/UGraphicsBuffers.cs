@@ -610,6 +610,10 @@ namespace EngineNS.Graphics.Pipeline
             FrameBuffers.BindDepthStencilView(dsv);
             return true;
         }
+        public void FlushModify()
+        {
+            FrameBuffers.FlushModify();
+        }
         public bool SetRenderTarget(TtRenderGraph policy, int index, TtRenderGraphPin pin)
         {
             if (pin.PinType == TtRenderGraphPin.EPinType.Input ||

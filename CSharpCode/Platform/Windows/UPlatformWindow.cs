@@ -50,6 +50,8 @@ namespace EngineNS
 
         [DllImport("kernel32.dll")]
         public static extern int SetDllDirectoryA(string path);
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr LoadLibraryA(string path);
         [DllImport("user32.dll")]
         public static extern int MessageBoxA(IntPtr hWnd, string lpText,string lpCaption, int uType);
         [DllImport("user32.dll")]
