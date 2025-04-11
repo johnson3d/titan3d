@@ -10,8 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AdvanceShadowShading.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AdvShadowMapNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DepthTile.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FullQTreeBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QTileTree.cs" />
   </ItemGroup>
 </Project>

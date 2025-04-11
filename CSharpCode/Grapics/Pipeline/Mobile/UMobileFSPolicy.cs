@@ -7,16 +7,6 @@ namespace EngineNS.Graphics.Pipeline.Mobile
     public class TtMobileFSPolicy : TtRenderPolicy
     {
         #region Feature On/Off
-        public override bool DisableShadow
-        {
-            get => mDisableShadow;
-            set
-            {
-                mDisableShadow = value;
-                BasePassNode.mOpaqueShading.DisableShadow.SetValue(value);
-                BasePassNode.mOpaqueShading.UpdatePermutation();
-            }
-        }
         public override bool DisableAO
         {
             get => mDisableAO;

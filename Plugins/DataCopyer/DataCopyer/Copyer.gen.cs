@@ -142724,6 +142724,7 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileEditorFSPolicy;
+			ar.Write(srcObj.ShadowMode);
 			ar.Write(srcObj.TypeAA);
 			ar.Write(srcObj.TypeFog);
 		};
@@ -142731,12 +142732,44 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var tarObj = tar as EngineNS.Graphics.Pipeline.Mobile.TtMobileEditorFSPolicy;
 			var srcObj = src as EngineNS.Graphics.Pipeline.Mobile.TtMobileEditorFSPolicy;
+			tarObj.ShadowMode = srcObj.ShadowMode;
 			tarObj.TypeAA = srcObj.TypeAA;
 			tarObj.TypeFog = srcObj.TypeFog;
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1348861192419928885 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileEditorFSPolicy;
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA t_TypeAA;
+			ar.Read(out t_TypeAA);
+			srcObj.TypeAA = t_TypeAA;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeAA", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_15567830835772408686 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileEditorFSPolicy;
+			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
+			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
+				}
+			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA t_TypeAA;
 			ar.Read(out t_TypeAA);
 			srcObj.TypeAA = t_TypeAA;
@@ -142779,6 +142812,7 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileFSPolicy;
 			ar.Write(srcObj.DisableHDR);
+			ar.Write(srcObj.ShadowMode);
 			ar.Write(srcObj.TypeAA);
 			ar.Write(srcObj.TypeFog);
 		};
@@ -142787,8 +142821,49 @@ namespace EngineNS.Plugins.DataCopyer
 			var tarObj = tar as EngineNS.Graphics.Pipeline.Mobile.TtMobileFSPolicy;
 			var srcObj = src as EngineNS.Graphics.Pipeline.Mobile.TtMobileFSPolicy;
 			tarObj.DisableHDR = srcObj.DisableHDR;
+			tarObj.ShadowMode = srcObj.ShadowMode;
 			tarObj.TypeAA = srcObj.TypeAA;
 			tarObj.TypeFog = srcObj.TypeFog;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_3287939895973450911 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Mobile.TtMobileFSPolicy;
+			System.Boolean t_DisableHDR;
+			ar.Read(out t_DisableHDR);
+			srcObj.DisableHDR = t_DisableHDR;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
+			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA t_TypeAA;
+			ar.Read(out t_TypeAA);
+			srcObj.TypeAA = t_TypeAA;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeAA", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
 		};
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_13882069834396030988 = (EngineNS.IO.IReader ar, object obj)=>
 		{
@@ -142878,7 +142953,7 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.DisableAO);
 			ar.Write(srcObj.DisableHDR);
 			ar.Write(srcObj.DisablePointLight);
-			ar.Write(srcObj.DisableShadow);
+			ar.Write(srcObj.ShadowMode);
 			ar.Write(srcObj.TypeAA);
 			ar.Write(srcObj.TypeFog);
 		};
@@ -142889,7 +142964,7 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.DisableAO = srcObj.DisableAO;
 			tarObj.DisableHDR = srcObj.DisableHDR;
 			tarObj.DisablePointLight = srcObj.DisablePointLight;
-			tarObj.DisableShadow = srcObj.DisableShadow;
+			tarObj.ShadowMode = srcObj.ShadowMode;
 			tarObj.TypeAA = srcObj.TypeAA;
 			tarObj.TypeFog = srcObj.TypeFog;
 		};
@@ -142925,11 +143000,62 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			System.Boolean t_DisableShadow;
 			ar.Read(out t_DisableShadow);
-			srcObj.DisableShadow = t_DisableShadow;
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA t_TypeAA;
+			ar.Read(out t_TypeAA);
+			srcObj.TypeAA = t_TypeAA;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisableShadow", false);
+					sr.OnPropertyRead(ar.Tag, "TypeAA", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9916826898964841430 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Shader.CommanShading.UBasePassPolicy;
+			System.Boolean t_DisableAO;
+			ar.Read(out t_DisableAO);
+			srcObj.DisableAO = t_DisableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DisableAO", false);
+				}
+			}
+			System.Boolean t_DisableHDR;
+			ar.Read(out t_DisableHDR);
+			srcObj.DisableHDR = t_DisableHDR;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
+				}
+			}
+			System.Boolean t_DisablePointLight;
+			ar.Read(out t_DisablePointLight);
+			srcObj.DisablePointLight = t_DisablePointLight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DisablePointLight", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
+			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
 				}
 			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA t_TypeAA;
@@ -145452,7 +145578,7 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.DisableAO);
 			ar.Write(srcObj.DisableHDR);
 			ar.Write(srcObj.DisablePointLight);
-			ar.Write(srcObj.DisableShadow);
+			ar.Write(srcObj.ShadowMode);
 			ar.Write(srcObj.TypeAA);
 			ar.Write(srcObj.TypeFog);
 		};
@@ -145463,7 +145589,7 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.DisableAO = srcObj.DisableAO;
 			tarObj.DisableHDR = srcObj.DisableHDR;
 			tarObj.DisablePointLight = srcObj.DisablePointLight;
-			tarObj.DisableShadow = srcObj.DisableShadow;
+			tarObj.ShadowMode = srcObj.ShadowMode;
 			tarObj.TypeAA = srcObj.TypeAA;
 			tarObj.TypeFog = srcObj.TypeFog;
 		};
@@ -145499,11 +145625,62 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			System.Boolean t_DisableShadow;
 			ar.Read(out t_DisableShadow);
-			srcObj.DisableShadow = t_DisableShadow;
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA t_TypeAA;
+			ar.Read(out t_TypeAA);
+			srcObj.TypeAA = t_TypeAA;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisableShadow", false);
+					sr.OnPropertyRead(ar.Tag, "TypeAA", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9916826898964841430 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.TtDeferredPolicyBase;
+			System.Boolean t_DisableAO;
+			ar.Read(out t_DisableAO);
+			srcObj.DisableAO = t_DisableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DisableAO", false);
+				}
+			}
+			System.Boolean t_DisableHDR;
+			ar.Read(out t_DisableHDR);
+			srcObj.DisableHDR = t_DisableHDR;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
+				}
+			}
+			System.Boolean t_DisablePointLight;
+			ar.Read(out t_DisablePointLight);
+			srcObj.DisablePointLight = t_DisablePointLight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DisablePointLight", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
+			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
 				}
 			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA t_TypeAA;
@@ -145534,7 +145711,7 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.DisableAO);
 			ar.Write(srcObj.DisableHDR);
 			ar.Write(srcObj.DisablePointLight);
-			ar.Write(srcObj.DisableShadow);
+			ar.Write(srcObj.ShadowMode);
 			ar.Write(srcObj.TypeAA);
 			ar.Write(srcObj.TypeFog);
 		};
@@ -145545,7 +145722,7 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.DisableAO = srcObj.DisableAO;
 			tarObj.DisableHDR = srcObj.DisableHDR;
 			tarObj.DisablePointLight = srcObj.DisablePointLight;
-			tarObj.DisableShadow = srcObj.DisableShadow;
+			tarObj.ShadowMode = srcObj.ShadowMode;
 			tarObj.TypeAA = srcObj.TypeAA;
 			tarObj.TypeFog = srcObj.TypeFog;
 		};
@@ -145581,11 +145758,62 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			System.Boolean t_DisableShadow;
 			ar.Read(out t_DisableShadow);
-			srcObj.DisableShadow = t_DisableShadow;
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA t_TypeAA;
+			ar.Read(out t_TypeAA);
+			srcObj.TypeAA = t_TypeAA;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisableShadow", false);
+					sr.OnPropertyRead(ar.Tag, "TypeAA", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9916826898964841430 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.TtForwordPolicyBase;
+			System.Boolean t_DisableAO;
+			ar.Read(out t_DisableAO);
+			srcObj.DisableAO = t_DisableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DisableAO", false);
+				}
+			}
+			System.Boolean t_DisableHDR;
+			ar.Read(out t_DisableHDR);
+			srcObj.DisableHDR = t_DisableHDR;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
+				}
+			}
+			System.Boolean t_DisablePointLight;
+			ar.Read(out t_DisablePointLight);
+			srcObj.DisablePointLight = t_DisablePointLight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DisablePointLight", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
+			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
 				}
 			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA t_TypeAA;
@@ -145670,7 +145898,7 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.DisableAO);
 			ar.Write(srcObj.DisableHDR);
 			ar.Write(srcObj.DisablePointLight);
-			ar.Write(srcObj.DisableShadow);
+			ar.Write(srcObj.ShadowMode);
 			ar.Write(srcObj.TypeAA);
 			ar.Write(srcObj.TypeFog);
 		};
@@ -145681,7 +145909,7 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.DisableAO = srcObj.DisableAO;
 			tarObj.DisableHDR = srcObj.DisableHDR;
 			tarObj.DisablePointLight = srcObj.DisablePointLight;
-			tarObj.DisableShadow = srcObj.DisableShadow;
+			tarObj.ShadowMode = srcObj.ShadowMode;
 			tarObj.TypeAA = srcObj.TypeAA;
 			tarObj.TypeFog = srcObj.TypeFog;
 		};
@@ -145717,11 +145945,62 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			System.Boolean t_DisableShadow;
 			ar.Read(out t_DisableShadow);
-			srcObj.DisableShadow = t_DisableShadow;
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA t_TypeAA;
+			ar.Read(out t_TypeAA);
+			srcObj.TypeAA = t_TypeAA;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "DisableShadow", false);
+					sr.OnPropertyRead(ar.Tag, "TypeAA", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeFog t_TypeFog;
+			ar.Read(out t_TypeFog);
+			srcObj.TypeFog = t_TypeFog;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "TypeFog", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9916826898964841430 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.TtRenderPolicy;
+			System.Boolean t_DisableAO;
+			ar.Read(out t_DisableAO);
+			srcObj.DisableAO = t_DisableAO;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DisableAO", false);
+				}
+			}
+			System.Boolean t_DisableHDR;
+			ar.Read(out t_DisableHDR);
+			srcObj.DisableHDR = t_DisableHDR;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DisableHDR", false);
+				}
+			}
+			System.Boolean t_DisablePointLight;
+			ar.Read(out t_DisablePointLight);
+			srcObj.DisablePointLight = t_DisablePointLight;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DisablePointLight", false);
+				}
+			}
+			EngineNS.Graphics.Pipeline.EShadowMode t_ShadowMode;
+			ar.Read(out t_ShadowMode);
+			srcObj.ShadowMode = t_ShadowMode;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadowMode", false);
 				}
 			}
 			EngineNS.Graphics.Pipeline.TtRenderPolicy.ETypeAA t_TypeAA;
@@ -202879,6 +203158,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Graphics_Pipeline_Mobile_TtMobileEditorFSPolicy.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Mobile_TtMobileEditorFSPolicy.CopyCurrentVersion;
 				kls.RegVersion(1348861192419928885, EngineNS_Graphics_Pipeline_Mobile_TtMobileEditorFSPolicy.Read_1348861192419928885);
+				kls.RegVersion(15567830835772408686, EngineNS_Graphics_Pipeline_Mobile_TtMobileEditorFSPolicy.Read_15567830835772408686);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Mobile.TtMobileForwordNodeBase@EngineCore");
@@ -202891,6 +203171,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Graphics_Pipeline_Mobile_TtMobileFSPolicy.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Mobile_TtMobileFSPolicy.CopyCurrentVersion;
 				kls.RegVersion(13882069834396030988, EngineNS_Graphics_Pipeline_Mobile_TtMobileFSPolicy.Read_13882069834396030988);
+				kls.RegVersion(3287939895973450911, EngineNS_Graphics_Pipeline_Mobile_TtMobileFSPolicy.Read_3287939895973450911);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Mobile.TtMobileOpaqueNode@EngineCore");
@@ -202915,6 +203196,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Graphics_Pipeline_Shader_CommanShading_UBasePassPolicy.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Shader_CommanShading_UBasePassPolicy.CopyCurrentVersion;
 				kls.RegVersion(675706602868539352, EngineNS_Graphics_Pipeline_Shader_CommanShading_UBasePassPolicy.Read_675706602868539352);
+				kls.RegVersion(9916826898964841430, EngineNS_Graphics_Pipeline_Shader_CommanShading_UBasePassPolicy.Read_9916826898964841430);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Shader.TtEffect.TtEffectDesc@EngineCore");
@@ -203029,12 +203311,14 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Graphics_Pipeline_TtDeferredPolicyBase.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_TtDeferredPolicyBase.CopyCurrentVersion;
 				kls.RegVersion(675706602868539352, EngineNS_Graphics_Pipeline_TtDeferredPolicyBase.Read_675706602868539352);
+				kls.RegVersion(9916826898964841430, EngineNS_Graphics_Pipeline_TtDeferredPolicyBase.Read_9916826898964841430);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.TtForwordPolicyBase@EngineCore");
 				kls.Writer = EngineNS_Graphics_Pipeline_TtForwordPolicyBase.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_TtForwordPolicyBase.CopyCurrentVersion;
 				kls.RegVersion(675706602868539352, EngineNS_Graphics_Pipeline_TtForwordPolicyBase.Read_675706602868539352);
+				kls.RegVersion(9916826898964841430, EngineNS_Graphics_Pipeline_TtForwordPolicyBase.Read_9916826898964841430);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.TtGpuCullingNode@EngineCore");
@@ -203053,6 +203337,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Writer = EngineNS_Graphics_Pipeline_TtRenderPolicy.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_TtRenderPolicy.CopyCurrentVersion;
 				kls.RegVersion(675706602868539352, EngineNS_Graphics_Pipeline_TtRenderPolicy.Read_675706602868539352);
+				kls.RegVersion(9916826898964841430, EngineNS_Graphics_Pipeline_TtRenderPolicy.Read_9916826898964841430);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.IO.BaseSerializer@EngineCore");
@@ -203882,7 +204167,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(547543558045874187, Survivor_TtWeaponProxyNode.Read_547543558045874187);
 				kls.RegVersion(6246337379466960295, Survivor_TtWeaponProxyNode.Read_6246337379466960295);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("2F_09_72_6B_1D_13_1A_FF_3B_1A_D8_52_0F_6D_D3_3B_68_4A_7A_39");
+			this.VersionHash = EngineNS.Hash160.Parse("18_00_47_32_ED_BC_D7_06_2F_7B_A9_82_14_28_A6_84_8B_A9_96_21");
 		}
 	}
 }

@@ -23,11 +23,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             get;
             set;
         }
-        public UPermutationItem DisableShadow
-        {
-            get;
-            set;
-        }
         public UPermutationItem DisableSunshaft
         {
             get;
@@ -92,6 +87,24 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 this.UpdatePermutation();
             }
         }
+        public UPermutationItem ShadowModePermutation
+        {
+            get;
+            set;
+        }
+        [Category("Option")]
+        public EShadowMode ShadowMode
+        {
+            get
+            {
+                return (EShadowMode)ShadowModePermutation.Value.GetValue(ShadowModePermutation);
+            }
+            set
+            {
+                ShadowModePermutation.SetValue((uint)value);
+                this.UpdatePermutation();
+            }
+        }
         #endregion
         public TtDeferredDirLightingShading()
         {
@@ -101,14 +114,12 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             DisableAO = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_AO", (int)Shader.EPermutation_Bool.BitWidth);
             DisablePointLights = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_POINTLIGHTS", (int)Shader.EPermutation_Bool.BitWidth);
-            DisableShadow = this.PushPermutation<Shader.EPermutation_Bool>("DISABLE_SHADOW_ALL", (int)Shader.EPermutation_Bool.BitWidth);
             DisableSunshaft = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_SUNSHAFT", (int)Shader.EPermutation_Bool.BitWidth);
             DisableBloom = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_BLOOM", (int)Shader.EPermutation_Bool.BitWidth);
             DisableHdr = this.PushPermutation<Shader.EPermutation_Bool>("ENV_DISABLE_HDR", (int)Shader.EPermutation_Bool.BitWidth);
             EnableRimLight = this.PushPermutation<Shader.EPermutation_Bool>("ENV_ENABLE_RIMLIGHT", (int)Shader.EPermutation_Bool.BitWidth);
 
             DisableAO.SetValue((int)Shader.EPermutation_Bool.FalseValue);
-            DisableShadow.SetValue((int)Shader.EPermutation_Bool.FalseValue);
             DisablePointLights.SetValue((int)Shader.EPermutation_Bool.FalseValue);
             DisableSunshaft.SetValue((int)Shader.EPermutation_Bool.TrueValue);
             DisableBloom.SetValue((int)Shader.EPermutation_Bool.TrueValue);
@@ -117,6 +128,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
 
             DebugShowModePermutation = this.PushPermutation<EDebugShowMode>("ENV_EDebugShowMode", GetBitWidth((int)EDebugShowMode.Num));
             DebugShowModePermutation.SetValue((int)EDebugShowMode.None);
+
+            ShadowModePermutation = this.PushPermutation<EShadowMode>("ENV_EShadowMode", GetBitWidth((int)EShadowMode.Num));
+            ShadowModePermutation.SetValue((int)EShadowMode.Csm);
 
             this.UpdatePermutation();
         }
@@ -282,11 +296,6 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 dirLightingNode.CBShadingEnv.SetValue("RimIntensity", dirLightingNode.RimIntensity);
                 drawcall.BindCBV(index, dirLightingNode.CBShadingEnv);
             }
-        }
-        public void SetDisableShadow(bool value)
-        {
-            DisableShadow.SetValue(value);
-            UpdatePermutation();
         }
         public void SetDisableAO(bool value)
         {

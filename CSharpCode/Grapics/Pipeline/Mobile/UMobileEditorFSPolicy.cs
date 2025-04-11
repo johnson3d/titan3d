@@ -279,7 +279,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         {
             base.TickLogic(world, onRemove);
 
-            if (this.DisableShadow == false)
+            if (this.ShadowMode == EShadowMode.Csm)
                 mShadowMapNode?.TickLogic(world, this, true);
 
             GpuSceneNode?.TickLogic(world, this, true);
@@ -306,7 +306,7 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public unsafe override void TickSync()
         {
-            if (this.DisableShadow == false)
+            if (this.ShadowMode == EShadowMode.Csm)
                 mShadowMapNode?.TickSync(this);
 
             GpuSceneNode?.TickSync(this);

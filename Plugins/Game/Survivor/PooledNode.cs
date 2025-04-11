@@ -19,7 +19,7 @@ namespace Survivor
             [RName.PGRName(FilterExts = EngineNS.Graphics.Mesh.TtMaterialMesh.AssetExt)]
             public RName MeshName { get; set; }
             [EngineNS.Rtti.Meta]
-            public int Count { get; set; } = 256;
+            public int Count { get; set; } = 1024;
         }
 
         public List<TtMeshNode> mMeshes = new List<TtMeshNode>();
@@ -92,7 +92,7 @@ namespace Survivor
             if (count - mMeshes.Count > 0)
             {
                 count = count - mMeshes.Count;
-                DVector3 size = new DVector3(128, 0, 128);
+                DVector3 size = new DVector3(1024, 0, 1024);
                 for (int i = 0; i < count; i++)
                 {
                     TtMeshNode.TtMeshNodeData meshData = new TtMeshNode.TtMeshNodeData();

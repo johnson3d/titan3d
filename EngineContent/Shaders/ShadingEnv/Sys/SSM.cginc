@@ -66,7 +66,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 #endif
 		DO_PS_MATERIAL(input, mtl);
 	}
-
+	
 #ifdef ALPHA_TEST
 	//half Alpha = mtl.mAlpha;
 	//half AlphaTestThreshold = mtl.mAlphaTest;

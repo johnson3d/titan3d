@@ -263,8 +263,15 @@ namespace EngineNS.Editor.Forms
                             Selected = false,
                             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data)=>
                             {
-                                PreviewViewport.RenderPolicy.DisableShadow = !PreviewViewport.RenderPolicy.DisableShadow;
-                                item.Selected = PreviewViewport.RenderPolicy.DisableShadow;
+                                if(PreviewViewport.RenderPolicy.ShadowMode == EShadowMode.Csm)
+                                {
+                                    PreviewViewport.RenderPolicy.ShadowMode = EShadowMode.None;
+                                }
+                                else
+                                {
+                                    PreviewViewport.RenderPolicy.ShadowMode = EShadowMode.Csm;
+                                }
+                                item.Selected = PreviewViewport.RenderPolicy.ShadowMode == EShadowMode.None;
                             },
                         },
                         new EGui.UIProxy.MenuItemProxy()

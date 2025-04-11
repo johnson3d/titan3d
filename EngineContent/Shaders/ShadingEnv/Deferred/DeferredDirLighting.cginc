@@ -22,6 +22,10 @@
 
 #include "../../Inc/SysFunctionDefImpl.cginc"
 
+#if !defined(ENV_EShadowMode)
+#define ENV_EShadowMode EShadowMode_Csm
+#endif
+
 Texture2D DepthBuffer DX_AUTOBIND;
 SamplerState Samp_DepthBuffer DX_AUTOBIND;
 
@@ -37,7 +41,12 @@ SamplerState Samp_GBufferRT2 DX_AUTOBIND;
 Texture2D GBufferRT3 DX_AUTOBIND;
 SamplerState Samp_GBufferRT3 DX_AUTOBIND;
 
+#if ENV_EShadowMode == EShadowMode_Csm
 Texture2D GShadowMap DX_AUTOBIND;
+#elif ENV_EShadowMode == EShadowMode_Advance
+Texture2DArray GShadowMapArray DX_AUTOBIND;
+#elif ENV_EShadowMode == EShadowMode_None
+#endif
 SamplerState Samp_GShadowMap DX_AUTOBIND;
 
 TextureCube gEnvMap DX_AUTOBIND;
@@ -162,21 +171,19 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 
 	//shadow;
 	half ShadowValue = 1.0h;
-
-	ShadowFilterData mSFD;
-	mSFD.mShadowMap = GShadowMap;
-	mSFD.mShadowMapSampler = Samp_GShadowMap;
-	mSFD.mShadowMapSizeAndRcp = gShadowMapSizeAndRcp;
-	mSFD.mShadowTransitionScale = (half)gShadowTransitionScale;
-
+	
 	float4 ShadowMapUV = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	//half PerPixelViewerDistance = (half)input.vPosition.w;
 	half PerPixelViewerDistance = (half)LinearFromDepth(rtDepth);
 
 	output.RT0.a = 1.0h;
-#if DISABLE_SHADOW_ALL == 1
-	ShadowValue = 1.0h;
-#else
+#if ENV_EShadowMode == EShadowMode_Csm
+	ShadowFilterData mSFD;
+	mSFD.mShadowMap = GShadowMap;
+	mSFD.mShadowMapSampler = Samp_GShadowMap;
+	mSFD.mShadowMapSizeAndRcp = gShadowMapSizeAndRcp;
+	mSFD.mShadowTransitionScale = (half)gShadowTransitionScale;
+	
 	if (PerPixelViewerDistance > gShadowDistance || GBuffer.IsAcceptShadow() == false)
 	{
 		ShadowValue = 1.0h;
@@ -241,6 +248,8 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		half FadeValue = (half)saturate(PerPixelViewerDistance * gFadeParam.x + gFadeParam.y);		
 		ShadowValue = lerp(ShadowValue, 1.0h, FadeValue);
 	}
+#elif ENV_EShadowMode == EShadowMode_None
+	ShadowValue = 1.0h;
 #endif
 
 	half Sdiff = 1.0h - Metallic;

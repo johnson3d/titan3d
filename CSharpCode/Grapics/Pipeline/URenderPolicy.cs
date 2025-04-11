@@ -17,7 +17,14 @@ namespace EngineNS.Graphics.Pipeline
         public EDrawMode DrawMode;
         public Mesh.TtMesh Mesh;
     }
-
+    [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "EShadowMode")]
+    public enum EShadowMode : uint
+    {
+        None = 0,
+        Csm,
+        Advance,
+        Num,
+    }
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     //[Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.URenderPolicy@EngineCore" })]
     public partial class TtRenderPolicy : TtRenderGraph, IO.ISerializer
@@ -183,13 +190,13 @@ namespace EngineNS.Graphics.Pipeline
         {
             get => mLookNode;
         }
-        protected bool mDisableShadow;
+        protected EShadowMode mShadowMode = EShadowMode.Csm;
         [Category("Option")]
         [Rtti.Meta]
-        public virtual bool DisableShadow
+        public virtual EShadowMode ShadowMode
         {
-            get => mDisableShadow;
-            set => mDisableShadow = value;
+            get => mShadowMode;
+            set => mShadowMode = value;
         }
         protected bool mDisableAO;
         [Category("Option")]
@@ -407,15 +414,15 @@ namespace EngineNS.Graphics.Pipeline
         #region Feature On/Off
         [Category("Option")]
         [Rtti.Meta]
-        public override bool DisableShadow
+        public override EShadowMode ShadowMode
         {
-            get => mDisableShadow;
+            get => mShadowMode;
             set
             {
-                mDisableShadow = value;
+                mShadowMode = value;
                 var shading = this.FindFirstNode<Deferred.TtDeferredDirLightingNode>()?.GetPassShading() as Deferred.TtDeferredDirLightingShading;
-                //var shading = DirLightingNode.ScreenDrawPolicy.mBasePassShading as UDeferredDirLightingShading;
-                shading?.SetDisableShadow(value);
+                shading?.ShadowModePermutation.SetValue((uint)value);
+                shading?.UpdatePermutation();
             }
         }
         [Category("Option")]

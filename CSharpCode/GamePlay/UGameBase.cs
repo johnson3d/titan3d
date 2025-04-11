@@ -188,7 +188,7 @@ namespace EngineNS.GamePlay
             if (rPolicy == null)
                 rPolicy = TtEngine.Instance.Config.MainRPolicyName;
             await WorldViewportSlate.Initialize(null, rPolicy, zMin, zMax);
-            WorldViewportSlate.RenderPolicy.DisableShadow = false;
+            WorldViewportSlate.RenderPolicy.ShadowMode = Graphics.Pipeline.EShadowMode.Csm;
             TtEngine.Instance.GfxDevice.SlateApplication.NativeWindow.RegEventProcessor(WorldViewportSlate);
         }
         [Rtti.Meta]
@@ -249,7 +249,7 @@ namespace EngineNS.GamePlay
             if (rPolicy == null)
                 rPolicy = TtEngine.Instance.Config.MainRPolicyName;
             await WorldViewportSlate.Initialize(null, rPolicy, zMin, zMax);
-            WorldViewportSlate.RenderPolicy.DisableShadow = false;
+            WorldViewportSlate.RenderPolicy.ShadowMode = Graphics.Pipeline.EShadowMode.Csm;
             TtEngine.Instance.GfxDevice.SlateApplication.NativeWindow.RegEventProcessor(WorldViewportSlate);
 
             if (bSetToWorld)
