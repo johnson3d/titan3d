@@ -219,15 +219,41 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             #endregion
 
             #region shadow
-            index = drawcall.FindBinder("GShadowMap");
-            if (index.IsValidPointer)
+            if (dirLightingNode.mBasePassShading.ShadowMode != EShadowMode.None)
             {
-                var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.ShadowMapPinIn);
-                drawcall.BindSRV(index, attachBuffer.Srv);
+                var advShadowNode = dirLightingNode.AdvanceShadowMapNode;
+                if (advShadowNode != null && advShadowNode.Enable)
+                {
+                    if (dirLightingNode.mBasePassShading.ShadowMode != EShadowMode.Advance)
+                        dirLightingNode.mBasePassShading.ShadowMode = EShadowMode.Advance;
+
+                    index = drawcall.FindBinder("GShadowMapArray");
+                    if (index.IsValidPointer)
+                    {
+                        drawcall.BindSRV(index, advShadowNode.DepthTextureArraySRV);
+                    }
+                    index = drawcall.FindBinder("QTreeNodeBuffer");
+                    if (index.IsValidPointer)
+                    {
+                        advShadowNode.mShadowQTree.AdvShadowNodeDatas.Flush2GPU(cmd);
+                        drawcall.BindSRV(index, advShadowNode.mShadowQTree.AdvShadowNodeDatas.Srv);
+                    }
+                }
+                else
+                {
+                    if (dirLightingNode.mBasePassShading.ShadowMode != EShadowMode.Csm)
+                        dirLightingNode.mBasePassShading.ShadowMode = EShadowMode.Csm;
+                    index = drawcall.FindBinder("GShadowMap");
+                    if (index.IsValidPointer)
+                    {
+                        var attachBuffer = dirLightingNode.GetAttachBuffer(dirLightingNode.ShadowMapPinIn);
+                        drawcall.BindSRV(index, attachBuffer.Srv);
+                    }
+                    index = drawcall.FindBinder("Samp_GShadowMap");
+                    if (index.IsValidPointer)
+                        drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+                }
             }
-            index = drawcall.FindBinder("Samp_GShadowMap");
-            if (index.IsValidPointer)
-                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
             #endregion
 
             #region effect
@@ -340,6 +366,8 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         public TtRenderGraphPin GpuScenePinIn = TtRenderGraphPin.CreateInput("GpuScene", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin PointLightsPinIn = TtRenderGraphPin.CreateInput("PointLights", NxRHI.EBufferType.BFT_SRV | NxRHI.EBufferType.BFT_UAV);
 
+        public TtRenderGraphPin RtAdvShadowIn = TtRenderGraphPin.CreateInput("AdvShadow", NxRHI.EBufferType.BFT_NONE);
+
         public NxRHI.TtCbView CBShadingEnv;
         [Category("Shading")]
         public float RimPower { get; set; } = 5.0f;
@@ -371,6 +399,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             AddInput(TileScreenPinIn);
             AddInput(PointLightsPinIn);
             AddInput(GpuScenePinIn);
+            AddInput(RtAdvShadowIn);
+            RtAdvShadowIn.IsAllowInputNull = true;
+            RtAdvShadowIn.LinkType = "AdvShadow";
         }
         public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
@@ -389,10 +420,17 @@ namespace EngineNS.Graphics.Pipeline.Deferred
         {
             return mBasePassShading;
         }
+        public Bricks.AdvanceShadow.TtAdvanceShadowMapNode AdvanceShadowMapNode;
         public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
         {
             await base.Initialize(policy, debugName);
             mBasePassShading = await TtEngine.Instance.ShadingEnvManager.GetShadingEnv<TtDeferredDirLightingShading>();
+
+            var linker = RtAdvShadowIn.FindInLinker();
+            if (linker != null)
+            {
+                AdvanceShadowMapNode = linker.OutPin.HostNode as Bricks.AdvanceShadow.TtAdvanceShadowMapNode;
+            }
         }
         [ThreadStatic]
         private static Profiler.TimeScope mScopeTick;

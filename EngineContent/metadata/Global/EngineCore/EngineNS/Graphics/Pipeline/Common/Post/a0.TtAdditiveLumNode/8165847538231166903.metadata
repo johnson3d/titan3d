@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_8165847538231166903 Type="EngineNS.Graphics.Pipeline.Common.Post.TtAdditiveLumNode@EngineCore">
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <Factor1 Type="System.Single@Unknown" Order="0" />
+  <Factor2 Type="System.Single@Unknown" Order="0" />
+  <OutputScaleFactor Type="System.Single@Unknown" Order="0" />
+</Hash_8165847538231166903>

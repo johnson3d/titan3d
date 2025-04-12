@@ -106,6 +106,9 @@
     <Filter Include="ShadingEnv\RayTracing">
       <UniqueIdentifier>{8145f663-9a92-4822-8ab8-2f6f85c45104}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Bricks\AdvanceShadow">
+      <UniqueIdentifier>{65a00b5e-8d3d-4887-817d-034b4d2d9a0a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Material\TestMaterial.mtl">
@@ -445,6 +448,9 @@
     </None>
     <None Include="$(MSBuildThisFileDirectory)ShadingEnv\Deferred\DeferredOpaqueMeshlets.cginc">
       <Filter>ShadingEnv\Deferred</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\AdvanceShadow\AdvanceShadow.cginc">
+      <Filter>Bricks\AdvanceShadow</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

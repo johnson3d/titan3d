@@ -293,10 +293,9 @@ namespace EngineNS.Graphics.Pipeline
                     {
                         foreach (var j in i)
                         {
-                            if (j.IsUsed == false)
+                            if (j.IsUsed == false || j.Enable == false)
                                 continue;
-                            if (j.Enable)
-                                j.BeginTickLogic(world, this as TtRenderPolicy, true);
+                            j.BeginTickLogic(world, this as TtRenderPolicy, true);
                         }
                     }
                 }
@@ -323,10 +322,9 @@ namespace EngineNS.Graphics.Pipeline
                     {
                         foreach (var j in i)
                         {
-                            if (j.IsUsed == false)
+                            if (j.IsUsed == false || j.Enable == false)
                                 continue;
-                            if (j.Enable)
-                                j.EndTickLogic(world, this as TtRenderPolicy, true);
+                            j.EndTickLogic(world, this as TtRenderPolicy, true);
                         }
                     }
                 }
@@ -354,29 +352,27 @@ namespace EngineNS.Graphics.Pipeline
                     {
                         foreach (var j in i)
                         {
-                            if (j.IsUsed == false)
+                            if (j.IsUsed == false || j.Enable == false)
                                 continue;
-                            if (j.Enable)
-                            {
-                                j.BeforeTickLogic((TtRenderPolicy)this);
 
-                                j.TickLogic(world, (TtRenderPolicy)this, true);
+                            j.BeforeTickLogic((TtRenderPolicy)this);
 
-                                j.TryReleaseBufers(mTempTryReleaseLinkers, onRemove);
+                            j.TickLogic(world, (TtRenderPolicy)this, true);
 
-                                //int NunOfRefZero = 0; 
-                                //foreach (var ca in this.AttachmentCache.CachedAttachments)
-                                //{
-                                //    if(ca.Value.RefCount == 0 && ca.Value.LifeMode == UAttachBuffer.ELifeMode.Transient)
-                                //    {
-                                //        NunOfRefZero++;
-                                //    }
-                                //}
-                                //if(NunOfRefZero!=0)
-                                //{
-                                //    int xxx = 0;
-                                //}
-                            }
+                            j.TryReleaseBufers(mTempTryReleaseLinkers, onRemove);
+
+                            //int NunOfRefZero = 0; 
+                            //foreach (var ca in this.AttachmentCache.CachedAttachments)
+                            //{
+                            //    if(ca.Value.RefCount == 0 && ca.Value.LifeMode == UAttachBuffer.ELifeMode.Transient)
+                            //    {
+                            //        NunOfRefZero++;
+                            //    }
+                            //}
+                            //if(NunOfRefZero!=0)
+                            //{
+                            //    int xxx = 0;
+                            //}
                         }
                     }
                 }
@@ -393,8 +389,9 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     foreach (var j in i)
                     {
-                        if (j.Enable)
-                            j.TickSync((TtRenderPolicy)this);
+                        if (j.IsUsed == false || j.Enable == false)
+                            continue;
+                        j.TickSync((TtRenderPolicy)this);
                     }
                 }
             }

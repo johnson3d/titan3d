@@ -236,6 +236,10 @@ namespace EngineNS.Editor.ShaderCompiler
             {
                 memberType = "void";
             }
+            else if (type == typeof(Matrix))
+            {
+                memberType = "matrix";
+            }
             else
             {
                 var attr = type.GetCustomAttribute<TtShaderDefineAttribute>(false);

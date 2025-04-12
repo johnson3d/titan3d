@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_9078457618382641718 Type="EngineNS.Graphics.Pipeline.TtCpuCullingNode@EngineCore">
+  <CullCameraName Type="System.String@Unknown" Order="0" />
+  <IsUsed Type="System.Boolean@Unknown" Order="0" />
+</Hash_9078457618382641718>

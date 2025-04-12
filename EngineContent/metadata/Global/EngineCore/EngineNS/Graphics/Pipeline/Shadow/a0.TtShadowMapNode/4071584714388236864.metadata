@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_4071584714388236864 Type="EngineNS.Graphics.Pipeline.Shadow.TtShadowMapNode@EngineCore">
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <IsDepth32 Type="System.Boolean@Unknown" Order="0" />
+</Hash_4071584714388236864>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_14665172820827899550 Type="EngineNS.Graphics.Pipeline.Common.Post.TtAdditiveNode@EngineCore">
+  <Factor1 Type="System.Single@Unknown" Order="0" />
+  <Factor2 Type="System.Single@Unknown" Order="0" />
+  <IsUsed Type="System.Boolean@Unknown" Order="0" />
+  <OutputScaleFactor Type="System.Single@Unknown" Order="0" />
+</Hash_14665172820827899550>

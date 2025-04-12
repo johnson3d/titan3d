@@ -22,10 +22,6 @@
 
 #include "../../Inc/SysFunctionDefImpl.cginc"
 
-#if !defined(ENV_EShadowMode)
-#define ENV_EShadowMode EShadowMode_Csm
-#endif
-
 Texture2D DepthBuffer DX_AUTOBIND;
 SamplerState Samp_DepthBuffer DX_AUTOBIND;
 
@@ -44,7 +40,7 @@ SamplerState Samp_GBufferRT3 DX_AUTOBIND;
 #if ENV_EShadowMode == EShadowMode_Csm
 Texture2D GShadowMap DX_AUTOBIND;
 #elif ENV_EShadowMode == EShadowMode_Advance
-Texture2DArray GShadowMapArray DX_AUTOBIND;
+#include "../../Bricks/AdvanceShadow/AdvanceShadow.cginc"
 #elif ENV_EShadowMode == EShadowMode_None
 #endif
 SamplerState Samp_GShadowMap DX_AUTOBIND;
@@ -221,37 +217,44 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		{
 			mSFD.mViewer2ShadowDepth = (half)ShadowMapUV.z;
 			
-			//#if USE_ESM
-			//ShadowValue = GetESMValue(ShadowMapUV.xy, mSFD, 10.0);
-			//#else
 			ShadowValue = DoPCF4x4(ShadowMapUV.xy, mSFD);
-			//#endif
 			//ShadowValue = NoFiltering(ShadowMapUV.xy, mSFD);
 			
 			half FadeValue = (half)saturate(PerPixelViewerDistance * gFadeParam.x + gFadeParam.y);
 			ShadowValue = lerp(ShadowValue, 1.0h, FadeValue);
 		}
-
-// 		ShadowMapUV = mul(float4(WorldPos, 1.0f), gViewer2ShadowMtx[0]);
-
-// 		mSFD.mViewer2ShadowDepth = (half)ShadowMapUV.z;
-
-// //#if USE_ESM
-// 	ShadowValue = GetESMValue(ShadowMapUV.xy, mSFD, 10);//GetESMValue(float2 SMUV, float CurrentDepth, ShadowFilterData SFD, float ESM_C)
-// //#else
-// //	ShadowValue = DoPCF4x4(ShadowMapUV.xy, mSFD);
-// //#endif
-
+		
 		if (ShadowValue < 1.0f)
 			output.RT0.a = 0.0h;
 
 		half FadeValue = (half)saturate(PerPixelViewerDistance * gFadeParam.x + gFadeParam.y);		
 		ShadowValue = lerp(ShadowValue, 1.0h, FadeValue);
 	}
+#elif ENV_EShadowMode == EShadowMode_Advance
+	int pageIndex = GetPageNode(WorldPos.xz);
+    if (pageIndex < 0)
+    {
+        ShadowValue = 1.0h;
+    }
+    else
+    {
+        FAdvShadowNodeData node = QTreeNodeBuffer[pageIndex];
+        ShadowMapUV = mul(float4(WorldPos, 1.0f), node.ShadowMatrix);
+        float shadowSpaceDepth = GShadowMapArray.SampleLevel(Samp_GShadowMap, float3(ShadowMapUV.xy, node.PageIndex), 0).r;
+		//compare depth, esm? USE_INVERSE_Z
+        if (ShadowMapUV.z > shadowSpaceDepth)
+        {
+			ShadowValue = 1.0h;
+        }
+		else
+		{
+			ShadowValue = 0.5h;
+		}
+    }
 #elif ENV_EShadowMode == EShadowMode_None
 	ShadowValue = 1.0h;
 #endif
-
+    
 	half Sdiff = 1.0h - Metallic;
 	half3 OptDiffShading = Sdiff * Albedo;
 

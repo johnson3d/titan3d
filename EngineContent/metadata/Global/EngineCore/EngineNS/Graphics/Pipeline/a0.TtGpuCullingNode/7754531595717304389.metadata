@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_7754531595717304389 Type="EngineNS.Graphics.Pipeline.TtGpuCullingNode@EngineCore">
+  <EnableInstanceMeshCullling Type="System.Boolean@Unknown" Order="0" />
+  <EnableStaticMeshBatch Type="System.Boolean@Unknown" Order="0" />
+  <IsUsed Type="System.Boolean@Unknown" Order="0" />
+</Hash_7754531595717304389>

@@ -15,6 +15,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)..\..\cache\debugutility\engine_preprocessors.cginc" />
+    <None Include="$(MSBuildThisFileDirectory)Bricks\AdvanceShadow\AdvanceShadow.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\FX\Hair.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\ClusterCulling.cginc" />
     <None Include="$(MSBuildThisFileDirectory)Bricks\GpuDriven\FRaster.cginc" />

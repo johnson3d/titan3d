@@ -9,53 +9,65 @@ using static EngineNS.Bricks.AdvanceShadow.TtQNode;
 
 namespace EngineNS.Bricks.AdvanceShadow
 {
+    [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FAdvShadowNodeData")]
     public struct FAdvShadowNodeData
     {
         public void SetDefault()
         {
-            ChildIndex00 = -1;
-            ChildIndex01 = -1;
-            ChildIndex10 = -1;
-            ChildIndex11 = -1;
-            PageIndex = -2;
+            mChildIndex00 = -1;
+            mChildIndex01 = -1;
+            mChildIndex10 = -1;
+            mChildIndex11 = -1;
+            mPageIndex = -2;
         }
-        public int ChildIndex00;
-        public int ChildIndex01;
-        public int ChildIndex10;
-        public int ChildIndex11;
+        public Matrix mShadowMatrix;
+        public int mChildIndex00;
+        public int mChildIndex01;
+        public int mChildIndex10;
+        public int mChildIndex11;
 
-        public int PageIndex;
+        public int mNodeType;
+        public int mPageIndex;
     }
+
+    //[EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FShadowPage")]
+    //public struct FShadowPage
+    //{
+    //    public int mTextureArray;
+    //    //public Vector2 AtlasUV;
+    //    public FShadowPage(int arrayIndex)
+    //    {
+    //        mTextureArray = arrayIndex;
+    //    }
+    //}
+
     public partial class TtQNode
     {
         public TtQNode(int deepLevel)
         {
             DeepLevel = deepLevel;
+            Leaf = new TtQLeaf(this);
         }
-
+        public enum ENodeType
+        {
+            Node,
+            Leaf,
+            DeathNode,
+        }
+        public ENodeType NodeType = ENodeType.DeathNode;
         public TtQTree QTree;
         public int NodeIndex;
         public int DeepLevel;
         public DBoundingBox2D AABB;
-        public TtQNode Child00;
-        public TtQNode Child01;
-        public TtQNode Child10;
-        public TtQNode Child11;
+        public TtQNode Parent = null;
+        public TtQNode Child00 = null;
+        public TtQNode Child01 = null;
+        public TtQNode Child10 = null;
+        public TtQNode Child11 = null;
         public TtQLeaf Leaf = null;
         public int PageIndex = -2;
-        
-        public bool IsLeaf
-        {
-            get => PageIndex >= 0;
-        }
-        public bool IsNode
-        {
-            get => PageIndex == -1;
-        }
-        public bool IsDeathNode
-        {
-            get => PageIndex == -2;
-        }
+        public Matrix ShadowMatrix;
+
         public struct FShadowObject
         {
             public TtNode SceneNode;
@@ -65,49 +77,40 @@ namespace EngineNS.Bricks.AdvanceShadow
         public Dictionary<TtNode, FShadowObject> ShadowObjects = new Dictionary<TtNode, FShadowObject>();
         public void SetToGpuData(ref FAdvShadowNodeData data)
         {
-            data.PageIndex = PageIndex;
+            data.mNodeType = (int)NodeType;
+            data.mPageIndex = PageIndex;
             if (Child00 != null)
             {
-                data.ChildIndex00 = Child00.NodeIndex;
-                data.ChildIndex01 = Child01.NodeIndex;
-                data.ChildIndex10 = Child10.NodeIndex;
-                data.ChildIndex11 = Child11.NodeIndex;
+                data.mChildIndex00 = Child00.NodeIndex;
+                data.mChildIndex01 = Child01.NodeIndex;
+                data.mChildIndex10 = Child10.NodeIndex;
+                data.mChildIndex11 = Child11.NodeIndex;
             }
         }
         internal void AsLeaf()
         {
+            NodeType = ENodeType.Leaf;
             if (PageIndex < 0)
             {
                 PageIndex = QTree.AllocPage();
             }
-            if (Leaf == null)
-            {   
-                Leaf = new TtQLeaf(this);
-            }
         }
         internal void AsNode()
         {
+            NodeType = ENodeType.Node;
+            if (PageIndex < 0)
+            {
+                PageIndex = QTree.AllocPage();
+            }
+        }
+        internal void AsDeathNode()
+        {
+            NodeType = ENodeType.DeathNode;
             if (PageIndex >= 0)
             {
                 QTree.FreePage(PageIndex);
             }
             PageIndex = -1;
-            if (Leaf != null)
-            {
-                Leaf = null;
-            }
-        }
-        internal void AsDeathNode()
-        {
-            if (PageIndex >= 0)
-            {
-                QTree.FreePage(PageIndex);
-            }
-            PageIndex = -2;
-            if (Leaf != null)
-            {
-                Leaf = null;
-            }
         }
         internal bool PushObject(in FShadowObject shadowObj)
         {
@@ -164,7 +167,7 @@ namespace EngineNS.Bricks.AdvanceShadow
 
         public void GatherLeafs(List<TtQNode> leafs)
         {
-            if (this.IsLeaf)
+            if (this.NodeType == ENodeType.Leaf)
             {
                 leafs.Add(this);
                 return;
@@ -180,6 +183,19 @@ namespace EngineNS.Bricks.AdvanceShadow
         public int ShadowObjectCount
         {
             get => CountShadowObjects(true);
+        }
+        public void GatherLeafShadowObjects(List<TtQNode> leafs, Dictionary<TtNode, FShadowObject> objs)
+        {
+            GatherLeafs(leafs);
+            foreach (var i in leafs)
+            {
+                foreach (var j in i.ShadowObjects)
+                {
+                    if (objs.ContainsKey(j.Key))
+                        continue;
+                    objs.Add(j.Key, j.Value);
+                }
+            }
         }
         public int CountShadowObjects(bool bExludeSame = true)
         {
@@ -211,17 +227,6 @@ namespace EngineNS.Bricks.AdvanceShadow
         }
     }
 
-    public struct FShadowPage
-    {
-        public int TextureArray;
-        public Matrix ShadowMatrix;
-        public FShadowPage(int arrayIndex, Matrix mat)
-        {
-            TextureArray = arrayIndex;
-            ShadowMatrix = mat;
-        }
-    }
-
     public class TtQLeaf
     {
         public TtQLeaf(TtQNode node) 
@@ -234,15 +239,16 @@ namespace EngineNS.Bricks.AdvanceShadow
         public TtCamera ShadowCamera;
         public bool IsDirty = true;
         public bool IsContainDynamicObject = false;
+        
         public int PageIndex
         {
             get => HostNode.PageIndex;
         }
-        public ref FShadowPage GetShadowPage()
-        {
-            return ref HostNode.QTree.ShadowPages[PageIndex];
-        }
-        public void UpdateShadowMatrix(TtWorld world, uint time)
+        //public ref FShadowPage GetShadowPage()
+        //{
+        //    return ref HostNode.QTree.ShadowPages[PageIndex];
+        //}
+        public void UpdateShadowMatrix(TtWorld world)
         {
             if (IsDirty == false)
             {
@@ -252,12 +258,12 @@ namespace EngineNS.Bricks.AdvanceShadow
             if (HostNode.ShadowObjects.Count == 0)
                 return;
 
-            if (PageIndex > HostNode.QTree.ShadowPages.Length)
+            if (PageIndex >= HostNode.QTree.MaxPageCount)
                 return;
 
-            UpdateShadowMapTime = time;
+            UpdateShadowMapTime = HostNode.QTree.UpdateShadowMapTime;
 
-            ref FShadowPage page = ref GetShadowPage();
+            //ref FShadowPage page = ref GetShadowPage();
             DBoundingBox aabb = new DBoundingBox();
             DBoundingBox2D aabb2d = new DBoundingBox2D();
             aabb.InitEmptyBox();
@@ -272,7 +278,8 @@ namespace EngineNS.Bricks.AdvanceShadow
 
             DVector2 c2d;
             float width;
-            if(HostNode.AABB.Contains(in aabb2d) == ContainmentType.Contains)
+            bool bKeepViewSize = true;
+            if (bKeepViewSize == false && HostNode.AABB.Contains(in aabb2d) == ContainmentType.Contains)
             {
                 c2d = aabb2d.GetCenter();
                 width = (float)aabb2d.GetMaxSide();
@@ -281,7 +288,8 @@ namespace EngineNS.Bricks.AdvanceShadow
             {
                 c2d = HostNode.AABB.GetCenter();
                 //Clamp by HostNode.AABB
-                width = MathF.Min(FrustumSphereDiameter, (float)HostNode.AABB.GetSize().X);
+                //width = MathF.Min(FrustumSphereDiameter, (float)HostNode.AABB.GetSize().X);
+                width = (float)HostNode.AABB.GetSize().X;
             }
 
             ShadowCamera.SetMatrixStartPosition(world.CameraOffset);
@@ -294,7 +302,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             ShadowCamera.UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext);
 
             Matrix vp = ShadowCamera.GetViewProjection();
-            page.ShadowMatrix = vp * HostNode.QTree.mOrtho2UVMtx;
+            HostNode.ShadowMatrix = vp * HostNode.QTree.mOrtho2UVMtx;
         }
     }
 
@@ -306,13 +314,14 @@ namespace EngineNS.Bricks.AdvanceShadow
         public Vector3 LightDirection;
         public TtFullQTreeBuilder QTreeBuilder;
         public TtQNode[] QNodes = null;
-        public FAdvShadowNodeData[] AdvShadowNodeDatas = null;
-        public FShadowPage[] ShadowPages = null;
+        public TtCpu2GpuBuffer<FAdvShadowNodeData> AdvShadowNodeDatas = null;
+        //public FShadowPage[] ShadowPages = null;
         public Stack<int> PageAllocator = new Stack<int>();
         public TtQNode Root = null;
         public float MaxShadowDistance = 1000;
         public int MaxDeepLevel = 5;
-        public int MaxTileCount = 0;
+        public int MaxPageCount = 0;
+        
         public void UpdateLightDirection(Vector3 dir)
         {
             if (LightDirection == dir)
@@ -333,7 +342,7 @@ namespace EngineNS.Bricks.AdvanceShadow
         [Category("Debug")]
         public int AlivePage
         {
-            get => MaxTileCount - PageAllocator.Count;
+            get => MaxPageCount - PageAllocator.Count;
         }
         public static void CountFullTreeNode(int level, out int side, out int total)
         {
@@ -345,7 +354,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                 total += side * side;
             }
         }
-        public void Initialize(int maxDeepLevel, DBoundingBox2D aabb, int maxTile)
+        public unsafe void Initialize(int maxDeepLevel, DBoundingBox2D aabb, int maxTile)
         {
             MaxDeepLevel = maxDeepLevel;
 
@@ -354,18 +363,21 @@ namespace EngineNS.Bricks.AdvanceShadow
             CountFullTreeNode(MaxDeepLevel, out side, out total);
 
             PageAllocator.Clear();
-            MaxTileCount = Math.Min(side * side, maxTile);
-            ShadowPages = new FShadowPage[MaxTileCount];
-            for (int i = 0; i < MaxTileCount; i++)
+            MaxPageCount = Math.Min(side * side, maxTile);
+            //ShadowPages = new FShadowPage[MaxTileCount];
+            for (int i = 0; i < MaxPageCount; i++)
             {
-                ShadowPages[i].TextureArray = i;
-                PageAllocator.Push(MaxTileCount - 1 - i);
+            //    ShadowPages[i].mTextureArray = i;
+                PageAllocator.Push(MaxPageCount - 1 - i);
             }
 
             QTreeBuilder = new TtFullQTreeBuilder();
             QTreeBuilder.InitBuilder(MaxDeepLevel, in aabb);
             QNodes = QTreeBuilder.Nodes;
-            AdvShadowNodeDatas = QTreeBuilder.AdvShadowNodeDatas;
+            AdvShadowNodeDatas = new TtCpu2GpuBuffer<FAdvShadowNodeData>();
+            AdvShadowNodeDatas.Initialize(NxRHI.EBufferType.BFT_SRV);
+            AdvShadowNodeDatas.SetSize(QTreeBuilder.AdvShadowNodeDatas.Length);
+            
             Root = QTreeBuilder.Root;
             Root.Initialize(this, in aabb.Minimum, in aabb.Maximum);
 
@@ -416,18 +428,18 @@ namespace EngineNS.Bricks.AdvanceShadow
                 return;
             PageAllocator.Push(index);
         }
-        public void FreeNodeTree(TtQNode node)
+        public void FreeChildTree(TtQNode node)
         {
-            if (node.IsDeathNode)
+            if (node.NodeType == ENodeType.DeathNode)
             {
                 return;
             }
-            if (node.IsNode && node.Child00 != null)
+            if (node.NodeType == ENodeType.Node && node.Child00 != null)
             {
-                FreeNodeTree(node.Child00);
-                FreeNodeTree(node.Child01);
-                FreeNodeTree(node.Child10);
-                FreeNodeTree(node.Child11);
+                FreeChildTree(node.Child00);
+                FreeChildTree(node.Child01);
+                FreeChildTree(node.Child10);
+                FreeChildTree(node.Child11);
 
                 node.PushShadowObjects(this, node.Child00.ShadowObjects);
                 node.PushShadowObjects(this, node.Child01.ShadowObjects);
@@ -438,8 +450,12 @@ namespace EngineNS.Bricks.AdvanceShadow
                 node.Child01.ShadowObjects.Clear();
                 node.Child10.ShadowObjects.Clear();
                 node.Child11.ShadowObjects.Clear();
+
+                node.Child00.AsDeathNode();
+                node.Child01.AsDeathNode();
+                node.Child10.AsDeathNode();
+                node.Child11.AsDeathNode();
             }
-            node.AsDeathNode();
         }
         [ThreadStatic]
         static Profiler.TimeScope mScopeUpdateQTree;
@@ -459,13 +475,22 @@ namespace EngineNS.Bricks.AdvanceShadow
             get => mUpdateShadowMapNodes;
         }
         private uint mUpdateShadowMapTime = 1;
+        public uint UpdateShadowMapTime
+        {
+            get => mUpdateShadowMapTime;
+        }
         public DVector2 CameralPosition;
-        public void UpdateQTree(TtWorld world, TtCamera cameral, int limitLeaf)
+        public unsafe void UpdateQTree(TtWorld world, TtCamera cameral, int limitLeaf)
         {
             using (new Profiler.TimeScopeHelper(ScopeUpdateQTree))
             {
                 CameralPosition = new DVector2(cameral.GetPosition().X, cameral.GetPosition().Z);
                 UpdateQTree(in CameralPosition, Root);
+                fixed (FAdvShadowNodeData* p = &QTreeBuilder.AdvShadowNodeDatas[0])
+                {
+                    AdvShadowNodeDatas.UpdateData(0, p, QTreeBuilder.AdvShadowNodeDatas.Length * sizeof(FAdvShadowNodeData));
+                    //AdvShadowNodeDatas.Flush2GPU();
+                }
                 mUpdateShadowMapNodes.Clear();
                 GetDirtyLeafs(world, Root, mUpdateShadowMapNodes);
                 mUpdateShadowMapNodes.Sort((x,y)=>
@@ -478,10 +503,10 @@ namespace EngineNS.Bricks.AdvanceShadow
                 {
                     mUpdateShadowMapNodes.RemoveRange(limitLeaf, mUpdateShadowMapNodes.Count - limitLeaf);
                 }
-                foreach (var i in mUpdateShadowMapNodes)
-                {
-                    i.Leaf.UpdateShadowMatrix(world, mUpdateShadowMapTime);
-                }
+                //foreach (var i in mUpdateShadowMapNodes)
+                //{
+                //    i.Leaf.UpdateShadowMatrix(world);
+                //}
                 mUpdateShadowMapTime++;
 
                 //var count = Root.ShadowObjectCount;
@@ -512,7 +537,7 @@ namespace EngineNS.Bricks.AdvanceShadow
         }
         protected bool GetDirtyLeafs(TtWorld world, TtQNode node, List<TtQNode> leaf, int limitLeaf = int.MaxValue)
         {
-            if (node.IsLeaf)
+            if (node.NodeType == ENodeType.Leaf)
             {
                 if (node.Leaf.IsDirty == false)
                     return true;
@@ -546,20 +571,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             {
                 if (node.Child00 != null)
                 {
-                    FreeNodeTree(node.Child00);
-                    FreeNodeTree(node.Child01);
-                    FreeNodeTree(node.Child10);
-                    FreeNodeTree(node.Child11);
-
-                    node.PushShadowObjects(this, node.Child00.ShadowObjects);
-                    node.PushShadowObjects(this, node.Child01.ShadowObjects);
-                    node.PushShadowObjects(this, node.Child10.ShadowObjects);
-                    node.PushShadowObjects(this, node.Child11.ShadowObjects);
-
-                    node.Child00.ShadowObjects.Clear();
-                    node.Child01.ShadowObjects.Clear();
-                    node.Child10.ShadowObjects.Clear();
-                    node.Child11.ShadowObjects.Clear();
+                    FreeChildTree(node);
                 }
 
                 node.AsLeaf();
@@ -568,13 +580,14 @@ namespace EngineNS.Bricks.AdvanceShadow
 
             node.AsNode();
 
-            if (node.ShadowObjects.Count > 0)
+            //if (node.ShadowObjects.Count > 0)
+            if (node.Child00.NodeType == ENodeType.DeathNode)
             {
                 node.Child00.PushShadowObjects(this, node.ShadowObjects);
                 node.Child01.PushShadowObjects(this, node.ShadowObjects);
                 node.Child10.PushShadowObjects(this, node.ShadowObjects);
                 node.Child11.PushShadowObjects(this, node.ShadowObjects);
-                node.ShadowObjects.Clear();
+                //node.ShadowObjects.Clear();
             }
 
             UpdateQTree(in cameralPos, node.Child00);
@@ -687,7 +700,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             var min = new Vector2((float)(node.AABB.Minimum.X / size.X), (float)(node.AABB.Minimum.Y / size.Y)) * drawSize + DrawOffset;
             var max = new Vector2((float)(node.AABB.Maximum.X / size.X), (float)(node.AABB.Maximum.Y / size.Y)) * drawSize + DrawOffset;
             
-            if (node.IsNode && node.Child00 != null)
+            if (node.NodeType == ENodeType.Node && node.Child00 != null)
             {
                 var level = (byte)(node.DeepLevel * 255 / MaxDeepLevel);
                 var color = new Color4b(level, level, level, 255);
@@ -699,13 +712,13 @@ namespace EngineNS.Bricks.AdvanceShadow
                 DrawQTree(graphNode, node.Child10, cmdlist, in drawSize, in DrawOffset, ref stats);
                 DrawQTree(graphNode, node.Child11, cmdlist, in drawSize, in DrawOffset, ref stats);
             }
-            else if(node.IsDeathNode)
+            else if(node.NodeType == ENodeType.DeathNode)
             {
                 return;
             }
             else
             {
-                if (node.ShadowObjects.Count > 0 && graphNode.mDebuggerSRViews != null)
+                if (node.ShadowObjects.Count > 0 && graphNode.mDebuggerSRViews != null && node.Leaf.PageIndex < graphNode.mDebuggerSRViews.Length)
                 {
                     var srv = graphNode.mDebuggerSRViews[node.Leaf.PageIndex];
                     cmdlist.AddImage((ulong)srv.GetTextureHandle(), in min, in max, in Vector2.Zero, in Vector2.One, 0xffffffff);
@@ -746,7 +759,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             {
                 return;
             }
-            if (node.Child00 != null && node.Child00.IsDeathNode == false)
+            if (node.Child00 != null && node.Child00.NodeType !=  ENodeType.DeathNode)
             {
                 PushShadowObject(node.Child00, in shadowObject);
                 PushShadowObject(node.Child01, in shadowObject);

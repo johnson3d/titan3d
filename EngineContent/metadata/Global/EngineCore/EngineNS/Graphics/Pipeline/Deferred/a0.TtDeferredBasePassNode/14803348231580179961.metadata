@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_14803348231580179961 Type="EngineNS.Graphics.Pipeline.Deferred.TtDeferredBasePassNode@EngineCore">
+  <ClearMRT Type="System.Boolean@Unknown" Order="0" />
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <EnableMeshlets Type="System.Boolean@Unknown" Order="0" />
+</Hash_14803348231580179961>

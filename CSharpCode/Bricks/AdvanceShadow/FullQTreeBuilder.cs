@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NPOI.POIFS.Properties;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -58,18 +59,16 @@ namespace EngineNS.Bricks.AdvanceShadow
                 Layers[i].GridSize = aabb.GetSize() / Layers[i].Side;
                 total += Layers[i].Nodes.Length;
             }
-            
+
+            Nodes = new TtQNode[total];
             for (int i = 0; i < Layers.Length - 1; i++)
             {
                 Build(i);
             }
-            Nodes = new TtQNode[total];
+            
             AdvShadowNodeDatas = new FAdvShadowNodeData[total];
 
-            for (int i = 0; i < Layers.Length; i++)
-            {
-                BuildNodeArray(i);
-            }
+            BuildNodeArray();
         }
         public void Build(int layer)
         {
@@ -80,20 +79,33 @@ namespace EngineNS.Bricks.AdvanceShadow
                 for (int x = 0; x < curLayer.Side; x++)
                 {
                     var node = curLayer.GetNode(x, y);
+                    node.NodeIndex = curLayer.LayerStartIndex + node.IndexInLayer;
+                    Nodes[node.NodeIndex] = node;
+
                     node.Child00 = childLayer.GetNode(x * 2, y * 2);
                     node.Child01 = childLayer.GetNode(x * 2 + 1, y * 2);
                     node.Child10 = childLayer.GetNode(x * 2, y * 2 + 1);
                     node.Child11 = childLayer.GetNode(x * 2 + 1, y * 2 + 1);
+
+                    node.Child00.Parent = node;
+                    node.Child01.Parent = node;
+                    node.Child10.Parent = node;
+                    node.Child11.Parent = node;
                 }
             }
         }
-        public void BuildNodeArray(int layer)
+        public void BuildNodeArray()
+        {
+            for (int i = 0; i < Layers.Length; i++)
+            {
+                BuildNodeArray(i);
+            }
+        }
+        private void BuildNodeArray(int layer)
         {
             var curLayer = Layers[layer];
             foreach(var i in curLayer.Nodes)
             {
-                i.NodeIndex = Layers[layer].LayerStartIndex + i.IndexInLayer;
-                Nodes[i.NodeIndex] = i;
                 i.SetToGpuData(ref AdvShadowNodeDatas[i.NodeIndex]);
             }
         }

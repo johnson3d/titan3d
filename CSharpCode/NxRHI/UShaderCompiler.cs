@@ -114,6 +114,7 @@ namespace EngineNS.NxRHI
                 var ret = mCoreObject.CompileShader(shaderDesc.mCoreObject, shader, entry, type, sm, defines.mCoreObject, sl, bDebugShader, extHlslVersion, dxcArgs, blob.mCoreObject, asModule);
                 if (ret == false)
                 {
+                    System.Diagnostics.Debugger.Break();
                     Profiler.Log.WriteLine<Profiler.TtGraphicsGategory>(Profiler.ELogTag.Warning, $"{shader}({entry}) compile failed");
                 }
                 if (blob.Size > 0)

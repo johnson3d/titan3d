@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Mail;
 using EngineNS.Graphics.Mesh;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.Graphics.Pipeline.Shader;
 using EngineNS.NxRHI;
-using Microsoft.Toolkit.HighPerformance.Buffers;
+using EngineNS.GamePlay.Scene;
+using EngineNS.Thread.Async;
+using EngineNS.GamePlay;
+using System.ComponentModel;
 
 namespace EngineNS.Bricks.AdvanceShadow
 {
@@ -38,8 +40,10 @@ namespace EngineNS.Bricks.AdvanceShadow
     public class TtAdvanceShadowMapNode : TtRenderGraphNode
     {
         public TtRenderGraphPin DepthPinOut = TtRenderGraphPin.CreateOutput("Depth", false, EPixelFormat.PXF_D16_UNORM, NxRHI.EBufferType.BFT_DSV | NxRHI.EBufferType.BFT_SRV);//or D32
+        public TtRenderGraphPin SelfNodePinOut = TtRenderGraphPin.CreateOutput("Self", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_NONE);
         bool mIsDepth32 = false;
         [Rtti.Meta]
+        [Category("Option")]
         public bool IsDepth32
         {
             get => mIsDepth32;
@@ -50,6 +54,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             }
         }
         [Rtti.Meta]
+        [Category("Option")]
         public int PageResolution { get; set; } = 128;
         public NxRHI.TtTexture DepthTextureArray;
         public NxRHI.TtSrView DepthTextureArraySRV;
@@ -80,6 +85,8 @@ namespace EngineNS.Bricks.AdvanceShadow
         public override void InitNodePins()
         {
             AddOutput(DepthPinOut);
+            AddOutput(SelfNodePinOut);
+            SelfNodePinOut.LinkType = "AdvShadow";
         }
         public override TtGraphicsShadingEnv GetPassShading(TtMesh.TtAtom atom = null)
         {
@@ -125,6 +132,8 @@ namespace EngineNS.Bricks.AdvanceShadow
             mGBuffer.SetSize(PageResolution, PageResolution);
         }
         public GamePlay.TtWorld.TtVisParameter mVisParameter = new GamePlay.TtWorld.TtVisParameter();
+        public List<TtQNode> mLeafs = new List<TtQNode>();
+        public Dictionary<TtNode, TtQNode.FShadowObject> mShadowObjects = new Dictionary<TtNode, TtQNode.FShadowObject>();
         public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             if (mShadowQTree == null)
@@ -147,7 +156,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                 desc.Width = (uint)PageResolution;
                 desc.Height = (uint)PageResolution;
                 desc.MipLevels = 1;
-                desc.ArraySize = (uint)mShadowQTree.ShadowPages.Length;
+                desc.ArraySize = (uint)mShadowQTree.MaxPageCount;
                 desc.Format = DepthPinOut.Attachement.Format;
                 DepthPinOut.Attachement.Width = desc.Width;
                 DepthPinOut.Attachement.Height = desc.Height;
@@ -169,7 +178,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                         view.Dispose();
                     }
                 }
-                mDebuggerSRViews = new TtSrView[mShadowQTree.ShadowPages.Length];
+                mDebuggerSRViews = new TtSrView[mShadowQTree.MaxPageCount];
                 for (int i = 0; i < mDebuggerSRViews.Length; i++)
                 {
                     var srvDesc1 = new FSrvDesc();
@@ -190,7 +199,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                         view.Dispose();
                     }
                 }
-                mDSViews = new TtDepthStencilView[mShadowQTree.ShadowPages.Length];
+                mDSViews = new TtDepthStencilView[mShadowQTree.MaxPageCount];
 
                 for (int i = 0; i < mDSViews.Length; i++)
                 {
@@ -217,26 +226,44 @@ namespace EngineNS.Bricks.AdvanceShadow
 
             foreach (var i in mShadowQTree.UpdateShadowMapNodes)
             {
-                if (i.Leaf != null)
+                if (i.NodeType == TtQNode.ENodeType.Leaf)
                 {
-                    mVisParameter.ClearVisibles();
-                    mVisParameter.CullCamera = i.Leaf.ShadowCamera;
-                    foreach (var j in i.ShadowObjects)
-                    {
-                        j.Value.SceneNode.OnGatherVisibleMeshes(mVisParameter);
-                    }
-                    var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
-                    using (new NxRHI.TtCmdListScope(cmdlist))
-                    {
-                        mGBuffer.SetDepthStencil(mDSViews[i.Leaf.PageIndex]);
-                        //mGBuffer.SetDepthStencil(Dsv);
-                        mGBuffer.FlushModify();
-                        DrawDepth(cmdlist, world, policy);
-                    }
-                    policy.CommitCommandList(cmdlist);
+                    DrawShadowObjects(world, policy, i, i.ShadowObjects);
+
+                    //var cur = i.Parent;
+                    //while (cur != null)
+                    //{
+                    //    mLeafs.Clear();
+                    //    mShadowObjects.Clear();
+                    //    cur.GatherLeafShadowObjects(mLeafs, mShadowObjects);
+                    //    DrawShadowObjects(world, policy, cur, mShadowObjects);
+                    //    cur = cur.Parent;
+                    //    break;
+                    //}
                 }
             }
             mVisParameter.ClearVisibles();
+        }
+        private void DrawShadowObjects(GamePlay.TtWorld world, TtRenderPolicy policy, TtQNode node, Dictionary<TtNode, TtQNode.FShadowObject> shadowObjects)
+        {
+            if (node.Leaf.IsDirty == false)
+                return;
+            node.Leaf.UpdateShadowMatrix(world);
+            mVisParameter.ClearVisibles();
+            mVisParameter.CullCamera = node.Leaf.ShadowCamera;
+            foreach (var j in shadowObjects)
+            {
+                j.Value.SceneNode.OnGatherVisibleMeshes(mVisParameter);
+            }
+            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            using (new NxRHI.TtCmdListScope(cmdlist))
+            {
+                mGBuffer.SetDepthStencil(mDSViews[node.Leaf.PageIndex]);
+                //mGBuffer.SetDepthStencil(Dsv);
+                mGBuffer.FlushModify();
+                DrawDepth(cmdlist, world, policy);
+            }
+            policy.CommitCommandList(cmdlist);
         }
         private void DrawDepth(NxRHI.TtCommandList cmdlist, GamePlay.TtWorld world, TtRenderPolicy policy)
         {

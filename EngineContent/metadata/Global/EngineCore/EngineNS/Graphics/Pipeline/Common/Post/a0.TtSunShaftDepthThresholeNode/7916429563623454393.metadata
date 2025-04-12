@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_7916429563623454393 Type="EngineNS.Graphics.Pipeline.Common.Post.TtSunShaftDepthThresholeNode@EngineCore">
+  <DepthThreshole Type="System.Single@Unknown" Order="0" />
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <LumThreshold Type="System.Single@Unknown" Order="0" />
+  <MaxBlurRadius Type="System.Single@Unknown" Order="0" />
+  <OutputScaleFactor Type="System.Single@Unknown" Order="0" />
+</Hash_7916429563623454393>

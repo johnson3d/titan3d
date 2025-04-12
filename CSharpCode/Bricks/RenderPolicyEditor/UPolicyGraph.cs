@@ -75,7 +75,7 @@ namespace EngineNS.Bricks.RenderPolicyEditor
 
                 var iPin = new PinIn();
                 iPin.Name = pin.Name;
-                iPin.LinkDesc = NewInOutPinDesc("GraphNode");
+                iPin.LinkDesc = NewInOutPinDesc(pin.LinkType);
                 iPin.MultiLinks = true;
                 AddPinIn(iPin);
             }
@@ -86,12 +86,12 @@ namespace EngineNS.Bricks.RenderPolicyEditor
 
                 var oPin = new PinOut();
                 oPin.Name = pin.Name;
-                oPin.LinkDesc = NewInOutPinDesc("GraphNode");
+                oPin.LinkDesc = NewInOutPinDesc(pin.LinkType);
                 oPin.MultiLinks = true;
                 AddPinOut(oPin);
             }
         }
-        private LinkDesc NewInOutPinDesc(string linkType = "Value")
+        private LinkDesc NewInOutPinDesc(string linkType)
         {
             var result = new LinkDesc();
             result.Icon.Size = new Vector2(20, 20);

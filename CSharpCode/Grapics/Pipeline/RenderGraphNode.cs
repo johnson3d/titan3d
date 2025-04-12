@@ -2,6 +2,7 @@
 using NPOI.Util;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -18,6 +19,7 @@ namespace EngineNS.Graphics.Pipeline
         }
         public string Name { get; private set; }
         public EPinType PinType { get; private set; }
+        public string LinkType { get; set; } = "GraphNode";//如果需要特定Type才能链接，那就再PinOut和PinIn上做一个LinkType的匹配
         public bool IsAutoResize { get; set; } = true;
         public bool IsAllowInputNull { get; set; } = false;
         public TtRenderGraphNode HostNode { get; set; }
@@ -106,14 +108,26 @@ namespace EngineNS.Graphics.Pipeline
             
         }
         internal int mMaxLeafDistance = 0;
+        [Category("Option")]
         public int MaxLeafDistance
         {
             get => mMaxLeafDistance;
         }
         public int TempRootDistance = 0;
-        public bool IsUsed { get; set; } = true;
-        public bool Enable { get; set; } = true;
+        public virtual bool IsUsed 
+        { 
+            get; 
+            set;
+        } = true;
+        [Category("Option")]
+        [Rtti.Meta]
+        public virtual bool Enable
+        {
+            get;
+            set;
+        } = true;
         private string mName;
+        [Category("Option")]
         public virtual string Name
         {
             get => mName;

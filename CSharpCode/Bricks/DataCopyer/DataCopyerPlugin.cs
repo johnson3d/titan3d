@@ -957,9 +957,13 @@ namespace EngineNS.Bricks.DataCopyer
                 creator.AddLine($"var srcObj = obj as {meta.ClassType.FullName.Replace('+', '.')};", ref code);
                 foreach (var j in i.Propertys)
                 {
-                    if (j.PropInfo != null && j.PropInfo.GetCustomAttribute<Rtti.MetaAttribute>().IsNoSerializable)
+                    if (j.PropInfo != null)
                     {
-                        continue;
+                        var attr = j.PropInfo.GetCustomAttribute<Rtti.MetaAttribute>();
+                        if(attr != null && attr.IsNoSerializable)
+                        {
+                            continue;
+                        }
                     }
                     if (j.CustumSerializer != null)
                     {

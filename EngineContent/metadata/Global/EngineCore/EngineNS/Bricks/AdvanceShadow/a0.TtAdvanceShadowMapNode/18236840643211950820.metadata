@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Hash_18236840643211950820 Type="EngineNS.Bricks.AdvanceShadow.TtAdvanceShadowMapNode@EngineCore">
+  <Enable Type="System.Boolean@Unknown" Order="0" />
+  <IsDepth32 Type="System.Boolean@Unknown" Order="0" />
+  <PageResolution Type="System.Int32@Unknown" Order="0" />
+</Hash_18236840643211950820>
