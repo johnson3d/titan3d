@@ -11,6 +11,9 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AdvanceShadowShading.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FullQTreeBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QLeaf.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QTileTree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QTreeVisualDebugger.cs" />
   </ItemGroup>
 </Project>

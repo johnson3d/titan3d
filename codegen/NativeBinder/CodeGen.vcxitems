@@ -122,6 +122,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/PhyShape_2581692454.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/PhyTriggerPair_2581692454.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/PhyTriMesh_2581692454.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/ProxyMemStreamWriter_2581692454.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/QLeaf_2581692454.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/QNodeBase_2581692454.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/QNode_2581692454.cpp2cs.cpp" />
@@ -203,6 +204,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/DX12HeapAllocatorManager_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/DX12HeapAllocator_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/DX12PagedGpuMemAllocator_910209287.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FAccelerationStructureDesc_910209287.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FAStructureInstanceDesc_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FAttachmentDesc_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FBlendDesc_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FBufferDesc_910209287.cpp2cs.cpp" />
@@ -224,6 +227,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FGpuPipelineDesc_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FGpuResourceAlignment_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FGpuSystemDesc_910209287.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FHitGroup_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FIbvDesc_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FIndirectDispatchArgument_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FIndirectDrawArgument_910209287.cpp2cs.cpp" />
@@ -277,14 +281,19 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FTexCube_Array_SRV_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FTexCube_SRV_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FTextureDesc_910209287.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FTopAccelerationStructureDesc_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FTransientBuffer_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FUavDesc_910209287.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FUploadBuffer_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FVbvDesc_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FVertexArray_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FViewInstanceDesc_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FViewInstanceLocation_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/FViewPort_910209287.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IAccelerationStructure_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IActionDraw_910209287.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IAStructureInstance_910209287.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IBindless_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IBuffer_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/ICbView_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/ICmdQueue_910209287.cpp2cs.cpp" />
@@ -309,6 +318,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IGraphicsEffect_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IIbView_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IInputLayout_910209287.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IRayTracingDraw_910209287.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IRayTracingEffect_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IRenderPass_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IRenderTargetView_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/ISampler_910209287.cpp2cs.cpp" />
@@ -318,6 +329,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/ISrView_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/ISwapChain_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/ITexture_910209287.cpp2cs.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/ITopAccelerationStructure_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IUaView_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/NxRHI/IVbView_910209287.cpp2cs.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS/PythonWrapper/FPyClassWrapper_1093809840.cpp2cs.cpp" />

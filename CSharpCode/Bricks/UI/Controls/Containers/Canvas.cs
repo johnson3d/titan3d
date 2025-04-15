@@ -139,16 +139,16 @@ namespace EngineNS.UI.Controls.Containers
             }
         }
 
-        [Bind.AttachedProperty(Name = "SizeToContent", Category = "Layout(Canvas)")]
-        static void OnChildSizeToContentChanged(IBindableObject element, TtBindableProperty property, ESizeToContent value)
-        {
-            var ui = element as TtUIElement;
-            if(ui != null)
-            {
-                var canvas = VisualTreeHelper.GetParent(ui) as TtCanvasControl;
-                canvas?.InvalidateMeasure();
-            }
-        }
+        //[Bind.AttachedProperty(Name = "SizeToContent", Category = "Layout(Canvas)")]
+        //static void OnChildSizeToContentChanged(IBindableObject element, TtBindableProperty property, ESizeToContent value)
+        //{
+        //    var ui = element as TtUIElement;
+        //    if(ui != null)
+        //    {
+        //        var canvas = VisualTreeHelper.GetParent(ui) as TtCanvasControl;
+        //        canvas?.InvalidateMeasure();
+        //    }
+        //}
 
         protected override SizeF MeasureOverride(in SizeF availableSize)
         {
@@ -156,7 +156,7 @@ namespace EngineNS.UI.Controls.Containers
             for(int i=0; i<count; i++)
             {
                 var childUI = VisualTreeHelper.GetChild(this, i);
-                var sizeToContent = TtCanvasControl.GetSizeToContent(childUI);
+                //var sizeToContent = TtCanvasControl.GetSizeToContent(childUI);
                 var anchorMin = TtCanvasControl.GetAnchorMin(childUI);
                 var anchorMax = TtCanvasControl.GetAnchorMax(childUI);
                 var anchorRectX = TtCanvasControl.GetAnchorRectX(childUI);
@@ -204,7 +204,7 @@ namespace EngineNS.UI.Controls.Containers
             for (int i=0; i<count; i++)
             {
                 var childUI = VisualTreeHelper.GetChild(this, i);
-                var sizeToContent = TtCanvasControl.GetSizeToContent(childUI);
+                var sizeToContent = mSizeToContent;//TtCanvasControl.GetSizeToContent(childUI);
                 var anchorMin = TtCanvasControl.GetAnchorMin(childUI);
                 var anchorMax = TtCanvasControl.GetAnchorMax(childUI);
                 var anchorRectX = TtCanvasControl.GetAnchorRectX(childUI);
@@ -287,7 +287,7 @@ namespace EngineNS.UI.Controls.Containers
 
         public override bool NeedUpdateLayoutWhenChildDesiredSizeChanged(TtUIElement child)
         {
-            var sizeToContent = TtCanvasControl.GetSizeToContent(child);
+            var sizeToContent = mSizeToContent;// TtCanvasControl.GetSizeToContent(child);
             if(sizeToContent == ESizeToContent.None)
                 return false;
             else

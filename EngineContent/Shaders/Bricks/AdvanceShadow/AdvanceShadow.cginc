@@ -15,9 +15,8 @@ cbuffer cbAdvanceShadow DX_AUTOBIND
     int PageCount;
     float MaxShadowDistance;
     int MaxDeepLevel;
-    
-    int2 LayerStartAndSide[32];
-    float2 LayerGridSize[32];
+
+    FAdvShadowLayerData LayerData[32];
 };
 
 int GetPageNode(float2 pos)
@@ -28,11 +27,11 @@ int GetPageNode(float2 pos)
     float dist = length(pos - CameraPosition.xz);
     if (dist > MaxShadowDistance)
         return -1;
-    int level = (int) (dist * MaxDeepLevel / MaxShadowDistance);
-    float2 gridSize = LayerGridSize[level];
+    int level = (int) ((MaxShadowDistance - dist) * MaxDeepLevel / MaxShadowDistance);
+    float2 gridSize = LayerData[level].LayerGridSize;
     
     int2 sigment = (int2) ((pos - BoxMin) / gridSize);
-    int2 layer = LayerStartAndSide[level];
+    int2 layer = LayerData[level].LayerStartAndSide;
     int index = layer.x + (sigment.y * layer.y + sigment.x);
     if (index >= NodeCount)
         return -1;

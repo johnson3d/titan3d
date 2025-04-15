@@ -393,7 +393,17 @@ namespace EngineNS.Graphics.Pipeline
                 CmdQueue.Execute(tsCmd.CmdList);
             }
         }
-
+        public void QueueCmd(NxRHI.FRenderCmd cmd, string name, object tag = null, NxRHI.EQueueType qType = NxRHI.EQueueType.QU_Default)
+        {
+            if (CmdQueue != null)
+            {
+                CmdQueue.QueueCmd(cmd, name, tag, qType);
+            }
+            else
+            {
+                TtEngine.Instance.GfxDevice.RenderSwapQueue.QueueCmd(cmd, name, tag, qType);
+            }
+        }
         public void CommitCommandList(NxRHI.TtCommandList cmd, string name = null, NxRHI.EQueueType qType = NxRHI.EQueueType.QU_Default)
         {
             if (CmdQueue != null)

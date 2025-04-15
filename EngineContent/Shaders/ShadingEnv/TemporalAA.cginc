@@ -1,5 +1,6 @@
 #ifndef __TEMPORAL_AA_H__
 #define __TEMPORAL_AA_H__
+#include "../Inc/Math.cginc"
 
 static const int2 kOffsets3x3[9] =
 {
@@ -66,7 +67,7 @@ struct TAA
         float3 Filtered = (BoxMin + BoxMax) * 0.5f;
         float3 RayOrigin = History;
         float3 RayDir = Filtered - History;
-        RayDir = abs(RayDir) < (1.0 / 65536.0) ? (1.0 / 65536.0) : RayDir;
+        RayDir = V_Select(abs(RayDir) < (1.0 / 65536.0), (1.0 / 65536.0), RayDir);
         float3 InvRayDir = rcp(RayDir);
 
         float3 MinIntersect = (BoxMin - RayOrigin) * InvRayDir;

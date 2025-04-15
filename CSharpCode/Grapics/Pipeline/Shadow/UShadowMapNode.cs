@@ -26,10 +26,13 @@ namespace EngineNS.Graphics.Pipeline.Shadow
         }
         public override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall)
         {
-            var shadowMapNode = policy.FindFirstNode<TtShadowMapNode>();
+            //var shadowMapNode = policy.FindFirstNode<TtShadowMapNode>();
+            //if (shadowMapNode == null)
+            //    return;
+
+            var shadowMapNode = drawcall.TagObject as TtShadowMapNode;
             if (shadowMapNode == null)
                 return;
-
             drawcall.mCoreObject.BindPipeline(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, shadowMapNode.DepthRaster.mCoreObject);
         }
     }

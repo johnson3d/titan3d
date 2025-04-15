@@ -251,6 +251,7 @@ namespace EngineNS.Graphics.Mesh
                             return;
                         }
                         var drawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateGraphicDraw();// (shading, Material.ParentMaterial, mesh.MdfQueue);
+                        drawcall.TagObject = node;
                         drawcall.SetSourceAtom(this);
                         drawcall.BindShaderEffect(effect);
                         drawcall.BindGeomMesh(MeshPrimitives.mCoreObject.GetGeomtryMesh());

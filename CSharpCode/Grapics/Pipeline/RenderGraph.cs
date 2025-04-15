@@ -355,12 +355,14 @@ namespace EngineNS.Graphics.Pipeline
                             if (j.IsUsed == false || j.Enable == false)
                                 continue;
 
-                            j.BeforeTickLogic((TtRenderPolicy)this);
+                            using (new Profiler.TimeScopeHelper(j.RDGTickLogicScope))
+                            {
+                                j.BeforeTickLogic((TtRenderPolicy)this);
 
-                            j.TickLogic(world, (TtRenderPolicy)this, true);
+                                j.TickLogic(world, (TtRenderPolicy)this, true);
 
-                            j.TryReleaseBufers(mTempTryReleaseLinkers, onRemove);
-
+                                j.TryReleaseBufers(mTempTryReleaseLinkers, onRemove);
+                            }
                             //int NunOfRefZero = 0; 
                             //foreach (var ca in this.AttachmentCache.CachedAttachments)
                             //{

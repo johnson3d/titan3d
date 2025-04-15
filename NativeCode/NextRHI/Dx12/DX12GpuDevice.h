@@ -167,6 +167,10 @@ namespace NxRHI
 		void Init(DX12GpuDevice* device);
 		void ClearIdleCmdlists();
 		void TryRecycle();
+
+		virtual void BeginEvent(const char* info) override;
+		virtual void EndEvent(const char* info) override;
+
 		DX12GpuDevice*					mDevice = nullptr;
 		VCritical						mQueueLocker;
 		std::queue<AutoRef<ICommandList>>	mIdleCmdlist;

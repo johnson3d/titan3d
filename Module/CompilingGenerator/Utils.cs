@@ -38,11 +38,11 @@ namespace Standart.Hash.xxHash
         {
             Debug.Assert(src != null);
             Debug.Assert(dst != null);
-            Debug.Assert(srcOffset >= 0 && srcOffset < src.Length);
-            Debug.Assert(dstOffset >= 0 && dstOffset < dst.Length);
+            Debug.Assert(srcOffset >= 0 && srcOffset < src!.Length);
+            Debug.Assert(dstOffset >= 0 && dstOffset < dst!.Length);
             Debug.Assert(count >= 0);
-            Debug.Assert(count + srcOffset <= src.Length);
-            Debug.Assert(count + dstOffset <= dst.Length);
+            Debug.Assert(count + srcOffset <= src!.Length);
+            Debug.Assert(count + dstOffset <= dst!.Length);
                       
             fixed (byte* pSrc = &src[srcOffset])
             fixed (byte* pDst = &dst[dstOffset])

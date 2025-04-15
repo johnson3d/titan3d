@@ -23,7 +23,7 @@ using System.Text;
 namespace EngineNS.UI.Bind
 {
     // test only /////////////////////////////////////////////
-    public partial class BindA : TtBindableObject
+    /* public partial class BindA : TtBindableObject
     {
         Guid mId = Guid.NewGuid(); 
         public bool IsSource = false;
@@ -106,7 +106,7 @@ namespace EngineNS.UI.Bind
                 mBindValueC2 = value;
             }
         }
-    }
+    } */
     class Int2DoubleConvert : TtBindTypeConvertBase
     {
 
@@ -144,7 +144,7 @@ namespace EngineNS.UI.Bind
             return (int)value;
         }
     }
-    public static class BindTestClass
+    /*public static class BindTestClass
     {
         public static void BindTest()
         {
@@ -177,7 +177,7 @@ namespace EngineNS.UI.Bind
             //bindB2.BindValueB = 20;
             //bindC1.BindValueC2 = 30;
         }
-    }
+    }*/
     // generated code ////////////////////////////////////////
     //public partial class BindB
     //{

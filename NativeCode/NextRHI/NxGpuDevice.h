@@ -1287,6 +1287,8 @@ namespace NxRHI
 		{
 			ExecuteCommandList(1, &pCmdlist, 0, nullptr, type);
 		}
+		virtual void BeginEvent(const char* info) {};
+		virtual void EndEvent(const char* info) {};
 		//NumOfWait = 0: No wait
 		//NumOfWait = 0xFFFFFFFF: Prev Queued Cmdlist
 		virtual void ExecuteCommandList(UINT NumOfExe, ICommandList** Cmdlist, UINT NumOfWait, ICommandList** ppWaitCmdlists, EQueueType type) = 0;

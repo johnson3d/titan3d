@@ -1,5 +1,4 @@
-﻿using NPOI.POIFS.Properties;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -61,7 +60,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             }
 
             Nodes = new TtQNode[total];
-            for (int i = 0; i < Layers.Length - 1; i++)
+            for (int i = 0; i < Layers.Length; i++)
             {
                 Build(i);
             }
@@ -73,6 +72,19 @@ namespace EngineNS.Bricks.AdvanceShadow
         public void Build(int layer)
         {
             var curLayer = Layers[layer];
+            if(layer == Layers.Length - 1)
+            {
+                for (int y = 0; y < curLayer.Side; y++)
+                {
+                    for (int x = 0; x < curLayer.Side; x++)
+                    {
+                        var node = curLayer.GetNode(x, y);
+                        node.NodeIndex = curLayer.LayerStartIndex + node.IndexInLayer;
+                        Nodes[node.NodeIndex] = node;
+                    }
+                }
+                return;
+            }
             var childLayer = Layers[layer + 1];
             for (int y = 0; y < curLayer.Side; y++)
             {
@@ -80,6 +92,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                 {
                     var node = curLayer.GetNode(x, y);
                     node.NodeIndex = curLayer.LayerStartIndex + node.IndexInLayer;
+
                     Nodes[node.NodeIndex] = node;
 
                     node.Child00 = childLayer.GetNode(x * 2, y * 2);

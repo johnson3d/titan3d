@@ -11,6 +11,14 @@ using System.ComponentModel;
 
 namespace EngineNS.Bricks.AdvanceShadow
 {
+    [EngineNS.Editor.ShaderCompiler.TtShaderDefine(ShaderName = "FAdvShadowLayerData")]
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]//align 16 for cbv
+    public struct FAdvShadowLayerData
+    {
+        public Vector2i mLayerStartAndSide;
+        public Vector2 mLayerGridSize;
+    }
+
     public class TtAdvanceShadowShading : Graphics.Pipeline.Shader.TtGraphicsShadingEnv
     {
         public TtAdvanceShadowShading()
@@ -29,9 +37,10 @@ namespace EngineNS.Bricks.AdvanceShadow
         }
         public override void OnBuildDrawCall(TtRenderPolicy policy, NxRHI.TtGraphicDraw drawcall)
         {
-            var shadowMapNode = policy.FindFirstNode<TtAdvanceShadowMapNode>();
-            if (shadowMapNode == null)
-                return;
+            //var shadowMapNode = policy.FindFirstNode<TtAdvanceShadowMapNode>();
+            //if (shadowMapNode == null)
+            //    return;
+            var shadowMapNode = drawcall.TagObject as TtAdvanceShadowMapNode;
 
             drawcall.mCoreObject.BindPipeline(TtEngine.Instance.GfxDevice.RenderContext.mCoreObject, shadowMapNode.DepthRaster.mCoreObject);
         }
@@ -65,6 +74,7 @@ namespace EngineNS.Bricks.AdvanceShadow
         public TtSrView[] mDebuggerSRViews;
         public TtAttachBuffer DepthAttachment = new TtAttachBuffer();
 
+        public TtCbView mDirLightingCBV = null;
         public TtAdvanceShadowMapNode()
         {
             Name = "AdvShadowMap";
@@ -105,6 +115,9 @@ namespace EngineNS.Bricks.AdvanceShadow
             dpRastDesc.m_Rasterizer.m_DepthBias = 1;
             dpRastDesc.m_Rasterizer.m_SlopeScaledDepthBias = 2.0f;
             DepthRaster = TtEngine.Instance.GfxDevice.PipelineManager.GetPipelineState(rc, in dpRastDesc);
+
+            if (this.Enable)
+                this.Enable = true;
         }
         public unsafe void BuildGBuffer(TtRenderPolicy policy)
         {
@@ -161,6 +174,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                 DepthPinOut.Attachement.Width = desc.Width;
                 DepthPinOut.Attachement.Height = desc.Height;
                 DepthTextureArray = TtEngine.Instance.GfxDevice.RenderContext.CreateTexture(in desc);
+                DepthTextureArray.SetDebugName("AdvShadowDepthArray");
 
                 FSrvDesc srvDesc = new FSrvDesc();
                 srvDesc.SetTexture2DArray();
@@ -224,27 +238,21 @@ namespace EngineNS.Bricks.AdvanceShadow
             mVisParameter.World = world;
             mVisParameter.IsGatherVisibleNodes = false;
 
+            policy.QueueCmd((ICommandList ImCmdlist, ref FRCmdInfo info) =>
+            {
+                TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.BeginEvent("AdvShadowDrawShadowMap");
+            }, "BeginAdvShadowDrawShadowMap");
             foreach (var i in mShadowQTree.UpdateShadowMapNodes)
             {
-                if (i.NodeType == TtQNode.ENodeType.Leaf)
-                {
-                    DrawShadowObjects(world, policy, i, i.ShadowObjects);
-
-                    //var cur = i.Parent;
-                    //while (cur != null)
-                    //{
-                    //    mLeafs.Clear();
-                    //    mShadowObjects.Clear();
-                    //    cur.GatherLeafShadowObjects(mLeafs, mShadowObjects);
-                    //    DrawShadowObjects(world, policy, cur, mShadowObjects);
-                    //    cur = cur.Parent;
-                    //    break;
-                    //}
-                }
+                DrawShadowObjects(world, policy, i, i.ShadowObjects);
             }
+            policy.QueueCmd((ICommandList ImCmdlist, ref FRCmdInfo info) =>
+            {
+                TtEngine.Instance.GfxDevice.RenderContext.GpuQueue.EndEvent("AdvShadowDrawShadowMap");
+            }, "EndAdvShadowDrawShadowMap");
             mVisParameter.ClearVisibles();
         }
-        private void DrawShadowObjects(GamePlay.TtWorld world, TtRenderPolicy policy, TtQNode node, Dictionary<TtNode, TtQNode.FShadowObject> shadowObjects)
+        private void DrawShadowObjects(GamePlay.TtWorld world, TtRenderPolicy policy, TtQNode node, List<TtQNode.FShadowObject> shadowObjects)
         {
             if (node.Leaf.IsDirty == false)
                 return;
@@ -253,7 +261,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             mVisParameter.CullCamera = node.Leaf.ShadowCamera;
             foreach (var j in shadowObjects)
             {
-                j.Value.SceneNode.OnGatherVisibleMeshes(mVisParameter);
+                j.SceneNode.OnGatherVisibleMeshes(mVisParameter);
             }
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist))
@@ -313,6 +321,56 @@ namespace EngineNS.Bricks.AdvanceShadow
             cmdlist.BeginPass(mGBuffer.FrameBuffers, in passClear, "AdvShadowDepth");
             cmdlist.FlushDraws();
             cmdlist.EndPass();
+        }
+
+        public unsafe void OnDirLightingDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        {
+            if (mShadowQTree == null)
+                return;
+
+            var index = drawcall.FindBinder("GShadowMapArray");
+            if (index.IsValidPointer)
+            {
+                drawcall.BindSRV(index, DepthTextureArraySRV);
+            }
+            index = drawcall.FindBinder("Samp_GShadowMap");
+            if (index.IsValidPointer)
+            {
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+            }
+            index = drawcall.FindBinder("QTreeNodeBuffer");
+            if (index.IsValidPointer)
+            {
+                mShadowQTree.AdvShadowNodeDatas.Flush2GPU(cmd);
+                drawcall.BindSRV(index, mShadowQTree.AdvShadowNodeDatas.Srv);
+            }
+            index = drawcall.FindBinder("cbAdvanceShadow");
+            if (index.IsValidPointer)
+            {
+                if (mDirLightingCBV == null)
+                {
+                    mDirLightingCBV = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                    mDirLightingCBV.SetValue("BoxMin", mShadowQTree.Root.AABB.Minimum.AsSingleVector());
+                    mDirLightingCBV.SetValue("BoxMax", mShadowQTree.Root.AABB.Maximum.AsSingleVector());
+                    mDirLightingCBV.SetValue("NodeCount", mShadowQTree.QNodes.Length);
+                    mDirLightingCBV.SetValue("PageCount", mShadowQTree.MaxPageCount);
+                    mDirLightingCBV.SetValue("MaxShadowDistance", mShadowQTree.MaxShadowDistance);
+                    mDirLightingCBV.SetValue("MaxDeepLevel", mShadowQTree.MaxDeepLevel);
+
+                    var indexLayerData = index.FindField("LayerData");
+                    for (int i = 0; i < mShadowQTree.QTreeBuilder.Layers.Length; i++)
+                    {
+                        var layer = mShadowQTree.QTreeBuilder.Layers[i];
+                        FAdvShadowLayerData layerData;
+                        layerData.mLayerStartAndSide.X = layer.LayerStartIndex;
+                        layerData.mLayerStartAndSide.Y = layer.Side;
+                        layerData.mLayerGridSize = layer.GridSize.AsSingleVector();
+
+                        mDirLightingCBV.SetValue(indexLayerData, i, in layerData); 
+                    }
+                }
+                drawcall.BindCBV(index, mDirLightingCBV);
+            }
         }
     }
 }

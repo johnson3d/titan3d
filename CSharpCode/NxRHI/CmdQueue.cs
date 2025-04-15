@@ -254,6 +254,7 @@ namespace EngineNS.NxRHI
             IRenderDocTool.GetInstance().StartFrameCapture();
             return true;
         }
+        int CaptureId = 0;
         public string EndFrameCapture(string tagName = null, bool openRenderDoc = true)
         {
             if (CaptureRenderDocFrame == false)
@@ -270,7 +271,7 @@ namespace EngineNS.NxRHI
             if (!string.IsNullOrEmpty(file) && IO.TtFileManager.FileExists(file))
             {
                 var extName = (tagName != null) ? "_" + tagName : "";
-                var tarFile = IO.TtFileManager.GetPureName(file) + $"{extName}.rdc";
+                var tarFile = IO.TtFileManager.GetPureName(file) + $"_{CaptureId++}_{extName}.rdc";
                 var absTarFile = TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Cache, IO.TtFileManager.ESystemDir.RenderDoc) + tarFile;
                 try
                 {

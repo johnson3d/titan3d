@@ -294,6 +294,18 @@ namespace EngineNS.Graphics.Pipeline
         {
 
         }
+        public Profiler.TimeScope mRDGTickLogicScope = null;
+        public Profiler.TimeScope RDGTickLogicScope
+        {
+            get
+            {
+                if (mRDGTickLogicScope == null)
+                {
+                    mRDGTickLogicScope = new Profiler.TimeScope(this.GetType(), nameof(TickLogic));
+                }
+                return mRDGTickLogicScope;
+            }
+        }
         public virtual void BeforeTickLogic(TtRenderPolicy policy)
         {
 

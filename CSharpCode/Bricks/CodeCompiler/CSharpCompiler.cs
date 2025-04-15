@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.MSBuild;
+using Org.BouncyCastle.Operators;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -35,6 +36,37 @@ namespace EngineNS.CodeCompiler
             }
         }
 
+        public class CustomAnalyzerConfigOptionsProvider : AnalyzerConfigOptionsProvider
+        {
+            private readonly AnalyzerConfigOptions mGlobalOptions;
+
+            public CustomAnalyzerConfigOptionsProvider(Dictionary<string, string> options)
+            {
+                mGlobalOptions = new CustomAnalyzerConfigOptions(options);
+            }
+
+            public override AnalyzerConfigOptions GlobalOptions => mGlobalOptions;
+
+            public override AnalyzerConfigOptions GetOptions(SyntaxTree tree)
+                => mGlobalOptions;
+
+            public override AnalyzerConfigOptions GetOptions(AdditionalText textFile)
+                => mGlobalOptions;
+
+            private class CustomAnalyzerConfigOptions : AnalyzerConfigOptions
+            {
+                private readonly Dictionary<string, string> _options;
+
+                public CustomAnalyzerConfigOptions(Dictionary<string, string> options)
+                {
+                    _options = options;
+                }
+
+                public override bool TryGetValue(string key, out string value)
+                    => _options.TryGetValue(key, out value);
+            }
+        }
+
         public static bool CompilerCSharpCodes(string[] cshaprFiles, string[] refAssemblyFiles, string[] preprocessorSymbols, string outputFile, string pdbFile, CSharpCompilationOptions option)
         {
             try
@@ -62,10 +94,48 @@ namespace EngineNS.CodeCompiler
                     metaRefs[i + mBaseAssemblys.Length] = MetadataReference.CreateFromFile(refAssemblyFiles[i]);
                 }
 
+                var genFilePath = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "temp", "Generated");
+                EngineNS.IO.TtFileManager.CreateDirectory(genFilePath);
+                //var analyzerConfigOptions = new Dictionary<string, string>
+                //{
+                //    ["build_property.EmitCompilerGeneratedFiles"] = "true",
+                //    ["build_property.CompilerGeneratedFilesOutputPath"] = genFilePath + "\\"
+                //};
+                //var optionsProvider = new CustomAnalyzerConfigOptionsProvider(analyzerConfigOptions);
                 var name = IO.TtFileManager.GetPureName(outputFile);
                 var compilation = CSharpCompilation.Create(name, syntaxTrees, metaRefs, option);
-                var generatorDriver = CSharpGeneratorDriver.Create(new CompilingGenerator.BindingCodeGenerator());
+                var generatorDriver = CSharpGeneratorDriver.Create(new[] { new CompilingGenerator.BindingCodeIncrementalGenerator() });
+                //generatorDriver.WithUpdatedAnalyzerConfigOptions(optionsProvider)
+                //               .RunGeneratorsAndUpdateCompilation(compilation, out var updateCompilation, out var diagnostics);
                 generatorDriver.RunGeneratorsAndUpdateCompilation(compilation, out var updateCompilation, out var diagnostics);
+                var genResult = generatorDriver.GetRunResult();
+                if(genResult.Results.Length > 0)
+                {
+                    var insGen = (genResult.Results[0].Generator).AsIncrementalGenerator() as CompilingGenerator.BindingCodeIncrementalGenerator;
+                    if(insGen != null)
+                    {
+                        foreach(var genCodeData in insGen.GeneratedCodes)
+                        {
+                            var tempGenFilePath = System.IO.Path.Combine(genFilePath, genCodeData.Key);
+                            if (IO.TtFileManager.FileExists(tempGenFilePath))
+                                IO.TtFileManager.DeleteFile(tempGenFilePath);
+                            using (var fs = new StreamWriter(tempGenFilePath, false, Encoding.UTF8))
+                            {
+                                fs.Write(genCodeData.Value);
+                            }
+                        }
+                    }
+                }
+                foreach (var genTree in genResult.GeneratedTrees)
+                {
+                    var genFile = genTree.ToString();
+                    //var genFileName = System.IO.Path.GetFileName(genFile);
+                    //var tempGenFilePath = System.IO.Path.Combine(genFilePath, genFileName);
+                    //using (var fs = new FileStream(tempGenFilePath, FileMode.Create))
+                    //{
+                    //    fs.Write(genTree. .ToFullString());
+                    //}
+                }
                 bool retValue = true;
                 using (var outStream = new MemoryStream())
                 using (var pdbStream = new MemoryStream())

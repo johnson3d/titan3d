@@ -1,3 +1,4 @@
+using Assimp;
 using EngineNS.Bricks.CodeBuilder;
 using EngineNS.IO;
 using EngineNS.Rtti;

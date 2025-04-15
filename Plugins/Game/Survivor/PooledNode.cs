@@ -19,7 +19,9 @@ namespace Survivor
             [RName.PGRName(FilterExts = EngineNS.Graphics.Mesh.TtMaterialMesh.AssetExt)]
             public RName MeshName { get; set; }
             [EngineNS.Rtti.Meta]
-            public int Count { get; set; } = 1024;
+            public int Count { get; set; } = 256;
+            [EngineNS.Rtti.Meta]
+            public float Size { get; set; } = 256.0f;
         }
 
         public List<TtMeshNode> mMeshes = new List<TtMeshNode>();
@@ -78,7 +80,7 @@ namespace Survivor
             foreach (var i in mMeshes)
             {
                 var rd = MathHelper.RandomDirection(false).AsDVector();
-                i.Placement.Position = rd * 1024;
+                i.Placement.Position = rd * GetNodeData<TtSceneMeshCreatorData>().Size;
             }
         }
         public async TtTask ResetMeshCount(int count)
@@ -92,7 +94,7 @@ namespace Survivor
             if (count - mMeshes.Count > 0)
             {
                 count = count - mMeshes.Count;
-                DVector3 size = new DVector3(1024, 0, 1024);
+                DVector3 size = new DVector3(GetNodeData<TtSceneMeshCreatorData>().Size, 0, GetNodeData<TtSceneMeshCreatorData>().Size);
                 for (int i = 0; i < count; i++)
                 {
                     TtMeshNode.TtMeshNodeData meshData = new TtMeshNode.TtMeshNodeData();

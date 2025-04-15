@@ -231,24 +231,40 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		ShadowValue = lerp(ShadowValue, 1.0h, FadeValue);
 	}
 #elif ENV_EShadowMode == EShadowMode_Advance
-	int pageIndex = GetPageNode(WorldPos.xz);
-    if (pageIndex < 0)
+	int nodeIndex = GetPageNode(WorldPos.xz);
+    if (nodeIndex < 0)
     {
         ShadowValue = 1.0h;
     }
     else
     {
-        FAdvShadowNodeData node = QTreeNodeBuffer[pageIndex];
-        ShadowMapUV = mul(float4(WorldPos, 1.0f), node.ShadowMatrix);
-        float shadowSpaceDepth = GShadowMapArray.SampleLevel(Samp_GShadowMap, float3(ShadowMapUV.xy, node.PageIndex), 0).r;
-		//compare depth, esm? USE_INVERSE_Z
-        if (ShadowMapUV.z > shadowSpaceDepth)
-        {
+        FAdvShadowNodeData node = QTreeNodeBuffer[nodeIndex];
+		if (node.PageIndex < 0)	
+		{
 			ShadowValue = 1.0h;
-        }
+		}
 		else
 		{
-			ShadowValue = 0.5h;
+			ShadowMapUV = mul(float4(WorldPos, 1.0f), node.ShadowMatrix);
+			ShadowMapUV.z = ShadowMapUV.z / ShadowMapUV.w;
+			//if (ShadowMapUV.x > 1 || ShadowMapUV.x < 0 || ShadowMapUV.z < 0 || ShadowMapUV.z > 1)
+			if (ShadowMapUV.z < 0 || ShadowMapUV.z > 1)
+			{
+				ShadowValue = 1.0h;
+			}
+			else
+			{
+				float shadowSpaceDepth = GShadowMapArray.SampleLevel(Samp_GShadowMap, float3(ShadowMapUV.xy, node.PageIndex), 0).r;
+				//compare depth, esm? USE_INVERSE_Z
+				if (ShadowMapUV.z + 0.01 > shadowSpaceDepth)//bias for pages
+				{
+					ShadowValue = 1.0h;
+				}
+				else
+				{
+					ShadowValue = 0.0h;
+				}
+			}
 		}
     }
 #elif ENV_EShadowMode == EShadowMode_None

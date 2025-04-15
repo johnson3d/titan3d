@@ -334,12 +334,14 @@ namespace EngineNS.NxRHI
                 }
             }
         }
-        public bool SetValue<T>(string name, in T v, bool bFlush = true, EUpdateMode mode = EUpdateMode.Auto) where T : unmanaged
+        public unsafe bool SetValue<T>(string name, in T v, bool bFlush = true, EUpdateMode mode = EUpdateMode.Auto) where T : unmanaged
         {
             if (ShaderBinder.IsValidPointer == false)
                 return false;
             var binder = ShaderBinder.FindField(name);
             if (binder.IsValidPointer == false)
+                return false;
+            if (binder.Size < sizeof(T))
                 return false;
             SetValue<T>(binder, v, bFlush, mode);
             return true;

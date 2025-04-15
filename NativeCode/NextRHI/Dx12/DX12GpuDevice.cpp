@@ -12,6 +12,7 @@
 #include "../NxEffect.h"
 #include "../../Base/thread/vfxthread.h"
 #include <dxgi1_3.h>
+#include <pix3.h>
 
 #if defined(HasModule_GpuDump)
 #include "../../Bricks/GpuDump/NvAftermath.h"
@@ -1333,6 +1334,16 @@ namespace NxRHI
 	{
 		IncreaseSignal(mFlushFence, type);
 		return mFlushFence->WaitToExpect();
+	}
+	void DX12CmdQueue::BeginEvent(const char* info)
+	{
+		auto infoW = StringHelper::strtowstr(info);
+		PIXBeginEvent(mCmdQueue.GetPtr(), 0, infoW.c_str());
+	}
+	
+	void DX12CmdQueue::EndEvent(const char* info)
+	{
+		PIXEndEvent(mCmdQueue.GetPtr());
 	}
 }
 

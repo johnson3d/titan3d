@@ -1,0 +1,2569 @@
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Diagnostics.SymbolStore;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime.InteropServices.ComTypes;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading;
+
+namespace CompilingGenerator
+{
+    public static class IncrementalGeneratorExtensions
+    {
+        public static IncrementalValuesProvider<Grouping<TKey, TElement>> GroupBy<TElement, TKey>(
+            this IncrementalValuesProvider<TElement> source,
+            Func<TElement, TKey> keySelector,
+            IEqualityComparer<TKey>? comparer = null)
+        {
+            return source.Collect()
+                .SelectMany((items, _) =>
+                {
+                    var groups = items
+                        .GroupBy(keySelector, comparer ?? EqualityComparer<TKey>.Default)
+                        .Select(g => new Grouping<TKey, TElement>(g.Key, g.ToImmutableArray()));
+
+                    return groups.ToImmutableArray();
+                });
+        }
+        public sealed class Grouping<TKey, TElement> : IGrouping<TKey, TElement>
+        {
+            public TKey Key { get; }
+            private readonly ImmutableArray<TElement> _elements;
+
+            public Grouping(TKey key, ImmutableArray<TElement> elements)
+            {
+                Key = key;
+                _elements = elements;
+            }
+
+            public IEnumerator<TElement> GetEnumerator() => _elements.AsEnumerable().GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        }
+    }
+
+    [Generator]
+    public sealed partial class BindingCodeIncrementalGenerator : IIncrementalGenerator
+    {
+        static readonly string mBindPropAttrName = "EngineNS.UI.Bind.BindPropertyAttribute";
+        static readonly string mAttachedPropAttrName = "EngineNS.UI.Bind.AttachedPropertyAttribute";
+        static readonly string mBindObjectAttrName = "EngineNS.UI.Bind.BindableObjectAttribute";
+        static readonly string mMetaAttrName = "EngineNS.Rtti.Meta";
+        static readonly string mShowWithPropertyAttrName = "EngineNS.EGui.Controls.PropertyGrid.PGShowWithProperty";
+
+        static readonly string mBindPropAttrNameWithoutSuffix = "";
+        static readonly string mAttachedPropAttrNameWithoutSuffix = "";
+        static readonly string mBindObjectAttrNameWithoutSuffix = "";
+
+        public Dictionary<string, string> GeneratedCodes = new Dictionary<string, string>();
+
+        private sealed class ClassInfo
+        {
+            public ISymbol? Class;
+            public ImmutableArray<IPropertySymbol?> BindProperties;
+            public ImmutableArray<IMethodSymbol?> AttachedMethods;
+        }
+        static ImmutableArray<ClassInfo?> mAllClass;
+        //static string Temp;
+        public void Initialize(IncrementalGeneratorInitializationContext context)
+        {
+            //context.RegisterSourceOutput(context.CompilationProvider, (spc, compilation) =>
+            //{
+
+            //});
+            //context.RegisterSourceOutput(context.MetadataReferencesProvider, (spc, metadataReferences) =>
+            //{
+            //});
+            //context.RegisterSourceOutput(context.ParseOptionsProvider, (spc, option)=>
+            //{
+
+            //});
+            //context.RegisterSourceOutput(context.AdditionalTextsProvider, (spc, additionalTexts) =>
+            //{
+            //});
+            //context.RegisterSourceOutput(context.AnalyzerConfigOptionsProvider, (spc, options) =>
+            //{
+            //    var globalVals = options.GlobalOptions;
+
+            //    string val;
+            //    if(globalVals.TryGetValue("build_property.EmitCompilerGeneratedFiles", out val))
+            //    {
+            //        var bb = val;
+            //        val = bb + " ";
+            //        Temp = val;
+            //    }
+            //    if(globalVals.TryGetValue("build_property.CompilerGeneratedFilesOutputPath", out val))
+            //    {
+            //        var bb = val;
+            //        val = bb + " ";
+            //        Temp = val;
+            //    }
+            //});
+
+            var mBindPropAttrNameWithoutSuffix = mBindPropAttrName.EndsWith("Attribute")
+                    ? mBindPropAttrName.Substring(0, mBindPropAttrName.Length - "Attribute".Length)
+                    : mBindPropAttrName;
+            var mAttachedPropAttrNameWithoutSuffix = mAttachedPropAttrName.EndsWith("Attribute")
+                    ? mAttachedPropAttrName.Substring(0, mAttachedPropAttrName.Length - "Attribute".Length)
+                    : mAttachedPropAttrName;
+            var mBindObjectAttrNameWithoutSuffix = mBindObjectAttrName.EndsWith("Attribute")
+                    ? mBindObjectAttrName.Substring(0, mBindObjectAttrName.Length - "Attribute".Length)
+                    : mBindObjectAttrName;
+
+            var classInfoProvider = context.SyntaxProvider
+                .CreateSyntaxProvider(
+                    predicate: static (n, _) => n is ClassDeclarationSyntax,
+                    transform: static (ctx, _) => GetClassInfo(ctx))
+                .Where(t => t != null)
+                .GroupBy(static t => t!.Class, SymbolEqualityComparer.Default)
+                .Collect()
+                .Select((group, _) => MergeClassParts(group!));
+
+            context.RegisterSourceOutput(classInfoProvider, GenerateSource);
+        }
+
+        private static ImmutableArray<ClassInfo> MergeClassParts(ImmutableArray<IncrementalGeneratorExtensions.Grouping<ISymbol?, ClassInfo>> groupArray)
+        {
+            List<ClassInfo> infos = new List<ClassInfo>();
+            foreach (var group in groupArray)
+            {
+                var allParts = group.Distinct().ToImmutableArray();
+                if (allParts.Length == 0)
+                    return ImmutableArray<ClassInfo>.Empty;
+
+                var retInfo = allParts[0];
+                for (int i = 1; i < allParts.Length; i++)
+                {
+                    retInfo.BindProperties = retInfo.BindProperties.AddRange(allParts[i].BindProperties);
+                    retInfo.AttachedMethods = retInfo.AttachedMethods.AddRange(allParts[i].AttachedMethods);
+                }
+                infos.Add(retInfo);
+            }
+
+            return infos.ToImmutableArray();
+        }
+
+        private static bool HasAttribute(SemanticModel semanticModel,
+            SyntaxList<AttributeListSyntax> attributes, string targetAttribute)
+        {
+            return attributes.SelectMany(a => a.Attributes)
+                .Any(attr => semanticModel.GetTypeInfo(attr).Type?.ToDisplayString() == targetAttribute);
+        }
+        static bool IsValidClassDecSyntax(ClassDeclarationSyntax clsDecSyntax, GeneratorSyntaxContext context)
+        {
+            var compilation = context.SemanticModel.Compilation;
+            var model = compilation.GetSemanticModel(clsDecSyntax.SyntaxTree);
+            var clsSymbol = model.GetDeclaredSymbol(clsDecSyntax) as INamedTypeSymbol;
+            if (clsSymbol != null)
+            {
+                var baseType = clsSymbol;
+                while (baseType != null)
+                {
+                    var typeStr = baseType.ToDisplayString();
+                    if (typeStr == "object")
+                        break;
+                    if (typeStr == "EngineNS.UI.Controls.TtUIElement")
+                        return true;
+                    baseType = baseType.BaseType;
+                }
+            }
+            foreach (var attributeListSyntax in clsDecSyntax.AttributeLists)
+            {
+                foreach (var attributeSyntax in attributeListSyntax.Attributes)
+                {
+                    var symbol = context.SemanticModel.GetSymbolInfo(attributeSyntax).Symbol;
+                    if (symbol != null && symbol.ContainingType.ToDisplayString() == BindingCodeIncrementalGenerator.mBindObjectAttrName)
+                        return true;
+                }
+            }
+            return false;
+        }
+        private static ClassInfo? GetClassInfo(GeneratorSyntaxContext context)
+        {
+            var classDecl = (ClassDeclarationSyntax)context.Node;
+            var semanticModel = context.SemanticModel;
+
+            // 收集绑定属性
+            var bindProperties = classDecl.Members
+                .OfType<PropertyDeclarationSyntax>()
+                .Where(p => HasAttribute(semanticModel, p.AttributeLists, mBindPropAttrName))
+                .Select(p =>
+                {
+                    return semanticModel.GetDeclaredSymbol(p) as IPropertySymbol;
+                })
+                .Where(p => p != null)
+                .ToImmutableArray();
+
+            var attachedMethods = classDecl.Members
+                .OfType<MethodDeclarationSyntax>()
+                .Where(p => HasAttribute(semanticModel, p.AttributeLists, mAttachedPropAttrName))
+                .Select(p =>
+                {
+                    return semanticModel.GetDeclaredSymbol(p) as IMethodSymbol;
+                })
+                .Where(p => p != null)
+                .ToImmutableArray();
+
+            if (IsValidClassDecSyntax(classDecl, context) || 
+                bindProperties.Length > 0 || 
+                attachedMethods.Length > 0)
+            {
+                return new ClassInfo
+                {
+                    Class = semanticModel.GetDeclaredSymbol(classDecl),
+                    BindProperties = bindProperties,
+                    AttachedMethods = attachedMethods
+                };
+            }
+
+            return null;
+        }
+
+        private void GenerateSource(SourceProductionContext context, ImmutableArray<ClassInfo> allInfos)
+        {
+            foreach (var info in allInfos)
+            {
+                var classSymbol = info.Class as INamedTypeSymbol;
+                if (classSymbol == null)
+                {
+                    return;
+                }
+
+                var bindObjectMemberSymbols = info.BindProperties.Where(p =>
+                {
+                    if(p == null)
+                        return false;
+
+                    foreach(var tempInfo in allInfos)
+                    {
+                        if(SymbolEqualityComparer.Default.Equals(p.Type, tempInfo.Class))
+                            return true;
+                    }
+                    return false;
+                }).ToImmutableArray();
+
+                var namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
+                var genericTypeName = "___T___";
+                var className = classSymbol.Name;
+                var classGeneric = "";
+                if (classSymbol.IsGenericType)
+                {
+                    classGeneric = "<";
+                    foreach (var arg in classSymbol.TypeArguments)
+                    {
+                        classGeneric += arg.Name + ",";
+                    }
+                    classGeneric = classGeneric.TrimEnd(',');
+                    classGeneric += ">";
+                }
+                bool baseHasBindObjectInterface = false;
+                //bool ignoreHostElementGen = false;
+                var baseType = classSymbol.BaseType;
+                bool baseFromUIElement = false;
+                while ((baseType != null))
+                {
+                    var baseTypeDisplayString = baseType.ToDisplayString();
+                    if (baseTypeDisplayString == "EngineNS.UI.Controls.TtUIElement")
+                        baseFromUIElement = true;
+                    if (baseTypeDisplayString == "object")
+                        break;
+                    if (baseTypeDisplayString == "EngineNS.UI.Bind.TtBindableObject")
+                    {
+                        baseHasBindObjectInterface = true;
+                        break;
+                    }
+                    //if (baseTypeDisplayString == "EngineNS.UI.TtUIMacrossBase")
+                    //{
+                    //    ignoreHostElementGen = true;
+                    //    break;
+                    //}
+                    foreach (var ifac in baseType.AllInterfaces)
+                    {
+                        if (ifac.ToDisplayString() == "EngineNS.UI.Bind.IBindableObject")
+                        {
+                            baseHasBindObjectInterface = true;
+                            break;
+                        }
+                    }
+                    var baseTypeAttributes = baseType.GetAttributes();
+                    if (baseTypeAttributes.Length > 0)
+                    {
+                        var attData = baseTypeAttributes.SingleOrDefault(ad =>
+                        {
+                            var attrClass = ad.AttributeClass;
+                            if (attrClass == null)
+                                return false;
+
+                            return attrClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == $"global::{mBindObjectAttrName}" ||
+                                   attrClass.Name == mBindObjectAttrNameWithoutSuffix ||
+                                   attrClass.Name == mBindObjectAttrName;
+                        });
+                        if (attData != null)
+                            baseHasBindObjectInterface = true;
+                    }
+                    if (baseHasBindObjectInterface)
+                        break;
+                    baseType = baseType.BaseType;
+                }
+                string bindImpSource = "";
+                string setValueWithPropertyName = $@"
+#nullable enable
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void SetValue<{genericTypeName}>(in {genericTypeName} value, [CallerMemberName] string? propertyName = null)
+#nullable disable
+        {{
+            if(string.IsNullOrEmpty(propertyName))
+                return;
+            var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);
+            SetValue_<{genericTypeName}>(in value, in propertyNameHash);
+        }}
+        protected{(baseHasBindObjectInterface ? " override" : " virtual")} void SetValue_<{genericTypeName}>(in {genericTypeName} value, in UInt64 propertyNameHash)
+        {{";
+                bool hasSetValueWithPropertyNameSwitch = false;
+                string setValueWithPropertyNameSwitch = $@"
+            switch(propertyNameHash)
+            {{";
+
+                string getValueWithPropertyName = $@"
+#nullable enable
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} {genericTypeName} GetValue<{genericTypeName}>([CallerMemberName] string? propertyName = null)
+#nullable disable
+        {{
+            if(string.IsNullOrEmpty(propertyName))
+                return default({genericTypeName});
+            var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);
+            return GetValue_<{genericTypeName}>(in propertyNameHash);
+        }}
+        protected{(baseHasBindObjectInterface ? " override" : " virtual")} {genericTypeName} GetValue_<{genericTypeName}>(in UInt64 propertyNameHash)
+        {{";
+                bool hasGetValueWithPropertyNameSwitch = false;
+                string getValueWithPropertyNameSwitch = $@"
+            switch(propertyNameHash)
+            {{";
+
+                string createBindingExpressionMethod = $@"
+        protected{(baseHasBindObjectInterface ? " override" : " virtual")} EngineNS.UI.Bind.TtBindingExpressionBase CreateBindingExpression_<TProperty>(in UInt64 propertyNameHash, EngineNS.UI.Bind.TtBindingBase binding, EngineNS.UI.Bind.TtBindingExpressionBase parent)
+        {{";
+                bool hasCreateBindingExpressionMethodSwitch = false;
+                string createBindingExpressionMethodSwitch = $@"
+            switch(propertyNameHash)
+            {{";
+
+                string onValueChangePropertys = "";
+                string getPropertyValueSwitch = "";
+                string setPropertyValueSwitch = "";
+                string tourBindableProperties = "";
+                string hasBindablePropertiesStr = "";
+                string getContentsPresenterContainerSwitchStr = "";
+                string tourContentsPresenterContainersStr = "";
+                string setExpressionValueSwitchStr = "";
+                //bool hasCreateBindingMethodExpressionMethodSwitch = false;
+                //string createBindingMethodExpressionMethodSwitch = $@"
+                //if(string.IsNullOrEmpty(propertyName))
+                //    return null;
+                //var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);
+                //switch(propertyNameHash)
+                //{{";
+
+                var source = $@"
+using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+
+namespace {namespaceName}
+{{";
+                //        var classAttrs = classSymbol.GetAttributes();
+                //        if (classAttrs.Length > 0)
+                //        {
+                //            var metaSymbol = context.Compilation.GetTypeByMetadataName(mMetaAttrName);
+                //            var attData = classAttrs.SingleOrDefault(ad => (ad.AttributeClass == null) ? false : ad.AttributeClass.Equals(metaSymbol, SymbolEqualityComparer.Default));
+                //            if (attData == null)
+                //            {
+                //                source += $@"
+                //[{mMetaAttrName}]";
+                //            }
+                //        }
+                bool HasIBindableObject = false;
+                bool HasIPropertyCustomization = false;
+                bool HasISerializer = false;
+                foreach (var iface in classSymbol.AllInterfaces)
+                {
+                    var ifaceStr = iface.ToDisplayString();
+                    switch (ifaceStr)
+                    {
+                        case "EngineNS.UI.Bind.IBindableObject":
+                            HasIBindableObject = true;
+                            break;
+                        case "EngineNS.EGui.Controls.PropertyGrid.IPropertyCustomization":
+                            HasIPropertyCustomization = true;
+                            break;
+                        case "EngineNS.IO.ISerializer":
+                            HasISerializer = true;
+                            break;
+                    }
+                }
+                string attributes = "";
+                if (!HasIBindableObject)
+                    attributes += "EngineNS.UI.Bind.IBindableObject,";
+                if (!HasIPropertyCustomization)
+                    attributes += "EngineNS.EGui.Controls.PropertyGrid.IPropertyCustomization,";
+                if (!HasISerializer)
+                    attributes += "EngineNS.IO.ISerializer,";
+                if (!string.IsNullOrEmpty(attributes))
+                {
+                    attributes = " : " + attributes.TrimEnd(',');
+                }
+
+                source += $@"
+    public partial class {className}{classGeneric}{attributes}
+    {{";
+                var bindExprDicName = $"mBindExprDic";
+                var triggerDicName = "mPropertyTriggers_";
+                var setAttachedPropertiesStr = "";
+                var getAttachedPropertyValueStr = "";
+                var setAttachedPropertyValueStr = "";
+                if (!baseHasBindObjectInterface)
+                {
+                    source += @$"
+        protected Dictionary<EngineNS.UI.Bind.TtBindableProperty, EngineNS.UI.Bind.TtBindablePropertyValueBase> {bindExprDicName} = new Dictionary<EngineNS.UI.Bind.TtBindableProperty, EngineNS.UI.Bind.TtBindablePropertyValueBase>();
+        protected EngineNS.UI.Trigger.TtTriggerCollection {triggerDicName} = new EngineNS.UI.Trigger.TtTriggerCollection();
+        [System.ComponentModel.Browsable(false)]        
+        public EngineNS.UI.Trigger.TtTriggerCollection Triggers => {triggerDicName};
+        public string PropertyNameInHost;
+        public UInt64 PropertyNameInHostHash;";
+                    //        if (!ignoreHostElementGen)
+                    {
+                        source += $@"
+        private System.WeakReference<EngineNS.UI.Controls.TtUIElement> mHostElementRef = new System.WeakReference<EngineNS.UI.Controls.TtUIElement>(null);
+        [System.ComponentModel.Browsable(false)]        
+        public EngineNS.UI.Controls.TtUIElement HostElement
+        {{
+            get
+            {{
+                EngineNS.UI.Controls.TtUIElement outValue;
+                if(mHostElementRef.TryGetTarget(out outValue))
+                    return outValue;
+                return null;
+            }}
+            set
+            {{
+                mHostElementRef.SetTarget(value);
+            }}
+        }}";
+                    }
+                }
+
+                foreach (var propSymbol in info.BindProperties)
+                {
+                    if (propSymbol == null)
+                        continue;
+                    var propName = propSymbol.Name;
+                    var propTypeDisplayName = propSymbol.Type.ToDisplayString();
+                    bool isBindableObject = false;
+                    foreach (var att in propSymbol.Type.GetAttributes())
+                    {
+                        if (att.AttributeClass == null)
+                            continue;
+                        if (att.AttributeClass.ToDisplayString() == mBindObjectAttrName)
+                        {
+                            isBindableObject = true;
+                            break;
+                        }
+                    }
+
+                    //if(!symbolTypeDic.TryGetValue(propSymbol.Type,out var symbolList))
+                    //{
+                    //    symbolList = new List<ISymbol>();
+                    //    symbolTypeDic[propSymbol.Type] = symbolList;
+                    //}
+                    //symbolList.Add(propSymbol);
+
+                    var attData = propSymbol.GetAttributes().Single(ad =>
+                    {
+                        var attrClass = ad.AttributeClass;
+                        if (attrClass == null)
+                            return false;
+
+                        return attrClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == $"global::{mBindPropAttrName}" ||
+                               attrClass.Name == mBindPropAttrNameWithoutSuffix ||
+                               attrClass.Name == mBindPropAttrName;
+                    });
+                    var defaultValOpt = attData.NamedArguments.SingleOrDefault(kvp => kvp.Key == "DefaultValue").Value;
+                    var defValStr = $"default({propTypeDisplayName})";
+                    if (!defaultValOpt.IsNull)
+                    {
+                        defValStr = (defaultValOpt.Value == null) ? "null" : ((defaultValOpt.Value is bool) ? defaultValOpt.Value.ToString().ToLower() : defaultValOpt.Value.ToString());
+                    }
+                    var valEditorAttOpt = propSymbol.GetAttributes().SingleOrDefault(ad =>
+                    {
+                        var cls = ad.AttributeClass;
+                        while (cls != null)
+                        {
+                            if (cls.ToDisplayString() == "EngineNS.EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute")
+                                return true;
+                            cls = cls.BaseType;
+                        }
+                        return false;
+                    });
+                    string valEditorStr = "null";
+                    if (valEditorAttOpt != null && valEditorAttOpt.AttributeClass != null)
+                    {
+                        var editorName = valEditorAttOpt.AttributeClass.ToDisplayString();
+                        valEditorStr = @$"typeof({namespaceName}.{className}{classGeneric}).GetProperty(""{propName}"").GetCustomAttributes(typeof({editorName}), false)[0] as {editorName}";
+                    }
+                    var displayNameAttOpt = propSymbol.GetAttributes().SingleOrDefault(ad =>
+                    {
+                        var cls = ad.AttributeClass;
+                        while (cls != null)
+                        {
+                            if (cls.ToDisplayString() == "EngineNS.UI.Bind.BindPropertyDisplayNameAttribute")
+                                return true;
+                            cls = cls.BaseType;
+                        }
+                        return false;
+                    });
+                    string displayNameStr = "null";
+                    if (displayNameAttOpt != null && displayNameAttOpt.AttributeClass != null)
+                    {
+                        var attName = displayNameAttOpt.AttributeClass.ToDisplayString();
+                        displayNameStr = @$"typeof({namespaceName}.{className}{classGeneric}).GetProperty(""{propName}"").GetCustomAttributes(typeof({attName}), false)[0] as {attName}";
+                    }
+                    var valCategoryAttData = propSymbol.GetAttributes().SingleOrDefault(ad => (ad.AttributeClass == null) ? false : (ad.AttributeClass.ToDisplayString() == "System.ComponentModel.CategoryAttribute"));
+                    string categoryValue = "";
+                    if (valCategoryAttData != null && valCategoryAttData.ConstructorArguments.Length > 0)
+                        categoryValue = System.Convert.ToString(valCategoryAttData.ConstructorArguments[0].Value);
+                    var bindPropName = $"{propName}Property";
+                    if (!classSymbol.MemberNames.Any(name => bindPropName == name))
+                    {
+                        source += @$"
+        public static EngineNS.UI.Bind.TtBindableProperty {bindPropName} = EngineNS.TtEngine.Instance.UIBindManager.Register<{propTypeDisplayName}, {className}{classGeneric}>(""{propName}"",{(string.IsNullOrEmpty(categoryValue) ? "" : @$" ""{categoryValue}"",")} {defValStr}, null, {valEditorStr}, {displayNameStr});";
+                    }
+
+                    //var bindingImpName = $"{className}_BindingImp_{propName}";
+                    var bindingExprImpName = $"{className}_BindingExprImp_{propName}";
+                    //var bindingMethodExprImpName = $"{className}_BindingMethodExprImp_{propName}";
+
+                    hasCreateBindingExpressionMethodSwitch = true;
+                    var propNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propName);
+                    createBindingExpressionMethodSwitch += $@"
+                case {propNameHash}: //{propName}
+                    {{
+                        var beImp = new {bindingExprImpName}{classGeneric}(binding, {propName}, parent);
+                        beImp.TargetObject = this;
+                        beImp.TargetProperty = (EngineNS.UI.Bind.TtBindableProperty<{propTypeDisplayName}>){bindPropName};
+                        return beImp;
+                    }}";
+                    //        hasCreateBindingMethodExpressionMethodSwitch = true;
+                    //        createBindingMethodExpressionMethodSwitch += $@"
+                    //case {propNameHash}: //{propName}
+                    //    {{
+                    //        var beImp = new {bindingMethodExprImpName}(binding, parent);
+                    //        return beImp;
+                    //    }}";
+                    hasSetValueWithPropertyNameSwitch = true;
+                    setValueWithPropertyNameSwitch += $@"
+                case {propNameHash}: //{propName}";
+                    if (isBindableObject)
+                    {
+                        setValueWithPropertyNameSwitch += $@"
+                    dynamic valueDynamic_{propName} = value;
+                    valueDynamic_{propName}.HostElement = this;
+                    valueDynamic_{propName}.PropertyNameInHost = ""{propName}"";
+                    valueDynamic_{propName}.PropertyNameInHostHash = {propNameHash};
+                    SetValue<{genericTypeName}>(valueDynamic_{propName}, {bindPropName});
+                    return;";
+                    }
+                    else
+                    {
+                        setValueWithPropertyNameSwitch += $@"
+                    SetValue<{genericTypeName}>(value, {bindPropName});
+                    return;";
+                    }
+                    hasGetValueWithPropertyNameSwitch = true;
+                    getValueWithPropertyNameSwitch += $@"
+                case {propNameHash}: //{propName}
+                    return GetValue<{genericTypeName}>({bindPropName});";
+
+                    getPropertyValueSwitch += $@"
+                case {propNameHash}: //{propName}
+                    value = {propName};//GetValue<{propTypeDisplayName}>({bindPropName});
+                    return true;";
+
+                    if (!propSymbol.IsReadOnly)
+                    {
+                        setPropertyValueSwitch += $@"
+                case {propNameHash}: //{propName}";
+                        if (isBindableObject)
+                        {
+                            setPropertyValueSwitch += $@"
+                    dynamic valueDynamic_{propName} = value;
+                    valueDynamic_{propName}.HostElement = this;
+                    valueDynamic_{propName}.PropertyNameInHost = ""{propName}"";
+                    valueDynamic_{propName}.PropertyNameInHostHash = {propNameHash};
+                    //SetValue<{propTypeDisplayName}>(({propTypeDisplayName})value, {bindPropName});
+                    {propName} = ({propTypeDisplayName})valueDynamic_{propName};
+                    return true;";
+                        }
+                        else
+                        {
+                            setPropertyValueSwitch += $@"
+                    //SetValue<{propTypeDisplayName}>(({propTypeDisplayName})value, {bindPropName});
+                    {propName} = ({propTypeDisplayName})value;
+                    return true;";
+                        }
+                    }
+                    else
+                    {
+                        setPropertyValueSwitch += $@"
+                case {propNameHash}: //{propName}
+                        return true;";
+                    }
+
+                    if (isBindableObject)
+                    {
+                        onValueChangePropertys += $@"
+                case {propNameHash}: //{propName}";
+                    }
+
+                    setExpressionValueSwitchStr += $@"
+                case {propNameHash}: // {propName}
+                    exp.SetValue(bp, {propName});
+                    return;";
+
+                    tourBindableProperties += $@"
+            tourAction.Invoke(""{propName}"", {bindPropName}, ref data);";
+
+                    hasBindablePropertiesStr += $@"
+            if(matchCase)
+            {{
+                if(""{propName}"".Contains(containString))
+                    return true;
+            }}
+            else
+            {{
+                if(""{propName}"".ToLower().Contains(containString))
+                    return true;
+            }}";
+
+                    if (propTypeDisplayName == "EngineNS.UI.Controls.Containers.TtTemplateContainer")
+                    {
+                        getContentsPresenterContainerSwitchStr += $@"
+                case {propNameHash}: //{propName}
+                    return {propName};
+            ";
+                        tourContentsPresenterContainersStr += $@"
+            action?.Invoke({propName}, ref data);";
+                    }
+
+                    bindImpSource += $@"
+    public class {bindingExprImpName}{classGeneric} : EngineNS.UI.Bind.TtBindingExpression<{propTypeDisplayName}>
+    {{
+        public {bindingExprImpName}(EngineNS.UI.Bind.TtBindingBase binding, EngineNS.UI.Bind.TtBindingExpressionBase parent)
+            : base(binding, parent)
+        {{
+        }}
+        public {bindingExprImpName}(EngineNS.UI.Bind.TtBindingBase binding, {propTypeDisplayName} val, EngineNS.UI.Bind.TtBindingExpressionBase parent)
+            : base(binding, parent)
+        {{
+            GetValueStore<{propTypeDisplayName}>().SetValue(val);
+        }}
+        public override void UpdateSource()
+        {{
+            if ((Mode == EngineNS.UI.Bind.EBindingMode.OneTime) && (mSetValueTime > 0))
+                return;
+            mSetValueTime++;
+            GetFinalValue<{propTypeDisplayName}>().CopyFrom(GetValueStore<{propTypeDisplayName}>());
+            if(mParentExp != null)
+            {{
+                mParentExp.UpdateSource();
+            }}";
+                    if (propSymbol.IsReadOnly)
+                    {
+                        bindImpSource += $@"
+        }}";
+                    }
+                    else
+                    {
+                        bindImpSource += $@"
+            else
+            {{
+                TargetProperty?.OnValueChanged?.Invoke(TargetObject, TargetProperty, GetFinalValue<{propTypeDisplayName}>().GetValue<{propTypeDisplayName}>());
+                (({namespaceName}.{className}{classGeneric})TargetObject).{propName} = GetValueStore<{propTypeDisplayName}>().GetValue<{propTypeDisplayName}>();
+            }}
+        }}";
+                    }
+                    bindImpSource += $@"
+        protected override object GetObjectValue(EngineNS.UI.Bind.TtBindableProperty bp)
+        {{
+            return GetFinalValue<{propTypeDisplayName}>().GetValue<{propTypeDisplayName}>();
+        }}
+    }}";
+
+                    //                    bindImpSource += $@"
+                    //public class {bindingMethodExprImpName} : EngineNS.UI.Bind.TtBindingMethodExpression<{propTypeDisplayName}>
+                    //{{
+                    //    public {bindingMethodExprImpName}(EngineNS.UI.Bind.TtBindingBase binding, EngineNS.UI.Bind.TtBindingExpressionBase parent)
+                    //        : base(binding, parent)
+                    //    {{
+                    //    }}
+                    //}}";
+
+                }
+                foreach (var methodSymbol in info.AttachedMethods)
+                {
+                    if (methodSymbol == null)
+                        continue;
+                    if (methodSymbol.Parameters.Length < 3)
+                        continue;
+
+                    if (!methodSymbol.IsStatic)
+                    {
+                        context.ReportDiagnostic(Diagnostic.Create(
+                            new DiagnosticDescriptor(
+                                "BindingGeneric",
+                                "Method is not static",
+                                "Attached property method {0} must be static",
+                                "Error",
+                                DiagnosticSeverity.Error,
+                                true), methodSymbol.Locations.FirstOrDefault(),
+                                methodSymbol.Name));
+
+                    }
+                    if (methodSymbol.Parameters.Length != 3)
+                    {
+                        context.ReportDiagnostic(Diagnostic.Create(
+                            new DiagnosticDescriptor(
+                                "BindingGeneric",
+                                "Method need three parameters",
+                                $"Method parameters must be {className}, EngineNS.UI.Bind.TtBindableProperty, [property type]",
+                                "Error",
+                                DiagnosticSeverity.Error,
+                                true), methodSymbol.Locations.FirstOrDefault(),
+                                methodSymbol.Name));
+                    }
+                    if (methodSymbol.Parameters[0].Type.ToDisplayString() != $"EngineNS.UI.Bind.IBindableObject")
+                    {
+                        context.ReportDiagnostic(Diagnostic.Create(
+                            new DiagnosticDescriptor(
+                                "BindingGeneric",
+                                "Method first parameter type error",
+                                $"Method first parameter type must be EngineNS.UI.Bind.IBindableObject",
+                                "Error",
+                                DiagnosticSeverity.Error,
+                                true), methodSymbol.Locations.FirstOrDefault(),
+                                methodSymbol.Name));
+                    }
+                    if (methodSymbol.Parameters[1].Type.ToDisplayString() != "EngineNS.UI.Bind.TtBindableProperty")
+                    {
+                        context.ReportDiagnostic(Diagnostic.Create(
+                            new DiagnosticDescriptor(
+                                "BindingGeneric",
+                                "Method second parameter type error",
+                                $"Method second parameter type must be EngineNS.UI.Bind.TtBindableProperty",
+                                "Error",
+                                DiagnosticSeverity.Error,
+                                true), methodSymbol.Locations.FirstOrDefault(),
+                                methodSymbol.Name));
+                    }
+                    var propTypeDisplayName = methodSymbol.Parameters[2].Type.ToDisplayString();
+                    var methodName = methodSymbol.Name;
+                    var attData = methodSymbol.GetAttributes().Single(ad =>
+                    {
+                        var attrClass = ad.AttributeClass;
+                        if (attrClass == null)
+                            return false;
+
+                        return attrClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == $"global::{mAttachedPropAttrName}" ||
+                               attrClass.Name == mAttachedPropAttrNameWithoutSuffix ||
+                               attrClass.Name == mAttachedPropAttrName;
+                    });
+                    var nameOpt = attData.NamedArguments.SingleOrDefault(kvp => kvp.Key == "Name").Value;
+                    string nameVal = "";
+                    if (nameOpt.Value == null)
+                    {
+                        context.ReportDiagnostic(Diagnostic.Create(
+                            new DiagnosticDescriptor(
+                                "BindingGeneric",
+                                "Attached property name not set",
+                                "Must set AttachedPropertyAttribute Name field, like Name = \"your property name\"",
+                                "Error",
+                                DiagnosticSeverity.Error,
+                                true), methodSymbol.Locations.FirstOrDefault(),
+                                methodSymbol.Name));
+                    }
+                    else
+                        nameVal = nameOpt.Value.ToString();
+                    var bindPropName = $"{nameVal}Property";
+                    var defValOpt = attData.NamedArguments.SingleOrDefault(kvp => kvp.Key == "DefaultValue").Value;
+                    var defValStr = $"default({propTypeDisplayName})";
+                    if (!defValOpt.IsNull)
+                    {
+                        defValStr = (defValOpt.Value == null) ? "null" : defValOpt.Value.ToString();
+                    }
+                    var valCategoryOpt = attData.NamedArguments.SingleOrDefault(kvp => kvp.Key == "Category").Value;
+                    string categoryVal = "";
+                    if (valCategoryOpt.Value != null)
+                        categoryVal = valCategoryOpt.Value.ToString();
+                    setAttachedPropertiesStr += $@"
+            target.AddAttachedProperty<{propTypeDisplayName}>({bindPropName}, this, {defValStr});";
+                    getAttachedPropertyValueStr += $@"
+                case {Standart.Hash.xxHash.xxHash64.ComputeHash(nameVal)}: //{nameVal}
+                    return value.GetValue<{propTypeDisplayName}>();";
+                    setAttachedPropertyValueStr += $@"
+                case {Standart.Hash.xxHash.xxHash64.ComputeHash(nameVal)}: //{nameVal}
+                    {{
+                        var tagVal = ({propTypeDisplayName})value;
+                        valueStore.SetValue<{propTypeDisplayName}>(tagVal);
+                        bp.CallOnValueChanged(obj, bp, tagVal);
+                    }}
+                    break;";
+                    var valEditorAttOpt = methodSymbol.GetAttributes().SingleOrDefault(ad =>
+                    {
+                        var cls = ad.AttributeClass;
+                        while (cls != null)
+                        {
+                            if (cls.ToDisplayString() == "EngineNS.EGui.Controls.PropertyGrid.PGCustomValueEditorAttribute")
+                                return true;
+                            cls = cls.BaseType;
+                        }
+                        return false;
+                    });
+                    string valEditorStr = "null";
+                    if (valEditorAttOpt != null && valEditorAttOpt.AttributeClass != null)
+                    {
+                        var editorName = valEditorAttOpt.AttributeClass.ToDisplayString();
+                        valEditorStr = @$"typeof({namespaceName}.{className}{classGeneric}).GetMethod(""{methodName}"", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic, null, new Type[] {{ typeof({methodSymbol.Parameters[0].Type.ToDisplayString()}), typeof({methodSymbol.Parameters[1].Type.ToDisplayString()}), typeof({methodSymbol.Parameters[2].Type.ToDisplayString()}) }}, null).GetCustomAttributes(typeof({editorName}), false)[0] as {editorName}";
+                    }
+                    var displayNameAttOpt = methodSymbol.GetAttributes().SingleOrDefault(ad =>
+                    {
+                        var cls = ad.AttributeClass;
+                        while (cls != null)
+                        {
+                            if (cls.ToDisplayString() == "EngineNS.UI.Bind.BindPropertyDisplayNameAttribute")
+                                return true;
+                            cls = cls.BaseType;
+                        }
+                        return false;
+                    });
+                    string displayNameStr = "null";
+                    if (displayNameAttOpt != null && displayNameAttOpt.AttributeClass != null)
+                    {
+                        var attName = displayNameAttOpt.AttributeClass.ToDisplayString();
+                        displayNameStr = @$"typeof({namespaceName}.{className}{classGeneric}).GetMethod(""{methodName}"", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic, null, new Type[] {{ typeof({methodSymbol.Parameters[0].Type.ToDisplayString()}), typeof({methodSymbol.Parameters[1].Type.ToDisplayString()}), typeof({methodSymbol.Parameters[2].Type.ToDisplayString()}) }}, null).GetCustomAttributes(typeof({attName}), false)[0] as {attName}";
+                    }
+                    if (!classSymbol.MemberNames.Any(name => bindPropName == name))
+                    {
+                        source += $@"
+        public static EngineNS.UI.Bind.TtBindableProperty {bindPropName} = EngineNS.TtEngine.Instance.UIBindManager.RegisterAttached<{propTypeDisplayName}, {className}{classGeneric}>(""{nameVal}"",{(string.IsNullOrEmpty(categoryVal) ? "" : @$" ""{categoryVal}"",")} {defValStr}, {methodName}, {valEditorStr}, {displayNameStr});";
+                    }
+
+                    if (!classSymbol.MemberNames.Any(name => $"Get{nameVal}" == name))
+                    {
+                        source += $@"
+        public static {propTypeDisplayName} Get{nameVal}(EngineNS.UI.Bind.IBindableObject target)
+        {{
+            if(target == null)
+                return {defValStr};
+            return target.GetValue<{propTypeDisplayName}>({bindPropName});
+        }}";
+                    }
+                    if (!classSymbol.MemberNames.Any(name => $"Set{nameVal}" == name))
+                    {
+                        source += $@"
+        public static void Set{nameVal}(EngineNS.UI.Bind.IBindableObject target, {propTypeDisplayName} value)
+        {{
+            target?.SetValue<{propTypeDisplayName}>(value, {bindPropName});
+        }}";
+                    }
+                }
+
+                source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} EngineNS.UI.Bind.TtBindingExpressionBase CreateBindingExpression<TProperty>(string propertyName, EngineNS.UI.Bind.TtBindingBase binding, EngineNS.UI.Bind.TtBindingExpressionBase parent)
+        {{
+            if(string.IsNullOrEmpty(propertyName))
+                return null;
+            var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);
+            return CreateBindingExpression_<TProperty>(in propertyNameHash, binding, parent);
+        }}";
+                createBindingExpressionMethodSwitch += $@"
+            }}";
+                if (hasCreateBindingExpressionMethodSwitch)
+                    createBindingExpressionMethod += createBindingExpressionMethodSwitch;
+                if (baseHasBindObjectInterface)
+                {
+                    createBindingExpressionMethod += $@"
+            return base.CreateBindingExpression_<TProperty>(in propertyNameHash, binding, parent);
+        }}
+";
+                }
+                else
+                {
+                    createBindingExpressionMethod += $@"
+            return null;
+        }}
+";
+                }
+                source += createBindingExpressionMethod;
+
+                setValueWithPropertyNameSwitch += $@"
+            }}";
+                if (hasSetValueWithPropertyNameSwitch)
+                    setValueWithPropertyName += setValueWithPropertyNameSwitch;
+                if (baseHasBindObjectInterface)
+                {
+                    setValueWithPropertyName += $@"
+            base.SetValue_<{genericTypeName}>(in value, in propertyNameHash);
+        }}
+";
+                }
+                else
+                {
+                    setValueWithPropertyName += $@"
+        }}
+";
+                }
+                source += setValueWithPropertyName;
+                source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void SetValue<{genericTypeName}>(in {genericTypeName} value, EngineNS.UI.Bind.TtBindableProperty bp)
+        {{
+            EngineNS.UI.Bind.TtBindablePropertyValueBase bpVal = null;
+            lock ({bindExprDicName})
+            {{
+                if (!{bindExprDicName}.TryGetValue(bp, out bpVal))
+                {{
+                    if (bp.IsAttachedProperty)
+                    {{
+                        //bpVal = new EngineNS.UI.Bind.TtAttachedValue<EngineNS.UI.Bind.IBindableObject, {genericTypeName}>(bpHost);
+                        //{bindExprDicName}[bp] = bpVal;
+                    }}
+                    else
+                    {{
+                        var expVals = new EngineNS.UI.Bind.TtExpressionValues();
+                        expVals.Expressions.Add(new EngineNS.UI.Bind.TtDefaultValueExpression(new EngineNS.UI.Bind.ValueStore<{genericTypeName}>(((EngineNS.UI.Bind.TtBindableProperty<{genericTypeName}>)bp).DefaultValue)));
+                        bpVal = expVals;
+                        {bindExprDicName}[bp] = bpVal;
+                    }}
+                }}
+            }}
+            if (bpVal == null)
+                return;
+            if({triggerDicName}.HasTrigger(bp))
+            {{
+                var oldVal = bpVal.GetValue<{genericTypeName}>(bp);
+                bpVal.SetValue<{genericTypeName}>(this, bp, in value);
+                {triggerDicName}.InvokeTriggers(this, bp, oldVal, value);
+            }}
+            else
+                bpVal.SetValue<{genericTypeName}>(this, bp, in value);
+
+            if(HostElement != null && !string.IsNullOrEmpty(PropertyNameInHost))
+            {{
+                var hostElementTarget = HostElement;
+                var hostBP = hostElementTarget.GetBindableProperty(PropertyNameInHostHash, PropertyNameInHost);
+                if(hostElementTarget.HasBinded(hostBP))
+                    hostElementTarget.SetValue(this, hostBP);
+            }}
+        }}
+";
+                getValueWithPropertyNameSwitch += $@"
+            }}";
+                if (hasGetValueWithPropertyNameSwitch)
+                    getValueWithPropertyName += getValueWithPropertyNameSwitch;
+                if (baseHasBindObjectInterface)
+                {
+                    getValueWithPropertyName += $@"
+            return base.GetValue_<{genericTypeName}>(in propertyNameHash);
+        }}
+";
+                }
+                else
+                {
+                    getValueWithPropertyName += $@"
+            return default({genericTypeName});
+        }}
+";
+                }
+                source += getValueWithPropertyName;
+                source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} {genericTypeName} GetValue<{genericTypeName}>(EngineNS.UI.Bind.TtBindableProperty bp)
+        {{
+            if (bp == null)
+                return default({genericTypeName});
+            EngineNS.UI.Bind.TtBindablePropertyValueBase bpVal = null;
+            lock ({bindExprDicName})
+            {{
+                if (!{bindExprDicName}.TryGetValue(bp, out bpVal))
+                    return default({genericTypeName});
+            }}
+            return bpVal.GetValue<{genericTypeName}>(bp);
+        }}
+";
+                if (baseFromUIElement && !classSymbol.Constructors.Any(symbol => ((symbol.Parameters.Length == 0) && (!symbol.IsImplicitlyDeclared) && (!symbol.IsStatic))))
+                {
+                    source += $@"
+        public {className}()
+            : base()
+        {{
+        }}";
+                }
+                if (baseFromUIElement && !classSymbol.Constructors.Any((symbol) =>
+                {
+                    if ((symbol.Parameters.Length == 1) && (symbol.Parameters[0].Type.ToDisplayString() == "EngineNS.UI.Controls.Containers.TtContainer"))
+                        return true;
+                    return false;
+                }))
+                {
+                    source += $@"
+        public {className}(EngineNS.UI.Controls.Containers.TtContainer parent)
+            : base(parent)
+        {{
+        }}";
+                }
+
+                if (!classSymbol.MemberNames.Any(name => "SetBindExpression" == name))
+                {
+                    source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void SetBindExpression(EngineNS.UI.Bind.TtBindableProperty bp, EngineNS.UI.Bind.TtBindingExpressionBase expr)
+        {{
+            EngineNS.UI.Bind.TtBindablePropertyValueBase bpVal = null;
+            lock({bindExprDicName})
+            {{
+                if(!{bindExprDicName}.TryGetValue(bp, out bpVal))
+                {{
+                    bpVal = new EngineNS.UI.Bind.TtExpressionValues();
+                    {bindExprDicName}[bp] = bpVal;
+                }}
+            }}
+            ((EngineNS.UI.Bind.TtExpressionValues)bpVal).Expressions.Add(expr);
+        }}";
+                }
+
+                if (!classSymbol.MemberNames.Any(name => "FindBindableProperty" == name) && !baseHasBindObjectInterface)
+                {
+                    source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} EngineNS.UI.Bind.TtBindableProperty FindBindableProperty(string propertyName)
+        {{
+            var nameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);
+            return GetBindableProperty(nameHash, propertyName);
+        }}";
+                }
+
+                {
+                    source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} EngineNS.UI.Bind.TtBindableProperty GetBindableProperty(UInt64 propertyNameHash, string propertyName)
+        {{";
+                    var switchCode = $@"
+            switch(propertyNameHash)
+            {{";
+                    bool hasSwitchCode = false;
+                    foreach (var symbol in info.BindProperties)
+                    {
+                        hasSwitchCode = true;
+                        switchCode += $@"
+                case {Standart.Hash.xxHash.xxHash64.ComputeHash(symbol!.Name)}: // {symbol.Name}
+                    return {symbol.Name}Property;";
+                    }
+
+                    switchCode += $@"
+            }}";
+                    if (hasSwitchCode)
+                        source += switchCode;
+                    if (baseHasBindObjectInterface)
+                    {
+                        source += $@"
+            return base.GetBindableProperty(propertyNameHash, propertyName);
+        }}";
+                    }
+                    else
+                    {
+                        source += $@"
+            lock({bindExprDicName})
+            {{
+                foreach(var key in {bindExprDicName}.Keys)
+                {{
+                    if (key.Name == propertyName)
+                        return key;
+                }}
+            }}
+            return null;
+        }}";
+                    }
+                }
+                if (!classSymbol.MemberNames.Any(name => "ResetHostPropertyData" == name))
+                {
+                    source += $@"
+        protected{(baseHasBindObjectInterface ? " override" : " virtual")} void ResetHostPropertyData<{genericTypeName}>(in {genericTypeName} value, in {genericTypeName} oldValue, in UInt64 propertyHash, in string propertyName)
+        {{
+            if(string.IsNullOrEmpty(propertyName))
+                return;";
+                    if (!string.IsNullOrEmpty(onValueChangePropertys))
+                    {
+                        source += $@"
+            switch(propertyHash)
+            {{";
+                        source += onValueChangePropertys;
+                        source += $@"
+                {{
+                    dynamic valueDynamic = value;
+                    if(valueDynamic != null)
+                    {{
+                        valueDynamic.HostElement = this;
+                        valueDynamic.PropertyNameInHost = propertyName;
+                        valueDynamic.PropertyNameInHostHash = propertyHash;
+                    }}
+                    dynamic oldValueDynamic = oldValue;
+                    if(oldValueDynamic != null)
+                    {{
+                        oldValueDynamic.HostElement = null;
+                        oldValueDynamic.PropertyNameInHost = """";
+                        oldValueDynamic.PropertyNameInHostHash = 0;
+                    }}
+                }}
+                break;
+            }}";
+                    }
+                    if (baseHasBindObjectInterface)
+                    {
+                        source += $@"
+            base.ResetHostPropertyData(in value, in oldValue, in propertyHash, in propertyName);";
+                    }
+                    source += $@"
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "OnValueChange" == name))
+                {
+                    source += $@"
+#nullable enable
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void OnValueChange<{genericTypeName}>(in {genericTypeName} value, in {genericTypeName} oldValue, [CallerMemberName] string? propertyName = null)
+#nullable disable
+        {{
+            if(string.IsNullOrEmpty(propertyName))
+                return;
+            var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);
+            var bp = GetBindableProperty(propertyNameHash, propertyName);
+            if (bp == null)
+                return;
+            ResetHostPropertyData(in value, in oldValue, in propertyNameHash, in propertyName);
+            EngineNS.UI.Bind.TtBindablePropertyValueBase bpVal = null;
+            lock ({bindExprDicName})
+            {{
+                {bindExprDicName}.TryGetValue(bp, out bpVal);
+            }}
+            if (bpVal == null)
+            {{
+                {triggerDicName}.InvokeTriggers(this, bp, oldValue, value);
+            }}
+            else
+            {{
+                if({triggerDicName}.HasTrigger(bp))
+                {{
+                    var oldVal = bpVal.GetValue<{genericTypeName}>(bp);
+                    bpVal.SetValue<{genericTypeName}>(this, bp, in value);
+                    {triggerDicName}.InvokeTriggers(this, bp, oldVal, value);
+                }}
+                else
+                    bpVal.SetValue<{genericTypeName}>(this, bp, value);
+            }}
+            if(HostElement != null && !string.IsNullOrEmpty(PropertyNameInHost))
+            {{
+                var hostElementTarget = HostElement;
+                var hostBP = hostElementTarget.GetBindableProperty(PropertyNameInHostHash, PropertyNameInHost);
+                if(hostElementTarget.HasBinded(hostBP))
+                    hostElementTarget.SetValue(this, hostBP);
+            }}
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "HasBinded" == name))
+                {
+                    source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} bool HasBinded(EngineNS.UI.Bind.TtBindableProperty bp)
+        {{
+            lock({bindExprDicName})
+            {{
+                return {bindExprDicName}.ContainsKey(bp);
+            }}
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "ClearBindExpression" == name))
+                {
+                    source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void ClearBindExpression(EngineNS.UI.Bind.TtBindableProperty bp)
+        {{
+            lock({bindExprDicName})
+            {{
+                {bindExprDicName}.Remove(bp);
+            }}
+
+            if(bp == null)
+            {{
+                foreach(var data in BindingDatas)
+                {{
+                    var bdMethod = data.Value as EngineNS.UI.Controls.TtUIElement.BindingData_Method;
+                    if (bdMethod == null)
+                        continue;
+
+                    EngineNS.UI.Controls.TtUIElement.MacrossMethodData md;
+                    if(MacrossMethods.TryGetValue(data.Key, out md))
+                    {{
+                        var pbData = md as EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData;
+                        if(pbData != null)
+                        {{
+                            if (pbData.GetDesc != null)
+                                MethodDisplayNames.Remove(pbData.GetDesc);
+                            if (pbData.SetDesc != null)
+                                MethodDisplayNames.Remove(pbData.SetDesc);
+                        }}
+                    }}
+                }}
+
+                BindingDatas.Clear();
+            }}
+            else
+            {{
+
+                BindingDatas.Remove(bp.Name);
+
+                EngineNS.UI.Controls.TtUIElement.MacrossMethodData data;
+                if(MacrossMethods.TryGetValue(bp.Name, out data))
+                {{
+                    var pbData = data as EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData;
+                    if(pbData != null)
+                    {{
+                        if(pbData.GetDesc != null)
+                            MethodDisplayNames.Remove(pbData.GetDesc);
+                        if(pbData.SetDesc != null)
+                            MethodDisplayNames.Remove(pbData.SetDesc);
+                    }}
+                    MacrossMethods.Remove(bp.Name);
+                }}
+            }}
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "RemoveAttachedProperties" == name))
+                {
+                    source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void RemoveAttachedProperties(System.Type propertiesHostType)
+        {{
+            var removePros = new System.Collections.Generic.HashSet<EngineNS.UI.Bind.TtBindableProperty>();
+            foreach (var data in {bindExprDicName})
+            {{
+                if(data.Key.HostType.IsEqual(propertiesHostType))
+                {{
+                    removePros.Add(data.Key);
+                }}
+            }}
+            foreach(var key in removePros)
+            {{
+                RemoveAttachedProperty(key);
+            }}
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "RemoveAttachedProperty" == name))
+                {
+                    source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void RemoveAttachedProperty(EngineNS.UI.Bind.TtBindableProperty property)
+        {{
+            {bindExprDicName}.Remove(property);
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "SetAttachedProperties" == name))
+                {
+                    source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void SetAttachedProperties(EngineNS.UI.Bind.IBindableObject target)
+        {{
+            {(baseHasBindObjectInterface ? "base.SetAttachedProperties(target);" : "")}";
+                    source += setAttachedPropertiesStr;
+                    source += $@"
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "AddAttachedProperty" == name))
+                {
+                    source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void AddAttachedProperty<{genericTypeName}>(EngineNS.UI.Bind.TtBindableProperty property, EngineNS.UI.Bind.IBindableObject bpHost, in {genericTypeName} defaultValue)
+        {{
+            var bpVal = new EngineNS.UI.Bind.TtAttachedValue<EngineNS.UI.Bind.IBindableObject, {genericTypeName}>(bpHost);
+            mBindExprDic[property] = bpVal;
+            if(mPropertyTriggers_.HasTrigger(property))
+            {{
+                var oldVal = bpVal.GetValue<{genericTypeName}>(property);
+                bpVal.SetValue<{genericTypeName}>(this, property, in defaultValue);
+                mPropertyTriggers_.InvokeTriggers(this, property, oldVal, defaultValue);
+            }}
+            else
+                bpVal.SetValue<{genericTypeName}>(this, property, in defaultValue);
+        }}";
+                }
+
+                if (!classSymbol.MemberNames.Any(name => "GetAttachedPropertyValue" == name))
+                {
+                    source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} object GetAttachedPropertyValue(EngineNS.UI.Bind.TtBindableProperty bp, EngineNS.UI.Bind.ValueStoreBase value)
+        {{";
+                    if (!string.IsNullOrEmpty(getAttachedPropertyValueStr))
+                    {
+                        source += $@"    
+            var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(bp.Name);
+            switch(propertyNameHash)
+            {{
+            {getAttachedPropertyValueStr}
+            }}";
+                    }
+                    source += $@"
+            {(baseHasBindObjectInterface ? "return base.GetAttachedPropertyValue(bp, value);" : "return null; ")}            
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "SetAttachedPropertyValue" == name))
+                {
+                    source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void SetAttachedPropertyValue(EngineNS.UI.Bind.IBindableObject obj, EngineNS.UI.Bind.TtBindableProperty bp, EngineNS.UI.Bind.ValueStoreBase valueStore, object value)
+        {{";
+                    if (!string.IsNullOrEmpty(setAttachedPropertyValueStr))
+                    {
+                        source += $@"    
+            var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(bp.Name);
+            switch(propertyNameHash)
+            {{
+            {setAttachedPropertyValueStr}
+            }}";
+                    }
+                    source += $@"
+            {(baseHasBindObjectInterface ? "base.SetAttachedPropertyValue(obj, bp, valueStore, value);" : "")}            
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "__getPropertiesExceptNames" == name))
+                {
+                    source += $@"
+        System.Collections.Generic.HashSet<string> __getPropertiesExceptNames = new System.Collections.Generic.HashSet<string>();";
+                }
+                if (!classSymbol.MemberNames.Any(name => "IsPropertyVisibleDirty" == name))
+                {
+                    source += $@"
+        [System.ComponentModel.Browsable(false)]
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} bool IsPropertyVisibleDirty
+        {{
+            get;
+            set;
+        }} = false;";
+                }
+
+                // GetAttachedProperties
+                if (!classSymbol.MemberNames.Any(name => "GetAttachedProperties" == name))
+                {
+                    source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void GetAttachedProperties(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        {{
+            foreach(var bindData in {bindExprDicName})
+            {{
+                if(bindData.Value.Type == EngineNS.UI.Bind.TtBindablePropertyValueBase.EType.AttachedValue)
+                {{
+                    var proDesc = EngineNS.EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+                    proDesc.Name = bindData.Key.Name;
+                    if(bindData.Key.DisplayNameAtt != null)
+                        proDesc.DisplayName = bindData.Key.DisplayNameAtt.GetDisplayName(this);
+                    proDesc.PropertyType = bindData.Key.PropertyType;
+                    proDesc.Category = bindData.Key.Category;
+                    proDesc.CustomValueEditor = bindData.Key.CustomValueEditor;
+                    collection.Add(proDesc);
+                }}
+            }}
+        }}";
+                }
+                // GetEvents
+                if (!classSymbol.MemberNames.Any(name => "GetEvents" == name))
+                {
+                    source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void GetEvents(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType, EngineNS.Rtti.TtTypeDesc type)
+        {{
+            var tempCollection = collection;
+            EngineNS.UI.Event.TtEventManager.QueryEvents(type, 
+                ((curType, name, e)=>
+                {{
+                    var proDesc = EngineNS.EGui.Controls.PropertyGrid.PropertyCollection.PropertyDescPool.QueryObjectSync();
+                    proDesc.Name = name;
+                    proDesc.CanCreateNew = false;
+                    proDesc.PropertyType = EngineNS.Rtti.TtTypeDesc.TypeOf(typeof(EngineNS.UI.Event.TtRoutedEventHandler));
+                    proDesc.Category = ""Events"";
+                    proDesc.CustomValueEditor = new EngineNS.UI.Event.PGRoutedEventHandlerEditorAttribute();
+                    tempCollection.Add(proDesc);
+                }}), true);
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "GetSelfProperties" == name))
+                {
+                    source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void GetSelfProperties(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType, EngineNS.Rtti.TtTypeDesc type)
+        {{
+            var pros = System.ComponentModel.TypeDescriptor.GetProperties(this);
+            __getPropertiesExceptNames.Clear(); ";
+
+                    foreach (var valSymbol in info.BindProperties)
+                    {
+                        if (valSymbol == null)
+                            continue;
+
+                        string conditionStr = "";
+                        int i = 0;
+                        foreach (var att in valSymbol.GetAttributes())
+                        {
+                            if (att.AttributeClass == null)
+                                continue;
+                            if (att.AttributeClass.ToDisplayString().Contains(BindingCodeIncrementalGenerator.mShowWithPropertyAttrName))
+                            {
+                                var proVal = att.NamedArguments.SingleOrDefault(kvp => kvp.Key == "PropertyValue").Value;
+                                var proName = att.NamedArguments.SingleOrDefault(kvp => kvp.Key == "PropertyName").Value;
+                                var valType = att.NamedArguments.SingleOrDefault(kvp => kvp.Key == "ValueType").Value;
+                                var compareStr = "";
+                                if (Equals(valType.Value, 1))
+                                {
+                                    compareStr = "!=";
+                                }
+                                else if (Equals(valType.Value, 2))
+                                {
+                                    compareStr = "<";
+                                }
+                                else if (Equals(valType.Value, 3))
+                                {
+                                    compareStr = "<=";
+                                }
+                                else if (Equals(valType.Value, 4))
+                                {
+                                    compareStr = ">";
+                                }
+                                else if (Equals(valType.Value, 5))
+                                {
+                                    compareStr = ">=";
+                                }
+                                else
+                                {
+                                    compareStr = "==";
+                                }
+                                if (i != 0)
+                                {
+                                    conditionStr += " && ";
+                                }
+                                conditionStr += $@"
+                !({proName.Value} {compareStr} ({((proVal.Type == null) ? "" : (proVal.Type.ToDisplayString()))}){proVal.Value})";
+                                i++;
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(conditionStr))
+                        {
+                            source += $@"
+            if({conditionStr})
+            {{
+                __getPropertiesExceptNames.Add(""{valSymbol.Name}"");
+            }}";
+                        }
+                    }
+
+                    source += $@"
+            collection.InitValue(this, type, pros, parentIsValueType, __getPropertiesExceptNames);
+        }}";
+                }
+
+                if (!classSymbol.MemberNames.Any(name => "GetProperties" == name))
+                {
+                    source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void GetProperties(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        {{
+            var type = EngineNS.Rtti.TtTypeDesc.TypeOf(this.GetType());
+            // self properties
+            GetSelfProperties(ref collection, parentIsValueType, type);
+            // attached properties
+            GetAttachedProperties(ref collection, parentIsValueType);
+            // events
+            GetEvents(ref collection, parentIsValueType, type);
+            IsPropertyVisibleDirty = false;
+        }}";
+                }
+                source += $@"
+        protected{(baseHasBindObjectInterface ? " override" : " virtual")} bool _GetPropertyValueWithPropertyHash(ulong propertyNameHash, ref object value)
+        {{";
+                if (!string.IsNullOrEmpty(getPropertyValueSwitch))
+                {
+                    source += $@"
+            switch(propertyNameHash)
+            {{
+    {getPropertyValueSwitch}
+            }}";
+                }
+                if (baseHasBindObjectInterface)
+                {
+                    source += $@"
+            return base._GetPropertyValueWithPropertyHash(propertyNameHash, ref value);";
+                }
+                else
+                {
+                    source += $@"
+            value = null;
+            return false;";
+                }
+                source += $@"
+        }}";
+                if (!classSymbol.MemberNames.Any(name => "TourBindProperties" == name))
+                {
+                    if (!baseHasBindObjectInterface)
+                    {
+                        source += $@"
+        public delegate void TourBindProperyAction<{genericTypeName}>(string propertyName, EngineNS.UI.Bind.TtBindableProperty bindProperty, ref {genericTypeName} data);";
+                    }
+                    source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void TourBindProperties<{genericTypeName}>(ref {genericTypeName} data, TourBindProperyAction<{genericTypeName}> tourAction)
+        {{
+            if(tourAction == null)
+                return;
+            {tourBindableProperties}";
+                    if (baseHasBindObjectInterface)
+                    {
+                        source += $@"
+            base.TourBindProperties(ref data, tourAction);";
+                    }
+                    source += $@"
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "HasBindProperties" == name))
+                {
+                    source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} bool HasBindProperties(string containString, bool matchCase = false)
+        {{
+            if(!matchCase)
+                containString = containString.ToLower();";
+                    if (string.IsNullOrEmpty(hasBindablePropertiesStr))
+                    {
+                        if (baseHasBindObjectInterface)
+                        {
+                            source += $@"
+            return base.HasBindProperties(containString, matchCase);";
+                        }
+                        else
+                        {
+                            source += $@"
+            return false;";
+                        }
+                    }
+                    else
+                    {
+                        source += $@"
+            {hasBindablePropertiesStr}";
+                        if (baseHasBindObjectInterface)
+                        {
+                            source += $@"
+            return base.HasBindProperties(containString, matchCase);";
+                        }
+                        else
+                        {
+                            source += $@"
+            return false;";
+                        }
+                    }
+                    source += $@"
+        }}";
+                }
+
+                source += $@"
+        object _GetPropertyValue(string propertyName)
+        {{
+            if(string.IsNullOrEmpty(propertyName))
+                return null;
+            object retValue = null;
+            var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);
+            if(_GetPropertyValueWithPropertyHash(propertyNameHash, ref retValue))
+                return retValue;
+            var bp = GetBindableProperty(propertyNameHash, propertyName);
+            if(bp != null)
+            {{
+                EngineNS.UI.Bind.TtBindablePropertyValueBase bpVal = null;
+                lock (mBindExprDic)
+                if (mBindExprDic.TryGetValue(bp, out bpVal))
+                {{
+                    return bpVal.GetValue<object>(bp);
+                }}
+            }}
+            else
+            {{
+                var pro = this.GetType().GetProperty(propertyName);
+                if (pro != null)
+                    return pro.GetValue(this);
+            }}
+
+            //foreach(var bindData in {bindExprDicName})
+            //{{
+            //    if(bindData.Key.Name == propertyName)
+            //    {{
+            //        return bindData.Value.GetValue<object>(bindData.Key);
+            //    }}
+            //}}
+
+            return EngineNS.EGui.Controls.PropertyGrid.PropertyNotFindValueClass.PropertyNotFindValue;            
+        }}";
+
+                if (!classSymbol.MemberNames.Any(name => "GetPropertyValue" == name))
+                {
+                    source += $@"
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} object GetPropertyValue(string propertyName)
+        {{
+            return _GetPropertyValue(propertyName);
+        }}";
+                }
+                source += $@"
+        protected{(baseHasBindObjectInterface ? " override" : " virtual")} bool _SetPropertyValueWithPropertyHash(ulong propertyNameHash, object value)
+        {{";
+                if (!string.IsNullOrEmpty(setPropertyValueSwitch))
+                {
+                    source += $@"
+            switch(propertyNameHash)
+            {{
+    {setPropertyValueSwitch}
+            }}";
+                }
+                if (baseHasBindObjectInterface)
+                {
+                    source += $@"
+            return base._SetPropertyValueWithPropertyHash(propertyNameHash, value);";
+                }
+                else
+                {
+                    source += $@"
+            return false;";
+                }
+                source += $@"
+        }}";
+
+                source += $@"
+        void _SetPropertyValue(string propertyName, object value)
+        {{
+            if(string.IsNullOrEmpty(propertyName))
+                return;
+            var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertyName);
+            if(_SetPropertyValueWithPropertyHash(propertyNameHash, value))
+                return;
+            var bp = GetBindableProperty(propertyNameHash, propertyName);
+            if(bp != null)
+            {{
+                EngineNS.UI.Bind.TtBindablePropertyValueBase bpVal = null;
+                lock (mBindExprDic)
+                if (mBindExprDic.TryGetValue(bp, out bpVal))
+                {{
+                    bpVal.SetValue<object>(this, bp, value);
+                }}
+            }}
+            else
+            {{
+                var pro = this.GetType().GetProperty(propertyName);
+                if (pro != null)
+                    pro.SetValue(this, value);
+            }}
+            //var pro = this.GetType().GetProperty(propertyName);
+            //if (pro != null)
+            //    pro.SetValue(this, value);
+            //else
+            //{{
+            //    foreach(var bindData in {bindExprDicName})
+            //    {{
+            //        if(bindData.Key.Name == propertyName)
+            //        {{
+            //            bindData.Value.SetValue<object>(this, bindData.Key, in value);
+            //            break;
+            //        }}
+            //    }}
+            //}}            
+        }}";
+
+                if (!classSymbol.MemberNames.Any(name => "SetPropertyValue" == name))
+                {
+                    // todo: 这里可以生成代码来设置属性，不需要通过反射，另外可以生成泛型的 SetPropertyValue(string propertyName, {genericTypeName} value) 来对应设置不同类型的属性，减少GC
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetPropertyValue(string propertyName, object value)
+        {{
+            _SetPropertyValue(propertyName, value);
+        }}
+";
+                }
+
+                if (!classSymbol.MemberNames.Any(name => "SetTemplateValue" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetTemplateValue(EngineNS.UI.Template.TtTemplateSimpleValue simpleValue)
+        {{
+            var objType = this.GetType();
+            if(simpleValue.Property.IsAttachedProperty)
+            {{
+                this.SetValue(simpleValue.Value, simpleValue.Property);
+            }}
+            else if(simpleValue.Property.HostType.IsEqual(objType) || simpleValue.Property.HostType.IsParentClass(objType))
+            {{";
+                    string tempValSwitchCode = "";
+
+                    foreach (var valSymbol in info.BindProperties)
+                    {
+                        if (valSymbol != null && !valSymbol.IsReadOnly)
+                        {
+                            tempValSwitchCode += $@"
+                case {Standart.Hash.xxHash.xxHash64.ComputeHash(valSymbol.Name)}: // {valSymbol.Name}
+                    this.{valSymbol.Name} = ({valSymbol.Type.ToDisplayString()})(simpleValue.Value);
+                    return;";
+                        }
+                    }
+                    if (!string.IsNullOrEmpty(tempValSwitchCode))
+                    {
+                        source += $@"
+                switch(simpleValue.PropertyNameHash)
+                {{{tempValSwitchCode}
+                }}";
+                    }
+                    if (baseType != null)
+                    {
+                        var baseTypeDS = baseType.ToDisplayString();
+                        if (baseTypeDS != "object")
+                        {
+                            source += $@"
+                base.SetTemplateValue(simpleValue);";
+                        }
+                    }
+                    source += $@"
+            }}
+            else
+            {{
+                this.SetValue(simpleValue.Value, simpleValue.Property);
+            }}";
+                    source += $@"
+        }}";
+                }
+
+                if (!classSymbol.MemberNames.Any(name => "IsMatchTriggerCondition" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} bool IsMatchTriggerCondition<{genericTypeName}>(EngineNS.UI.Trigger.TtTriggerConditionLogical<{genericTypeName}> triggerCondition)
+        {{
+            if(triggerCondition.Property.HostType.IsParentClass(this.GetType()))
+            {{";
+                    string tempSwitchCode = "";
+
+                    foreach (var propertySymbol in info.BindProperties)
+                    {
+                        if (propertySymbol != null)
+                        {
+                            if (propertySymbol.Type.IsReferenceType)
+                            {
+                                tempSwitchCode += $@"
+                    case {Standart.Hash.xxHash.xxHash64.ComputeHash(propertySymbol.Name)}: // {propertySymbol.Name}
+                        switch(triggerCondition.Op)
+                        {{
+                            case EngineNS.UI.Trigger.TtTriggerConditionLogical<{genericTypeName}>.ELogicalOperation.Equal:
+                                return this.{propertySymbol.Name} == triggerCondition.Value.GetValue<{propertySymbol.Type.ToDisplayString()}>();
+                            case EngineNS.UI.Trigger.TtTriggerConditionLogical<{genericTypeName}>.ELogicalOperation.NotEqual:
+                                return this.{propertySymbol.Name} != triggerCondition.Value.GetValue<{propertySymbol.Type.ToDisplayString()}>();
+                        }}
+                        break;";
+                            }
+                            else
+                            {
+                                tempSwitchCode += $@"
+                    case {Standart.Hash.xxHash.xxHash64.ComputeHash(propertySymbol.Name)}: // {propertySymbol.Name}
+                        switch(triggerCondition.Op)
+                        {{
+                            case EngineNS.UI.Trigger.TtTriggerConditionLogical<{genericTypeName}>.ELogicalOperation.Equal:
+                                return this.{propertySymbol.Name}.Equals(triggerCondition.Value.GetValue<{propertySymbol.Type.ToDisplayString()}>());
+                            case EngineNS.UI.Trigger.TtTriggerConditionLogical<{genericTypeName}>.ELogicalOperation.NotEqual:
+                                return !this.{propertySymbol.Name}.Equals(triggerCondition.Value.GetValue<{propertySymbol.Type.ToDisplayString()}>());
+                        }}
+                        break;";
+                            }
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(tempSwitchCode))
+                    {
+                        source += $@"
+                switch(triggerCondition.PropertyNameHash)
+                {{{tempSwitchCode}
+                }}";
+                    }
+                    if (baseType != null)
+                    {
+                        var baseTypeDS = baseType.ToDisplayString();
+                        if (baseTypeDS != "object")
+                        {
+                            source += $@"
+                return base.IsMatchTriggerCondition(triggerCondition);";
+                        }
+                        else
+                        {
+                            source += $@"
+                return false;";
+                        }
+                    }
+
+                    source += $@"
+            }}
+            else
+            {{
+                switch(triggerCondition.Op)
+                {{
+                    case EngineNS.UI.Trigger.TtTriggerConditionLogical<{genericTypeName}>.ELogicalOperation.Equal:
+                        return triggerCondition.Value.IsValueEqual<{genericTypeName}>(this.GetValue<{genericTypeName}>(triggerCondition.Property));
+                    case EngineNS.UI.Trigger.TtTriggerConditionLogical<{genericTypeName}>.ELogicalOperation.NotEqual:
+                        return !triggerCondition.Value.IsValueEqual<{genericTypeName}>(this.GetValue<{genericTypeName}>(triggerCondition.Property));
+                }}
+            }}
+            return false;
+        }}";
+                }
+
+                if (!classSymbol.MemberNames.Any(name => "SetFromTriggerSimpleValue" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetFromTriggerSimpleValue<{genericTypeName}>(EngineNS.UI.Trigger.TtTriggerSimpleValue<{genericTypeName}> triggerSimpleValue)
+        {{
+            var objType = this.GetType();
+            if(triggerSimpleValue.Property.IsAttachedProperty)
+            {{
+                triggerSimpleValue.OldValueStore.SetValue(this.GetValue<{genericTypeName}>(triggerSimpleValue.Property));
+                this.SetValue(triggerSimpleValue.ValueStore.GetValue<{genericTypeName}>(), triggerSimpleValue.Property);
+            }}
+            else if(triggerSimpleValue.Property.HostType.IsEqual(objType) || triggerSimpleValue.Property.HostType.IsParentClass(objType))
+            {{";
+                    string triggerValSwitchCode = "";
+                    foreach (var propertySymbol in info.BindProperties)
+                    {
+                        if (propertySymbol != null && !propertySymbol.IsReadOnly)
+                        {
+                            bool isBindableObject = false;
+                            foreach (var att in propertySymbol.Type.GetAttributes())
+                            {
+                                if (att.AttributeClass == null)
+                                    continue;
+                                if (att.AttributeClass.ToDisplayString() == BindingCodeIncrementalGenerator.mBindObjectAttrName)
+                                {
+                                    isBindableObject = true;
+                                    break;
+                                }
+                            }
+                            var proHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertySymbol.Name);
+                            triggerValSwitchCode += $@"
+                case {proHash}: // {propertySymbol.Name}
+                    triggerSimpleValue.OldValueStore.SetValue(this.{propertySymbol.Name});";
+                            if (isBindableObject)
+                            {
+                                triggerValSwitchCode += $@"
+                    var tempVal_{propertySymbol.Name} = triggerSimpleValue.ValueStore.GetValue<{propertySymbol.Type.ToDisplayString()}>();
+                    tempVal_{propertySymbol.Name}.HostElement = this;
+                    tempVal_{propertySymbol.Name}.PropertyNameInHost = ""{propertySymbol.Name}"";
+                    tempVal_{propertySymbol.Name}.PropertyNameInHostHash = {proHash};
+                    this.{propertySymbol.Name} = tempVal_{propertySymbol.Name};
+                    return;";
+                            }
+                            else
+                            {
+                                triggerValSwitchCode += $@"
+                    this.{propertySymbol.Name} = triggerSimpleValue.ValueStore.GetValue<{propertySymbol.Type.ToDisplayString()}>();
+                    return;";
+                            }
+                        }
+                    }
+                    if (!string.IsNullOrEmpty(triggerValSwitchCode))
+                    {
+                        source += $@"
+                switch(triggerSimpleValue.PropertyNameHash)
+                {{{triggerValSwitchCode}
+                }}";
+                    }
+                    if (baseType != null)
+                    {
+                        var baseTypeDS = baseType.ToDisplayString();
+                        if (baseTypeDS != "object")
+                        {
+                            source += $@"
+                base.SetFromTriggerSimpleValue(triggerSimpleValue);";
+                        }
+                    }
+                    source += $@"
+            }}
+            else
+            {{
+                triggerSimpleValue.OldValueStore.SetValue(this.GetValue<{genericTypeName}>(triggerSimpleValue.Property));
+                this.SetValue(triggerSimpleValue.ValueStore.GetValue<{genericTypeName}>(), triggerSimpleValue.Property);
+            }}
+        }}";
+                }
+
+                if (!classSymbol.MemberNames.Any(name => "GetDefaultTriggerValue" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} EngineNS.UI.Bind.ValueStoreBase GetDefaultTriggerValue(UInt64 propertyNameHash)
+        {{";
+                    string triggerDefaultSwitchCode = "";
+                    foreach (var propertySymbol in info.BindProperties)
+                    {
+                        if (propertySymbol != null && !propertySymbol.IsReadOnly)
+                        {
+                            triggerDefaultSwitchCode += $@"
+                case {Standart.Hash.xxHash.xxHash64.ComputeHash(propertySymbol.Name)}: // {propertySymbol.Name}
+                    return new EngineNS.UI.Bind.ValueStore<{propertySymbol.Type.ToDisplayString()}>({propertySymbol.Name});";
+                        }
+                    }
+                    if (!string.IsNullOrEmpty(triggerDefaultSwitchCode))
+                    {
+                        source += $@"
+            switch(propertyNameHash)
+            {{{triggerDefaultSwitchCode}
+            }}";
+                    }
+                    if (baseType != null)
+                    {
+                        var baseTypeDS = baseType.ToDisplayString();
+                        if (baseTypeDS != "object")
+                        {
+                            source += $@"
+            return base.GetDefaultTriggerValue(propertyNameHash);";
+                        }
+                        else
+                        {
+                            source += $@"
+            return null;";
+                        }
+                    }
+                    else
+                        source += $@"
+            return null;";
+                    source += $@"
+        }}";
+                }
+
+                if (!classSymbol.MemberNames.Any(name => "RestoreFromTriggerSimpleValue" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void RestoreFromTriggerSimpleValue<{genericTypeName}>(EngineNS.UI.Trigger.TtTriggerSimpleValue<{genericTypeName}> triggerSimpleValue)
+        {{
+            var objType = this.GetType();
+            if(triggerSimpleValue.Property.IsAttachedProperty)
+            {{
+                this.SetValue(triggerSimpleValue.OldValueStore.GetValue<{genericTypeName}>(), triggerSimpleValue.Property);
+            }}
+            else if(triggerSimpleValue.Property.HostType.IsEqual(objType) || triggerSimpleValue.Property.HostType.IsParentClass(objType))
+            {{";
+                    string triggerRestoreValSwitchCode = "";
+                    foreach (var propertySymbol in info.BindProperties)
+                    {
+                        if (propertySymbol != null && !propertySymbol.IsReadOnly)
+                        {
+                            bool isBindableObject = false;
+                            foreach (var att in propertySymbol.Type.GetAttributes())
+                            {
+                                if (att.AttributeClass == null)
+                                    continue;
+                                if (att.AttributeClass.ToDisplayString() == BindingCodeIncrementalGenerator.mBindObjectAttrName)
+                                {
+                                    isBindableObject = true;
+                                    break;
+                                }
+                            }
+                            var proHash = Standart.Hash.xxHash.xxHash64.ComputeHash(propertySymbol.Name);
+                            if (isBindableObject)
+                            {
+                                triggerRestoreValSwitchCode += $@"
+                case {proHash}: // {propertySymbol.Name}
+                    var tempVal_{propertySymbol.Name} = triggerSimpleValue.OldValueStore.GetValue<{propertySymbol.Type.ToDisplayString()}>();
+                    tempVal_{propertySymbol.Name}.HostElement = this;
+                    tempVal_{propertySymbol.Name}.PropertyNameInHost = ""{propertySymbol.Name}"";
+                    tempVal_{propertySymbol.Name}.PropertyNameInHostHash = {proHash};
+                    this.{propertySymbol.Name} = tempVal_{propertySymbol.Name};
+                    return;";
+                            }
+                            else
+                            {
+                                triggerRestoreValSwitchCode += $@"
+                case {proHash}: // {propertySymbol.Name}
+                    this.{propertySymbol.Name} = triggerSimpleValue.OldValueStore.GetValue<{propertySymbol.Type.ToDisplayString()}>();
+                    return;";
+                            }
+                        }
+                    }
+                    if (!string.IsNullOrEmpty(triggerRestoreValSwitchCode))
+                    {
+                        source += $@"
+                switch(triggerSimpleValue.PropertyNameHash)
+                {{{triggerRestoreValSwitchCode}
+                }}";
+                    }
+                    if (baseType != null)
+                    {
+                        var baseTypeDS = baseType.ToDisplayString();
+                        if (baseTypeDS != "object")
+                        {
+                            source += $@"
+                base.RestoreFromTriggerSimpleValue(triggerSimpleValue);";
+                        }
+                    }
+                    source += $@"
+            }}
+            else
+                this.SetValue(triggerSimpleValue.OldValueStore.GetValue<{genericTypeName}>(), triggerSimpleValue.Property);
+        }}";
+                }
+
+                // macross used bind values
+                if (!baseHasBindObjectInterface && !classSymbol.MemberNames.Any(name => "BindingDatas" == name))
+                {
+                    source += $@"
+        [System.ComponentModel.Browsable(false)]
+        [{mMetaAttrName}]
+        public Dictionary<string, EngineNS.UI.Controls.TtUIElement.BindingDataBase> BindingDatas
+        {{
+            get;
+            set;
+        }} = new Dictionary<string, EngineNS.UI.Controls.TtUIElement.BindingDataBase>();";
+                }
+                if (!baseHasBindObjectInterface && !classSymbol.MemberNames.Any(name => "Id" == name))
+                {
+                    source += $@"
+        UInt64 mPrivateId = 0;
+        [{mMetaAttrName}]
+        public UInt64 Id
+        {{
+            get
+            {{
+                if (mPrivateId == 0)
+                    mPrivateId = Standart.Hash.xxHash.xxHash64.ComputeHash(Guid.NewGuid().ToByteArray());
+                return mPrivateId;
+            }}
+            set => mPrivateId = value;
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "GetPropertyBindMethodName" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} string GetPropertyBindMethodName(string propertyName, bool isSet)
+        {{
+            if (isSet)
+                return ""Set_"" + propertyName + ""_"" + Id;
+            else
+                return ""Get_"" + propertyName + ""_"" + Id;
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "GetEventMethodName" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} string GetEventMethodName(string eventName)
+        {{
+            return ""On_"" + eventName + ""_"" + Id;
+        }}";
+                }
+                if (!baseHasBindObjectInterface && !classSymbol.MemberNames.Any(name => "MethodDisplayNames" == name))
+                {
+                    source += $@"
+        [System.ComponentModel.Browsable(false)]
+        public Dictionary<EngineNS.Bricks.CodeBuilder.TtMethodDeclaration, EngineNS.UI.Controls.TtUIElement.MacrossMethodData> MethodDisplayNames = new Dictionary<EngineNS.Bricks.CodeBuilder.TtMethodDeclaration, EngineNS.UI.Controls.TtUIElement.MacrossMethodData>();";
+                }
+                if (!classSymbol.MemberNames.Any(name => "GetMethodDisplayName" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} string GetMethodDisplayName(EngineNS.Bricks.CodeBuilder.TtMethodDeclaration desc)
+        {{
+            EngineNS.UI.Controls.TtUIElement.MacrossMethodData val = null;
+            if(MethodDisplayNames.TryGetValue(desc, out val))
+            {{
+                return val.GetDisplayName(desc);
+            }}
+            return desc.MethodName;
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "SetMethodDisplayNamesDirty" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetMethodDisplayNamesDirty()
+        {{
+            foreach(var name in MethodDisplayNames)
+            {{
+                name.Value.DisplayNameDirty = true;
+            }}
+        }}";
+                }
+                if (!baseHasBindObjectInterface && !classSymbol.MemberNames.Any(name => "MacrossMethods" == name))
+                {
+                    source += $@"
+        Dictionary<string, EngineNS.UI.Controls.TtUIElement.MacrossMethodData> mMacrossMethods = new Dictionary<string, EngineNS.UI.Controls.TtUIElement.MacrossMethodData>();
+        [EngineNS.Rtti.Meta]
+        [System.ComponentModel.Browsable(false)]
+        public Dictionary<string, EngineNS.UI.Controls.TtUIElement.MacrossMethodData> MacrossMethods
+        {{
+            get => mMacrossMethods;
+            set
+            {{
+                mMacrossMethods = value;
+            }}
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "SetEventBindMethod" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetEventBindMethod(string eventName, EngineNS.Bricks.CodeBuilder.TtMethodDeclaration desc)
+        {{
+            var data = new EngineNS.UI.Controls.TtUIElement.MacrossEventMethodData()
+            {{
+                EventName = eventName,
+                Desc = desc,
+                HostObject = this,
+            }};
+            MacrossMethods[eventName] = data;
+            MethodDisplayNames[desc] = data;
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "HasMethod" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} bool HasMethod(string keyName, out string methodDisplayName)
+        {{
+            EngineNS.UI.Controls.TtUIElement.MacrossMethodData data;
+            if (MacrossMethods.TryGetValue(keyName, out data))
+            {{
+                methodDisplayName = data.GetDisplayName(null);
+                return true;
+            }}
+            methodDisplayName = """";
+            return false;
+        }}";
+                }
+                //    if (!classSymbol.MemberNames.Any(name => "SetPropertyBindMethod" == name))
+                //    {
+                //        source += $@"
+                //public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetPropertyBindMethod(string propertyName, EngineNS.Bricks.CodeBuilder.TtMethodDeclaration desc, bool isSet)
+                //{{
+                //    EngineNS.UI.Controls.TtUIElement.MacrossMethodData data;
+                //    if(MacrossMethods.TryGetValue(propertyName, out data))
+                //    {{
+                //        var pbData = data as EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData;
+                //        if (isSet)
+                //            pbData.SetDesc = desc;
+                //        else
+                //            pbData.GetDesc = desc;
+                //    }}
+                //    else
+                //    {{
+                //        var pbData = new EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData()
+                //        {{
+                //            PropertyName = propertyName,
+                //            HostObject = this,
+                //        }};
+                //        if (isSet)
+                //            pbData.SetDesc = desc;
+                //        else
+                //            pbData.GetDesc = desc;
+                //        MacrossMethods[propertyName] = pbData;
+                //        data = pbData;
+                //    }}
+                //    MethodDisplayNames[desc] = data;
+                //}}";
+                //    }
+                if (!classSymbol.MemberNames.Any(name => "OnRemoveMacrossMethod" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void OnRemoveMacrossMethod(ref EngineNS.UI.Editor.TtUIEditor.MacrossEditorRemoveMethodQueryData data)
+        {{";
+                    if (baseHasBindObjectInterface)
+                    {
+                        source += $@"
+            base.OnRemoveMacrossMethod(ref data);";
+                    }
+                    else
+                    {
+                        source += $@"
+            List<string> needDeletes = new List<string>();
+            foreach(var method in MacrossMethods)
+            {{
+                if(method.Value is EngineNS.UI.Controls.TtUIElement.MacrossEventMethodData)
+                {{
+                    // remove event bind method
+                    var evd = method.Value as EngineNS.UI.Controls.TtUIElement.MacrossEventMethodData;
+                    if (evd.Desc.Equals(data.Desc))
+                    {{
+                        needDeletes.Add(method.Key);
+                        MethodDisplayNames.Remove(data.Desc);
+                    }}
+                }}
+                else if(method.Value is EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData)
+                {{
+                    // remove property bind method
+                    var pvd = method.Value as EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData;
+                    if(pvd.SetDesc.Equals(data.Desc) ||
+                       pvd.GetDesc.Equals(data.Desc))
+                    {{
+                        needDeletes.Add(method.Key);
+                        MethodDisplayNames.Remove(data.Desc);
+                        BindingDatas.Remove(method.Key);
+                    }}
+                }}
+            }}
+            for(int i=0; i<needDeletes.Count; i++)
+            {{
+                MacrossMethods.Remove(needDeletes[i]);
+            }}";
+                    }
+
+                    foreach (var bindObj in bindObjectMemberSymbols)
+                    {
+                        if (bindObj == null)
+                            continue;
+                        source += $@"
+            if({bindObj.Name} != null)
+                {bindObj.Name}.OnRemoveMacrossMethod(ref data);";
+                    }
+                    source += $@"
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "CheckMacrossMethodDataValid" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} bool CheckMacrossMethodDataValid(EngineNS.Bricks.CodeBuilder.MacrossNode.MethodData methodData)
+        {{";
+                    if (baseHasBindObjectInterface)
+                    {
+                        source += $@"
+            if(base.CheckMacrossMethodDataValid(methodData))
+                return true;";
+                    }
+                    else
+                    {
+                        source += $@"
+            foreach(var evt in MacrossMethods)
+            {{
+                if(evt.Value is EngineNS.UI.Controls.TtUIElement.MacrossEventMethodData)
+                {{
+                    var data = evt.Value as EngineNS.UI.Controls.TtUIElement.MacrossEventMethodData;
+                    var eventName = data.EventName;
+                    if(methodData.MethodDec.MethodName == GetEventMethodName(eventName))
+                        return true;
+                }}
+                else if(evt.Value is EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData)
+                {{
+                    var data = evt.Value as EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData;
+                    var propertyName = data.PropertyName;
+                    if(methodData.MethodDec.MethodName == GetPropertyBindMethodName(propertyName, true))
+                        return true;
+                    if(methodData.MethodDec.MethodName == GetPropertyBindMethodName(propertyName, false))
+                        return true;
+                }}
+            }}";
+                    }
+
+                    source += $@"
+            return false;
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "BindMacross" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void BindMacross(ref int temp, EngineNS.Bricks.CodeBuilder.TtClassDeclaration defClass)
+        {{";
+                    if (baseHasBindObjectInterface)
+                    {
+                        source += $@"
+            base.BindMacross(ref temp, defClass);";
+                    }
+                    else
+                    {
+                        source += $@"
+            List<string> needDeletes = new List<string>();
+            foreach(var evt in MacrossMethods)
+            {{
+                if(evt.Value is EngineNS.UI.Controls.TtUIElement.MacrossEventMethodData)
+                {{
+                    var data = evt.Value as EngineNS.UI.Controls.TtUIElement.MacrossEventMethodData;
+                    var eventName = data.EventName;
+                    var methodDesc = defClass.FindMethod(GetEventMethodName(eventName));
+                    if(methodDesc == null)
+                    {{
+                        // method已删除或不存在
+                        needDeletes.Add(evt.Key);
+                    }}
+                    else
+                    {{
+                        data.Desc = methodDesc;
+                        methodDesc.GetDisplayNameFunc = GetMethodDisplayName;
+                        MethodDisplayNames[methodDesc] = data;
+                    }}
+                }}
+                else if(evt.Value is EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData)
+                {{
+                    var data = evt.Value as EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData;
+                    var propertyName = data.PropertyName;
+                    var setMethodDesc = defClass.FindMethod(GetPropertyBindMethodName(propertyName, true));
+                    var getMethodDesc = defClass.FindMethod(GetPropertyBindMethodName(propertyName, false));
+                    if(setMethodDesc == null && getMethodDesc == null)
+                    {{
+                        // method已删除或不存在
+                        needDeletes.Add(evt.Key);
+                    }}
+                    else
+                    {{
+                        if(getMethodDesc != null)
+                        {{
+                            data.GetDesc = getMethodDesc;
+                            getMethodDesc.GetDisplayNameFunc = GetMethodDisplayName;
+                            MethodDisplayNames[getMethodDesc] = data;
+                        }}
+                        if(setMethodDesc != null)
+                        {{
+                            data.SetDesc = setMethodDesc;
+                            setMethodDesc.GetDisplayNameFunc = GetMethodDisplayName;
+                            MethodDisplayNames[setMethodDesc] = data;
+                        }}
+                    }}
+                }}
+            }}
+
+            for(int i = 0; i<needDeletes.Count; i++)
+            {{
+                MacrossMethods.Remove(needDeletes[i]);
+            }}";
+                    }
+                    foreach (var bindObj in bindObjectMemberSymbols)
+                    {
+                        source += $@"
+            if({bindObj!.Name} != null)
+                {bindObj.Name}.BindMacross(ref temp, defClass);";
+                    }
+                    source += $@"
+        }}";
+                }
+                if (!baseHasBindObjectInterface && !classSymbol.MemberNames.Any(name => "Name" == name))
+                {
+                    //bool find = false;
+                    //var tempBaseType = classSymbol.BaseType;
+                    //while ((baseType != null))
+                    //{
+                    //    if(baseType.MemberNames.Any(name => "Name" == name))
+                    //    {
+                    //        find = true;
+                    //        break;
+                    //    }
+                    //    baseType = baseType.BaseType;
+                    //}
+                    //if(!find)
+                    {
+                        source += $@"
+        [System.ComponentModel.Browsable(false)]
+        public string Name {{ get; set; }}";
+                    }
+                }
+                if (!classSymbol.MemberNames.Any(name => "UpdatePropertiesName" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void UpdatePropertiesName()
+        {{";
+                    if (baseHasBindObjectInterface)
+                    {
+                        source += $@"
+            base.UpdatePropertiesName();";
+                    }
+                    foreach (var bindObj in bindObjectMemberSymbols)
+                    {
+                        source += $@"
+            if({bindObj!.Name} != null)
+            {{
+                {bindObj.Name}.Name = Name + "".{bindObj.Name}"";
+                {bindObj.Name}.UpdatePropertiesName();
+            }}";
+                    }
+
+                    source += $@"
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "FindBindObject" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} EngineNS.UI.Bind.IBindableObject FindBindObject(UInt64 id)
+        {{
+            if (Id == id)
+                return this;";
+                    foreach (var bindObj in bindObjectMemberSymbols)
+                    {
+                        source += $@"
+            if({bindObj!.Name} != null)
+            {{
+                var retVal = {bindObj.Name}.FindBindObject(id);
+                if(retVal != null)
+                    return retVal;
+            }}";
+                    }
+                    if (baseHasBindObjectInterface)
+                    {
+                        source += $@"
+            return base.FindBindObject(id);";
+                    }
+                    else
+                    {
+                        source += $@"
+            return null;";
+                    }
+
+                    source += $@"
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "GenerateBindingDataStatement" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void GenerateBindingDataStatement(EngineNS.UI.Editor.TtUIEditor editor, List<EngineNS.Bricks.CodeBuilder.TtStatementBase> sequence)
+        {{";
+                    foreach (var bindObj in bindObjectMemberSymbols)
+                    {
+                        source += $@"
+            if({bindObj!.Name} != null)
+                {bindObj.Name}.GenerateBindingDataStatement(editor, sequence);";
+                    }
+                    if (baseHasBindObjectInterface)
+                    {
+                        source += $@"
+            base.GenerateBindingDataStatement(editor, sequence);";
+                    }
+                    else
+                    {
+                        source += $@"
+            foreach(var data in BindingDatas)
+            {{
+                data.Value.GenerateStatement(editor, sequence);
+            }}";
+                    }
+                    source += $@"
+        }}";
+                }
+                if (!HasISerializer)
+                {
+                    if (!classSymbol.MemberNames.Any(name => "OnPreRead" == name))
+                    {
+                        source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void OnPreRead(object tagObject, object hostObject, bool fromXml) {{}}";
+                    }
+                    if (!classSymbol.MemberNames.Any(name => "OnPropertyRead" == name))
+                    {
+                        source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void OnPropertyRead(object tagObject, string prop, bool fromXml) {{}}";
+                    }
+                }
+                if (!classSymbol.MemberNames.Any(name => "InitialMethodDeclaration" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void InitialMethodDeclaration(string propertyName, EngineNS.Bricks.CodeBuilder.TtMethodDeclaration desc, bool isSet)
+        {{
+            desc.MethodName = GetPropertyBindMethodName(propertyName, isSet);
+            desc.GetDisplayNameFunc = GetMethodDisplayName;
+
+            EngineNS.UI.Controls.TtUIElement.MacrossMethodData data;
+            if(MacrossMethods.TryGetValue(propertyName, out data))
+            {{
+                var pbData = data as EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData;
+                if (isSet)
+                    pbData.SetDesc = desc;
+                else
+                    pbData.GetDesc = desc;
+            }}
+            else
+            {{
+                var pbData = new EngineNS.UI.Controls.TtUIElement.MacrossPropertyBindMethodData()
+                {{
+                    PropertyName = propertyName,
+                    HostObject = this,
+                }};
+                if (isSet)
+                    pbData.SetDesc = desc;
+                else
+                    pbData.GetDesc = desc;
+                MacrossMethods[propertyName] = pbData;
+                data = pbData;
+            }}
+            MethodDisplayNames[desc] = data;
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "GetContentsPresenterContainer" == name))
+                {
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} EngineNS.UI.Controls.Containers.TtTemplateContainer GetContentsPresenterContainer(System.UInt64 contentsPresenterHash)
+        {{";
+                    if (!string.IsNullOrEmpty(getContentsPresenterContainerSwitchStr))
+                    {
+                        source += $@"
+            switch(contentsPresenterHash)
+            {{";
+                        source += getContentsPresenterContainerSwitchStr;
+                        source += $@"
+            }}";
+                    }
+                    if (baseHasBindObjectInterface)
+                    {
+                        source += $@"
+            return base.GetContentsPresenterContainer(contentsPresenterHash);
+        }}";
+                    }
+                    else
+                    {
+                        source += $@"
+            return null;
+        }}";
+                    }
+                }
+                if (!classSymbol.MemberNames.Any(name => "TourContentsPresenterContainers" == name))
+                {
+                    if (!baseHasBindObjectInterface)
+                    {
+                        source += $@"
+        public delegate void Delegate_TourContentsPresenterContainer<{genericTypeName}>(EngineNS.UI.Controls.TtUIElement element, ref {genericTypeName} data);";
+                    }
+
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void TourContentsPresenterContainers<{genericTypeName}>(Delegate_TourContentsPresenterContainer<{genericTypeName}> action, ref {genericTypeName} data)
+        {{";
+                    source += tourContentsPresenterContainersStr;
+                    if (baseHasBindObjectInterface)
+                    {
+                        source += $@"
+            base.TourContentsPresenterContainers(action, ref data);";
+                    }
+                    source += $@"
+        }}";
+                }
+                if (!classSymbol.MemberNames.Any(name => "SetExpressionValue" == name))
+                {
+                    source += $@"
+        protected {(baseHasBindObjectInterface ? "override" : "virtual")} void SetExpressionValue_(EngineNS.UI.Bind.TtBindingExpressionBase exp, EngineNS.UI.Bind.TtBindableProperty bp, in UInt64 propertyNameHash)
+        {{";
+                    if (!string.IsNullOrEmpty(setExpressionValueSwitchStr))
+                    {
+                        source += $@"
+            switch(propertyNameHash)
+            {{";
+                        source += setExpressionValueSwitchStr;
+                        source += $@"
+            }}";
+                    }
+                    source += $@"
+            {(baseHasBindObjectInterface ? "base.SetExpressionValue_(exp, bp, in propertyNameHash);" : "")}
+        }}";
+
+                    source += $@"
+        public {(baseHasBindObjectInterface ? "override" : "virtual")} void SetExpressionValue(EngineNS.UI.Bind.TtBindingExpressionBase exp, EngineNS.UI.Bind.TtBindableProperty bp)
+        {{
+            var propertyNameHash = Standart.Hash.xxHash.xxHash64.ComputeHash(bp.Name);
+            SetExpressionValue_(exp, bp, in propertyNameHash);
+        }}";
+                }
+
+                source += "\r\n    }\r\n";
+                source += bindImpSource;
+                source += "}\r\n";
+
+                var fileName = $"{classSymbol.ToDisplayString().Replace('<', '_').Replace('>', '_')}_bind.g.cs";
+                context.AddSource(fileName, SourceText.From(source, Encoding.UTF8));
+
+                GeneratedCodes[fileName] = source;
+            }
+        }
+    }
+}

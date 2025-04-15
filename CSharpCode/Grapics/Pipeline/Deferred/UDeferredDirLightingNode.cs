@@ -226,18 +226,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 {
                     if (dirLightingNode.mBasePassShading.ShadowMode != EShadowMode.Advance)
                         dirLightingNode.mBasePassShading.ShadowMode = EShadowMode.Advance;
-
-                    index = drawcall.FindBinder("GShadowMapArray");
-                    if (index.IsValidPointer)
-                    {
-                        drawcall.BindSRV(index, advShadowNode.DepthTextureArraySRV);
-                    }
-                    index = drawcall.FindBinder("QTreeNodeBuffer");
-                    if (index.IsValidPointer)
-                    {
-                        advShadowNode.mShadowQTree.AdvShadowNodeDatas.Flush2GPU(cmd);
-                        drawcall.BindSRV(index, advShadowNode.mShadowQTree.AdvShadowNodeDatas.Srv);
-                    }
+                    dirLightingNode.AdvanceShadowMapNode.OnDirLightingDrawCall(cmd, drawcall, policy, atom);
                 }
                 else
                 {
@@ -430,6 +419,9 @@ namespace EngineNS.Graphics.Pipeline.Deferred
             if (linker != null)
             {
                 AdvanceShadowMapNode = linker.OutPin.HostNode as Bricks.AdvanceShadow.TtAdvanceShadowMapNode;
+
+                if (AdvanceShadowMapNode.Enable)
+                    mBasePassShading.ShadowMode = EShadowMode.Advance;
             }
         }
         [ThreadStatic]

@@ -9,55 +9,6 @@
     <Import_RootNamespace>CodeGenCSharp</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.CodeBuilder.ShaderNode.Control.TtCoreMaterialShader.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Font.TtFontHLSLMethod.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.FX.Hair.TtHairShader.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.FX.Skin.TtSkinShader.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.NodeGraph.TtNodeGraph.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Particle.TtEmitter.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Particle.TtEmitterMacross.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Particle.TtNebulaMacross.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Particle.TtNebulaParticle.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.Node.UBezier.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.Node.UProgram.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.UBufferComponent.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.UPgcGraph.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.UPgcGraphProgram.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Procedure.UPgcNodeBase.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.Terrain.CDLOD.UTerrainMaterialId.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.WorldSimulator.GOAP.IAction.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.WorldSimulator.GOAP.IActor.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.WorldSimulator.GOAP.IInventory.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.WorldSimulator.GOAP.IItem.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Bricks.WorldSimulator.GOAP.IItemContain.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Converter.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.CustomConvert.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.GamePlay.Scene.TtNode.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.GamePlay.TtGameInstance.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.GamePlay.TtMacrossGame.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Mesh.TtMesh.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Pipeline.Shader.TtMacrossShaderUtility.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Pipeline.Shader.TtMaterial.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Pipeline.Shader.TtMaterialFunction.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Pipeline.Shader.TtMaterialInstanceManager.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Pipeline.Shader.TtMaterialManager.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Pipeline.Shader.TtShadingMacross.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Graphics.Pipeline.TtViewportSlate.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Macross.BaseClass.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Macross.SubClass1.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Macross.SubClass2.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Macross.UMacrossTestClass.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.MathHelper.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.Support.TConvert.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.TtCommandMacross.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.TtEngine.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.TtMcCommand.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.UI.Controls.Containers.TtUIElementCollection.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.UI.Controls.TtUIElement.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.UI.TtUIMacrossBase.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.UI.TtUIManager.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.UTest.UTest_MetaObject.macross.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EngineNS.UTickableManager.macross.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MacrossContextMenu.macross.cs" />
   </ItemGroup>
 </Project>

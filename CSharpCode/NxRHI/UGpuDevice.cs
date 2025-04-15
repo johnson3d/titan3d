@@ -593,6 +593,14 @@ namespace EngineNS.NxRHI
             mCoreObject.ReleaseIdleCmdlist(cmd);
         }
 
+        public void BeginEvent(string info)
+        {
+            mCoreObject.BeginEvent(info);
+        }
+        public void EndEvent(string info)
+        {
+            mCoreObject.EndEvent(info);
+        }
     }
 
     public struct FTransientCmd : IDisposable

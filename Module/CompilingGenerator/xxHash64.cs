@@ -24,7 +24,7 @@ namespace Standart.Hash.xxHash
         {
             Debug.Assert(data != null);
             Debug.Assert(length >= 0);
-            Debug.Assert(length <= data.Length);
+            Debug.Assert(length <= data!.Length);
 
             fixed (byte* pData = &data[0])
             {
@@ -43,7 +43,7 @@ namespace Standart.Hash.xxHash
         {
             Debug.Assert(data != null);
             Debug.Assert(length >= 0);
-            Debug.Assert(offset < data.Length);
+            Debug.Assert(offset < data!.Length);
             Debug.Assert(length <= data.Length - offset);
 
             fixed (byte* pData = &data[0 + offset])
@@ -108,7 +108,7 @@ namespace Standart.Hash.xxHash
             {
                 // Read flow of bytes
                 while ((readBytes =
-                           await stream.ReadAsync(buffer, offset, bufferSize, cancellationToken).ConfigureAwait(false)) > 0)
+                           await stream!.ReadAsync(buffer, offset, bufferSize, cancellationToken).ConfigureAwait(false)) > 0)
                 {
                     length = length + readBytes;
                     offset = offset + readBytes;
@@ -204,7 +204,7 @@ namespace Standart.Hash.xxHash
             try
             {
                 // Read flow of bytes
-                while ((readBytes = stream.Read(buffer, offset, bufferSize)) > 0)
+                while ((readBytes = stream!.Read(buffer, offset, bufferSize)) > 0)
                 {
                     length = length + readBytes;
                     offset = offset + readBytes;
@@ -247,7 +247,7 @@ namespace Standart.Hash.xxHash
             fixed (char* c = str)
             {
                 byte* ptr = (byte*) c;
-                int length = str.Length * 2;
+                int length = str!.Length * 2;
 
                 return UnsafeComputeHash(ptr, length, seed);
             }

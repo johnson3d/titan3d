@@ -15,6 +15,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS.Rtti.TtNativeCoreProvider.cs2cpp.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS.UTest.UTestCs2CppBuilder.cs2cpp.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)EngineNS.UnitTest.UTestCs2CppBuilder.cs2cpp.cpp" />
   </ItemGroup>
 </Project>

@@ -4,17 +4,18 @@ using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.SymbolStore;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-
+/*
 namespace CompilingGenerator
 {
     [Generator]
-    public sealed partial class BindingCodeGenerator : ISourceGenerator
+    public sealed partial class BindingCodeGeneratorOld : ISourceGenerator
     {
         static readonly string mBindPropAttrName = "EngineNS.UI.Bind.BindPropertyAttribute";
         static readonly string mAttachedPropAttrName = "EngineNS.UI.Bind.AttachedPropertyAttribute";
@@ -137,6 +138,16 @@ namespace CompilingGenerator
                 }
             }
         }
+
+//        public BindingCodeGenerator()
+//        {
+//#if DEBUG
+//            if(!Debugger.IsAttached)
+//            {
+//                Debugger.Launch();
+//            }
+//#endif
+//        }
 
         string ProcessClass(INamedTypeSymbol? classSymbol, List<ISymbol> symbols, List<ISymbol> bindObjectMemberSymbols, ISymbol? bindPropertySymbol, ISymbol? attachedPropertySymbol, ISymbol? bindObjectSymbol, GeneratorExecutionContext context)
         {
@@ -1259,7 +1270,7 @@ namespace {namespaceName}
             if (!classSymbol.MemberNames.Any(name => "GetAttachedProperties" == name))
             {
                 source += $@"
-        public void GetAttachedProperties(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void GetAttachedProperties(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType)
         {{
             foreach(var bindData in {bindExprDicName})
             {{
@@ -1281,7 +1292,7 @@ namespace {namespaceName}
             if (!classSymbol.MemberNames.Any(name => "GetEvents" == name))
             {
                 source += $@"
-        public void GetEvents(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType, EngineNS.Rtti.TtTypeDesc type)
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void GetEvents(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType, EngineNS.Rtti.TtTypeDesc type)
         {{
             var tempCollection = collection;
             EngineNS.UI.Event.TtEventManager.QueryEvents(type, 
@@ -1300,11 +1311,11 @@ namespace {namespaceName}
             if (!classSymbol.MemberNames.Any(name => "GetSelfProperties" == name))
             {
                 source += $@"
-        public void GetSelfProperties(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType, EngineNS.Rtti.TtTypeDesc type)
+        public{(baseHasBindObjectInterface ? " override" : " virtual")} void GetSelfProperties(ref EngineNS.EGui.Controls.PropertyGrid.CustomPropertyDescriptorCollection collection, bool parentIsValueType, EngineNS.Rtti.TtTypeDesc type)
         {{
             var pros = System.ComponentModel.TypeDescriptor.GetProperties(this);
             __getPropertiesExceptNames.Clear(); ";
-
+    
                 foreach (var valSymbol in symbols)
                 {
                     if (valSymbol is IPropertySymbol)
@@ -2568,13 +2579,27 @@ namespace {namespaceName}
 
                 var classSource = ProcessClass(key as INamedTypeSymbol, groupSymbols, bindObjectMemberSymbols, bindPropertySymbol, attachedPropertySymbol, bindObjectSymbol, context);
                 var fileName = $"{key.ToDisplayString().Replace('<', '_').Replace('>', '_')}_bind.g.cs";
+
+                context.ReportDiagnostic(Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        id: "GEN001",
+                        title: key + " generator debug",
+                        messageFormat: "生成器已触发，路径：{0}",
+                        category: "Debug",
+                        DiagnosticSeverity.Info,
+                        isEnabledByDefault: true),
+                    Location.None,
+                    context.Compilation.SyntaxTrees.First().FilePath
+                    ));
+                
                 context.AddSource(fileName, SourceText.From(classSource, Encoding.UTF8));
             }
         }
 
-        public void Initialize(GeneratorInitializationContext context)
+        public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             context.RegisterForSyntaxNotifications(() => new BindingSyntaxReceiver());
         }
     }
 }
+*/
