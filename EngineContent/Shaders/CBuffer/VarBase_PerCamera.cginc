@@ -78,14 +78,19 @@ inline matrix GetPreFrameViewPrjMtx(bool bJitter = true)
 	return bJitter ? JitterPreFrameViewPrjMtx : PreFrameViewPrjMtx;
 }
 
-inline float LinearFromDepth(float z)
+inline float LinearFromDepth(float z, float zNear, float zFar)
 {
 #if USE_INVERSE_Z == 1
-	return (gZNear * gZFar) / (gZNear - z * (gZNear - gZFar));
+	return (zNear * zFar) / (zNear - z * (zNear - zFar));
 #else
 	//需要优化成 1 / (arg1 - z * arg2)形式，可以减少两个数学运算
-    return (gZNear * gZFar) / (gZFar - z * (gZFar - gZNear));
+    return (zNear * zFar) / (zFar - z * (zFar - zNear));
 #endif
+}
+
+inline float LinearFromDepth(float z)
+{
+    return LinearFromDepth(z, gZNear, gZFar);
 }
 
 inline float NormalizedLinearFromDepth(float z)

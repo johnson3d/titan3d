@@ -145,8 +145,8 @@ namespace EngineNS.Bricks.AdvanceShadow
             mGBuffer.SetSize(PageResolution, PageResolution);
         }
         public GamePlay.TtWorld.TtVisParameter mVisParameter = new GamePlay.TtWorld.TtVisParameter();
-        public List<TtQNode> mLeafs = new List<TtQNode>();
-        public Dictionary<TtNode, TtQNode.FShadowObject> mShadowObjects = new Dictionary<TtNode, TtQNode.FShadowObject>();
+        //public List<TtQNode> mLeafs = new List<TtQNode>();
+        //public Dictionary<TtNode, TtShadowObject> mShadowObjects = new Dictionary<TtNode, TtShadowObject>();
         public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
         {
             if (mShadowQTree == null)
@@ -252,7 +252,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             }, "EndAdvShadowDrawShadowMap");
             mVisParameter.ClearVisibles();
         }
-        private void DrawShadowObjects(GamePlay.TtWorld world, TtRenderPolicy policy, TtQNode node, List<TtQNode.FShadowObject> shadowObjects)
+        private void DrawShadowObjects(GamePlay.TtWorld world, TtRenderPolicy policy, TtQNode node, List<TtShadowObject> shadowObjects)
         {
             if (node.Leaf.IsDirty == false)
                 return;
@@ -266,7 +266,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist))
             {
-                mGBuffer.SetDepthStencil(mDSViews[node.Leaf.PageIndex]);
+                mGBuffer.SetDepthStencil(mDSViews[node.PageIndex]);
                 //mGBuffer.SetDepthStencil(Dsv);
                 mGBuffer.FlushModify();
                 DrawDepth(cmdlist, world, policy);

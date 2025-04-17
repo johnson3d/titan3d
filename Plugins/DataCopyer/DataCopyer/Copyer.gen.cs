@@ -9185,7 +9185,7 @@ namespace EngineNS.Plugins.DataCopyer
 			ar.Write(srcObj.BehaviorName);
 			ar.Write(srcObj.BoxCenter);
 			ar.Write(srcObj.BoxExtent);
-			ar.Write(srcObj.MaxDeepLeve);
+			ar.Write(srcObj.MaxDeepLevel);
 			ar.Write(srcObj.MaxDirtyPagePerFrame);
 			ar.Write(srcObj.MaxShadowDistance);
 			ar.Write(srcObj.Name);
@@ -9241,7 +9241,7 @@ namespace EngineNS.Plugins.DataCopyer
 			tarObj.BehaviorName = srcObj.BehaviorName;
 			tarObj.BoxCenter = srcObj.BoxCenter;
 			tarObj.BoxExtent = srcObj.BoxExtent;
-			tarObj.MaxDeepLeve = srcObj.MaxDeepLeve;
+			tarObj.MaxDeepLevel = srcObj.MaxDeepLevel;
 			tarObj.MaxDirtyPagePerFrame = srcObj.MaxDirtyPagePerFrame;
 			tarObj.MaxShadowDistance = srcObj.MaxShadowDistance;
 			tarObj.Name = srcObj.Name;
@@ -9300,11 +9300,141 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			System.Int32 t_MaxDeepLeve;
 			ar.Read(out t_MaxDeepLeve);
-			srcObj.MaxDeepLeve = t_MaxDeepLeve;
+			System.Int32 t_MaxDirtyPagePerFrame;
+			ar.Read(out t_MaxDirtyPagePerFrame);
+			srcObj.MaxDirtyPagePerFrame = t_MaxDirtyPagePerFrame;
 			{
 				if (srcObj is IO.ISerializer sr)
 				{
-					sr.OnPropertyRead(ar.Tag, "MaxDeepLeve", false);
+					sr.OnPropertyRead(ar.Tag, "MaxDirtyPagePerFrame", false);
+				}
+			}
+			System.Single t_MaxShadowDistance;
+			ar.Read(out t_MaxShadowDistance);
+			srcObj.MaxShadowDistance = t_MaxShadowDistance;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxShadowDistance", false);
+				}
+			}
+			System.String t_Name;
+			ar.Read(out t_Name);
+			srcObj.Name = t_Name;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Name", false);
+				}
+			}
+			EngineNS.GamePlay.Scene.TtNode.ENodeStyles t_NodeStyles;
+			ar.Read(out t_NodeStyles);
+			srcObj.NodeStyles = t_NodeStyles;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NodeStyles", false);
+				}
+			}
+			System.Int32 t_ShadowMapPage;
+			ar.Read(out t_ShadowMapPage);
+			srcObj.ShadowMapPage = t_ShadowMapPage;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "ShadowMapPage", false);
+				}
+			}
+			EngineNS.Hash64 type_BoundVolume;
+			ar.Read(out type_BoundVolume);
+			var meta_BoundVolume = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_BoundVolume);
+			if(meta_BoundVolume != null)
+			{
+				EngineNS.Hash64 ver_BoundVolume;
+				ar.Read(out ver_BoundVolume);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_BoundVolume.ClassType.TypeString, ver_BoundVolume );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.Scene.TtBoundVolume t_BoundVolume = null;
+					t_BoundVolume = srcObj.BoundVolume;
+					if (t_BoundVolume == null)
+					{
+						t_BoundVolume = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_BoundVolume.ClassType) as EngineNS.GamePlay.Scene.TtBoundVolume;
+					}
+					fn(ar, t_BoundVolume);
+					srcObj.BoundVolume = t_BoundVolume;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "BoundVolume", false);
+						}
+					}
+				}
+			}
+			EngineNS.Hash64 type_Placement;
+			ar.Read(out type_Placement);
+			var meta_Placement = EngineNS.Rtti.TtClassMetaManager.Instance.GetMeta(type_Placement);
+			if(meta_Placement != null)
+			{
+				EngineNS.Hash64 ver_Placement;
+				ar.Read(out ver_Placement);
+				var fn = EngineNS.TtEngine.Instance.DataCopyer.FindReader(meta_Placement.ClassType.TypeString, ver_Placement );
+				if (fn != null)
+				{
+					EngineNS.GamePlay.TtPlacementBase t_Placement = null;
+					t_Placement = srcObj.Placement;
+					if (t_Placement == null)
+					{
+						t_Placement = EngineNS.Rtti.TtTypeDescManager.CreateInstance(meta_Placement.ClassType) as EngineNS.GamePlay.TtPlacementBase;
+					}
+					fn(ar, t_Placement);
+					srcObj.Placement = t_Placement;
+					{
+						if (srcObj is IO.ISerializer sr)
+						{
+							sr.OnPropertyRead(ar.Tag, "Placement", false);
+						}
+					}
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_6702979905246457492 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Bricks.AdvanceShadow.TtAdvanceShadowNode.TtAdvanceShadowData;
+			EngineNS.RName t_BehaviorName;
+			ar.Read(out t_BehaviorName);
+			srcObj.BehaviorName = t_BehaviorName;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BehaviorName", false);
+				}
+			}
+			EngineNS.DVector2 t_BoxCenter;
+			ar.Read(out t_BoxCenter);
+			srcObj.BoxCenter = t_BoxCenter;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BoxCenter", false);
+				}
+			}
+			System.Double t_BoxExtent;
+			ar.Read(out t_BoxExtent);
+			srcObj.BoxExtent = t_BoxExtent;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BoxExtent", false);
+				}
+			}
+			System.Int32 t_MaxDeepLevel;
+			ar.Read(out t_MaxDeepLevel);
+			srcObj.MaxDeepLevel = t_MaxDeepLevel;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "MaxDeepLevel", false);
 				}
 			}
 			System.Int32 t_MaxDirtyPagePerFrame;
@@ -9437,13 +9567,6 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			System.Int32 t_MaxDeepLeve;
 			ar.Read(out t_MaxDeepLeve);
-			srcObj.MaxDeepLeve = t_MaxDeepLeve;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxDeepLeve", false);
-				}
-			}
 			System.Int32 t_MaxDirtyPagePerFrame;
 			ar.Read(out t_MaxDirtyPagePerFrame);
 			srcObj.MaxDirtyPagePerFrame = t_MaxDirtyPagePerFrame;
@@ -9556,13 +9679,6 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			System.Int32 t_MaxDeepLeve;
 			ar.Read(out t_MaxDeepLeve);
-			srcObj.MaxDeepLeve = t_MaxDeepLeve;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxDeepLeve", false);
-				}
-			}
 			System.Single t_MaxShadowDistance;
 			ar.Read(out t_MaxShadowDistance);
 			srcObj.MaxShadowDistance = t_MaxShadowDistance;
@@ -9657,13 +9773,6 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 			System.Int32 t_MaxDeepLeve;
 			ar.Read(out t_MaxDeepLeve);
-			srcObj.MaxDeepLeve = t_MaxDeepLeve;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "MaxDeepLeve", false);
-				}
-			}
 			System.Single t_MaxShadowDistance;
 			ar.Read(out t_MaxShadowDistance);
 			srcObj.MaxShadowDistance = t_MaxShadowDistance;
@@ -158114,6 +158223,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(17614260722275186306, EngineNS_Bricks_AdvanceShadow_TtAdvanceShadowNode_TtAdvanceShadowData.Read_17614260722275186306);
 				kls.RegVersion(5946046180104153787, EngineNS_Bricks_AdvanceShadow_TtAdvanceShadowNode_TtAdvanceShadowData.Read_5946046180104153787);
 				kls.RegVersion(8773366346584446658, EngineNS_Bricks_AdvanceShadow_TtAdvanceShadowNode_TtAdvanceShadowData.Read_8773366346584446658);
+				kls.RegVersion(6702979905246457492, EngineNS_Bricks_AdvanceShadow_TtAdvanceShadowNode_TtAdvanceShadowData.Read_6702979905246457492);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Bricks.AdvanceShadow.TtAdvanceShadowNode@EngineCore");
@@ -162811,7 +162921,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(1254883338472374524, Survivor_TtWeaponProxyNode.Read_1254883338472374524);
 				kls.RegVersion(6246337379466960295, Survivor_TtWeaponProxyNode.Read_6246337379466960295);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("9E_60_3F_90_E7_3C_DD_38_68_85_0A_D0_72_99_30_00_B8_D2_D1_2F");
+			this.VersionHash = EngineNS.Hash160.Parse("74_28_E6_B4_20_D1_BD_B8_D6_9F_2A_B7_78_AD_B3_EE_53_38_72_4E");
 		}
 	}
 }

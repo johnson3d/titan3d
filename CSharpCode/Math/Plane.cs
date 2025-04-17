@@ -117,7 +117,7 @@ namespace EngineNS
         /// </summary>
         /// <param name="point">平面通过的点坐标</param>
         /// <param name="normal">平面法向量</param>
-        public Plane( Vector3 point, Vector3 normal )
+        public Plane(in Vector3 point, in Vector3 normal)
 	    {
 		    Normal = normal;
 		    D = -Vector3.Dot( normal, point );
@@ -128,7 +128,7 @@ namespace EngineNS
         /// <param name="point1">平面通过的点坐标</param>
         /// <param name="point2">平面通过的点坐标</param>
         /// <param name="point3">平面通过的点坐标</param>
-        public Plane( Vector3 point1, Vector3 point2, Vector3 point3 )
+        public Plane(in Vector3 point1, in Vector3 point2, in Vector3 point3 )
 	    {
 		    float x1 = point2.X - point1.X;
 		    float y1 = point2.Y - point1.Y;

@@ -16,6 +16,7 @@ namespace EngineNS.GamePlay.Scene
         public string DefaultNamePrefix = "Node";
     }
     [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.UNodeData@EngineCore" })]
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtNodeData : IO.BaseSerializer
     {
         public int GetStructSize()
@@ -718,6 +719,7 @@ namespace EngineNS.GamePlay.Scene
                 mIsPrefab = value;
             }
         }
+        [Category("Option")]
         public TtNodeData NodeData
         {
             get

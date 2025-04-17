@@ -102,7 +102,9 @@ namespace Survivor
                     var mesh = await TtNode.SpawnNode<TtMeshNode>(this, null, meshData);
                     var rd = MathHelper.RandomDirection(false).AsDVector();
                     mesh.Placement.Position = rd * size;
+                    mesh.Placement.Scale = new Vector3(1, 3, 1);
                     mesh.IsCastShadow = true;
+                    mesh.IsAcceptShadow = true;
                     AdvShadowNode?.PushShadowNodes(mesh, false);
                     mMeshes.Add(mesh);
                 }

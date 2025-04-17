@@ -12,9 +12,11 @@ namespace EngineNS.Bricks.AdvanceShadow
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtQTree
     {
+        public Dictionary<TtNode, TtShadowObject> ShadowObjectDictionary = new Dictionary<TtNode, TtShadowObject>();
         public Matrix mOrtho2UVMtx = Matrix.Identity;
 
         public Vector3 LightDirection;
+        public DMatrix ProjectShadowMatrix;
         public TtFullQTreeBuilder QTreeBuilder;
         public TtQNode[] QNodes = null;
         public TtCpu2GpuBuffer<FAdvShadowNodeData> AdvShadowNodeDatas = null;
@@ -30,16 +32,21 @@ namespace EngineNS.Bricks.AdvanceShadow
             if (LightDirection == dir)
                 return;
 
-            var objs = new List<TtQNode.FShadowObject>(Root.ShadowObjects);
+            DPlane plane = new DPlane(in DVector3.UnitY, 0);
+            ProjectShadowMatrix = DMatrix.MakeShadow(dir.AsDVector(), plane);
+            LightDirection = dir;
+
+            foreach (var i in QTreeBuilder.Nodes)
+            {
+                i.BuildCullPlanes();
+            }
 
             Root.ClearShadowNodes();
-
-            foreach(var i in objs)
+            foreach(var i in ShadowObjectDictionary)
             {
-                this.PushShadowNode(i.SceneNode, dir, false);
+                this.PushShadowNode(i.Value.SceneNode, i.Value.IsDynamic);
             }
-            
-            LightDirection = dir;
+
             MarkAllLeafDirty();
         }
         public void MarkAllLeafDirty()
@@ -96,7 +103,6 @@ namespace EngineNS.Bricks.AdvanceShadow
             Root.AsLeaf();
 
             mOrtho2UVMtx = Matrix.MakeOrtho2UV(TtEngine.Instance.GfxDevice.RenderContext.RhiType);
-            //mOrtho2UVMtx = Matrix.Transpose(in mOrtho2UVMtx);
         }
         public void UpdateAABB(TtQNode node)
         {
@@ -196,6 +202,8 @@ namespace EngineNS.Bricks.AdvanceShadow
             using (new Profiler.TimeScopeHelper(ScopeUpdateQTree))
             {
                 CameralPosition = new DVector2(cameral.GetPosition().X, cameral.GetPosition().Z);
+                CheckShadowObjectChanged();
+
                 UpdateQTree(in CameralPosition, Root);
                 QTreeBuilder.BuildNodeArray();
                 fixed (FAdvShadowNodeData* p = &QTreeBuilder.AdvShadowNodeDatas[0])
@@ -209,14 +217,19 @@ namespace EngineNS.Bricks.AdvanceShadow
                 {
                     //todo: compare AABB size
                     //x.AABB.GetSize()
-                    var left = (mUpdateShadowMapTime - x.Leaf.UpdateShadowMapTime) * 100;
-                    var right = (mUpdateShadowMapTime - y.Leaf.UpdateShadowMapTime) * 100;
-                    if (left > right)
+                    if (x.UpdateShadowMapTime > y.UpdateShadowMapTime)
                         return 1;
-                    else if (left < right)
+                    else if (x.UpdateShadowMapTime < y.UpdateShadowMapTime)
                         return -1;
                     else
-                        return y.ShadowObjects.Count.CompareTo(x.ShadowObjects.Count);
+                    {
+                        if (x.DeepLevel < y.DeepLevel)
+                            return 1;
+                        else if (x.DeepLevel > y.DeepLevel)
+                            return -1;
+                        else
+                            return y.ShadowObjects.Count.CompareTo(x.ShadowObjects.Count);
+                    }   
                 });
                 if (mUpdateShadowMapNodes.Count > limitLeaf)
                 {
@@ -226,8 +239,11 @@ namespace EngineNS.Bricks.AdvanceShadow
                 for (int i = 0; i < count; i++)
                 {
                     var cur = mUpdateShadowMapNodes[i].Parent;
-                    while (cur != null)
+                    int parentCount = 0;
+                    const int MaxParentCount = 2;
+                    while (cur != null && parentCount < MaxParentCount)
                     {
+                        parentCount++;
                         if (cur.ShadowObjects.Count > 0)
                         {
                             bool bFind = false;
@@ -250,6 +266,19 @@ namespace EngineNS.Bricks.AdvanceShadow
                 }
                 mUpdateShadowMapTime++;
             }   
+        }
+        public void CheckShadowObjectChanged()
+        {
+            foreach (var i in ShadowObjectDictionary)
+            {
+                if (i.Value.SceneNode.BoundVolume.AbsAABB == i.Value.AABB)
+                {
+                    continue;
+                }
+                i.Value.AABB = i.Value.SceneNode.BoundVolume.AbsAABB;
+                Root.RemoveShadowNode(i.Value.SceneNode);
+                PushShadowObject(Root, i.Value);
+            }
         }
         public TtQNode GetPageNode(DVector2 pos)
         {
@@ -422,29 +451,23 @@ namespace EngineNS.Bricks.AdvanceShadow
             //return dist;
         }
         
-        public void PushShadowNode(TtNode node, in Vector3 lightDir, bool isDynamic)
+        public void PushShadowNode(TtNode node, bool isDynamic)
         {
-            ref var aabb = ref node.AbsAABB;
-            DPlane plane = new DPlane(in DVector3.UnitY, 0);
-
-            var matrix = DMatrix.MakeShadow(lightDir.AsDVector(), plane);
-            DBoundingBox2D projAABB = new DBoundingBox2D();
-            projAABB.InitEmptyBox();
-            for (int i = 0; i < 8; i++)
+            TtShadowObject shadowObj;
+            if (ShadowObjectDictionary.TryGetValue(node, out shadowObj) == false)
             {
-                var c = aabb.GetCorner(i);
-                var cp = DVector3.TransformCoordinate(in c, in matrix);
-
-                var cp2d = new DVector2(cp.X, cp.Z);
-                projAABB.Merge(in cp2d);
+                shadowObj = new TtShadowObject();
+                ShadowObjectDictionary.Add(node, shadowObj);
             }
-            TtQNode.FShadowObject shadowObj;
+
+            ref var aabb = ref node.AbsAABB;
+            
             shadowObj.SceneNode = node;
-            shadowObj.AABB = projAABB;
+            shadowObj.AABB = node.BoundVolume.AbsAABB;
             shadowObj.IsDynamic = isDynamic;
-            PushShadowObject(Root, in shadowObj);
+            PushShadowObject(Root, shadowObj);
         }
-        private void PushShadowObject(TtQNode node, in TtQNode.FShadowObject shadowObject)
+        private void PushShadowObject(TtQNode node, TtShadowObject shadowObject)
         {
             if (node.PushObject(shadowObject) == false)
             {
@@ -453,11 +476,19 @@ namespace EngineNS.Bricks.AdvanceShadow
 
             if (node.Child00 != null && node.Child00.NodeType != TtQNode.ENodeType.DeathNode)
             {
-                PushShadowObject(node.Child00, in shadowObject);
-                PushShadowObject(node.Child01, in shadowObject);
-                PushShadowObject(node.Child10, in shadowObject);
-                PushShadowObject(node.Child11, in shadowObject);
+                PushShadowObject(node.Child00, shadowObject);
+                PushShadowObject(node.Child01, shadowObject);
+                PushShadowObject(node.Child10, shadowObject);
+                PushShadowObject(node.Child11, shadowObject);
             }
+        }
+        public void RemoveShadowNode(TtNode node)
+        {
+            TtShadowObject shadowObj;
+            if (ShadowObjectDictionary.TryGetValue(node, out shadowObj) == false)
+                return;
+            ShadowObjectDictionary.Remove(node);
+            this.Root.RemoveShadowNode(node);
         }
     }
     [Bricks.CodeBuilder.ContextMenu("AdvanceShadow", "AdvanceShadow", TtNode.EditorKeyword)]
@@ -467,16 +498,22 @@ namespace EngineNS.Bricks.AdvanceShadow
         public class TtAdvanceShadowData : TtNodeData
         {
             [Rtti.Meta]
+            [Category("Option")]
             public DVector2 BoxCenter { get; set; } = DVector2.Zero;
             [Rtti.Meta]
+            [Category("Option")]
             public double BoxExtent { get; set; } = 1024;
             [Rtti.Meta]
-            public int MaxDeepLeve { get; set; } = 7;
+            [Category("Option")]
+            public int MaxDeepLevel { get; set; } = 8;
             [Rtti.Meta]
+            [Category("Option")]
             public float MaxShadowDistance { get; set; } = 500.0f;
             [Rtti.Meta]
+            [Category("Option")]
             public int ShadowMapPage { get; set; } = 512;
             [Rtti.Meta]
+            [Category("Option")]
             public int MaxDirtyPagePerFrame { get; set; } = 3;
         }
 
@@ -489,7 +526,7 @@ namespace EngineNS.Bricks.AdvanceShadow
 
             var data1 = GetNodeData<TtAdvanceShadowData>();
             DBoundingBox2D aabb = new DBoundingBox2D(data1.BoxCenter, data1.BoxExtent);
-            mShadowMapTree.Initialize(data1.MaxDeepLeve, aabb, data1.ShadowMapPage);
+            mShadowMapTree.Initialize(data1.MaxDeepLevel, aabb, data1.ShadowMapPage);
             mShadowMapTree.MaxShadowDistance = data1.MaxShadowDistance;
 
             return ret;
@@ -517,7 +554,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                     {
                         if (node.IsCastShadow)
                         {
-                            mShadowMapTree.PushShadowNode(node, mShadowMapTree.LightDirection, false);
+                            mShadowMapTree.PushShadowNode(node, false);
                         }
                         return true;
                     }, null);
@@ -583,7 +620,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             {
                 if (node.IsCastShadow)
                 {
-                    mShadowMapTree.PushShadowNode(node, mShadowMapTree.LightDirection, isDynamic);
+                    mShadowMapTree.PushShadowNode(node, isDynamic);
                 }
                 return true;
             }, null);

@@ -30,6 +30,29 @@
 - 16.Excel数据自动映射数据结构，自动读写
 - 17.插件动态加载卸载，游戏，引擎功能都可通过插件扩展
 - 18.专用的prefab编辑器
+# 当前缺省RenderGraph支持典型节点列表
+![总览图](Documents/editor/RenderPolicyEditor/rpolicy_editor.png)
+- 1.CullClusterNode,SwRastererizeNode,QuakResolveNode等一系列节点，用来实现软光栅渲染（尚未完全完成）
+- 2.Hzb，depth clip map用来做深度裁剪
+- 3.CpuCulling，在CPU内处理出可见Node列表
+- 4.DeferredBassPass，延迟渲染，3或者4RT输出，最后一个velocity输出可配置
+- 5.ShadowMap，经典CSM阴影
+- 6.ScreenTiling，屏幕分块，目前主要记录点影响的光源
+- 7.AdvShadow，基于QTree Clip Map的大范围阴影处理
+- 6.DirLighting，平行光等的PBR延迟着色
+- 7.Forward，前向节点，主要处理半透明一类的渲染
+- 8.Particle，用来处理粒子系统的驱动和渲染
+- 9.AvgBright,HDR用来处理动态光照tonemapping,eye adapter
+- 10.Picked,PickBlur,PickHollow,PickHollowBlend,HitProxy用来处理编辑器等的像素点选
+- 11.ScreenSpaceUI，用来处理屏幕空间UI渲染（3d UI直接在base pass或者forward中处理）
+- 12.其他效果节点
+- - 1.VoxelNode，从视口创建稀疏体素
+- - 2.FogNode，高度雾
+- - 3.LuminanceThredhole，提取亮度区间
+- - 4.Bloom，顾名思义
+- - 5.Additive，叠加颜色
+- - 6.SunShaftDepthThreshole,SunShaftRadialBlur用来做God Ray的系列节点
+- - 7.Taa，时域反走样，和前面输出的velocity配合使用
 # 编译构建
 ## Windows编译引擎
 1. **第一次编译引擎，很多时候需要单独调试运行CppWeavingTools和CSharpCodeTools两个工程一次，确保codegen下面NativeBinder和Cs2Cpp目录产生了必要的临时cpp,cs文件** 

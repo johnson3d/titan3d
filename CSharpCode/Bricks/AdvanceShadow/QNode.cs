@@ -32,6 +32,12 @@ namespace EngineNS.Bricks.AdvanceShadow
         public float mZFar;
     }
 
+    public class TtShadowObject
+    {
+        public TtNode SceneNode;
+        public DBoundingBox AABB;
+        public bool IsDynamic;
+    }
     public partial class TtQNode
     {
         public TtQNode(int deepLevel)
@@ -50,6 +56,7 @@ namespace EngineNS.Bricks.AdvanceShadow
         public int NodeIndex = -1;
         public int DeepLevel;
         public DBoundingBox2D AABB;
+        public DPlane[] CullPlanes = new DPlane[4];
         public TtQNode Parent = null;
         public TtQNode Child00 = null;
         public TtQNode Child01 = null;
@@ -59,13 +66,40 @@ namespace EngineNS.Bricks.AdvanceShadow
         public int PageIndex = -1;
         public Matrix ShadowMatrix;
 
-        public struct FShadowObject
+        public List<TtShadowObject> ShadowObjects = new List<TtShadowObject>();
+        public uint UpdateShadowMapTime
         {
-            public TtNode SceneNode;
-            public DBoundingBox2D AABB;
-            public bool IsDynamic;
+            get => Leaf.UpdateShadowMapTime;
         }
-        public List<FShadowObject> ShadowObjects = new List<FShadowObject>();
+        public void BuildCullPlanes()
+        {
+            /* 
+               1
+             0   2
+               3
+            */
+            var norm = Vector3.Cross(in Vector3.UnitZ, in QTree.LightDirection);
+            norm.Normalize();
+            var norm_d = norm.AsDVector();
+            CullPlanes[0] = new DPlane(new DVector3(AABB.Minimum.X, 0, AABB.Minimum.Y), norm_d);
+            CullPlanes[2] = new DPlane(new DVector3(AABB.Maximum.X, 0, AABB.Maximum.Y), norm_d);
+            norm = Vector3.Cross(in Vector3.UnitX, in QTree.LightDirection);
+            norm.Normalize();
+            norm_d = norm.AsDVector();
+            CullPlanes[1] = new DPlane(new DVector3(AABB.Maximum.X, 0, AABB.Maximum.Y), norm_d);
+            CullPlanes[3] = new DPlane(new DVector3(AABB.Minimum.X, 0, AABB.Minimum.Y), norm_d);
+
+            var center = AABB.GetCenter();
+            var center3d = new DVector3(center.X, 0, center.Y);
+            for (int i = 0; i < 4; i++)
+            {
+                if (DPlane.DotCoordinate(CullPlanes[i], center3d) > 0)
+                {
+                    CullPlanes[i].Normal = -CullPlanes[i].Normal;
+                    CullPlanes[i].D = -CullPlanes[i].D;
+                }
+            }
+        }
         public void SetToGpuData(ref FAdvShadowNodeData data)
         {
             data.mNodeType = (int)NodeType;
@@ -98,14 +132,22 @@ namespace EngineNS.Bricks.AdvanceShadow
                 }
             }
         }
-        internal void AsNode()
+        public void SurePage()
         {
-            NodeType = ENodeType.Node;
             if (PageIndex < 0 && ShadowObjects.Count > 0)
             {
                 PageIndex = QTree.AllocPage();
             }
-            else if (PageIndex >= 0)
+        }
+        internal void AsNode()
+        {
+            NodeType = ENodeType.Node;
+            //if (PageIndex < 0 && ShadowObjects.Count > 0)
+            //{
+            //    PageIndex = QTree.AllocPage();
+            //}
+            //else 
+            if (PageIndex >= 0)
             {
                 if (ShadowObjects.Count == 0)
                 {
@@ -121,15 +163,19 @@ namespace EngineNS.Bricks.AdvanceShadow
             {
                 QTree.FreePage(PageIndex);
             }
-            ShadowObjects = new List<FShadowObject>();
+            ShadowObjects = new List<TtShadowObject>();
             PageIndex = -1;
         }
-        internal bool PushObject(in FShadowObject shadowObj)
+        internal bool PushObject(in TtShadowObject shadowObj)
         {
-            if (DBoundingBox2D.Contains(in shadowObj.AABB, in AABB) == ContainmentType.Disjoint)
+            for(int i = 0; i < 4; i++)
             {
-                return false;
+                if(DPlane.Intersects(CullPlanes[i], in shadowObj.SceneNode.BoundVolume.AbsAABB) == PlaneIntersectionType.Front)
+                {
+                    return false;
+                }
             }
+
             ShadowObjects.Add(shadowObj);
 
             if (NodeType == ENodeType.Leaf)
@@ -159,14 +205,19 @@ namespace EngineNS.Bricks.AdvanceShadow
         }
         public void RemoveShadowNode(TtNode node)
         {
+            bool bFind = false;
             for (int i = 0; i < ShadowObjects.Count; i++)
             {
                 if (ShadowObjects[i].SceneNode == node)
                 {
                     ShadowObjects.RemoveAt(i);
+                    bFind = true;
                     break;
                 }
             }
+            if (bFind == false)
+                return;
+
             if (Child00 != null)
             {
                 Child00.RemoveShadowNode(node);
@@ -186,7 +237,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             AABB.Minimum = min;
             AABB.Maximum = max;
         }
-        public void PushShadowObjects(TtQTree tree, List<FShadowObject> nodes)
+        public void PushShadowObjects(TtQTree tree, List<TtShadowObject> nodes)
         {
             foreach (var i in nodes)
             {
@@ -208,11 +259,6 @@ namespace EngineNS.Bricks.AdvanceShadow
                 Child10.GatherLeafs(leafs);
                 Child11.GatherLeafs(leafs);
             }
-        }
-        public int ShadowObjectCount
-        {
-            //get => CountShadowObjects(true);
-            get => ShadowObjects.Count;
         }
     }
 }

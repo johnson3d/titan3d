@@ -40,6 +40,8 @@ namespace EngineNS.Bricks.AdvanceShadow
             if (HostNode.ShadowObjects.Count == 0)
                 return;
 
+            HostNode.SurePage();
+
             if (PageIndex >= HostNode.QTree.MaxPageCount)
                 return;
 
@@ -49,29 +51,15 @@ namespace EngineNS.Bricks.AdvanceShadow
 
             //ref FShadowPage page = ref GetShadowPage();
             DBoundingBox aabb = new DBoundingBox();
-            DBoundingBox2D aabb2d = new DBoundingBox2D();
             aabb.InitEmptyBox();
-            aabb2d.InitEmptyBox();
             foreach (var i in HostNode.ShadowObjects)
             {
                 aabb.Merge(in i.SceneNode.AbsAABB);
-                aabb2d.Merge(i.AABB);
             }
 
-            DVector2 c2d;
-            float width;
-            bool bKeepViewSize = true;
-            if (bKeepViewSize == false && HostNode.AABB.Contains(in aabb2d) == ContainmentType.Contains)
-            {
-                c2d = aabb2d.GetCenter();
-                width = (float)aabb2d.GetMaxSide();
-            }
-            else
-            {
-                c2d = HostNode.AABB.GetCenter();
-                width = (float)HostNode.AABB.GetSize().X;
-            }
-
+            DVector2 c2d = HostNode.AABB.GetCenter();
+            float width = (float)HostNode.AABB.GetSize().X;
+            
             var forward = HostNode.QTree.LightDirection;
             var right = Vector3.Right;
             var up = Vector3.Cross(in forward, in right);
