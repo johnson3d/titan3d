@@ -32,12 +32,13 @@
 - 18.专用的prefab编辑器
 # 当前缺省RenderGraph支持典型节点列表
 ![总览图](Documents/editor/RenderPolicyEditor/rpolicy_editor.png)
+一切都渲染流程都是节点链接配置出来，所以不要问引擎支持什么渲染特性，扩充和组合节点决定了最终的渲染管线效果
 - 1.CullClusterNode,SwRastererizeNode,QuakResolveNode等一系列节点，用来实现软光栅渲染（尚未完全完成）
 - 2.Hzb，depth clip map用来做深度裁剪
 - 3.CpuCulling，在CPU内处理出可见Node列表
 - 4.DeferredBassPass，延迟渲染，3或者4RT输出，最后一个velocity输出可配置
 - 5.ShadowMap，经典CSM阴影
-- 6.ScreenTiling，屏幕分块，目前主要记录点影响的光源
+- 6.ScreenTiling，屏幕分块，目前主要记录影响的点光源
 - 7.AdvShadow，基于QTree Clip Map的大范围阴影处理
 - 6.DirLighting，平行光等的PBR延迟着色
 - 7.Forward，前向节点，主要处理半透明一类的渲染
