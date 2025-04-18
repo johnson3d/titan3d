@@ -321,7 +321,7 @@ namespace NxRHI
 
 	void DX12Buffer::UpdateGpuData(ICommandList* cmd, UINT subRes, void* pData, const FSubResourceFootPrint* pFootPrint)
 	{
-		if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
+		//if (Desc.Usage == EGpuUsage::USAGE_DEFAULT)
 		{
 			auto device = mDeviceRef.GetPtr();
 			D3D12_RESOURCE_DESC resDesc{};
@@ -387,7 +387,7 @@ namespace NxRHI
 				cmd->PushGpuDraw(cpDraw);
 			}
 		}
-		else
+		/*else
 		{
 			FMappedSubResource mapped{};
 			if (this->Map(subRes, &mapped, false))
@@ -395,7 +395,7 @@ namespace NxRHI
 				memcpy(mapped.pData, pData, pFootPrint->RowPitch);
 				this->Unmap(subRes);
 			}
-		}
+		}*/
 	}
 	void DX12Buffer::UpdateGpuData(UINT subRes, void* pData, const FSubResourceFootPrint* pFootPrint)
 	{

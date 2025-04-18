@@ -452,6 +452,9 @@
     <None Include="$(MSBuildThisFileDirectory)Bricks\AdvanceShadow\AdvanceShadow.cginc">
       <Filter>Bricks\AdvanceShadow</Filter>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Bricks\AdvanceShadow\ESM.cginc">
+      <Filter>Bricks\AdvanceShadow</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Compute\calcrate.compute">

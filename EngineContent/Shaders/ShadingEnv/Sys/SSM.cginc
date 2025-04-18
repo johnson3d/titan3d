@@ -22,7 +22,7 @@ PS_INPUT VS_Main(VS_INPUT input1)
 	MTL_OUTPUT mtl = (MTL_OUTPUT)0;
 	//mtl template stuff;
 	{
-#ifndef DO_VS_MATERIAL
+#ifdef DO_VS_MATERIAL
 		DO_VS_MATERIAL(output, mtl);
 #endif
 

@@ -39,4 +39,17 @@ int GetPageNode(float2 pos)
     return index;
 }
 
+float GetESMValue(float linearDepth, float far, float c)
+{
+     // 方法 1：非线性压缩
+    //float compressedDepth = log(linearDepth + 1.0);
+    //float safeInput = min(compressedDepth * c, 80.0);
+    
+    // 方法 2：动态参数调整    
+    float safeC = 80.0 / far;
+    float safeInput = c * safeC * linearDepth;
+    float esmValue = exp(safeInput);
+    return esmValue;
+}
+
 #endif//_AdvanceShadow_cginc_

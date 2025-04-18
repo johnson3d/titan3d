@@ -560,7 +560,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                     }, null);
                     mPushShadowNode = true;
                 }
-                //test code
+                //test code,for renderdoc capture
                 mShadowMapTree.MarkAllLeafDirty();
 
                 var cullingNode = args.Policy.FindFirstNode<TtCpuCullingNode>();

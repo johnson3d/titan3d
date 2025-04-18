@@ -398,5 +398,9 @@ namespace EngineNS.Graphics.Pipeline
         {
             return null;
         }
+        public virtual void OnDrawCall(Shader.TtGraphicsShadingEnv shading, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Mesh.TtMesh.TtAtom atom)
+        {
+
+        }
     }
 }

@@ -256,9 +256,11 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 			else
 			{
 				float shadowSpaceDepth = GShadowMapArray.SampleLevel(Samp_GShadowMap, float3(ShadowMapUV.xy, node.PageIndex), 0).r;
-				float linearShadowSpaceDepth = LinearFromDepth(shadowSpaceDepth, node.ZNear, node.ZFar);
+				float esmValue = GetESMValue(linearZ - 0.003, node.ZFar, 1.0f);
+				//ShadowValue = saturate(shadowSpaceDepth / esmValue);
 				//compare depth, esm? USE_INVERSE_Z
-				if (ShadowMapUV.z + 0.003 > shadowSpaceDepth)//bias for pages
+				//if (ShadowMapUV.z + 0.003 > shadowSpaceDepth)//bias for pages
+				if( esmValue < shadowSpaceDepth)
 				{
 					ShadowValue = 1.0h;
 				}

@@ -23,34 +23,35 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         }
         public override void OnDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
-            var aaNode = drawcall.TagObject as TtGaussNode;
-            if (aaNode == null)
-            {
-                var pipelinePolicy = policy.TagObject as TtRenderPolicy;
-                aaNode = pipelinePolicy.FindFirstNode<TtGaussNode>();
-            }
+            var aaNode = drawcall.TagObject as TtRenderGraphNode;
+            aaNode.OnDrawCall(this, cmd, drawcall, policy, atom);
+            //if (aaNode == null)
+            //{
+            //    var pipelinePolicy = policy.TagObject as TtRenderPolicy;
+            //    aaNode = pipelinePolicy.FindFirstNode<TtGaussNode>();
+            //}
 
-            var index = drawcall.FindBinder("ColorBuffer");
-            if (index.IsValidPointer)
-            {
-                var attachBuffer = aaNode.GetAttachBuffer(aaNode.ColorPinIn);
-                drawcall.BindSRV(index, attachBuffer.Srv);
-            }
-            index = drawcall.FindBinder("Samp_ColorBuffer");
-            if (index.IsValidPointer)
-                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+            //var index = drawcall.FindBinder("ColorBuffer");
+            //if (index.IsValidPointer)
+            //{
+            //    var attachBuffer = aaNode.GetAttachBuffer(aaNode.ColorPinIn);
+            //    drawcall.BindSRV(index, attachBuffer.Srv);
+            //}
+            //index = drawcall.FindBinder("Samp_ColorBuffer");
+            //if (index.IsValidPointer)
+            //    drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
 
-            index = drawcall.FindBinder("cbShadingEnv");
-            if (index.IsValidPointer)
-            {
-                if (aaNode.CBShadingEnv == null)
-                {
-                    aaNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
-                }
-                drawcall.BindCBV(index, aaNode.CBShadingEnv);
-            }
+            //index = drawcall.FindBinder("cbShadingEnv");
+            //if (index.IsValidPointer)
+            //{
+            //    if (aaNode.CBShadingEnv == null)
+            //    {
+            //        aaNode.CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+            //    }
+            //    drawcall.BindCBV(index, aaNode.CBShadingEnv);
+            //}
 
-            base.OnDrawCall(cmd, drawcall, policy, atom);
+            //base.OnDrawCall(cmd, drawcall, policy, atom);
         }
     }
     [Bricks.CodeBuilder.ContextMenu("Gauss", "Post\\Gauss", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
@@ -150,6 +151,29 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                     this.CreateGBuffers(policy, buffer.BufferDesc.Format);
                     ResultPinOut.Attachement.Format = buffer.BufferDesc.Format;
                 }
+            }
+        }
+
+        public override void OnDrawCall(Shader.TtGraphicsShadingEnv shading, NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
+        {
+            var index = drawcall.FindBinder("ColorBuffer");
+            if (index.IsValidPointer)
+            {
+                var attachBuffer = GetAttachBuffer(ColorPinIn);
+                drawcall.BindSRV(index, attachBuffer.Srv);
+            }
+            index = drawcall.FindBinder("Samp_ColorBuffer");
+            if (index.IsValidPointer)
+                drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.LinearClampState);
+
+            index = drawcall.FindBinder("cbShadingEnv");
+            if (index.IsValidPointer)
+            {
+                if (CBShadingEnv == null)
+                {
+                    CBShadingEnv = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
+                }
+                drawcall.BindCBV(index, CBShadingEnv);
             }
         }
     }

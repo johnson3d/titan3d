@@ -42,10 +42,27 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             DebugName = debugName;
 
+            ScreenMesh = CreateScreenMesh();
+            //var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
+            //materials[0] = TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial;
+            //if (materials[0] == null)
+            //    return;
+
+            //var mesh = new Graphics.Mesh.TtMesh();
+            //var rect = Graphics.Mesh.TtMeshDataProvider.MakeRect2D(-1, -1, 2, 2, 0.5F, false);
+            //var rectMesh = rect.ToMesh();
+            //var ok = mesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
+            //if (ok)
+            //{
+            //    ScreenMesh = mesh;
+            //}
+        }
+        public static Graphics.Mesh.TtMesh CreateScreenMesh()
+        {
             var materials = new Graphics.Pipeline.Shader.TtMaterial[1];
             materials[0] = TtEngine.Instance.GfxDevice.MaterialManager.ScreenMaterial;
             if (materials[0] == null)
-                return;
+                return null;
 
             var mesh = new Graphics.Mesh.TtMesh();
             var rect = Graphics.Mesh.TtMeshDataProvider.MakeRect2D(-1, -1, 2, 2, 0.5F, false);
@@ -53,8 +70,9 @@ namespace EngineNS.Graphics.Pipeline.Common
             var ok = mesh.Initialize(rectMesh, materials, Rtti.TtTypeDescGetter<Graphics.Mesh.TtMdfStaticMesh>.TypeDesc);
             if (ok)
             {
-                ScreenMesh = mesh;
+                return mesh;
             }
+            return null;
         }
         public TtGraphicsBuffers.TtTargetViewIdentifier TargetViewId = new TtGraphicsBuffers.TtTargetViewIdentifier();
         public virtual unsafe TtGraphicsBuffers CreateGBuffers(TtRenderPolicy policy, EPixelFormat format)

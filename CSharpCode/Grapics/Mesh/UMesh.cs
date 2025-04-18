@@ -143,12 +143,8 @@ namespace EngineNS.Graphics.Mesh
         {
             mPerMeshCBuffer = cbv;
         }
-        public class UMeshAttachment
-        {
-            
-        }
         public bool IsDrawHitproxy = false;
-        public UMeshAttachment Tag { get; set; }
+        public object Tag { get; set; }
         public class TtAtom : IDisposable
         {
             public void Dispose()
