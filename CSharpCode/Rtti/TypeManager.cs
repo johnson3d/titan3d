@@ -359,7 +359,16 @@ namespace EngineNS.Rtti
         }
         public static TtTypeDesc TypeOf(string typeStr)
         {
-            var result = TtTypeDescManager.Instance.GetTypeDescFromString(typeStr);
+            var result = TtTypeDescManager.Instance.GetTypeDescFromString(typeStr, out var isAlias);
+            if (result == null)
+            {
+                Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Typeof failed:{typeStr}");
+            }
+            return result;
+        }
+        public static TtTypeDesc TypeOf(string typeStr, out bool isAlias)
+        {
+            var result = TtTypeDescManager.Instance.GetTypeDescFromString(typeStr, out isAlias);
             if (result == null)
             {
                 Profiler.Log.WriteLine<Profiler.TtCoreGategory>(Profiler.ELogTag.Warning, $"Typeof failed:{typeStr}");
@@ -860,7 +869,7 @@ namespace EngineNS.Rtti
             StringMap[originName] = result;
             if (tryAdd2Manager)
             {
-                if (GetTypeDescFromString(result) == null)
+                if (GetTypeDescFromString(result, out var isAlias) == null)
                 {
                     var typeDesc = new TtTypeDesc();
                     typeDesc.Assembly = assm;
@@ -870,8 +879,9 @@ namespace EngineNS.Rtti
             }
             return result;
         }
-        public TtTypeDesc GetTypeDescFromString(string typeStr)
+        public TtTypeDesc GetTypeDescFromString(string typeStr, out bool isAlias)
         {
+            isAlias = false;
             foreach (var i in Services)
             {
                 TtTypeDesc t;
@@ -880,6 +890,7 @@ namespace EngineNS.Rtti
                     return t;
                 }
             }
+            isAlias = true;
             return Rtti.TtTypeDescManager.Instance.FindNameAlias(typeStr);
         }
         public TtTypeDesc GetTypeDescFromFullName(string fullName)
@@ -898,7 +909,7 @@ namespace EngineNS.Rtti
         }
         public System.Type GetTypeFromString(string typeStr)
         {
-            var typeDesc = GetTypeDescFromString(typeStr);
+            var typeDesc = GetTypeDescFromString(typeStr, out var isAlias);
             return (typeDesc != null) ? typeDesc.SystemType : null;
         }
         public bool RegAssembly(System.Reflection.Assembly asm, out ServiceManager manager, out TtAssemblyDesc outDesc)

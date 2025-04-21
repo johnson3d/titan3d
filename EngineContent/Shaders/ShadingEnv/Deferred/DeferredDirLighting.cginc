@@ -254,6 +254,7 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 			}
 			else
 			{
+				ShadowMapUV.z = max(ShadowMapUV.z, 0);
 				float occluderDepth = GShadowMapArray.SampleLevel(Samp_GShadowMap, float3(ShadowMapUV.xy, node.PageIndex), 0).r;
 				float esmValue = GetESMValue((ShadowMapUV.z - 0.003), node.ZNear, node.ZFar);//+ 0.0001f
 				ShadowValue = saturate(occluderDepth / esmValue);

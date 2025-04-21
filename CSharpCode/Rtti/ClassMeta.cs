@@ -2,6 +2,7 @@
 using EngineNS.Support;
 using EngineNS.Thread.Async;
 using EngineNS.UI;
+using MathNet.Numerics.Distributions;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -347,8 +348,12 @@ namespace EngineNS.Rtti
                     {
                         ver = new TtMetaVersion(this);
                         MetaVersions[key] = ver;
+                        ver.LoadVersion(key, myXmlDoc.LastChild);
                     }
-                    ver.LoadVersion(key, myXmlDoc.LastChild);
+                    else
+                    {//Is Alias Same Hash
+                        return true;
+                    }
                 }
             }
             catch (System.Exception)
@@ -1272,9 +1277,12 @@ namespace EngineNS.Rtti
                             TtClassMeta.TypeDescText(text, out readModule, out strName);
                             if (moduleName == null || (moduleName != null && readModule == moduleName))
                             {
-                                var type = TtTypeDesc.TypeOf(strName);// EngineNS.Rtti.UTypeDescManager.Instance.GetTypeDescFromString(strName);
+                                bool isAlias;
+                                var type = TtTypeDesc.TypeOf(strName, out isAlias);// EngineNS.Rtti.UTypeDescManager.Instance.GetTypeDescFromString(strName);
                                 if (type != null)
                                 {
+                                    //if (isAlias)
+                                    //    continue;
                                     TtClassMeta meta = null;
                                     var key = TtTypeDesc.TypeStr(type);
                                     if (mMetas.TryGetValue(key, out meta) == false)

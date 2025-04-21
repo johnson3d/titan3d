@@ -199,8 +199,12 @@ namespace EngineNS.GamePlay.Scene
 
             if (NodeData != null)
             {
-                if (NodeData.Placement == null && placementType != null)
+                if (NodeData.Placement == null)
                 {
+                    if (placementType == null)
+                    {
+                        placementType = typeof(TtPlacement);
+                    }
                     NodeData.Placement = Rtti.TtTypeDescManager.CreateInstance(placementType) as TtPlacementBase;
                     NodeData.Placement.HostNode = this;
                     switch (bvType)
@@ -1469,9 +1473,10 @@ namespace EngineNS.GamePlay.Scene
             //meta.CopyObjectMetaField(data, NodeData);
             TtEngine.Instance.DataCopyer.DataCopy(data, NodeData);
             var node = Rtti.TtTypeDescManager.CreateInstance(this.GetType()) as TtNode;
-            data.BoundVolume.HostNode = node;
+            if (data.BoundVolume != null)
+                data.BoundVolume.HostNode = node;
             data.Placement.HostNode = node;
-            await node.InitializeNode(world, data, data.BoundVolume.BVType, data.Placement?.GetType());
+            await node.InitializeNode(world, data, data.BoundVolume != null ? data.BoundVolume.BVType : EBoundVolumeType.None, data.Placement?.GetType());
             node.Placement.Position = this.Placement.Position;
             node.Placement.Quat = this.Placement.Quat;
             node.Placement.Scale = this.Placement.Scale;

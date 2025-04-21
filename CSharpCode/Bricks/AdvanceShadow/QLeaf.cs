@@ -83,7 +83,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             ShadowCamera.LookAtLH(eye, c3d, in up);
 
             var shadowZNear = 1.0f;// (\float)shadowCameraBox.Minimum.Z;
-            var shadowZFar = (float)(farLen + HostNode.Size + 1.2);
+            var shadowZFar = (float)(farLen + 1.2);
 
             ShadowCamera.DoOrthoProjectionForShadow(width, width, shadowZNear, shadowZFar, 0, 0);
             ShadowCamera.UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext);
