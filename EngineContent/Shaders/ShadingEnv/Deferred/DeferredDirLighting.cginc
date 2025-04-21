@@ -247,27 +247,31 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 		{
 			ShadowMapUV = mul(float4(WorldPos, 1.0f), node.ShadowMatrix);
 			ShadowMapUV.z = ShadowMapUV.z / ShadowMapUV.w;
-			float linearZ = LinearFromDepth(ShadowMapUV.z, node.ZNear, node.ZFar);
 			//if (ShadowMapUV.x > 1 || ShadowMapUV.x < 0 || ShadowMapUV.z < 0 || ShadowMapUV.z > 1)
-			if (ShadowMapUV.z < 0 || ShadowMapUV.z > 1)
+			if (ShadowMapUV.z > 1)
 			{
 				ShadowValue = 1.0h;
 			}
 			else
 			{
-				float shadowSpaceDepth = GShadowMapArray.SampleLevel(Samp_GShadowMap, float3(ShadowMapUV.xy, node.PageIndex), 0).r;
-				float esmValue = GetESMValue(linearZ - 0.003, node.ZFar, 1.0f);
-				//ShadowValue = saturate(shadowSpaceDepth / esmValue);
+				float occluderDepth = GShadowMapArray.SampleLevel(Samp_GShadowMap, float3(ShadowMapUV.xy, node.PageIndex), 0).r;
+				float esmValue = GetESMValue((ShadowMapUV.z - 0.003), node.ZNear, node.ZFar);//+ 0.0001f
+				ShadowValue = saturate(occluderDepth / esmValue);
+				if (ShadowValue < 1)
+				{
+					//ShadowValue = saturate(occluderDepth / esmValue - 0.3f);
+					//ShadowValue = 1 - ShadowValue;
+				}
 				//compare depth, esm? USE_INVERSE_Z
 				//if (ShadowMapUV.z + 0.003 > shadowSpaceDepth)//bias for pages
-				if( esmValue < shadowSpaceDepth)
-				{
-					ShadowValue = 1.0h;
-				}
-				else
-				{
-					ShadowValue = 0.0h;
-				}
+				//if( esmValue < shadowSpaceDepth)
+				//{
+				//	ShadowValue = 1.0h;
+				//}
+				//else
+				//{
+				//	ShadowValue = 0.0h;
+				//}
 				//if (linearZ - 0.01 < linearShadowSpaceDepth)
 				//{
 				//	ShadowValue = 1.0h;

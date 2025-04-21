@@ -79,11 +79,11 @@ namespace EngineNS.Bricks.AdvanceShadow
                     minDist = d;
             }
             var farLen = maxDist - minDist;
-            var eye = c3d + dir * (minDist * 1.5 - 100);
+            var eye = c3d + dir * (minDist - 1.1);
             ShadowCamera.LookAtLH(eye, c3d, in up);
 
-            var shadowZNear = 0.3f;// (\float)shadowCameraBox.Minimum.Z;
-            var shadowZFar = (float)(farLen * 1.5 + 200.0);
+            var shadowZNear = 1.0f;// (\float)shadowCameraBox.Minimum.Z;
+            var shadowZFar = (float)(farLen + HostNode.Size + 1.2);
 
             ShadowCamera.DoOrthoProjectionForShadow(width, width, shadowZNear, shadowZFar, 0, 0);
             ShadowCamera.UpdateConstBufferData(TtEngine.Instance.GfxDevice.RenderContext);

@@ -156,7 +156,7 @@ namespace EngineNS.Bricks.AdvanceShadow
             desc.Width = (uint)PageResolution;
             desc.Height = (uint)PageResolution;
             desc.MipLevels = 1;
-            desc.Format = EPixelFormat.PXF_D16_UNORM;
+            desc.Format = (DepthPinOut.Attachement.Format == EPixelFormat.PXF_R16_FLOAT) ? EPixelFormat.PXF_D16_UNORM : EPixelFormat.PXF_D32_FLOAT;
             DepthPinOut.Attachement.Width = desc.Width;
             DepthPinOut.Attachement.Height = desc.Height;
             PageDepthTexture = rc.CreateTexture(in desc);
@@ -355,17 +355,7 @@ namespace EngineNS.Bricks.AdvanceShadow
 
             cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new NxRHI.TtCmdListScope(cmdlist))
-            {
-                mDrawScreenGBuffers.SetRenderTarget(0, mRtViews[node.PageIndex]);
-                mDrawScreenGBuffers.FlushModify();
-                if (mEsmCBuffer != null)
-                {
-                    mEsmCBuffer.SetValue("ESMConstant", 5.0f);
-                    mEsmCBuffer.SetValue("DepthNear", node.Leaf.ShadowCamera.ZNear);
-                    mEsmCBuffer.SetValue("DepthFar", node.Leaf.ShadowCamera.ZFar);
-                    mEsmCBuffer.FlushDirty(cmdlist.mCoreObject);
-                }
-
+            {   
                 mDrawScreenGBuffers.SetRenderTarget(0, mRtViews[node.PageIndex]);
                 mDrawScreenGBuffers.FlushModify();
                 DrawESM(node, cmdlist, world, policy);
@@ -437,6 +427,7 @@ namespace EngineNS.Bricks.AdvanceShadow
                         drawcall.TagObject = this;
                         drawcall.BindCBV(drawcall.Effect.BindIndexer.cbPerViewport, mDrawScreenGBuffers.PerViewportCBuffer);
                         drawcall.BindCBV(drawcall.Effect.BindIndexer.cbPerCamera, node.Leaf.ShadowCamera.PerCameraCBuffer);
+
                         cmdlist.PushGpuDraw(drawcall);
                     }
                 }
@@ -458,7 +449,6 @@ namespace EngineNS.Bricks.AdvanceShadow
                 cmdlist.EndPass();
             }
         }
-        public TtCbView mEsmCBuffer = null;
         public override void OnDrawCall(TtGraphicsShadingEnv shading, ICommandList cmd, TtGraphicDraw drawcall, TtRenderPolicy policy, TtMesh.TtAtom atom)
         {
             if (shading == mEsmShading)
@@ -473,18 +463,13 @@ namespace EngineNS.Bricks.AdvanceShadow
                 {
                     drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
                 }
-                index = drawcall.FindBinder("cbESMConstants");
+                index = drawcall.FindBinder("cbAdvanceShadow");
                 if (index.IsValidPointer)
                 {
-                    if (mEsmCBuffer == null)
-                    {
-                        mEsmCBuffer = TtEngine.Instance.GfxDevice.RenderContext.CreateCBV(index);
-                    }
-                    drawcall.BindSampler(index, TtEngine.Instance.GfxDevice.SamplerStateManager.PointState);
+                    drawcall.BindCBV(index, mDirLightingCBV);
                 }
             }
         }
-
         public unsafe void OnDirLightingDrawCall(NxRHI.ICommandList cmd, NxRHI.TtGraphicDraw drawcall, TtRenderPolicy policy, Graphics.Mesh.TtMesh.TtAtom atom)
         {
             if (mShadowQTree == null)
@@ -531,6 +516,10 @@ namespace EngineNS.Bricks.AdvanceShadow
                         mDirLightingCBV.SetValue(indexLayerData, i, in layerData); 
                     }
                 }
+                
+                mDirLightingCBV.SetValue("EsmConstant", mShadowQTree.EsmConstant);
+                mDirLightingCBV.SetValue("MaxExp", mShadowQTree.MaxExp);
+                mDirLightingCBV.SetValue("GaussSigma", mShadowQTree.GaussSigma);
                 drawcall.BindCBV(index, mDirLightingCBV);
             }
         }

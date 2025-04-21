@@ -75,6 +75,7 @@ namespace EngineNS.GamePlay.Scene
             set
             {
                 uint flags = (((uint)value & ((uint)TtNode.ENodeStyles.HitproxyMasks >> 2)) << 2);
+                UnsetStyle(TtNode.ENodeStyles.HitproxyMasks);
                 SetStyle((TtNode.ENodeStyles)flags);
             }
         }

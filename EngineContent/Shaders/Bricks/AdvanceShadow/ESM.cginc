@@ -31,13 +31,6 @@ struct PS_OUTPUT
 Texture2D DepthBuffer DX_AUTOBIND;
 SamplerState Samp_DepthBuffer DX_AUTOBIND;
 
-cbuffer cbESMConstants DX_AUTOBIND
-{
-    float ESMConstant; // 指数系数（越大阴影越“硬”）
-    float DepthNear;
-    float DepthFar;
-}
-
 float ESM_GaussNxN(Texture2D Tex, SamplerState Sampler, float2 uv, int n, float2 stride, float sigma)
 {
     float color = 0;
@@ -50,7 +43,9 @@ float ESM_GaussNxN(Texture2D Tex, SamplerState Sampler, float2 uv, int n, float2
         {
             float w = GaussWeight2D(i, j, sigma);
             float2 coord = uv + float2(i, j) * stride;
-            color += GetESMValue(Tex.SampleLevel(Sampler, coord, 0).r, gZFar, 1.0f) * w;
+            
+            float depth = Tex.SampleLevel(Sampler, coord, 0).r;
+            color += GetESMValue(depth, gZNear, gZFar) * w;
             weight += w;
         }
     }
@@ -66,11 +61,10 @@ PS_OUTPUT PS_Main(PS_INPUT input)
     float2 uv = input.vUV;
     
     float depth = DepthBuffer.SampleLevel(Samp_DepthBuffer, uv, 0);
-    float linearDepth = LinearFromDepth(depth);
     
-    output.RT0.r = GetESMValue(linearDepth, gZFar, 1.0f);
+    output.RT0.r = GetESMValue(depth, gZNear, gZFar);
     
-    //output.RT0.r = ESM_GaussNxN(DepthBuffer, Samp_DepthBuffer, uv, 5, float2(1 / 128.0f, 1 / 128.0f), 1.0f);
+    output.RT0.r = ESM_GaussNxN(DepthBuffer, Samp_DepthBuffer, uv, 5, float2(1 / 128.0f, 1 / 128.0f), GaussSigma);
     return output;
 }
 

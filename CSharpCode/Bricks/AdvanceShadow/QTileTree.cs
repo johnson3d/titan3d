@@ -6,6 +6,7 @@ using EngineNS.Thread.Async;
 using EngineNS.GamePlay;
 using System.ComponentModel;
 using EngineNS.UI.Controls;
+using Org.BouncyCastle.Asn1.Mozilla;
 
 namespace EngineNS.Bricks.AdvanceShadow
 {
@@ -26,7 +27,10 @@ namespace EngineNS.Bricks.AdvanceShadow
         public float MaxShadowDistance = 1000;
         public int MaxDeepLevel = 5;
         public int MaxPageCount = 0;
-        
+        public float EsmConstant = 1.0f;
+        public float MaxExp = 11.0f;//80.0f;//
+        public float GaussSigma = 1.0f;
+
         public void UpdateLightDirection(Vector3 dir)
         {
             if (LightDirection == dir)
@@ -574,6 +578,33 @@ namespace EngineNS.Bricks.AdvanceShadow
                 }
             }
             return true;
+        }
+        [Category("Option")]
+        public float EsmConstant
+        {
+            get => mShadowMapTree.EsmConstant;
+            set
+            {
+                mShadowMapTree.EsmConstant = value;
+            }
+        }
+        [Category("Option")]
+        public float MaxExp
+        {
+            get => mShadowMapTree.MaxExp;
+            set
+            {
+                mShadowMapTree.MaxExp = value;
+            }
+        }
+        [Category("Option")]
+        public float GaussSigma
+        {
+            get => mShadowMapTree.GaussSigma;
+            set
+            {
+                mShadowMapTree.GaussSigma = value;
+            }
         }
         TtQTreeVisualDebugger mDebugger;
         [Category("Debug")]

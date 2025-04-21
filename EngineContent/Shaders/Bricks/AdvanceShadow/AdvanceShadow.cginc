@@ -15,6 +15,10 @@ cbuffer cbAdvanceShadow DX_AUTOBIND
     int PageCount;
     float MaxShadowDistance;
     int MaxDeepLevel;
+    
+    float EsmConstant; // 指数系数（越大阴影越“硬”）
+    float MaxExp;
+    float GaussSigma;
 
     FAdvShadowLayerData LayerData[32];
 };
@@ -39,16 +43,24 @@ int GetPageNode(float2 pos)
     return index;
 }
 
-float GetESMValue(float linearDepth, float far, float c)
+//https://blog.csdn.net/Jaihk662/article/details/127259797
+float GetESMValue(float sampleDepth, float near, float far)
 {
+    float linearDepth = LinearFromDepth(sampleDepth, near, far);
+    ///linearDepth = (linearDepth - near) / (far - near);
+    
+    //linearDepth = 1 - sampleDepth;
      // 方法 1：非线性压缩
     //float compressedDepth = log(linearDepth + 1.0);
     //float safeInput = min(compressedDepth * c, 80.0);
     
     // 方法 2：动态参数调整    
-    float safeC = 80.0 / far;
-    float safeInput = c * safeC * linearDepth;
+    //float safeC = 11.0 / far;
+    float safeC = 1.0f;
+    float safeInput = min(EsmConstant * safeC * linearDepth, MaxExp);
+    //float safeInput = EsmConstant * linearDepth;
     float esmValue = exp(safeInput);
+    
     return esmValue;
 }
 

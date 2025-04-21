@@ -66,6 +66,14 @@ namespace EngineNS.Bricks.AdvanceShadow
         public int PageIndex = -1;
         public Matrix ShadowMatrix;
 
+        public float Size
+        {
+            get
+            {
+                return (float)AABB.GetSize().X;
+            }
+        }
+
         public List<TtShadowObject> ShadowObjects = new List<TtShadowObject>();
         public uint UpdateShadowMapTime
         {
