@@ -26,7 +26,6 @@ namespace EngineNS.Graphics.Pipeline
         Num,
     }
     [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
-    //[Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.URenderPolicy@EngineCore" })]
     public partial class TtRenderPolicy : TtRenderGraph, IO.ISerializer
     {
         #region ISerializer

@@ -160,6 +160,8 @@ namespace EngineNS.NxRHI
         private async Thread.Async.TtTask BuildCmdParameters()
         {
             Srv = await TtEngine.Instance.GfxDevice.TextureManager.GetTexture(this.GetAssetName(), 1);
+            if (Srv == null)
+                return;
             bool isCubemap = Srv.PicDesc.CubeFaces == 6;
             var rc = TtEngine.Instance.GfxDevice.RenderContext;
             TtShadingEnv shading = null;

@@ -113,7 +113,9 @@ namespace EngineNS.Graphics.Pipeline.Common
 
                 //mCopyDrawcall.Commit(cmdlist);
                 cmdlist.PushGpuDraw(mCopyDrawcall);
+                cmdlist.BeginEvent(Name);
                 cmdlist.FlushDraws();
+                cmdlist.EndEvent();
             }
             policy.CommitCommandList(cmdlist);
         }

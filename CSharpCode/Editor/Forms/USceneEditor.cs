@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using EngineNS.EGui.Controls;
@@ -22,6 +23,7 @@ namespace EngineNS.Editor.Forms
 
         }
     }
+    [EGui.Controls.PropertyGrid.PGCategoryFilters(ExcludeFilters = new string[] { "Misc" })]
     public partial class TtSceneEditor : Editor.IAssetEditor, ITickable, IRootForm
     {
         public int GetTickOrder()
@@ -201,6 +203,8 @@ namespace EngineNS.Editor.Forms
                 HostEditor.NodeInspector.Target = HostEditor.mWorldOutliner.SelectedNodes; //proxies;
             }
         }
+        [Category("Option")]
+        [ReadOnly(true)]
         public RName AssetName { get; set; }
         protected bool mVisible = true;
         public bool Visible 
@@ -225,6 +229,7 @@ namespace EngineNS.Editor.Forms
         public EGui.Controls.PropertyGrid.PropertyGrid NodeInspector = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid ScenePropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
+        [Category("Option")]
         public Graphics.Pipeline.TtRenderPolicy RenderPolicy { get => PreviewViewport.RenderPolicy; }
 
         bool mIsDrawing = false;
@@ -798,7 +803,7 @@ namespace EngineNS.Editor.Forms
         EGui.UIProxy.MenuItemProxy mEditorSettingsShow = new EGui.UIProxy.MenuItemProxy()
         {
             MenuName = "Editor Settings",
-            Selected = false,
+            Selected = true,
             Action = (EGui.UIProxy.MenuItemProxy item, Support.TtAnyPointer data) =>
             {
                 item.Selected = !item.Selected;

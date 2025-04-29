@@ -324,7 +324,7 @@ namespace EngineNS.GamePlay
                     //    }, rp);
                     //    return false;
                     //}
-                    else
+                    else if (node.HasStyle(TtNode.ENodeStyles.Invisible) == false)
                     {
                         using (new Profiler.TimeScopeHelper(ScopeOnGatherVisibleMeshes))
                         {

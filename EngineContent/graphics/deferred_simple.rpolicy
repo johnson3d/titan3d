@@ -2,7 +2,7 @@
 <Root Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyGraph@EngineCore">
   <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,graphics/deferred_simple.rpolicy,d7035653-b8cb-456d-86f8-c230b33bbe96" />
   <GraphName Type="System.String@Unknown" Value="NodeGraph" />
-  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="30">
+  <Nodes Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase@EngineCore,&gt;@Unknown" Count="31">
     <e_0 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
       <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.TtHitproxyNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="Hitproxy" />
@@ -240,12 +240,12 @@
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_19>
     <e_20 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
-      <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode@EngineCore" />
+      <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.TtCopy2NextFrameNode@EngineCore" />
       <Label Type="System.String@Unknown" Value="PrevDepth" />
       <Name Type="System.String@Unknown" Value="PrevDepth" />
       <NodeId Type="System.Guid@Unknown" Value="766b1d0e-ea7b-405d-a679-725625ed5e33" />
       <Position Type="EngineNS.Vector2@EngineCore" Value="1380.5004,373.09985" />
-      <GraphNode Type="EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode@EngineCore">
+      <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtCopy2NextFrameNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
@@ -359,6 +359,17 @@
       </GraphNode>
       <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
     </e_29>
+    <e_30 Type="EngineNS.Bricks.RenderPolicyEditor.UPolicyNode@EngineCore">
+      <GraphNodeTypeString Type="System.String@Unknown" Value="EngineNS.Graphics.Pipeline.Common.TtDebuggerNode@EngineCore" />
+      <Label Type="System.String@Unknown" Value="Debugger" />
+      <Name Type="System.String@Unknown" Value="Debugger" />
+      <NodeId Type="System.Guid@Unknown" Value="2a241135-c74f-4ace-b22a-84a6d0e4d4e2" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="2784.4402,411.00006" />
+      <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtDebuggerNode@EngineCore">
+        <Enable Type="System.Boolean@Unknown" Value="True" />
+      </GraphNode>
+      <InputEditableValues Type="System.Collections.Generic.List&lt;EngineNS.Bricks.NodeGraph.TtNodeBase.UInputEditableValueInfo@EngineCore,&gt;@Unknown" Count="0" />
+    </e_30>
   </Nodes>
   <PolicyType Type="EngineNS.Rtti.TtTypeDesc@EngineCore" Value="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore" />
   <RenderPolicy Type="EngineNS.Graphics.Pipeline.TtDeferredPolicyBase@EngineCore">

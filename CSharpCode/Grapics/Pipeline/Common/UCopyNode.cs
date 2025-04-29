@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Text;
 
 namespace EngineNS.Graphics.Pipeline.Common
@@ -37,7 +39,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public TtAttachBuffer ResultBuffer;
         public bool IsCpuAceesResult { get; set; } = false;
         public NxRHI.TtCopyDraw mCopyDrawcall;
-        TtAttachBuffer DestAttachement = new TtAttachBuffer();
+        public TtAttachBuffer DestAttachement = new TtAttachBuffer();
         public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
             var attachement = RenderGraph.AttachmentCache.ImportAttachment(DestPinOut, DestAttachement);
@@ -117,7 +119,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                     //}
 
                     cmdlist.PushGpuDraw(mCopyDrawcall);
+                    cmdlist.BeginEvent(Name);
                     cmdlist.FlushDraws();
+                    cmdlist.EndEvent();
                 }
                 
                 policy.CommitCommandList(cmdlist);
@@ -126,12 +130,13 @@ namespace EngineNS.Graphics.Pipeline.Common
     }
 
     [Bricks.CodeBuilder.ContextMenu("Copy", "Copy2NextFrame", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
-    public class UCopy2NextFrameNode : Graphics.Pipeline.TtRenderGraphNode
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode@EngineCore", "EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode" })]
+    public class TtCopy2NextFrameNode : Graphics.Pipeline.TtRenderGraphNode
     {
         public TtRenderGraphPin SrcPinIn = TtRenderGraphPin.CreateInput("Src", NxRHI.EBufferType.BFT_SRV);
         public TtRenderGraphPin PrevPinOut = TtRenderGraphPin.CreateOutput("Prev", false, EPixelFormat.PXF_UNKNOWN, NxRHI.EBufferType.BFT_SRV);
 
-        public UCopy2NextFrameNode()
+        public TtCopy2NextFrameNode()
         {
             Name = "Copy2NextFrameNode";
         }
@@ -239,7 +244,9 @@ namespace EngineNS.Graphics.Pipeline.Common
                     //mCopyDrawcall.mCoreObject.FootPrint = fp;
                     
                     cmdlist.PushGpuDraw(mCopyDrawcall);
+                    cmdlist.BeginEvent(Name);
                     cmdlist.FlushDraws();
+                    cmdlist.EndEvent();
                 }
                 policy.CommitCommandList(cmdlist);
             }
@@ -249,6 +256,177 @@ namespace EngineNS.Graphics.Pipeline.Common
         {
             base.TickSync(policy);
             MathHelper.Swap(ref ResultBuffer[0], ref ResultBuffer[1]);
+        }
+    }
+
+    [Bricks.CodeBuilder.ContextMenu("Debugger", "Debugger", Bricks.RenderPolicyEditor.UPolicyGraph.RGDEditorKeyword)]
+    public class TtDebuggerNode : Graphics.Pipeline.TtRenderGraphNode
+    {
+        public class TtRDGDebugger : IRootForm
+        {
+            public bool Visible { get; set; } = true;
+            public uint DockId { get; set; }
+            public ImGuiWindowClass DockKeyClass { get; }
+            public ImGuiCond_ DockCond { get; set; } = ImGuiCond_.ImGuiCond_FirstUseEver;
+            public TtRDGDebugger()
+            {
+
+            }
+            public unsafe void Dispose()
+            {
+
+            }
+            public async Thread.Async.TtTask<bool> Initialize()
+            {
+                await EngineNS.Thread.TtAsyncDummyClass.DummyFunc();
+                return true;
+            }
+            public TtDebuggerNode RDGNode;
+            Vector2 Offset = Vector2.Zero;
+            public void OnDraw()
+            {
+                var result = EGui.UIProxy.DockProxy.BeginMainForm("Advance Shadow Debugger", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+                if (result)
+                {
+                    if (RDGNode != null && RDGNode.ResultBuffer.BufferDesc.Format != EPixelFormat.PXF_UNKNOWN)
+                    {
+                        var winPos = ImGuiAPI.GetWindowPos();
+                        var vpMin = ImGuiAPI.GetWindowContentRegionMin();
+                        var vpMax = ImGuiAPI.GetWindowContentRegionMax();
+                        var DrawOffset = new Vector2();
+                        DrawOffset.SetValue(winPos.X + vpMin.X, winPos.Y + vpMin.Y);
+                        DrawOffset += Offset;
+
+                        var cmdlist = ImGuiAPI.GetWindowDrawList();
+                        var size = ImGuiAPI.GetWindowSize();
+                        //RDGNode.ResultBuffer.Srv.TagObject = "RDG Debugger";
+                        cmdlist.AddImage((ulong)RDGNode.ResultBuffer.Srv.GetTextureHandle(), DrawOffset, DrawOffset + (vpMax - vpMin), in Vector2.Zero, in Vector2.One, 0xFFFFFFFF);
+                    }
+                }
+                EGui.UIProxy.DockProxy.EndMainForm(result);
+            }
+        }
+
+        public TtDebuggerNode()
+        {
+            Name = "Debugger";
+        }
+        public TtRDGDebugger mDebugger;
+        [Category("Option")]
+        public bool ShowDebugger
+        {
+            get
+            {
+                return mDebugger != null;
+            }
+            set
+            {
+                if (value == true)
+                {
+                    if (mDebugger == null)
+                    {
+                        mDebugger = new TtRDGDebugger();
+                        mDebugger.RDGNode = this;
+                    }
+                    TtEngine.RootFormManager.RegRootForm(mDebugger);
+                }
+                else
+                {
+                    if (mDebugger != null)
+                    {
+                        TtEngine.RootFormManager.UnregRootForm(mDebugger);
+                        mDebugger = null;
+                    }
+                }
+            }
+        }
+
+        public TtRenderGraphPin SrcPinIn = TtRenderGraphPin.CreateInput("Src", NxRHI.EBufferType.BFT_SRV);
+        public override void InitNodePins()
+        {
+            AddInput(SrcPinIn);
+            SrcPinIn.IsAllowInputNull = true;
+        }
+        public override async System.Threading.Tasks.Task Initialize(TtRenderPolicy policy, string debugName)
+        {
+            var rc = TtEngine.Instance.GfxDevice.RenderContext;
+
+            await base.Initialize(policy, debugName);
+
+            mCopyDrawcall = TtEngine.Instance.GfxDevice.RenderContext.CreateCopyDraw();
+        }
+        public override void Dispose()
+        {
+            CoreSDK.DisposeObject(ref ResultBuffer);
+            CoreSDK.DisposeObject(ref mCopyDrawcall);
+            base.Dispose();
+        }
+        public TtAttachBuffer ResultBuffer;
+        public bool IsCpuAceesResult { get; set; } = false;
+        public NxRHI.TtCopyDraw mCopyDrawcall;
+        public override void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
+        {
+            
+        }
+        [ThreadStatic]
+        private static Profiler.TimeScope mScopeTick;
+        private static Profiler.TimeScope ScopeTick
+        {
+            get
+            {
+                if (mScopeTick == null)
+                    mScopeTick = new Profiler.TimeScope(typeof(TtCopyNode), nameof(TickLogic));
+                return mScopeTick;
+            }
+        }
+        public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
+        {
+            using (new Profiler.TimeScopeHelper(ScopeTick))
+            {
+                if (mCopyDrawcall == null)
+                    return;
+
+                var srcPin = GetAttachBuffer(SrcPinIn);
+                if (ResultBuffer == null || SrcPinIn.Attachement.Format != ResultBuffer.BufferDesc.Format ||
+                    SrcPinIn.Attachement.Width != ResultBuffer.BufferDesc.Width ||
+                    SrcPinIn.Attachement.Height != ResultBuffer.BufferDesc.Height)
+                {
+                    ResultBuffer = srcPin.Clone();
+                }
+
+                var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+
+                using (new NxRHI.TtCmdListScope(cmdlist))
+                {
+                    var tarPin = ResultBuffer;
+
+                    if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
+                    {
+                        mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Buffer;
+                    }
+                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtTexture))
+                    {
+                        mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Texture;
+                    }
+                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
+                    {
+                        mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Texture2Buffer;
+                    }
+                    else if (srcPin.GpuResource.GetType() == typeof(NxRHI.TtTexture) && tarPin.GpuResource.GetType() == typeof(NxRHI.TtBuffer))
+                    {
+                        mCopyDrawcall.Mode = NxRHI.ECopyDrawMode.CDM_Buffer2Texture;
+                    }
+                    mCopyDrawcall.BindSrc(srcPin.GpuResource);
+                    mCopyDrawcall.BindDest(tarPin.GpuResource);
+
+                    cmdlist.PushGpuDraw(mCopyDrawcall);
+                    cmdlist.BeginEvent(Name);
+                    cmdlist.FlushDraws();
+                    cmdlist.EndEvent();
+                }
+
+                policy.CommitCommandList(cmdlist);
+            }
         }
     }
 }

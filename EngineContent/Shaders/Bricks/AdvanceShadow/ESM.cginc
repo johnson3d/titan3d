@@ -60,9 +60,9 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 
     float2 uv = input.vUV;
     
-    float depth = DepthBuffer.SampleLevel(Samp_DepthBuffer, uv, 0);
+    //float depth = DepthBuffer.SampleLevel(Samp_DepthBuffer, uv, 0);
     
-    output.RT0.r = GetESMValue(depth, gZNear, gZFar);
+    //output.RT0.r = GetESMValue(depth, gZNear, gZFar);
     
     output.RT0.r = ESM_GaussNxN(DepthBuffer, Samp_DepthBuffer, uv, 5, float2(1 / 128.0f, 1 / 128.0f), GaussSigma);
     return output;

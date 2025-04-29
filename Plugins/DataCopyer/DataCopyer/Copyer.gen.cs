@@ -143293,6 +143293,50 @@ namespace EngineNS.Plugins.DataCopyer
 			}
 		};
 	}
+	static class EngineNS_Graphics_Pipeline_Common_TtCopy2NextFrameNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtCopy2NextFrameNode;
+			ar.Write(srcObj.Enable);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Pipeline.Common.TtCopy2NextFrameNode;
+			var srcObj = src as EngineNS.Graphics.Pipeline.Common.TtCopy2NextFrameNode;
+			tarObj.Enable = srcObj.Enable;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1031439478003122711 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtCopy2NextFrameNode;
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5470286241272553349 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtCopy2NextFrameNode;
+			System.Boolean t_IsUsed;
+			ar.Read(out t_IsUsed);
+			srcObj.IsUsed = t_IsUsed;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "IsUsed", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9524687136534877311 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtCopy2NextFrameNode;
+		};
+	}
 	static class EngineNS_Graphics_Pipeline_Common_TtCopy2SwapChainNode
 	{
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
@@ -143379,6 +143423,33 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9524687136534877311 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtCopyNode;
+		};
+	}
+	static class EngineNS_Graphics_Pipeline_Common_TtDebuggerNode
+	{
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtDebuggerNode;
+			ar.Write(srcObj.Enable);
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
+		{
+			var tarObj = tar as EngineNS.Graphics.Pipeline.Common.TtDebuggerNode;
+			var srcObj = src as EngineNS.Graphics.Pipeline.Common.TtDebuggerNode;
+			tarObj.Enable = srcObj.Enable;
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1031439478003122711 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtDebuggerNode;
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
 		};
 	}
 	static class EngineNS_Graphics_Pipeline_Common_TtEndingNode
@@ -144168,50 +144239,6 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9524687136534877311 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.TtScreenTilingNode;
-		};
-	}
-	static class EngineNS_Graphics_Pipeline_Common_UCopy2NextFrameNode
-	{
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode;
-			ar.Write(srcObj.Enable);
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FCopy CopyCurrentVersion = (object tar, object src)=>
-		{
-			var tarObj = tar as EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode;
-			var srcObj = src as EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode;
-			tarObj.Enable = srcObj.Enable;
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_1031439478003122711 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode;
-			System.Boolean t_Enable;
-			ar.Read(out t_Enable);
-			srcObj.Enable = t_Enable;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "Enable", false);
-				}
-			}
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_5470286241272553349 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode;
-			System.Boolean t_IsUsed;
-			ar.Read(out t_IsUsed);
-			srcObj.IsUsed = t_IsUsed;
-			{
-				if (srcObj is IO.ISerializer sr)
-				{
-					sr.OnPropertyRead(ar.Tag, "IsUsed", false);
-				}
-			}
-		};
-		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_9524687136534877311 = (EngineNS.IO.IReader ar, object obj)=>
-		{
-			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode;
 		};
 	}
 	static class EngineNS_Graphics_Pipeline_Common_UNodePinDefine
@@ -205848,6 +205875,14 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(6238651276872534364, EngineNS_Graphics_Pipeline_Common_TtClearMRTNode.Read_6238651276872534364);
 			}
 			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.TtCopy2NextFrameNode@EngineCore");
+				kls.Writer = EngineNS_Graphics_Pipeline_Common_TtCopy2NextFrameNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Pipeline_Common_TtCopy2NextFrameNode.CopyCurrentVersion;
+				kls.RegVersion(1031439478003122711, EngineNS_Graphics_Pipeline_Common_TtCopy2NextFrameNode.Read_1031439478003122711);
+				kls.RegVersion(5470286241272553349, EngineNS_Graphics_Pipeline_Common_TtCopy2NextFrameNode.Read_5470286241272553349);
+				kls.RegVersion(9524687136534877311, EngineNS_Graphics_Pipeline_Common_TtCopy2NextFrameNode.Read_9524687136534877311);
+			}
+			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.TtCopy2SwapChainNode@EngineCore");
 				kls.Writer = EngineNS_Graphics_Pipeline_Common_TtCopy2SwapChainNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Common_TtCopy2SwapChainNode.CopyCurrentVersion;
@@ -205862,6 +205897,12 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(1031439478003122711, EngineNS_Graphics_Pipeline_Common_TtCopyNode.Read_1031439478003122711);
 				kls.RegVersion(5470286241272553349, EngineNS_Graphics_Pipeline_Common_TtCopyNode.Read_5470286241272553349);
 				kls.RegVersion(9524687136534877311, EngineNS_Graphics_Pipeline_Common_TtCopyNode.Read_9524687136534877311);
+			}
+			{
+				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.TtDebuggerNode@EngineCore");
+				kls.Writer = EngineNS_Graphics_Pipeline_Common_TtDebuggerNode.WriteCurrentVersion;
+				kls.Copy = EngineNS_Graphics_Pipeline_Common_TtDebuggerNode.CopyCurrentVersion;
+				kls.RegVersion(1031439478003122711, EngineNS_Graphics_Pipeline_Common_TtDebuggerNode.Read_1031439478003122711);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.TtEndingNode@EngineCore");
@@ -205958,14 +205999,6 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(1031439478003122711, EngineNS_Graphics_Pipeline_Common_TtScreenTilingNode.Read_1031439478003122711);
 				kls.RegVersion(5470286241272553349, EngineNS_Graphics_Pipeline_Common_TtScreenTilingNode.Read_5470286241272553349);
 				kls.RegVersion(9524687136534877311, EngineNS_Graphics_Pipeline_Common_TtScreenTilingNode.Read_9524687136534877311);
-			}
-			{
-				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.UCopy2NextFrameNode@EngineCore");
-				kls.Writer = EngineNS_Graphics_Pipeline_Common_UCopy2NextFrameNode.WriteCurrentVersion;
-				kls.Copy = EngineNS_Graphics_Pipeline_Common_UCopy2NextFrameNode.CopyCurrentVersion;
-				kls.RegVersion(1031439478003122711, EngineNS_Graphics_Pipeline_Common_UCopy2NextFrameNode.Read_1031439478003122711);
-				kls.RegVersion(5470286241272553349, EngineNS_Graphics_Pipeline_Common_UCopy2NextFrameNode.Read_5470286241272553349);
-				kls.RegVersion(9524687136534877311, EngineNS_Graphics_Pipeline_Common_UCopy2NextFrameNode.Read_9524687136534877311);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.UNodePinDefine@EngineCore");
@@ -207075,7 +207108,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(547543558045874187, Survivor_TtWeaponProxyNode.Read_547543558045874187);
 				kls.RegVersion(6246337379466960295, Survivor_TtWeaponProxyNode.Read_6246337379466960295);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("B4_C3_E5_0A_7A_0D_F9_33_E0_78_88_73_D6_25_8E_5F_42_09_B5_91");
+			this.VersionHash = EngineNS.Hash160.Parse("B0_BC_8A_A1_23_AC_F9_82_D3_5A_D5_D4_13_E2_41_07_EA_32_28_ED");
 		}
 	}
 }

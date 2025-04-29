@@ -202,6 +202,15 @@ namespace EngineNS.Graphics.Pipeline
                 {
                     i.Value.TempRootDistance = 0;
                     NodeLayers[i.Value.MaxLeafDistance].Add(i.Value);
+                    var debugger = i.Value as Common.TtDebuggerNode;
+                    if (debugger != null)
+                    {
+                        if (debugger.SrcPinIn.FindInLinker() != null)
+                        {
+                            debugger.IsUsed = true;
+                            UpdateNodeTree(debugger, ref hasInputError, false);
+                        }
+                    }
                 }
             }
 
@@ -218,7 +227,7 @@ namespace EngineNS.Graphics.Pipeline
                 //}
             }
         }
-        private void UpdateNodeTree(TtRenderGraphNode node, ref bool hasInputError)
+        private void UpdateNodeTree(TtRenderGraphNode node, ref bool hasInputError, bool bRecursive = true)
         {
             for (int i = 0; i < node.NumOfInput; i++)
             {
@@ -229,7 +238,10 @@ namespace EngineNS.Graphics.Pipeline
                     //if (linker.OutPin.PinType != TtRenderGraphPin.EPinType.Output)
                     //{                        
                     //}
-                    UpdateNodeTree(linker.OutPin.HostNode, ref hasInputError);
+                    if (bRecursive)
+                    {
+                        UpdateNodeTree(linker.OutPin.HostNode, ref hasInputError);
+                    }
                     linker.InPin.Attachement.AttachmentName = linker.OutPin.Attachement.AttachmentName;
                     linker.InPin.Attachement.Format = linker.OutPin.Attachement.Format;
                     linker.InPin.Attachement.Width = linker.OutPin.Attachement.Width;
@@ -263,12 +275,21 @@ namespace EngineNS.Graphics.Pipeline
         }
         public void FrameBuild(Graphics.Pipeline.TtRenderPolicy policy)
         {
-            foreach (var i in GraphNodes)
+            foreach(var i in NodeLayers)
             {
-                if (i.Value.IsUsed == false)
-                    continue;
-                i.Value.FrameBuild(policy);
+                foreach (var j in i)
+                {
+                    if (j.IsUsed == false || j.Enable == false)
+                        continue;
+                    j.FrameBuild(policy);
+                }
             }
+            //foreach (var i in GraphNodes)
+            //{
+            //    if (i.Value.IsUsed == false)
+            //        continue;
+            //    i.Value.FrameBuild(policy);
+            //}
         }
         [ThreadStatic]
         private static Profiler.TimeScope mScopeBeginTickLogic;

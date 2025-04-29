@@ -260,27 +260,8 @@ PS_OUTPUT PS_Main(PS_INPUT input)
 				ShadowValue = saturate(occluderDepth / esmValue);
 				if (ShadowValue < 1)
 				{
-					//ShadowValue = saturate(occluderDepth / esmValue - 0.3f);
-					//ShadowValue = 1 - ShadowValue;
+					//ShadowValue = ShadowValue * 0.1f;
 				}
-				//compare depth, esm? USE_INVERSE_Z
-				//if (ShadowMapUV.z + 0.003 > shadowSpaceDepth)//bias for pages
-				//if( esmValue < shadowSpaceDepth)
-				//{
-				//	ShadowValue = 1.0h;
-				//}
-				//else
-				//{
-				//	ShadowValue = 0.0h;
-				//}
-				//if (linearZ - 0.01 < linearShadowSpaceDepth)
-				//{
-				//	ShadowValue = 1.0h;
-				//}
-				//else
-				//{
-				//	ShadowValue = 0.0h;
-				//}
 			}
 		}
     }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.Bricks.RenderPolicyEditor.TtRenderPolicyAssetAMeta@EngineCore">
   <AssetId Type="System.Guid@Unknown" Value="efdf8adb-02ca-43e6-b536-8c3f3fb0c9da" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,graphics/deferred.rpolicy,efdf8adb-02ca-43e6-b536-8c3f3fb0c9da" />
   <Description Type="System.String@Unknown" Value="This is a EngineNS.Bricks.RenderPolicyEditor.URenderPolicyAsset&#xA;Hahah" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
