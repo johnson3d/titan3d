@@ -274,7 +274,6 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
             public unsafe void Dispose()
             {
-
             }
             public async Thread.Async.TtTask<bool> Initialize()
             {
@@ -285,7 +284,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             Vector2 Offset = Vector2.Zero;
             public void OnDraw()
             {
-                var result = EGui.UIProxy.DockProxy.BeginMainForm("Advance Shadow Debugger", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
+                var result = EGui.UIProxy.DockProxy.BeginMainForm($"RDG Visual Debugger:{RDGNode?.Name}", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
                 if (result)
                 {
                     if (RDGNode != null && RDGNode.ResultBuffer.BufferDesc.Format != EPixelFormat.PXF_UNKNOWN)
@@ -357,6 +356,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         }
         public override void Dispose()
         {
+            ShowDebugger = false;
             CoreSDK.DisposeObject(ref ResultBuffer);
             CoreSDK.DisposeObject(ref mCopyDrawcall);
             base.Dispose();

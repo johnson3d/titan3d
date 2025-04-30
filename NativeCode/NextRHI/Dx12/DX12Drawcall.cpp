@@ -242,7 +242,7 @@ namespace NxRHI
 	}
 	void DX12GraphicDraw::OnBindResource(const FEffectBinder* binder, FBindResource& resource)
 	{
-		if (binder->IsBindless())
+		if (binder == nullptr || binder->IsBindless())
 			return;
 		
 		//BindResourceToHeap(device, binder, resource);

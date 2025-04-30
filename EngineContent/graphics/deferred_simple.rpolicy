@@ -364,7 +364,7 @@
       <Label Type="System.String@Unknown" Value="Debugger" />
       <Name Type="System.String@Unknown" Value="Debugger" />
       <NodeId Type="System.Guid@Unknown" Value="2a241135-c74f-4ace-b22a-84a6d0e4d4e2" />
-      <Position Type="EngineNS.Vector2@EngineCore" Value="2784.4402,411.00006" />
+      <Position Type="EngineNS.Vector2@EngineCore" Value="617.33997,-75.19995" />
       <GraphNode Type="EngineNS.Graphics.Pipeline.Common.TtDebuggerNode@EngineCore">
         <Enable Type="System.Boolean@Unknown" Value="True" />
       </GraphNode>

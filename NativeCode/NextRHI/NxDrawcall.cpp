@@ -167,29 +167,28 @@ namespace NxRHI
 		
 		for (auto& i : BindResources)
 		{
+			IGpuResource* t = i.second.Resource;
+			if (t == nullptr)
+				continue;
 			switch (i.first->BindType)
 			{
 				case SBT_CBV:
 				{
-					IGpuResource* t = i.second.Resource;
 					effect->BindCBV(cmdlist, i.first, (ICbView*)t);
 				}
 				break;
 				case SBT_SRV:
 				{
-					IGpuResource* t = i.second.Resource;
 					effect->BindSrv(cmdlist, i.first, (ISrView*)t);
 				}
 				break;
 				case SBT_UAV:
 				{
-					IGpuResource* t = i.second.Resource;
 					effect->BindUav(cmdlist, i.first, (IUaView*)t);
 				}
 				break;
 				case SBT_Sampler:
 				{
-					IGpuResource* t = i.second.Resource;
 					effect->BindSampler(cmdlist, i.first, (ISampler*)t);
 				}
 				break;
@@ -316,29 +315,28 @@ namespace NxRHI
 		mEffect->Commit(cmdlist);
 		for (auto& i : BindResources)
 		{
+			IGpuResource* t = i.second.Resource;
+			if (t == nullptr)
+				continue;
 			switch (i.first->Type)
 			{
 				case SBT_CBV:
-				{
-					IGpuResource* t = i.second.Resource;
+				{	
 					cmdlist->SetCBV(EShaderType::SDT_ComputeShader, i.first, (ICbView*)t);
 				}
 				break;
 				case SBT_SRV:
 				{
-					IGpuResource* t = i.second.Resource;
 					cmdlist->SetSrv(EShaderType::SDT_ComputeShader, i.first, (ISrView*)t);
 				}
 				break;
 				case SBT_UAV:
 				{
-					IGpuResource* t = i.second.Resource;
 					cmdlist->SetUav(EShaderType::SDT_ComputeShader, i.first, (IUaView*)t);
 				}
 				break;
 				case SBT_Sampler:
 				{
-					IGpuResource* t = i.second.Resource;
 					cmdlist->SetSampler(EShaderType::SDT_ComputeShader, i.first, (ISampler*)t);
 				}
 				break;
@@ -362,7 +360,6 @@ namespace NxRHI
 			{
 				case SBT_UAV:
 				{
-					IGpuResource* t = i.second.Resource;
 					cmdlist->SetUav(EShaderType::SDT_ComputeShader, i.first, nullptr);
 				}
 				break;
