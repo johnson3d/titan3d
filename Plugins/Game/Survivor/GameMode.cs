@@ -14,16 +14,6 @@ namespace Survivor
     [EngineNS.Rtti.Meta]
     public partial class TtGameMode : TtGameModeBase
     {
-        [EngineNS.Rtti.Meta(Flags = EngineNS.Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
-        public TtWeaponManager WeaponManager { get; } = new TtWeaponManager();
-        [EngineNS.Rtti.Meta(Flags = EngineNS.Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
-        public TtHeroManager HeroManager { get; } = new TtHeroManager();
-        [EngineNS.Rtti.Meta(Flags = EngineNS.Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
-        public TtMonsterManager MonsterManager { get; } = new TtMonsterManager();
-        [EngineNS.Rtti.Meta(Flags = EngineNS.Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
-        public TtItemManager ItemManager { get; } = new TtItemManager();
-        [EngineNS.Rtti.Meta(Flags = EngineNS.Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
-        public TtSkillManager SkillManager { get; } = new TtSkillManager();
         EngineNS.UI.Controls.TtUIElement mBattleUI;
         [EngineNS.Rtti.Meta(Flags = EngineNS.Rtti.MetaAttribute.EMetaFlags.NoSerializable)]
         public EngineNS.UI.Controls.TtUIElement BattleUI
@@ -85,27 +75,27 @@ namespace Survivor
             [RName.PGRName(FilterExts = EngineNS.Bricks.DataSet.TtDataSet.AssetExt)]
             RName name)
         {
-            WeaponManager.LoadDataSet(name);
+            TtDatabase.Instance.LoadWeapons(name);
         }
         [EngineNS.Rtti.Meta]
         public void LoadHeros(
             [RName.PGRName(FilterExts = EngineNS.Bricks.DataSet.TtDataSet.AssetExt)]
             RName name)
         {
-            HeroManager.LoadDataSet(name);
+            TtDatabase.Instance.LoadHeros(name);
         }
         [EngineNS.Rtti.Meta]
         public void LoadMonsters(
         [RName.PGRName(FilterExts = EngineNS.Bricks.DataSet.TtDataSet.AssetExt)]
             RName name)
         {
-            MonsterManager.LoadDataSet(name);
+            TtDatabase.Instance.LoadMonsters(name);
         }
         public void LoadItems(
         [RName.PGRName(FilterExts = EngineNS.Bricks.DataSet.TtDataSet.AssetExt)]
             RName name)
         {
-            ItemManager.LoadDataSet(name);
+            TtDatabase.Instance.LoadItems(name);
         }
         [EngineNS.Rtti.Meta]
         public async TtTask InitMonsterSpawner() 
@@ -118,7 +108,7 @@ namespace Survivor
         [EngineNS.Rtti.Meta]
         public async TtTask<bool> InitControlledCharacter(EngineNS.GamePlay.Controller.TtCharacterController cc, int roleId)
         {
-            var roleData = HeroManager.GetData("RoleId", roleId);
+            var roleData = TtDatabase.Instance.GetHeroData(roleId);
             if (roleData == null)
                 return false;
             Player = cc.ControlledCharacter;

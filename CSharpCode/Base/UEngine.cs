@@ -380,6 +380,7 @@ namespace EngineNS
             this.PluginModuleManager.InitPlugins(this, bLoadPluginModuel);
 
             EngineNS.Rtti.TtClassMetaManager.Instance.LoadMetas("EngineCore");
+            
             var t3 = Support.TtTime.HighPrecision_GetTickCount();
 
             EngineNS.Profiler.Log.InitLogger();

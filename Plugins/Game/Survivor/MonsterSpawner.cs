@@ -5,10 +5,7 @@ using EngineNS.Thread.Async;
 using EngineNS.GamePlay;
 using EngineNS.GamePlay.Scene;
 using EngineNS.Bricks.PhysicsCore.SceneNode;
-using static Survivor.TtMonsterController;
-using static Survivor.TtWeaponNode;
 using System.ComponentModel;
-using static Survivor.TtMonsterSpawnerNode;
 
 namespace Survivor
 {
@@ -42,7 +39,7 @@ namespace Survivor
 
         public virtual void CreateMonster(int monsterId, FTransform transform, TtMonsterSpawnerNode spawner)
         {
-            var monsterData = TtGameMode.GetSurvivorGameMode().MonsterManager.GetData("MonsterId", monsterId);
+            var monsterData = TtDatabase.Instance.GetMonsterData(monsterId);
             InitMonster(monsterData, transform, spawner).AddWaitTask();
             //InitMonster(monsterData, transform, world).WaitCompletedAndDispose();
         }
@@ -72,7 +69,7 @@ namespace Survivor
                 var controlNode = monsterPrefab.FindFirstChild<TtPhyControllerNodeBase>(null, true);
                 controlNode.SetFootPosition(transform.Position.ToSingleVector3());
 
-                var monsterCtrollerData = new TtMonsterControllerData();
+                var monsterCtrollerData = new TtMonsterController.TtMonsterControllerData();
                 var monsterCtroller = await TtNode.SpawnNode<TtMonsterController>(monsterNode, null,
                     monsterCtrollerData, EBoundVolumeType.Box, typeof(TtPlacement));
                 monsterCtroller.Player = TtGameMode.GetSurvivorGameMode().Player;
@@ -80,7 +77,7 @@ namespace Survivor
                 monsterCtroller.Parent = monsterNode;
                 monsterNode.Controller = monsterCtroller;
 
-                var weaponNodeData = new TtWeaponNodeData();
+                var weaponNodeData = new TtWeaponNode.TtWeaponNodeData();
                 weaponNodeData.WeaponType = "Melee";
                 var weaponNode = await TtNode.SpawnNode<TtWeaponNode>(monsterNode, null,
                     weaponNodeData, EBoundVolumeType.None, typeof(TtPlacement));

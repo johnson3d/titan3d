@@ -5,10 +5,6 @@ using EngineNS.GamePlay.Scene;
 using EngineNS.Graphics.Pipeline;
 using EngineNS.NxPhysics;
 using EngineNS.Thread.Async;
-using MathNet.Numerics.Random;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Survivor
 {

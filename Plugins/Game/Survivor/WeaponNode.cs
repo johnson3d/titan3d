@@ -357,7 +357,7 @@ namespace Survivor
             await base.InitializeNode(world, data, bvType, placementType);
             if(WeaponNodeData.WeaponId > 0)
             {
-                WeaponData = TtGameMode.GetSurvivorGameMode().WeaponManager.GetData("ItemId", WeaponNodeData.WeaponId);
+                WeaponData = TtDatabase.Instance.GetWeaponData(WeaponNodeData.WeaponId);
                 if (WeaponData == null)
                 {
                     EngineNS.Profiler.Log.WriteLine<EngineNS.Profiler.TtGameplayGategory>(EngineNS.Profiler.ELogTag.Warning, $"Weapon({WeaponNodeData.WeaponId}) not found");

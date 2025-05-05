@@ -372,7 +372,7 @@ namespace EngineNS.GamePlay
             //phyControl.Parent = ChiefPlayer;
 
             var movement = await TtNode.SpawnNode<EngineNS.GamePlay.Movemnet.TtCharacterMovement>(ChiefPlayer, null, 
-                new EngineNS.GamePlay.Scene.TtNodeData() { Name = "Movement" }, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
+                new EngineNS.GamePlay.Movemnet.TtCharacterMovement.TtCharacterMovementData() { Name = "Movement" }, EngineNS.GamePlay.Scene.EBoundVolumeType.Box, typeof(EngineNS.GamePlay.TtPlacement));
             movement.Parent = ChiefPlayer;
 
             characterController.MovementNode = movement;

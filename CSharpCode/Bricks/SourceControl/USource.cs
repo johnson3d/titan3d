@@ -101,6 +101,7 @@ namespace EngineNS.Bricks.SourceControl
                     }
                 }
             }
+            AddDirectory(TtEngine.Instance.FileManager.GetPath(IO.TtFileManager.ERootDir.Engine, IO.TtFileManager.ESystemDir.MetaData));
             return true;
         }
         public void AddFile(string file, bool bWaitFile = false)
@@ -129,6 +130,13 @@ namespace EngineNS.Bricks.SourceControl
             if (Source != null)
             {
                 Source.RemoveFile(file, delLocal);
+            }
+        }
+        public void AddDirectory(string path)
+        {
+            if (Source != null)
+            {
+                Source.AddDirectory(path);
             }
         }
     }

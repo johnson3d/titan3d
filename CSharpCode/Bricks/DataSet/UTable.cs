@@ -42,6 +42,8 @@ namespace EngineNS.Bricks.DataSet
             [Rtti.MetaParameter(FilterType = typeof(TtDataProvider), ConvertOutArguments = Rtti.MetaParameterAttribute.EArgumentFilter.R)]
             System.Type type = null)
         {
+            if (DataProviders[0] == null)
+                return null;
             var prop = DataProviders[0].GetType().GetProperty(propName);
             if (bSorted == false)
             {
