@@ -17,7 +17,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             base.Dispose();
         }
         public TtRenderGraphPin GpuScenePinInOut = TtRenderGraphPin.CreateInputOutput("GpuScene", NxRHI.EBufferType.BFT_UAV);
-        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInput("Color", NxRHI.EBufferType.BFT_SRV);
+        public TtRenderGraphPin ColorPinIn = TtRenderGraphPin.CreateInputOutput("Color", NxRHI.EBufferType.BFT_SRV);
         public TtAvgBrightnessNode()
         {
             Name = "AvgBrightnessNode";
@@ -25,7 +25,7 @@ namespace EngineNS.Graphics.Pipeline.Common
         public override void InitNodePins()
         {
             AddInputOutput(GpuScenePinInOut);
-            AddInput(ColorPinIn);
+            AddInputOutput(ColorPinIn);
         }
         public static readonly Vector3ui Dispatch_SetupDimArray1 = new Vector3ui(1, 1, 1);
         public static readonly Vector3ui Dispatch_SetupDimArray2 = new Vector3ui(32, 32, 1);

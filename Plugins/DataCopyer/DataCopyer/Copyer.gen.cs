@@ -142132,6 +142132,7 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FWrite WriteCurrentVersion = (EngineNS.IO.IWriter ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.Post.TtBloomNode;
+			ar.Write(srcObj.BlurSize);
 			ar.Write(srcObj.DownSampleSigma);
 			ar.Write(srcObj.Enable);
 			ar.Write(srcObj.NumDownSample);
@@ -142140,6 +142141,7 @@ namespace EngineNS.Plugins.DataCopyer
 		{
 			var tarObj = tar as EngineNS.Graphics.Pipeline.Common.Post.TtBloomNode;
 			var srcObj = src as EngineNS.Graphics.Pipeline.Common.Post.TtBloomNode;
+			tarObj.BlurSize = srcObj.BlurSize;
 			tarObj.DownSampleSigma = srcObj.DownSampleSigma;
 			tarObj.Enable = srcObj.Enable;
 			tarObj.NumDownSample = srcObj.NumDownSample;
@@ -142178,6 +142180,46 @@ namespace EngineNS.Plugins.DataCopyer
 		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_7835409391520793861 = (EngineNS.IO.IReader ar, object obj)=>
 		{
 			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.Post.TtBloomNode;
+			System.Single t_DownSampleSigma;
+			ar.Read(out t_DownSampleSigma);
+			srcObj.DownSampleSigma = t_DownSampleSigma;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "DownSampleSigma", false);
+				}
+			}
+			System.Boolean t_Enable;
+			ar.Read(out t_Enable);
+			srcObj.Enable = t_Enable;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "Enable", false);
+				}
+			}
+			System.Int32 t_NumDownSample;
+			ar.Read(out t_NumDownSample);
+			srcObj.NumDownSample = t_NumDownSample;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "NumDownSample", false);
+				}
+			}
+		};
+		internal static EngineNS.Bricks.DataCopyer.TtDataCopyer.FReader Read_14989340671478545798 = (EngineNS.IO.IReader ar, object obj)=>
+		{
+			var srcObj = obj as EngineNS.Graphics.Pipeline.Common.Post.TtBloomNode;
+			System.Int32 t_BlurSize;
+			ar.Read(out t_BlurSize);
+			srcObj.BlurSize = t_BlurSize;
+			{
+				if (srcObj is IO.ISerializer sr)
+				{
+					sr.OnPropertyRead(ar.Tag, "BlurSize", false);
+				}
+			}
 			System.Single t_DownSampleSigma;
 			ar.Read(out t_DownSampleSigma);
 			srcObj.DownSampleSigma = t_DownSampleSigma;
@@ -200088,6 +200130,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.RegVersion(16591366883758851005, EngineNS_Graphics_Pipeline_Common_Post_TtBloomNode.Read_16591366883758851005);
 				kls.RegVersion(5175494747066321577, EngineNS_Graphics_Pipeline_Common_Post_TtBloomNode.Read_5175494747066321577);
 				kls.RegVersion(7835409391520793861, EngineNS_Graphics_Pipeline_Common_Post_TtBloomNode.Read_7835409391520793861);
+				kls.RegVersion(14989340671478545798, EngineNS_Graphics_Pipeline_Common_Post_TtBloomNode.Read_14989340671478545798);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.Post.TtFsrNode@EngineCore");
@@ -201328,7 +201371,7 @@ namespace EngineNS.Plugins.DataCopyer
 				kls.Copy = Survivor_TtWeaponProxyNode.CopyCurrentVersion;
 				kls.RegVersion(12507694465426579364, Survivor_TtWeaponProxyNode.Read_12507694465426579364);
 			}
-			this.VersionHash = EngineNS.Hash160.Parse("F4_77_36_41_3E_C7_52_8F_53_08_4D_38_09_58_0E_8E_8C_FA_CA_2F");
+			this.VersionHash = EngineNS.Hash160.Parse("DE_16_44_8F_C2_57_85_84_CB_A2_5D_34_BC_92_E1_3F_1D_0A_AA_F9");
 		}
 	}
 }

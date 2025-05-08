@@ -15,8 +15,6 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
         public TtBloomNode()
         {
             Name = "BloomNode";
-
-            mBloomStruct.SetDefault();
         }
         public override void InitNodePins()
         {
@@ -25,23 +23,12 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
 
             base.InitNodePins();
         }
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 16)]
-        struct FBloomStruct
-        {
-            public void SetDefault()
-            {
-                DownSampleSigma = 1.0f;
-            }
-            public float DownSampleSigma;
-        }
-        FBloomStruct mBloomStruct;
         [Category("Option")]
         [Rtti.Meta]
-        public float DownSampleSigma
-        {
-            get => mBloomStruct.DownSampleSigma;
-            set => mBloomStruct.DownSampleSigma = value;
-        }
+        public float DownSampleSigma { get; set; } = 1.0f;
+        [Category("Option")]
+        [Rtti.Meta]
+        public int BlurSize { get; set; } = 5;
         [Category("Option")]
         [Rtti.Meta]
         public int NumDownSample { get; set; } = 5;
@@ -62,6 +49,8 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 dsNode.Name = $"{this.Name}:Down{i}";
                 dsNode.ResultPinOut.IsAutoResize = false;
                 await dsNode.Initialize(policy, dsNode.Name);
+                dsNode.BlurSigma = DownSampleSigma;
+                dsNode.BlurSize = BlurSize;
 
                 dsNode.ColorPinIn.Attachement.SetDesc(curOutPin.Attachement);
                 DownSampleNodes[i] = dsNode;
@@ -78,6 +67,8 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 usNode.Name = $"{this.Name}:Up{i}";
                 usNode.ResultPinOut.IsAutoResize = false;
                 await usNode.Initialize(policy, usNode.Name);
+                usNode.BlurSigma = DownSampleSigma;
+                usNode.BlurSize = BlurSize;
 
                 usNode.Color1PinIn.Attachement.SetDesc(DownSampleNodes[i].ResultPinOut.Attachement);
                 usNode.Color2PinIn.Attachement.SetDesc(prevMipPin.Attachement);

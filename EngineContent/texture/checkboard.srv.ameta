@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root Type="EngineNS.NxRHI.TtSrViewAMeta@EngineCore">
-  <AssetId Type="System.Guid@Unknown" Value="560770de-c559-4718-93cb-bb4e1995176f" />
-  <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,texture/checkboard.srv,560770de-c559-4718-93cb-bb4e1995176f" />
-  <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.USrView&#xA;" />
+  <AssetId Type="System.Guid@Unknown" Value="23521d76-b70d-4d3d-80e3-c5ec4740fc09" />
+  <AssetName Type="EngineNS.RName@EngineCore" Value="Engine,texture/checkboard.srv,00000000-0000-0000-0000-000000000000" />
+  <Description Type="System.String@Unknown" Value="This is a EngineNS.NxRHI.TtSrView&#xA;" />
   <Icon Type="EngineNS.EGui.TtUVAnim@EngineCore">
     <Color Type="System.UInt32@Unknown" Value="4294967295" />
     <Duration Type="System.Single@Unknown" Value="1000" />
@@ -11,7 +11,7 @@
     </FrameUVs>
     <Size Type="EngineNS.Vector2@EngineCore" Value="50,50" />
   </Icon>
-  <OriginImageAddress Type="System.String@Unknown" Value="texture/checkboard.srv:Engine" />
+  <OriginImageAddress Type="System.String@Unknown" Value="E:\titanengine\enginecontent\texture\checkboard.png" />
   <RefAssetRNames Type="System.Collections.Generic.List&lt;EngineNS.RName@EngineCore,&gt;@Unknown" Count="0" />
   <TypeStr Type="System.String@Unknown" Value="EngineNS.NxRHI.TtSrView@EngineCore" />
 </Root>

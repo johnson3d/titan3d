@@ -515,12 +515,15 @@ namespace EngineNS.Graphics.Pipeline.Shader
         }
         public async Thread.Async.TtTask<T> GetShadingEnv<T>() where T : TtShadingEnv, new()
         {
-            TtShadingEnv shading;
-            if (Shadings.TryGetValue(typeof(T), out shading))
-                return shading as T;
             T result = new T();
             await result.OnCreateEffect();
-            Shadings.Add(typeof(T), result);
+
+            //TtShadingEnv shading;
+            //if (Shadings.TryGetValue(typeof(T), out shading))
+            //    return shading as T;
+            //T result = new T();
+            //await result.OnCreateEffect();
+            //Shadings.Add(typeof(T), result);
             return result;
         }
     }
