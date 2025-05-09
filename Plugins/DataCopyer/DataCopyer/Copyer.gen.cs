@@ -200127,10 +200127,10 @@ namespace EngineNS.Plugins.DataCopyer
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.Post.TtBloomNode@EngineCore");
 				kls.Writer = EngineNS_Graphics_Pipeline_Common_Post_TtBloomNode.WriteCurrentVersion;
 				kls.Copy = EngineNS_Graphics_Pipeline_Common_Post_TtBloomNode.CopyCurrentVersion;
+				kls.RegVersion(14989340671478545798, EngineNS_Graphics_Pipeline_Common_Post_TtBloomNode.Read_14989340671478545798);
 				kls.RegVersion(16591366883758851005, EngineNS_Graphics_Pipeline_Common_Post_TtBloomNode.Read_16591366883758851005);
 				kls.RegVersion(5175494747066321577, EngineNS_Graphics_Pipeline_Common_Post_TtBloomNode.Read_5175494747066321577);
 				kls.RegVersion(7835409391520793861, EngineNS_Graphics_Pipeline_Common_Post_TtBloomNode.Read_7835409391520793861);
-				kls.RegVersion(14989340671478545798, EngineNS_Graphics_Pipeline_Common_Post_TtBloomNode.Read_14989340671478545798);
 			}
 			{
 				var kls = this.GetClassCopyer("EngineNS.Graphics.Pipeline.Common.Post.TtFsrNode@EngineCore");

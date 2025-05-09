@@ -1,5 +1,6 @@
 ﻿using EngineNS.Bricks.DataCopyer;
 using EngineNS.IO;
+using MathNet.Numerics.Distributions;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -517,6 +518,11 @@ namespace EngineNS.Bricks.DataCopyer
         public Hash160 CalcVersionHash()
         {
             var metas = Rtti.TtClassMetaManager.Instance.Metas.Values.ToList();
+            for (int i = metas.Count - 1; i >= 0; i--)
+            {
+                if (metas[i].ClassType == null || metas[i].CurrentVersion == null)
+                    metas.RemoveAt(i);
+            }
             metas.Sort((x, y) =>
             {
                 return x.ClassMetaName.CompareTo(y.ClassMetaName);
@@ -564,6 +570,11 @@ namespace EngineNS.Bricks.DataCopyer
             var creator = new TtCodeWriter();
             creator.AddLine("//Gen by engine", ref code);
             List<Rtti.TtClassMeta> metas = Rtti.TtClassMetaManager.Instance.Metas.Values.ToList();
+            for (int i = metas.Count - 1; i >= 0; i--)
+            {
+                if (metas[i].ClassType == null || metas[i].CurrentVersion == null)
+                    metas.RemoveAt(i);
+            }
             metas.Sort((x, y) =>
             {
                 return x.ClassMetaName.CompareTo(y.ClassMetaName);
@@ -585,6 +596,7 @@ namespace EngineNS.Bricks.DataCopyer
                         var met = metas[nn];
                         if (met.ClassType.IsValueType)
                             continue;
+                        
                         string klsCode = "";
                         var klsCreator = new TtCodeWriter();
                         klsCreator.IntentCount = creator.IntentCount;
@@ -622,6 +634,7 @@ namespace EngineNS.Bricks.DataCopyer
                         {
                             if (met.ClassType.IsValueType)
                                 continue;
+                            
                             string klsCode = "";
                             var klsCreator = new TtCodeWriter();
                             klsCreator.IntentCount = creator.IntentCount;
