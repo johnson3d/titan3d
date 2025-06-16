@@ -104,18 +104,18 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 }
             }
         }
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             foreach (var i in DownSampleNodes)
             {
                 i.BeforeTickLogic(policy);
-                i.TickLogic(world, policy, bClear);
+                i.TickLogic(world, policy, frameCmdList, bClear);
             }
 
             for (int i = UpSampleNodes.Length - 1; i >= 0; i--)
             {
                 UpSampleNodes[i].BeforeTickLogic(policy);
-                UpSampleNodes[i].TickLogic(world, policy, bClear);
+                UpSampleNodes[i].TickLogic(world, policy, frameCmdList, bClear);
             }
 
             MoveAttachment(UpSampleNodes[0].ResultPinOut, ResultPinOut);
@@ -129,7 +129,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
                 RenderGraph.AttachmentCache.RemoveAttachement(i.ResultPinOut.Attachement.AttachmentName);
             }
 
-            base.TickLogic(world, policy, bClear);
+            base.TickLogic(world, policy, frameCmdList, bClear);
         }
         public override void TickSync(TtRenderPolicy policy)
         {

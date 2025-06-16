@@ -279,30 +279,33 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         {
             base.TickLogic(world, onRemove);
 
+            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             if (this.ShadowMode == EShadowMode.Csm)
-                mShadowMapNode?.TickLogic(world, this, true);
+                mShadowMapNode?.TickLogic(world, this, cmdlist, true);
 
-            GpuSceneNode?.TickLogic(world, this, true);
+            GpuSceneNode?.TickLogic(world, this, cmdlist, true);
 
-            BasePassNode?.TickLogic(world, this, true);
+            BasePassNode?.TickLogic(world, this, cmdlist, true);
 
-            ScreenTilingNode?.TickLogic(world, this, false);
+            ScreenTilingNode?.TickLogic(world, this, cmdlist, false);
 
-            HzbNode?.TickLogic(world, this, false);
+            HzbNode?.TickLogic(world, this, cmdlist, false);
 
-            VoxelsNode?.TickLogic(world, this, true);
+            VoxelsNode?.TickLogic(world, this, cmdlist, true);
 
-            TranslucentNode?.TickLogic(world, this, true);
+            TranslucentNode?.TickLogic(world, this, cmdlist, true);
 
-            HitproxyNode?.TickLogic(world, this, true);
+            HitproxyNode?.TickLogic(world, this, cmdlist, true);
 
-            PickedNode?.TickLogic(world, this, true);
+            PickedNode?.TickLogic(world, this, cmdlist, true);
 
-            PickBlurNode?.TickLogic(world, this, true);
+            PickBlurNode?.TickLogic(world, this, cmdlist, true);
 
-            PickHollowNode?.TickLogic(world, this, true);
+            PickHollowNode?.TickLogic(world, this, cmdlist, true);
 
-            FinalCopyNode?.TickLogic(world, this, true);
+            FinalCopyNode?.TickLogic(world, this, cmdlist, true);
+
+            this.CommitCommandList(cmdlist, "Frame");
         }
         public unsafe override void TickSync()
         {

@@ -110,13 +110,13 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
         public NxRHI.TtCbView CBShadingEnv;
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             if (policy.TypeFog == TtRenderPolicy.ETypeFog.None)
             {
                 return;
             }
-            base.TickLogic(world, policy, bClear);
+            base.TickLogic(world, policy, frameCmdList, bClear);
         }
         public override void TickSync(TtRenderPolicy policy)
         {

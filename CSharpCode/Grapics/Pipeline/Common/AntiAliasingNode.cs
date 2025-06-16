@@ -299,7 +299,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
             }
         }
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             switch (policy.TypeAA)
             {
@@ -307,11 +307,11 @@ namespace EngineNS.Graphics.Pipeline.Common
                     break;
                 case TtRenderPolicy.ETypeAA.Taa:
                     PreColorPinIn.ImportedBuffer = PreColor;
-                    base.TickLogic(world, policy, bClear);
+                    base.TickLogic(world, policy, frameCmdList, bClear);
                     TickCopyLogic(policy);
                     break;
                 case TtRenderPolicy.ETypeAA.Fsaa:
-                    base.TickLogic(world, policy, bClear);
+                    base.TickLogic(world, policy, frameCmdList, bClear);
                     break;
             }
         }

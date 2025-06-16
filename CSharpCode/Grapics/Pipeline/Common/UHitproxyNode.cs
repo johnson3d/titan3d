@@ -278,7 +278,7 @@ namespace EngineNS.Graphics.Pipeline.Common
             }
         }
         Support.TtBlobObject FetchGpuDataBlob = new Support.TtBlobObject();
-        public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             if (IsHitproxyBuilding)
                 return;

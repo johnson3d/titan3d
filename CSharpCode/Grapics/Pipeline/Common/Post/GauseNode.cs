@@ -122,9 +122,9 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             set => mGaussStruct.BlurSigma = value;
         }
         public NxRHI.TtCbView CBShadingEnv;
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            base.TickLogic(world, policy, bClear);
+            base.TickLogic(world, policy, frameCmdList, bClear);
             if (CBShadingEnv != null)
             {
                 var buffer = this.FindAttachBuffer(ColorPinIn);
@@ -304,9 +304,9 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             set => mGaussStruct.BlurSigma = value;
         }
         public NxRHI.TtCbView CBShadingEnv;
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            base.TickLogic(world, policy, bClear);
+            base.TickLogic(world, policy, frameCmdList, bClear);
             if (CBShadingEnv != null)
             {
                 var buffer = this.FindAttachBuffer(Color1PinIn);

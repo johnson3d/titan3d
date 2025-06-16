@@ -170,7 +170,7 @@ namespace EngineNS.Editor.Forms
         public EGui.Controls.PropertyGrid.PropertyGrid MeshPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         public EGui.Controls.PropertyGrid.PropertyGrid EditorPropGrid = new EGui.Controls.PropertyGrid.PropertyGrid();
         EngineNS.GamePlay.Scene.TtMeshNode mCurrentMeshNode;
-        EngineNS.GamePlay.Scene.TtMeshNode mArrowMeshNode;
+        //EngineNS.GamePlay.Scene.TtMeshNode mArrowMeshNode;
         float mCurrentMeshRadius = 1.0f;
         public float PlaneScale = 5.0f;
         EngineNS.GamePlay.Scene.TtMeshNode PlaneMeshNode;

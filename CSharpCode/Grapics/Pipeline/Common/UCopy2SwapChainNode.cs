@@ -98,7 +98,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 attachement.Rtv = ColorAttachement.Rtv;
             }
         }
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             if (mCopyDrawcall == null)
                 return;

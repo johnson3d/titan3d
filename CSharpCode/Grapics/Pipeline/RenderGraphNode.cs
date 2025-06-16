@@ -310,7 +310,7 @@ namespace EngineNS.Graphics.Pipeline
         {
 
         }
-        public virtual void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
+        public virtual void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
 
         }

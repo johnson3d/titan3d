@@ -435,12 +435,12 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 return mScopeTick;
             }
         } 
-        public override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
                 GBuffers?.SetViewportCBuffer(world, policy);
-                base.TickLogic(world, policy, bClear);
+                base.TickLogic(world, policy, frameCmdList, bClear);
             }
         }
         public override void TickSync(TtRenderPolicy policy)

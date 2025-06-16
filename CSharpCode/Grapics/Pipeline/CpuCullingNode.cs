@@ -87,7 +87,7 @@ namespace EngineNS.Graphics.Pipeline
                 return mScopeTick;
             }
         } 
-        public override unsafe void TickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             //if (GetInput(0).FindInLinker() == null)
             //{

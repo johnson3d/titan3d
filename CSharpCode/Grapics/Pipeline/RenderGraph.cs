@@ -365,7 +365,9 @@ namespace EngineNS.Graphics.Pipeline
         }
         public virtual void TickLogic(GamePlay.TtWorld world, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
         {
+            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
             using (new Profiler.TimeScopeHelper(ScopeTickLogic))
+            using (new NxRHI.TtCmdListScope(cmdlist))
             {
                 if (NodeLayers != null)
                 {
@@ -380,7 +382,7 @@ namespace EngineNS.Graphics.Pipeline
                             {
                                 j.BeforeTickLogic((TtRenderPolicy)this);
 
-                                j.TickLogic(world, (TtRenderPolicy)this, true);
+                                j.TickLogic(world, (TtRenderPolicy)this, cmdlist, true);
 
                                 j.TryReleaseBufers(mTempTryReleaseLinkers, onRemove);
                             }
@@ -402,7 +404,8 @@ namespace EngineNS.Graphics.Pipeline
                 //EndTickLogic(world);
 
                 mTempTryReleaseLinkers.Clear();
-            }   
+            }
+            ((TtRenderPolicy)this).CommitCommandList(cmdlist, "Frame");
         }
         public virtual void TickSync()
         {

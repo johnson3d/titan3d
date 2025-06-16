@@ -61,7 +61,8 @@
 3. 编译Core.Window工程（C++）
 4. 编译Engine.Window工程（C#）
 5. 编译MainEditor工程（C#）
-6. **因为github的LFS限制，可能需要运行一下Setup.bat做一些运行环境配置**
+6. **因为github的LFS限制，可能需要手工解压一些压缩文件，清单如下**
+- - binaries\Tools\net8.0\libclang.7z
 ## Windows编译Android APK
 1. 编译Core.Android工程（C++）
 2. 编译Engine.Android程（C#）

@@ -543,7 +543,7 @@ namespace EngineNS.Graphics.Mesh
         }
 
         #region Meshlets
-        bool HasMeshLets = false;
+        //bool HasMeshLets = false;
         Bricks.GpuDriven.TtMeshlets mMeshlets;
         public Bricks.GpuDriven.TtMeshlets Meshlets
         {

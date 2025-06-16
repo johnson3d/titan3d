@@ -72,7 +72,7 @@ namespace CompilingGenerator
             public ImmutableArray<IPropertySymbol?> BindProperties;
             public ImmutableArray<IMethodSymbol?> AttachedMethods;
         }
-        static ImmutableArray<ClassInfo?> mAllClass;
+        //static ImmutableArray<ClassInfo?> mAllClass;
         //static string Temp;
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {

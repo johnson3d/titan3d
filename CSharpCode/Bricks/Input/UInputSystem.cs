@@ -72,7 +72,7 @@ namespace EngineNS.Bricks.Input
             //    return -1;
             //return 0;
         }
-        private int TickMsgResult = 0;
+        internal int TickMsgResult = 0;
         internal unsafe int TickImpl(TtEngine engine)
         {
             if (mKeyboardStateDirty)

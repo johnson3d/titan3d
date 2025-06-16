@@ -388,7 +388,7 @@ namespace EngineNS.Bricks.DataSet
             SaveToExcel(ref ok, name);
             return ok;
         }
-        partial void SaveToExcel(ref bool isOk, string name);
+        partial void SaveToExcel(ref bool isOk, string filepath);
         public TtTable GetTable(string name)
         {
             TtTable result;
@@ -570,7 +570,7 @@ namespace EngineNS.Bricks.DataSet
             }
             ImGuiAPI.SameLine(0, -1);
         }
-        bool ShowDataSets = true;
+        //bool ShowDataSets = true;
         protected void DrawDataSets()
         {
             var sz = new Vector2(-1);

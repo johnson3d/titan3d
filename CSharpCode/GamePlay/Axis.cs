@@ -1087,7 +1087,7 @@ namespace EngineNS.GamePlay
                 mSelectedNodes = value;
             }
         }
-        FSelectedNodeData mPosNode;
+        FSelectedNodeData mPosNode = new ();
         public FSelectedNodeData GetPosNode()
         {
             if (mPosNode.Node != null)

@@ -72,7 +72,9 @@ namespace EngineNS.Graphics.Pipeline.Mobile
         }
         public unsafe override void TickLogic(GamePlay.TtWorld world, Action<TtRenderGraphNode, TtRenderGraphPin, TtAttachBuffer> onRemove)
         {
-            BasePassNode.TickLogic(world, this, true);
+            var cmdlist = TtEngine.Instance.GfxDevice.RenderContext.CmdListManager.GetCmdList();
+            BasePassNode.TickLogic(world, this, cmdlist, true);
+            this.CommitCommandList(cmdlist, "Frame");
         }
         public unsafe override void TickSync()
         {

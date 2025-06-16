@@ -142,7 +142,7 @@ namespace EngineNS.Graphics.Pipeline.Common
                 return mScopeTick;
             }
         }
-        public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {

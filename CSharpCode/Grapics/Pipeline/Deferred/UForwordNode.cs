@@ -225,7 +225,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 return mScopeTick;
             }
         }
-        public unsafe override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {
@@ -454,7 +454,7 @@ namespace EngineNS.Graphics.Pipeline.Deferred
                 return mScopeTick;
             }
         }
-        public unsafe override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             using (new Profiler.TimeScopeHelper(ScopeTick))
             {

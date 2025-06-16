@@ -106,7 +106,7 @@ namespace EngineNS.Bricks.Procedure.Node.GpuShading
             }
             mCopyDrawcall.Copy(PrevWaterTexture.GpuBuffer, water.Buffer as NxRHI.TtBuffer);
         }
-        public unsafe override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             using (new NxRHI.TtCmdListScope(mCmdList))
             {

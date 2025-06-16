@@ -152,7 +152,7 @@ namespace EngineNS.Graphics.Pipeline.RayTracing
             LightingPinOut.Attachement.Width = (uint)x;
             LightingPinOut.Attachement.Height = (uint)y;
         }
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             if (mRayTracingDraw == null)
             {

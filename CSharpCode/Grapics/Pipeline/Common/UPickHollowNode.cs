@@ -97,12 +97,12 @@ namespace EngineNS.Graphics.Pipeline.Common
 
             base.OnResize(policy, x * scaleFactor, y * scaleFactor);
         }
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             var PickedManager = policy.GetOptionData("PickedManager") as TtPickedProxiableManager;
             if (PickedManager != null && PickedManager.PickedProxies.Count == 0)
                 return;
-            base.TickLogic(world, policy, bClear);
+            base.TickLogic(world, policy, frameCmdList, bClear);
         }
     }
 
@@ -213,12 +213,12 @@ namespace EngineNS.Graphics.Pipeline.Common
                 }
             }
         }
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             var PickedManager = policy.GetOptionData("PickedManager") as TtPickedProxiableManager;
             if (PickedManager != null && PickedManager.PickedProxies.Count == 0)
                 return;
-            base.TickLogic(world, policy, bClear);
+            base.TickLogic(world, policy, frameCmdList, bClear);
         }
     }
 }

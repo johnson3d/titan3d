@@ -357,7 +357,7 @@ namespace EngineNS.Graphics.Pipeline.Shadow
                 return mScopeCull;
             }
         }
-        public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, bool bClear)
+        public override unsafe void TickLogic(GamePlay.TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             foreach (var i in CSMCullingNode)
             {

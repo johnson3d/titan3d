@@ -280,15 +280,6 @@ namespace EngineNS.Graphics.Pipeline
         }
 
         #region Manager
-
-/* 项目“Engine.Android”的未合并的更改
-在此之前:
-        public NxRHI.UTextureManager TextureManager { get; } = new NxRHI.UTextureManager();
-        public Shader.TtMaterialManager MaterialManager { get; private set; } = new Shader.TtMaterialManager();
-在此之后:
-        public NxRHI.TtTextureManager TextureManager { get; } = new NxRHI.UTextureManager();
-        public Shader.TtMaterialManager MaterialManager { get; private set; } = new Shader.TtMaterialManager();
-*/
         public NxRHI.TtTextureManager TextureManager { get; } = new NxRHI.TtTextureManager();
         [Rtti.Meta]
         public Shader.TtMaterialManager MaterialManager { get; private set; } = new Shader.TtMaterialManager();

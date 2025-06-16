@@ -28,8 +28,7 @@ namespace EngineNS.UI.Controls.Containers
             set
             {
                 mChildRName = value;
-                var task = OnSetChildRName();
-                TtEngine.Instance.TaskCollector.AddWaitTask(task);
+                OnSetChildRName().AddWaitTask();
             }
         }
         // check source is dirty
@@ -40,7 +39,11 @@ namespace EngineNS.UI.Controls.Containers
         {
             get
             {
-                if(mMacrossGetter == null)
+                if (Children.Count > 0 && Children[Children.Count - 1] != null)
+                {
+                    return Children[Children.Count - 1].MacrossGetter;
+                }
+                if (mMacrossGetter == null)
                 {
                     mMacrossGetter = TtMacrossGetter<TtUIMacrossBase>.NewInstance();
                     mMacrossGetter.Name = ChildRName;

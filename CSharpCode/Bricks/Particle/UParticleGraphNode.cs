@@ -73,9 +73,5 @@ namespace EngineNS.Bricks.Particle
         {
             base.FrameBuild(policy);
         }
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
-        {
-            base.TickLogic(world, policy, bClear);
-        }
     }
 }

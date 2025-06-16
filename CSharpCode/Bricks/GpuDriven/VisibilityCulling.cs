@@ -264,7 +264,7 @@ namespace EngineNS.Bricks.GpuDriven
             }
         }
         public GamePlay.TtWorld.TtVisParameter VisParameter = new();
-        public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
+        public unsafe override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             if (CBCameraFrustum != null)
             {

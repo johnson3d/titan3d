@@ -146,9 +146,9 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
         }
         public NxRHI.TtCbView CBShadingEnv;
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
-            base.TickLogic(world, policy, bClear);
+            base.TickLogic(world, policy, frameCmdList, bClear);
 
             var toViewport = policy.DefaultCamera.GetViewProjection();
             var clipPos = Vector3.Transform(new Vector3(100,100,100), in toViewport);
@@ -279,7 +279,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             }
         }
         public NxRHI.TtCbView CBShadingEnv;
-        public override void TickLogic(TtWorld world, TtRenderPolicy policy, bool bClear)
+        public override void TickLogic(TtWorld world, TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             var toViewport = policy.DefaultCamera.GetViewProjection();
             var clipPos = Vector3.Transform(new Vector3(100, 100, 100), in toViewport);
@@ -292,7 +292,7 @@ namespace EngineNS.Graphics.Pipeline.Common.Post
             {
                 CBShadingEnv.SetValue("SunShaftStruct", in mSunShaftStruct);
             }
-            base.TickLogic(world, policy, bClear);
+            base.TickLogic(world, policy, frameCmdList, bClear);
         }
         public override void TickSync(TtRenderPolicy policy)
         {
