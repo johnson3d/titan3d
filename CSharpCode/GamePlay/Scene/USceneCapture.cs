@@ -1,6 +1,7 @@
-﻿using EngineNS.Graphics.Pipeline;
+using EngineNS.Graphics.Pipeline;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,9 +10,15 @@ using static EngineNS.GamePlay.TtWorld;
 namespace EngineNS.GamePlay.Scene
 {
     [Bricks.CodeBuilder.ContextMenu("Capture", "SceneCapture", TtNode.EditorKeyword)]
-    [TtNode(NodeDataType = typeof(USceneCapture.USceneCaptureData), DefaultNamePrefix = "Capture")]
-    public partial class USceneCapture : TtSceneActorNode, ITickable, IRootForm
+    [TtNode(NodeDataType = typeof(TtSceneCapture.TtSceneCaptureData), DefaultNamePrefix = "Capture")]
+    [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.USceneCapture@EngineCore", "EngineNS.GamePlay.Scene.USceneCapture" })]
+    public partial class TtSceneCapture : TtSceneActorNode, ITickable, IRootForm
     {
+        public override void Dispose()
+        {
+            Visible = false;
+            base.Dispose();
+        }
         public int GetTickOrder()
         {
             return 0;
@@ -22,7 +29,8 @@ namespace EngineNS.GamePlay.Scene
             OnlyShowNodes,
             ExcludeNodes,
         }
-        public class USceneCaptureData : TtNodeData
+        [Rtti.Meta(NameAlias = new string[] { "EngineNS.GamePlay.Scene.USceneCapture.USceneCaptureData@EngineCore", "EngineNS.GamePlay.Scene.USceneCapture.USceneCaptureData" })]
+        public class TtSceneCaptureData : TtNodeData
         {
             [Rtti.Meta]
             [RName.PGRName(FilterExts = Bricks.RenderPolicyEditor.TtRenderPolicyAsset.AssetExt)]
@@ -36,15 +44,39 @@ namespace EngineNS.GamePlay.Scene
             [Rtti.Meta]
             public List<Guid> ExcludeActors { get; set; }
         }
+
+        #region OnlyShowNodes
+        public List<TtNode> OnlyShowNodes { get; } = new List<TtNode>();
+        [Rtti.Meta]
+        public void AddOnlyShowNode(TtNode node)
+        {
+            if (OnlyShowNodes.Contains(node) == false)
+            {
+                OnlyShowNodes.Add(node);
+            }
+        }
+        [Rtti.Meta]
+        public void RemoveOnlyShowNode(TtNode node)
+        {
+            if (OnlyShowNodes.Contains(node))
+            {
+                OnlyShowNodes.Remove(node);
+            }
+        }
+        [Rtti.Meta]
+        public void ClearOnlyShowNodes()
+        {
+            OnlyShowNodes.Clear();
+        }
+        #endregion
         public Graphics.Pipeline.TtRenderPolicy RenderPolicy { get; set; }
         public Editor.Controller.EditorCameraController CameraController = new Editor.Controller.EditorCameraController();
         public GamePlay.TtWorld CaptureWorld { get; set; }
-        GamePlay.TtWorld.TtVisParameter mVisParameter = new GamePlay.TtWorld.TtVisParameter();
         protected override async Thread.Async.TtTask<bool> InitializeNode(TtWorld world, TtNodeData data, EBoundVolumeType bvType, Type placementType)
         {
             await base.InitializeNode(world, data, bvType, placementType);
 
-            var nd = GetNodeData<USceneCaptureData>();
+            var nd = GetNodeData<TtSceneCaptureData>();
             if (nd.RPolicyName == null)
             {
                 nd.RPolicyName = TtEngine.Instance.Config.SimpleRPolicyName;
@@ -63,12 +95,58 @@ namespace EngineNS.GamePlay.Scene
 
             CaptureWorld = world;
 
+            this.OnlyShowNodes.Clear();
+            if (nd.ShowActors != null && nd.ShowActors.Count > 0)
+            {
+                foreach (var i in nd.ShowActors)
+                {
+                    var node = world.Root.FindNode(i, true);
+                    if (node != null)
+                    {
+                        this.OnlyShowNodes.Add(node);
+                    }
+                }
+            }
+
             UpdateCamera();
 
             TtEngine.Instance.TickableManager.AddTickable(this);
 
+            var cullNode = RenderPolicy.FindFirstNode<TtCpuCullingNode>();
+            GamePlay.TtWorld.TtVisParameter mVisParameter = cullNode.VisParameter;
             mVisParameter.IsGatherVisibleMeshes = this.OnVisitNode;
+            cullNode.UserTickLogic = (GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear) =>
+            {
+                mVisParameter.World = CaptureWorld;
+                mVisParameter.CullCamera = RenderPolicy.DefaultCamera;
+                if (CaptureMode == ECaptureMode.OnlyShowNodes)
+                {
+                    mVisParameter.ClearVisibles();
+                    foreach (var i in OnlyShowNodes)
+                    {
+                        CaptureWorld.GatherVisibleMeshes(mVisParameter, i);
+                    }
+                }
+                else
+                {
+                    CaptureWorld.GatherVisibleMeshes(mVisParameter);
+                }
+            };
+
             return true;
+        }
+        protected override void OnBeforeSaveNodeData()
+        {
+            var nd = GetNodeData<TtSceneCaptureData>();
+            nd.ShowActors.Clear();
+            foreach (var i in OnlyShowNodes)
+            {
+                var node = CaptureWorld.Root.FindNode(i.NodeId, true);
+                if (node != null)
+                {
+                    nd.ShowActors.Add(i.NodeId);
+                }
+            }
         }
         bool OnVisitNode(Scene.TtNode node, TtVisParameter arg)
         {
@@ -80,18 +158,19 @@ namespace EngineNS.GamePlay.Scene
                     }
                 case ECaptureMode.OnlyShowNodes:
                     {
-                        var actor = node as TtSceneActorNode;
-                        if (actor == null)
-                            return false;
-                        var data = GetNodeData<USceneCaptureData>();
-                        return data.ShowActors.Contains(actor.NodeId);
+                        //var actor = node as TtSceneActorNode;
+                        //if (actor == null)
+                        //    return false;
+                        //var data = GetNodeData<TtSceneCaptureData>();
+                        //return data.ShowActors.Contains(actor.NodeId);
+                        return true;
                     }
                 case ECaptureMode.ExcludeNodes:
                     {
                         var actor = node as TtSceneActorNode;
                         if (actor == null)
                             return false;
-                        var data = GetNodeData<USceneCaptureData>();
+                        var data = GetNodeData<TtSceneCaptureData>();
                         return !data.ExcludeActors.Contains(actor.NodeId);
                     }
                 default:
@@ -100,21 +179,23 @@ namespace EngineNS.GamePlay.Scene
             
             return true;
         }
+        [Category("Option")]
+        [Rtti.Meta]
         public ECaptureMode CaptureMode
         {
-            get => GetNodeData<USceneCaptureData>().CaptureMode;
+            get => GetNodeData<TtSceneCaptureData>().CaptureMode;
             set
             {
-                GetNodeData<USceneCaptureData>().CaptureMode = value;
+                GetNodeData<TtSceneCaptureData>().CaptureMode = value;
             }
         }
-
+        [Category("Option")]
         public Vector2 TargetSize
         {
-            get => GetNodeData<USceneCaptureData>().TargetSize;
+            get => GetNodeData<TtSceneCaptureData>().TargetSize;
             set
             {
-                GetNodeData<USceneCaptureData>().TargetSize = value;
+                GetNodeData<TtSceneCaptureData>().TargetSize = value;
                 RenderPolicy.OnResize(value.X, value.Y);
             }
         }
@@ -146,10 +227,6 @@ namespace EngineNS.GamePlay.Scene
             }
             IsCaptureVisible = true;
 
-            mVisParameter.World = CaptureWorld;
-            mVisParameter.CullCamera = RenderPolicy.DefaultCamera;
-            CaptureWorld.GatherVisibleMeshes(mVisParameter);
-
             RenderPolicy?.BeginTickLogic(CaptureWorld);
             RenderPolicy?.TickLogic(CaptureWorld, null);
             RenderPolicy?.EndTickLogic(CaptureWorld);
@@ -169,13 +246,14 @@ namespace EngineNS.GamePlay.Scene
         }
 
         #region DebugUI
-        bool mVisible;
+        bool mShowDebugger;
+        [Category("Option")]
         public bool Visible 
         {
-            get => mVisible;
+            get => mShowDebugger;
             set
             {
-                mVisible = value;
+                mShowDebugger = value;
                 if (value)
                     TtEngine.RootFormManager.RegRootForm(this);
                 else
@@ -199,7 +277,7 @@ namespace EngineNS.GamePlay.Scene
             if (Visible == false || RenderPolicy == null)
                 return;
 
-            ImGuiAPI.SetNextWindowSize(GetNodeData<USceneCaptureData>().TargetSize, ImGuiCond_.ImGuiCond_FirstUseEver);
+            ImGuiAPI.SetNextWindowSize(GetNodeData<TtSceneCaptureData>().TargetSize, ImGuiCond_.ImGuiCond_FirstUseEver);
             var result = EGui.UIProxy.DockProxy.BeginMainForm($"Capture:{this.NodeName}", this, ImGuiWindowFlags_.ImGuiWindowFlags_None);
             if (result)
             {
@@ -223,3 +301,53 @@ namespace EngineNS.GamePlay.Scene
         #endregion
     }
 }
+#if TitanEngine_AutoGen_Macross
+#region TitanEngine_AutoGen_Macross
+
+
+namespace EngineNS.GamePlay.Scene
+{
+	partial class TtSceneCapture
+	{
+		private static EngineNS.Macross.TtMacrossBreak macross_break_AddOnlyShowNode_467596569 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtSceneCapture->void AddOnlyShowNode(TtNode node)");
+		public unsafe void macross_AddOnlyShowNode (string nodeName, TtNode node) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":node", node);
+				}
+			}
+			AddOnlyShowNode(node);
+			macross_break_AddOnlyShowNode_467596569.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_RemoveOnlyShowNode_467596569 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtSceneCapture->void RemoveOnlyShowNode(TtNode node)");
+		public unsafe void macross_RemoveOnlyShowNode (string nodeName, TtNode node) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+					stackframe.SetWatchVariable(nodeName + ":node", node);
+				}
+			}
+			RemoveOnlyShowNode(node);
+			macross_break_RemoveOnlyShowNode_467596569.TryBreak();
+		}
+		private static EngineNS.Macross.TtMacrossBreak macross_break_ClearOnlyShowNodes_2609910045 = new EngineNS.Macross.TtMacrossBreak("EngineNS.GamePlay.Scene.TtSceneCapture->void ClearOnlyShowNodes()");
+		public unsafe void macross_ClearOnlyShowNodes (string nodeName) 
+		{
+			using(var stackframe = EngineNS.Macross.TtMacrossStackTracer.CurrentFrame)
+			{
+				if(stackframe != null)
+				{
+				}
+			}
+			ClearOnlyShowNodes();
+			macross_break_ClearOnlyShowNodes_2609910045.TryBreak();
+		}
+	}
+}
+#endregion//TitanEngine_AutoGen_Macross
+#endif//TitanEngine_AutoGen_Macross

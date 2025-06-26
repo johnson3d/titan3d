@@ -294,6 +294,7 @@ namespace EngineNS.GamePlay.Scene
                     node.AddAttribute(dataAttr);
                     using (var ar = dataAttr.GetWriter((ulong)SceneData.GetStructSize() * 2))
                     {
+                        this.OnBeforeSaveNodeData();
                         ar.Write(SceneData);
                     }
                 }
@@ -585,12 +586,12 @@ namespace EngineNS.GamePlay.Scene
     {
         public TtScene Root;
 
-        public TtNode FindSceneNode(in Guid id)
+        public TtNode FindSceneNode(in Guid id, bool bRecursive)
         {
             if (Root == null)
                 return null;
 
-            return Root.FindNode(in id);
+            return Root.FindNode(in id, bRecursive);
         }
 
         public virtual void InitializeMacrossNodePropertyValues()

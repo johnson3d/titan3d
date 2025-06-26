@@ -1,6 +1,8 @@
 ﻿using EngineNS.GamePlay.Character;
 using EngineNS.IO;
+using EngineNS.Rtti;
 using NPOI.SS.UserModel;
+using Org.BouncyCastle.Asn1.Mozilla;
 using System;
 using System.Collections.Generic;
 using static EngineNS.Editor.Forms.TtCpuProfiler.TtTimeScopeTree;
@@ -159,7 +161,7 @@ namespace EngineNS.Editor
                 {
                     return Children[index];
                 }
-                public string NodeName 
+                public string NodeName
                 {
                     get;
                     set;
@@ -175,7 +177,13 @@ namespace EngineNS.Editor
                     if (this.Selected)
                         flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
                     bool ret = false;
-                    var name = (string.IsNullOrEmpty(NodeName) ? "EmptyName" : NodeName) + "##" + index;
+                    string hit = "";
+                    if (MetaVersion != null)
+                    {
+                        hit = $"({MetaVersion.HitCount})";
+                    }
+
+                    var name = (string.IsNullOrEmpty(NodeName) ? "EmptyName" : NodeName + hit) + "##" + index;
                     if (NumOfChild == 0)
                     {
                         flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
@@ -188,6 +196,8 @@ namespace EngineNS.Editor
                     return ret;
                 }
             }
+            public int TotalVersionCount { get; set; } = 0;
+            public int UsedVersionCount { get; set; } = 0;
 
             public TtMetaNode RootNode = new TtMetaNode();
             public Rtti.TtMetaVersion mCurMetaVersion = null;
@@ -198,7 +208,26 @@ namespace EngineNS.Editor
             }
             public unsafe void OnDraw()
             {
+                TotalVersionCount = 0;
+                UsedVersionCount = 0;
+
+                foreach (var i in TtClassMetaManager.Instance.Metas)
+                {
+                    foreach (var j in i.Value.MetaVersions)
+                    {
+                        if(j.Value.HitCount > 0)
+                        {
+                            UsedVersionCount++;
+                        }
+                    }
+                    TotalVersionCount+= i.Value.MetaVersions.Count;
+                }
+
                 DrawTree(RootNode, 0);
+
+                ImGuiAPI.Separator();
+                ImGuiAPI.Text($"Total Version Count: {TotalVersionCount}");
+                ImGuiAPI.Text($"Used Version Count: {UsedVersionCount}");
             }
             public override void OnNodeUI_LClick(INodeUIProvider provider)
             {

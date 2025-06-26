@@ -594,15 +594,27 @@ namespace EngineNS.GamePlay.Scene
             set { }
         }
 
-        public TtNode FindNode(in Guid nodeId)
+        public TtNode FindNode(in Guid nodeId, bool bRecursive)
         {
             if(nodeId == Guid.Empty)
                 return null;
             for(int i=0; i<Children.Count; i++)
             {
-                if(Children[i].NodeId == nodeId)
+                if (Children[i].NodeId == nodeId)
+                {
                     return Children[i];
+                }
+                else
+                {
+                    if (bRecursive)
+                    {
+                        var fd = Children[i].FindNode(in nodeId, true);
+                        if (fd!=null)
+                            return fd;
+                    }
+                }
             }
+            
             return null;
         }
 
@@ -955,6 +967,10 @@ namespace EngineNS.GamePlay.Scene
             IgnoreNodeDesc = (1 << 1),
             IsBehaviorData = (1 << 2),
         }
+        protected virtual void OnBeforeSaveNodeData()
+        {
+
+        }
         public unsafe void SaveChildNode(TtNode scene, EngineNS.XndHolder xnd, EngineNS.XndNode node)
         {
             foreach(var i in Children)
@@ -979,6 +995,7 @@ namespace EngineNS.GamePlay.Scene
                         //using (var dataAttr = xnd.NewAttribute(Rtti.TtTypeDesc.TypeStr(i.NodeData.GetType()), 1, nodeFlags))
                         using (var ar = dataAttr.GetWriter((ulong)NodeData.GetStructSize() * 2))
                         {
+                            i.OnBeforeSaveNodeData();
                             ar.Write(i.NodeData);
                         }
 

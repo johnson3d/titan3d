@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <BaseOutputPath>$(SolutionDir)\binaries\Plugins</BaseOutputPath>
+	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <Import Project="..\TencentAIGC\TencentAIGC.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <PackageReference Include="TencentCloudSDK" Version="3.0.1268" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Module\Engine.Window\Engine.Window.csproj" />
+  </ItemGroup>
+
+</Project>

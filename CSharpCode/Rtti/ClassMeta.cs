@@ -317,6 +317,7 @@ namespace EngineNS.Rtti
             TtMetaVersion result;
             if (MetaVersions.TryGetValue(hash, out result))
             {
+                result.HitCount++;
                 return result;
             }
 
@@ -1077,6 +1078,7 @@ namespace EngineNS.Rtti
         {
             HostClass = kls;
         }
+        public int HitCount { get; set; } = 0;
         public TtClassMeta HostClass
         {
             get;

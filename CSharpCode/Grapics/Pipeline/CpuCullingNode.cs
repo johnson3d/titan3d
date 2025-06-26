@@ -86,13 +86,20 @@ namespace EngineNS.Graphics.Pipeline
                     mScopeTick = new Profiler.TimeScope(typeof(TtCpuCullingNode), nameof(TickLogic));
                 return mScopeTick;
             }
-        } 
-        public override unsafe void TickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
+        }
+        public delegate void FTickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear);
+        public FTickLogic UserTickLogic = null;
+        public override void TickLogic(GamePlay.TtWorld world, Graphics.Pipeline.TtRenderPolicy policy, NxRHI.TtCommandList frameCmdList, bool bClear)
         {
             //if (GetInput(0).FindInLinker() == null)
             //{
 
             //}
+            if (UserTickLogic!=null)
+            {
+                UserTickLogic(world, policy, frameCmdList, bClear);
+                return;
+            }
             if (FrozenCullCameral != null)
             {
                 mVisParameter.CullCamera = FrozenCullCameral;

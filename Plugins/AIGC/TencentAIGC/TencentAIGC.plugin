@@ -1,0 +1,10 @@
+{
+  "Enable": true,
+  "LoadOnInit": false,
+  "Platforms": [
+    "PLTF_ALL"
+  ],
+  "Dependencies": [
+    
+  ]
+}
