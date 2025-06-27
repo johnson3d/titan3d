@@ -71,6 +71,47 @@ namespace EngineNS.Bricks.AssetImpExp
             {
                 return null;
             }
+            return BuildAssetDescription();
+        }
+        public TtAssetDescription PreImport(System.IO.Stream ar)
+        {
+            //FilePath = filePath;
+            Assimp.AssimpContext assimpContext = new Assimp.AssimpContext();
+            try
+            {
+                AiScene = assimpContext.ImportFileFromStream(ar, DefaultSceneFlags);
+                if (AiScene == null)
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            return BuildAssetDescription();
+        }
+        public TtAssetDescription PreImport(byte[] data)
+        {
+            //FilePath = filePath;
+            Assimp.AssimpContext assimpContext = new Assimp.AssimpContext();
+            try
+            {
+                System.IO.MemoryStream ar = new System.IO.MemoryStream(data);
+                AiScene = assimpContext.ImportFileFromStream(ar, DefaultSceneFlags);
+                if (AiScene == null)
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            return BuildAssetDescription();
+        }
+        private TtAssetDescription BuildAssetDescription()
+        {
             var meshNodes = AssimpSceneUtil.FindMeshNodes(AiScene);
             bool nodeHasScale = false;
             bool nodeHasTranslation = false;
@@ -89,7 +130,7 @@ namespace EngineNS.Bricks.AssetImpExp
                 }
             }
             TtAssetDescription assetsGenerateDescription = new TtAssetDescription();
-            assetsGenerateDescription.FileName = Path.GetFileNameWithoutExtension(filePath); ;
+            assetsGenerateDescription.FileName = Path.GetFileNameWithoutExtension(FilePath);
             assetsGenerateDescription.MeshesCount = meshNodes.Count;
             assetsGenerateDescription.MeshesHaveScale = nodeHasScale;
             assetsGenerateDescription.MeshesHaveTranslation = nodeHasTranslation;
@@ -121,6 +162,114 @@ namespace EngineNS.Bricks.AssetImpExp
         {
             return AiScene == null ? null : AiScene.Animations;
         }
+
+        #region TtMeshImportSetting
+        public static TtMeshImportSetting CreateMeshImporter(string filePath)
+        {
+            TtAssetImporter AssetImporter = new TtAssetImporter();
+            var assetDescription = AssetImporter.PreImport(filePath);
+            if (assetDescription == null)
+            {
+                return null;
+            }
+            else
+            {
+                return ToMeshImportSetting(AssetImporter, assetDescription);
+            }
+        }
+        public static TtMeshImportSetting CreateMeshImporter(System.IO.Stream ar)
+        {
+            TtAssetImporter AssetImporter = new TtAssetImporter();
+            var assetDescription = AssetImporter.PreImport(ar);
+            if (assetDescription == null)
+            {
+                return null;
+            }
+            else
+            {
+                return ToMeshImportSetting(AssetImporter, assetDescription);
+            }
+        }
+        public static TtMeshImportSetting CreateMeshImporter(byte[] data)
+        {
+            TtAssetImporter AssetImporter = new TtAssetImporter();
+            var assetDescription = AssetImporter.PreImport(data);
+            if (assetDescription == null)
+            {
+                return null;
+            }
+            else
+            {
+                return ToMeshImportSetting(AssetImporter, assetDescription);
+            }
+        }
+        private static TtMeshImportSetting ToMeshImportSetting(TtAssetImporter AssetImporter, TtAssetDescription assetDescription)
+        {
+            TtMeshImportSetting meshImprotSetting = new TtMeshImportSetting();
+            meshImprotSetting.FileName = assetDescription.FileName;
+            meshImprotSetting.MeshesCount = assetDescription.MeshesCount;
+            meshImprotSetting.MeshesHaveScale = assetDescription.MeshesHaveScale;
+            meshImprotSetting.MeshesHaveTranslation = assetDescription.MeshesHaveTranslation;
+            meshImprotSetting.UpAxis = assetDescription.UpAxis;
+            meshImprotSetting.UnitScaleFactor = assetDescription.UnitScaleFactor;
+            meshImprotSetting.Generator = assetDescription.Generator;
+            meshImprotSetting.AssetImporter = AssetImporter;
+            return meshImprotSetting;
+        }
+        #endregion
+
+        #region TtAnimImportSettin
+        public static TtAnimImportSetting CreateAnimationImporter(string filePath)
+        {
+            TtAssetImporter assetImporter = new TtAssetImporter();
+            var AssetDescription = assetImporter.PreImport(filePath);
+            if (AssetDescription == null)
+            {
+                return null;
+            }
+            else
+            {
+                return ToAnimationImportSetting(assetImporter, AssetDescription);
+            }
+        }
+        public static TtAnimImportSetting CreateAnimationImporter(System.IO.Stream ar)
+        {
+            TtAssetImporter assetImporter = new TtAssetImporter();
+            var AssetDescription = assetImporter.PreImport(ar);
+            if (AssetDescription == null)
+            {
+                return null;
+            }
+            else
+            {
+                return ToAnimationImportSetting(assetImporter, AssetDescription);
+            }
+        }
+        public static TtAnimImportSetting CreateAnimationImporter(byte[] data)
+        {
+            TtAssetImporter assetImporter = new TtAssetImporter();
+            var AssetDescription = assetImporter.PreImport(data);
+            if (AssetDescription == null)
+            {
+                return null;
+            }
+            else
+            {
+                return ToAnimationImportSetting(assetImporter, AssetDescription);
+            }
+        }
+        private static TtAnimImportSetting ToAnimationImportSetting(TtAssetImporter AssetImporter, TtAssetDescription AssetDescription)
+        {
+            TtAnimImportSetting animImprotSetting = new TtAnimImportSetting();
+            animImprotSetting.FileName = AssetDescription.FileName;
+            animImprotSetting.AnimationsCount = AssetDescription.AnimationsCount;
+            animImprotSetting.UpAxis = AssetDescription.UpAxis;
+            animImprotSetting.UnitScaleFactor = AssetDescription.UnitScaleFactor;
+            animImprotSetting.Generator = AssetDescription.Generator;
+            animImprotSetting.AssetImporter = AssetImporter;
+            return animImprotSetting;
+        }
+        #endregion
     }
 
     public class AssimpSceneUtil

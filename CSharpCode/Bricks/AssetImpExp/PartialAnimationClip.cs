@@ -7,7 +7,7 @@ using System.Text;
 
 namespace EngineNS.Animation.Asset
 {
-    public class TtAnimImprotSetting
+    public class TtAnimImportSetting
     {
         [Category("FileInfo"), ReadOnly(true)]
         public string FileName { get; set; } = "";
@@ -25,12 +25,17 @@ namespace EngineNS.Animation.Asset
         public bool IgnoreScale { get; set; } = true;
         [Category("ImportSetting"), Browsable(false)]
         public TtAssetImporter AssetImporter = null;
+
+        public bool ImportAndSaveAnimation(RName dir)
+        {
+            return TtAnimationClip.ImportAttribute.ImportAndSaveAnimation(dir, this);
+        }
     }
     public partial class TtAnimationClip
     {
         public partial class ImportAttribute
         {
-            List<TtAnimImprotSetting> AnimImprotSettings = new ();
+            List<TtAnimImportSetting> AnimImportSettings = new ();
             public unsafe partial bool AssimpCreateCreateDraw(EGui.Controls.TtContentBrowser ContentBrowser)
             {
                 if (bPopOpen == false)
@@ -54,34 +59,48 @@ namespace EngineNS.Animation.Asset
                             for (int i = 0; i < count; ++i)
                             {
                                 var path = mFileDialog.GetFilePathByIndex(i);
-                                TtAnimImprotSetting animImprotSetting = new TtAnimImprotSetting();
-                                if (!string.IsNullOrEmpty(path))
+                                TtAnimImportSetting animImprotSetting = TtAssetImporter.CreateAnimationImporter(path);
+                                if (animImprotSetting==null)
                                 {
-                                    TtAssetImporter assetImporter = new TtAssetImporter();
-                                    var AssetDescription = assetImporter.PreImport(path);
-                                    if (AssetDescription == null)
-                                    {
-                                        eErrorType = enErrorType.EmptyName;
-                                    }
-                                    else
-                                    {
-                                        animImprotSetting .FileName = AssetDescription.FileName;
-                                        animImprotSetting .AnimationsCount = AssetDescription.AnimationsCount;
-                                        animImprotSetting .UpAxis = AssetDescription.UpAxis;
-                                        animImprotSetting .UnitScaleFactor = AssetDescription.UnitScaleFactor;
-                                        animImprotSetting .Generator = AssetDescription.Generator;
-                                        animImprotSetting.AssetImporter = assetImporter;
-                                        if (i == 0)
-                                        {
-                                            mName = IO.TtFileManager.GetPureName(path);
-                                            PGAsset.Target = animImprotSetting;
-                                            mName = IO.TtFileManager.GetPureName(path);
-                                        }
-                                        AnimImprotSettings.Add(animImprotSetting);
-                                    }
+                                    eErrorType = enErrorType.EmptyName;
                                 }
-                            }
-                               
+                                else
+                                {
+                                    if (i == 0)
+                                    {
+                                        mName = IO.TtFileManager.GetPureName(path);
+                                        PGAsset.Target = animImprotSetting;
+                                        mName = IO.TtFileManager.GetPureName(path);
+                                    }
+                                    AnimImportSettings.Add(animImprotSetting);
+                                }
+                                //TtAnimImportSetting animImprotSetting = new TtAnimImportSetting();
+                                //if (!string.IsNullOrEmpty(path))
+                                //{
+                                //    TtAssetImporter assetImporter = new TtAssetImporter();
+                                //    var AssetDescription = assetImporter.PreImport(path);
+                                //    if (AssetDescription == null)
+                                //    {
+                                //        eErrorType = enErrorType.EmptyName;
+                                //    }
+                                //    else
+                                //    {
+                                //        animImprotSetting .FileName = AssetDescription.FileName;
+                                //        animImprotSetting .AnimationsCount = AssetDescription.AnimationsCount;
+                                //        animImprotSetting .UpAxis = AssetDescription.UpAxis;
+                                //        animImprotSetting .UnitScaleFactor = AssetDescription.UnitScaleFactor;
+                                //        animImprotSetting .Generator = AssetDescription.Generator;
+                                //        animImprotSetting.AssetImporter = assetImporter;
+                                //        if (i == 0)
+                                //        {
+                                //            mName = IO.TtFileManager.GetPureName(path);
+                                //            PGAsset.Target = animImprotSetting;
+                                //            mName = IO.TtFileManager.GetPureName(path);
+                                //        }
+                                //        AnimImprotSettings.Add(animImprotSetting);
+                                //    }
+                                //}
+                            }  
                         }
                         // close
                         mFileDialog.CloseDialog();
@@ -140,14 +159,14 @@ namespace EngineNS.Animation.Asset
 
             private unsafe bool DoImport()
             {
-               foreach(var setting in AnimImprotSettings)
+                foreach (var setting in AnimImportSettings)
                 {
-                    ImportAndSaveAnimation(setting);
+                    setting.ImportAndSaveAnimation(mDir);
                 }
                 return true;
             }
 
-            private unsafe bool ImportAndSaveAnimation(TtAnimImprotSetting animImprotSetting)
+            public static unsafe bool ImportAndSaveAnimation(RName mDir, TtAnimImportSetting animImprotSetting)
             {
                 bool hasOnlyOneAnim = false;
                 if (animImprotSetting.AnimationsCount == 1)
